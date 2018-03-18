@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Specify proper DataDir -->
+<ESNDemoSettings DataDir="C:\Users\OKOZELSK\_Data\Development\MSVCS\Projects\OKOSW\Demo\Data">
+  <TestCase Name="MackeyGlass series prediction (Linear regression readout)" CSVDataFileName="MackeyGlass.csv" OutputFields="Value" BootSeqMinLength="2000" TrainingSeqMaxLength="2000" TestingSeqLength="500" TestSamplesSelection="Sequence" NormalizerReserveRatio="0.1">
+    <ESN RandomizerSeek="0"
+         InputFields="Value"
+         InputFieldExtendedMemorySize="0"
+         RouteInputToRegression="false"
+         ReadOutHiddenLayersStructure=""
+         OutputNeuronActivation="IDENTITY"
+         RegressionMethod="LINEAR"
+         RegressionMaxAttempts="1"
+         RegressionMaxIterations="10"
+         RegressionStopMSEValue="1E-20"
+         >
+      <ReservoirConfig CfgName="ResMain"
+                        ApplyToInputFields="Value"
+                        ReservoirPerInputField="false"
+                        Topology="Random"
+                        Size="500"
+                        BiasScale="0"
+                        InputConnectionDensity="0.5"
+                        InputWeightScale="0.2"
+                        ContextNeuronFeedbackDensity="0"
+                        FeedbackConnectionDensity="0"
+                        FeedbackWeightScale="0"
+                        ReservoirNeuronActivation="TANH"
+                        RetainmentNeuronsDensity="0"
+                        RetainmentMinRate="0"
+                        RetainmentMaxRate="0"
+                        InternalWeightScale="0.15"
+                        AugmentedStatesFeature="false"
+                        >
+        <RandomTopologyConfig ConnectionsDensity="0.1"/>
+      </ReservoirConfig>
+    </ESN>
+  </TestCase>
+  <TestCase Name="Sinusoid series prediction (Linear regression readout)" CSVDataFileName="Sinusoid.csv" OutputFields="Value" BootSeqMinLength="700" TrainingSeqMaxLength="1000" TestingSeqLength="10" TestSamplesSelection="Sequence" NormalizerReserveRatio="0.1">
+    <ESN RandomizerSeek="0"
+         InputFields="Value"
+         InputFieldExtendedMemorySize="0"
+         RouteInputToRegression="false"
+         ReadOutHiddenLayersStructure=""
+         OutputNeuronActivation="IDENTITY"
+         RegressionMethod="LINEAR"
+         RegressionMaxAttempts="1"
+         RegressionMaxIterations="1"
+         RegressionStopMSEValue="1E-20"
+         >
+      <ReservoirConfig CfgName="ResMain"
+                        ApplyToInputFields="Value"
+                        ReservoirPerInputField="false"
+                        Topology="Random"
+                        Size="200"
+                        BiasScale="0"
+                        InputConnectionDensity="1"
+                        InputWeightScale="0.2"
+                        ContextNeuronFeedbackDensity="0"
+                        FeedbackConnectionDensity="0"
+                        FeedbackWeightScale="0"
+                        ReservoirNeuronActivation="TANH"
+                        RetainmentNeuronsDensity="0"
+                        RetainmentMinRate="0"
+                        RetainmentMaxRate="0"
+                        InternalWeightScale="0.2"
+                        AugmentedStatesFeature="false"
+                        >
+        <RandomTopologyConfig ConnectionsDensity="0.1"/>
+      </ReservoirConfig>
+    </ESN>
+  </TestCase>
+  <TestCase Name="Sinusoid series prediction (Ring topology, FF network with hidden structure as the readout and RESILIENT trainer)" CSVDataFileName="Sinusoid.csv" OutputFields="Value" BootSeqMinLength="700" TrainingSeqMaxLength="1000" TestingSeqLength="10" TestSamplesSelection="Sequence" NormalizerReserveRatio="0.1">
+    <ESN RandomizerSeek="0"
+         InputFields="Value"
+         InputFieldExtendedMemorySize="0"
+         RouteInputToRegression="false"
+         ReadOutHiddenLayersStructure="5;TANH;5;TANH"
+         OutputNeuronActivation="IDENTITY"
+         RegressionMethod="RESILIENT"
+         RegressionMaxAttempts="2"
+         RegressionMaxIterations="5000"
+         RegressionStopMSEValue="1E-20"
+         >
+      <ReservoirConfig CfgName="ResMain"
+                        ApplyToInputFields="Value"
+                        ReservoirPerInputField="false"
+                        Topology="Ring"
+                        Size="200"
+                        BiasScale="0"
+                        InputConnectionDensity="1"
+                        InputWeightScale="0.2"
+                        ContextNeuronFeedbackDensity="0"
+                        FeedbackConnectionDensity="0"
+                        FeedbackWeightScale="0"
+                        ReservoirNeuronActivation="TANH"
+                        RetainmentNeuronsDensity="0"
+                        RetainmentMinRate="0"
+                        RetainmentMaxRate="0"
+                        InternalWeightScale="0.2"
+                        AugmentedStatesFeature="false"
+                        >
+        <RingTopologyConfig BiDirection="false" SelfConnectionsDensity="0.1" InterConnectionsDensity="0.1"/>
+      </ReservoirConfig>
+    </ESN>
+  </TestCase>
+  <TestCase Name="SPXL High and Low prices prediction (separated reservoir per each input field, single readout neuron and RESILIENT trainer)" CSVDataFileName="SPXL.csv" OutputFields="High;Low" BootSeqMinLength="200" TrainingSeqMaxLength="1000" TestingSeqLength="10" TestSamplesSelection="Random" NormalizerReserveRatio="0.1">
+    <ESN RandomizerSeek="0"
+         InputFields="High;Low;Adj Close"
+         InputFieldExtendedMemorySize="0"
+         RouteInputToRegression="false"
+         ReadOutHiddenLayersStructure=""
+         OutputNeuronActivation="IDENTITY"
+         RegressionMethod="RESILIENT"
+         RegressionMaxAttempts="5"
+         RegressionMaxIterations="3000"
+         RegressionStopMSEValue="1E-10"
+         >
+      <ReservoirConfig CfgName="ResMain"
+                        ApplyToInputFields="High;Low;Adj Close"
+                        ReservoirPerInputField="true"
+                        Topology="Random"
+                        Size="200"
+                        BiasScale="0"
+                        InputConnectionDensity="1"
+                        InputWeightScale="0.9"
+                        ContextNeuronFeedbackDensity="0"
+                        FeedbackConnectionDensity="0"
+                        FeedbackWeightScale="0"
+                        ReservoirNeuronActivation="TANH"
+                        RetainmentNeuronsDensity="1"
+                        RetainmentMinRate="0"
+                        RetainmentMaxRate="0.5"
+                        InternalWeightScale="0.1"
+                        AugmentedStatesFeature="false"
+                        >
+        <RandomTopologyConfig ConnectionsDensity="0.15"/>
+      </ReservoirConfig>
+    </ESN>
+  </TestCase>
+  <TestCase Name="SPXL High and Low prices prediction (single reservoir for all input fields, single readout neuron and RESILIENT trainer)" CSVDataFileName="SPXL.csv" OutputFields="High;Low" BootSeqMinLength="1000" TrainingSeqMaxLength="2000" TestingSeqLength="10" TestSamplesSelection="Random" NormalizerReserveRatio="0.1">
+    <ESN RandomizerSeek="0"
+         InputFields="High;Low;Adj Close"
+         InputFieldExtendedMemorySize="0"
+         RouteInputToRegression="false"
+         ReadOutHiddenLayersStructure=""
+         OutputNeuronActivation="IDENTITY"
+         RegressionMethod="RESILIENT"
+         RegressionMaxAttempts="5"
+         RegressionMaxIterations="10000"
+         RegressionStopMSEValue="1E-10"
+         >
+      <ReservoirConfig CfgName="ResMain"
+                        ApplyToInputFields="High;Low;Adj Close"
+                        ReservoirPerInputField="false"
+                        Topology="Random"
+                        Size="1000"
+                        BiasScale="0"
+                        InputConnectionDensity="0.25"
+                        InputWeightScale="0.2"
+                        ContextNeuronFeedbackDensity="0"
+                        FeedbackConnectionDensity="0"
+                        FeedbackWeightScale="0"
+                        ReservoirNeuronActivation="TANH"
+                        RetainmentNeuronsDensity="0.5"
+                        RetainmentMinRate="0"
+                        RetainmentMaxRate="0.75"
+                        InternalWeightScale="0.2"
+                        AugmentedStatesFeature="false"
+                        >
+        <RandomTopologyConfig ConnectionsDensity="0.1"/>
+      </ReservoirConfig>
+    </ESN>
+  </TestCase>
+  <TestCase Name="TTOO High and Low prices prediction (single reservoir for all input fields, single readout neuron and RESILIENT trainer)" CSVDataFileName="TTOO.csv" OutputFields="High;Low" BootSeqMinLength="300" TrainingSeqMaxLength="1000" TestingSeqLength="10" TestSamplesSelection="Random" NormalizerReserveRatio="0.1">
+    <ESN RandomizerSeek="0"
+         InputFields="High;Low;Adj Close"
+         InputFieldExtendedMemorySize="0"
+         RouteInputToRegression="true"
+         ReadOutHiddenLayersStructure=""
+         OutputNeuronActivation="IDENTITY"
+         RegressionMethod="RESILIENT"
+         RegressionMaxAttempts="5"
+         RegressionMaxIterations="10000"
+         RegressionStopMSEValue="1E-10"
+         >
+      <ReservoirConfig CfgName="ResMain"
+                        ApplyToInputFields="High;Low;Adj Close"
+                        ReservoirPerInputField="false"
+                        Topology="Random"
+                        Size="300"
+                        BiasScale="0"
+                        InputConnectionDensity="0.5"
+                        InputWeightScale="0.4"
+                        ContextNeuronFeedbackDensity="0"
+                        FeedbackConnectionDensity="0"
+                        FeedbackWeightScale="0"
+                        ReservoirNeuronActivation="TANH"
+                        RetainmentNeuronsDensity="0.5"
+                        RetainmentMinRate="0"
+                        RetainmentMaxRate="0.75"
+                        InternalWeightScale="0.4"
+                        AugmentedStatesFeature="false"
+                        >
+        <RandomTopologyConfig ConnectionsDensity="0.1"/>
+      </ReservoirConfig>
+    </ESN>
+  </TestCase>
+</ESNDemoSettings>

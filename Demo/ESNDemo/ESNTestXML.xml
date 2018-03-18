@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ESN RandomizerSeek="0">
+  <Input RouteToReadout="false">
+    <Field Name="Value"/>
+  </Input>
+  <Reservoir Name="ResMain" Size="200" Activation="TANH" Multiple="false" AugmentedStates="false">
+    <Input BiasScale="0">
+      <Field Name="Value" ConnectionDensity="1" WeightScale="0.2"/>
+    </Input>
+    <Internal WeightScale="0.2">
+      <RandomTopology ConnectionsDensity="0.15"/>
+      <RetirementNeurons Density="0" RetirementMinRate="0" RetirementMaxRate="0"/>
+      <ContextNeuron Activation="TANH" InWeightScale="0" OutWeightScale="0"/>
+    </Internal>
+    <Feedback Density="0" WeightScale="0"/>
+  </Reservoir>
+  <Readout Activation="IDENTITY">
+    <Layer Neurons="5" Activation="TANH"/>
+    <Layer Neurons="5" Activation="TANH"/>
+  </Readout>
+  <Regression RegressionMethod="RESILIENT" MaxAttempts="2" MaxEpochs="5000" StopMSE="1E-20"/>
+</ESN>
