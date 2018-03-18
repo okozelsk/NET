@@ -197,9 +197,8 @@ namespace OKOSW.Neural.Networks.EchoState
         }
 
         /// <summary>
-        /// Method returns the new instance of this instance as a copy.
+        /// Returns the new instance of this instance as a copy.
         /// </summary>
-        /// <returns></returns>
         public ESNSettings Clone()
         {
             ESNSettings clone = new ESNSettings(this);
@@ -215,7 +214,7 @@ namespace OKOSW.Neural.Networks.EchoState
             public int NeuronsCount { get; set; }
             public ActivationFactory.EnumActivationType ActivationType { get; set; }
 
-            //Constructor
+            //Constructors
             public ReadOutHiddenLayerCfg(string neuronsCount, string activationType)
             {
                 NeuronsCount = int.Parse(neuronsCount);
@@ -230,6 +229,7 @@ namespace OKOSW.Neural.Networks.EchoState
                 return;
             }
 
+            //Methods
             public bool IsEquivalent(ReadOutHiddenLayerCfg cmpItem)
             {
                 if (NeuronsCount != cmpItem.NeuronsCount || ActivationType != cmpItem.ActivationType)
@@ -239,10 +239,14 @@ namespace OKOSW.Neural.Networks.EchoState
                 return true;
             }
 
+            /// <summary>
+            /// Returns the new instance of this instance as a copy.
+            /// </summary>
             public ReadOutHiddenLayerCfg Clone()
             {
                 return new ReadOutHiddenLayerCfg(this);
             }
+
         }//ReadOutHiddenLayerCfg
 
         /// <summary>
@@ -275,6 +279,7 @@ namespace OKOSW.Neural.Networks.EchoState
                 ReservoirSettings = new AnalogReservoirSettings(source.ReservoirSettings);
                 return;
             }
+            
             //Methods
             public InputResCfgMap Clone()
             {
