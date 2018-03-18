@@ -10,6 +10,9 @@ using OKOSW.MathTools.MatrixMath;
 
 namespace OKOSW.Neural.Networks.FF.Basic
 {
+    /// <summary>
+    /// Startup parameters for linear regression trainer
+    /// </summary>
     [Serializable]
     public class LinRegrParameters
     {
@@ -23,6 +26,13 @@ namespace OKOSW.Neural.Networks.FF.Basic
 
     }//LinRegrParameters
 
+    /// <summary>
+    /// Implements linear regression trainer.
+    /// Principle is to add each iteration less and less piece of white-noise to predictors and then perform linear regression.
+    /// This technique allows to find more stable weight solution (according to testing samples) than just a linear regression
+    /// of pure predictors.
+    /// Trainee Basic network has to have only output layer and Identity activation.
+    /// </summary>
     [Serializable]
     public class LinRegrTrainer : IBasicTrainer
     {
@@ -39,6 +49,15 @@ namespace OKOSW.Neural.Networks.FF.Basic
         private int m_epoch;
 
         //Constructor
+        /// <summary>
+        /// Constructs new instance of linear regression trainer
+        /// </summary>
+        /// <param name="net">Basic network to be trained</param>
+        /// <param name="inputs">Predictors (input)</param>
+        /// <param name="outputs">Ideal outputs (the same rows count as inputs)</param>
+        /// <param name="maxEpoch">Maximum allowed training epochs</param>
+        /// <param name="rand">Random object to be used for adding white-noise to predictors</param>
+        /// <param name="parameters">Optional startup parameters of the trainer</param>
         public LinRegrTrainer(BasicNetwork net, List<double[]> inputs, List<double[]> outputs, int maxEpoch, Random rand, LinRegrParameters parameters = null)
         {
             //Check network readyness
@@ -99,11 +118,11 @@ namespace OKOSW.Neural.Networks.FF.Basic
         /// </summary>
         public double MSE { get { return m_MSE; } }
         /// <summary>
-        /// Current epoch (incemented by call of Iteration)
+        /// Current epoch (incremented each call of Iteration)
         /// </summary>
         public int Epoch { get { return m_epoch; } }
         /// <summary>
-        /// Training FF BasicNetwork
+        /// Trainee FF BasicNetwork
         /// </summary>
         public BasicNetwork Net { get { return m_net; } }
 

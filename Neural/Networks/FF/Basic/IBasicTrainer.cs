@@ -14,11 +14,11 @@ namespace OKOSW.Neural.Networks.FF.Basic
         /// </summary>
         double MSE { get; }
         /// <summary>
-        /// Current epoch (incemented by call of Iteration)
+        /// Current epoch (incremented each call of Iteration)
         /// </summary>
         int Epoch { get; }
         /// <summary>
-        /// Training FF BasicNetwork
+        /// Trainee FF BasicNetwork
         /// </summary>
         BasicNetwork Net { get; }
 

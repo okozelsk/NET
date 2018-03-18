@@ -12,12 +12,12 @@ namespace OKOSW.Neural.Reservoir.Analog
     public interface IAnalogReservoir
     {
         /// <summary>
-        /// Reservoir unique ID.
+        /// Reservoir ID.
         /// </summary>
         string ID { get; }
 
         /// <summary>
-        /// Reservoir configuration name.
+        /// Reservoir configuration name (together with ID should be unique).
         /// </summary>
         string ConfigName { get; }
 
@@ -27,7 +27,7 @@ namespace OKOSW.Neural.Reservoir.Analog
         int Size { get; }
 
         /// <summary>
-        /// Reservoir outputs (predictors) count from internal neurons.
+        /// Number of reservoir's output predictors
         /// </summary>
         int OutputPredictorsCount { get; }
 
@@ -37,9 +37,8 @@ namespace OKOSW.Neural.Reservoir.Analog
         AnalogNeuron[] Neurons { get; }
 
         /// <summary>
-        /// Resets all reservoir neurons to their initial state (typicaly zero),
-        /// so client then can start the computing from the beginning.
-        /// Function does not affect weights or internal structure.
+        /// Resets all reservoir neurons to their initial state (before boot state).
+        /// Function does not affect weights or internal structure of the resservoir.
         /// </summary>
         void Reset();
 
@@ -47,14 +46,14 @@ namespace OKOSW.Neural.Reservoir.Analog
         /// Computes reservoir neurons new states and returns new set of reservoir output predictors.
         /// </summary>
         /// <param name="input">Array of new input values.</param>
-        /// <param name="outputPredictors">Array of output predictors values. Array has to be sized to OutputPredictorsCount reservoir property.</param>
-        /// <param name="collectStatistics">Switch if to collect statistics. Typical usage is FALSE within boot phase and TRUE after boot phase.</param>
+        /// <param name="outputPredictors">Array to be filled with output predictors values. Array has to be sized to OutputPredictorsCount reservoir property.</param>
+        /// <param name="collectStatistics">Switch dictates, if to collect statistics. Typical usage is FALSE within boot phase and TRUE after boot phase.</param>
         void Compute(double[] input, double[] outputPredictors, bool collectStatistics);
 
         /// <summary>
         /// Sets feedback values for next computation round
         /// </summary>
-        /// <param name="feedback">Array of feedback values.</param>
+        /// <param name="feedback">Feedback values.</param>
         void SetFeedback(double[] feedback);
     }
 }

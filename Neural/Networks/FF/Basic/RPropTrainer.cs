@@ -103,7 +103,7 @@ namespace OKOSW.Neural.Networks.FF.Basic
         /// </summary>
         public int Epoch { get { return m_epoch; } }
         /// <summary>
-        /// Training FF BasicNetwork
+        /// Trainee FF BasicNetwork
         /// </summary>
         public BasicNetwork Net { get { return m_net; } }
 

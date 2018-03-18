@@ -12,7 +12,7 @@ using OKOSW.Neural.Activation;
 namespace OKOSW.Neural.Reservoir.Analog
 {
     /// <summary>
-    /// Implements reservoir supporting various topologies and features
+    /// Implements analog reservoir supporting several internal topologies and advanced features
     /// </summary>
     [Serializable]
     public class AnalogReservoir : IAnalogReservoir
@@ -35,15 +35,15 @@ namespace OKOSW.Neural.Reservoir.Analog
         private bool m_augmentedStatesFeature;
 
         /// <summary>
-        /// Constructs computing reservoir
+        /// Constructs analog computing reservoir.
         /// </summary>
-        /// <param name="ID">Reservoir identifier (together with reservoir configuration name has to be unique)</param>
-        /// <param name="inputValuesCount">Count of reservoir input falues</param>
-        /// <param name="feedbackValuesCount">Count of values to be fed back</param>
+        /// <param name="ID">Reservoir identifier (together with reservoir configuration name should be unique)</param>
+        /// <param name="inputValuesCount">Number of reservoir input values</param>
+        /// <param name="feedbackValuesCount">Number of values to be fed back</param>
         /// <param name="settings">Reservoir initialization parameters</param>
         /// <param name="randomizerSeek">
-        /// Calling constructor with the same randomizerSeek greater or equal to 0 ensures the same reservoir initialization.
-        /// Specify randomizerSeek less than 0 for different initialization after aech call.
+        /// Calling constructor with the same randomizerSeek greater or equal to 0 ensures the same reservoir initialization (good for tuning).
+        /// Specify randomizerSeek less than 0 for different initialization aech time the constructor will be called.
         /// </param>
         public AnalogReservoir(int ID, int inputValuesCount, int feedbackValuesCount, AnalogReservoirSettings settings, int randomizerSeek = -1)
         {
@@ -77,7 +77,7 @@ namespace OKOSW.Neural.Reservoir.Analog
             {
                 m_neurons[n] = new AnalogNeuron(ActivationFactory.CreateAF(settings.ReservoirNeuronActivation), retainmentRates[n]);
             }
-            //Helper array for neurons order randomizations purposes
+            //Helper array for neurons order randomization purposes
             int[] neuronsShuffledIndices = new int[settings.Size];
             //--------------------------------------------------------
             //Context neuron feature
@@ -123,7 +123,7 @@ namespace OKOSW.Neural.Reservoir.Analog
                 }
             }
             //--------------------------------------------------------
-            //Reservoir topology -> schema of connections between reservoir neurons
+            //Reservoir topology -> schema of internal connections
             m_partyNeuronsIdxs = new List<int>[m_neurons.Length];
             m_partyNeuronsWeights = new List<double>[m_neurons.Length];
             for (int i = 0; i < m_neurons.Length; i++)
@@ -149,11 +149,25 @@ namespace OKOSW.Neural.Reservoir.Analog
             return;
         }
 
+        /// <summary>
+        /// Returns random weight within range -scale, +scale
+        /// </summary>
+        /// <param name="rand">Random object to be used.</param>
+        /// <param name="scale">Determines the range within the weight has to be.</param>
+        /// <returns></returns>
         public static double RandomWeight(Random rand, double scale)
         {
             return rand.NextBoundedUniformDouble(-1, 1) * scale;
         }
 
+        /// <summary>
+        /// Establishes connection between two reservoir neurons.
+        /// </summary>
+        /// <param name="targetNeuronIdx">Target neuron index</param>
+        /// <param name="partyNeuronIdx">Party neuron index</param>
+        /// <param name="weightScale">Connection weight scale</param>
+        /// <param name="check">Check if the connection already exists?</param>
+        /// <returns>Success/Unsuccess (connection already exists)</returns>
         private bool AddConnection(int targetNeuronIdx, int partyNeuronIdx, double weightScale, bool check = true)
         {
             if (!check || !m_partyNeuronsIdxs[targetNeuronIdx].Contains(partyNeuronIdx))
@@ -165,11 +179,24 @@ namespace OKOSW.Neural.Reservoir.Analog
             return false;
         }
 
+        /// <summary>
+        /// Establishes connection between two reservoir neurons.
+        /// </summary>
+        /// <param name="connectionID">Position of the connection within flat representation.</param>
+        /// <param name="weightScale">Connection weight scale</param>
+        /// <param name="check">Check if the connection already exists?</param>
+        /// <returns>Success/Unsuccess (connection already exists)</returns>
         private bool AddConnection(int connectionID, double weightScale, bool check = true)
         {
             return AddConnection(connectionID / m_neurons.Length, connectionID % m_neurons.Length, weightScale, check);
         }
 
+        /// <summary>
+        /// Connects all reservoir neurons to a ring shape.
+        /// </summary>
+        /// <param name="weightScale">Connection weight scale</param>
+        /// <param name="biDirection">Bi direction ring?</param>
+        /// <param name="check">Check if the connection already exists?</param>
         private void SetRingConnections(double weightScale, bool biDirection, bool check = true)
         {
             for (int i = 0; i < m_neurons.Length; i++)
@@ -185,6 +212,12 @@ namespace OKOSW.Neural.Reservoir.Analog
             return;
         }
 
+        /// <summary>
+        /// Sets randomly selected number of neurons (corresponding to density) to be self-connected
+        /// </summary>
+        /// <param name="density">How many neurons will be self-connected?</param>
+        /// <param name="weightScale">Connection weight scale</param>
+        /// <param name="check">Check if the connection already exists?</param>
         private void SetSelfConnections(double density, double weightScale, bool check = true)
         {
             int connectionsCount = (int)Math.Round((double)m_neurons.Length * density);
@@ -197,6 +230,12 @@ namespace OKOSW.Neural.Reservoir.Analog
             return;
         }
 
+        /// <summary>
+        /// Sets random neurons inter connections.
+        /// </summary>
+        /// <param name="density">How many connections from Size x Size options will be randomly initialized?</param>
+        /// <param name="weightScale">Connection weight scale</param>
+        /// <param name="check">Check if the connection already exists?</param>
         private void SetInterConnections(double density, double weightScale, bool check = true)
         {
             int connectionsCount = (int)Math.Round((double)((m_neurons.Length - 1) * m_neurons.Length) * density);
@@ -221,6 +260,11 @@ namespace OKOSW.Neural.Reservoir.Analog
             return;
         }
 
+        /// <summary>
+        /// Initializes random topology connection schema
+        /// </summary>
+        /// <param name="cfg">Configuration parameters</param>
+        /// <param name="weightScale">Connection weight scale</param>
         private void SetupRandomTopology(AnalogReservoirSettings.RandomTopologyConfig cfg, double weightScale)
         {
             //Fully random connections setup
@@ -234,6 +278,11 @@ namespace OKOSW.Neural.Reservoir.Analog
             return;
         }
 
+        /// <summary>
+        /// Initializes ring shape topology connection schema
+        /// </summary>
+        /// <param name="cfg">Configuration parameters</param>
+        /// <param name="weightScale">Connection weight scale</param>
         private void SetupRingTopology(AnalogReservoirSettings.RingTopologyConfig cfg, double weightScale)
         {
             //Ring connections part
@@ -245,6 +294,11 @@ namespace OKOSW.Neural.Reservoir.Analog
             return;
         }
 
+        /// <summary>
+        /// Initializes doubly twisted thoroidal shape topology connection schema
+        /// </summary>
+        /// <param name="cfg">Configuration parameters</param>
+        /// <param name="weightScale">Connection weight scale</param>
         private void SetupDTTTopology(AnalogReservoirSettings.DTTTopologyConfig cfg, double weightScale)
         {
             //HTwist part (single direction ring)
@@ -271,12 +325,12 @@ namespace OKOSW.Neural.Reservoir.Analog
 
         //Properties
         /// <summary>
-        /// Reservoir unique ID.
+        /// Reservoir ID.
         /// </summary>
         public string ID { get { return m_ID; } }
 
         /// <summary>
-        /// Reservoir name.
+        /// Reservoir configuration name (together with ID should be unique).
         /// </summary>
         public string ConfigName { get { return m_configName; } }
 
@@ -286,7 +340,7 @@ namespace OKOSW.Neural.Reservoir.Analog
         public int Size { get { return m_neurons.Length; } }
 
         /// <summary>
-        /// Reservoir outputs (predictors) count from internal neurons.
+        /// Number of reservoir's output predictors (Size or Size*2 when augumented states are enabled).
         /// </summary>
         public int OutputPredictorsCount { get { return m_augmentedStatesFeature ? m_neurons.Length * 2 : m_neurons.Length; } }
 
@@ -297,9 +351,8 @@ namespace OKOSW.Neural.Reservoir.Analog
 
         //Methods
         /// <summary>
-        /// Resets all reservoir neurons to their initial state (typicaly zero),
-        /// so client then can start the computing from the beginning.
-        /// Function does not affect weights or internal structure.
+        /// Resets all reservoir neurons to their initial state (before boot state).
+        /// Function does not affect weights or internal structure of the resservoir.
         /// </summary>
         public void Reset()
         {
@@ -316,8 +369,8 @@ namespace OKOSW.Neural.Reservoir.Analog
         /// Computes reservoir neurons new states and returns new set of reservoir output predictors.
         /// </summary>
         /// <param name="input">Array of new input values.</param>
-        /// <param name="outputPredictors">Array of output predictors values. Array has to be sized to OutputPredictorsCount reservoir property.</param>
-        /// <param name="collectStatistics">Switch if to collect statistics. Typical usage is FALSE within boot phase and TRUE after boot phase.</param>
+        /// <param name="outputPredictors">Array to be filled with output predictors values. Array has to be sized to OutputPredictorsCount reservoir property.</param>
+        /// <param name="collectStatistics">Switch dictates, if to collect statistics. Typical usage is FALSE within boot phase and TRUE after boot phase.</param>
         public void Compute(double[] input, double[] outputPredictors, bool collectStatistics)
         {
             //Update input memory
@@ -383,7 +436,7 @@ namespace OKOSW.Neural.Reservoir.Analog
         /// <summary>
         /// Sets feedback values for next computation round
         /// </summary>
-        /// <param name="feedback">Array of feedback values.</param>
+        /// <param name="feedback">Feedback values.</param>
         public void SetFeedback(double[] feedback)
         {
             feedback.CopyTo(m_feedback, 0);
@@ -395,7 +448,7 @@ namespace OKOSW.Neural.Reservoir.Analog
 
         //Inner classes
         /// <summary>
-        /// Implements input component of reservoir
+        /// Implements input component of the analog reservoir
         /// </summary>
         [Serializable]
         private class ReservoirInputBlock
@@ -455,6 +508,10 @@ namespace OKOSW.Neural.Reservoir.Analog
                 return;
             }
 
+            /// <summary>
+            /// Computes input signal from input fields to be processed by specified neuron
+            /// </summary>
+            /// <param name="reservoirNeuronIdx">Reservoir neuron index</param>
             public double GetInputSignal(int reservoirNeuronIdx)
             {
                 double signal = 0;
