@@ -16,18 +16,18 @@ using OKOSW.Demo.Log;
 
 namespace OKOSW.Demo
 {
-
     /// <summary>
     /// Demonstrates ESN usage
     /// </summary>
     public static class ESNDemo
     {
         /// <summary>
-        /// Creates ESN required DataBundle object containing normalized data for training
+        /// Loads data, prepares output normalizer(s) and creates ESN required DataBundle object containing
+        /// standardized and normalized data to be used for network training and testing.
         /// </summary>
-        /// <param name="demoCaseParams">Particular demo case parameters</param>
-        /// <param name="predictionInputVector">OUT input vector to be used for ESN further prediction</param>
-        /// <param name="outputNormalizer">OUT normalizer object for ESN outputs denormalization</param>
+        /// <param name="demoCaseParams">Demo case settings</param>
+        /// <param name="predictionInputVector">OUT prepared input vector to be used for ESN further prediction (after training)</param>
+        /// <param name="outputNormalizers">OUT prepared normalizer(s) for ESN outputs denormalization</param>
         /// <returns></returns>
         public static ESN.DataBundle ESNDataBundleFromFile(ESNDemoSettings.DemoCaseParams demoCaseParams, out double[] predictionInputVector, out List<Normalizer> outputNormalizers)
         {
@@ -136,10 +136,15 @@ namespace OKOSW.Demo
         }
 
         /// <summary>
-        /// Regression callback control function
+        /// This is a callback control function called from the regression process after each epoch.
+        /// Primary purpose is to identify the best network (weights).
+        /// Here is used simply outArgs.Best = (inArgs.CurrRegrData.CombinedError LT inArgs.BestRegrData.CombinedError), but
+        /// the real logic could be much more complex.
+        /// Secondary purpose is to inform the caller about the progress and to give a chance to control the progress
+        /// (to stop current attempt or to stop whole regression).
         /// </summary>
-        /// <param name="inArgs"></param>
-        /// <returns></returns>
+        /// <param name="inArgs">Contains current/best error statistics, reservoir(s) statistics and the user object</param>
+        /// <returns>Instructions for the calling regression process.</returns>
         public static RegressionCallBackOutArgs ESNTraininigControl(RegressionCallBackInArgs inArgs)
         {
             //Report reservoirs statistics in case of the first call
@@ -147,10 +152,10 @@ namespace OKOSW.Demo
             {
                 for (int resIdx = 0; resIdx < inArgs.ReservoirsStatistics.Count; resIdx++)
                 {
-                    ((IOutputLog)inArgs.ControllerData).Write("    Stats of the reservoir neurons " + inArgs.ReservoirsStatistics[resIdx].ResID, false);
-                    ((IOutputLog)inArgs.ControllerData).Write("      MAX States  Avg, Max, Min, SDdev: " + inArgs.ReservoirsStatistics[resIdx].NeuronsMaxAbsStatesStat.ArithAvg.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsMaxAbsStatesStat.Max.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsMaxAbsStatesStat.Min.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsMaxAbsStatesStat.StdDev.ToString(CultureInfo.InvariantCulture), false);
-                    ((IOutputLog)inArgs.ControllerData).Write("      AVG States  Avg, Max, Min, SDdev: " + inArgs.ReservoirsStatistics[resIdx].NeuronsGeoAvgStatesStat.ArithAvg.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsGeoAvgStatesStat.Max.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsGeoAvgStatesStat.Min.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsGeoAvgStatesStat.StdDev.ToString(CultureInfo.InvariantCulture), false);
-                    ((IOutputLog)inArgs.ControllerData).Write("      States SPAN Avg, Max, Min, SDdev: " + inArgs.ReservoirsStatistics[resIdx].NeuronsStateSpansStat.ArithAvg.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsStateSpansStat.Max.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsStateSpansStat.Min.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsStateSpansStat.StdDev.ToString(CultureInfo.InvariantCulture), false);
+                    ((IOutputLog)inArgs.ControllerData).Write("    Reservoir neurons statistics for ResID " + inArgs.ReservoirsStatistics[resIdx].ResID, false);
+                    ((IOutputLog)inArgs.ControllerData).Write("     States range Avg, Max, Min, SDdev: " + inArgs.ReservoirsStatistics[resIdx].NeuronsStateSpansStat.ArithAvg.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsStateSpansStat.Max.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsStateSpansStat.Min.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsStateSpansStat.StdDev.ToString(CultureInfo.InvariantCulture), false);
+                    ((IOutputLog)inArgs.ControllerData).Write("       MAX states Avg, Max, Min, SDdev: " + inArgs.ReservoirsStatistics[resIdx].NeuronsMaxAbsStatesStat.ArithAvg.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsMaxAbsStatesStat.Max.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsMaxAbsStatesStat.Min.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsMaxAbsStatesStat.StdDev.ToString(CultureInfo.InvariantCulture), false);
+                    ((IOutputLog)inArgs.ControllerData).Write("       AVG states Avg, Max, Min, SDdev: " + inArgs.ReservoirsStatistics[resIdx].NeuronsGeoAvgStatesStat.ArithAvg.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsGeoAvgStatesStat.Max.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsGeoAvgStatesStat.Min.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsGeoAvgStatesStat.StdDev.ToString(CultureInfo.InvariantCulture), false);
                     ((IOutputLog)inArgs.ControllerData).Write(" ", false);
                 }
             }
@@ -161,16 +166,21 @@ namespace OKOSW.Demo
                 "    OutFieldNbr: " + inArgs.RegrValID.ToString() +
                 ", Attempt/Epoch: " + inArgs.RegrAttemptNumber.ToString().PadLeft(2, '0') + "/" + inArgs.Epoch.ToString().PadLeft(5, '0') +
                 ", DSet-Sizes: (" + inArgs.CurrRegrData.TrainingErrorStat.SamplesCount.ToString() + ", " + inArgs.CurrRegrData.TestingErrorStat.SamplesCount.ToString() + ")" +
-                ", B-TrainA: " + (outArgs.Best ? inArgs.CurrRegrData.TrainingErrorStat : inArgs.BestRegrData.TrainingErrorStat).ArithAvg.ToString("E3", CultureInfo.InvariantCulture) +
-                ", B-TestA: " + (outArgs.Best ? inArgs.CurrRegrData.TestingErrorStat : inArgs.BestRegrData.TestingErrorStat).ArithAvg.ToString("E3", CultureInfo.InvariantCulture) +
-                ", B-TestM: " + (outArgs.Best ? inArgs.CurrRegrData.TestingErrorStat : inArgs.BestRegrData.TestingErrorStat).Min.ToString("E3", CultureInfo.InvariantCulture) +
-                ", C-TrainA: " + inArgs.CurrRegrData.TrainingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture) +
-                ", C-TestA: " + inArgs.CurrRegrData.TestingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture) +
-                ", C-TestM: " + inArgs.CurrRegrData.TestingErrorStat.Min.ToString("E3", CultureInfo.InvariantCulture)
+                ", Best-Train: " + (outArgs.Best ? inArgs.CurrRegrData.TrainingErrorStat : inArgs.BestRegrData.TrainingErrorStat).ArithAvg.ToString("E3", CultureInfo.InvariantCulture) +
+                ", Best-Test: " + (outArgs.Best ? inArgs.CurrRegrData.TestingErrorStat : inArgs.BestRegrData.TestingErrorStat).ArithAvg.ToString("E3", CultureInfo.InvariantCulture) +
+                ", Curr-Train: " + inArgs.CurrRegrData.TrainingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture) +
+                ", Curr-Test: " + inArgs.CurrRegrData.TestingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture)
                 , !(inArgs.Epoch == 1 && inArgs.RegrAttemptNumber == 1));
             return outArgs;
         }
 
+        /// <summary>
+        /// Executes one specified demo case.
+        /// Loads and prepares sample data, trains network and display results and prediction.
+        /// </summary>
+        /// <param name="log">Into this interface demo writes output to be displayed</param>
+        /// <param name="demoCaseParams">Demo case settings to be executed</param>
+        /// <returns></returns>
         public static double[] PerformDemoCase(IOutputLog log, ESNDemoSettings.DemoCaseParams demoCaseParams)
         {
             log.Write("  Performing demo case " + demoCaseParams.Name, false);
@@ -198,27 +208,29 @@ namespace OKOSW.Demo
             //Report regression information
             for (int outputIdx = 0; outputIdx < regrOuts.Length; outputIdx++)
             {
-                log.Write("    Output Field: " + demoCaseParams.OutputFieldsNames[outputIdx], false);
-                log.Write("       Predicion: " + outputVector[outputIdx].ToString(CultureInfo.InvariantCulture), false);
-                log.Write("      Out weights", false);
+                log.Write("    " + demoCaseParams.OutputFieldsNames[outputIdx], false);
+                log.Write("       Predicted next: " + outputVector[outputIdx].ToString(CultureInfo.InvariantCulture), false);
+                log.Write("     Regr weights stat", false);
                 log.Write("        Min, Max, Avg: " + regrOuts[outputIdx].OutputWeightsStat.Min.ToString(CultureInfo.InvariantCulture) + " " + regrOuts[outputIdx].OutputWeightsStat.Max.ToString(CultureInfo.InvariantCulture) + " " + regrOuts[outputIdx].OutputWeightsStat.ArithAvg.ToString(CultureInfo.InvariantCulture), false);
                 log.Write("        Upd, Cnt, Zrs: " + regrOuts[outputIdx].BestUpdatesCount.ToString() + " " + regrOuts[outputIdx].OutputWeightsStat.SamplesCount.ToString() + " " + (regrOuts[outputIdx].OutputWeightsStat.SamplesCount - regrOuts[outputIdx].OutputWeightsStat.NonzeroSamplesCount).ToString(), false);
-                log.Write("      Errors", false);
-                log.Write("        TrainE Avg: " + regrOuts[outputIdx].TrainingErrorStat.ArithAvg.ToString(CultureInfo.InvariantCulture), false);
-                log.Write("        Test   Len: " + demoCaseParams.TestingSeqLength.ToString(CultureInfo.InvariantCulture), false);
-                log.Write("        TestE  Avg: " + regrOuts[outputIdx].TestingErrorStat.ArithAvg.ToString(CultureInfo.InvariantCulture), false);
-                log.Write("        Test Max NaturalE (+/-): " + (outputNormalizers[outputIdx].ComputeNaturalError(regrOuts[outputIdx].TestingErrorStat.Max)).ToString(CultureInfo.InvariantCulture), false);
-                log.Write("        Test Avg NaturalE (+/-): " + (outputNormalizers[outputIdx].ComputeNaturalError(regrOuts[outputIdx].TestingErrorStat.ArithAvg)).ToString(CultureInfo.InvariantCulture), false);
+                log.Write("            Error stat", false);
+                log.Write("    Train set samples: " + regrOuts[outputIdx].TrainingErrorStat.SamplesCount.ToString(), false);
+                log.Write("    Train set Avg Err: " + regrOuts[outputIdx].TrainingErrorStat.ArithAvg.ToString(CultureInfo.InvariantCulture), false);
+                log.Write("     Test set samples: " + regrOuts[outputIdx].TestingErrorStat.SamplesCount.ToString(), false);
+                log.Write("     Test set Avg Err: " + regrOuts[outputIdx].TestingErrorStat.ArithAvg.ToString(CultureInfo.InvariantCulture), false);
+                log.Write("    Test Max Real Err: " + (outputNormalizers[outputIdx].ComputeNaturalError(regrOuts[outputIdx].TestingErrorStat.Max)).ToString(CultureInfo.InvariantCulture), false);
+                log.Write("    Test Avg Real Err: " + (outputNormalizers[outputIdx].ComputeNaturalError(regrOuts[outputIdx].TestingErrorStat.ArithAvg)).ToString(CultureInfo.InvariantCulture), false);
+                log.Write("    (Note that displayed errors are not squared. Squared errors would be much smaller)", false);
             }
             log.Write(" ", false);
             return outputVector;
         }
 
         /// <summary>
-        /// Runs ESN demos. Function prepares and runs different data sets and related ESN settings.
+        /// Runs ESN demo. Calls PerformDemoCase for each demo case defined in demoSettingsFile XML.
         /// </summary>
-        /// <param name="log">Logging object to be used as demo messages output</param>
-        /// <param name="demoSettingsFile">XML file name containing settings for ESN demo</param>
+        /// <param name="log">Into this interface demo writes output to be displayed</param>
+        /// <param name="demoSettingsFile">XML file name which contains defined ESN demo cases</param>
         public static void RunDemo(IOutputLog log, string demoSettingsFile)
         {
             log.Write("ESN demo started", false);
