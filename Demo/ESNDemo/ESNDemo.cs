@@ -222,7 +222,6 @@ namespace OKOSW.Demo
         public static void RunDemo(IOutputLog log, string demoSettingsFile)
         {
             log.Write("ESN demo started", false);
-            ESNDemoSettings settings = new ESNDemoSettings(demoSettingsFile);
             ESNDemoSettings demoSettings = new ESNDemoSettings(demoSettingsFile);
             TimeSeriesGenerator.GenerateStandardCSVFiles(demoSettings.DataDir);
             foreach(ESNDemoSettings.DemoCaseParams demoCaseParams in demoSettings.DemoCases)
