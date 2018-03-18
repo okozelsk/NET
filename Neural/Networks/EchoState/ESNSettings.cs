@@ -208,6 +208,7 @@ namespace OKOSW.Neural.Networks.EchoState
 
 
         //Inner classes
+        [Serializable]
         public class ReadOutHiddenLayerCfg
         {
             //Attributes
