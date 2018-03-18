@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace OKOSW.Demo.Log
 {
+    /// <summary>
+    /// Simple interface to allow to display output information
+    /// </summary>
     public class ConsoleLog : IOutputLog
     {
         //Constants
