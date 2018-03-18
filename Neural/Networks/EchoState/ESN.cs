@@ -9,12 +9,19 @@ using OKOSW.Neural.Reservoir.Analog;
 namespace OKOSW.Neural.Networks.EchoState
 {
     /// <summary>
-    /// Implements Echo State Network with multiple reservoirs optional feature.
+    /// Implements Echo State Network
     /// </summary>
     [Serializable]
     public class ESN
     {
         //Delegates
+        /// <summary>
+        /// Selects testing samples from all_ samples.
+        /// </summary>
+        /// <param name="all_predictors">All sample predictors</param>
+        /// <param name="all_outputs">All sample desired outputs</param>
+        /// <param name="outputIdx">Index of ESN output value for which will be network trained.</param>
+        /// <param name="testSamplesIdxs">Array to be filled with selected test samples indexes (function output).</param>
         public delegate void TestSamplesSelector(List<double[]> all_predictors, List<double[]> all_outputs, int outputIdx, int[] testSamplesIdxs);
         //Constants
         //Attributes
@@ -26,6 +33,11 @@ namespace OKOSW.Neural.Networks.EchoState
         private RegressionData[] m_regression;
 
         //Constructor
+        /// <summary>
+        /// Constructs an instance of Echo State Network
+        /// </summary>
+        /// <param name="settings">Echo State Network settings</param>
+        /// <param name="outputValuesCount">For how many different values will ESN predict.</param>
         public ESN(ESNSettings settings, int outputValuesCount)
         {
             m_settings = settings;
@@ -135,18 +147,25 @@ namespace OKOSW.Neural.Networks.EchoState
         }
 
         /// <summary>
-        /// Could be called before next prediction to tell the network right previous outputs
+        /// Could be called before next prediction to tell the network right previous outputs (feedback)
         /// </summary>
-        /// <param name="rightOutputs">Last known right output</param>
-        public void PushFeedback(double[] rightOutputs)
+        /// <param name="lastRealValues">Last real values</param>
+        public void PushFeedback(double[] lastRealValues)
         {
             foreach (ReservoirInstanceData resData in m_reservoirInstances)
             {
-                resData.ReservoirObj.SetFeedback(rightOutputs);
+                resData.ReservoirObj.SetFeedback(lastRealValues);
             }
             return;
         }
 
+        /// <summary>
+        /// Selects testing samples as a lasting sequence in all_ samples.
+        /// </summary>
+        /// <param name="all_predictors">All sample predictors</param>
+        /// <param name="all_outputs">All sample desired outputs</param>
+        /// <param name="outputIdx">Index of ESN output value for which will be network trained. Not used here.</param>
+        /// <param name="testSamplesIdxs">Array to be filled with selected test samples indexes</param>
         public void SelectTestSamples_Seq(List<double[]> all_predictors, List<double[]> all_outputs, int outputIdx, int[] testSamplesIdxs)
         {
             //Sequential selection
@@ -157,6 +176,13 @@ namespace OKOSW.Neural.Networks.EchoState
             return;
         }
 
+        /// <summary>
+        /// Selects testing samples randomly from all_ samples.
+        /// </summary>
+        /// <param name="all_predictors">All sample predictors</param>
+        /// <param name="all_outputs">All sample desired outputs</param>
+        /// <param name="outputIdx">Index of ESN output value for which will be network trained. Not used here.</param>
+        /// <param name="testSamplesIdxs">Array to be filled with selected test samples indexes</param>
         public void SelectTestSamples_Rnd(List<double[]> all_predictors, List<double[]> all_outputs, int outputIdx, int[] testSamplesIdxs)
         {
             //Random selection
@@ -173,11 +199,11 @@ namespace OKOSW.Neural.Networks.EchoState
         /// Trains network (computes output weights).
         /// </summary>
         /// <param name="dataSet">Bundle containing all known input and desired output samples (in time order)</param>
-        /// <param name="bootSamplesCount">Specifies, how many of starting items of dataSet to skip in regression phase</param>
+        /// <param name="bootSamplesCount">Specifies, how many of starting items of dataSet will be used for booting of reservoirs (to ensure reservoir neurons states consistently corresponding to input data)</param>
         /// <param name="testSamplesCount">Specifies, how many samples from dataSet to use as the network test samples</param>
-        /// <param name="testSamplesSelector">Function to be called to select testing samples</param>
-        /// <param name="RegressionController">Function is continuously called during the regression phase to give to caller control over regression progress</param>
-        /// <param name="regressionControllerData">Custom object to be passed to RegressionController together with other standard arguments</param>
+        /// <param name="testSamplesSelector">Function to be called to select testing samples (use SelectTestSamples_Seq, SelectTestSamples_Rnd or implement your own)</param>
+        /// <param name="RegressionController">Function is continuously calling back during the regression phase to give control over regression progress</param>
+        /// <param name="regressionControllerData">Custom object to be unmodified passed to RegressionController together with other standard arguments</param>
         /// <returns>Array of regression outputs</returns>
         public RegressionData[] Train(DataBundle dataSet,
                                  int bootSamplesCount,
@@ -225,7 +251,7 @@ namespace OKOSW.Neural.Networks.EchoState
             //Statistics
             CollectReservoirsStats();
             
-            //Regressions
+            //Alone regression for each ESN output field
             for (int outputIdx = 0; outputIdx < m_regression.Length; outputIdx++)
             {
                 //Testing data indexes
@@ -240,21 +266,22 @@ namespace OKOSW.Neural.Networks.EchoState
                 List<double[]> testingOutputs = new List<double[]>(testSamplesCount);
                 for (int i = 0; i < all_predictors.Count; i++)
                 {
-                    //Array.
                     if (!testIndexesHashSet.Contains(i))
                     {
+                        //Training sample
                         trainingPredictors.Add(all_predictors[i]);
                         trainingOutputs.Add(new double[1]);
                         trainingOutputs[trainingOutputs.Count - 1][0] = all_outputs[i][outputIdx];
                     }
                     else
                     {
+                        //Testing sample
                         testingPredictors.Add(all_predictors[i]);
                         testingOutputs.Add(new double[1]);
                         testingOutputs[testingOutputs.Count - 1][0] = all_outputs[i][outputIdx];
                     }
                 }
-
+                //Regression
                 results[outputIdx] = RGS.BuildOutputFFNet(outputIdx,
                                                           m_reservoirsStatistics,
                                                           trainingPredictors,
