@@ -148,9 +148,9 @@ namespace OKOSW.Demo
                 for (int resIdx = 0; resIdx < inArgs.ReservoirsStatistics.Count; resIdx++)
                 {
                     ((IOutputLog)inArgs.ControllerData).Write("    Stats of the reservoir neurons " + inArgs.ReservoirsStatistics[resIdx].ResID, false);
-                    ((IOutputLog)inArgs.ControllerData).Write("      MAX States  Avg, Max, Min, SDdev: " + inArgs.ReservoirsStatistics[resIdx].NeuronsMaxAbsStatesStat.ArithAvg.ToString() + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsMaxAbsStatesStat.Max.ToString() + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsMaxAbsStatesStat.Min.ToString() + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsMaxAbsStatesStat.StdDev.ToString(), false);
-                    ((IOutputLog)inArgs.ControllerData).Write("      AVG States  Avg, Max, Min, SDdev: " + inArgs.ReservoirsStatistics[resIdx].NeuronsGeoAvgStatesStat.ArithAvg.ToString() + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsGeoAvgStatesStat.Max.ToString() + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsGeoAvgStatesStat.Min.ToString() + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsGeoAvgStatesStat.StdDev.ToString(), false);
-                    ((IOutputLog)inArgs.ControllerData).Write("      States SPAN Avg, Max, Min, SDdev: " + inArgs.ReservoirsStatistics[resIdx].NeuronsStateSpansStat.ArithAvg.ToString() + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsStateSpansStat.Max.ToString() + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsStateSpansStat.Min.ToString() + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsStateSpansStat.StdDev.ToString(), false);
+                    ((IOutputLog)inArgs.ControllerData).Write("      MAX States  Avg, Max, Min, SDdev: " + inArgs.ReservoirsStatistics[resIdx].NeuronsMaxAbsStatesStat.ArithAvg.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsMaxAbsStatesStat.Max.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsMaxAbsStatesStat.Min.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsMaxAbsStatesStat.StdDev.ToString(CultureInfo.InvariantCulture), false);
+                    ((IOutputLog)inArgs.ControllerData).Write("      AVG States  Avg, Max, Min, SDdev: " + inArgs.ReservoirsStatistics[resIdx].NeuronsGeoAvgStatesStat.ArithAvg.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsGeoAvgStatesStat.Max.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsGeoAvgStatesStat.Min.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsGeoAvgStatesStat.StdDev.ToString(CultureInfo.InvariantCulture), false);
+                    ((IOutputLog)inArgs.ControllerData).Write("      States SPAN Avg, Max, Min, SDdev: " + inArgs.ReservoirsStatistics[resIdx].NeuronsStateSpansStat.ArithAvg.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsStateSpansStat.Max.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsStateSpansStat.Min.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsStateSpansStat.StdDev.ToString(CultureInfo.InvariantCulture), false);
                     ((IOutputLog)inArgs.ControllerData).Write(" ", false);
                 }
             }
@@ -199,16 +199,16 @@ namespace OKOSW.Demo
             for (int outputIdx = 0; outputIdx < regrOuts.Length; outputIdx++)
             {
                 log.Write("    Output Field: " + demoCaseParams.OutputFieldsNames[outputIdx], false);
-                log.Write("       Predicion: " + outputVector[outputIdx].ToString(), false);
+                log.Write("       Predicion: " + outputVector[outputIdx].ToString(CultureInfo.InvariantCulture), false);
                 log.Write("      Out weights", false);
-                log.Write("        Min, Max, Avg: " + regrOuts[outputIdx].OutputWeightsStat.Min.ToString() + " " + regrOuts[outputIdx].OutputWeightsStat.Max.ToString() + " " + regrOuts[outputIdx].OutputWeightsStat.ArithAvg.ToString(), false);
+                log.Write("        Min, Max, Avg: " + regrOuts[outputIdx].OutputWeightsStat.Min.ToString(CultureInfo.InvariantCulture) + " " + regrOuts[outputIdx].OutputWeightsStat.Max.ToString(CultureInfo.InvariantCulture) + " " + regrOuts[outputIdx].OutputWeightsStat.ArithAvg.ToString(CultureInfo.InvariantCulture), false);
                 log.Write("        Upd, Cnt, Zrs: " + regrOuts[outputIdx].BestUpdatesCount.ToString() + " " + regrOuts[outputIdx].OutputWeightsStat.SamplesCount.ToString() + " " + (regrOuts[outputIdx].OutputWeightsStat.SamplesCount - regrOuts[outputIdx].OutputWeightsStat.NonzeroSamplesCount).ToString(), false);
                 log.Write("      Errors", false);
-                log.Write("        TrainE Avg: " + regrOuts[outputIdx].TrainingErrorStat.ArithAvg.ToString(), false);
-                log.Write("        Test   Len: " + demoCaseParams.TestingSeqLength.ToString(), false);
-                log.Write("        TestE  Avg: " + regrOuts[outputIdx].TestingErrorStat.ArithAvg.ToString(), false);
-                log.Write("        Test Max NaturalE (+/-): " + (outputNormalizers[outputIdx].ComputeNaturalError(regrOuts[outputIdx].TestingErrorStat.Max)).ToString(), false);
-                log.Write("        Test Avg NaturalE (+/-): " + (outputNormalizers[outputIdx].ComputeNaturalError(regrOuts[outputIdx].TestingErrorStat.ArithAvg)).ToString(), false);
+                log.Write("        TrainE Avg: " + regrOuts[outputIdx].TrainingErrorStat.ArithAvg.ToString(CultureInfo.InvariantCulture), false);
+                log.Write("        Test   Len: " + demoCaseParams.TestingSeqLength.ToString(CultureInfo.InvariantCulture), false);
+                log.Write("        TestE  Avg: " + regrOuts[outputIdx].TestingErrorStat.ArithAvg.ToString(CultureInfo.InvariantCulture), false);
+                log.Write("        Test Max NaturalE (+/-): " + (outputNormalizers[outputIdx].ComputeNaturalError(regrOuts[outputIdx].TestingErrorStat.Max)).ToString(CultureInfo.InvariantCulture), false);
+                log.Write("        Test Avg NaturalE (+/-): " + (outputNormalizers[outputIdx].ComputeNaturalError(regrOuts[outputIdx].TestingErrorStat.ArithAvg)).ToString(CultureInfo.InvariantCulture), false);
             }
             log.Write(" ", false);
             return outputVector;
