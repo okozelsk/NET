@@ -18,7 +18,7 @@ namespace OKOSW.Neural.Reservoir.Analog
     public class AnalogReservoir : IAnalogReservoir
     {
         //Attributes
-        private string m_ID;
+        private string m_seqNum;
         private string m_configName;
         private Random m_rand;
         private ReservoirInputBlock m_inputBlock;
@@ -37,7 +37,7 @@ namespace OKOSW.Neural.Reservoir.Analog
         /// <summary>
         /// Constructs analog computing reservoir.
         /// </summary>
-        /// <param name="ID">Reservoir identifier (together with reservoir configuration name should be unique)</param>
+        /// <param name="seqNum">Reservoir sequence identifier (together with reservoir configuration name should be unique within the parent)</param>
         /// <param name="inputValuesCount">Number of reservoir input values</param>
         /// <param name="feedbackValuesCount">Number of values to be fed back</param>
         /// <param name="settings">Reservoir initialization parameters</param>
@@ -45,13 +45,13 @@ namespace OKOSW.Neural.Reservoir.Analog
         /// Calling constructor with the same randomizerSeek greater or equal to 0 ensures the same reservoir initialization (good for tuning).
         /// Specify randomizerSeek less than 0 for different initialization aech time the constructor will be called.
         /// </param>
-        public AnalogReservoir(int ID, int inputValuesCount, int feedbackValuesCount, AnalogReservoirSettings settings, int randomizerSeek = -1)
+        public AnalogReservoir(int seqNum, int inputValuesCount, int feedbackValuesCount, AnalogReservoirSettings settings, int randomizerSeek = -1)
         {
             //--------------------------------------------------------
             //Configuration name
             m_configName = settings.CfgName;
             //Reservoir ID
-            m_ID = m_configName + "(" + ID.ToString() + ")";
+            m_seqNum = m_configName + "(" + seqNum.ToString() + ")";
             //--------------------------------------------------------
             //Random object initialization
             if (randomizerSeek < 0) m_rand = new Random();
@@ -327,7 +327,7 @@ namespace OKOSW.Neural.Reservoir.Analog
         /// <summary>
         /// Reservoir ID.
         /// </summary>
-        public string ID { get { return m_ID; } }
+        public string SeqNum { get { return m_seqNum; } }
 
         /// <summary>
         /// Reservoir configuration name (together with ID should be unique).
