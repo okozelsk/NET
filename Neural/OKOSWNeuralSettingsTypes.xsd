@@ -1,0 +1,189 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema targetNamespace="OKOSW-Neural-Settings-Types"
+           attributeFormDefault="unqualified"
+           elementFormDefault="unqualified"
+           xmlns="OKOSW-Neural-Settings-Types"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           >
+
+  <!-- ________________________________________LOW LEVEL TYPES_________________________________________________ -->
+  <!-- SIMPLE TYPES -->
+  <!-- NUMERIC TYPES -->
+  <!-- Nonzero unsigned integer -->
+  <xs:simpleType name="UIntGT0">
+    <xs:restriction base="xs:unsignedInt">
+      <xs:minInclusive value="1" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Unsigned double -->
+  <xs:simpleType name="UDouble">
+    <xs:restriction base="xs:double">
+      <xs:minInclusive value="0" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Unsigned double less than 1 -->
+  <xs:simpleType name="UDoubleLT1">
+    <xs:restriction base="xs:double">
+      <xs:minInclusive value="0" />
+      <xs:maxExclusive value="1" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Unsigned double less than or equal 1 -->
+  <xs:simpleType name="UDoubleLE1">
+    <xs:restriction base="xs:double">
+      <xs:minInclusive value="0" />
+      <xs:maxInclusive value="1" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- ENUMERATION TYPES -->
+  <!-- Activation functions enumeration -->
+  <xs:simpleType name="EnumActivation">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="ELLIOT"/>
+      <xs:enumeration value="IDENTITY"/>
+      <xs:enumeration value="SINUSOID"/>
+      <xs:enumeration value="TANH"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Regression methods enumeration -->
+  <xs:simpleType name="EnumRegressionMethod">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="LINEAR"/>
+      <xs:enumeration value="RESILIENT"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+
+  <!-- COMPLEX TYPES -->
+  <!-- Name -->
+  <xs:complexType name="Name">
+    <xs:attribute type="xs:string" name="Name" use="required"/>
+  </xs:complexType>
+
+
+  <!-- ________________________________________BASIC FF NETWORK TYPES_________________________________________________ -->
+  <!-- Basic FF network hidden layer -->
+  <xs:complexType name="BFFNetHiddenLayer">
+    <xs:attribute type="UIntGT0" name="Neurons" use="required"/>
+    <xs:attribute type="EnumActivation" name="Activation" use="required"/>
+  </xs:complexType>
+
+  <!-- Basic FF network structure -->
+  <xs:complexType name="BFFNet">
+    <xs:sequence minOccurs="0" maxOccurs="unbounded">
+      <xs:element type="BFFNetHiddenLayer" name="Layer"/>
+    </xs:sequence>
+    <xs:attribute type="EnumActivation" name="Activation" use="required"/>
+  </xs:complexType>
+
+
+  <!-- ________________________________________ANALOG RESERVOIR TYPES_________________________________________________ -->
+  <!-- Reservoir input settings -->
+  <xs:complexType name="AnaResInput">
+    <xs:sequence minOccurs="1" maxOccurs="unbounded">
+      <xs:element type="Name" name="Field"/>
+    </xs:sequence>
+    <xs:attribute type="UDouble" name="BiasScale" use="required"/>
+    <xs:attribute type="UDoubleLE1" name="ConnectionDensity" use="required"/>
+    <xs:attribute type="UDouble" name="WeightScale" use="required"/>
+  </xs:complexType>
+
+  <!-- Reservoir random topology -->
+  <xs:complexType name="AnaResRandomTopology">
+    <xs:attribute type="UDoubleLE1" name="ConnectionsDensity" use="required"/>
+  </xs:complexType>
+
+  <!-- Reservoir ring topology -->
+  <xs:complexType name="AnaResRingTopology">
+    <xs:attribute type="UDoubleLE1" name="SelfConnectionsDensity" use="required"/>
+    <xs:attribute type="UDoubleLE1" name="InterConnectionsDensity" use="required"/>
+    <xs:attribute type="xs:boolean" name="BiDirection" use="required"/>
+  </xs:complexType>
+
+  <!-- Reservoir DTT topology -->
+  <xs:complexType name="AnaResDTTTopology">
+    <xs:attribute type="UDoubleLE1" name="SelfConnectionsDensity" use="required"/>
+  </xs:complexType>
+
+  <!-- Reservoir retirement neurons -->
+  <xs:complexType name="AnaResRetirementNeurons">
+    <xs:attribute type="UDoubleLE1" name="Density" use="required"/>
+    <xs:attribute type="UDoubleLT1" name="RetirementMinRate" use="required"/>
+    <xs:attribute type="UDoubleLT1" name="RetirementMaxRate" use="required"/>
+  </xs:complexType>
+
+  <!-- Reservoir context neuron -->
+  <xs:complexType name="AnaResReservoirContextNeuron">
+    <xs:attribute type="UDoubleLE1" name="FeedbackDensity" use="required"/>
+    <xs:attribute type="EnumActivation" name="Activation" use="required"/>
+    <xs:attribute type="UDouble" name="InWeightScale" use="required"/>
+    <xs:attribute type="UDouble" name="OutWeightScale" use="required"/>
+  </xs:complexType>
+
+  <!-- Reservoir internal structure-->
+  <xs:complexType name="AnaResInternal">
+    <xs:sequence minOccurs="0" maxOccurs="1">
+      <xs:choice>
+        <xs:element type="AnaResRandomTopology" name="RandomTopology" />
+        <xs:element type="AnaResRingTopology" name="RingTopology" />
+        <xs:element type="AnaResDTTTopology" name="DTTTopology" />
+      </xs:choice>
+      <xs:element type="AnaResRetirementNeurons" name="RetirementNeurons" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="AnaResReservoirContextNeuron" name="ContextNeuron" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+    <xs:attribute type="xs:unsignedInt" name="Size" use="required" />
+    <xs:attribute type="EnumActivation" name="Activation" use="required" />
+    <xs:attribute type="UDouble" name="WeightScale" use="required"/>
+  </xs:complexType>
+
+  <!-- Reservoir Feedback -->
+  <xs:complexType name="AnaResFeedback">
+    <xs:attribute type="UDoubleLE1" name="Density" use="required"/>
+    <xs:attribute type="UDouble" name="WeightScale" use="required"/>
+  </xs:complexType>
+
+  <!-- Reservoir structure -->
+  <xs:complexType name="AnaResStruct">
+    <xs:sequence minOccurs="1">
+      <xs:element type="AnaResInput" name="Input" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="AnaResInternal" name="Internal" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="AnaResFeedback" name="Feedback" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+    <xs:attribute type="xs:string" name="Name" use="required" />
+    <xs:attribute type="xs:boolean" name="Multiple" use="required" />
+    <xs:attribute type="xs:boolean" name="AugmentedStates" use="required" />
+  </xs:complexType>
+
+  <!-- ________________________________________ESN TYPES_________________________________________________ -->
+  <!-- ESN Input -->
+  <xs:complexType name="ESNInput">
+    <xs:sequence minOccurs="1" maxOccurs="unbounded">
+      <xs:element type="Name" name="Field"/>
+    </xs:sequence>
+    <xs:attribute type="xs:boolean" name="RouteToReadout" use="required"/>
+  </xs:complexType>
+
+  <!-- ESN Regression -->
+  <xs:complexType name="ESNRegression">
+    <xs:attribute type="EnumRegressionMethod" name="RegressionMethod" use="required"/>
+    <xs:attribute type="UIntGT0" name="MaxAttempts" use="required"/>
+    <xs:attribute type="UIntGT0" name="MaxEpochs" use="required"/>
+    <xs:attribute type="UDouble" name="StopMSE" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="ESNStruct">
+    <xs:sequence>
+      <xs:element type="ESNInput" name="Input" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="AnaResStruct" name="Reservoir" minOccurs="1" maxOccurs="unbounded"/>
+      <xs:element type="BFFNet" name="Readout" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="ESNRegression" name="Regression" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+    <xs:attribute type="xs:int" name="RandomizerSeek" use="required" />
+  </xs:complexType>
+
+</xs:schema>
