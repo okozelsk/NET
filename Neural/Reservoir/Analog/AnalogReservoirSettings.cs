@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Reflection;
 using System.Globalization;
-using System.Xml;
-using OKOSW.Extensions;
+using System.Xml.Linq;
+using OKOSW.XMLTools;
 using OKOSW.Neural.Activation;
 
 namespace OKOSW.Neural.Reservoir.Analog
@@ -116,64 +117,71 @@ namespace OKOSW.Neural.Reservoir.Analog
             return;
         }
 
-        public AnalogReservoirSettings(XmlNode xmlNode)
+        public AnalogReservoirSettings(XElement resElem)
         {
-            CfgName = xmlNode.Attributes["Name"].Value;
-            AugmentedStatesFeature = bool.Parse(xmlNode.Attributes["AugmentedStates"].Value);
+            //Validation
+            //A very ugly validation
+            XMLValidator validator = new XMLValidator();
+            Assembly neuralAssembly = Assembly.Load("Neural");
+            validator.AddSchema(neuralAssembly.GetManifestResourceStream("OKOSW.Neural.Reservoir.Analog.AnalogReservoirSettings.xsd"));
+            validator.AddSchema(neuralAssembly.GetManifestResourceStream("OKOSW.Neural.OKOSWNeuralSettingsTypes.xsd"));
+            validator.LoadXDocFromString(resElem.ToString());
+            //Parsing
+            CfgName = resElem.Attribute("Name").Value;
+            AugmentedStatesFeature = bool.Parse(resElem.Attribute("AugmentedStates").Value);
             //Input
-            XmlNode inputNode = xmlNode.SelectSingleNode("Input");
-            BiasScale = double.Parse(inputNode.Attributes["BiasScale"].Value, CultureInfo.InvariantCulture);
-            InputConnectionDensity = double.Parse(inputNode.Attributes["ConnectionDensity"].Value, CultureInfo.InvariantCulture);
-            InputWeightScale = double.Parse(inputNode.Attributes["WeightScale"].Value, CultureInfo.InvariantCulture);
+            XElement inputElem = resElem.Descendants("Input").First();
+            BiasScale = double.Parse(inputElem.Attribute("BiasScale").Value, CultureInfo.InvariantCulture);
+            InputConnectionDensity = double.Parse(inputElem.Attribute("ConnectionDensity").Value, CultureInfo.InvariantCulture);
+            InputWeightScale = double.Parse(inputElem.Attribute("WeightScale").Value, CultureInfo.InvariantCulture);
             //Internal
-            XmlNode internalNode = xmlNode.SelectSingleNode("Internal");
-            Size = int.Parse(internalNode.Attributes["Size"].Value);
-            ReservoirNeuronActivation = ActivationFactory.ParseActivation(internalNode.Attributes["Activation"].Value);
-            InternalWeightScale = double.Parse(internalNode.Attributes["WeightScale"].Value, CultureInfo.InvariantCulture);
+            XElement internalElem = resElem.Descendants("Internal").First();
+            Size = int.Parse(internalElem.Attribute("Size").Value);
+            ReservoirNeuronActivation = ActivationFactory.ParseActivation(internalElem.Attribute("Activation").Value);
+            InternalWeightScale = double.Parse(internalElem.Attribute("WeightScale").Value, CultureInfo.InvariantCulture);
             //Topology
-            XmlNode topologyNode = null;
-            List<XmlNode> topologyNodes = new List<XmlNode>();
-            if ((topologyNode = internalNode.SelectSingleNode("RandomTopology")) != null) topologyNodes.Add(topologyNode);
-            if ((topologyNode = internalNode.SelectSingleNode("RingTopology")) != null) topologyNodes.Add(topologyNode);
-            if ((topologyNode = internalNode.SelectSingleNode("DTTTopology")) != null) topologyNodes.Add(topologyNode);
-            if(topologyNodes.Count != 1)
+            List<XElement> topologyElems = new List<XElement>();
+            topologyElems.AddRange(internalElem.Descendants("RandomTopology"));
+            topologyElems.AddRange(internalElem.Descendants("RingTopology"));
+            topologyElems.AddRange(internalElem.Descendants("DTTTopology"));
+            if(topologyElems.Count != 1)
             {
                 throw new Exception("Only one topology can be specified in reservoir settings.");
             }
-            topologyNode = topologyNodes[0];
+            XElement topologyElem = topologyElems[0];
             //Random?
-            if (topologyNode.Name == "RandomTopology")
+            if (topologyElem.Name == "RandomTopology")
             {
-                RandomTopologyCfg = new RandomTopologyConfig(topologyNode);
+                RandomTopologyCfg = new RandomTopologyConfig(topologyElem);
                 Topology = EnumReservoirTopology.Random;
             }
             //Ring?
-            else if (topologyNode.Name == "RingTopology")
+            else if (topologyElem.Name == "RingTopology")
             {
-                RingTopologyCfg = new RingTopologyConfig(topologyNode);
+                RingTopologyCfg = new RingTopologyConfig(topologyElem);
                 Topology = EnumReservoirTopology.Ring;
             }
             else
             {
                 //DTT
-                DTTTopologyCfg = new DTTTopologyConfig(topologyNode);
+                DTTTopologyCfg = new DTTTopologyConfig(topologyElem);
                 Topology = EnumReservoirTopology.DTT;
             }
             //Retirement neurons
-            XmlNode retirementNode = internalNode.SelectSingleNode("RetirementNeurons");
-            RetainmentNeuronsDensity = double.Parse(retirementNode.Attributes["Density"].Value, CultureInfo.InvariantCulture);
-            RetainmentMinRate = double.Parse(retirementNode.Attributes["RetirementMinRate"].Value, CultureInfo.InvariantCulture);
-            RetainmentMaxRate = double.Parse(retirementNode.Attributes["RetirementMaxRate"].Value, CultureInfo.InvariantCulture);
+            XElement retirementElem = internalElem.Descendants("RetirementNeurons").First();
+            RetainmentNeuronsDensity = double.Parse(retirementElem.Attribute("Density").Value, CultureInfo.InvariantCulture);
+            RetainmentMinRate = double.Parse(retirementElem.Attribute("RetirementMinRate").Value, CultureInfo.InvariantCulture);
+            RetainmentMaxRate = double.Parse(retirementElem.Attribute("RetirementMaxRate").Value, CultureInfo.InvariantCulture);
             //Context neuron
-            XmlNode ctxNeuronNode = internalNode.SelectSingleNode("ContextNeuron");
-            ContextNeuronFeedbackDensity = double.Parse(ctxNeuronNode.Attributes["FeedbackDensity"].Value, CultureInfo.InvariantCulture);
-            ContextNeuronActivation = ActivationFactory.ParseActivation(ctxNeuronNode.Attributes["Activation"].Value);
-            ContextNeuronInWeightScale = double.Parse(ctxNeuronNode.Attributes["InWeightScale"].Value, CultureInfo.InvariantCulture);
-            ContextNeuronOutWeightScale = double.Parse(ctxNeuronNode.Attributes["OutWeightScale"].Value, CultureInfo.InvariantCulture);
+            XElement ctxNeuronElem = internalElem.Descendants("ContextNeuron").First();
+            ContextNeuronFeedbackDensity = double.Parse(ctxNeuronElem.Attribute("FeedbackDensity").Value, CultureInfo.InvariantCulture);
+            ContextNeuronActivation = ActivationFactory.ParseActivation(ctxNeuronElem.Attribute("Activation").Value);
+            ContextNeuronInWeightScale = double.Parse(ctxNeuronElem.Attribute("InWeightScale").Value, CultureInfo.InvariantCulture);
+            ContextNeuronOutWeightScale = double.Parse(ctxNeuronElem.Attribute("OutWeightScale").Value, CultureInfo.InvariantCulture);
             //Feedback
-            XmlNode feedbackNode = xmlNode.SelectSingleNode("Feedback");
-            FeedbackConnectionDensity = double.Parse(feedbackNode.Attributes["Density"].Value, CultureInfo.InvariantCulture);
-            FeedbackWeightScale = double.Parse(feedbackNode.Attributes["WeightScale"].Value, CultureInfo.InvariantCulture);
+            XElement feedbackElem = resElem.Descendants("Feedback").First();
+            FeedbackConnectionDensity = double.Parse(feedbackElem.Attribute("Density").Value, CultureInfo.InvariantCulture);
+            FeedbackWeightScale = double.Parse(feedbackElem.Attribute("WeightScale").Value, CultureInfo.InvariantCulture);
             return;
         }
 
@@ -254,9 +262,9 @@ namespace OKOSW.Neural.Reservoir.Analog
                 return;
             }
 
-            public RandomTopologyConfig(XmlNode xmlNode)
+            public RandomTopologyConfig(XElement randomTopologyElem)
             {
-                ConnectionsDensity = double.Parse(xmlNode.Attributes["ConnectionsDensity"].Value, CultureInfo.InvariantCulture);
+                ConnectionsDensity = double.Parse(randomTopologyElem.Attribute("ConnectionsDensity").Value, CultureInfo.InvariantCulture);
                 return;
             }
             /// <summary>Checkes if this settings are equivalent to specified settings</summary>
@@ -300,11 +308,11 @@ namespace OKOSW.Neural.Reservoir.Analog
                 return;
             }
 
-            public RingTopologyConfig(XmlNode xmlNode)
+            public RingTopologyConfig(XElement ringTopologyElem)
             {
-                BiDirection = bool.Parse(xmlNode.Attributes["BiDirection"].Value);
-                SelfConnectionsDensity = double.Parse(xmlNode.Attributes["SelfConnectionsDensity"].Value, CultureInfo.InvariantCulture);
-                InterConnectionsDensity = double.Parse(xmlNode.Attributes["InterConnectionsDensity"].Value, CultureInfo.InvariantCulture);
+                BiDirection = bool.Parse(ringTopologyElem.Attribute("BiDirection").Value);
+                SelfConnectionsDensity = double.Parse(ringTopologyElem.Attribute("SelfConnectionsDensity").Value, CultureInfo.InvariantCulture);
+                InterConnectionsDensity = double.Parse(ringTopologyElem.Attribute("InterConnectionsDensity").Value, CultureInfo.InvariantCulture);
                 return;
             }
             /// <summary>Checkes if this settings are equivalent to specified settings</summary>
@@ -345,9 +353,9 @@ namespace OKOSW.Neural.Reservoir.Analog
                 return;
             }
 
-            public DTTTopologyConfig(XmlNode xmlNode)
+            public DTTTopologyConfig(XElement dttTopologyElem)
             {
-                SelfConnectionsDensity = double.Parse(xmlNode.Attributes["SelfConnectionsDensity"].Value, CultureInfo.InvariantCulture);
+                SelfConnectionsDensity = double.Parse(dttTopologyElem.Attribute("SelfConnectionsDensity").Value, CultureInfo.InvariantCulture);
                 return;
             }
             /// <summary>Checkes if this settings are equivalent to specified settings</summary>

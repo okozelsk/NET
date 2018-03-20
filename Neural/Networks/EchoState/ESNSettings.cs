@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Globalization;
-using System.Xml;
+using System.Xml.Linq;
+using System.Reflection;
 using OKOSW.Extensions;
 using OKOSW.Neural.Activation;
 using OKOSW.Neural.Reservoir.Analog;
-
-
+using OKOSW.XMLTools;
 
 namespace OKOSW.Neural.Networks.EchoState
 {
@@ -86,42 +86,50 @@ namespace OKOSW.Neural.Networks.EchoState
         }
 
         /// <summary>Creates ESN setup parameters initialized from XML</summary>
-        public ESNSettings(XmlNode xmlNode)
+        public ESNSettings(XElement esnElem)
         {
-            RandomizerSeek = int.Parse(xmlNode.Attributes["RandomizerSeek"].Value);
+            //Validation
+            //A very ugly validation
+            XMLValidator validator = new XMLValidator();
+            Assembly neuralAssembly = Assembly.Load("Neural");
+            validator.AddSchema(neuralAssembly.GetManifestResourceStream("OKOSW.Neural.Networks.EchoState.ESNSettings.xsd"));
+            validator.AddSchema(neuralAssembly.GetManifestResourceStream("OKOSW.Neural.OKOSWNeuralSettingsTypes.xsd"));
+            validator.LoadXDocFromString(esnElem.ToString());
+            //Parsing
+            RandomizerSeek = int.Parse(esnElem.Attribute("RandomizerSeek").Value);
             //Input
-            XmlNode inputNode = xmlNode.SelectSingleNode("Input");
-            RouteInputToReadout = bool.Parse(inputNode.Attributes["RouteToReadout"].Value);
+            XElement inputElem = esnElem.Descendants("Input").First();
+            RouteInputToReadout = bool.Parse(inputElem.Attribute("RouteToReadout").Value);
             InputFieldsNames = new List<string>();
-            foreach(XmlNode inputFieldNode in inputNode.SelectNodes("Field"))
+            foreach(XElement inputFieldElem in inputElem.Descendants("Field"))
             {
-                InputFieldsNames.Add(inputFieldNode.Attributes["Name"].Value);
+                InputFieldsNames.Add(inputFieldElem.Attribute("Name").Value);
             }
             //Readout
-            XmlNode readoutNode = xmlNode.SelectSingleNode("Readout");
-            OutputNeuronActivation = ActivationFactory.ParseActivation(readoutNode.Attributes["Activation"].Value);
+            XElement readoutElem = esnElem.Descendants("Readout").First();
+            OutputNeuronActivation = ActivationFactory.ParseActivation(readoutElem.Attribute("Activation").Value);
             //Hidden layers
             ReadOutHiddenLayers = new List<ReadOutHiddenLayerCfg>();
-            foreach (XmlNode layerNode in readoutNode.SelectNodes("Layer"))
+            foreach (XElement layerElem in readoutElem.Descendants("Layer"))
             {
-                ReadOutHiddenLayers.Add(new ReadOutHiddenLayerCfg(layerNode.Attributes["Neurons"].Value, layerNode.Attributes["Activation"].Value));
+                ReadOutHiddenLayers.Add(new ReadOutHiddenLayerCfg(layerElem.Attribute("Neurons").Value, layerElem.Attribute("Activation").Value));
             }
             //Regression
-            XmlNode regressionNode = xmlNode.SelectSingleNode("Regression");
-            RegressionMethod = regressionNode.Attributes["RegressionMethod"].Value.ToUpper();
-            RegressionMaxAttempts = int.Parse(regressionNode.Attributes["MaxAttempts"].Value);
-            RegressionMaxEpochs = int.Parse(regressionNode.Attributes["MaxEpochs"].Value);
-            RegressionStopMSEValue = double.Parse(regressionNode.Attributes["StopMSE"].Value, CultureInfo.InvariantCulture);
+            XElement regressionElem = esnElem.Descendants("Regression").First();
+            RegressionMethod = regressionElem.Attribute("RegressionMethod").Value.ToUpper();
+            RegressionMaxAttempts = int.Parse(regressionElem.Attribute("MaxAttempts").Value);
+            RegressionMaxEpochs = int.Parse(regressionElem.Attribute("MaxEpochs").Value);
+            RegressionStopMSEValue = double.Parse(regressionElem.Attribute("StopMSE").Value, CultureInfo.InvariantCulture);
             //Reservoirs and mapping to input fields
             InputsToResCfgsMapping = new List<InputResCfgMap>();
-            foreach (XmlNode resNode in xmlNode.SelectNodes("Reservoir"))
+            foreach (XElement resElem in esnElem.Descendants("Reservoir"))
             {
-                AnalogReservoirSettings resCfg = new AnalogReservoirSettings(resNode);
+                AnalogReservoirSettings resCfg = new AnalogReservoirSettings(resElem);
                 List<string> resFields = new List<string>();
-                XmlNode resInputNode = resNode.SelectSingleNode("Input");
-                foreach(XmlNode resInputFieldNode in resInputNode.SelectNodes("Field"))
+                XElement resInputElem = resElem.Descendants("Input").First();
+                foreach(XElement resInputFieldElem in resInputElem.Descendants("Field"))
                 {
-                    resFields.Add(resInputFieldNode.Attributes["Name"].Value);
+                    resFields.Add(resInputFieldElem.Attribute("Name").Value);
                 }
                 List<int> resFieldsIdxs = new List<int>();
                 foreach (string fieldName in resFields)
@@ -133,7 +141,7 @@ namespace OKOSW.Neural.Networks.EchoState
                     }
                     resFieldsIdxs.Add(fieldIdx);
                 }
-                bool aloneReservoirPerInputField = bool.Parse(resNode.Attributes["Multiple"].Value);
+                bool aloneReservoirPerInputField = bool.Parse(resElem.Attribute("Multiple").Value);
                 if (!aloneReservoirPerInputField)
                 {
                     //All specified input fields will be mixed into the one reservoir

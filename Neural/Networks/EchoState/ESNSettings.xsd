@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema attributeFormDefault="unqualified"
+           elementFormDefault="unqualified"
+           xmlns:nst="OKOSW-Neural-Settings-Types"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           >
+  <xs:import namespace="OKOSW-Neural-Settings-Types" />
+
+  <!-- ESN settings XML document -->
+  <xs:element name="ESN" type="nst:ESNStruct"/>
+
+</xs:schema>
