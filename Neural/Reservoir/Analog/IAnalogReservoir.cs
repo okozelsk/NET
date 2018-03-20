@@ -12,12 +12,12 @@ namespace OKOSW.Neural.Reservoir.Analog
     public interface IAnalogReservoir
     {
         /// <summary>
-        /// Reservoir ID.
+        /// Reservoir sequence number.
         /// </summary>
-        string ID { get; }
+        string SeqNum { get; }
 
         /// <summary>
-        /// Reservoir configuration name (together with ID should be unique).
+        /// Reservoir configuration name (together with SeqNum should be unique).
         /// </summary>
         string ConfigName { get; }
 
