@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Specify your DataDir -->
+<!-- Specify your data location in DataDir attribute -->
 <ESNDemoSettings DataDir="C:\Users\OKOZELSK\_Data\Development\MSVCS\Projects\OKOSW\Demo\Data">
   <DemoCase Name="TTOO High and Low prices prediction (single reservoir for all input fields, single readout neuron and RESILIENT trainer)">
     <Samples CSVDataFileName="TTOO.csv" BootSeqMinLength="300" TrainingSeqMaxLength="1000" TestingSeqLength="10" TestSamplesSelection="RANDOM" SingleNormalizer="true" NormalizerReserveRatio="0.1"/>
