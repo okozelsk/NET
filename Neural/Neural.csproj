@@ -55,6 +55,11 @@
     <Compile Include="Networks\FF\Basic\LinRegrTrainer.cs" />
     <Compile Include="Networks\FF\Basic\RPropTrainer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="Reservoir\Analog\AnalogNeuron.cs" />
     <Compile Include="Reservoir\Analog\AnalogReservoirSettings.cs" />
     <Compile Include="Reservoir\Analog\IAnalogReservoir.cs" />
@@ -78,7 +83,17 @@
       <Name>Queue</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="OKOSWNeuralSettingsTypes.xsd">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
