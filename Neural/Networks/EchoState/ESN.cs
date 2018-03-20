@@ -356,7 +356,7 @@ namespace OKOSW.Neural.Networks.EchoState
             {
                 InputFieldIdxs = inputFieldIdxs;
                 ReservoirObj = reservoirObj;
-                Statistics = new ReservoirStat(ReservoirObj.ID);
+                Statistics = new ReservoirStat(ReservoirObj.SeqNum);
                 return;
             }
 
