@@ -235,7 +235,7 @@ namespace OKOSW.Demo
         {
             log.Write("ESN demo started", false);
             ESNDemoSettings demoSettings = new ESNDemoSettings(demoSettingsFile);
-            TimeSeriesGenerator.GenerateStandardCSVFiles(demoSettings.DataDir);
+            //TimeSeriesGenerator.GenerateStandardCSVFiles(demoSettings.DataDir);
             foreach(ESNDemoSettings.DemoCaseParams demoCaseParams in demoSettings.DemoCases)
             {
                 double[] predictions = PerformDemoCase(log, demoCaseParams);

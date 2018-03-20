@@ -43,6 +43,11 @@
     <Compile Include="ESNDemo.cs" />
     <Compile Include="ESNDemoSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CSVTools\CSVTools.csproj">
@@ -61,6 +66,10 @@
       <Project>{5859e49a-3079-4ea7-b0c5-86c4b26e09d6}</Project>
       <Name>Neural</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\XMLTools\XMLTools.csproj">
+      <Project>{faba419d-e4ea-460a-9114-5768c491039b}</Project>
+      <Name>XMLTools</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DemoSupport\DemoSupport.csproj">
       <Project>{d52159ce-be0e-4977-bcfa-23194cf6d6ed}</Project>
       <Name>DemoSupport</Name>
@@ -69,6 +78,10 @@
   <ItemGroup>
     <EmbeddedResource Include="ESNDemoSettings.xsd">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

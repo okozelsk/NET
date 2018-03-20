@@ -4,7 +4,7 @@
            xmlns:nst="OKOSW-Neural-Settings-Types"
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
            >
-  <xs:import schemaLocation="..\..\Neural\OKOSWNeuralSettingsTypes.xsd" namespace="OKOSW-Neural-Settings-Types" />
+  <xs:import namespace="OKOSW-Neural-Settings-Types" />
 
   <!-- SIMPLE TYPES -->
   <!-- Enumeration of test samples selection methods supported in ESN demo -->

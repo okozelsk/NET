@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Xml;
-using System.Xml.Schema;
+using System.IO;
+using System.Xml.Linq;
 using System.Globalization;
 using OKOSW.Extensions;
-using OKOSW.CSVTools;
+using OKOSW.XMLTools;
+using OKOSW.Neural;
 using OKOSW.Neural.Networks.EchoState;
-
+using System.Reflection;
 
 namespace OKOSW.Demo
 {
@@ -23,41 +24,24 @@ namespace OKOSW.Demo
         //Constructor
         public ESNDemoSettings(string xmlFile)
         {
-            Validate(xmlFile);
-            XmlDocument xmlDoc = new XmlDocument();
-            xmlDoc.Load(xmlFile);
-            XmlNode paramsNode= xmlDoc.SelectSingleNode("//ESNDemoSettings");
-            DataDir = paramsNode.Attributes["DataDir"].Value;
-            XmlNodeList nodes = paramsNode.SelectNodes("DemoCase");
+            XMLValidator validator = new XMLValidator();
+            Assembly esnDemoAssembly = Assembly.GetExecutingAssembly();
+            Assembly neuralAssembly = Assembly.Load("Neural");
+            validator.AddSchema(esnDemoAssembly.GetManifestResourceStream("OKOSW.Demo.ESNDemoSettings.xsd"));
+            validator.AddSchema(neuralAssembly.GetManifestResourceStream("OKOSW.Neural.OKOSWNeuralSettingsTypes.xsd"));
+            XDocument xmlDoc = validator.LoadXDocFromFile(xmlFile);
+            XElement root = xmlDoc.Descendants("ESNDemoSettings").First();
+            DataDir = root.Attribute("DataDir").Value;
             DemoCases = new List<DemoCaseParams>();
-            foreach (XmlNode node in nodes)
+            foreach (XElement demoCaseParamsElem in root.Descendants("DemoCase"))
             {
-                DemoCases.Add(new DemoCaseParams(node, DataDir));
+                DemoCases.Add(new DemoCaseParams(demoCaseParamsElem, DataDir));
             }
+
             return;
         }
         //Properties
         //Methods
-        private void Validate(String filename)
-        {
-            XmlSchemaSet schemaSet = new XmlSchemaSet();
-            schemaSet.Add("", "ESNDemoSettings.xsd");
-            XmlReaderSettings settings = new XmlReaderSettings();
-            settings.Schemas.Add(schemaSet);
-            settings.ValidationEventHandler += new ValidationEventHandler(XmlValidationCallBack);
-            settings.ValidationType = ValidationType.Schema;
-            //Create the schema validating reader.
-            XmlReader vreader = XmlReader.Create(filename, settings);
-            while (vreader.Read()) { }
-            //Close the reader.
-            vreader.Close();
-            return;
-        }
-
-        private void XmlValidationCallBack(object sender, ValidationEventArgs args)
-        {
-            throw new Exception("Validation error: " + args.Message);
-        }
 
         //Inner classes
         //////////////////////////////////////////////////////////////////////////////////////
@@ -77,24 +61,24 @@ namespace OKOSW.Demo
             public ESNSettings ESNCfg { get; }
 
             //Constructor
-            public DemoCaseParams(XmlNode paramsNode, string dir)
+            public DemoCaseParams(XElement demoCaseElem, string dir)
             {
-                Name = paramsNode.Attributes["Name"].Value;
-                XmlNode samplesNode = paramsNode.SelectSingleNode("Samples");
-                CSVDataFileName = dir + "\\" + samplesNode.Attributes["CSVDataFileName"].Value;
-                BootSeqMinLength = int.Parse(samplesNode.Attributes["BootSeqMinLength"].Value);
-                TrainingSeqMaxLength = int.Parse(samplesNode.Attributes["TrainingSeqMaxLength"].Value);
-                TestingSeqLength = int.Parse(samplesNode.Attributes["TestingSeqLength"].Value);
-                TestSamplesSelection = samplesNode.Attributes["TestSamplesSelection"].Value;
-                SingleNormalizer = bool.Parse(samplesNode.Attributes["SingleNormalizer"].Value);
-                NormalizerReserveRatio = double.Parse(samplesNode.Attributes["NormalizerReserveRatio"].Value, CultureInfo.InvariantCulture);
+                Name = demoCaseElem.Attribute("Name").Value;
+                XElement samplesElem = demoCaseElem.Descendants("Samples").First();
+                CSVDataFileName = dir + "\\" + samplesElem.Attribute("CSVDataFileName").Value;
+                BootSeqMinLength = int.Parse(samplesElem.Attribute("BootSeqMinLength").Value);
+                TrainingSeqMaxLength = int.Parse(samplesElem.Attribute("TrainingSeqMaxLength").Value);
+                TestingSeqLength = int.Parse(samplesElem.Attribute("TestingSeqLength").Value);
+                TestSamplesSelection = samplesElem.Attribute("TestSamplesSelection").Value;
+                SingleNormalizer = bool.Parse(samplesElem.Attribute("SingleNormalizer").Value);
+                NormalizerReserveRatio = double.Parse(samplesElem.Attribute("NormalizerReserveRatio").Value, CultureInfo.InvariantCulture);
                 OutputFieldsNames = new List<string>();
-                XmlNode outputNode = paramsNode.SelectSingleNode("Output");
-                foreach (XmlNode outputField in outputNode.SelectNodes("Field"))
+                XElement outputElem = demoCaseElem.Descendants("Output").First();
+                foreach (XElement outputFieldElem in outputElem.Descendants("Field"))
                 {
-                    OutputFieldsNames.Add(outputField.Attributes["Name"].Value);
+                    OutputFieldsNames.Add(outputFieldElem.Attribute("Name").Value);
                 }
-                ESNCfg = new ESNSettings(paramsNode.SelectSingleNode("ESN"));
+                ESNCfg = new ESNSettings(demoCaseElem.Descendants("ESN").First());
                 return;
             }
         }//DemoCaseParams
