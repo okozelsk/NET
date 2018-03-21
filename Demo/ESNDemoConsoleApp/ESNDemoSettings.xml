@@ -18,7 +18,7 @@
         <Internal Size="300" Activation="ELLIOT" WeightScale="0.4">
           <RandomTopology ConnectionsDensity="0.1"/>
           <RetirementNeurons Density="0.5" RetirementMinRate="0" RetirementMaxRate="0.75"/>
-          <ContextNeuron FeedbackDensity="0.1" Activation="ELLIOT" InWeightScale="0.005" OutWeightScale="0.2"/>
+          <ContextNeuron FeedbackDensity="1" Activation="ELLIOT" InWeightScale="1" OutWeightScale="0.2"/>
         </Internal>
         <Feedback Density="0" WeightScale="0"/>
       </Reservoir>
