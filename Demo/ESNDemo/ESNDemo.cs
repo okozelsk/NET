@@ -221,7 +221,7 @@ namespace OKOSW.Demo
                 log.Write("     Test set Avg Err: " + regrOuts[outputIdx].TestingErrorStat.ArithAvg.ToString(CultureInfo.InvariantCulture), false);
                 log.Write("    Test Max Real Err: " + (outputNormalizers[outputIdx].ComputeNaturalError(regrOuts[outputIdx].TestingErrorStat.Max)).ToString(CultureInfo.InvariantCulture), false);
                 log.Write("    Test Avg Real Err: " + (outputNormalizers[outputIdx].ComputeNaturalError(regrOuts[outputIdx].TestingErrorStat.ArithAvg)).ToString(CultureInfo.InvariantCulture), false);
-                log.Write("    (Note that displayed errors are not squared. Squared errors would be much smaller)", false);
+                log.Write("    (Note that displayed errors are not MSE. MSE errors would be much smaller)", false);
             }
             log.Write(" ", false);
             return outputVector;
