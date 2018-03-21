@@ -1,4 +1,4 @@
-The aim of the project is to make the reservoir computing methods available for .net without necessity to bind other libraries (Python, MatLab, etc.). The first (already implemented) method is the Echo State Network (aka ESN). Project's next ambition is to implement the Liquid State Machine (aka LSM).
+The aim of the project is to make the reservoir computing methods available for .net without binding other libraries (Python, MatLab, etc.). The first (already implemented) method is the Echo State Network (aka ESN). Project's next ambition is to implement the Liquid State Machine (aka LSM).
 
 Currently implemented components:
 	Normalizer
