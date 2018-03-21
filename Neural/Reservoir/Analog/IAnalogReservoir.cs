@@ -37,6 +37,11 @@ namespace OKOSW.Neural.Reservoir.Analog
         AnalogNeuron[] Neurons { get; }
 
         /// <summary>
+        /// Context neuron.
+        /// </summary>
+        AnalogNeuron ContextNeuron { get; }
+
+        /// <summary>
         /// Resets all reservoir neurons to their initial state (before boot state).
         /// Function does not affect weights or internal structure of the resservoir.
         /// </summary>
