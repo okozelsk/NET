@@ -4,14 +4,16 @@ Currently implemented:
 	Normalizer (data normalizer/denormalizer supporting gausse data standardization)
 	Activation functions (Tanh, Elliot, Sinusoid, Identity)
 	AnalogReservoir
-		(supporting Random, Ring and Doubly Twisted Thoroidal internal connection topologies)
-		(supporting Feedback, Context neuron and Retirement neurons features)
+		(supporting internal connection topologies: Random, Ring, Doubly Twisted Thoroidal)
+		(supporting Context neuron and Retirement neurons features)
+		(supporting Augmented states)
 	FF/BasicNetwork (Feed Forward Network)
 	LinRegrTrainer (Linear Regression trainer)
-	RPROPTrainer (Resilient Propagation trainer)
+	RPROPTrainer (Resilient Propagation trainer iRPROP+)
 	ESN (Echo State Network supporting multiple internal reservoirs)
+		(supporting Feedback)
 
-Usage is demonstrated through simple demo console application (/Demo/ESNDemoConsoleApp)
+Usage is demonstrated in simple demo console application (/Demo/ESNDemoConsoleApp)
 
 
 
