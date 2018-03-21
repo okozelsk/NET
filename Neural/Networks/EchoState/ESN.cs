@@ -321,16 +321,18 @@ namespace OKOSW.Neural.Networks.EchoState
             //Attributes
             public string ResID { get; }
             public BasicStat NeuronsMaxAbsStatesStat { get; }
-            public BasicStat NeuronsGeoAvgStatesStat { get; }
+            public BasicStat NeuronsRMSStatesStat { get; }
             public BasicStat NeuronsStateSpansStat { get; }
+            public double CtxNeuronStatesRMS { get; set; }
 
             //Constructor
             public ReservoirStat(string resID)
             {
                 ResID = resID;
                 NeuronsMaxAbsStatesStat = new BasicStat();
-                NeuronsGeoAvgStatesStat = new BasicStat();
+                NeuronsRMSStatesStat = new BasicStat();
                 NeuronsStateSpansStat = new BasicStat();
+                CtxNeuronStatesRMS = 0;
                 return;
             }
 
@@ -338,8 +340,9 @@ namespace OKOSW.Neural.Networks.EchoState
             public void Reset()
             {
                 NeuronsMaxAbsStatesStat.Reset();
-                NeuronsGeoAvgStatesStat.Reset();
+                NeuronsRMSStatesStat.Reset();
                 NeuronsStateSpansStat.Reset();
+                CtxNeuronStatesRMS = 0;
                 return;
             }
         }
@@ -374,9 +377,10 @@ namespace OKOSW.Neural.Networks.EchoState
                 foreach (AnalogNeuron neuron in ReservoirObj.Neurons)
                 {
                     Statistics.NeuronsMaxAbsStatesStat.AddSampleValue(Math.Max(Math.Abs(neuron.StatesStat.Max), Math.Abs(neuron.StatesStat.Min)));
-                    Statistics.NeuronsGeoAvgStatesStat.AddSampleValue(neuron.StatesStat.RootMeanSquare);
+                    Statistics.NeuronsRMSStatesStat.AddSampleValue(neuron.StatesStat.RootMeanSquare);
                     Statistics.NeuronsStateSpansStat.AddSampleValue(neuron.StatesStat.Span);
                 }
+                Statistics.CtxNeuronStatesRMS = ReservoirObj.ContextNeuron.StatesStat.RootMeanSquare;
                 return;
             }
         }//ReservoirInstanceData
