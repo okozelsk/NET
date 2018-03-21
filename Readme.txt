@@ -13,7 +13,7 @@ Currently implemented:
 	ESN (Echo State Network supporting multiple internal reservoirs)
 		(supporting Feedback)
 
-Usage is demonstrated in simple demo console application (/Demo/ESNDemoConsoleApp)
+Usage is demonstrated in a simple demo console application (/Demo/ESNDemoConsoleApp)
 
 
 
