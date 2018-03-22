@@ -17,60 +17,60 @@ namespace OKOSW.MathTools.MatrixMath
         //Constants
 
         //Attributes
-        private double[][] m_QRData;
-        private double[] m_RDiagData;
-        private int m_rowsCount;
-        private int m_colsCount;
+        private double[][] _QRData;
+        private double[] _RDiagData;
+        private int _rowsCount;
+        private int _colsCount;
 
         //Constructor
         public QRD(Matrix source)
         {
             //Initialization
-            m_QRData = source.GetDataClone();
-            m_rowsCount = source.RowsCount;
-            m_colsCount = source.ColsCount;
-            m_RDiagData = new double[m_colsCount];
+            _QRData = source.GetDataClone();
+            _rowsCount = source.RowsCount;
+            _colsCount = source.ColsCount;
+            _RDiagData = new double[_colsCount];
 
             // Main loop.
-            for(int k = 0; k < m_colsCount; k++)
+            for(int k = 0; k < _colsCount; k++)
             {
                 //Compute 2-norm of k-th column
                 double norm = 0;
-                for (int i = k; i < m_rowsCount; i++)
+                for (int i = k; i < _rowsCount; i++)
                 {
-                    norm = Hypotenuse(norm, m_QRData[i][k]);
+                    norm = Hypotenuse(norm, _QRData[i][k]);
                 }
 
                 if (norm != 0)
                 {
                     // Form k-th Householder vector.
-                    if (m_QRData[k][k] < 0)
+                    if (_QRData[k][k] < 0)
                     {
                         norm = -norm;
                     }
-                    for (int i = k; i < m_rowsCount; i++)
+                    for (int i = k; i < _rowsCount; i++)
                     {
-                        m_QRData[i][k] /= norm;
+                        _QRData[i][k] /= norm;
                     }
-                    m_QRData[k][k] += 1.0;
+                    _QRData[k][k] += 1.0;
 
                     //Apply transformation to remaining columns.
-                    Parallel.For(k + 1, m_colsCount, j =>
-                    //for (int j = k + 1; j < m_colsCount; j++)
+                    Parallel.For(k + 1, _colsCount, j =>
+                    //for (int j = k + 1; j < _colsCount; j++)
                     {
                         double s = 0.0;
-                        for (int i = k; i < m_rowsCount; i++)
+                        for (int i = k; i < _rowsCount; i++)
                         {
-                            s += m_QRData[i][k] * m_QRData[i][j];
+                            s += _QRData[i][k] * _QRData[i][j];
                         }
-                        s = -s / m_QRData[k][k];
-                        for (int i = k; i < m_rowsCount; i++)
+                        s = -s / _QRData[k][k];
+                        for (int i = k; i < _rowsCount; i++)
                         {
-                            m_QRData[i][j] += s * m_QRData[i][k];
+                            _QRData[i][j] += s * _QRData[i][k];
                         }
                     });
                 }
-                m_RDiagData[k] = -norm;
+                _RDiagData[k] = -norm;
             }
             if (!FullRank)
             {
@@ -87,9 +87,9 @@ namespace OKOSW.MathTools.MatrixMath
         {
             get
             {
-                for (int j = 0; j < m_colsCount; j++)
+                for (int j = 0; j < _colsCount; j++)
                 {
-                    if (m_RDiagData[j] == 0)
+                    if (_RDiagData[j] == 0)
                     {
                         return false;
                     }
@@ -129,7 +129,7 @@ namespace OKOSW.MathTools.MatrixMath
         /// <param name="B">A Matrix with as many rows as A and at least one column.</param>
         public Matrix Solve(Matrix B)
         {
-            if (B.RowsCount != m_rowsCount)
+            if (B.RowsCount != _rowsCount)
             {
                 throw new Exception("Different row counts.");
             }
@@ -139,38 +139,38 @@ namespace OKOSW.MathTools.MatrixMath
             double[][] X = B.GetDataClone();
 
             // Compute Y = transpose(Q)*B
-            for (int k = 0; k < m_colsCount; k++)
+            for (int k = 0; k < _colsCount; k++)
             {
                 for (int j = 0; j < nx; j++)
                 {
                     double s = 0.0;
-                    for (int i = k; i < m_rowsCount; i++)
+                    for (int i = k; i < _rowsCount; i++)
                     {
-                        s += m_QRData[i][k] * X[i][j];
+                        s += _QRData[i][k] * X[i][j];
                     }
-                    s = -s / m_QRData[k][k];
-                    for (int i = k; i < m_rowsCount; i++)
+                    s = -s / _QRData[k][k];
+                    for (int i = k; i < _rowsCount; i++)
                     {
-                        X[i][j] += s * m_QRData[i][k];
+                        X[i][j] += s * _QRData[i][k];
                     }
                 }
             }
             // Solve R*X = Y;
-            for (int k = m_colsCount - 1; k >= 0; k--)
+            for (int k = _colsCount - 1; k >= 0; k--)
             {
                 for (int j = 0; j < nx; j++)
                 {
-                    X[k][j] /= m_RDiagData[k];
+                    X[k][j] /= _RDiagData[k];
                 }
                 for (int i = 0; i < k; i++)
                 {
                     for (int j = 0; j < nx; j++)
                     {
-                        X[i][j] -= X[k][j] * m_QRData[i][k];
+                        X[i][j] -= X[k][j] * _QRData[i][k];
                     }
                 }
             }
-            return (new Matrix(X).GetSubMatrix(0, m_colsCount - 1, 0, nx - 1));
+            return (new Matrix(X).GetSubMatrix(0, _colsCount - 1, 0, nx - 1));
         }
     }//QRD
 

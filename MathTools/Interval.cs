@@ -6,39 +6,57 @@ using System.Text;
 namespace OKOSW.MathTools
 {
     /// <summary>
-    /// Implements simple thread safe interval.
+    /// Implements simple thread safe class representing interval.
     /// </summary>
     [Serializable]
     public class Interval
     {
         //Constants
-        public const int TYPE_MIN_CLOSED_MAX_CLOSED = 0;
-        public const int TYPE_MIN_CLOSED_MAX_OPEN = 1;
-        public const int TYPE_MIN_OPEN_MAX_CLOSED = 2;
-        public const int TYPE_MIN_OPEN_MAX_OPEN = 3;
+        /// <summary>
+        /// Supported interval types
+        /// </summary>
+        public enum IntervalType
+        {
+            LeftClosedRightClosed,
+            LeftClosedRightOpen,
+            LeftOpenRightClosed,
+            LeftOpenRightOpen
+        }
 
         //Attributes
         //Locker to ensure thread safe behaviour
-        private Object m_lock = new Object();
+        private Object _lock = new Object();
         //Initialization indicator
-        private bool m_initialized;
+        private bool _initialized;
         //Interval borders
-        private double m_min;
-        private double m_max;
+        private double _min;
+        private double _max;
 
         //Constructor
+        /// <summary>
+        /// Construct an interval
+        /// </summary>
         public Interval()
         {
             Reset();
             return;
         }
 
+        /// <summary>
+        /// Construct an interval
+        /// </summary>
+        /// <param name="min">Left value</param>
+        /// <param name="max">Right value</param>
         public Interval(double min, double max)
         {
             Set(min, max);
             return;
         }
 
+        /// <summary>
+        /// Construct an interval
+        /// </summary>
+        /// <param name="values">Collection of values from which are determined interval's min and max borders</param>
         public Interval (IEnumerable<double> values)
         {
             Reset();
@@ -49,202 +67,273 @@ namespace OKOSW.MathTools
             return;
         }
 
-        public Interval(Interval sourceInterval)
+        /// <summary>
+        /// Construct an interval as a copy of source
+        /// </summary>
+        /// <param name="source">Source interval</param>
+        public Interval(Interval source)
         {
-            Set(sourceInterval);
+            CopyFrom(source);
             return;
         }
 
         //Properties
+        /// <summary>
+        /// Is interval properly initialized and ready to use?
+        /// </summary>
         public bool Initialized
         {
             get
             {
-                lock (m_lock)
+                lock (_lock)
                 {
-                    return m_initialized;
+                    return _initialized;
                 }
             }
         }
 
+        /// <summary>
+        /// Left border of the interval
+        /// </summary>
         public double Min
         {
             get
             {
-                lock (m_lock)
+                lock (_lock)
                 {
-                    return m_min;
+                    return _min;
                 }
             }
         }
 
+        /// <summary>
+        /// Right border of the interval
+        /// </summary>
         public double Max
         {
             get
             {
-                lock (m_lock)
+                lock (_lock)
                 {
-                    return m_max;
+                    return _max;
                 }
             }
         }
 
+        /// <summary>
+        /// Middle value of the interval (min + (max-min)/2)
+        /// </summary>
         public double Mid
         {
             get
             {
-                lock (m_lock)
+                lock (_lock)
                 {
-                    return m_min + ((m_max - m_min) / 2d);
+                    return _min + ((_max - _min) / 2d);
                 }
             }
         }
 
+        /// <summary>
+        /// Min and Max span (max-min)
+        /// </summary>
         public double Span
         {
             get
             {
-                lock (m_lock)
+                lock (_lock)
                 {
-                    return m_max - m_min;
+                    return _max - _min;
                 }
             }
         }
 
         //Methods
+        /// <summary>
+        /// Resets interval to uninitialized state
+        /// </summary>
         public void Reset()
         {
-            lock(m_lock)
+            lock(_lock)
             {
-                m_initialized = false;
-                m_min = 0;
-                m_max = 0;
+                _initialized = false;
+                _min = 0;
+                _max = 0;
             }
             return;
         }
 
+        /// <summary>
+        /// Creates shallow copy of this interval
+        /// </summary>
+        /// <returns></returns>
         public Interval Clone()
         {
-            lock (m_lock)
+            lock (_lock)
             {
                 Interval clone = new Interval(this);
                 return clone;
             }
         }
 
+        /// <summary>
+        /// Sets this internals as a copy of the source
+        /// </summary>
+        /// <param name="source"></param>
+        public void CopyFrom(Interval source)
+        {
+            lock (_lock)
+            {
+                _min = source._min;
+                _max = source._max;
+                _initialized = source._initialized;
+            }
+            return;
+        }
+
+        /// <summary>
+        /// Sets interval border values min and max. It is not necessary to care about border order, function evaluates Min and Max by itself.
+        /// </summary>
+        /// <param name="border1">First border value</param>
+        /// <param name="border2">Second border value</param>
         public void Set(double border1, double border2)
         {
-            lock (m_lock)
+            lock (_lock)
             {
-                m_min = Math.Min(border1, border2);
-                m_max = Math.Max(border1, border2);
-                m_initialized = true;
+                _min = Math.Min(border1, border2);
+                _max = Math.Max(border1, border2);
+                _initialized = true;
             }
             return;
         }
 
-        public void Set(Interval sourceInterval)
+        /// <summary>
+        /// Adjusts min and max according to sample value.
+        /// </summary>
+        /// <param name="sampleValue">Sample value</param>
+        public void Adjust(double sampleValue)
         {
-            lock (m_lock)
+            lock (_lock)
             {
-                m_min = sourceInterval.m_min;
-                m_max = sourceInterval.m_max;
-                m_initialized = sourceInterval.m_initialized;
-            }
-            return;
-        }
-
-        public void Adjust(double value)
-        {
-            lock (m_lock)
-            {
-                if (!m_initialized)
+                if (!_initialized)
                 {
-                    m_min = value;
-                    m_max = value;
-                    m_initialized = true;
+                    _min = sampleValue;
+                    _max = sampleValue;
+                    _initialized = true;
                 }
                 else
                 {
-                    if (value < m_min)
+                    if (sampleValue < _min)
                     {
-                        m_min = value;
+                        _min = sampleValue;
                     }
-                    else if (value > m_max)
+                    else if (sampleValue > _max)
                     {
-                        m_max = value;
+                        _max = sampleValue;
                     }
                 }
             }
             return;
         }
 
-        public void Adjust(IEnumerable<double> values)
+        /// <summary>
+        /// Adjusts min and max according to sample valus in given collection.
+        /// </summary>
+        /// <param name="sampleValuesCollection">Collection of sample values</param>
+        public void Adjust(IEnumerable<double> sampleValuesCollection)
         {
-            foreach(double value in values)
+            foreach(double value in sampleValuesCollection)
             {
                 Adjust(value);
             }
             return;
         }
 
-        public void Adjust(IEnumerable<long> values)
+        /// <summary>
+        /// Adjusts min and max according to sample valus in given collection.
+        /// </summary>
+        /// <param name="sampleValuesCollection">Collection of sample values</param>
+        public void Adjust(IEnumerable<long> sampleValuesCollection)
         {
-            foreach (long value in values)
+            foreach (long value in sampleValuesCollection)
             {
                 Adjust(value);
             }
             return;
         }
 
-        public void Adjust(IEnumerable<ulong> values)
+        /// <summary>
+        /// Adjusts min and max according to sample valus in given collection.
+        /// </summary>
+        /// <param name="sampleValuesCollection">Collection of sample values</param>
+        public void Adjust(IEnumerable<ulong> sampleValuesCollection)
         {
-            foreach (ulong value in values)
+            foreach (ulong value in sampleValuesCollection)
             {
                 Adjust(value);
             }
             return;
         }
 
-        public void Adjust(IEnumerable<int> values)
+        /// <summary>
+        /// Adjusts min and max according to sample valus in given collection.
+        /// </summary>
+        /// <param name="sampleValuesCollection">Collection of sample values</param>
+        public void Adjust(IEnumerable<int> sampleValuesCollection)
         {
-            foreach (int value in values)
+            foreach (int value in sampleValuesCollection)
             {
                 Adjust(value);
             }
             return;
         }
 
-        public void Adjust(IEnumerable<uint> values)
+        /// <summary>
+        /// Adjusts min and max according to sample valus in given collection.
+        /// </summary>
+        /// <param name="sampleValuesCollection">Collection of sample values</param>
+        public void Adjust(IEnumerable<uint> sampleValuesCollection)
         {
-            foreach (uint value in values)
+            foreach (uint value in sampleValuesCollection)
             {
                 Adjust(value);
             }
             return;
         }
 
-        public void Adjust(IEnumerable<sbyte> values)
+        /// <summary>
+        /// Adjusts min and max according to sample valus in given collection.
+        /// </summary>
+        /// <param name="sampleValuesCollection">Collection of sample values</param>
+        public void Adjust(IEnumerable<sbyte> sampleValuesCollection)
         {
-            foreach (sbyte value in values)
+            foreach (sbyte value in sampleValuesCollection)
             {
                 Adjust(value);
             }
             return;
         }
 
-        public void Adjust(IEnumerable<byte> values)
+        /// <summary>
+        /// Adjusts min and max according to sample valus in given collection.
+        /// </summary>
+        /// <param name="sampleValuesCollection">Collection of sample values</param>
+        public void Adjust(IEnumerable<byte> sampleValuesCollection)
         {
-            foreach (byte value in values)
+            foreach (byte value in sampleValuesCollection)
             {
                 Adjust(value);
             }
             return;
         }
 
-        public void Adjust(IEnumerable<Interval> values)
+        /// <summary>
+        /// Adjusts min and max to represent an unification of given intervals
+        /// </summary>
+        /// <param name="intervalsCollection">Collection of intervals</param>
+        public void Adjust(IEnumerable<Interval> intervalsCollection)
         {
-            foreach (Interval item in values)
+            foreach (Interval item in intervalsCollection)
             {
                 Adjust(item.Min);
                 Adjust(item.Max);
@@ -252,20 +341,25 @@ namespace OKOSW.MathTools
             return;
         }
 
-        public bool Belongs(double value, int intervalType = TYPE_MIN_CLOSED_MAX_CLOSED)
+        /// <summary>
+        /// Tests if given value belongs to this interval
+        /// </summary>
+        /// <param name="value">Value to be tested</param>
+        /// <param name="intervalType">Type of this interval to be considered</param>
+        public bool BelongsTo(double value, IntervalType intervalType = IntervalType.LeftClosedRightClosed)
         {
-            lock (m_lock)
+            lock (_lock)
             {
                 switch (intervalType)
                 {
-                    case TYPE_MIN_CLOSED_MAX_CLOSED:
-                        return (value >= m_min && value <= m_max);
-                    case TYPE_MIN_CLOSED_MAX_OPEN:
-                        return (value >= m_min && value < m_max);
-                    case TYPE_MIN_OPEN_MAX_CLOSED:
-                        return (value > m_min && value <= m_max);
-                    case TYPE_MIN_OPEN_MAX_OPEN:
-                        return (value > m_min && value < m_max);
+                    case IntervalType.LeftClosedRightClosed:
+                        return (value >= _min && value <= _max);
+                    case IntervalType.LeftClosedRightOpen:
+                        return (value >= _min && value < _max);
+                    case IntervalType.LeftOpenRightClosed:
+                        return (value > _min && value <= _max);
+                    case IntervalType.LeftOpenRightOpen:
+                        return (value > _min && value < _max);
                     default:
                         break;
                 }

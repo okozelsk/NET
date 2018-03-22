@@ -18,21 +18,21 @@ namespace OKOSW.Neural.Reservoir.Analog
     public class AnalogReservoir : IAnalogReservoir
     {
         //Attributes
-        private string m_seqNum;
-        private string m_configName;
-        private Random m_rand;
-        private ReservoirInputBlock m_inputBlock;
-        private AnalogNeuron[] m_neurons;
-        private List<int>[] m_partyNeuronsIdxs;
-        private List<double>[] m_partyNeuronsWeights;
-        private bool m_contextNeuronFeature;
-        private AnalogNeuron m_contextNeuron;
-        private double[] m_neurons2ContextWeights;
-        private double[] m_context2NeuronsWeights;
-        private bool m_feedbackFeature;
-        private double[] m_feedback;
-        private double[] m_feedbackWeights;
-        private bool m_augmentedStatesFeature;
+        private string _seqNum;
+        private string _configName;
+        private Random _rand;
+        private ReservoirInputBlock _inputBlock;
+        private AnalogNeuron[] _neurons;
+        private List<int>[] _partyNeuronsIdxs;
+        private List<double>[] _partyNeuronsWeights;
+        private bool _contextNeuronFeature;
+        private AnalogNeuron _contextNeuron;
+        private double[] _neurons2ContextWeights;
+        private double[] _context2NeuronsWeights;
+        private bool _feedbackFeature;
+        private double[] _feedback;
+        private double[] _feedbackWeights;
+        private bool _augmentedStatesFeature;
 
         /// <summary>
         /// Constructs analog computing reservoir.
@@ -49,103 +49,103 @@ namespace OKOSW.Neural.Reservoir.Analog
         {
             //--------------------------------------------------------
             //Configuration name
-            m_configName = settings.CfgName;
+            _configName = settings.CfgName;
             //Reservoir ID
-            m_seqNum = m_configName + "(" + seqNum.ToString() + ")";
+            _seqNum = _configName + "(" + seqNum.ToString() + ")";
             //--------------------------------------------------------
             //Random object initialization
-            if (randomizerSeek < 0) m_rand = new Random();
-            else m_rand = new Random(randomizerSeek);
+            if (randomizerSeek < 0) _rand = new Random();
+            else _rand = new Random(randomizerSeek);
             //--------------------------------------------------------
             //Input memory and connections
             int neuronsPerInput = Math.Max(1, (int)Math.Round((double)settings.Size * settings.InputConnectionDensity, 0));
-            m_inputBlock = new ReservoirInputBlock(inputValuesCount, settings.Size, settings.BiasScale, settings.InputWeightScale, neuronsPerInput, m_rand);
+            _inputBlock = new ReservoirInputBlock(inputValuesCount, settings.Size, settings.BiasScale, settings.InputWeightScale, neuronsPerInput, _rand);
             //--------------------------------------------------------
             //Reservoir neurons
-            m_neurons = new AnalogNeuron[settings.Size];
+            _neurons = new AnalogNeuron[settings.Size];
             //Neurons retainment rates
-            double[] retainmentRates = new double[m_neurons.Length];
+            double[] retainmentRates = new double[_neurons.Length];
             retainmentRates.Populate(0);
-            int retainmentNeuronsCount = (int)Math.Round((double)m_neurons.Length * settings.RetainmentNeuronsDensity, 0);
+            int retainmentNeuronsCount = (int)Math.Round((double)_neurons.Length * settings.RetainmentNeuronsDensity, 0);
             if (retainmentNeuronsCount > 0 && settings.RetainmentMaxRate > 0)
             {
-                m_rand.FillUniform(retainmentRates, settings.RetainmentMinRate, settings.RetainmentMaxRate, 1, retainmentNeuronsCount);
-                m_rand.Shuffle(retainmentRates);
+                _rand.FillUniform(retainmentRates, settings.RetainmentMinRate, settings.RetainmentMaxRate, 1, retainmentNeuronsCount);
+                _rand.Shuffle(retainmentRates);
             }
             //Neurons creation
-            for (int n = 0; n < m_neurons.Length; n++)
+            for (int n = 0; n < _neurons.Length; n++)
             {
-                m_neurons[n] = new AnalogNeuron(ActivationFactory.CreateAF(settings.ReservoirNeuronActivation), retainmentRates[n]);
+                _neurons[n] = new AnalogNeuron(ActivationFactory.CreateAF(settings.ReservoirNeuronActivation), retainmentRates[n]);
             }
             //Helper array for neurons order randomization purposes
             int[] neuronsShuffledIndices = new int[settings.Size];
             //--------------------------------------------------------
             //Context neuron feature
-            int contextNeuronFeedbacksCount = (int)Math.Round((double)m_neurons.Length * settings.ContextNeuronFeedbackDensity, 0);
-            m_contextNeuron = null;
-            m_neurons2ContextWeights = null;
-            m_context2NeuronsWeights = null;
-            m_contextNeuronFeature = (contextNeuronFeedbacksCount > 0);
-            if (m_contextNeuronFeature)
+            int contextNeuronFeedbacksCount = (int)Math.Round((double)_neurons.Length * settings.ContextNeuronFeedbackDensity, 0);
+            _contextNeuron = null;
+            _neurons2ContextWeights = null;
+            _context2NeuronsWeights = null;
+            _contextNeuronFeature = (contextNeuronFeedbacksCount > 0);
+            if (_contextNeuronFeature)
             {
-                m_contextNeuron = new AnalogNeuron(ActivationFactory.CreateAF(settings.ContextNeuronActivation), 0);
+                _contextNeuron = new AnalogNeuron(ActivationFactory.CreateAF(settings.ContextNeuronActivation), 0);
                 //Weights from each res neuron to context neuron
-                m_neurons2ContextWeights = new double[m_neurons.Length];
-                m_rand.FillUniform(m_neurons2ContextWeights, -1, 1, settings.ContextNeuronInWeightScale);
+                _neurons2ContextWeights = new double[_neurons.Length];
+                _rand.FillUniform(_neurons2ContextWeights, -1, 1, settings.ContextNeuronInWeightScale);
                 //Weights from context neuron to res neurons
-                m_context2NeuronsWeights = new double[m_neurons.Length];
-                m_context2NeuronsWeights.Populate(0);
-                neuronsShuffledIndices.ShuffledIndices(m_rand);
-                for (int i = 0; i < contextNeuronFeedbacksCount && i < m_neurons.Length; i++)
+                _context2NeuronsWeights = new double[_neurons.Length];
+                _context2NeuronsWeights.Populate(0);
+                neuronsShuffledIndices.ShuffledIndices(_rand);
+                for (int i = 0; i < contextNeuronFeedbacksCount && i < _neurons.Length; i++)
                 {
-                    m_context2NeuronsWeights[neuronsShuffledIndices[i]] = RandomWeight(m_rand, settings.ContextNeuronOutWeightScale);
+                    _context2NeuronsWeights[neuronsShuffledIndices[i]] = RandomWeight(_rand, settings.ContextNeuronOutWeightScale);
                 }
             }
             //--------------------------------------------------------
             //Feedback feature and weights
-            int neuronsPerOutput = (int)Math.Round(settings.FeedbackConnectionDensity * (double)m_neurons.Length, 0);
-            m_feedback = new double[feedbackValuesCount];
-            m_feedback.Populate(0);
-            m_feedbackWeights = null;
-            m_feedbackFeature = (neuronsPerOutput > 0);
-            if (m_feedbackFeature)
+            int neuronsPerOutput = (int)Math.Round(settings.FeedbackConnectionDensity * (double)_neurons.Length, 0);
+            _feedback = new double[feedbackValuesCount];
+            _feedback.Populate(0);
+            _feedbackWeights = null;
+            _feedbackFeature = (neuronsPerOutput > 0);
+            if (_feedbackFeature)
             {
                 //Feedback weights
-                m_feedbackWeights = new double[feedbackValuesCount * m_neurons.Length];
-                m_feedbackWeights.Populate(0);
+                _feedbackWeights = new double[feedbackValuesCount * _neurons.Length];
+                _feedbackWeights.Populate(0);
                 for (int outNo = 0; outNo < feedbackValuesCount; outNo++)
                 {
-                    neuronsShuffledIndices.ShuffledIndices(m_rand);
+                    neuronsShuffledIndices.ShuffledIndices(_rand);
                     for (int i = 0; i < neuronsPerOutput; i++)
                     {
-                        m_feedbackWeights[outNo * m_neurons.Length + neuronsShuffledIndices[i]] = RandomWeight(m_rand, settings.FeedbackWeightScale);
+                        _feedbackWeights[outNo * _neurons.Length + neuronsShuffledIndices[i]] = RandomWeight(_rand, settings.FeedbackWeightScale);
                     }
                 }
             }
             //--------------------------------------------------------
             //Reservoir topology -> schema of internal connections
-            m_partyNeuronsIdxs = new List<int>[m_neurons.Length];
-            m_partyNeuronsWeights = new List<double>[m_neurons.Length];
-            for (int i = 0; i < m_neurons.Length; i++)
+            _partyNeuronsIdxs = new List<int>[_neurons.Length];
+            _partyNeuronsWeights = new List<double>[_neurons.Length];
+            for (int i = 0; i < _neurons.Length; i++)
             {
-                m_partyNeuronsIdxs[i] = new List<int>();
-                m_partyNeuronsWeights[i] = new List<double>();
+                _partyNeuronsIdxs[i] = new List<int>();
+                _partyNeuronsWeights[i] = new List<double>();
             }
             switch (settings.Topology)
             {
-                case AnalogReservoirSettings.EnumReservoirTopology.Random:
+                case AnalogReservoirSettings.ReservoirTopologyType.Random:
                     SetupRandomTopology(settings.RandomTopologyCfg, settings.InternalWeightScale);
                     break;
-                case AnalogReservoirSettings.EnumReservoirTopology.Ring:
+                case AnalogReservoirSettings.ReservoirTopologyType.Ring:
                     SetupRingTopology(settings.RingTopologyCfg, settings.InternalWeightScale);
                     break;
-                case AnalogReservoirSettings.EnumReservoirTopology.DTT:
+                case AnalogReservoirSettings.ReservoirTopologyType.DTT:
                     SetupDTTTopology(settings.DTTTopologyCfg, settings.InternalWeightScale);
                     break;
             }
             //--------------------------------------------------------
             //Augmented states
-            m_augmentedStatesFeature = settings.AugmentedStatesFeature;
+            _augmentedStatesFeature = settings.AugmentedStatesFeature;
             return;
         }
 
@@ -170,10 +170,10 @@ namespace OKOSW.Neural.Reservoir.Analog
         /// <returns>Success/Unsuccess (connection already exists)</returns>
         private bool AddConnection(int targetNeuronIdx, int partyNeuronIdx, double weightScale, bool check = true)
         {
-            if (!check || !m_partyNeuronsIdxs[targetNeuronIdx].Contains(partyNeuronIdx))
+            if (!check || !_partyNeuronsIdxs[targetNeuronIdx].Contains(partyNeuronIdx))
             {
-                m_partyNeuronsIdxs[targetNeuronIdx].Add(partyNeuronIdx);
-                m_partyNeuronsWeights[targetNeuronIdx].Add(RandomWeight(m_rand, weightScale));
+                _partyNeuronsIdxs[targetNeuronIdx].Add(partyNeuronIdx);
+                _partyNeuronsWeights[targetNeuronIdx].Add(RandomWeight(_rand, weightScale));
                 return true;
             }
             return false;
@@ -188,7 +188,7 @@ namespace OKOSW.Neural.Reservoir.Analog
         /// <returns>Success/Unsuccess (connection already exists)</returns>
         private bool AddConnection(int connectionID, double weightScale, bool check = true)
         {
-            return AddConnection(connectionID / m_neurons.Length, connectionID % m_neurons.Length, weightScale, check);
+            return AddConnection(connectionID / _neurons.Length, connectionID % _neurons.Length, weightScale, check);
         }
 
         /// <summary>
@@ -199,13 +199,13 @@ namespace OKOSW.Neural.Reservoir.Analog
         /// <param name="check">Check if the connection already exists?</param>
         private void SetRingConnections(double weightScale, bool biDirection, bool check = true)
         {
-            for (int i = 0; i < m_neurons.Length; i++)
+            for (int i = 0; i < _neurons.Length; i++)
             {
-                int partyNeuronIdx = (i == 0) ? (m_neurons.Length - 1) : (i - 1);
+                int partyNeuronIdx = (i == 0) ? (_neurons.Length - 1) : (i - 1);
                 AddConnection(i, partyNeuronIdx, weightScale, check);
                 if(biDirection)
                 {
-                    partyNeuronIdx = (i == m_neurons.Length - 1) ? (0) : (i + 1);
+                    partyNeuronIdx = (i == _neurons.Length - 1) ? (0) : (i + 1);
                     AddConnection(i, partyNeuronIdx, weightScale, check);
                 }
             }
@@ -220,9 +220,9 @@ namespace OKOSW.Neural.Reservoir.Analog
         /// <param name="check">Check if the connection already exists?</param>
         private void SetSelfConnections(double density, double weightScale, bool check = true)
         {
-            int connectionsCount = (int)Math.Round((double)m_neurons.Length * density);
-            int[] indices = new int[m_neurons.Length];
-            indices.ShuffledIndices(m_rand);
+            int connectionsCount = (int)Math.Round((double)_neurons.Length * density);
+            int[] indices = new int[_neurons.Length];
+            indices.ShuffledIndices(_rand);
             for (int i = 0; i < connectionsCount; i++)
             {
                 AddConnection(indices[i], indices[i], weightScale, check);
@@ -238,21 +238,21 @@ namespace OKOSW.Neural.Reservoir.Analog
         /// <param name="check">Check if the connection already exists?</param>
         private void SetInterConnections(double density, double weightScale, bool check = true)
         {
-            int connectionsCount = (int)Math.Round((double)((m_neurons.Length - 1) * m_neurons.Length) * density);
-            int[] randomConnections = new int[(m_neurons.Length - 1) * m_neurons.Length];
+            int connectionsCount = (int)Math.Round((double)((_neurons.Length - 1) * _neurons.Length) * density);
+            int[] randomConnections = new int[(_neurons.Length - 1) * _neurons.Length];
             int indicesPos = 0;
-            for(int n1Idx = 0; n1Idx < m_neurons.Length; n1Idx++)
+            for(int n1Idx = 0; n1Idx < _neurons.Length; n1Idx++)
             {
-                for(int n2Idx = 0; n2Idx < m_neurons.Length; n2Idx++)
+                for(int n2Idx = 0; n2Idx < _neurons.Length; n2Idx++)
                 {
                     if(n1Idx != n2Idx)
                     {
-                        randomConnections[indicesPos] = n1Idx * m_neurons.Length + n2Idx;
+                        randomConnections[indicesPos] = n1Idx * _neurons.Length + n2Idx;
                         ++indicesPos;
                     }
                 }
             }
-            m_rand.Shuffle(randomConnections);
+            _rand.Shuffle(randomConnections);
             for (int i = 0; i < connectionsCount; i++)
             {
                 AddConnection(randomConnections[i], weightScale, check);
@@ -268,9 +268,9 @@ namespace OKOSW.Neural.Reservoir.Analog
         private void SetupRandomTopology(AnalogReservoirSettings.RandomTopologyConfig cfg, double weightScale)
         {
             //Fully random connections setup
-            int connectionsCount = (int)Math.Round((double)m_neurons.Length * (double)m_neurons.Length * cfg.ConnectionsDensity);
-            int[] randomConnections = new int[m_neurons.Length * m_neurons.Length];
-            randomConnections.ShuffledIndices(m_rand);
+            int connectionsCount = (int)Math.Round((double)_neurons.Length * (double)_neurons.Length * cfg.ConnectionsDensity);
+            int[] randomConnections = new int[_neurons.Length * _neurons.Length];
+            randomConnections.ShuffledIndices(_rand);
             for (int i = 0; i < connectionsCount; i++)
             {
                 AddConnection(randomConnections[i], weightScale, false);
@@ -304,11 +304,11 @@ namespace OKOSW.Neural.Reservoir.Analog
             //HTwist part (single direction ring)
             SetRingConnections(weightScale, false);
             //VTwist part
-            int step = (int)Math.Floor(Math.Sqrt(m_neurons.Length));
-            for (int partyNeuronIdx = 0; partyNeuronIdx < m_neurons.Length; partyNeuronIdx++)
+            int step = (int)Math.Floor(Math.Sqrt(_neurons.Length));
+            for (int partyNeuronIdx = 0; partyNeuronIdx < _neurons.Length; partyNeuronIdx++)
             {
                 int targetNeuronIdx = partyNeuronIdx + step;
-                if (targetNeuronIdx > m_neurons.Length - 1)
+                if (targetNeuronIdx > _neurons.Length - 1)
                 {
                     int left = partyNeuronIdx % step;
                     targetNeuronIdx = (left == 0) ? (step - 1) : (left - 1);
@@ -327,32 +327,32 @@ namespace OKOSW.Neural.Reservoir.Analog
         /// <summary>
         /// Reservoir ID.
         /// </summary>
-        public string SeqNum { get { return m_seqNum; } }
+        public string SeqNum { get { return _seqNum; } }
 
         /// <summary>
         /// Reservoir configuration name (together with ID should be unique).
         /// </summary>
-        public string ConfigName { get { return m_configName; } }
+        public string ConfigName { get { return _configName; } }
 
         /// <summary>
         /// Reservoir size. (Reservoir neurons count)
         /// </summary>
-        public int Size { get { return m_neurons.Length; } }
+        public int Size { get { return _neurons.Length; } }
 
         /// <summary>
         /// Number of reservoir's output predictors (Size or Size*2 when augumented states are enabled).
         /// </summary>
-        public int OutputPredictorsCount { get { return m_augmentedStatesFeature ? m_neurons.Length * 2 : m_neurons.Length; } }
+        public int OutputPredictorsCount { get { return _augmentedStatesFeature ? _neurons.Length * 2 : _neurons.Length; } }
 
         /// <summary>
         /// Reservoir neurons.
         /// </summary>
-        public AnalogNeuron[] Neurons { get { return m_neurons; } }
+        public AnalogNeuron[] Neurons { get { return _neurons; } }
 
         /// <summary>
         /// Context neuron.
         /// </summary>
-        public AnalogNeuron ContextNeuron { get { return m_contextNeuron; } }
+        public AnalogNeuron ContextNeuron { get { return _contextNeuron; } }
 
         //Methods
         /// <summary>
@@ -361,12 +361,12 @@ namespace OKOSW.Neural.Reservoir.Analog
         /// </summary>
         public void Reset()
         {
-            foreach (AnalogNeuron neuron in m_neurons)
+            foreach (AnalogNeuron neuron in _neurons)
             {
                 neuron.Reset();
             }
-            if(m_contextNeuronFeature)m_contextNeuron.Reset();
-            m_feedback.Populate(0);
+            if(_contextNeuronFeature)_contextNeuron.Reset();
+            _feedback.Populate(0);
             return;
         }
 
@@ -379,61 +379,61 @@ namespace OKOSW.Neural.Reservoir.Analog
         public void Compute(double[] input, double[] outputPredictors, bool collectStatistics)
         {
             //Update input memory
-            m_inputBlock.Update(input);
+            _inputBlock.Update(input);
             //Store all reservoir neurons states
-            foreach(AnalogNeuron neuron in m_neurons)
+            foreach(AnalogNeuron neuron in _neurons)
             {
                 neuron.StoreCurrentState();
             }
             //Compute new states of all reservoir neurons and fill output array of predictors
-            Parallel.For(0, m_neurons.Length, (neuronIdx) =>
+            Parallel.For(0, _neurons.Length, (neuronIdx) =>
             {
                 //----------------------------------------------------
                 //Input signal
-                double inputSignal = m_inputBlock.GetInputSignal(neuronIdx);
+                double inputSignal = _inputBlock.GetInputSignal(neuronIdx);
                 //----------------------------------------------------
                 //Signal from reservoir neurons
                 double reservoirSignal = 0;
                 //Add reservoir neurons signal
-                for (int j = 0; j < m_partyNeuronsIdxs[neuronIdx].Count; j++)
+                for (int j = 0; j < _partyNeuronsIdxs[neuronIdx].Count; j++)
                 {
-                    reservoirSignal += m_partyNeuronsWeights[neuronIdx][j] * m_neurons[m_partyNeuronsIdxs[neuronIdx][j]].PreviousState;
+                    reservoirSignal += _partyNeuronsWeights[neuronIdx][j] * _neurons[_partyNeuronsIdxs[neuronIdx][j]].PreviousState;
                 }
                 //Add context neuron signal if allowed
-                reservoirSignal += m_contextNeuronFeature ? m_context2NeuronsWeights[neuronIdx] * m_contextNeuron.CurrentState : 0;
+                reservoirSignal += _contextNeuronFeature ? _context2NeuronsWeights[neuronIdx] * _contextNeuron.CurrentState : 0;
                 //----------------------------------------------------
                 //Feedback signal
                 double feedbackSignal = 0;
-                if (m_feedbackFeature)
+                if (_feedbackFeature)
                 {
-                    for (int outpIdx = 0; outpIdx < m_feedback.Length; outpIdx++)
+                    for (int outpIdx = 0; outpIdx < _feedback.Length; outpIdx++)
                     {
-                        feedbackSignal += m_feedback[outpIdx] * m_feedbackWeights[outpIdx * m_neurons.Length + neuronIdx];
+                        feedbackSignal += _feedback[outpIdx] * _feedbackWeights[outpIdx * _neurons.Length + neuronIdx];
                     }
                 }
                 //----------------------------------------------------
                 //Set new state of reservoir neuron
-                m_neurons[neuronIdx].NewState(inputSignal + reservoirSignal + feedbackSignal, collectStatistics);
+                _neurons[neuronIdx].NewState(inputSignal + reservoirSignal + feedbackSignal, collectStatistics);
                 //----------------------------------------------------
                 //Set neuron state to output predictors
-                outputPredictors[neuronIdx] = m_neurons[neuronIdx].CurrentState;
+                outputPredictors[neuronIdx] = _neurons[neuronIdx].CurrentState;
                 //----------------------------------------------------
                 //Set neuron augmented state to output predictors
-                if (m_augmentedStatesFeature)
+                if (_augmentedStatesFeature)
                 {
-                    outputPredictors[m_neurons.Length + neuronIdx] = outputPredictors[neuronIdx] * outputPredictors[neuronIdx];
+                    outputPredictors[_neurons.Length + neuronIdx] = outputPredictors[neuronIdx] * outputPredictors[neuronIdx];
                 }
             });
             //----------------------------------------------------
             //New state of context neuron if allowed
-            if (m_contextNeuronFeature)
+            if (_contextNeuronFeature)
             {
                 double res2ContextSignal = 0;
-                for (int neuronIdx = 0; neuronIdx < m_neurons.Length; neuronIdx++)
+                for (int neuronIdx = 0; neuronIdx < _neurons.Length; neuronIdx++)
                 {
-                    res2ContextSignal += m_neurons2ContextWeights[neuronIdx] * m_neurons[neuronIdx].CurrentState;
+                    res2ContextSignal += _neurons2ContextWeights[neuronIdx] * _neurons[neuronIdx].CurrentState;
                 }
-                m_contextNeuron.NewState(res2ContextSignal, collectStatistics);
+                _contextNeuron.NewState(res2ContextSignal, collectStatistics);
             }
             return;
         }
@@ -444,7 +444,7 @@ namespace OKOSW.Neural.Reservoir.Analog
         /// <param name="feedback">Feedback values.</param>
         public void SetFeedback(double[] feedback)
         {
-            feedback.CopyTo(m_feedback, 0);
+            feedback.CopyTo(_feedback, 0);
             return;
         }
 
@@ -460,11 +460,11 @@ namespace OKOSW.Neural.Reservoir.Analog
         {
             //Constants
             //Attributes
-            private int m_inputValuesCount;
-            private double[] m_inputBiases;
-            private double[] m_inputValues;
-            private int m_reservoirNeuronsCount;
-            private List<InputConnection>[] m_connections;
+            private int _inputValuesCount;
+            private double[] _inputBiases;
+            private double[] _inputValues;
+            private int _reservoirNeuronsCount;
+            private List<InputConnection>[] _connections;
 
             //Constructor
             public ReservoirInputBlock(int inputValuesCount,
@@ -475,22 +475,22 @@ namespace OKOSW.Neural.Reservoir.Analog
                                        Random rand
                                        )
             {
-                m_inputValuesCount = inputValuesCount;
-                m_reservoirNeuronsCount = reservoirNeuronsCount;
+                _inputValuesCount = inputValuesCount;
+                _reservoirNeuronsCount = reservoirNeuronsCount;
                 //Input biases
-                m_inputBiases = new double[m_reservoirNeuronsCount];
-                rand.FillUniform(m_inputBiases, -1, 1, biasScale);
+                _inputBiases = new double[_reservoirNeuronsCount];
+                rand.FillUniform(_inputBiases, -1, 1, biasScale);
                 //Input values
-                m_inputValues = new double[m_inputValuesCount];
-                m_inputValues.Populate(0);
+                _inputValues = new double[_inputValuesCount];
+                _inputValues.Populate(0);
                 //Connections to reservoir neurons
-                m_connections = new List<InputConnection>[m_reservoirNeuronsCount];
-                for (int i = 0; i < m_reservoirNeuronsCount; i++)
+                _connections = new List<InputConnection>[_reservoirNeuronsCount];
+                for (int i = 0; i < _reservoirNeuronsCount; i++)
                 {
-                    m_connections[i] = new List<InputConnection>(m_inputValuesCount * neuronsPerInput);
+                    _connections[i] = new List<InputConnection>(_inputValuesCount * neuronsPerInput);
                 }
-                int[] neuronIdxs = new int[m_reservoirNeuronsCount];
-                for (int fieldIdx = 0; fieldIdx < m_inputValuesCount; fieldIdx++)
+                int[] neuronIdxs = new int[_reservoirNeuronsCount];
+                for (int fieldIdx = 0; fieldIdx < _inputValuesCount; fieldIdx++)
                 {
                     neuronIdxs.ShuffledIndices(rand);
                     for (int i = 0; i < neuronsPerInput; i++)
@@ -498,18 +498,18 @@ namespace OKOSW.Neural.Reservoir.Analog
                         InputConnection connection = new InputConnection();
                         connection.FieldIdx = fieldIdx;
                         connection.Weight = AnalogReservoir.RandomWeight(rand, inputWeightScale);
-                        m_connections[neuronIdxs[i]].Add(connection);
+                        _connections[neuronIdxs[i]].Add(connection);
                     }
                 }
                 return;
             }
             //Properties
-            public int InputValuesCount { get { return m_inputValuesCount; } }
+            public int InputValuesCount { get { return _inputValuesCount; } }
 
             //Methods
             public void Update(double[] newInputValues)
             {
-                newInputValues.CopyTo(m_inputValues, 0);
+                newInputValues.CopyTo(_inputValues, 0);
                 return;
             }
 
@@ -520,12 +520,12 @@ namespace OKOSW.Neural.Reservoir.Analog
             public double GetInputSignal(int reservoirNeuronIdx)
             {
                 double signal = 0;
-                if (m_connections[reservoirNeuronIdx].Count > 0)
+                if (_connections[reservoirNeuronIdx].Count > 0)
                 {
-                    signal += m_inputBiases[reservoirNeuronIdx];
-                    foreach (InputConnection connection in m_connections[reservoirNeuronIdx])
+                    signal += _inputBiases[reservoirNeuronIdx];
+                    foreach (InputConnection connection in _connections[reservoirNeuronIdx])
                     {
-                        signal += m_inputValues[connection.FieldIdx] * connection.Weight;
+                        signal += _inputValues[connection.FieldIdx] * connection.Weight;
                     }
                 }
                 return signal;

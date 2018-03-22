@@ -37,7 +37,7 @@ namespace OKOSW.Demo
             string exCommonText = "Can't parse data from file " + demoCaseParams.CSVDataFileName;
             //All data fields names
             string allColumnsLine = stream.ReadLine();
-            char csv_delimiter = DelimitedStringValues.DetermineDelimiter(allColumnsLine);
+            char csv_delimiter = DelimitedStringValues.RecognizeDelimiter(allColumnsLine);
             DelimitedStringValues allColumnsDsv = new DelimitedStringValues(csv_delimiter);
             allColumnsDsv.LoadFromString(allColumnsLine);
             if (allColumnsDsv.ValuesCount < demoCaseParams.ESNCfg.InputFieldsNames.Count)
@@ -50,7 +50,7 @@ namespace OKOSW.Demo
             Normalizer singleNormalizer = new Normalizer(normalizationInterval, demoCaseParams.NormalizerReserveRatio);
             foreach (string fieldName in demoCaseParams.ESNCfg.InputFieldsNames)
             {
-                int fieldIdx = allColumnsDsv.FindValueIndex(fieldName);
+                int fieldIdx = allColumnsDsv.IndexOf(fieldName);
                 inputFieldsIdxs.Add(fieldIdx);
                 if (demoCaseParams.SingleNormalizer)
                 {
@@ -145,7 +145,7 @@ namespace OKOSW.Demo
         /// </summary>
         /// <param name="inArgs">Contains current/best error statistics, reservoir(s) statistics and the user object</param>
         /// <returns>Instructions for the calling regression process.</returns>
-        public static RegressionCallBackOutArgs ESNTraininigControl(RegressionCallBackInArgs inArgs)
+        public static RegressionControlOutArgs ESNRegressionControl(RegressionControlInArgs inArgs)
         {
             //Report reservoirs statistics in case of the first call
             if (inArgs.RegrValID == 0 && inArgs.RegrAttemptNumber == 1 && inArgs.Epoch == 1)
@@ -160,7 +160,7 @@ namespace OKOSW.Demo
                     ((IOutputLog)inArgs.ControllerData).Write(" ", false);
                 }
             }
-            RegressionCallBackOutArgs outArgs = new RegressionCallBackOutArgs();
+            RegressionControlOutArgs outArgs = new RegressionControlOutArgs();
             outArgs.Best = (inArgs.CurrRegrData.CombinedError < inArgs.BestRegrData.CombinedError);
             //Progress prompt
             ((IOutputLog)inArgs.ControllerData).Write(
@@ -191,13 +191,13 @@ namespace OKOSW.Demo
             ESN.DataBundle data = ESNDataBundleFromFile(demoCaseParams, out predictionInputVector, out outputNormalizers);
             //ESN training
             ESN esn = new ESN(demoCaseParams.ESNCfg, demoCaseParams.OutputFieldsNames.Count);
-            ESN.TestSamplesSelector samplesSelector = esn.SelectTestSamples_Rnd;
-            if (demoCaseParams.TestSamplesSelection == "SEQUENCE") samplesSelector = esn.SelectTestSamples_Seq;
+            ESN.ESNTestSamplesSelectorCallbackDelegate samplesSelector = esn.SelectRandomTestSamples;
+            if (demoCaseParams.TestSamplesSelection == "SEQUENCE") samplesSelector = esn.SelectSequenceTestSamples;
             RegressionData[] regrOuts = esn.Train(data,
                                                   demoCaseParams.BootSeqMinLength,
                                                   demoCaseParams.TestingSeqLength,
                                                   samplesSelector,
-                                                  ESNTraininigControl,
+                                                  ESNRegressionControl,
                                                   log
                                                   );
             //Next future values prediction

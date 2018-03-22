@@ -18,8 +18,8 @@ namespace OKOSW.Neural.Reservoir.Analog
     public class AnalogReservoirSettings
     {
         //Constants
-        /// <summary>Type of supported reservoir topologies</summary>
-        public enum EnumReservoirTopology
+        /// <summary>Supported types of reservoir topologies</summary>
+        public enum ReservoirTopologyType
         {
             /// <summary>Random topology.</summary>
             Random,
@@ -36,9 +36,9 @@ namespace OKOSW.Neural.Reservoir.Analog
         public double InputConnectionDensity { get; set; }
         public double InputWeightScale { get; set; }
         public int Size { get; set; }
-        public ActivationFactory.EnumActivationType ReservoirNeuronActivation { get; set; }
+        public ActivationFactory.ActivationType ReservoirNeuronActivation { get; set; }
         public double InternalWeightScale { get; set; }
-        public EnumReservoirTopology Topology { get; set; }
+        public ReservoirTopologyType Topology { get; set; }
         public RandomTopologyConfig RandomTopologyCfg { get; set; }
         public RingTopologyConfig RingTopologyCfg { get; set; }
         public DTTTopologyConfig DTTTopologyCfg { get; set; }
@@ -46,7 +46,7 @@ namespace OKOSW.Neural.Reservoir.Analog
         public double RetainmentMinRate { get; set; }
         public double RetainmentMaxRate { get; set; }
         public double ContextNeuronFeedbackDensity { get; set; }
-        public ActivationFactory.EnumActivationType ContextNeuronActivation { get; set; }
+        public ActivationFactory.ActivationType ContextNeuronActivation { get; set; }
         public double ContextNeuronInWeightScale { get; set; }
         public double ContextNeuronOutWeightScale { get; set; }
         public double FeedbackConnectionDensity { get; set; }
@@ -61,9 +61,9 @@ namespace OKOSW.Neural.Reservoir.Analog
             InputConnectionDensity = 1; //Default is full input connection
             InputWeightScale = 0.2;
             Size = 200; //Normal number of reservoir neurons
-            ReservoirNeuronActivation = ActivationFactory.EnumActivationType.Tanh; //Default is Tanh
+            ReservoirNeuronActivation = ActivationFactory.ActivationType.Tanh; //Default is Tanh
             InternalWeightScale = 0.2;
-            Topology = EnumReservoirTopology.Random; //Default is random
+            Topology = ReservoirTopologyType.Random; //Default is random
             RandomTopologyCfg = new RandomTopologyConfig();
             RingTopologyCfg = null;
             DTTTopologyCfg = null;
@@ -121,7 +121,7 @@ namespace OKOSW.Neural.Reservoir.Analog
         {
             //Validation
             //A very ugly validation
-            XMLValidator validator = new XMLValidator();
+            XmlValidator validator = new XmlValidator();
             Assembly neuralAssembly = Assembly.Load("Neural");
             validator.AddSchema(neuralAssembly.GetManifestResourceStream("OKOSW.Neural.Reservoir.Analog.AnalogReservoirSettings.xsd"));
             validator.AddSchema(neuralAssembly.GetManifestResourceStream("OKOSW.Neural.OKOSWNeuralSettingsTypes.xsd"));
@@ -153,19 +153,19 @@ namespace OKOSW.Neural.Reservoir.Analog
             if (topologyElem.Name == "RandomTopology")
             {
                 RandomTopologyCfg = new RandomTopologyConfig(topologyElem);
-                Topology = EnumReservoirTopology.Random;
+                Topology = ReservoirTopologyType.Random;
             }
             //Ring?
             else if (topologyElem.Name == "RingTopology")
             {
                 RingTopologyCfg = new RingTopologyConfig(topologyElem);
-                Topology = EnumReservoirTopology.Ring;
+                Topology = ReservoirTopologyType.Ring;
             }
             else
             {
                 //DTT
                 DTTTopologyCfg = new DTTTopologyConfig(topologyElem);
-                Topology = EnumReservoirTopology.DTT;
+                Topology = ReservoirTopologyType.DTT;
             }
             //Retirement neurons
             XElement retirementElem = internalElem.Descendants("RetirementNeurons").First();
@@ -186,10 +186,10 @@ namespace OKOSW.Neural.Reservoir.Analog
         }
 
         //Methods
-        /// <summary>Checkes if this settings are equivalent to specified settings</summary>
-        /// <param name="cmpSettings">Settings to be compared with this settings</param>
-        public bool IsEquivalent(AnalogReservoirSettings cmpSettings)
+        public override bool Equals(object obj)
         {
+            if (obj.GetType() != typeof(AnalogReservoirSettings)) return false;
+            AnalogReservoirSettings cmpSettings = (AnalogReservoirSettings)obj;
             if (CfgName != cmpSettings.CfgName ||
                 AugmentedStatesFeature != cmpSettings.AugmentedStatesFeature ||
                 BiasScale != cmpSettings.BiasScale ||
@@ -214,26 +214,31 @@ namespace OKOSW.Neural.Reservoir.Analog
             }
             switch (Topology)
             {
-                case EnumReservoirTopology.Random:
-                    if (!RandomTopologyCfg.IsEquivalent(cmpSettings.RandomTopologyCfg)) return false;
+                case ReservoirTopologyType.Random:
+                    if (!RandomTopologyCfg.Equals(cmpSettings.RandomTopologyCfg)) return false;
                     break;
-                case EnumReservoirTopology.Ring:
-                    if (!RingTopologyCfg.IsEquivalent(cmpSettings.RingTopologyCfg)) return false;
+                case ReservoirTopologyType.Ring:
+                    if (!RingTopologyCfg.Equals(cmpSettings.RingTopologyCfg)) return false;
                     break;
-                case EnumReservoirTopology.DTT:
-                    if (!DTTTopologyCfg.IsEquivalent(cmpSettings.DTTTopologyCfg)) return false;
+                case ReservoirTopologyType.DTT:
+                    if (!DTTTopologyCfg.Equals(cmpSettings.DTTTopologyCfg)) return false;
                     break;
             }
             return true;
         }
 
-        public static EnumReservoirTopology ParseReservoirTopology(string code)
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
+        public static ReservoirTopologyType ParseReservoirTopology(string code)
         {
             switch (code.ToUpper())
             {
-                case "RANDOM": return EnumReservoirTopology.Random;
-                case "RING": return EnumReservoirTopology.Ring;
-                case "DTT": return EnumReservoirTopology.DTT;
+                case "RANDOM": return ReservoirTopologyType.Random;
+                case "RING": return ReservoirTopologyType.Ring;
+                case "DTT": return ReservoirTopologyType.DTT;
                 default:
                     throw new Exception("Unknown topology code " + code);
             }
@@ -267,15 +272,22 @@ namespace OKOSW.Neural.Reservoir.Analog
                 ConnectionsDensity = double.Parse(randomTopologyElem.Attribute("ConnectionsDensity").Value, CultureInfo.InvariantCulture);
                 return;
             }
-            /// <summary>Checkes if this settings are equivalent to specified settings</summary>
-            /// <param name="cmpSettings">Settings to be compared with this settings</param>
-            public bool IsEquivalent(RandomTopologyConfig cmpSettings)
+
+            //Methods
+            public override bool Equals(object obj)
             {
+                if (obj.GetType() != typeof(RandomTopologyConfig)) return false;
+                RandomTopologyConfig cmpSettings = (RandomTopologyConfig)obj;
                 if (ConnectionsDensity != cmpSettings.ConnectionsDensity)
                 {
                     return false;
                 }
                 return true;
+            }
+
+            public override int GetHashCode()
+            {
+                return base.GetHashCode();
             }
 
         }//RandomTopologyConfig
@@ -315,10 +327,12 @@ namespace OKOSW.Neural.Reservoir.Analog
                 InterConnectionsDensity = double.Parse(ringTopologyElem.Attribute("InterConnectionsDensity").Value, CultureInfo.InvariantCulture);
                 return;
             }
-            /// <summary>Checkes if this settings are equivalent to specified settings</summary>
-            /// <param name="cmpSettings">Settings to be compared with this settings</param>
-            public bool IsEquivalent(RingTopologyConfig cmpSettings)
+
+            //Methods
+            public override bool Equals(object obj)
             {
+                if (obj.GetType() != typeof(RingTopologyConfig)) return false;
+                RingTopologyConfig cmpSettings = (RingTopologyConfig)obj;
                 if (BiDirection != cmpSettings.BiDirection ||
                    SelfConnectionsDensity != cmpSettings.SelfConnectionsDensity ||
                    InterConnectionsDensity != cmpSettings.InterConnectionsDensity
@@ -327,6 +341,11 @@ namespace OKOSW.Neural.Reservoir.Analog
                     return false;
                 }
                 return true;
+            }
+
+            public override int GetHashCode()
+            {
+                return base.GetHashCode();
             }
 
         }//RingTopologyConfig
@@ -358,15 +377,22 @@ namespace OKOSW.Neural.Reservoir.Analog
                 SelfConnectionsDensity = double.Parse(dttTopologyElem.Attribute("SelfConnectionsDensity").Value, CultureInfo.InvariantCulture);
                 return;
             }
-            /// <summary>Checkes if this settings are equivalent to specified settings</summary>
-            /// <param name="cmpSettings">Settings to be compared with this settings</param>
-            public bool IsEquivalent(DTTTopologyConfig cmpSettings)
+
+            //Methods
+            public override bool Equals(object obj)
             {
+                if (obj.GetType() != typeof(DTTTopologyConfig)) return false;
+                DTTTopologyConfig cmpSettings = (DTTTopologyConfig)obj;
                 if (SelfConnectionsDensity != cmpSettings.SelfConnectionsDensity)
                 {
                     return false;
                 }
                 return true;
+            }
+
+            public override int GetHashCode()
+            {
+                return base.GetHashCode();
             }
 
         }//DTTTopologyConfig

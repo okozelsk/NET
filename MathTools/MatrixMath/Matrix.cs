@@ -12,15 +12,15 @@ namespace OKOSW.MathTools.MatrixMath
     {
         //Constants
         //Attributes
-        protected double[][] m_data;
+        protected double[][] _data;
         
         //Constructors
         public Matrix(int rowsCount, int colsCount, double[] flatData = null)
         {
-            m_data = new double[rowsCount][];
+            _data = new double[rowsCount][];
             for (int row = 0; row < rowsCount; row++)
             {
-                m_data[row] = new double[colsCount];
+                _data[row] = new double[colsCount];
             }
             if (flatData != null)
             {
@@ -30,21 +30,21 @@ namespace OKOSW.MathTools.MatrixMath
         }
 
         public Matrix(Matrix sourceMatrix)
-            :this(sourceMatrix.m_data)
+            :this(sourceMatrix._data)
         {
             return;
         }
 
         public Matrix(double[][] data)
         {
-            m_data = data.Clone2D();
+            _data = data.Clone2D();
             return;
         }
 
         //Properties
-        public double[][] Data { get { return m_data; } }
-        public int RowsCount { get { return m_data.Length; } }
-        public int ColsCount { get { return m_data[0].Length; } }
+        public double[][] Data { get { return _data; } }
+        public int RowsCount { get { return _data.Length; } }
+        public int ColsCount { get { return _data[0].Length; } }
         public int Size { get { return RowsCount * ColsCount; } }
         public bool IsVector { get { return (RowsCount == 1 || ColsCount == 1); } }
         public bool Singular
@@ -55,7 +55,7 @@ namespace OKOSW.MathTools.MatrixMath
                 {
                     for(int j = 0; j < ColsCount; j++)
                     {
-                        if(m_data[i][j] != 0)
+                        if(_data[i][j] != 0)
                         {
                             return false;
                         }
@@ -92,7 +92,7 @@ namespace OKOSW.MathTools.MatrixMath
         //Instance methods
         public void Set(double value = 0)
         {
-            m_data.Populate(value);
+            _data.Populate(value);
             return;
         }
 
@@ -103,7 +103,7 @@ namespace OKOSW.MathTools.MatrixMath
             {
                 for (int j = 0; j < ColsCount; j++)
                 {
-                    m_data[i][j] = flatData[dataIndex++];
+                    _data[i][j] = flatData[dataIndex++];
                 }
             }
             return;
@@ -115,7 +115,7 @@ namespace OKOSW.MathTools.MatrixMath
             {
                 for (int j = 0; j < ColsCount; j++)
                 {
-                    m_data[i][j] = source.m_data[i][j];
+                    _data[i][j] = source._data[i][j];
                 }
             }
             return;
@@ -123,21 +123,21 @@ namespace OKOSW.MathTools.MatrixMath
 
         public void SetRow(int row, double value = 0)
         {
-            m_data[row].Populate(value);
+            _data[row].Populate(value);
             return;
         }
 
         public void SetRow(int row, double[] rowData)
         {
-            rowData.CopyTo(m_data[row], 0);
+            rowData.CopyTo(_data[row], 0);
             return;
         }
 
         public void SetCol(int col, double value = 0)
         {
-            for(int i = 0; i < m_data.Length; i++)
+            for(int i = 0; i < _data.Length; i++)
             {
-                m_data[i][col] = value;
+                _data[i][col] = value;
             }
             return;
         }
@@ -146,7 +146,7 @@ namespace OKOSW.MathTools.MatrixMath
         {
             for (int i = 0; i < colData.Length; i++)
             {
-                m_data[i][col] = colData[i];
+                _data[i][col] = colData[i];
             }
             return;
         }
@@ -163,7 +163,7 @@ namespace OKOSW.MathTools.MatrixMath
             {
                 for (int j = 0; j <= source.ColsCount; j++)
                 {
-                    m_data[fromRow + i][fromCol + j] = source.m_data[i][j];
+                    _data[fromRow + i][fromCol + j] = source._data[i][j];
                 }
             }
             return;
@@ -176,7 +176,7 @@ namespace OKOSW.MathTools.MatrixMath
             {
                 for (int j = 0; j < ColsCount; j++)
                 {
-                    flatData[dataIndex++] = m_data[i][j];
+                    flatData[dataIndex++] = _data[i][j];
                 }
             }
             return;
@@ -195,7 +195,7 @@ namespace OKOSW.MathTools.MatrixMath
             for (int row = 0; row < RowsCount; row++)
             {
                 colMatrixData[row] = new double[1];
-                colMatrixData[row][0] = m_data[row][col];
+                colMatrixData[row][0] = _data[row][col];
             }
             return new Matrix(colMatrixData);
         }
@@ -206,7 +206,7 @@ namespace OKOSW.MathTools.MatrixMath
             rowMatrixData[0] = new double[ColsCount];
             for (int col = 0; col < ColsCount; col++)
             {
-                rowMatrixData[0][col] = m_data[row][col];
+                rowMatrixData[0][col] = _data[row][col];
             }
             return new Matrix(rowMatrixData);
         }
@@ -225,7 +225,7 @@ namespace OKOSW.MathTools.MatrixMath
             {
                 for (int j = fromCol; j <= toCol; j++)
                 {
-                    resultMatrix.m_data[i - fromRow][j - fromCol] = m_data[i][j];
+                    resultMatrix._data[i - fromRow][j - fromCol] = _data[i][j];
                 }
             }
             return resultMatrix;
@@ -233,7 +233,7 @@ namespace OKOSW.MathTools.MatrixMath
 
         public double[][] GetDataClone()
         {
-            return m_data.Clone2D();
+            return _data.Clone2D();
         }
 
         public Matrix Clone()
@@ -249,7 +249,7 @@ namespace OKOSW.MathTools.MatrixMath
         /// <param name="value">The value to add.</param>
         public void Add(int row, int col, double value)
         {
-            m_data[row][col] += value;
+            _data[row][col] += value;
             return;
         }
 
@@ -262,7 +262,7 @@ namespace OKOSW.MathTools.MatrixMath
             {
                 for(int j = 0; j < ColsCount; j++)
                 {
-                    m_data[i][j] = values.m_data[i][j];
+                    _data[i][j] = values._data[i][j];
                 }
             }
             return;
@@ -278,7 +278,7 @@ namespace OKOSW.MathTools.MatrixMath
             {
                 for (int j = 0; j < ColsCount; j++)
                 {
-                    sum += m_data[i][j];
+                    sum += _data[i][j];
                 }
             }
             return sum;

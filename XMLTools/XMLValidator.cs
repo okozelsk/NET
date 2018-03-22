@@ -11,51 +11,69 @@ using System.Xml.Schema;
 namespace OKOSW.XMLTools
 {
     /// <summary>
-    /// Provides XML loading/validation functionalities
+    /// Provides xml loading/validation functionalities
     /// </summary>
-    public class XMLValidator
+    public class XmlValidator
     {
         //Constants
         //Attributes
-        private XmlSchemaSet m_schemas;
+        private XmlSchemaSet _schemaSet;
 
         //Constructor
-        public XMLValidator()
+        public XmlValidator()
         {
-            m_schemas = new XmlSchemaSet();
+            _schemaSet = new XmlSchemaSet();
             return;
         }
 
         //Properties
 
         //Methods
+        /// <summary>
+        /// Loads new xml schema from the given stream. Stream is then closed and disposed.
+        /// </summary>
+        /// <param name="schemaStream">Stream from which to load xml schema</param>
         public void AddSchema(Stream schemaStream)
         {
             //Load schema
-            XmlSchema schema = XmlSchema.Read(schemaStream, new ValidationEventHandler(XmlValidationCallBack));
+            XmlSchema schema = XmlSchema.Read(schemaStream, new ValidationEventHandler(XmlValidationCallback));
             //Add schema to schema set
-            m_schemas.Add(schema);
+            _schemaSet.Add(schema);
             schemaStream.Close();
             schemaStream.Dispose();
             return;
         }
 
+        /// <summary>
+        /// Creates new XDocument, content is loaded from given file and validated against stored xml schemaSet
+        /// </summary>
+        /// <param name="filename">Xml content of document to be loaded</param>
+        /// <returns>XDocument</returns>
         public XDocument LoadXDocFromFile(string filename)
         {
             XDocument xDoc = XDocument.Load(filename);
-            xDoc.Validate(m_schemas, new ValidationEventHandler(XmlValidationCallBack));
+            xDoc.Validate(_schemaSet, new ValidationEventHandler(XmlValidationCallback));
             return xDoc;
         }
 
+
+        /// <summary>
+        /// Creates new XDocument, content is loaded from given string and validated against stored xml schemaSet
+        /// </summary>
+        /// <param name="xmlContent">Xml content of document to be loaded</param>
+        /// <returns>XDocument</returns>
         public XDocument LoadXDocFromString(string xmlContent)
         {
 
             XDocument xDoc = XDocument.Parse(xmlContent);
-            xDoc.Validate(m_schemas, new ValidationEventHandler(XmlValidationCallBack));
+            xDoc.Validate(_schemaSet, new ValidationEventHandler(XmlValidationCallback));
             return xDoc;
         }
 
-        private void XmlValidationCallBack(object sender, ValidationEventArgs args)
+        /// <summary>
+        /// Callback function called during validations.
+        /// </summary>
+        private void XmlValidationCallback(object sender, ValidationEventArgs args)
         {
             throw new Exception("Validation error: " + args.Message);
         }

@@ -12,15 +12,15 @@ namespace OKOSW.Demo.Log
     public class ConsoleLog : IOutputLog
     {
         //Constants
-        public const int CONSOLE_MIN_WIDTH = 160;
-        public const int CONSOLE_MIN_HEIGHT = 50;
-        public const int CONSOLE_BUFFER_MIN_WIDTH = CONSOLE_MIN_WIDTH*2;
-        public const int CONSOLE_BUFFER_MIN_HEIGHT = 1000;
+        public const int ConsoleMinWidth = 160;
+        public const int ConsoleMinHeight = 50;
+        public const int ConsoleBufferMinWidth = ConsoleMinWidth*2;
+        public const int ConsoleBufferMinHeight = 1000;
 
         //Attributes
-        private int m_lastMessageLength;
-        private int m_lastCursorLeft;
-        private int m_lastCursorTop;
+        private int _lastMessageLength;
+        private int _lastCursorLeft;
+        private int _lastCursorTop;
 
         /// <summary>
         /// Constructs console log and sets required console sizes (if necessary)
@@ -28,15 +28,15 @@ namespace OKOSW.Demo.Log
         public ConsoleLog()
         {
             //Ensure console min sizes
-            Console.BufferWidth = Math.Max(CONSOLE_BUFFER_MIN_WIDTH, Console.BufferWidth);
-            Console.BufferHeight = Math.Max(CONSOLE_BUFFER_MIN_HEIGHT, Console.BufferHeight);
-            Console.WindowWidth = Math.Max(CONSOLE_MIN_WIDTH, Console.WindowWidth);
-            Console.WindowHeight = Math.Max(CONSOLE_MIN_HEIGHT, Console.WindowHeight);
+            Console.BufferWidth = Math.Max(ConsoleBufferMinWidth, Console.BufferWidth);
+            Console.BufferHeight = Math.Max(ConsoleBufferMinHeight, Console.BufferHeight);
+            Console.WindowWidth = Math.Max(ConsoleMinWidth, Console.WindowWidth);
+            Console.WindowHeight = Math.Max(ConsoleMinHeight, Console.WindowHeight);
             Console.Clear();
             //Store current cursor position
             StoreCursor();
             //Reset last message length
-            m_lastMessageLength = 0;
+            _lastMessageLength = 0;
             return;
         }
 
@@ -46,8 +46,8 @@ namespace OKOSW.Demo.Log
         /// </summary>
         private void RestoreCursor()
         {
-            Console.CursorLeft = m_lastCursorLeft;
-            Console.CursorTop = m_lastCursorTop;
+            Console.CursorLeft = _lastCursorLeft;
+            Console.CursorTop = _lastCursorTop;
             return;
         }
 
@@ -56,8 +56,8 @@ namespace OKOSW.Demo.Log
         /// </summary>
         private void StoreCursor()
         {
-            m_lastCursorLeft = Console.CursorLeft;
-            m_lastCursorTop = Console.CursorTop;
+            _lastCursorLeft = Console.CursorLeft;
+            _lastCursorTop = Console.CursorTop;
             return;
         }
 
@@ -72,10 +72,10 @@ namespace OKOSW.Demo.Log
             if (replaceLastMessage)
             {
                 RestoreCursor();
-                if (m_lastMessageLength > 0)
+                if (_lastMessageLength > 0)
                 {
-                    StringBuilder emptyMsg = new StringBuilder(m_lastMessageLength);
-                    for (int i = 0; i < m_lastMessageLength; i++)
+                    StringBuilder emptyMsg = new StringBuilder(_lastMessageLength);
+                    for (int i = 0; i < _lastMessageLength; i++)
                     {
                         emptyMsg.Append(" ");
                     }
@@ -90,7 +90,7 @@ namespace OKOSW.Demo.Log
                 StoreCursor();
                 Console.Write(message);
             }
-            m_lastMessageLength = message.Length;
+            _lastMessageLength = message.Length;
             return;
         }
 

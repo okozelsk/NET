@@ -6,85 +6,103 @@ using System.Threading.Tasks;
 
 namespace OKOSW.Queue
 {
+    /// <summary>
+    /// Implements simple thread safe FIFO queue template
+    /// </summary>
     public class SimpleQueue<T>
     {
         //Constants
         //Attributes
-        private Object m_lock;
-        private int m_capacity;
-        private T[] m_queue;
-        private int m_enqueueOffset;
-        private int m_dequeueOffset;
-        private int m_count;
+        private Object _lock;
+        private int _capacity;
+        private T[] _queue;
+        private int _enqueueOffset;
+        private int _dequeueOffset;
+        private int _count;
 
         //Constructor
         public SimpleQueue(int capacity)
         {
-            m_lock = new Object();
-            m_capacity = capacity;
-            m_queue = new T[m_capacity];
-            m_enqueueOffset = 0;
-            m_dequeueOffset = 0;
-            m_count = 0;
+            _lock = new Object();
+            _capacity = capacity;
+            _queue = new T[_capacity];
+            _enqueueOffset = 0;
+            _dequeueOffset = 0;
+            _count = 0;
             return;
         }
 
         //Properties
+        /// <summary>
+        /// Count of enqueued items
+        /// </summary>
         public int Count
         {
             get
             {
-                lock(m_lock)
+                lock(_lock)
                 {
-                    return m_count;
+                    return _count;
                 }
             }
         }
 
+        /// <summary>
+        /// Is queue full?
+        /// </summary>
         public bool Full
         {
             get
             {
-                lock (m_lock)
+                lock (_lock)
                 {
-                    return (m_count == m_capacity);
+                    return (_count == _capacity);
                 }
             }
         }
 
         //Methods
+        /// <summary>
+        /// Adds new item into the queue
+        /// </summary>
+        /// <param name="item">Item to be added</param>
+        /// <returns>False if queue is full, True if success</returns>
         public bool Enqueue(T item)
         {
-            lock(m_lock)
+            lock(_lock)
             {
-                if (m_count < m_capacity)
+                if (_count < _capacity)
                 {
-                    m_queue[m_enqueueOffset] = item;
-                    ++m_enqueueOffset;
-                    if (m_enqueueOffset == m_capacity)
+                    _queue[_enqueueOffset] = item;
+                    ++_enqueueOffset;
+                    if (_enqueueOffset == _capacity)
                     {
-                        m_enqueueOffset = 0;
+                        _enqueueOffset = 0;
                     }
-                    ++m_count;
+                    ++_count;
                     return true;
                 }
             }
             return false;
         }
 
+        /// <summary>
+        /// Dequeues item (FIFO order)
+        /// </summary>
+        /// <returns>Default(T) if queue is empty, Item if success.</returns>
         public T Dequeue()
         {
-            lock(m_lock)
+            lock(_lock)
             {
-                if (m_count > 0)
+                if (_count > 0)
                 {
-                    T item = m_queue[m_dequeueOffset];
-                    ++m_dequeueOffset;
-                    if (m_dequeueOffset == m_capacity)
+                    T item = _queue[_dequeueOffset];
+                    ++_dequeueOffset;
+                    if (_dequeueOffset == _capacity)
                     {
-                        m_dequeueOffset = 0;
+                        _dequeueOffset = 0;
                     }
-                    --m_count;
+                    --_count;
                     return item;
                 }
             }

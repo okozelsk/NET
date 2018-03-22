@@ -32,7 +32,7 @@ namespace OKOSW.Neural.Networks.EchoState
         /// <summary>Number of neurons in hidden layers of the read out FF network</summary>
         public List<ReadOutHiddenLayerCfg> ReadOutHiddenLayers { get; set; }
         /// <summary>Readout FF network output neuron activation function.</summary>
-        public ActivationFactory.EnumActivationType OutputNeuronActivation { get; set; }
+        public ActivationFactory.ActivationType OutputNeuronActivation { get; set; }
         /// <summary>Regression method (LM or RESILIENT).</summary>
         public string RegressionMethod { get; set; }
         /// <summary>Maximum number of regression attempts.</summary>
@@ -52,7 +52,7 @@ namespace OKOSW.Neural.Networks.EchoState
             InputsToResCfgsMapping = new List<InputResCfgMap>();
             RouteInputToReadout = true;
             ReadOutHiddenLayers = new List<ReadOutHiddenLayerCfg>();
-            OutputNeuronActivation = ActivationFactory.EnumActivationType.Identity; //Standard
+            OutputNeuronActivation = ActivationFactory.ActivationType.Identity; //Standard
             RegressionMethod = "LINEAR";
             RegressionMaxAttempts = 1; //Standard
             RegressionMaxEpochs = 50; //Usually enough value is 100
@@ -90,7 +90,7 @@ namespace OKOSW.Neural.Networks.EchoState
         {
             //Validation
             //A very ugly validation
-            XMLValidator validator = new XMLValidator();
+            XmlValidator validator = new XmlValidator();
             Assembly neuralAssembly = Assembly.Load("Neural");
             validator.AddSchema(neuralAssembly.GetManifestResourceStream("OKOSW.Neural.Networks.EchoState.ESNSettings.xsd"));
             validator.AddSchema(neuralAssembly.GetManifestResourceStream("OKOSW.Neural.OKOSWNeuralSettingsTypes.xsd"));
@@ -169,10 +169,10 @@ namespace OKOSW.Neural.Networks.EchoState
 
 
         //Methods
-        /// <summary>Checkes if this settings are equivalent to specified settings</summary>
-        /// <param name="cmpSettings">Settings to be compared with this settings</param>
-        public bool IsEquivalent(ESNSettings cmpSettings)
+        public override bool Equals(object obj)
         {
+            if (obj.GetType() != typeof(ESNSettings)) return false;
+            ESNSettings cmpSettings = (ESNSettings)obj;
             if (RandomizerSeek != cmpSettings.RandomizerSeek ||
                !InputFieldsNames.ToArray().EqualValues(cmpSettings.InputFieldsNames.ToArray()) ||
                InputsToResCfgsMapping.Count != cmpSettings.InputsToResCfgsMapping.Count ||
@@ -189,14 +189,14 @@ namespace OKOSW.Neural.Networks.EchoState
             }
             for (int i = 0; i < InputsToResCfgsMapping.Count; i++)
             {
-                if (!InputsToResCfgsMapping[i].IsEquivalent(cmpSettings.InputsToResCfgsMapping[i]))
+                if (!InputsToResCfgsMapping[i].Equals(cmpSettings.InputsToResCfgsMapping[i]))
                 {
                     return false;
                 }
             }
             for (int i = 0; i < ReadOutHiddenLayers.Count; i++)
             {
-                if (!ReadOutHiddenLayers[i].IsEquivalent(cmpSettings.ReadOutHiddenLayers[i]))
+                if (!ReadOutHiddenLayers[i].Equals(cmpSettings.ReadOutHiddenLayers[i]))
                 {
                     return false;
                 }
@@ -204,8 +204,13 @@ namespace OKOSW.Neural.Networks.EchoState
             return true;
         }
 
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
         /// <summary>
-        /// Returns the new instance of this instance as a copy.
+        /// Creates the shallow copy of this instance
         /// </summary>
         public ESNSettings Clone()
         {
@@ -220,7 +225,7 @@ namespace OKOSW.Neural.Networks.EchoState
         {
             //Attributes
             public int NeuronsCount { get; set; }
-            public ActivationFactory.EnumActivationType ActivationType { get; set; }
+            public ActivationFactory.ActivationType ActivationType { get; set; }
 
             //Constructors
             public ReadOutHiddenLayerCfg(string neuronsCount, string activationType)
@@ -238,13 +243,20 @@ namespace OKOSW.Neural.Networks.EchoState
             }
 
             //Methods
-            public bool IsEquivalent(ReadOutHiddenLayerCfg cmpItem)
+            public override bool Equals(object obj)
             {
-                if (NeuronsCount != cmpItem.NeuronsCount || ActivationType != cmpItem.ActivationType)
+                if (obj.GetType() != typeof(ReadOutHiddenLayerCfg)) return false;
+                ReadOutHiddenLayerCfg cmpSettings = (ReadOutHiddenLayerCfg)obj;
+                if (NeuronsCount != cmpSettings.NeuronsCount || ActivationType != cmpSettings.ActivationType)
                 {
                     return false;
                 }
                 return true;
+            }
+
+            public override int GetHashCode()
+            {
+                return base.GetHashCode();
             }
 
             /// <summary>
@@ -294,10 +306,12 @@ namespace OKOSW.Neural.Networks.EchoState
                 return new InputResCfgMap(this);
             }
 
-            public bool IsEquivalent(InputResCfgMap cmpSettings)
+            public override bool Equals(object obj)
             {
+                if (obj.GetType() != typeof(InputResCfgMap)) return false;
+                InputResCfgMap cmpSettings = (InputResCfgMap)obj;
                 if (InputFieldsIdxs.Count != cmpSettings.InputFieldsIdxs.Count ||
-                    !ReservoirSettings.IsEquivalent(cmpSettings.ReservoirSettings)
+                    !ReservoirSettings.Equals(cmpSettings.ReservoirSettings)
                     )
                 {
                     return false;
@@ -311,9 +325,13 @@ namespace OKOSW.Neural.Networks.EchoState
                 }
                 return true;
             }
-        }
 
+            public override int GetHashCode()
+            {
+                return base.GetHashCode();
+            }
 
+        }//InputResCfgMap
 
     }//ESNSettings
 }//Namespace

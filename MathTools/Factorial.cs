@@ -12,19 +12,19 @@ namespace OKOSW.MathTools
     public static class Factorial
     {
         //Constants
-        public const uint MAX_BASE = 20;
+        public const uint FactorialMaxInputValue = 20;
         //Attributes
-        private static readonly ulong[] m_cache;
+        private static readonly ulong[] _resultCache;
 
         //Constructor
         static Factorial()
         {
             //Preparation of the precomputed factorial cache
-            m_cache = new ulong[MAX_BASE + 1];
-            m_cache[0] = 1;
-            for(uint n = 1; n <= MAX_BASE; n++)
+            _resultCache = new ulong[FactorialMaxInputValue + 1];
+            _resultCache[0] = 1;
+            for(uint n = 1; n <= FactorialMaxInputValue; n++)
             {
-                m_cache[n] = m_cache[n - 1] * n;
+                _resultCache[n] = _resultCache[n - 1] * n;
             }
             return;
         }
@@ -35,11 +35,11 @@ namespace OKOSW.MathTools
         /// <param name="n"></param>
         public static ulong Get(uint n)
         {
-            if(n > MAX_BASE)
+            if(n > FactorialMaxInputValue)
             {
                 throw (new ArgumentException("Argument is bigger than Factorial.MAX_BASE"));
             }
-            return m_cache[n];
+            return _resultCache[n];
         }
 
         /// <summary>

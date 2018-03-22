@@ -16,7 +16,7 @@ namespace OKOSW.MathTools
         public static ulong GetCombinationsCount(uint n, uint k)
         {
             //Basic checks
-            if (n < k || k > Factorial.MAX_BASE)
+            if (n < k || k > Factorial.FactorialMaxInputValue)
             {
                 return 0;
             }

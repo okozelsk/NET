@@ -24,7 +24,7 @@ namespace OKOSW.Demo
         //Constructor
         public ESNDemoSettings(string xmlFile)
         {
-            XMLValidator validator = new XMLValidator();
+            XmlValidator validator = new XmlValidator();
             Assembly esnDemoAssembly = Assembly.GetExecutingAssembly();
             Assembly neuralAssembly = Assembly.Load("Neural");
             validator.AddSchema(esnDemoAssembly.GetManifestResourceStream("OKOSW.Demo.ESNDemoSettings.xsd"));

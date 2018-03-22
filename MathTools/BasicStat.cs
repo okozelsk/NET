@@ -14,22 +14,22 @@ namespace OKOSW.MathTools
     {
         //Attributes
         //Locker to ensure thread safe behaviour
-        private Object m_lock = new Object();
+        private Object _lock = new Object();
         //Base values
-        private double m_sum;
-        private double m_sumOfPowers;
-        private double m_min;
-        private double m_max;
-        private int m_samplesCount;
-        private int m_nonzeroSamplesCount;
+        private double _sum;
+        private double _sumOfPowers;
+        private double _min;
+        private double _max;
+        private int _samplesCount;
+        private int _nonzeroSamplesCount;
         //Precomputed properties
-        private bool m_recompute;
-        private double m_arithAvg;
-        private double m_meanSquare;
-        private double m_rootMeanSquare;
-        private double m_variance;
-        private double m_stdDev;
-        private double m_spanDev;
+        private bool _recompute;
+        private double _arithAvg;
+        private double _meanSquare;
+        private double _rootMeanSquare;
+        private double _variance;
+        private double _stdDev;
+        private double _spanDev;
 
         //Constructors
         public BasicStat()
@@ -85,9 +85,9 @@ namespace OKOSW.MathTools
         {
             get
             {
-                lock(m_lock)
+                lock(_lock)
                 {
-                    return m_samplesCount;
+                    return _samplesCount;
                 }
             }
         }
@@ -96,9 +96,9 @@ namespace OKOSW.MathTools
         {
             get
             {
-                lock (m_lock)
+                lock (_lock)
                 {
-                    return m_nonzeroSamplesCount;
+                    return _nonzeroSamplesCount;
                 }
             }
         }
@@ -107,9 +107,9 @@ namespace OKOSW.MathTools
         {
             get
             {
-                lock (m_lock)
+                lock (_lock)
                 {
-                    return m_sum;
+                    return _sum;
                 }
             }
         }
@@ -118,9 +118,9 @@ namespace OKOSW.MathTools
         {
             get
             {
-                lock (m_lock)
+                lock (_lock)
                 {
-                    return m_sumOfPowers;
+                    return _sumOfPowers;
                 }
             }
         }
@@ -129,9 +129,9 @@ namespace OKOSW.MathTools
         {
             get
             {
-                lock (m_lock)
+                lock (_lock)
                 {
-                    return m_min;
+                    return _min;
                 }
             }
         }
@@ -140,9 +140,9 @@ namespace OKOSW.MathTools
         {
             get
             {
-                lock (m_lock)
+                lock (_lock)
                 {
-                    return m_max;
+                    return _max;
                 }
             }
         }
@@ -151,9 +151,9 @@ namespace OKOSW.MathTools
         {
             get
             {
-                lock (m_lock)
+                lock (_lock)
                 {
-                    return m_min + ((m_max - m_min) / 2d);
+                    return _min + ((_max - _min) / 2d);
                 }
             }
         }
@@ -162,9 +162,9 @@ namespace OKOSW.MathTools
         {
             get
             {
-                lock (m_lock)
+                lock (_lock)
                 {
-                    return (m_max - m_min);
+                    return (_max - _min);
                 }
             }
         }
@@ -173,10 +173,10 @@ namespace OKOSW.MathTools
         {
             get
             {
-                lock (m_lock)
+                lock (_lock)
                 {
                     Recompute();
-                    return m_arithAvg;
+                    return _arithAvg;
                 }
             }
         }
@@ -185,10 +185,10 @@ namespace OKOSW.MathTools
         {
             get
             {
-                lock (m_lock)
+                lock (_lock)
                 {
                     Recompute();
-                    return m_meanSquare;
+                    return _meanSquare;
                 }
             }
         }
@@ -197,10 +197,10 @@ namespace OKOSW.MathTools
         {
             get
             {
-                lock (m_lock)
+                lock (_lock)
                 {
                     Recompute();
-                    return m_rootMeanSquare;
+                    return _rootMeanSquare;
                 }
             }
         }
@@ -209,10 +209,10 @@ namespace OKOSW.MathTools
         {
             get
             {
-                lock (m_lock)
+                lock (_lock)
                 {
                     Recompute();
-                    return m_variance;
+                    return _variance;
                 }
             }
         }
@@ -221,10 +221,10 @@ namespace OKOSW.MathTools
         {
             get
             {
-                lock (m_lock)
+                lock (_lock)
                 {
                     Recompute();
-                    return m_stdDev;
+                    return _stdDev;
                 }
             }
         }
@@ -233,10 +233,10 @@ namespace OKOSW.MathTools
         {
             get
             {
-                lock (m_lock)
+                lock (_lock)
                 {
                     Recompute();
-                    return m_spanDev;
+                    return _spanDev;
                 }
             }
         }
@@ -244,15 +244,15 @@ namespace OKOSW.MathTools
         //Methods
         public void Reset()
         {
-            lock(m_lock)
+            lock(_lock)
             {
-                m_sum = 0;
-                m_sumOfPowers = 0;
-                m_min = 0;
-                m_max = 0;
-                m_samplesCount = 0;
-                m_nonzeroSamplesCount = 0;
-                m_recompute = true;
+                _sum = 0;
+                _sumOfPowers = 0;
+                _min = 0;
+                _max = 0;
+                _samplesCount = 0;
+                _nonzeroSamplesCount = 0;
+                _recompute = true;
                 Recompute();
             }
             return;
@@ -260,72 +260,72 @@ namespace OKOSW.MathTools
 
         public void Adopt(BasicStat source)
         {
-            lock(m_lock)
+            lock(_lock)
             {
-                m_sum = source.m_sum;
-                m_sumOfPowers = source.m_sumOfPowers;
-                m_min = source.m_min;
-                m_max = source.m_max;
-                m_samplesCount = source.m_samplesCount;
-                m_nonzeroSamplesCount = source.m_nonzeroSamplesCount;
-                m_recompute = source.m_recompute;
-                m_arithAvg = source.m_arithAvg;
-                m_rootMeanSquare = source.m_rootMeanSquare;
-                m_variance = source.m_variance;
-                m_stdDev = source.m_stdDev;
-                m_spanDev = source.m_spanDev;
+                _sum = source._sum;
+                _sumOfPowers = source._sumOfPowers;
+                _min = source._min;
+                _max = source._max;
+                _samplesCount = source._samplesCount;
+                _nonzeroSamplesCount = source._nonzeroSamplesCount;
+                _recompute = source._recompute;
+                _arithAvg = source._arithAvg;
+                _rootMeanSquare = source._rootMeanSquare;
+                _variance = source._variance;
+                _stdDev = source._stdDev;
+                _spanDev = source._spanDev;
             }
             return;
         }
 
         private void Recompute()
         {
-            if(m_recompute)
+            if(_recompute)
             {
-                if (m_samplesCount > 0)
+                if (_samplesCount > 0)
                 {
-                    m_arithAvg = m_sum / (double)(m_samplesCount);
-                    m_meanSquare = m_sumOfPowers / (double)(m_samplesCount);
-                    m_rootMeanSquare = Math.Sqrt(m_meanSquare);
-                    m_variance = (m_sumOfPowers / (double)(m_samplesCount)) - m_arithAvg.Power(2);
-                    m_stdDev = (m_variance > 0) ? m_stdDev = Math.Sqrt(m_variance) : 0;
-                    m_spanDev = (m_max - m_min) * m_stdDev;
+                    _arithAvg = _sum / (double)(_samplesCount);
+                    _meanSquare = _sumOfPowers / (double)(_samplesCount);
+                    _rootMeanSquare = Math.Sqrt(_meanSquare);
+                    _variance = (_sumOfPowers / (double)(_samplesCount)) - _arithAvg.Power(2);
+                    _stdDev = (_variance > 0) ? _stdDev = Math.Sqrt(_variance) : 0;
+                    _spanDev = (_max - _min) * _stdDev;
                 }
                 else
                 {
-                    m_arithAvg = 0;
-                    m_meanSquare = 0;
-                    m_rootMeanSquare = 0;
-                    m_variance = 0;
-                    m_stdDev = 0;
-                    m_spanDev = 0;
+                    _arithAvg = 0;
+                    _meanSquare = 0;
+                    _rootMeanSquare = 0;
+                    _variance = 0;
+                    _stdDev = 0;
+                    _spanDev = 0;
                 }
-                m_recompute = false;
+                _recompute = false;
             }
             return;
         }
 
         public void AddSampleValue(double value)
         {
-            lock(m_lock)
+            lock(_lock)
             {
-                m_sum += value;
-                m_sumOfPowers += value.Power(2);
-                if (m_samplesCount == 0)
+                _sum += value;
+                _sumOfPowers += value.Power(2);
+                if (_samplesCount == 0)
                 {
-                    m_min = m_max = value;
+                    _min = _max = value;
                 }
                 else
                 {
-                    if (value < m_min) m_min = value;
-                    else if (value > m_max) m_max = value;
+                    if (value < _min) _min = value;
+                    else if (value > _max) _max = value;
                 }
-                ++m_samplesCount;
+                ++_samplesCount;
                 if (value != 0)
                 {
-                    ++m_nonzeroSamplesCount;
+                    ++_nonzeroSamplesCount;
                 }
-                m_recompute = true;
+                _recompute = true;
             }
             return;
         }

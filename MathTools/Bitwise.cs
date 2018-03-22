@@ -7,26 +7,26 @@ using System.Threading.Tasks;
 namespace OKOSW.MathTools
 {
     /// <summary>
-    /// Useful bitwise operations.
+    /// Helper bitwise operations.
     /// Bit positions are zero based.
     /// Zero bit position has value 1, position 1 has value 2, position 2 has value 4, etc..
     /// </summary>
     public static class Bitwise
     {
         //Constants
-        private const uint MAX_BIT_POS = 63;
+        private const uint MaxBitPos = 63;
         //Attributes
-        private static readonly ulong[] m_bitValuesCache;
+        private static readonly ulong[] _bitValuesCache;
         
         //Constructor
         static Bitwise()
         {
             //Preparation of the precomputed bit values cache
-            m_bitValuesCache = new ulong[MAX_BIT_POS + 1];
-            m_bitValuesCache[0] = 1;
-            for (uint bitPos = 1; bitPos <= MAX_BIT_POS; bitPos++)
+            _bitValuesCache = new ulong[MaxBitPos + 1];
+            _bitValuesCache[0] = 1;
+            for (uint bitPos = 1; bitPos <= MaxBitPos; bitPos++)
             {
-                m_bitValuesCache[bitPos] = m_bitValuesCache[bitPos - 1] * 2;
+                _bitValuesCache[bitPos] = _bitValuesCache[bitPos - 1] * 2;
             }
             return;
         }
@@ -34,12 +34,12 @@ namespace OKOSW.MathTools
         //Methods
         public static ulong SetBit(ulong number, uint bitPos)
         {
-            return number | m_bitValuesCache[bitPos];
+            return number | _bitValuesCache[bitPos];
         }
 
         public static bool IsBitSet(ulong number, uint bitPos)
         {
-            return ((number & m_bitValuesCache[bitPos]) > 0);
+            return ((number & _bitValuesCache[bitPos]) > 0);
         }
 
         public static ulong GetBitValue(ulong number, uint bitPos)
@@ -49,13 +49,13 @@ namespace OKOSW.MathTools
 
         public static int GetBitPos(ulong bitValue)
         {
-            for(int i = 0; i < m_bitValuesCache.Length; i++)
+            for(int i = 0; i < _bitValuesCache.Length; i++)
             {
-                if(m_bitValuesCache[i] == bitValue)
+                if(_bitValuesCache[i] == bitValue)
                 {
                     return i;
                 }
-                else if(m_bitValuesCache[i] > bitValue)
+                else if(_bitValuesCache[i] > bitValue)
                 {
                     break;
                 }
@@ -65,9 +65,9 @@ namespace OKOSW.MathTools
 
         public static int GetGEBitPos(ulong value)
         {
-            for (int i = 0; i < m_bitValuesCache.Length; i++)
+            for (int i = 0; i < _bitValuesCache.Length; i++)
             {
-                if (m_bitValuesCache[i] >= value)
+                if (_bitValuesCache[i] >= value)
                 {
                     return i;
                 }
@@ -77,7 +77,7 @@ namespace OKOSW.MathTools
 
         public static int GetHighestBitPos(ulong value)
         {
-            for (int i = m_bitValuesCache.Length; i >= 0; i--)
+            for (int i = _bitValuesCache.Length; i >= 0; i--)
             {
                 if (IsBitSet(value, (uint)i))
                 {
@@ -90,12 +90,12 @@ namespace OKOSW.MathTools
         public static ulong GetHighestBitValue(ulong value)
         {
             int i = GetHighestBitPos(value);
-            return (i > 0) ? m_bitValuesCache[i] : (ulong)0;
+            return (i > 0) ? _bitValuesCache[i] : (ulong)0;
         }
 
         public static int GetLowestBitPos(ulong value)
         {
-            for (int i = 0; i < m_bitValuesCache.Length; i++)
+            for (int i = 0; i < _bitValuesCache.Length; i++)
             {
                 if (IsBitSet(value, (uint)i))
                 {
@@ -108,7 +108,7 @@ namespace OKOSW.MathTools
         public static ulong GetLowestBitValue(ulong value)
         {
             int i = GetLowestBitPos(value);
-            return (i > 0) ? m_bitValuesCache[i] : (ulong)0;
+            return (i > 0) ? _bitValuesCache[i] : (ulong)0;
         }
 
     }//Bitwise

@@ -9,23 +9,23 @@ namespace OKOSW.MathTools
 {
     /// <summary>
     /// Implements thread safe normalizer and denormalizer. Scales input to desired normalized range and vice versa.
-    /// Normalizer supports data standardization (gausse)
+    /// Normalizer supports gausse data standardization
     /// </summary>
     [Serializable]
     public class Normalizer
     {
         //Constants
         //Default borders of normalization range
-        public const double DEFAULT_NR_MIN = -1;
-        public const double DEFAULT_NR_MAX = 1;
+        public const double DefaultNormRangeMin = -1;
+        public const double DefaultNormRangeMax = 1;
         //Default is to use gausse standardization during normalization
-        public const bool DEFAULT_STANDARDIZE = true;
+        public const bool DefaultStandardizeSwitch = true;
 
         //Attributes
-        private bool m_standardize;
-        private double m_reserveRatio;
-        private BasicStat m_samplesStat;
-        private Interval m_normRange;
+        private bool _standardize;
+        private double _reserveRatio;
+        private BasicStat _samplesStat;
+        private Interval _normRange;
 
         //Constructors
         /// <summary>
@@ -34,24 +34,24 @@ namespace OKOSW.MathTools
         /// <param name="source">Source normalizer</param>
         public Normalizer(Normalizer source)
         {
-            m_standardize = source.m_standardize;
-            m_reserveRatio = source.m_reserveRatio;
-            m_samplesStat = new BasicStat(source.m_samplesStat);
-            m_normRange = new Interval(source.m_normRange);
+            _standardize = source._standardize;
+            _reserveRatio = source._reserveRatio;
+            _samplesStat = new BasicStat(source._samplesStat);
+            _normRange = new Interval(source._normRange);
             return;
         }
 
         /// <summary>
         /// Constructs normalizer
         /// </summary>
-        /// <param name="reserveRatio">Reserved part of known samples range to avoid overflow by future unseen data.</param>
+        /// <param name="reserveRatio">Reserved part of known samples range to avoid normalization overflow by future unseen data.</param>
         /// <param name="standardize">If to apply gausse data standardization</param>
-        public Normalizer(double reserveRatio, bool standardize = DEFAULT_STANDARDIZE)
+        public Normalizer(double reserveRatio, bool standardize = DefaultStandardizeSwitch)
         {
-            m_standardize = standardize;
-            m_normRange = new Interval(DEFAULT_NR_MIN, DEFAULT_NR_MAX);
-            m_samplesStat = new BasicStat();
-            m_reserveRatio = reserveRatio;
+            _standardize = standardize;
+            _normRange = new Interval(DefaultNormRangeMin, DefaultNormRangeMax);
+            _samplesStat = new BasicStat();
+            _reserveRatio = reserveRatio;
             return;
         }
 
@@ -61,23 +61,23 @@ namespace OKOSW.MathTools
         /// <param name="normRange">Output range of normalized values</param>
         /// <param name="reserveRatio">Reserved part of known samples range to avoid overflow by future unseen data.</param>
         /// <param name="standardize">If to apply gausse data standardization</param>
-        public Normalizer(Interval normRange, double reserveRatio, bool standardize = DEFAULT_STANDARDIZE)
+        public Normalizer(Interval normRange, double reserveRatio, bool standardize = DefaultStandardizeSwitch)
         {
-            m_standardize = standardize;
-            m_normRange = new Interval(normRange);
-            m_samplesStat = new BasicStat();
-            m_reserveRatio = reserveRatio;
+            _standardize = standardize;
+            _normRange = new Interval(normRange);
+            _samplesStat = new BasicStat();
+            _reserveRatio = reserveRatio;
             return;
         }
 
         //Properties
-        public bool Initialized { get { return (m_samplesStat.SamplesCount > 0 && m_samplesStat.Min != m_samplesStat.Max); } }
-        public double ReserveRatio { get { return m_reserveRatio; } }
-        public bool Standardize { get { return m_standardize; } }
-        public Interval NormRange { get { return m_normRange; } }
-        public BasicStat SamplesStat { get { return m_samplesStat; } }
-        private double VMin { get { return m_samplesStat.Min - ((m_samplesStat.Span * m_reserveRatio) / 2); } }
-        private double VMax { get { return m_samplesStat.Max + ((m_samplesStat.Span * m_reserveRatio) / 2); } }
+        public bool Initialized { get { return (_samplesStat.SamplesCount > 0 && _samplesStat.Min != _samplesStat.Max); } }
+        public double ReserveRatio { get { return _reserveRatio; } }
+        public bool Standardize { get { return _standardize; } }
+        public Interval NormRange { get { return _normRange; } }
+        public BasicStat SamplesStat { get { return _samplesStat; } }
+        private double VMin { get { return _samplesStat.Min - ((_samplesStat.Span * _reserveRatio) / 2); } }
+        private double VMax { get { return _samplesStat.Max + ((_samplesStat.Span * _reserveRatio) / 2); } }
 
         //Methods
         /// <summary>
@@ -86,7 +86,7 @@ namespace OKOSW.MathTools
         /// <param name="sampleValue">Sample value</param>
         public void Adjust(double sampleValue)
         {
-            m_samplesStat.AddSampleValue(sampleValue);
+            _samplesStat.AddSampleValue(sampleValue);
             return;
         }
 
@@ -99,7 +99,7 @@ namespace OKOSW.MathTools
         /// <returns>Normalized v</returns>
         private double Normalize(double min, double max, double v)
         {
-            return m_normRange.Min + m_normRange.Span * ((v - min) / (max - min));
+            return _normRange.Min + _normRange.Span * ((v - min) / (max - min));
         }
 
         /// <summary>
@@ -111,7 +111,7 @@ namespace OKOSW.MathTools
         /// <returns>Natural value</returns>
         private double Naturalize(double min, double max, double n)
         {
-            return min + (max - min) * ((n - m_normRange.Min) / m_normRange.Span);
+            return min + (max - min) * ((n - _normRange.Min) / _normRange.Span);
         }
 
         /// <summary>
@@ -132,8 +132,8 @@ namespace OKOSW.MathTools
         /// <returns>Half of gausse interval</returns>
         private double ComputeGausseHalfInterval()
         {
-            double gausseLo = Math.Abs((VMin - m_samplesStat.ArithAvg) / m_samplesStat.StdDev);
-            double gausseHi = Math.Abs((VMax - m_samplesStat.ArithAvg) / m_samplesStat.StdDev);
+            double gausseLo = Math.Abs((VMin - _samplesStat.ArithAvg) / _samplesStat.StdDev);
+            double gausseHi = Math.Abs((VMax - _samplesStat.ArithAvg) / _samplesStat.StdDev);
             return Math.Max(gausseLo, gausseHi);
         }
 
@@ -147,11 +147,11 @@ namespace OKOSW.MathTools
             //Check readiness
             CheckInitiated();
             //Value preprocessing
-            if (m_standardize)
+            if (_standardize)
             {
                 //Gausse standardization
                 double gausseHalfInt = ComputeGausseHalfInterval();
-                double gausseValue = (naturalValue - m_samplesStat.ArithAvg) / m_samplesStat.StdDev;
+                double gausseValue = (naturalValue - _samplesStat.ArithAvg) / _samplesStat.StdDev;
                 //Normalization
                 return Normalize(-gausseHalfInt, gausseHalfInt, gausseValue);
             }
@@ -172,13 +172,13 @@ namespace OKOSW.MathTools
             //Check readiness
             CheckInitiated();
             //Value preprocessing
-            if (m_standardize)
+            if (_standardize)
             {
                 //Denormalization
                 double gausseHalfInt = ComputeGausseHalfInterval();
                 double standardizedGausse = Naturalize(-gausseHalfInt, gausseHalfInt, normValue);
                 //Destandardization -> natural value
-                return (standardizedGausse * m_samplesStat.StdDev) + m_samplesStat.ArithAvg;
+                return (standardizedGausse * _samplesStat.StdDev) + _samplesStat.ArithAvg;
             }
             else
             {
@@ -195,7 +195,7 @@ namespace OKOSW.MathTools
         public double ComputeNaturalError(double normError)
         {
             CheckInitiated();
-            return ((VMax - VMin) * Math.Abs(normError)) * (1 - m_reserveRatio);
+            return ((VMax - VMin) * Math.Abs(normError)) * (1 - _reserveRatio);
         }
 
     }//Normalizer

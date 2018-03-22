@@ -13,8 +13,8 @@ namespace ESNDemoConsoleApp
         static void Main(string[] args)
         {
             string demoSettingsFile = @"ESNDemoSettings.xml";
-            IOutputLog logger = new ConsoleLog();
-            ESNDemo.RunDemo(logger, demoSettingsFile);
+            IOutputLog demoOutputLog = new ConsoleLog();
+            ESNDemo.RunDemo(demoOutputLog, demoSettingsFile);
             Console.ReadLine();
             return;
         }

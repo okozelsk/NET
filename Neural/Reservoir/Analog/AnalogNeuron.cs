@@ -16,38 +16,38 @@ namespace OKOSW.Neural.Reservoir.Analog
     public class AnalogNeuron
     {
         //Constants
-        public const double MAX_RETAINMENT_RATE = 0.99;
+        public const double RetirementMaxRate = 0.99;
         //Attributes
-        protected IActivationFunction m_aFn;
-        protected double m_retainmentRate;
-        protected double m_previousState;
-        protected double m_currentState;
+        protected IActivationFunction _activation;
+        protected double _retainmentRate;
+        protected double _previousState;
+        protected double _currentState;
         //Service statistics
         public BasicStat StatesStat { get; }
 
         /// <summary>
         /// Construct simple analog neuron for analog reservoir. If retainmentRate is greater than 0, neuron is the leaky integrator.
         /// </summary>
-        public AnalogNeuron(IActivationFunction aFn, double retainmentRate = 0)
+        public AnalogNeuron(IActivationFunction activation, double retainmentRate = 0)
         {
-            m_aFn = aFn;
-            m_retainmentRate = retainmentRate.Bound(0, MAX_RETAINMENT_RATE);
-            m_previousState = m_currentState = 0;
+            _activation = activation;
+            _retainmentRate = retainmentRate.Bound(0, RetirementMaxRate);
+            _previousState = _currentState = 0;
             StatesStat = new BasicStat();
             return;
         }
 
         //Properties
-        public double RetainmentRate { get { return m_retainmentRate; } }
-        public double CurrentState { get { return m_currentState; } }
-        public double PreviousState { get { return m_previousState; } }
+        public double RetainmentRate { get { return _retainmentRate; } }
+        public double CurrentState { get { return _currentState; } }
+        public double PreviousState { get { return _previousState; } }
 
         /// <summary>
         /// Resets neuron current and stored states to its initial default values (0).
         /// </summary>
         public virtual void Reset()
         {
-            m_previousState = m_currentState = 0;
+            _previousState = _currentState = 0;
             return;
         }
 
@@ -56,8 +56,8 @@ namespace OKOSW.Neural.Reservoir.Analog
         /// </summary>
         public void NewState(double signal, bool collectStatistics)
         {
-            m_currentState = (m_retainmentRate * m_currentState) + (1d - m_retainmentRate) * m_aFn.Compute(signal);
-            if(collectStatistics)StatesStat.AddSampleValue(m_currentState);
+            _currentState = (_retainmentRate * _currentState) + (1d - _retainmentRate) * _activation.Compute(signal);
+            if(collectStatistics)StatesStat.AddSampleValue(_currentState);
             return;
         }
 
@@ -66,7 +66,7 @@ namespace OKOSW.Neural.Reservoir.Analog
         /// </summary>
         public void StoreCurrentState()
         {
-            m_previousState = m_currentState;
+            _previousState = _currentState;
             return;
         }
     }

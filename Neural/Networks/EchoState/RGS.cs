@@ -10,7 +10,7 @@ using OKOSW.Neural.Networks.FF.Basic;
 
 namespace OKOSW.Neural.Networks.EchoState
 {
-    public delegate RegressionCallBackOutArgs RegressionControllerFn(RegressionCallBackInArgs inArgs);
+    public delegate RegressionControlOutArgs RGSCallbackDelegate(RegressionControlInArgs inArgs);
 
     /// <summary>
     /// Contains BasicNetwork and key statistics
@@ -27,7 +27,7 @@ namespace OKOSW.Neural.Networks.EchoState
         public int BestUpdatesCount { get; set; } = 0;
 
         //Method
-        public void AdoptSource(RegressionData source)
+        public void CopyFrom(RegressionData source)
         {
             FFNet = (BasicNetwork)source.FFNet.Clone();
             TrainingErrorStat = source.TrainingErrorStat;
@@ -38,7 +38,7 @@ namespace OKOSW.Neural.Networks.EchoState
     }//RegressionData
 
     [Serializable]
-    public class RegressionCallBackInArgs
+    public class RegressionControlInArgs
     {
         public List<ESN.ReservoirStat> ReservoirsStatistics { get; set; } = null;
         public int RegrValID { get; set; } = 0;
@@ -54,9 +54,9 @@ namespace OKOSW.Neural.Networks.EchoState
     }
 
     [Serializable]
-    public class RegressionCallBackOutArgs
+    public class RegressionControlOutArgs
     {
-        public bool StopCurrentTrainingCycle { get; set; } = false;
+        public bool StopCurrentAttempt { get; set; } = false;
         public bool StopRegression { get; set; } = false;
         public bool Best { get; set; } = false;
     }
@@ -77,13 +77,13 @@ namespace OKOSW.Neural.Networks.EchoState
                                                       List<double[]> testingPredictors,
                                                       List<double[]> testingOutputs,
                                                       List<ESNSettings.ReadOutHiddenLayerCfg> readOutHiddenLayers,
-                                                      ActivationFactory.EnumActivationType outputNeuronActivation,
+                                                      ActivationFactory.ActivationType outputNeuronActivation,
                                                       string regrMethod,
                                                       int maxRegrAttempts,
                                                       int maxEpochs,
                                                       double minError,
                                                       Random rand = null,
-                                                      RegressionControllerFn Controller = null,
+                                                      RGSCallbackDelegate Controller = null,
                                                       Object controllerData = null
                                                       )
         {
@@ -134,15 +134,15 @@ namespace OKOSW.Neural.Networks.EchoState
                     if (bestRegrData.CombinedError == -1)
                     {
                         //Adopt current regression results
-                        bestRegrData.AdoptSource(currRegrData);
+                        bestRegrData.CopyFrom(currRegrData);
                         ++bestRegrData.BestUpdatesCount;
                     }
                     //Perform call back if it is defined
-                    RegressionCallBackOutArgs cbOut = null;
+                    RegressionControlOutArgs cbOut = null;
                     if (Controller != null)
                     {
                         //Improvement evaluation is driven externaly
-                        RegressionCallBackInArgs cbIn = new RegressionCallBackInArgs();
+                        RegressionControlInArgs cbIn = new RegressionControlInArgs();
                         cbIn.ReservoirsStatistics = reservoirsStatistics;
                         cbIn.RegrValID = regrValID;
                         cbIn.RegrAttemptNumber = regrAttemptNumber;
@@ -156,7 +156,7 @@ namespace OKOSW.Neural.Networks.EchoState
                         cbIn.ControllerData = controllerData;
                         cbOut = Controller(cbIn);
                         best = cbOut.Best;
-                        stopTrainingCycle = cbOut.StopCurrentTrainingCycle;
+                        stopTrainingCycle = cbOut.StopCurrentAttempt;
                         stopRegression = cbOut.StopRegression;
                     }
                     else
@@ -171,7 +171,7 @@ namespace OKOSW.Neural.Networks.EchoState
                     if (best)
                     {
                         //Adopt current regression results
-                        bestRegrData.AdoptSource(currRegrData);
+                        bestRegrData.CopyFrom(currRegrData);
                         ++bestRegrData.BestUpdatesCount;
                     }
                     //Training stop conditions
