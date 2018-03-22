@@ -101,6 +101,11 @@ namespace OKOSW.Neural.Reservoir.Analog
                     _context2NeuronsWeights[neuronsShuffledIndices[i]] = RandomWeight(_rand, settings.ContextNeuronOutWeightScale);
                 }
             }
+            else
+            {
+                //Neuron must be instantiated due to its statistics
+                _contextNeuron = new AnalogNeuron(ActivationFactory.CreateAF(settings.ReservoirNeuronActivation), 0);
+            }
             //--------------------------------------------------------
             //Feedback feature and weights
             int neuronsPerOutput = (int)Math.Round(settings.FeedbackConnectionDensity * (double)_neurons.Length, 0);
