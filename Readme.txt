@@ -13,19 +13,19 @@ Currently implemented components:
 		Feed Forward Network
 	LinRegrTrainer
 		Linear Regression trainer
-	RPROPTrainer
+	RPopPTrainer
 		Resilient Propagation trainer iRPROP+
-	ESN
+	Esn
 		Echo State Network
 		supporting multiple internal reservoirs
 		supporting Feedback
 
-The functionality of all components is demonstrated in a simple demo application (/Demo/ESNDemoConsoleApp)
-	Application has no startup parameters. All the settins are in ESNDemoSettings.xml file. File has to be in the same folder as the executable.
-	The input data for each prediction session (demo case) is the csv file.
-	You can simply modify ESNDemoSettings.xml to configure your own prediction session (Input data, ESN and Regression settings).
-		
-
+The functionality is demonstrated in a simple demo application (/Demo/EsnDemoConsoleApp).
+Application has no startup parameters, all necessary settins are specified in EsnDemoSettings.xml file.
+EsnDemoSettings.xml has to be in the same folder as the executable EsnDemoConsoleApp.exe.
+Application performs training-->prediction operations sequence for each demo case defined in EsnDemoSettings.xml.
+Necessary input time series data has to be stored in csv format.
+You can simply modify EsnDemoSettings.xml to configure your own training-->prediction sessions.
 
 
 
