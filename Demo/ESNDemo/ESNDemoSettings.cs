@@ -7,14 +7,14 @@ using System.IO;
 using System.Xml.Linq;
 using System.Globalization;
 using OKOSW.Extensions;
-using OKOSW.XMLTools;
+using OKOSW.XmlTools;
 using OKOSW.Neural;
 using OKOSW.Neural.Networks.EchoState;
 using System.Reflection;
 
 namespace OKOSW.Demo
 {
-    public class ESNDemoSettings
+    public class EsnDemoSettings
     {
         //Constants
         //Attributes
@@ -22,15 +22,15 @@ namespace OKOSW.Demo
         public List<DemoCaseParams> DemoCases { get; }
 
         //Constructor
-        public ESNDemoSettings(string xmlFile)
+        public EsnDemoSettings(string xmlFile)
         {
             XmlValidator validator = new XmlValidator();
             Assembly esnDemoAssembly = Assembly.GetExecutingAssembly();
             Assembly neuralAssembly = Assembly.Load("Neural");
-            validator.AddSchema(esnDemoAssembly.GetManifestResourceStream("OKOSW.Demo.ESNDemoSettings.xsd"));
-            validator.AddSchema(neuralAssembly.GetManifestResourceStream("OKOSW.Neural.OKOSWNeuralSettingsTypes.xsd"));
+            validator.AddSchema(esnDemoAssembly.GetManifestResourceStream("OKOSW.Demo.EsnDemoSettings.xsd"));
+            validator.AddSchema(neuralAssembly.GetManifestResourceStream("OKOSW.Neural.NeuralSettingsTypes.xsd"));
             XDocument xmlDoc = validator.LoadXDocFromFile(xmlFile);
-            XElement root = xmlDoc.Descendants("ESNDemoSettings").First();
+            XElement root = xmlDoc.Descendants("EsnDemoSettings").First();
             DataDir = root.Attribute("DataDir").Value;
             DemoCases = new List<DemoCaseParams>();
             foreach (XElement demoCaseParamsElem in root.Descendants("DemoCase"))
@@ -58,7 +58,7 @@ namespace OKOSW.Demo
             public string TestSamplesSelection { get; }
             public bool SingleNormalizer { get; }
             public double NormalizerReserveRatio { get; }
-            public ESNSettings ESNCfg { get; }
+            public EsnSettings ESNCfg { get; }
 
             //Constructor
             public DemoCaseParams(XElement demoCaseElem, string dir)
@@ -78,7 +78,7 @@ namespace OKOSW.Demo
                 {
                     OutputFieldsNames.Add(outputFieldElem.Attribute("Name").Value);
                 }
-                ESNCfg = new ESNSettings(demoCaseElem.Descendants("ESN").First());
+                ESNCfg = new EsnSettings(demoCaseElem.Descendants("Esn").First());
                 return;
             }
         }//DemoCaseParams

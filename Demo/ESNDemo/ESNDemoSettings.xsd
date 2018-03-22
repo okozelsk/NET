@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xs:schema attributeFormDefault="unqualified"
            elementFormDefault="unqualified"
-           xmlns:nst="OKOSW-Neural-Settings-Types"
+           xmlns:nst="Neural-Settings-Types"
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
            >
-  <xs:import namespace="OKOSW-Neural-Settings-Types" />
+  <xs:import namespace="Neural-Settings-Types" />
 
   <!-- SIMPLE TYPES -->
   <!-- Enumeration of test samples selection methods supported in ESN demo -->
@@ -39,14 +39,14 @@
   <xs:complexType name="CaseStruct">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="SampleData" name="Samples" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="nst:ESNStruct" name="ESN" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="nst:EsnStruct" name="Esn" minOccurs="1" maxOccurs="1"/>
       <xs:element type="Ouput" name="Output" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:string" name="Name" use="required"/>
   </xs:complexType>
 
   <!-- ESN demo settings XML document -->
-  <xs:element name="ESNDemoSettings">
+  <xs:element name="EsnDemoSettings">
     <xs:complexType>
       <xs:sequence minOccurs="1" maxOccurs="unbounded">
         <xs:element type="CaseStruct" name="DemoCase"/>

@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<xs:schema targetNamespace="OKOSW-Neural-Settings-Types"
+<xs:schema targetNamespace="Neural-Settings-Types"
            attributeFormDefault="unqualified"
            elementFormDefault="unqualified"
-           xmlns="OKOSW-Neural-Settings-Types"
+           xmlns="Neural-Settings-Types"
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
            >
 
@@ -160,8 +160,8 @@
   </xs:complexType>
 
   <!-- ________________________________________ESN TYPES_________________________________________________ -->
-  <!-- ESN Input -->
-  <xs:complexType name="ESNInput">
+  <!-- Esn Input -->
+  <xs:complexType name="EsnInput">
     <xs:sequence minOccurs="1" maxOccurs="unbounded">
       <xs:element type="Name" name="Field"/>
     </xs:sequence>
@@ -169,19 +169,19 @@
   </xs:complexType>
 
   <!-- ESN Regression -->
-  <xs:complexType name="ESNRegression">
+  <xs:complexType name="EsnRegression">
     <xs:attribute type="EnumRegressionMethod" name="RegressionMethod" use="required"/>
     <xs:attribute type="UIntGT0" name="MaxAttempts" use="required"/>
     <xs:attribute type="UIntGT0" name="MaxEpochs" use="required"/>
     <xs:attribute type="UDouble" name="StopMSE" use="required"/>
   </xs:complexType>
 
-  <xs:complexType name="ESNStruct">
+  <xs:complexType name="EsnStruct">
     <xs:sequence>
-      <xs:element type="ESNInput" name="Input" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="EsnInput" name="Input" minOccurs="1" maxOccurs="1"/>
       <xs:element type="AnaResStruct" name="Reservoir" minOccurs="1" maxOccurs="unbounded"/>
       <xs:element type="BFFNet" name="Readout" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="ESNRegression" name="Regression" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="EsnRegression" name="Regression" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:int" name="RandomizerSeek" use="required" />
   </xs:complexType>

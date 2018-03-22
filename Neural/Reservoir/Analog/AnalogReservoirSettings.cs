@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Reflection;
 using System.Globalization;
 using System.Xml.Linq;
-using OKOSW.XMLTools;
+using OKOSW.XmlTools;
 using OKOSW.Neural.Activation;
 
 namespace OKOSW.Neural.Reservoir.Analog
@@ -124,7 +124,7 @@ namespace OKOSW.Neural.Reservoir.Analog
             XmlValidator validator = new XmlValidator();
             Assembly neuralAssembly = Assembly.Load("Neural");
             validator.AddSchema(neuralAssembly.GetManifestResourceStream("OKOSW.Neural.Reservoir.Analog.AnalogReservoirSettings.xsd"));
-            validator.AddSchema(neuralAssembly.GetManifestResourceStream("OKOSW.Neural.OKOSWNeuralSettingsTypes.xsd"));
+            validator.AddSchema(neuralAssembly.GetManifestResourceStream("OKOSW.Neural.NeuralSettingsTypes.xsd"));
             validator.LoadXDocFromString(resElem.ToString());
             //Parsing
             CfgName = resElem.Attribute("Name").Value;

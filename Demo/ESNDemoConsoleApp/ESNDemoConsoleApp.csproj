@@ -7,8 +7,8 @@
     <ProjectGuid>{D18DB05D-F4C4-4388-846A-52BA4B3722D1}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ESNDemoConsoleApp</RootNamespace>
-    <AssemblyName>ESNDemoConsoleApp</AssemblyName>
+    <RootNamespace>OKOSW.EsnDemoConsoleApp</RootNamespace>
+    <AssemblyName>EsnDemoConsoleApp</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <PublishUrl>publish\</PublishUrl>
@@ -36,6 +36,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>true</UseVSHostingProcess>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -75,9 +76,9 @@
       <Project>{d52159ce-be0e-4977-bcfa-23194cf6d6ed}</Project>
       <Name>DemoSupport</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ESNDemo\ESNDemo.csproj">
+    <ProjectReference Include="..\ESNDemo\EsnDemo.csproj">
       <Project>{4d350554-7031-41d8-af4b-0a642c048109}</Project>
-      <Name>ESNDemo</Name>
+      <Name>EsnDemo</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -99,7 +100,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="ESNDemoSettings.xml">
+    <Content Include="EsnDemoSettings.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <SubType>Designer</SubType>
     </Content>

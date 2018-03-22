@@ -9,13 +9,13 @@ using System.Reflection;
 using OKOSW.Extensions;
 using OKOSW.Neural.Activation;
 using OKOSW.Neural.Reservoir.Analog;
-using OKOSW.XMLTools;
+using OKOSW.XmlTools;
 
 namespace OKOSW.Neural.Networks.EchoState
 {
     /// <summary>Echo State Network general settings</summary>
     [Serializable]
-    public class ESNSettings
+    public class EsnSettings
     {
         //Properties
         /// <summary>
@@ -44,7 +44,7 @@ namespace OKOSW.Neural.Networks.EchoState
 
         //Constructors
         /// <summary>Creates ESN setup parameters initialized by default values</summary>
-        public ESNSettings()
+        public EsnSettings()
         {
             //Default settings
             RandomizerSeek = 0; //Default is setting for debug
@@ -61,7 +61,7 @@ namespace OKOSW.Neural.Networks.EchoState
         }
 
         /// <summary>Creates ESN setup parameters initialized as a values copy of specified source ESN settings</summary>
-        public ESNSettings(ESNSettings source)
+        public EsnSettings(EsnSettings source)
         {
             //Copy
             RandomizerSeek = source.RandomizerSeek;
@@ -86,14 +86,14 @@ namespace OKOSW.Neural.Networks.EchoState
         }
 
         /// <summary>Creates ESN setup parameters initialized from XML</summary>
-        public ESNSettings(XElement esnElem)
+        public EsnSettings(XElement esnElem)
         {
             //Validation
             //A very ugly validation
             XmlValidator validator = new XmlValidator();
             Assembly neuralAssembly = Assembly.Load("Neural");
-            validator.AddSchema(neuralAssembly.GetManifestResourceStream("OKOSW.Neural.Networks.EchoState.ESNSettings.xsd"));
-            validator.AddSchema(neuralAssembly.GetManifestResourceStream("OKOSW.Neural.OKOSWNeuralSettingsTypes.xsd"));
+            validator.AddSchema(neuralAssembly.GetManifestResourceStream("OKOSW.Neural.Networks.EchoState.EsnSettings.xsd"));
+            validator.AddSchema(neuralAssembly.GetManifestResourceStream("OKOSW.Neural.NeuralSettingsTypes.xsd"));
             validator.LoadXDocFromString(esnElem.ToString());
             //Parsing
             RandomizerSeek = int.Parse(esnElem.Attribute("RandomizerSeek").Value);
@@ -171,8 +171,8 @@ namespace OKOSW.Neural.Networks.EchoState
         //Methods
         public override bool Equals(object obj)
         {
-            if (obj.GetType() != typeof(ESNSettings)) return false;
-            ESNSettings cmpSettings = (ESNSettings)obj;
+            if (obj.GetType() != typeof(EsnSettings)) return false;
+            EsnSettings cmpSettings = (EsnSettings)obj;
             if (RandomizerSeek != cmpSettings.RandomizerSeek ||
                !InputFieldsNames.ToArray().EqualValues(cmpSettings.InputFieldsNames.ToArray()) ||
                InputsToResCfgsMapping.Count != cmpSettings.InputsToResCfgsMapping.Count ||
@@ -212,9 +212,9 @@ namespace OKOSW.Neural.Networks.EchoState
         /// <summary>
         /// Creates the shallow copy of this instance
         /// </summary>
-        public ESNSettings Clone()
+        public EsnSettings Clone()
         {
-            ESNSettings clone = new ESNSettings(this);
+            EsnSettings clone = new EsnSettings(this);
             return clone;
         }
 

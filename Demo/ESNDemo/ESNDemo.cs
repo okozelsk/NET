@@ -8,7 +8,7 @@ using System.Globalization;
 using System.Xml;
 using OKOSW.MathTools;
 using OKOSW.Extensions;
-using OKOSW.CSVTools;
+using OKOSW.CsvTools;
 using OKOSW.Neural.Networks.EchoState;
 using OKOSW.Demo;
 using OKOSW.Demo.Log;
@@ -19,7 +19,7 @@ namespace OKOSW.Demo
     /// <summary>
     /// Demonstrates ESN usage
     /// </summary>
-    public static class ESNDemo
+    public static class EsnDemo
     {
         /// <summary>
         /// Loads data, prepares output normalizer(s) and creates ESN required DataBundle object containing
@@ -29,10 +29,10 @@ namespace OKOSW.Demo
         /// <param name="predictionInputVector">OUT prepared input vector to be used for ESN further prediction (after training)</param>
         /// <param name="outputNormalizers">OUT prepared normalizer(s) for ESN outputs denormalization</param>
         /// <returns></returns>
-        public static ESN.DataBundle ESNDataBundleFromFile(ESNDemoSettings.DemoCaseParams demoCaseParams, out double[] predictionInputVector, out List<Normalizer> outputNormalizers)
+        public static Esn.DataBundle ESNDataBundleFromFile(EsnDemoSettings.DemoCaseParams demoCaseParams, out double[] predictionInputVector, out List<Normalizer> outputNormalizers)
         {
             Interval normalizationInterval = new Interval(-1, 1);
-            ESN.DataBundle data = new ESN.DataBundle(2000);
+            Esn.DataBundle data = new Esn.DataBundle(2000);
             StreamReader stream = new StreamReader(new FileStream(demoCaseParams.CSVDataFileName, FileMode.Open));
             string exCommonText = "Can't parse data from file " + demoCaseParams.CSVDataFileName;
             //All data fields names
@@ -182,16 +182,16 @@ namespace OKOSW.Demo
         /// <param name="log">Into this interface demo writes output to be displayed</param>
         /// <param name="demoCaseParams">Demo case settings to be executed</param>
         /// <returns></returns>
-        public static double[] PerformDemoCase(IOutputLog log, ESNDemoSettings.DemoCaseParams demoCaseParams)
+        public static double[] PerformDemoCase(IOutputLog log, EsnDemoSettings.DemoCaseParams demoCaseParams)
         {
             log.Write("  Performing demo case " + demoCaseParams.Name, false);
             //Load of data bundle for ESN training
             double[] predictionInputVector;
             List<Normalizer> outputNormalizers;
-            ESN.DataBundle data = ESNDataBundleFromFile(demoCaseParams, out predictionInputVector, out outputNormalizers);
+            Esn.DataBundle data = ESNDataBundleFromFile(demoCaseParams, out predictionInputVector, out outputNormalizers);
             //ESN training
-            ESN esn = new ESN(demoCaseParams.ESNCfg, demoCaseParams.OutputFieldsNames.Count);
-            ESN.ESNTestSamplesSelectorCallbackDelegate samplesSelector = esn.SelectRandomTestSamples;
+            Esn esn = new Esn(demoCaseParams.ESNCfg, demoCaseParams.OutputFieldsNames.Count);
+            Esn.EsnTestSamplesSelectorCallbackDelegate samplesSelector = esn.SelectRandomTestSamples;
             if (demoCaseParams.TestSamplesSelection == "SEQUENCE") samplesSelector = esn.SelectSequenceTestSamples;
             RegressionData[] regrOuts = esn.Train(data,
                                                   demoCaseParams.BootSeqMinLength,
@@ -235,9 +235,9 @@ namespace OKOSW.Demo
         public static void RunDemo(IOutputLog log, string demoSettingsFile)
         {
             log.Write("ESN demo started", false);
-            ESNDemoSettings demoSettings = new ESNDemoSettings(demoSettingsFile);
+            EsnDemoSettings demoSettings = new EsnDemoSettings(demoSettingsFile);
             //TimeSeriesGenerator.GenerateStandardCSVFiles(demoSettings.DataDir);
-            foreach(ESNDemoSettings.DemoCaseParams demoCaseParams in demoSettings.DemoCases)
+            foreach(EsnDemoSettings.DemoCaseParams demoCaseParams in demoSettings.DemoCases)
             {
                 double[] predictions = PerformDemoCase(log, demoCaseParams);
             }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace OKOSW.CSVTools
+namespace OKOSW.CsvTools
 {
     /// <summary>
     /// Helper class for CSV parsing/generating operations.

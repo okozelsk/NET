@@ -46,9 +46,9 @@
     <Compile Include="TimeSeriesGenerator.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\CSVTools\CSVTools.csproj">
+    <ProjectReference Include="..\..\CSVTools\CsvTools.csproj">
       <Project>{2bb5f156-8785-4483-a05a-6960b5817f56}</Project>
-      <Name>CSVTools</Name>
+      <Name>CsvTools</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Extensions\Extensions.csproj">
       <Project>{3be0d8a7-5908-4d16-8822-029de64db619}</Project>

@@ -12,7 +12,7 @@ namespace OKOSW.Neural.Networks.EchoState
     /// Implements Echo State Network
     /// </summary>
     [Serializable]
-    public class ESN
+    public class Esn
     {
         //Delegates
         /// <summary>
@@ -22,10 +22,10 @@ namespace OKOSW.Neural.Networks.EchoState
         /// <param name="all_outputs">All sample desired outputs</param>
         /// <param name="outputIdx">Index of ESN output value for which will be network trained.</param>
         /// <param name="testSamplesIdxs">Array to be filled with selected test samples indexes (function output).</param>
-        public delegate void ESNTestSamplesSelectorCallbackDelegate(List<double[]> all_predictors, List<double[]> all_outputs, int outputIdx, int[] testSamplesIdxs);
+        public delegate void EsnTestSamplesSelectorCallbackDelegate(List<double[]> all_predictors, List<double[]> all_outputs, int outputIdx, int[] testSamplesIdxs);
         //Constants
         //Attributes
-        private ESNSettings _settings;
+        private EsnSettings _settings;
         private Random _rand;
         private ReservoirInstanceData[] _reservoirInstances;
         private List<ReservoirStat> _reservoirsStatistics;
@@ -38,7 +38,7 @@ namespace OKOSW.Neural.Networks.EchoState
         /// </summary>
         /// <param name="settings">Echo State Network settings</param>
         /// <param name="outputValuesCount">For how many different values will ESN predict.</param>
-        public ESN(ESNSettings settings, int outputValuesCount)
+        public Esn(EsnSettings settings, int outputValuesCount)
         {
             _settings = settings;
             //Random object
@@ -72,7 +72,7 @@ namespace OKOSW.Neural.Networks.EchoState
         }
 
         //Properties
-        public ESNSettings Settings { get { return _settings; } }
+        public EsnSettings Settings { get { return _settings; } }
         public List<ReservoirStat> ReservoirsStatistics { get { return _reservoirsStatistics; } }
         public RegressionData[] Regression { get { return _regression; } }
 
@@ -208,7 +208,7 @@ namespace OKOSW.Neural.Networks.EchoState
         public RegressionData[] Train(DataBundle dataSet,
                                  int bootSamplesCount,
                                  int testSamplesCount,
-                                 ESNTestSamplesSelectorCallbackDelegate testSamplesSelector,
+                                 EsnTestSamplesSelectorCallbackDelegate testSamplesSelector,
                                  RGSCallbackDelegate RegressionController = null,
                                  Object regressionControllerData = null
                                  )
@@ -282,7 +282,7 @@ namespace OKOSW.Neural.Networks.EchoState
                     }
                 }
                 //Regression
-                results[outputIdx] = RGS.BuildOutputFFNet(outputIdx,
+                results[outputIdx] = EchoState.Regression.BuildOutputFFNet(outputIdx,
                                                           _reservoirsStatistics,
                                                           trainingPredictors,
                                                           trainingOutputs,

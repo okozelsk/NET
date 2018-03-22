@@ -47,9 +47,9 @@
     <Compile Include="Activation\IdentityAF.cs" />
     <Compile Include="Activation\SinusoidAF.cs" />
     <Compile Include="Activation\TanhAF.cs" />
-    <Compile Include="Networks\EchoState\ESN.cs" />
-    <Compile Include="Networks\EchoState\ESNSettings.cs" />
-    <Compile Include="Networks\EchoState\RGS.cs" />
+    <Compile Include="Networks\EchoState\Esn.cs" />
+    <Compile Include="Networks\EchoState\EsnSettings.cs" />
+    <Compile Include="Networks\EchoState\Regression.cs" />
     <Compile Include="Networks\FF\Basic\BasicNetwork.cs" />
     <Compile Include="Networks\FF\Basic\IBasicTrainer.cs" />
     <Compile Include="Networks\FF\Basic\LinRegrTrainer.cs" />
@@ -66,9 +66,9 @@
     <Compile Include="Reservoir\Analog\AnalogReservoir.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CSVTools\CSVTools.csproj">
+    <ProjectReference Include="..\CSVTools\CsvTools.csproj">
       <Project>{2bb5f156-8785-4483-a05a-6960b5817f56}</Project>
-      <Name>CSVTools</Name>
+      <Name>CsvTools</Name>
     </ProjectReference>
     <ProjectReference Include="..\Extensions\Extensions.csproj">
       <Project>{3be0d8a7-5908-4d16-8822-029de64db619}</Project>
@@ -82,13 +82,13 @@
       <Project>{d713b3dc-5c17-4b8c-86fb-4ef22525d0d5}</Project>
       <Name>Queue</Name>
     </ProjectReference>
-    <ProjectReference Include="..\XMLTools\XMLTools.csproj">
+    <ProjectReference Include="..\XMLTools\XmlTools.csproj">
       <Project>{faba419d-e4ea-460a-9114-5768c491039b}</Project>
-      <Name>XMLTools</Name>
+      <Name>XmlTools</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="OKOSWNeuralSettingsTypes.xsd">
+    <EmbeddedResource Include="NeuralSettingsTypes.xsd">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>
@@ -102,7 +102,7 @@
     <EmbeddedResource Include="Reservoir\Analog\AnalogReservoirSettings.xsd" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Networks\EchoState\ESNSettings.xsd" />
+    <EmbeddedResource Include="Networks\EchoState\EsnSettings.xsd" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

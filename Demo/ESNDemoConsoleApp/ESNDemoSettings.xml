@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Specify your data location in DataDir attribute -->
-<ESNDemoSettings DataDir=".\\Data">
+<EsnDemoSettings DataDir=".\\Data">
   <DemoCase Name="TTOO High and Low prices prediction (single reservoir for all input fields, single readout neuron and RESILIENT trainer)">
     <Samples CSVDataFileName="TTOO.csv" BootSeqMinLength="300" TrainingSeqMaxLength="1000" TestingSeqLength="10" TestSamplesSelection="RANDOM" SingleNormalizer="true" NormalizerReserveRatio="0.1"/>
-    <ESN RandomizerSeek="0">
+    <Esn RandomizerSeek="0">
       <Input RouteToReadout="true">
         <Field Name="High"/>
         <Field Name="Low"/>
@@ -25,7 +25,7 @@
       <Readout Activation="IDENTITY">
       </Readout>
       <Regression RegressionMethod="RESILIENT" MaxAttempts="5" MaxEpochs="10000" StopMSE="1E-20"/>
-    </ESN>
+    </Esn>
     <Output>
       <Field Name="High"/>
       <Field Name="Low"/>
@@ -33,7 +33,7 @@
   </DemoCase>
   <DemoCase Name="SPXL High and Low prices prediction (single reservoir for all input fields, single readout neuron and RESILIENT trainer)">
     <Samples CSVDataFileName="SPXL.csv" BootSeqMinLength="1000" TrainingSeqMaxLength="2000" TestingSeqLength="10" TestSamplesSelection="RANDOM" SingleNormalizer="true" NormalizerReserveRatio="0.1"/>
-    <ESN RandomizerSeek="0">
+    <Esn RandomizerSeek="0">
       <Input RouteToReadout="true">
         <Field Name="High"/>
         <Field Name="Low"/>
@@ -55,7 +55,7 @@
       <Readout Activation="IDENTITY">
       </Readout>
       <Regression RegressionMethod="RESILIENT" MaxAttempts="5" MaxEpochs="10000" StopMSE="1E-20"/>
-    </ESN>
+    </Esn>
     <Output>
       <Field Name="High"/>
       <Field Name="Low"/>
@@ -63,7 +63,7 @@
   </DemoCase>
   <DemoCase Name="SPXL High and Low prices prediction (separated reservoir per each input field, single readout neuron and RESILIENT trainer)">
     <Samples CSVDataFileName="SPXL.csv" BootSeqMinLength="200" TrainingSeqMaxLength="1000" TestingSeqLength="10" TestSamplesSelection="RANDOM" SingleNormalizer="false" NormalizerReserveRatio="0.1"/>
-    <ESN RandomizerSeek="0">
+    <Esn RandomizerSeek="0">
       <Input RouteToReadout="true">
         <Field Name="High"/>
         <Field Name="Low"/>
@@ -85,7 +85,7 @@
       <Readout Activation="IDENTITY">
       </Readout>
       <Regression RegressionMethod="RESILIENT" MaxAttempts="5" MaxEpochs="3000" StopMSE="1E-20"/>
-    </ESN>
+    </Esn>
     <Output>
       <Field Name="High"/>
       <Field Name="Low"/>
@@ -93,7 +93,7 @@
   </DemoCase>
   <DemoCase Name="MackeyGlass series prediction (Linear regression readout)">
     <Samples CSVDataFileName="MackeyGlass.csv" BootSeqMinLength="2000" TrainingSeqMaxLength="2000" TestingSeqLength="500" TestSamplesSelection="SEQUENCE" SingleNormalizer="false" NormalizerReserveRatio="0.1"/>
-    <ESN RandomizerSeek="0">
+    <Esn RandomizerSeek="0">
       <Input RouteToReadout="false">
         <Field Name="Value"/>
       </Input>
@@ -111,14 +111,14 @@
       <Readout Activation="IDENTITY">
       </Readout>
       <Regression RegressionMethod="LINEAR" MaxAttempts="1" MaxEpochs="10" StopMSE="1E-20"/>
-    </ESN>
+    </Esn>
     <Output>
       <Field Name="Value"/>
     </Output>
   </DemoCase>
   <DemoCase Name="Sinusoid series prediction (Linear regression readout)">
     <Samples CSVDataFileName="Sinusoid.csv" BootSeqMinLength="700" TrainingSeqMaxLength="1000" TestingSeqLength="10" TestSamplesSelection="SEQUENCE" SingleNormalizer="false" NormalizerReserveRatio="0.1"/>
-    <ESN RandomizerSeek="0">
+    <Esn RandomizerSeek="0">
       <Input RouteToReadout="false">
         <Field Name="Value"/>
       </Input>
@@ -136,14 +136,14 @@
       <Readout Activation="IDENTITY">
       </Readout>
       <Regression RegressionMethod="LINEAR" MaxAttempts="1" MaxEpochs="1" StopMSE="1E-20"/>
-    </ESN>
+    </Esn>
     <Output>
       <Field Name="Value"/>
     </Output>
   </DemoCase>
   <DemoCase Name="Sinusoid series prediction (Ring topology, FF network with hidden structure as the readout and RESILIENT trainer)">
     <Samples CSVDataFileName="Sinusoid.csv" BootSeqMinLength="700" TrainingSeqMaxLength="1000" TestingSeqLength="10" TestSamplesSelection="SEQUENCE" SingleNormalizer="false" NormalizerReserveRatio="0.1"/>
-    <ESN RandomizerSeek="0">
+    <Esn RandomizerSeek="0">
       <Input RouteToReadout="false">
         <Field Name="Value"/>
       </Input>
@@ -163,9 +163,9 @@
         <Layer Neurons="5" Activation="TANH"/>
       </Readout>
       <Regression RegressionMethod="RESILIENT" MaxAttempts="2" MaxEpochs="5000" StopMSE="1E-20"/>
-    </ESN>
+    </Esn>
     <Output>
       <Field Name="Value"/>
     </Output>
   </DemoCase>
-</ESNDemoSettings>
+</EsnDemoSettings>

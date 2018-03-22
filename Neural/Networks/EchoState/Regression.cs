@@ -40,7 +40,7 @@ namespace OKOSW.Neural.Networks.EchoState
     [Serializable]
     public class RegressionControlInArgs
     {
-        public List<ESN.ReservoirStat> ReservoirsStatistics { get; set; } = null;
+        public List<Esn.ReservoirStat> ReservoirsStatistics { get; set; } = null;
         public int RegrValID { get; set; } = 0;
         public int RegrAttemptNumber { get; set; } = -1;
         public int Epoch { get; set; } = -1;
@@ -65,18 +65,18 @@ namespace OKOSW.Neural.Networks.EchoState
     /// <summary>
     /// Compute appropriate weights
     /// </summary>
-    public static class RGS
+    public static class Regression
     {
         /// <summary>
         /// Builds trained BasicNetwork using Levnberg Marquardt or Resilient method (ENCOG implementation)
         /// </summary>
         public static RegressionData BuildOutputFFNet(int regrValID,
-                                                      List<ESN.ReservoirStat> reservoirsStatistics,
+                                                      List<Esn.ReservoirStat> reservoirsStatistics,
                                                       List<double[]> trainingPredictors,
                                                       List<double[]> trainingOutputs,
                                                       List<double[]> testingPredictors,
                                                       List<double[]> testingOutputs,
-                                                      List<ESNSettings.ReadOutHiddenLayerCfg> readOutHiddenLayers,
+                                                      List<EsnSettings.ReadOutHiddenLayerCfg> readOutHiddenLayers,
                                                       ActivationFactory.ActivationType outputNeuronActivation,
                                                       string regrMethod,
                                                       int maxRegrAttempts,

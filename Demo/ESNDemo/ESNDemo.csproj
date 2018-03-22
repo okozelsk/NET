@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>OKOSW.Demo</RootNamespace>
-    <AssemblyName>ESNDemo</AssemblyName>
+    <AssemblyName>EsnDemo</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -40,8 +40,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ESNDemo.cs" />
-    <Compile Include="ESNDemoSettings.cs" />
+    <Compile Include="EsnDemo.cs" />
+    <Compile Include="EsnDemoSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -50,9 +50,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\CSVTools\CSVTools.csproj">
+    <ProjectReference Include="..\..\CSVTools\CsvTools.csproj">
       <Project>{2bb5f156-8785-4483-a05a-6960b5817f56}</Project>
-      <Name>CSVTools</Name>
+      <Name>CsvTools</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Extensions\Extensions.csproj">
       <Project>{3be0d8a7-5908-4d16-8822-029de64db619}</Project>
@@ -66,9 +66,9 @@
       <Project>{5859e49a-3079-4ea7-b0c5-86c4b26e09d6}</Project>
       <Name>Neural</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\XMLTools\XMLTools.csproj">
+    <ProjectReference Include="..\..\XMLTools\XmlTools.csproj">
       <Project>{faba419d-e4ea-460a-9114-5768c491039b}</Project>
-      <Name>XMLTools</Name>
+      <Name>XmlTools</Name>
     </ProjectReference>
     <ProjectReference Include="..\DemoSupport\DemoSupport.csproj">
       <Project>{d52159ce-be0e-4977-bcfa-23194cf6d6ed}</Project>
@@ -76,7 +76,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="ESNDemoSettings.xsd">
+    <EmbeddedResource Include="EsnDemoSettings.xsd">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">

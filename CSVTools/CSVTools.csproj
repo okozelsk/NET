@@ -7,8 +7,8 @@
     <ProjectGuid>{2BB5F156-8785-4483-A05A-6960B5817F56}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>OKOSW.CSVTools</RootNamespace>
-    <AssemblyName>CSVTools</AssemblyName>
+    <RootNamespace>OKOSW.CsvTools</RootNamespace>
+    <AssemblyName>CsvTools</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>

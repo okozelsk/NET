@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Xml;
 using OKOSW.MathTools;
 using OKOSW.Extensions;
-using OKOSW.CSVTools;
+using OKOSW.CsvTools;
 using OKOSW.Neural.Activation;
 
 namespace OKOSW.Neural.Reservoir.Analog
