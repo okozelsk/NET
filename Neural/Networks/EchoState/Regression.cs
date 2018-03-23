@@ -63,12 +63,12 @@ namespace OKOSW.Neural.Networks.EchoState
 
 
     /// <summary>
-    /// Compute appropriate weights
+    /// Regression phase
     /// </summary>
     public static class Regression
     {
         /// <summary>
-        /// Builds trained BasicNetwork using Levnberg Marquardt or Resilient method (ENCOG implementation)
+        /// Builds trained BasicNetwork
         /// </summary>
         public static RegressionData BuildOutputFFNet(int regrValID,
                                                       List<Esn.ReservoirStat> reservoirsStatistics,
