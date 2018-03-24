@@ -45,20 +45,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TimeSeriesGenerator.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\CSVTools\CsvTools.csproj">
-      <Project>{2bb5f156-8785-4483-a05a-6960b5817f56}</Project>
-      <Name>CsvTools</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Extensions\Extensions.csproj">
-      <Project>{3be0d8a7-5908-4d16-8822-029de64db619}</Project>
-      <Name>Extensions</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\MathTools\MathTools.csproj">
-      <Project>{14197a5b-e12b-4afd-88be-aec93fb94cb4}</Project>
-      <Name>MathTools</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

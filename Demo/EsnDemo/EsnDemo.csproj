@@ -50,25 +50,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\CSVTools\CsvTools.csproj">
-      <Project>{2bb5f156-8785-4483-a05a-6960b5817f56}</Project>
-      <Name>CsvTools</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Extensions\Extensions.csproj">
-      <Project>{3be0d8a7-5908-4d16-8822-029de64db619}</Project>
-      <Name>Extensions</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\MathTools\MathTools.csproj">
-      <Project>{14197a5b-e12b-4afd-88be-aec93fb94cb4}</Project>
-      <Name>MathTools</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Neural\Neural.csproj">
-      <Project>{5859e49a-3079-4ea7-b0c5-86c4b26e09d6}</Project>
-      <Name>Neural</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\XMLTools\XmlTools.csproj">
-      <Project>{faba419d-e4ea-460a-9114-5768c491039b}</Project>
-      <Name>XmlTools</Name>
+    <ProjectReference Include="..\..\RCNet\RCNet.csproj">
+      <Project>{7f44508e-0b06-4652-9631-4740ea97efe1}</Project>
+      <Name>RCNet</Name>
     </ProjectReference>
     <ProjectReference Include="..\DemoSupport\DemoSupport.csproj">
       <Project>{d52159ce-be0e-4977-bcfa-23194cf6d6ed}</Project>

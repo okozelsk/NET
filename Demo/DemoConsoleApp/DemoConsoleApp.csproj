@@ -72,6 +72,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\RCNet\RCNet.csproj">
+      <Project>{7f44508e-0b06-4652-9631-4740ea97efe1}</Project>
+      <Name>RCNet</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DemoSupport\DemoSupport.csproj">
       <Project>{d52159ce-be0e-4977-bcfa-23194cf6d6ed}</Project>
       <Name>DemoSupport</Name>
