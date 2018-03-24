@@ -15,7 +15,7 @@ namespace OKOSW.Neural.Reservoir.Analog
     /// Implements analog reservoir supporting several internal topologies and advanced features
     /// </summary>
     [Serializable]
-    public class AnalogReservoir : IAnalogReservoir
+    public class AnalogReservoir
     {
         //Attributes
         private string _instanceName;
@@ -148,6 +148,18 @@ namespace OKOSW.Neural.Reservoir.Analog
             return;
         }
 
+        //Properties
+        /// <summary>
+        /// Reservoir size. (Reservoir neurons count)
+        /// </summary>
+        public int Size { get { return _neurons.Length; } }
+
+        /// <summary>
+        /// Number of reservoir's output predictors (Size or Size*2 when augumented states are enabled).
+        /// </summary>
+        public int OutputPredictorsCount { get { return _augmentedStatesFeature ? _neurons.Length * 2 : _neurons.Length; } }
+
+        //Methods
         /// <summary>
         /// Returns random weight within range -scale, +scale
         /// </summary>
@@ -319,20 +331,6 @@ namespace OKOSW.Neural.Reservoir.Analog
             return;
         }
 
-
-        #region IReservoir implementation
-
-        //Properties
-        /// <summary>
-        /// Reservoir size. (Reservoir neurons count)
-        /// </summary>
-        public int Size { get { return _neurons.Length; } }
-
-        /// <summary>
-        /// Number of reservoir's output predictors (Size or Size*2 when augumented states are enabled).
-        /// </summary>
-        public int OutputPredictorsCount { get { return _augmentedStatesFeature ? _neurons.Length * 2 : _neurons.Length; } }
-
         /// <summary>
         /// Collects key neuron states statistics
         /// </summary>
@@ -356,7 +354,6 @@ namespace OKOSW.Neural.Reservoir.Analog
             return stats;
         }
 
-        //Methods
         /// <summary>
         /// Resets all reservoir neurons to their initial state (before boot state).
         /// Function does not affect weights or internal structure of the resservoir.
@@ -447,7 +444,7 @@ namespace OKOSW.Neural.Reservoir.Analog
         }
 
         /// <summary>
-        /// Sets feedback values for next computation round
+        /// Sets feedback values for next Compute
         /// </summary>
         /// <param name="feedback">Feedback values.</param>
         public void SetFeedback(double[] feedback)
@@ -458,9 +455,6 @@ namespace OKOSW.Neural.Reservoir.Analog
             }
             return;
         }
-
-
-        #endregion
 
         //Inner classes
         /// <summary>

@@ -11,10 +11,10 @@ using OKOSW.MathTools;
 namespace OKOSW.Neural.Networks.FF
 {
     /// <summary>
-    /// Implements basic feedforward network supporting multiple hidden layers
+    /// Implements feed forward network supporting multiple hidden layers
     /// </summary>
     [Serializable]
-    public class BasicNetwork
+    public class FeedForwardNetwork
     {
         //Constants
         //Dummy BIAS input value
@@ -31,7 +31,7 @@ namespace OKOSW.Neural.Networks.FF
         private bool _isAllowedNguyenWidrowRandomization;
 
         //Constructor
-        public BasicNetwork(int inputValuesCount, int outputValuesCount)
+        public FeedForwardNetwork(int inputValuesCount, int outputValuesCount)
         {
             //Input/Output counts
             _inputValuesCount = inputValuesCount;
@@ -181,9 +181,9 @@ namespace OKOSW.Neural.Networks.FF
         /// <summary>
         /// Creates the copy of this network
         /// </summary>
-        public BasicNetwork Clone()
+        public FeedForwardNetwork Clone()
         {
-            BasicNetwork clone = new BasicNetwork(InputValuesCount, OutputValuesCount);
+            FeedForwardNetwork clone = new FeedForwardNetwork(InputValuesCount, OutputValuesCount);
             clone._nodesCount = _nodesCount;
             foreach (Layer layer in Layers)
             {
@@ -333,7 +333,7 @@ namespace OKOSW.Neural.Networks.FF
                 int biasFlatIdx = _biasesStartFlatIdx;
                 for (int nodeIdx = 0; nodeIdx < LayerNodesCount; nodeIdx++, biasFlatIdx++)
                 {
-                    double sum = flatWeights[biasFlatIdx] * BasicNetwork.BiasValue;
+                    double sum = flatWeights[biasFlatIdx] * FeedForwardNetwork.BiasValue;
                     for (int inputIdx = 0; inputIdx < InputNodesCount; inputIdx++, weightFlatIdx++)
                     {
                         sum += flatWeights[weightFlatIdx] * inputs[inputIdx];
@@ -359,8 +359,8 @@ namespace OKOSW.Neural.Networks.FF
                 }
                 return result;
             }
-        }//BasicNetworkLayer
-    }//BasicNetwork
+        }//Layer
+    }//FeedForwardNetwork
 
     /// <summary>
     /// Supported training methods

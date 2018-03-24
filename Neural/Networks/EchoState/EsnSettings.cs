@@ -127,7 +127,7 @@ namespace OKOSW.Neural.Networks.EchoState
             //Readout
             XElement readoutElem = esnSettingsElem.Descendants("Readout").First();
             OutputNeuronActivation = ActivationFactory.ParseActivation(readoutElem.Attribute("OutputActivation").Value);
-            RegressionMethod = BasicNetwork.ParseTrainingMethodType(readoutElem.Attribute("RegressionMethod").Value);
+            RegressionMethod = FeedForwardNetwork.ParseTrainingMethodType(readoutElem.Attribute("RegressionMethod").Value);
             RegressionAttempts = int.Parse(readoutElem.Attribute("Attempts").Value);
             RegressionAttemptEpochs = int.Parse(readoutElem.Attribute("AttemptEpochs").Value);
             RegressionAttemptStopMSE = double.Parse(readoutElem.Attribute("AttemptStopMSE").Value, CultureInfo.InvariantCulture);

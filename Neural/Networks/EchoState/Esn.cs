@@ -312,7 +312,7 @@ namespace OKOSW.Neural.Networks.EchoState
                                                        RegressionController,
                                                        regressionControllerData
                                                        );
-                //Store regression results and BasicNetwork
+                //Store regression results and FF network
                 _regression[outputIdx] = results[outputIdx];
             }
 
@@ -320,7 +320,7 @@ namespace OKOSW.Neural.Networks.EchoState
         }
 
         /// <summary>
-        /// Builds trained BasicNetwork
+        /// Builds and trains FF network for specified Esn output field
         /// </summary>
         private EsnRegressionData PerformRegression(int outputFieldIdx,
                                                     string outputFieldName,
@@ -334,8 +334,8 @@ namespace OKOSW.Neural.Networks.EchoState
                                                     )
         {
             EsnRegressionData bestRegrData = new EsnRegressionData();
-            //Create basic network
-            BasicNetwork network = new BasicNetwork(trainingPredictors[0].Length, testingOutputs[0].Length);
+            //Create FF network
+            FeedForwardNetwork network = new FeedForwardNetwork(trainingPredictors[0].Length, testingOutputs[0].Length);
             for (int i = 0; i < _settings.ReadOutHiddenLayers.Count; i++)
             {
                 network.AddLayer(_settings.ReadOutHiddenLayers[i].NeuronsCount,
@@ -349,7 +349,7 @@ namespace OKOSW.Neural.Networks.EchoState
             {
                 network.RandomizeWeights(_rand);
                 //Create trainer object
-                IBasicTrainer trainer = null;
+                IFeedForwardNetworkTrainer trainer = null;
                 switch (_settings.RegressionMethod)
                 {
                     case TrainingMethodType.Linear:
@@ -452,7 +452,7 @@ namespace OKOSW.Neural.Networks.EchoState
         {
             //Attribute properties
             public string OutputFieldName;
-            public BasicNetwork FFNet { get; set; }
+            public FeedForwardNetwork FFNet { get; set; }
             public BasicStat TrainingErrorStat { get; set; }
             public BasicStat TestingErrorStat { get; set; }
             public BasicStat OutputWeightsStat { get; set; }

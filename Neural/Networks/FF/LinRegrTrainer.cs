@@ -31,14 +31,14 @@ namespace OKOSW.Neural.Networks.FF
     /// Principle is to add each iteration less and less piece of white-noise to predictors and then perform linear regression.
     /// This technique allows to find more stable weight solution (according to testing samples) than just a linear regression
     /// of pure predictors.
-    /// Trainee Basic network has to have only output layer and Identity activation.
+    /// Trainee FF network has to have only output layer and Identity activation.
     /// </summary>
     [Serializable]
-    public class LinRegrTrainer : IBasicTrainer
+    public class LinRegrTrainer : IFeedForwardNetworkTrainer
     {
         //Attributes
         private LinRegrParameters _parameters;
-        private BasicNetwork _net;
+        private FeedForwardNetwork _net;
         private List<double[]> _trainInputs;
         private List<double[]> _trainIdealOutputs;
         private List<Matrix> _regrIdealOutputs;
@@ -52,13 +52,13 @@ namespace OKOSW.Neural.Networks.FF
         /// <summary>
         /// Constructs new instance of linear regression trainer
         /// </summary>
-        /// <param name="net">Basic network to be trained</param>
+        /// <param name="net">FF network to be trained</param>
         /// <param name="inputs">Predictors (input)</param>
         /// <param name="outputs">Ideal outputs (the same rows count as inputs)</param>
         /// <param name="maxEpoch">Maximum allowed training epochs</param>
         /// <param name="rand">Random object to be used for adding white-noise to predictors</param>
         /// <param name="parameters">Optional startup parameters of the trainer</param>
-        public LinRegrTrainer(BasicNetwork net, List<double[]> inputs, List<double[]> outputs, int maxEpoch, Random rand, LinRegrParameters parameters = null)
+        public LinRegrTrainer(FeedForwardNetwork net, List<double[]> inputs, List<double[]> outputs, int maxEpoch, Random rand, LinRegrParameters parameters = null)
         {
             //Check network readyness
             if (!net.Finalized)
@@ -122,9 +122,9 @@ namespace OKOSW.Neural.Networks.FF
         /// </summary>
         public int Epoch { get { return _epoch; } }
         /// <summary>
-        /// Trainee FF BasicNetwork
+        /// Trainee FF network
         /// </summary>
-        public BasicNetwork Net { get { return _net; } }
+        public FeedForwardNetwork Net { get { return _net; } }
 
         //Methods
         private Matrix PreparePredictors(double noiseIntensity)

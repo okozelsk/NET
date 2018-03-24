@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace OKOSW.Neural.Networks.FF
 {
-    interface IBasicTrainer
+    interface IFeedForwardNetworkTrainer
     {
         //Properties
         /// <summary>
@@ -18,9 +18,9 @@ namespace OKOSW.Neural.Networks.FF
         /// </summary>
         int Epoch { get; }
         /// <summary>
-        /// Trainee FF BasicNetwork
+        /// Trainee FF network
         /// </summary>
-        BasicNetwork Net { get; }
+        FeedForwardNetwork Net { get; }
 
         /// <summary>
         /// Performs training iteration.

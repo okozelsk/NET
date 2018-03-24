@@ -34,11 +34,11 @@ namespace OKOSW.Neural.Networks.FF
     /// Implements iRPROP+ method trainer
     /// </summary>
     [Serializable]
-    public class RPropTrainer : IBasicTrainer
+    public class RPropTrainer : IFeedForwardNetworkTrainer
     {
         //Attributes
         private RPropParameters _parameters;
-        private BasicNetwork _net;
+        private FeedForwardNetwork _net;
         private List<double[]> _trainInputs;
         private List<double[]> _trainIdealOutputs;
         private double[] _weigthsGradsAcc;
@@ -51,7 +51,7 @@ namespace OKOSW.Neural.Networks.FF
         private List<WorkerRange> _workerRangeCollection;
 
         //Constructor
-        public RPropTrainer(BasicNetwork net, List<double[]> inputs, List<double[]> outputs, RPropParameters parameters = null)
+        public RPropTrainer(FeedForwardNetwork net, List<double[]> inputs, List<double[]> outputs, RPropParameters parameters = null)
         {
             if (!net.Finalized)
             {
@@ -109,9 +109,9 @@ namespace OKOSW.Neural.Networks.FF
         /// </summary>
         public int Epoch { get { return _epoch; } }
         /// <summary>
-        /// Trainee FF BasicNetwork
+        /// Trainee FF network
         /// </summary>
-        public BasicNetwork Net { get { return _net; } }
+        public FeedForwardNetwork Net { get { return _net; } }
 
         //Methods
 
@@ -180,7 +180,7 @@ namespace OKOSW.Neural.Networks.FF
         private double[] Compute(double[] input, List<double[]> layersInputs, double[] derivatives)
         {
             double[] result = input;
-            foreach (BasicNetwork.Layer layer in _net.Layers)
+            foreach (FeedForwardNetwork.Layer layer in _net.Layers)
             {
                 layersInputs.Add(result);
                 result = layer.Compute(result, _net.FlatWeights, derivatives);
@@ -238,7 +238,7 @@ namespace OKOSW.Neural.Networks.FF
                     //----------------------------------------------------
                     //Compute network nodes gradients
                     //Compute output layer gradients and update last error statistics
-                    BasicNetwork.Layer outputLayer = _net.Layers[_net.Layers.Count - 1];
+                    FeedForwardNetwork.Layer outputLayer = _net.Layers[_net.Layers.Count - 1];
                     for (int nodeIdx = 0, outputLayerNodeFlatIdx = outputLayer.NodesStartFlatIdx; nodeIdx < outputLayer.LayerNodesCount; nodeIdx++, outputLayerNodeFlatIdx++)
                     {
                         double error = _trainIdealOutputs[row][nodeIdx] - computedOutputs[nodeIdx];
@@ -249,8 +249,8 @@ namespace OKOSW.Neural.Networks.FF
                     //Hidden layers gradients
                     for (int layerIdx = _net.Layers.Count - 2; layerIdx >= 0; layerIdx--)
                     {
-                        BasicNetwork.Layer currLayer = _net.Layers[layerIdx];
-                        BasicNetwork.Layer nextLayer = _net.Layers[layerIdx + 1];
+                        FeedForwardNetwork.Layer currLayer = _net.Layers[layerIdx];
+                        FeedForwardNetwork.Layer nextLayer = _net.Layers[layerIdx + 1];
                         int currLayerNodeFlatIdx = currLayer.NodesStartFlatIdx;
                         for (int currLayerNodeIdx = 0; currLayerNodeIdx < currLayer.LayerNodesCount; currLayerNodeIdx++, currLayerNodeFlatIdx++)
                         {
@@ -267,7 +267,7 @@ namespace OKOSW.Neural.Networks.FF
                     //Compute increments for gradients accumulator
                     for (int layerIdx = 0; layerIdx < _net.Layers.Count; layerIdx++)
                     {
-                        BasicNetwork.Layer layer = _net.Layers[layerIdx];
+                        FeedForwardNetwork.Layer layer = _net.Layers[layerIdx];
                         double[] layerInputs = layersInputs[layerIdx];
                         int nodeFlatIdx = layer.NodesStartFlatIdx;
                         int biasFlatIdx = layer.BiasesStartFlatIdx;
@@ -280,7 +280,7 @@ namespace OKOSW.Neural.Networks.FF
                                 weigthsGradsAccInput[weightFlatIdx] += layerInputs[inputIdx] * nodesGradients[nodeFlatIdx];
                             }
                             //Bias gradients accumulation
-                            weigthsGradsAccInput[biasFlatIdx] += nodesGradients[nodeFlatIdx] * BasicNetwork.BiasValue;
+                            weigthsGradsAccInput[biasFlatIdx] += nodesGradients[nodeFlatIdx] * FeedForwardNetwork.BiasValue;
                         }
                     }
                 }//Worker loop
