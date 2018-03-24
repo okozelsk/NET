@@ -9,7 +9,7 @@ using RCNet.Extensions;
 using RCNet.CsvTools;
 using RCNet.Neural.Activation;
 
-namespace RCNet.Neural.Networks.EchoState
+namespace RCNet.Neural.Network.EchoState
 {
     /// <summary>
     /// Implements analog reservoir supporting several internal topologies and advanced features

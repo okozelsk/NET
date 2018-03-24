@@ -9,7 +9,7 @@ using System.Xml.Linq;
 using RCNet.XmlTools;
 using RCNet.Neural.Activation;
 
-namespace RCNet.Neural.Networks.EchoState
+namespace RCNet.Neural.Network.EchoState
 {
     /// <summary>
     /// Reservoir settings
@@ -137,7 +137,7 @@ namespace RCNet.Neural.Networks.EchoState
             //A very ugly validation
             XmlValidator validator = new XmlValidator();
             Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddSchema(assemblyRCNet.GetManifestResourceStream("RCNet.Neural.Networks.EchoState.AnalogReservoirSettings.xsd"));
+            validator.AddSchema(assemblyRCNet.GetManifestResourceStream("RCNet.Neural.Network.EchoState.AnalogReservoirSettings.xsd"));
             validator.AddSchema(assemblyRCNet.GetManifestResourceStream("RCNet.Neural.NeuralSettingsTypes.xsd"));
             validator.LoadXDocFromString(reservoirSettingsElem.ToString());
             //Parsing

@@ -8,10 +8,10 @@ using System.Xml.Linq;
 using System.Reflection;
 using RCNet.Extensions;
 using RCNet.Neural.Activation;
-using RCNet.Neural.Networks.FF;
+using RCNet.Neural.Network.FF;
 using RCNet.XmlTools;
 
-namespace RCNet.Neural.Networks.EchoState
+namespace RCNet.Neural.Network.EchoState
 {
     /// <summary>Echo State Network general settings</summary>
     [Serializable]
@@ -102,7 +102,7 @@ namespace RCNet.Neural.Networks.EchoState
             //A very ugly validation
             XmlValidator validator = new XmlValidator();
             Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddSchema(assemblyRCNet.GetManifestResourceStream("RCNet.Neural.Networks.EchoState.EsnSettings.xsd"));
+            validator.AddSchema(assemblyRCNet.GetManifestResourceStream("RCNet.Neural.Network.EchoState.EsnSettings.xsd"));
             validator.AddSchema(assemblyRCNet.GetManifestResourceStream("RCNet.Neural.NeuralSettingsTypes.xsd"));
             validator.LoadXDocFromString(esnSettingsElem.ToString());
             //Parsing

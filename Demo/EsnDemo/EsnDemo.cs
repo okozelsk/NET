@@ -9,8 +9,8 @@ using System.Xml;
 using RCNet.MathTools;
 using RCNet.Extensions;
 using RCNet.CsvTools;
-using RCNet.Neural.Networks.Data;
-using RCNet.Neural.Networks.EchoState;
+using RCNet.Neural.Network.Data;
+using RCNet.Neural.Network.EchoState;
 using RCNet.Demo;
 using RCNet.Demo.Log;
 

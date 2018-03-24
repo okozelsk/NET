@@ -10,7 +10,7 @@ using System.Reflection;
 using RCNet.Extensions;
 using RCNet.XmlTools;
 using RCNet.Neural;
-using RCNet.Neural.Networks.EchoState;
+using RCNet.Neural.Network.EchoState;
 
 namespace RCNet.Demo
 {

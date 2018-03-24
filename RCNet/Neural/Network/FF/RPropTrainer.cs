@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
 using RCNet.Extensions;
 
-namespace RCNet.Neural.Networks.FF
+namespace RCNet.Neural.Network.FF
 {
     /// <summary>
     /// Parameters of RPROP trainer

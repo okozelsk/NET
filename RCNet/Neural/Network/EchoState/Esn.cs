@@ -5,10 +5,10 @@ using System.Threading.Tasks;
 using RCNet.Extensions;
 using RCNet.MathTools;
 using RCNet.Neural.Activation;
-using RCNet.Neural.Networks.Data;
-using RCNet.Neural.Networks.FF;
+using RCNet.Neural.Network.Data;
+using RCNet.Neural.Network.FF;
 
-namespace RCNet.Neural.Networks.EchoState
+namespace RCNet.Neural.Network.EchoState
 {
     /// <summary>
     /// Implements Echo State Network

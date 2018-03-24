@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RCNet.Neural.Networks.Data
+namespace RCNet.Neural.Network.Data
 {
     /// <summary>
     /// Bundle of predictors and desired outputs

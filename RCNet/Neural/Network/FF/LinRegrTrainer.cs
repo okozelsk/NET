@@ -8,7 +8,7 @@ using RCNet.Extensions;
 using RCNet.Neural.Activation;
 using RCNet.MathTools.MatrixMath;
 
-namespace RCNet.Neural.Networks.FF
+namespace RCNet.Neural.Network.FF
 {
     /// <summary>
     /// Startup parameters for linear regression trainer
