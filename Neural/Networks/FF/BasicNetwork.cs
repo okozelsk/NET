@@ -8,7 +8,7 @@ using OKOSW.Extensions;
 using OKOSW.Neural.Activation;
 using OKOSW.MathTools;
 
-namespace OKOSW.Neural.Networks.FF.Basic
+namespace OKOSW.Neural.Networks.FF
 {
     /// <summary>
     /// Implements basic feedforward network supporting multiple hidden layers

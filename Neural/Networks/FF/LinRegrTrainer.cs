@@ -8,7 +8,7 @@ using OKOSW.Extensions;
 using OKOSW.Neural.Activation;
 using OKOSW.MathTools.MatrixMath;
 
-namespace OKOSW.Neural.Networks.FF.Basic
+namespace OKOSW.Neural.Networks.FF
 {
     /// <summary>
     /// Startup parameters for linear regression trainer

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
 using OKOSW.Extensions;
 
-namespace OKOSW.Neural.Networks.FF.Basic
+namespace OKOSW.Neural.Networks.FF
 {
     /// <summary>
     /// Parameters of RPROP trainer

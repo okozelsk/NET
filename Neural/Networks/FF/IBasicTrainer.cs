@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OKOSW.Neural.Networks.FF.Basic
+namespace OKOSW.Neural.Networks.FF
 {
     interface IBasicTrainer
     {

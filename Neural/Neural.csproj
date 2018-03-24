@@ -53,10 +53,10 @@
     <Compile Include="Networks\Data\SamplesDataBundle.cs" />
     <Compile Include="Networks\EchoState\Esn.cs" />
     <Compile Include="Networks\EchoState\EsnSettings.cs" />
-    <Compile Include="Networks\FF\Basic\BasicNetwork.cs" />
-    <Compile Include="Networks\FF\Basic\IBasicTrainer.cs" />
-    <Compile Include="Networks\FF\Basic\LinRegrTrainer.cs" />
-    <Compile Include="Networks\FF\Basic\RPropTrainer.cs" />
+    <Compile Include="Networks\FF\BasicNetwork.cs" />
+    <Compile Include="Networks\FF\IBasicTrainer.cs" />
+    <Compile Include="Networks\FF\LinRegrTrainer.cs" />
+    <Compile Include="Networks\FF\RPropTrainer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
