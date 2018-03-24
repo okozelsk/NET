@@ -48,10 +48,9 @@ namespace OKOSW.Demo
         public class DemoCaseParams
         {
             //Constants
-            //Attributes
+            //Properties
             public string Name { get; }
             public string CSVDataFileName { get; }
-            public List<string> OutputFieldsNames { get; }
             public int BootSeqMinLength { get; }
             public int TrainingSeqMaxLength { get; }
             public int TestingSeqLength { get; }
@@ -59,6 +58,7 @@ namespace OKOSW.Demo
             public bool SingleNormalizer { get; }
             public double NormalizerReserveRatio { get; }
             public EsnSettings ESNCfg { get; }
+            public List<string> OutputFieldsNames { get { return ESNCfg.OutputFieldsNames; } }
 
             //Constructor
             public DemoCaseParams(XElement demoCaseElem, string dir)
@@ -72,15 +72,10 @@ namespace OKOSW.Demo
                 TestSamplesSelection = samplesElem.Attribute("TestSamplesSelection").Value;
                 SingleNormalizer = bool.Parse(samplesElem.Attribute("SingleNormalizer").Value);
                 NormalizerReserveRatio = double.Parse(samplesElem.Attribute("NormalizerReserveRatio").Value, CultureInfo.InvariantCulture);
-                OutputFieldsNames = new List<string>();
-                XElement outputElem = demoCaseElem.Descendants("Output").First();
-                foreach (XElement outputFieldElem in outputElem.Descendants("Field"))
-                {
-                    OutputFieldsNames.Add(outputFieldElem.Attribute("Name").Value);
-                }
-                ESNCfg = new EsnSettings(demoCaseElem.Descendants("Esn").First());
+                ESNCfg = new EsnSettings(demoCaseElem.Descendants("EsnSettings").First());
                 return;
             }
+
         }//DemoCaseParams
 
     }//ESNDemoSettings

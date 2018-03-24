@@ -3,14 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using OKOSW.MathTools;
 
 namespace OKOSW.Neural.Activation
 {
     /// <summary>
-    /// Neuron activation
+    /// Neuron activation function
     /// </summary>
     public interface IActivationFunction
     {
+        //Properties
+        Interval Range { get; }
+
+        //Methods
         /// <summary>
         /// Process input
         /// </summary>
@@ -19,11 +24,12 @@ namespace OKOSW.Neural.Activation
         double Compute(double x);
 
         /// <summary>
-        /// Partial derivative
+        /// Derivative
         /// </summary>
         /// <param name="c">Result of Compute method</param>
+        /// <param name="x">Argument of Compute method</param>
         /// <returns></returns>
-        double ComputeDerivative(double c);
+        double ComputeDerivative(double c, double x);
 
     }//IActivationFunction
 }//Namespace

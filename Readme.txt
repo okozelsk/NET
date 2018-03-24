@@ -4,7 +4,7 @@ Currently implemented components:
 	Normalizer
 		data normalizer/denormalizer with built-in gausse data standardization
 	Activation functions
-		Tanh, Elliot, Sinusoid, Identity
+		TanH, Elliot (Softsign), Sinusoid, Identity, ISRU (Inverse Squere Root Unit), Sigmoid (Logistic, Softstep), Gaussian
 	AnalogReservoir
 		supporting internal connection topologies: Random, Ring, Doubly Twisted Thoroidal
 		supporting Context neuron and Retirement neurons features

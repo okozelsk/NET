@@ -1,171 +1,186 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Specify your data location in DataDir attribute -->
 <EsnDemoSettings DataDir=".\\Data">
-  <DemoCase Name="TTOO High and Low prices prediction (single reservoir for all input fields, single readout neuron and RESILIENT trainer)">
-    <Samples CSVDataFileName="TTOO.csv" BootSeqMinLength="300" TrainingSeqMaxLength="1000" TestingSeqLength="10" TestSamplesSelection="RANDOM" SingleNormalizer="true" NormalizerReserveRatio="0.1"/>
-    <Esn RandomizerSeek="0">
-      <Input RouteToReadout="true">
+  <DemoCase Name="Sinusoid time series prediction (Random topology, Linear regression readout)">
+    <Samples CSVDataFileName="Sinusoid.csv" BootSeqMinLength="700" TrainingSeqMaxLength="1000" TestingSeqLength="10" TestSamplesSelection="Sequential" SingleNormalizer="false" NormalizerReserveRatio="0.1"/>
+    <EsnSettings RandomizerSeek="0">
+      <InputFields RouteToReadout="false">
+        <Field Name="Value"/>
+      </InputFields>
+      <ReservoirSettingsContainer>
+        <AnalogReservoirSettings Name="Random topology 200 TanH neurons">
+          <Input BiasScale="0" ConnectionDensity="1" WeightScale="0.2"/>
+          <Internal Size="200" Activation="TanH" WeightScale="0.2">
+            <RandomTopology ConnectionsDensity="0.1"/>
+          </Internal>
+        </AnalogReservoirSettings>
+      </ReservoirSettingsContainer>
+      <ReservoirInstancesContainer>
+        <ReservoirInstance InstanceName="Main" SettingsName="Random topology 200 TanH neurons" AugmentedStates="false">
+          <InputField Name="Value"/>
+        </ReservoirInstance>
+      </ReservoirInstancesContainer>
+      <Readout OutputActivation="Identity" RegressionMethod="Linear" Attempts="1" AttemptEpochs="1" AttemptStopMSE="1E-20"/>
+      <OutputFields>
+        <Field Name="Value"/>
+      </OutputFields>
+    </EsnSettings>
+  </DemoCase>
+  <DemoCase Name="Sinusoid time series prediction (Ring topology, Readout with hidden TanH neurons and Resilient trainer)">
+    <Samples CSVDataFileName="Sinusoid.csv" BootSeqMinLength="700" TrainingSeqMaxLength="1000" TestingSeqLength="10" TestSamplesSelection="Sequential" SingleNormalizer="false" NormalizerReserveRatio="0.1"/>
+    <EsnSettings RandomizerSeek="0">
+      <InputFields RouteToReadout="false">
+        <Field Name="Value"/>
+      </InputFields>
+      <ReservoirSettingsContainer>
+        <AnalogReservoirSettings Name="Ring topology 200 TanH neurons">
+          <Input BiasScale="0" ConnectionDensity="1" WeightScale="0.2"/>
+          <Internal Size="200" Activation="TanH" WeightScale="0.2">
+            <RingTopology BiDirection="false" SelfConnectionsDensity="0.1" InterConnectionsDensity="0.1"/>
+          </Internal>
+          <!-- Feedback is nonsense. It is placed here only for feature usage demostration -->
+          <Feedback Density="1" WeightScale="0.2">
+            <Field Name="Value"/>
+          </Feedback>
+        </AnalogReservoirSettings>
+      </ReservoirSettingsContainer>
+      <ReservoirInstancesContainer>
+        <ReservoirInstance InstanceName="Main" SettingsName="Ring topology 200 TanH neurons" AugmentedStates="false">
+          <InputField Name="Value"/>
+        </ReservoirInstance>
+      </ReservoirInstancesContainer>
+      <Readout OutputActivation="Identity" RegressionMethod="Resilient" Attempts="2" AttemptEpochs="5000" AttemptStopMSE="1E-20">
+        <HiddenLayer Neurons="20" Activation="TanH"/>
+      </Readout>
+      <OutputFields>
+        <Field Name="Value"/>
+      </OutputFields>
+    </EsnSettings>
+  </DemoCase>
+  <DemoCase Name="MackeyGlass chaotic time series prediction (Random topology, Linear regression readout)">
+    <Samples CSVDataFileName="MackeyGlass.csv" BootSeqMinLength="2000" TrainingSeqMaxLength="2000" TestingSeqLength="500" TestSamplesSelection="Sequential" SingleNormalizer="false" NormalizerReserveRatio="0.1"/>
+    <EsnSettings RandomizerSeek="0">
+      <InputFields RouteToReadout="false">
+        <Field Name="Value"/>
+      </InputFields>
+      <ReservoirSettingsContainer>
+        <AnalogReservoirSettings Name="Random topology 300 TanH neurons">
+          <Input BiasScale="0" ConnectionDensity="1" WeightScale="0.2"/>
+          <Internal Size="300" Activation="TanH" WeightScale="0.2">
+            <RandomTopology ConnectionsDensity="0.15"/>
+          </Internal>
+        </AnalogReservoirSettings>
+      </ReservoirSettingsContainer>
+      <ReservoirInstancesContainer>
+        <ReservoirInstance InstanceName="Main" SettingsName="Random topology 300 TanH neurons" AugmentedStates="true">
+          <InputField Name="Value"/>
+        </ReservoirInstance>
+      </ReservoirInstancesContainer>
+      <Readout OutputActivation="Identity" RegressionMethod="Linear" Attempts="1" AttemptEpochs="10" AttemptStopMSE="1E-20"/>
+      <OutputFields>
+        <Field Name="Value"/>
+      </OutputFields>
+    </EsnSettings>
+  </DemoCase>
+  <DemoCase Name="Yahoo finance TTOO title High and Low prices prediction (single reservoir for all input fields, no hidden readout neurons and Resilient trainer)">
+    <Samples CSVDataFileName="TTOO.csv" BootSeqMinLength="300" TrainingSeqMaxLength="1000" TestingSeqLength="10" TestSamplesSelection="Random" SingleNormalizer="true" NormalizerReserveRatio="0.1"/>
+    <EsnSettings RandomizerSeek="0">
+      <InputFields RouteToReadout="true">
         <Field Name="High"/>
         <Field Name="Low"/>
         <Field Name="Adj Close"/>
-      </Input>
-      <Reservoir Name="ResMain" Multiple="false" AugmentedStates="false">
-        <Input BiasScale="0" ConnectionDensity="0.5" WeightScale="0.4">
-          <Field Name="High"/>
-          <Field Name="Low"/>
-          <Field Name="Adj Close"/>
-        </Input>
-        <Internal Size="300" Activation="ELLIOT" WeightScale="0.4">
-          <RandomTopology ConnectionsDensity="0.1"/>
-          <RetirementNeurons Density="0.5" RetirementMinRate="0" RetirementMaxRate="0.75"/>
-          <ContextNeuron FeedbackDensity="1" Activation="ELLIOT" InWeightScale="1" OutWeightScale="0.2"/>
-        </Internal>
-        <Feedback Density="0" WeightScale="0"/>
-      </Reservoir>
-      <Readout Activation="IDENTITY">
-      </Readout>
-      <Regression RegressionMethod="RESILIENT" MaxAttempts="5" MaxEpochs="10000" StopMSE="1E-20"/>
-    </Esn>
-    <Output>
-      <Field Name="High"/>
-      <Field Name="Low"/>
-    </Output>
+      </InputFields>
+      <ReservoirSettingsContainer>
+        <AnalogReservoirSettings Name="Random topology 300 TanH neurons">
+          <Input BiasScale="0" ConnectionDensity="0.5" WeightScale="0.4"/>
+          <Internal Size="300" Activation="TanH" WeightScale="0.4">
+            <RandomTopology ConnectionsDensity="0.1"/>
+            <RetirementNeurons Density="0.5" RetirementMinRate="0" RetirementMaxRate="0.75"/>
+            <ContextNeuron FeedbackDensity="1" Activation="Elliot" InWeightScale="1" OutWeightScale="0.2"/>
+          </Internal>
+          <Feedback Density="0" WeightScale="0"/>
+        </AnalogReservoirSettings>
+      </ReservoirSettingsContainer>
+      <ReservoirInstancesContainer>
+        <ReservoirInstance InstanceName="Main" SettingsName="Random topology 300 TanH neurons" AugmentedStates="false">
+          <InputField Name="High"/>
+          <InputField Name="Low"/>
+          <InputField Name="Adj Close"/>
+        </ReservoirInstance>
+      </ReservoirInstancesContainer>
+      <Readout OutputActivation="Identity" RegressionMethod="Resilient" Attempts="5" AttemptEpochs="10000" AttemptStopMSE="1E-20"/>
+      <OutputFields>
+        <Field Name="High"/>
+        <Field Name="Low"/>
+      </OutputFields>
+    </EsnSettings>
   </DemoCase>
-  <DemoCase Name="SPXL High and Low prices prediction (single reservoir for all input fields, single readout neuron and RESILIENT trainer)">
-    <Samples CSVDataFileName="SPXL.csv" BootSeqMinLength="1000" TrainingSeqMaxLength="2000" TestingSeqLength="10" TestSamplesSelection="RANDOM" SingleNormalizer="true" NormalizerReserveRatio="0.1"/>
-    <Esn RandomizerSeek="0">
-      <Input RouteToReadout="true">
+  <DemoCase Name="Yahoo finance SPXL title High and Low prices prediction (single reservoir for all input fields, no hidden readout neurons and Resilient trainer)">
+    <Samples CSVDataFileName="SPXL.csv" BootSeqMinLength="1000" TrainingSeqMaxLength="2000" TestingSeqLength="10" TestSamplesSelection="Random" SingleNormalizer="true" NormalizerReserveRatio="0.1"/>
+    <EsnSettings RandomizerSeek="0">
+      <InputFields RouteToReadout="true">
         <Field Name="High"/>
         <Field Name="Low"/>
         <Field Name="Adj Close"/>
-      </Input>
-      <Reservoir Name="ResMain" Multiple="false" AugmentedStates="false">
-        <Input BiasScale="0" ConnectionDensity="0.25" WeightScale="0.2">
-          <Field Name="High"/>
-          <Field Name="Low"/>
-          <Field Name="Adj Close"/>
-        </Input>
-        <Internal Size="1000" Activation="TANH" WeightScale="0.2">
-          <RandomTopology ConnectionsDensity="0.1"/>
-          <RetirementNeurons Density="0.5" RetirementMinRate="0" RetirementMaxRate="0.75"/>
-          <ContextNeuron FeedbackDensity="0" Activation="TANH" InWeightScale="0" OutWeightScale="0"/>
-        </Internal>
-        <Feedback Density="0" WeightScale="0"/>
-      </Reservoir>
-      <Readout Activation="IDENTITY">
-      </Readout>
-      <Regression RegressionMethod="RESILIENT" MaxAttempts="5" MaxEpochs="10000" StopMSE="1E-20"/>
-    </Esn>
-    <Output>
-      <Field Name="High"/>
-      <Field Name="Low"/>
-    </Output>
+      </InputFields>
+      <ReservoirSettingsContainer>
+        <AnalogReservoirSettings Name="Random topology 1000 TanH neurons">
+          <Input BiasScale="0" ConnectionDensity="0.25" WeightScale="0.2"/>
+          <Internal Size="1000" Activation="TanH" WeightScale="0.2">
+            <RandomTopology ConnectionsDensity="0.1"/>
+            <RetirementNeurons Density="0.5" RetirementMinRate="0" RetirementMaxRate="0.75"/>
+          </Internal>
+          <Feedback Density="0" WeightScale="0"/>
+        </AnalogReservoirSettings>
+      </ReservoirSettingsContainer>
+      <ReservoirInstancesContainer>
+        <ReservoirInstance InstanceName="Main" SettingsName="Random topology 1000 TanH neurons" AugmentedStates="false">
+          <InputField Name="High"/>
+          <InputField Name="Low"/>
+          <InputField Name="Adj Close"/>
+        </ReservoirInstance>
+      </ReservoirInstancesContainer>
+      <Readout OutputActivation="Identity" RegressionMethod="Resilient" Attempts="5" AttemptEpochs="10000" AttemptStopMSE="1E-20"/>
+      <OutputFields>
+        <Field Name="High"/>
+        <Field Name="Low"/>
+      </OutputFields>
+    </EsnSettings>
   </DemoCase>
-  <DemoCase Name="SPXL High and Low prices prediction (separated reservoir per each input field, single readout neuron and RESILIENT trainer)">
-    <Samples CSVDataFileName="SPXL.csv" BootSeqMinLength="200" TrainingSeqMaxLength="1000" TestingSeqLength="10" TestSamplesSelection="RANDOM" SingleNormalizer="false" NormalizerReserveRatio="0.1"/>
-    <Esn RandomizerSeek="0">
-      <Input RouteToReadout="true">
+  <DemoCase Name="Yahoo finance SPXL title High and Low prices prediction (alone reservoir per each input field, no hidden readout neurons and Resilient trainer)">
+    <Samples CSVDataFileName="SPXL.csv" BootSeqMinLength="200" TrainingSeqMaxLength="1000" TestingSeqLength="10" TestSamplesSelection="Random" SingleNormalizer="false" NormalizerReserveRatio="0.1"/>
+    <EsnSettings RandomizerSeek="0">
+      <InputFields RouteToReadout="true">
         <Field Name="High"/>
         <Field Name="Low"/>
         <Field Name="Adj Close"/>
-      </Input>
-      <Reservoir Name="ResMain" Multiple="true" AugmentedStates="false">
-        <Input BiasScale="0" ConnectionDensity="1" WeightScale="0.9">
-          <Field Name="High"/>
-          <Field Name="Low"/>
-          <Field Name="Adj Close"/>
-        </Input>
-        <Internal Size="200" Activation="TANH" WeightScale="0.1">
-          <RandomTopology ConnectionsDensity="0.15"/>
-          <RetirementNeurons Density="1" RetirementMinRate="0" RetirementMaxRate="0.5"/>
-          <ContextNeuron FeedbackDensity="0" Activation="TANH" InWeightScale="0" OutWeightScale="0"/>
-        </Internal>
-        <Feedback Density="0" WeightScale="0"/>
-      </Reservoir>
-      <Readout Activation="IDENTITY">
-      </Readout>
-      <Regression RegressionMethod="RESILIENT" MaxAttempts="5" MaxEpochs="3000" StopMSE="1E-20"/>
-    </Esn>
-    <Output>
-      <Field Name="High"/>
-      <Field Name="Low"/>
-    </Output>
-  </DemoCase>
-  <DemoCase Name="MackeyGlass series prediction (Linear regression readout)">
-    <Samples CSVDataFileName="MackeyGlass.csv" BootSeqMinLength="2000" TrainingSeqMaxLength="2000" TestingSeqLength="500" TestSamplesSelection="SEQUENCE" SingleNormalizer="false" NormalizerReserveRatio="0.1"/>
-    <Esn RandomizerSeek="0">
-      <Input RouteToReadout="false">
-        <Field Name="Value"/>
-      </Input>
-      <Reservoir Name="ResMain" Multiple="false" AugmentedStates="false">
-        <Input BiasScale="0" ConnectionDensity="0.5" WeightScale="0.2">
-          <Field Name="Value"/>
-        </Input>
-        <Internal Size="500" Activation="TANH" WeightScale="0.15">
-          <RandomTopology ConnectionsDensity="0.1"/>
-          <RetirementNeurons Density="0" RetirementMinRate="0" RetirementMaxRate="0"/>
-          <ContextNeuron FeedbackDensity="0" Activation="TANH" InWeightScale="0" OutWeightScale="0"/>
-        </Internal>
-        <Feedback Density="0" WeightScale="0"/>
-      </Reservoir>
-      <Readout Activation="IDENTITY">
-      </Readout>
-      <Regression RegressionMethod="LINEAR" MaxAttempts="1" MaxEpochs="10" StopMSE="1E-20"/>
-    </Esn>
-    <Output>
-      <Field Name="Value"/>
-    </Output>
-  </DemoCase>
-  <DemoCase Name="Sinusoid series prediction (Linear regression readout)">
-    <Samples CSVDataFileName="Sinusoid.csv" BootSeqMinLength="700" TrainingSeqMaxLength="1000" TestingSeqLength="10" TestSamplesSelection="SEQUENCE" SingleNormalizer="false" NormalizerReserveRatio="0.1"/>
-    <Esn RandomizerSeek="0">
-      <Input RouteToReadout="false">
-        <Field Name="Value"/>
-      </Input>
-      <Reservoir Name="ResMain" Multiple="false" AugmentedStates="false">
-        <Input BiasScale="0" ConnectionDensity="1" WeightScale="0.2">
-          <Field Name="Value"/>
-        </Input>
-        <Internal Size="200" Activation="TANH" WeightScale="0.2">
-          <RandomTopology ConnectionsDensity="0.1"/>
-          <RetirementNeurons Density="0" RetirementMinRate="0" RetirementMaxRate="0"/>
-          <ContextNeuron FeedbackDensity="0" Activation="TANH" InWeightScale="0" OutWeightScale="0"/>
-        </Internal>
-        <Feedback Density="0" WeightScale="0"/>
-      </Reservoir>
-      <Readout Activation="IDENTITY">
-      </Readout>
-      <Regression RegressionMethod="LINEAR" MaxAttempts="1" MaxEpochs="1" StopMSE="1E-20"/>
-    </Esn>
-    <Output>
-      <Field Name="Value"/>
-    </Output>
-  </DemoCase>
-  <DemoCase Name="Sinusoid series prediction (Ring topology, FF network with hidden structure as the readout and RESILIENT trainer)">
-    <Samples CSVDataFileName="Sinusoid.csv" BootSeqMinLength="700" TrainingSeqMaxLength="1000" TestingSeqLength="10" TestSamplesSelection="SEQUENCE" SingleNormalizer="false" NormalizerReserveRatio="0.1"/>
-    <Esn RandomizerSeek="0">
-      <Input RouteToReadout="false">
-        <Field Name="Value"/>
-      </Input>
-      <Reservoir Name="ResMain" Multiple="false" AugmentedStates="false">
-        <Input BiasScale="0" ConnectionDensity="1" WeightScale="0.2">
-          <Field Name="Value"/>
-        </Input>
-        <Internal Size="200" Activation="TANH" WeightScale="0.2">
-          <RingTopology BiDirection="false" SelfConnectionsDensity="0.1" InterConnectionsDensity="0.1"/>
-          <RetirementNeurons Density="0" RetirementMinRate="0" RetirementMaxRate="0"/>
-          <ContextNeuron FeedbackDensity="0" Activation="TANH" InWeightScale="0" OutWeightScale="0"/>
-        </Internal>
-        <Feedback Density="0" WeightScale="0"/>
-      </Reservoir>
-      <Readout Activation="IDENTITY">
-        <Layer Neurons="5" Activation="TANH"/>
-        <Layer Neurons="5" Activation="TANH"/>
-      </Readout>
-      <Regression RegressionMethod="RESILIENT" MaxAttempts="2" MaxEpochs="5000" StopMSE="1E-20"/>
-    </Esn>
-    <Output>
-      <Field Name="Value"/>
-    </Output>
+      </InputFields>
+      <ReservoirSettingsContainer>
+        <AnalogReservoirSettings Name="Random topology 200 TanH neurons">
+          <Input BiasScale="0" ConnectionDensity="1" WeightScale="0.9"/>
+          <Internal Size="200" Activation="TanH" WeightScale="0.1">
+            <RandomTopology ConnectionsDensity="0.15"/>
+            <RetirementNeurons Density="1" RetirementMinRate="0" RetirementMaxRate="0.5"/>
+          </Internal>
+          <Feedback Density="0" WeightScale="0"/>
+        </AnalogReservoirSettings>
+      </ReservoirSettingsContainer>
+      <ReservoirInstancesContainer>
+        <ReservoirInstance InstanceName="High" SettingsName="Random topology 200 TanH neurons" AugmentedStates="false">
+          <InputField Name="High"/>
+        </ReservoirInstance>
+        <ReservoirInstance InstanceName="Low" SettingsName="Random topology 200 TanH neurons" AugmentedStates="false">
+          <InputField Name="Low"/>
+        </ReservoirInstance>
+        <ReservoirInstance InstanceName="Adj Close" SettingsName="Random topology 200 TanH neurons" AugmentedStates="false">
+          <InputField Name="Adj Close"/>
+        </ReservoirInstance>
+      </ReservoirInstancesContainer>
+      <Readout OutputActivation="Identity" RegressionMethod="Resilient" Attempts="5" AttemptEpochs="3000" AttemptStopMSE="1E-20"/>
+      <OutputFields>
+        <Field Name="High"/>
+        <Field Name="Low"/>
+      </OutputFields>
+    </EsnSettings>
   </DemoCase>
 </EsnDemoSettings>

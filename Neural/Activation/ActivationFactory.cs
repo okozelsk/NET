@@ -13,29 +13,38 @@ namespace OKOSW.Neural.Activation
         public enum ActivationType
         {
             /// <summary>
-            /// "Identity" activation function.
+            /// "Identity" (aka Linear) activation function.
             /// </summary>
             Identity,
             /// <summary>"Sinusoid" activation function</summary>
             Sinusoid,
-            /// <summary>"Elliot" activation function</summary>
+            /// <summary>"Elliot" (aka Softsign) activation function</summary>
             Elliot,
-            /// <summary>"Tanh" activation function</summary>
-            Tanh
+            /// <summary>"TanH" activation function</summary>
+            TanH,
+            /// <summary>"Inverse Square Root Unit" activation function</summary>
+            ISRU,
+            /// <summary>"Sigmoid" (aka Logistic, Softstep) activation function</summary>
+            Sigmoid,
+            /// <summary>"Gaussian" activation function</summary>
+            Gaussian
         };
 
         /// <summary>Returns new instance of specified activation function</summary>
         /// <param name="type">Enumerated type of activation function</param>
-        public static IActivationFunction CreateAF(ActivationType type, double p1 = double.NaN)
+        public static IActivationFunction CreateActivationFunction(ActivationType type, double p1 = double.NaN, double p2 = double.NaN)
         {
             switch (type)
             {
                 case ActivationType.Identity: return new IdentityAF();
                 case ActivationType.Sinusoid: return new SinusoidAF();
                 case ActivationType.Elliot: return new ElliotAF((double.IsNaN(p1) ? 1 : p1));
-                case ActivationType.Tanh: return new TanhAF();
+                case ActivationType.TanH: return new TanhAF();
+                case ActivationType.ISRU: return new InverseSquareRootUnitAF((double.IsNaN(p1) ? 1 : p1));
+                case ActivationType.Sigmoid: return new SigmoidAF();
+                case ActivationType.Gaussian: return new GaussianAF();
                 default:
-                    throw new ApplicationException("Unsupported activation function type: " + type.ToString());
+                    throw new ArgumentException("Unsupported activation function type: " + type.ToString());
             }
         }
 
@@ -46,9 +55,12 @@ namespace OKOSW.Neural.Activation
                 case "IDENTITY": return ActivationType.Identity;
                 case "SINUSOID": return ActivationType.Sinusoid;
                 case "ELLIOT": return ActivationType.Elliot;
-                case "TANH": return ActivationType.Tanh;
+                case "TANH": return ActivationType.TanH;
+                case "ISRU": return ActivationType.ISRU;
+                case "SIGMOID": return ActivationType.Sigmoid;
+                case "GAUSSIAN": return ActivationType.Gaussian;
                 default:
-                    throw new ApplicationException("Unsupported activation function code: " + code);
+                    throw new ArgumentException("Unsupported activation function code: " + code);
             }
         }
 

@@ -12,16 +12,6 @@ namespace OKOSW.Neural.Reservoir.Analog
     public interface IAnalogReservoir
     {
         /// <summary>
-        /// Reservoir sequence number.
-        /// </summary>
-        string SeqNum { get; }
-
-        /// <summary>
-        /// Reservoir configuration name (together with SeqNum should be unique).
-        /// </summary>
-        string ConfigName { get; }
-
-        /// <summary>
         /// Reservoir size. (Reservoir neurons count)
         /// </summary>
         int Size { get; }
@@ -32,14 +22,9 @@ namespace OKOSW.Neural.Reservoir.Analog
         int OutputPredictorsCount { get; }
 
         /// <summary>
-        /// Reservoir neurons.
+        /// Collects key neuron states statistics
         /// </summary>
-        AnalogNeuron[] Neurons { get; }
-
-        /// <summary>
-        /// Context neuron.
-        /// </summary>
-        AnalogNeuron ContextNeuron { get; }
+        AnalogReservoirStat CollectStateStatistics();
 
         /// <summary>
         /// Resets all reservoir neurons to their initial state (before boot state).

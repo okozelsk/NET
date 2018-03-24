@@ -10,8 +10,8 @@
   <!-- Enumeration of test samples selection methods supported in ESN demo -->
   <xs:simpleType name="EnumTestSamplesSelectionMethod">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="RANDOM"/>
-      <xs:enumeration value="SEQUENCE"/>
+      <xs:enumeration value="Random"/>
+      <xs:enumeration value="Sequential"/>
     </xs:restriction>
   </xs:simpleType>
 
@@ -28,19 +28,11 @@
     <xs:attribute type="nst:UDouble" name="NormalizerReserveRatio" use="required"/>
   </xs:complexType>
 
-  <!-- Output fields -->
-  <xs:complexType name="Ouput">
-    <xs:sequence minOccurs="1" maxOccurs="unbounded">
-      <xs:element type="nst:Name" name="Field"/>
-    </xs:sequence>
-  </xs:complexType>
-
   <!-- Case structure -->
   <xs:complexType name="CaseStruct">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="SampleData" name="Samples" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="nst:EsnStruct" name="Esn" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="Ouput" name="Output" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="nst:EsnSettingsStruct" name="EsnSettings" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:string" name="Name" use="required"/>
   </xs:complexType>
@@ -48,8 +40,8 @@
   <!-- ESN demo settings XML document -->
   <xs:element name="EsnDemoSettings">
     <xs:complexType>
-      <xs:sequence minOccurs="1" maxOccurs="unbounded">
-        <xs:element type="CaseStruct" name="DemoCase"/>
+      <xs:sequence minOccurs="1" maxOccurs="1">
+        <xs:element type="CaseStruct" name="DemoCase" minOccurs="1" maxOccurs="unbounded"/>
       </xs:sequence>
       <xs:attribute type="xs:string" name="DataDir" use="required"/>
     </xs:complexType>

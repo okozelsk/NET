@@ -18,112 +18,106 @@ namespace OKOSW.Neural.Reservoir.Analog
     public class AnalogReservoir : IAnalogReservoir
     {
         //Attributes
-        private string _seqNum;
-        private string _configName;
+        private string _instanceName;
+        private AnalogReservoirSettings _settings;
         private Random _rand;
         private ReservoirInputBlock _inputBlock;
         private AnalogNeuron[] _neurons;
         private List<int>[] _partyNeuronsIdxs;
         private List<double>[] _partyNeuronsWeights;
-        private bool _contextNeuronFeature;
         private AnalogNeuron _contextNeuron;
         private double[] _neurons2ContextWeights;
         private double[] _context2NeuronsWeights;
-        private bool _feedbackFeature;
         private double[] _feedback;
         private double[] _feedbackWeights;
         private bool _augmentedStatesFeature;
 
         /// <summary>
-        /// Constructs analog computing reservoir.
+        /// Constructs analog reservoir
         /// </summary>
-        /// <param name="seqNum">Reservoir sequence identifier (together with reservoir configuration name should be unique within the parent)</param>
-        /// <param name="inputValuesCount">Number of reservoir input values</param>
-        /// <param name="feedbackValuesCount">Number of values to be fed back</param>
-        /// <param name="settings">Reservoir initialization parameters</param>
+        /// <param name="inputFieldsCount">Number of reservoir input values</param>
+        /// <param name="settings">Analog reservoir settings</param>
+        /// <param name="augmentedStates">Specifies if this reservoir will add augmented states to predictors</param>
         /// <param name="randomizerSeek">
         /// Calling constructor with the same randomizerSeek greater or equal to 0 ensures the same reservoir initialization (good for tuning).
         /// Specify randomizerSeek less than 0 for different initialization aech time the constructor will be called.
         /// </param>
-        public AnalogReservoir(int seqNum, int inputValuesCount, int feedbackValuesCount, AnalogReservoirSettings settings, int randomizerSeek = -1)
+        public AnalogReservoir(string instanceName, int inputFieldsCount, AnalogReservoirSettings settings, bool augmentedStates, int randomizerSeek = -1)
         {
+            _instanceName = instanceName;
             //--------------------------------------------------------
-            //Configuration name
-            _configName = settings.CfgName;
-            //Reservoir ID
-            _seqNum = _configName + "(" + seqNum.ToString() + ")";
+            //Settings
+            _settings = settings.DeepClone();
             //--------------------------------------------------------
             //Random object initialization
             if (randomizerSeek < 0) _rand = new Random();
             else _rand = new Random(randomizerSeek);
             //--------------------------------------------------------
             //Input memory and connections
-            int neuronsPerInput = Math.Max(1, (int)Math.Round((double)settings.Size * settings.InputConnectionDensity, 0));
-            _inputBlock = new ReservoirInputBlock(inputValuesCount, settings.Size, settings.BiasScale, settings.InputWeightScale, neuronsPerInput, _rand);
+            int neuronsPerInput = Math.Max(1, (int)Math.Round((double)_settings.Size * _settings.InputConnectionDensity, 0));
+            _inputBlock = new ReservoirInputBlock(inputFieldsCount, _settings.Size, _settings.BiasScale, _settings.InputWeightScale, neuronsPerInput, _rand);
             //--------------------------------------------------------
             //Reservoir neurons
-            _neurons = new AnalogNeuron[settings.Size];
+            _neurons = new AnalogNeuron[_settings.Size];
             //Neurons retainment rates
             double[] retainmentRates = new double[_neurons.Length];
             retainmentRates.Populate(0);
-            int retainmentNeuronsCount = (int)Math.Round((double)_neurons.Length * settings.RetainmentNeuronsDensity, 0);
-            if (retainmentNeuronsCount > 0 && settings.RetainmentMaxRate > 0)
+            if (_settings.RetainmentNeuronsFeature)
             {
-                _rand.FillUniform(retainmentRates, settings.RetainmentMinRate, settings.RetainmentMaxRate, 1, retainmentNeuronsCount);
-                _rand.Shuffle(retainmentRates);
+                int retainmentNeuronsCount = (int)Math.Round((double)_neurons.Length * _settings.RetainmentNeuronsDensity, 0);
+                if (retainmentNeuronsCount > 0 && _settings.RetainmentMaxRate > 0)
+                {
+                    _rand.FillUniform(retainmentRates, _settings.RetainmentMinRate, _settings.RetainmentMaxRate, 1, retainmentNeuronsCount);
+                    _rand.Shuffle(retainmentRates);
+                }
             }
             //Neurons creation
             for (int n = 0; n < _neurons.Length; n++)
             {
-                _neurons[n] = new AnalogNeuron(ActivationFactory.CreateAF(settings.ReservoirNeuronActivation), retainmentRates[n]);
+                _neurons[n] = new AnalogNeuron(ActivationFactory.CreateActivationFunction(_settings.ReservoirNeuronActivation), retainmentRates[n]);
             }
             //Helper array for neurons order randomization purposes
-            int[] neuronsShuffledIndices = new int[settings.Size];
+            int[] neuronsShuffledIndices = new int[_settings.Size];
             //--------------------------------------------------------
             //Context neuron feature
-            int contextNeuronFeedbacksCount = (int)Math.Round((double)_neurons.Length * settings.ContextNeuronFeedbackDensity, 0);
             _contextNeuron = null;
             _neurons2ContextWeights = null;
             _context2NeuronsWeights = null;
-            _contextNeuronFeature = (contextNeuronFeedbacksCount > 0);
-            if (_contextNeuronFeature)
+            if (_settings.ContextNeuronFeature)
             {
-                _contextNeuron = new AnalogNeuron(ActivationFactory.CreateAF(settings.ContextNeuronActivation), 0);
+                int contextNeuronFeedbacksCount = (int)Math.Round((double)_neurons.Length * _settings.ContextNeuronFeedbackDensity, 0);
+                _contextNeuron = new AnalogNeuron(ActivationFactory.CreateActivationFunction(_settings.ContextNeuronActivation), 0);
                 //Weights from each res neuron to context neuron
                 _neurons2ContextWeights = new double[_neurons.Length];
-                _rand.FillUniform(_neurons2ContextWeights, -1, 1, settings.ContextNeuronInWeightScale);
+                _rand.FillUniform(_neurons2ContextWeights, -1, 1, _settings.ContextNeuronInWeightScale);
                 //Weights from context neuron to res neurons
                 _context2NeuronsWeights = new double[_neurons.Length];
                 _context2NeuronsWeights.Populate(0);
                 neuronsShuffledIndices.ShuffledIndices(_rand);
                 for (int i = 0; i < contextNeuronFeedbacksCount && i < _neurons.Length; i++)
                 {
-                    _context2NeuronsWeights[neuronsShuffledIndices[i]] = RandomWeight(_rand, settings.ContextNeuronOutWeightScale);
+                    _context2NeuronsWeights[neuronsShuffledIndices[i]] = RandomWeight(_rand, _settings.ContextNeuronOutWeightScale);
                 }
-            }
-            else
-            {
-                //Neuron must be instantiated due to its statistics
-                _contextNeuron = new AnalogNeuron(ActivationFactory.CreateAF(settings.ReservoirNeuronActivation), 0);
             }
             //--------------------------------------------------------
             //Feedback feature and weights
-            int neuronsPerOutput = (int)Math.Round(settings.FeedbackConnectionDensity * (double)_neurons.Length, 0);
-            _feedback = new double[feedbackValuesCount];
-            _feedback.Populate(0);
+            _feedback = null;
             _feedbackWeights = null;
-            _feedbackFeature = (neuronsPerOutput > 0);
-            if (_feedbackFeature)
+            if (_settings.FeedbackFeature)
             {
+                int neuronsPerOutput = (int)Math.Round(_settings.FeedbackConnectionDensity * (double)_neurons.Length, 0);
+                //Feedback values
+                _feedback = new double[_settings.FeedbackFieldsNames.Count];
+                _feedback.Populate(0);
                 //Feedback weights
-                _feedbackWeights = new double[feedbackValuesCount * _neurons.Length];
+                _feedbackWeights = new double[_feedback.Length * _neurons.Length];
                 _feedbackWeights.Populate(0);
-                for (int outNo = 0; outNo < feedbackValuesCount; outNo++)
+                for (int outNo = 0; outNo < _feedback.Length; outNo++)
                 {
                     neuronsShuffledIndices.ShuffledIndices(_rand);
                     for (int i = 0; i < neuronsPerOutput; i++)
                     {
-                        _feedbackWeights[outNo * _neurons.Length + neuronsShuffledIndices[i]] = RandomWeight(_rand, settings.FeedbackWeightScale);
+                        _feedbackWeights[outNo * _neurons.Length + neuronsShuffledIndices[i]] = RandomWeight(_rand, _settings.FeedbackWeightScale);
                     }
                 }
             }
@@ -136,21 +130,21 @@ namespace OKOSW.Neural.Reservoir.Analog
                 _partyNeuronsIdxs[i] = new List<int>();
                 _partyNeuronsWeights[i] = new List<double>();
             }
-            switch (settings.Topology)
+            switch (_settings.TopologyType)
             {
                 case AnalogReservoirSettings.ReservoirTopologyType.Random:
-                    SetupRandomTopology(settings.RandomTopologyCfg, settings.InternalWeightScale);
+                    SetupRandomTopology((AnalogReservoirSettings.RandomTopology)(_settings.TopologySettings), _settings.InternalWeightScale);
                     break;
                 case AnalogReservoirSettings.ReservoirTopologyType.Ring:
-                    SetupRingTopology(settings.RingTopologyCfg, settings.InternalWeightScale);
+                    SetupRingTopology((AnalogReservoirSettings.RingTopology)(_settings.TopologySettings), _settings.InternalWeightScale);
                     break;
                 case AnalogReservoirSettings.ReservoirTopologyType.DTT:
-                    SetupDTTTopology(settings.DTTTopologyCfg, settings.InternalWeightScale);
+                    SetupDTTTopology((AnalogReservoirSettings.DTTTopology)(_settings.TopologySettings), _settings.InternalWeightScale);
                     break;
             }
             //--------------------------------------------------------
             //Augmented states
-            _augmentedStatesFeature = settings.AugmentedStatesFeature;
+            _augmentedStatesFeature = augmentedStates;
             return;
         }
 
@@ -270,7 +264,7 @@ namespace OKOSW.Neural.Reservoir.Analog
         /// </summary>
         /// <param name="cfg">Configuration parameters</param>
         /// <param name="weightScale">Connection weight scale</param>
-        private void SetupRandomTopology(AnalogReservoirSettings.RandomTopologyConfig cfg, double weightScale)
+        private void SetupRandomTopology(AnalogReservoirSettings.RandomTopology cfg, double weightScale)
         {
             //Fully random connections setup
             int connectionsCount = (int)Math.Round((double)_neurons.Length * (double)_neurons.Length * cfg.ConnectionsDensity);
@@ -288,7 +282,7 @@ namespace OKOSW.Neural.Reservoir.Analog
         /// </summary>
         /// <param name="cfg">Configuration parameters</param>
         /// <param name="weightScale">Connection weight scale</param>
-        private void SetupRingTopology(AnalogReservoirSettings.RingTopologyConfig cfg, double weightScale)
+        private void SetupRingTopology(AnalogReservoirSettings.RingTopology cfg, double weightScale)
         {
             //Ring connections part
             SetRingConnections(weightScale, cfg.BiDirection, false);
@@ -304,7 +298,7 @@ namespace OKOSW.Neural.Reservoir.Analog
         /// </summary>
         /// <param name="cfg">Configuration parameters</param>
         /// <param name="weightScale">Connection weight scale</param>
-        private void SetupDTTTopology(AnalogReservoirSettings.DTTTopologyConfig cfg, double weightScale)
+        private void SetupDTTTopology(AnalogReservoirSettings.DTTTopology cfg, double weightScale)
         {
             //HTwist part (single direction ring)
             SetRingConnections(weightScale, false);
@@ -330,16 +324,6 @@ namespace OKOSW.Neural.Reservoir.Analog
 
         //Properties
         /// <summary>
-        /// Reservoir ID.
-        /// </summary>
-        public string SeqNum { get { return _seqNum; } }
-
-        /// <summary>
-        /// Reservoir configuration name (together with ID should be unique).
-        /// </summary>
-        public string ConfigName { get { return _configName; } }
-
-        /// <summary>
         /// Reservoir size. (Reservoir neurons count)
         /// </summary>
         public int Size { get { return _neurons.Length; } }
@@ -350,14 +334,27 @@ namespace OKOSW.Neural.Reservoir.Analog
         public int OutputPredictorsCount { get { return _augmentedStatesFeature ? _neurons.Length * 2 : _neurons.Length; } }
 
         /// <summary>
-        /// Reservoir neurons.
+        /// Collects key neuron states statistics
         /// </summary>
-        public AnalogNeuron[] Neurons { get { return _neurons; } }
-
-        /// <summary>
-        /// Context neuron.
-        /// </summary>
-        public AnalogNeuron ContextNeuron { get { return _contextNeuron; } }
+        public AnalogReservoirStat CollectStateStatistics()
+        {
+            AnalogReservoirStat stats = new AnalogReservoirStat(_instanceName);
+            foreach (AnalogNeuron neuron in _neurons)
+            {
+                stats.NeuronsMaxAbsStatesStat.AddSampleValue(Math.Max(Math.Abs(neuron.StatesStat.Max), Math.Abs(neuron.StatesStat.Min)));
+                stats.NeuronsRMSStatesStat.AddSampleValue(neuron.StatesStat.RootMeanSquare);
+                stats.NeuronsStateSpansStat.AddSampleValue(neuron.StatesStat.Span);
+            }
+            if (_settings.ContextNeuronFeature)
+            {
+                stats.CtxNeuronStatesRMS = _contextNeuron.StatesStat.RootMeanSquare;
+            }
+            else
+            {
+                stats.CtxNeuronStatesRMS = -1;
+            }
+            return stats;
+        }
 
         //Methods
         /// <summary>
@@ -370,8 +367,14 @@ namespace OKOSW.Neural.Reservoir.Analog
             {
                 neuron.Reset();
             }
-            if(_contextNeuronFeature)_contextNeuron.Reset();
-            _feedback.Populate(0);
+            if (_settings.ContextNeuronFeature)
+            {
+                _contextNeuron.Reset();
+            }
+            if (_settings.FeedbackFeature)
+            {
+                _feedback.Populate(0);
+            }
             return;
         }
 
@@ -405,11 +408,11 @@ namespace OKOSW.Neural.Reservoir.Analog
                     reservoirSignal += _partyNeuronsWeights[neuronIdx][j] * _neurons[_partyNeuronsIdxs[neuronIdx][j]].PreviousState;
                 }
                 //Add context neuron signal if allowed
-                reservoirSignal += _contextNeuronFeature ? _context2NeuronsWeights[neuronIdx] * _contextNeuron.CurrentState : 0;
+                reservoirSignal += _settings.ContextNeuronFeature ? _context2NeuronsWeights[neuronIdx] * _contextNeuron.CurrentState : 0;
                 //----------------------------------------------------
                 //Feedback signal
                 double feedbackSignal = 0;
-                if (_feedbackFeature)
+                if (_settings.FeedbackFeature)
                 {
                     for (int outpIdx = 0; outpIdx < _feedback.Length; outpIdx++)
                     {
@@ -426,12 +429,12 @@ namespace OKOSW.Neural.Reservoir.Analog
                 //Set neuron augmented state to output predictors
                 if (_augmentedStatesFeature)
                 {
-                    outputPredictors[_neurons.Length + neuronIdx] = outputPredictors[neuronIdx] * outputPredictors[neuronIdx];
+                    outputPredictors[_neurons.Length + neuronIdx] = outputPredictors[neuronIdx].Power(2);
                 }
             });
             //----------------------------------------------------
             //New state of context neuron if allowed
-            if (_contextNeuronFeature)
+            if (_settings.ContextNeuronFeature)
             {
                 double res2ContextSignal = 0;
                 for (int neuronIdx = 0; neuronIdx < _neurons.Length; neuronIdx++)
@@ -449,7 +452,10 @@ namespace OKOSW.Neural.Reservoir.Analog
         /// <param name="feedback">Feedback values.</param>
         public void SetFeedback(double[] feedback)
         {
-            feedback.CopyTo(_feedback, 0);
+            if (_settings.FeedbackFeature)
+            {
+                feedback.CopyTo(_feedback, 0);
+            }
             return;
         }
 
@@ -547,4 +553,33 @@ namespace OKOSW.Neural.Reservoir.Analog
         }//ReservoirInputBlock
 
     }//AnalogReservoir
+
+    /// <summary>
+    /// Reservoir's key statistics
+    /// </summary>
+    [Serializable]
+    public class AnalogReservoirStat
+    {
+        //Attributes
+        public string ReservoirInstanceName { get; }
+        public BasicStat NeuronsMaxAbsStatesStat { get; }
+        public BasicStat NeuronsRMSStatesStat { get; }
+        public BasicStat NeuronsStateSpansStat { get; }
+        public double CtxNeuronStatesRMS { get; set; }
+
+        //Constructor
+        public AnalogReservoirStat(string reservoirInstanceName)
+        {
+            ReservoirInstanceName = reservoirInstanceName;
+            NeuronsMaxAbsStatesStat = new BasicStat();
+            NeuronsRMSStatesStat = new BasicStat();
+            NeuronsStateSpansStat = new BasicStat();
+            CtxNeuronStatesRMS = 0;
+            return;
+        }
+
+    }//AnalogReservoirStat
+
+
+
 }//Namespace

@@ -9,84 +9,95 @@ using System.Reflection;
 using OKOSW.Extensions;
 using OKOSW.Neural.Activation;
 using OKOSW.Neural.Reservoir.Analog;
+using OKOSW.Neural.Networks.FF.Basic;
 using OKOSW.XmlTools;
 
 namespace OKOSW.Neural.Networks.EchoState
 {
     /// <summary>Echo State Network general settings</summary>
     [Serializable]
-    public class EsnSettings
+    public sealed class EsnSettings
     {
-        //Properties
+        //Attribute properties
         /// <summary>
-        /// RandomizerSeek greater or equal to 0 causes the same "Random" initialization (important for parameters tuning and results comparableness).
-        /// Specify randomizerSeek less than 0 to get different initialization of Random class every time (and also different results).
+        /// RandomizerSeek greater or equal to 0 causes the same "Random" initialization (useful for parameters tuning).
+        /// Specify randomizerSeek less than 0 for different "Random" initialization every time the Esn is instatiating.
         /// </summary>
         public int RandomizerSeek { get; set; }
-        /// <summary>Count of input fields.</summary>
+        /// <summary>Input fields names.</summary>
         public List<string> InputFieldsNames { get; set; }
-        /// <summary>List of all mappings of input field(s) to appropriate reservoir configuration</summary>
-        public List<InputResCfgMap> InputsToResCfgsMapping { get; set; }
-        /// <summary>If true, unmodified input values will be added as a part of the regression predictors</summary>
+        /// <summary>List of future reservoir instances</summary>
+        public List<Input2ResSettingsMap> Input2ResSettingsMapCollection { get; set; }
+        /// <summary>If true, unmodified input values will be added as a part of the Esn regression predictors</summary>
         public bool RouteInputToReadout { get; set; }
-        /// <summary>Number of neurons in hidden layers of the read out FF network</summary>
-        public List<ReadOutHiddenLayerCfg> ReadOutHiddenLayers { get; set; }
-        /// <summary>Readout FF network output neuron activation function.</summary>
+        /// <summary>Readout hidden layers</summary>
+        public List<HiddenLayerSettings> ReadOutHiddenLayers { get; set; }
+        /// <summary>Readout output neuron activation function.</summary>
         public ActivationFactory.ActivationType OutputNeuronActivation { get; set; }
-        /// <summary>Regression method (LM or RESILIENT).</summary>
-        public string RegressionMethod { get; set; }
+        /// <summary>Readout regression method to be used.</summary>
+        public TrainingMethodType RegressionMethod { get; set; }
         /// <summary>Maximum number of regression attempts.</summary>
-        public int RegressionMaxAttempts { get; set; }
-        /// <summary>Maximum number of iterations to find output ESN weights.</summary>
-        public int RegressionMaxEpochs { get; set; }
-        /// <summary>Regression will be stopped after the specified MSE on training dataset will be reached.</summary>
-        public double RegressionStopMSEValue { get; set; }
+        public int RegressionAttempts { get; set; }
+        /// <summary>Maximum number of iterations during regression attempt.</summary>
+        public int RegressionAttemptEpochs { get; set; }
+        /// <summary>Regression attempt will be stopped after the specified MSE on training dataset will be reached.</summary>
+        public double RegressionAttemptStopMSE { get; set; }
+        /// <summary>Esn output fields names (predictions).</summary>
+        public List<string> OutputFieldsNames { get; set; }
 
         //Constructors
-        /// <summary>Creates ESN setup parameters initialized by default values</summary>
+        /// <summary>Creates uninitialized Esn settings instance</summary>
         public EsnSettings()
         {
             //Default settings
-            RandomizerSeek = 0; //Default is setting for debug
+            RandomizerSeek = 0;
             InputFieldsNames = new List<string>();
-            InputsToResCfgsMapping = new List<InputResCfgMap>();
-            RouteInputToReadout = true;
-            ReadOutHiddenLayers = new List<ReadOutHiddenLayerCfg>();
-            OutputNeuronActivation = ActivationFactory.ActivationType.Identity; //Standard
-            RegressionMethod = "LINEAR";
-            RegressionMaxAttempts = 1; //Standard
-            RegressionMaxEpochs = 50; //Usually enough value is 100
-            RegressionStopMSEValue = 1E-15; //Usually does not make sense to continue regression after reaching MSE 1E-15
+            Input2ResSettingsMapCollection = new List<Input2ResSettingsMap>();
+            RouteInputToReadout = false;
+            ReadOutHiddenLayers = new List<HiddenLayerSettings>();
+            OutputNeuronActivation = ActivationFactory.ActivationType.Identity;
+            RegressionMethod = TrainingMethodType.Linear;
+            RegressionAttempts = 0;
+            RegressionAttemptEpochs = 0;
+            RegressionAttemptStopMSE = 0;
+            OutputFieldsNames = new List<string>();
             return;
         }
 
-        /// <summary>Creates ESN setup parameters initialized as a values copy of specified source ESN settings</summary>
+        /// <summary>
+        /// Creates this instance as a deep copy of source instance
+        /// </summary>
+        /// <param name="source">Source settings</param>
         public EsnSettings(EsnSettings source)
         {
             //Copy
             RandomizerSeek = source.RandomizerSeek;
-            InputFieldsNames = source.InputFieldsNames;
-            InputsToResCfgsMapping = new List<InputResCfgMap>(source.InputsToResCfgsMapping.Count);
-            foreach (InputResCfgMap mapping in source.InputsToResCfgsMapping)
+            InputFieldsNames = new List<string>(source.InputFieldsNames);
+            Input2ResSettingsMapCollection = new List<Input2ResSettingsMap>(source.Input2ResSettingsMapCollection.Count);
+            foreach (Input2ResSettingsMap mapping in source.Input2ResSettingsMapCollection)
             {
-                InputsToResCfgsMapping.Add(mapping.Clone());
+                Input2ResSettingsMapCollection.Add(mapping.DeepClone());
             }
             RouteInputToReadout = source.RouteInputToReadout;
-            ReadOutHiddenLayers = new List<ReadOutHiddenLayerCfg>(source.ReadOutHiddenLayers.Count);
-            foreach (ReadOutHiddenLayerCfg hiddenLayerCfg in source.ReadOutHiddenLayers)
+            ReadOutHiddenLayers = new List<HiddenLayerSettings>(source.ReadOutHiddenLayers.Count);
+            foreach (HiddenLayerSettings hiddenLayerSettings in source.ReadOutHiddenLayers)
             {
-                ReadOutHiddenLayers.Add(hiddenLayerCfg.Clone());
+                ReadOutHiddenLayers.Add(hiddenLayerSettings.DeepClone());
             }
             OutputNeuronActivation = source.OutputNeuronActivation;
             RegressionMethod = source.RegressionMethod;
-            RegressionMaxAttempts = source.RegressionMaxAttempts;
-            RegressionMaxEpochs = source.RegressionMaxEpochs;
-            RegressionStopMSEValue = source.RegressionStopMSEValue;
+            RegressionAttempts = source.RegressionAttempts;
+            RegressionAttemptEpochs = source.RegressionAttemptEpochs;
+            RegressionAttemptStopMSE = source.RegressionAttemptStopMSE;
+            OutputFieldsNames = new List<string>(source.OutputFieldsNames);
             return;
         }
 
-        /// <summary>Creates ESN setup parameters initialized from XML</summary>
-        public EsnSettings(XElement esnElem)
+        /// <summary>
+        /// Creates instance and initialize it from given xml element
+        /// </summary>
+        /// <param name="esnSettingsElem">Xml element containing esn settings</param>
+        public EsnSettings(XElement esnSettingsElem)
         {
             //Validation
             //A very ugly validation
@@ -94,102 +105,121 @@ namespace OKOSW.Neural.Networks.EchoState
             Assembly neuralAssembly = Assembly.Load("Neural");
             validator.AddSchema(neuralAssembly.GetManifestResourceStream("OKOSW.Neural.Networks.EchoState.EsnSettings.xsd"));
             validator.AddSchema(neuralAssembly.GetManifestResourceStream("OKOSW.Neural.NeuralSettingsTypes.xsd"));
-            validator.LoadXDocFromString(esnElem.ToString());
+            validator.LoadXDocFromString(esnSettingsElem.ToString());
             //Parsing
-            RandomizerSeek = int.Parse(esnElem.Attribute("RandomizerSeek").Value);
-            //Input
-            XElement inputElem = esnElem.Descendants("Input").First();
-            RouteInputToReadout = bool.Parse(inputElem.Attribute("RouteToReadout").Value);
+            //Randomizer seek
+            RandomizerSeek = int.Parse(esnSettingsElem.Attribute("RandomizerSeek").Value);
+            //Input fields
+            XElement inputFieldsElem = esnSettingsElem.Descendants("InputFields").First();
+            RouteInputToReadout = bool.Parse(inputFieldsElem.Attribute("RouteToReadout").Value);
             InputFieldsNames = new List<string>();
-            foreach(XElement inputFieldElem in inputElem.Descendants("Field"))
+            foreach(XElement inputFieldElem in inputFieldsElem.Descendants("Field"))
             {
                 InputFieldsNames.Add(inputFieldElem.Attribute("Name").Value);
             }
+            //Available reservoir settings
+            List<AnalogReservoirSettings> availableResSettings = new List<AnalogReservoirSettings>();
+            XElement reservoirSettingsContainerElem = esnSettingsElem.Descendants("ReservoirSettingsContainer").First();
+            foreach (XElement reservoirSettingsElem in reservoirSettingsContainerElem.Descendants("AnalogReservoirSettings"))
+            {
+                availableResSettings.Add(new AnalogReservoirSettings(reservoirSettingsElem));
+            }
             //Readout
-            XElement readoutElem = esnElem.Descendants("Readout").First();
-            OutputNeuronActivation = ActivationFactory.ParseActivation(readoutElem.Attribute("Activation").Value);
-            //Hidden layers
-            ReadOutHiddenLayers = new List<ReadOutHiddenLayerCfg>();
-            foreach (XElement layerElem in readoutElem.Descendants("Layer"))
+            XElement readoutElem = esnSettingsElem.Descendants("Readout").First();
+            OutputNeuronActivation = ActivationFactory.ParseActivation(readoutElem.Attribute("OutputActivation").Value);
+            RegressionMethod = BasicNetwork.ParseTrainingMethodType(readoutElem.Attribute("RegressionMethod").Value);
+            RegressionAttempts = int.Parse(readoutElem.Attribute("Attempts").Value);
+            RegressionAttemptEpochs = int.Parse(readoutElem.Attribute("AttemptEpochs").Value);
+            RegressionAttemptStopMSE = double.Parse(readoutElem.Attribute("AttemptStopMSE").Value, CultureInfo.InvariantCulture);
+            //Readout hidden layers
+            ReadOutHiddenLayers = new List<HiddenLayerSettings>();
+            foreach (XElement hiddenLayerElem in readoutElem.Descendants("Layer"))
             {
-                ReadOutHiddenLayers.Add(new ReadOutHiddenLayerCfg(layerElem.Attribute("Neurons").Value, layerElem.Attribute("Activation").Value));
+                ReadOutHiddenLayers.Add(new HiddenLayerSettings(hiddenLayerElem));
             }
-            //Regression
-            XElement regressionElem = esnElem.Descendants("Regression").First();
-            RegressionMethod = regressionElem.Attribute("RegressionMethod").Value.ToUpper();
-            RegressionMaxAttempts = int.Parse(regressionElem.Attribute("MaxAttempts").Value);
-            RegressionMaxEpochs = int.Parse(regressionElem.Attribute("MaxEpochs").Value);
-            RegressionStopMSEValue = double.Parse(regressionElem.Attribute("StopMSE").Value, CultureInfo.InvariantCulture);
-            //Reservoirs and mapping to input fields
-            InputsToResCfgsMapping = new List<InputResCfgMap>();
-            foreach (XElement resElem in esnElem.Descendants("Reservoir"))
+            //Output fields
+            XElement outputFieldsElem = esnSettingsElem.Descendants("OutputFields").First();
+            OutputFieldsNames = new List<string>();
+            foreach (XElement outputFieldElem in outputFieldsElem.Descendants("Field"))
             {
-                AnalogReservoirSettings resCfg = new AnalogReservoirSettings(resElem);
-                List<string> resFields = new List<string>();
-                XElement resInputElem = resElem.Descendants("Input").First();
-                foreach(XElement resInputFieldElem in resInputElem.Descendants("Field"))
-                {
-                    resFields.Add(resInputFieldElem.Attribute("Name").Value);
-                }
-                List<int> resFieldsIdxs = new List<int>();
-                foreach (string fieldName in resFields)
-                {
-                    int fieldIdx = InputFieldsNames.IndexOf(fieldName);
-                    if (fieldIdx == -1)
-                    {
-                        throw new Exception("Reservoir configuration " + resCfg.CfgName + ": unknown input field name " + fieldName);
-                    }
-                    resFieldsIdxs.Add(fieldIdx);
-                }
-                bool aloneReservoirPerInputField = bool.Parse(resElem.Attribute("Multiple").Value);
-                if (!aloneReservoirPerInputField)
-                {
-                    //All specified input fields will be mixed into the one reservoir
-                    InputResCfgMap mapping = new InputResCfgMap(resFieldsIdxs, resCfg);
-                    InputsToResCfgsMapping.Add(mapping);
-                }
-                else
-                {
-                    //Each specified input field will have its own reservoir instance
-                    foreach (int inpFieldIdx in resFieldsIdxs)
-                    {
-                        List<int> singleInpIdxs = new List<int>();
-                        singleInpIdxs.Add(inpFieldIdx);
-                        InputResCfgMap mapping = new InputResCfgMap(singleInpIdxs, resCfg);
-                        InputsToResCfgsMapping.Add(mapping);
-                    }
-                }
+                OutputFieldsNames.Add(outputFieldElem.Attribute("Name").Value);
             }
+            //Mapping of input fields to reservoir settings (future reservoir instance)
+            Input2ResSettingsMapCollection = new List<Input2ResSettingsMap>();
+            XElement reservoirInstancesContainerElem = esnSettingsElem.Descendants("ReservoirInstancesContainer").First();
+            foreach (XElement reservoirInstanceElem in reservoirInstancesContainerElem.Descendants("ReservoirInstance"))
+            {
+                Input2ResSettingsMap newMap = new Input2ResSettingsMap();
+                newMap.InstanceName = reservoirInstanceElem.Attribute("InstanceName").Value;
+                newMap.AugmentedStates = bool.Parse(reservoirInstanceElem.Attribute("AugmentedStates").Value);
+                //Select reservoir settings
+                newMap.ReservoirSettings = (from settings in availableResSettings
+                                            where settings.SettingsName == reservoirInstanceElem.Attribute("SettingsName").Value
+                                            select settings).First();
+                //Associated input fields
+                foreach (XElement inputFieldElem in reservoirInstanceElem.Descendants("InputField"))
+                {
+                    string inputFieldName = inputFieldElem.Attribute("Name").Value;
+                    //Index in InputFieldsNames
+                    int inputFieldIdx = InputFieldsNames.IndexOf(inputFieldName);
+                    //Found?
+                    if (inputFieldIdx < 0)
+                    {
+                        //Not found
+                        throw new Exception($"Reservoir instance {newMap.InstanceName}: input field {inputFieldName} is not defined among Esn input fields.");
+                    }
+                    newMap.InputFieldsIdxs.Add(inputFieldIdx);
+                    newMap.InputFieldsNames.Add(inputFieldName);
+                }
+                //Associated feedback fields
+                foreach (string feedbackFieldName in newMap.ReservoirSettings.FeedbackFieldsNames)
+                {
+                    //Index in OutputFieldsNames
+                    int feedbackFieldIdx = OutputFieldsNames.IndexOf(feedbackFieldName);
+                    //Found?
+                    if (feedbackFieldIdx < 0)
+                    {
+                        //Not found
+                        throw new Exception($"Reservoir instance {newMap.InstanceName}: feedback field {feedbackFieldName} is not defined among Esn output fields.");
+                    }
+                    newMap.FeedbackFieldsIdxs.Add(feedbackFieldIdx);
+                    newMap.FeedbackFieldsNames.Add(feedbackFieldName);
+                }
+                Input2ResSettingsMapCollection.Add(newMap);
+            }
+
             return;
         }
 
         //Properties
         /// <summary>Number of input fields.</summary>
         public int InputFieldsCount { get { return InputFieldsNames.Count; } }
+        /// <summary>Number of output fields.</summary>
+        public int OutputFieldsCount { get { return OutputFieldsNames.Count; } }
 
 
         //Methods
         public override bool Equals(object obj)
         {
-            if (obj.GetType() != typeof(EsnSettings)) return false;
-            EsnSettings cmpSettings = (EsnSettings)obj;
+            if (obj == null) return false;
+            EsnSettings cmpSettings = obj as EsnSettings;
             if (RandomizerSeek != cmpSettings.RandomizerSeek ||
                !InputFieldsNames.ToArray().EqualValues(cmpSettings.InputFieldsNames.ToArray()) ||
-               InputsToResCfgsMapping.Count != cmpSettings.InputsToResCfgsMapping.Count ||
+               Input2ResSettingsMapCollection.Count != cmpSettings.Input2ResSettingsMapCollection.Count ||
                RouteInputToReadout != cmpSettings.RouteInputToReadout ||
                OutputNeuronActivation != cmpSettings.OutputNeuronActivation ||
                RegressionMethod != cmpSettings.RegressionMethod ||
-               RegressionMaxAttempts != cmpSettings.RegressionMaxAttempts ||
-               RegressionMaxEpochs != cmpSettings.RegressionMaxEpochs ||
-               RegressionStopMSEValue != cmpSettings.RegressionStopMSEValue ||
+               RegressionAttempts != cmpSettings.RegressionAttempts ||
+               RegressionAttemptEpochs != cmpSettings.RegressionAttemptEpochs ||
+               RegressionAttemptStopMSE != cmpSettings.RegressionAttemptStopMSE ||
                ReadOutHiddenLayers.Count != cmpSettings.ReadOutHiddenLayers.Count
                )
             {
                 return false;
             }
-            for (int i = 0; i < InputsToResCfgsMapping.Count; i++)
+            for (int i = 0; i < Input2ResSettingsMapCollection.Count; i++)
             {
-                if (!InputsToResCfgsMapping[i].Equals(cmpSettings.InputsToResCfgsMapping[i]))
+                if (!Input2ResSettingsMapCollection[i].Equals(cmpSettings.Input2ResSettingsMapCollection[i]))
                 {
                     return false;
                 }
@@ -210,115 +240,91 @@ namespace OKOSW.Neural.Networks.EchoState
         }
 
         /// <summary>
-        /// Creates the shallow copy of this instance
+        /// Creates the deep copy instance of this instance
         /// </summary>
-        public EsnSettings Clone()
+        public EsnSettings DeepClone()
         {
             EsnSettings clone = new EsnSettings(this);
             return clone;
         }
 
-
         //Inner classes
-        [Serializable]
-        public class ReadOutHiddenLayerCfg
-        {
-            //Attributes
-            public int NeuronsCount { get; set; }
-            public ActivationFactory.ActivationType ActivationType { get; set; }
-
-            //Constructors
-            public ReadOutHiddenLayerCfg(string neuronsCount, string activationType)
-            {
-                NeuronsCount = int.Parse(neuronsCount);
-                ActivationType = ActivationFactory.ParseActivation(activationType);
-                return;
-            }
-
-            public ReadOutHiddenLayerCfg(ReadOutHiddenLayerCfg source)
-            {
-                NeuronsCount = source.NeuronsCount;
-                ActivationType = source.ActivationType;
-                return;
-            }
-
-            //Methods
-            public override bool Equals(object obj)
-            {
-                if (obj.GetType() != typeof(ReadOutHiddenLayerCfg)) return false;
-                ReadOutHiddenLayerCfg cmpSettings = (ReadOutHiddenLayerCfg)obj;
-                if (NeuronsCount != cmpSettings.NeuronsCount || ActivationType != cmpSettings.ActivationType)
-                {
-                    return false;
-                }
-                return true;
-            }
-
-            public override int GetHashCode()
-            {
-                return base.GetHashCode();
-            }
-
-            /// <summary>
-            /// Returns the new instance of this instance as a copy.
-            /// </summary>
-            public ReadOutHiddenLayerCfg Clone()
-            {
-                return new ReadOutHiddenLayerCfg(this);
-            }
-
-        }//ReadOutHiddenLayerCfg
-
         /// <summary>
-        /// Mapping of ESN input field(s) to reservoir configuration
+        /// Mapping of Esn's input fields to specific reservoir settings
         /// </summary>
         [Serializable]
-        public class InputResCfgMap
+        public sealed class Input2ResSettingsMap
         {
-            //Attributes
-            public List<int> InputFieldsIdxs;
-            public AnalogReservoirSettings ReservoirSettings;
+            //Attribute properties
+            public List<int> InputFieldsIdxs {get; set;}
+            public List<string> InputFieldsNames { get; set; }
+            public List<int> FeedbackFieldsIdxs { get; set; }
+            public List<string> FeedbackFieldsNames { get; set; }
+            public string InstanceName { get; set; }
+            public AnalogReservoirSettings ReservoirSettings { get; set; }
+            public bool AugmentedStates { get; set; }
 
             //Constructor
-            public InputResCfgMap(List<int> inputFieldsIdxs = null, AnalogReservoirSettings reservoirSettings = null)
+            public Input2ResSettingsMap()
             {
-                if (inputFieldsIdxs == null)
-                {
-                    InputFieldsIdxs = new List<int>();
-                }
-                else
-                {
-                    InputFieldsIdxs = new List<int>(inputFieldsIdxs);
-                }
-                ReservoirSettings = reservoirSettings;
+                InputFieldsIdxs = new List<int>();
+                InputFieldsNames = new List<string>();
+                FeedbackFieldsIdxs = new List<int>();
+                FeedbackFieldsNames = new List<string>();
+                InstanceName = string.Empty;
+                ReservoirSettings = null;
+                AugmentedStates = false;
                 return;
             }
-            public InputResCfgMap(InputResCfgMap source)
+            public Input2ResSettingsMap(Input2ResSettingsMap source)
             {
                 InputFieldsIdxs = new List<int>(source.InputFieldsIdxs);
-                ReservoirSettings = new AnalogReservoirSettings(source.ReservoirSettings);
+                InputFieldsNames = new List<string>(source.InputFieldsNames);
+                FeedbackFieldsIdxs = new List<int>(source.FeedbackFieldsIdxs);
+                FeedbackFieldsNames = new List<string>(source.FeedbackFieldsNames);
+                InstanceName = source.InstanceName;
+                ReservoirSettings = source.ReservoirSettings.DeepClone();
+                AugmentedStates = source.AugmentedStates;
                 return;
             }
             
             //Methods
-            public InputResCfgMap Clone()
+            /// <summary>
+            /// Creates the deep copy instance of this instance
+            /// </summary>
+            /// <returns></returns>
+            public Input2ResSettingsMap DeepClone()
             {
-                return new InputResCfgMap(this);
+                return new Input2ResSettingsMap(this);
             }
 
             public override bool Equals(object obj)
             {
-                if (obj.GetType() != typeof(InputResCfgMap)) return false;
-                InputResCfgMap cmpSettings = (InputResCfgMap)obj;
+                if (obj == null) return false;
+                Input2ResSettingsMap cmpSettings = obj as Input2ResSettingsMap;
                 if (InputFieldsIdxs.Count != cmpSettings.InputFieldsIdxs.Count ||
-                    !ReservoirSettings.Equals(cmpSettings.ReservoirSettings)
+                    FeedbackFieldsIdxs.Count != cmpSettings.FeedbackFieldsIdxs.Count ||
+                    InstanceName != cmpSettings.InstanceName ||
+                    !ReservoirSettings.Equals(cmpSettings.ReservoirSettings) ||
+                    AugmentedStates != cmpSettings.AugmentedStates
                     )
                 {
                     return false;
                 }
                 for (int i = 0; i < InputFieldsIdxs.Count; i++)
                 {
-                    if (InputFieldsIdxs[i] != cmpSettings.InputFieldsIdxs[i])
+                    if (InputFieldsIdxs[i] != cmpSettings.InputFieldsIdxs[i] ||
+                        InputFieldsNames[i] != cmpSettings.InputFieldsNames[i]
+                        )
+                    {
+                        return false;
+                    }
+                }
+                for (int i = 0; i < FeedbackFieldsIdxs.Count; i++)
+                {
+                    if (FeedbackFieldsIdxs[i] != cmpSettings.FeedbackFieldsIdxs[i] ||
+                        FeedbackFieldsNames[i] != cmpSettings.FeedbackFieldsNames[i]
+                        )
                     {
                         return false;
                     }
@@ -328,10 +334,12 @@ namespace OKOSW.Neural.Networks.EchoState
 
             public override int GetHashCode()
             {
-                return base.GetHashCode();
+                return InstanceName.GetHashCode();
             }
 
-        }//InputResCfgMap
+        }//Input2ResSettingsMap
 
     }//ESNSettings
+
+
 }//Namespace

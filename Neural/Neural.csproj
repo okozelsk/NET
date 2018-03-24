@@ -42,14 +42,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Activation\ActivationFactory.cs" />
+    <Compile Include="Activation\InverseSquareRootUnitAF.cs" />
     <Compile Include="Activation\ElliotAF.cs" />
     <Compile Include="Activation\IActivationFunction.cs" />
     <Compile Include="Activation\IdentityAF.cs" />
+    <Compile Include="Activation\GaussianAF.cs" />
     <Compile Include="Activation\SinusoidAF.cs" />
+    <Compile Include="Activation\SigmoidAF.cs" />
     <Compile Include="Activation\TanhAF.cs" />
+    <Compile Include="Networks\Data\SamplesDataBundle.cs" />
     <Compile Include="Networks\EchoState\Esn.cs" />
     <Compile Include="Networks\EchoState\EsnSettings.cs" />
-    <Compile Include="Networks\EchoState\Regression.cs" />
     <Compile Include="Networks\FF\Basic\BasicNetwork.cs" />
     <Compile Include="Networks\FF\Basic\IBasicTrainer.cs" />
     <Compile Include="Networks\FF\Basic\LinRegrTrainer.cs" />

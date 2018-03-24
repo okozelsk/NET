@@ -7,6 +7,6 @@
   <xs:import namespace="Neural-Settings-Types" />
 
   <!-- ESN settings XML document -->
-  <xs:element name="Esn" type="nst:EsnStruct"/>
+  <xs:element name="EsnSettings" type="nst:EsnSettingsStruct"/>
 
 </xs:schema>

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+using System.Xml.Linq;
 using System.Threading.Tasks;
 using OKOSW.Extensions;
 using OKOSW.Neural.Activation;
@@ -54,6 +55,23 @@ namespace OKOSW.Neural.Networks.FF.Basic
         public double[] FlatWeights { get { return _flatWeights; } }
 
         //Methods
+        //Static methods
+        /// <summary>
+        /// Parses training method type from string code
+        /// </summary>
+        /// <param name="code">Code of the training method type</param>
+        public static TrainingMethodType ParseTrainingMethodType(string code)
+        {
+            switch (code.ToUpper())
+            {
+                case "LINEAR": return TrainingMethodType.Linear;
+                case "RESILIENT": return TrainingMethodType.Resilient;
+                default:
+                    throw new ArgumentException($"Unknown training method code {code}");
+            }
+        }
+
+        //Instance methods
         /// <summary>
         /// Adds new hidden layer into this network
         /// </summary>
@@ -161,7 +179,7 @@ namespace OKOSW.Neural.Networks.FF.Basic
         }
 
         /// <summary>
-        /// Creates shallow copy of this network
+        /// Creates the copy of this network
         /// </summary>
         public BasicNetwork Clone()
         {
@@ -290,7 +308,7 @@ namespace OKOSW.Neural.Networks.FF.Basic
             }
 
             /// <summary>
-            /// Creates shallow copy of this layer
+            /// Creates a copy of this layer
             /// </summary>
             public Layer Clone()
             {
@@ -337,11 +355,86 @@ namespace OKOSW.Neural.Networks.FF.Basic
                 double[] result = Compute(inputs, flatWeights);
                 for (int nodeIdx = 0; nodeIdx < LayerNodesCount; nodeIdx++)
                 {
-                    flatDerivatives[_nodesStartFlatIdx + nodeIdx] = Activation.ComputeDerivative(result[nodeIdx]);
+                    flatDerivatives[_nodesStartFlatIdx + nodeIdx] = Activation.ComputeDerivative(result[nodeIdx], inputs[nodeIdx]);
                 }
                 return result;
             }
         }//BasicNetworkLayer
     }//BasicNetwork
+
+    /// <summary>
+    /// Supported training methods
+    /// </summary>
+    public enum TrainingMethodType
+    {
+        /// <summary>
+        /// Linear regression
+        /// </summary>
+        Linear,
+        /// <summary>
+        /// Resilient backpropagation
+        /// </summary>
+        Resilient
+    }//TrainingMethodType
+
+    /// <summary>
+    /// Feed forward network hidden layer settings
+    /// </summary>
+    [Serializable]
+    public sealed class HiddenLayerSettings
+    {
+        //Attributes
+        public int NeuronsCount { get; set; }
+        public ActivationFactory.ActivationType ActivationType { get; set; }
+
+        //Constructors
+        public HiddenLayerSettings(int neuronsCount, ActivationFactory.ActivationType activationType)
+        {
+            NeuronsCount = neuronsCount;
+            ActivationType = activationType;
+            return;
+        }
+
+        public HiddenLayerSettings(HiddenLayerSettings source)
+        {
+            NeuronsCount = source.NeuronsCount;
+            ActivationType = source.ActivationType;
+            return;
+        }
+
+        public HiddenLayerSettings(XElement hiddenLayerElem)
+        {
+            NeuronsCount = int.Parse(hiddenLayerElem.Attribute("Neurons").Value);
+            ActivationType = ActivationFactory.ParseActivation(hiddenLayerElem.Attribute("Activation").Value);
+            return;
+        }
+
+        //Methods
+        public override bool Equals(object obj)
+        {
+            if (obj == null) return false;
+            HiddenLayerSettings cmpSettings = obj as HiddenLayerSettings;
+            if (NeuronsCount != cmpSettings.NeuronsCount || ActivationType != cmpSettings.ActivationType)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        public override int GetHashCode()
+        {
+            return NeuronsCount.GetHashCode();
+        }
+
+        /// <summary>
+        /// Returns the new instance of this instance as a deep copy.
+        /// </summary>
+        public HiddenLayerSettings DeepClone()
+        {
+            return new HiddenLayerSettings(this);
+        }
+
+    }//HiddenLayerSettings
+
 
 }//Namespace

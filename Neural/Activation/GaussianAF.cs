@@ -9,26 +9,25 @@ using OKOSW.MathTools;
 namespace OKOSW.Neural.Activation
 {
     /// <summary>
-    /// Sinusoid activation function
+    /// Gaussian activation function
     /// </summary>
     [Serializable]
-    public class SinusoidAF : IActivationFunction
+    public class GaussianAF : IActivationFunction
     {
         //Properties
-        public Interval Range { get { return new Interval(-1, 1); } }
+        public Interval Range { get { return new Interval(0, 1); } }
 
         //Methods
         public double Compute(double x)
         {
-            return Math.Sin(2d * x).Bound();
+            return Math.Exp(-(x.Power(2).Bound()));
         }
 
         public double ComputeDerivative(double c, double x = double.NaN)
         {
-            return Math.Cos(2d * c).Bound();
+            return -2*x*c;
         }
 
-    }//SinusoidAF
-
+    }//GaussianAF
 }//Namespace
 

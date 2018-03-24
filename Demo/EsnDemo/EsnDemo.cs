@@ -9,6 +9,7 @@ using System.Xml;
 using OKOSW.MathTools;
 using OKOSW.Extensions;
 using OKOSW.CsvTools;
+using OKOSW.Neural.Networks.Data;
 using OKOSW.Neural.Networks.EchoState;
 using OKOSW.Demo;
 using OKOSW.Demo.Log;
@@ -22,17 +23,17 @@ namespace OKOSW.Demo
     public static class EsnDemo
     {
         /// <summary>
-        /// Loads data, prepares output normalizer(s) and creates ESN required DataBundle object containing
+        /// Loads data, prepares output normalizer(s) and creates ESN required SamplesDataBundle object containing
         /// standardized and normalized data to be used for network training and testing.
         /// </summary>
         /// <param name="demoCaseParams">Demo case settings</param>
         /// <param name="predictionInputVector">OUT prepared input vector to be used for ESN further prediction (after training)</param>
         /// <param name="outputNormalizers">OUT prepared normalizer(s) for ESN outputs denormalization</param>
         /// <returns></returns>
-        public static Esn.DataBundle ESNDataBundleFromFile(EsnDemoSettings.DemoCaseParams demoCaseParams, out double[] predictionInputVector, out List<Normalizer> outputNormalizers)
+        public static SamplesDataBundle ESNDataBundleFromFile(EsnDemoSettings.DemoCaseParams demoCaseParams, out double[] predictionInputVector, out List<Normalizer> outputNormalizers)
         {
             Interval normalizationInterval = new Interval(-1, 1);
-            Esn.DataBundle data = new Esn.DataBundle(2000);
+            SamplesDataBundle data = new SamplesDataBundle();
             StreamReader stream = new StreamReader(new FileStream(demoCaseParams.CSVDataFileName, FileMode.Open));
             string exCommonText = "Can't parse data from file " + demoCaseParams.CSVDataFileName;
             //All data fields names
@@ -145,26 +146,26 @@ namespace OKOSW.Demo
         /// </summary>
         /// <param name="inArgs">Contains current/best error statistics, reservoir(s) statistics and the user object</param>
         /// <returns>Instructions for the calling regression process.</returns>
-        public static RegressionControlOutArgs ESNRegressionControl(RegressionControlInArgs inArgs)
+        public static Esn.EsnRegressionControlOutArgs ESNRegressionControl(Esn.EsnRegressionControlInArgs inArgs)
         {
             //Report reservoirs statistics in case of the first call
-            if (inArgs.RegrValID == 0 && inArgs.RegrAttemptNumber == 1 && inArgs.Epoch == 1)
+            if (inArgs.OutputFieldIdx == 0 && inArgs.RegrAttemptNumber == 1 && inArgs.Epoch == 1)
             {
                 for (int resIdx = 0; resIdx < inArgs.ReservoirsStatistics.Count; resIdx++)
                 {
-                    ((IOutputLog)inArgs.ControllerData).Write("    Reservoir neurons statistics for ResID " + inArgs.ReservoirsStatistics[resIdx].ResID, false);
+                    ((IOutputLog)inArgs.ControllerData).Write($"    Neurons states statistics of reservoir instance {inArgs.ReservoirsStatistics[resIdx].ReservoirInstanceName} ", false);
                     ((IOutputLog)inArgs.ControllerData).Write("          ABS-MAX Avg, Max, Min, SDdev: " + inArgs.ReservoirsStatistics[resIdx].NeuronsMaxAbsStatesStat.ArithAvg.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsMaxAbsStatesStat.Max.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsMaxAbsStatesStat.Min.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsMaxAbsStatesStat.StdDev.ToString(CultureInfo.InvariantCulture), false);
                     ((IOutputLog)inArgs.ControllerData).Write("              RMS Avg, Max, Min, SDdev: " + inArgs.ReservoirsStatistics[resIdx].NeuronsRMSStatesStat.ArithAvg.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsRMSStatesStat.Max.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsRMSStatesStat.Min.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsRMSStatesStat.StdDev.ToString(CultureInfo.InvariantCulture), false);
                     ((IOutputLog)inArgs.ControllerData).Write("             SPAN Avg, Max, Min, SDdev: " + inArgs.ReservoirsStatistics[resIdx].NeuronsStateSpansStat.ArithAvg.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsStateSpansStat.Max.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsStateSpansStat.Min.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsStateSpansStat.StdDev.ToString(CultureInfo.InvariantCulture), false);
                     ((IOutputLog)inArgs.ControllerData).Write("             Context neuron states RMS: " + inArgs.ReservoirsStatistics[resIdx].CtxNeuronStatesRMS.ToString(CultureInfo.InvariantCulture), false);
-                    ((IOutputLog)inArgs.ControllerData).Write(" ", false);
+                    ((IOutputLog)inArgs.ControllerData).Write("Regression:", false);
                 }
             }
-            RegressionControlOutArgs outArgs = new RegressionControlOutArgs();
+            Esn.EsnRegressionControlOutArgs outArgs = new Esn.EsnRegressionControlOutArgs();
             outArgs.Best = (inArgs.CurrRegrData.CombinedError < inArgs.BestRegrData.CombinedError);
             //Progress prompt
             ((IOutputLog)inArgs.ControllerData).Write(
-                "    OutFieldNbr: " + inArgs.RegrValID.ToString() +
+                "    OutputField: " + inArgs.OutputFieldName +
                 ", Attempt/Epoch: " + inArgs.RegrAttemptNumber.ToString().PadLeft(2, '0') + "/" + inArgs.Epoch.ToString().PadLeft(5, '0') +
                 ", DSet-Sizes: (" + inArgs.CurrRegrData.TrainingErrorStat.SamplesCount.ToString() + ", " + inArgs.CurrRegrData.TestingErrorStat.SamplesCount.ToString() + ")" +
                 ", Best-Train: " + (outArgs.Best ? inArgs.CurrRegrData.TrainingErrorStat : inArgs.BestRegrData.TrainingErrorStat).ArithAvg.ToString("E3", CultureInfo.InvariantCulture) +
@@ -188,18 +189,18 @@ namespace OKOSW.Demo
             //Load of data bundle for ESN training
             double[] predictionInputVector;
             List<Normalizer> outputNormalizers;
-            Esn.DataBundle data = ESNDataBundleFromFile(demoCaseParams, out predictionInputVector, out outputNormalizers);
+            SamplesDataBundle data = ESNDataBundleFromFile(demoCaseParams, out predictionInputVector, out outputNormalizers);
             //ESN training
-            Esn esn = new Esn(demoCaseParams.ESNCfg, demoCaseParams.OutputFieldsNames.Count);
+            Esn esn = new Esn(demoCaseParams.ESNCfg);
             Esn.EsnTestSamplesSelectorCallbackDelegate samplesSelector = esn.SelectRandomTestSamples;
-            if (demoCaseParams.TestSamplesSelection == "SEQUENCE") samplesSelector = esn.SelectSequenceTestSamples;
-            RegressionData[] regrOuts = esn.Train(data,
-                                                  demoCaseParams.BootSeqMinLength,
-                                                  demoCaseParams.TestingSeqLength,
-                                                  samplesSelector,
-                                                  ESNRegressionControl,
-                                                  log
-                                                  );
+            if (demoCaseParams.TestSamplesSelection == "Sequential") samplesSelector = esn.SelectSequentialTestSamples;
+            Esn.EsnRegressionData[] regrOuts = esn.Train(data,
+                                                         demoCaseParams.BootSeqMinLength,
+                                                         demoCaseParams.TestingSeqLength,
+                                                         samplesSelector,
+                                                         ESNRegressionControl,
+                                                         log
+                                                         );
             //Next future values prediction
             double[] outputVector = esn.PredictNext(predictionInputVector);
             for(int i = 0; i < outputVector.Length; i++)
@@ -209,9 +210,9 @@ namespace OKOSW.Demo
             //Report regression information
             for (int outputIdx = 0; outputIdx < regrOuts.Length; outputIdx++)
             {
-                log.Write("    " + demoCaseParams.OutputFieldsNames[outputIdx], false);
+                log.Write("          OutputField: " + regrOuts[outputIdx].OutputFieldName, false);
                 log.Write("       Predicted next: " + outputVector[outputIdx].ToString(CultureInfo.InvariantCulture), false);
-                log.Write("     Regr weights stat", false);
+                log.Write("    Trained weights stat", false);
                 log.Write("        Min, Max, Avg: " + regrOuts[outputIdx].OutputWeightsStat.Min.ToString(CultureInfo.InvariantCulture) + " " + regrOuts[outputIdx].OutputWeightsStat.Max.ToString(CultureInfo.InvariantCulture) + " " + regrOuts[outputIdx].OutputWeightsStat.ArithAvg.ToString(CultureInfo.InvariantCulture), false);
                 log.Write("        Upd, Cnt, Zrs: " + regrOuts[outputIdx].BestUpdatesCount.ToString() + " " + regrOuts[outputIdx].OutputWeightsStat.SamplesCount.ToString() + " " + (regrOuts[outputIdx].OutputWeightsStat.SamplesCount - regrOuts[outputIdx].OutputWeightsStat.NonzeroSamplesCount).ToString(), false);
                 log.Write("            Error stat", false);

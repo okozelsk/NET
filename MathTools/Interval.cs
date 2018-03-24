@@ -21,7 +21,7 @@ namespace OKOSW.MathTools
             LeftClosedRightOpen,
             LeftOpenRightClosed,
             LeftOpenRightOpen
-        }
+        }//IntervalType
 
         //Attributes
         //Locker to ensure thread safe behaviour
@@ -149,6 +149,27 @@ namespace OKOSW.MathTools
         }
 
         //Methods
+        public override bool Equals(object obj)
+        {
+            if (obj == null) return false;
+            Interval cmpInterval = obj as Interval;
+            lock(_lock)
+            {
+                return (_min == cmpInterval._min && _max == cmpInterval._max);
+            }
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 3;
+                hash = hash * 7 + _min.GetHashCode();
+                hash = hash * 7 + _max.GetHashCode();
+                return hash;
+            }
+        }
+
         /// <summary>
         /// Resets interval to uninitialized state
         /// </summary>
@@ -164,7 +185,7 @@ namespace OKOSW.MathTools
         }
 
         /// <summary>
-        /// Creates shallow copy of this interval
+        /// Creates a copy of this interval
         /// </summary>
         /// <returns></returns>
         public Interval Clone()

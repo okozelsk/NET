@@ -11,16 +11,17 @@ namespace OKOSW.MathTools.MatrixMath
     /// QR Decomposition.
     /// This class is based on a class from the public domain JAMA package.
     /// http://math.nist.gov/javanumerics/jama/
+    /// Added parallel processing.
     /// </summary>
     public class QRD
     {
         //Constants
 
         //Attributes
-        private double[][] _QRData;
-        private double[] _RDiagData;
         private int _rowsCount;
         private int _colsCount;
+        private double[][] _QRData;
+        private double[] _RDiagData;
 
         //Constructor
         public QRD(Matrix source)
@@ -30,21 +31,19 @@ namespace OKOSW.MathTools.MatrixMath
             _rowsCount = source.RowsCount;
             _colsCount = source.ColsCount;
             _RDiagData = new double[_colsCount];
-
-            // Main loop.
+            //Main loop
             for(int k = 0; k < _colsCount; k++)
             {
                 //Compute 2-norm of k-th column
-                double norm = 0;
+                double norm = 0d;
                 for (int i = k; i < _rowsCount; i++)
                 {
                     norm = Hypotenuse(norm, _QRData[i][k]);
-                }
-
-                if (norm != 0)
+                }//i
+                if (norm != 0d)
                 {
                     // Form k-th Householder vector.
-                    if (_QRData[k][k] < 0)
+                    if (_QRData[k][k] < 0d)
                     {
                         norm = -norm;
                     }
@@ -52,11 +51,9 @@ namespace OKOSW.MathTools.MatrixMath
                     {
                         _QRData[i][k] /= norm;
                     }
-                    _QRData[k][k] += 1.0;
-
+                    _QRData[k][k] += 1d;
                     //Apply transformation to remaining columns.
                     Parallel.For(k + 1, _colsCount, j =>
-                    //for (int j = k + 1; j < _colsCount; j++)
                     {
                         double s = 0.0;
                         for (int i = k; i < _rowsCount; i++)
@@ -71,7 +68,7 @@ namespace OKOSW.MathTools.MatrixMath
                     });
                 }
                 _RDiagData[k] = -norm;
-            }
+            }//k
             if (!FullRank)
             {
                 throw new Exception("Matrix is rank deficient.");
@@ -81,15 +78,111 @@ namespace OKOSW.MathTools.MatrixMath
 
         //Properties
         /// <summary>
+        /// Returns the Householder vectors
+        /// </summary>
+        public Matrix H
+        {
+            get
+            {
+                Matrix result = new Matrix(_rowsCount, _colsCount);
+                double[][] resultData = result.Data;
+                Parallel.For(0, _rowsCount, row =>
+                 {
+                     for (int col = 0; col < _colsCount; col++)
+                     {
+                         if (row >= col)
+                         {
+                             resultData[row][col] = _QRData[row][col];
+                         }
+                         else
+                         {
+                             resultData[row][col] = 0d;
+                         }
+                     }//col
+                });//row
+                return result;
+            }//get
+        }//H
+
+        /// <summary>
+        /// Returns the upper triangular factor
+        /// </summary>
+        public Matrix R
+        {
+            get
+            {
+                Matrix result = new Matrix(_colsCount, _colsCount);
+                double[][] resultData = result.Data;
+                Parallel.For(0, _colsCount, i =>
+                {
+                    for (int j = 0; j < _colsCount; j++)
+                    {
+                        if (i < j)
+                        {
+                            resultData[i][j] = _QRData[i][j];
+                        }
+                        else if (i == j)
+                        {
+                            resultData[i][j] = _RDiagData[i];
+                        }
+                        else
+                        {
+                            resultData[i][j] = 0d;
+                        }
+                    }//j
+                });//i
+                return result;
+            }
+        }//R
+
+        /// <summary>
+        /// Generates and returns the (economy-sized) orthogonal factor
+        /// </summary>
+        public Matrix Q
+        {
+            get
+            {
+                Matrix result = new Matrix(_rowsCount, _colsCount);
+                double[][] resultData = result.Data;
+                for (int k = _colsCount - 1; k >= 0; k--)
+                {
+                    for (int row = 0; row < _rowsCount; row++)
+                    {
+                        resultData[row][k] = 0d;
+                    }//row
+                    resultData[k][k] = 1d;
+                    for (int j = k; j < _colsCount; j++)
+                    {
+                        if (_QRData[k][k] != 0d)
+                        {
+                            double s = 0d;
+                            for (int i = k; i < _rowsCount; i++)
+                            {
+                                s += _QRData[i][k] * resultData[i][j];
+                            }
+                            s = -s / _QRData[k][k];
+                            for (int i = k; i < _rowsCount; i++)
+                            {
+                                resultData[i][j] += s * _QRData[i][k];
+                            }
+                        }
+                    }//j
+                }//k
+                return result;
+            }
+        }//Q
+
+
+        /// <summary>
         /// Is full rank? 
         /// </summary>
         public bool FullRank
         {
             get
             {
-                for (int j = 0; j < _colsCount; j++)
+                for (int col = 0; col < _colsCount; col++)
                 {
-                    if (_RDiagData[j] == 0)
+                    if (_RDiagData[col] == 0)
                     {
                         return false;
                     }
@@ -126,7 +219,7 @@ namespace OKOSW.MathTools.MatrixMath
         /// <summary>
         /// Least squares solution of A*X = B
         /// </summary>
-        /// <param name="B">A Matrix with as many rows as A and at least one column.</param>
+        /// <param name="B">A Matrix with as many rows as A and at least one column (desired values).</param>
         public Matrix Solve(Matrix B)
         {
             if (B.RowsCount != _rowsCount)
