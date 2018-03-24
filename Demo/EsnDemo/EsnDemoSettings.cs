@@ -26,9 +26,9 @@ namespace RCNet.Demo
         {
             XmlValidator validator = new XmlValidator();
             Assembly esnDemoAssembly = Assembly.GetExecutingAssembly();
-            Assembly neuralAssembly = Assembly.Load("Neural");
+            Assembly assemblyRCNet = Assembly.Load("RCNet");
             validator.AddSchema(esnDemoAssembly.GetManifestResourceStream("RCNet.Demo.EsnDemoSettings.xsd"));
-            validator.AddSchema(neuralAssembly.GetManifestResourceStream("RCNet.Neural.NeuralSettingsTypes.xsd"));
+            validator.AddSchema(assemblyRCNet.GetManifestResourceStream("RCNet.NeuralSettingsTypes.xsd"));
             XDocument xmlDoc = validator.LoadXDocFromFile(xmlFile);
             XElement root = xmlDoc.Descendants("EsnDemoSettings").First();
             DataDir = root.Attribute("DataDir").Value;

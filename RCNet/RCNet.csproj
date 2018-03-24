@@ -78,7 +78,7 @@
     <Compile Include="XmlTools\XmlValidator.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Neural\NeuralSettingsTypes.xsd">
+    <EmbeddedResource Include="NeuralSettingsTypes.xsd">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>

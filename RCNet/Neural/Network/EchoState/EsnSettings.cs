@@ -103,7 +103,7 @@ namespace RCNet.Neural.Network.EchoState
             XmlValidator validator = new XmlValidator();
             Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
             validator.AddSchema(assemblyRCNet.GetManifestResourceStream("RCNet.Neural.Network.EchoState.EsnSettings.xsd"));
-            validator.AddSchema(assemblyRCNet.GetManifestResourceStream("RCNet.Neural.NeuralSettingsTypes.xsd"));
+            validator.AddSchema(assemblyRCNet.GetManifestResourceStream("RCNet.NeuralSettingsTypes.xsd"));
             validator.LoadXDocFromString(esnSettingsElem.ToString());
             //Parsing
             //Randomizer seek
