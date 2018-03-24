@@ -7,7 +7,7 @@
     <ProjectGuid>{3BE0D8A7-5908-4D16-8822-029DE64DB619}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>OKOSW.Extensions</RootNamespace>
+    <RootNamespace>RCNet.Extensions</RootNamespace>
     <AssemblyName>Extensions</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

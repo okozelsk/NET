@@ -7,7 +7,7 @@
     <ProjectGuid>{14197A5B-E12B-4AFD-88BE-AEC93FB94CB4}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>OKOSW.MathTools</RootNamespace>
+    <RootNamespace>RCNet.MathTools</RootNamespace>
     <AssemblyName>MathTools</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

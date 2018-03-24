@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
-using OKOSW.MathTools;
-using OKOSW.Extensions;
-using OKOSW.CsvTools;
-using OKOSW.Neural.Activation;
+using RCNet.MathTools;
+using RCNet.Extensions;
+using RCNet.CsvTools;
+using RCNet.Neural.Activation;
 
-namespace OKOSW.Neural.Networks.EchoState
+namespace RCNet.Neural.Networks.EchoState
 {
     /// <summary>
     /// Implements analog reservoir supporting several internal topologies and advanced features

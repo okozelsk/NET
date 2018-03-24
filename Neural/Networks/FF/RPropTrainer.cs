@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
-using OKOSW.Extensions;
+using RCNet.Extensions;
 
-namespace OKOSW.Neural.Networks.FF
+namespace RCNet.Neural.Networks.FF
 {
     /// <summary>
     /// Parameters of RPROP trainer

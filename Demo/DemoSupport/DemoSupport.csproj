@@ -7,7 +7,7 @@
     <ProjectGuid>{D52159CE-BE0E-4977-BCFA-23194CF6D6ED}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>OKOSW.Demo</RootNamespace>
+    <RootNamespace>RCNet.Demo</RootNamespace>
     <AssemblyName>DemoSupport</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

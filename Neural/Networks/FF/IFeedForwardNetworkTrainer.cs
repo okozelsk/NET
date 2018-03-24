@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OKOSW.Neural.Networks.FF
+namespace RCNet.Neural.Networks.FF
 {
     interface IFeedForwardNetworkTrainer
     {

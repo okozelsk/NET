@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using OKOSW.MathTools;
-using OKOSW.Extensions;
+using RCNet.MathTools;
+using RCNet.Extensions;
 
-namespace OKOSW.Neural.Activation
+namespace RCNet.Neural.Activation
 {
     /// <summary>
     /// Elliot activation function

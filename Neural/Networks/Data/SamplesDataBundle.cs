@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OKOSW.Neural.Networks.Data
+namespace RCNet.Neural.Networks.Data
 {
     /// <summary>
     /// Bundle of predictors and desired outputs

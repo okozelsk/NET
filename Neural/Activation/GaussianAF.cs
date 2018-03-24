@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using OKOSW.Extensions;
-using OKOSW.MathTools;
+using RCNet.Extensions;
+using RCNet.MathTools;
 
-namespace OKOSW.Neural.Activation
+namespace RCNet.Neural.Activation
 {
     /// <summary>
     /// Gaussian activation function

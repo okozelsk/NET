@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 using System.IO;
 using System.Xml.Linq;
 using System.Globalization;
-using OKOSW.Extensions;
-using OKOSW.XmlTools;
-using OKOSW.Neural;
-using OKOSW.Neural.Networks.EchoState;
 using System.Reflection;
+using RCNet.Extensions;
+using RCNet.XmlTools;
+using RCNet.Neural;
+using RCNet.Neural.Networks.EchoState;
 
-namespace OKOSW.Demo
+namespace RCNet.Demo
 {
     public class EsnDemoSettings
     {
@@ -27,8 +27,8 @@ namespace OKOSW.Demo
             XmlValidator validator = new XmlValidator();
             Assembly esnDemoAssembly = Assembly.GetExecutingAssembly();
             Assembly neuralAssembly = Assembly.Load("Neural");
-            validator.AddSchema(esnDemoAssembly.GetManifestResourceStream("OKOSW.Demo.EsnDemoSettings.xsd"));
-            validator.AddSchema(neuralAssembly.GetManifestResourceStream("OKOSW.Neural.NeuralSettingsTypes.xsd"));
+            validator.AddSchema(esnDemoAssembly.GetManifestResourceStream("RCNet.Demo.EsnDemoSettings.xsd"));
+            validator.AddSchema(neuralAssembly.GetManifestResourceStream("RCNet.Neural.NeuralSettingsTypes.xsd"));
             XDocument xmlDoc = validator.LoadXDocFromFile(xmlFile);
             XElement root = xmlDoc.Descendants("EsnDemoSettings").First();
             DataDir = root.Attribute("DataDir").Value;

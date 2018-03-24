@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Security.Cryptography;
 
-namespace Extensions
+namespace RCNet.Extensions
 {
     /// <summary>
     /// Useful extensions of RNGCryptoServiceProvider class.

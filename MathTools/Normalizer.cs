@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using OKOSW.Extensions;
+using RCNet.Extensions;
 
-namespace OKOSW.MathTools
+namespace RCNet.MathTools
 {
     /// <summary>
     /// Implements thread safe normalizer and denormalizer. Scales input to desired normalized range and vice versa.

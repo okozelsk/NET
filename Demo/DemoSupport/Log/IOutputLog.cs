@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OKOSW.Demo.Log
+namespace RCNet.Demo.Log
 {
     /// <summary>
     /// Simple output log interface

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OKOSW.Extensions
+namespace RCNet.Extensions
 {
     /// <summary>Useful extensions of Random class.</summary>
     public static class RandomClassExtensions

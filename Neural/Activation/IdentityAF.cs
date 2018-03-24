@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using OKOSW.MathTools;
+using RCNet.MathTools;
 
-namespace OKOSW.Neural.Activation
+namespace RCNet.Neural.Activation
 {
     /// <summary>
     /// Linear activation function

@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using OKOSW.Demo;
-using OKOSW.Demo.Log;
+using RCNet.Demo;
+using RCNet.Demo.Log;
 
-namespace OKOSW.DemoConsoleApp
+namespace RCNet.DemoConsoleApp
 {
     class Program
     {

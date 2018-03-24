@@ -7,7 +7,7 @@
     <ProjectGuid>{5859E49A-3079-4EA7-B0C5-86C4B26E09D6}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>OKOSW.Neural</RootNamespace>
+    <RootNamespace>RCNet.Neural</RootNamespace>
     <AssemblyName>Neural</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

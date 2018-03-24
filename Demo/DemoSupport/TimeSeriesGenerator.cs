@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.IO;
 using System.Globalization;
 
-namespace OKOSW.Demo
+namespace RCNet.Demo
 {
     /// <summary>
     /// Tool for generation of several usual time series types

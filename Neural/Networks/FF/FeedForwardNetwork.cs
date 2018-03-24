@@ -4,11 +4,11 @@ using System.Text;
 using System.Threading;
 using System.Xml.Linq;
 using System.Threading.Tasks;
-using OKOSW.Extensions;
-using OKOSW.Neural.Activation;
-using OKOSW.MathTools;
+using RCNet.Extensions;
+using RCNet.Neural.Activation;
+using RCNet.MathTools;
 
-namespace OKOSW.Neural.Networks.FF
+namespace RCNet.Neural.Networks.FF
 {
     /// <summary>
     /// Implements feed forward network supporting multiple hidden layers

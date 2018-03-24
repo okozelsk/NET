@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 using System.Reflection;
 using System.Globalization;
 using System.Xml.Linq;
-using OKOSW.XmlTools;
-using OKOSW.Neural.Activation;
+using RCNet.XmlTools;
+using RCNet.Neural.Activation;
 
-namespace OKOSW.Neural.Networks.EchoState
+namespace RCNet.Neural.Networks.EchoState
 {
     /// <summary>
     /// Reservoir settings
@@ -137,8 +137,8 @@ namespace OKOSW.Neural.Networks.EchoState
             //A very ugly validation
             XmlValidator validator = new XmlValidator();
             Assembly neuralAssembly = Assembly.Load("Neural");
-            validator.AddSchema(neuralAssembly.GetManifestResourceStream("OKOSW.Neural.Networks.EchoState.AnalogReservoirSettings.xsd"));
-            validator.AddSchema(neuralAssembly.GetManifestResourceStream("OKOSW.Neural.NeuralSettingsTypes.xsd"));
+            validator.AddSchema(neuralAssembly.GetManifestResourceStream("RCNet.Neural.Networks.EchoState.AnalogReservoirSettings.xsd"));
+            validator.AddSchema(neuralAssembly.GetManifestResourceStream("RCNet.Neural.NeuralSettingsTypes.xsd"));
             validator.LoadXDocFromString(reservoirSettingsElem.ToString());
             //Parsing
             SettingsName = reservoirSettingsElem.Attribute("Name").Value;

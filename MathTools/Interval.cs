@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace OKOSW.MathTools
+namespace RCNet.MathTools
 {
     /// <summary>
     /// Implements simple thread safe class representing interval.

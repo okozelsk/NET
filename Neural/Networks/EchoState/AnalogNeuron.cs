@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using OKOSW.Extensions;
-using OKOSW.MathTools;
-using OKOSW.Neural.Activation;
+using RCNet.Extensions;
+using RCNet.MathTools;
+using RCNet.Neural.Activation;
 
-namespace OKOSW.Neural.Networks.EchoState
+namespace RCNet.Neural.Networks.EchoState
 {
     /// <summary>
     /// Implements analog reservoir's neuron

@@ -4,11 +4,11 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
 using System.Runtime.CompilerServices;
-using OKOSW.Extensions;
-using OKOSW.Neural.Activation;
-using OKOSW.MathTools.MatrixMath;
+using RCNet.Extensions;
+using RCNet.Neural.Activation;
+using RCNet.MathTools.MatrixMath;
 
-namespace OKOSW.Neural.Networks.FF
+namespace RCNet.Neural.Networks.FF
 {
     /// <summary>
     /// Startup parameters for linear regression trainer

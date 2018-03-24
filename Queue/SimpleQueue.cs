@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OKOSW.Queue
+namespace RCNet.Queue
 {
     /// <summary>
     /// Implements simple thread safe FIFO queue template

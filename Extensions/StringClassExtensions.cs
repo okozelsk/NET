@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Globalization;
 
-namespace OKOSW.Extensions
+namespace RCNet.Extensions
 {
     /// <summary>
     /// Useful String class Extensions

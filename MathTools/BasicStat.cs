@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using OKOSW.Extensions;
+using RCNet.Extensions;
 
-namespace OKOSW.MathTools
+namespace RCNet.MathTools
 {
     /// <summary>
     /// Implements simple statistics (thread safe).

@@ -8,7 +8,7 @@ using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Schema;
 
-namespace OKOSW.XmlTools
+namespace RCNet.XmlTools
 {
     /// <summary>
     /// Provides xml loading/validation functionalities

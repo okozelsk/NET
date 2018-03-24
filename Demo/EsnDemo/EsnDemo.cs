@@ -6,16 +6,16 @@ using System.Threading.Tasks;
 using System.IO;
 using System.Globalization;
 using System.Xml;
-using OKOSW.MathTools;
-using OKOSW.Extensions;
-using OKOSW.CsvTools;
-using OKOSW.Neural.Networks.Data;
-using OKOSW.Neural.Networks.EchoState;
-using OKOSW.Demo;
-using OKOSW.Demo.Log;
+using RCNet.MathTools;
+using RCNet.Extensions;
+using RCNet.CsvTools;
+using RCNet.Neural.Networks.Data;
+using RCNet.Neural.Networks.EchoState;
+using RCNet.Demo;
+using RCNet.Demo.Log;
 
 
-namespace OKOSW.Demo
+namespace RCNet.Demo
 {
     /// <summary>
     /// Demonstrates ESN usage

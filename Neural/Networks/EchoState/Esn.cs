@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
-using OKOSW.Extensions;
-using OKOSW.MathTools;
-using OKOSW.Neural.Activation;
-using OKOSW.Neural.Networks.Data;
-using OKOSW.Neural.Networks.FF;
+using RCNet.Extensions;
+using RCNet.MathTools;
+using RCNet.Neural.Activation;
+using RCNet.Neural.Networks.Data;
+using RCNet.Neural.Networks.FF;
 
-namespace OKOSW.Neural.Networks.EchoState
+namespace RCNet.Neural.Networks.EchoState
 {
     /// <summary>
     /// Implements Echo State Network

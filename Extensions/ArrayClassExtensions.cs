@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 
-namespace OKOSW.Extensions
+namespace RCNet.Extensions
 {
     /// <summary>
     /// Useful extensions of Array class

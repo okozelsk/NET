@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 using System.Globalization;
 using System.Xml.Linq;
 using System.Reflection;
-using OKOSW.Extensions;
-using OKOSW.Neural.Activation;
-using OKOSW.Neural.Networks.FF;
-using OKOSW.XmlTools;
+using RCNet.Extensions;
+using RCNet.Neural.Activation;
+using RCNet.Neural.Networks.FF;
+using RCNet.XmlTools;
 
-namespace OKOSW.Neural.Networks.EchoState
+namespace RCNet.Neural.Networks.EchoState
 {
     /// <summary>Echo State Network general settings</summary>
     [Serializable]
@@ -102,8 +102,8 @@ namespace OKOSW.Neural.Networks.EchoState
             //A very ugly validation
             XmlValidator validator = new XmlValidator();
             Assembly neuralAssembly = Assembly.Load("Neural");
-            validator.AddSchema(neuralAssembly.GetManifestResourceStream("OKOSW.Neural.Networks.EchoState.EsnSettings.xsd"));
-            validator.AddSchema(neuralAssembly.GetManifestResourceStream("OKOSW.Neural.NeuralSettingsTypes.xsd"));
+            validator.AddSchema(neuralAssembly.GetManifestResourceStream("RCNet.Neural.Networks.EchoState.EsnSettings.xsd"));
+            validator.AddSchema(neuralAssembly.GetManifestResourceStream("RCNet.Neural.NeuralSettingsTypes.xsd"));
             validator.LoadXDocFromString(esnSettingsElem.ToString());
             //Parsing
             //Randomizer seek
