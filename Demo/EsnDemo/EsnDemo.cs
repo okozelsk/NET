@@ -158,8 +158,9 @@ namespace OKOSW.Demo
                     ((IOutputLog)inArgs.ControllerData).Write("              RMS Avg, Max, Min, SDdev: " + inArgs.ReservoirsStatistics[resIdx].NeuronsRMSStatesStat.ArithAvg.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsRMSStatesStat.Max.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsRMSStatesStat.Min.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsRMSStatesStat.StdDev.ToString(CultureInfo.InvariantCulture), false);
                     ((IOutputLog)inArgs.ControllerData).Write("             SPAN Avg, Max, Min, SDdev: " + inArgs.ReservoirsStatistics[resIdx].NeuronsStateSpansStat.ArithAvg.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsStateSpansStat.Max.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsStateSpansStat.Min.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsStateSpansStat.StdDev.ToString(CultureInfo.InvariantCulture), false);
                     ((IOutputLog)inArgs.ControllerData).Write("             Context neuron states RMS: " + inArgs.ReservoirsStatistics[resIdx].CtxNeuronStatesRMS.ToString(CultureInfo.InvariantCulture), false);
-                    ((IOutputLog)inArgs.ControllerData).Write("Regression:", false);
+                    ((IOutputLog)inArgs.ControllerData).Write(" ", false);
                 }
+                ((IOutputLog)inArgs.ControllerData).Write("Regression:", false);
             }
             Esn.EsnRegressionControlOutArgs outArgs = new Esn.EsnRegressionControlOutArgs();
             outArgs.Best = (inArgs.CurrRegrData.CombinedError < inArgs.BestRegrData.CombinedError);
