@@ -8,7 +8,6 @@ using System.Xml.Linq;
 using System.Reflection;
 using OKOSW.Extensions;
 using OKOSW.Neural.Activation;
-using OKOSW.Neural.Reservoir.Analog;
 using OKOSW.Neural.Networks.FF;
 using OKOSW.XmlTools;
 

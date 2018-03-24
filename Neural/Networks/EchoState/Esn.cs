@@ -7,7 +7,6 @@ using OKOSW.MathTools;
 using OKOSW.Neural.Activation;
 using OKOSW.Neural.Networks.Data;
 using OKOSW.Neural.Networks.FF;
-using OKOSW.Neural.Reservoir.Analog;
 
 namespace OKOSW.Neural.Networks.EchoState
 {

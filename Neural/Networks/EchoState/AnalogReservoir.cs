@@ -9,7 +9,7 @@ using OKOSW.Extensions;
 using OKOSW.CsvTools;
 using OKOSW.Neural.Activation;
 
-namespace OKOSW.Neural.Reservoir.Analog
+namespace OKOSW.Neural.Networks.EchoState
 {
     /// <summary>
     /// Implements analog reservoir supporting several internal topologies and advanced features

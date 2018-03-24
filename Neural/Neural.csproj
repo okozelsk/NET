@@ -63,9 +63,9 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Reservoir\Analog\AnalogNeuron.cs" />
-    <Compile Include="Reservoir\Analog\AnalogReservoirSettings.cs" />
-    <Compile Include="Reservoir\Analog\AnalogReservoir.cs" />
+    <Compile Include="Networks\EchoState\AnalogNeuron.cs" />
+    <Compile Include="Networks\EchoState\AnalogReservoirSettings.cs" />
+    <Compile Include="Networks\EchoState\AnalogReservoir.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CSVTools\CsvTools.csproj">
@@ -101,7 +101,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Reservoir\Analog\AnalogReservoirSettings.xsd" />
+    <EmbeddedResource Include="Networks\EchoState\AnalogReservoirSettings.xsd" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Networks\EchoState\EsnSettings.xsd" />

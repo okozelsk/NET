@@ -7,7 +7,7 @@ using OKOSW.Extensions;
 using OKOSW.MathTools;
 using OKOSW.Neural.Activation;
 
-namespace OKOSW.Neural.Reservoir.Analog
+namespace OKOSW.Neural.Networks.EchoState
 {
     /// <summary>
     /// Implements analog reservoir's neuron

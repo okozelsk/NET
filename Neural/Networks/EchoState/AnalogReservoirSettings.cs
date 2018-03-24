@@ -9,7 +9,7 @@ using System.Xml.Linq;
 using OKOSW.XmlTools;
 using OKOSW.Neural.Activation;
 
-namespace OKOSW.Neural.Reservoir.Analog
+namespace OKOSW.Neural.Networks.EchoState
 {
     /// <summary>
     /// Reservoir settings
@@ -137,7 +137,7 @@ namespace OKOSW.Neural.Reservoir.Analog
             //A very ugly validation
             XmlValidator validator = new XmlValidator();
             Assembly neuralAssembly = Assembly.Load("Neural");
-            validator.AddSchema(neuralAssembly.GetManifestResourceStream("OKOSW.Neural.Reservoir.Analog.AnalogReservoirSettings.xsd"));
+            validator.AddSchema(neuralAssembly.GetManifestResourceStream("OKOSW.Neural.Networks.EchoState.AnalogReservoirSettings.xsd"));
             validator.AddSchema(neuralAssembly.GetManifestResourceStream("OKOSW.Neural.NeuralSettingsTypes.xsd"));
             validator.LoadXDocFromString(reservoirSettingsElem.ToString());
             //Parsing
