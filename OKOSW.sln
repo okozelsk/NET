@@ -17,7 +17,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DemoSupport", "Demo\DemoSup
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EsnDemo", "Demo\ESNDemo\EsnDemo.csproj", "{4D350554-7031-41D8-AF4B-0A642C048109}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EsnDemoConsoleApp", "Demo\ESNDemoConsoleApp\EsnDemoConsoleApp.csproj", "{D18DB05D-F4C4-4388-846A-52BA4B3722D1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DemoConsoleApp", "Demo\ESNDemoConsoleApp\DemoConsoleApp.csproj", "{D18DB05D-F4C4-4388-846A-52BA4B3722D1}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{27FD896B-0D8F-4083-A577-2CA808E4145E}"
 	ProjectSection(SolutionItems) = preProject

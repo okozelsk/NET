@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace OKOSW.EsnDemoConsoleApp.Properties {
+namespace OKOSW.DemoConsoleApp.Properties {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace OKOSW.EsnDemoConsoleApp.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("OKOSW.EsnDemoConsoleApp.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("OKOSW.DemoConsoleApp.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;

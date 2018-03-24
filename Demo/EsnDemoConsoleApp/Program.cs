@@ -6,15 +6,17 @@ using System.Threading.Tasks;
 using OKOSW.Demo;
 using OKOSW.Demo.Log;
 
-namespace OKOSW.EsnDemoConsoleApp
+namespace OKOSW.DemoConsoleApp
 {
     class Program
     {
         static void Main(string[] args)
         {
-            string demoSettingsFile = @"EsnDemoSettings.xml";
+            //Output logging to console
             IOutputLog demoOutputLog = new ConsoleLog();
-            EsnDemo.RunDemo(demoOutputLog, demoSettingsFile);
+            //Esn demo
+            string esnDemoSettingsFile = @"EsnDemoSettings.xml";
+            EsnDemo.RunDemo(demoOutputLog, esnDemoSettingsFile);
             Console.ReadLine();
             return;
         }
