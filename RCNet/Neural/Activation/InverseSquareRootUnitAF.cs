@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using RCNet.MathTools;
 using RCNet.Extensions;
 
@@ -10,6 +6,7 @@ namespace RCNet.Neural.Activation
 {
     /// <summary>
     /// Inverse Square Root Unit (ISRU) activation function
+    /// See the IActivationFunction.
     /// </summary>
     [Serializable]
     public class InverseSquareRootUnitAF : IActivationFunction
@@ -35,7 +32,7 @@ namespace RCNet.Neural.Activation
             return x / (1d + Alpha * x.Power(2));
         }
 
-        public double ComputeDerivative(double c, double x)
+        public double Derive(double c, double x)
         {
             return (1d / Math.Sqrt(1d + Alpha * x.Power(2))).Power(3);
         }

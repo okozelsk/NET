@@ -1,15 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using RCNet.Extensions;
 using RCNet.MathTools;
 
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Sigmoid activation function
+    /// Sigmoid activation function (aka Logistic, Softstep)
+    /// See the IActivationFunction.
     /// </summary>
     [Serializable]
     public class SigmoidAF : IActivationFunction
@@ -23,7 +20,7 @@ namespace RCNet.Neural.Activation
             return 1d / (1d + Math.Exp(-x)).Bound();
         }
 
-        public double ComputeDerivative(double c, double x = double.NaN)
+        public double Derive(double c, double x = double.NaN)
         {
             return c * (1d - c);
         }

@@ -75,7 +75,7 @@ namespace RCNet.Demo
                 DelimitedStringValues columnNames = new DelimitedStringValues(csvDelimiter);
                 columnNames.LoadFromString(delimitedColumnNames);
                 //Check if the recognized data delimiter works properly
-                if (columnNames.ValuesCount < demoCaseParams.EsnConfiguration.InputFieldNameCollection.Count)
+                if (columnNames.NumOfStringValues < demoCaseParams.EsnConfiguration.InputFieldNameCollection.Count)
                 {
                     throw new Exception(exCommonText + " Unknown delimiter.");
                 }
@@ -210,7 +210,7 @@ namespace RCNet.Demo
                 ((IOutputLog)inArgs.ControllerData).Write(
                     "      OutputField: " + inArgs.OutputFieldName +
                     ", Attempt/Epoch: " + inArgs.RegrAttemptNumber.ToString().PadLeft(inArgs.RegrMaxAttempt.ToString().Length, '0') + "/" + inArgs.Epoch.ToString().PadLeft(inArgs.MaxEpoch.ToString().Length, '0') +
-                    ", DSet-Sizes: (" + inArgs.RegrCurrResult.TrainingErrorStat.SamplesCount.ToString() + ", " + inArgs.RegrCurrResult.TestingErrorStat.SamplesCount.ToString() + ")" +
+                    ", DSet-Sizes: (" + inArgs.RegrCurrResult.TrainingErrorStat.NumOfSamples.ToString() + ", " + inArgs.RegrCurrResult.TestingErrorStat.NumOfSamples.ToString() + ")" +
                     ", Best-Train: " + (outArgs.Best ? inArgs.RegrCurrResult.TrainingErrorStat : inArgs.RegrBestResult.TrainingErrorStat).ArithAvg.ToString("E3", CultureInfo.InvariantCulture) +
                     ", Best-Test: " + (outArgs.Best ? inArgs.RegrCurrResult.TestingErrorStat : inArgs.RegrBestResult.TestingErrorStat).ArithAvg.ToString("E3", CultureInfo.InvariantCulture) +
                     ", Curr-Train: " + inArgs.RegrCurrResult.TrainingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture) +
@@ -267,14 +267,14 @@ namespace RCNet.Demo
                 log.Write("         Predicted next: " + outputVector[outputIdx].ToString(CultureInfo.InvariantCulture), false);
                 log.Write("      Trained weights stat", false);
                 log.Write("          Min, Max, Avg: " + regrOuts[outputIdx].OutputWeightsStat.Min.ToString(CultureInfo.InvariantCulture) + " " + regrOuts[outputIdx].OutputWeightsStat.Max.ToString(CultureInfo.InvariantCulture) + " " + regrOuts[outputIdx].OutputWeightsStat.ArithAvg.ToString(CultureInfo.InvariantCulture), false);
-                log.Write("          Upd, Cnt, Zrs: " + regrOuts[outputIdx].UpdateCounter.ToString() + " " + regrOuts[outputIdx].OutputWeightsStat.SamplesCount.ToString() + " " + (regrOuts[outputIdx].OutputWeightsStat.SamplesCount - regrOuts[outputIdx].OutputWeightsStat.NonzeroSamplesCount).ToString(), false);
+                log.Write("          Upd, Cnt, Zrs: " + regrOuts[outputIdx].UpdateCounter.ToString() + " " + regrOuts[outputIdx].OutputWeightsStat.NumOfSamples.ToString() + " " + (regrOuts[outputIdx].OutputWeightsStat.NumOfSamples - regrOuts[outputIdx].OutputWeightsStat.NumOfNonzeroSamples).ToString(), false);
                 log.Write("              Error stat", false);
-                log.Write("      Train set samples: " + regrOuts[outputIdx].TrainingErrorStat.SamplesCount.ToString(), false);
+                log.Write("      Train set samples: " + regrOuts[outputIdx].TrainingErrorStat.NumOfSamples.ToString(), false);
                 log.Write("      Train set Avg Err: " + regrOuts[outputIdx].TrainingErrorStat.ArithAvg.ToString(CultureInfo.InvariantCulture), false);
-                log.Write("       Test set samples: " + regrOuts[outputIdx].TestingErrorStat.SamplesCount.ToString(), false);
+                log.Write("       Test set samples: " + regrOuts[outputIdx].TestingErrorStat.NumOfSamples.ToString(), false);
                 log.Write("       Test set Avg Err: " + regrOuts[outputIdx].TestingErrorStat.ArithAvg.ToString(CultureInfo.InvariantCulture), false);
-                log.Write("      Test Max Real Err: " + (outputNormalizers[outputIdx].ComputeNaturalError(regrOuts[outputIdx].TestingErrorStat.Max)).ToString(CultureInfo.InvariantCulture), false);
-                log.Write("      Test Avg Real Err: " + (outputNormalizers[outputIdx].ComputeNaturalError(regrOuts[outputIdx].TestingErrorStat.ArithAvg)).ToString(CultureInfo.InvariantCulture), false);
+                log.Write("      Test Max Real Err: " + (outputNormalizers[outputIdx].ComputeNaturalSpan(regrOuts[outputIdx].TestingErrorStat.Max)).ToString(CultureInfo.InvariantCulture), false);
+                log.Write("      Test Avg Real Err: " + (outputNormalizers[outputIdx].ComputeNaturalSpan(regrOuts[outputIdx].TestingErrorStat.ArithAvg)).ToString(CultureInfo.InvariantCulture), false);
             }
             log.Write(" ", false);
             log.Write(" ", false);

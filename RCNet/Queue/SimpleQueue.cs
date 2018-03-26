@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RCNet.Queue
 {
     /// <summary>
-    /// Implements simple thread safe FIFO queue template
+    /// Implements a simple thread safe FIFO queue template
     /// </summary>
     public class SimpleQueue<T>
     {
@@ -34,7 +30,7 @@ namespace RCNet.Queue
 
         //Properties
         /// <summary>
-        /// Count of enqueued items
+        /// Number of enqueued items
         /// </summary>
         public int Count
         {
@@ -48,7 +44,7 @@ namespace RCNet.Queue
         }
 
         /// <summary>
-        /// Is queue full?
+        /// Is the queue full?
         /// </summary>
         public bool Full
         {
@@ -63,7 +59,7 @@ namespace RCNet.Queue
 
         //Methods
         /// <summary>
-        /// Adds new item into the queue
+        /// Adds a new item into the queue
         /// </summary>
         /// <param name="item">Item to be added</param>
         /// <returns>False if queue is full, True if success</returns>
@@ -87,9 +83,9 @@ namespace RCNet.Queue
         }
 
         /// <summary>
-        /// Dequeues item (FIFO order)
+        /// Dequeues the item (FIFO order)
         /// </summary>
-        /// <returns>Default(T) if queue is empty, Item if success.</returns>
+        /// <returns>The item if success or the Default(T) if queue is empty.</returns>
         public T Dequeue()
         {
             lock(_lock)
@@ -108,5 +104,7 @@ namespace RCNet.Queue
             }
             return default(T);
         }
+
     }//SimpleQueue
+
 }//Namespace

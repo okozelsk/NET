@@ -8,7 +8,7 @@ using RCNet.MathTools;
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Neuron activation function
+    /// Interface of the activation function
     /// </summary>
     public interface IActivationFunction
     {
@@ -17,19 +17,17 @@ namespace RCNet.Neural.Activation
 
         //Methods
         /// <summary>
-        /// Process input
+        /// Computes the result of the activation function
         /// </summary>
-        /// <param name="x">Neuron input</param>
-        /// <returns></returns>
+        /// <param name="x">Argument</param>
         double Compute(double x);
 
         /// <summary>
-        /// Derivative
+        /// Computes the derivation
         /// </summary>
-        /// <param name="c">Result of Compute method</param>
-        /// <param name="x">Argument of Compute method</param>
-        /// <returns></returns>
-        double ComputeDerivative(double c, double x);
+        /// <param name="c">The result of the Compute method</param>
+        /// <param name="x">The argument of the Compute method</param>
+        double Derive(double c, double x);
 
     }//IActivationFunction
 }//Namespace

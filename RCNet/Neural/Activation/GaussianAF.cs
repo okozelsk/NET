@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using RCNet.Extensions;
 using RCNet.MathTools;
 
@@ -10,6 +6,7 @@ namespace RCNet.Neural.Activation
 {
     /// <summary>
     /// Gaussian activation function
+    /// See the IActivationFunction.
     /// </summary>
     [Serializable]
     public class GaussianAF : IActivationFunction
@@ -23,7 +20,7 @@ namespace RCNet.Neural.Activation
             return Math.Exp(-(x.Power(2).Bound()));
         }
 
-        public double ComputeDerivative(double c, double x = double.NaN)
+        public double Derive(double c, double x = double.NaN)
         {
             return -2*x*c;
         }

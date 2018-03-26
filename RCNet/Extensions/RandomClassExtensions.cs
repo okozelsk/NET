@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RCNet.Extensions
 {
-    /// <summary>Useful extensions of Random class.</summary>
+    /// <summary>
+    /// Useful extensions of Random class.
+    /// </summary>
     public static class RandomClassExtensions
     {
-        /// <summary>Randomly shuffles an array of objects</summary>
+        /// <summary>
+        /// Randomly shuffles an array of objects
+        /// </summary>
         /// <param name="array">Array of objects to be randomly shuffled</param>
         public static void Shuffle<T>(this Random rand, T[] array)
         {
@@ -24,7 +25,9 @@ namespace RCNet.Extensions
             return;
         }
 
-        /// <summary>Randomly shuffles a list of objects</summary>
+        /// <summary>
+        /// Randomly shuffles a list of objects
+        /// </summary>
         /// <param name="list">List of objects to be randomly shuffled</param>
         public static void Shuffle<T>(this Random rand, List<T> list)
         {
@@ -39,7 +42,9 @@ namespace RCNet.Extensions
             return;
         }
 
-        /// <summary>Returns random double following Gaussian distribution.</summary>
+        /// <summary>
+        /// Returns random double following Gaussian distribution.
+        /// </summary>
         /// <param name="mean">Required target mean</param>
         /// <param name="stdDev">Required target standard deviation</param>
         public static double NextGaussianDouble(this Random rand, double mean = 0, double stdDev = 1)
@@ -53,7 +58,9 @@ namespace RCNet.Extensions
             return mean + stdDev * randStdNormal;
         }
 
-        /// <summary>Returns random double following Gaussian distribution within min and max. Could be very slow (depending on parameters)</summary>
+        /// <summary>
+        /// Returns random double following Gaussian distribution within min and max.
+        /// </summary>
         public static double NextBoundedGaussianDouble(this Random rand, double min = -1, double max = 1, double mean = 0, double stdDev = 1)
         {
             double result = 0;
@@ -64,7 +71,9 @@ namespace RCNet.Extensions
             return result;
         }
 
-        /// <summary>Fills array by gaussian random values.</summary>
+        /// <summary>
+        /// Fills array with gaussian random values.
+        /// </summary>
         public static void FillGaussian(this Random rand, double[] array, double mean = 0, double stdDev = 1, double min = -1, double max = 1, int count = -1)
         {
             if (count < 0) count = array.Length;
@@ -75,7 +84,9 @@ namespace RCNet.Extensions
             return;
         }
 
-        /// <summary>Returns random double within specified boundaries.</summary>
+        /// <summary>
+        /// Returns random double within specified boundaries.
+        /// </summary>
         /// <param name="min">Min random double value</param>
         /// <param name="max">Max random double value</param>
         public static double NextBoundedUniformDouble(this Random rand, double min = -1, double max = 1)
@@ -83,7 +94,9 @@ namespace RCNet.Extensions
             return rand.NextDouble() * (max - min) + min;
         }
 
-        /// <summary>Returns random double within specified boundaries with random sign.</summary>
+        /// <summary>
+        /// Returns random double within specified boundaries with random sign.
+        /// </summary>
         /// <param name="absMin">Min random double absolute value</param>
         /// <param name="absMax">Max random double absolute value</param>
         public static double NextBoundedUniformDoubleRS(this Random rand, double absMin = 0, double absMax = 1)
@@ -92,7 +105,9 @@ namespace RCNet.Extensions
             return sign * (rand.NextDouble() * (absMax - absMin) + absMin);
         }
 
-        /// <summary>Fills array by random values within range min and max.</summary>
+        /// <summary>
+        /// Fills array with random values within the range min and max.
+        /// </summary>
         public static void FillUniform(this Random rand, double[] array, double min = -1, double max = 1, double scale = 1, int count = -1)
         {
             if (count < 0) count = array.Length;
@@ -103,7 +118,9 @@ namespace RCNet.Extensions
             return;
         }
 
-        /// <summary>Fills array by random values within absolute range min and max, having random sign.</summary>
+        /// <summary>
+        /// Fills array with random values within the given boundaries, having random sign.
+        /// </summary>
         public static void FillUniformRS(this Random rand, double[] array, double absMin = 0, double absMax = 1, int count = -1)
         {
             if (count < 0) count = array.Length;
@@ -113,6 +130,6 @@ namespace RCNet.Extensions
             }
             return;
         }
-    }
+    }//RandomClassExtensions
 
-}
+}//Namespace

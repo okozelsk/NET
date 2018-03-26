@@ -1,14 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using RCNet.MathTools;
 
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Linear activation function
+    /// Identity activation function (aka Linear)
+    /// See the IActivationFunction.
     /// </summary>
     [Serializable]
     public class IdentityAF : IActivationFunction
@@ -23,7 +20,7 @@ namespace RCNet.Neural.Activation
             return x;
         }
 
-        public double ComputeDerivative(double c, double x = double.NaN)
+        public double Derive(double c, double x = double.NaN)
         {
             //Allways 1
             return 1d;

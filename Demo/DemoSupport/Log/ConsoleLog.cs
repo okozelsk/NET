@@ -1,13 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace RCNet.Demo.Log
 {
     /// <summary>
-    /// Simple interface to allow to display output information
+    /// Simple class implementing the IOutputLog interface.
+    /// Messages are written to the system console.
     /// </summary>
     public class ConsoleLog : IOutputLog
     {
@@ -27,7 +25,7 @@ namespace RCNet.Demo.Log
         /// </summary>
         public ConsoleLog()
         {
-            //Ensure console min sizes
+            //Set console min sizes
             Console.BufferWidth = Math.Max(ConsoleBufferMinWidth, Console.BufferWidth);
             Console.BufferHeight = Math.Max(ConsoleBufferMinHeight, Console.BufferHeight);
             Console.WindowWidth = Math.Max(ConsoleMinWidth, Console.WindowWidth);
@@ -42,7 +40,7 @@ namespace RCNet.Demo.Log
 
         //Methods
         /// <summary>
-        /// Restores cursor position
+        /// Restores the cursor position
         /// </summary>
         private void RestoreCursor()
         {
@@ -52,7 +50,7 @@ namespace RCNet.Demo.Log
         }
 
         /// <summary>
-        /// Stores current cursor position
+        /// Stores the current cursor position
         /// </summary>
         private void StoreCursor()
         {
@@ -62,10 +60,10 @@ namespace RCNet.Demo.Log
         }
 
         /// <summary>
-        /// Writes message to console
+        /// Writes a message to console
         /// </summary>
-        /// <param name="message">Message to be written to output</param>
-        /// <param name="replaceLastMessage">Indicates if to replace last written message by this new message</param>
+        /// <param name="message">Message to be written to console</param>
+        /// <param name="replaceLastMessage">Indicates if to replace a text of the last message by the new one.</param>
         public void Write(string message, bool replaceLastMessage = false)
         {
 
@@ -95,4 +93,5 @@ namespace RCNet.Demo.Log
         }
 
     }//ConsoleLog
+
 }//Namespace

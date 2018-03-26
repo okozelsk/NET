@@ -166,12 +166,12 @@ namespace RCNet.Neural.Network.FF
                 Matrix solution = decomposition.Solve(_regrIdealOutputCollection[outputIdx]);
                 //Store weights
                 //Input weights
-                for (int i = 0; i < solution.RowsCount - 1; i++)
+                for (int i = 0; i < solution.NumOfRows - 1; i++)
                 {
                     newWaights[outputIdx * _net.InputValuesCount + i] = solution.Data[i][0];
                 }
                 //Bias weight
-                newWaights[_net.OutputValuesCount * _net.InputValuesCount + outputIdx] = solution.Data[solution.RowsCount - 1][0];
+                newWaights[_net.OutputValuesCount * _net.InputValuesCount + outputIdx] = solution.Data[solution.NumOfRows - 1][0];
             }
             //Set new weights and compute error
             _net.SetWeights(newWaights);

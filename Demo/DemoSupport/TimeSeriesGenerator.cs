@@ -9,86 +9,100 @@ using System.Globalization;
 namespace RCNet.Demo
 {
     /// <summary>
-    /// Tool for generation of several usual time series types
+    /// A tool for generating some frequently used time series and saving them to a csv file
     /// </summary>
     public static class TimeSeriesGenerator
     {
         /// <summary>
-        /// Generates random time series of numbers between 0 and 1.
+        /// Generates a random time series of the numbers between 0 and 1.
         /// </summary>
-        /// <param name="length">Required series length</param>
-        /// <param name="randSeek">Specify less than 0 to obtain different series each call</param>
-        /// <returns>List of generated values</returns>
+        /// <param name="length">The required length</param>
+        /// <param name="randSeek">The random generator seek. Specify a value less than zero to obtain different results when you recall the function.</param>
+        /// <returns>The collection of generated values</returns>
         public static List<double> GenRandomTimeSeries(int length, int randSeek = -1)
         {
             Random rand = (randSeek < 0) ? new Random() : new Random(randSeek);
-            List<double> values = new List<double>(length);
+            List<double> dataCollection = new List<double>(length);
             for (int i = 0; i < length; i++)
             {
-                values.Add(rand.NextDouble());
+                dataCollection.Add(rand.NextDouble());
             }
-            return values;
+            return dataCollection;
         }
 
         /// <summary>
-        /// Generates sinusoid time series
+        /// Generates a sinusoid time series
         /// </summary>
-        /// <param name="length">Required series length</param>
-        /// <returns>List of generated values</returns>
+        /// <param name="length">The required length</param>
+        /// <returns>The collection of generated values</returns>
         public static List<double> GenSinusoidTimeSeries(int length)
         {
-            List<double> values = new List<double>(length);
+            List<double> dataCollection = new List<double>(length);
             for (int i = 0; i < length; i++)
             {
                 double sinVal = Math.Sin(Math.PI * i / 180.0);
-                values.Add(sinVal);
+                dataCollection.Add(sinVal);
             }
-            return values;
+            return dataCollection;
         }
 
         /// <summary>
-        /// Generates MackeyGlass time series
+        /// Generates the Mackey Glass time series
         /// </summary>
-        /// <param name="length">Required series length</param>
-        /// <returns>List of generated values</returns>
+        /// <param name="length">The required length</param>
+        /// <returns>The collection of generated values</returns>
         public static List<double> GenMackeyGlassTimeSeries(int length)
         {
             double[] genInitValues = { 0.9697, 0.9699, 0.9794, 1.0003, 1.0319, 1.0703, 1.1076, 1.1352, 1.1485, 1.1482, 1.1383, 1.1234, 1.1072, 1.0928, 1.0820, 1.0756, 1.0739, 1.0759 };
             int tau = genInitValues.Length; //18
             double b = 0.1d, c = 0.2d;
-            List<double> values = new List<double>(genInitValues);
+            List<double> dataCollection = new List<double>(genInitValues);
             for (int i = genInitValues.Length; i < genInitValues.Length + length; i++)
             {
-                double refMgV = values[i - tau];
-                double lastMgV = values.Last();
-                double newMgV = lastMgV - b * lastMgV + c * refMgV / (1 + Math.Pow(refMgV, 10));
-                values.Add(newMgV);
+                double refMGV = dataCollection[i - tau];
+                double lastMGV = dataCollection.Last();
+                double newMGV = lastMGV - b * lastMGV + c * refMGV / (1 + Math.Pow(refMGV, 10));
+                dataCollection.Add(newMGV);
             }
-            values.RemoveRange(0, tau);
-            return values;
+            dataCollection.RemoveRange(0, tau);
+            return dataCollection;
         }
 
-        public static void StoreTimeSeriesAsCSV(string fileName, string columnName, List<double> data)
+        /// <summary>
+        /// Function saves given time series in a csv file.
+        /// </summary>
+        /// <param name="fileName">Name of the output csv file.</param>
+        /// <param name="valueColumnName">Name of the value column</param>
+        /// <param name="dataCollection">Data</param>
+        /// <param name="cultureInfo">Culture info to be used</param>
+        public static void SaveTimeSeriesToCsvFile(string fileName, string valueColumnName, List<double> dataCollection, CultureInfo cultureInfo)
         {
-            StreamWriter stream = new StreamWriter(new FileStream(fileName, FileMode.Create));
-            stream.WriteLine(columnName);
-            foreach (double value in data)
+            using (StreamWriter stream = new StreamWriter(new FileStream(fileName, FileMode.Create)))
             {
-                stream.WriteLine(value.ToString("F20", CultureInfo.CurrentCulture));
+                stream.WriteLine(valueColumnName);
+                foreach (double value in dataCollection)
+                {
+                    stream.WriteLine(value.ToString("F20", cultureInfo));
+                }
             }
-            stream.Close();
-            stream.Dispose();
             return;
         }
 
-        public static void GenerateStandardCSVFiles(string dir, int dataLength = 10000)
+        /// <summary>
+        /// Function generates ans saves three types of time series in csv format for demo purposes.
+        /// (Random, Sinusoid and Mackey Glass)
+        /// </summary>
+        /// <param name="dir">The output directory</param>
+        /// <param name="cultureInfo">The culture info to be used</param>
+        /// <param name="timeSeriesLength">The required length of the generated time series</param>
+        public static void PrepareDemoTimeSeriesCsvFiles(string dir, CultureInfo cultureInfo, int timeSeriesLength = 10000)
         {
-            StoreTimeSeriesAsCSV(dir + "\\" + "Random.csv", "Value", GenRandomTimeSeries(dataLength));
-            StoreTimeSeriesAsCSV(dir + "\\" + "Sinusoid.csv", "Value", GenSinusoidTimeSeries(dataLength));
-            StoreTimeSeriesAsCSV(dir + "\\" + "MackeyGlass.csv", "Value", GenMackeyGlassTimeSeries(dataLength));
+            SaveTimeSeriesToCsvFile(dir + "\\" + "Random.csv", "Value", GenRandomTimeSeries(timeSeriesLength), cultureInfo);
+            SaveTimeSeriesToCsvFile(dir + "\\" + "Sinusoid.csv", "Value", GenSinusoidTimeSeries(timeSeriesLength), cultureInfo);
+            SaveTimeSeriesToCsvFile(dir + "\\" + "MackeyGlass.csv", "Value", GenMackeyGlassTimeSeries(timeSeriesLength), cultureInfo);
             return;
         }
-    }//TimeSeriesGenerator
 
+    }//TimeSeriesGenerator
 
 }//Namespace

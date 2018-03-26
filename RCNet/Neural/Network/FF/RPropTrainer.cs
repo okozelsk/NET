@@ -175,13 +175,13 @@ namespace RCNet.Neural.Network.FF
         /// <summary>
         /// Network computation for training purposes.
         /// </summary>
-        private double[] Compute(double[] input, List<double[]> layersInputs, double[] derivatives)
+        private double[] Compute(double[] input, List<double[]> layersInputs, double[] derivations)
         {
             double[] result = input;
             foreach (FeedForwardNetwork.Layer layer in _net.Layers)
             {
                 layersInputs.Add(result);
-                result = layer.Compute(result, _net.FlatWeights, derivatives);
+                result = layer.Compute(result, _net.FlatWeights, derivations);
             }
             return result;
         }
@@ -223,16 +223,16 @@ namespace RCNet.Neural.Network.FF
                 double[] weigthsGradsAccInput = new double[_net.FlatWeights.Length];
                 weigthsGradsAccInput.Populate(0);
                 double[] nodesGradients = new double[_net.NodesCount];
-                double[] derivatives = new double[_net.NodesCount];
+                double[] derivations = new double[_net.NodesCount];
                 List<double[]> layersInputs = new List<double[]>(_net.Layers.Count);
                 //----------------------------------------------------
                 //Go paralelly through all samples
                 for (int row = range.FromRow; row <= range.ToRow; row++)
                 {
                     //----------------------------------------------------
-                    //Network computation (collect layers inputs and derivatives)
+                    //Network computation (collect layers inputs and derivations)
                     layersInputs.Clear();
-                    double[] computedOutputs = Compute(_trainInputs[row], layersInputs, derivatives);
+                    double[] computedOutputs = Compute(_trainInputs[row], layersInputs, derivations);
                     //----------------------------------------------------
                     //Compute network nodes gradients
                     //Compute output layer gradients and update last error
@@ -240,7 +240,7 @@ namespace RCNet.Neural.Network.FF
                     for (int nodeIdx = 0, outputLayerNodeFlatIdx = outputLayer.NodesStartFlatIdx; nodeIdx < outputLayer.NumOfLayerNodes; nodeIdx++, outputLayerNodeFlatIdx++)
                     {
                         double error = _trainIdealOutputs[row][nodeIdx] - computedOutputs[nodeIdx];
-                        nodesGradients[outputLayerNodeFlatIdx] = derivatives[outputLayerNodeFlatIdx] * error;
+                        nodesGradients[outputLayerNodeFlatIdx] = derivations[outputLayerNodeFlatIdx] * error;
                         //Accumulate power of error
                         sumOfErrPowers += error * error;
                     }
@@ -258,7 +258,7 @@ namespace RCNet.Neural.Network.FF
                                 int nextLayerWeightFlatIdx = nextLayer.WeightsStartFlatIdx + nextLayerNodeIdx * nextLayer.NumOfInputNodes + currLayerNodeIdx;
                                 sum += nodesGradients[nextLayer.NodesStartFlatIdx + nextLayerNodeIdx] * _net.FlatWeights[nextLayerWeightFlatIdx];
                             }
-                            nodesGradients[currLayerNodeFlatIdx] = derivatives[currLayerNodeFlatIdx] * sum;
+                            nodesGradients[currLayerNodeFlatIdx] = derivations[currLayerNodeFlatIdx] * sum;
                         }
                     }
                     //----------------------------------------------------

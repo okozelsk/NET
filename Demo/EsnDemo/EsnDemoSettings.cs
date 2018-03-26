@@ -4,6 +4,7 @@ using System.Linq;
 using System.Xml.Linq;
 using System.Globalization;
 using System.Reflection;
+using System.IO;
 using RCNet.XmlTools;
 using RCNet.Neural.Network.EchoState;
 
@@ -38,8 +39,14 @@ namespace RCNet.Demo
             XmlValidator validator = new XmlValidator();
             Assembly esnDemoAssembly = Assembly.GetExecutingAssembly();
             Assembly assemblyRCNet = Assembly.Load("RCNet");
-            validator.AddSchema(esnDemoAssembly.GetManifestResourceStream("RCNet.Demo.EsnDemoSettings.xsd"));
-            validator.AddSchema(assemblyRCNet.GetManifestResourceStream("RCNet.NeuralSettingsTypes.xsd"));
+            using (Stream schemaStream = esnDemoAssembly.GetManifestResourceStream("RCNet.Demo.EsnDemoSettings.xsd"))
+            {
+                validator.AddSchema(schemaStream);
+            }
+            using (Stream schemaStream = assemblyRCNet.GetManifestResourceStream("RCNet.NeuralSettingsTypes.xsd"))
+            {
+                validator.AddSchema(schemaStream);
+            }
             XDocument xmlDoc = validator.LoadXDocFromFile(demoSettingsXmlFile);
             //Parse DataDir
             XElement root = xmlDoc.Descendants("EsnDemoSettings").First();

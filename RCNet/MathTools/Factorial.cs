@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RCNet.MathTools
 {
     /// <summary>
-    /// Implements cached factorial computation.
+    /// Implements the cached factorial computation.
     /// </summary>
     public static class Factorial
     {
@@ -17,6 +13,9 @@ namespace RCNet.MathTools
         private static readonly ulong[] _resultCache;
 
         //Constructor
+        /// <summary>
+        /// Prepares the internal static result cache
+        /// </summary>
         static Factorial()
         {
             //Preparation of the precomputed factorial cache
@@ -71,4 +70,5 @@ namespace RCNet.MathTools
         }
 
     }//Factorial
+
 } //Namespace

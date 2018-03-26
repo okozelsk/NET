@@ -1,19 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace RCNet.MathTools
 {
     /// <summary>
-    /// Implements simple thread safe class representing interval.
+    /// Implements a simple thread safe class representing interval.
     /// </summary>
     [Serializable]
     public class Interval
     {
         //Constants
         /// <summary>
-        /// Supported interval types
+        /// Types of interval
         /// </summary>
         public enum IntervalType
         {
@@ -54,9 +52,9 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Construct an interval
+        /// Constructs an interval
         /// </summary>
-        /// <param name="values">Collection of values from which are determined interval's min and max borders</param>
+        /// <param name="values">Collection of the values from which are determined interval's min and max borders</param>
         public Interval (IEnumerable<double> values)
         {
             Reset();
@@ -68,9 +66,9 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Construct an interval as a copy of source
+        /// Constructs an interval as a copy of source instance
         /// </summary>
-        /// <param name="source">Source interval</param>
+        /// <param name="source">Source instance</param>
         public Interval(Interval source)
         {
             CopyFrom(source);
@@ -79,7 +77,7 @@ namespace RCNet.MathTools
 
         //Properties
         /// <summary>
-        /// Is interval properly initialized and ready to use?
+        /// Is this interval properly initialized and ready to use?
         /// </summary>
         public bool Initialized
         {
@@ -171,7 +169,7 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Resets interval to uninitialized state
+        /// Resets this interval to the uninitialized state
         /// </summary>
         public void Reset()
         {
@@ -185,7 +183,7 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Creates a copy of this interval
+        /// Creates a clone of this interval
         /// </summary>
         /// <returns></returns>
         public Interval Clone()
@@ -198,9 +196,9 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Sets this internals as a copy of the source
+        /// Copies all internal attribute values from the source instance into this instance
         /// </summary>
-        /// <param name="source"></param>
+        /// <param name="source">Source instance</param>
         public void CopyFrom(Interval source)
         {
             lock (_lock)
@@ -213,10 +211,11 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Sets interval border values min and max. It is not necessary to care about border order, function evaluates Min and Max by itself.
+        /// Sets the border values min and max.
+        /// It is not necessary to care about border order, function evaluates the Min and Max by itself.
         /// </summary>
-        /// <param name="border1">First border value</param>
-        /// <param name="border2">Second border value</param>
+        /// <param name="border1">The first border value</param>
+        /// <param name="border2">The second border value</param>
         public void Set(double border1, double border2)
         {
             lock (_lock)
@@ -229,7 +228,7 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Adjusts min and max according to sample value.
+        /// Adjusts the min and max borders according to sample value.
         /// </summary>
         /// <param name="sampleValue">Sample value</param>
         public void Adjust(double sampleValue)
@@ -258,12 +257,12 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Adjusts min and max according to sample valus in given collection.
+        /// Adjusts the min and max borders according to sample valus in a given collection.
         /// </summary>
-        /// <param name="sampleValuesCollection">Collection of sample values</param>
-        public void Adjust(IEnumerable<double> sampleValuesCollection)
+        /// <param name="sampleValueCollection">Collection of sample values</param>
+        public void Adjust(IEnumerable<double> sampleValueCollection)
         {
-            foreach(double value in sampleValuesCollection)
+            foreach(double value in sampleValueCollection)
             {
                 Adjust(value);
             }
@@ -271,12 +270,12 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Adjusts min and max according to sample valus in given collection.
+        /// Adjusts the min and max borders according to sample valus in a given collection.
         /// </summary>
-        /// <param name="sampleValuesCollection">Collection of sample values</param>
-        public void Adjust(IEnumerable<long> sampleValuesCollection)
+        /// <param name="sampleValueCollection">Collection of sample values</param>
+        public void Adjust(IEnumerable<long> sampleValueCollection)
         {
-            foreach (long value in sampleValuesCollection)
+            foreach (long value in sampleValueCollection)
             {
                 Adjust(value);
             }
@@ -284,12 +283,12 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Adjusts min and max according to sample valus in given collection.
+        /// Adjusts the min and max borders according to sample valus in a given collection.
         /// </summary>
-        /// <param name="sampleValuesCollection">Collection of sample values</param>
-        public void Adjust(IEnumerable<ulong> sampleValuesCollection)
+        /// <param name="sampleValueCollection">Collection of sample values</param>
+        public void Adjust(IEnumerable<ulong> sampleValueCollection)
         {
-            foreach (ulong value in sampleValuesCollection)
+            foreach (ulong value in sampleValueCollection)
             {
                 Adjust(value);
             }
@@ -297,12 +296,12 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Adjusts min and max according to sample valus in given collection.
+        /// Adjusts the min and max borders according to sample valus in a given collection.
         /// </summary>
-        /// <param name="sampleValuesCollection">Collection of sample values</param>
-        public void Adjust(IEnumerable<int> sampleValuesCollection)
+        /// <param name="sampleValueCollection">Collection of sample values</param>
+        public void Adjust(IEnumerable<int> sampleValueCollection)
         {
-            foreach (int value in sampleValuesCollection)
+            foreach (int value in sampleValueCollection)
             {
                 Adjust(value);
             }
@@ -310,12 +309,12 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Adjusts min and max according to sample valus in given collection.
+        /// Adjusts the min and max borders according to sample valus in a given collection.
         /// </summary>
-        /// <param name="sampleValuesCollection">Collection of sample values</param>
-        public void Adjust(IEnumerable<uint> sampleValuesCollection)
+        /// <param name="sampleValueCollection">Collection of sample values</param>
+        public void Adjust(IEnumerable<uint> sampleValueCollection)
         {
-            foreach (uint value in sampleValuesCollection)
+            foreach (uint value in sampleValueCollection)
             {
                 Adjust(value);
             }
@@ -323,12 +322,12 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Adjusts min and max according to sample valus in given collection.
+        /// Adjusts the min and max borders according to sample valus in a given collection.
         /// </summary>
-        /// <param name="sampleValuesCollection">Collection of sample values</param>
-        public void Adjust(IEnumerable<sbyte> sampleValuesCollection)
+        /// <param name="sampleValueCollection">Collection of sample values</param>
+        public void Adjust(IEnumerable<sbyte> sampleValueCollection)
         {
-            foreach (sbyte value in sampleValuesCollection)
+            foreach (sbyte value in sampleValueCollection)
             {
                 Adjust(value);
             }
@@ -336,28 +335,14 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Adjusts min and max according to sample valus in given collection.
+        /// Adjusts the min and max borders according to sample valus in a given collection.
         /// </summary>
-        /// <param name="sampleValuesCollection">Collection of sample values</param>
-        public void Adjust(IEnumerable<byte> sampleValuesCollection)
+        /// <param name="sampleValueCollection">Collection of sample values</param>
+        public void Adjust(IEnumerable<byte> sampleValueCollection)
         {
-            foreach (byte value in sampleValuesCollection)
+            foreach (byte value in sampleValueCollection)
             {
                 Adjust(value);
-            }
-            return;
-        }
-
-        /// <summary>
-        /// Adjusts min and max to represent an unification of given intervals
-        /// </summary>
-        /// <param name="intervalsCollection">Collection of intervals</param>
-        public void Adjust(IEnumerable<Interval> intervalsCollection)
-        {
-            foreach (Interval item in intervalsCollection)
-            {
-                Adjust(item.Min);
-                Adjust(item.Max);
             }
             return;
         }
@@ -366,7 +351,7 @@ namespace RCNet.MathTools
         /// Tests if given value belongs to this interval
         /// </summary>
         /// <param name="value">Value to be tested</param>
-        /// <param name="intervalType">Type of this interval to be considered</param>
+        /// <param name="intervalType">Type of interval to be considered</param>
         public bool BelongsTo(double value, IntervalType intervalType = IntervalType.LeftClosedRightClosed)
         {
             lock (_lock)
@@ -389,4 +374,5 @@ namespace RCNet.MathTools
         }
 
     }//Interval
+
 }//Namespace

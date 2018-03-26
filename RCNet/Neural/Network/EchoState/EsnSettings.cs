@@ -4,6 +4,7 @@ using System.Linq;
 using System.Globalization;
 using System.Xml.Linq;
 using System.Reflection;
+using System.IO;
 using RCNet.Extensions;
 using RCNet.Neural.Activation;
 using RCNet.Neural.Network.FF;
@@ -103,7 +104,7 @@ namespace RCNet.Neural.Network.EchoState
         }
 
         /// <summary>
-        /// Deep copy constructor
+        /// The deep copy constructor
         /// </summary>
         /// <param name="source">Source instance</param>
         public EsnSettings(EsnSettings source)
@@ -145,8 +146,14 @@ namespace RCNet.Neural.Network.EchoState
             //A very ugly validation. Xml schema does not support validation of the xml fragment against specific type.
             XmlValidator validator = new XmlValidator();
             Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddSchema(assemblyRCNet.GetManifestResourceStream("RCNet.Neural.Network.EchoState.EsnSettings.xsd"));
-            validator.AddSchema(assemblyRCNet.GetManifestResourceStream("RCNet.NeuralSettingsTypes.xsd"));
+            using (Stream schemaStream = assemblyRCNet.GetManifestResourceStream("RCNet.Neural.Network.EchoState.EsnSettings.xsd"))
+            {
+                validator.AddSchema(schemaStream);
+            }
+            using (Stream schemaStream = assemblyRCNet.GetManifestResourceStream("RCNet.NeuralSettingsTypes.xsd"))
+            {
+                validator.AddSchema(schemaStream);
+            }
             validator.LoadXDocFromString(esnSettingsElem.ToString());
             //Parsing
             //Randomizer seek
@@ -237,7 +244,7 @@ namespace RCNet.Neural.Network.EchoState
             if (obj == null) return false;
             EsnSettings cmpSettings = obj as EsnSettings;
             if (RandomizerSeek != cmpSettings.RandomizerSeek ||
-               !InputFieldNameCollection.ToArray().EqualValues(cmpSettings.InputFieldNameCollection.ToArray()) ||
+               !InputFieldNameCollection.ToArray().ContainsEqualValues(cmpSettings.InputFieldNameCollection.ToArray()) ||
                ReservoirInstanceDefinitionCollection.Count != cmpSettings.ReservoirInstanceDefinitionCollection.Count ||
                RouteInputToReadout != cmpSettings.RouteInputToReadout ||
                OutputNeuronActivation != cmpSettings.OutputNeuronActivation ||
@@ -335,7 +342,7 @@ namespace RCNet.Neural.Network.EchoState
             }
 
             /// <summary>
-            /// Deep copy constructor.
+            /// The deep copy constructor.
             /// </summary>
             /// <param name="source">Source instance</param>
             public ReservoirInstanceDefinition(ReservoirInstanceDefinition source)

@@ -342,18 +342,18 @@ namespace RCNet.Neural.Network.FF
             }
 
             /// <summary>
-            /// Computes state of each layer's neuron and its derivative
+            /// Computes state of each layer's neuron and its derivation
             /// </summary>
             /// <param name="inputs">Input values for this layer</param>
             /// <param name="flatWeights">Network's flat weights structure</param>
-            /// <param name="flatDerivatives">Derivatives of computed states</param>
+            /// <param name="flatDerivations">Derivations of computed states</param>
             /// <returns>Layer's neurons values (states)</returns>
-            public double[] Compute(double[] inputs, double[] flatWeights, double[] flatDerivatives)
+            public double[] Compute(double[] inputs, double[] flatWeights, double[] flatDerivations)
             {
                 double[] result = Compute(inputs, flatWeights);
                 for (int nodeIdx = 0; nodeIdx < NumOfLayerNodes; nodeIdx++)
                 {
-                    flatDerivatives[_nodesStartFlatIdx + nodeIdx] = Activation.ComputeDerivative(result[nodeIdx], inputs[nodeIdx]);
+                    flatDerivations[_nodesStartFlatIdx + nodeIdx] = Activation.Derive(result[nodeIdx], inputs[nodeIdx]);
                 }
                 return result;
             }

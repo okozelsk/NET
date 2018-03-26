@@ -1,26 +1,36 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using RCNet.Extensions;
 
 namespace RCNet.MathTools.MatrixMath
 {
+    /// <summary>
+    /// Class represents the mathematical matrix of double values.
+    /// Class does not support the sparse matrix format.
+    /// </summary>
     [Serializable]
     public class Matrix
     {
         //Constants
         //Attributes
+        /// <summary>
+        /// Matrix data stored in array of arrays of double.
+        /// </summary>
         protected double[][] _data;
-        
+
         //Constructors
-        public Matrix(int rowsCount, int colsCount, double[] flatData = null)
+        /// <summary>
+        /// Instantiates the matrix.
+        /// </summary>
+        /// <param name="numOfRows">Number of rows</param>
+        /// <param name="numOfCols">Number of columns</param>
+        /// <param name="flatData">Optional. The data to be copied into the matrix (in the flat form)</param>
+        public Matrix(int numOfRows, int numOfCols, double[] flatData = null)
         {
-            _data = new double[rowsCount][];
-            for (int row = 0; row < rowsCount; row++)
+            _data = new double[numOfRows][];
+            for (int row = 0; row < numOfRows; row++)
             {
-                _data[row] = new double[colsCount];
+                _data[row] = new double[numOfCols];
+                _data[row].Populate(0);
             }
             if (flatData != null)
             {
@@ -29,12 +39,19 @@ namespace RCNet.MathTools.MatrixMath
             return;
         }
 
+        /// <summary>
+        /// The deep copy constructor
+        /// </summary>
+        /// <param name="sourceMatrix"></param>
         public Matrix(Matrix sourceMatrix)
             :this(sourceMatrix._data)
         {
             return;
         }
 
+        /// <summary>
+        /// Instantiates matrix based on dimensions of given array of arrays and copies the data into the new matrix.
+        /// </summary>
         public Matrix(double[][] data)
         {
             _data = data.Clone2D();
@@ -43,17 +60,17 @@ namespace RCNet.MathTools.MatrixMath
 
         //Properties
         public double[][] Data { get { return _data; } }
-        public int RowsCount { get { return _data.Length; } }
-        public int ColsCount { get { return _data[0].Length; } }
-        public int Size { get { return RowsCount * ColsCount; } }
-        public bool IsVector { get { return (RowsCount == 1 || ColsCount == 1); } }
-        public bool Singular
+        public int NumOfRows { get { return _data.Length; } }
+        public int NumOfCols { get { return _data[0].Length; } }
+        public int Size { get { return NumOfRows * NumOfCols; } }
+        public bool IsVector { get { return (NumOfRows == 1 || NumOfCols == 1); } }
+        public bool IsSingular
         {
             get
             {
-                for(int i = 0; i < RowsCount; i++)
+                for(int i = 0; i < NumOfRows; i++)
                 {
-                    for(int j = 0; j < ColsCount; j++)
+                    for(int j = 0; j < NumOfCols; j++)
                     {
                         if(_data[i][j] != 0)
                         {
@@ -68,40 +85,48 @@ namespace RCNet.MathTools.MatrixMath
         //Methods
         //Static methods
         /// <summary>
-        /// Creates a matrix that has colData.Length rows and one column.
+        /// Creates a matrix that has data.Length rows and one column.
         /// </summary>
-        /// <param name="colData">Column values</param>
-        public static Matrix CreateSingleColumnMatrix(double[] colData)
+        /// <param name="data">Column values</param>
+        public static Matrix CreateSingleColumnMatrix(double[] data)
         {
-            Matrix result = new Matrix(colData.Length, 1);
-            result.SetCol(0, colData);
+            Matrix result = new Matrix(data.Length, 1);
+            result.SetCol(0, data);
             return result;
         }
 
         /// <summary>
-        /// Creates a matrix that has one row and rowData.Length columns.
+        /// Creates a matrix that has one row and data.Length columns.
         /// </summary>
-        /// <param name="rowData">Row values.</param>
-        public static Matrix CreateRowMatrix(double[] rowData)
+        /// <param name="data">Row values</param>
+        public static Matrix CreateSingleRowMatrix(double[] data)
         {
-            Matrix result = new Matrix(1, rowData.Length);
-            result.SetRow(0, rowData);
+            Matrix result = new Matrix(1, data.Length);
+            result.SetRow(0, data);
             return result;
         }
 
         //Instance methods
+        /// <summary>
+        /// Fills the whole matrix with given value
+        /// </summary>
+        /// <param name="value">Value</param>
         public void Set(double value = 0)
         {
             _data.Populate(value);
             return;
         }
 
+        /// <summary>
+        /// Fills the whole matrix with the values from given 1D array (flat format)
+        /// </summary>
+        /// <param name="flatData">Data in the flat format</param>
         public void Set(double[] flatData)
         {
             int dataIndex = 0;
-            for (int i = 0; i < RowsCount; i++)
+            for (int i = 0; i < NumOfRows; i++)
             {
-                for (int j = 0; j < ColsCount; j++)
+                for (int j = 0; j < NumOfCols; j++)
                 {
                     _data[i][j] = flatData[dataIndex++];
                 }
@@ -109,11 +134,15 @@ namespace RCNet.MathTools.MatrixMath
             return;
         }
 
+        /// <summary>
+        /// Copies all values from the source matrix into the this matrix.
+        /// </summary>
+        /// <param name="source">Source matrix</param>
         public void Set(Matrix source)
         {
-            for (int i = 0; i < RowsCount; i++)
+            for (int i = 0; i < NumOfRows; i++)
             {
-                for (int j = 0; j < ColsCount; j++)
+                for (int j = 0; j < NumOfCols; j++)
                 {
                     _data[i][j] = source._data[i][j];
                 }
@@ -121,18 +150,33 @@ namespace RCNet.MathTools.MatrixMath
             return;
         }
 
+        /// <summary>
+        /// Fills specified row with given value
+        /// </summary>
+        /// <param name="row">Matrix row</param>
+        /// <param name="value">Value</param>
         public void SetRow(int row, double value = 0)
         {
             _data[row].Populate(value);
             return;
         }
 
-        public void SetRow(int row, double[] rowData)
+        /// <summary>
+        /// Copies values from the given array into the specified matrix row.
+        /// </summary>
+        /// <param name="row">Matrix row</param>
+        /// <param name="data">Data</param>
+        public void SetRow(int row, double[] data)
         {
-            rowData.CopyTo(_data[row], 0);
+            data.CopyTo(_data[row], 0);
             return;
         }
 
+        /// <summary>
+        /// Fills specified matrix column with the specified value.
+        /// </summary>
+        /// <param name="col">Matrix column</param>
+        /// <param name="value">Value</param>
         public void SetCol(int col, double value = 0)
         {
             for(int i = 0; i < _data.Length; i++)
@@ -142,26 +186,31 @@ namespace RCNet.MathTools.MatrixMath
             return;
         }
 
-        public void SetCol(int col, double[] colData)
+        /// <summary>
+        /// Copies values from the given array into the specified matrix column.
+        /// </summary>
+        /// <param name="col">Matrix column</param>
+        /// <param name="data">Data</param>
+        public void SetCol(int col, double[] data)
         {
-            for (int i = 0; i < colData.Length; i++)
+            for (int i = 0; i < data.Length; i++)
             {
-                _data[i][col] = colData[i];
+                _data[i][col] = data[i];
             }
             return;
         }
 
         /// <summary>
-        /// Set a submatrix.
+        /// Copies values from the source matrix into the this matrix starting from specified row and col position.
         /// </summary>
         /// <param name="fromRow">Initial row index</param>
         /// <param name="fromCol">Initial column index</param>
         /// <param name="source">Source matrix</param>
         public void SetSubMatrix(int fromRow, int fromCol, Matrix source)
         {
-            for (int i = 0; i <= source.RowsCount; i++)
+            for (int i = 0; i <= source.NumOfRows; i++)
             {
-                for (int j = 0; j <= source.ColsCount; j++)
+                for (int j = 0; j <= source.NumOfCols; j++)
                 {
                     _data[fromRow + i][fromCol + j] = source._data[i][j];
                 }
@@ -169,12 +218,16 @@ namespace RCNet.MathTools.MatrixMath
             return;
         }
 
+        /// <summary>
+        /// Copies data of this matrix into the 1D array of double values (flat format)
+        /// </summary>
+        /// <param name="flatData">Array to be filled</param>
         public void GetFlatData(double[] flatData)
         {
             int dataIndex = 0;
-            for (int i = 0; i < RowsCount; i++)
+            for (int i = 0; i < NumOfRows; i++)
             {
-                for (int j = 0; j < ColsCount; j++)
+                for (int j = 0; j < NumOfCols; j++)
                 {
                     flatData[dataIndex++] = _data[i][j];
                 }
@@ -182,6 +235,9 @@ namespace RCNet.MathTools.MatrixMath
             return;
         }
 
+        /// <summary>
+        /// Converts data of this matrix into the 1D array of double values (flat format)
+        /// </summary>
         public double[] GetFlatData()
         {
             double[] flatData = new double[Size];
@@ -189,10 +245,15 @@ namespace RCNet.MathTools.MatrixMath
             return flatData;
         }
 
+        /// <summary>
+        /// Creates a matrix having the same number of rows as this matrix and one column.
+        /// Column values are copied from the specified column of this matrix.
+        /// </summary>
+        /// <param name="col">This matrix column index</param>
         public Matrix GetColSubMatrix(int col)
         {
-            double[][] colMatrixData = new double[RowsCount][];
-            for (int row = 0; row < RowsCount; row++)
+            double[][] colMatrixData = new double[NumOfRows][];
+            for (int row = 0; row < NumOfRows; row++)
             {
                 colMatrixData[row] = new double[1];
                 colMatrixData[row][0] = _data[row][col];
@@ -200,11 +261,16 @@ namespace RCNet.MathTools.MatrixMath
             return new Matrix(colMatrixData);
         }
 
+        /// <summary>
+        /// Creates a matrix having the same number of columns as this matrix and one row.
+        /// Row values are copied from the specified row of this matrix.
+        /// </summary>
+        /// <param name="row">This matrix row index</param>
         public Matrix GetRowSubMatrix(int row)
         {
             double[][] rowMatrixData = new double[1][];
-            rowMatrixData[0] = new double[ColsCount];
-            for (int col = 0; col < ColsCount; col++)
+            rowMatrixData[0] = new double[NumOfCols];
+            for (int col = 0; col < NumOfCols; col++)
             {
                 rowMatrixData[0][col] = _data[row][col];
             }
@@ -212,7 +278,7 @@ namespace RCNet.MathTools.MatrixMath
         }
 
         /// <summary>
-        /// Gets a submatrix.
+        /// Creates a submatrix of this matrix.
         /// </summary>
         /// <param name="fromRow">Initial row index.</param>
         /// <param name="toRow">Final row index.</param>
@@ -231,6 +297,9 @@ namespace RCNet.MathTools.MatrixMath
             return resultMatrix;
         }
 
+        /// <summary>
+        /// Returns clone of the internal array of arrays.
+        /// </summary>
         public double[][] GetDataClone()
         {
             return _data.Clone2D();
@@ -241,48 +310,6 @@ namespace RCNet.MathTools.MatrixMath
             return new Matrix(this);
         }
 
-        /// <summary>
-        /// Add the specified value to the specified row and column of the matrix.
-        /// </summary>
-        /// <param name="row">The row to add to.</param>
-        /// <param name="col">The column to add to.</param>
-        /// <param name="value">The value to add.</param>
-        public void Add(int row, int col, double value)
-        {
-            _data[row][col] += value;
-            return;
-        }
-
-        /// <summary>
-        /// Add the values of specified matrix into the this matrix.
-        /// </summary>
-        public void Add(Matrix values)
-        {
-            for(int i = 0; i < RowsCount; i++)
-            {
-                for(int j = 0; j < ColsCount; j++)
-                {
-                    _data[i][j] = values._data[i][j];
-                }
-            }
-            return;
-        }
-
-        /// <summary>
-        /// Sum all of the values in the matrix.
-        /// </summary>
-        public double Sum(Matrix values)
-        {
-            double sum = 0;
-            for (int i = 0; i < RowsCount; i++)
-            {
-                for (int j = 0; j < ColsCount; j++)
-                {
-                    sum += _data[i][j];
-                }
-            }
-            return sum;
-        }
-
     }//Matrix
+
 } //Namespace

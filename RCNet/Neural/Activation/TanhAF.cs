@@ -1,15 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using RCNet.Extensions;
 using RCNet.MathTools;
 
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Tanh activation function
+    /// TanH activation function
+    /// See the IActivationFunction.
     /// </summary>
     [Serializable]
     public class TanhAF : IActivationFunction
@@ -21,14 +18,15 @@ namespace RCNet.Neural.Activation
         public double Compute(double x)
         {
             //Tanh
-            return 2d / (1d + Math.Exp(-2d * x)).Bound() - 1d; //3x faster than Math.Tanh;
+            return 2d / (1d + Math.Exp(-2d * x)).Bound() - 1d; //Faster than Math.Tanh;
         }
 
-        public double ComputeDerivative(double c, double x = double.NaN)
+        public double Derive(double c, double x = double.NaN)
         {
             return 1d - c.Power(2);
         }
 
     }//TanhAF
+
 }//Namespace
 

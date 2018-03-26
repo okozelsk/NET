@@ -1,15 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using RCNet.MathTools;
 using RCNet.Extensions;
 
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Elliot activation function
+    /// Elliot activation function (aka Softsign).
+    /// See the IActivationFunction.
     /// </summary>
     [Serializable]
     public class ElliotAF : IActivationFunction
@@ -35,7 +32,7 @@ namespace RCNet.Neural.Activation
             return (x * Slope) / (1d + Math.Abs(x * Slope));
         }
 
-        public double ComputeDerivative(double c, double x = double.NaN)
+        public double Derive(double c, double x = double.NaN)
         {
             return (Slope * 1d) / ((1d + Math.Abs(c * Slope)).Power(2));
         }

@@ -43,7 +43,7 @@ namespace RCNet.Neural.Network.EchoState
         /// <param name="predictorsCollection">Predictors collection</param>
         /// <param name="outputsCollection">Desired outputs collection (desired outputs in the same order as predictors)</param>
         /// <param name="regrOutputFieldIdx">Index of the Esn output field for which will be performed the regression.</param>
-        /// <param name="testSampleIdxCollection">Array of indexes to be filled by this function.</param>
+        /// <param name="testSampleIdxCollection">Array of indexes to be filled.</param>
         public delegate void EsnTestSamplesSelectorCallbackDelegate(List<double[]> predictorsCollection,
                                                                     List<double[]> outputsCollection,
                                                                     int regrOutputFieldIdx, 

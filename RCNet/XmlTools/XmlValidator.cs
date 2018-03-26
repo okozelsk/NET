@@ -1,17 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO;
-using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Schema;
 
 namespace RCNet.XmlTools
 {
     /// <summary>
-    /// Provides xml loading/validation functionalities
+    /// The class provides the xml loading/validation functionalities
     /// </summary>
     public class XmlValidator
     {
@@ -20,35 +15,34 @@ namespace RCNet.XmlTools
         private XmlSchemaSet _schemaSet;
 
         //Constructor
+        /// <summary>
+        /// Instantiates a XmlValidator
+        /// </summary>
         public XmlValidator()
         {
             _schemaSet = new XmlSchemaSet();
             return;
         }
 
-        //Properties
-
         //Methods
         /// <summary>
-        /// Loads new xml schema from the given stream. Stream is then closed and disposed.
+        /// Loads and adds the new xml schema from a given stream.
         /// </summary>
-        /// <param name="schemaStream">Stream from which to load xml schema</param>
+        /// <param name="schemaStream">A stream from which to load the xml schema</param>
         public void AddSchema(Stream schemaStream)
         {
-            //Load schema
+            //Load the schema
             XmlSchema schema = XmlSchema.Read(schemaStream, new ValidationEventHandler(XmlValidationCallback));
-            //Add schema to schema set
+            //Add the schema into the schema set
             _schemaSet.Add(schema);
-            schemaStream.Close();
-            schemaStream.Dispose();
             return;
         }
 
         /// <summary>
-        /// Creates new XDocument, content is loaded from given file and validated against stored xml schemaSet
+        /// Creates a new XDocument and loads its content from a given file.
+        /// Xml document is validated against the stored SchemaSet
         /// </summary>
-        /// <param name="filename">Xml content of document to be loaded</param>
-        /// <returns>XDocument</returns>
+        /// <param name="filename">File containing the xml content</param>
         public XDocument LoadXDocFromFile(string filename)
         {
             XDocument xDoc = XDocument.Load(filename);
@@ -58,10 +52,10 @@ namespace RCNet.XmlTools
 
 
         /// <summary>
-        /// Creates new XDocument, content is loaded from given string and validated against stored xml schemaSet
+        /// Creates a new XDocument and loads its content from a given string.
+        /// Xml document is validated against the stored SchemaSet
         /// </summary>
-        /// <param name="xmlContent">Xml content of document to be loaded</param>
-        /// <returns>XDocument</returns>
+        /// <param name="xmlContent">A string containing the xml content</param>
         public XDocument LoadXDocFromString(string xmlContent)
         {
 
@@ -75,8 +69,9 @@ namespace RCNet.XmlTools
         /// </summary>
         private void XmlValidationCallback(object sender, ValidationEventArgs args)
         {
-            throw new Exception("Validation error: " + args.Message);
+            throw new Exception($"Validation error: {args.Message}");
         }
 
     }//XMLValidator
+
 }//Namespace

@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using RCNet.Extensions;
 
 namespace RCNet.MathTools
 {
     /// <summary>
-    /// Implements simple statistics (thread safe).
+    /// Implements the simple and thread safe statistics.
     /// </summary>
     [Serializable]
     public class BasicStat
@@ -17,11 +15,11 @@ namespace RCNet.MathTools
         private Object _lock = new Object();
         //Base values
         private double _sum;
-        private double _sumOfPowers;
+        private double _sumOfSquares;
         private double _min;
         private double _max;
-        private int _samplesCount;
-        private int _nonzeroSamplesCount;
+        private int _numOfSamples;
+        private int _numOfNonzeroSamples;
         //Precomputed properties
         private bool _recompute;
         private double _arithAvg;
@@ -32,77 +30,110 @@ namespace RCNet.MathTools
         private double _spanDev;
 
         //Constructors
+        /// <summary>
+        /// Creates an uninitialized instance
+        /// </summary>
         public BasicStat()
         {
             Reset();
             return;
         }
 
-        public BasicStat(IEnumerable<double> values)
+        /// <summary>
+        /// Creates an instance and loads given sample values
+        /// </summary>
+        public BasicStat(IEnumerable<double> sampleValueCollection)
         {
-            SetSampleValues(values);
+            SetSampleValues(sampleValueCollection);
             return;
         }
 
-        public BasicStat(IEnumerable<long> values)
+        /// <summary>
+        /// Creates an instance and loads given sample values
+        /// </summary>
+        public BasicStat(IEnumerable<long> sampleValueCollection)
         {
-            SetSampleValues(values);
+            SetSampleValues(sampleValueCollection);
             return;
         }
 
-        public BasicStat(IEnumerable<ulong> values)
+        /// <summary>
+        /// Creates an instance and loads given sample values
+        /// </summary>
+        public BasicStat(IEnumerable<ulong> sampleValueCollection)
         {
-            SetSampleValues(values);
+            SetSampleValues(sampleValueCollection);
             return;
         }
 
-        public BasicStat(IEnumerable<int> values)
+        /// <summary>
+        /// Creates an instance and loads given sample values
+        /// </summary>
+        public BasicStat(IEnumerable<int> sampleValueCollection)
         {
-            SetSampleValues(values);
+            SetSampleValues(sampleValueCollection);
             return;
         }
 
-        public BasicStat(IEnumerable<uint> values)
+        /// <summary>
+        /// Creates an instance and loads given sample values
+        /// </summary>
+        public BasicStat(IEnumerable<uint> sampleValueCollection)
         {
-            SetSampleValues(values);
+            SetSampleValues(sampleValueCollection);
             return;
         }
 
-        public BasicStat(IEnumerable<byte> values)
+        /// <summary>
+        /// Creates an instance and loads given sample values
+        /// </summary>
+        public BasicStat(IEnumerable<byte> sampleValueCollection)
         {
-            SetSampleValues(values);
+            SetSampleValues(sampleValueCollection);
             return;
         }
 
+        /// <summary>
+        /// The copy constructor
+        /// </summary>
         public BasicStat(BasicStat source)
         {
-            Adopt(source);
+            CopyFrom(source);
             return;
         }
 
         //Properties
-        public int SamplesCount
+        /// <summary>
+        /// Number of sample values affected in the statistics
+        /// </summary>
+        public int NumOfSamples
         {
             get
             {
                 lock(_lock)
                 {
-                    return _samplesCount;
+                    return _numOfSamples;
                 }
             }
         }
 
-        public int NonzeroSamplesCount
+        /// <summary>
+        /// Number of nonzero sample values affected in the statistics
+        /// </summary>
+        public int NumOfNonzeroSamples
         {
             get
             {
                 lock (_lock)
                 {
-                    return _nonzeroSamplesCount;
+                    return _numOfNonzeroSamples;
                 }
             }
         }
 
+        /// <summary>
+        /// Sum of the sample values
+        /// </summary>
         public double Sum
         {
             get
@@ -114,17 +145,23 @@ namespace RCNet.MathTools
             }
         }
 
-        public double SumOfPowers
+        /// <summary>
+        /// Sum of the squared sample values
+        /// </summary>
+        public double SumOfSquares
         {
             get
             {
                 lock (_lock)
                 {
-                    return _sumOfPowers;
+                    return _sumOfSquares;
                 }
             }
         }
 
+        /// <summary>
+        /// Min sample value
+        /// </summary>
         public double Min
         {
             get
@@ -136,6 +173,9 @@ namespace RCNet.MathTools
             }
         }
 
+        /// <summary>
+        /// Max sample value
+        /// </summary>
         public double Max
         {
             get
@@ -147,6 +187,9 @@ namespace RCNet.MathTools
             }
         }
 
+        /// <summary>
+        /// Mid = Min + ((Max-Min)/2)
+        /// </summary>
         public double Mid
         {
             get
@@ -158,6 +201,9 @@ namespace RCNet.MathTools
             }
         }
 
+        /// <summary>
+        /// Span = (Max-Min)
+        /// </summary>
         public double Span
         {
             get
@@ -169,6 +215,9 @@ namespace RCNet.MathTools
             }
         }
 
+        /// <summary>
+        /// Mean of the sample values
+        /// </summary>
         public double ArithAvg
         {
             get
@@ -181,6 +230,9 @@ namespace RCNet.MathTools
             }
         }
 
+        /// <summary>
+        /// Mean of the squared sample values
+        /// </summary>
         public double MeanSquare
         {
             get
@@ -193,6 +245,9 @@ namespace RCNet.MathTools
             }
         }
 
+        /// <summary>
+        /// Root of the mean of the squared sample values
+        /// </summary>
         public double RootMeanSquare
         {
             get
@@ -205,6 +260,9 @@ namespace RCNet.MathTools
             }
         }
 
+        /// <summary>
+        /// The variance of the sample values
+        /// </summary>
         public double Variance
         {
             get
@@ -217,6 +275,9 @@ namespace RCNet.MathTools
             }
         }
 
+        /// <summary>
+        /// The standard deviation of the sample values
+        /// </summary>
         public double StdDev
         {
             get
@@ -229,6 +290,9 @@ namespace RCNet.MathTools
             }
         }
 
+        /// <summary>
+        /// SpanDev = (Span * StdDev)
+        /// </summary>
         public double SpanDev
         {
             get
@@ -242,32 +306,39 @@ namespace RCNet.MathTools
         }
 
         //Methods
+        /// <summary>
+        /// Resets the statistics
+        /// </summary>
         public void Reset()
         {
             lock(_lock)
             {
                 _sum = 0;
-                _sumOfPowers = 0;
+                _sumOfSquares = 0;
                 _min = 0;
                 _max = 0;
-                _samplesCount = 0;
-                _nonzeroSamplesCount = 0;
+                _numOfSamples = 0;
+                _numOfNonzeroSamples = 0;
                 _recompute = true;
                 Recompute();
             }
             return;
         }
 
-        public void Adopt(BasicStat source)
+        /// <summary>
+        /// Copies all internal attribute values from the source instance into this instance
+        /// </summary>
+        /// <param name="source">The source instance</param>
+        public void CopyFrom(BasicStat source)
         {
             lock(_lock)
             {
                 _sum = source._sum;
-                _sumOfPowers = source._sumOfPowers;
+                _sumOfSquares = source._sumOfSquares;
                 _min = source._min;
                 _max = source._max;
-                _samplesCount = source._samplesCount;
-                _nonzeroSamplesCount = source._nonzeroSamplesCount;
+                _numOfSamples = source._numOfSamples;
+                _numOfNonzeroSamples = source._numOfNonzeroSamples;
                 _recompute = source._recompute;
                 _arithAvg = source._arithAvg;
                 _rootMeanSquare = source._rootMeanSquare;
@@ -278,16 +349,19 @@ namespace RCNet.MathTools
             return;
         }
 
+        /// <summary>
+        /// Recomputes the statistics (if necessary)
+        /// </summary>
         private void Recompute()
         {
             if(_recompute)
             {
-                if (_samplesCount > 0)
+                if (_numOfSamples > 0)
                 {
-                    _arithAvg = _sum / (double)(_samplesCount);
-                    _meanSquare = _sumOfPowers / (double)(_samplesCount);
+                    _arithAvg = _sum / (double)(_numOfSamples);
+                    _meanSquare = _sumOfSquares / (double)(_numOfSamples);
                     _rootMeanSquare = Math.Sqrt(_meanSquare);
-                    _variance = (_sumOfPowers / (double)(_samplesCount)) - _arithAvg.Power(2);
+                    _variance = (_sumOfSquares / (double)(_numOfSamples)) - _arithAvg.Power(2);
                     _stdDev = (_variance > 0) ? _stdDev = Math.Sqrt(_variance) : 0;
                     _spanDev = (_max - _min) * _stdDev;
                 }
@@ -305,13 +379,16 @@ namespace RCNet.MathTools
             return;
         }
 
+        /// <summary>
+        /// Affects the sample value
+        /// </summary>
         public void AddSampleValue(double value)
         {
             lock(_lock)
             {
                 _sum += value;
-                _sumOfPowers += value.Power(2);
-                if (_samplesCount == 0)
+                _sumOfSquares += value.Power(2);
+                if (_numOfSamples == 0)
                 {
                     _min = _max = value;
                 }
@@ -320,109 +397,145 @@ namespace RCNet.MathTools
                     if (value < _min) _min = value;
                     else if (value > _max) _max = value;
                 }
-                ++_samplesCount;
+                ++_numOfSamples;
                 if (value != 0)
                 {
-                    ++_nonzeroSamplesCount;
+                    ++_numOfNonzeroSamples;
                 }
                 _recompute = true;
             }
             return;
         }
 
-        public void AddSampleValues(IEnumerable<double> values)
+        /// <summary>
+        /// Affects sample values from the collection
+        /// </summary>
+        public void AddSampleValues(IEnumerable<double> sampleValueCollection)
         {
-            foreach(double value in values)
+            foreach(double value in sampleValueCollection)
             {
                 AddSampleValue(value);
             }
             return;
         }
 
-        public void AddSampleValues(IEnumerable<long> values)
+        /// <summary>
+        /// Affects sample values from the collection
+        /// </summary>
+        public void AddSampleValues(IEnumerable<long> sampleValueCollection)
         {
-            foreach (long value in values)
+            foreach (long value in sampleValueCollection)
             {
                 AddSampleValue(value);
             }
             return;
         }
 
-        public void AddSampleValues(IEnumerable<ulong> values)
+        /// <summary>
+        /// Affects sample values from the collection
+        /// </summary>
+        public void AddSampleValues(IEnumerable<ulong> sampleValueCollection)
         {
-            foreach (ulong value in values)
+            foreach (ulong value in sampleValueCollection)
             {
                 AddSampleValue(value);
             }
             return;
         }
 
-        public void AddSampleValues(IEnumerable<int> values)
+        /// <summary>
+        /// Affects sample values from the collection
+        /// </summary>
+        public void AddSampleValues(IEnumerable<int> sampleValueCollection)
         {
-            foreach (int value in values)
+            foreach (int value in sampleValueCollection)
             {
                 AddSampleValue(value);
             }
             return;
         }
 
-        public void AddSampleValues(IEnumerable<uint> values)
+        /// <summary>
+        /// Affects sample values from the collection
+        /// </summary>
+        public void AddSampleValues(IEnumerable<uint> sampleValueCollection)
         {
-            foreach (uint value in values)
+            foreach (uint value in sampleValueCollection)
             {
                 AddSampleValue(value);
             }
             return;
         }
 
-        public void AddSampleValues(IEnumerable<byte> values)
+        /// <summary>
+        /// Affects sample values from the collection
+        /// </summary>
+        public void AddSampleValues(IEnumerable<byte> sampleValueCollection)
         {
-            foreach (byte value in values)
+            foreach (byte value in sampleValueCollection)
             {
                 AddSampleValue(value);
             }
             return;
         }
 
-        public void SetSampleValues(IEnumerable<double> values)
+        /// <summary>
+        /// Resets the statistics and then affects sample values from the collection
+        /// </summary>
+        public void SetSampleValues(IEnumerable<double> sampleValueCollection)
         {
             Reset();
-            AddSampleValues(values);
+            AddSampleValues(sampleValueCollection);
             return;
         }
 
-        public void SetSampleValues(IEnumerable<long> values)
+        /// <summary>
+        /// Resets the statistics and then affects sample values from the collection
+        /// </summary>
+        public void SetSampleValues(IEnumerable<long> sampleValueCollection)
         {
             Reset();
-            AddSampleValues(values);
+            AddSampleValues(sampleValueCollection);
             return;
         }
 
-        public void SetSampleValues(IEnumerable<ulong> values)
+        /// <summary>
+        /// Resets the statistics and then affects sample values from the collection
+        /// </summary>
+        public void SetSampleValues(IEnumerable<ulong> sampleValueCollection)
         {
             Reset();
-            AddSampleValues(values);
+            AddSampleValues(sampleValueCollection);
             return;
         }
 
-        public void SetSampleValues(IEnumerable<int> values)
+        /// <summary>
+        /// Resets the statistics and then affects sample values from the collection
+        /// </summary>
+        public void SetSampleValues(IEnumerable<int> sampleValueCollection)
         {
             Reset();
-            AddSampleValues(values);
+            AddSampleValues(sampleValueCollection);
             return;
         }
 
-        public void SetSampleValues(IEnumerable<uint> values)
+        /// <summary>
+        /// Resets the statistics and then affects sample values from the collection
+        /// </summary>
+        public void SetSampleValues(IEnumerable<uint> sampleValueCollection)
         {
             Reset();
-            AddSampleValues(values);
+            AddSampleValues(sampleValueCollection);
             return;
         }
 
-        public void SetSampleValues(IEnumerable<byte> values)
+        /// <summary>
+        /// Resets the statistics and then affects sample values from the collection
+        /// </summary>
+        public void SetSampleValues(IEnumerable<byte> sampleValueCollection)
         {
             Reset();
-            AddSampleValues(values);
+            AddSampleValues(sampleValueCollection);
             return;
         }
 

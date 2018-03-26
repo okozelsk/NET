@@ -1,15 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RCNet.Neural.Activation
 {
     public static class ActivationFactory
     {
         //Constants
-        /// <summary>Supported types of neuron activation function</summary>
+        /// <summary>
+        /// Supported types of neuron activation function
+        /// </summary>
         public enum ActivationType
         {
             /// <summary>
@@ -30,8 +28,12 @@ namespace RCNet.Neural.Activation
             Gaussian
         };
 
-        /// <summary>Returns new instance of specified activation function</summary>
-        /// <param name="type">Enumerated type of activation function</param>
+        /// <summary>
+        /// Returns the new instance of the specified activation function
+        /// </summary>
+        /// <param name="type">
+        /// Desired type of activation function
+        /// </param>
         public static IActivationFunction CreateActivationFunction(ActivationType type, double p1 = double.NaN, double p2 = double.NaN)
         {
             switch (type)
@@ -44,10 +46,15 @@ namespace RCNet.Neural.Activation
                 case ActivationType.Sigmoid: return new SigmoidAF();
                 case ActivationType.Gaussian: return new GaussianAF();
                 default:
-                    throw new ArgumentException("Unsupported activation function type: " + type.ToString());
+                    throw new ArgumentException($"Unsupported activation function type: {type}");
             }
         }
 
+        /// <summary>
+        /// Parses given string code of the activation function type.
+        /// </summary>
+        /// <param name="code">A code of the activation function type.</param>
+        /// <returns>Parsed activation function type.</returns>
         public static ActivationType ParseActivation(string code)
         {
             switch (code.ToUpper())
@@ -60,9 +67,10 @@ namespace RCNet.Neural.Activation
                 case "SIGMOID": return ActivationType.Sigmoid;
                 case "GAUSSIAN": return ActivationType.Gaussian;
                 default:
-                    throw new ArgumentException("Unsupported activation function code: " + code);
+                    throw new ArgumentException($"Unsupported activation function code: {code}");
             }
         }
 
     }//ActivationFactory
+
 }//Namespace

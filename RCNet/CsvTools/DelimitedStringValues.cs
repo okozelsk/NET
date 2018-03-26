@@ -1,51 +1,51 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace RCNet.CsvTools
 {
     /// <summary>
-    /// Helper class for CSV parsing/generating operations.
+    /// Helper class for csv string operations.
     /// </summary>
     public class DelimitedStringValues
     {
         //Constants
+        //Delimiters
         public const char SemicolonDelimiter = ';';
         public const char CommaDelimiter = ',';
         public const char DefaultDelimiter = SemicolonDelimiter;
 
         //Attributes
         private char _delimiter;
-        private List<string> _values;
+        private List<string> _stringValueCollection;
 
         //Constructor
         public DelimitedStringValues(char delimiter = DefaultDelimiter)
         {
             _delimiter = delimiter;
-            _values = new List<string>();
+            _stringValueCollection = new List<string>();
             return;
         }
 
         //Properties
         public char Delimiter { get { return _delimiter; } }
-        public int ValuesCount { get { return _values.Count; } }
-        public List<string> Values { get { return _values; } }
+        public int NumOfStringValues { get { return _stringValueCollection.Count; } }
+        public List<string> StringValueCollection { get { return _stringValueCollection; } }
 
         //Methods
         //Static methods
         /// <summary>
-        /// Tries to recognize delimiter
+        /// Tries to recognize used delimiter
         /// </summary>
-        /// <param name="data">Sample delimited data</param>
+        /// <param name="sampleDelimitedData">Sample delimited data</param>
         /// <returns>Found or default delimiter</returns>
-        public static char RecognizeDelimiter(string data)
+        public static char RecognizeDelimiter(string sampleDelimitedData)
         {
-            if (data.IndexOf(SemicolonDelimiter) != -1)
+            if (sampleDelimitedData.IndexOf(SemicolonDelimiter) != -1)
             {
                 return SemicolonDelimiter;
             }
-            if (data.IndexOf(CommaDelimiter) != -1)
+            if (sampleDelimitedData.IndexOf(CommaDelimiter) != -1)
             {
                 return CommaDelimiter;
             }
@@ -53,16 +53,16 @@ namespace RCNet.CsvTools
         }
 
         /// <summary>
-        /// Converts collection of string values to string where values are delimited by given delimiter.
+        /// Converts collection of string values to a single string where values are delimited by the given delimiter.
         /// </summary>
-        /// <param name="values">Collection of values</param>
-        /// <param name="delimiter">Desired values delimiter</param>
+        /// <param name="stringValueCollection">Collection of string values</param>
+        /// <param name="delimiter">Values delimiter to be used</param>
         /// <returns>Built string containing delimited values</returns>
-        public static string ValuesToDelimited(IEnumerable<string> values, char delimiter = DefaultDelimiter)
+        public static string ValuesToDelimited(IEnumerable<string> stringValueCollection, char delimiter = DefaultDelimiter)
         {
             StringBuilder output = new StringBuilder();
             bool firstVal = true;
-            foreach(string value in values)
+            foreach(string value in stringValueCollection)
             {
                 if(!firstVal)
                 {
@@ -75,11 +75,11 @@ namespace RCNet.CsvTools
         }
 
         /// <summary>
-        /// Splits given string containing delimited values to the list of values
+        /// Splits the given string containing delimited values to the collection of string values
         /// </summary>
         /// <param name="delimValues">String containing delimited values</param>
-        /// <param name="delimiter">Delimiter used in the delimValues string</param>
-        /// <returns>Built list of values</returns>
+        /// <param name="delimiter">Delimiter of the values</param>
+        /// <returns>Collection of the string values</returns>
         public static List<string> DelimitedToValues(string delimValues, char delimiter = DefaultDelimiter)
         {
             List<string> values = new List<string>();
@@ -94,16 +94,16 @@ namespace RCNet.CsvTools
 
         //Instance methods
         /// <summary>
-        /// Cleares internal list of values
+        /// Cleares the internal collection of string values
         /// </summary>
         public void Reset()
         {
-            _values.Clear();
+            _stringValueCollection.Clear();
             return;
         }
 
         /// <summary>
-        /// Changes delimiter
+        /// Changes the delimiter
         /// </summary>
         /// <param name="delimiter">New delimiter</param>
         public void ChangeDelimiter(char delimiter)
@@ -113,43 +113,43 @@ namespace RCNet.CsvTools
         }
 
         /// <summary>
-        /// Adds string value to internal list of values
+        /// Adds string value into the internal collection of string values
         /// </summary>
         /// <param name="value">Value to be added</param>
-        /// <returns>Count of values after operation</returns>
+        /// <returns>Number of string values in the internal collection after the operation</returns>
         public int AddValue(string value)
         {
-            _values.Add(value);
-            return _values.Count;
+            _stringValueCollection.Add(value);
+            return _stringValueCollection.Count;
         }
 
         /// <summary>
-        /// Loads new values from string containing delimited values
+        /// Loads string values into the internal collection from a string containing delimited values
         /// </summary>
         /// <param name="delimValues">String containing delimited values</param>
-        /// <param name="reset">Indicates if to clear internal values before operation</param>
-        /// <param name="recognizeDelimiter">If false (default) then instance delimiter is used. If true then delimiter will be tried to recognize before split </param>
-        /// <returns>Count of values after operation</returns>
+        /// <param name="reset">Indicates if to clear the internal collection before the load</param>
+        /// <param name="recognizeDelimiter">If false then the instance delimiter will be used. If true then delimiter will be tried to recognized from the given data.</param>
+        /// <returns>Number of string values in the internal collection after the operation</returns>
         public int LoadFromString(string delimValues, bool reset = true, bool recognizeDelimiter = false)
         {
             if(reset)
             {
                 Reset();
             }
-            _values.AddRange(DelimitedToValues(delimValues,
-                                                recognizeDelimiter ? RecognizeDelimiter(delimValues) : _delimiter
-                                                ));
-            return _values.Count;
+            _stringValueCollection.AddRange(DelimitedToValues(delimValues,
+                                            recognizeDelimiter ? RecognizeDelimiter(delimValues) : _delimiter
+                                            ));
+            return _stringValueCollection.Count;
         }
 
         /// <summary>
-        /// Returns value corresponding with given index
+        /// Returns the string value from the internal collection having given index
         /// </summary>
         /// <param name="idx">Index</param>
-        /// <returns>Corresponding string value</returns>
+        /// <returns>String value from the internal collection</returns>
         public string GetValue(int idx)
         {
-            return _values[idx];
+            return _stringValueCollection[idx];
         }
 
         /// <summary>
@@ -157,18 +157,18 @@ namespace RCNet.CsvTools
         /// </summary>
         public int IndexOf(string value)
         {
-            return _values.IndexOf(value);
+            return _stringValueCollection.IndexOf(value);
         }
 
         /// <summary>
-        /// Converts internal list of string values to the string where values are delimited by internally used delimiter.
+        /// Copies the values from the internal collection to a single string. Values are delimited by the instance delimiter.
         /// </summary>
-        /// <returns>Built string containing delimited values</returns>
+        /// <returns>Single string containing delimited values</returns>
         public override string ToString()
         {
-            return ValuesToDelimited(_values, _delimiter);
+            return ValuesToDelimited(_stringValueCollection, _delimiter);
         }
-
+  
     }//DelimitedStringValues
 
 }//Namespace

@@ -1,14 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RCNet.Extensions;
 
 namespace RCNet.MathTools
 {
     /// <summary>
-    /// Implements thread safe normalizer and denormalizer. Scales input to desired normalized range and vice versa.
+    /// Implements the thread safe normalizer and denormalizer. Scales the input to desired normalized range and vice versa.
     /// Normalizer supports gausse data standardization
     /// </summary>
     [Serializable]
@@ -18,7 +13,7 @@ namespace RCNet.MathTools
         //Default borders of normalization range
         public const double DefaultNormRangeMin = -1;
         public const double DefaultNormRangeMax = 1;
-        //Default is to use gausse standardization during normalization
+        //Default is to use the gausse standardization
         public const bool DefaultStandardizeSwitch = true;
 
         //Attributes
@@ -29,9 +24,9 @@ namespace RCNet.MathTools
 
         //Constructors
         /// <summary>
-        /// Constructs normalizer as a copy of another normalizer
+        /// The copy constructor
         /// </summary>
-        /// <param name="source">Source normalizer</param>
+        /// <param name="source">Source instance</param>
         public Normalizer(Normalizer source)
         {
             _standardize = source._standardize;
@@ -42,10 +37,15 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Constructs normalizer
+        /// Instantiates a normalizer
         /// </summary>
-        /// <param name="reserveRatio">Reserved part of known samples range to avoid normalization overflow by future unseen data.</param>
-        /// <param name="standardize">If to apply gausse data standardization</param>
+        /// <param name="reserveRatio">
+        /// The reserve kept by the normalizer to protect against overflow if the future data
+        /// would grow from a known range.
+        /// </param>
+        /// <param name="standardize">
+        /// A switch if to apply the data standardization
+        /// </param>
         public Normalizer(double reserveRatio, bool standardize = DefaultStandardizeSwitch)
         {
             _standardize = standardize;
@@ -58,9 +58,16 @@ namespace RCNet.MathTools
         /// <summary>
         /// Constructs normalizer
         /// </summary>
-        /// <param name="normRange">Output range of normalized values</param>
-        /// <param name="reserveRatio">Reserved part of known samples range to avoid overflow by future unseen data.</param>
-        /// <param name="standardize">If to apply gausse data standardization</param>
+        /// <param name="normRange">
+        /// The range of normalized values
+        /// </param>
+        /// <param name="reserveRatio">
+        /// The reserve kept by the normalizer to protect against overflow if the future data
+        /// would grow from a known range.
+        /// </param>
+        /// <param name="standardize">
+        /// A switch if to apply the data standardization
+        /// </param>
         public Normalizer(Interval normRange, double reserveRatio, bool standardize = DefaultStandardizeSwitch)
         {
             _standardize = standardize;
@@ -71,7 +78,7 @@ namespace RCNet.MathTools
         }
 
         //Properties
-        public bool Initialized { get { return (_samplesStat.SamplesCount > 0 && _samplesStat.Min != _samplesStat.Max); } }
+        public bool Initialized { get { return (_samplesStat.NumOfSamples > 0 && _samplesStat.Min != _samplesStat.Max); } }
         public double ReserveRatio { get { return _reserveRatio; } }
         public bool Standardize { get { return _standardize; } }
         public Interval NormRange { get { return _normRange; } }
@@ -81,7 +88,7 @@ namespace RCNet.MathTools
 
         //Methods
         /// <summary>
-        /// Updates normalizer
+        /// Adapts to the sample value
         /// </summary>
         /// <param name="sampleValue">Sample value</param>
         public void Adjust(double sampleValue)
@@ -91,7 +98,7 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Standard normalization
+        /// The standard normalization
         /// </summary>
         /// <param name="min">Samples min</param>
         /// <param name="max">Samples max</param>
@@ -103,7 +110,7 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Standard denormalization
+        /// The standard denormalization
         /// </summary>
         /// <param name="min">Samples min</param>
         /// <param name="max">Samples max</param>
@@ -127,9 +134,9 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Computes half of gausse interval
+        /// Computes the half of a gausse interval
         /// </summary>
-        /// <returns>Half of gausse interval</returns>
+        /// <returns>The half of a gausse interval</returns>
         private double ComputeGausseHalfInterval()
         {
             double gausseLo = Math.Abs((VMin - _samplesStat.ArithAvg) / _samplesStat.StdDev);
@@ -138,7 +145,7 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Normalizes given natural (sample) value
+        /// Normalizes the given natural (sample) value
         /// </summary>
         /// <param name="naturalValue">Natural value to be normalized</param>
         /// <returns>Normalized value</returns>
@@ -163,7 +170,7 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Denormalizes given normalized value
+        /// Denormalizes the given normalized value
         /// </summary>
         /// <param name="normValue">Normalized value to be denormalized</param>
         /// <returns>Natural (denormalized) value</returns>
@@ -188,14 +195,14 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Computes what part of natural range is affected by normalized error (piece of normalized range)
+        /// Computes what part of the natural values range is affected by the piece of the normalized range
         /// </summary>
-        /// <param name="normError">Piece of normalized range</param>
+        /// <param name="normSpan">Piece of normalized range</param>
         /// <returns>Piece of natural range</returns>
-        public double ComputeNaturalError(double normError)
+        public double ComputeNaturalSpan(double normSpan)
         {
             CheckInitiated();
-            return ((VMax - VMin) * Math.Abs(normError)) * (1 - _reserveRatio);
+            return ((VMax - VMin) * Math.Abs(normSpan)) * (1 - _reserveRatio);
         }
 
     }//Normalizer

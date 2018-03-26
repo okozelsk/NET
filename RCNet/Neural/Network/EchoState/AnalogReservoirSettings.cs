@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Globalization;
 using System.Xml.Linq;
+using System.IO;
 using RCNet.XmlTools;
 using RCNet.Neural.Activation;
 
@@ -179,7 +180,7 @@ namespace RCNet.Neural.Network.EchoState
         }
 
         /// <summary>
-        /// Deep copy constructor
+        /// The deep copy constructor
         /// </summary>
         /// <param name="source">Source instance</param>
         public AnalogReservoirSettings(AnalogReservoirSettings source)
@@ -237,8 +238,14 @@ namespace RCNet.Neural.Network.EchoState
             //A very ugly validation. Xml schema does not support validation of the xml fragment against specific type.
             XmlValidator validator = new XmlValidator();
             Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddSchema(assemblyRCNet.GetManifestResourceStream("RCNet.Neural.Network.EchoState.AnalogReservoirSettings.xsd"));
-            validator.AddSchema(assemblyRCNet.GetManifestResourceStream("RCNet.NeuralSettingsTypes.xsd"));
+            using (Stream schemaStream = assemblyRCNet.GetManifestResourceStream("RCNet.Neural.Network.EchoState.AnalogReservoirSettings.xsd"))
+            {
+                validator.AddSchema(schemaStream);
+            }
+            using (Stream schemaStream = assemblyRCNet.GetManifestResourceStream("RCNet.NeuralSettingsTypes.xsd"))
+            {
+                validator.AddSchema(schemaStream);
+            }
             validator.LoadXDocFromString(reservoirSettingsElem.ToString());
             //Parsing
             //Settings name
