@@ -220,7 +220,7 @@ namespace RCNet.MathTools.MatrixMath
         {
             if (B.NumOfRows != _numOfRows)
             {
-                throw new Exception("Different row counts.");
+                throw new Exception("Different number of rows.");
             }
 
             // Copy right hand side

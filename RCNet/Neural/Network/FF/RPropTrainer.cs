@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
 using RCNet.Extensions;
@@ -77,16 +76,16 @@ namespace RCNet.Neural.Network.FF
             _prevMSE = 0;
             _lastMSE = 0;
             _epoch = 0;
-            //Parallel gradient workers count and batch ranges preparation
+            //Parallel gradient workers / batch ranges preparation
             _workerRangeCollection = new List<WorkerRange>();
-            int workersCount = Math.Min(Environment.ProcessorCount, _trainInputs.Count);
-            workersCount = Math.Max(1, workersCount);
-            int workerBatchSize = _trainInputs.Count / workersCount;
-            for (int workerIdx = 0, fromRow = 0; workerIdx < workersCount; workerIdx++, fromRow += workerBatchSize)
+            int numOfWorkers = Math.Min(Environment.ProcessorCount, _trainInputs.Count);
+            numOfWorkers = Math.Max(1, numOfWorkers);
+            int workerBatchSize = _trainInputs.Count / numOfWorkers;
+            for (int workerIdx = 0, fromRow = 0; workerIdx < numOfWorkers; workerIdx++, fromRow += workerBatchSize)
             {
                 WorkerRange workerRange = new WorkerRange();
                 workerRange.FromRow = fromRow;
-                if (workerIdx == workersCount - 1)
+                if (workerIdx == numOfWorkers - 1)
                 {
                     workerRange.ToRow = _trainInputs.Count - 1;
                 }
@@ -178,7 +177,7 @@ namespace RCNet.Neural.Network.FF
         private double[] Compute(double[] input, List<double[]> layersInputs, double[] derivations)
         {
             double[] result = input;
-            foreach (FeedForwardNetwork.Layer layer in _net.Layers)
+            foreach (FeedForwardNetwork.Layer layer in _net.LayerCollection)
             {
                 layersInputs.Add(result);
                 result = layer.Compute(result, _net.FlatWeights, derivations);
@@ -222,9 +221,9 @@ namespace RCNet.Neural.Network.FF
                 double sumOfErrPowers = 0;
                 double[] weigthsGradsAccInput = new double[_net.FlatWeights.Length];
                 weigthsGradsAccInput.Populate(0);
-                double[] nodesGradients = new double[_net.NodesCount];
-                double[] derivations = new double[_net.NodesCount];
-                List<double[]> layersInputs = new List<double[]>(_net.Layers.Count);
+                double[] neuronsGradients = new double[_net.NumOfNeurons];
+                double[] derivations = new double[_net.NumOfNeurons];
+                List<double[]> layersInputs = new List<double[]>(_net.LayerCollection.Count);
                 //----------------------------------------------------
                 //Go paralelly through all samples
                 for (int row = range.FromRow; row <= range.ToRow; row++)
@@ -234,51 +233,51 @@ namespace RCNet.Neural.Network.FF
                     layersInputs.Clear();
                     double[] computedOutputs = Compute(_trainInputs[row], layersInputs, derivations);
                     //----------------------------------------------------
-                    //Compute network nodes gradients
+                    //Compute network neurons gradients
                     //Compute output layer gradients and update last error
-                    FeedForwardNetwork.Layer outputLayer = _net.Layers[_net.Layers.Count - 1];
-                    for (int nodeIdx = 0, outputLayerNodeFlatIdx = outputLayer.NodesStartFlatIdx; nodeIdx < outputLayer.NumOfLayerNodes; nodeIdx++, outputLayerNodeFlatIdx++)
+                    FeedForwardNetwork.Layer outputLayer = _net.LayerCollection[_net.LayerCollection.Count - 1];
+                    for (int neuronIdx = 0, outputLayerNeuronsFlatIdx = outputLayer.NeuronsStartFlatIdx; neuronIdx < outputLayer.NumOfLayerNeurons; neuronIdx++, outputLayerNeuronsFlatIdx++)
                     {
-                        double error = _trainIdealOutputs[row][nodeIdx] - computedOutputs[nodeIdx];
-                        nodesGradients[outputLayerNodeFlatIdx] = derivations[outputLayerNodeFlatIdx] * error;
+                        double error = _trainIdealOutputs[row][neuronIdx] - computedOutputs[neuronIdx];
+                        neuronsGradients[outputLayerNeuronsFlatIdx] = derivations[outputLayerNeuronsFlatIdx] * error;
                         //Accumulate power of error
                         sumOfErrPowers += error * error;
                     }
                     //Hidden layers gradients
-                    for (int layerIdx = _net.Layers.Count - 2; layerIdx >= 0; layerIdx--)
+                    for (int layerIdx = _net.LayerCollection.Count - 2; layerIdx >= 0; layerIdx--)
                     {
-                        FeedForwardNetwork.Layer currLayer = _net.Layers[layerIdx];
-                        FeedForwardNetwork.Layer nextLayer = _net.Layers[layerIdx + 1];
-                        int currLayerNodeFlatIdx = currLayer.NodesStartFlatIdx;
-                        for (int currLayerNodeIdx = 0; currLayerNodeIdx < currLayer.NumOfLayerNodes; currLayerNodeIdx++, currLayerNodeFlatIdx++)
+                        FeedForwardNetwork.Layer currLayer = _net.LayerCollection[layerIdx];
+                        FeedForwardNetwork.Layer nextLayer = _net.LayerCollection[layerIdx + 1];
+                        int currLayerNeuronFlatIdx = currLayer.NeuronsStartFlatIdx;
+                        for (int currLayerNeuronIdx = 0; currLayerNeuronIdx < currLayer.NumOfLayerNeurons; currLayerNeuronIdx++, currLayerNeuronFlatIdx++)
                         {
                             double sum = 0;
-                            for (int nextLayerNodeIdx = 0; nextLayerNodeIdx < nextLayer.NumOfLayerNodes; nextLayerNodeIdx++)
+                            for (int nextLayerNeuronIdx = 0; nextLayerNeuronIdx < nextLayer.NumOfLayerNeurons; nextLayerNeuronIdx++)
                             {
-                                int nextLayerWeightFlatIdx = nextLayer.WeightsStartFlatIdx + nextLayerNodeIdx * nextLayer.NumOfInputNodes + currLayerNodeIdx;
-                                sum += nodesGradients[nextLayer.NodesStartFlatIdx + nextLayerNodeIdx] * _net.FlatWeights[nextLayerWeightFlatIdx];
+                                int nextLayerWeightFlatIdx = nextLayer.WeightsStartFlatIdx + nextLayerNeuronIdx * nextLayer.NumOfInputNodes + currLayerNeuronIdx;
+                                sum += neuronsGradients[nextLayer.NeuronsStartFlatIdx + nextLayerNeuronIdx] * _net.FlatWeights[nextLayerWeightFlatIdx];
                             }
-                            nodesGradients[currLayerNodeFlatIdx] = derivations[currLayerNodeFlatIdx] * sum;
+                            neuronsGradients[currLayerNeuronFlatIdx] = derivations[currLayerNeuronFlatIdx] * sum;
                         }
                     }
                     //----------------------------------------------------
                     //Compute increments for gradients accumulator
-                    for (int layerIdx = 0; layerIdx < _net.Layers.Count; layerIdx++)
+                    for (int layerIdx = 0; layerIdx < _net.LayerCollection.Count; layerIdx++)
                     {
-                        FeedForwardNetwork.Layer layer = _net.Layers[layerIdx];
+                        FeedForwardNetwork.Layer layer = _net.LayerCollection[layerIdx];
                         double[] layerInputs = layersInputs[layerIdx];
-                        int nodeFlatIdx = layer.NodesStartFlatIdx;
+                        int neuronFlatIdx = layer.NeuronsStartFlatIdx;
                         int biasFlatIdx = layer.BiasesStartFlatIdx;
                         int weightFlatIdx = layer.WeightsStartFlatIdx;
-                        for (int nodeIdx = 0; nodeIdx < layer.NumOfLayerNodes; nodeIdx++, nodeFlatIdx++, biasFlatIdx++)
+                        for (int neuronIdx = 0; neuronIdx < layer.NumOfLayerNeurons; neuronIdx++, neuronFlatIdx++, biasFlatIdx++)
                         {
                             //Weights gradients accumulation
                             for (int inputIdx = 0; inputIdx < layer.NumOfInputNodes; inputIdx++, weightFlatIdx++)
                             {
-                                weigthsGradsAccInput[weightFlatIdx] += layerInputs[inputIdx] * nodesGradients[nodeFlatIdx];
+                                weigthsGradsAccInput[weightFlatIdx] += layerInputs[inputIdx] * neuronsGradients[neuronFlatIdx];
                             }
                             //Bias gradients accumulation
-                            weigthsGradsAccInput[biasFlatIdx] += nodesGradients[nodeFlatIdx] * FeedForwardNetwork.BiasValue;
+                            weigthsGradsAccInput[biasFlatIdx] += neuronsGradients[neuronFlatIdx] * FeedForwardNetwork.BiasValue;
                         }
                     }
                 }//Worker loop
@@ -296,7 +295,7 @@ namespace RCNet.Neural.Network.FF
             _weigthsGradsAcc.CopyTo(_weigthsPrevGradsAcc, 0);
             //----------------------------------------------------
             //Finish MSE
-            _lastMSE /= (double)(_trainInputs.Count * _net.OutputValuesCount);
+            _lastMSE /= (double)(_trainInputs.Count * _net.NumOfOutputValues);
             return;
         }
 

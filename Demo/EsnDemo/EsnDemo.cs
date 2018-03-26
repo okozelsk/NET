@@ -129,12 +129,12 @@ namespace RCNet.Demo
             
             //SamplesDataBundle creation
             //Counts and positions
-            int demoVectorsCount = demoCaseParams.NumOfBootSamples + demoCaseParams.MaxNumOfTrainingSamples + demoCaseParams.NumOfTestSamples;
-            if(demoVectorsCount > inputVectorCollection.Count)
+            int numOfDemoVectors = demoCaseParams.NumOfBootSamples + demoCaseParams.MaxNumOfTrainingSamples + demoCaseParams.NumOfTestSamples;
+            if(numOfDemoVectors > inputVectorCollection.Count)
             {
-                demoVectorsCount = inputVectorCollection.Count;
+                numOfDemoVectors = inputVectorCollection.Count;
             }
-            int firstVectorIdx = (inputVectorCollection.Count - demoVectorsCount) - 1;
+            int firstVectorIdx = (inputVectorCollection.Count - numOfDemoVectors) - 1;
             if (firstVectorIdx < 0)
             {
                 firstVectorIdx = 0;
@@ -156,8 +156,8 @@ namespace RCNet.Demo
                     {
                         outputVector[i] = outputNormalizerCollection[i].Normalize(inputVectorCollection[vectorIdx + 1][outputFieldIdxCollection[i]]);
                     }
-                    data.Inputs.Add(inputVector);
-                    data.Outputs.Add(outputVector);
+                    data.InputVectorCollection.Add(inputVector);
+                    data.OutputVectorCollection.Add(outputVector);
                 }
                 else
                 {
@@ -189,13 +189,13 @@ namespace RCNet.Demo
             //Report reservoirs statistics in case of the first call
             if (inArgs.OutputFieldIdx == 0 && inArgs.RegrAttemptNumber == 1 && inArgs.Epoch == 1)
             {
-                for (int resIdx = 0; resIdx < inArgs.ReservoirsStatistics.Count; resIdx++)
+                for (int resIdx = 0; resIdx < inArgs.ReservoirStatisticsCollection.Count; resIdx++)
                 {
-                    ((IOutputLog)inArgs.ControllerData).Write($"    Neurons states statistics of reservoir instance {inArgs.ReservoirsStatistics[resIdx].ReservoirInstanceName} ", false);
-                    ((IOutputLog)inArgs.ControllerData).Write("          ABS-MAX Avg, Max, Min, SDdev: " + inArgs.ReservoirsStatistics[resIdx].NeuronsMaxAbsStatesStat.ArithAvg.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsMaxAbsStatesStat.Max.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsMaxAbsStatesStat.Min.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsMaxAbsStatesStat.StdDev.ToString(CultureInfo.InvariantCulture), false);
-                    ((IOutputLog)inArgs.ControllerData).Write("              RMS Avg, Max, Min, SDdev: " + inArgs.ReservoirsStatistics[resIdx].NeuronsRMSStatesStat.ArithAvg.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsRMSStatesStat.Max.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsRMSStatesStat.Min.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsRMSStatesStat.StdDev.ToString(CultureInfo.InvariantCulture), false);
-                    ((IOutputLog)inArgs.ControllerData).Write("             SPAN Avg, Max, Min, SDdev: " + inArgs.ReservoirsStatistics[resIdx].NeuronsStateSpansStat.ArithAvg.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsStateSpansStat.Max.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsStateSpansStat.Min.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirsStatistics[resIdx].NeuronsStateSpansStat.StdDev.ToString(CultureInfo.InvariantCulture), false);
-                    ((IOutputLog)inArgs.ControllerData).Write("             Context neuron states RMS: " + inArgs.ReservoirsStatistics[resIdx].CtxNeuronStatesRMS.ToString(CultureInfo.InvariantCulture), false);
+                    ((IOutputLog)inArgs.ControllerData).Write($"    Neurons states statistics of reservoir instance {inArgs.ReservoirStatisticsCollection[resIdx].ReservoirInstanceName} ", false);
+                    ((IOutputLog)inArgs.ControllerData).Write("          ABS-MAX Avg, Max, Min, SDdev: " + inArgs.ReservoirStatisticsCollection[resIdx].NeuronsMaxAbsStatesStat.ArithAvg.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirStatisticsCollection[resIdx].NeuronsMaxAbsStatesStat.Max.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirStatisticsCollection[resIdx].NeuronsMaxAbsStatesStat.Min.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirStatisticsCollection[resIdx].NeuronsMaxAbsStatesStat.StdDev.ToString(CultureInfo.InvariantCulture), false);
+                    ((IOutputLog)inArgs.ControllerData).Write("              RMS Avg, Max, Min, SDdev: " + inArgs.ReservoirStatisticsCollection[resIdx].NeuronsRMSStatesStat.ArithAvg.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirStatisticsCollection[resIdx].NeuronsRMSStatesStat.Max.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirStatisticsCollection[resIdx].NeuronsRMSStatesStat.Min.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirStatisticsCollection[resIdx].NeuronsRMSStatesStat.StdDev.ToString(CultureInfo.InvariantCulture), false);
+                    ((IOutputLog)inArgs.ControllerData).Write("             SPAN Avg, Max, Min, SDdev: " + inArgs.ReservoirStatisticsCollection[resIdx].NeuronsStateSpansStat.ArithAvg.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirStatisticsCollection[resIdx].NeuronsStateSpansStat.Max.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirStatisticsCollection[resIdx].NeuronsStateSpansStat.Min.ToString(CultureInfo.InvariantCulture) + " " + inArgs.ReservoirStatisticsCollection[resIdx].NeuronsStateSpansStat.StdDev.ToString(CultureInfo.InvariantCulture), false);
+                    ((IOutputLog)inArgs.ControllerData).Write("             Context neuron states RMS: " + inArgs.ReservoirStatisticsCollection[resIdx].CtxNeuronStatesRMS.ToString(CultureInfo.InvariantCulture), false);
                 }
                 ((IOutputLog)inArgs.ControllerData).Write("    Regression:", false);
             }
@@ -267,7 +267,7 @@ namespace RCNet.Demo
                 log.Write("         Predicted next: " + outputVector[outputIdx].ToString(CultureInfo.InvariantCulture), false);
                 log.Write("      Trained weights stat", false);
                 log.Write("          Min, Max, Avg: " + regrOuts[outputIdx].OutputWeightsStat.Min.ToString(CultureInfo.InvariantCulture) + " " + regrOuts[outputIdx].OutputWeightsStat.Max.ToString(CultureInfo.InvariantCulture) + " " + regrOuts[outputIdx].OutputWeightsStat.ArithAvg.ToString(CultureInfo.InvariantCulture), false);
-                log.Write("          Upd, Cnt, Zrs: " + regrOuts[outputIdx].UpdateCounter.ToString() + " " + regrOuts[outputIdx].OutputWeightsStat.NumOfSamples.ToString() + " " + (regrOuts[outputIdx].OutputWeightsStat.NumOfSamples - regrOuts[outputIdx].OutputWeightsStat.NumOfNonzeroSamples).ToString(), false);
+                log.Write("          Upd, Cnt, Zrs: " + regrOuts[outputIdx].WeightsUpdateCounter.ToString() + " " + regrOuts[outputIdx].OutputWeightsStat.NumOfSamples.ToString() + " " + (regrOuts[outputIdx].OutputWeightsStat.NumOfSamples - regrOuts[outputIdx].OutputWeightsStat.NumOfNonzeroSamples).ToString(), false);
                 log.Write("              Error stat", false);
                 log.Write("      Train set samples: " + regrOuts[outputIdx].TrainingErrorStat.NumOfSamples.ToString(), false);
                 log.Write("      Train set Avg Err: " + regrOuts[outputIdx].TrainingErrorStat.ArithAvg.ToString(CultureInfo.InvariantCulture), false);

@@ -63,7 +63,7 @@ namespace RCNet.Neural.Network.FF
                 throw new Exception("Can´t create LinRegr trainer. Network structure was not finalized.");
             }
             //Check network conditions
-            if (net.Layers.Count != 1 || !(net.Layers[0].Activation is IdentityAF))
+            if (net.LayerCollection.Count != 1 || !(net.LayerCollection[0].Activation is IdentityAF))
             {
                 throw new Exception("Can´t create LinRegr trainer. Network structure is not complient (single layer having Identity activation).");
             }
@@ -82,8 +82,8 @@ namespace RCNet.Neural.Network.FF
             _net = net;
             _trainingInputCollection = inputs;
             _trainingIdealOutputCollection = outputs;
-            _regrIdealOutputCollection = new List<Matrix>(_net.OutputValuesCount);
-            for (int outputIdx = 0; outputIdx < _net.OutputValuesCount; outputIdx++)
+            _regrIdealOutputCollection = new List<Matrix>(_net.NumOfOutputValues);
+            for (int outputIdx = 0; outputIdx < _net.NumOfOutputValues; outputIdx++)
             {
                 Matrix regrOutputs = new Matrix(_trainingInputCollection.Count, 1);
                 for (int row = 0; row < _trainingInputCollection.Count; row++)
@@ -126,17 +126,17 @@ namespace RCNet.Neural.Network.FF
         //Methods
         private Matrix PreparePredictors(double noiseIntensity)
         {
-            Matrix predictors = new Matrix(_trainingInputCollection.Count, _net.InputValuesCount + 1);
+            Matrix predictors = new Matrix(_trainingInputCollection.Count, _net.NumOfInputValues + 1);
             for (int row = 0; row < _trainingInputCollection.Count; row++)
             {
                 //Predictors
-                for(int col = 0; col < _net.InputValuesCount; col++)
+                for(int col = 0; col < _net.NumOfInputValues; col++)
                 {
                     double predictor = _trainingInputCollection[row][col];
                     predictors.Data[row][col] = predictor * (1d + _rand.NextBoundedUniformDoubleRS(0, noiseIntensity));
                 }
                 //Add bias to predictors
-                predictors.Data[row][_net.InputValuesCount] = 1;
+                predictors.Data[row][_net.NumOfInputValues] = 1;
             }
             return predictors;
         }
@@ -160,7 +160,7 @@ namespace RCNet.Neural.Network.FF
             //New waights
             double[] newWaights = new double[_net.FlatWeights.Length];
             //Regression for each output neuron
-            for (int outputIdx = 0; outputIdx < _net.OutputValuesCount; outputIdx++)
+            for (int outputIdx = 0; outputIdx < _net.NumOfOutputValues; outputIdx++)
             {
                 //Regression
                 Matrix solution = decomposition.Solve(_regrIdealOutputCollection[outputIdx]);
@@ -168,10 +168,10 @@ namespace RCNet.Neural.Network.FF
                 //Input weights
                 for (int i = 0; i < solution.NumOfRows - 1; i++)
                 {
-                    newWaights[outputIdx * _net.InputValuesCount + i] = solution.Data[i][0];
+                    newWaights[outputIdx * _net.NumOfInputValues + i] = solution.Data[i][0];
                 }
                 //Bias weight
-                newWaights[_net.OutputValuesCount * _net.InputValuesCount + outputIdx] = solution.Data[solution.NumOfRows - 1][0];
+                newWaights[_net.NumOfOutputValues * _net.NumOfInputValues + outputIdx] = solution.Data[solution.NumOfRows - 1][0];
             }
             //Set new weights and compute error
             _net.SetWeights(newWaights);

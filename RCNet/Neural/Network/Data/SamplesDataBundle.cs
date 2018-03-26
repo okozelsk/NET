@@ -1,33 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RCNet.Neural.Network.Data
 {
     /// <summary>
-    /// Bundle of predictors and desired outputs
+    /// Bundle of the input vectors and desired output vectors collections
     /// </summary>
     [Serializable]
     public class SamplesDataBundle
     {
         //Attributes
-        public List<double[]> Inputs { get; }
-        public List<double[]> Outputs { get; }
+        public List<double[]> InputVectorCollection { get; }
+        public List<double[]> OutputVectorCollection { get; }
 
         //Constructors
         public SamplesDataBundle()
         {
-            Inputs = new List<double[]>();
-            Outputs = new List<double[]>();
+            InputVectorCollection = new List<double[]>();
+            OutputVectorCollection = new List<double[]>();
             return;
         }
 
-        public SamplesDataBundle(int vectorsCount)
+        public SamplesDataBundle(int numOfVectors)
         {
-            Inputs = new List<double[]>(vectorsCount);
-            Outputs = new List<double[]>(vectorsCount);
+            InputVectorCollection = new List<double[]>(numOfVectors);
+            OutputVectorCollection = new List<double[]>(numOfVectors);
             return;
         }
 

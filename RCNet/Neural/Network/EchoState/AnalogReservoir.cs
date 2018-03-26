@@ -97,10 +97,10 @@ namespace RCNet.Neural.Network.EchoState
             retainmentRates.Populate(0);
             if (_settings.RetainmentNeuronsFeature)
             {
-                int retainmentNeuronsCount = (int)Math.Round((double)_neurons.Length * _settings.RetainmentNeuronsDensity, 0);
-                if (retainmentNeuronsCount > 0 && _settings.RetainmentMaxRate > 0)
+                int numOfRetainmentNeurons = (int)Math.Round((double)_neurons.Length * _settings.RetainmentNeuronsDensity, 0);
+                if (numOfRetainmentNeurons > 0 && _settings.RetainmentMaxRate > 0)
                 {
-                    _rand.FillUniform(retainmentRates, _settings.RetainmentMinRate, _settings.RetainmentMaxRate, 1, retainmentNeuronsCount);
+                    _rand.FillUniform(retainmentRates, _settings.RetainmentMinRate, _settings.RetainmentMaxRate, 1, numOfRetainmentNeurons);
                     _rand.Shuffle(retainmentRates);
                 }
             }
@@ -117,7 +117,7 @@ namespace RCNet.Neural.Network.EchoState
             _context2NeuronsWeights = null;
             if (_settings.ContextNeuronFeature)
             {
-                int contextNeuronFeedbacksCount = (int)Math.Round((double)_neurons.Length * _settings.ContextNeuronFeedbackDensity, 0);
+                int numOfContextNeuronFeedbacks = (int)Math.Round((double)_neurons.Length * _settings.ContextNeuronFeedbackDensity, 0);
                 _contextNeuron = new AnalogNeuron(ActivationFactory.CreateActivationFunction(_settings.ContextNeuronActivation), 0);
                 //Weights from each res neuron to context neuron
                 _neurons2ContextWeights = new double[_neurons.Length];
@@ -126,7 +126,7 @@ namespace RCNet.Neural.Network.EchoState
                 _context2NeuronsWeights = new double[_neurons.Length];
                 _context2NeuronsWeights.Populate(0);
                 neuronsShuffledIndices.ShuffledIndices(_rand);
-                for (int i = 0; i < contextNeuronFeedbacksCount && i < _neurons.Length; i++)
+                for (int i = 0; i < numOfContextNeuronFeedbacks && i < _neurons.Length; i++)
                 {
                     _context2NeuronsWeights[neuronsShuffledIndices[i]] = RandomWeight(_rand, _settings.ContextNeuronOutWeightScale);
                 }
@@ -260,10 +260,10 @@ namespace RCNet.Neural.Network.EchoState
         /// <param name="check">Check if the connection already exists?</param>
         private void SetSelfConnections(double density, double weightScale, bool check = true)
         {
-            int connectionsCount = (int)Math.Round((double)_neurons.Length * density);
+            int numOfConnections = (int)Math.Round((double)_neurons.Length * density);
             int[] indices = new int[_neurons.Length];
             indices.ShuffledIndices(_rand);
-            for (int i = 0; i < connectionsCount; i++)
+            for (int i = 0; i < numOfConnections; i++)
             {
                 AddConnection(indices[i], indices[i], weightScale, check);
             }
@@ -278,7 +278,7 @@ namespace RCNet.Neural.Network.EchoState
         /// <param name="check">Check if the connection already exists?</param>
         private void SetInterConnections(double density, double weightScale, bool check = true)
         {
-            int connectionsCount = (int)Math.Round((double)((_neurons.Length - 1) * _neurons.Length) * density);
+            int numOfConnections = (int)Math.Round((double)((_neurons.Length - 1) * _neurons.Length) * density);
             int[] randomConnections = new int[(_neurons.Length - 1) * _neurons.Length];
             int indicesPos = 0;
             for(int n1Idx = 0; n1Idx < _neurons.Length; n1Idx++)
@@ -293,7 +293,7 @@ namespace RCNet.Neural.Network.EchoState
                 }
             }
             _rand.Shuffle(randomConnections);
-            for (int i = 0; i < connectionsCount; i++)
+            for (int i = 0; i < numOfConnections; i++)
             {
                 AddConnection(randomConnections[i], weightScale, check);
             }
@@ -308,10 +308,10 @@ namespace RCNet.Neural.Network.EchoState
         private void SetupRandomTopology(AnalogReservoirSettings.RandomTopology cfg, double weightScale)
         {
             //Fully random connections setup
-            int connectionsCount = (int)Math.Round((double)_neurons.Length * (double)_neurons.Length * cfg.ConnectionsDensity);
+            int numOfConnections = (int)Math.Round((double)_neurons.Length * (double)_neurons.Length * cfg.ConnectionsDensity);
             int[] randomConnections = new int[_neurons.Length * _neurons.Length];
             randomConnections.ShuffledIndices(_rand);
-            for (int i = 0; i < connectionsCount; i++)
+            for (int i = 0; i < numOfConnections; i++)
             {
                 AddConnection(randomConnections[i], weightScale, false);
             }
@@ -498,12 +498,12 @@ namespace RCNet.Neural.Network.EchoState
             private int _numOfInputValues;
             private double[] _inputBiases;
             private double[] _inputValues;
-            private int _reservoirNeuronsCount;
+            private int _numOfReservoirNeurons;
             private List<InputConnection>[] _inputConnectionCollection;
 
             //Constructor
             public ReservoirInputComponent(int numOfInputValues,
-                                           int reservoirNeuronsCount,
+                                           int numOfReservoirNeurons,
                                            double biasScale,
                                            double inputWeightScale,
                                            int neuronsPerInput,
@@ -511,20 +511,20 @@ namespace RCNet.Neural.Network.EchoState
                                            )
             {
                 _numOfInputValues = numOfInputValues;
-                _reservoirNeuronsCount = reservoirNeuronsCount;
+                _numOfReservoirNeurons = numOfReservoirNeurons;
                 //Input biases
-                _inputBiases = new double[_reservoirNeuronsCount];
+                _inputBiases = new double[_numOfReservoirNeurons];
                 rand.FillUniform(_inputBiases, -1, 1, biasScale);
                 //Input values
                 _inputValues = new double[_numOfInputValues];
                 _inputValues.Populate(0);
                 //Connections to reservoir neurons
-                _inputConnectionCollection = new List<InputConnection>[_reservoirNeuronsCount];
-                for (int i = 0; i < _reservoirNeuronsCount; i++)
+                _inputConnectionCollection = new List<InputConnection>[_numOfReservoirNeurons];
+                for (int i = 0; i < _numOfReservoirNeurons; i++)
                 {
                     _inputConnectionCollection[i] = new List<InputConnection>(_numOfInputValues * neuronsPerInput);
                 }
-                int[] neuronIdxs = new int[_reservoirNeuronsCount];
+                int[] neuronIdxs = new int[_numOfReservoirNeurons];
                 for (int fieldIdx = 0; fieldIdx < _numOfInputValues; fieldIdx++)
                 {
                     neuronIdxs.ShuffledIndices(rand);

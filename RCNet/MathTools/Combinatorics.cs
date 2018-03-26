@@ -12,7 +12,7 @@ namespace RCNet.MathTools
         /// </summary>
         /// <param name="n">The n</param>
         /// <param name="k">The k</param>
-        public static ulong GetCombinationsCount(uint n, uint k)
+        public static ulong ComputeNumOfCombinations(uint n, uint k)
         {
             //Basic checks
             if (n < k || k > Factorial.FactorialMaxInputValue)
