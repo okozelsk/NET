@@ -8,7 +8,7 @@ using RCNet.Extensions;
 namespace RCNet.Neural.Network.FF
 {
     /// <summary>
-    /// Parameters of RPROP trainer
+    /// Setup parameters for the resilient propagation trainer
     /// </summary>
     [Serializable]
     public class RPropParameters
@@ -109,17 +109,15 @@ namespace RCNet.Neural.Network.FF
         /// </summary>
         public int Epoch { get { return _epoch; } }
         /// <summary>
-        /// Trainee FF network
+        /// FF network beeing trained
         /// </summary>
         public FeedForwardNetwork Net { get { return _net; } }
 
         //Methods
 
         /// <summary>
-        /// Decreases zero recognition precision.
+        /// Decreases the zero recognition precision.
         /// </summary>
-        /// <param name="value"></param>
-        /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private double Sign(double value)
         {
@@ -237,7 +235,7 @@ namespace RCNet.Neural.Network.FF
                     double[] computedOutputs = Compute(_trainInputs[row], layersInputs, derivatives);
                     //----------------------------------------------------
                     //Compute network nodes gradients
-                    //Compute output layer gradients and update last error statistics
+                    //Compute output layer gradients and update last error
                     FeedForwardNetwork.Layer outputLayer = _net.Layers[_net.Layers.Count - 1];
                     for (int nodeIdx = 0, outputLayerNodeFlatIdx = outputLayer.NodesStartFlatIdx; nodeIdx < outputLayer.NumOfLayerNodes; nodeIdx++, outputLayerNodeFlatIdx++)
                     {
