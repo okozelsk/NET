@@ -205,7 +205,7 @@ namespace RCNet.Demo
             outArgs.Best = (inArgs.RegrCurrResult.CombinedError < inArgs.RegrBestResult.CombinedError);
             //Report the progress
             int reportInterval = Math.Max(inArgs.MaxEpoch / 100, 1);
-            if (outArgs.Best || (inArgs.Epoch % reportInterval) == 0 || inArgs.Epoch == inArgs.MaxEpoch)
+            if (outArgs.Best || (inArgs.Epoch % reportInterval) == 0 || inArgs.Epoch == inArgs.MaxEpoch || (inArgs.Epoch == 1 && inArgs.RegrAttemptNumber == 1))
             {
                 ((IOutputLog)inArgs.ControllerData).Write(
                     "      OutputField: " + inArgs.OutputFieldName +
