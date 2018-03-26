@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Reflection;
 using System.Globalization;
 using System.Xml.Linq;
@@ -12,49 +10,147 @@ using RCNet.Neural.Activation;
 namespace RCNet.Neural.Network.EchoState
 {
     /// <summary>
-    /// Reservoir settings
+    /// The class contains analog reservoir configuration parameters and also contains
+    /// internal logic so it is not just a container of parameters. Creating an proper instance by hand is not
+    /// a trivial task.
+    /// The easiest and safest way to create an instance is to use the xml constructor.
     /// </summary>
     [Serializable]
-    public sealed class AnalogReservoirSettings
+    public class AnalogReservoirSettings
     {
         //Constants
-        /// <summary>Supported types of reservoir topologies</summary>
+        /// <summary>
+        /// Supported types of reservoir internal topology
+        /// </summary>
         public enum ReservoirTopologyType
         {
-            /// <summary>Random topology.</summary>
+            /// <summary>
+            /// Random topology. Reservoir's neurons are connected randomly.
+            /// </summary>
             Random,
-            /// <summary>Ring topology</summary>
+            /// <summary>
+            /// Ring topology. Reservoir's neurons are connected in a ring shape.
+            /// </summary>
             Ring,
-            /// <summary>Doubly twisted thoroidal topology</summary>
+            /// <summary>
+            /// Doubly twisted thoroidal topology.
+            /// </summary>
             DTT
         };
 
         //Attribute properties
+        /// <summary>
+        /// Name of this configuration
+        /// </summary>
         public string SettingsName { get; set; }
+        /// <summary>
+        /// Each reservoir's neuron has its own constant input bias. Bias is always added to input signal.
+        /// A constant bias value will be for each neuron selected randomly from the range (-BiasScale;+BiasScale).
+        /// To disable input biasing specify 0.
+        /// </summary>
         public double BiasScale { get; set; }
+        /// <summary>
+        /// Each input field will be connected by the random weight to the number of
+        /// reservoir neurons = (Size * Density).
+        /// Typical InputConnectionDensity = 1 (it means the full connectivity).
+        /// </summary>
         public double InputConnectionDensity { get; set; }
+        /// <summary>
+        /// A weight of each input field to reservoir's neuron connection will be randomly selected
+        /// from the open interval (-InputWeightScale, +InputWeightScale).
+        /// </summary>
         public double InputWeightScale { get; set; }
+        /// <summary>
+        /// Number of the neurons in the reservoir.
+        /// </summary>
         public int Size { get; set; }
+        /// <summary>
+        /// Activation function of the neurons in the reservoir.
+        /// </summary>
         public ActivationFactory.ActivationType ReservoirNeuronActivation { get; set; }
+        /// <summary>
+        /// Neurons in the reservoir are interconnected. The weight of the connection will be randomly selected
+        /// from the open interval (-InternalWeightScale, +InternalWeightScale).
+        /// </summary>
         public double InternalWeightScale { get; set; }
+        /// <summary>
+        /// One of the supported reservoir topologies of internal neural networking.
+        /// See the enumeration ReservoirTopologyType.
+        /// </summary>
         public ReservoirTopologyType TopologyType { get; set; }
+        /// <summary>
+        /// Parameters of the topology of internal neural networking.
+        /// See classes RandomTopology, RingTopology and DTTTopology.
+        /// </summary>
         public Object TopologySettings { get; set; }
+        /// <summary>
+        /// Indicates whether the retainment (leaky integrators) neurons feature is used.
+        /// </summary>
         public bool RetainmentNeuronsFeature { get; set; }
+        /// <summary>
+        /// The parameter says how much of the reservoir's neurons will have the Retainment property set.
+        /// Specific neurons will be selected randomly.
+        /// Count = Size * Density
+        /// </summary>
         public double RetainmentNeuronsDensity { get; set; }
+        /// <summary>
+        /// If the reservoir's neuron is selected to have Retainment property then its retainment rate will be randomly selected
+        /// from the closed interval (RetainmentMinRate, RetainmentMaxRate).
+        /// </summary>
         public double RetainmentMinRate { get; set; }
+        /// <summary>
+        /// If the reservoir's neuron is selected to have Retainment property then its retainment rate will be randomly selected
+        /// from the closed interval (RetainmentMinRate, RetainmentMaxRate).
+        /// </summary>
         public double RetainmentMaxRate { get; set; }
+        /// <summary>
+        /// Indicates whether the context neuron feature is used.
+        /// Context neuron is a special neuron outside the reservoir, which mixes and processes the signal from all
+        /// the neurons in the reservoir. The context neuron state thus represents the state of the entire reservoir
+        /// and is then used as one of the inputs to the neurons in the reservoir.
+        /// </summary>
         public bool ContextNeuronFeature { get; set; }
+        /// <summary>
+        /// The parameter says how many neurons in the reservoir will receive the signal from the context neuron.
+        /// Count = Size * Density
+        /// </summary>
         public double ContextNeuronFeedbackDensity { get; set; }
+        /// <summary>
+        /// Activation function of the context neuron.
+        /// </summary>
         public ActivationFactory.ActivationType ContextNeuronActivation { get; set; }
+        /// <summary>
+        /// Each weight of the connection from the reservoir's neuron to the contex neuron will be randomly selected
+        /// from the open interval (-ContextNeuronInWeightScale, +ContextNeuronInWeightScale)
+        /// </summary>
         public double ContextNeuronInWeightScale { get; set; }
+        /// <summary>
+        /// Each weight of the connection from the contex neuron to the reservoir's neuron will be randomly selected
+        /// from the open interval (-ContextNeuronOutWeightScale, +ContextNeuronOutWeightScale)
+        /// </summary>
         public double ContextNeuronOutWeightScale { get; set; }
+        /// Indicates whether the feedback feature is used.
         public bool FeedbackFeature { get; set; }
+        /// <summary>
+        /// Each feedback field will be connected by the random weight to the number of
+        /// reservoir neurons = (Size * Density).
+        /// Typical FeedbackConnectionDensity = 1 (it means the full connectivity).
+        /// </summary>
         public double FeedbackConnectionDensity { get; set; }
+        /// <summary>
+        /// A weight of each feedback field to reservoir's neuron connection will be randomly selected
+        /// from the open interval (-FeedbackWeightScale, +FeedbackWeightScale).
+        /// </summary>
         public double FeedbackWeightScale { get; set; }
-        public List<string> FeedbackFieldsNames { get; set; }
+        /// <summary>
+        /// Collection of feedback field names.
+        /// </summary>
+        public List<string> FeedbackFieldNameCollection { get; set; }
 
         //Constructors
-        /// <summary>Creates uninitialized reservoir settings instance</summary>
+        /// <summary>
+        /// Creates an uninitialized instance
+        /// </summary>
         public AnalogReservoirSettings()
         {
             SettingsName = string.Empty;
@@ -78,14 +174,14 @@ namespace RCNet.Neural.Network.EchoState
             FeedbackFeature = false;
             FeedbackConnectionDensity = 0;
             FeedbackWeightScale = 0;
-            FeedbackFieldsNames = new List<string>();
+            FeedbackFieldNameCollection = new List<string>();
             return;
         }
 
         /// <summary>
-        /// Creates this instance as a deep copy of source instance
+        /// Deep copy constructor
         /// </summary>
-        /// <param name="source">Source settings</param>
+        /// <param name="source">Source instance</param>
         public AnalogReservoirSettings(AnalogReservoirSettings source)
         {
             SettingsName = source.SettingsName;
@@ -123,24 +219,29 @@ namespace RCNet.Neural.Network.EchoState
             FeedbackFeature = source.FeedbackFeature;
             FeedbackConnectionDensity = source.FeedbackConnectionDensity;
             FeedbackWeightScale = source.FeedbackWeightScale;
-            FeedbackFieldsNames = new List<string>(source.FeedbackFieldsNames);
+            FeedbackFieldNameCollection = new List<string>(source.FeedbackFieldNameCollection);
             return;
         }
 
         /// <summary>
-        /// Creates instance and initialize it from given xml element
+        /// Creates the instance and initialize it from given xml element.
+        /// This is the preferred way to instantiate reservoir settings.
         /// </summary>
-        /// <param name="reservoirSettingsElem">Xml element containing reservoir settings</param>
+        /// <param name="reservoirSettingsElem">
+        /// Xml data containing reservoir settings.
+        /// Content of xml element is always validated against the xml schema.
+        /// </param>
         public AnalogReservoirSettings(XElement reservoirSettingsElem)
         {
             //Validation
-            //A very ugly validation
+            //A very ugly validation. Xml schema does not support validation of the xml fragment against specific type.
             XmlValidator validator = new XmlValidator();
             Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
             validator.AddSchema(assemblyRCNet.GetManifestResourceStream("RCNet.Neural.Network.EchoState.AnalogReservoirSettings.xsd"));
             validator.AddSchema(assemblyRCNet.GetManifestResourceStream("RCNet.NeuralSettingsTypes.xsd"));
             validator.LoadXDocFromString(reservoirSettingsElem.ToString());
             //Parsing
+            //Settings name
             SettingsName = reservoirSettingsElem.Attribute("Name").Value;
             //Input
             XElement inputElem = reservoirSettingsElem.Descendants("Input").First();
@@ -184,14 +285,14 @@ namespace RCNet.Neural.Network.EchoState
                 TopologyType = ReservoirTopologyType.DTT;
                 TopologySettings = new DTTTopology(topologyElem);
             }
-            //Retirement neurons
-            XElement retirementElem = internalElem.Descendants("RetirementNeurons").FirstOrDefault();
-            RetainmentNeuronsFeature = (retirementElem != null);
+            //Retainment neurons
+            XElement retainmentElem = internalElem.Descendants("RetainmentNeurons").FirstOrDefault();
+            RetainmentNeuronsFeature = (retainmentElem != null);
             if (RetainmentNeuronsFeature)
             {
-                RetainmentNeuronsDensity = double.Parse(retirementElem.Attribute("Density").Value, CultureInfo.InvariantCulture);
-                RetainmentMinRate = double.Parse(retirementElem.Attribute("RetirementMinRate").Value, CultureInfo.InvariantCulture);
-                RetainmentMaxRate = double.Parse(retirementElem.Attribute("RetirementMaxRate").Value, CultureInfo.InvariantCulture);
+                RetainmentNeuronsDensity = double.Parse(retainmentElem.Attribute("Density").Value, CultureInfo.InvariantCulture);
+                RetainmentMinRate = double.Parse(retainmentElem.Attribute("RetainmentMinRate").Value, CultureInfo.InvariantCulture);
+                RetainmentMaxRate = double.Parse(retainmentElem.Attribute("RetainmentMaxRate").Value, CultureInfo.InvariantCulture);
                 RetainmentNeuronsFeature = (RetainmentNeuronsDensity > 0 &&
                                             RetainmentMaxRate > 0
                                             );
@@ -226,16 +327,16 @@ namespace RCNet.Neural.Network.EchoState
             //Feedback
             XElement feedbackElem = reservoirSettingsElem.Descendants("Feedback").FirstOrDefault();
             FeedbackFeature = (feedbackElem != null);
-            FeedbackFieldsNames = new List<string>();
+            FeedbackFieldNameCollection = new List<string>();
             if (FeedbackFeature)
             {
                 FeedbackConnectionDensity = double.Parse(feedbackElem.Attribute("Density").Value, CultureInfo.InvariantCulture);
                 FeedbackWeightScale = double.Parse(feedbackElem.Attribute("WeightScale").Value, CultureInfo.InvariantCulture);
                 foreach (XElement feedbackFieldElem in feedbackElem.Descendants("Field"))
                 {
-                    FeedbackFieldsNames.Add(feedbackFieldElem.Attribute("Name").Value);
+                    FeedbackFieldNameCollection.Add(feedbackFieldElem.Attribute("Name").Value);
                 }
-                FeedbackFeature = (FeedbackFieldsNames.Count > 0);
+                FeedbackFeature = (FeedbackFieldNameCollection.Count > 0);
             }
             else
             {
@@ -247,6 +348,11 @@ namespace RCNet.Neural.Network.EchoState
 
         //Methods
         //Static methods
+        /// <summary>
+        /// Parses string code to ReservoirTopologyType.
+        /// </summary>
+        /// <param name="code">Topology code</param>
+        /// <returns></returns>
         public static ReservoirTopologyType ParseReservoirTopology(string code)
         {
             switch (code.ToUpper())
@@ -255,7 +361,7 @@ namespace RCNet.Neural.Network.EchoState
                 case "RING": return ReservoirTopologyType.Ring;
                 case "DTT": return ReservoirTopologyType.DTT;
                 default:
-                    throw new ArgumentException($"Unknown reservoir topology code {code}");
+                    throw new ArgumentException($"Unknown reservoir's topology code {code}");
             }
         }
 
@@ -323,9 +429,13 @@ namespace RCNet.Neural.Network.EchoState
         /// Additional setup parameters for Random reservoir topology
         /// </summary>
         [Serializable]
-        public sealed class RandomTopology
+        public class RandomTopology
         {
             //Attributes
+            /// <summary>
+            /// The parameter says how many interconnections from all possible interconnections will be used.
+            /// Count = Size * Size * Density
+            /// </summary>
             public double ConnectionsDensity { get; set; }
 
             //Constructors
@@ -370,11 +480,22 @@ namespace RCNet.Neural.Network.EchoState
         /// Additional setup parameters for Ring reservoir topology
         /// </summary>
         [Serializable]
-        public sealed class RingTopology
+        public class RingTopology
         {
             //Attributes
+            /// <summary>
+            /// The parameter specifies whether the ring interconnection will be bidirectional.
+            /// </summary>
             public bool BiDirection { get; set; }
+            /// <summary>
+            /// The parameter says how many neurons in the reservoir will receive the signal from itself.
+            /// Count = Size * Density
+            /// </summary>
             public double SelfConnectionsDensity { get; set; }
+            /// <summary>
+            /// The parameter says how many additional interconnections from all possible interconnections will be used.
+            /// Count = Size * Size * Density
+            /// </summary>
             public double InterConnectionsDensity { get; set; }
 
             //Constructors
@@ -428,9 +549,13 @@ namespace RCNet.Neural.Network.EchoState
         /// Additional setup parameters for DTT reservoir topology
         /// </summary>
         [Serializable]
-        public sealed class DTTTopology
+        public class DTTTopology
         {
             //Attributes
+            /// <summary>
+            /// The parameter says how many neurons in the reservoir will receive the signal from itself.
+            /// Count = Size * Density
+            /// </summary>
             public double SelfConnectionsDensity { get; set; }
 
             //Constructors

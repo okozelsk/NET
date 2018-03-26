@@ -18,7 +18,7 @@ namespace RCNet.Neural.Network.FF
         /// </summary>
         int Epoch { get; }
         /// <summary>
-        /// Trainee FF network
+        /// FF network beeing trained
         /// </summary>
         FeedForwardNetwork Net { get; }
 

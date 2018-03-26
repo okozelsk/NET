@@ -2,7 +2,7 @@
 <!-- Specify your data location in DataDir attribute -->
 <EsnDemoSettings DataDir=".\\Data">
   <DemoCase Name="Sinusoid time series prediction (Random topology, Linear regression readout)">
-    <Samples CSVDataFileName="Sinusoid.csv" BootSeqMinLength="700" TrainingSeqMaxLength="1000" TestingSeqLength="10" TestSamplesSelection="Sequential" SingleNormalizer="false" NormalizerReserveRatio="0.1"/>
+    <Samples CsvDataFileName="Sinusoid.csv" NumOfBootSamples="400" MaxNumOfTrainingSamples="1000" NumOfTestSamples="10" TestSamplesSelectionMethod="Sequential" SingleNormalizer="false" NormalizerReserveRatio="0.1"/>
     <EsnSettings RandomizerSeek="0">
       <InputFields RouteToReadout="false">
         <Field Name="Value"/>
@@ -13,6 +13,10 @@
           <Internal Size="200" Activation="TanH" WeightScale="0.2">
             <RandomTopology ConnectionsDensity="0.1"/>
           </Internal>
+          <!-- Feedback is nonsense in this case (duplicates the input) and it is placed here only for usage demostration -->
+          <Feedback Density="1" WeightScale="0.2">
+            <Field Name="Value"/>
+          </Feedback>
         </AnalogReservoirSettings>
       </ReservoirSettingsContainer>
       <ReservoirInstancesContainer>
@@ -27,30 +31,26 @@
     </EsnSettings>
   </DemoCase>
   <DemoCase Name="Sinusoid time series prediction (Ring topology, Readout with hidden TanH neurons and Resilient trainer)">
-    <Samples CSVDataFileName="Sinusoid.csv" BootSeqMinLength="700" TrainingSeqMaxLength="1000" TestingSeqLength="10" TestSamplesSelection="Sequential" SingleNormalizer="false" NormalizerReserveRatio="0.1"/>
+    <Samples CsvDataFileName="Sinusoid.csv" NumOfBootSamples="100" MaxNumOfTrainingSamples="1000" NumOfTestSamples="10" TestSamplesSelectionMethod="Sequential" SingleNormalizer="false" NormalizerReserveRatio="0.1"/>
     <EsnSettings RandomizerSeek="0">
-      <InputFields RouteToReadout="false">
+      <InputFields RouteToReadout="true">
         <Field Name="Value"/>
       </InputFields>
       <ReservoirSettingsContainer>
-        <AnalogReservoirSettings Name="Ring topology 200 TanH neurons">
-          <Input BiasScale="0" ConnectionDensity="1" WeightScale="0.2"/>
-          <Internal Size="200" Activation="TanH" WeightScale="0.2">
-            <RingTopology BiDirection="false" SelfConnectionsDensity="0.1" InterConnectionsDensity="0.1"/>
+        <AnalogReservoirSettings Name="Ring topology 50 TanH neurons">
+          <Input BiasScale="0" ConnectionDensity="1" WeightScale="0.05"/>
+          <Internal Size="50" Activation="TanH" WeightScale="0.5">
+            <RingTopology BiDirection="false" SelfConnectionsDensity="0" InterConnectionsDensity="0"/>
           </Internal>
-          <!-- Feedback is nonsense. It is placed here only for feature usage demostration -->
-          <Feedback Density="1" WeightScale="0.2">
-            <Field Name="Value"/>
-          </Feedback>
         </AnalogReservoirSettings>
       </ReservoirSettingsContainer>
       <ReservoirInstancesContainer>
-        <ReservoirInstance InstanceName="Main" SettingsName="Ring topology 200 TanH neurons" AugmentedStates="false">
+        <ReservoirInstance InstanceName="Main" SettingsName="Ring topology 50 TanH neurons" AugmentedStates="false">
           <InputField Name="Value"/>
         </ReservoirInstance>
       </ReservoirInstancesContainer>
       <Readout OutputActivation="Identity" RegressionMethod="Resilient" Attempts="2" AttemptEpochs="5000" AttemptStopMSE="1E-20">
-        <HiddenLayer Neurons="20" Activation="TanH"/>
+        <HiddenLayer Neurons="52" Activation="TanH"/>
       </Readout>
       <OutputFields>
         <Field Name="Value"/>
@@ -58,7 +58,7 @@
     </EsnSettings>
   </DemoCase>
   <DemoCase Name="MackeyGlass chaotic time series prediction (Random topology, Linear regression readout)">
-    <Samples CSVDataFileName="MackeyGlass.csv" BootSeqMinLength="2000" TrainingSeqMaxLength="2000" TestingSeqLength="500" TestSamplesSelection="Sequential" SingleNormalizer="false" NormalizerReserveRatio="0.1"/>
+    <Samples CsvDataFileName="MackeyGlass.csv" NumOfBootSamples="2000" MaxNumOfTrainingSamples="2000" NumOfTestSamples="500" TestSamplesSelectionMethod="Sequential" SingleNormalizer="false" NormalizerReserveRatio="0.1"/>
     <EsnSettings RandomizerSeek="0">
       <InputFields RouteToReadout="false">
         <Field Name="Value"/>
@@ -83,7 +83,7 @@
     </EsnSettings>
   </DemoCase>
   <DemoCase Name="Yahoo finance TTOO title High and Low prices prediction (single reservoir for all input fields, no hidden readout neurons and Resilient trainer)">
-    <Samples CSVDataFileName="TTOO.csv" BootSeqMinLength="300" TrainingSeqMaxLength="1000" TestingSeqLength="10" TestSamplesSelection="Random" SingleNormalizer="true" NormalizerReserveRatio="0.1"/>
+    <Samples CsvDataFileName="TTOO.csv" NumOfBootSamples="300" MaxNumOfTrainingSamples="1000" NumOfTestSamples="10" TestSamplesSelectionMethod="Random" SingleNormalizer="true" NormalizerReserveRatio="0.1"/>
     <EsnSettings RandomizerSeek="0">
       <InputFields RouteToReadout="true">
         <Field Name="High"/>
@@ -95,7 +95,7 @@
           <Input BiasScale="0" ConnectionDensity="0.5" WeightScale="0.4"/>
           <Internal Size="300" Activation="TanH" WeightScale="0.4">
             <RandomTopology ConnectionsDensity="0.1"/>
-            <RetirementNeurons Density="0.5" RetirementMinRate="0" RetirementMaxRate="0.75"/>
+            <RetainmentNeurons Density="0.5" RetainmentMinRate="0" RetainmentMaxRate="0.75"/>
             <ContextNeuron FeedbackDensity="1" Activation="Elliot" InWeightScale="1" OutWeightScale="0.2"/>
           </Internal>
           <Feedback Density="0" WeightScale="0"/>
@@ -116,7 +116,7 @@
     </EsnSettings>
   </DemoCase>
   <DemoCase Name="Yahoo finance SPXL title High and Low prices prediction (single reservoir for all input fields, no hidden readout neurons and Resilient trainer)">
-    <Samples CSVDataFileName="SPXL.csv" BootSeqMinLength="1000" TrainingSeqMaxLength="2000" TestingSeqLength="10" TestSamplesSelection="Random" SingleNormalizer="true" NormalizerReserveRatio="0.1"/>
+    <Samples CsvDataFileName="SPXL.csv" NumOfBootSamples="1000" MaxNumOfTrainingSamples="2000" NumOfTestSamples="10" TestSamplesSelectionMethod="Random" SingleNormalizer="true" NormalizerReserveRatio="0.1"/>
     <EsnSettings RandomizerSeek="0">
       <InputFields RouteToReadout="true">
         <Field Name="High"/>
@@ -128,7 +128,7 @@
           <Input BiasScale="0" ConnectionDensity="0.25" WeightScale="0.2"/>
           <Internal Size="1000" Activation="TanH" WeightScale="0.2">
             <RandomTopology ConnectionsDensity="0.1"/>
-            <RetirementNeurons Density="0.5" RetirementMinRate="0" RetirementMaxRate="0.75"/>
+            <RetainmentNeurons Density="0.5" RetainmentMinRate="0" RetainmentMaxRate="0.75"/>
           </Internal>
           <Feedback Density="0" WeightScale="0"/>
         </AnalogReservoirSettings>
@@ -148,7 +148,7 @@
     </EsnSettings>
   </DemoCase>
   <DemoCase Name="Yahoo finance SPXL title High and Low prices prediction (alone reservoir per each input field, no hidden readout neurons and Resilient trainer)">
-    <Samples CSVDataFileName="SPXL.csv" BootSeqMinLength="200" TrainingSeqMaxLength="1000" TestingSeqLength="10" TestSamplesSelection="Random" SingleNormalizer="false" NormalizerReserveRatio="0.1"/>
+    <Samples CsvDataFileName="SPXL.csv" NumOfBootSamples="200" MaxNumOfTrainingSamples="1000" NumOfTestSamples="10" TestSamplesSelectionMethod="Random" SingleNormalizer="false" NormalizerReserveRatio="0.1"/>
     <EsnSettings RandomizerSeek="0">
       <InputFields RouteToReadout="true">
         <Field Name="High"/>
@@ -160,7 +160,7 @@
           <Input BiasScale="0" ConnectionDensity="1" WeightScale="0.9"/>
           <Internal Size="200" Activation="TanH" WeightScale="0.1">
             <RandomTopology ConnectionsDensity="0.15"/>
-            <RetirementNeurons Density="1" RetirementMinRate="0" RetirementMaxRate="0.5"/>
+            <RetainmentNeurons Density="1" RetainmentMinRate="0" RetainmentMaxRate="0.5"/>
           </Internal>
           <Feedback Density="0" WeightScale="0"/>
         </AnalogReservoirSettings>

@@ -1,62 +1,95 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using System.Xml;
 using RCNet.MathTools;
 using RCNet.Extensions;
-using RCNet.CsvTools;
 using RCNet.Neural.Activation;
 
 namespace RCNet.Neural.Network.EchoState
 {
     /// <summary>
-    /// Implements analog reservoir supporting several internal topologies and advanced features
+    /// Implements analog reservoir supporting several internal topologies and advanced features.
     /// </summary>
     [Serializable]
     public class AnalogReservoir
     {
         //Attributes
+        /// <summary>
+        /// Name of this instance
+        /// </summary>
         private string _instanceName;
+        /// <summary>
+        /// Reservoir's settings.
+        /// </summary>
         private AnalogReservoirSettings _settings;
+        /// <summary>
+        /// Random generator.
+        /// </summary>
         private Random _rand;
-        private ReservoirInputBlock _inputBlock;
+        /// <summary>
+        /// The component processing input data.
+        /// </summary>
+        private ReservoirInputComponent _inputComponent;
+        /// <summary>
+        /// Reservoir's neurons.
+        /// </summary>
         private AnalogNeuron[] _neurons;
+        /// <summary>
+        /// Indexes of the interconnected neurons.
+        /// </summary>
         private List<int>[] _partyNeuronsIdxs;
+        /// <summary>
+        /// Weights of the interconnections.
+        /// </summary>
         private List<double>[] _partyNeuronsWeights;
+        /// <summary>
+        /// The context neuron
+        /// </summary>
         private AnalogNeuron _contextNeuron;
+        /// <summary>
+        /// Context neuron's in weights
+        /// </summary>
         private double[] _neurons2ContextWeights;
+        /// <summary>
+        /// Context neuron's out weights
+        /// </summary>
         private double[] _context2NeuronsWeights;
+        /// <summary>
+        /// Feedback values.
+        /// </summary>
         private double[] _feedback;
+        /// <summary>
+        /// Feedback weights.
+        /// </summary>
         private double[] _feedbackWeights;
+        /// <summary>
+        /// Produce augmented states?
+        /// </summary>
         private bool _augmentedStatesFeature;
 
         /// <summary>
-        /// Constructs analog reservoir
+        /// Instantiates the analog reservoir
         /// </summary>
-        /// <param name="inputFieldsCount">Number of reservoir input values</param>
+        /// <param name="numOfInputValues">Number of reservoir's input values</param>
         /// <param name="settings">Analog reservoir settings</param>
         /// <param name="augmentedStates">Specifies if this reservoir will add augmented states to predictors</param>
         /// <param name="randomizerSeek">
-        /// Calling constructor with the same randomizerSeek greater or equal to 0 ensures the same reservoir initialization (good for tuning).
-        /// Specify randomizerSeek less than 0 for different initialization aech time the constructor will be called.
+        /// A value greater than or equal to 0 will always ensure the same initialization of the internal
+        /// random number generator and therefore the same reservoir structure, which is good for tuning
+        /// other reservoir's parameters.
+        /// A value less than 0 causes a fully random initialization when creating a reservoir instance.
         /// </param>
-        public AnalogReservoir(string instanceName, int inputFieldsCount, AnalogReservoirSettings settings, bool augmentedStates, int randomizerSeek = -1)
+        public AnalogReservoir(string instanceName, int numOfInputValues, AnalogReservoirSettings settings, bool augmentedStates, int randomizerSeek = -1)
         {
             _instanceName = instanceName;
-            //--------------------------------------------------------
             //Settings
             _settings = settings.DeepClone();
-            //--------------------------------------------------------
-            //Random object initialization
+            //Random generator initialization
             if (randomizerSeek < 0) _rand = new Random();
             else _rand = new Random(randomizerSeek);
-            //--------------------------------------------------------
-            //Input memory and connections
+            //Input component and connections
             int neuronsPerInput = Math.Max(1, (int)Math.Round((double)_settings.Size * _settings.InputConnectionDensity, 0));
-            _inputBlock = new ReservoirInputBlock(inputFieldsCount, _settings.Size, _settings.BiasScale, _settings.InputWeightScale, neuronsPerInput, _rand);
-            //--------------------------------------------------------
+            _inputComponent = new ReservoirInputComponent(numOfInputValues, _settings.Size, _settings.BiasScale, _settings.InputWeightScale, neuronsPerInput, _rand);
             //Reservoir neurons
             _neurons = new AnalogNeuron[_settings.Size];
             //Neurons retainment rates
@@ -78,7 +111,6 @@ namespace RCNet.Neural.Network.EchoState
             }
             //Helper array for neurons order randomization purposes
             int[] neuronsShuffledIndices = new int[_settings.Size];
-            //--------------------------------------------------------
             //Context neuron feature
             _contextNeuron = null;
             _neurons2ContextWeights = null;
@@ -99,7 +131,6 @@ namespace RCNet.Neural.Network.EchoState
                     _context2NeuronsWeights[neuronsShuffledIndices[i]] = RandomWeight(_rand, _settings.ContextNeuronOutWeightScale);
                 }
             }
-            //--------------------------------------------------------
             //Feedback feature and weights
             _feedback = null;
             _feedbackWeights = null;
@@ -107,7 +138,7 @@ namespace RCNet.Neural.Network.EchoState
             {
                 int neuronsPerOutput = (int)Math.Round(_settings.FeedbackConnectionDensity * (double)_neurons.Length, 0);
                 //Feedback values
-                _feedback = new double[_settings.FeedbackFieldsNames.Count];
+                _feedback = new double[_settings.FeedbackFieldNameCollection.Count];
                 _feedback.Populate(0);
                 //Feedback weights
                 _feedbackWeights = new double[_feedback.Length * _neurons.Length];
@@ -121,8 +152,7 @@ namespace RCNet.Neural.Network.EchoState
                     }
                 }
             }
-            //--------------------------------------------------------
-            //Reservoir topology -> schema of internal connections
+            //Reservoir topology, the schema of interconnections
             _partyNeuronsIdxs = new List<int>[_neurons.Length];
             _partyNeuronsWeights = new List<double>[_neurons.Length];
             for (int i = 0; i < _neurons.Length; i++)
@@ -142,7 +172,6 @@ namespace RCNet.Neural.Network.EchoState
                     SetupDTTTopology((AnalogReservoirSettings.DTTTopology)(_settings.TopologySettings), _settings.InternalWeightScale);
                     break;
             }
-            //--------------------------------------------------------
             //Augmented states
             _augmentedStatesFeature = augmentedStates;
             return;
@@ -150,21 +179,21 @@ namespace RCNet.Neural.Network.EchoState
 
         //Properties
         /// <summary>
-        /// Reservoir size. (Reservoir neurons count)
+        /// Reservoir size. (Number of neurons in the reservoir)
         /// </summary>
         public int Size { get { return _neurons.Length; } }
 
         /// <summary>
         /// Number of reservoir's output predictors (Size or Size*2 when augumented states are enabled).
         /// </summary>
-        public int OutputPredictorsCount { get { return _augmentedStatesFeature ? _neurons.Length * 2 : _neurons.Length; } }
+        public int NumOfOutputPredictors { get { return _augmentedStatesFeature ? _neurons.Length * 2 : _neurons.Length; } }
 
         //Methods
         /// <summary>
-        /// Returns random weight within range -scale, +scale
+        /// Returns random weight within the interval (-scale, +scale)
         /// </summary>
         /// <param name="rand">Random object to be used.</param>
-        /// <param name="scale">Determines the range within the weight has to be.</param>
+        /// <param name="scale">Weight scale.</param>
         /// <returns></returns>
         public static double RandomWeight(Random rand, double scale)
         {
@@ -172,11 +201,11 @@ namespace RCNet.Neural.Network.EchoState
         }
 
         /// <summary>
-        /// Establishes connection between two reservoir neurons.
+        /// Establishes the interconnection of reservoir neurons.
         /// </summary>
         /// <param name="targetNeuronIdx">Target neuron index</param>
         /// <param name="partyNeuronIdx">Party neuron index</param>
-        /// <param name="weightScale">Connection weight scale</param>
+        /// <param name="weightScale">Scale of the connection weight</param>
         /// <param name="check">Check if the connection already exists?</param>
         /// <returns>Success/Unsuccess (connection already exists)</returns>
         private bool AddConnection(int targetNeuronIdx, int partyNeuronIdx, double weightScale, bool check = true)
@@ -191,10 +220,10 @@ namespace RCNet.Neural.Network.EchoState
         }
 
         /// <summary>
-        /// Establishes connection between two reservoir neurons.
+        /// Establishes the interconnection of reservoir neurons.
         /// </summary>
-        /// <param name="connectionID">Position of the connection within flat representation.</param>
-        /// <param name="weightScale">Connection weight scale</param>
+        /// <param name="connectionID">Position of the connection within flat representation (Size * Size).</param>
+        /// <param name="weightScale">Scale of the connection weight</param>
         /// <param name="check">Check if the connection already exists?</param>
         /// <returns>Success/Unsuccess (connection already exists)</returns>
         private bool AddConnection(int connectionID, double weightScale, bool check = true)
@@ -205,8 +234,8 @@ namespace RCNet.Neural.Network.EchoState
         /// <summary>
         /// Connects all reservoir neurons to a ring shape.
         /// </summary>
-        /// <param name="weightScale">Connection weight scale</param>
-        /// <param name="biDirection">Bi direction ring?</param>
+        /// <param name="weightScale">Scale of the connection weight</param>
+        /// <param name="biDirection">Bidirectional ring?</param>
         /// <param name="check">Check if the connection already exists?</param>
         private void SetRingConnections(double weightScale, bool biDirection, bool check = true)
         {
@@ -227,7 +256,7 @@ namespace RCNet.Neural.Network.EchoState
         /// Sets randomly selected number of neurons (corresponding to density) to be self-connected
         /// </summary>
         /// <param name="density">How many neurons will be self-connected?</param>
-        /// <param name="weightScale">Connection weight scale</param>
+        /// <param name="weightScale">Scale of the connection weight</param>
         /// <param name="check">Check if the connection already exists?</param>
         private void SetSelfConnections(double density, double weightScale, bool check = true)
         {
@@ -245,7 +274,7 @@ namespace RCNet.Neural.Network.EchoState
         /// Sets random neurons inter connections.
         /// </summary>
         /// <param name="density">How many connections from Size x Size options will be randomly initialized?</param>
-        /// <param name="weightScale">Connection weight scale</param>
+        /// <param name="weightScale">Scale of the connection weight</param>
         /// <param name="check">Check if the connection already exists?</param>
         private void SetInterConnections(double density, double weightScale, bool check = true)
         {
@@ -275,7 +304,7 @@ namespace RCNet.Neural.Network.EchoState
         /// Initializes random topology connection schema
         /// </summary>
         /// <param name="cfg">Configuration parameters</param>
-        /// <param name="weightScale">Connection weight scale</param>
+        /// <param name="weightScale">Scale of the connection weight</param>
         private void SetupRandomTopology(AnalogReservoirSettings.RandomTopology cfg, double weightScale)
         {
             //Fully random connections setup
@@ -293,7 +322,7 @@ namespace RCNet.Neural.Network.EchoState
         /// Initializes ring shape topology connection schema
         /// </summary>
         /// <param name="cfg">Configuration parameters</param>
-        /// <param name="weightScale">Connection weight scale</param>
+        /// <param name="weightScale">Scale of the connection weight</param>
         private void SetupRingTopology(AnalogReservoirSettings.RingTopology cfg, double weightScale)
         {
             //Ring connections part
@@ -309,7 +338,7 @@ namespace RCNet.Neural.Network.EchoState
         /// Initializes doubly twisted thoroidal shape topology connection schema
         /// </summary>
         /// <param name="cfg">Configuration parameters</param>
-        /// <param name="weightScale">Connection weight scale</param>
+        /// <param name="weightScale">Scale of the connection weight</param>
         private void SetupDTTTopology(AnalogReservoirSettings.DTTTopology cfg, double weightScale)
         {
             //HTwist part (single direction ring)
@@ -332,7 +361,7 @@ namespace RCNet.Neural.Network.EchoState
         }
 
         /// <summary>
-        /// Collects key neuron states statistics
+        /// Collects neurons states key statistics
         /// </summary>
         public AnalogReservoirStat CollectStateStatistics()
         {
@@ -376,27 +405,33 @@ namespace RCNet.Neural.Network.EchoState
         }
 
         /// <summary>
-        /// Computes reservoir neurons new states and returns new set of reservoir output predictors.
+        /// Computes reservoir neurons states and fills given array of reservoir output predictors.
         /// </summary>
-        /// <param name="input">Array of new input values.</param>
-        /// <param name="outputPredictors">Array to be filled with output predictors values. Array has to be sized to OutputPredictorsCount reservoir property.</param>
-        /// <param name="collectStatistics">Switch dictates, if to collect statistics. Typical usage is FALSE within boot phase and TRUE after boot phase.</param>
+        /// <param name="input">
+        /// Array of input values.
+        /// </param>
+        /// <param name="outputPredictors">
+        /// Array to be filled with predictors values.
+        /// Array has to be sized to the value of NumOfOutputPredictors reservoir's property.
+        /// </param>
+        /// <param name="collectStatistics">
+        /// Switch says, if to collect statistics.
+        /// Specify false within booting phase and true after booting phase.
+        /// </param>
         public void Compute(double[] input, double[] outputPredictors, bool collectStatistics)
         {
             //Update input memory
-            _inputBlock.Update(input);
+            _inputComponent.Update(input);
             //Store all reservoir neurons states
             foreach(AnalogNeuron neuron in _neurons)
             {
                 neuron.StoreCurrentState();
             }
-            //Compute new states of all reservoir neurons and fill output array of predictors
+            //Compute new states of all reservoir neurons and fill the array of output predictors
             Parallel.For(0, _neurons.Length, (neuronIdx) =>
             {
-                //----------------------------------------------------
                 //Input signal
-                double inputSignal = _inputBlock.GetInputSignal(neuronIdx);
-                //----------------------------------------------------
+                double inputSignal = _inputComponent.GetInputSignal(neuronIdx);
                 //Signal from reservoir neurons
                 double reservoirSignal = 0;
                 //Add reservoir neurons signal
@@ -406,7 +441,6 @@ namespace RCNet.Neural.Network.EchoState
                 }
                 //Add context neuron signal if allowed
                 reservoirSignal += _settings.ContextNeuronFeature ? _context2NeuronsWeights[neuronIdx] * _contextNeuron.CurrentState : 0;
-                //----------------------------------------------------
                 //Feedback signal
                 double feedbackSignal = 0;
                 if (_settings.FeedbackFeature)
@@ -416,21 +450,17 @@ namespace RCNet.Neural.Network.EchoState
                         feedbackSignal += _feedback[outpIdx] * _feedbackWeights[outpIdx * _neurons.Length + neuronIdx];
                     }
                 }
-                //----------------------------------------------------
                 //Set new state of reservoir neuron
-                _neurons[neuronIdx].NewState(inputSignal + reservoirSignal + feedbackSignal, collectStatistics);
-                //----------------------------------------------------
-                //Set neuron state to output predictors
+                _neurons[neuronIdx].Compute(inputSignal + reservoirSignal + feedbackSignal, collectStatistics);
+                //Set the neuron's state into the array of output predictors
                 outputPredictors[neuronIdx] = _neurons[neuronIdx].CurrentState;
-                //----------------------------------------------------
-                //Set neuron augmented state to output predictors
+                //Set the neuron's augmented state into the array of output predictors
                 if (_augmentedStatesFeature)
                 {
                     outputPredictors[_neurons.Length + neuronIdx] = outputPredictors[neuronIdx].Power(2);
                 }
             });
-            //----------------------------------------------------
-            //New state of context neuron if allowed
+            //Compute context neuron state (if allowed)
             if (_settings.ContextNeuronFeature)
             {
                 double res2ContextSignal = 0;
@@ -438,13 +468,13 @@ namespace RCNet.Neural.Network.EchoState
                 {
                     res2ContextSignal += _neurons2ContextWeights[neuronIdx] * _neurons[neuronIdx].CurrentState;
                 }
-                _contextNeuron.NewState(res2ContextSignal, collectStatistics);
+                _contextNeuron.Compute(res2ContextSignal, collectStatistics);
             }
             return;
         }
 
         /// <summary>
-        /// Sets feedback values for next Compute
+        /// Sets feedback values for the next Compute calling
         /// </summary>
         /// <param name="feedback">Feedback values.</param>
         public void SetFeedback(double[] feedback)
@@ -461,55 +491,56 @@ namespace RCNet.Neural.Network.EchoState
         /// Implements input component of the analog reservoir
         /// </summary>
         [Serializable]
-        private class ReservoirInputBlock
+        private class ReservoirInputComponent
         {
             //Constants
             //Attributes
-            private int _inputValuesCount;
+            private int _numOfInputValues;
             private double[] _inputBiases;
             private double[] _inputValues;
             private int _reservoirNeuronsCount;
-            private List<InputConnection>[] _connections;
+            private List<InputConnection>[] _inputConnectionCollection;
 
             //Constructor
-            public ReservoirInputBlock(int inputValuesCount,
-                                       int reservoirNeuronsCount,
-                                       double biasScale,
-                                       double inputWeightScale,
-                                       int neuronsPerInput,
-                                       Random rand
-                                       )
+            public ReservoirInputComponent(int numOfInputValues,
+                                           int reservoirNeuronsCount,
+                                           double biasScale,
+                                           double inputWeightScale,
+                                           int neuronsPerInput,
+                                           Random rand
+                                           )
             {
-                _inputValuesCount = inputValuesCount;
+                _numOfInputValues = numOfInputValues;
                 _reservoirNeuronsCount = reservoirNeuronsCount;
                 //Input biases
                 _inputBiases = new double[_reservoirNeuronsCount];
                 rand.FillUniform(_inputBiases, -1, 1, biasScale);
                 //Input values
-                _inputValues = new double[_inputValuesCount];
+                _inputValues = new double[_numOfInputValues];
                 _inputValues.Populate(0);
                 //Connections to reservoir neurons
-                _connections = new List<InputConnection>[_reservoirNeuronsCount];
+                _inputConnectionCollection = new List<InputConnection>[_reservoirNeuronsCount];
                 for (int i = 0; i < _reservoirNeuronsCount; i++)
                 {
-                    _connections[i] = new List<InputConnection>(_inputValuesCount * neuronsPerInput);
+                    _inputConnectionCollection[i] = new List<InputConnection>(_numOfInputValues * neuronsPerInput);
                 }
                 int[] neuronIdxs = new int[_reservoirNeuronsCount];
-                for (int fieldIdx = 0; fieldIdx < _inputValuesCount; fieldIdx++)
+                for (int fieldIdx = 0; fieldIdx < _numOfInputValues; fieldIdx++)
                 {
                     neuronIdxs.ShuffledIndices(rand);
                     for (int i = 0; i < neuronsPerInput; i++)
                     {
                         InputConnection connection = new InputConnection();
-                        connection.FieldIdx = fieldIdx;
+                        connection.InputValueIdx = fieldIdx;
                         connection.Weight = AnalogReservoir.RandomWeight(rand, inputWeightScale);
-                        _connections[neuronIdxs[i]].Add(connection);
+                        _inputConnectionCollection[neuronIdxs[i]].Add(connection);
                     }
                 }
                 return;
             }
+
             //Properties
-            public int InputValuesCount { get { return _inputValuesCount; } }
+            public int NumOfInputValues { get { return _numOfInputValues; } }
 
             //Methods
             public void Update(double[] newInputValues)
@@ -519,18 +550,18 @@ namespace RCNet.Neural.Network.EchoState
             }
 
             /// <summary>
-            /// Computes input signal from input fields to be processed by specified neuron
+            /// Computes input signal from input to be processed by specified neuron
             /// </summary>
-            /// <param name="reservoirNeuronIdx">Reservoir neuron index</param>
+            /// <param name="reservoirNeuronIdx">Index of the reservoir's neuron</param>
             public double GetInputSignal(int reservoirNeuronIdx)
             {
                 double signal = 0;
-                if (_connections[reservoirNeuronIdx].Count > 0)
+                if (_inputConnectionCollection[reservoirNeuronIdx].Count > 0)
                 {
                     signal += _inputBiases[reservoirNeuronIdx];
-                    foreach (InputConnection connection in _connections[reservoirNeuronIdx])
+                    foreach (InputConnection connection in _inputConnectionCollection[reservoirNeuronIdx])
                     {
-                        signal += _inputValues[connection.FieldIdx] * connection.Weight;
+                        signal += _inputValues[connection.InputValueIdx] * connection.Weight;
                     }
                 }
                 return signal;
@@ -540,11 +571,11 @@ namespace RCNet.Neural.Network.EchoState
             [Serializable]
             private class InputConnection
             {
-                public int FieldIdx { get; set; } = 0;
+                public int InputValueIdx { get; set; } = 0;
                 public double Weight { get; set; } = 0;
-            }
+            }//InputConnection
 
-        }//ReservoirInputBlock
+        }//ReservoirInputComponent
 
     }//AnalogReservoir
 

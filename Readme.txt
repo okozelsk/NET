@@ -1,5 +1,5 @@
-The aim of the project is to make the reservoir computing methods available for .net, without
-binding external libraries like Python, MatLab, Encog, etc.
+The aim of the project is to make the reservoir computing methods easy to use and available for .net without
+dependency on external libraries.
 
 Currently implemented components:
 	Normalizer
@@ -11,10 +11,10 @@ Currently implemented components:
 		supporting multiple hidden layers
 	Trainers
 		Linear regression trainer
-		Resilient propagation trainer iRPROP+
+		Resilient propagation trainer (iRPROP+ variant)
 	Analog Reservoir
 		supporting internal connection topologies: Random, Ring, Doubly Twisted Thoroidal
-		supporting Context neuron, Retirement neurons and Augmented states features
+		supporting Context neuron, Retainment neurons (leaky integrators) and Augmented states features
 	Echo State Network
 		supporting multiple internal reservoirs
 		supporting feedback
@@ -31,7 +31,7 @@ Demo application
 	in EsnDemoSettings.xml file.
 	EsnDemoSettings.xml has to be in the same folder as the executable DemoConsoleApp.exe.
 	Application performs training-->prediction operations sequence for each demo case
-	defined in DemoSettings.xml.
+	defined in EsnDemoSettings.xml.
 	Input time series data has to be stored in a file (csv format).
 	You can simply modify EsnDemoSettings.xml and configure your own training-->prediction sessions.
 

@@ -1,129 +1,160 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO;
 using System.Globalization;
-using System.Xml;
 using RCNet.MathTools;
 using RCNet.Extensions;
 using RCNet.CsvTools;
 using RCNet.Neural.Network.Data;
 using RCNet.Neural.Network.EchoState;
-using RCNet.Demo;
 using RCNet.Demo.Log;
 
 
 namespace RCNet.Demo
 {
     /// <summary>
-    /// Demonstrates ESN usage
+    /// Demonstrates the Esn usage.
+    /// It performs training-->prediction operations sequence for each demo case defined in xml file.
+    /// Input time series data has to be stored in a file (csv format).
+	/// You can simply modify xml and configure your own training-->prediction sessions.
     /// </summary>
     public static class EsnDemo
     {
         /// <summary>
-        /// Loads data, prepares output normalizer(s) and creates ESN required SamplesDataBundle object containing
-        /// standardized and normalized data to be used for network training and testing.
+        /// Helper function.
+        /// Loads the data from csv file, prepares output normalizer(s) and creates SamplesDataBundle object containing
+        /// standardized and normalized data to be used for Esn training, testing and prediction.
+        /// Note that all data is always normalized to the interval (-1.1), so only activation functions supporting
+        /// this range should be used in demo case Esn settings.
         /// </summary>
-        /// <param name="demoCaseParams">Demo case settings</param>
-        /// <param name="predictionInputVector">OUT prepared input vector to be used for ESN further prediction (after training)</param>
-        /// <param name="outputNormalizers">OUT prepared normalizer(s) for ESN outputs denormalization</param>
-        /// <returns></returns>
-        public static SamplesDataBundle ESNDataBundleFromFile(EsnDemoSettings.DemoCaseParams demoCaseParams, out double[] predictionInputVector, out List<Normalizer> outputNormalizers)
+        /// <param name="demoCaseParams">
+        /// Demo case settings
+        /// </param>
+        /// <param name="predictionInputVector">
+        /// Prepared input vector to be used for Esn lasting prediction (after training)
+        /// </param>
+        /// <param name="outputNormalizerCollection">
+        /// Prepared normalizer(s) for Esn outputs denormalization
+        /// </param>
+        /// <returns>
+        /// Prepared SamplesDataBundle object
+        /// </returns>
+        public static SamplesDataBundle SamplesDataBundleFromFile(EsnDemoSettings.EsnDemoCaseSettings demoCaseParams,
+                                                                  out double[] predictionInputVector,
+                                                                  out List<Normalizer> outputNormalizerCollection
+                                                                  )
         {
-            Interval normalizationInterval = new Interval(-1, 1);
+            //Allocations
+            //Returned data bundle
             SamplesDataBundle data = new SamplesDataBundle();
-            StreamReader stream = new StreamReader(new FileStream(demoCaseParams.CSVDataFileName, FileMode.Open));
-            string exCommonText = "Can't parse data from file " + demoCaseParams.CSVDataFileName;
-            //All data fields names
-            string allColumnsLine = stream.ReadLine();
-            char csv_delimiter = DelimitedStringValues.RecognizeDelimiter(allColumnsLine);
-            DelimitedStringValues allColumnsDsv = new DelimitedStringValues(csv_delimiter);
-            allColumnsDsv.LoadFromString(allColumnsLine);
-            if (allColumnsDsv.ValuesCount < demoCaseParams.ESNCfg.InputFieldsNames.Count)
-            {
-                throw new Exception(exCommonText + " Unknown delimiter.");
-            }
-            //Input data fields indexes and normalizers allocation
-            List<int> inputFieldsIdxs = new List<int>();
-            List<Normalizer> inputNormalizers = new List<Normalizer>(demoCaseParams.ESNCfg.InputFieldsNames.Count);
+            //Allways normalize between -1 and 1
+            Interval normalizationInterval = new Interval(-1, 1);
+            //Mapped Esn input fields to csv columns
+            List<int> inputFieldIdxCollection = new List<int>();
+            //Normalizers for input fields
+            List<Normalizer> inputNormalizerCollection = new List<Normalizer>(demoCaseParams.EsnConfiguration.InputFieldNameCollection.Count);
+            //Used if single normalizer is required in the demo case settings
             Normalizer singleNormalizer = new Normalizer(normalizationInterval, demoCaseParams.NormalizerReserveRatio);
-            foreach (string fieldName in demoCaseParams.ESNCfg.InputFieldsNames)
+            //Mapped Esn output fields to Esn input fields
+            List<int> outputFieldIdxCollection = new List<int>();
+            //Output fields normalizers
+            outputNormalizerCollection = new List<Normalizer>(demoCaseParams.EsnConfiguration.OutputFieldNameCollection.Count);
+            //Collection of all available input vectors loaded from csv file
+            List<double[]> inputVectorCollection = new List<double[]>();
+            //Commonly used exception message
+            string exCommonText = $"Can't parse data from file {demoCaseParams.CsvDataFileName}";
+
+            //Open file and load the data
+            using (StreamReader streamReader = new StreamReader(new FileStream(demoCaseParams.CsvDataFileName, FileMode.Open)))
             {
-                int fieldIdx = allColumnsDsv.IndexOf(fieldName);
-                inputFieldsIdxs.Add(fieldIdx);
-                if (demoCaseParams.SingleNormalizer)
+                //First row contains column names (data fields)
+                string delimitedColumnNames = streamReader.ReadLine();
+                //What data delimiter is used?
+                char csvDelimiter = DelimitedStringValues.RecognizeDelimiter(delimitedColumnNames);
+                //Split column names
+                DelimitedStringValues columnNames = new DelimitedStringValues(csvDelimiter);
+                columnNames.LoadFromString(delimitedColumnNames);
+                //Check if the recognized data delimiter works properly
+                if (columnNames.ValuesCount < demoCaseParams.EsnConfiguration.InputFieldNameCollection.Count)
                 {
-                    inputNormalizers.Add(singleNormalizer);
+                    throw new Exception(exCommonText + " Unknown delimiter.");
                 }
-                else
+                //Input data fields and normalizers
+                foreach (string fieldName in demoCaseParams.EsnConfiguration.InputFieldNameCollection)
                 {
-                    inputNormalizers.Add(new Normalizer(normalizationInterval, demoCaseParams.NormalizerReserveRatio));
-                }
-            }
-            //Output data fields indexes within input fields and normalizers allocation
-            List<int> outputFieldsIdxs = new List<int>();
-            outputNormalizers = new List<Normalizer>(demoCaseParams.OutputFieldsNames.Count);
-            foreach (string fieldName in demoCaseParams.OutputFieldsNames)
-            {
-                int fieldIdx = demoCaseParams.ESNCfg.InputFieldsNames.IndexOf(fieldName);
-                if(fieldIdx == -1)
-                {
-                    throw new Exception(exCommonText);
-                }
-                outputFieldsIdxs.Add(fieldIdx);
-                outputNormalizers.Add(inputNormalizers[fieldIdx]);
-            }
-            //All input vectors with natural data and normalizers adjustment
-            List<double[]> allInputVectors = new List<double[]>();
-            DelimitedStringValues dataRowDsv = new DelimitedStringValues(csv_delimiter);
-            while (!stream.EndOfStream)
-            {
-                dataRowDsv.LoadFromString(stream.ReadLine());
-                double[] inputVector = new double[inputFieldsIdxs.Count];
-                for(int i = 0; i < inputFieldsIdxs.Count; i++)
-                {
-                    double dataValue = dataRowDsv.GetValue(inputFieldsIdxs[i]).ParseDouble(true, exCommonText);
-                    inputVector[i] = dataValue;
+                    int fieldIdx = columnNames.IndexOf(fieldName);
+                    inputFieldIdxCollection.Add(fieldIdx);
                     if (demoCaseParams.SingleNormalizer)
                     {
-                        singleNormalizer.Adjust(dataValue);
+                        inputNormalizerCollection.Add(singleNormalizer);
                     }
                     else
                     {
-                        inputNormalizers[i].Adjust(dataValue);
+                        inputNormalizerCollection.Add(new Normalizer(normalizationInterval, demoCaseParams.NormalizerReserveRatio));
                     }
                 }
-                allInputVectors.Add(inputVector);
-            }
-            stream.Close();
-            //DataBundle creation
-            int demoVectorsCount = demoCaseParams.BootSeqMinLength + demoCaseParams.TrainingSeqMaxLength + demoCaseParams.TestingSeqLength;
-            if(demoVectorsCount > allInputVectors.Count)
+                //Output data fields and normalizers
+                foreach (string fieldName in demoCaseParams.EsnConfiguration.OutputFieldNameCollection)
+                {
+                    int fieldIdx = demoCaseParams.EsnConfiguration.InputFieldNameCollection.IndexOf(fieldName);
+                    if (fieldIdx == -1)
+                    {
+                        throw new Exception(exCommonText);
+                    }
+                    outputFieldIdxCollection.Add(fieldIdx);
+                    outputNormalizerCollection.Add(inputNormalizerCollection[fieldIdx]);
+                }
+                //Collect input vectors and adjust normalizers
+                DelimitedStringValues dataRow = new DelimitedStringValues(csvDelimiter);
+                while (!streamReader.EndOfStream)
+                {
+                    dataRow.LoadFromString(streamReader.ReadLine());
+                    double[] inputVector = new double[inputFieldIdxCollection.Count];
+                    for (int i = 0; i < inputFieldIdxCollection.Count; i++)
+                    {
+                        double dataValue = dataRow.GetValue(inputFieldIdxCollection[i]).ParseDouble(true, exCommonText);
+                        inputVector[i] = dataValue;
+                        if (demoCaseParams.SingleNormalizer)
+                        {
+                            singleNormalizer.Adjust(dataValue);
+                        }
+                        else
+                        {
+                            inputNormalizerCollection[i].Adjust(dataValue);
+                        }
+                    }
+                    inputVectorCollection.Add(inputVector);
+                }
+            }//Loading the file
+            
+            //SamplesDataBundle creation
+            //Counts and positions
+            int demoVectorsCount = demoCaseParams.NumOfBootSamples + demoCaseParams.MaxNumOfTrainingSamples + demoCaseParams.NumOfTestSamples;
+            if(demoVectorsCount > inputVectorCollection.Count)
             {
-                demoVectorsCount = allInputVectors.Count;
+                demoVectorsCount = inputVectorCollection.Count;
             }
-            int firstVectorIdx = (allInputVectors.Count - demoVectorsCount) - 1;
+            int firstVectorIdx = (inputVectorCollection.Count - demoVectorsCount) - 1;
             if (firstVectorIdx < 0)
             {
                 firstVectorIdx = 0;
             }
+            //Data normalization and division to input/output vectors
             predictionInputVector = null;
-            for (int vectorIdx = firstVectorIdx; vectorIdx < allInputVectors.Count; vectorIdx++)
+            for (int vectorIdx = firstVectorIdx; vectorIdx < inputVectorCollection.Count; vectorIdx++)
             {
                 //Normalized input vector
-                double[] inputVector = new double[inputFieldsIdxs.Count];
-                for(int i = 0; i < inputFieldsIdxs.Count; i++)
+                double[] inputVector = new double[inputFieldIdxCollection.Count];
+                for(int i = 0; i < inputFieldIdxCollection.Count; i++)
                 {
-                    inputVector[i] = inputNormalizers[i].Normalize(allInputVectors[vectorIdx][i]);
+                    inputVector[i] = inputNormalizerCollection[i].Normalize(inputVectorCollection[vectorIdx][i]);
                 }
-                if(vectorIdx < allInputVectors.Count - 1)
+                if(vectorIdx < inputVectorCollection.Count - 1)
                 {
-                    double[] outputVector = new double[outputFieldsIdxs.Count];
-                    for (int i = 0; i < outputFieldsIdxs.Count; i++)
+                    double[] outputVector = new double[outputFieldIdxCollection.Count];
+                    for (int i = 0; i < outputFieldIdxCollection.Count; i++)
                     {
-                        outputVector[i] = outputNormalizers[i].Normalize(allInputVectors[vectorIdx + 1][outputFieldsIdxs[i]]);
+                        outputVector[i] = outputNormalizerCollection[i].Normalize(inputVectorCollection[vectorIdx + 1][outputFieldIdxCollection[i]]);
                     }
                     data.Inputs.Add(inputVector);
                     data.Outputs.Add(outputVector);
@@ -137,15 +168,22 @@ namespace RCNet.Demo
         }
 
         /// <summary>
-        /// This is a callback control function called from the regression process after each epoch.
-        /// Primary purpose is to identify the best network (weights).
+        /// This is the control function of the regression process and is called
+        /// after the completion of each regression training epoch.
+        /// The goal of the regression process is for each Esn output field to train a feed forward network
+        /// that will give good results both on the training data and the test data.
+        /// Esn.EsnRegressionControlInArgs object passed to the function contains the best error statistics so far
+        /// and the latest statistics. The primary purpose of the function is to decide whether the latest statistics
+        /// are better than the best statistics so far.
         /// Here is used simply outArgs.Best = (inArgs.CurrRegrData.CombinedError LT inArgs.BestRegrData.CombinedError), but
         /// the real logic could be much more complex.
-        /// Secondary purpose is to inform the caller about the progress and to give a chance to control the progress
-        /// (to stop current attempt or to stop whole regression).
+        /// The function can also tell the regression process that it does not make any sense to continue the regression.
+        /// It can terminate the current regression attempt or whole output field regression process.
+        /// The reservoir statistics are also available in the Esn.EsnRegressionControlInArgs object, which should be
+        /// monitored to ensure that the neurons of the reservoirs have not been oversaturated.
         /// </summary>
-        /// <param name="inArgs">Contains current/best error statistics, reservoir(s) statistics and the user object</param>
-        /// <returns>Instructions for the calling regression process.</returns>
+        /// <param name="inArgs">Contains all the necessary information to control the progress of the regression.</param>
+        /// <returns>Instructions for the regression process.</returns>
         public static Esn.EsnRegressionControlOutArgs ESNRegressionControl(Esn.EsnRegressionControlInArgs inArgs)
         {
             //Report reservoirs statistics in case of the first call
@@ -161,53 +199,67 @@ namespace RCNet.Demo
                 }
                 ((IOutputLog)inArgs.ControllerData).Write("    Regression:", false);
             }
+            //Instantiate output object.
             Esn.EsnRegressionControlOutArgs outArgs = new Esn.EsnRegressionControlOutArgs();
-            outArgs.Best = (inArgs.CurrRegrData.CombinedError < inArgs.BestRegrData.CombinedError);
-            //Progress prompt
-            ((IOutputLog)inArgs.ControllerData).Write(
-                "      OutputField: " + inArgs.OutputFieldName +
-                ", Attempt/Epoch: " + inArgs.RegrAttemptNumber.ToString().PadLeft(2, '0') + "/" + inArgs.Epoch.ToString().PadLeft(5, '0') +
-                ", DSet-Sizes: (" + inArgs.CurrRegrData.TrainingErrorStat.SamplesCount.ToString() + ", " + inArgs.CurrRegrData.TestingErrorStat.SamplesCount.ToString() + ")" +
-                ", Best-Train: " + (outArgs.Best ? inArgs.CurrRegrData.TrainingErrorStat : inArgs.BestRegrData.TrainingErrorStat).ArithAvg.ToString("E3", CultureInfo.InvariantCulture) +
-                ", Best-Test: " + (outArgs.Best ? inArgs.CurrRegrData.TestingErrorStat : inArgs.BestRegrData.TestingErrorStat).ArithAvg.ToString("E3", CultureInfo.InvariantCulture) +
-                ", Curr-Train: " + inArgs.CurrRegrData.TrainingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture) +
-                ", Curr-Test: " + inArgs.CurrRegrData.TestingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture)
-                , !(inArgs.Epoch == 1 && inArgs.RegrAttemptNumber == 1));
+            //Evaluate statistics and decide if the latest statistics are the best.
+            outArgs.Best = (inArgs.RegrCurrResult.CombinedError < inArgs.RegrBestResult.CombinedError);
+            //Report the progress
+            int reportInterval = Math.Max(inArgs.MaxEpoch / 100, 1);
+            if (outArgs.Best || (inArgs.Epoch % reportInterval) == 0 || inArgs.Epoch == inArgs.MaxEpoch)
+            {
+                ((IOutputLog)inArgs.ControllerData).Write(
+                    "      OutputField: " + inArgs.OutputFieldName +
+                    ", Attempt/Epoch: " + inArgs.RegrAttemptNumber.ToString().PadLeft(inArgs.RegrMaxAttempt.ToString().Length, '0') + "/" + inArgs.Epoch.ToString().PadLeft(inArgs.MaxEpoch.ToString().Length, '0') +
+                    ", DSet-Sizes: (" + inArgs.RegrCurrResult.TrainingErrorStat.SamplesCount.ToString() + ", " + inArgs.RegrCurrResult.TestingErrorStat.SamplesCount.ToString() + ")" +
+                    ", Best-Train: " + (outArgs.Best ? inArgs.RegrCurrResult.TrainingErrorStat : inArgs.RegrBestResult.TrainingErrorStat).ArithAvg.ToString("E3", CultureInfo.InvariantCulture) +
+                    ", Best-Test: " + (outArgs.Best ? inArgs.RegrCurrResult.TestingErrorStat : inArgs.RegrBestResult.TestingErrorStat).ArithAvg.ToString("E3", CultureInfo.InvariantCulture) +
+                    ", Curr-Train: " + inArgs.RegrCurrResult.TrainingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture) +
+                    ", Curr-Test: " + inArgs.RegrCurrResult.TestingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture)
+                    , !(inArgs.Epoch == 1 && inArgs.RegrAttemptNumber == 1));
+            }
             return outArgs;
         }
 
         /// <summary>
-        /// Executes one specified demo case.
-        /// Loads and prepares sample data, trains network and display results and prediction.
+        /// Executes specified demo case.
+        /// Loads and prepares sample data, trains Esn and displayes results plus prediction.
         /// </summary>
-        /// <param name="log">Into this interface demo writes output to be displayed</param>
+        /// <param name="log">Here demo writes its output messages</param>
         /// <param name="demoCaseParams">Demo case settings to be executed</param>
         /// <returns></returns>
-        public static double[] PerformDemoCase(IOutputLog log, EsnDemoSettings.DemoCaseParams demoCaseParams)
+        public static double[] PerformDemoCase(IOutputLog log, EsnDemoSettings.EsnDemoCaseSettings demoCaseParams)
         {
             log.Write("  Performing demo case " + demoCaseParams.Name, false);
-            //Load of data bundle for ESN training
+            //Load of data bundle for Esv training
             double[] predictionInputVector;
             List<Normalizer> outputNormalizers;
-            SamplesDataBundle data = ESNDataBundleFromFile(demoCaseParams, out predictionInputVector, out outputNormalizers);
-            //ESN training
-            Esn esn = new Esn(demoCaseParams.ESNCfg);
+            SamplesDataBundle data = SamplesDataBundleFromFile(demoCaseParams,
+                                                               out predictionInputVector,
+                                                               out outputNormalizers
+                                                               );
+            //Instantiate Esn
+            Esn esn = new Esn(demoCaseParams.EsnConfiguration);
+            //Select appropriate method for the test samples selection
             Esn.EsnTestSamplesSelectorCallbackDelegate samplesSelector = esn.SelectRandomTestSamples;
-            if (demoCaseParams.TestSamplesSelection == "Sequential") samplesSelector = esn.SelectSequentialTestSamples;
-            Esn.EsnRegressionData[] regrOuts = esn.Train(data,
-                                                         demoCaseParams.BootSeqMinLength,
-                                                         demoCaseParams.TestingSeqLength,
+            if (demoCaseParams.TestSamplesSelectionMethod == "Sequential") samplesSelector = esn.SelectSequentialTestSamples;
+            //Esn training (regression)
+            Esn.EsnRegressionResult[] regrOuts = esn.Train(data,
+                                                         demoCaseParams.NumOfBootSamples,
+                                                         demoCaseParams.NumOfTestSamples,
                                                          samplesSelector,
                                                          ESNRegressionControl,
                                                          log
                                                          );
-            //Next future values prediction
-            double[] outputVector = esn.PredictNext(predictionInputVector);
+            //Next values prediction
+            //Note that there is not necessary to call PushFeedback function immediately after training.
+            //Feedback was already pushed during the Esn training.
+            double[] outputVector = esn.Compute(predictionInputVector);
+            //Values are normalized so they have to be denormalize
             for(int i = 0; i < outputVector.Length; i++)
             {
                 outputVector[i] = outputNormalizers[i].Naturalize(outputVector[i]);
             }
-            //Report regression results
+            //Report training (regression) results and prediction
             log.Write("    Results", false);
             for (int outputIdx = 0; outputIdx < regrOuts.Length; outputIdx++)
             {
@@ -215,7 +267,7 @@ namespace RCNet.Demo
                 log.Write("         Predicted next: " + outputVector[outputIdx].ToString(CultureInfo.InvariantCulture), false);
                 log.Write("      Trained weights stat", false);
                 log.Write("          Min, Max, Avg: " + regrOuts[outputIdx].OutputWeightsStat.Min.ToString(CultureInfo.InvariantCulture) + " " + regrOuts[outputIdx].OutputWeightsStat.Max.ToString(CultureInfo.InvariantCulture) + " " + regrOuts[outputIdx].OutputWeightsStat.ArithAvg.ToString(CultureInfo.InvariantCulture), false);
-                log.Write("          Upd, Cnt, Zrs: " + regrOuts[outputIdx].BestUpdatesCount.ToString() + " " + regrOuts[outputIdx].OutputWeightsStat.SamplesCount.ToString() + " " + (regrOuts[outputIdx].OutputWeightsStat.SamplesCount - regrOuts[outputIdx].OutputWeightsStat.NonzeroSamplesCount).ToString(), false);
+                log.Write("          Upd, Cnt, Zrs: " + regrOuts[outputIdx].UpdateCounter.ToString() + " " + regrOuts[outputIdx].OutputWeightsStat.SamplesCount.ToString() + " " + (regrOuts[outputIdx].OutputWeightsStat.SamplesCount - regrOuts[outputIdx].OutputWeightsStat.NonzeroSamplesCount).ToString(), false);
                 log.Write("              Error stat", false);
                 log.Write("      Train set samples: " + regrOuts[outputIdx].TrainingErrorStat.SamplesCount.ToString(), false);
                 log.Write("      Train set Avg Err: " + regrOuts[outputIdx].TrainingErrorStat.ArithAvg.ToString(CultureInfo.InvariantCulture), false);
@@ -230,17 +282,20 @@ namespace RCNet.Demo
         }
 
         /// <summary>
-        /// Runs ESN demo. Calls PerformDemoCase for each demo case defined in demoSettingsFile XML.
+        /// Runs ESN demo. This is the main function.
+        /// For each demo case defined in demoSettingsXmlFile function calls PerformDemoCase.
         /// </summary>
         /// <param name="log">Into this interface demo writes output to be displayed</param>
-        /// <param name="demoSettingsFile">XML file name which contains defined ESN demo cases</param>
-        public static void RunDemo(IOutputLog log, string demoSettingsFile)
+        /// <param name="demoSettingsXmlFile">Xml file containing definitions of demo cases to be prformed</param>
+        public static void RunDemo(IOutputLog log, string demoSettingsXmlFile)
         {
             log.Write("ESN demo started", false);
-            EsnDemoSettings demoSettings = new EsnDemoSettings(demoSettingsFile);
-            //TimeSeriesGenerator.GenerateStandardCSVFiles(demoSettings.DataDir);
-            foreach(EsnDemoSettings.DemoCaseParams demoCaseParams in demoSettings.DemoCases)
+            //Instantiate demo settings from the xml file
+            EsnDemoSettings demoSettings = new EsnDemoSettings(demoSettingsXmlFile);
+            //Loop through the demo cases
+            foreach(EsnDemoSettings.EsnDemoCaseSettings demoCaseParams in demoSettings.DemoCaseParamsCollection)
             {
+                //Execute the demo case
                 double[] predictions = PerformDemoCase(log, demoCaseParams);
             }
             log.Write("ESN demo finished", false);

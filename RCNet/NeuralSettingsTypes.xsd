@@ -101,11 +101,11 @@
     <xs:attribute type="UDoubleLE1" name="SelfConnectionsDensity" use="required"/>
   </xs:complexType>
 
-  <!-- Analog reservoir retirement neurons -->
-  <xs:complexType name="AnalogReservoirRetirementNeurons">
+  <!-- Analog reservoir retainment neurons -->
+  <xs:complexType name="AnalogReservoirRetainmentNeurons">
     <xs:attribute type="UDoubleLE1" name="Density" use="required"/>
-    <xs:attribute type="UDoubleLT1" name="RetirementMinRate" use="required"/>
-    <xs:attribute type="UDoubleLT1" name="RetirementMaxRate" use="required"/>
+    <xs:attribute type="UDoubleLT1" name="RetainmentMinRate" use="required"/>
+    <xs:attribute type="UDoubleLT1" name="RetainmentMaxRate" use="required"/>
   </xs:complexType>
 
   <!-- Analog reservoir context neuron -->
@@ -124,7 +124,7 @@
         <xs:element type="AnalogReservoirRingTopology" name="RingTopology" minOccurs="1" maxOccurs="1"/>
         <xs:element type="AnalogReservoirDTTTopology" name="DTTTopology" minOccurs="1" maxOccurs="1"/>
       </xs:choice>
-      <xs:element type="AnalogReservoirRetirementNeurons" name="RetirementNeurons" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="AnalogReservoirRetainmentNeurons" name="RetainmentNeurons" minOccurs="0" maxOccurs="1"/>
       <xs:element type="AnalogReservoirContextNeuron" name="ContextNeuron" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:unsignedInt" name="Size" use="required" />

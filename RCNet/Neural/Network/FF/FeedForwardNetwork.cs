@@ -11,7 +11,7 @@ using RCNet.MathTools;
 namespace RCNet.Neural.Network.FF
 {
     /// <summary>
-    /// Implements feed forward network supporting multiple hidden layers
+    /// Implements the feed forward network supporting multiple hidden layers
     /// </summary>
     [Serializable]
     public class FeedForwardNetwork
@@ -75,18 +75,18 @@ namespace RCNet.Neural.Network.FF
         /// <summary>
         /// Adds new hidden layer into this network
         /// </summary>
-        /// <param name="nodesCount">Count of layer's neurons</param>
-        /// <param name="activation">Each of layer's neuron will be activated by this</param>
-        public void AddLayer(int nodesCount, IActivationFunction activation)
+        /// <param name="numOfNodes">Number of layer's neurons</param>
+        /// <param name="activation">Each of layer's neuron will be activated by this activation function</param>
+        public void AddLayer(int numOfNodes, IActivationFunction activation)
         {
             if (!Finalized)
             {
-                if(nodesCount < 1)
+                if(numOfNodes < 1)
                 {
-                    throw new ArgumentException("Invalid nodesCount parameter value: " + nodesCount.ToString());
+                    throw new ArgumentException($"Invalid numOfNodes parameter value {numOfNodes.ToString()}");
                 }
                 //Add new layer
-                Layers.Add(new Layer(nodesCount, activation));
+                Layers.Add(new Layer(numOfNodes, activation));
             }
             else
             {
@@ -98,7 +98,7 @@ namespace RCNet.Neural.Network.FF
         /// <summary>
         /// Finalizes network internal structure and locks structure against further changes.
         /// </summary>
-        /// <param name="outputActivation">Activation function of output layer's neurons</param>
+        /// <param name="outputActivation">Activation function of the output layer's neurons</param>
         public void FinalizeStructure(IActivationFunction outputActivation)
         {
             if (Finalized)
@@ -115,9 +115,9 @@ namespace RCNet.Neural.Network.FF
             foreach (Layer layer in _layers)
             {
                 layer.FinalizeStructure(inputNodesCount, nodesFlatStartIdx, weightsFlatStartIdx);
-                nodesFlatStartIdx += layer.LayerNodesCount;
-                weightsFlatStartIdx += (layer.LayerNodesCount * layer.InputNodesCount + layer.LayerNodesCount);
-                inputNodesCount = layer.LayerNodesCount;
+                nodesFlatStartIdx += layer.NumOfLayerNodes;
+                weightsFlatStartIdx += (layer.NumOfLayerNodes * layer.NumOfInputNodes + layer.NumOfLayerNodes);
+                inputNodesCount = layer.NumOfLayerNodes;
                 if(layer.Activation.GetType() != typeof(ElliotAF) &&
                    layer.Activation.GetType() != typeof(TanhAF)
                    )
@@ -137,17 +137,17 @@ namespace RCNet.Neural.Network.FF
         /// <summary>
         /// Applies Nguyen Widrow weights randomization method.
         /// </summary>
-        /// <param name="rand">Random object to be used</param>
+        /// <param name="rand">Random generator to be used</param>
         private void RandomizeWeightsByNguyenWidrowMethod(Random rand)
         {
             foreach (Layer layer in _layers)
             {
                 int weightFlatIndex = layer.WeightsStartFlatIdx;
                 int biasFlatIndex = layer.BiasesStartFlatIdx;
-                double b = 0.35d * Math.Pow(layer.LayerNodesCount, (1d / layer.InputNodesCount));
-                for(int layerNodeIdx = 0; layerNodeIdx < layer.LayerNodesCount; layerNodeIdx++, biasFlatIndex++)
+                double b = 0.35d * Math.Pow(layer.NumOfLayerNodes, (1d / layer.NumOfInputNodes));
+                for(int layerNodeIdx = 0; layerNodeIdx < layer.NumOfLayerNodes; layerNodeIdx++, biasFlatIndex++)
                 {
-                    for (int inputNodeIdx = 0; inputNodeIdx < layer.InputNodesCount; inputNodeIdx++, weightFlatIndex++)
+                    for (int inputNodeIdx = 0; inputNodeIdx < layer.NumOfInputNodes; inputNodeIdx++, weightFlatIndex++)
                     {
                         _flatWeights[weightFlatIndex] = rand.NextBoundedUniformDouble(0, b);
                     }
@@ -160,7 +160,7 @@ namespace RCNet.Neural.Network.FF
         /// <summary>
         /// Randomizes network's weights (must be called before training)
         /// </summary>
-        /// <param name="rand">Random object to be used</param>
+        /// <param name="rand">Random generator to be used</param>
         public void RandomizeWeights(Random rand)
         {
             if(!Finalized)
@@ -209,7 +209,7 @@ namespace RCNet.Neural.Network.FF
         }
 
         /// <summary>
-        /// Function goes through inputs collection (batch) and for each input computes output.
+        /// Function goes through collection (batch) of inputs and for each of them computes the output.
         /// Computed output is then compared to corresponding ideal output.
         /// The error Abs(ideal - computed) is passed to overall error statistics.
         /// </summary>
@@ -232,7 +232,7 @@ namespace RCNet.Neural.Network.FF
         }
 
         /// <summary>
-        /// Adopts given weights.
+        /// Adopts the given weights.
         /// </summary>
         /// <param name="newFlatWeights">Weights to be adopted (in flat format)</param>
         public void SetWeights(double[] newFlatWeights)
@@ -242,9 +242,8 @@ namespace RCNet.Neural.Network.FF
         }
 
         /// <summary>
-        /// Function creates basic statistics of internal weights values
+        /// Function creates the statistics of the internal weights
         /// </summary>
-        /// <returns>Basic statistics of internal weights values</returns>
         public BasicStat ComputeWeightsStat()
         {
             return (new BasicStat(_flatWeights));
@@ -252,30 +251,31 @@ namespace RCNet.Neural.Network.FF
 
         //Inner classes
         /// <summary>
-        /// Represents BasicNetwork layer
+        /// Feed forward network's layer
         /// </summary>
         [Serializable]
         public class Layer
         {
-            //Attributes
+            //Attribute properties
             public IActivationFunction Activation { get; }
-            private int _inputNodesCount;
-            private int _layerNodesCount;
+            //Attributes
+            private int _numOfInputNodes;
+            private int _numOfLayerNodes;
             private int _weightsStartFlatIdx;
             private int _biasesStartFlatIdx;
             private int _nodesStartFlatIdx;
 
             //Constructor
             /// <summary>
-            /// Constructs new layer
+            /// Instantiates the layer
             /// </summary>
-            /// <param name="nodesCount">Count of layer's neurons</param>
-            /// <param name="activation">Each of layer's neuron will be activated by this</param>
-            public Layer(int nodesCount, IActivationFunction activation)
+            /// <param name="numOfNodes">Number of layer's neurons</param>
+            /// <param name="activation">Each of layer's neuron will be activated by this activation function</param>
+            public Layer(int numOfNodes, IActivationFunction activation)
             {
                 Activation = activation;
-                _layerNodesCount = nodesCount;
-                _inputNodesCount = -1;
+                _numOfLayerNodes = numOfNodes;
+                _numOfInputNodes = -1;
                 _weightsStartFlatIdx = 0;
                 _biasesStartFlatIdx = 0;
                 _nodesStartFlatIdx = 0;
@@ -283,9 +283,9 @@ namespace RCNet.Neural.Network.FF
             }
 
             //Properties
-            public bool Finalized { get { return _inputNodesCount > 0; } }
-            public int InputNodesCount { get { return _inputNodesCount; } }
-            public int LayerNodesCount { get { return _layerNodesCount; } }
+            public bool Finalized { get { return _numOfInputNodes > 0; } }
+            public int NumOfInputNodes { get { return _numOfInputNodes; } }
+            public int NumOfLayerNodes { get { return _numOfLayerNodes; } }
             public int WeightsStartFlatIdx { get { return _weightsStartFlatIdx; } }
             public int BiasesStartFlatIdx { get { return _biasesStartFlatIdx; } }
             public int NodesStartFlatIdx { get { return _nodesStartFlatIdx; } }
@@ -293,16 +293,16 @@ namespace RCNet.Neural.Network.FF
 
             //Methods
             /// <summary>
-            /// Finalizes layer structure and sets layer data flat indexes
+            /// Finalizes the layer structure
             /// </summary>
-            /// <param name="inputNodesCount">Number of previous layer nodes (or network input nodes)</param>
-            /// <param name="nodesFlatStartIdx">Where starts this layer nodes in flat structure</param>
-            /// <param name="weightsFlatStartIdx">Where starts this layer weights in flat structure</param>
-            public void FinalizeStructure(int inputNodesCount, int nodesFlatStartIdx, int weightsFlatStartIdx)
+            /// <param name="numOfInputNodes">Number of input nodes</param>
+            /// <param name="nodesFlatStartIdx">Where starts this layer nodes in a flat structure</param>
+            /// <param name="weightsFlatStartIdx">Where starts this layer weights in a flat structure</param>
+            public void FinalizeStructure(int numOfInputNodes, int nodesFlatStartIdx, int weightsFlatStartIdx)
             {
-                _inputNodesCount = inputNodesCount;
+                _numOfInputNodes = numOfInputNodes;
                 _weightsStartFlatIdx = weightsFlatStartIdx;
-                _biasesStartFlatIdx = weightsFlatStartIdx + _layerNodesCount * _inputNodesCount;
+                _biasesStartFlatIdx = weightsFlatStartIdx + _numOfLayerNodes * _numOfInputNodes;
                 _nodesStartFlatIdx = nodesFlatStartIdx;
                 return;
             }
@@ -312,8 +312,8 @@ namespace RCNet.Neural.Network.FF
             /// </summary>
             public Layer Clone()
             {
-                Layer clone = new Layer(LayerNodesCount, Activation);
-                clone._inputNodesCount = _inputNodesCount;
+                Layer clone = new Layer(_numOfLayerNodes, Activation);
+                clone._numOfInputNodes = _numOfInputNodes;
                 clone._weightsStartFlatIdx = _weightsStartFlatIdx;
                 clone._biasesStartFlatIdx = _biasesStartFlatIdx;
                 clone._nodesStartFlatIdx = _nodesStartFlatIdx;
@@ -328,13 +328,13 @@ namespace RCNet.Neural.Network.FF
             /// <returns>Layer's neurons values (states)</returns>
             public double[] Compute(double[] inputs, double[] flatWeights)
             {
-                double[] result = new double[LayerNodesCount];
+                double[] result = new double[NumOfLayerNodes];
                 int weightFlatIdx = _weightsStartFlatIdx;
                 int biasFlatIdx = _biasesStartFlatIdx;
-                for (int nodeIdx = 0; nodeIdx < LayerNodesCount; nodeIdx++, biasFlatIdx++)
+                for (int nodeIdx = 0; nodeIdx < NumOfLayerNodes; nodeIdx++, biasFlatIdx++)
                 {
                     double sum = flatWeights[biasFlatIdx] * FeedForwardNetwork.BiasValue;
-                    for (int inputIdx = 0; inputIdx < InputNodesCount; inputIdx++, weightFlatIdx++)
+                    for (int inputIdx = 0; inputIdx < NumOfInputNodes; inputIdx++, weightFlatIdx++)
                     {
                         sum += flatWeights[weightFlatIdx] * inputs[inputIdx];
                     }
@@ -353,7 +353,7 @@ namespace RCNet.Neural.Network.FF
             public double[] Compute(double[] inputs, double[] flatWeights, double[] flatDerivatives)
             {
                 double[] result = Compute(inputs, flatWeights);
-                for (int nodeIdx = 0; nodeIdx < LayerNodesCount; nodeIdx++)
+                for (int nodeIdx = 0; nodeIdx < NumOfLayerNodes; nodeIdx++)
                 {
                     flatDerivatives[_nodesStartFlatIdx + nodeIdx] = Activation.ComputeDerivative(result[nodeIdx], inputs[nodeIdx]);
                 }
@@ -427,7 +427,7 @@ namespace RCNet.Neural.Network.FF
         }
 
         /// <summary>
-        /// Returns the new instance of this instance as a deep copy.
+        /// Creates the deep copy instance of this instance.
         /// </summary>
         public HiddenLayerSettings DeepClone()
         {
