@@ -18,11 +18,11 @@ Currently implemented components:
 		supporting multiple internal reservoirs
 		supporting feedback
 		readout layer consists of FF network for every output field (with or without hidden layers)
-		ESN does not support SpectralRadius parameter and it will not be added.
-			Onstead of the SpectralRadius parameter the implemented Esn provides detailed statistics
-			over internal reservoirs' neurons states. User should simply tune weight scales
-			and monitor the statistics/results to select right scales and also to avoid
-			reservoirs' neurons oversaturation.
+		Note that Esn does not support SpectralRadius parameter and it will not be added.
+		Instead of the SpectralRadius parameter the Esn provides detailed statistics
+		over internal reservoirs' neurons states. User should simply tune weight scales
+		and monitor the statistics/results to select right scales and also to avoid
+		reservoirs' neurons oversaturation.
 			
 Demo application
 	All the functionality is demonstrated in a simple demo application (/Demo/DemoConsoleApp).
