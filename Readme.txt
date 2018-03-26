@@ -1,5 +1,4 @@
-The aim of the project is to make the reservoir computing methods easy to use and available for .net without
-dependency on external libraries.
+The aim of the project is to make the reservoir computing methods easy to use and available for .net without dependency on external libraries.
 
 Currently implemented components:
 	Normalizer
@@ -20,9 +19,9 @@ Currently implemented components:
 		supporting feedback
 		readout layer consists of FF network for every output field (with or without hidden layers)
 		ESN does not support SpectralRadius parameter and it will not be added.
-			instead of SpectralRadius parameter ESN provides detailed statistics
-			of reservoirs' neurons states. User should simply tune weight scales
-			and watch statistics/results to select right scales and also to avoid
+			Onstead of the SpectralRadius parameter the implemented Esn provides detailed statistics
+			over internal reservoirs' neurons states. User should simply tune weight scales
+			and monitor the statistics/results to select right scales and also to avoid
 			reservoirs' neurons oversaturation.
 			
 Demo application
