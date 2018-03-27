@@ -12,6 +12,7 @@ namespace RCNet.Extensions
         /// Randomly shuffles an array of objects
         /// </summary>
         /// <param name="array">Array of objects to be randomly shuffled</param>
+        /// <param name="rand"></param>
         public static void Shuffle<T>(this Random rand, T[] array)
         {
             int n = array.Length;
@@ -29,6 +30,7 @@ namespace RCNet.Extensions
         /// Randomly shuffles a list of objects
         /// </summary>
         /// <param name="list">List of objects to be randomly shuffled</param>
+        /// <param name="rand"></param>
         public static void Shuffle<T>(this Random rand, List<T> list)
         {
             int n = list.Count;
@@ -47,6 +49,7 @@ namespace RCNet.Extensions
         /// </summary>
         /// <param name="mean">Required target mean</param>
         /// <param name="stdDev">Required target standard deviation</param>
+        /// <param name="rand"></param>
         public static double NextGaussianDouble(this Random rand, double mean = 0, double stdDev = 1)
         {
             //Uniform(0,1] random doubles
@@ -89,6 +92,7 @@ namespace RCNet.Extensions
         /// </summary>
         /// <param name="min">Min random double value</param>
         /// <param name="max">Max random double value</param>
+        /// <param name="rand"></param>
         public static double NextBoundedUniformDouble(this Random rand, double min = -1, double max = 1)
         {
             return rand.NextDouble() * (max - min) + min;
@@ -99,6 +103,7 @@ namespace RCNet.Extensions
         /// </summary>
         /// <param name="absMin">Min random double absolute value</param>
         /// <param name="absMax">Max random double absolute value</param>
+        /// <param name="rand"></param>
         public static double NextBoundedUniformDoubleRS(this Random rand, double absMin = 0, double absMax = 1)
         {
             double sign = (rand.Next(2) == 0) ? - 1d : 1d;

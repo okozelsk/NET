@@ -373,6 +373,9 @@ namespace RCNet.Neural.Network.EchoState
         }
 
         //Instance methods
+        /// <summary>
+        /// See the base.
+        /// </summary>
         public override bool Equals(object obj)
         {
             if (obj == null) return false;
@@ -416,6 +419,9 @@ namespace RCNet.Neural.Network.EchoState
             return true;
         }
 
+        /// <summary>
+        /// See the base.
+        /// </summary>
         public override int GetHashCode()
         {
             return SettingsName.GetHashCode();
@@ -446,18 +452,28 @@ namespace RCNet.Neural.Network.EchoState
             public double ConnectionsDensity { get; set; }
 
             //Constructors
+            /// <summary>
+            /// Creates an unitialized instance
+            /// </summary>
             public RandomTopology()
             {
                 ConnectionsDensity = 0;
                 return;
             }
 
+            /// <summary>
+            /// Copy constructor
+            /// </summary>
+            /// <param name="source">Source instance</param>
             public RandomTopology(RandomTopology source)
             {
                 ConnectionsDensity = source.ConnectionsDensity;
                 return;
             }
 
+            /// <summary>
+            /// Creates the instance itialized from xml
+            /// </summary>
             public RandomTopology(XElement randomTopologyElem)
             {
                 ConnectionsDensity = double.Parse(randomTopologyElem.Attribute("ConnectionsDensity").Value, CultureInfo.InvariantCulture);
@@ -465,6 +481,9 @@ namespace RCNet.Neural.Network.EchoState
             }
 
             //Methods
+            /// <summary>
+            /// See the base.
+            /// </summary>
             public override bool Equals(object obj)
             {
                 if (obj == null) return false;
@@ -476,6 +495,9 @@ namespace RCNet.Neural.Network.EchoState
                 return true;
             }
 
+            /// <summary>
+            /// See the base.
+            /// </summary>
             public override int GetHashCode()
             {
                 return base.GetHashCode();
@@ -506,6 +528,9 @@ namespace RCNet.Neural.Network.EchoState
             public double InterConnectionsDensity { get; set; }
 
             //Constructors
+            /// <summary>
+            /// Creates an unitialized instance
+            /// </summary>
             public RingTopology()
             {
                 BiDirection = false;
@@ -514,6 +539,10 @@ namespace RCNet.Neural.Network.EchoState
                 return;
             }
 
+            /// <summary>
+            /// Copy constructor
+            /// </summary>
+            /// <param name="source">Source instance</param>
             public RingTopology(RingTopology source)
             {
                 BiDirection = source.BiDirection;
@@ -522,6 +551,9 @@ namespace RCNet.Neural.Network.EchoState
                 return;
             }
 
+            /// <summary>
+            /// Creates the instance itialized from xml
+            /// </summary>
             public RingTopology(XElement ringTopologyElem)
             {
                 BiDirection = bool.Parse(ringTopologyElem.Attribute("BiDirection").Value);
@@ -531,6 +563,9 @@ namespace RCNet.Neural.Network.EchoState
             }
 
             //Methods
+            /// <summary>
+            /// See the base.
+            /// </summary>
             public override bool Equals(object obj)
             {
                 if (obj == null) return false;
@@ -545,6 +580,9 @@ namespace RCNet.Neural.Network.EchoState
                 return true;
             }
 
+            /// <summary>
+            /// See the base.
+            /// </summary>
             public override int GetHashCode()
             {
                 return base.GetHashCode();
@@ -566,18 +604,28 @@ namespace RCNet.Neural.Network.EchoState
             public double SelfConnectionsDensity { get; set; }
 
             //Constructors
+            /// <summary>
+            /// Creates an unitialized instance
+            /// </summary>
             public DTTTopology()
             {
                 SelfConnectionsDensity = 0;
                 return;
             }
 
+            /// <summary>
+            /// Copy constructor
+            /// </summary>
+            /// <param name="source">Source instance</param>
             public DTTTopology(DTTTopology source)
             {
                 SelfConnectionsDensity = source.SelfConnectionsDensity;
                 return;
             }
 
+            /// <summary>
+            /// Creates the instance itialized from xml
+            /// </summary>
             public DTTTopology(XElement dttTopologyElem)
             {
                 SelfConnectionsDensity = double.Parse(dttTopologyElem.Attribute("SelfConnectionsDensity").Value, CultureInfo.InvariantCulture);
@@ -585,6 +633,9 @@ namespace RCNet.Neural.Network.EchoState
             }
 
             //Methods
+            /// <summary>
+            /// See the base.
+            /// </summary>
             public override bool Equals(object obj)
             {
                 if (obj == null) return false;
@@ -596,6 +647,9 @@ namespace RCNet.Neural.Network.EchoState
                 return true;
             }
 
+            /// <summary>
+            /// See the base.
+            /// </summary>
             public override int GetHashCode()
             {
                 return base.GetHashCode();

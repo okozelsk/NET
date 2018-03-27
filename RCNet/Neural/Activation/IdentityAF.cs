@@ -11,15 +11,27 @@ namespace RCNet.Neural.Activation
     public class IdentityAF : IActivationFunction
     {
         //Properties
+        /// <summary>
+        /// The working range
+        /// </summary>
         public Interval Range { get { return new Interval(double.NegativeInfinity, double.PositiveInfinity); } }
 
         //Methods
+        /// <summary>
+        /// Computes the result of the activation function
+        /// </summary>
+        /// <param name="x">Argument</param>
         public double Compute(double x)
         {
             //The same value
             return x;
         }
 
+        /// <summary>
+        /// Computes the derivation
+        /// </summary>
+        /// <param name="c">The result of the Compute method</param>
+        /// <param name="x">The argument of the Compute method</param>
         public double Derive(double c, double x = double.NaN)
         {
             //Allways 1
@@ -27,4 +39,5 @@ namespace RCNet.Neural.Activation
         }
 
     }//IdentityAF
+
 }//Namespace

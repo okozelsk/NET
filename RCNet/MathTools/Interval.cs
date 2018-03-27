@@ -15,9 +15,21 @@ namespace RCNet.MathTools
         /// </summary>
         public enum IntervalType
         {
+            /// <summary>
+            /// LCRC
+            /// </summary>
             LeftClosedRightClosed,
+            /// <summary>
+            /// LCRO
+            /// </summary>
             LeftClosedRightOpen,
+            /// <summary>
+            /// LORC
+            /// </summary>
             LeftOpenRightClosed,
+            /// <summary>
+            /// LORO
+            /// </summary>
             LeftOpenRightOpen
         }//IntervalType
 
@@ -147,6 +159,9 @@ namespace RCNet.MathTools
         }
 
         //Methods
+        /// <summary>
+        /// See the base.
+        /// </summary>
         public override bool Equals(object obj)
         {
             if (obj == null) return false;
@@ -157,6 +172,9 @@ namespace RCNet.MathTools
             }
         }
 
+        /// <summary>
+        /// See the base.
+        /// </summary>
         public override int GetHashCode()
         {
             unchecked

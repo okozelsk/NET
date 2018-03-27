@@ -12,6 +12,7 @@ namespace RCNet.Extensions
         /// Shifts all array elements to the right and sets the first element value to newValue
         /// </summary>
         /// <param name="newValue">New value of the first array element</param>
+        /// <param name="array"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ShiftRight<T>(this T[] array, T newValue)
         {
@@ -27,6 +28,7 @@ namespace RCNet.Extensions
         /// Shifts all array elements to the left and sets the last element value to newValue
         /// </summary>
         /// <param name="newValue">New value of the last array element</param>
+        /// <param name="array"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ShiftLeft<T>(this T[] array, T newValue)
         {
@@ -42,6 +44,7 @@ namespace RCNet.Extensions
         /// Compares the values of this array with the values in the given array.
         /// </summary>
         /// <param name="cmpArray">Array to compare with</param>
+        /// <param name="array"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool ContainsEqualValues<T>(this T[] array, T[] cmpArray)
         {
@@ -57,6 +60,9 @@ namespace RCNet.Extensions
         /// Fills the array with specified value
         /// </summary>
         /// <param name="value">Value to be used</param>
+        /// <param name="start">Starting index</param>
+        /// <param name="count">Count</param>
+        /// <param name="array"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Populate<T>(this T[] array, T value, int start = -1, int count = -1)
         {
@@ -73,6 +79,7 @@ namespace RCNet.Extensions
         /// Fills the array with specified value
         /// </summary>
         /// <param name="value">Value to be used</param>
+        /// <param name="array"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Populate<T>(this T[,] array, T value)
         {
@@ -92,6 +99,7 @@ namespace RCNet.Extensions
         /// Fills the array of arrays with specified value
         /// </summary>
         /// <param name="value">Value to be used</param>
+        /// <param name="array"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Populate<T>(this T[][] array, T value)
         {
@@ -110,6 +118,7 @@ namespace RCNet.Extensions
         /// <summary>
         /// Clones the array of arrays
         /// </summary>
+        /// <param name="array"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T[][] Clone2D<T>(this T[][] array)
         {
@@ -133,6 +142,7 @@ namespace RCNet.Extensions
         /// Multiplicates all array values by the given coefficient
         /// </summary>
         /// <param name="coeff">Coefficient</param>
+        /// <param name="array"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Scale(this double[] array, double coeff)
         {
@@ -146,6 +156,7 @@ namespace RCNet.Extensions
         /// <summary>
         /// Fills array with the indexes 0...(Array.Length - 1)
         /// </summary>
+        /// <param name="array"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Indices(this int[] array)
         {
@@ -160,6 +171,7 @@ namespace RCNet.Extensions
         /// Fills array with randomly shuffled indexes 0...(ArrayLength - 1)
         /// </summary>
         /// <param name="rand">Random generator to be used</param>
+        /// <param name="array"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ShuffledIndices(this int[] array, Random rand)
         {
@@ -168,6 +180,6 @@ namespace RCNet.Extensions
             return;
         }
 
-    }
+    }//ArrayClassExtensions
 
-}
+}//Namespace

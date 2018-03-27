@@ -13,6 +13,9 @@ namespace RCNet.Neural.Activation
     public interface IActivationFunction
     {
         //Properties
+        /// <summary>
+        /// The working range
+        /// </summary>
         Interval Range { get; }
 
         //Methods

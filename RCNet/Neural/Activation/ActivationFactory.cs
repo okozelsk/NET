@@ -2,6 +2,9 @@
 
 namespace RCNet.Neural.Activation
 {
+    /// <summary>
+    /// Class mediates operations with activation functions
+    /// </summary>
     public static class ActivationFactory
     {
         //Constants
@@ -33,6 +36,12 @@ namespace RCNet.Neural.Activation
         /// </summary>
         /// <param name="type">
         /// Desired type of activation function
+        /// </param>
+        /// <param name="p1">
+        /// A parameter for the activation constructor
+        /// </param>
+        /// <param name="p2">
+        /// A parameter for the activation constructor
         /// </param>
         public static IActivationFunction CreateActivationFunction(ActivationType type, double p1 = double.NaN, double p2 = double.NaN)
         {

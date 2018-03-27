@@ -10,14 +10,17 @@ namespace RCNet.MathTools
     public class Normalizer
     {
         //Constants
-        //Default borders of normalization range
+        /// <summary>
+        /// Default min border of the normalization range
+        /// </summary>
         public const double DefaultNormRangeMin = -1;
+        /// <summary>
+        /// Default max border of the normalization range
+        /// </summary>
         public const double DefaultNormRangeMax = 1;
-        //Default is to use the gausse standardization
-        public const bool DefaultStandardizeSwitch = true;
 
         //Attributes
-        private bool _standardize;
+        private bool _standardization;
         private double _reserveRatio;
         private BasicStat _samplesStat;
         private Interval _normRange;
@@ -29,7 +32,7 @@ namespace RCNet.MathTools
         /// <param name="source">Source instance</param>
         public Normalizer(Normalizer source)
         {
-            _standardize = source._standardize;
+            _standardization = source._standardization;
             _reserveRatio = source._reserveRatio;
             _samplesStat = new BasicStat(source._samplesStat);
             _normRange = new Interval(source._normRange);
@@ -46,9 +49,9 @@ namespace RCNet.MathTools
         /// <param name="standardize">
         /// A switch if to apply the data standardization
         /// </param>
-        public Normalizer(double reserveRatio, bool standardize = DefaultStandardizeSwitch)
+        public Normalizer(double reserveRatio, bool standardize = true)
         {
-            _standardize = standardize;
+            _standardization = standardize;
             _normRange = new Interval(DefaultNormRangeMin, DefaultNormRangeMax);
             _samplesStat = new BasicStat();
             _reserveRatio = reserveRatio;
@@ -66,11 +69,11 @@ namespace RCNet.MathTools
         /// would grow from a known range.
         /// </param>
         /// <param name="standardize">
-        /// A switch if to apply the data standardization
+        /// A switch whether to apply the data standardization
         /// </param>
-        public Normalizer(Interval normRange, double reserveRatio, bool standardize = DefaultStandardizeSwitch)
+        public Normalizer(Interval normRange, double reserveRatio, bool standardize = true)
         {
-            _standardize = standardize;
+            _standardization = standardize;
             _normRange = new Interval(normRange);
             _samplesStat = new BasicStat();
             _reserveRatio = reserveRatio;
@@ -78,10 +81,26 @@ namespace RCNet.MathTools
         }
 
         //Properties
+        /// <summary>
+        /// Indicates whether the normalizer is properly initialized
+        /// </summary>
         public bool Initialized { get { return (_samplesStat.NumOfSamples > 0 && _samplesStat.Min != _samplesStat.Max); } }
+        /// <summary>
+        /// The reserve kept by the normalizer to protect against overflow if the future data
+        /// would grow from a known range.
+        /// </summary>
         public double ReserveRatio { get { return _reserveRatio; } }
-        public bool Standardize { get { return _standardize; } }
+        /// <summary>
+        /// Indicates whether is applied the data standardization
+        /// </summary>
+        public bool Standardization { get { return _standardization; } }
+        /// <summary>
+        /// The normalization range
+        /// </summary>
         public Interval NormRange { get { return _normRange; } }
+        /// <summary>
+        /// The statistics of the sample data
+        /// </summary>
         public BasicStat SamplesStat { get { return _samplesStat; } }
         private double VMin { get { return _samplesStat.Min - ((_samplesStat.Span * _reserveRatio) / 2); } }
         private double VMax { get { return _samplesStat.Max + ((_samplesStat.Span * _reserveRatio) / 2); } }
@@ -154,7 +173,7 @@ namespace RCNet.MathTools
             //Check readiness
             CheckInitiated();
             //Value preprocessing
-            if (_standardize)
+            if (_standardization)
             {
                 //Gausse standardization
                 double gausseHalfInt = ComputeGausseHalfInterval();
@@ -179,7 +198,7 @@ namespace RCNet.MathTools
             //Check readiness
             CheckInitiated();
             //Value preprocessing
-            if (_standardize)
+            if (_standardization)
             {
                 //Denormalization
                 double gausseHalfInt = ComputeGausseHalfInterval();

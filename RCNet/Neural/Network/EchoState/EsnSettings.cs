@@ -133,7 +133,7 @@ namespace RCNet.Neural.Network.EchoState
         }
 
         /// <summary>
-        /// Creates the instance and initialize it from given xml element.
+        /// Creates the instance and initializes it from given xml element.
         /// This is the preferred way to instantiate Esn settings.
         /// </summary>
         /// <param name="esnSettingsElem">
@@ -239,6 +239,9 @@ namespace RCNet.Neural.Network.EchoState
         }
 
         //Methods
+        /// <summary>
+        /// See the base.
+        /// </summary>
         public override bool Equals(object obj)
         {
             if (obj == null) return false;
@@ -274,6 +277,9 @@ namespace RCNet.Neural.Network.EchoState
             return true;
         }
 
+        /// <summary>
+        /// See the base.
+        /// </summary>
         public override int GetHashCode()
         {
             return base.GetHashCode();
@@ -323,7 +329,7 @@ namespace RCNet.Neural.Network.EchoState
             /// The parameter specifies whether, in addition to the standard neuron states,
             /// augmented states of reservoir neurons will be added to the reservoir output predictors.
             /// Augmented states double the number of output predictors of the reservoir.
-            /// The augmented state of the neuron is the second power of its state.
+            /// The augmented state of the neuron is its squared state.
             /// </summary>
             public bool AugmentedStates { get; set; }
 
@@ -365,6 +371,9 @@ namespace RCNet.Neural.Network.EchoState
                 return new ReservoirInstanceDefinition(this);
             }
 
+            /// <summary>
+            /// See the base.
+            /// </summary>
             public override bool Equals(object obj)
             {
                 if (obj == null) return false;
@@ -395,6 +404,9 @@ namespace RCNet.Neural.Network.EchoState
                 return true;
             }
 
+            /// <summary>
+            /// See the base.
+            /// </summary>
             public override int GetHashCode()
             {
                 return InstanceName.GetHashCode();

@@ -12,8 +12,11 @@ namespace RCNet.Neural.Network.EchoState
     public class AnalogNeuron
     {
         //Constants
-        //Maximum retainment rate
+        /// <summary>
+        /// Maximum retainment rate value
+        /// </summary>
         public const double RetainmentMaxRate = 0.99;
+
         //Attributes
         /// <summary>
         /// Neuron's activation function
@@ -54,8 +57,17 @@ namespace RCNet.Neural.Network.EchoState
         }
 
         //Properties
+        /// <summary>
+        /// Retainment rate value
+        /// </summary>
         public double RetainmentRate { get { return _retainmentRate; } }
+        /// <summary>
+        /// Neuron's current state
+        /// </summary>
         public double CurrentState { get { return _currentState; } }
+        /// <summary>
+        /// Neuron's previous state
+        /// </summary>
         public double PreviousState { get { return _previousState; } }
 
         /// <summary>

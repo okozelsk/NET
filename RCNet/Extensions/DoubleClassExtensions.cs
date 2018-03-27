@@ -40,6 +40,7 @@ namespace RCNet.Extensions
         /// Computes the power (faster than Math.Pow)
         /// </summary>
         /// <param name="exponent">uint exponent</param>
+        /// <param name="x"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double Power(this double x, uint exponent)
         {

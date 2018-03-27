@@ -11,8 +11,17 @@ namespace RCNet.CsvTools
     {
         //Constants
         //Delimiters
+        /// <summary>
+        /// The semicolon
+        /// </summary>
         public const char SemicolonDelimiter = ';';
+        /// <summary>
+        /// The comma
+        /// </summary>
         public const char CommaDelimiter = ',';
+        /// <summary>
+        /// The default delimiter
+        /// </summary>
         public const char DefaultDelimiter = SemicolonDelimiter;
 
         //Attributes
@@ -20,6 +29,10 @@ namespace RCNet.CsvTools
         private List<string> _stringValueCollection;
 
         //Constructor
+        /// <summary>
+        /// Creates the new instance
+        /// </summary>
+        /// <param name="delimiter">The delimiter of the string values</param>
         public DelimitedStringValues(char delimiter = DefaultDelimiter)
         {
             _delimiter = delimiter;
@@ -28,8 +41,17 @@ namespace RCNet.CsvTools
         }
 
         //Properties
+        /// <summary>
+        /// Current delimiter of the string values
+        /// </summary>
         public char Delimiter { get { return _delimiter; } }
+        /// <summary>
+        /// Number of string values
+        /// </summary>
         public int NumOfStringValues { get { return _stringValueCollection.Count; } }
+        /// <summary>
+        /// Collection of string values
+        /// </summary>
         public List<string> StringValueCollection { get { return _stringValueCollection; } }
 
         //Methods

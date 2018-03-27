@@ -8,6 +8,9 @@ namespace RCNet.MathTools
     public static class Factorial
     {
         //Constants
+        /// <summary>
+        /// The highest value that can be used as the argument for factorial computation
+        /// </summary>
         public const uint FactorialMaxInputValue = 20;
         //Attributes
         private static readonly ulong[] _resultCache;

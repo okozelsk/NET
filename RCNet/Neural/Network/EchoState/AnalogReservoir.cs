@@ -70,6 +70,7 @@ namespace RCNet.Neural.Network.EchoState
         /// <summary>
         /// Instantiates the analog reservoir
         /// </summary>
+        /// <param name="instanceName">Name of the reservoir instance</param>
         /// <param name="numOfInputValues">Number of reservoir's input values</param>
         /// <param name="settings">Analog reservoir settings</param>
         /// <param name="augmentedStates">Specifies if this reservoir will add augmented states to predictors</param>
@@ -586,13 +587,32 @@ namespace RCNet.Neural.Network.EchoState
     public class AnalogReservoirStat
     {
         //Attributes
+        /// <summary>
+        /// Name of the reservoir instance
+        /// </summary>
         public string ReservoirInstanceName { get; }
+        /// <summary>
+        /// Statistics of max absolute values of the neurons' states
+        /// </summary>
         public BasicStat NeuronsMaxAbsStatesStat { get; }
+        /// <summary>
+        /// Statistics of RMSs of the neurons' states
+        /// </summary>
         public BasicStat NeuronsRMSStatesStat { get; }
+        /// <summary>
+        /// Statistics of spans of the neurons' states
+        /// </summary>
         public BasicStat NeuronsStateSpansStat { get; }
+        /// <summary>
+        /// RMS of the context neuron's states
+        /// </summary>
         public double CtxNeuronStatesRMS { get; set; }
 
         //Constructor
+        /// <summary>
+        /// Creates an unitialized instance
+        /// </summary>
+        /// <param name="reservoirInstanceName">Name of the reservoir instance</param>
         public AnalogReservoirStat(string reservoirInstanceName)
         {
             ReservoirInstanceName = reservoirInstanceName;

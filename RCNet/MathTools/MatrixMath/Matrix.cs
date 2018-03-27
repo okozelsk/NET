@@ -59,11 +59,29 @@ namespace RCNet.MathTools.MatrixMath
         }
 
         //Properties
+        /// <summary>
+        /// Matrix data
+        /// </summary>
         public double[][] Data { get { return _data; } }
+        /// <summary>
+        /// Number of matrix rows
+        /// </summary>
         public int NumOfRows { get { return _data.Length; } }
+        /// <summary>
+        /// Number of matrix columns
+        /// </summary>
         public int NumOfCols { get { return _data[0].Length; } }
+        /// <summary>
+        /// Size of the matrix = (NumOfRows * NumOfCols)
+        /// </summary>
         public int Size { get { return NumOfRows * NumOfCols; } }
+        /// <summary>
+        /// Indicates whether the matrix is a vector.
+        /// </summary>
         public bool IsVector { get { return (NumOfRows == 1 || NumOfCols == 1); } }
+        /// <summary>
+        /// Indicates whether the matrix is the singular matrix.
+        /// </summary>
         public bool IsSingular
         {
             get
@@ -305,6 +323,9 @@ namespace RCNet.MathTools.MatrixMath
             return _data.Clone2D();
         }
 
+        /// <summary>
+        /// Creates the deep copy
+        /// </summary>
         public Matrix Clone()
         {
             return new Matrix(this);

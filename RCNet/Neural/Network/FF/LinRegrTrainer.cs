@@ -13,11 +13,23 @@ namespace RCNet.Neural.Network.FF
     public class LinRegrParameters
     {
         //Constants
+        /// <summary>
+        /// Default value of the starting noise intensity
+        /// </summary>
         public const double DefaultStartingNoiseIntensity = 0.01;
+        /// <summary>
+        /// Default maximum exponent of E (Math.Exp)
+        /// </summary>
         public const double DeafaultMaxExpArgument = 30;
 
         //Attributes
+        /// <summary>
+        /// Value of the starting noise intensity
+        /// </summary>
         public double StartingNoiseIntensity { get; set; } = DefaultStartingNoiseIntensity;
+        /// <summary>
+        /// Maximum exponent of E (Math.Exp)
+        /// </summary>
         public double MaxExpArgument { get; set; } = DeafaultMaxExpArgument;
 
     }//LinRegrParameters
@@ -36,9 +48,9 @@ namespace RCNet.Neural.Network.FF
         //Attributes
         private LinRegrParameters _parameters;
         private FeedForwardNetwork _net;
-        private List<double[]> _trainingInputCollection;
-        private List<double[]> _trainingIdealOutputCollection;
-        private List<Matrix> _regrIdealOutputCollection;
+        private List<double[]> _inputVectorCollection;
+        private List<double[]> _outputVectorCollection;
+        private List<Matrix> _outputSingleColMatrixCollection;
         private Random _rand;
         private double[] _alphas;
         private double _mse;
@@ -50,12 +62,18 @@ namespace RCNet.Neural.Network.FF
         /// Constructs new instance of linear regression trainer
         /// </summary>
         /// <param name="net">FF network to be trained</param>
-        /// <param name="inputs">Predictors (input)</param>
-        /// <param name="outputs">Ideal outputs (the same number of rows as number of inputs)</param>
+        /// <param name="inputVectorCollection">Predictors (input)</param>
+        /// <param name="outputVectorCollection">Ideal outputs (the same number of rows as number of inputs)</param>
         /// <param name="maxEpoch">Maximum allowed training epochs</param>
         /// <param name="rand">Random object to be used for adding a white-noise to predictors</param>
         /// <param name="parameters">Optional startup parameters of the trainer</param>
-        public LinRegrTrainer(FeedForwardNetwork net, List<double[]> inputs, List<double[]> outputs, int maxEpoch, Random rand, LinRegrParameters parameters = null)
+        public LinRegrTrainer(FeedForwardNetwork net,
+                              List<double[]> inputVectorCollection,
+                              List<double[]> outputVectorCollection,
+                              int maxEpoch,
+                              Random rand,
+                              LinRegrParameters parameters = null
+                              )
         {
             //Check network readyness
             if (!net.Finalized)
@@ -68,9 +86,9 @@ namespace RCNet.Neural.Network.FF
                 throw new Exception("Can´t create LinRegr trainer. Network structure is not complient (single layer having Identity activation).");
             }
             //Check samples conditions
-            if(inputs.Count < inputs[0].Length + 1)
+            if(inputVectorCollection.Count < inputVectorCollection[0].Length + 1)
             {
-                throw new Exception("Can´t create LinRegr trainer. Insufficient number of training samples. Minimum is " + (inputs[0].Length + 1).ToString() + ".");
+                throw new Exception("Can´t create LinRegr trainer. Insufficient number of training samples. Minimum is " + (inputVectorCollection[0].Length + 1).ToString() + ".");
             }
             //Parameters
             _parameters = parameters;
@@ -80,18 +98,18 @@ namespace RCNet.Neural.Network.FF
                 _parameters = new LinRegrParameters();
             }
             _net = net;
-            _trainingInputCollection = inputs;
-            _trainingIdealOutputCollection = outputs;
-            _regrIdealOutputCollection = new List<Matrix>(_net.NumOfOutputValues);
+            _inputVectorCollection = inputVectorCollection;
+            _outputVectorCollection = outputVectorCollection;
+            _outputSingleColMatrixCollection = new List<Matrix>(_net.NumOfOutputValues);
             for (int outputIdx = 0; outputIdx < _net.NumOfOutputValues; outputIdx++)
             {
-                Matrix regrOutputs = new Matrix(_trainingInputCollection.Count, 1);
-                for (int row = 0; row < _trainingInputCollection.Count; row++)
+                Matrix outputSingleColMatrix = new Matrix(_outputVectorCollection.Count, 1);
+                for (int row = 0; row < _outputVectorCollection.Count; row++)
                 {
                     //Output
-                    regrOutputs.Data[row][0] = _trainingIdealOutputCollection[row][outputIdx];
+                    outputSingleColMatrix.Data[row][0] = _outputVectorCollection[row][outputIdx];
                 }
-                _regrIdealOutputCollection.Add(regrOutputs);
+                _outputSingleColMatrixCollection.Add(outputSingleColMatrix);
             }
             _rand = rand;
             _maxEpoch = maxEpoch;
@@ -126,13 +144,13 @@ namespace RCNet.Neural.Network.FF
         //Methods
         private Matrix PreparePredictors(double noiseIntensity)
         {
-            Matrix predictors = new Matrix(_trainingInputCollection.Count, _net.NumOfInputValues + 1);
-            for (int row = 0; row < _trainingInputCollection.Count; row++)
+            Matrix predictors = new Matrix(_inputVectorCollection.Count, _net.NumOfInputValues + 1);
+            for (int row = 0; row < _inputVectorCollection.Count; row++)
             {
                 //Predictors
                 for(int col = 0; col < _net.NumOfInputValues; col++)
                 {
-                    double predictor = _trainingInputCollection[row][col];
+                    double predictor = _inputVectorCollection[row][col];
                     predictors.Data[row][col] = predictor * (1d + _rand.NextBoundedUniformDoubleRS(0, noiseIntensity));
                 }
                 //Add bias to predictors
@@ -147,10 +165,8 @@ namespace RCNet.Neural.Network.FF
         /// </summary>
         public void Iteration()
         {
-            //----------------------------------------------------
             //Next epoch
             ++_epoch;
-            //----------------------------------------------------
             //Noise intensity
             double intensity = _alphas[Math.Min(_maxEpoch, _epoch) - 1];
             //Adjusted predictors
@@ -163,7 +179,7 @@ namespace RCNet.Neural.Network.FF
             for (int outputIdx = 0; outputIdx < _net.NumOfOutputValues; outputIdx++)
             {
                 //Regression
-                Matrix solution = decomposition.Solve(_regrIdealOutputCollection[outputIdx]);
+                Matrix solution = decomposition.Solve(_outputSingleColMatrixCollection[outputIdx]);
                 //Store weights
                 //Input weights
                 for (int i = 0; i < solution.NumOfRows - 1; i++)
@@ -175,7 +191,7 @@ namespace RCNet.Neural.Network.FF
             }
             //Set new weights and compute error
             _net.SetWeights(newWaights);
-            _mse = _net.ComputeBatchErrorStat(_trainingInputCollection, _trainingIdealOutputCollection).MeanSquare;
+            _mse = _net.ComputeBatchErrorStat(_inputVectorCollection, _outputVectorCollection).MeanSquare;
             return;
         }
 

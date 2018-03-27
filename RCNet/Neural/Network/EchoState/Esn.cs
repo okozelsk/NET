@@ -42,7 +42,7 @@ namespace RCNet.Neural.Network.EchoState
         /// </summary>
         /// <param name="predictorsCollection">Predictors collection</param>
         /// <param name="outputsCollection">Desired outputs collection (desired outputs in the same order as predictors)</param>
-        /// <param name="regrOutputFieldIdx">Index of the Esn output field for which will be performed the regression.</param>
+        /// <param name="regrOutputFieldIdx">Index of the Esn output field for which the regression will be performed.</param>
         /// <param name="testSampleIdxCollection">Array of indexes to be filled.</param>
         public delegate void EsnTestSamplesSelectorCallbackDelegate(List<double[]> predictorsCollection,
                                                                     List<double[]> outputsCollection,
@@ -562,21 +562,46 @@ namespace RCNet.Neural.Network.EchoState
 
         /// <summary>
         /// Contains the best trained feed forward network and related
-        /// important statistics.
+        /// important error statistics.
         /// </summary>
         [Serializable]
         public class EsnRegressionResult
         {
             //Attribute properties
+            /// <summary>
+            /// Esn output field name for which the regression was performed
+            /// </summary>
             public string OutputFieldName;
+            /// <summary>
+            /// Trained feed forward network
+            /// </summary>
             public FeedForwardNetwork FFNet { get; set; }
+            /// <summary>
+            /// Training error statistics
+            /// </summary>
             public BasicStat TrainingErrorStat { get; set; }
+            /// <summary>
+            /// Testing error statistics
+            /// </summary>
             public BasicStat TestingErrorStat { get; set; }
+            /// <summary>
+            /// Statistics of the FF network weights
+            /// </summary>
             public BasicStat OutputWeightsStat { get; set; }
+            /// <summary>
+            /// Achieved combined error.
+            /// Formula for combined error calculation is Max(training error, testing error)
+            /// </summary>
             public double CombinedError { get; set; }
+            /// <summary>
+            /// Number of updates of the best weights
+            /// </summary>
             public int WeightsUpdateCounter { get; set; }
 
             //Constructor
+            /// <summary>
+            /// Creates an unitialized instance
+            /// </summary>
             public EsnRegressionResult()
             {
                 OutputFieldName = string.Empty;
@@ -604,6 +629,9 @@ namespace RCNet.Neural.Network.EchoState
             }
             
             //Methods
+            /// <summary>
+            /// Creates the deep copy instance of this instance
+            /// </summary>
             public EsnRegressionResult DeepClone()
             {
                 return new EsnRegressionResult(this);
@@ -611,32 +639,92 @@ namespace RCNet.Neural.Network.EchoState
 
         }//EsnRegressionResult
 
+        /// <summary>
+        /// The class contains information needed to control the progress of the regression process.
+        /// </summary>
         [Serializable]
         public class EsnRegressionControlInArgs
         {
             //Attribute properties
+            /// <summary>
+            /// Collection of important statistics for each instance of the reservoir
+            /// </summary>
             public List<AnalogReservoirStat> ReservoirStatisticsCollection { get; set; } = null;
+            /// <summary>
+            /// Esn output field index for which the regression is performing
+            /// </summary>
             public int OutputFieldIdx { get; set; } = 0;
+            /// <summary>
+            /// Esn output field name for which the regression is performing
+            /// </summary>
             public string OutputFieldName;
+            /// <summary>
+            /// Current regression attempt number 
+            /// </summary>
             public int RegrAttemptNumber { get; set; } = -1;
+            /// <summary>
+            /// Maximum number of regression attempts
+            /// </summary>
             public int RegrMaxAttempt { get; set; } = -1;
+            /// <summary>
+            /// Current epoch number
+            /// </summary>
             public int Epoch { get; set; } = -1;
+            /// <summary>
+            /// Maximum nuber of epochs
+            /// </summary>
             public int MaxEpoch { get; set; } = -1;
+            /// <summary>
+            /// Esn predictors collection for training
+            /// </summary>
             public List<double[]> TrainingPredictorsCollection { get; set; } = null;
+            /// <summary>
+            /// Desired outputs collection for training
+            /// </summary>
             public List<double[]> TrainingOutputsCollection { get; set; } = null;
+            /// <summary>
+            /// Esn predictors collection for testing
+            /// </summary>
             public List<double[]> TestingPredictorsCollection { get; set; } = null;
+            /// <summary>
+            /// Desired outputs collection for testing
+            /// </summary>
             public List<double[]> TestingOutputsCollection { get; set; } = null;
+            /// <summary>
+            /// Contains the current feed forward network and related
+            /// important error statistics.
+            /// </summary>
             public EsnRegressionResult RegrCurrResult { get; set; } = null;
+            /// <summary>
+            /// Contains the best feed forward network for now and related
+            /// important error statistics.
+            /// </summary>
             public EsnRegressionResult RegrBestResult { get; set; } = null;
+            /// <summary>
+            /// The custom user object that was passed to the Train method
+            /// </summary>
             public Object ControllerData { get; set; } = null;
         }//EsnRegressionControlInArgs
 
+        /// <summary>
+        /// Contains instructions for the regression process
+        /// </summary>
         [Serializable]
         public class EsnRegressionControlOutArgs
         {
             //Attribute properties
+            /// <summary>
+            /// Indicates whether to end the current regression attempt
+            /// </summary>
             public bool StopCurrentAttempt { get; set; } = false;
+            /// <summary>
+            /// Indicates whether to end the entire regression process for the current Esn output field
+            /// </summary>
             public bool StopRegression { get; set; } = false;
+            /// <summary>
+            /// This is the most important switch indicating whether the RegrCurrResult is better than
+            /// the existing RegrBestResult
+            /// </summary>
             public bool Best { get; set; } = false;
         }//EsnRegressionControlOutArgs
 

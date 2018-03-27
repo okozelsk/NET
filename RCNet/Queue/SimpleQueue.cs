@@ -17,6 +17,10 @@ namespace RCNet.Queue
         private int _count;
 
         //Constructor
+        /// <summary>
+        /// Instantiate a simple queue
+        /// </summary>
+        /// <param name="capacity">Maximum capacity of the queue</param>
         public SimpleQueue(int capacity)
         {
             _lock = new Object();

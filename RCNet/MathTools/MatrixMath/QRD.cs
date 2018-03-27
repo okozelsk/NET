@@ -20,6 +20,10 @@ namespace RCNet.MathTools.MatrixMath
         private double[] _RDiagData;
 
         //Constructor
+        /// <summary>
+        /// Instantiates the QR decomposition
+        /// </summary>
+        /// <param name="source">Source matrix</param>
         public QRD(Matrix source)
         {
             //Initialization

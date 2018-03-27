@@ -15,11 +15,19 @@ namespace RCNet.Neural.Network.FF
     public class FeedForwardNetwork
     {
         //Constants
-        //Dummy BIAS input value
+        /// <summary>
+        /// Dummy bias input value
+        /// </summary>
         public const double BiasValue = 1d;
-        //Default min/max weights for random initialization
+        /// <summary>
+        /// Default minimum weight range limit for random initialization
+        /// </summary>
         public const double WeightDefaultIniMin = 0.005;
+        /// <summary>
+        /// Default maximum weight range limit for random initialization
+        /// </summary>
         public const double WeightDefaultIniMax = 0.05;
+        
         //Attributes
         private int _numOfInputValues;
         private int _numOfOutputValues;
@@ -29,6 +37,11 @@ namespace RCNet.Neural.Network.FF
         private bool _isAllowedNguyenWidrowRandomization;
 
         //Constructor
+        /// <summary>
+        /// Instantiates a feed forward network
+        /// </summary>
+        /// <param name="numOfInputValues">Number of network's input values</param>
+        /// <param name="numOfOutputValues">Number of network's output values</param>
         public FeedForwardNetwork(int numOfInputValues, int numOfOutputValues)
         {
             //Input/Output counts
@@ -45,11 +58,29 @@ namespace RCNet.Neural.Network.FF
         }
 
         //Properties
+        /// <summary>
+        /// Indicates whether the network structure is finalized
+        /// </summary>
         public bool Finalized { get { return _numOfNeurons > 0; } }
+        /// <summary>
+        /// Number of network's input values
+        /// </summary>
         public int NumOfInputValues { get { return _numOfInputValues; } }
+        /// <summary>
+        /// Number of network's output values
+        /// </summary>
         public int NumOfOutputValues { get { return _numOfOutputValues; } }
+        /// <summary>
+        /// Total number of network's neurons
+        /// </summary>
         public int NumOfNeurons { get { return _numOfNeurons; } }
+        /// <summary>
+        /// Collection of network's layers
+        /// </summary>
         public List<Layer> LayerCollection { get { return _layerCollection; } }
+        /// <summary>
+        /// All network's weights in a flat format
+        /// </summary>
         public double[] FlatWeights { get { return _flatWeights; } }
 
         //Methods
@@ -255,6 +286,9 @@ namespace RCNet.Neural.Network.FF
         public class Layer
         {
             //Attribute properties
+            /// <summary>
+            /// The activation function of the layer's neurons
+            /// </summary>
             public IActivationFunction Activation { get; }
             //Attributes
             private int _numOfInputNodes;
@@ -281,11 +315,29 @@ namespace RCNet.Neural.Network.FF
             }
 
             //Properties
+            /// <summary>
+            /// Indicates whether the layer structure is finalized
+            /// </summary>
             public bool Finalized { get { return _numOfInputNodes > 0; } }
+            /// <summary>
+            /// Number of layer input nodes
+            /// </summary>
             public int NumOfInputNodes { get { return _numOfInputNodes; } }
+            /// <summary>
+            /// Number of layer neurons
+            /// </summary>
             public int NumOfLayerNeurons { get { return _numOfLayerNeurons; } }
+            /// <summary>
+            /// Starting index of this layer weights in a flat structure
+            /// </summary>
             public int WeightsStartFlatIdx { get { return _weightsStartFlatIdx; } }
+            /// <summary>
+            /// Starting index of this layer biases in a flat structure
+            /// </summary>
             public int BiasesStartFlatIdx { get { return _biasesStartFlatIdx; } }
+            /// <summary>
+            /// Starting index of this layer neurons in a flat structure
+            /// </summary>
             public int NeuronsStartFlatIdx { get { return _neuronsStartFlatIdx; } }
 
 
@@ -371,10 +423,21 @@ namespace RCNet.Neural.Network.FF
     public class HiddenLayerSettings
     {
         //Attributes
+        /// <summary>
+        /// Number of hidden layer neurons
+        /// </summary>
         public int NumOfNeurons { get; set; }
+        /// <summary>
+        /// Type of activation function of the hidden layer neurons
+        /// </summary>
         public ActivationFactory.ActivationType ActivationType { get; set; }
 
         //Constructors
+        /// <summary>
+        /// Creates an initialized instance
+        /// </summary>
+        /// <param name="numOfNeurons">Number of hidden layer neurons</param>
+        /// <param name="activationType">Type of activation function of the hidden layer neurons</param>
         public HiddenLayerSettings(int numOfNeurons, ActivationFactory.ActivationType activationType)
         {
             NumOfNeurons = numOfNeurons;
@@ -382,6 +445,10 @@ namespace RCNet.Neural.Network.FF
             return;
         }
 
+        /// <summary>
+        /// Copy constructor
+        /// </summary>
+        /// <param name="source">Source instance</param>
         public HiddenLayerSettings(HiddenLayerSettings source)
         {
             NumOfNeurons = source.NumOfNeurons;
@@ -389,6 +456,13 @@ namespace RCNet.Neural.Network.FF
             return;
         }
 
+        /// <summary>
+        /// Creates the instance and initializes it from given xml element.
+        /// </summary>
+        /// <param name="hiddenLayerElem">
+        /// Xml data containing the settings.
+        /// Content of xml element is not validated against the xml schema.
+        /// </param>
         public HiddenLayerSettings(XElement hiddenLayerElem)
         {
             NumOfNeurons = int.Parse(hiddenLayerElem.Attribute("Neurons").Value);
@@ -397,6 +471,9 @@ namespace RCNet.Neural.Network.FF
         }
 
         //Methods
+        /// <summary>
+        /// See the base.
+        /// </summary>
         public override bool Equals(object obj)
         {
             if (obj == null) return false;
@@ -408,6 +485,9 @@ namespace RCNet.Neural.Network.FF
             return true;
         }
 
+        /// <summary>
+        /// See the base.
+        /// </summary>
         public override int GetHashCode()
         {
             return NumOfNeurons.GetHashCode();
