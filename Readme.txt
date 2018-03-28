@@ -38,6 +38,7 @@ All the functionality is demonstrated in a simple demo application (/Demo/DemoCo
 
 Other information
 -----------------
+Source code is written in C# 6.0.
 Very soon an official release will be published and from this point will be also kept the backward compatibility. Product documentation will be published on the associated wiki.
 Project's next ambition is to implement the Liquid State Machine (LSM).
 
