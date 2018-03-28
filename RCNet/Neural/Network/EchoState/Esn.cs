@@ -252,7 +252,7 @@ namespace RCNet.Neural.Network.EchoState
             List<AnalogReservoirStat> stats = new List<AnalogReservoirStat>();
             foreach(ReservoirInstance resInstance in _reservoirInstanceCollection)
             {
-                stats.Add(resInstance.ReservoirObj.CollectStateStatistics());
+                stats.Add(resInstance.ReservoirObj.CollectStatistics());
             }
             return stats;
         }

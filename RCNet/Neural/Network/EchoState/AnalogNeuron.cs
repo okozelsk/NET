@@ -23,6 +23,10 @@ namespace RCNet.Neural.Network.EchoState
         /// </summary>
         private IActivationFunction _activation;
         /// <summary>
+        /// Neuron's bias
+        /// </summary>
+        private double _bias;
+        /// <summary>
         /// Neuron's retainment rate
         /// </summary>
         private double _retainmentRate;
@@ -46,10 +50,12 @@ namespace RCNet.Neural.Network.EchoState
         /// If retainmentRate is greater than 0, neuron is the leaky integrator.
         /// </summary>
         /// <param name="activation">Neuron's activation function</param>
+        /// <param name="bias">Neuron's bias value</param>
         /// <param name="retainmentRate">Neuron's retainment rate</param>
-        public AnalogNeuron(IActivationFunction activation, double retainmentRate = 0)
+        public AnalogNeuron(IActivationFunction activation, double bias, double retainmentRate = 0)
         {
             _activation = activation;
+            _bias = bias;
             _retainmentRate = retainmentRate.Bound(0, RetainmentMaxRate);
             _previousState = _currentState = 0;
             StatesStat = new BasicStat();
@@ -84,7 +90,7 @@ namespace RCNet.Neural.Network.EchoState
         /// </summary>
         public void Compute(double signal, bool collectStatistics)
         {
-            _currentState = (_retainmentRate * _currentState) + (1d - _retainmentRate) * _activation.Compute(signal);
+            _currentState = (_retainmentRate * _currentState) + (1d - _retainmentRate) * _activation.Compute(_bias + signal);
             if(collectStatistics)StatesStat.AddSampleValue(_currentState);
             return;
         }

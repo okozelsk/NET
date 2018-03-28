@@ -68,7 +68,6 @@
     <xs:attribute type="xs:string" name="Name" use="required"/>
   </xs:complexType>
 
-
   <!-- ________________________________________FF NETWORK TYPES_________________________________________________ -->
   <!-- FF network hidden layer -->
   <xs:complexType name="FFNetHiddenLayer">
@@ -79,7 +78,6 @@
   <!-- ________________________________________ANALOG RESERVOIR TYPES_________________________________________________ -->
   <!-- Analog reservoir input settings -->
   <xs:complexType name="AnalogReservoirInput">
-    <xs:attribute type="UDouble" name="BiasScale" use="required"/>
     <xs:attribute type="UDoubleLE1" name="ConnectionDensity" use="required"/>
     <xs:attribute type="UDouble" name="WeightScale" use="required"/>
   </xs:complexType>
@@ -93,7 +91,7 @@
   <xs:complexType name="AnalogReservoirRingTopology">
     <xs:attribute type="UDoubleLE1" name="SelfConnectionsDensity" use="required"/>
     <xs:attribute type="UDoubleLE1" name="InterConnectionsDensity" use="required"/>
-    <xs:attribute type="xs:boolean" name="BiDirection" use="required"/>
+    <xs:attribute type="xs:boolean" name="Bidirectional" use="required"/>
   </xs:complexType>
 
   <!-- Analog reservoir DTT (Doubly Twisted Thoroidal) topology -->
@@ -110,10 +108,10 @@
 
   <!-- Analog reservoir context neuron -->
   <xs:complexType name="AnalogReservoirContextNeuron">
-    <xs:attribute type="UDoubleLE1" name="FeedbackDensity" use="required"/>
     <xs:attribute type="EnumActivation" name="Activation" use="required"/>
-    <xs:attribute type="UDouble" name="InWeightScale" use="required"/>
-    <xs:attribute type="UDouble" name="OutWeightScale" use="required"/>
+    <xs:attribute type="UDouble" name="InputWeight" use="required"/>
+    <xs:attribute type="UDoubleLE1" name="FeedbackDensity" use="required"/>
+    <xs:attribute type="UDouble" name="FeedbackWeightScale" use="required"/>
   </xs:complexType>
 
   <!-- Analog reservoir internal -->
@@ -129,6 +127,7 @@
     </xs:sequence>
     <xs:attribute type="xs:unsignedInt" name="Size" use="required" />
     <xs:attribute type="EnumActivation" name="Activation" use="required" />
+    <xs:attribute type="UDouble" name="BiasScale" use="required"/>
     <xs:attribute type="UDouble" name="WeightScale" use="required"/>
   </xs:complexType>
 

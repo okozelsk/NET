@@ -153,7 +153,7 @@ namespace RCNet.Neural.Network.FF
                     double predictor = _inputVectorCollection[row][col];
                     predictors.Data[row][col] = predictor * (1d + _rand.NextBoundedUniformDoubleRS(0, noiseIntensity));
                 }
-                //Add bias to predictors
+                //Add constant bias to predictors
                 predictors.Data[row][_net.NumOfInputValues] = 1;
             }
             return predictors;
@@ -174,7 +174,7 @@ namespace RCNet.Neural.Network.FF
             //Decomposition
             QRD decomposition = new QRD(predictors);
             //New waights
-            double[] newWaights = new double[_net.FlatWeights.Length];
+            double[] newWaights = new double[_net.NumOfWeights];
             //Regression for each output neuron
             for (int outputIdx = 0; outputIdx < _net.NumOfOutputValues; outputIdx++)
             {

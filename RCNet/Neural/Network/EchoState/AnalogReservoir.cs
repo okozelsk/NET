@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using RCNet.MathTools;
@@ -17,81 +18,88 @@ namespace RCNet.Neural.Network.EchoState
         /// <summary>
         /// Name of this instance
         /// </summary>
-        private string _instanceName;
+        protected string _instanceName;
         /// <summary>
         /// Reservoir's settings.
         /// </summary>
-        private AnalogReservoirSettings _settings;
+        protected AnalogReservoirSettings _settings;
         /// <summary>
         /// Random generator.
         /// </summary>
-        private Random _rand;
-        /// <summary>
-        /// The component processing input data.
-        /// </summary>
-        private ReservoirInputComponent _inputComponent;
+        protected Random _rand;
         /// <summary>
         /// Reservoir's neurons.
         /// </summary>
-        private AnalogNeuron[] _neurons;
+        protected AnalogNeuron[] _neurons;
         /// <summary>
-        /// Indexes of the interconnected neurons.
+        /// Number of reservoir inputs
         /// </summary>
-        private List<int>[] _partyNeuronsIdxs;
+        protected int _numOfInputNodes;
         /// <summary>
-        /// Weights of the interconnections.
+        /// A list of input connections for each neuron
         /// </summary>
-        private List<double>[] _partyNeuronsWeights;
+        protected List<Connection>[] _neuronInputConnectionsCollection;
         /// <summary>
-        /// The context neuron
+        /// A list of neuron connections for each neuron
         /// </summary>
-        private AnalogNeuron _contextNeuron;
-        /// <summary>
-        /// Context neuron's in weights
-        /// </summary>
-        private double[] _neurons2ContextWeights;
-        /// <summary>
-        /// Context neuron's out weights
-        /// </summary>
-        private double[] _context2NeuronsWeights;
+        protected List<Connection>[] _neuronNeuronConnectionsCollection;
         /// <summary>
         /// Feedback values.
         /// </summary>
-        private double[] _feedback;
+        protected double[] _feedback;
         /// <summary>
-        /// Feedback weights.
+        /// A list of feedback connections for each neuron
         /// </summary>
-        private double[] _feedbackWeights;
+        protected List<Connection>[] _neuronFeedbackConnectionsCollection;
         /// <summary>
-        /// Produce augmented states?
+        /// The context neuron
+        /// </summary>
+        protected AnalogNeuron _contextNeuron;
+        /// <summary>
+        /// Fixed input weight into the context neuron 
+        /// </summary>
+        protected double _contextNeuronInputWeight;
+        /// <summary>
+        /// Context neuron feedback weights to reservoir neurons
+        /// </summary>
+        protected double[] _contextNeuronFeedbackWeights;
+        /// <summary>
+        /// Specifies whether to produce augmented states
         /// </summary>
         private bool _augmentedStatesFeature;
 
         /// <summary>
         /// Instantiates the analog reservoir
         /// </summary>
-        /// <param name="instanceName">Name of the reservoir instance</param>
-        /// <param name="numOfInputValues">Number of reservoir's input values</param>
-        /// <param name="settings">Analog reservoir settings</param>
-        /// <param name="augmentedStates">Specifies if this reservoir will add augmented states to predictors</param>
+        /// <param name="instanceName">The name of the reservoir instance</param>
+        /// <param name="numOfInputNodes">Number of reservoir inputs</param>
+        /// <param name="settings">Reservoir settings</param>
+        /// <param name="augmentedStates">Specifies whether this reservoir will add augmented states to output predictors</param>
         /// <param name="randomizerSeek">
         /// A value greater than or equal to 0 will always ensure the same initialization of the internal
         /// random number generator and therefore the same reservoir structure, which is good for tuning
         /// other reservoir's parameters.
         /// A value less than 0 causes a fully random initialization when creating a reservoir instance.
         /// </param>
-        public AnalogReservoir(string instanceName, int numOfInputValues, AnalogReservoirSettings settings, bool augmentedStates, int randomizerSeek = -1)
+        public AnalogReservoir(string instanceName, int numOfInputNodes, AnalogReservoirSettings settings, bool augmentedStates, int randomizerSeek = -1)
         {
             _instanceName = instanceName;
-            //Settings
+            _numOfInputNodes = numOfInputNodes;
             _settings = settings.DeepClone();
+            //Allocations for the mapping of the connections
+            _neuronInputConnectionsCollection = new List<Connection>[_settings.Size];
+            _neuronNeuronConnectionsCollection = new List<Connection>[_settings.Size];
+            _neuronFeedbackConnectionsCollection = new List<Connection>[_settings.Size];
+            for(int n = 0; n < _settings.Size; n++)
+            {
+                _neuronInputConnectionsCollection[n] = new List<Connection>();
+                _neuronNeuronConnectionsCollection[n] = new List<Connection>();
+                _neuronFeedbackConnectionsCollection[n] = new List<Connection>();
+            }
             //Random generator initialization
             if (randomizerSeek < 0) _rand = new Random();
             else _rand = new Random(randomizerSeek);
-            //Input component and connections
-            int neuronsPerInput = Math.Max(1, (int)Math.Round((double)_settings.Size * _settings.InputConnectionDensity, 0));
-            _inputComponent = new ReservoirInputComponent(numOfInputValues, _settings.Size, _settings.BiasScale, _settings.InputWeightScale, neuronsPerInput, _rand);
-            //Reservoir neurons
+            //Allocation of reservoir neurons array and creation of the neurons
             _neurons = new AnalogNeuron[_settings.Size];
             //Neurons retainment rates
             double[] retainmentRates = new double[_neurons.Length];
@@ -105,62 +113,43 @@ namespace RCNet.Neural.Network.EchoState
                     _rand.Shuffle(retainmentRates);
                 }
             }
+            //Neurons biases
+            double[] biases = new double[_neurons.Length];
+            _rand.FillUniform(biases, -1, 1, _settings.BiasScale);
             //Neurons creation
             for (int n = 0; n < _neurons.Length; n++)
             {
-                _neurons[n] = new AnalogNeuron(ActivationFactory.CreateActivationFunction(_settings.ReservoirNeuronActivation), retainmentRates[n]);
+                _neurons[n] = new AnalogNeuron(ActivationFactory.CreateActivationFunction(_settings.ReservoirNeuronActivation), biases[n], retainmentRates[n]);
             }
-            //Helper array for neurons order randomization purposes
-            int[] neuronsShuffledIndices = new int[_settings.Size];
-            //Context neuron feature
-            _contextNeuron = null;
-            _neurons2ContextWeights = null;
-            _context2NeuronsWeights = null;
-            if (_settings.ContextNeuronFeature)
-            {
-                int numOfContextNeuronFeedbacks = (int)Math.Round((double)_neurons.Length * _settings.ContextNeuronFeedbackDensity, 0);
-                _contextNeuron = new AnalogNeuron(ActivationFactory.CreateActivationFunction(_settings.ContextNeuronActivation), 0);
-                //Weights from each res neuron to context neuron
-                _neurons2ContextWeights = new double[_neurons.Length];
-                _rand.FillUniform(_neurons2ContextWeights, -1, 1, _settings.ContextNeuronInWeightScale);
-                //Weights from context neuron to res neurons
-                _context2NeuronsWeights = new double[_neurons.Length];
-                _context2NeuronsWeights.Populate(0);
-                neuronsShuffledIndices.ShuffledIndices(_rand);
-                for (int i = 0; i < numOfContextNeuronFeedbacks && i < _neurons.Length; i++)
-                {
-                    _context2NeuronsWeights[neuronsShuffledIndices[i]] = RandomWeight(_rand, _settings.ContextNeuronOutWeightScale);
-                }
-            }
-            //Feedback feature and weights
+            //Input
+            SetRandomInterconnections(_neuronInputConnectionsCollection, _numOfInputNodes, _settings.InputConnectionDensity, _settings.InputWeightScale, false);
+            //Feedback
             _feedback = null;
-            _feedbackWeights = null;
             if (_settings.FeedbackFeature)
             {
-                int neuronsPerOutput = (int)Math.Round(_settings.FeedbackConnectionDensity * (double)_neurons.Length, 0);
-                //Feedback values
                 _feedback = new double[_settings.FeedbackFieldNameCollection.Count];
                 _feedback.Populate(0);
-                //Feedback weights
-                _feedbackWeights = new double[_feedback.Length * _neurons.Length];
-                _feedbackWeights.Populate(0);
-                for (int outNo = 0; outNo < _feedback.Length; outNo++)
+                SetRandomInterconnections(_neuronFeedbackConnectionsCollection, _settings.FeedbackFieldNameCollection.Count, _settings.FeedbackConnectionDensity, _settings.FeedbackWeightScale, false);
+            }
+            //Context neuron
+            _contextNeuron = null;
+            _contextNeuronInputWeight = 0;
+            _contextNeuronFeedbackWeights = null;
+            if (_settings.ContextNeuronFeature)
+            {
+                _contextNeuron = new AnalogNeuron(ActivationFactory.CreateActivationFunction(_settings.ContextNeuronActivation), 0);
+                _contextNeuronInputWeight = _settings.ContextNeuronInputWeight;
+                _contextNeuronFeedbackWeights = new double[_neurons.Length];
+                _contextNeuronFeedbackWeights.Populate(0);
+                int numOfContextNeuronFeedbacks = (int)Math.Round((double)_neurons.Length * _settings.ContextNeuronFeedbackDensity, 0);
+                int[] neuronIndices = new int[_neurons.Length];
+                neuronIndices.ShuffledIndices(_rand);
+                for (int i = 0; i < numOfContextNeuronFeedbacks && i < _neurons.Length; i++)
                 {
-                    neuronsShuffledIndices.ShuffledIndices(_rand);
-                    for (int i = 0; i < neuronsPerOutput; i++)
-                    {
-                        _feedbackWeights[outNo * _neurons.Length + neuronsShuffledIndices[i]] = RandomWeight(_rand, _settings.FeedbackWeightScale);
-                    }
+                    _contextNeuronFeedbackWeights[neuronIndices[i]] = GetRandomWeight(_settings.ContextNeuronFeedbackWeightScale);
                 }
             }
-            //Reservoir topology, the schema of interconnections
-            _partyNeuronsIdxs = new List<int>[_neurons.Length];
-            _partyNeuronsWeights = new List<double>[_neurons.Length];
-            for (int i = 0; i < _neurons.Length; i++)
-            {
-                _partyNeuronsIdxs[i] = new List<int>();
-                _partyNeuronsWeights[i] = new List<double>();
-            }
+            //Topology
             switch (_settings.TopologyType)
             {
                 case AnalogReservoirSettings.ReservoirTopologyType.Random:
@@ -191,156 +180,155 @@ namespace RCNet.Neural.Network.EchoState
 
         //Methods
         /// <summary>
-        /// Returns random weight within the interval (-scale, +scale)
+        /// Returns a random weight value within the interval (-scale, +scale)
         /// </summary>
-        /// <param name="rand">Random object to be used.</param>
         /// <param name="scale">Weight scale.</param>
-        /// <returns></returns>
-        public static double RandomWeight(Random rand, double scale)
+        /// <returns>A random weight value</returns>
+        protected double GetRandomWeight(double scale)
         {
-            return rand.NextBoundedUniformDouble(-1, 1) * scale;
+            return _rand.NextBoundedUniformDouble(-1, 1) * scale;
         }
 
         /// <summary>
-        /// Establishes the interconnection of reservoir neurons.
+        /// This general function checks the existency of the interconnection between the entity and a party entity
         /// </summary>
-        /// <param name="targetNeuronIdx">Target neuron index</param>
-        /// <param name="partyNeuronIdx">Party neuron index</param>
-        /// <param name="weightScale">Scale of the connection weight</param>
-        /// <param name="check">Check if the connection already exists?</param>
-        /// <returns>Success/Unsuccess (connection already exists)</returns>
-        private bool AddConnection(int targetNeuronIdx, int partyNeuronIdx, double weightScale, bool check = true)
+        /// <param name="entityConnectionsCollection">Bank of connections of the entities</param>
+        /// <param name="entityIdx">An index of the entity in the connections bank</param>
+        /// <param name="partyIdx">An index of the party entity</param>
+        protected bool ExistsInterconnection(List<Connection>[] entityConnectionsCollection, int entityIdx, int partyIdx)
         {
-            if (!check || !_partyNeuronsIdxs[targetNeuronIdx].Contains(partyNeuronIdx))
+            //Try to select the same connection
+            Connection equalConn = (from connection in entityConnectionsCollection[entityIdx]
+                                    where connection.Idx == partyIdx
+                                    select connection
+                                    ).FirstOrDefault();
+            return (equalConn != null);
+        }
+
+        /// <summary>
+        /// This general function establish the interconnection between the entity and a party entity
+        /// and sets the connection's random weight.
+        /// </summary>
+        /// <param name="entityConnectionsCollection">Bank of connections of the entities</param>
+        /// <param name="entityIdx">An index of the entity in the connections bank</param>
+        /// <param name="partyIdx">An index of the party entity</param>
+        /// <param name="weightScale">Random weight scale</param>
+        /// <param name="duplicityCheck">Indicates whether to check the interconnection existency before its creation</param>
+        /// <returns>Success/Unsuccess</returns>
+        protected bool AddInterconnection(List<Connection>[] entityConnectionsCollection, int entityIdx, int partyIdx, double weightScale, bool duplicityCheck)
+        {
+            if(duplicityCheck)
             {
-                _partyNeuronsIdxs[targetNeuronIdx].Add(partyNeuronIdx);
-                _partyNeuronsWeights[targetNeuronIdx].Add(RandomWeight(_rand, weightScale));
-                return true;
+                if(ExistsInterconnection(entityConnectionsCollection, entityIdx, partyIdx))
+                {
+                    //Connection already exists
+                    return false;
+                }
             }
-            return false;
+            //Add new connection
+            entityConnectionsCollection[entityIdx].Add(new Connection(partyIdx, GetRandomWeight(weightScale)));
+            return true;
         }
 
         /// <summary>
-        /// Establishes the interconnection of reservoir neurons.
+        /// This general function sets the random interconnections and weights between the entities and party entities
         /// </summary>
-        /// <param name="connectionID">Position of the connection within flat representation (Size * Size).</param>
-        /// <param name="weightScale">Scale of the connection weight</param>
-        /// <param name="check">Check if the connection already exists?</param>
-        /// <returns>Success/Unsuccess (connection already exists)</returns>
-        private bool AddConnection(int connectionID, double weightScale, bool check = true)
+        /// <param name="entityConnectionsCollection">Bank of connections of the entities</param>
+        /// <param name="numOfParties">Number of party entities to be interconnected with entities</param>
+        /// <param name="density">Interconnection density</param>
+        /// <param name="weightScale">Random weight scale</param>
+        /// <param name="duplicityCheck">Indicates whether to check the interconnection existency before its creation</param>
+        protected void SetRandomInterconnections(List<Connection>[] entityConnectionsCollection, int numOfParties, double density, double weightScale, bool duplicityCheck)
         {
-            return AddConnection(connectionID / _neurons.Length, connectionID % _neurons.Length, weightScale, check);
+            int[] allConnections = new int[entityConnectionsCollection.Length * numOfParties];
+            int numOfConnections = (int)Math.Round(allConnections.Length * density, 0);
+            allConnections.ShuffledIndices(_rand);
+            for(int i = 0; i < numOfConnections && i < allConnections.Length; i++)
+            {
+                int entityIdx = allConnections[i] / numOfParties;
+                int partyIdx = allConnections[i] % numOfParties;
+                if(!AddInterconnection(entityConnectionsCollection, entityIdx, partyIdx, weightScale, duplicityCheck))
+                {
+                    //Try one more
+                    ++numOfConnections;
+                }
+            }
+            return;
         }
 
         /// <summary>
         /// Connects all reservoir neurons to a ring shape.
         /// </summary>
         /// <param name="weightScale">Scale of the connection weight</param>
-        /// <param name="biDirection">Bidirectional ring?</param>
-        /// <param name="check">Check if the connection already exists?</param>
-        private void SetRingConnections(double weightScale, bool biDirection, bool check = true)
+        /// <param name="bidirectional">Specifies whether the ring interconnection will be bidirectional.</param>
+        /// <param name="duplicityCheck">Indicates whether to check the interconnection existency before its creation</param>
+        protected void SetRingConnections(double weightScale, bool bidirectional, bool duplicityCheck = true)
         {
             for (int i = 0; i < _neurons.Length; i++)
             {
                 int partyNeuronIdx = (i == 0) ? (_neurons.Length - 1) : (i - 1);
-                AddConnection(i, partyNeuronIdx, weightScale, check);
-                if(biDirection)
+                AddInterconnection(_neuronNeuronConnectionsCollection, i, partyNeuronIdx, weightScale, duplicityCheck);
+                if(bidirectional)
                 {
                     partyNeuronIdx = (i == _neurons.Length - 1) ? (0) : (i + 1);
-                    AddConnection(i, partyNeuronIdx, weightScale, check);
+                    AddInterconnection(_neuronNeuronConnectionsCollection, i, partyNeuronIdx, weightScale, duplicityCheck);
                 }
             }
             return;
         }
 
         /// <summary>
-        /// Sets randomly selected number of neurons (corresponding to density) to be self-connected
+        /// Sets number of neurons (corresponding to density) to be self-connected
         /// </summary>
-        /// <param name="density">How many neurons will be self-connected?</param>
-        /// <param name="weightScale">Scale of the connection weight</param>
-        /// <param name="check">Check if the connection already exists?</param>
-        private void SetSelfConnections(double density, double weightScale, bool check = true)
+        /// <param name="density">Specifies what part of neurons will be self-connected</param>
+        /// <param name="weightScale">Random weight scale</param>
+        /// <param name="duplicityCheck">Indicates whether to check the interconnection existency before its creation</param>
+        protected void SetSelfConnections(double density, double weightScale, bool duplicityCheck = true)
         {
             int numOfConnections = (int)Math.Round((double)_neurons.Length * density);
             int[] indices = new int[_neurons.Length];
             indices.ShuffledIndices(_rand);
             for (int i = 0; i < numOfConnections; i++)
             {
-                AddConnection(indices[i], indices[i], weightScale, check);
+                AddInterconnection(_neuronNeuronConnectionsCollection, indices[i], indices[i], weightScale, duplicityCheck);
             }
             return;
         }
 
         /// <summary>
-        /// Sets random neurons inter connections.
-        /// </summary>
-        /// <param name="density">How many connections from Size x Size options will be randomly initialized?</param>
-        /// <param name="weightScale">Scale of the connection weight</param>
-        /// <param name="check">Check if the connection already exists?</param>
-        private void SetInterConnections(double density, double weightScale, bool check = true)
-        {
-            int numOfConnections = (int)Math.Round((double)((_neurons.Length - 1) * _neurons.Length) * density);
-            int[] randomConnections = new int[(_neurons.Length - 1) * _neurons.Length];
-            int indicesPos = 0;
-            for(int n1Idx = 0; n1Idx < _neurons.Length; n1Idx++)
-            {
-                for(int n2Idx = 0; n2Idx < _neurons.Length; n2Idx++)
-                {
-                    if(n1Idx != n2Idx)
-                    {
-                        randomConnections[indicesPos] = n1Idx * _neurons.Length + n2Idx;
-                        ++indicesPos;
-                    }
-                }
-            }
-            _rand.Shuffle(randomConnections);
-            for (int i = 0; i < numOfConnections; i++)
-            {
-                AddConnection(randomConnections[i], weightScale, check);
-            }
-            return;
-        }
-
-        /// <summary>
-        /// Initializes random topology connection schema
+        /// Initializes the random topology connection schema
         /// </summary>
         /// <param name="cfg">Configuration parameters</param>
         /// <param name="weightScale">Scale of the connection weight</param>
-        private void SetupRandomTopology(AnalogReservoirSettings.RandomTopology cfg, double weightScale)
+        protected void SetupRandomTopology(AnalogReservoirSettings.RandomTopology cfg, double weightScale)
         {
             //Fully random connections setup
-            int numOfConnections = (int)Math.Round((double)_neurons.Length * (double)_neurons.Length * cfg.ConnectionsDensity);
-            int[] randomConnections = new int[_neurons.Length * _neurons.Length];
-            randomConnections.ShuffledIndices(_rand);
-            for (int i = 0; i < numOfConnections; i++)
-            {
-                AddConnection(randomConnections[i], weightScale, false);
-            }
+            SetRandomInterconnections(_neuronNeuronConnectionsCollection, _neurons.Length, cfg.ConnectionsDensity, weightScale, false);
             return;
         }
 
         /// <summary>
-        /// Initializes ring shape topology connection schema
+        /// Initializes the ring topology connection schema
         /// </summary>
         /// <param name="cfg">Configuration parameters</param>
         /// <param name="weightScale">Scale of the connection weight</param>
-        private void SetupRingTopology(AnalogReservoirSettings.RingTopology cfg, double weightScale)
+        protected void SetupRingTopology(AnalogReservoirSettings.RingTopology cfg, double weightScale)
         {
             //Ring connections part
-            SetRingConnections(weightScale, cfg.BiDirection, false);
+            SetRingConnections(weightScale, cfg.Bidirectional, false);
             //Self connections part
             SetSelfConnections(cfg.SelfConnectionsDensity, weightScale, false);
             //Inter connections part
-            SetInterConnections(cfg.InterConnectionsDensity, weightScale, true);
+            SetRandomInterconnections(_neuronNeuronConnectionsCollection, _neurons.Length, cfg.InterConnectionsDensity, weightScale, true);
             return;
         }
 
         /// <summary>
-        /// Initializes doubly twisted thoroidal shape topology connection schema
+        /// Initializes the doubly twisted thoroidal topology connection schema
         /// </summary>
         /// <param name="cfg">Configuration parameters</param>
         /// <param name="weightScale">Scale of the connection weight</param>
-        private void SetupDTTTopology(AnalogReservoirSettings.DTTTopology cfg, double weightScale)
+        protected void SetupDTTTopology(AnalogReservoirSettings.DTTTopology cfg, double weightScale)
         {
             //HTwist part (single direction ring)
             SetRingConnections(weightScale, false);
@@ -354,7 +342,7 @@ namespace RCNet.Neural.Network.EchoState
                     int left = partyNeuronIdx % step;
                     targetNeuronIdx = (left == 0) ? (step - 1) : (left - 1);
                 }
-                AddConnection(targetNeuronIdx, partyNeuronIdx, weightScale, false);
+                AddInterconnection(_neuronNeuronConnectionsCollection, targetNeuronIdx, partyNeuronIdx, weightScale, false);
             }
             //Self connections part
             SetSelfConnections(cfg.SelfConnectionsDensity, weightScale, false);
@@ -362,11 +350,11 @@ namespace RCNet.Neural.Network.EchoState
         }
 
         /// <summary>
-        /// Collects neurons states key statistics
+        /// Collects key statistics related to reservoir neurons states
         /// </summary>
-        public AnalogReservoirStat CollectStateStatistics()
+        public AnalogReservoirStat CollectStatistics()
         {
-            AnalogReservoirStat stats = new AnalogReservoirStat(_instanceName);
+            AnalogReservoirStat stats = new AnalogReservoirStat(_instanceName, _settings.SettingsName);
             foreach (AnalogNeuron neuron in _neurons)
             {
                 stats.NeuronsMaxAbsStatesStat.AddSampleValue(Math.Max(Math.Abs(neuron.StatesStat.Max), Math.Abs(neuron.StatesStat.Min)));
@@ -415,15 +403,13 @@ namespace RCNet.Neural.Network.EchoState
         /// Array to be filled with predictors values.
         /// Array has to be sized to the value of NumOfOutputPredictors reservoir's property.
         /// </param>
-        /// <param name="collectStatistics">
-        /// Switch says, if to collect statistics.
-        /// Specify false within booting phase and true after booting phase.
+        /// <param name="updateStatistics">
+        /// Specifies whether to update neurons statistics.
+        /// Specify "false" within the booting phase and "true" after the booting phase.
         /// </param>
-        public void Compute(double[] input, double[] outputPredictors, bool collectStatistics)
+        public void Compute(double[] input, double[] outputPredictors, bool updateStatistics)
         {
-            //Update input memory
-            _inputComponent.Update(input);
-            //Store all reservoir neurons states
+            //Store all the reservoir neurons states
             foreach(AnalogNeuron neuron in _neurons)
             {
                 neuron.StoreCurrentState();
@@ -432,28 +418,31 @@ namespace RCNet.Neural.Network.EchoState
             Parallel.For(0, _neurons.Length, (neuronIdx) =>
             {
                 //Input signal
-                double inputSignal = _inputComponent.GetInputSignal(neuronIdx);
+                double inputSignal = 0;
+                foreach(Connection conn in _neuronInputConnectionsCollection[neuronIdx])
+                {
+                    inputSignal += input[conn.Idx] * conn.Weight;
+                }
                 //Signal from reservoir neurons
                 double reservoirSignal = 0;
-                //Add reservoir neurons signal
-                for (int j = 0; j < _partyNeuronsIdxs[neuronIdx].Count; j++)
+                foreach (Connection conn in _neuronNeuronConnectionsCollection[neuronIdx])
                 {
-                    reservoirSignal += _partyNeuronsWeights[neuronIdx][j] * _neurons[_partyNeuronsIdxs[neuronIdx][j]].PreviousState;
+                    reservoirSignal += _neurons[conn.Idx].PreviousState * conn.Weight;
                 }
                 //Add context neuron signal if allowed
-                reservoirSignal += _settings.ContextNeuronFeature ? _context2NeuronsWeights[neuronIdx] * _contextNeuron.CurrentState : 0;
+                reservoirSignal += _settings.ContextNeuronFeature ? _contextNeuronFeedbackWeights[neuronIdx] * _contextNeuron.CurrentState : 0;
                 //Feedback signal
                 double feedbackSignal = 0;
                 if (_settings.FeedbackFeature)
                 {
-                    for (int outpIdx = 0; outpIdx < _feedback.Length; outpIdx++)
+                    foreach (Connection conn in _neuronFeedbackConnectionsCollection[neuronIdx])
                     {
-                        feedbackSignal += _feedback[outpIdx] * _feedbackWeights[outpIdx * _neurons.Length + neuronIdx];
+                        feedbackSignal += _feedback[conn.Idx] * conn.Weight;
                     }
                 }
-                //Set new state of reservoir neuron
-                _neurons[neuronIdx].Compute(inputSignal + reservoirSignal + feedbackSignal, collectStatistics);
-                //Set the neuron's state into the array of output predictors
+                //Compute the new state of the reservoir neuron
+                _neurons[neuronIdx].Compute(inputSignal + reservoirSignal + feedbackSignal, updateStatistics);
+                //Set the neuron state into the array of output predictors
                 outputPredictors[neuronIdx] = _neurons[neuronIdx].CurrentState;
                 //Set the neuron's augmented state into the array of output predictors
                 if (_augmentedStatesFeature)
@@ -467,9 +456,9 @@ namespace RCNet.Neural.Network.EchoState
                 double res2ContextSignal = 0;
                 for (int neuronIdx = 0; neuronIdx < _neurons.Length; neuronIdx++)
                 {
-                    res2ContextSignal += _neurons2ContextWeights[neuronIdx] * _neurons[neuronIdx].CurrentState;
+                    res2ContextSignal += _contextNeuronInputWeight * _neurons[neuronIdx].CurrentState;
                 }
-                _contextNeuron.Compute(res2ContextSignal, collectStatistics);
+                _contextNeuron.Compute(res2ContextSignal, updateStatistics);
             }
             return;
         }
@@ -489,94 +478,32 @@ namespace RCNet.Neural.Network.EchoState
 
         //Inner classes
         /// <summary>
-        /// Implements input component of the analog reservoir
+        /// Represents a connection
         /// </summary>
         [Serializable]
-        private class ReservoirInputComponent
+        protected class Connection
         {
-            //Constants
-            //Attributes
-            private int _numOfInputValues;
-            private double[] _inputBiases;
-            private double[] _inputValues;
-            private int _numOfReservoirNeurons;
-            private List<InputConnection>[] _inputConnectionCollection;
-
-            //Constructor
-            public ReservoirInputComponent(int numOfInputValues,
-                                           int numOfReservoirNeurons,
-                                           double biasScale,
-                                           double inputWeightScale,
-                                           int neuronsPerInput,
-                                           Random rand
-                                           )
-            {
-                _numOfInputValues = numOfInputValues;
-                _numOfReservoirNeurons = numOfReservoirNeurons;
-                //Input biases
-                _inputBiases = new double[_numOfReservoirNeurons];
-                rand.FillUniform(_inputBiases, -1, 1, biasScale);
-                //Input values
-                _inputValues = new double[_numOfInputValues];
-                _inputValues.Populate(0);
-                //Connections to reservoir neurons
-                _inputConnectionCollection = new List<InputConnection>[_numOfReservoirNeurons];
-                for (int i = 0; i < _numOfReservoirNeurons; i++)
-                {
-                    _inputConnectionCollection[i] = new List<InputConnection>(_numOfInputValues * neuronsPerInput);
-                }
-                int[] neuronIdxs = new int[_numOfReservoirNeurons];
-                for (int fieldIdx = 0; fieldIdx < _numOfInputValues; fieldIdx++)
-                {
-                    neuronIdxs.ShuffledIndices(rand);
-                    for (int i = 0; i < neuronsPerInput; i++)
-                    {
-                        InputConnection connection = new InputConnection();
-                        connection.InputValueIdx = fieldIdx;
-                        connection.Weight = AnalogReservoir.RandomWeight(rand, inputWeightScale);
-                        _inputConnectionCollection[neuronIdxs[i]].Add(connection);
-                    }
-                }
-                return;
-            }
-
-            //Properties
-            public int NumOfInputValues { get { return _numOfInputValues; } }
-
-            //Methods
-            public void Update(double[] newInputValues)
-            {
-                newInputValues.CopyTo(_inputValues, 0);
-                return;
-            }
-
             /// <summary>
-            /// Computes input signal from input to be processed by specified neuron
+            /// Party index
             /// </summary>
-            /// <param name="reservoirNeuronIdx">Index of the reservoir's neuron</param>
-            public double GetInputSignal(int reservoirNeuronIdx)
+            public int Idx { get; set; }
+            /// <summary>
+            /// Connection weight
+            /// </summary>
+            public double Weight { get; set; }
+            
+            /// <summary>
+            /// Creates an initialized instance
+            /// </summary>
+            /// <param name="idx">Party index</param>
+            /// <param name="weight">Weight</param>
+            public Connection(int idx, double weight)
             {
-                double signal = 0;
-                if (_inputConnectionCollection[reservoirNeuronIdx].Count > 0)
-                {
-                    signal += _inputBiases[reservoirNeuronIdx];
-                    foreach (InputConnection connection in _inputConnectionCollection[reservoirNeuronIdx])
-                    {
-                        signal += _inputValues[connection.InputValueIdx] * connection.Weight;
-                    }
-                }
-                return signal;
+                Idx = idx;
+                Weight = weight;
             }
 
-            //Inner classes
-            [Serializable]
-            private class InputConnection
-            {
-                public int InputValueIdx { get; set; } = 0;
-                public double Weight { get; set; } = 0;
-            }//InputConnection
-
-        }//ReservoirInputComponent
+        }//Connection
 
     }//AnalogReservoir
 
@@ -591,6 +518,10 @@ namespace RCNet.Neural.Network.EchoState
         /// Name of the reservoir instance
         /// </summary>
         public string ReservoirInstanceName { get; }
+        /// <summary>
+        /// Name of the reservoir configuration settings
+        /// </summary>
+        public string ReservoirSettingsName { get; }
         /// <summary>
         /// Statistics of max absolute values of the neurons' states
         /// </summary>
@@ -613,9 +544,11 @@ namespace RCNet.Neural.Network.EchoState
         /// Creates an unitialized instance
         /// </summary>
         /// <param name="reservoirInstanceName">Name of the reservoir instance</param>
-        public AnalogReservoirStat(string reservoirInstanceName)
+        /// <param name="reservoirSettingsName">Name of the reservoir configuration settings</param>
+        public AnalogReservoirStat(string reservoirInstanceName, string reservoirSettingsName)
         {
             ReservoirInstanceName = reservoirInstanceName;
+            ReservoirSettingsName = reservoirSettingsName;
             NeuronsMaxAbsStatesStat = new BasicStat();
             NeuronsRMSStatesStat = new BasicStat();
             NeuronsStateSpansStat = new BasicStat();

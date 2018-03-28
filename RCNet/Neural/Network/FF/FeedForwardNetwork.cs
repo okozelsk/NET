@@ -75,13 +75,13 @@ namespace RCNet.Neural.Network.FF
         /// </summary>
         public int NumOfNeurons { get { return _numOfNeurons; } }
         /// <summary>
+        /// Total number of network's weights
+        /// </summary>
+        public int NumOfWeights { get { return _flatWeights.Length; } }
+        /// <summary>
         /// Collection of network's layers
         /// </summary>
         public List<Layer> LayerCollection { get { return _layerCollection; } }
-        /// <summary>
-        /// All network's weights in a flat format
-        /// </summary>
-        public double[] FlatWeights { get { return _flatWeights; } }
 
         //Methods
         //Static methods
@@ -110,10 +110,6 @@ namespace RCNet.Neural.Network.FF
         {
             if (!Finalized)
             {
-                if(numOfNeurons < 1)
-                {
-                    throw new ArgumentOutOfRangeException("numOfNeurons", $"Invalid parameter value: {numOfNeurons}");
-                }
                 //Add new layer
                 _layerCollection.Add(new Layer(numOfNeurons, activation));
             }
@@ -223,7 +219,7 @@ namespace RCNet.Neural.Network.FF
         }
 
         /// <summary>
-        /// Computes network output values
+        /// Computes network output values (faster version for standard usage)
         /// </summary>
         /// <param name="input">Input values to be passed into the network</param>
         /// <returns>Computed output values</returns>
@@ -233,6 +229,32 @@ namespace RCNet.Neural.Network.FF
             foreach (Layer layer in LayerCollection)
             {
                 result = layer.Compute(result, _flatWeights);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Computes network output values (slower version for training purposes)
+        /// </summary>
+        /// <param name="input">
+        /// Input values to be passed into the network
+        /// </param>
+        /// <param name="layerInputCollection">
+        /// It must be an instantiated empty collection.
+        /// Function will add inputs for each network layer into the collection.
+        /// </param>
+        /// <param name="flatDerivations">
+        /// It must be an allocated array of length = NumOfNeurons (flat structure).
+        /// Function will set the activation derivations into the array.
+        /// </param>
+        /// <returns>Computed output values</returns>
+        public double[] Compute(double[] input, List<double[]> layerInputCollection, double[] flatDerivations)
+        {
+            double[] result = input;
+            foreach (FeedForwardNetwork.Layer layer in _layerCollection)
+            {
+                layerInputCollection.Add(result);
+                result = layer.Compute(result, _flatWeights, flatDerivations);
             }
             return result;
         }
@@ -258,6 +280,14 @@ namespace RCNet.Neural.Network.FF
                 }
             });
             return errStat;
+        }
+
+        /// <summary>
+        /// Returns copy of all network internal weights (in a flat format)
+        /// </summary>
+        public double[] GetWeights()
+        {
+            return (double[])_flatWeights.Clone();
         }
 
         /// <summary>
@@ -305,6 +335,16 @@ namespace RCNet.Neural.Network.FF
             /// <param name="activation">Each of the layer's neuron will be activated by this activation function</param>
             public Layer(int numOfNeurons, IActivationFunction activation)
             {
+                //Check correctness
+                if (numOfNeurons < 1)
+                {
+                    throw new ArgumentOutOfRangeException("numOfNeurons", $"Invalid parameter value: {numOfNeurons}");
+                }
+                if (activation == null)
+                {
+                    throw new ArgumentException("activation", "Activation can't be null");
+                }
+                //Setup
                 Activation = activation;
                 _numOfLayerNeurons = numOfNeurons;
                 _numOfInputNodes = -1;
@@ -348,7 +388,7 @@ namespace RCNet.Neural.Network.FF
             /// <param name="numOfInputNodes">Number of input nodes</param>
             /// <param name="neuronsFlatStartIdx">Starting index of this layer neurons in a flat structure</param>
             /// <param name="weightsFlatStartIdx">Starting index of this layer weights in a flat structure</param>
-            public void FinalizeStructure(int numOfInputNodes, int neuronsFlatStartIdx, int weightsFlatStartIdx)
+            internal void FinalizeStructure(int numOfInputNodes, int neuronsFlatStartIdx, int weightsFlatStartIdx)
             {
                 _numOfInputNodes = numOfInputNodes;
                 _weightsStartFlatIdx = weightsFlatStartIdx;
@@ -360,7 +400,7 @@ namespace RCNet.Neural.Network.FF
             /// <summary>
             /// Creates a deep copy of this layer
             /// </summary>
-            public Layer Clone()
+            internal Layer Clone()
             {
                 Layer clone = new Layer(_numOfLayerNeurons, Activation);
                 clone._numOfInputNodes = _numOfInputNodes;
@@ -377,7 +417,7 @@ namespace RCNet.Neural.Network.FF
             /// <param name="flatWeights">Network's weights in a flat structure</param>
             /// <param name="flatDerivations">Network's neuron state derivations in a flat structure</param>
             /// <returns>The layer's neurons states</returns>
-            public double[] Compute(double[] inputs, double[] flatWeights, double[] flatDerivations = null)
+            internal double[] Compute(double[] inputs, double[] flatWeights, double[] flatDerivations = null)
             {
                 double[] result = new double[NumOfLayerNeurons];
                 int weightFlatIdx = _weightsStartFlatIdx;

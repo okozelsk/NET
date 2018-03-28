@@ -10,9 +10,7 @@ namespace RCNet.Demo.Log
     public class ConsoleLog : IOutputLog
     {
         //Constants
-        public const int ConsoleMinWidth = 160;
-        public const int ConsoleMinHeight = 50;
-        public const int ConsoleBufferMinWidth = ConsoleMinWidth*2;
+        public const int ConsoleBufferMinWidth = 320;
         public const int ConsoleBufferMinHeight = 1000;
 
         //Attributes
@@ -25,11 +23,11 @@ namespace RCNet.Demo.Log
         /// </summary>
         public ConsoleLog()
         {
-            //Set console min sizes
-            Console.BufferWidth = Math.Max(ConsoleBufferMinWidth, Console.BufferWidth);
-            Console.BufferHeight = Math.Max(ConsoleBufferMinHeight, Console.BufferHeight);
-            Console.WindowWidth = Math.Max(ConsoleMinWidth, Console.WindowWidth);
-            Console.WindowHeight = Math.Max(ConsoleMinHeight, Console.WindowHeight);
+            Console.WindowLeft = 0;
+            Console.WindowTop = 0;
+            //Set console buffer size
+            Console.SetBufferSize(Math.Max(ConsoleBufferMinWidth, Console.BufferWidth), Math.Max(ConsoleBufferMinHeight, Console.BufferHeight));
+            //Clear the console
             Console.Clear();
             //Store current cursor position
             StoreCursor();
