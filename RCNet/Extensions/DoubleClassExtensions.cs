@@ -63,4 +63,5 @@ namespace RCNet.Extensions
         }
 
     }//DoubleClassExtensions
+
 }//Namespace

@@ -18,7 +18,6 @@
             <RetainmentNeurons Density="0.5" RetainmentMinRate="0" RetainmentMaxRate="0.75"/>
             <ContextNeuron Activation="TanH" InputWeight="0.5" FeedbackDensity="1" FeedbackWeightScale="0.3"/>
           </Internal>
-          <Feedback Density="0" WeightScale="0"/>
         </AnalogReservoirSettings>
       </ReservoirSettingsContainer>
       <ReservoirInstancesContainer>

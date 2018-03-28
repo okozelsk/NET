@@ -67,7 +67,7 @@
     <Compile Include="Neural\Activation\SigmoidAF.cs" />
     <Compile Include="Neural\Activation\SinusoidAF.cs" />
     <Compile Include="Neural\Activation\TanhAF.cs" />
-    <Compile Include="Neural\Network\Data\SamplesDataBundle.cs" />
+    <Compile Include="Neural\Network\Data\SampleDataBundle.cs" />
     <Compile Include="Neural\Network\EchoState\AnalogNeuron.cs" />
     <Compile Include="Neural\Network\EchoState\AnalogReservoir.cs" />
     <Compile Include="Neural\Network\EchoState\AnalogReservoirSettings.cs" />

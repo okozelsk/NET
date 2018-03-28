@@ -55,7 +55,7 @@ namespace RCNet.MathTools
             return IsBitSet(number, bitPos) ? (ulong)1 : (ulong)0;
         }
 
-
     }//Bitwise
 
 }//Namespace
+

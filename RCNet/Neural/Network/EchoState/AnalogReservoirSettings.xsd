@@ -10,3 +10,4 @@
   <xs:element name="AnalogReservoirSettings" type="nst:AnalogReservoirSettingsStruct"/>
 
 </xs:schema>
+

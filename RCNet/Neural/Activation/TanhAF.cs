@@ -40,4 +40,3 @@ namespace RCNet.Neural.Activation
     }//TanhAF
 
 }//Namespace
-

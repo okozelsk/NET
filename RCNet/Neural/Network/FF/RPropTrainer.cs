@@ -342,4 +342,4 @@ namespace RCNet.Neural.Network.FF
 
     }//RPropTrainer
 
-}
+}//Namespace

@@ -10,3 +10,4 @@
   <xs:element name="EsnSettings" type="nst:EsnSettingsStruct"/>
 
 </xs:schema>
+

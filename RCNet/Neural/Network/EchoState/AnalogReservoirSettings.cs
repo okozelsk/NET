@@ -659,3 +659,4 @@ namespace RCNet.Neural.Network.EchoState
     }//AnalogReservoirSettings
 
 }//Namespace
+

@@ -103,5 +103,7 @@ namespace RCNet.Neural.Network.EchoState
             _previousState = _currentState;
             return;
         }
-    }
-}
+
+    }//AnalogNeuron
+
+}//Namespace

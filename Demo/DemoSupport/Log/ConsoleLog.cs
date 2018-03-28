@@ -89,7 +89,6 @@ namespace RCNet.Demo.Log
             _lastMessageLength = message.Length;
             return;
         }
-
     }//ConsoleLog
 
 }//Namespace

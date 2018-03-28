@@ -394,3 +394,4 @@ namespace RCNet.MathTools
     }//Interval
 
 }//Namespace
+

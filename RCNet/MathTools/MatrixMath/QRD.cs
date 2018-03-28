@@ -265,6 +265,7 @@ namespace RCNet.MathTools.MatrixMath
             }
             return (new Matrix(X).GetSubMatrix(0, _numOfCols - 1, 0, nx - 1));
         }
+
     }//QRD
 
 }//Namespace

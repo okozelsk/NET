@@ -225,4 +225,5 @@ namespace RCNet.MathTools
         }
 
     }//Normalizer
+
 }//Namespace

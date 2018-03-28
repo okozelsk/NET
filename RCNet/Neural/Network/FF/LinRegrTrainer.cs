@@ -195,7 +195,7 @@ namespace RCNet.Neural.Network.FF
             return;
         }
 
-
     }//LinRegrTrainer
 
 }//Namespace
+

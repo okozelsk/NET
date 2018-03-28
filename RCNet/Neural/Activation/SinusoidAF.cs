@@ -39,4 +39,3 @@ namespace RCNet.Neural.Activation
     }//SinusoidAF
 
 }//Namespace
-

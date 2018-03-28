@@ -267,7 +267,7 @@ namespace RCNet.Neural.Network.EchoState
         /// the overall error on the training data and the test data.
         /// </summary>
         /// <param name="dataSet">
-        /// Bundle containing known input and desired output sample vectors (in time order)
+        /// The bundle containing known input and desired output sample vectors (in time order)
         /// </param>
         /// <param name="numOfBootSamples">
         /// How many of starting items from dataSet will be used for booting of reservoirs to ensure
@@ -291,7 +291,7 @@ namespace RCNet.Neural.Network.EchoState
         /// <returns>
         /// Array of regression outputs
         /// </returns>
-        public EsnRegressionResult[] Train(SamplesDataBundle dataSet,
+        public EsnRegressionResult[] Train(SampleDataBundle dataSet,
                                            int numOfBootSamples,
                                            int numOfTestSamples,
                                            EsnTestSamplesSelectorCallbackDelegate testSamplesSelector,

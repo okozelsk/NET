@@ -123,4 +123,5 @@ namespace RCNet.Extensions
         }
 
     }//RNGCryptoServiceProviderClassExtension
+
 }//Namespace

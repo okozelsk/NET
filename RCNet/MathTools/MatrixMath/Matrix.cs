@@ -334,3 +334,4 @@ namespace RCNet.MathTools.MatrixMath
     }//Matrix
 
 } //Namespace
+

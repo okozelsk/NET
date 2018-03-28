@@ -543,5 +543,4 @@ namespace RCNet.Neural.Network.FF
 
     }//HiddenLayerSettings
 
-
 }//Namespace

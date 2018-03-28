@@ -59,3 +59,4 @@ namespace RCNet.Neural.Activation
     }//InverseSquareRootUnitAF
 
 }//Namespace
+

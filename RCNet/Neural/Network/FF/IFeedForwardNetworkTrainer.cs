@@ -27,5 +27,6 @@ namespace RCNet.Neural.Network.FF
         /// </summary>
         void Iteration();
 
-    }
-}
+    }//IFeedForwardNetworkTrainer
+
+}//Namespace

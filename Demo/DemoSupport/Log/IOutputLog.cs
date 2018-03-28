@@ -13,6 +13,7 @@ namespace RCNet.Demo.Log
         /// <param name="message">The message to be written to output</param>
         /// <param name="replaceLastMessage">Indicates if to replace a text of the last message by the new one.</param>
         void Write(string message, bool replaceLastMessage = false);
+
     }//IOutputLog
 
 }//Namespace

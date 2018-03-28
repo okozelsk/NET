@@ -22,7 +22,7 @@ namespace RCNet.Demo
     {
         /// <summary>
         /// Helper function.
-        /// Loads the data from csv file, prepares output normalizer(s) and creates SamplesDataBundle object containing
+        /// Loads the data from csv file, prepares output normalizer(s) and creates SampleDataBundle object containing
         /// standardized and normalized data to be used for Esn training, testing and prediction.
         /// Note that all data is always normalized to the interval (-1.1), so only activation functions supporting
         /// this range should be used in demo case Esn settings.
@@ -37,16 +37,16 @@ namespace RCNet.Demo
         /// Prepared normalizer(s) for Esn outputs denormalization
         /// </param>
         /// <returns>
-        /// Prepared SamplesDataBundle object
+        /// Prepared SampleDataBundle object
         /// </returns>
-        public static SamplesDataBundle SamplesDataBundleFromFile(EsnDemoSettings.EsnDemoCaseSettings demoCaseParams,
+        public static SampleDataBundle SampleDataBundleFromFile(EsnDemoSettings.EsnDemoCaseSettings demoCaseParams,
                                                                   out double[] predictionInputVector,
                                                                   out List<Normalizer> outputNormalizerCollection
                                                                   )
         {
             //Allocations
             //Returned data bundle
-            SamplesDataBundle data = new SamplesDataBundle();
+            SampleDataBundle data = new SampleDataBundle();
             //Allways normalize between -1 and 1
             Interval normalizationInterval = new Interval(-1, 1);
             //Mapped Esn input fields to csv columns
@@ -127,7 +127,7 @@ namespace RCNet.Demo
                 }
             }//Loading the file
             
-            //SamplesDataBundle creation
+            //SampleDataBundle creation
             //Counts and positions
             int numOfDemoVectors = demoCaseParams.NumOfBootSamples + demoCaseParams.MaxNumOfTrainingSamples + demoCaseParams.NumOfTestSamples;
             if(numOfDemoVectors > inputVectorCollection.Count)
@@ -233,7 +233,7 @@ namespace RCNet.Demo
             //Load of data bundle for Esv training
             double[] predictionInputVector;
             List<Normalizer> outputNormalizers;
-            SamplesDataBundle data = SamplesDataBundleFromFile(demoCaseParams,
+            SampleDataBundle data = SampleDataBundleFromFile(demoCaseParams,
                                                                out predictionInputVector,
                                                                out outputNormalizers
                                                                );
@@ -301,6 +301,6 @@ namespace RCNet.Demo
             log.Write("ESN demo finished", false);
             return;
         }
-
     }//ESNDemo
+
 }//Namespace

@@ -539,5 +539,6 @@ namespace RCNet.MathTools
             return;
         }
 
-    }
-}
+    }//BasicStat
+
+}//Namespace

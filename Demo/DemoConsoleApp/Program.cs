@@ -8,7 +8,7 @@ namespace RCNet.DemoConsoleApp
     {
         static void Main(string[] args)
         {
-            //Output logging to console
+            //Logging the output to a console
             IOutputLog demoOutputLog = new ConsoleLog();
             //Esn demo
             string esnDemoSettingsFile = @"EsnDemoSettings.xml";
@@ -16,7 +16,6 @@ namespace RCNet.DemoConsoleApp
             Console.ReadLine();
             return;
         }
-
     }//Program
 
 }//Namespace

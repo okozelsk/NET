@@ -41,3 +41,4 @@ namespace RCNet.Neural.Activation
     }//IdentityAF
 
 }//Namespace
+

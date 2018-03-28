@@ -416,5 +416,4 @@ namespace RCNet.Neural.Network.EchoState
 
     }//ESNSettings
 
-
 }//Namespace

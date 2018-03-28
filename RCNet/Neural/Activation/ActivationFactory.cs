@@ -83,3 +83,4 @@ namespace RCNet.Neural.Activation
     }//ActivationFactory
 
 }//Namespace
+

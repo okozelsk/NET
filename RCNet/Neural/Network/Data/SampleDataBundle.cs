@@ -7,7 +7,7 @@ namespace RCNet.Neural.Network.Data
     /// Bundle of the input vectors and desired output vectors collections
     /// </summary>
     [Serializable]
-    public class SamplesDataBundle
+    public class SampleDataBundle
     {
         //Attributes
         /// <summary>
@@ -23,7 +23,7 @@ namespace RCNet.Neural.Network.Data
         /// <summary>
         /// Instantiates data bundle
         /// </summary>
-        public SamplesDataBundle()
+        public SampleDataBundle()
         {
             InputVectorCollection = new List<double[]>();
             OutputVectorCollection = new List<double[]>();
@@ -33,12 +33,13 @@ namespace RCNet.Neural.Network.Data
         /// <summary>
         /// Instantiates data bundle
         /// </summary>
-        public SamplesDataBundle(int numOfVectors)
+        public SampleDataBundle(int numOfVectors)
         {
             InputVectorCollection = new List<double[]>(numOfVectors);
             OutputVectorCollection = new List<double[]>(numOfVectors);
             return;
         }
 
-    }//SamplesDataBundle
+    }//SampleDataBundle
+
 }//Namespace

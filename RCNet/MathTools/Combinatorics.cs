@@ -30,3 +30,4 @@ namespace RCNet.MathTools
     }//Combinatorics
 
 }//Namespace
+

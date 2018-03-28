@@ -33,4 +33,5 @@ namespace RCNet.Neural.Activation
         double Derive(double c, double x);
 
     }//IActivationFunction
+
 }//Namespace
