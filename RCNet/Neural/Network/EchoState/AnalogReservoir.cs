@@ -122,14 +122,14 @@ namespace RCNet.Neural.Network.EchoState
                 _neurons[n] = new AnalogNeuron(ActivationFactory.CreateActivationFunction(_settings.ReservoirNeuronActivation), biases[n], retainmentRates[n]);
             }
             //Input
-            SetRandomInterconnections(_neuronInputConnectionsCollection, _numOfInputNodes, _settings.InputConnectionDensity, _settings.InputWeightScale, false);
+            SetGuaranteedRandomInterconnections(_neuronInputConnectionsCollection, _numOfInputNodes, _settings.InputConnectionDensity, _settings.InputWeightScale);
             //Feedback
             _feedback = null;
             if (_settings.FeedbackFeature)
             {
                 _feedback = new double[_settings.FeedbackFieldNameCollection.Count];
                 _feedback.Populate(0);
-                SetRandomInterconnections(_neuronFeedbackConnectionsCollection, _settings.FeedbackFieldNameCollection.Count, _settings.FeedbackConnectionDensity, _settings.FeedbackWeightScale, false);
+                SetGuaranteedRandomInterconnections(_neuronFeedbackConnectionsCollection, _settings.FeedbackFieldNameCollection.Count, _settings.FeedbackConnectionDensity, _settings.FeedbackWeightScale);
             }
             //Context neuron
             _contextNeuron = null;
@@ -228,6 +228,72 @@ namespace RCNet.Neural.Network.EchoState
             //Add new connection
             entityConnectionsCollection[entityIdx].Add(new Connection(partyIdx, GetRandomWeight(weightScale)));
             return true;
+        }
+
+        /// <summary>
+        /// This general function sets the random interconnections and weights between the entities and party entities.
+        /// Function guarantees at least one connection for party entity.
+        /// </summary>
+        /// <param name="entityConnectionsCollection">Bank of connections of the entities</param>
+        /// <param name="numOfParties">Number of party entities to be interconnected with entities</param>
+        /// <param name="density">Interconnection density</param>
+        /// <param name="weightScale">Random weight scale</param>
+        protected void SetGuaranteedRandomInterconnections(List<Connection>[] entityConnectionsCollection, int numOfParties, double density, double weightScale)
+        {
+            density = density.Bound(0, 1);
+            int idealNumOfConnections = (int)Math.Round(entityConnectionsCollection.Length * numOfParties * density, 0);
+            int partyNumOfConnections = Math.Max(1, (int)Math.Round(entityConnectionsCollection.Length * density, 0));
+            //Plan the party connection counts
+            int[] planedPartyConnectionCounts = new int[numOfParties];
+            planedPartyConnectionCounts.Populate(partyNumOfConnections);
+            int numOfAddedConnections = partyNumOfConnections * numOfParties;
+            if(numOfAddedConnections < idealNumOfConnections)
+            {
+                for(int i = numOfAddedConnections; i < idealNumOfConnections; i++)
+                {
+                    int partyIdx = _rand.Next(0, numOfParties);
+                    for(int j = 0; j < numOfParties; j++)
+                    {
+                        if (planedPartyConnectionCounts[partyIdx] < entityConnectionsCollection.Length)
+                        {
+                            ++planedPartyConnectionCounts[partyIdx];
+                            break;
+                        }
+                        else
+                        {
+                            ++partyIdx;
+                            if(partyIdx == numOfParties)
+                            {
+                                partyIdx = 0;
+                            }
+                        }
+                    }
+                }
+            }
+            //Add connections
+            for (int partyIdx = 0; partyIdx < numOfParties; partyIdx++)
+            {
+                for (int j = 0; j < planedPartyConnectionCounts[partyIdx]; j++)
+                {
+                    int entityIdx = _rand.Next(0, entityConnectionsCollection.Length);
+                    for(int k = 0; k < entityConnectionsCollection.Length; k++)
+                    {
+                        if (AddInterconnection(entityConnectionsCollection, entityIdx, partyIdx, weightScale, true))
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            ++entityIdx;
+                            if(entityIdx == entityConnectionsCollection.Length)
+                            {
+                                entityIdx = 0;
+                            }
+                        }
+                    }
+                }
+            }
+            return;
         }
 
         /// <summary>
