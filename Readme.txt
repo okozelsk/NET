@@ -26,8 +26,9 @@ Analog Reservoir
 Echo State Network
 	Feedback
 	Multiple internal reservoirs
-	Readout layer consists of feed forward network for every output field (with or without hidden layers)
-	Esn does not support SpectralRadius parameter (low added value) but provides the internal statistics
+	Readout layer consists of the feed forward network for every output field
+	Esn does not support SpectralRadius parameter (low added value)
+	Esn provides the internal statistics
 	User should simply tune parameters and monitor the statistics and results
 
 Demo application
