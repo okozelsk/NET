@@ -39,14 +39,14 @@ namespace RCNet.Demo
         /// <returns>
         /// Prepared SampleDataBundle object
         /// </returns>
-        public static SampleDataBundle SampleDataBundleFromFile(EsnDemoSettings.EsnDemoCaseSettings demoCaseParams,
+        public static SampleDataPairBundle SampleDataBundleFromFile(EsnDemoSettings.EsnDemoCaseSettings demoCaseParams,
                                                                   out double[] predictionInputVector,
                                                                   out List<Normalizer> outputNormalizerCollection
                                                                   )
         {
             //Allocations
             //Returned data bundle
-            SampleDataBundle data = new SampleDataBundle();
+            SampleDataPairBundle data = new SampleDataPairBundle();
             //Allways normalize between -1 and 1
             Interval normalizationInterval = new Interval(-1, 1);
             //Mapped Esn input fields to csv columns
@@ -233,7 +233,7 @@ namespace RCNet.Demo
             //Load of data bundle for Esv training
             double[] predictionInputVector;
             List<Normalizer> outputNormalizers;
-            SampleDataBundle data = SampleDataBundleFromFile(demoCaseParams,
+            SampleDataPairBundle data = SampleDataBundleFromFile(demoCaseParams,
                                                                out predictionInputVector,
                                                                out outputNormalizers
                                                                );

@@ -291,7 +291,7 @@ namespace RCNet.Neural.Network.EchoState
         /// <returns>
         /// Array of regression outputs
         /// </returns>
-        public EsnRegressionResult[] Train(SampleDataBundle dataSet,
+        public EsnRegressionResult[] Train(SampleDataPairBundle dataSet,
                                            int numOfBootSamples,
                                            int numOfTestSamples,
                                            EsnTestSamplesSelectorCallbackDelegate testSamplesSelector,
