@@ -15,7 +15,6 @@
     </xs:restriction>
   </xs:simpleType>
 
-
   <!-- COMPLEX TYPES -->
   <!-- Sample data -->
   <xs:complexType name="SampleData">

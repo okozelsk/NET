@@ -2,9 +2,53 @@
 <!-- You can specify your data location in DataDir attribute -->
 <EsnDemoSettings DataDir=".\\Data">
   <!-- You can modify/remove existing or add your own DemoCase elements -->
+  <DemoCase Name="Pattern recognition task Libras Movement from https://archive.ics.uci.edu (Single reservoir, Hidden layer, Resilient)">
+    <Samples CsvDataFileName="LibrasMovement.csv" NumOfBootSamples="200" MaxNumOfTrainingSamples="1000" NumOfTestSamples="15" TestSamplesSelectionMethod="Sequential" SingleNormalizer="false" NormalizerReserveRatio="0.1"/>
+    <EsnSettings TaskType="Categorization" RandomizerSeek="0">
+      <InputFields RouteToReadout="false">
+        <Field Name="coord_abcissa"/>
+        <Field Name="coord_ordinate"/>
+      </InputFields>
+      <ReservoirSettingsContainer>
+        <AnalogReservoirSettings Name="Random topology with 200 TanH neurons">
+          <Input ConnectionDensity="1" WeightScale="0.2"/>
+          <Internal Size="200" Activation="TanH" BiasScale="0" WeightScale="0.2">
+            <RingTopology Bidirectional="false" InterConnectionsDensity="0" SelfConnectionsDensity="0"/>
+            <ContextNeuron Activation="TanH" InputWeight="1" FeedbackDensity="0.5" FeedbackWeightScale="0.2"/>
+          </Internal>
+        </AnalogReservoirSettings>
+      </ReservoirSettingsContainer>
+      <ReservoirInstancesContainer>
+        <ReservoirInstance InstanceName="Main" SettingsName="Random topology with 200 TanH neurons" AugmentedStates="false">
+          <InputField Name="coord_abcissa"/>
+          <InputField Name="coord_ordinate"/>
+        </ReservoirInstance>
+      </ReservoirInstancesContainer>
+      <Readout OutputActivation="TanH" RegressionMethod="Resilient" Attempts="20" AttemptEpochs="250" AttemptStopMSE="1E-20">
+        <HiddenLayer Neurons="15" Activation="TanH"/>
+      </Readout>
+      <OutputFields>
+        <Field Name="curved swing"/>
+        <Field Name="horizontal swing"/>
+        <Field Name="vertical swing"/>
+        <Field Name="anti-clockwise arc"/>
+        <Field Name="clockwise arc"/>
+        <Field Name="circle"/>
+        <Field Name="horizontal straight-line"/>
+        <Field Name="vertical straight-line"/>
+        <Field Name="horizontal zigzag"/>
+        <Field Name="vertical zigzag"/>
+        <Field Name="horizontal wavy"/>
+        <Field Name="vertical wavy"/>
+        <Field Name="face-up curve"/>
+        <Field Name="face-down curve"/>
+        <Field Name="tremble"/>
+      </OutputFields>
+    </EsnSettings>
+  </DemoCase>
   <DemoCase Name="Prediction of the High and Low prices of SPXL title from Yahoo finance (A separate reservoir for each input field, Resilient)">
     <Samples CsvDataFileName="SPXL.csv" NumOfBootSamples="200" MaxNumOfTrainingSamples="1000" NumOfTestSamples="10" TestSamplesSelectionMethod="Random" SingleNormalizer="true" NormalizerReserveRatio="0.1"/>
-    <EsnSettings RandomizerSeek="0">
+    <EsnSettings TaskType="TimeSeriesPrediction" RandomizerSeek="0">
       <InputFields RouteToReadout="true">
         <Field Name="High"/>
         <Field Name="Low"/>
@@ -48,7 +92,7 @@
   </DemoCase>
   <DemoCase Name="Prediction of the High and Low prices of SPXL title from Yahoo finance (Single reservoir, Resilient)">
     <Samples CsvDataFileName="SPXL.csv" NumOfBootSamples="1000" MaxNumOfTrainingSamples="2000" NumOfTestSamples="10" TestSamplesSelectionMethod="Random" SingleNormalizer="true" NormalizerReserveRatio="0.1"/>
-    <EsnSettings RandomizerSeek="0">
+    <EsnSettings TaskType="TimeSeriesPrediction" RandomizerSeek="0">
       <InputFields RouteToReadout="true">
         <Field Name="High"/>
         <Field Name="Low"/>
@@ -80,7 +124,7 @@
   </DemoCase>
   <DemoCase Name="Prediction of the High and Low prices of TTOO title from Yahoo finance (Single reservoir, Resilient)">
     <Samples CsvDataFileName="TTOO.csv" NumOfBootSamples="300" MaxNumOfTrainingSamples="1000" NumOfTestSamples="10" TestSamplesSelectionMethod="Random" SingleNormalizer="true" NormalizerReserveRatio="0.1"/>
-    <EsnSettings RandomizerSeek="0">
+    <EsnSettings TaskType="TimeSeriesPrediction" RandomizerSeek="0">
       <InputFields RouteToReadout="true">
         <Field Name="High"/>
         <Field Name="Low"/>
@@ -113,7 +157,7 @@
   </DemoCase>
   <DemoCase Name="Prediction of the Sinusoid time series (Single reservoir, Hidden layers, Resilient)">
     <Samples CsvDataFileName="Sinusoid.csv" NumOfBootSamples="100" MaxNumOfTrainingSamples="1000" NumOfTestSamples="10" TestSamplesSelectionMethod="Sequential" SingleNormalizer="false" NormalizerReserveRatio="0.1"/>
-    <EsnSettings RandomizerSeek="0">
+    <EsnSettings TaskType="TimeSeriesPrediction" RandomizerSeek="0">
       <InputFields RouteToReadout="true">
         <Field Name="Value"/>
       </InputFields>
@@ -141,7 +185,7 @@
   </DemoCase>
   <DemoCase Name="Prediction of the Sinusoid time series (Single reservoir, Linear regression)">
     <Samples CsvDataFileName="Sinusoid.csv" NumOfBootSamples="400" MaxNumOfTrainingSamples="1000" NumOfTestSamples="10" TestSamplesSelectionMethod="Sequential" SingleNormalizer="false" NormalizerReserveRatio="0.1"/>
-    <EsnSettings RandomizerSeek="0">
+    <EsnSettings TaskType="TimeSeriesPrediction" RandomizerSeek="0">
       <InputFields RouteToReadout="false">
         <Field Name="Value"/>
       </InputFields>
@@ -170,7 +214,7 @@
   </DemoCase>
   <DemoCase Name="Prediction of the Mackey Glass chaotic time series (Single reservoir, Linear regression)">
     <Samples CsvDataFileName="MackeyGlass.csv" NumOfBootSamples="2000" MaxNumOfTrainingSamples="2000" NumOfTestSamples="500" TestSamplesSelectionMethod="Sequential" SingleNormalizer="false" NormalizerReserveRatio="0.1"/>
-    <EsnSettings RandomizerSeek="0">
+    <EsnSettings TaskType="TimeSeriesPrediction" RandomizerSeek="0">
       <InputFields RouteToReadout="false">
         <Field Name="Value"/>
       </InputFields>

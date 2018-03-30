@@ -21,7 +21,26 @@ namespace RCNet.Neural.Network.EchoState
     [Serializable]
     public class EsnSettings
     {
-        //Properties as attributes
+        /// <summary>
+        /// Supported task types which can be solved by Esn.
+        /// </summary>
+        public enum Purpose
+        {
+            /// <summary>
+            /// Time series prediction
+            /// </summary>
+            TimeSeriesPrediction,
+            /// <summary>
+            /// Pattern recognition
+            /// </summary>
+            Categorization
+        }
+
+        //Attribute properties
+        /// <summary>
+        /// Type of the task for which is Esn designed
+        /// </summary>
+        public Purpose TaskType { get; set; }
         /// <summary>
         /// A value greater than or equal to 0 will always ensure the same initialization of the internal
         /// random number generator and therefore the same network structure, which is good for tuning
@@ -89,6 +108,7 @@ namespace RCNet.Neural.Network.EchoState
         public EsnSettings()
         {
             //Default settings
+            TaskType = Purpose.TimeSeriesPrediction;
             RandomizerSeek = 0;
             InputFieldNameCollection = new List<string>();
             ReservoirInstanceDefinitionCollection = new List<ReservoirInstanceDefinition>();
@@ -110,6 +130,7 @@ namespace RCNet.Neural.Network.EchoState
         public EsnSettings(EsnSettings source)
         {
             //Copy
+            TaskType = source.TaskType;
             RandomizerSeek = source.RandomizerSeek;
             InputFieldNameCollection = new List<string>(source.InputFieldNameCollection);
             ReservoirInstanceDefinitionCollection = new List<ReservoirInstanceDefinition>(source.ReservoirInstanceDefinitionCollection.Count);
@@ -156,11 +177,17 @@ namespace RCNet.Neural.Network.EchoState
             }
             validator.LoadXDocFromString(esnSettingsElem.ToString());
             //Parsing
+            //Task type
+            TaskType = ParsePurpose(esnSettingsElem.Attribute("TaskType").Value);
             //Randomizer seek
             RandomizerSeek = int.Parse(esnSettingsElem.Attribute("RandomizerSeek").Value);
             //Input fields
             XElement inputFieldsElem = esnSettingsElem.Descendants("InputFields").First();
-            RouteInputToReadout = bool.Parse(inputFieldsElem.Attribute("RouteToReadout").Value);
+            RouteInputToReadout = bool.Parse(inputFieldsElem.Attributes("RouteToReadout").FirstOrDefault().Value);
+            if(TaskType == Purpose.Categorization && RouteInputToReadout)
+            {
+                throw new Exception("For categorization task setup is not allowed to route input to readout because of possible variable length of the input.");
+            }
             InputFieldNameCollection = new List<string>();
             foreach(XElement inputFieldElem in inputFieldsElem.Descendants("Field"))
             {
@@ -222,6 +249,10 @@ namespace RCNet.Neural.Network.EchoState
                 //Associated Esn output fields tor feedback
                 foreach (string feedbackFieldName in newMap.ReservoirSettings.FeedbackFieldNameCollection)
                 {
+                    if(TaskType == Purpose.Categorization)
+                    {
+                        throw new Exception($"Reservoir instance {newMap.InstanceName}: feedback fields are not allowed for categorization task type.");
+                    }
                     //Index in OutputFieldsNames
                     int feedbackFieldIdx = OutputFieldNameCollection.IndexOf(feedbackFieldName);
                     //Found?
@@ -239,6 +270,17 @@ namespace RCNet.Neural.Network.EchoState
         }
 
         //Methods
+        public Purpose ParsePurpose(string code)
+        {
+            switch(code.ToUpper())
+            {
+                case "TIMESERIESPREDICTION": return Purpose.TimeSeriesPrediction;
+                case "CATEGORIZATION": return Purpose.Categorization;
+                default:
+                    throw new ArgumentException($"Unknown task type {code}", "code");
+            }
+        }
+        
         /// <summary>
         /// See the base.
         /// </summary>

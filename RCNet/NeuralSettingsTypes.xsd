@@ -61,6 +61,14 @@
     </xs:restriction>
   </xs:simpleType>
 
+  <!-- Enumeration of neural task type -->
+  <xs:simpleType name="EnumNeuralTaskType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="TimeSeriesPrediction"/>
+      <xs:enumeration value="Categorization"/>
+    </xs:restriction>
+  </xs:simpleType>
+
 
   <!-- COMPLEX TYPES -->
   <!-- Name -->
@@ -156,7 +164,7 @@
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="Name" name="Field" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
-    <xs:attribute type="xs:boolean" name="RouteToReadout" use="required"/>
+    <xs:attribute type="xs:boolean" name="RouteToReadout" use="optional" default="false"/>
   </xs:complexType>
 
   <!-- Esn readout settings -->
@@ -211,6 +219,7 @@
       <xs:element type="EsnReadout" name="Readout" minOccurs="1" maxOccurs="1"/>
       <xs:element type="EsnOuputFields" name="OutputFields" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
+    <xs:attribute type="EnumNeuralTaskType" name="TaskType" use="required"/>
     <xs:attribute type="xs:int" name="RandomizerSeek" use="required" />
   </xs:complexType>
 
