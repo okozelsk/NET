@@ -1,7 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- You can specify your data location in DataDir attribute -->
 <EsnDemoSettings DataDir=".\\Data">
-  <!-- You can modify/remove existing or add your own DemoCase nodes -->
+  <!-- You can modify/remove existing or add your own DemoCase elements -->
+  <DemoCase Name="Prediction of the High and Low prices of SPXL title from Yahoo finance (A separate reservoir for each input field, Resilient)">
+    <Samples CsvDataFileName="SPXL.csv" NumOfBootSamples="200" MaxNumOfTrainingSamples="1000" NumOfTestSamples="10" TestSamplesSelectionMethod="Random" SingleNormalizer="true" NormalizerReserveRatio="0.1"/>
+    <EsnSettings RandomizerSeek="0">
+      <InputFields RouteToReadout="true">
+        <Field Name="High"/>
+        <Field Name="Low"/>
+        <Field Name="Adj Close"/>
+      </InputFields>
+      <ReservoirSettingsContainer>
+        <AnalogReservoirSettings Name="Random topology with 200 TanH neurons">
+          <Input ConnectionDensity="1" WeightScale="0.9"/>
+          <Internal Size="200" Activation="TanH" BiasScale="0" WeightScale="0.2">
+            <RandomTopology ConnectionsDensity="0.1"/>
+            <RetainmentNeurons Density="1" RetainmentMinRate="0" RetainmentMaxRate="0.5"/>
+          </Internal>
+          <Feedback Density="0" WeightScale="0"/>
+        </AnalogReservoirSettings>
+        <AnalogReservoirSettings Name="DTT topology with 200 TanH neurons">
+          <Input ConnectionDensity="1" WeightScale="0.9"/>
+          <Internal Size="200" Activation="TanH" BiasScale="0" WeightScale="0.9">
+            <DTTTopology SelfConnectionsDensity="0"/>
+            <RetainmentNeurons Density="1" RetainmentMinRate="0" RetainmentMaxRate="0.8"/>
+          </Internal>
+          <Feedback Density="0" WeightScale="0"/>
+        </AnalogReservoirSettings>
+      </ReservoirSettingsContainer>
+      <ReservoirInstancesContainer>
+        <ReservoirInstance InstanceName="High" SettingsName="Random topology with 200 TanH neurons" AugmentedStates="false">
+          <InputField Name="High"/>
+        </ReservoirInstance>
+        <ReservoirInstance InstanceName="Low" SettingsName="Random topology with 200 TanH neurons" AugmentedStates="false">
+          <InputField Name="Low"/>
+        </ReservoirInstance>
+        <ReservoirInstance InstanceName="Adj Close" SettingsName="DTT topology with 200 TanH neurons" AugmentedStates="false">
+          <InputField Name="Adj Close"/>
+        </ReservoirInstance>
+      </ReservoirInstancesContainer>
+      <Readout OutputActivation="Identity" RegressionMethod="Resilient" Attempts="5" AttemptEpochs="3000" AttemptStopMSE="1E-20"/>
+      <OutputFields>
+        <Field Name="High"/>
+        <Field Name="Low"/>
+      </OutputFields>
+    </EsnSettings>
+  </DemoCase>
   <DemoCase Name="Prediction of the High and Low prices of SPXL title from Yahoo finance (Single reservoir, Resilient)">
     <Samples CsvDataFileName="SPXL.csv" NumOfBootSamples="1000" MaxNumOfTrainingSamples="2000" NumOfTestSamples="10" TestSamplesSelectionMethod="Random" SingleNormalizer="true" NormalizerReserveRatio="0.1"/>
     <EsnSettings RandomizerSeek="0">
@@ -92,50 +136,6 @@
       </Readout>
       <OutputFields>
         <Field Name="Value"/>
-      </OutputFields>
-    </EsnSettings>
-  </DemoCase>
-  <DemoCase Name="Prediction of the High and Low prices of SPXL title from Yahoo finance (A separate reservoir for each input field, Resilient)">
-    <Samples CsvDataFileName="SPXL.csv" NumOfBootSamples="200" MaxNumOfTrainingSamples="1000" NumOfTestSamples="10" TestSamplesSelectionMethod="Random" SingleNormalizer="false" NormalizerReserveRatio="0.1"/>
-    <EsnSettings RandomizerSeek="0">
-      <InputFields RouteToReadout="true">
-        <Field Name="High"/>
-        <Field Name="Low"/>
-        <Field Name="Adj Close"/>
-      </InputFields>
-      <ReservoirSettingsContainer>
-        <AnalogReservoirSettings Name="Random topology with 200 TanH neurons">
-          <Input ConnectionDensity="1" WeightScale="0.9"/>
-          <Internal Size="200" Activation="TanH" BiasScale="0.1" WeightScale="0.1">
-            <RandomTopology ConnectionsDensity="0.15"/>
-            <RetainmentNeurons Density="1" RetainmentMinRate="0" RetainmentMaxRate="0.5"/>
-          </Internal>
-          <Feedback Density="0" WeightScale="0"/>
-        </AnalogReservoirSettings>
-        <AnalogReservoirSettings Name="Random topology with 200 Elliot neurons">
-          <Input ConnectionDensity="1" WeightScale="0.9"/>
-          <Internal Size="200" Activation="Elliot" BiasScale="0.3" WeightScale="0.1">
-            <RandomTopology ConnectionsDensity="0.15"/>
-            <RetainmentNeurons Density="1" RetainmentMinRate="0" RetainmentMaxRate="0.5"/>
-          </Internal>
-          <Feedback Density="0" WeightScale="0"/>
-        </AnalogReservoirSettings>
-      </ReservoirSettingsContainer>
-      <ReservoirInstancesContainer>
-        <ReservoirInstance InstanceName="High" SettingsName="Random topology with 200 TanH neurons" AugmentedStates="false">
-          <InputField Name="High"/>
-        </ReservoirInstance>
-        <ReservoirInstance InstanceName="Low" SettingsName="Random topology with 200 TanH neurons" AugmentedStates="false">
-          <InputField Name="Low"/>
-        </ReservoirInstance>
-        <ReservoirInstance InstanceName="Adj Close" SettingsName="Random topology with 200 Elliot neurons" AugmentedStates="false">
-          <InputField Name="Adj Close"/>
-        </ReservoirInstance>
-      </ReservoirInstancesContainer>
-      <Readout OutputActivation="Identity" RegressionMethod="Resilient" Attempts="5" AttemptEpochs="3000" AttemptStopMSE="1E-20"/>
-      <OutputFields>
-        <Field Name="High"/>
-        <Field Name="Low"/>
       </OutputFields>
     </EsnSettings>
   </DemoCase>

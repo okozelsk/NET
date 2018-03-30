@@ -27,7 +27,7 @@ namespace RCNet.MathTools
 
         //Constructors
         /// <summary>
-        /// The copy constructor
+        /// A deep copy constructor
         /// </summary>
         /// <param name="source">Source instance</param>
         public Normalizer(Normalizer source)
@@ -43,11 +43,10 @@ namespace RCNet.MathTools
         /// Instantiates a normalizer
         /// </summary>
         /// <param name="reserveRatio">
-        /// The reserve kept by the normalizer to protect against overflow if the future data
-        /// would grow from a known range.
+        /// Reserve held by a normalizer to cover cases where future data exceeds a known range of sample data.
         /// </param>
         /// <param name="standardize">
-        /// A switch if to apply the data standardization
+        /// Specifies whether to apply data standardization
         /// </param>
         public Normalizer(double reserveRatio, bool standardize = true)
         {
@@ -62,14 +61,13 @@ namespace RCNet.MathTools
         /// Constructs normalizer
         /// </summary>
         /// <param name="normRange">
-        /// The range of normalized values
+        /// Range of normalized values
         /// </param>
         /// <param name="reserveRatio">
-        /// The reserve kept by the normalizer to protect against overflow if the future data
-        /// would grow from a known range.
+        /// Reserve held by a normalizer to cover cases where future data exceeds a known range of sample data.
         /// </param>
         /// <param name="standardize">
-        /// A switch whether to apply the data standardization
+        /// Specifies whether to apply data standardization
         /// </param>
         public Normalizer(Interval normRange, double reserveRatio, bool standardize = true)
         {
@@ -86,12 +84,11 @@ namespace RCNet.MathTools
         /// </summary>
         public bool Initialized { get { return (_samplesStat.NumOfSamples > 0 && _samplesStat.Min != _samplesStat.Max); } }
         /// <summary>
-        /// The reserve kept by the normalizer to protect against overflow if the future data
-        /// would grow from a known range.
+        /// Reserve held by a normalizer to cover cases where future data exceeds a known range of sample data.
         /// </summary>
         public double ReserveRatio { get { return _reserveRatio; } }
         /// <summary>
-        /// Indicates whether is applied the data standardization
+        /// Indicates whether the data standardization is applied
         /// </summary>
         public bool Standardization { get { return _standardization; } }
         /// <summary>
@@ -106,6 +103,15 @@ namespace RCNet.MathTools
         private double VMax { get { return _samplesStat.Max + ((_samplesStat.Span * _reserveRatio) / 2); } }
 
         //Methods
+        /// <summary>
+        /// Resets normalizer to initial state
+        /// </summary>
+        public void Reset()
+        {
+            _samplesStat.Reset();
+            return;
+        }
+
         /// <summary>
         /// Adapts to the sample value
         /// </summary>

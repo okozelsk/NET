@@ -101,8 +101,7 @@ namespace RCNet.Demo
             /// </summary>
             public bool SingleNormalizer { get; }
             /// <summary>
-            /// The reserve kept by the normalizer to protect against overflow if the future data
-            /// would grow from a known range.
+            /// Reserve held by a normalizer to cover cases where future data exceeds a known range of sample data.
             /// </summary>
             public double NormalizerReserveRatio { get; }
             /// <summary>

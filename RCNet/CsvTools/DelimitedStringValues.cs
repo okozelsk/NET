@@ -146,6 +146,30 @@ namespace RCNet.CsvTools
         }
 
         /// <summary>
+        /// Removes string value at specified position from the internal collection of string values
+        /// </summary>
+        /// <param name="index">The zero-based index of value to be removed</param>
+        /// <returns>Number of string values in the internal collection after the operation</returns>
+        public int RemoveAt(int index)
+        {
+            _stringValueCollection.RemoveAt(index);
+            return _stringValueCollection.Count;
+        }
+
+        /// <summary>
+        /// Removes trailing empty or white spaced string values
+        /// </summary>
+        /// <returns>Number of string values in the internal collection after the operation</returns>
+        public int RemoveTrailingWhites()
+        {
+            while(_stringValueCollection.Count > 0 && _stringValueCollection[_stringValueCollection.Count - 1].Trim() == string.Empty)
+            {
+                _stringValueCollection.RemoveAt(_stringValueCollection.Count - 1);
+            }
+            return _stringValueCollection.Count;
+        }
+
+        /// <summary>
         /// Loads string values into the internal collection from a string containing delimited values
         /// </summary>
         /// <param name="delimValues">String containing delimited values</param>

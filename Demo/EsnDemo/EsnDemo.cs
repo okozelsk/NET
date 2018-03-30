@@ -22,9 +22,9 @@ namespace RCNet.Demo
     {
         /// <summary>
         /// Helper function.
-        /// Loads the data from csv file, prepares output normalizer(s) and creates SampleDataBundle object containing
+        /// Loads the data from csv file, prepares output normalizer(s) and creates SamplePairBundle object containing
         /// standardized and normalized data to be used for Esn training, testing and prediction.
-        /// Note that all data is always normalized to the interval (-1.1), so only activation functions supporting
+        /// Note that all data is always normalized to the interval (-1, 1), so only activation functions supporting
         /// this range should be used in demo case Esn settings.
         /// </summary>
         /// <param name="demoCaseParams">
@@ -37,16 +37,16 @@ namespace RCNet.Demo
         /// Prepared normalizer(s) for Esn outputs denormalization
         /// </param>
         /// <returns>
-        /// Prepared SampleDataBundle object
+        /// Prepared SamplePairBundle object
         /// </returns>
-        public static SampleDataPairBundle SampleDataBundleFromFile(EsnDemoSettings.EsnDemoCaseSettings demoCaseParams,
+        public static VectorsPairBundle SampleDataBundleFromFileOrg(EsnDemoSettings.EsnDemoCaseSettings demoCaseParams,
                                                                   out double[] predictionInputVector,
                                                                   out List<Normalizer> outputNormalizerCollection
                                                                   )
         {
             //Allocations
             //Returned data bundle
-            SampleDataPairBundle data = new SampleDataPairBundle();
+            VectorsPairBundle data = new VectorsPairBundle();
             //Allways normalize between -1 and 1
             Interval normalizationInterval = new Interval(-1, 1);
             //Mapped Esn input fields to csv columns
@@ -127,7 +127,7 @@ namespace RCNet.Demo
                 }
             }//Loading the file
             
-            //SampleDataBundle creation
+            //Bundle creation
             //Counts and positions
             int numOfDemoVectors = demoCaseParams.NumOfBootSamples + demoCaseParams.MaxNumOfTrainingSamples + demoCaseParams.NumOfTestSamples;
             if(numOfDemoVectors > inputVectorCollection.Count)
@@ -164,6 +164,90 @@ namespace RCNet.Demo
                     predictionInputVector = inputVector;
                 }
             }
+            return data;
+        }
+
+        public static VectorsPairBundle SampleDataBundleFromFile(EsnDemoSettings.EsnDemoCaseSettings demoCaseParams,
+                                                                  out double[] predictionInputVector,
+                                                                  out List<Normalizer> outputNormalizerCollection
+                                                                  )
+        {
+            //Allways normalize between -1 and 1
+            Interval normalizationInterval = new Interval(-1, 1);
+            //Commonly used exception message
+            string exCommonText = $"Can't parse data from file {demoCaseParams.CsvDataFileName}";
+            //Bundle handler
+            BundleNormalizer bh = new BundleNormalizer(normalizationInterval, demoCaseParams.NormalizerReserveRatio, true, true);
+            List<int> fieldIndexes = new List<int>();
+            List<double[]> allData = new List<double[]>();
+            //Open file and load the data
+            using (StreamReader streamReader = new StreamReader(new FileStream(demoCaseParams.CsvDataFileName, FileMode.Open)))
+            {
+                //First row contains column names (data fields)
+                string delimitedColumnNames = streamReader.ReadLine();
+                //What data delimiter is used?
+                char csvDelimiter = DelimitedStringValues.RecognizeDelimiter(delimitedColumnNames);
+                //Split column names
+                DelimitedStringValues columnNames = new DelimitedStringValues(csvDelimiter);
+                columnNames.LoadFromString(delimitedColumnNames);
+                //Check if the recognized data delimiter works properly
+                if (columnNames.NumOfStringValues < demoCaseParams.EsnConfiguration.InputFieldNameCollection.Count)
+                {
+                    throw new Exception(exCommonText + " Unknown delimiter.");
+                }
+                //Define fields
+                foreach (string name in demoCaseParams.EsnConfiguration.InputFieldNameCollection)
+                {
+                    if (!bh.IsFieldDefined(name))
+                    {
+                        bh.DefineField(name, demoCaseParams.SingleNormalizer ? "COMMON" : name);
+                        fieldIndexes.Add(columnNames.IndexOf(name));
+                    }
+                    bh.DefineInputField(name);
+                }
+                foreach (string name in demoCaseParams.EsnConfiguration.OutputFieldNameCollection)
+                {
+                    if (!bh.IsFieldDefined(name))
+                    {
+                        bh.DefineField(name, demoCaseParams.SingleNormalizer ? "COMMON" : name);
+                        fieldIndexes.Add(columnNames.IndexOf(name));
+                    }
+                    bh.DefineOutputField(name);
+                }
+                //Finalize structure
+                bh.FinalizeStructure();
+                //Load all relevant data
+                DelimitedStringValues dataRow = new DelimitedStringValues(csvDelimiter);
+                while (!streamReader.EndOfStream)
+                {
+                    dataRow.LoadFromString(streamReader.ReadLine());
+                    double[] vector = new double[fieldIndexes.Count];
+                    for (int i = 0; i < fieldIndexes.Count; i++)
+                    {
+                        vector[i] = dataRow.GetValue(fieldIndexes[i]).ParseDouble(true, exCommonText);
+                    }
+                    allData.Add(vector);
+                }
+            }//Loading the file
+            //Reduction of samples
+            int numOfDemoVectors = demoCaseParams.NumOfBootSamples + demoCaseParams.MaxNumOfTrainingSamples + demoCaseParams.NumOfTestSamples;
+            if (numOfDemoVectors > allData.Count)
+            {
+                numOfDemoVectors = allData.Count;
+            }
+            int firstVectorIdx = (allData.Count - numOfDemoVectors) - 1;
+            if (firstVectorIdx < 0)
+            {
+                firstVectorIdx = 0;
+            }
+            if(firstVectorIdx > 0)
+            {
+                allData.RemoveRange(0, firstVectorIdx);
+            }
+            //Returned data bundle
+            VectorsPairBundle data = null;
+            predictionInputVector = bh.CreateBundleFromVectorCollection(allData, true, out data);
+            outputNormalizerCollection = bh.OutputFieldNormalizerRefCollection;
             return data;
         }
 
@@ -222,20 +306,26 @@ namespace RCNet.Demo
 
         /// <summary>
         /// Executes specified demo case.
-        /// Loads and prepares sample data, trains Esn and displayes results plus prediction.
+        /// Loads and prepares sample data, trains Esn and displayes results
         /// </summary>
-        /// <param name="log">Here demo writes its output messages</param>
+        /// <param name="log">Into this interface demo writes its output messages</param>
         /// <param name="demoCaseParams">Demo case settings to be executed</param>
-        /// <returns></returns>
-        public static double[] PerformDemoCase(IOutputLog log, EsnDemoSettings.EsnDemoCaseSettings demoCaseParams)
+        public static void PerformDemoCase(IOutputLog log, EsnDemoSettings.EsnDemoCaseSettings demoCaseParams)
         {
+            Interval normRange = new Interval(-1, 1);
             log.Write("  Performing demo case " + demoCaseParams.Name, false);
-            //Load of data bundle for Esv training
+            //Load data bundle from csv file
             double[] predictionInputVector;
-            List<Normalizer> outputNormalizers;
-            SampleDataPairBundle data = SampleDataBundleFromFile(demoCaseParams,
-                                                               out predictionInputVector,
-                                                               out outputNormalizers
+            BundleNormalizer bundleNormalizer;
+            VectorsPairBundle data = TimeSeriesDataLoader.Load(demoCaseParams.CsvDataFileName,
+                                                               demoCaseParams.EsnConfiguration.InputFieldNameCollection,
+                                                               demoCaseParams.EsnConfiguration.OutputFieldNameCollection,
+                                                               normRange,
+                                                               demoCaseParams.NormalizerReserveRatio,
+                                                               true,
+                                                               demoCaseParams.SingleNormalizer,
+                                                               out bundleNormalizer,
+                                                               out predictionInputVector
                                                                );
             //Instantiate Esn
             Esn esn = new Esn(demoCaseParams.EsnConfiguration);
@@ -254,11 +344,8 @@ namespace RCNet.Demo
             //Note that there is not necessary to call PushFeedback function immediately after training.
             //Feedback was already pushed during the Esn training.
             double[] outputVector = esn.Compute(predictionInputVector);
-            //Values are normalized so they have to be denormalize
-            for(int i = 0; i < outputVector.Length; i++)
-            {
-                outputVector[i] = outputNormalizers[i].Naturalize(outputVector[i]);
-            }
+            //Values are normalized so they have to be denormalized
+            bundleNormalizer.NaturalizeOutputVector(outputVector);
             //Report training (regression) results and prediction
             log.Write("    Results", false);
             for (int outputIdx = 0; outputIdx < regrOuts.Length; outputIdx++)
@@ -273,12 +360,12 @@ namespace RCNet.Demo
                 log.Write("      Train set Avg Err: " + regrOuts[outputIdx].TrainingErrorStat.ArithAvg.ToString(CultureInfo.InvariantCulture), false);
                 log.Write("       Test set samples: " + regrOuts[outputIdx].TestingErrorStat.NumOfSamples.ToString(), false);
                 log.Write("       Test set Avg Err: " + regrOuts[outputIdx].TestingErrorStat.ArithAvg.ToString(CultureInfo.InvariantCulture), false);
-                log.Write("      Test Max Real Err: " + (outputNormalizers[outputIdx].ComputeNaturalSpan(regrOuts[outputIdx].TestingErrorStat.Max)).ToString(CultureInfo.InvariantCulture), false);
-                log.Write("      Test Avg Real Err: " + (outputNormalizers[outputIdx].ComputeNaturalSpan(regrOuts[outputIdx].TestingErrorStat.ArithAvg)).ToString(CultureInfo.InvariantCulture), false);
+                log.Write("      Test Max Real Err: " + (bundleNormalizer.OutputFieldNormalizerRefCollection[outputIdx].ComputeNaturalSpan(regrOuts[outputIdx].TestingErrorStat.Max)).ToString(CultureInfo.InvariantCulture), false);
+                log.Write("      Test Avg Real Err: " + (bundleNormalizer.OutputFieldNormalizerRefCollection[outputIdx].ComputeNaturalSpan(regrOuts[outputIdx].TestingErrorStat.ArithAvg)).ToString(CultureInfo.InvariantCulture), false);
             }
             log.Write(" ", false);
             log.Write(" ", false);
-            return outputVector;
+            return;
         }
 
         /// <summary>
@@ -289,6 +376,10 @@ namespace RCNet.Demo
         /// <param name="demoSettingsXmlFile">Xml file containing definitions of demo cases to be prformed</param>
         public static void RunDemo(IOutputLog log, string demoSettingsXmlFile)
         {
+            //DEBUG
+            BundleNormalizer bh;
+            PatternVectorPairBundle bundle = PatternDataLoader.Load(@"Data\LibrasMovementPattern.csv", new Interval(-1, 1), 0.1, true, out bh);
+
             log.Write("ESN demo started", false);
             //Instantiate demo settings from the xml file
             EsnDemoSettings demoSettings = new EsnDemoSettings(demoSettingsXmlFile);
@@ -296,7 +387,7 @@ namespace RCNet.Demo
             foreach(EsnDemoSettings.EsnDemoCaseSettings demoCaseParams in demoSettings.DemoCaseParamsCollection)
             {
                 //Execute the demo case
-                double[] predictions = PerformDemoCase(log, demoCaseParams);
+                PerformDemoCase(log, demoCaseParams);
             }
             log.Write("ESN demo finished", false);
             return;

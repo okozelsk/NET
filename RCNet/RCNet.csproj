@@ -46,6 +46,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CsvTools\DelimitedStringValues.cs" />
+    <Compile Include="CsvTools\TimeSeriesDataLoader.cs" />
+    <Compile Include="CsvTools\PatternDataLoader.cs" />
     <Compile Include="Extensions\ArrayClassExtensions.cs" />
     <Compile Include="Extensions\DoubleClassExtensions.cs" />
     <Compile Include="Extensions\RandomClassExtensions.cs" />
@@ -68,7 +70,9 @@
     <Compile Include="Neural\Activation\SigmoidAF.cs" />
     <Compile Include="Neural\Activation\SinusoidAF.cs" />
     <Compile Include="Neural\Activation\TanhAF.cs" />
-    <Compile Include="Neural\Network\Data\SampleDataPairBundle.cs" />
+    <Compile Include="Neural\Network\Data\BundleNormalizer.cs" />
+    <Compile Include="Neural\Network\Data\PatternVectorPairBundle.cs" />
+    <Compile Include="Neural\Network\Data\VectorsPairBundle.cs" />
     <Compile Include="Neural\Network\EchoState\AnalogNeuron.cs" />
     <Compile Include="Neural\Network\EchoState\AnalogReservoir.cs" />
     <Compile Include="Neural\Network\EchoState\AnalogReservoirSettings.cs" />
