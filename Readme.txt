@@ -44,7 +44,7 @@ Bundle normalizer
 
 Demo application
 ----------------
-All the functionality is demonstrated in a simple demo application (/Demo/DemoConsoleApp). Application has no startup parameters, all necessary settins are specified in EsnDemoSettings.xml file. EsnDemoSettings.xml has to be in the same folder as the executable DemoConsoleApp.exe. Application performs training-->prediction operations sequence for each demo case defined in EsnDemoSettings.xml. Input time series data has to be stored in a file (csv format). You can simply modify EsnDemoSettings.xml and configure your own training-->prediction sessions.
+All the functionality is demonstrated in a simple demo application (/Demo/DemoConsoleApp). Application has no startup parameters, all necessary settins are specified in EsnDemoSettings.xml file. EsnDemoSettings.xml has to be in the same folder as the executable DemoConsoleApp.exe. Application performs sequence of demo cases defined in EsnDemoSettings.xml. Input data has to be stored in a file (csv format). You can simply modify EsnDemoSettings.xml and configure your own cases.
 
 
 Other information
