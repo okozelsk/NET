@@ -14,9 +14,8 @@ namespace RCNet.Demo
 {
     /// <summary>
     /// Demonstrates the Esn usage.
-    /// It performs training-->prediction operations sequence for each demo case defined in xml file.
-    /// Input time series data has to be stored in a file (csv format).
-	/// You can simply modify xml and configure your own training-->prediction sessions.
+    /// It performs demo cases defined in xml file.
+    /// Input data has to be stored in a file (csv format).
     /// </summary>
     public static class EsnDemo
     {
@@ -56,6 +55,7 @@ namespace RCNet.Demo
             Esn.EsnRegressionControlOutArgs outArgs = new Esn.EsnRegressionControlOutArgs();
             //Evaluate statistics and decide if the latest statistics are the best.
             outArgs.Best = (inArgs.RegrCurrResult.CombinedError < inArgs.RegrBestResult.CombinedError);
+            //outArgs.Best = (inArgs.RegrCurrResult.TrainingErrorStat.ArithAvg < inArgs.RegrBestResult.TrainingErrorStat.ArithAvg);
             //Report the progress
             int reportInterval = Math.Max(inArgs.MaxEpoch / 100, 1);
             if (outArgs.Best || (inArgs.Epoch % reportInterval) == 0 || inArgs.Epoch == inArgs.MaxEpoch || (inArgs.Epoch == 1 && inArgs.RegrAttemptNumber == 1))
@@ -84,7 +84,7 @@ namespace RCNet.Demo
             //For demo purposes is allowed only the normalization range (-1, 1)
             Interval normRange = new Interval(-1, 1);
             log.Write("  Performing demo case " + demoCaseParams.Name, false);
-            if (demoCaseParams.EsnConfiguration.TaskType == EsnSettings.Purpose.TimeSeriesPrediction)
+            if (demoCaseParams.EsnConfiguration.TaskType == EsnSettings.EsnTaskType.TimeSeriesPrediction)
             {
                 //Load data bundle from csv file
                 double[] predictionInputVector;
@@ -124,7 +124,7 @@ namespace RCNet.Demo
                 {
                     log.Write("            OutputField: " + regrOuts[outputIdx].OutputFieldName, false);
                     log.Write("         Predicted next: " + outputVector[outputIdx].ToString(CultureInfo.InvariantCulture), false);
-                    log.Write("      Trained weights stat", false);
+                    log.Write("    Trained weights stat", false);
                     log.Write("          Min, Max, Avg: " + regrOuts[outputIdx].OutputWeightsStat.Min.ToString(CultureInfo.InvariantCulture) + " " + regrOuts[outputIdx].OutputWeightsStat.Max.ToString(CultureInfo.InvariantCulture) + " " + regrOuts[outputIdx].OutputWeightsStat.ArithAvg.ToString(CultureInfo.InvariantCulture), false);
                     log.Write("          Upd, Cnt, Zrs: " + regrOuts[outputIdx].WeightsUpdateCounter.ToString() + " " + regrOuts[outputIdx].OutputWeightsStat.NumOfSamples.ToString() + " " + (regrOuts[outputIdx].OutputWeightsStat.NumOfSamples - regrOuts[outputIdx].OutputWeightsStat.NumOfNonzeroSamples).ToString(), false);
                     log.Write("              Error stat", false);
@@ -136,7 +136,7 @@ namespace RCNet.Demo
                     log.Write("      Test Avg Real Err: " + (bundleNormalizer.OutputFieldNormalizerRefCollection[outputIdx].ComputeNaturalSpan(regrOuts[outputIdx].TestingErrorStat.ArithAvg)).ToString(CultureInfo.InvariantCulture), false);
                 }
             }
-            else if(demoCaseParams.EsnConfiguration.TaskType == EsnSettings.Purpose.Categorization)
+            else if(demoCaseParams.EsnConfiguration.TaskType == EsnSettings.EsnTaskType.Categorization)
             {
                 //Load data bundle from csv file
                 BundleNormalizer bundleNormalizer;
@@ -163,7 +163,7 @@ namespace RCNet.Demo
                 for (int outputIdx = 0; outputIdx < regrOuts.Length; outputIdx++)
                 {
                     log.Write("            OutputField: " + regrOuts[outputIdx].OutputFieldName, false);
-                    log.Write("      Trained weights stat", false);
+                    log.Write("    Trained weights stat", false);
                     log.Write("          Min, Max, Avg: " + regrOuts[outputIdx].OutputWeightsStat.Min.ToString(CultureInfo.InvariantCulture) + " " + regrOuts[outputIdx].OutputWeightsStat.Max.ToString(CultureInfo.InvariantCulture) + " " + regrOuts[outputIdx].OutputWeightsStat.ArithAvg.ToString(CultureInfo.InvariantCulture), false);
                     log.Write("          Upd, Cnt, Zrs: " + regrOuts[outputIdx].WeightsUpdateCounter.ToString() + " " + regrOuts[outputIdx].OutputWeightsStat.NumOfSamples.ToString() + " " + (regrOuts[outputIdx].OutputWeightsStat.NumOfSamples - regrOuts[outputIdx].OutputWeightsStat.NumOfNonzeroSamples).ToString(), false);
                     log.Write("              Error stat", false);

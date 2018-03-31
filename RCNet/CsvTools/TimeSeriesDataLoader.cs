@@ -10,8 +10,43 @@ using RCNet.Neural.Network.Data;
 
 namespace RCNet.CsvTools
 {
+    /// <summary>
+    /// The class allows to upload sample data for a TimeSeriesPrediction task from an .csv file.
+    /// </summary>
     public static class TimeSeriesDataLoader
     {
+        /// <summary>
+        /// Loads the data and prepares VectorsPairBundle.
+        /// The first line of the csv file must be field names. These field names must
+        /// match the names of the input and output fields.
+        /// </summary>
+        /// <param name="fileName">
+        /// Data file name
+        /// </param>
+        /// <param name="inputFieldNameCollection">
+        /// Input fields
+        /// </param>
+        /// <param name="outputFieldNameCollection">
+        /// Output fields
+        /// </param>
+        /// <param name="normRange">
+        /// Range of normalized values
+        /// </param>
+        /// <param name="normReserveRatio">
+        /// Reserve held by a normalizer to cover cases where future data exceeds a known range of sample data.
+        /// </param>
+        /// <param name="dataStandardization">
+        /// Specifies whether to apply data standardization
+        /// </param>
+        /// <param name="singleNormalizer">
+        /// Use true if all input and output fields are about the same range of values.
+        /// </param>
+        /// <param name="bundleNormalizer">
+        /// Returned initialized instance of BundleNormalizer.
+        /// </param>
+        /// <param name="remainingInputVector">
+        /// Returned the last input vector unused in the bundle.
+        /// </param>
         public static VectorsPairBundle Load(string fileName,
                                              List<string> inputFieldNameCollection,
                                              List<string> outputFieldNameCollection,

@@ -15,21 +15,32 @@ Activation functions
 	Gaussian
 Feed Forward Network
 	Multiple hidden layers
-Network Trainers
-	Linear regression trainer
-	Resilient propagation trainer (iRPROP+ variant)
+	Network Trainers
+		Linear regression trainer
+		Resilient propagation trainer (iRPROP+ variant)
 Analog Reservoir
-	Random, Ring and Doubly Twisted Thoroidal internal connection topologies
+	Supported topologies:
+		Random
+		Ring
+		Doubly Twisted Thoroidal
 	Context neuron feature
 	Retainment neurons (leaky integrators) feature
 	Augmented states feature
 Echo State Network
-	Feedback
 	Multiple internal reservoirs
 	Readout layer consists of the feed forward network for every output field
 	Esn does not support SpectralRadius parameter (low added value)
-	Esn provides the internal statistics
-	User should simply tune parameters and monitor the statistics and results
+		but provides the internal statistics
+	Supported task types:
+		Time series prediction
+		Categorization
+			Supports variable length patterns
+Data loaders (csv)
+	Supporting data formats for Esn task types
+
+Bundle normalizer
+	Helper for data bundle normalization
+
 
 Demo application
 ----------------

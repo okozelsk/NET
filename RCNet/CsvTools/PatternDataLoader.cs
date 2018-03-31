@@ -10,8 +10,38 @@ using RCNet.Neural.Network.Data;
 
 namespace RCNet.CsvTools
 {
+    /// <summary>
+    /// The class allows to upload sample data for a Categorization task from an .csv file.
+    /// </summary>
     public static class PatternDataLoader
     {
+        /// <summary>
+        /// Loads the data and prepares PatternVectorPairBundle.
+        /// 1st row of the file must start with the #RepetitiveGroupOfAttributes keyword followed by
+        /// attribute names.
+        /// 2nd row of the file must start with the #CategorizationClasses keyword followed by
+        /// class names.
+        /// 3rd+ rows are the data rows.
+        /// The data row must begin with at least one set of values for defined repetitive attributes.
+        /// Value groups may be more in sequence.
+        /// The data row must end with a value for each defined categorization class.
+        /// </summary>
+        /// <param name="fileName">
+        /// Data file name
+        /// </param>
+        /// <param name="normRange">
+        /// Range of normalized values
+        /// </param>
+        /// <param name="normReserveRatio">
+        /// Reserve held by a normalizer to cover cases where future data exceeds a known range of sample data.
+        /// </param>
+        /// <param name="inputDataStandardization">
+        /// Specifies whether to apply data standardization to input data.
+        /// Output data is never standardized.
+        /// </param>
+        /// <param name="bundleNormalizer">
+        /// Returned initialized instance of BundleNormalizer.
+        /// </param>
         public static PatternVectorPairBundle Load(string fileName,
                                                    Interval normRange,
                                                    double normReserveRatio,

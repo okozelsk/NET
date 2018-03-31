@@ -46,6 +46,9 @@ namespace RCNet.Neural.Network.Data
         public List<Normalizer> OutputFieldNormalizerRefCollection { get; }
 
         //Constructors
+        /// <summary>
+        /// Creates an uninitialized instance.
+        /// </summary>
         /// <param name="normRange">
         /// Range of normalized values
         /// </param>
@@ -56,10 +59,10 @@ namespace RCNet.Neural.Network.Data
         /// Specifies whether to apply data standardization
         /// </param>
         public BundleNormalizer(Interval normRange,
-                             double normReserveRatio,
-                             bool inputDataStandardization = true,
-                             bool outputDataStandardization = true
-                             )
+                                double normReserveRatio,
+                                bool inputDataStandardization = true,
+                                bool outputDataStandardization = true
+                                )
         {
             _fieldTypeNormalizerCollection = new Dictionary<string, Normalizer>();
             _fieldNameTypeCollection = new Dictionary<string, string>();
@@ -86,11 +89,23 @@ namespace RCNet.Neural.Network.Data
             return;
         }
 
+        /// <summary>
+        /// Determines whether the specified field is defined.
+        /// </summary>
+        /// <param name="name">Field name</param>
         public bool IsFieldDefined(string name)
         {
             return _fieldNameTypeCollection.ContainsKey(name);
         }
 
+        /// <summary>
+        /// Defines a data field that can then be used in input fields or output fields.
+        /// The normalizer instance binds to the data field type.
+        /// Specifying the same type name on different data fields causes the data fields to be grouped under
+        /// one instance of the normalizer.
+        /// </summary>
+        /// <param name="name">Field name</param>
+        /// <param name="type">Field type</param>
         public void DefineField(string name, string type)
         {
             if (_outputFieldAdjustmentSwitches != null)
@@ -110,6 +125,10 @@ namespace RCNet.Neural.Network.Data
             return;
         }
 
+        /// <summary>
+        /// Once the data field is defined (DefineField), it can be designated as an input and / or output field
+        /// </summary>
+        /// <param name="name">Field name</param>
         public void DefineInputField(string name)
         {
             if (_outputFieldAdjustmentSwitches != null)
@@ -135,6 +154,10 @@ namespace RCNet.Neural.Network.Data
             return;
         }
 
+        /// <summary>
+        /// Once the data field is defined (DefineField), it can be designated as an input and / or output field
+        /// </summary>
+        /// <param name="name">Field name</param>
         public void DefineOutputField(string name)
         {
             if (_outputFieldAdjustmentSwitches != null)
@@ -160,6 +183,10 @@ namespace RCNet.Neural.Network.Data
             return;
         }
 
+        /// <summary>
+        /// Finalizes the field definition.
+        /// Data operations are only allowed after the internal structure has been finalized.
+        /// </summary>
         public void FinalizeStructure()
         {
             if(_outputFieldAdjustmentSwitches != null)
@@ -179,6 +206,9 @@ namespace RCNet.Neural.Network.Data
             return;
         }
 
+        /// <summary>
+        /// Checkes if the structure is finalized
+        /// </summary>
         protected void CheckStructure()
         {
             if (_outputFieldAdjustmentSwitches == null)
@@ -478,6 +508,6 @@ namespace RCNet.Neural.Network.Data
             return remainingInputVector;
         }
 
-    }//BundleHandler
+    }//BundleNormalizer
 
 }//Namespace

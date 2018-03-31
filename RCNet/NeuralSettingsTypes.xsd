@@ -119,7 +119,7 @@
     <xs:attribute type="EnumActivation" name="Activation" use="required"/>
     <xs:attribute type="UDouble" name="InputWeight" use="required"/>
     <xs:attribute type="UDoubleLE1" name="FeedbackDensity" use="required"/>
-    <xs:attribute type="UDouble" name="FeedbackWeightScale" use="required"/>
+    <xs:attribute type="UDouble" name="FeedbackWeight" use="required"/>
   </xs:complexType>
 
   <!-- Analog reservoir internal -->

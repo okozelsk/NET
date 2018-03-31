@@ -77,11 +77,16 @@ namespace RCNet.Neural.Network.EchoState
         public double PreviousState { get { return _previousState; } }
 
         /// <summary>
-        /// Resets neuron to its initial state (0).
+        /// Resets neuron to its initial state (0) and optionaly resets internal statistics
         /// </summary>
-        public virtual void Reset()
+        /// <param name="resetStatistics">Specifies whether to reset the internal statistics</param>
+        public virtual void Reset(bool resetStatistics)
         {
             _previousState = _currentState = 0;
+            if(resetStatistics)
+            {
+                StatesStat.Reset();
+            }
             return;
         }
 

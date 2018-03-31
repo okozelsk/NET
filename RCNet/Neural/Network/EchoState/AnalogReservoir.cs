@@ -60,7 +60,7 @@ namespace RCNet.Neural.Network.EchoState
         /// </summary>
         protected double _contextNeuronInputWeight;
         /// <summary>
-        /// Context neuron feedback weights to reservoir neurons
+        /// Context neuron feedback weight
         /// </summary>
         protected double[] _contextNeuronFeedbackWeights;
         /// <summary>
@@ -77,9 +77,8 @@ namespace RCNet.Neural.Network.EchoState
         /// <param name="augmentedStates">Specifies whether this reservoir will add augmented states to output predictors</param>
         /// <param name="randomizerSeek">
         /// A value greater than or equal to 0 will always ensure the same initialization of the internal
-        /// random number generator and therefore the same reservoir structure, which is good for tuning
-        /// other reservoir's parameters.
-        /// A value less than 0 causes a fully random initialization when creating a reservoir instance.
+        /// random number generator and therefore the same reservoir structure, which is good for tuning purposes.
+        /// A value less than 0 causes a fully random initialization each time creating a reservoir instance.
         /// </param>
         public AnalogReservoir(string instanceName, int numOfInputNodes, AnalogReservoirSettings settings, bool augmentedStates, int randomizerSeek = -1)
         {
@@ -146,7 +145,7 @@ namespace RCNet.Neural.Network.EchoState
                 neuronIndices.ShuffledIndices(_rand);
                 for (int i = 0; i < numOfContextNeuronFeedbacks && i < _neurons.Length; i++)
                 {
-                    _contextNeuronFeedbackWeights[neuronIndices[i]] = GetRandomWeight(_settings.ContextNeuronFeedbackWeightScale);
+                    _contextNeuronFeedbackWeights[neuronIndices[i]] = _settings.ContextNeuronFeedbackWeight;
                 }
             }
             //Topology
@@ -232,7 +231,7 @@ namespace RCNet.Neural.Network.EchoState
 
         /// <summary>
         /// This general function sets the random interconnections and weights between the entities and party entities.
-        /// Function guarantees at least one connection for party entity.
+        /// Function guarantees at least one connection for the party entity.
         /// </summary>
         /// <param name="entityConnectionsCollection">Bank of connections of the entities</param>
         /// <param name="numOfParties">Number of party entities to be interconnected with entities</param>
@@ -439,18 +438,19 @@ namespace RCNet.Neural.Network.EchoState
         }
 
         /// <summary>
-        /// Resets all reservoir neurons to their initial state (before boot state).
+        /// Resets all reservoir neurons to their initial state.
         /// Function does not affect weights or internal structure of the resservoir.
         /// </summary>
-        public void Reset()
+        /// <param name="resetStatistics">Specifies whether to reset internal statistics</param>
+        public void Reset(bool resetStatistics)
         {
             foreach (AnalogNeuron neuron in _neurons)
             {
-                neuron.Reset();
+                neuron.Reset(resetStatistics);
             }
             if (_settings.ContextNeuronFeature)
             {
-                _contextNeuron.Reset();
+                _contextNeuron.Reset(resetStatistics);
             }
             if (_settings.FeedbackFeature)
             {
@@ -460,20 +460,16 @@ namespace RCNet.Neural.Network.EchoState
         }
 
         /// <summary>
-        /// Computes reservoir neurons states and fills given array of reservoir output predictors.
+        /// Computes reservoir neurons states.
         /// </summary>
         /// <param name="input">
         /// Array of input values.
         /// </param>
-        /// <param name="outputPredictors">
-        /// Array to be filled with predictors values.
-        /// Array has to be sized to the value of NumOfOutputPredictors reservoir's property.
-        /// </param>
         /// <param name="updateStatistics">
         /// Specifies whether to update neurons statistics.
-        /// Specify "false" within the booting phase and "true" after the booting phase.
+        /// Specify "false" during the booting phase and "true" after the booting phase.
         /// </param>
-        public void Compute(double[] input, double[] outputPredictors, bool updateStatistics)
+        public void Compute(double[] input, bool updateStatistics)
         {
             //Store all the reservoir neurons states
             foreach(AnalogNeuron neuron in _neurons)
@@ -508,13 +504,6 @@ namespace RCNet.Neural.Network.EchoState
                 }
                 //Compute the new state of the reservoir neuron
                 _neurons[neuronIdx].Compute(inputSignal + reservoirSignal + feedbackSignal, updateStatistics);
-                //Set the neuron state into the array of output predictors
-                outputPredictors[neuronIdx] = _neurons[neuronIdx].CurrentState;
-                //Set the neuron's augmented state into the array of output predictors
-                if (_augmentedStatesFeature)
-                {
-                    outputPredictors[_neurons.Length + neuronIdx] = outputPredictors[neuronIdx].Power(2);
-                }
             });
             //Compute context neuron state (if allowed)
             if (_settings.ContextNeuronFeature)
@@ -530,7 +519,24 @@ namespace RCNet.Neural.Network.EchoState
         }
 
         /// <summary>
-        /// Sets feedback values for the next Compute calling
+        /// Returns reservoir predictors
+        /// </summary>
+        public double[] GetPredictors()
+        {
+            double[] outputPredictors = new double[NumOfOutputPredictors];
+            for(int n = 0; n < _neurons.Length; n++)
+            {
+                outputPredictors[n] = _neurons[n].CurrentState;
+                if(_augmentedStatesFeature)
+                {
+                    outputPredictors[_neurons.Length + n] = outputPredictors[n] * outputPredictors[n];
+                }
+            }
+            return outputPredictors;
+        }
+
+        /// <summary>
+        /// Sets feedback values for the next Compute call
         /// </summary>
         /// <param name="feedback">Feedback values.</param>
         public void SetFeedback(double[] feedback)

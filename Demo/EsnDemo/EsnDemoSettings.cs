@@ -84,10 +84,6 @@ namespace RCNet.Demo
             /// </summary>
             public int NumOfBootSamples { get; }
             /// <summary>
-            /// Maximum number of samples to be used for Esn training purposes.
-            /// </summary>
-            public int MaxNumOfTrainingSamples { get; }
-            /// <summary>
             /// Number of samples to be used to test Esn generalization capability.
             /// </summary>
             public int NumOfTestSamples { get; }
@@ -116,8 +112,7 @@ namespace RCNet.Demo
                 Name = demoCaseElem.Attribute("Name").Value;
                 XElement samplesElem = demoCaseElem.Descendants("Samples").First();
                 CsvDataFileName = dir + "\\" + samplesElem.Attribute("CsvDataFileName").Value;
-                NumOfBootSamples = int.Parse(samplesElem.Attribute("NumOfBootSamples").Value);
-                MaxNumOfTrainingSamples = int.Parse(samplesElem.Attribute("MaxNumOfTrainingSamples").Value);
+                NumOfBootSamples = (samplesElem.Attribute("NumOfBootSamples") == null) ? 0 : int.Parse(samplesElem.Attribute("NumOfBootSamples").Value);
                 NumOfTestSamples = int.Parse(samplesElem.Attribute("NumOfTestSamples").Value);
                 TestSamplesSelectionMethod = samplesElem.Attribute("TestSamplesSelectionMethod").Value;
                 SingleNormalizer = bool.Parse(samplesElem.Attribute("SingleNormalizer").Value);

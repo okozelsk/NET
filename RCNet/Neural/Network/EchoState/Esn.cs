@@ -102,11 +102,12 @@ namespace RCNet.Neural.Network.EchoState
         /// <summary>
         /// Sets Esn internal state to initial state
         /// </summary>
-        private void Reset()
+        /// <param name="resetStatistics">Specifies whether to reset internal statistics</param>
+        private void Reset(bool resetStatistics)
         {
             foreach(ReservoirInstance reservoirInstanceData in _reservoirInstanceCollection)
             {
-                reservoirInstanceData.Reset();
+                reservoirInstanceData.Reset(resetStatistics);
             }
             _reservoirsReadoutLayer.Populate(0);
             return;
@@ -130,9 +131,9 @@ namespace RCNet.Neural.Network.EchoState
                 {
                     reservoirInput[i] = inputValues[resInstance.InstanceDefinition.InputFieldMappingCollection[i]];
                 }
-                double[] reservoirPredictors = new double[resInstance.ReservoirObj.NumOfOutputPredictors];
-                //Compute reservoir output
-                resInstance.ReservoirObj.Compute(reservoirInput, reservoirPredictors, collectStatesStatistics);
+                //Compute reservoir
+                resInstance.ReservoirObj.Compute(reservoirInput, collectStatesStatistics);
+                double[] reservoirPredictors = resInstance.ReservoirObj.GetPredictors();
                 //Add predictors to common readout layer
                 reservoirPredictors.CopyTo(_reservoirsReadoutLayer, reservoirsReadoutLayerIdx);
                 reservoirsReadoutLayerIdx += reservoirPredictors.Length;
@@ -153,18 +154,20 @@ namespace RCNet.Neural.Network.EchoState
             //Compute reservoir(s)
             foreach (ReservoirInstance resInstance in _reservoirInstanceCollection)
             {
-                double[] reservoirPredictors = new double[resInstance.ReservoirObj.NumOfOutputPredictors];
+                //Reset reservoir states but keep internal statistics
+                resInstance.Reset(false);
+                double[] reservoirInput = new double[resInstance.InstanceDefinition.InputFieldMappingCollection.Count];
                 foreach (double[] inputVector in inputPattern)
                 {
-                    double[] reservoirInput = new double[resInstance.InstanceDefinition.InputFieldMappingCollection.Count];
                     for (int i = 0; i < resInstance.InstanceDefinition.InputFieldMappingCollection.Count; i++)
                     {
                         reservoirInput[i] = inputVector[resInstance.InstanceDefinition.InputFieldMappingCollection[i]];
                     }
-                    //Compute reservoir output
-                    resInstance.ReservoirObj.Compute(reservoirInput, reservoirPredictors, true);
+                    //Compute the reservoir
+                    resInstance.ReservoirObj.Compute(reservoirInput, true);
                 }
                 //Add predictors to common readout layer
+                double[] reservoirPredictors = resInstance.ReservoirObj.GetPredictors();
                 reservoirPredictors.CopyTo(_reservoirsReadoutLayer, reservoirsReadoutLayerIdx);
                 reservoirsReadoutLayerIdx += reservoirPredictors.Length;
             }
@@ -173,24 +176,23 @@ namespace RCNet.Neural.Network.EchoState
 
         /// <summary>
         /// Compute fuction for pattern recognition tasks.
-        /// Processes given input pattern and computes output.
+        /// Processes given input pattern and computes the output.
         /// </summary>
         /// <param name="inputPattern">Input values</param>
         /// <returns>Computed output values</returns>
         public double[] Compute(List<double[]> inputPattern)
         {
-            //There is no continuity, each pattern is independed so internal states has to be reseted
-            Reset();
+            if(_settings.TaskType != EsnSettings.EsnTaskType.Categorization)
+            {
+                throw new Exception("Calling this function is inconsistent with the Esn settings. This function is for categorization purposes.");
+            }
             PushInput(inputPattern);
-            //Collect all predictors
-            double[] predictors = new double[_reservoirsReadoutLayer.Length];
-            _reservoirsReadoutLayer.CopyTo(predictors, 0);
             //Compute output
             double[] output = new double[_regressionResultCollection.Length];
             for (int i = 0; i < _regressionResultCollection.Length; i++)
             {
                 double[] outputValue;
-                outputValue = _regressionResultCollection[i].FFNet.Compute(predictors);
+                outputValue = _regressionResultCollection[i].FFNet.Compute(_reservoirsReadoutLayer);
                 output[i] = outputValue[0];
             }
             return output;
@@ -204,6 +206,10 @@ namespace RCNet.Neural.Network.EchoState
         /// <returns>Computed output values</returns>
         public double[] Compute(double[] inputVector)
         {
+            if (_settings.TaskType != EsnSettings.EsnTaskType.TimeSeriesPrediction)
+            {
+                throw new Exception("Calling this function is inconsistent with the Esn settings. This function is for time series prediction purposes.");
+            }
             //Push input into the Esn
             PushInput(inputVector, true);
             //Collect all predictors
@@ -244,6 +250,10 @@ namespace RCNet.Neural.Network.EchoState
         /// </param>
         public void PushFeedback(double[] lastRealValues)
         {
+            if (_settings.TaskType != EsnSettings.EsnTaskType.TimeSeriesPrediction)
+            {
+                throw new Exception("Calling this function is inconsistent with the Esn settings. This function is for time series prediction purposes.");
+            }
             foreach (ReservoirInstance resInstance in _reservoirInstanceCollection)
             {
                 if (resInstance.InstanceDefinition.ReservoirSettings.FeedbackFeature)
@@ -313,10 +323,9 @@ namespace RCNet.Neural.Network.EchoState
             return stats;
         }
 
-
         /// <summary>
-        /// Trains the Esn network.
-        /// All input vectors are processed by internal reservoirs and the corresponding Esn predictors are recorded.
+        /// Trains the Esn network for the categorization (pattern recognition) task.
+        /// All input patterns are processed by internal reservoirs and the corresponding Esn predictors are recorded.
         /// Predictors are then subdivided into training data and test data.
         /// Training data is used to teach the output feed forward networks (regression phase).
         /// The degree of generalization is tested on test data.
@@ -324,16 +333,10 @@ namespace RCNet.Neural.Network.EchoState
         /// the overall error on the training data and the test data.
         /// </summary>
         /// <param name="dataSet">
-        /// The bundle containing known input and desired output sample vectors (in time order)
-        /// </param>
-        /// <param name="numOfBootSamples">
-        /// How many of starting items from dataSet will be used for booting of reservoirs to ensure
-        /// reservoir neurons states be affected by input data only. Boot sequence length of the reservoir should be greater
-        /// or equal to reservoir neurons count. So for this Esn parameter use the boot sequence length of the largest
-        /// reservoir in the Esn.
+        /// The bundle containing known input patterns and desired output sample vectors
         /// </param>
         /// <param name="numOfTestSamples">
-        /// How many samples from the dataSet will be used as the Esn test samples.
+        /// Number of test samples from the total number of samples.
         /// </param>
         /// <param name="testSamplesSelector">
         /// Function to be called to select testing samples
@@ -355,80 +358,39 @@ namespace RCNet.Neural.Network.EchoState
                                            Object regressionControllerData = null
                                            )
         {
+            if (_settings.TaskType != EsnSettings.EsnTaskType.Categorization)
+            {
+                throw new Exception("Calling this function is inconsistent with the Esn settings. This function is for categorization purposes.");
+            }
             EsnRegressionResult[] results = new EsnRegressionResult[_regressionResultCollection.Length];
-            int numOfPredictors = _reservoirsReadoutLayer.Length;
             //All predictors to be used for training/testing
-            int dataSetLength = dataSet.InputPatternCollection.Count;
-            List<double[]> allPredictorsCollection = new List<double[]>(dataSetLength);
-            List<double[]> allOutputsCollection = new List<double[]>(dataSetLength);
+            List<double[]> predictorsCollection = new List<double[]>(dataSet.InputPatternCollection.Count);
+            List<double[]> outputsCollection = new List<double[]>(dataSet.InputPatternCollection.Count);
             //Collection
-            for (int dataSetIdx = 0; dataSetIdx < dataSetLength; dataSetIdx++)
+            for (int dataSetIdx = 0; dataSetIdx < dataSet.InputPatternCollection.Count; dataSetIdx++)
             {
                 //Push input data into the Esn
                 PushInput(dataSet.InputPatternCollection[dataSetIdx]);
                 //Predictors
-                double[] predictors = new double[numOfPredictors];
+                double[] predictors = new double[_reservoirsReadoutLayer.Length];
                 //Reservoir units states to predictors
                 _reservoirsReadoutLayer.CopyTo(predictors, 0);
-                allPredictorsCollection.Add(predictors);
-                //Desired outputs
-                allOutputsCollection.Add(dataSet.OutputVectorCollection[dataSetIdx]);
+                predictorsCollection.Add(predictors);
+                //Add desired outputs
+                outputsCollection.Add(dataSet.OutputVectorCollection[dataSetIdx]);
             }
-
-            //Collect reservoirs statistics
-            List<AnalogReservoirStat> reservoirsStats = CollectReservoirInstancesStatatistics();
-
-            //Alone regression for each Esn output field
-            for (int outputIdx = 0; outputIdx < _regressionResultCollection.Length; outputIdx++)
-            {
-                //Testing data indexes
-                int[] testIndexes = new int[numOfTestSamples];
-                testSamplesSelector(allPredictorsCollection, allOutputsCollection, outputIdx, testIndexes);
-                HashSet<int> testSampleIndexCollection = new HashSet<int>(testIndexes);
-                //Dividing to training and testing sets
-                int numOfTrainingSamples = allPredictorsCollection.Count - numOfTestSamples;
-                List<double[]> trainingPredictorsCollection = new List<double[]>(numOfTrainingSamples);
-                List<double[]> trainingOutputsCollection = new List<double[]>(numOfTrainingSamples);
-                List<double[]> testingPredictorsCollection = new List<double[]>(numOfTestSamples);
-                List<double[]> testingOutputsCollection = new List<double[]>(numOfTestSamples);
-                for (int i = 0; i < allPredictorsCollection.Count; i++)
-                {
-                    if (!testSampleIndexCollection.Contains(i))
-                    {
-                        //Training sample
-                        trainingPredictorsCollection.Add(allPredictorsCollection[i]);
-                        trainingOutputsCollection.Add(new double[1]);
-                        trainingOutputsCollection[trainingOutputsCollection.Count - 1][0] = allOutputsCollection[i][outputIdx];
-                    }
-                    else
-                    {
-                        //Testing sample
-                        testingPredictorsCollection.Add(allPredictorsCollection[i]);
-                        testingOutputsCollection.Add(new double[1]);
-                        testingOutputsCollection[testingOutputsCollection.Count - 1][0] = allOutputsCollection[i][outputIdx];
-                    }
-                }
-                //Regression
-                results[outputIdx] = PerformRegression(outputIdx,
-                                                       _settings.OutputFieldNameCollection[outputIdx],
-                                                       reservoirsStats,
-                                                       trainingPredictorsCollection,
-                                                       trainingOutputsCollection,
-                                                       testingPredictorsCollection,
-                                                       testingOutputsCollection,
-                                                       regressionController,
-                                                       regressionControllerData
-                                                       );
-                //Store regression results and trained FF network
-                _regressionResultCollection[outputIdx] = results[outputIdx];
-            }
-
-            return results;
+            return PerformRegressions(predictorsCollection,
+                                      outputsCollection,
+                                      numOfTestSamples,
+                                      testSamplesSelector,
+                                      regressionController,
+                                      regressionControllerData
+                                      );
         }
 
 
         /// <summary>
-        /// Trains the Esn network.
+        /// Trains the Esn network for the time series prediction task.
         /// All input vectors are processed by internal reservoirs and the corresponding Esn predictors are recorded.
         /// Predictors are then subdivided into training data and test data.
         /// Training data is used to teach the output feed forward networks (regression phase).
@@ -440,13 +402,14 @@ namespace RCNet.Neural.Network.EchoState
         /// The bundle containing known input and desired output sample vectors (in time order)
         /// </param>
         /// <param name="numOfBootSamples">
-        /// How many of starting items from dataSet will be used for booting of reservoirs to ensure
-        /// reservoir neurons states be affected by input data only. Boot sequence length of the reservoir should be greater
-        /// or equal to reservoir neurons count. So for this Esn parameter use the boot sequence length of the largest
-        /// reservoir in the Esn.
+        /// Number of boot samples from the beginning of all samples.
+        /// The purpose of the boot samples is to ensure that the states of the neurons in the reservoir
+        /// depend only on the time series data and not on the initial state of the neurons in the reservoir.
+        /// The number of boot samples depends on the size and configuration of the reservoirs.
+        /// It is usually sufficient to set the number of boot samples equal to the number of neurons in the largest reservoir.
         /// </param>
         /// <param name="numOfTestSamples">
-        /// How many samples from the dataSet will be used as the Esn test samples.
+        /// Number of test samples from the total number of samples.
         /// </param>
         /// <param name="testSamplesSelector">
         /// Function to be called to select testing samples
@@ -469,6 +432,10 @@ namespace RCNet.Neural.Network.EchoState
                                            Object regressionControllerData = null
                                            )
         {
+            if (_settings.TaskType != EsnSettings.EsnTaskType.TimeSeriesPrediction)
+            {
+                throw new Exception("Calling this function is inconsistent with the Esn settings. This function is for time series prediction purposes.");
+            }
             EsnRegressionResult[] results = new EsnRegressionResult[_regressionResultCollection.Length];
             int numOfPredictors = _reservoirsReadoutLayer.Length;
             if(_settings.RouteInputToReadout)
@@ -477,10 +444,10 @@ namespace RCNet.Neural.Network.EchoState
             }
             //All predictors to be used for training/testing
             int dataSetLength = dataSet.InputVectorCollection.Count;
-            List<double[]> allPredictorsCollection = new List<double[]>(dataSetLength - numOfBootSamples);
-            List<double[]> allOutputsCollection = new List<double[]>(dataSetLength - numOfBootSamples);
-            //ESN Reset
-            Reset();
+            List<double[]> predictorsCollection = new List<double[]>(dataSetLength - numOfBootSamples);
+            List<double[]> outputsCollection = new List<double[]>(dataSetLength - numOfBootSamples);
+            //Reset the internal states and statistics
+            Reset(true);
             //Collection
             for (int dataSetIdx = 0; dataSetIdx < dataSetLength; dataSetIdx++)
             {
@@ -500,44 +467,71 @@ namespace RCNet.Neural.Network.EchoState
                         //Input to predictors
                         dataSet.InputVectorCollection[dataSetIdx].CopyTo(predictors, _reservoirsReadoutLayer.Length);
                     }
-                    allPredictorsCollection.Add(predictors);
+                    predictorsCollection.Add(predictors);
                     //Desired outputs
-                    allOutputsCollection.Add(dataSet.OutputVectorCollection[dataSetIdx]);
+                    outputsCollection.Add(dataSet.OutputVectorCollection[dataSetIdx]);
                 }
                 PushFeedback(dataSet.OutputVectorCollection[dataSetIdx]);
             }
 
+            return PerformRegressions(predictorsCollection,
+                                      outputsCollection,
+                                      numOfTestSamples,
+                                      testSamplesSelector,
+                                      regressionController,
+                                      regressionControllerData
+                                      );
+        }
+
+        /// <summary>
+        /// Function prepares the training/testing datasets and calls alone regression for each Esn output field.
+        /// </summary>
+        /// <param name="predictorsCollection">Collection of all available Esn predictors</param>
+        /// <param name="outputsCollection">Collection of all available desired outputs related to predictors</param>
+        /// <param name="numOfTestSamples">Required number of test samples</param>
+        /// <param name="testSamplesSelector">Test samples selector delegate</param>
+        /// <param name="regressionController">Regression controller delegate</param>
+        /// <param name="regressionControllerData">An user object</param>
+        /// <returns>Array of regression results</returns>
+        private EsnRegressionResult[] PerformRegressions(List<double[]> predictorsCollection,
+                                                         List<double[]> outputsCollection,
+                                                         int numOfTestSamples,
+                                                         TestSamplesSelectorDelegate testSamplesSelector,
+                                                         EsnRegressionCallbackDelegate regressionController,
+                                                         Object regressionControllerData
+                                                         )
+        {
+            EsnRegressionResult[] results = new EsnRegressionResult[_regressionResultCollection.Length];
             //Collect reservoirs statistics
             List<AnalogReservoirStat> reservoirsStats = CollectReservoirInstancesStatatistics();
-            
             //Alone regression for each Esn output field
             for (int outputIdx = 0; outputIdx < _regressionResultCollection.Length; outputIdx++)
             {
                 //Testing data indexes
                 int[] testIndexes = new int[numOfTestSamples];
-                testSamplesSelector(allPredictorsCollection, allOutputsCollection, outputIdx, testIndexes);
+                testSamplesSelector(predictorsCollection, outputsCollection, outputIdx, testIndexes);
                 HashSet<int> testSampleIndexCollection = new HashSet<int>(testIndexes);
-                //Dividing to training and testing sets
-                int numOfTrainingSamples = allPredictorsCollection.Count - numOfTestSamples;
+                //Division to training and testing sets
+                int numOfTrainingSamples = predictorsCollection.Count - numOfTestSamples;
                 List<double[]> trainingPredictorsCollection = new List<double[]>(numOfTrainingSamples);
                 List<double[]> trainingOutputsCollection = new List<double[]>(numOfTrainingSamples);
                 List<double[]> testingPredictorsCollection = new List<double[]>(numOfTestSamples);
                 List<double[]> testingOutputsCollection = new List<double[]>(numOfTestSamples);
-                for (int i = 0; i < allPredictorsCollection.Count; i++)
+                for (int i = 0; i < predictorsCollection.Count; i++)
                 {
                     if (!testSampleIndexCollection.Contains(i))
                     {
                         //Training sample
-                        trainingPredictorsCollection.Add(allPredictorsCollection[i]);
+                        trainingPredictorsCollection.Add(predictorsCollection[i]);
                         trainingOutputsCollection.Add(new double[1]);
-                        trainingOutputsCollection[trainingOutputsCollection.Count - 1][0] = allOutputsCollection[i][outputIdx];
+                        trainingOutputsCollection[trainingOutputsCollection.Count - 1][0] = outputsCollection[i][outputIdx];
                     }
                     else
                     {
                         //Testing sample
-                        testingPredictorsCollection.Add(allPredictorsCollection[i]);
+                        testingPredictorsCollection.Add(predictorsCollection[i]);
                         testingOutputsCollection.Add(new double[1]);
-                        testingOutputsCollection[testingOutputsCollection.Count - 1][0] = allOutputsCollection[i][outputIdx];
+                        testingOutputsCollection[testingOutputsCollection.Count - 1][0] = outputsCollection[i][outputIdx];
                     }
                 }
                 //Regression
@@ -722,9 +716,10 @@ namespace RCNet.Neural.Network.EchoState
             /// <summary>
             /// Resets reservoir internal state to the initial state.
             /// </summary>
-            public void Reset()
+            /// <param name="resetStatistics">Specifies whether to reset internal statistics</param>
+            public void Reset(bool resetStatistics)
             {
-                ReservoirObj.Reset();
+                ReservoirObj.Reset(resetStatistics);
                 return;
             }
 

@@ -125,10 +125,9 @@ namespace RCNet.Neural.Network.EchoState
         /// </summary>
         public double ContextNeuronFeedbackDensity { get; set; }
         /// <summary>
-        /// Each weight of the connection from the contex neuron to the reservoir's neuron will be randomly selected
-        /// from the open interval (-ContextNeuronFeedbackWeightScale, +ContextNeuronFeedbackWeightScale)
+        /// Weight of the feedback connection from the context neuron.
         /// </summary>
-        public double ContextNeuronFeedbackWeightScale { get; set; }
+        public double ContextNeuronFeedbackWeight { get; set; }
         /// Indicates whether the feedback feature is used.
         public bool FeedbackFeature { get; set; }
         /// <summary>
@@ -170,7 +169,7 @@ namespace RCNet.Neural.Network.EchoState
             ContextNeuronActivation = ReservoirNeuronActivation;
             ContextNeuronInputWeight = 0;
             ContextNeuronFeedbackDensity = 0;
-            ContextNeuronFeedbackWeightScale = 0;
+            ContextNeuronFeedbackWeight = 0;
             FeedbackFeature = false;
             FeedbackConnectionDensity = 0;
             FeedbackWeightScale = 0;
@@ -215,7 +214,7 @@ namespace RCNet.Neural.Network.EchoState
             ContextNeuronActivation = source.ContextNeuronActivation;
             ContextNeuronInputWeight = source.ContextNeuronInputWeight;
             ContextNeuronFeedbackDensity = source.ContextNeuronFeedbackDensity;
-            ContextNeuronFeedbackWeightScale = source.ContextNeuronFeedbackWeightScale;
+            ContextNeuronFeedbackWeight = source.ContextNeuronFeedbackWeight;
             FeedbackFeature = source.FeedbackFeature;
             FeedbackConnectionDensity = source.FeedbackConnectionDensity;
             FeedbackWeightScale = source.FeedbackWeightScale;
@@ -317,10 +316,10 @@ namespace RCNet.Neural.Network.EchoState
                 ContextNeuronActivation = ActivationFactory.ParseActivation(ctxNeuronElem.Attribute("Activation").Value);
                 ContextNeuronInputWeight = double.Parse(ctxNeuronElem.Attribute("InputWeight").Value, CultureInfo.InvariantCulture);
                 ContextNeuronFeedbackDensity = double.Parse(ctxNeuronElem.Attribute("FeedbackDensity").Value, CultureInfo.InvariantCulture);
-                ContextNeuronFeedbackWeightScale = double.Parse(ctxNeuronElem.Attribute("FeedbackWeightScale").Value, CultureInfo.InvariantCulture);
+                ContextNeuronFeedbackWeight = double.Parse(ctxNeuronElem.Attribute("FeedbackWeight").Value, CultureInfo.InvariantCulture);
                 ContextNeuronFeature = (ContextNeuronFeedbackDensity > 0 &&
                                         ContextNeuronInputWeight > 0 &&
-                                        ContextNeuronFeedbackWeightScale > 0
+                                        ContextNeuronFeedbackWeight > 0
                                         );
             }
             else
@@ -328,7 +327,7 @@ namespace RCNet.Neural.Network.EchoState
                 ContextNeuronActivation = ReservoirNeuronActivation;
                 ContextNeuronInputWeight = 0;
                 ContextNeuronFeedbackDensity = 0;
-                ContextNeuronFeedbackWeightScale = 0;
+                ContextNeuronFeedbackWeight = 0;
             }
             //Feedback
             XElement feedbackElem = reservoirSettingsElem.Descendants("Feedback").FirstOrDefault();
@@ -395,7 +394,7 @@ namespace RCNet.Neural.Network.EchoState
                 ContextNeuronFeedbackDensity != cmpSettings.ContextNeuronFeedbackDensity ||
                 ContextNeuronActivation != cmpSettings.ContextNeuronActivation ||
                 ContextNeuronInputWeight != cmpSettings.ContextNeuronInputWeight ||
-                ContextNeuronFeedbackWeightScale != cmpSettings.ContextNeuronFeedbackWeightScale ||
+                ContextNeuronFeedbackWeight != cmpSettings.ContextNeuronFeedbackWeight ||
                 FeedbackFeature != cmpSettings.FeedbackFeature ||
                 FeedbackConnectionDensity != cmpSettings.FeedbackConnectionDensity ||
                 FeedbackWeightScale != cmpSettings.FeedbackWeightScale
