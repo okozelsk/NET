@@ -266,19 +266,23 @@ namespace RCNet.Neural.Network.FF
         /// </summary>
         /// <param name="inputCollection">Collection of the network inputs (batch)</param>
         /// <param name="idealOutputCollection">Collection of the ideal outputs (batch)</param>
+        /// <param name="computedOutputCollection">Collection of the computed outputs (batch)</param>
         /// <returns>Error statistics</returns>
-        public BasicStat ComputeBatchErrorStat(List<double[]> inputCollection, List<double[]> idealOutputCollection)
+        public BasicStat ComputeBatchErrorStat(List<double[]> inputCollection, List<double[]> idealOutputCollection, out List<double[]> computedOutputCollection)
         {
             BasicStat errStat = new BasicStat();
+            double[][] computedOutputs = new double[idealOutputCollection.Count][];
             Parallel.For(0, inputCollection.Count, row =>
             {
-                double[] computedOutputs = Compute(inputCollection[row]);
+                double[] computedOutputVector = Compute(inputCollection[row]);
+                computedOutputs[row] = computedOutputVector;
                 for (int i = 0; i < _numOfOutputValues; i++)
                 {
-                    double error = idealOutputCollection[row][i] - computedOutputs[i];
+                    double error = idealOutputCollection[row][i] - computedOutputVector[i];
                     errStat.AddSampleValue(Math.Abs(error));
                 }
             });
+            computedOutputCollection = new List<double[]>(computedOutputs);
             return errStat;
         }
 

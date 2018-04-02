@@ -33,7 +33,7 @@ Echo State Network
 		but provides the internal statistics
 	Supported task types:
 		Time series prediction
-		Categorization
+		Classification
 			Supports variable length patterns
 Data loaders (csv)
 	Supporting data formats for Esn task types

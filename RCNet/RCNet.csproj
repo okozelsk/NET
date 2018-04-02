@@ -54,6 +54,7 @@
     <Compile Include="Extensions\RNGCryptoServiceProviderClassExtension.cs" />
     <Compile Include="Extensions\StringClassExtensions.cs" />
     <Compile Include="MathTools\BasicStat.cs" />
+    <Compile Include="MathTools\BinErrStat.cs" />
     <Compile Include="MathTools\Bitwise.cs" />
     <Compile Include="MathTools\Combinatorics.cs" />
     <Compile Include="MathTools\Factorial.cs" />
@@ -70,6 +71,7 @@
     <Compile Include="Neural\Activation\SigmoidAF.cs" />
     <Compile Include="Neural\Activation\SinusoidAF.cs" />
     <Compile Include="Neural\Activation\TanhAF.cs" />
+    <Compile Include="Neural\CommonTypes.cs" />
     <Compile Include="Neural\Network\Data\BundleNormalizer.cs" />
     <Compile Include="Neural\Network\Data\PatternVectorPairBundle.cs" />
     <Compile Include="Neural\Network\Data\VectorsPairBundle.cs" />
@@ -82,6 +84,8 @@
     <Compile Include="Neural\Network\FF\IFeedForwardNetworkTrainer.cs" />
     <Compile Include="Neural\Network\FF\LinRegrTrainer.cs" />
     <Compile Include="Neural\Network\FF\RPropTrainer.cs" />
+    <Compile Include="Neural\Network\RCReadout\ReadoutUnit.cs" />
+    <Compile Include="Neural\Network\RCReadout\Regression.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Queue\SimpleQueue.cs" />
     <Compile Include="XmlTools\XmlValidator.cs" />

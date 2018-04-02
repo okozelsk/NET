@@ -12,12 +12,12 @@ namespace RCNet.Neural.Network.Data
     public class BundleNormalizer
     {
         //Attributes
-        protected Dictionary<string, Normalizer> _fieldTypeNormalizerCollection;
-        protected Dictionary<string, string> _fieldNameTypeCollection;
-        protected List<string> _fieldNameCollection;
-        protected List<string> _inputFieldNameCollection;
-        protected List<string> _outputFieldNameCollection;
-        protected bool[] _outputFieldAdjustmentSwitches;
+        private Dictionary<string, Normalizer> _fieldTypeNormalizerCollection;
+        private Dictionary<string, string> _fieldNameTypeCollection;
+        private List<string> _fieldNameCollection;
+        private List<string> _inputFieldNameCollection;
+        private List<string> _outputFieldNameCollection;
+        private bool[] _outputFieldAdjustmentSwitches;
 
         //Attribute properties
         /// <summary>
@@ -56,7 +56,10 @@ namespace RCNet.Neural.Network.Data
         /// Reserve held by the normalizers to cover cases where future data exceeds a known range of sample data.
         /// </param>
         /// <param name="inputDataStandardization">
-        /// Specifies whether to apply data standardization
+        /// Specifies whether to apply data standardization to input data
+        /// </param>
+        /// <param name="outputDataStandardization">
+        /// Specifies whether to apply data standardization to output data
         /// </param>
         public BundleNormalizer(Interval normRange,
                                 double normReserveRatio,
@@ -80,7 +83,7 @@ namespace RCNet.Neural.Network.Data
         }
 
         //Methods
-        protected void ResetNormalizers()
+        private void ResetNormalizers()
         {
             foreach(Normalizer normalizer in _fieldTypeNormalizerCollection.Values)
             {
@@ -209,7 +212,7 @@ namespace RCNet.Neural.Network.Data
         /// <summary>
         /// Checkes if the structure is finalized
         /// </summary>
-        protected void CheckStructure()
+        private void CheckStructure()
         {
             if (_outputFieldAdjustmentSwitches == null)
             {
@@ -222,7 +225,7 @@ namespace RCNet.Neural.Network.Data
         /// Adjusts normalizer instances associated with input fields
         /// </summary>
         /// <param name="inputVector">Input vector</param>
-        protected void AdjustInputNormalizers(double[] inputVector)
+        private void AdjustInputNormalizers(double[] inputVector)
         {
             CheckStructure();
             for (int i = 0; i < InputFieldNormalizerRefCollection.Count; i++)
@@ -236,7 +239,7 @@ namespace RCNet.Neural.Network.Data
         /// Adjusts normalizer instances associated with output fields
         /// </summary>
         /// <param name="outputVector">Output vector</param>
-        protected void AdjustOutputNormalizers(double[] outputVector)
+        private void AdjustOutputNormalizers(double[] outputVector)
         {
             CheckStructure();
             for (int i = 0; i < OutputFieldNormalizerRefCollection.Count; i++)
@@ -448,6 +451,13 @@ namespace RCNet.Neural.Network.Data
             return;
         }
 
+        /// <summary>
+        /// Creates the VectorsPairBundle from the vector collection
+        /// </summary>
+        /// <param name="vectorCollection">Collection of vectors</param>
+        /// <param name="normalize">Specifies whether to normalize data in the created bundle</param>
+        /// <param name="bundle">Created bundle</param>
+        /// <returns>The last unused vector</returns>
         public double[] CreateBundleFromVectorCollection(List<double[]> vectorCollection,
                                                          bool normalize,
                                                          out VectorsPairBundle bundle

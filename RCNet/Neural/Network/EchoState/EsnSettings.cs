@@ -21,26 +21,11 @@ namespace RCNet.Neural.Network.EchoState
     [Serializable]
     public class EsnSettings
     {
-        /// <summary>
-        /// Supported task types which can be solved by Esn.
-        /// </summary>
-        public enum EsnTaskType
-        {
-            /// <summary>
-            /// Time series prediction
-            /// </summary>
-            TimeSeriesPrediction,
-            /// <summary>
-            /// Pattern recognition
-            /// </summary>
-            Categorization
-        }
-
         //Attribute properties
         /// <summary>
         /// Type of the task for which is Esn designed
         /// </summary>
-        public EsnTaskType TaskType { get; set; }
+        public CommonTypes.TaskType TaskType { get; set; }
         /// <summary>
         /// A value greater than or equal to 0 will always ensure the same initialization of the internal
         /// random number generator and therefore the same network structure, which is good for tuning
@@ -108,7 +93,7 @@ namespace RCNet.Neural.Network.EchoState
         public EsnSettings()
         {
             //Default settings
-            TaskType = EsnTaskType.TimeSeriesPrediction;
+            TaskType = CommonTypes.TaskType.Prediction;
             RandomizerSeek = 0;
             InputFieldNameCollection = new List<string>();
             ReservoirInstanceDefinitionCollection = new List<ReservoirInstanceDefinition>();
@@ -178,15 +163,15 @@ namespace RCNet.Neural.Network.EchoState
             validator.LoadXDocFromString(esnSettingsElem.ToString());
             //Parsing
             //Task type
-            TaskType = ParseEsnTaskType(esnSettingsElem.Attribute("TaskType").Value);
+            TaskType = CommonTypes.ParseTaskType(esnSettingsElem.Attribute("TaskType").Value);
             //Randomizer seek
             RandomizerSeek = int.Parse(esnSettingsElem.Attribute("RandomizerSeek").Value);
             //Input fields
             XElement inputFieldsElem = esnSettingsElem.Descendants("InputFields").First();
             RouteInputToReadout = (inputFieldsElem.Attribute("RouteToReadout") == null) ? false : bool.Parse(inputFieldsElem.Attribute("RouteToReadout").Value);
-            if(TaskType == EsnTaskType.Categorization && RouteInputToReadout)
+            if(TaskType == CommonTypes.TaskType.Classification && RouteInputToReadout)
             {
-                throw new Exception("For categorization task setup is not allowed to route input to readout because of possible variable length of the input.");
+                throw new Exception("For the classification task setup is not allowed to route input to readout because of possible variable length of the input.");
             }
             InputFieldNameCollection = new List<string>();
             foreach(XElement inputFieldElem in inputFieldsElem.Descendants("Field"))
@@ -249,9 +234,9 @@ namespace RCNet.Neural.Network.EchoState
                 //Associated Esn output fields tor feedback
                 foreach (string feedbackFieldName in newMap.ReservoirSettings.FeedbackFieldNameCollection)
                 {
-                    if(TaskType == EsnTaskType.Categorization)
+                    if(TaskType == CommonTypes.TaskType.Classification)
                     {
-                        throw new Exception($"Reservoir instance {newMap.InstanceName}: feedback fields are not allowed for categorization task type.");
+                        throw new Exception($"Reservoir instance {newMap.InstanceName}: feedback fields are not allowed for classification task type.");
                     }
                     //Index in OutputFieldsNames
                     int feedbackFieldIdx = OutputFieldNameCollection.IndexOf(feedbackFieldName);
@@ -270,17 +255,6 @@ namespace RCNet.Neural.Network.EchoState
         }
 
         //Methods
-        public EsnTaskType ParseEsnTaskType(string code)
-        {
-            switch(code.ToUpper())
-            {
-                case "TIMESERIESPREDICTION": return EsnTaskType.TimeSeriesPrediction;
-                case "CATEGORIZATION": return EsnTaskType.Categorization;
-                default:
-                    throw new ArgumentException($"Unknown task type {code}", "code");
-            }
-        }
-        
         /// <summary>
         /// See the base.
         /// </summary>

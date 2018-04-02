@@ -18,51 +18,51 @@ namespace RCNet.Neural.Network.EchoState
         /// <summary>
         /// Name of this instance
         /// </summary>
-        protected string _instanceName;
+        private string _instanceName;
         /// <summary>
         /// Reservoir's settings.
         /// </summary>
-        protected AnalogReservoirSettings _settings;
+        private AnalogReservoirSettings _settings;
         /// <summary>
         /// Random generator.
         /// </summary>
-        protected Random _rand;
+        private Random _rand;
         /// <summary>
         /// Reservoir's neurons.
         /// </summary>
-        protected AnalogNeuron[] _neurons;
+        private AnalogNeuron[] _neurons;
         /// <summary>
         /// Number of reservoir inputs
         /// </summary>
-        protected int _numOfInputNodes;
+        private int _numOfInputNodes;
         /// <summary>
         /// A list of input connections for each neuron
         /// </summary>
-        protected List<Connection>[] _neuronInputConnectionsCollection;
+        private List<Connection>[] _neuronInputConnectionsCollection;
         /// <summary>
         /// A list of neuron connections for each neuron
         /// </summary>
-        protected List<Connection>[] _neuronNeuronConnectionsCollection;
+        private List<Connection>[] _neuronNeuronConnectionsCollection;
         /// <summary>
         /// Feedback values.
         /// </summary>
-        protected double[] _feedback;
+        private double[] _feedback;
         /// <summary>
         /// A list of feedback connections for each neuron
         /// </summary>
-        protected List<Connection>[] _neuronFeedbackConnectionsCollection;
+        private List<Connection>[] _neuronFeedbackConnectionsCollection;
         /// <summary>
         /// The context neuron
         /// </summary>
-        protected AnalogNeuron _contextNeuron;
+        private AnalogNeuron _contextNeuron;
         /// <summary>
         /// Fixed input weight into the context neuron 
         /// </summary>
-        protected double _contextNeuronInputWeight;
+        private double _contextNeuronInputWeight;
         /// <summary>
         /// Context neuron feedback weight
         /// </summary>
-        protected double[] _contextNeuronFeedbackWeights;
+        private double[] _contextNeuronFeedbackWeights;
         /// <summary>
         /// Specifies whether to produce augmented states
         /// </summary>
@@ -183,7 +183,7 @@ namespace RCNet.Neural.Network.EchoState
         /// </summary>
         /// <param name="scale">Weight scale.</param>
         /// <returns>A random weight value</returns>
-        protected double GetRandomWeight(double scale)
+        private double GetRandomWeight(double scale)
         {
             return _rand.NextBoundedUniformDouble(-1, 1) * scale;
         }
@@ -194,7 +194,7 @@ namespace RCNet.Neural.Network.EchoState
         /// <param name="entityConnectionsCollection">Bank of connections of the entities</param>
         /// <param name="entityIdx">An index of the entity in the connections bank</param>
         /// <param name="partyIdx">An index of the party entity</param>
-        protected bool ExistsInterconnection(List<Connection>[] entityConnectionsCollection, int entityIdx, int partyIdx)
+        private bool ExistsInterconnection(List<Connection>[] entityConnectionsCollection, int entityIdx, int partyIdx)
         {
             //Try to select the same connection
             Connection equalConn = (from connection in entityConnectionsCollection[entityIdx]
@@ -214,7 +214,7 @@ namespace RCNet.Neural.Network.EchoState
         /// <param name="weightScale">Random weight scale</param>
         /// <param name="duplicityCheck">Indicates whether to check the interconnection existency before its creation</param>
         /// <returns>Success/Unsuccess</returns>
-        protected bool AddInterconnection(List<Connection>[] entityConnectionsCollection, int entityIdx, int partyIdx, double weightScale, bool duplicityCheck)
+        private bool AddInterconnection(List<Connection>[] entityConnectionsCollection, int entityIdx, int partyIdx, double weightScale, bool duplicityCheck)
         {
             if(duplicityCheck)
             {
@@ -237,7 +237,7 @@ namespace RCNet.Neural.Network.EchoState
         /// <param name="numOfParties">Number of party entities to be interconnected with entities</param>
         /// <param name="density">Interconnection density</param>
         /// <param name="weightScale">Random weight scale</param>
-        protected void SetGuaranteedRandomInterconnections(List<Connection>[] entityConnectionsCollection, int numOfParties, double density, double weightScale)
+        private void SetGuaranteedRandomInterconnections(List<Connection>[] entityConnectionsCollection, int numOfParties, double density, double weightScale)
         {
             density = density.Bound(0, 1);
             int idealNumOfConnections = (int)Math.Round(entityConnectionsCollection.Length * numOfParties * density, 0);
@@ -303,7 +303,7 @@ namespace RCNet.Neural.Network.EchoState
         /// <param name="density">Interconnection density</param>
         /// <param name="weightScale">Random weight scale</param>
         /// <param name="duplicityCheck">Indicates whether to check the interconnection existency before its creation</param>
-        protected void SetRandomInterconnections(List<Connection>[] entityConnectionsCollection, int numOfParties, double density, double weightScale, bool duplicityCheck)
+        private void SetRandomInterconnections(List<Connection>[] entityConnectionsCollection, int numOfParties, double density, double weightScale, bool duplicityCheck)
         {
             int[] allConnections = new int[entityConnectionsCollection.Length * numOfParties];
             int numOfConnections = (int)Math.Round(allConnections.Length * density, 0);
@@ -327,7 +327,7 @@ namespace RCNet.Neural.Network.EchoState
         /// <param name="weightScale">Scale of the connection weight</param>
         /// <param name="bidirectional">Specifies whether the ring interconnection will be bidirectional.</param>
         /// <param name="duplicityCheck">Indicates whether to check the interconnection existency before its creation</param>
-        protected void SetRingConnections(double weightScale, bool bidirectional, bool duplicityCheck = true)
+        private void SetRingConnections(double weightScale, bool bidirectional, bool duplicityCheck = true)
         {
             for (int i = 0; i < _neurons.Length; i++)
             {
@@ -348,7 +348,7 @@ namespace RCNet.Neural.Network.EchoState
         /// <param name="density">Specifies what part of neurons will be self-connected</param>
         /// <param name="weightScale">Random weight scale</param>
         /// <param name="duplicityCheck">Indicates whether to check the interconnection existency before its creation</param>
-        protected void SetSelfConnections(double density, double weightScale, bool duplicityCheck = true)
+        private void SetSelfConnections(double density, double weightScale, bool duplicityCheck = true)
         {
             int numOfConnections = (int)Math.Round((double)_neurons.Length * density);
             int[] indices = new int[_neurons.Length];
@@ -365,7 +365,7 @@ namespace RCNet.Neural.Network.EchoState
         /// </summary>
         /// <param name="cfg">Configuration parameters</param>
         /// <param name="weightScale">Scale of the connection weight</param>
-        protected void SetupRandomTopology(AnalogReservoirSettings.RandomTopology cfg, double weightScale)
+        private void SetupRandomTopology(AnalogReservoirSettings.RandomTopology cfg, double weightScale)
         {
             //Fully random connections setup
             SetRandomInterconnections(_neuronNeuronConnectionsCollection, _neurons.Length, cfg.ConnectionsDensity, weightScale, false);
@@ -377,7 +377,7 @@ namespace RCNet.Neural.Network.EchoState
         /// </summary>
         /// <param name="cfg">Configuration parameters</param>
         /// <param name="weightScale">Scale of the connection weight</param>
-        protected void SetupRingTopology(AnalogReservoirSettings.RingTopology cfg, double weightScale)
+        private void SetupRingTopology(AnalogReservoirSettings.RingTopology cfg, double weightScale)
         {
             //Ring connections part
             SetRingConnections(weightScale, cfg.Bidirectional, false);
@@ -393,7 +393,7 @@ namespace RCNet.Neural.Network.EchoState
         /// </summary>
         /// <param name="cfg">Configuration parameters</param>
         /// <param name="weightScale">Scale of the connection weight</param>
-        protected void SetupDTTTopology(AnalogReservoirSettings.DTTTopology cfg, double weightScale)
+        private void SetupDTTTopology(AnalogReservoirSettings.DTTTopology cfg, double weightScale)
         {
             //HTwist part (single direction ring)
             SetRingConnections(weightScale, false);
@@ -444,10 +444,10 @@ namespace RCNet.Neural.Network.EchoState
         /// <param name="resetStatistics">Specifies whether to reset internal statistics</param>
         public void Reset(bool resetStatistics)
         {
-            foreach (AnalogNeuron neuron in _neurons)
+            Parallel.ForEach<AnalogNeuron>(_neurons, neuron =>
             {
                 neuron.Reset(resetStatistics);
-            }
+            });
             if (_settings.ContextNeuronFeature)
             {
                 _contextNeuron.Reset(resetStatistics);
@@ -519,20 +519,20 @@ namespace RCNet.Neural.Network.EchoState
         }
 
         /// <summary>
-        /// Returns reservoir predictors
+        /// Copies all reservoir predictors to a given buffer starting from the specified possition
         /// </summary>
-        public double[] GetPredictors()
+        public void CopyPredictorsTo(double[] buffer, int fromOffset)
         {
-            double[] outputPredictors = new double[NumOfOutputPredictors];
-            for(int n = 0; n < _neurons.Length; n++)
+            Parallel.For(0, _neurons.Length, n =>
             {
-                outputPredictors[n] = _neurons[n].CurrentState;
-                if(_augmentedStatesFeature)
+                int buffIdx = fromOffset + n;
+                buffer[buffIdx] = _neurons[n].CurrentState;
+                if (_augmentedStatesFeature)
                 {
-                    outputPredictors[_neurons.Length + n] = outputPredictors[n] * outputPredictors[n];
+                    buffer[buffIdx + _neurons.Length] = buffer[buffIdx] * buffer[buffIdx];
                 }
-            }
-            return outputPredictors;
+            });
+            return;
         }
 
         /// <summary>
@@ -553,7 +553,7 @@ namespace RCNet.Neural.Network.EchoState
         /// Represents a connection
         /// </summary>
         [Serializable]
-        protected class Connection
+        private class Connection
         {
             /// <summary>
             /// Party index

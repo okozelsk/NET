@@ -1,5 +1,6 @@
 ﻿using System;
 using RCNet.MathTools;
+using RCNet.Extensions;
 
 namespace RCNet.Neural.Activation
 {
@@ -14,7 +15,7 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// The working range
         /// </summary>
-        public Interval Range { get { return new Interval(double.NegativeInfinity, double.PositiveInfinity); } }
+        public Interval Range { get { return new Interval(double.NegativeInfinity.Bound(), double.PositiveInfinity.Bound()); } }
 
         //Methods
         /// <summary>

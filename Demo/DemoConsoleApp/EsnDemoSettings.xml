@@ -2,9 +2,41 @@
 <!-- You can specify your data location in DataDir attribute -->
 <EsnDemoSettings DataDir=".\\Data">
   <!-- You can modify/remove existing or add your own DemoCase elements -->
+  <DemoCase Name="Pattern recognition task Splice junctions from https://archive.ics.uci.edu/ml/datasets/Molecular+Biology+%28Splice-junction+Gene+Sequences%29 (Single reservoir, Hidden layer, Resilient)">
+    <Samples CsvDataFileName="SpliceJunctions.csv" NumOfTestSamples="1000" TestSamplesSelectionMethod="Random" SingleNormalizer="false" NormalizerReserveRatio="0.1"/>
+    <EsnSettings TaskType="Classification" RandomizerSeek="0">
+      <InputFields RouteToReadout="false">
+        <Field Name="1st_Nucleotide"/>
+        <Field Name="2nd_Nucleotide"/>
+      </InputFields>
+      <ReservoirSettingsContainer>
+        <AnalogReservoirSettings Name="Random topology with 200 TanH neurons">
+          <Input ConnectionDensity="0.3" WeightScale="0.4"/>
+          <Internal Size="200" Activation="TanH" BiasScale="0" WeightScale="0.35">
+            <RandomTopology ConnectionsDensity="0.2"/>
+            <RetainmentNeurons Density="1" RetainmentMinRate="0" RetainmentMaxRate="0.8"/>
+          </Internal>
+        </AnalogReservoirSettings>
+      </ReservoirSettingsContainer>
+      <ReservoirInstancesContainer>
+        <ReservoirInstance InstanceName="RandMain" SettingsName="Random topology with 200 TanH neurons" AugmentedStates="true">
+          <InputField Name="1st_Nucleotide"/>
+          <InputField Name="2nd_Nucleotide"/>
+        </ReservoirInstance>
+      </ReservoirInstancesContainer>
+      <Readout OutputActivation="TanH" RegressionMethod="Resilient" Attempts="20" AttemptEpochs="1000" AttemptStopMSE="1E-20">
+        <HiddenLayer Neurons="50" Activation="TanH"/>
+      </Readout>
+      <OutputFields>
+        <Field Name="EI"/>
+        <Field Name="IE"/>
+        <Field Name="Neither"/>
+      </OutputFields>
+    </EsnSettings>
+  </DemoCase>
   <DemoCase Name="Prediction of the High and Low prices of SPXL title from Yahoo finance (A separate reservoir for each input field, Resilient)">
     <Samples CsvDataFileName="SPXL.csv" NumOfBootSamples="400" NumOfTestSamples="2" TestSamplesSelectionMethod="Sequential" SingleNormalizer="true" NormalizerReserveRatio="0.1"/>
-    <EsnSettings TaskType="TimeSeriesPrediction" RandomizerSeek="0">
+    <EsnSettings TaskType="Prediction" RandomizerSeek="0">
       <InputFields RouteToReadout="true">
         <Field Name="High"/>
         <Field Name="Low"/>
@@ -48,7 +80,7 @@
   </DemoCase>
   <DemoCase Name="Prediction of the High and Low prices of SPXL title from Yahoo finance (Single reservoir, Hidden layer, Resilient)">
     <Samples CsvDataFileName="SPXL.csv" NumOfBootSamples="400" NumOfTestSamples="2" TestSamplesSelectionMethod="Sequential" SingleNormalizer="true" NormalizerReserveRatio="0.1"/>
-    <EsnSettings TaskType="TimeSeriesPrediction" RandomizerSeek="0">
+    <EsnSettings TaskType="Prediction" RandomizerSeek="0">
       <InputFields RouteToReadout="true">
         <Field Name="High"/>
         <Field Name="Low"/>
@@ -82,7 +114,7 @@
   </DemoCase>
   <DemoCase Name="Pattern recognition task Libras Movement from https://archive.ics.uci.edu/ml/datasets/Libras+Movement (Single reservoir, Hidden layer, Resilient)">
     <Samples CsvDataFileName="LibrasMovement.csv" NumOfTestSamples="15" TestSamplesSelectionMethod="Sequential" SingleNormalizer="false" NormalizerReserveRatio="0.1"/>
-    <EsnSettings TaskType="Categorization" RandomizerSeek="0">
+    <EsnSettings TaskType="Classification" RandomizerSeek="0">
       <InputFields RouteToReadout="false">
         <Field Name="coord_abcissa"/>
         <Field Name="coord_ordinate"/>
@@ -126,7 +158,7 @@
   </DemoCase>
   <DemoCase Name="Prediction of the High and Low prices of TTOO title from Yahoo finance (Single reservoir, Hidden layer, Resilient)">
     <Samples CsvDataFileName="TTOO.csv" NumOfBootSamples="300" NumOfTestSamples="2" TestSamplesSelectionMethod="Sequential" SingleNormalizer="true" NormalizerReserveRatio="0.1"/>
-    <EsnSettings TaskType="TimeSeriesPrediction" RandomizerSeek="0">
+    <EsnSettings TaskType="Prediction" RandomizerSeek="0">
       <InputFields RouteToReadout="true">
         <Field Name="High"/>
         <Field Name="Low"/>
@@ -159,7 +191,7 @@
   </DemoCase>
   <DemoCase Name="Prediction of the Mackey Glass chaotic time series (Single reservoir, Linear regression)">
     <Samples CsvDataFileName="MackeyGlass.csv" NumOfBootSamples="600" NumOfTestSamples="500" TestSamplesSelectionMethod="Sequential" SingleNormalizer="false" NormalizerReserveRatio="0.1"/>
-    <EsnSettings TaskType="TimeSeriesPrediction" RandomizerSeek="0">
+    <EsnSettings TaskType="Prediction" RandomizerSeek="0">
       <InputFields RouteToReadout="false">
         <Field Name="Value"/>
       </InputFields>
@@ -184,7 +216,7 @@
   </DemoCase>
   <DemoCase Name="Prediction of the Sinusoid time series (Single reservoir, Linear regression)">
     <Samples CsvDataFileName="Sinusoid.csv" NumOfBootSamples="400" NumOfTestSamples="10" TestSamplesSelectionMethod="Sequential" SingleNormalizer="false" NormalizerReserveRatio="0.1"/>
-    <EsnSettings TaskType="TimeSeriesPrediction" RandomizerSeek="0">
+    <EsnSettings TaskType="Prediction" RandomizerSeek="0">
       <InputFields RouteToReadout="false">
         <Field Name="Value"/>
       </InputFields>

@@ -11,7 +11,7 @@ using RCNet.Neural.Network.Data;
 namespace RCNet.CsvTools
 {
     /// <summary>
-    /// The class allows to upload sample data for a Categorization task from an .csv file.
+    /// The class allows to upload sample data for a Classification task from an .csv file.
     /// </summary>
     public static class PatternDataLoader
     {
@@ -19,15 +19,21 @@ namespace RCNet.CsvTools
         /// Loads the data and prepares PatternVectorPairBundle.
         /// 1st row of the file must start with the #RepetitiveGroupOfAttributes keyword followed by
         /// attribute names.
-        /// 2nd row of the file must start with the #CategorizationClasses keyword followed by
+        /// 2nd row of the file must start with the #Classes keyword followed by
         /// class names.
         /// 3rd+ rows are the data rows.
         /// The data row must begin with at least one set of values for defined repetitive attributes.
         /// Value groups may be more in sequence.
-        /// The data row must end with a value for each defined categorization class.
+        /// The data row must end with a value for each defined classification class.
         /// </summary>
         /// <param name="fileName">
         /// Data file name
+        /// </param>
+        /// <param name="inputFieldNameCollection">
+        /// Input fields
+        /// </param>
+        /// <param name="outputFieldNameCollection">
+        /// Output fields
         /// </param>
         /// <param name="normRange">
         /// Range of normalized values
@@ -43,6 +49,8 @@ namespace RCNet.CsvTools
         /// Returned initialized instance of BundleNormalizer.
         /// </param>
         public static PatternVectorPairBundle Load(string fileName,
+                                                   List<string> inputFieldNameCollection,
+                                                   List<string> outputFieldNameCollection,
                                                    Interval normRange,
                                                    double normReserveRatio,
                                                    bool inputDataStandardization,
@@ -72,22 +80,46 @@ namespace RCNet.CsvTools
                 }
                 //Remove the #RepetitiveGroupOfAttributes keyword from the collection
                 repetitiveGroupOfAttributes.RemoveAt(0);
-                //The second row contains the "#CategorizationClasses" keyword followed by name(s) of categorization class(es)
-                string delimitedClassNames = streamReader.ReadLine();
-                if (!delimitedClassNames.StartsWith("#CategorizationClasses"))
+                //Check if attribute names match with the input fields collection
+                if(repetitiveGroupOfAttributes.NumOfStringValues != inputFieldNameCollection.Count)
                 {
-                    throw new FormatException("2nd row of the file doesn't start with the #CategorizationClasses keyword.");
+                    throw new FormatException("Different number of attributes in the file and number of specified input fields.");
+                }
+                foreach(string inputFieldName in inputFieldNameCollection)
+                {
+                    if(repetitiveGroupOfAttributes.IndexOf(inputFieldName) < 0)
+                    {
+                        throw new FormatException($"Input field name {inputFieldName} was not found among the repetitive attributes specified in the file.");
+                    }
+                }
+                //The second row contains the "#Classes" keyword followed by name(s) of classification class(es)
+                string delimitedClassNames = streamReader.ReadLine();
+                if (!delimitedClassNames.StartsWith("#Classes"))
+                {
+                    throw new FormatException("2nd row of the file doesn't start with the #Classes keyword.");
                 }
                 DelimitedStringValues classNames = new DelimitedStringValues(csvDelimiter);
                 classNames.LoadFromString(delimitedClassNames);
                 classNames.RemoveTrailingWhites();
-                //Check if the there is at least one categorization class name
+                //Check if the there is at least one classification class name
                 if (classNames.NumOfStringValues < 2)
                 {
-                    throw new FormatException("Missing categorization class(es) name(es).");
+                    throw new FormatException("Missing classification class(es) name(es).");
                 }
-                //Remove the #CategorizationClasses keyword from the collection
+                //Remove the #Classes keyword from the collection
                 classNames.RemoveAt(0);
+                //Check if class names match with the output fields collection
+                if (classNames.NumOfStringValues != outputFieldNameCollection.Count)
+                {
+                    throw new FormatException("Different number of classes in the file and number of specified output fields.");
+                }
+                foreach (string outputFieldName in outputFieldNameCollection)
+                {
+                    if (classNames.IndexOf(outputFieldName) < 0)
+                    {
+                        throw new FormatException($"Output field name {outputFieldName} was not found among the classes specified in the file.");
+                    }
+                }
                 //Bundle handler setup
                 foreach (string attrName in repetitiveGroupOfAttributes.StringValueCollection)
                 {

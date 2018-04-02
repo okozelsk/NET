@@ -191,7 +191,8 @@ namespace RCNet.Neural.Network.FF
             }
             //Set new weights and compute error
             _net.SetWeights(newWaights);
-            _mse = _net.ComputeBatchErrorStat(_inputVectorCollection, _outputVectorCollection).MeanSquare;
+            List<double[]> computedOutputCollection = null;
+            _mse = _net.ComputeBatchErrorStat(_inputVectorCollection, _outputVectorCollection, out computedOutputCollection).MeanSquare;
             return;
         }
 

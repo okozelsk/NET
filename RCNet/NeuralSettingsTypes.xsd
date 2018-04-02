@@ -64,8 +64,8 @@
   <!-- Enumeration of neural task type -->
   <xs:simpleType name="EnumNeuralTaskType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="TimeSeriesPrediction"/>
-      <xs:enumeration value="Categorization"/>
+      <xs:enumeration value="Prediction"/>
+      <xs:enumeration value="Classification"/>
     </xs:restriction>
   </xs:simpleType>
 

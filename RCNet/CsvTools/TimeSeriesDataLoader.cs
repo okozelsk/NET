@@ -11,7 +11,7 @@ using RCNet.Neural.Network.Data;
 namespace RCNet.CsvTools
 {
     /// <summary>
-    /// The class allows to upload sample data for a TimeSeriesPrediction task from an .csv file.
+    /// The class allows to upload sample data for a Prediction task from an .csv file.
     /// </summary>
     public static class TimeSeriesDataLoader
     {
