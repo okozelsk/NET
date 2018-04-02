@@ -32,14 +32,14 @@ Echo State Network
 	Esn does not support SpectralRadius parameter (low added value)
 		but provides the internal statistics
 	Supported task types:
-		Time series prediction
+		Prediction
 		Classification
-			Supports variable length patterns
+			Supports variable length of patterns
 Data loaders (csv)
-	Supporting data formats for Esn task types
+	csv data formats for specific task types
 
 Bundle normalizer
-	Helper for data bundle normalization
+	Helper for data bundle efficient normalization
 
 
 Demo application
