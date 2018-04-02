@@ -2,38 +2,6 @@
 <!-- You can specify your data location in DataDir attribute -->
 <EsnDemoSettings DataDir=".\\Data">
   <!-- You can modify/remove existing or add your own DemoCase elements -->
-  <DemoCase Name="Pattern recognition task Splice junctions from https://archive.ics.uci.edu/ml/datasets/Molecular+Biology+%28Splice-junction+Gene+Sequences%29 (Single reservoir, Hidden layer, Resilient)">
-    <Samples CsvDataFileName="SpliceJunctions.csv" NumOfTestSamples="1000" TestSamplesSelectionMethod="Random" SingleNormalizer="false" NormalizerReserveRatio="0.1"/>
-    <EsnSettings TaskType="Classification" RandomizerSeek="0">
-      <InputFields RouteToReadout="false">
-        <Field Name="1st_Nucleotide"/>
-        <Field Name="2nd_Nucleotide"/>
-      </InputFields>
-      <ReservoirSettingsContainer>
-        <AnalogReservoirSettings Name="Random topology with 200 TanH neurons">
-          <Input ConnectionDensity="0.3" WeightScale="0.4"/>
-          <Internal Size="200" Activation="TanH" BiasScale="0" WeightScale="0.35">
-            <RandomTopology ConnectionsDensity="0.2"/>
-            <RetainmentNeurons Density="1" RetainmentMinRate="0" RetainmentMaxRate="0.8"/>
-          </Internal>
-        </AnalogReservoirSettings>
-      </ReservoirSettingsContainer>
-      <ReservoirInstancesContainer>
-        <ReservoirInstance InstanceName="RandMain" SettingsName="Random topology with 200 TanH neurons" AugmentedStates="true">
-          <InputField Name="1st_Nucleotide"/>
-          <InputField Name="2nd_Nucleotide"/>
-        </ReservoirInstance>
-      </ReservoirInstancesContainer>
-      <Readout OutputActivation="TanH" RegressionMethod="Resilient" Attempts="20" AttemptEpochs="1000" AttemptStopMSE="1E-20">
-        <HiddenLayer Neurons="50" Activation="TanH"/>
-      </Readout>
-      <OutputFields>
-        <Field Name="EI"/>
-        <Field Name="IE"/>
-        <Field Name="Neither"/>
-      </OutputFields>
-    </EsnSettings>
-  </DemoCase>
   <DemoCase Name="Prediction of the High and Low prices of SPXL title from Yahoo finance (A separate reservoir for each input field, Resilient)">
     <Samples CsvDataFileName="SPXL.csv" NumOfBootSamples="400" NumOfTestSamples="2" TestSamplesSelectionMethod="Sequential" SingleNormalizer="true" NormalizerReserveRatio="0.1"/>
     <EsnSettings TaskType="Prediction" RandomizerSeek="0">
