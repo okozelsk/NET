@@ -62,6 +62,7 @@
     <Compile Include="MathTools\MatrixMath\Matrix.cs" />
     <Compile Include="MathTools\MatrixMath\QRD.cs" />
     <Compile Include="MathTools\Normalizer.cs" />
+    <Compile Include="MathTools\WeightedAvg.cs" />
     <Compile Include="Neural\Activation\ActivationFactory.cs" />
     <Compile Include="Neural\Activation\ElliotAF.cs" />
     <Compile Include="Neural\Activation\GaussianAF.cs" />
