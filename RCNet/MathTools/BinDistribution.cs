@@ -10,6 +10,7 @@ namespace RCNet.MathTools
     /// <summary>
     /// Class contains distribution of binary values
     /// </summary>
+    [Serializable]
     public class BinDistribution
     {
         //Attribute properties

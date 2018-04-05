@@ -84,15 +84,6 @@ namespace RCNet.Demo
             /// </summary>
             public int NumOfBootSamples { get; }
             /// <summary>
-            /// Number of samples to be used to test Esn generalization capability.
-            /// </summary>
-            public int NumOfTestSamples { get; }
-            /// <summary>
-            /// What the method to be used for selection of test samples.
-            /// (Sequential or Random)
-            /// </summary>
-            public string TestSamplesSelectionMethod { get; }
-            /// <summary>
             /// Use true if all input and output Esn fields are about the same range of values.
             /// </summary>
             public bool SingleNormalizer { get; }
@@ -113,8 +104,6 @@ namespace RCNet.Demo
                 XElement samplesElem = demoCaseElem.Descendants("Samples").First();
                 CsvDataFileName = dir + "\\" + samplesElem.Attribute("CsvDataFileName").Value;
                 NumOfBootSamples = (samplesElem.Attribute("NumOfBootSamples") == null) ? 0 : int.Parse(samplesElem.Attribute("NumOfBootSamples").Value);
-                NumOfTestSamples = int.Parse(samplesElem.Attribute("NumOfTestSamples").Value);
-                TestSamplesSelectionMethod = samplesElem.Attribute("TestSamplesSelectionMethod").Value;
                 SingleNormalizer = bool.Parse(samplesElem.Attribute("SingleNormalizer").Value);
                 NormalizerReserveRatio = double.Parse(samplesElem.Attribute("NormalizerReserveRatio").Value, CultureInfo.InvariantCulture);
                 //Instantiating of the EsnSettings

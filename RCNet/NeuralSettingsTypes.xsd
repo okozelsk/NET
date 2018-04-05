@@ -111,7 +111,7 @@
       <xs:element type="FFNetHiddenLayer" name="HiddenLayer" minOccurs="0" maxOccurs="unbounded"/>
       <xs:element type="ReadoutLayerOuputFields" name="OutputFields" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
-    <xs:attribute type="UDoubleLEThird" name="TestDataSetSize" use="required"/>
+    <xs:attribute type="UDoubleLEThird" name="RatioOfTestData" use="required"/>
     <xs:attribute type="xs:int" name="NumOfFolds" use="required"/>
   </xs:complexType>
 

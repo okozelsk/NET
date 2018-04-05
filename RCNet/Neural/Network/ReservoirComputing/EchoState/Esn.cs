@@ -72,7 +72,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
                 _numOfPredictors += _settings.InputFieldNameCollection.Count;
             }
             //Readout layer
-            _readoutLayer = null;
+            _readoutLayer = new ReadoutLayer(_settings.TaskType, _settings.ReadoutLayerConfig, _rand);
             return;
         }
 
@@ -256,7 +256,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
         /// <param name="userObject">
         /// The user object to be passed to informativeCallback.
         /// </param>
-        public RegressionStageInput PrepareRegressionStageInput(PatternVectorPairBundle dataSet,
+        public RegressionStageInput PrepareRegressionStageInput(ClassificationBundle dataSet,
                                                                 PredictorsCollectionCallbackDelegate informativeCallback = null,
                                                                 Object userObject = null
                                                                 )
@@ -308,7 +308,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
         /// <param name="userObject">
         /// The user object to be passed to informativeCallback.
         /// </param>
-        public RegressionStageInput PrepareRegressionStageInput(VectorsPairBundle dataSet,
+        public RegressionStageInput PrepareRegressionStageInput(PredictionBundle dataSet,
                                                                 int numOfBootSamples,
                                                                 PredictorsCollectionCallbackDelegate informativeCallback = null,
                                                                 Object userObject = null
@@ -364,20 +364,16 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
         /// <param name="regressionControllerData">
         /// Optional custom object to be passed to regressionController together with other standard information
         /// </param>
-        public void RegressionStage(RegressionStageInput rsi,
-                                    ReadoutUnit.RegressionCallbackDelegate regressionController = null,
-                                    Object regressionControllerData = null
-                                    )
+        public ValidationBundle RegressionStage(RegressionStageInput rsi,
+                                                ReadoutUnit.RegressionCallbackDelegate regressionController = null,
+                                                Object regressionControllerData = null
+                                                )
         {
-            _readoutLayer = new ReadoutLayer(_settings.TaskType,
-                                             _settings.ReadoutLayerConfig,
-                                             rsi.PredictorsCollection,
-                                             rsi.IdealOutputsCollection,
-                                             _rand,
-                                             regressionController,
-                                             regressionControllerData
-                                             );
-            return;
+            return _readoutLayer.Build(rsi.PredictorsCollection,
+                                       rsi.IdealOutputsCollection,
+                                       regressionController,
+                                       regressionControllerData
+                                       );
         }
 
 

@@ -256,7 +256,7 @@ namespace RCNet.Neural.Network.Data
         /// Adjusts internal normalizers
         /// </summary>
         /// <param name="bundle">Sample data bundle</param>
-        public void AdjustNormalizers(PatternVectorPairBundle bundle)
+        public void AdjustNormalizers(ClassificationBundle bundle)
         {
             ResetNormalizers();
             foreach (List<double[]> pattern in bundle.InputPatternCollection)
@@ -277,7 +277,7 @@ namespace RCNet.Neural.Network.Data
         /// Adjusts internal normalizers
         /// </summary>
         /// <param name="bundle">Sample data bundle</param>
-        public void AdjustNormalizers(VectorsPairBundle bundle)
+        public void AdjustNormalizers(PredictionBundle bundle)
         {
             ResetNormalizers();
             foreach (double[] inputVector in bundle.InputVectorCollection)
@@ -403,7 +403,7 @@ namespace RCNet.Neural.Network.Data
         /// Normalizes all values in the sample data bundle
         /// </summary>
         /// <param name="bundle">Sample data bundle</param>
-        public void Normalize(VectorsPairBundle bundle)
+        public void Normalize(PredictionBundle bundle)
         {
             AdjustNormalizers(bundle);
             NormalizeInputVectorCollection(bundle.InputVectorCollection);
@@ -415,7 +415,7 @@ namespace RCNet.Neural.Network.Data
         /// Naturalizes all values in the sample data bundle
         /// </summary>
         /// <param name="bundle">Sample data bundle</param>
-        public void Naturalize(VectorsPairBundle bundle)
+        public void Naturalize(PredictionBundle bundle)
         {
             NaturalizeInputVectorCollection(bundle.InputVectorCollection);
             NaturalizeOutputVectorCollection(bundle.OutputVectorCollection);
@@ -426,7 +426,7 @@ namespace RCNet.Neural.Network.Data
         /// Normalizes all values in the sample data bundle
         /// </summary>
         /// <param name="bundle">Sample data bundle</param>
-        public void Normalize(PatternVectorPairBundle bundle)
+        public void Normalize(ClassificationBundle bundle)
         {
             AdjustNormalizers(bundle);
             foreach (List<double[]> pattern in bundle.InputPatternCollection)
@@ -441,7 +441,7 @@ namespace RCNet.Neural.Network.Data
         /// Naturalizes all values in the sample data bundle
         /// </summary>
         /// <param name="bundle">Sample data bundle</param>
-        public void Naturalize(PatternVectorPairBundle bundle)
+        public void Naturalize(ClassificationBundle bundle)
         {
             foreach (List<double[]> pattern in bundle.InputPatternCollection)
             {
@@ -452,7 +452,7 @@ namespace RCNet.Neural.Network.Data
         }
 
         /// <summary>
-        /// Creates the VectorsPairBundle from the vector collection
+        /// Creates PredictionBundle from the vector collection
         /// </summary>
         /// <param name="vectorCollection">Collection of vectors</param>
         /// <param name="normalize">Specifies whether to normalize data in the created bundle</param>
@@ -460,7 +460,7 @@ namespace RCNet.Neural.Network.Data
         /// <returns>The last unused vector</returns>
         public double[] CreateBundleFromVectorCollection(List<double[]> vectorCollection,
                                                          bool normalize,
-                                                         out VectorsPairBundle bundle
+                                                         out PredictionBundle bundle
                                                          )
         {
             CheckStructure();
@@ -481,7 +481,7 @@ namespace RCNet.Neural.Network.Data
                 outputFieldIdxs[i] = _fieldNameCollection.IndexOf(_outputFieldNameCollection[i]);
             }
             double[] remainingInputVector = null;
-            bundle = new VectorsPairBundle();
+            bundle = new PredictionBundle();
             for(int row = 0; row < vectorCollection.Count; row++)
             {
                 //Input vector

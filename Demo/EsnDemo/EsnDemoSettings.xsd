@@ -7,21 +7,12 @@
   <xs:import namespace="Neural-Settings-Types" />
 
   <!-- SIMPLE TYPES -->
-  <!-- Enumeration of test samples selection methods supported in ESN demo -->
-  <xs:simpleType name="EnumTestSamplesSelectionMethod">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="Random"/>
-      <xs:enumeration value="Sequential"/>
-    </xs:restriction>
-  </xs:simpleType>
 
   <!-- COMPLEX TYPES -->
   <!-- Sample data -->
   <xs:complexType name="SampleData">
     <xs:attribute type="xs:string" name="CsvDataFileName" use="required"/>
     <xs:attribute type="xs:unsignedInt" name="NumOfBootSamples" use="optional" default="0"/>
-    <xs:attribute type="xs:unsignedInt" name="NumOfTestSamples" use="required"/>
-    <xs:attribute type="EnumTestSamplesSelectionMethod" name="TestSamplesSelectionMethod" use="required"/>
     <xs:attribute type="xs:boolean" name="SingleNormalizer" use="required"/>
     <xs:attribute type="nst:UDouble" name="NormalizerReserveRatio" use="required"/>
   </xs:complexType>

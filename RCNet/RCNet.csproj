@@ -75,8 +75,9 @@
     <Compile Include="Neural\Activation\TanhAF.cs" />
     <Compile Include="Neural\CommonTypes.cs" />
     <Compile Include="Neural\Network\Data\BundleNormalizer.cs" />
-    <Compile Include="Neural\Network\Data\PatternVectorPairBundle.cs" />
-    <Compile Include="Neural\Network\Data\VectorsPairBundle.cs" />
+    <Compile Include="Neural\Network\Data\ClassificationBundle.cs" />
+    <Compile Include="Neural\Network\Data\ValidationBundle.cs" />
+    <Compile Include="Neural\Network\Data\PredictionBundle.cs" />
     <Compile Include="Neural\Network\ReservoirComputing\EchoState\AnalogNeuron.cs" />
     <Compile Include="Neural\Network\ReservoirComputing\EchoState\AnalogReservoir.cs" />
     <Compile Include="Neural\Network\ReservoirComputing\EchoState\AnalogReservoirSettings.cs" />

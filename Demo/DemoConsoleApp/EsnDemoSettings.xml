@@ -3,7 +3,7 @@
 <EsnDemoSettings DataDir=".\\Data">
   <!-- You can modify/remove existing or add your own DemoCase elements -->
   <DemoCase Name="Prediction of the High and Low prices of TTOO title from Yahoo finance (Single reservoir, Linear regression)">
-    <Samples CsvDataFileName="TTOO.csv" NumOfBootSamples="300" NumOfTestSamples="2" TestSamplesSelectionMethod="Sequential" SingleNormalizer="true" NormalizerReserveRatio="0.1"/>
+    <Samples CsvDataFileName="TTOO.csv" NumOfBootSamples="300" SingleNormalizer="true" NormalizerReserveRatio="0.1"/>
     <EsnSettings TaskType="Prediction" RandomizerSeek="0">
       <InputFields RouteToReadout="true">
         <Field Name="High"/>
@@ -26,7 +26,7 @@
           <InputField Name="Adj Close"/>
         </ReservoirInstance>
       </ReservoirInstancesContainer>
-      <ReadoutLayer TestDataSetSize="0.1" NumOfFolds="0">
+      <ReadoutLayer RatioOfTestData="0.1" NumOfFolds="0">
         <OutputFields OutputActivation="Identity" RegressionMethod="Linear" Attempts="1" AttemptEpochs="100" AttemptStopMSE="1E-20">
           <Field Name="High"/>
           <Field Name="Low"/>
@@ -35,7 +35,7 @@
     </EsnSettings>
   </DemoCase>
   <DemoCase Name="Pattern recognition task Splice junctions from https://archive.ics.uci.edu/ml/datasets/Molecular+Biology+%28Splice-junction+Gene+Sequences%29 (Single reservoir, Hidden layer, Resilient)">
-    <Samples CsvDataFileName="SpliceJunctions.csv" NumOfTestSamples="1000" TestSamplesSelectionMethod="Random" SingleNormalizer="false" NormalizerReserveRatio="0.1"/>
+    <Samples CsvDataFileName="SpliceJunctions.csv" SingleNormalizer="false" NormalizerReserveRatio="0.1"/>
     <EsnSettings TaskType="Classification" RandomizerSeek="0">
       <InputFields RouteToReadout="false">
         <Field Name="1st_Nucleotide"/>
@@ -56,7 +56,7 @@
           <InputField Name="2nd_Nucleotide"/>
         </ReservoirInstance>
       </ReservoirInstancesContainer>
-      <ReadoutLayer TestDataSetSize="0.1" NumOfFolds="0">
+      <ReadoutLayer RatioOfTestData="0.1" NumOfFolds="0">
         <HiddenLayer Neurons="20" Activation="TanH"/>
         <OutputFields OutputActivation="TanH" RegressionMethod="Resilient" Attempts="5" AttemptEpochs="500" AttemptStopMSE="1E-20">
           <Field Name="EI"/>
@@ -67,7 +67,7 @@
     </EsnSettings>
   </DemoCase>
   <DemoCase Name="Prediction of the Mackey Glass chaotic time series (Single reservoir, Linear regression)">
-    <Samples CsvDataFileName="MackeyGlass.csv" NumOfBootSamples="600" NumOfTestSamples="500" TestSamplesSelectionMethod="Sequential" SingleNormalizer="false" NormalizerReserveRatio="0.1"/>
+    <Samples CsvDataFileName="MackeyGlass.csv" NumOfBootSamples="600" SingleNormalizer="false" NormalizerReserveRatio="0.1"/>
     <EsnSettings TaskType="Prediction" RandomizerSeek="0">
       <InputFields RouteToReadout="false">
         <Field Name="Value"/>
@@ -85,7 +85,7 @@
           <InputField Name="Value"/>
         </ReservoirInstance>
       </ReservoirInstancesContainer>
-      <ReadoutLayer TestDataSetSize="0.3" NumOfFolds="1">
+      <ReadoutLayer RatioOfTestData="0.3" NumOfFolds="1">
         <OutputFields OutputActivation="Identity" RegressionMethod="Linear" Attempts="1" AttemptEpochs="10" AttemptStopMSE="1E-20">
           <Field Name="Value"/>
         </OutputFields>
@@ -93,7 +93,7 @@
     </EsnSettings>
   </DemoCase>
   <DemoCase Name="Prediction of the High and Low prices of SPXL title from Yahoo finance (A separate reservoir for each input field, Resilient)">
-    <Samples CsvDataFileName="SPXL.csv" NumOfBootSamples="400" NumOfTestSamples="2" TestSamplesSelectionMethod="Sequential" SingleNormalizer="true" NormalizerReserveRatio="0.1"/>
+    <Samples CsvDataFileName="SPXL.csv" NumOfBootSamples="400" SingleNormalizer="true" NormalizerReserveRatio="0.1"/>
     <EsnSettings TaskType="Prediction" RandomizerSeek="0">
       <InputFields RouteToReadout="true">
         <Field Name="High"/>
@@ -129,7 +129,7 @@
           <InputField Name="Adj Close"/>
         </ReservoirInstance>
       </ReservoirInstancesContainer>
-      <ReadoutLayer TestDataSetSize="0.1" NumOfFolds="0">
+      <ReadoutLayer RatioOfTestData="0.1" NumOfFolds="0">
         <OutputFields OutputActivation="Identity" RegressionMethod="Resilient" Attempts="5" AttemptEpochs="200" AttemptStopMSE="1E-20">
           <Field Name="High"/>
           <Field Name="Low"/>
@@ -138,7 +138,7 @@
     </EsnSettings>
   </DemoCase>
   <DemoCase Name="Prediction of the High and Low prices of SPXL title from Yahoo finance (Single reservoir, Hidden layer, Resilient)">
-    <Samples CsvDataFileName="SPXL.csv" NumOfBootSamples="400" NumOfTestSamples="2" TestSamplesSelectionMethod="Sequential" SingleNormalizer="true" NormalizerReserveRatio="0.1"/>
+    <Samples CsvDataFileName="SPXL.csv" NumOfBootSamples="400" SingleNormalizer="true" NormalizerReserveRatio="0.1"/>
     <EsnSettings TaskType="Prediction" RandomizerSeek="0">
       <InputFields RouteToReadout="true">
         <Field Name="High"/>
@@ -162,7 +162,7 @@
           <InputField Name="Adj Close"/>
         </ReservoirInstance>
       </ReservoirInstancesContainer>
-      <ReadoutLayer TestDataSetSize="0.1" NumOfFolds="0">
+      <ReadoutLayer RatioOfTestData="0.1" NumOfFolds="0">
         <HiddenLayer Neurons="10" Activation="TanH"/>
         <OutputFields OutputActivation="Identity" RegressionMethod="Resilient" Attempts="2" AttemptEpochs="700" AttemptStopMSE="1E-20">
           <Field Name="High"/>
@@ -172,7 +172,7 @@
     </EsnSettings>
   </DemoCase>
   <DemoCase Name="Pattern recognition task Libras Movement from https://archive.ics.uci.edu/ml/datasets/Libras+Movement (Single reservoir, Hidden layer, Resilient)">
-    <Samples CsvDataFileName="LibrasMovement.csv" NumOfTestSamples="15" TestSamplesSelectionMethod="Sequential" SingleNormalizer="false" NormalizerReserveRatio="0.1"/>
+    <Samples CsvDataFileName="LibrasMovement.csv" SingleNormalizer="false" NormalizerReserveRatio="0.1"/>
     <EsnSettings TaskType="Classification" RandomizerSeek="0">
       <InputFields RouteToReadout="false">
         <Field Name="coord_abcissa"/>
@@ -193,7 +193,7 @@
           <InputField Name="coord_ordinate"/>
         </ReservoirInstance>
       </ReservoirInstancesContainer>
-      <ReadoutLayer TestDataSetSize="0.25" NumOfFolds="0">
+      <ReadoutLayer RatioOfTestData="0.25" NumOfFolds="0">
         <HiddenLayer Neurons="10" Activation="TanH"/>
         <OutputFields OutputActivation="TanH" RegressionMethod="Resilient" Attempts="3" AttemptEpochs="2000" AttemptStopMSE="1E-20">
           <Field Name="curved swing"/>
@@ -216,7 +216,7 @@
     </EsnSettings>
   </DemoCase>
   <DemoCase Name="Prediction of the Sinusoid time series (Single reservoir, Linear regression)">
-    <Samples CsvDataFileName="Sinusoid.csv" NumOfBootSamples="400" NumOfTestSamples="10" TestSamplesSelectionMethod="Sequential" SingleNormalizer="false" NormalizerReserveRatio="0.1"/>
+    <Samples CsvDataFileName="Sinusoid.csv" NumOfBootSamples="400" SingleNormalizer="false" NormalizerReserveRatio="0.1"/>
     <EsnSettings TaskType="Prediction" RandomizerSeek="0">
       <InputFields RouteToReadout="false">
         <Field Name="Value"/>
@@ -238,7 +238,7 @@
           <InputField Name="Value"/>
         </ReservoirInstance>
       </ReservoirInstancesContainer>
-      <ReadoutLayer TestDataSetSize="0.3" NumOfFolds="1">
+      <ReadoutLayer RatioOfTestData="0.3" NumOfFolds="1">
         <OutputFields OutputActivation="Identity" RegressionMethod="Linear" Attempts="1" AttemptEpochs="1" AttemptStopMSE="1E-20">
           <Field Name="Value"/>
         </OutputFields>

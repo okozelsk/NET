@@ -22,14 +22,14 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
         /// <summary>
         /// Parameter specifies how big part of available samples will be used for testing.
         /// </summary>
-        public double TestDataSetSize { get; set; }
+        public double RatioOfTestData { get; set; }
         /// <summary>
         /// Number of predicting readout units for each output field.
         /// It also detemines how many data sets for testing will be prepared.
         /// (x-fold cross-validation)
         /// https://en.wikipedia.org/wiki/Cross-validation_(statistics)
         /// Parameter has two options.
-        /// LE 0 - means auto setup to achieve full cross-validation if it is possible (related to specified TestDataSetSize)
+        /// LE 0 - means auto setup to achieve full cross-validation if it is possible (related to specified RatioOfTestData)
         /// GT 0 - means exact number of the folds
         /// </summary>
         public int NumOfFolds { get; set; }
@@ -76,7 +76,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
         public ReadoutLayerSettings()
         {
             //Default settings
-            TestDataSetSize = 0;
+            RatioOfTestData = 0;
             NumOfFolds = 0;
             HiddenLayerCollection = new List<HiddenLayerSettings>();
             OutputNeuronActivation = ActivationFactory.ActivationType.Identity;
@@ -95,7 +95,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
         public ReadoutLayerSettings(ReadoutLayerSettings source)
         {
             //Copy
-            TestDataSetSize = source.TestDataSetSize;
+            RatioOfTestData = source.RatioOfTestData;
             NumOfFolds = source.NumOfFolds;
             HiddenLayerCollection = new List<HiddenLayerSettings>(source.HiddenLayerCollection.Count);
             foreach (HiddenLayerSettings hiddenLayerSettings in source.HiddenLayerCollection)
@@ -135,7 +135,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
             }
             validator.LoadXDocFromString(readoutLayerSettingsElem.ToString());
             //Parsing
-            TestDataSetSize = double.Parse(readoutLayerSettingsElem.Attribute("TestDataSetSize").Value, CultureInfo.InvariantCulture);
+            RatioOfTestData = double.Parse(readoutLayerSettingsElem.Attribute("RatioOfTestData").Value, CultureInfo.InvariantCulture);
             NumOfFolds = int.Parse(readoutLayerSettingsElem.Attribute("NumOfFolds").Value);
             //Hidden layers
             HiddenLayerCollection = new List<HiddenLayerSettings>();
@@ -166,7 +166,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
         {
             if (obj == null) return false;
             ReadoutLayerSettings cmpSettings = obj as ReadoutLayerSettings;
-            if (TestDataSetSize != cmpSettings.TestDataSetSize ||
+            if (RatioOfTestData != cmpSettings.RatioOfTestData ||
                 NumOfFolds != cmpSettings.NumOfFolds ||
                 OutputNeuronActivation != cmpSettings.OutputNeuronActivation ||
                 RegressionMethod != cmpSettings.RegressionMethod ||

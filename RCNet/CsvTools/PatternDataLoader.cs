@@ -16,7 +16,7 @@ namespace RCNet.CsvTools
     public static class PatternDataLoader
     {
         /// <summary>
-        /// Loads the data and prepares PatternVectorPairBundle.
+        /// Loads the data and prepares ClassificationBundle.
         /// 1st row of the file must start with the #RepetitiveGroupOfAttributes keyword followed by
         /// attribute names.
         /// 2nd row of the file must start with the #Classes keyword followed by
@@ -48,7 +48,7 @@ namespace RCNet.CsvTools
         /// <param name="bundleNormalizer">
         /// Returned initialized instance of BundleNormalizer.
         /// </param>
-        public static PatternVectorPairBundle Load(string fileName,
+        public static ClassificationBundle Load(string fileName,
                                                    List<string> inputFieldNameCollection,
                                                    List<string> outputFieldNameCollection,
                                                    Interval normRange,
@@ -57,7 +57,7 @@ namespace RCNet.CsvTools
                                                    out BundleNormalizer bundleNormalizer
                                                    )
         {
-            PatternVectorPairBundle bundle = new PatternVectorPairBundle();
+            ClassificationBundle bundle = new ClassificationBundle();
             bundleNormalizer = new BundleNormalizer(normRange, normReserveRatio, inputDataStandardization, false);
             using (StreamReader streamReader = new StreamReader(new FileStream(fileName, FileMode.Open)))
             {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Globalization;
 using RCNet.MathTools;
 using RCNet.Neural.Activation;
 using RCNet.Neural.Network.Data;
@@ -21,6 +22,14 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
         /// Maximum number of the folds
         /// </summary>
         public const int MaxNumOfFolds = 100;
+        /// <summary>
+        /// Maximum part of available samples useable for test purposes
+        /// </summary>
+        public const double MaxRatioOfTestData = 0.3333333333333333d;
+        /// <summary>
+        /// Minimum length of the test dataset
+        /// </summary>
+        public const int MinLengthOfTestDataset = 2;
         //Attributes
         /// <summary>
         /// Type of the task
@@ -47,62 +56,70 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
 
         //Constructor
         /// <summary>
-        /// Creates an in initialized instance
+        /// Creates an uninitialized instance
         /// </summary>
         /// <param name="taskType">Type of the task</param>
         /// <param name="settings">Readout layer configuration</param>
-        /// <param name="predictorsCollection">Collection of all available predictors</param>
-        /// <param name="idealOutputsCollection">Collection of all available desired outputs related to predictors</param>
         /// <param name="rand">Random object to be used</param>
-        /// <param name="regressionController">Regression controller delegate</param>
-        /// <param name="regressionControllerData">An user object</param>
         public ReadoutLayer(CommonTypes.TaskType taskType,
                             ReadoutLayerSettings settings,
-                            List<double[]> predictorsCollection,
-                            List<double[]> idealOutputsCollection,
-                            Random rand,
-                            ReadoutUnit.RegressionCallbackDelegate regressionController,
-                            Object regressionControllerData
+                            Random rand
                             )
         {
             _taskType = taskType;
             _settings = settings.DeepClone();
             _rand = rand;
-            //Test dataset size
-            if(_settings.TestDataSetSize > 1d/3d)
+            _clusterCollection = new ReadoutUnit[_settings.OutputFieldNameCollection.Count][];
+            _clusterErrStatisticsCollection = new List<ClusterErrStatistics>();
+            return;
+        }
+
+        /// <summary>
+        /// Builds readout layer.
+        /// Prepares prediction clusters containing trained readout units.
+        /// </summary>
+        /// <param name="predictorsCollection">Collection of all available predictors</param>
+        /// <param name="idealOutputsCollection">Collection of all available desired outputs related to predictors</param>
+        /// <param name="regressionController">Regression controller delegate</param>
+        /// <param name="regressionControllerData">An user object</param>
+        public ValidationBundle Build(List<double[]> predictorsCollection,
+                                      List<double[]> idealOutputsCollection,
+                                      ReadoutUnit.RegressionCallbackDelegate regressionController,
+                                      Object regressionControllerData
+                                      )
+        {
+            //Allocation of computed vectors for validation bundle
+            List<double[]> computedVectorCollection = new List<double[]>(idealOutputsCollection.Count);
+            for(int i = 0; i < idealOutputsCollection.Count; i++)
             {
-                throw new ArgumentException("Test dataset size is greater than 1/3", "TestDataSetSize");
+                computedVectorCollection.Add(new double[idealOutputsCollection[0].Length]);
             }
-            int testDataSetSize = (int)Math.Round(idealOutputsCollection.Count * _settings.TestDataSetSize);
-            if(testDataSetSize < 2)
+            //Test dataset size
+            if (_settings.RatioOfTestData > MaxRatioOfTestData)
             {
-                throw new ArgumentException("Num of test samples is less than 2", "TestDataSetSize");
+                throw new ArgumentException($"Test dataset size is greater than {MaxRatioOfTestData.ToString(CultureInfo.InvariantCulture)}", "TestDataSetSize");
+            }
+            int testDataSetLength = (int)Math.Round(idealOutputsCollection.Count * _settings.RatioOfTestData);
+            if (testDataSetLength < MinLengthOfTestDataset)
+            {
+                throw new ArgumentException($"Num of test samples is less than {MinLengthOfTestDataset.ToString(CultureInfo.InvariantCulture)}", "TestDataSetSize");
             }
             //Number of folds
             int numOfFolds = _settings.NumOfFolds;
-            if(numOfFolds <= 0)
+            if (numOfFolds <= 0)
             {
                 //Auto setup
-                numOfFolds = idealOutputsCollection.Count / testDataSetSize;
-                if(numOfFolds > MaxNumOfFolds)
+                numOfFolds = idealOutputsCollection.Count / testDataSetLength;
+                if (numOfFolds > MaxNumOfFolds)
                 {
                     numOfFolds = MaxNumOfFolds;
                 }
             }
             //Create shuffled copy of the data
-            List<double[]> predictorsShuffledCollection = new List<double[]>(predictorsCollection.Count);
-            List<double[]> idealOutputsShuffledCollection = new List<double[]>(idealOutputsCollection.Count);
-            int[] shuffledIndices = new int[idealOutputsCollection.Count];
-            shuffledIndices.ShuffledIndices(_rand);
-            for(int i = 0; i < shuffledIndices.Length; i++)
-            {
-                predictorsShuffledCollection.Add(predictorsCollection[shuffledIndices[i]]);
-                idealOutputsShuffledCollection.Add(idealOutputsCollection[shuffledIndices[i]]);
-            }
-            //Data inspection, preparation of datasets and trained ReadoutUnits creation
-            _clusterCollection = new ReadoutUnit[_settings.OutputFieldNameCollection.Count][];
-            _clusterErrStatisticsCollection = new List<ClusterErrStatistics>();
-            //Cluster for each output field
+            PredictionBundle shuffledData = new PredictionBundle(predictorsCollection, idealOutputsCollection);
+            shuffledData.Shuffle(_rand);
+            //Data inspection, preparation of datasets and training of ReadoutUnits
+            //Clusters of readout units (one cluster for each output field)
             for (int clusterIdx = 0; clusterIdx < _settings.OutputFieldNameCollection.Count; clusterIdx++)
             {
                 _clusterCollection[clusterIdx] = new ReadoutUnit[numOfFolds];
@@ -114,7 +131,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
                     refBinDistr = new BinDistribution(ActivationFactory.CreateActivationFunction(_settings.OutputNeuronActivation).Range.Mid);
                 }
                 //Transformation to a single value vectors and data analysis
-                foreach (double[] idealVector in idealOutputsShuffledCollection)
+                foreach (double[] idealVector in shuffledData.OutputVectorCollection)
                 {
                     double[] value = new double[1];
                     value[0] = idealVector[clusterIdx];
@@ -125,34 +142,34 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
                         refBinDistr.Update(value);
                     }
                 }
-                List<VectorsPairBundle> subBundleCollection = null;
+                List<PredictionBundle> subBundleCollection = null;
                 //Datasets preparation is depending on the task type
-                if(_taskType == CommonTypes.TaskType.Classification)
+                if (_taskType == CommonTypes.TaskType.Classification)
                 {
                     //Classification task
-                    subBundleCollection = DivideSamplesForClassification(predictorsShuffledCollection,
+                    subBundleCollection = DivideSamplesForClassification(shuffledData.InputVectorCollection,
                                                                          idealValueCollection,
                                                                          refBinDistr,
-                                                                         testDataSetSize
+                                                                         testDataSetLength
                                                                          );
                 }
                 else
                 {
                     //Prediction task
-                    subBundleCollection = DivideSamplesForPrediction(predictorsShuffledCollection,
+                    subBundleCollection = DivideSamplesForPrediction(shuffledData.InputVectorCollection,
                                                                      idealValueCollection,
-                                                                     testDataSetSize
+                                                                     testDataSetLength
                                                                      );
                 }
                 //Readout units in the cluster
-                for(int foldIdx = 0; foldIdx < numOfFolds; foldIdx++)
+                for (int foldIdx = 0; foldIdx < numOfFolds; foldIdx++)
                 {
                     //Build training samples
                     List<double[]> trainingPredictorsCollection = new List<double[]>();
                     List<double[]> trainingIdealValueCollection = new List<double[]>();
-                    for(int bundleIdx = 0; bundleIdx < subBundleCollection.Count; bundleIdx++)
+                    for (int bundleIdx = 0; bundleIdx < subBundleCollection.Count; bundleIdx++)
                     {
-                        if(bundleIdx != foldIdx)
+                        if (bundleIdx != foldIdx)
                         {
                             trainingPredictorsCollection.AddRange(subBundleCollection[bundleIdx].InputVectorCollection);
                             trainingIdealValueCollection.AddRange(subBundleCollection[bundleIdx].OutputVectorCollection);
@@ -180,18 +197,19 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
                                                                                             regressionControllerData
                                                                                             );
                 }//foldIdx
-                //Cluster error statistics
+                //Cluster error statistics & data for validation bundle
                 ClusterErrStatistics ces = new ClusterErrStatistics(_taskType, numOfFolds, refBinDistr);
-                for (int sampleIdx = 0; sampleIdx < idealOutputsShuffledCollection.Count; sampleIdx++)
+                for (int sampleIdx = 0; sampleIdx < idealOutputsCollection.Count; sampleIdx++)
                 {
-                    double value = Compute(predictorsShuffledCollection[sampleIdx], clusterIdx);
-                    ces.Update(value, idealOutputsShuffledCollection[sampleIdx][clusterIdx]);
+                    double value = Compute(predictorsCollection[sampleIdx], clusterIdx);
+                    ces.Update(value, idealOutputsCollection[sampleIdx][clusterIdx]);
+                    computedVectorCollection[sampleIdx][clusterIdx] = value;
                 }
                 _clusterErrStatisticsCollection.Add(ces);
 
             }//clusterIdx
 
-            return;
+            return new ValidationBundle(computedVectorCollection, idealOutputsCollection);
         }
 
         //Properties
@@ -245,14 +263,14 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
             return outputVector;
         }
         
-        private List<VectorsPairBundle> DivideSamplesForClassification(List<double[]> predictorsCollection,
+        private List<PredictionBundle> DivideSamplesForClassification(List<double[]> predictorsCollection,
                                                                        List<double[]> idealValueCollection,
                                                                        BinDistribution refBinDistr,
                                                                        int bundleSize
                                                                        )
         {
             int numOfBundles = idealValueCollection.Count / bundleSize;
-            List<VectorsPairBundle> bundleCollection = new List<VectorsPairBundle>(numOfBundles);
+            List<PredictionBundle> bundleCollection = new List<PredictionBundle>(numOfBundles);
             //Scan
             int[] bin0SampleIdxs = new int[refBinDistr.NumOf[0]];
             int bin0SamplesPos = 0;
@@ -285,7 +303,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
             bin1SamplesPos = 0;
             for(int bundleNum = 0; bundleNum < numOfBundles; bundleNum++)
             {
-                VectorsPairBundle bundle = new VectorsPairBundle();
+                PredictionBundle bundle = new PredictionBundle();
                 //Bin 0
                 for (int i = 0; i < bundleBin0Count; i++)
                 {
@@ -318,18 +336,18 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
             return bundleCollection;
         }
 
-        private List<VectorsPairBundle> DivideSamplesForPrediction(List<double[]> predictorsCollection,
+        private List<PredictionBundle> DivideSamplesForPrediction(List<double[]> predictorsCollection,
                                                                    List<double[]> idealValueCollection,
                                                                    int bundleSize
                                                                    )
         {
             int numOfBundles = idealValueCollection.Count / bundleSize;
-            List<VectorsPairBundle> bundleCollection = new List<VectorsPairBundle>(numOfBundles);
+            List<PredictionBundle> bundleCollection = new List<PredictionBundle>(numOfBundles);
             //Bundles creation
             int samplesPos = 0;
             for (int bundleNum = 0; bundleNum < numOfBundles; bundleNum++)
             {
-                VectorsPairBundle bundle = new VectorsPairBundle();
+                PredictionBundle bundle = new PredictionBundle();
                 for (int i = 0; i < bundleSize; i++)
                 {
                     bundle.InputVectorCollection.Add(predictorsCollection[samplesPos]);

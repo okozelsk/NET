@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using RCNet.Extensions;
 
 namespace RCNet.Neural.Network.Data
 {
@@ -7,7 +8,7 @@ namespace RCNet.Neural.Network.Data
     /// Bundle of input vector and desired output vector
     /// </summary>
     [Serializable]
-    public class VectorsPairBundle
+    public class PredictionBundle
     {
         //Attributes
         /// <summary>
@@ -24,10 +25,24 @@ namespace RCNet.Neural.Network.Data
         /// <summary>
         /// Instantiates data bundle
         /// </summary>
-        public VectorsPairBundle()
+        public PredictionBundle()
         {
             InputVectorCollection = new List<double[]>();
             OutputVectorCollection = new List<double[]>();
+            return;
+        }
+
+        //Constructors
+        /// <summary>
+        /// Instantiates data bundle.
+        /// Creates shallow copy of given lists
+        /// </summary>
+        /// <param name="inputVectorCollection">Collection of input vectors</param>
+        /// <param name="outputVectorCollection">Collection of output vectors</param>
+        public PredictionBundle(List<double[]> inputVectorCollection, List<double[]> outputVectorCollection)
+        {
+            InputVectorCollection = new List<double[]>(inputVectorCollection);
+            OutputVectorCollection = new List<double[]>(outputVectorCollection);
             return;
         }
 
@@ -35,7 +50,7 @@ namespace RCNet.Neural.Network.Data
         /// Instantiates data bundle
         /// </summary>
         /// <param name="expectedNumOfPairs">Expected number of sample pairs</param>
-        public VectorsPairBundle(int expectedNumOfPairs)
+        public PredictionBundle(int expectedNumOfPairs)
         {
             InputVectorCollection = new List<double[]>(expectedNumOfPairs);
             OutputVectorCollection = new List<double[]>(expectedNumOfPairs);
@@ -54,7 +69,27 @@ namespace RCNet.Neural.Network.Data
             return;
         }
 
+        /// <summary>
+        /// Shuffles stored pairs
+        /// </summary>
+        /// <param name="rand">Random object</param>
+        public void Shuffle(Random rand)
+        {
+            List<double[]> l1 = new List<double[]>(InputVectorCollection);
+            List<double[]> l2 = new List<double[]>(OutputVectorCollection);
+            InputVectorCollection.Clear();
+            OutputVectorCollection.Clear();
+            int[] shuffledIndices = new int[l2.Count];
+            shuffledIndices.ShuffledIndices(rand);
+            for (int i = 0; i < shuffledIndices.Length; i++)
+            {
+                InputVectorCollection.Add(l1[shuffledIndices[i]]);
+                OutputVectorCollection.Add(l2[shuffledIndices[i]]);
+            }
+            return;
+        }
 
-    }//VectorsPairBundle
+
+    }//PredictionBundle
 
 }//Namespace

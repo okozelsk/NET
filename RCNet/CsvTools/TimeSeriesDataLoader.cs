@@ -16,7 +16,7 @@ namespace RCNet.CsvTools
     public static class TimeSeriesDataLoader
     {
         /// <summary>
-        /// Loads the data and prepares VectorsPairBundle.
+        /// Loads the data and prepares PredictionBundle.
         /// The first line of the csv file must be field names. These field names must
         /// match the names of the input and output fields.
         /// </summary>
@@ -47,7 +47,7 @@ namespace RCNet.CsvTools
         /// <param name="remainingInputVector">
         /// Returned the last input vector unused in the bundle.
         /// </param>
-        public static VectorsPairBundle Load(string fileName,
+        public static PredictionBundle Load(string fileName,
                                              List<string> inputFieldNameCollection,
                                              List<string> outputFieldNameCollection,
                                              Interval normRange,
@@ -58,7 +58,7 @@ namespace RCNet.CsvTools
                                              out double[] remainingInputVector
                                              )
         {
-            VectorsPairBundle bundle = null;
+            PredictionBundle bundle = null;
             bundleNormalizer = new BundleNormalizer(normRange, normReserveRatio, dataStandardization, dataStandardization);
             using (StreamReader streamReader = new StreamReader(new FileStream(fileName, FileMode.Open)))
             {
