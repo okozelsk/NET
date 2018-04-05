@@ -7,82 +7,102 @@ using System.Threading.Tasks;
 namespace RCNet.MathTools
 {
     /// <summary>
-    /// Simple error statistics of binary values (0/1)
+    /// Error statistics of binary 0/1 values
     /// </summary>
     [Serializable]
     public class BinErrStat
     {
-        //Attributes
-        /// <summary>
-        /// Binary 0/1 border
-        /// </summary>
-        private double _binBorder;
+        //Constants
+        private const double MaxErr = 1E9;
+
         //Attribute properties
         /// <summary>
-        /// Total number of compared binary values.
+        /// Reference distribution of 0/1 values
         /// </summary>
-        public int TotalNumOfBinValues { get; set; }
+        public BinDistribution RefBinValDistr { get; set; }
         /// <summary>
-        /// Number of recognized binary 1 values in ideals
+        /// This distribution of 0/1 values (from ideal)
         /// </summary>
-        public int NumOfBin1Values { get; set; }
+        public BinDistribution ThisBinValDistr { get; set; }
         /// <summary>
-        /// Number of errors on recognized binary 1 values
+        /// Statistics of errors on individual 0/1 values
         /// </summary>
-        public int NumOfBin1Errors { get; set; }
+        public BasicStat[] BinValErrStat { get; set; }
         /// <summary>
-        /// Total number of binary errors
+        /// Total error statistics
         /// </summary>
-        public int TotalNumOfBinErrors { get; set; }
-        /// <summary>
-        /// BasicStat of binary errors
-        /// </summary>
-        public BasicStat ErrStat { get; set; }
+        public BasicStat TotalErrStat { get; set; }
+
         //Properties
         /// <summary>
-        /// Number of recognized binary 0 values in ideals
+        /// Score based on bin values distributions and error rates.
         /// </summary>
-        public int NumOfBin0Values { get { return TotalNumOfBinValues - NumOfBin1Values; } }
-        /// <summary>
-        /// Number of errors on recognized binary 0 values
-        /// </summary>
-        public int NumOfBin0Errors { get { return TotalNumOfBinErrors - NumOfBin1Errors; } }
+        public double Score
+        {
+            get
+            {
+                double errSum = 0;
+                for (int binVal = 0; binVal <= 1; binVal++)
+                {
+                    double mulRatio = MaxErr;
+                    if (ThisBinValDistr.BinRate[binVal] > 0)
+                    {
+                        mulRatio = RefBinValDistr.BinRate[binVal] / ThisBinValDistr.BinRate[binVal];
+                    }
+                    double errRate = 1;
+                    if (ThisBinValDistr.NumOf[binVal] > 0)
+                    {
+                        errRate = BinValErrStat[binVal].Sum / BinValErrStat[binVal].NumOfSamples;
+                    }
+                    errRate *= mulRatio;
+                    errSum += errRate;
+                }
+                return 1d / (errSum + 1d / MaxErr);
+            }
+        }
+
+
 
         //Constructors
         /// <summary>
+        /// Creates an uninitialized instance
+        /// </summary>
+        /// <param name="refBinValDistr">Reference distribution of 0/1 values</param>
+        public BinErrStat(BinDistribution refBinValDistr)
+        {
+            RefBinValDistr = refBinValDistr.DeepClone();
+            ThisBinValDistr = new BinDistribution(RefBinValDistr.BinBorder);
+            BinValErrStat = new BasicStat[2];
+            BinValErrStat[0] = new BasicStat();
+            BinValErrStat[1] = new BasicStat();
+            TotalErrStat = new BasicStat();
+            return;
+        }
+
+        /// <summary>
         /// Construct an initialized instance
         /// </summary>
-        /// <param name="binBorder">Double value LT this border is considered 0 and GE 1</param>
-        /// <param name="valuesCollection">Collection of values to be compared with ideals</param>
-        /// <param name="idealsCollection">Collection of ideals</param>
-        public BinErrStat(double binBorder, IEnumerable<double[]> valuesCollection, IEnumerable<double[]> idealsCollection)
+        /// <param name="refBinValDistr">Reference distribution of 0/1 values</param>
+        /// <param name="computedVectorCollection">Collection of computed vectors</param>
+        /// <param name="idealVectorCollection">Collection of ideal vectors</param>
+        /// <param name="valueIdx">Index of a binary value within the vector</param>
+        public BinErrStat(BinDistribution refBinValDistr, IEnumerable<double[]> computedVectorCollection, IEnumerable<double[]> idealVectorCollection, int valueIdx = 0)
+            :this(refBinValDistr)
         {
-            _binBorder = binBorder;
-            ErrStat = new BasicStat();
-            //Evaluation
-            IEnumerator<double[]> idealsEnumerator = idealsCollection.GetEnumerator();
-            foreach (double[] values in valuesCollection)
-            {
-                idealsEnumerator.MoveNext();
-                double[] ideals = idealsEnumerator.Current;
-                for(int i = 0; i < values.Length; i++)
-                {
-                    ++TotalNumOfBinValues;
-                    if (ideals[i] >= _binBorder) ++NumOfBin1Values;
-                    if(!BinMatch(values[i], ideals[i]))
-                    {
-                        //Error
-                        ++TotalNumOfBinErrors;
-                        if (ideals[i] >= _binBorder) ++NumOfBin1Errors;
-                        ErrStat.AddSampleValue(1);
-                    }
-                    else
-                    {
-                        //OK
-                        ErrStat.AddSampleValue(0);
-                    }
-                }
-            }
+            Update(computedVectorCollection, idealVectorCollection, valueIdx);
+            return;
+        }
+
+        /// <summary>
+        /// Construct an initialized instance
+        /// </summary>
+        /// <param name="refBinValDistr">Reference distribution of 0/1 values</param>
+        /// <param name="computedValueCollection">Collection of computed vectors</param>
+        /// <param name="idealValueCollection">Collection of ideal vectors</param>
+        public BinErrStat(BinDistribution refBinValDistr, IEnumerable<double> computedValueCollection, IEnumerable<double> idealValueCollection)
+            : this(refBinValDistr)
+        {
+            Update(computedValueCollection, idealValueCollection);
             return;
         }
 
@@ -92,23 +112,78 @@ namespace RCNet.MathTools
         /// <param name="source">Source instance</param>
         public BinErrStat(BinErrStat source)
         {
-            _binBorder = source._binBorder;
-            TotalNumOfBinValues = source.TotalNumOfBinValues;
-            NumOfBin1Values = source.NumOfBin1Values;
-            NumOfBin1Errors = source.NumOfBin1Errors;
-            TotalNumOfBinErrors = source.TotalNumOfBinErrors;
-            ErrStat = new BasicStat(source.ErrStat);
+            RefBinValDistr = source.RefBinValDistr.DeepClone();
+            ThisBinValDistr = source.ThisBinValDistr.DeepClone();
+            BinValErrStat = new BasicStat[2];
+            BinValErrStat[0] = new BasicStat(source.BinValErrStat[0]);
+            BinValErrStat[1] = new BasicStat(source.BinValErrStat[1]);
+            TotalErrStat = new BasicStat(source.TotalErrStat);
             return;
         }
 
         //Methods
-        private bool BinMatch(double value, double idealValue)
+        /// <summary>
+        /// Compares if two values represent are the same binary value
+        /// </summary>
+        /// <param name="computedValue">Computed binary value</param>
+        /// <param name="idealValue">Ideal binary value</param>
+        /// <returns></returns>
+        private bool BinMatch(double computedValue, double idealValue)
         {
-            if (value >= _binBorder && idealValue >= _binBorder) return true;
-            if (value < _binBorder && idealValue < _binBorder) return true;
+            if (computedValue >= RefBinValDistr.BinBorder && idealValue >= RefBinValDistr.BinBorder) return true;
+            if (computedValue < RefBinValDistr.BinBorder && idealValue < RefBinValDistr.BinBorder) return true;
             return false;
         }
 
+        /// <summary>
+        /// Updates the statistics
+        /// </summary>
+        /// <param name="computedValue">Computed binary value</param>
+        /// <param name="idealValue">Ideal binary value</param>
+        public void Update(double computedValue, double idealValue)
+        {
+            ThisBinValDistr.Update(idealValue);
+            int idealBinVal = (idealValue >= ThisBinValDistr.BinBorder) ? 1 : 0;
+            int errValue = BinMatch(computedValue, idealValue) ? 0 : 1;
+            BinValErrStat[idealBinVal].AddSampleValue(errValue);
+            TotalErrStat.AddSampleValue(errValue);
+            return;
+        }
+
+        /// <summary>
+        /// Updates the statistics
+        /// </summary>
+        /// <param name="computedVectorCollection">Collection of computed vectors</param>
+        /// <param name="idealVectorCollection">Collection of ideal vectors</param>
+        /// <param name="valueIdx">Index of a binary value within the vectors</param>
+        public void Update(IEnumerable<double[]> computedVectorCollection, IEnumerable<double[]> idealVectorCollection, int valueIdx = 0)
+        {
+            IEnumerator<double[]> idealVectorEnumerator = idealVectorCollection.GetEnumerator();
+            foreach (double[] computedVector in computedVectorCollection)
+            {
+                idealVectorEnumerator.MoveNext();
+                double[] idealVector = idealVectorEnumerator.Current;
+                Update(computedVector[valueIdx], idealVector[valueIdx]);
+            }
+            return;
+        }
+
+        /// <summary>
+        /// Updates the statistics
+        /// </summary>
+        /// <param name="computedValueCollection">Collection of computed binary values</param>
+        /// <param name="idealValueCollection">Collection of ideal binary values</param>
+        public void Update(IEnumerable<double> computedValueCollection, IEnumerable<double> idealValueCollection)
+        {
+            IEnumerator<double> idealValueEnumerator = idealValueCollection.GetEnumerator();
+            foreach (double computedValue in computedValueCollection)
+            {
+                idealValueEnumerator.MoveNext();
+                double idealValue = idealValueEnumerator.Current;
+                Update(computedValue, idealValue);
+            }
+            return;
+        }
 
     }//BinErrStat
 

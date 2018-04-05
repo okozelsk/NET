@@ -8,7 +8,7 @@ using System.IO;
 using RCNet.XmlTools;
 using RCNet.Neural.Activation;
 
-namespace RCNet.Neural.Network.EchoState
+namespace RCNet.Neural.Network.ReservoirComputing.EchoState
 {
     /// <summary>
     /// The class contains analog reservoir configuration parameters and also contains
@@ -236,7 +236,7 @@ namespace RCNet.Neural.Network.EchoState
             //A very ugly validation. Xml schema does not support validation of the xml fragment against specific type.
             XmlValidator validator = new XmlValidator();
             Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            using (Stream schemaStream = assemblyRCNet.GetManifestResourceStream("RCNet.Neural.Network.EchoState.AnalogReservoirSettings.xsd"))
+            using (Stream schemaStream = assemblyRCNet.GetManifestResourceStream("RCNet.Neural.Network.ReservoirComputing.EchoState.AnalogReservoirSettings.xsd"))
             {
                 validator.AddSchema(schemaStream);
             }

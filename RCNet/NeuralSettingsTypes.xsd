@@ -39,6 +39,14 @@
     </xs:restriction>
   </xs:simpleType>
 
+  <!-- Unsigned double less than or equal 0.3333333333333333 -->
+  <xs:simpleType name="UDoubleLEThird">
+    <xs:restriction base="xs:double">
+      <xs:minExclusive value="0" />
+      <xs:maxInclusive value="0.3333333333333333" />
+    </xs:restriction>
+  </xs:simpleType>
+
   <!-- ENUMERATION TYPES -->
   <!-- Activation functions enumeration -->
   <xs:simpleType name="EnumActivation">
@@ -81,6 +89,30 @@
   <xs:complexType name="FFNetHiddenLayer">
     <xs:attribute type="UIntGT0" name="Neurons" use="required"/>
     <xs:attribute type="EnumActivation" name="Activation" use="required"/>
+  </xs:complexType>
+
+
+  <!-- ________________________________________READOUT LAYER TYPES_________________________________________________ -->
+  <!-- Readout layer output fields -->
+  <xs:complexType name="ReadoutLayerOuputFields">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="Name" name="Field" minOccurs="1" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute type="EnumActivation" name="OutputActivation" use="required"/>
+    <xs:attribute type="EnumRegressionMethod" name="RegressionMethod" use="required"/>
+    <xs:attribute type="UIntGT0" name="Attempts" use="required"/>
+    <xs:attribute type="UIntGT0" name="AttemptEpochs" use="required"/>
+    <xs:attribute type="UDouble" name="AttemptStopMSE" use="required"/>
+  </xs:complexType>
+  
+  <!-- Readout layer settings -->
+  <xs:complexType name="ReadoutLayerSettingsStruct">
+    <xs:sequence minOccurs="0" maxOccurs="1">
+      <xs:element type="FFNetHiddenLayer" name="HiddenLayer" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element type="ReadoutLayerOuputFields" name="OutputFields" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+    <xs:attribute type="UDoubleLEThird" name="TestDataSetSize" use="required"/>
+    <xs:attribute type="xs:int" name="NumOfFolds" use="required"/>
   </xs:complexType>
 
   <!-- ________________________________________ANALOG RESERVOIR TYPES_________________________________________________ -->
@@ -167,25 +199,6 @@
     <xs:attribute type="xs:boolean" name="RouteToReadout" use="optional" default="false"/>
   </xs:complexType>
 
-  <!-- Esn readout settings -->
-  <xs:complexType name="EsnReadout">
-    <xs:sequence minOccurs="0" maxOccurs="1">
-      <xs:element type="FFNetHiddenLayer" name="HiddenLayer" minOccurs="0" maxOccurs="unbounded"/>
-    </xs:sequence>
-    <xs:attribute type="EnumActivation" name="OutputActivation" use="required"/>
-    <xs:attribute type="EnumRegressionMethod" name="RegressionMethod" use="required"/>
-    <xs:attribute type="UIntGT0" name="Attempts" use="required"/>
-    <xs:attribute type="UIntGT0" name="AttemptEpochs" use="required"/>
-    <xs:attribute type="UDouble" name="AttemptStopMSE" use="required"/>
-  </xs:complexType>
-
-  <!-- Esn output fields -->
-  <xs:complexType name="EsnOuputFields">
-    <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="Name" name="Field" minOccurs="1" maxOccurs="unbounded"/>
-    </xs:sequence>
-  </xs:complexType>
-
   <!-- Esn reservoir settings container -->
   <xs:complexType name="EsnReservoirSettingsContainer">
     <xs:sequence minOccurs="1" maxOccurs="1">
@@ -216,8 +229,7 @@
       <xs:element type="EsnInputFields" name="InputFields" minOccurs="1" maxOccurs="1"/>
       <xs:element type="EsnReservoirSettingsContainer" name="ReservoirSettingsContainer" minOccurs="1" maxOccurs="1"/>
       <xs:element type="EsnReservoirInstancesContainer" name="ReservoirInstancesContainer" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="EsnReadout" name="Readout" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="EsnOuputFields" name="OutputFields" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="ReadoutLayerSettingsStruct" name="ReadoutLayer" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="EnumNeuralTaskType" name="TaskType" use="required"/>
     <xs:attribute type="xs:int" name="RandomizerSeek" use="required" />

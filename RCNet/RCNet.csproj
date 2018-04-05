@@ -54,6 +54,7 @@
     <Compile Include="Extensions\RNGCryptoServiceProviderClassExtension.cs" />
     <Compile Include="Extensions\StringClassExtensions.cs" />
     <Compile Include="MathTools\BasicStat.cs" />
+    <Compile Include="MathTools\BinDistribution.cs" />
     <Compile Include="MathTools\BinErrStat.cs" />
     <Compile Include="MathTools\Bitwise.cs" />
     <Compile Include="MathTools\Combinatorics.cs" />
@@ -76,17 +77,18 @@
     <Compile Include="Neural\Network\Data\BundleNormalizer.cs" />
     <Compile Include="Neural\Network\Data\PatternVectorPairBundle.cs" />
     <Compile Include="Neural\Network\Data\VectorsPairBundle.cs" />
-    <Compile Include="Neural\Network\EchoState\AnalogNeuron.cs" />
-    <Compile Include="Neural\Network\EchoState\AnalogReservoir.cs" />
-    <Compile Include="Neural\Network\EchoState\AnalogReservoirSettings.cs" />
-    <Compile Include="Neural\Network\EchoState\Esn.cs" />
-    <Compile Include="Neural\Network\EchoState\EsnSettings.cs" />
+    <Compile Include="Neural\Network\ReservoirComputing\EchoState\AnalogNeuron.cs" />
+    <Compile Include="Neural\Network\ReservoirComputing\EchoState\AnalogReservoir.cs" />
+    <Compile Include="Neural\Network\ReservoirComputing\EchoState\AnalogReservoirSettings.cs" />
+    <Compile Include="Neural\Network\ReservoirComputing\EchoState\Esn.cs" />
+    <Compile Include="Neural\Network\ReservoirComputing\EchoState\EsnSettings.cs" />
     <Compile Include="Neural\Network\FF\FeedForwardNetwork.cs" />
     <Compile Include="Neural\Network\FF\IFeedForwardNetworkTrainer.cs" />
     <Compile Include="Neural\Network\FF\LinRegrTrainer.cs" />
     <Compile Include="Neural\Network\FF\RPropTrainer.cs" />
-    <Compile Include="Neural\Network\RCReadout\ReadoutUnit.cs" />
-    <Compile Include="Neural\Network\RCReadout\Regression.cs" />
+    <Compile Include="Neural\Network\ReservoirComputing\Readout\ReadoutLayerSettings.cs" />
+    <Compile Include="Neural\Network\ReservoirComputing\Readout\ReadoutLayer.cs" />
+    <Compile Include="Neural\Network\ReservoirComputing\Readout\ReadoutUnit.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Queue\SimpleQueue.cs" />
     <Compile Include="XmlTools\XmlValidator.cs" />
@@ -97,8 +99,11 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Neural\Network\EchoState\AnalogReservoirSettings.xsd" />
-    <EmbeddedResource Include="Neural\Network\EchoState\EsnSettings.xsd" />
+    <EmbeddedResource Include="Neural\Network\ReservoirComputing\EchoState\AnalogReservoirSettings.xsd" />
+    <EmbeddedResource Include="Neural\Network\ReservoirComputing\EchoState\EsnSettings.xsd" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Neural\Network\ReservoirComputing\Readout\ReadoutLayerSettings.xsd" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

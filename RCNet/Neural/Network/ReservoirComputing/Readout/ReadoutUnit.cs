@@ -3,183 +3,179 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using RCNet.Extensions;
 using RCNet.MathTools;
 using RCNet.Neural.Activation;
 using RCNet.Neural.Network.FF;
 
-namespace RCNet.Neural.Network.RCReadout
+namespace RCNet.Neural.Network.ReservoirComputing.Readout
 {
     /// <summary>
-    /// Class encaptulates common readout-layer regression logic.
+    /// Contains the trained feed forward network associated with output field and related
+    /// important error statistics.
     /// </summary>
-    public static class Regression
+    [Serializable]
+    public class ReadoutUnit
     {
-
         //Delegates
         /// <summary>
-        /// Selects testing samples from all available samples.
-        /// </summary>
-        /// <param name="predictorsCollection">Predictors collection</param>
-        /// <param name="idealOutputsCollection">Desired outputs collection (desired outputs in the same order as predictors)</param>
-        /// <param name="readoutUnitIdx">Index of the readout unit (output field) for which the regression will be performed.</param>
-        /// <param name="testSampleIdxCollection">Array of test sample indexes to be filled by this function.</param>
-        public delegate void TestSamplesSelectorDelegate(List<double[]> predictorsCollection,
-                                                         List<double[]> idealOutputsCollection,
-                                                         int readoutUnitIdx,
-                                                         int[] testSampleIdxCollection
-                                                         );
-
-        /// <summary>
         /// This is the control function of the regression process and is called
-        /// after the completion of each regression training epoch.
-        /// The goal of the regression process is for each readout unit to train a feed forward network
+        /// after the completion of each regression training epoch for the readout unit.
+        /// The goal of the regression process is to train a feed forward network
         /// that will give good results both on the training data and the test data.
-        /// RegressionControlInArgs object passed to the function contains the best error statistics so far
-        /// and the latest statistics. The primary purpose of the function is to decide whether the latest statistics
+        /// RegressionControlInArgs object passed to the callback function contains the best error statistics so far
+        /// and the latest statistics. The primary purpose of this function is to decide whether the latest statistics
         /// are better than the best statistics so far.
         /// The function can also tell the regression process that it does not make any sense to continue the regression.
-        /// It can terminate the current regression attempt or whole readout unit regression process.
+        /// It can terminate the current regression attempt or whole regression process.
         /// </summary>
         /// <param name="inArgs">Contains all the necessary information to control the progress of the regression.</param>
         /// <returns>Instructions for the regression process.</returns>
         public delegate RegressionControlOutArgs RegressionCallbackDelegate(RegressionControlInArgs inArgs);
 
+        //Attribute properties
+        /// <summary>
+        /// Trained feed forward network
+        /// </summary>
+        public FeedForwardNetwork FFNet { get; set; }
+        /// <summary>
+        /// Training error statistics
+        /// </summary>
+        public BasicStat TrainingErrorStat { get; set; }
+        /// <summary>
+        /// Training binary error statistics
+        /// </summary>
+        public BinErrStat TrainingBinErrorStat { get; set; }
+        /// <summary>
+        /// Testing error statistics
+        /// </summary>
+        public BasicStat TestingErrorStat { get; set; }
+        /// <summary>
+        /// Testing binary error statistics
+        /// </summary>
+        public BinErrStat TestingBinErrorStat { get; set; }
+        /// <summary>
+        /// Statistics of the FF network weights
+        /// </summary>
+        public BasicStat OutputWeightsStat { get; set; }
+        /// <summary>
+        /// Achieved combined error.
+        /// Formula for combined error calculation is Max(training error, testing error)
+        /// </summary>
+        public double CombinedError { get; set; }
+        /// <summary>
+        /// Achieved combined binary score.
+        /// Formula for combined binary score calculation is Min(training bin error stat.Score, testing bin error stat.Score)
+        /// </summary>
+        public double CombinedBinScore { get; set; }
+
+        //Constructor
+        /// <summary>
+        /// Creates an unitialized instance
+        /// </summary>
+        public ReadoutUnit()
+        {
+            FFNet = null;
+            TrainingErrorStat = null;
+            TrainingBinErrorStat = null;
+            TestingErrorStat = null;
+            TestingBinErrorStat = null;
+            OutputWeightsStat = null;
+            CombinedError = -1;
+            CombinedBinScore = -1;
+            return;
+        }
+
+        /// <summary>
+        /// The deep copy constructor.
+        /// </summary>
+        /// <param name="source">Source instance</param>
+        public ReadoutUnit(ReadoutUnit source)
+        {
+            FFNet = null;
+            if (source.FFNet != null)
+            {
+                FFNet = source.FFNet.Clone();
+            }
+            TrainingErrorStat = null;
+            if (source.TrainingErrorStat != null)
+            {
+                TrainingErrorStat = new BasicStat(source.TrainingErrorStat);
+            }
+            TrainingBinErrorStat = null;
+            if (source.TrainingBinErrorStat != null)
+            {
+                TrainingBinErrorStat = new BinErrStat(source.TrainingBinErrorStat);
+            }
+            TestingErrorStat = null;
+            if (source.TestingErrorStat != null)
+            {
+                TestingErrorStat = new BasicStat(source.TestingErrorStat);
+            }
+            TestingBinErrorStat = null;
+            if (source.TestingBinErrorStat != null)
+            {
+                TestingBinErrorStat = new BinErrStat(source.TestingBinErrorStat);
+            }
+            OutputWeightsStat = null;
+            if (source.OutputWeightsStat != null)
+            {
+                OutputWeightsStat = new BasicStat(source.OutputWeightsStat);
+            }
+            CombinedError = source.CombinedError;
+            CombinedBinScore = source.CombinedBinScore;
+            return;
+        }
+
         //Methods
         /// <summary>
-        /// Selects the testing samples as the lasting sequence from given samples.
-        /// See the TestSamplesSelectorDelegate.
+        /// Creates the deep copy instance of this instance
         /// </summary>
-        public static void SelectSequentialTestSamples(List<double[]> predictorsCollection,
-                                                       List<double[]> idealOutputsCollection,
-                                                       int readoutUnitIdx,
-                                                       int[] testSampleIdxCollection
-                                                       )
+        public ReadoutUnit DeepClone()
         {
-            //Sequential selection
-            for (int srcIdx = predictorsCollection.Count - testSampleIdxCollection.Length, i = 0; srcIdx < predictorsCollection.Count; srcIdx++, i++)
-            {
-                testSampleIdxCollection[i] = srcIdx;
-            }
-            return;
+            return new ReadoutUnit(this);
         }
 
         /// <summary>
-        /// Selects testing samples randomly from given samples.
-        /// See the TestSamplesSelectorDelegate.
+        /// The default implementation of a judgement if the current readout unit is better than for now the best readout unit
         /// </summary>
-        public static void SelectRandomTestSamples(List<double[]> predictorsCollection,
-                                                   List<double[]> idealOutputsCollection,
-                                                   int readoutUnitIdx,
-                                                   int[] testSampleIdxCollection
-                                                   )
+        /// <param name="taskType">Type of the task</param>
+        /// <param name="current">Current readout unit</param>
+        /// <param name="best">For now the best readout unit</param>
+        public static bool IsBetter(CommonTypes.TaskType taskType, ReadoutUnit current, ReadoutUnit best)
         {
-            Random rand = new Random(0);
-            //Random selection
-            int[] randIndexes = new int[predictorsCollection.Count];
-            randIndexes.ShuffledIndices(rand);
-            for (int i = 0; i < testSampleIdxCollection.Length; i++)
+            switch(taskType)
             {
-                testSampleIdxCollection[i] = randIndexes[i];
-            }
-            return;
-        }
-
-        /// <summary>
-        /// Function prepares readout layer. One readout unit for each output field.
-        /// </summary>
-        /// <param name="outputFieldNameCollection">Collection of the output field names</param>
-        /// <param name="predictorsCollection">Collection of all available Esn predictors</param>
-        /// <param name="idealOutputsCollection">Collection of all available desired outputs related to predictors</param>
-        /// <param name="numOfTestSamples">Required number of test samples</param>
-        /// <param name="testSamplesSelector">Test samples selector delegate</param>
-        /// <param name="rand">Random object to be used</param>
-        /// <param name="hiddenLayerCollection">Collection of output FF network hidden layer settings</param>
-        /// <param name="outputNeuronActivation">Activation type of the FF output layer neuron</param>
-        /// <param name="regressionMethod">Regression method to be used</param>
-        /// <param name="regrAttempts">Number of regression attempts</param>
-        /// <param name="attemptEpochs">Number of epochs for each regression attempt</param>
-        /// <param name="stopMSE">The achieved training MSE when to terminate regression attempt</param>
-        /// <param name="regressionController">Regression controller delegate</param>
-        /// <param name="regressionControllerData">An user object</param>
-        /// <returns>Array of prepared readout units</returns>
-        public static ReadoutUnit[] LayerRegressions(List<string> outputFieldNameCollection,
-                                                     List<double[]> predictorsCollection,
-                                                     List<double[]> idealOutputsCollection,
-                                                     int numOfTestSamples,
-                                                     TestSamplesSelectorDelegate testSamplesSelector,
-                                                     Random rand,
-                                                     List<HiddenLayerSettings> hiddenLayerCollection,
-                                                     ActivationFactory.ActivationType outputNeuronActivation,
-                                                     TrainingMethodType regressionMethod,
-                                                     int regrAttempts,
-                                                     int attemptEpochs,
-                                                     double stopMSE,
-                                                     RegressionCallbackDelegate regressionController,
-                                                     Object regressionControllerData
-                                                     )
-        {
-            ReadoutUnit[] readoutUnits = new ReadoutUnit[outputFieldNameCollection.Count];
-            //Alone regression for each output field
-            for (int outputIdx = 0; outputIdx < outputFieldNameCollection.Count; outputIdx++)
-            {
-                //Testing data indexes
-                int[] testIndexes = new int[numOfTestSamples];
-                testSamplesSelector(predictorsCollection, idealOutputsCollection, outputIdx, testIndexes);
-                HashSet<int> testSampleIndexCollection = new HashSet<int>(testIndexes);
-                //Division to training and testing sets
-                int numOfTrainingSamples = predictorsCollection.Count - numOfTestSamples;
-                List<double[]> trainingPredictorsCollection = new List<double[]>(numOfTrainingSamples);
-                List<double[]> trainingOutputsCollection = new List<double[]>(numOfTrainingSamples);
-                List<double[]> testingPredictorsCollection = new List<double[]>(numOfTestSamples);
-                List<double[]> testingOutputsCollection = new List<double[]>(numOfTestSamples);
-                for (int i = 0; i < predictorsCollection.Count; i++)
-                {
-                    if (!testSampleIndexCollection.Contains(i))
+                case CommonTypes.TaskType.Prediction:
+                    return (current.CombinedError < best.CombinedError);
+                case CommonTypes.TaskType.Classification:
+                    if(current.CombinedBinScore > best.CombinedBinScore)
                     {
-                        //Training sample
-                        trainingPredictorsCollection.Add(predictorsCollection[i]);
-                        trainingOutputsCollection.Add(new double[1]);
-                        trainingOutputsCollection[trainingOutputsCollection.Count - 1][0] = idealOutputsCollection[i][outputIdx];
+                        return true;
                     }
-                    else
+                    else if(current.CombinedBinScore == best.CombinedBinScore && current.CombinedError < best.CombinedError)
                     {
-                        //Testing sample
-                        testingPredictorsCollection.Add(predictorsCollection[i]);
-                        testingOutputsCollection.Add(new double[1]);
-                        testingOutputsCollection[testingOutputsCollection.Count - 1][0] = idealOutputsCollection[i][outputIdx];
+                        return true;
                     }
-                }
-                //Readout unit regression
-                readoutUnits[outputIdx] = UnitRegression(outputIdx,
-                                                         outputFieldNameCollection[outputIdx],
-                                                         trainingPredictorsCollection,
-                                                         trainingOutputsCollection,
-                                                         testingPredictorsCollection,
-                                                         testingOutputsCollection,
-                                                         rand,
-                                                         hiddenLayerCollection,
-                                                         outputNeuronActivation,
-                                                         regressionMethod,
-                                                         regrAttempts,
-                                                         attemptEpochs,
-                                                         stopMSE,
-                                                         regressionController,
-                                                         regressionControllerData
-                                                         );
+                    break;
+                default:
+                    break;
             }
-            return readoutUnits;
+            return false;
         }
 
         /// <summary>
-        /// Prepares the readout unit for specified output field.
+        /// Prepares trained readout unit for specified output field and task.
         /// </summary>
-        /// <param name="readoutUnitIdx">Index of the readout unit</param>
-        /// <param name="outputFieldName">Name of the corresponding output field</param>
+        /// <param name="taskType">Type of the task</param>
+        /// <param name="readoutUnitIdx">Index of the readout unit (informative only)</param>
+        /// <param name="outputFieldName">Name of the corresponding output field (informative only)</param>
+        /// <param name="foldNum">Current fold number</param>
+        /// <param name="numOfFolds">Total number of the folds</param>
+        /// <param name="refBinDistr">Reference bin distribution (if task type is Classification)</param>
         /// <param name="trainingPredictorsCollection">Collection of the predictors for training</param>
-        /// <param name="trainingIdealOutputsCollection">Collection of ideal outputs for training</param>
+        /// <param name="trainingIdealOutputsCollection">Collection of ideal outputs for training. Note that the double array always has only one member.</param>
         /// <param name="testingPredictorsCollection">Collection of the predictors for testing</param>
-        /// <param name="testingIdealOutputsCollection">Collection of ideal outputs for testing</param>
+        /// <param name="testingIdealOutputsCollection">Collection of ideal outputs for testing. Note that the double array always has only one member.</param>
         /// <param name="rand">Random object to be used</param>
         /// <param name="hiddenLayerCollection">Collection of output FF network hidden layer settings</param>
         /// <param name="outputNeuronActivation">Activation type of the FF output layer neuron</param>
@@ -187,25 +183,29 @@ namespace RCNet.Neural.Network.RCReadout
         /// <param name="regrAttempts">Number of regression attempts</param>
         /// <param name="attemptEpochs">Number of epochs for each regression attempt</param>
         /// <param name="stopMSE">The achieved training MSE when to terminate regression attempt</param>
-        /// <param name="controller">Regression controller delegate</param>
+        /// <param name="controller">Regression controller</param>
         /// <param name="controllerUserObject">An user object to be passed to controller</param>
         /// <returns>Prepared readout unit</returns>
-        private static ReadoutUnit UnitRegression(int readoutUnitIdx,
-                                                  string outputFieldName,
-                                                  List<double[]> trainingPredictorsCollection,
-                                                  List<double[]> trainingIdealOutputsCollection,
-                                                  List<double[]> testingPredictorsCollection,
-                                                  List<double[]> testingIdealOutputsCollection,
-                                                  Random rand,
-                                                  List<HiddenLayerSettings> hiddenLayerCollection,
-                                                  ActivationFactory.ActivationType outputNeuronActivation,
-                                                  TrainingMethodType regressionMethod,
-                                                  int regrAttempts,
-                                                  int attemptEpochs,
-                                                  double stopMSE,
-                                                  RegressionCallbackDelegate controller = null,
-                                                  Object controllerUserObject = null
-                                                  )
+        public static ReadoutUnit CreateTrained(CommonTypes.TaskType taskType,
+                                                int readoutUnitIdx,
+                                                string outputFieldName,
+                                                int foldNum,
+                                                int numOfFolds,
+                                                BinDistribution refBinDistr,
+                                                List<double[]> trainingPredictorsCollection,
+                                                List<double[]> trainingIdealOutputsCollection,
+                                                List<double[]> testingPredictorsCollection,
+                                                List<double[]> testingIdealOutputsCollection,
+                                                Random rand,
+                                                List<HiddenLayerSettings> hiddenLayerCollection,
+                                                ActivationFactory.ActivationType outputNeuronActivation,
+                                                TrainingMethodType regressionMethod,
+                                                int regrAttempts,
+                                                int attemptEpochs,
+                                                double stopMSE,
+                                                RegressionCallbackDelegate controller = null,
+                                                Object controllerUserObject = null
+                                                )
         {
             ReadoutUnit bestReadoutUnit = new ReadoutUnit();
             //Regression attempts
@@ -236,6 +236,7 @@ namespace RCNet.Neural.Network.RCReadout
                     default:
                         throw new ArgumentException($"Not supported regression method {regressionMethod}");
                 }
+                //Reference binary distribution
                 //Iterate training cycles
                 for (int epoch = 1; epoch <= attemptEpochs; epoch++)
                 {
@@ -244,19 +245,26 @@ namespace RCNet.Neural.Network.RCReadout
                     List<double[]> testingComputedOutputsCollection = null;
                     //Compute current error statistics after training iteration
                     ReadoutUnit currReadoutUnit = new ReadoutUnit();
-                    currReadoutUnit.OutputFieldName = outputFieldName;
                     currReadoutUnit.FFNet = ffn;
                     currReadoutUnit.TrainingErrorStat = ffn.ComputeBatchErrorStat(trainingPredictorsCollection, trainingIdealOutputsCollection, out trainingComputedOutputsCollection);
-                    currReadoutUnit.TrainingBinErrorStat = new BinErrStat(ffn.LayerCollection[ffn.LayerCollection.Count - 1].Activation.Range.Mid, trainingComputedOutputsCollection, trainingIdealOutputsCollection);
+                    if(taskType == CommonTypes.TaskType.Classification)
+                    {
+                        currReadoutUnit.TrainingBinErrorStat = new BinErrStat(refBinDistr, trainingComputedOutputsCollection, trainingIdealOutputsCollection);
+                        currReadoutUnit.CombinedBinScore = currReadoutUnit.TrainingBinErrorStat.Score;
+                    }
                     currReadoutUnit.CombinedError = currReadoutUnit.TrainingErrorStat.ArithAvg;
                     if (testingPredictorsCollection != null && testingPredictorsCollection.Count > 0)
                     {
                         currReadoutUnit.TestingErrorStat = ffn.ComputeBatchErrorStat(testingPredictorsCollection, testingIdealOutputsCollection, out testingComputedOutputsCollection);
-                        currReadoutUnit.TestingBinErrorStat = new BinErrStat(ffn.LayerCollection[ffn.LayerCollection.Count - 1].Activation.Range.Mid, testingComputedOutputsCollection, testingIdealOutputsCollection);
                         currReadoutUnit.CombinedError = Math.Max(currReadoutUnit.CombinedError, currReadoutUnit.TestingErrorStat.ArithAvg);
+                        if (taskType == CommonTypes.TaskType.Classification)
+                        {
+                            currReadoutUnit.TestingBinErrorStat = new BinErrStat(refBinDistr, testingComputedOutputsCollection, testingIdealOutputsCollection);
+                            currReadoutUnit.CombinedBinScore = Math.Min(currReadoutUnit.CombinedBinScore, currReadoutUnit.TestingBinErrorStat.Score);
+                        }
                     }
                     //Current results processing
-                    bool best = false, stopTrainingCycle = false;
+                    bool better = false, stopTrainingCycle = false;
                     //Result first initialization
                     if (bestReadoutUnit.CombinedError == -1)
                     {
@@ -269,8 +277,11 @@ namespace RCNet.Neural.Network.RCReadout
                     {
                         //Evaluation of the improvement is driven externaly
                         RegressionControlInArgs cbIn = new RegressionControlInArgs();
+                        cbIn.TaskType = taskType;
                         cbIn.ReadoutUnitIdx = readoutUnitIdx;
                         cbIn.OutputFieldName = outputFieldName;
+                        cbIn.FoldNum = foldNum;
+                        cbIn.NumOfFolds = numOfFolds;
                         cbIn.RegrAttemptNumber = regrAttemptNumber;
                         cbIn.RegrMaxAttempts = regrAttempts;
                         cbIn.Epoch = epoch;
@@ -285,20 +296,17 @@ namespace RCNet.Neural.Network.RCReadout
                         cbIn.BestReadoutUnit = bestReadoutUnit;
                         cbIn.UserObject = controllerUserObject;
                         cbOut = controller(cbIn);
-                        best = cbOut.Best;
+                        better = cbOut.CurrentIsBetter;
                         stopTrainingCycle = cbOut.StopCurrentAttempt;
                         stopRegression = cbOut.StopRegression;
                     }
                     else
                     {
                         //Default implementation
-                        if (currReadoutUnit.CombinedError < bestReadoutUnit.CombinedError)
-                        {
-                            best = true;
-                        }
+                        better = IsBetter(taskType, currReadoutUnit, bestReadoutUnit);
                     }
                     //Best?
-                    if (best)
+                    if (better)
                     {
                         //Adopt current regression results
                         bestReadoutUnit = currReadoutUnit.DeepClone();
@@ -333,9 +341,21 @@ namespace RCNet.Neural.Network.RCReadout
         {
             //Attribute properties
             /// <summary>
+            /// Type of the neural task
+            /// </summary>
+            public CommonTypes.TaskType TaskType { get; set; } = CommonTypes.TaskType.Prediction;
+            /// <summary>
             /// Readout unit index for which the regression is performing (corresponds with output field index)
             /// </summary>
             public int ReadoutUnitIdx { get; set; } = 0;
+            /// <summary>
+            /// Current fold number
+            /// </summary>
+            public int FoldNum { get; set; } = 0;
+            /// <summary>
+            /// Total number of the folds
+            /// </summary>
+            public int NumOfFolds { get; set; } = 0;
             /// <summary>
             /// Output field name for which the regression is performing
             /// </summary>
@@ -412,13 +432,16 @@ namespace RCNet.Neural.Network.RCReadout
             /// </summary>
             public bool StopRegression { get; set; } = false;
             /// <summary>
-            /// This is the most important switch indicating whether the RegrCurrResult is better than
-            /// the existing RegrBestResult
+            /// This is the most important switch indicating whether the CurrReadoutUnit is better than
+            /// the existing BestReadoutUnit
             /// </summary>
-            public bool Best { get; set; } = false;
+            public bool CurrentIsBetter { get; set; } = false;
         }//RegressionControlOutArgs
 
 
-    }//ReadoutUnitRegression
 
+
+
+
+    }//ReadoutUnit
 }//Namespace

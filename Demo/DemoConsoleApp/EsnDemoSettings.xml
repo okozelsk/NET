@@ -2,6 +2,96 @@
 <!-- You can specify your data location in DataDir attribute -->
 <EsnDemoSettings DataDir=".\\Data">
   <!-- You can modify/remove existing or add your own DemoCase elements -->
+  <DemoCase Name="Prediction of the High and Low prices of TTOO title from Yahoo finance (Single reservoir, Linear regression)">
+    <Samples CsvDataFileName="TTOO.csv" NumOfBootSamples="300" NumOfTestSamples="2" TestSamplesSelectionMethod="Sequential" SingleNormalizer="true" NormalizerReserveRatio="0.1"/>
+    <EsnSettings TaskType="Prediction" RandomizerSeek="0">
+      <InputFields RouteToReadout="true">
+        <Field Name="High"/>
+        <Field Name="Low"/>
+        <Field Name="Adj Close"/>
+      </InputFields>
+      <ReservoirSettingsContainer>
+        <AnalogReservoirSettings Name="Random topology with 300 TanH neurons">
+          <Input ConnectionDensity="0.5" WeightScale="0.4"/>
+          <Internal Size="300" Activation="TanH" BiasScale="0" WeightScale="0.4">
+            <RandomTopology ConnectionsDensity="0.1"/>
+          </Internal>
+          <Feedback Density="0" WeightScale="0"/>
+        </AnalogReservoirSettings>
+      </ReservoirSettingsContainer>
+      <ReservoirInstancesContainer>
+        <ReservoirInstance InstanceName="Main" SettingsName="Random topology with 300 TanH neurons" AugmentedStates="false">
+          <InputField Name="High"/>
+          <InputField Name="Low"/>
+          <InputField Name="Adj Close"/>
+        </ReservoirInstance>
+      </ReservoirInstancesContainer>
+      <ReadoutLayer TestDataSetSize="0.1" NumOfFolds="0">
+        <OutputFields OutputActivation="Identity" RegressionMethod="Linear" Attempts="1" AttemptEpochs="100" AttemptStopMSE="1E-20">
+          <Field Name="High"/>
+          <Field Name="Low"/>
+        </OutputFields>
+      </ReadoutLayer>
+    </EsnSettings>
+  </DemoCase>
+  <DemoCase Name="Pattern recognition task Splice junctions from https://archive.ics.uci.edu/ml/datasets/Molecular+Biology+%28Splice-junction+Gene+Sequences%29 (Single reservoir, Hidden layer, Resilient)">
+    <Samples CsvDataFileName="SpliceJunctions.csv" NumOfTestSamples="1000" TestSamplesSelectionMethod="Random" SingleNormalizer="false" NormalizerReserveRatio="0.1"/>
+    <EsnSettings TaskType="Classification" RandomizerSeek="0">
+      <InputFields RouteToReadout="false">
+        <Field Name="1st_Nucleotide"/>
+        <Field Name="2nd_Nucleotide"/>
+      </InputFields>
+      <ReservoirSettingsContainer>
+        <AnalogReservoirSettings Name="Random topology with 200 TanH neurons">
+          <Input ConnectionDensity="0.3" WeightScale="0.4"/>
+          <Internal Size="200" Activation="TanH" BiasScale="0" WeightScale="0.35">
+            <RandomTopology ConnectionsDensity="0.2"/>
+            <RetainmentNeurons Density="1" RetainmentMinRate="0" RetainmentMaxRate="0.8"/>
+          </Internal>
+        </AnalogReservoirSettings>
+      </ReservoirSettingsContainer>
+      <ReservoirInstancesContainer>
+        <ReservoirInstance InstanceName="RandMain" SettingsName="Random topology with 200 TanH neurons" AugmentedStates="true">
+          <InputField Name="1st_Nucleotide"/>
+          <InputField Name="2nd_Nucleotide"/>
+        </ReservoirInstance>
+      </ReservoirInstancesContainer>
+      <ReadoutLayer TestDataSetSize="0.1" NumOfFolds="0">
+        <HiddenLayer Neurons="20" Activation="TanH"/>
+        <OutputFields OutputActivation="TanH" RegressionMethod="Resilient" Attempts="5" AttemptEpochs="500" AttemptStopMSE="1E-20">
+          <Field Name="EI"/>
+          <Field Name="IE"/>
+          <Field Name="Neither"/>
+        </OutputFields>
+      </ReadoutLayer>
+    </EsnSettings>
+  </DemoCase>
+  <DemoCase Name="Prediction of the Mackey Glass chaotic time series (Single reservoir, Linear regression)">
+    <Samples CsvDataFileName="MackeyGlass.csv" NumOfBootSamples="600" NumOfTestSamples="500" TestSamplesSelectionMethod="Sequential" SingleNormalizer="false" NormalizerReserveRatio="0.1"/>
+    <EsnSettings TaskType="Prediction" RandomizerSeek="0">
+      <InputFields RouteToReadout="false">
+        <Field Name="Value"/>
+      </InputFields>
+      <ReservoirSettingsContainer>
+        <AnalogReservoirSettings Name="Random topology with 300 TanH neurons">
+          <Input ConnectionDensity="1" WeightScale="0.2"/>
+          <Internal Size="300" Activation="TanH" BiasScale="0.1" WeightScale="0.2">
+            <RandomTopology ConnectionsDensity="0.15"/>
+          </Internal>
+        </AnalogReservoirSettings>
+      </ReservoirSettingsContainer>
+      <ReservoirInstancesContainer>
+        <ReservoirInstance InstanceName="Main" SettingsName="Random topology with 300 TanH neurons" AugmentedStates="true">
+          <InputField Name="Value"/>
+        </ReservoirInstance>
+      </ReservoirInstancesContainer>
+      <ReadoutLayer TestDataSetSize="0.3" NumOfFolds="1">
+        <OutputFields OutputActivation="Identity" RegressionMethod="Linear" Attempts="1" AttemptEpochs="10" AttemptStopMSE="1E-20">
+          <Field Name="Value"/>
+        </OutputFields>
+      </ReadoutLayer>
+    </EsnSettings>
+  </DemoCase>
   <DemoCase Name="Prediction of the High and Low prices of SPXL title from Yahoo finance (A separate reservoir for each input field, Resilient)">
     <Samples CsvDataFileName="SPXL.csv" NumOfBootSamples="400" NumOfTestSamples="2" TestSamplesSelectionMethod="Sequential" SingleNormalizer="true" NormalizerReserveRatio="0.1"/>
     <EsnSettings TaskType="Prediction" RandomizerSeek="0">
@@ -39,11 +129,12 @@
           <InputField Name="Adj Close"/>
         </ReservoirInstance>
       </ReservoirInstancesContainer>
-      <Readout OutputActivation="Identity" RegressionMethod="Resilient" Attempts="5" AttemptEpochs="200" AttemptStopMSE="1E-20"/>
-      <OutputFields>
-        <Field Name="High"/>
-        <Field Name="Low"/>
-      </OutputFields>
+      <ReadoutLayer TestDataSetSize="0.1" NumOfFolds="0">
+        <OutputFields OutputActivation="Identity" RegressionMethod="Resilient" Attempts="5" AttemptEpochs="200" AttemptStopMSE="1E-20">
+          <Field Name="High"/>
+          <Field Name="Low"/>
+        </OutputFields>
+      </ReadoutLayer>
     </EsnSettings>
   </DemoCase>
   <DemoCase Name="Prediction of the High and Low prices of SPXL title from Yahoo finance (Single reservoir, Hidden layer, Resilient)">
@@ -71,13 +162,13 @@
           <InputField Name="Adj Close"/>
         </ReservoirInstance>
       </ReservoirInstancesContainer>
-      <Readout OutputActivation="Identity" RegressionMethod="Resilient" Attempts="2" AttemptEpochs="700" AttemptStopMSE="1E-20">
+      <ReadoutLayer TestDataSetSize="0.1" NumOfFolds="0">
         <HiddenLayer Neurons="10" Activation="TanH"/>
-      </Readout>
-      <OutputFields>
-        <Field Name="High"/>
-        <Field Name="Low"/>
-      </OutputFields>
+        <OutputFields OutputActivation="Identity" RegressionMethod="Resilient" Attempts="2" AttemptEpochs="700" AttemptStopMSE="1E-20">
+          <Field Name="High"/>
+          <Field Name="Low"/>
+        </OutputFields>
+      </ReadoutLayer>
     </EsnSettings>
   </DemoCase>
   <DemoCase Name="Pattern recognition task Libras Movement from https://archive.ics.uci.edu/ml/datasets/Libras+Movement (Single reservoir, Hidden layer, Resilient)">
@@ -92,7 +183,7 @@
           <Input ConnectionDensity="1" WeightScale="0.2"/>
           <Internal Size="400" Activation="TanH" BiasScale="0.1" WeightScale="0.4">
             <RandomTopology ConnectionsDensity="0.1"/>
-            <ContextNeuron Activation="TanH" InputWeight="0.5" FeedbackDensity="1" FeedbackWeight="0.3"/>
+            <ContextNeuron Activation="TanH" InputWeight="0.45" FeedbackDensity="1" FeedbackWeight="0.3"/>
           </Internal>
         </AnalogReservoirSettings>
       </ReservoirSettingsContainer>
@@ -102,84 +193,26 @@
           <InputField Name="coord_ordinate"/>
         </ReservoirInstance>
       </ReservoirInstancesContainer>
-      <Readout OutputActivation="TanH" RegressionMethod="Resilient" Attempts="3" AttemptEpochs="2000" AttemptStopMSE="1E-20">
+      <ReadoutLayer TestDataSetSize="0.25" NumOfFolds="0">
         <HiddenLayer Neurons="10" Activation="TanH"/>
-      </Readout>
-      <OutputFields>
-        <Field Name="curved swing"/>
-        <Field Name="horizontal swing"/>
-        <Field Name="vertical swing"/>
-        <Field Name="anti-clockwise arc"/>
-        <Field Name="clockwise arc"/>
-        <Field Name="circle"/>
-        <Field Name="horizontal straight-line"/>
-        <Field Name="vertical straight-line"/>
-        <Field Name="horizontal zigzag"/>
-        <Field Name="vertical zigzag"/>
-        <Field Name="horizontal wavy"/>
-        <Field Name="vertical wavy"/>
-        <Field Name="face-up curve"/>
-        <Field Name="face-down curve"/>
-        <Field Name="tremble"/>
-      </OutputFields>
-    </EsnSettings>
-  </DemoCase>
-  <DemoCase Name="Prediction of the High and Low prices of TTOO title from Yahoo finance (Single reservoir, Hidden layer, Resilient)">
-    <Samples CsvDataFileName="TTOO.csv" NumOfBootSamples="300" NumOfTestSamples="2" TestSamplesSelectionMethod="Sequential" SingleNormalizer="true" NormalizerReserveRatio="0.1"/>
-    <EsnSettings TaskType="Prediction" RandomizerSeek="0">
-      <InputFields RouteToReadout="true">
-        <Field Name="High"/>
-        <Field Name="Low"/>
-        <Field Name="Adj Close"/>
-      </InputFields>
-      <ReservoirSettingsContainer>
-        <AnalogReservoirSettings Name="Random topology with 300 TanH neurons">
-          <Input ConnectionDensity="0.5" WeightScale="0.4"/>
-          <Internal Size="300" Activation="TanH" BiasScale="0" WeightScale="0.4">
-            <RandomTopology ConnectionsDensity="0.1"/>
-          </Internal>
-          <Feedback Density="0" WeightScale="0"/>
-        </AnalogReservoirSettings>
-      </ReservoirSettingsContainer>
-      <ReservoirInstancesContainer>
-        <ReservoirInstance InstanceName="Main" SettingsName="Random topology with 300 TanH neurons" AugmentedStates="false">
-          <InputField Name="High"/>
-          <InputField Name="Low"/>
-          <InputField Name="Adj Close"/>
-        </ReservoirInstance>
-      </ReservoirInstancesContainer>
-      <Readout OutputActivation="TanH" RegressionMethod="Resilient" Attempts="5" AttemptEpochs="2000" AttemptStopMSE="1E-20">
-        <HiddenLayer Neurons="50" Activation="TanH"/>
-      </Readout>
-      <OutputFields>
-        <Field Name="High"/>
-        <Field Name="Low"/>
-      </OutputFields>
-    </EsnSettings>
-  </DemoCase>
-  <DemoCase Name="Prediction of the Mackey Glass chaotic time series (Single reservoir, Linear regression)">
-    <Samples CsvDataFileName="MackeyGlass.csv" NumOfBootSamples="600" NumOfTestSamples="500" TestSamplesSelectionMethod="Sequential" SingleNormalizer="false" NormalizerReserveRatio="0.1"/>
-    <EsnSettings TaskType="Prediction" RandomizerSeek="0">
-      <InputFields RouteToReadout="false">
-        <Field Name="Value"/>
-      </InputFields>
-      <ReservoirSettingsContainer>
-        <AnalogReservoirSettings Name="Random topology with 300 TanH neurons">
-          <Input ConnectionDensity="1" WeightScale="0.2"/>
-          <Internal Size="300" Activation="TanH" BiasScale="0.1" WeightScale="0.2">
-            <RandomTopology ConnectionsDensity="0.15"/>
-          </Internal>
-        </AnalogReservoirSettings>
-      </ReservoirSettingsContainer>
-      <ReservoirInstancesContainer>
-        <ReservoirInstance InstanceName="Main" SettingsName="Random topology with 300 TanH neurons" AugmentedStates="true">
-          <InputField Name="Value"/>
-        </ReservoirInstance>
-      </ReservoirInstancesContainer>
-      <Readout OutputActivation="Identity" RegressionMethod="Linear" Attempts="1" AttemptEpochs="10" AttemptStopMSE="1E-20"/>
-      <OutputFields>
-        <Field Name="Value"/>
-      </OutputFields>
+        <OutputFields OutputActivation="TanH" RegressionMethod="Resilient" Attempts="3" AttemptEpochs="2000" AttemptStopMSE="1E-20">
+          <Field Name="curved swing"/>
+          <Field Name="horizontal swing"/>
+          <Field Name="vertical swing"/>
+          <Field Name="anti-clockwise arc"/>
+          <Field Name="clockwise arc"/>
+          <Field Name="circle"/>
+          <Field Name="horizontal straight-line"/>
+          <Field Name="vertical straight-line"/>
+          <Field Name="horizontal zigzag"/>
+          <Field Name="vertical zigzag"/>
+          <Field Name="horizontal wavy"/>
+          <Field Name="vertical wavy"/>
+          <Field Name="face-up curve"/>
+          <Field Name="face-down curve"/>
+          <Field Name="tremble"/>
+        </OutputFields>
+      </ReadoutLayer>
     </EsnSettings>
   </DemoCase>
   <DemoCase Name="Prediction of the Sinusoid time series (Single reservoir, Linear regression)">
@@ -194,7 +227,7 @@
           <Internal Size="200" Activation="TanH" BiasScale="0.1" WeightScale="0.2">
             <RandomTopology ConnectionsDensity="0.1"/>
           </Internal>
-          <!-- Feedback is nonsense in this case (duplicates the input) and it is placed here only for usage demostration -->
+          <!-- Feedback is nonsense in this case (duplicates the input) and it is placed here only for usage demonstration -->
           <Feedback Density="1" WeightScale="0.2">
             <Field Name="Value"/>
           </Feedback>
@@ -205,10 +238,11 @@
           <InputField Name="Value"/>
         </ReservoirInstance>
       </ReservoirInstancesContainer>
-      <Readout OutputActivation="Identity" RegressionMethod="Linear" Attempts="1" AttemptEpochs="1" AttemptStopMSE="1E-20"/>
-      <OutputFields>
-        <Field Name="Value"/>
-      </OutputFields>
+      <ReadoutLayer TestDataSetSize="0.3" NumOfFolds="1">
+        <OutputFields OutputActivation="Identity" RegressionMethod="Linear" Attempts="1" AttemptEpochs="1" AttemptStopMSE="1E-20">
+          <Field Name="Value"/>
+        </OutputFields>
+      </ReadoutLayer>
     </EsnSettings>
   </DemoCase>
 </EsnDemoSettings>

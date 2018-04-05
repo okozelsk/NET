@@ -16,7 +16,7 @@ namespace RCNet.Neural.Network.FF
         /// <summary>
         /// Default value of the starting noise intensity
         /// </summary>
-        public const double DefaultStartingNoiseIntensity = 0.01;
+        public const double DefaultStartingNoiseIntensity = 0.05;
         /// <summary>
         /// Default maximum exponent of E (Math.Exp)
         /// </summary>

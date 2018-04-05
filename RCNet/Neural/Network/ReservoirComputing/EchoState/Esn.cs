@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using RCNet.Extensions;
+using RCNet.MathTools;
 using RCNet.Neural.Network.Data;
-using RCNet.Neural.Network.RCReadout;
+using RCNet.Neural.Network.ReservoirComputing.Readout;
 
-namespace RCNet.Neural.Network.EchoState
+namespace RCNet.Neural.Network.ReservoirComputing.EchoState
 {
     /// <summary>
     /// Implements the Echo State Network.
@@ -41,9 +42,9 @@ namespace RCNet.Neural.Network.EchoState
         /// </summary>
         private int _numOfPredictors;
         /// <summary>
-        /// Collection of Esn readout units.
+        /// Readout layer.
         /// </summary>
-        private ReadoutUnit[] _readoutUnitCollection;
+        private ReadoutLayer _readoutLayer;
 
         //Constructor
         /// <summary>
@@ -70,13 +71,18 @@ namespace RCNet.Neural.Network.EchoState
             {
                 _numOfPredictors += _settings.InputFieldNameCollection.Count;
             }
-            //Readout units
-            _readoutUnitCollection = new ReadoutUnit[_settings.OutputFieldNameCollection.Count];
-            _readoutUnitCollection.Populate(null);
+            //Readout layer
+            _readoutLayer = null;
             return;
         }
 
         //Properties
+        /// <summary>
+        /// Collection of the error statistics.
+        /// Each cluster of readout units related to output field  has one summary error statistics in the collection.
+        /// Order is the same as the order of output fields.
+        /// </summary>
+        public List<ReadoutLayer.ClusterErrStatistics> ClusterErrStatisticsCollection { get { return _readoutLayer.ClusterErrStatisticsCollection; } }
 
         //Methods
         /// <summary>
@@ -166,14 +172,7 @@ namespace RCNet.Neural.Network.EchoState
             }
             double[] predictors = PushInput(inputPattern);
             //Compute output
-            double[] output = new double[_readoutUnitCollection.Length];
-            for (int i = 0; i < _readoutUnitCollection.Length; i++)
-            {
-                double[] outputValue;
-                outputValue = _readoutUnitCollection[i].FFNet.Compute(predictors);
-                output[i] = outputValue[0];
-            }
-            return output;
+            return _readoutLayer.Compute(predictors);
         }
 
         /// <summary>
@@ -191,14 +190,7 @@ namespace RCNet.Neural.Network.EchoState
             //Push input into the Esn
             double[] predictors = PushInput(inputVector, true);
             //Compute output
-            double[] output = new double[_readoutUnitCollection.Length];
-            for (int i = 0; i < _readoutUnitCollection.Length; i++)
-            {
-                double[] outputValue;
-                outputValue = _readoutUnitCollection[i].FFNet.Compute(predictors);
-                output[i] = outputValue[0];
-            }
-            return output;
+            return _readoutLayer.Compute(predictors);
         }
 
         /// <summary>
@@ -362,21 +354,9 @@ namespace RCNet.Neural.Network.EchoState
 
         /// <summary>
         /// Trains the Esn network readout layer.
-        /// Predictors are then subdivided into training data and test data.
-        /// Training data is used to teach the output feed forward networks (regression phase).
-        /// The degree of generalization is tested on test data.
-        /// The goal is to select a network where there is not a big difference between
-        /// the overall error on the training data and the test data.
         /// </summary>
         /// <param name="rsi">
         /// RegressionStageInput object prepared by PrepareRegressionStageInput function
-        /// </param>
-        /// <param name="numOfTestSamples">
-        /// Number of test samples from the total number of samples.
-        /// </param>
-        /// <param name="testSamplesSelector">
-        /// Function to be called to select testing samples
-        /// (use Regression.SelectSequentialTestSamples, Regression.SelectRandomTestSamples or implement your own method)
         /// </param>
         /// <param name="regressionController">
         /// Optional. see Regression.RegressionCallbackDelegate
@@ -384,38 +364,20 @@ namespace RCNet.Neural.Network.EchoState
         /// <param name="regressionControllerData">
         /// Optional custom object to be passed to regressionController together with other standard information
         /// </param>
-        /// <returns>
-        /// Array of trained readout units
-        /// </returns>
-        public ReadoutUnit[] RegressionStage(RegressionStageInput rsi,
-                                             int numOfTestSamples,
-                                             Regression.TestSamplesSelectorDelegate testSamplesSelector,
-                                             Regression.RegressionCallbackDelegate regressionController = null,
-                                             Object regressionControllerData = null
-                                             )
+        public void RegressionStage(RegressionStageInput rsi,
+                                    ReadoutUnit.RegressionCallbackDelegate regressionController = null,
+                                    Object regressionControllerData = null
+                                    )
         {
-            _readoutUnitCollection = Regression.LayerRegressions(_settings.OutputFieldNameCollection,
-                                                                 rsi.PredictorsCollection,
-                                                                 rsi.IdealOutputsCollection,
-                                                                 numOfTestSamples,
-                                                                 testSamplesSelector,
-                                                                 _rand,
-                                                                 _settings.HiddenLayerCollection,
-                                                                 _settings.OutputNeuronActivation,
-                                                                 _settings.RegressionMethod,
-                                                                 _settings.RegressionAttempts,
-                                                                 _settings.RegressionAttemptEpochs,
-                                                                 _settings.RegressionAttemptStopMSE,
-                                                                 regressionController,
-                                                                 regressionControllerData
-                                                                 );
-            //The function returns a clone to avoid the private data be modified outside the Esn object
-            ReadoutUnit[] clone = new ReadoutUnit[_readoutUnitCollection.Length];
-            for(int i = 0; i < clone.Length; i++)
-            {
-                clone[i] = _readoutUnitCollection[i].DeepClone();
-            }
-            return clone;
+            _readoutLayer = new ReadoutLayer(_settings.TaskType,
+                                             _settings.ReadoutLayerConfig,
+                                             rsi.PredictorsCollection,
+                                             rsi.IdealOutputsCollection,
+                                             _rand,
+                                             regressionController,
+                                             regressionControllerData
+                                             );
+            return;
         }
 
 

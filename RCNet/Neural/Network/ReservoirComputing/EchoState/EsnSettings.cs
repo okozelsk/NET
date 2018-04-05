@@ -8,9 +8,10 @@ using System.IO;
 using RCNet.Extensions;
 using RCNet.Neural.Activation;
 using RCNet.Neural.Network.FF;
+using RCNet.Neural.Network.ReservoirComputing.Readout;
 using RCNet.XmlTools;
 
-namespace RCNet.Neural.Network.EchoState
+namespace RCNet.Neural.Network.ReservoirComputing.EchoState
 {
     /// <summary>
     /// The class contains Esn (Echo State Network) configuration parameters and also contains
@@ -49,42 +50,9 @@ namespace RCNet.Neural.Network.EchoState
         /// </summary>
         public bool RouteInputToReadout { get; set; }
         /// <summary>
-        /// Collection of hidden layer definitions. Hidden layers are optional and can be used in the output
-        /// feed forward network that process predictors from reservoirs and computes Esn output field
-        /// value (for each output field is instantiated and trained alone feed forward network).
-        /// Defining hidden layers is useful in some specific cases.
-        /// In most cases, hidden layers are not defined and the output feed forward network
-        /// contains only the output neuron.
+        /// Configuration of the readout layer
         /// </summary>
-        public List<HiddenLayerSettings> HiddenLayerCollection { get; set; }
-        /// <summary>
-        /// Activation function of the output neuron calculating the output value of the Esn network.
-        /// This neuron is the output layer of the feed forward network processing predictors
-        /// from the reservoirs (for each output field is instantiated and trained alone output feed forward network).
-        /// </summary>
-        public ActivationFactory.ActivationType OutputNeuronActivation { get; set; }
-        /// <summary>
-        /// The parameter specifies what method will be used for training
-        /// the output feed forward network.
-        /// </summary>
-        public TrainingMethodType RegressionMethod { get; set; }
-        /// <summary>
-        /// Number of regression attempts.
-        /// </summary>
-        public int RegressionAttempts { get; set; }
-        /// <summary>
-        /// Number of iterations (epochs) during regression attempt.
-        /// </summary>
-        public int RegressionAttemptEpochs { get; set; }
-        /// <summary>
-        /// Regression attempt will be stopped after the specified
-        /// MSE on training dataset will be reached.
-        /// </summary>
-        public double RegressionAttemptStopMSE { get; set; }
-        /// <summary>
-        /// The collection of Esn output field names in order of how they will be predicted by Esn.
-        /// </summary>
-        public List<string> OutputFieldNameCollection { get; set; }
+        public ReadoutLayerSettings ReadoutLayerConfig { get; set; }
 
         //Constructors
         /// <summary>
@@ -98,13 +66,7 @@ namespace RCNet.Neural.Network.EchoState
             InputFieldNameCollection = new List<string>();
             ReservoirInstanceDefinitionCollection = new List<ReservoirInstanceDefinition>();
             RouteInputToReadout = false;
-            HiddenLayerCollection = new List<HiddenLayerSettings>();
-            OutputNeuronActivation = ActivationFactory.ActivationType.Identity;
-            RegressionMethod = TrainingMethodType.Linear;
-            RegressionAttempts = 0;
-            RegressionAttemptEpochs = 0;
-            RegressionAttemptStopMSE = 0;
-            OutputFieldNameCollection = new List<string>();
+            ReadoutLayerConfig = new ReadoutLayerSettings();
             return;
         }
 
@@ -124,17 +86,7 @@ namespace RCNet.Neural.Network.EchoState
                 ReservoirInstanceDefinitionCollection.Add(mapping.DeepClone());
             }
             RouteInputToReadout = source.RouteInputToReadout;
-            HiddenLayerCollection = new List<HiddenLayerSettings>(source.HiddenLayerCollection.Count);
-            foreach (HiddenLayerSettings hiddenLayerSettings in source.HiddenLayerCollection)
-            {
-                HiddenLayerCollection.Add(hiddenLayerSettings.DeepClone());
-            }
-            OutputNeuronActivation = source.OutputNeuronActivation;
-            RegressionMethod = source.RegressionMethod;
-            RegressionAttempts = source.RegressionAttempts;
-            RegressionAttemptEpochs = source.RegressionAttemptEpochs;
-            RegressionAttemptStopMSE = source.RegressionAttemptStopMSE;
-            OutputFieldNameCollection = new List<string>(source.OutputFieldNameCollection);
+            ReadoutLayerConfig = new ReadoutLayerSettings(source.ReadoutLayerConfig);
             return;
         }
 
@@ -152,7 +104,7 @@ namespace RCNet.Neural.Network.EchoState
             //A very ugly validation. Xml schema does not support validation of the xml fragment against specific type.
             XmlValidator validator = new XmlValidator();
             Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            using (Stream schemaStream = assemblyRCNet.GetManifestResourceStream("RCNet.Neural.Network.EchoState.EsnSettings.xsd"))
+            using (Stream schemaStream = assemblyRCNet.GetManifestResourceStream("RCNet.Neural.Network.ReservoirComputing.EchoState.EsnSettings.xsd"))
             {
                 validator.AddSchema(schemaStream);
             }
@@ -185,26 +137,9 @@ namespace RCNet.Neural.Network.EchoState
             {
                 availableResSettings.Add(new AnalogReservoirSettings(reservoirSettingsElem));
             }
-            //Readout
-            XElement readoutElem = esnSettingsElem.Descendants("Readout").First();
-            OutputNeuronActivation = ActivationFactory.ParseActivation(readoutElem.Attribute("OutputActivation").Value);
-            RegressionMethod = FeedForwardNetwork.ParseTrainingMethodType(readoutElem.Attribute("RegressionMethod").Value);
-            RegressionAttempts = int.Parse(readoutElem.Attribute("Attempts").Value);
-            RegressionAttemptEpochs = int.Parse(readoutElem.Attribute("AttemptEpochs").Value);
-            RegressionAttemptStopMSE = double.Parse(readoutElem.Attribute("AttemptStopMSE").Value, CultureInfo.InvariantCulture);
-            //Hidden layers
-            HiddenLayerCollection = new List<HiddenLayerSettings>();
-            foreach (XElement hiddenLayerElem in readoutElem.Descendants("HiddenLayer"))
-            {
-                HiddenLayerCollection.Add(new HiddenLayerSettings(hiddenLayerElem));
-            }
-            //Output fields
-            XElement outputFieldsElem = esnSettingsElem.Descendants("OutputFields").First();
-            OutputFieldNameCollection = new List<string>();
-            foreach (XElement outputFieldElem in outputFieldsElem.Descendants("Field"))
-            {
-                OutputFieldNameCollection.Add(outputFieldElem.Attribute("Name").Value);
-            }
+            //Readout layer
+            XElement readoutLayerElem = esnSettingsElem.Descendants("ReadoutLayer").First();
+            ReadoutLayerConfig = new ReadoutLayerSettings(readoutLayerElem);
             //Mapping of input fields to reservoir settings (future reservoir instance)
             ReservoirInstanceDefinitionCollection = new List<ReservoirInstanceDefinition>();
             XElement reservoirInstancesContainerElem = esnSettingsElem.Descendants("ReservoirInstancesContainer").First();
@@ -239,7 +174,7 @@ namespace RCNet.Neural.Network.EchoState
                         throw new Exception($"Reservoir instance {newMap.InstanceName}: feedback fields are not allowed for classification task type.");
                     }
                     //Index in OutputFieldsNames
-                    int feedbackFieldIdx = OutputFieldNameCollection.IndexOf(feedbackFieldName);
+                    int feedbackFieldIdx = ReadoutLayerConfig.OutputFieldNameCollection.IndexOf(feedbackFieldName);
                     //Found?
                     if (feedbackFieldIdx < 0)
                     {
@@ -262,30 +197,19 @@ namespace RCNet.Neural.Network.EchoState
         {
             if (obj == null) return false;
             EsnSettings cmpSettings = obj as EsnSettings;
-            if (RandomizerSeek != cmpSettings.RandomizerSeek ||
-               !InputFieldNameCollection.ToArray().ContainsEqualValues(cmpSettings.InputFieldNameCollection.ToArray()) ||
-               ReservoirInstanceDefinitionCollection.Count != cmpSettings.ReservoirInstanceDefinitionCollection.Count ||
-               RouteInputToReadout != cmpSettings.RouteInputToReadout ||
-               OutputNeuronActivation != cmpSettings.OutputNeuronActivation ||
-               RegressionMethod != cmpSettings.RegressionMethod ||
-               RegressionAttempts != cmpSettings.RegressionAttempts ||
-               RegressionAttemptEpochs != cmpSettings.RegressionAttemptEpochs ||
-               RegressionAttemptStopMSE != cmpSettings.RegressionAttemptStopMSE ||
-               HiddenLayerCollection.Count != cmpSettings.HiddenLayerCollection.Count
-               )
+            if (TaskType != cmpSettings.TaskType ||
+                RandomizerSeek != cmpSettings.RandomizerSeek ||
+                !InputFieldNameCollection.ToArray().ContainsEqualValues(cmpSettings.InputFieldNameCollection.ToArray()) ||
+                ReservoirInstanceDefinitionCollection.Count != cmpSettings.ReservoirInstanceDefinitionCollection.Count ||
+                RouteInputToReadout != cmpSettings.RouteInputToReadout ||
+                !ReadoutLayerConfig.Equals(cmpSettings.ReadoutLayerConfig)
+                )
             {
                 return false;
             }
             for (int i = 0; i < ReservoirInstanceDefinitionCollection.Count; i++)
             {
                 if (!ReservoirInstanceDefinitionCollection[i].Equals(cmpSettings.ReservoirInstanceDefinitionCollection[i]))
-                {
-                    return false;
-                }
-            }
-            for (int i = 0; i < HiddenLayerCollection.Count; i++)
-            {
-                if (!HiddenLayerCollection[i].Equals(cmpSettings.HiddenLayerCollection[i]))
                 {
                     return false;
                 }

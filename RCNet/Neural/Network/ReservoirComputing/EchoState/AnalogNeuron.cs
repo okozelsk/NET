@@ -3,7 +3,7 @@ using RCNet.Extensions;
 using RCNet.MathTools;
 using RCNet.Neural.Activation;
 
-namespace RCNet.Neural.Network.EchoState
+namespace RCNet.Neural.Network.ReservoirComputing.EchoState
 {
     /// <summary>
     /// Implements the analog reservoir's neuron

@@ -6,8 +6,8 @@ using RCNet.MathTools;
 using RCNet.Extensions;
 using RCNet.CsvTools;
 using RCNet.Neural.Network.Data;
-using RCNet.Neural.Network.EchoState;
-using RCNet.Neural.Network.RCReadout;
+using RCNet.Neural.Network.ReservoirComputing.EchoState;
+using RCNet.Neural.Network.ReservoirComputing.Readout;
 using RCNet.Neural;
 using RCNet.Demo.Log;
 
@@ -67,32 +67,43 @@ namespace RCNet.Demo
         /// Regression.RegressionControlInArgs object passed to the function contains the best error statistics so far
         /// and the latest statistics. The primary purpose of the function is to decide whether the latest statistics
         /// are better than the best statistics so far.
-        /// Here is used simply outArgs.Best = (inArgs.CurrReadoutUnit.CombinedError LT inArgs.BestReadoutUnit.CombinedError), but
-        /// the real logic could be much more complex.
+        /// Here is used simply the default implementation of the decision, but
+        /// the the implemented logic can be much more complicated in real-world situations.
         /// The function can also tell the regression process that it does not make any sense to continue the regression.
-        /// It can terminate the current regression attempt or whole output field regression process.
+        /// It can terminate the current regression attempt or whole readout unit regression process.
         /// </summary>
         /// <param name="inArgs">Contains all the necessary information to control the progress of the regression.</param>
         /// <returns>Instructions for the regression process.</returns>
-        public static Regression.RegressionControlOutArgs EsnRegressionControl(Regression.RegressionControlInArgs inArgs)
+        public static ReadoutUnit.RegressionControlOutArgs EsnRegressionControl(ReadoutUnit.RegressionControlInArgs inArgs)
         {
             //Instantiate output object.
-            Regression.RegressionControlOutArgs outArgs = new Regression.RegressionControlOutArgs();
-            //Evaluate statistics and decide if the latest statistics are the best.
-            outArgs.Best = (inArgs.CurrReadoutUnit.CombinedError < inArgs.BestReadoutUnit.CombinedError);
-            //outArgs.Best = (inArgs.RegrCurrResult.TrainingErrorStat.ArithAvg < inArgs.RegrBestResult.TrainingErrorStat.ArithAvg);
+            ReadoutUnit.RegressionControlOutArgs outArgs = new ReadoutUnit.RegressionControlOutArgs();
+            //Call the default implementation of the judgement.
+            outArgs.CurrentIsBetter = ReadoutUnit.IsBetter(inArgs.TaskType, inArgs.CurrReadoutUnit, inArgs.BestReadoutUnit);
             //Report the progress
             int reportInterval = Math.Max(inArgs.MaxEpochs / 100, 1);
-            if (outArgs.Best || (inArgs.Epoch % reportInterval) == 0 || inArgs.Epoch == inArgs.MaxEpochs || (inArgs.Epoch == 1 && inArgs.RegrAttemptNumber == 1))
+            ReadoutUnit bestReadoutUnit = outArgs.CurrentIsBetter ? inArgs.CurrReadoutUnit : inArgs.BestReadoutUnit;
+            if (outArgs.CurrentIsBetter || (inArgs.Epoch % reportInterval) == 0 || inArgs.Epoch == inArgs.MaxEpochs || (inArgs.Epoch == 1 && inArgs.RegrAttemptNumber == 1))
             {
                 ((IOutputLog)inArgs.UserObject).Write(
                     "      OutputField: " + inArgs.OutputFieldName +
-                    ", Attempt/Epoch: " + inArgs.RegrAttemptNumber.ToString().PadLeft(inArgs.RegrMaxAttempts.ToString().Length, '0') + "/" + inArgs.Epoch.ToString().PadLeft(inArgs.MaxEpochs.ToString().Length, '0') +
-                    ", DSet-Sizes: (" + inArgs.CurrReadoutUnit.TrainingErrorStat.NumOfSamples.ToString() + ", " + inArgs.CurrReadoutUnit.TestingErrorStat.NumOfSamples.ToString() + ")" +
-                    ", Best-Train: " + (outArgs.Best ? inArgs.CurrReadoutUnit.TrainingErrorStat : inArgs.BestReadoutUnit.TrainingErrorStat).ArithAvg.ToString("E3", CultureInfo.InvariantCulture) + "/" + (outArgs.Best ? inArgs.CurrReadoutUnit.TrainingBinErrorStat : inArgs.BestReadoutUnit.TrainingBinErrorStat).TotalNumOfBinErrors.ToString(CultureInfo.InvariantCulture) +
-                    ", Best-Test: " + (outArgs.Best ? inArgs.CurrReadoutUnit.TestingErrorStat : inArgs.BestReadoutUnit.TestingErrorStat).ArithAvg.ToString("E3", CultureInfo.InvariantCulture) + "/" + (outArgs.Best ? inArgs.CurrReadoutUnit.TestingBinErrorStat : inArgs.BestReadoutUnit.TestingBinErrorStat).TotalNumOfBinErrors.ToString(CultureInfo.InvariantCulture) +
-                    ", Curr-Train: " + inArgs.CurrReadoutUnit.TrainingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture) + "/" + inArgs.CurrReadoutUnit.TrainingBinErrorStat.TotalNumOfBinErrors.ToString(CultureInfo.InvariantCulture) +
-                    ", Curr-Test: " + inArgs.CurrReadoutUnit.TestingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture) + "/" + inArgs.CurrReadoutUnit.TestingBinErrorStat.TotalNumOfBinErrors.ToString(CultureInfo.InvariantCulture)
+                    ", Fold/Attempt/Epoch: " + inArgs.FoldNum.ToString().PadLeft(inArgs.NumOfFolds.ToString().Length, '0') + "/" +
+                                               inArgs.RegrAttemptNumber.ToString().PadLeft(inArgs.RegrMaxAttempts.ToString().Length, '0') + "/" +
+                                               inArgs.Epoch.ToString().PadLeft(inArgs.MaxEpochs.ToString().Length, '0') +
+                    ", DSet-Sizes: (" + inArgs.CurrReadoutUnit.TrainingErrorStat.NumOfSamples.ToString() + ", " +
+                                        inArgs.CurrReadoutUnit.TestingErrorStat.NumOfSamples.ToString() + ")" +
+                    ", Best-Train: " + bestReadoutUnit.TrainingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture) +
+                                       (inArgs.TaskType == CommonTypes.TaskType.Classification ? "/" : string.Empty) +
+                                       (inArgs.TaskType == CommonTypes.TaskType.Classification ? bestReadoutUnit.TrainingBinErrorStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture) : string.Empty) +
+                    ", Best-Test: " + bestReadoutUnit.TestingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture) +
+                                      (inArgs.TaskType == CommonTypes.TaskType.Classification ? "/" : string.Empty) +
+                                      (inArgs.TaskType == CommonTypes.TaskType.Classification ? bestReadoutUnit.TestingBinErrorStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture) : string.Empty) +
+                    ", Curr-Train: " + inArgs.CurrReadoutUnit.TrainingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture) +
+                                      (inArgs.TaskType == CommonTypes.TaskType.Classification ? "/" : string.Empty) +
+                                      (inArgs.TaskType == CommonTypes.TaskType.Classification ? inArgs.CurrReadoutUnit.TrainingBinErrorStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture) : string.Empty) +
+                    ", Curr-Test: " + inArgs.CurrReadoutUnit.TestingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture) +
+                                      (inArgs.TaskType == CommonTypes.TaskType.Classification ? "/" : string.Empty) +
+                                      (inArgs.TaskType == CommonTypes.TaskType.Classification ? inArgs.CurrReadoutUnit.TestingBinErrorStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture) : string.Empty)
                     , !(inArgs.Epoch == 1 && inArgs.RegrAttemptNumber == 1));
             }
             return outArgs;
@@ -127,7 +138,7 @@ namespace RCNet.Demo
                 //Load data bundle from csv file
                 VectorsPairBundle data = TimeSeriesDataLoader.Load(demoCaseParams.CsvDataFileName,
                                                                    demoCaseParams.EsnConfiguration.InputFieldNameCollection,
-                                                                   demoCaseParams.EsnConfiguration.OutputFieldNameCollection,
+                                                                   demoCaseParams.EsnConfiguration.ReadoutLayerConfig.OutputFieldNameCollection,
                                                                    normRange,
                                                                    demoCaseParams.NormalizerReserveRatio,
                                                                    true,
@@ -143,7 +154,7 @@ namespace RCNet.Demo
                 //Load data bundle from csv file
                 PatternVectorPairBundle data = PatternDataLoader.Load(demoCaseParams.CsvDataFileName,
                                                                       demoCaseParams.EsnConfiguration.InputFieldNameCollection,
-                                                                      demoCaseParams.EsnConfiguration.OutputFieldNameCollection,
+                                                                      demoCaseParams.EsnConfiguration.ReadoutLayerConfig.OutputFieldNameCollection,
                                                                       normRange,
                                                                       demoCaseParams.NormalizerReserveRatio,
                                                                       true,
@@ -156,11 +167,8 @@ namespace RCNet.Demo
 
             //Regression stage
             log.Write("    Regression stage", false);
-            //Select appropriate method for the test samples selection
-            Regression.TestSamplesSelectorDelegate samplesSelector = Regression.SelectRandomTestSamples;
-            if (demoCaseParams.TestSamplesSelectionMethod == "Sequential") samplesSelector = Regression.SelectSequentialTestSamples;
             //Training - Esn regression stage
-            ReadoutUnit[] readoutUnits = esn.RegressionStage(rsi, demoCaseParams.NumOfTestSamples, samplesSelector, EsnRegressionControl, log);
+            esn.RegressionStage(rsi, EsnRegressionControl, log);
 
             //Perform prediction if the task type is Prediction
             double[] predictionOutputVector = null;
@@ -176,23 +184,37 @@ namespace RCNet.Demo
             //Display results
             //Report training (regression) results and prediction
             log.Write("    Results", false);
-            for (int outputIdx = 0; outputIdx < readoutUnits.Length; outputIdx++)
+            List<ReadoutLayer.ClusterErrStatistics> clusterErrStatisticsCollection = esn.ClusterErrStatisticsCollection;
+            //Classification results
+            for (int outputIdx = 0; outputIdx < demoCaseParams.EsnConfiguration.ReadoutLayerConfig.OutputFieldNameCollection.Count; outputIdx++)
             {
-                log.Write("            OutputField: " + readoutUnits[outputIdx].OutputFieldName, false);
-                if (demoCaseParams.EsnConfiguration.TaskType == CommonTypes.TaskType.Prediction)
+                ReadoutLayer.ClusterErrStatistics ces = clusterErrStatisticsCollection[outputIdx];
+                if (demoCaseParams.EsnConfiguration.TaskType == CommonTypes.TaskType.Classification)
                 {
-                    log.Write("         Predicted next: " + predictionOutputVector[outputIdx].ToString(CultureInfo.InvariantCulture), false);
+                    //Report for classification task type
+                    log.Write("            OutputField: " + demoCaseParams.EsnConfiguration.ReadoutLayerConfig.OutputFieldNameCollection[outputIdx], false);
+                    log.Write("   Num of bin 0 samples: " + ces.BinaryErrStat.BinValErrStat[0].NumOfSamples.ToString(), false);
+                    log.Write("     Bad bin 0 classif.: " + ces.BinaryErrStat.BinValErrStat[0].Sum.ToString(CultureInfo.InvariantCulture), false);
+                    log.Write("       Bin 0 error rate: " + ces.BinaryErrStat.BinValErrStat[0].ArithAvg.ToString(CultureInfo.InvariantCulture), false);
+                    log.Write("         Bin 0 accuracy: " + (1 - ces.BinaryErrStat.BinValErrStat[0].ArithAvg).ToString(CultureInfo.InvariantCulture), false);
+                    log.Write("   Num of bin 1 samples: " + ces.BinaryErrStat.BinValErrStat[1].NumOfSamples.ToString(), false);
+                    log.Write("     Bad bin 1 classif.: " + ces.BinaryErrStat.BinValErrStat[1].Sum.ToString(CultureInfo.InvariantCulture), false);
+                    log.Write("       Bin 1 error rate: " + ces.BinaryErrStat.BinValErrStat[1].ArithAvg.ToString(CultureInfo.InvariantCulture), false);
+                    log.Write("         Bin 1 accuracy: " + (1 - ces.BinaryErrStat.BinValErrStat[1].ArithAvg).ToString(CultureInfo.InvariantCulture), false);
+                    log.Write("   Total num of samples: " + ces.BinaryErrStat.TotalErrStat.NumOfSamples.ToString(), false);
+                    log.Write("     Total bad classif.: " + ces.BinaryErrStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture), false);
+                    log.Write("       Total error rate: " + ces.BinaryErrStat.TotalErrStat.ArithAvg.ToString(CultureInfo.InvariantCulture), false);
+                    log.Write("         Total accuracy: " + (1 - ces.BinaryErrStat.TotalErrStat.ArithAvg).ToString(CultureInfo.InvariantCulture), false);
                 }
-                log.Write("    Trained weights stat", false);
-                log.Write("          Min, Max, Avg: " + readoutUnits[outputIdx].OutputWeightsStat.Min.ToString(CultureInfo.InvariantCulture) + " " + readoutUnits[outputIdx].OutputWeightsStat.Max.ToString(CultureInfo.InvariantCulture) + " " + readoutUnits[outputIdx].OutputWeightsStat.ArithAvg.ToString(CultureInfo.InvariantCulture), false);
-                log.Write("               Cnt, Zrs: " + readoutUnits[outputIdx].OutputWeightsStat.NumOfSamples.ToString() + " " + (readoutUnits[outputIdx].OutputWeightsStat.NumOfSamples - readoutUnits[outputIdx].OutputWeightsStat.NumOfNonzeroSamples).ToString(), false);
-                log.Write("              Error stat", false);
-                log.Write("      Train set samples: " + readoutUnits[outputIdx].TrainingErrorStat.NumOfSamples.ToString(), false);
-                log.Write("      Train set Avg Err: " + readoutUnits[outputIdx].TrainingErrorStat.ArithAvg.ToString(CultureInfo.InvariantCulture), false);
-                log.Write("       Test set samples: " + readoutUnits[outputIdx].TestingErrorStat.NumOfSamples.ToString(), false);
-                log.Write("       Test set Avg Err: " + readoutUnits[outputIdx].TestingErrorStat.ArithAvg.ToString(CultureInfo.InvariantCulture), false);
-                log.Write("      Test Max Real Err: " + (bundleNormalizer.OutputFieldNormalizerRefCollection[outputIdx].ComputeNaturalSpan(readoutUnits[outputIdx].TestingErrorStat.Max)).ToString(CultureInfo.InvariantCulture), false);
-                log.Write("      Test Avg Real Err: " + (bundleNormalizer.OutputFieldNormalizerRefCollection[outputIdx].ComputeNaturalSpan(readoutUnits[outputIdx].TestingErrorStat.ArithAvg)).ToString(CultureInfo.InvariantCulture), false);
+                else
+                {
+                    //Report for prediction task type
+                    log.Write("            OutputField: " + demoCaseParams.EsnConfiguration.ReadoutLayerConfig.OutputFieldNameCollection[outputIdx], false);
+                    log.Write("   Predicted next value: " + predictionOutputVector[outputIdx].ToString(CultureInfo.InvariantCulture), false);
+                    log.Write("   Total num of samples: " + ces.PrecissionErrStat.NumOfSamples.ToString(), false);
+                    log.Write("     Total Max Real Err: " + (bundleNormalizer.OutputFieldNormalizerRefCollection[outputIdx].ComputeNaturalSpan(ces.PrecissionErrStat.Max)).ToString(CultureInfo.InvariantCulture), false);
+                    log.Write("     Total Avg Real Err: " + (bundleNormalizer.OutputFieldNormalizerRefCollection[outputIdx].ComputeNaturalSpan(ces.PrecissionErrStat.ArithAvg)).ToString(CultureInfo.InvariantCulture), false);
+                }
                 log.Write(" ", false);
             }
             log.Write(" ", false);
