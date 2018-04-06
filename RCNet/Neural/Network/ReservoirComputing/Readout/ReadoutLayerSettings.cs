@@ -22,7 +22,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
         /// <summary>
         /// Parameter specifies how big part of available samples will be used for testing.
         /// </summary>
-        public double RatioOfTestData { get; set; }
+        public double TestDataRatio { get; set; }
         /// <summary>
         /// Number of predicting readout units for each output field.
         /// It also detemines how many data sets for testing will be prepared.
@@ -76,7 +76,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
         public ReadoutLayerSettings()
         {
             //Default settings
-            RatioOfTestData = 0;
+            TestDataRatio = 0;
             NumOfFolds = 0;
             HiddenLayerCollection = new List<HiddenLayerSettings>();
             OutputNeuronActivation = ActivationFactory.ActivationType.Identity;
@@ -95,7 +95,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
         public ReadoutLayerSettings(ReadoutLayerSettings source)
         {
             //Copy
-            RatioOfTestData = source.RatioOfTestData;
+            TestDataRatio = source.TestDataRatio;
             NumOfFolds = source.NumOfFolds;
             HiddenLayerCollection = new List<HiddenLayerSettings>(source.HiddenLayerCollection.Count);
             foreach (HiddenLayerSettings hiddenLayerSettings in source.HiddenLayerCollection)
@@ -135,25 +135,25 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
             }
             validator.LoadXDocFromString(readoutLayerSettingsElem.ToString());
             //Parsing
-            RatioOfTestData = double.Parse(readoutLayerSettingsElem.Attribute("RatioOfTestData").Value, CultureInfo.InvariantCulture);
-            NumOfFolds = int.Parse(readoutLayerSettingsElem.Attribute("NumOfFolds").Value);
+            TestDataRatio = double.Parse(readoutLayerSettingsElem.Attribute("testDataRatio").Value, CultureInfo.InvariantCulture);
+            NumOfFolds = readoutLayerSettingsElem.Attribute("folds").Value == "Auto" ? 0 : int.Parse(readoutLayerSettingsElem.Attribute("folds").Value);
             //Hidden layers
             HiddenLayerCollection = new List<HiddenLayerSettings>();
-            foreach (XElement hiddenLayerElem in readoutLayerSettingsElem.Descendants("HiddenLayer"))
+            foreach (XElement hiddenLayerElem in readoutLayerSettingsElem.Descendants("hiddenLayer"))
             {
                 HiddenLayerCollection.Add(new HiddenLayerSettings(hiddenLayerElem));
             }
             //Output fields
-            XElement outputFieldsElem = readoutLayerSettingsElem.Descendants("OutputFields").First();
-            OutputNeuronActivation = ActivationFactory.ParseActivation(outputFieldsElem.Attribute("OutputActivation").Value);
-            RegressionMethod = FeedForwardNetwork.ParseTrainingMethodType(outputFieldsElem.Attribute("RegressionMethod").Value);
-            RegressionAttempts = int.Parse(outputFieldsElem.Attribute("Attempts").Value);
-            RegressionAttemptEpochs = int.Parse(outputFieldsElem.Attribute("AttemptEpochs").Value);
-            RegressionAttemptStopMSE = double.Parse(outputFieldsElem.Attribute("AttemptStopMSE").Value, CultureInfo.InvariantCulture);
+            XElement outputFieldsElem = readoutLayerSettingsElem.Descendants("outputFields").First();
+            OutputNeuronActivation = ActivationFactory.ParseActivation(outputFieldsElem.Attribute("activation").Value);
+            RegressionMethod = FeedForwardNetwork.ParseTrainingMethodType(outputFieldsElem.Attribute("regressionMethod").Value);
+            RegressionAttempts = int.Parse(outputFieldsElem.Attribute("attempts").Value);
+            RegressionAttemptEpochs = int.Parse(outputFieldsElem.Attribute("attemptEpochs").Value);
+            RegressionAttemptStopMSE = double.Parse(outputFieldsElem.Attribute("attemptStopMSE").Value, CultureInfo.InvariantCulture);
             OutputFieldNameCollection = new List<string>();
-            foreach (XElement outputFieldElem in outputFieldsElem.Descendants("Field"))
+            foreach (XElement outputFieldElem in outputFieldsElem.Descendants("field"))
             {
-                OutputFieldNameCollection.Add(outputFieldElem.Attribute("Name").Value);
+                OutputFieldNameCollection.Add(outputFieldElem.Attribute("name").Value);
             }
             return;
         }
@@ -166,7 +166,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
         {
             if (obj == null) return false;
             ReadoutLayerSettings cmpSettings = obj as ReadoutLayerSettings;
-            if (RatioOfTestData != cmpSettings.RatioOfTestData ||
+            if (TestDataRatio != cmpSettings.TestDataRatio ||
                 NumOfFolds != cmpSettings.NumOfFolds ||
                 OutputNeuronActivation != cmpSettings.OutputNeuronActivation ||
                 RegressionMethod != cmpSettings.RegressionMethod ||

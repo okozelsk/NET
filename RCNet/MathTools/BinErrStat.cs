@@ -35,32 +35,30 @@ namespace RCNet.MathTools
 
         //Properties
         /// <summary>
-        /// Score based on bin values distributions and error rates.
+        /// Proportional error based on bin values distributions and error rates.
         /// </summary>
-        public double Score
+        public double ProportionalErr
         {
             get
             {
-                double errSum = 0;
+                double err = 0;
                 for (int binVal = 0; binVal <= 1; binVal++)
                 {
-                    double mulRatio = MaxErr;
+                    double proportionCoeff = MaxErr;
                     if (ThisBinValDistr.BinRate[binVal] > 0)
                     {
-                        mulRatio = RefBinValDistr.BinRate[binVal] / ThisBinValDistr.BinRate[binVal];
+                        proportionCoeff = RefBinValDistr.BinRate[binVal] / ThisBinValDistr.BinRate[binVal];
                     }
                     double errRate = 1;
                     if (ThisBinValDistr.NumOf[binVal] > 0)
                     {
                         errRate = BinValErrStat[binVal].Sum / BinValErrStat[binVal].NumOfSamples;
                     }
-                    errRate *= mulRatio;
-                    errSum += errRate;
+                    err += proportionCoeff * errRate;
                 }
-                return 1d / (errSum + 1d / MaxErr);
+                return err;
             }
         }
-
 
 
         //Constructors

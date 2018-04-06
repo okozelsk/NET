@@ -12,7 +12,7 @@ namespace RCNet.Demo
 {
     /// <summary>
     /// The class implements Esn demo configuration parameters.
-    /// The only way to create an instance is to use the xml constructor.
+    /// One and only way to create an instance is to use the xml constructor.
     /// </summary>
     public class EsnDemoSettings
     {
@@ -21,19 +21,19 @@ namespace RCNet.Demo
         /// <summary>
         /// File system directory where the sample data files are stored.
         /// </summary>
-        public string DataDir { get; }
+        public string DataFolder { get; }
         /// <summary>
         /// Collection of demo case definitions.
         /// </summary>
-        public List<EsnDemoCaseSettings> DemoCaseParamsCollection { get; }
+        public List<CaseSettings> CaseCfgCollection { get; }
 
         //Constructor
         /// <summary>
         /// Creates instance and initialize it from given xml file.
         /// This is the only way to instantiate Esn demo settings.
         /// </summary>
-        /// <param name="demoSettingsXmlFile">Xml file containing definitions of demo cases to be prformed</param>
-        public EsnDemoSettings(string demoSettingsXmlFile)
+        /// <param name="fileName">Xml file containing definitions of demo cases to be prformed</param>
+        public EsnDemoSettings(string fileName)
         {
             //Validate xml file and load the document 
             XmlValidator validator = new XmlValidator();
@@ -47,15 +47,15 @@ namespace RCNet.Demo
             {
                 validator.AddSchema(schemaStream);
             }
-            XDocument xmlDoc = validator.LoadXDocFromFile(demoSettingsXmlFile);
+            XDocument xmlDoc = validator.LoadXDocFromFile(fileName);
             //Parse DataDir
-            XElement root = xmlDoc.Descendants("EsnDemoSettings").First();
-            DataDir = root.Attribute("DataDir").Value;
+            XElement root = xmlDoc.Descendants("esnDemo").First();
+            DataFolder = root.Attribute("dataFolder").Value;
             //Parse demo cases definitions
-            DemoCaseParamsCollection = new List<EsnDemoCaseSettings>();
-            foreach (XElement demoCaseParamsElem in root.Descendants("DemoCase"))
+            CaseCfgCollection = new List<CaseSettings>();
+            foreach (XElement demoCaseParamsElem in root.Descendants("case"))
             {
-                DemoCaseParamsCollection.Add(new EsnDemoCaseSettings(demoCaseParamsElem, DataDir));
+                CaseCfgCollection.Add(new CaseSettings(demoCaseParamsElem, DataFolder));
             }
 
             return;
@@ -65,7 +65,7 @@ namespace RCNet.Demo
         /// <summary>
         /// Holds the configuration of the single Esn demo case.
         /// </summary>
-        public class EsnDemoCaseSettings
+        public class CaseSettings
         {
             //Constants
             //Attribute properties
@@ -74,9 +74,9 @@ namespace RCNet.Demo
             /// </summary>
             public string Name { get; }
             /// <summary>
-            /// File name of the csv file containing the time series data to be used.
+            /// Demo case data file (appropriate csv format)
             /// </summary>
-            public string CsvDataFileName { get; }
+            public string FileName { get; }
             /// <summary>
             /// How many of starting samples will be used for booting of reservoirs to ensure
             /// reservoir neurons states be affected by input data only. Boot sequence length of the reservoir should be greater
@@ -94,25 +94,23 @@ namespace RCNet.Demo
             /// <summary>
             /// 
             /// </summary>
-            public EsnSettings EsnConfiguration { get; }
+            public EsnSettings EsnCfg { get; }
 
             //Constructor
-            public EsnDemoCaseSettings(XElement demoCaseElem, string dir)
+            public CaseSettings(XElement demoCaseElem, string dir)
             {
-                //Simple parsing of demo case parameters
-                Name = demoCaseElem.Attribute("Name").Value;
-                XElement samplesElem = demoCaseElem.Descendants("Samples").First();
-                CsvDataFileName = dir + "\\" + samplesElem.Attribute("CsvDataFileName").Value;
-                NumOfBootSamples = (samplesElem.Attribute("NumOfBootSamples") == null) ? 0 : int.Parse(samplesElem.Attribute("NumOfBootSamples").Value);
-                SingleNormalizer = bool.Parse(samplesElem.Attribute("SingleNormalizer").Value);
-                NormalizerReserveRatio = double.Parse(samplesElem.Attribute("NormalizerReserveRatio").Value, CultureInfo.InvariantCulture);
-                //Instantiating of the EsnSettings
-                EsnConfiguration = new EsnSettings(demoCaseElem.Descendants("EsnSettings").First());
+                Name = demoCaseElem.Attribute("name").Value;
+                XElement samplesElem = demoCaseElem.Descendants("samples").First();
+                FileName = dir + "\\" + samplesElem.Attribute("fileName").Value;
+                NumOfBootSamples = (samplesElem.Attribute("bootSamples") == null) ? 0 : int.Parse(samplesElem.Attribute("bootSamples").Value);
+                SingleNormalizer = bool.Parse(samplesElem.Attribute("singleNormalizer").Value);
+                NormalizerReserveRatio = double.Parse(samplesElem.Attribute("normalizerReserve").Value, CultureInfo.InvariantCulture);
+                EsnCfg = new EsnSettings(demoCaseElem.Descendants("esnCfg").First());
                 return;
             }
 
-        }//EsnDemoCaseSettings
+        }//CaseSettings
 
-    }//ESNDemoSettings
+    }//EsnDemoSettings
 
 }//Namespace

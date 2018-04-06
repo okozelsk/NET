@@ -201,10 +201,10 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Creates a clone of this interval
+        /// Creates a deep copy of this interval
         /// </summary>
         /// <returns></returns>
-        public Interval Clone()
+        public Interval DeepClone()
         {
             lock (_lock)
             {

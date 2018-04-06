@@ -193,17 +193,17 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
             TopologyType = source.TopologyType;
             if (source.TopologySettings != null)
             {
-                if (source.TopologySettings.GetType() == typeof(RandomTopology))
+                if (source.TopologySettings.GetType() == typeof(RandomTopologySettings))
                 {
-                    TopologySettings = new RandomTopology((RandomTopology)source.TopologySettings);
+                    TopologySettings = new RandomTopologySettings((RandomTopologySettings)source.TopologySettings);
                 }
-                if (source.TopologySettings.GetType() == typeof(RingTopology))
+                if (source.TopologySettings.GetType() == typeof(RingTopologySettings))
                 {
-                    TopologySettings = new RingTopology((RingTopology)source.TopologySettings);
+                    TopologySettings = new RingTopologySettings((RingTopologySettings)source.TopologySettings);
                 }
-                if (source.TopologySettings.GetType() == typeof(DTTTopology))
+                if (source.TopologySettings.GetType() == typeof(DTTTopologySettings))
                 {
-                    TopologySettings = new DTTTopology((DTTTopology)source.TopologySettings);
+                    TopologySettings = new DTTTopologySettings((DTTTopologySettings)source.TopologySettings);
                 }
             }
             RetainmentNeuronsFeature = source.RetainmentNeuronsFeature;
@@ -247,22 +247,22 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
             validator.LoadXDocFromString(reservoirSettingsElem.ToString());
             //Parsing
             //Settings name
-            SettingsName = reservoirSettingsElem.Attribute("Name").Value;
+            SettingsName = reservoirSettingsElem.Attribute("name").Value;
             //Input
-            XElement inputElem = reservoirSettingsElem.Descendants("Input").First();
-            InputConnectionDensity = double.Parse(inputElem.Attribute("ConnectionDensity").Value, CultureInfo.InvariantCulture);
-            InputWeightScale = double.Parse(inputElem.Attribute("WeightScale").Value, CultureInfo.InvariantCulture);
+            XElement inputElem = reservoirSettingsElem.Descendants("input").First();
+            InputConnectionDensity = double.Parse(inputElem.Attribute("connectionDensity").Value, CultureInfo.InvariantCulture);
+            InputWeightScale = double.Parse(inputElem.Attribute("weightScale").Value, CultureInfo.InvariantCulture);
             //Internal
-            XElement internalElem = reservoirSettingsElem.Descendants("Internal").First();
-            Size = int.Parse(internalElem.Attribute("Size").Value);
-            ReservoirNeuronActivation = ActivationFactory.ParseActivation(internalElem.Attribute("Activation").Value);
-            BiasScale = double.Parse(internalElem.Attribute("BiasScale").Value, CultureInfo.InvariantCulture);
-            InternalWeightScale = double.Parse(internalElem.Attribute("WeightScale").Value, CultureInfo.InvariantCulture);
+            XElement internalElem = reservoirSettingsElem.Descendants("internal").First();
+            Size = int.Parse(internalElem.Attribute("size").Value);
+            ReservoirNeuronActivation = ActivationFactory.ParseActivation(internalElem.Attribute("activation").Value);
+            BiasScale = double.Parse(internalElem.Attribute("biasScale").Value, CultureInfo.InvariantCulture);
+            InternalWeightScale = double.Parse(internalElem.Attribute("weightScale").Value, CultureInfo.InvariantCulture);
             //Topology
             List<XElement> topologyElems = new List<XElement>();
-            topologyElems.AddRange(internalElem.Descendants("RandomTopology"));
-            topologyElems.AddRange(internalElem.Descendants("RingTopology"));
-            topologyElems.AddRange(internalElem.Descendants("DTTTopology"));
+            topologyElems.AddRange(internalElem.Descendants("topologyRandom"));
+            topologyElems.AddRange(internalElem.Descendants("topologyRing"));
+            topologyElems.AddRange(internalElem.Descendants("topologyDTT"));
             if(topologyElems.Count != 1)
             {
                 throw new Exception("Only one reservoir topology can be specified in reservoir settings.");
@@ -273,31 +273,31 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
             }
             XElement topologyElem = topologyElems[0];
             //Random?
-            if (topologyElem.Name == "RandomTopology")
+            if (topologyElem.Name == "topologyRandom")
             {
                 TopologyType = ReservoirTopologyType.Random;
-                TopologySettings = new RandomTopology(topologyElem);
+                TopologySettings = new RandomTopologySettings(topologyElem);
             }
             //Ring?
-            else if (topologyElem.Name == "RingTopology")
+            else if (topologyElem.Name == "topologyRing")
             {
                 TopologyType = ReservoirTopologyType.Ring;
-                TopologySettings = new RingTopology(topologyElem);
+                TopologySettings = new RingTopologySettings(topologyElem);
             }
             else
             {
                 //DTT
                 TopologyType = ReservoirTopologyType.DTT;
-                TopologySettings = new DTTTopology(topologyElem);
+                TopologySettings = new DTTTopologySettings(topologyElem);
             }
             //Retainment neurons
-            XElement retainmentElem = internalElem.Descendants("RetainmentNeurons").FirstOrDefault();
+            XElement retainmentElem = internalElem.Descendants("retainmentNeurons").FirstOrDefault();
             RetainmentNeuronsFeature = (retainmentElem != null);
             if (RetainmentNeuronsFeature)
             {
-                RetainmentNeuronsDensity = double.Parse(retainmentElem.Attribute("Density").Value, CultureInfo.InvariantCulture);
-                RetainmentMinRate = double.Parse(retainmentElem.Attribute("RetainmentMinRate").Value, CultureInfo.InvariantCulture);
-                RetainmentMaxRate = double.Parse(retainmentElem.Attribute("RetainmentMaxRate").Value, CultureInfo.InvariantCulture);
+                RetainmentNeuronsDensity = double.Parse(retainmentElem.Attribute("density").Value, CultureInfo.InvariantCulture);
+                RetainmentMinRate = double.Parse(retainmentElem.Attribute("retainmentMinRate").Value, CultureInfo.InvariantCulture);
+                RetainmentMaxRate = double.Parse(retainmentElem.Attribute("retainmentMaxRate").Value, CultureInfo.InvariantCulture);
                 RetainmentNeuronsFeature = (RetainmentNeuronsDensity > 0 &&
                                             RetainmentMaxRate > 0
                                             );
@@ -309,14 +309,14 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
                 RetainmentMaxRate = 0;
             }
             //Context neuron
-            XElement ctxNeuronElem = internalElem.Descendants("ContextNeuron").FirstOrDefault();
+            XElement ctxNeuronElem = internalElem.Descendants("contextNeuron").FirstOrDefault();
             ContextNeuronFeature = (ctxNeuronElem != null);
             if (ContextNeuronFeature)
             {
-                ContextNeuronActivation = ActivationFactory.ParseActivation(ctxNeuronElem.Attribute("Activation").Value);
-                ContextNeuronInputWeight = double.Parse(ctxNeuronElem.Attribute("InputWeight").Value, CultureInfo.InvariantCulture);
-                ContextNeuronFeedbackDensity = double.Parse(ctxNeuronElem.Attribute("FeedbackDensity").Value, CultureInfo.InvariantCulture);
-                ContextNeuronFeedbackWeight = double.Parse(ctxNeuronElem.Attribute("FeedbackWeight").Value, CultureInfo.InvariantCulture);
+                ContextNeuronActivation = ActivationFactory.ParseActivation(ctxNeuronElem.Attribute("activation").Value);
+                ContextNeuronInputWeight = double.Parse(ctxNeuronElem.Attribute("inputWeight").Value, CultureInfo.InvariantCulture);
+                ContextNeuronFeedbackDensity = double.Parse(ctxNeuronElem.Attribute("feedbackDensity").Value, CultureInfo.InvariantCulture);
+                ContextNeuronFeedbackWeight = double.Parse(ctxNeuronElem.Attribute("feedbackWeight").Value, CultureInfo.InvariantCulture);
                 ContextNeuronFeature = (ContextNeuronFeedbackDensity > 0 &&
                                         ContextNeuronInputWeight > 0 &&
                                         ContextNeuronFeedbackWeight > 0
@@ -330,16 +330,16 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
                 ContextNeuronFeedbackWeight = 0;
             }
             //Feedback
-            XElement feedbackElem = reservoirSettingsElem.Descendants("Feedback").FirstOrDefault();
+            XElement feedbackElem = reservoirSettingsElem.Descendants("feedback").FirstOrDefault();
             FeedbackFeature = (feedbackElem != null);
             FeedbackFieldNameCollection = new List<string>();
             if (FeedbackFeature)
             {
-                FeedbackConnectionDensity = double.Parse(feedbackElem.Attribute("Density").Value, CultureInfo.InvariantCulture);
-                FeedbackWeightScale = double.Parse(feedbackElem.Attribute("WeightScale").Value, CultureInfo.InvariantCulture);
-                foreach (XElement feedbackFieldElem in feedbackElem.Descendants("Field"))
+                FeedbackConnectionDensity = double.Parse(feedbackElem.Attribute("density").Value, CultureInfo.InvariantCulture);
+                FeedbackWeightScale = double.Parse(feedbackElem.Attribute("weightScale").Value, CultureInfo.InvariantCulture);
+                foreach (XElement feedbackFieldElem in feedbackElem.Descendants("field"))
                 {
-                    FeedbackFieldNameCollection.Add(feedbackFieldElem.Attribute("Name").Value);
+                    FeedbackFieldNameCollection.Add(feedbackFieldElem.Attribute("name").Value);
                 }
                 FeedbackFeature = (FeedbackFieldNameCollection.Count > 0);
             }
@@ -405,13 +405,13 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
             switch (TopologyType)
             {
                 case ReservoirTopologyType.Random:
-                    if (!((RandomTopology)TopologySettings).Equals((RandomTopology)cmpSettings.TopologySettings)) return false;
+                    if (!((RandomTopologySettings)TopologySettings).Equals((RandomTopologySettings)cmpSettings.TopologySettings)) return false;
                     break;
                 case ReservoirTopologyType.Ring:
-                    if (!((RingTopology)TopologySettings).Equals((RingTopology)cmpSettings.TopologySettings)) return false;
+                    if (!((RingTopologySettings)TopologySettings).Equals((RingTopologySettings)cmpSettings.TopologySettings)) return false;
                     break;
                 case ReservoirTopologyType.DTT:
-                    if (!((DTTTopology)TopologySettings).Equals((DTTTopology)cmpSettings.TopologySettings)) return false;
+                    if (!((DTTTopologySettings)TopologySettings).Equals((DTTTopologySettings)cmpSettings.TopologySettings)) return false;
                     break;
             }
             return true;
@@ -440,7 +440,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
         /// Additional setup parameters for Random reservoir topology
         /// </summary>
         [Serializable]
-        public class RandomTopology
+        public class RandomTopologySettings
         {
             //Attributes
             /// <summary>
@@ -453,7 +453,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
             /// <summary>
             /// Creates an unitialized instance
             /// </summary>
-            public RandomTopology()
+            public RandomTopologySettings()
             {
                 ConnectionsDensity = 0;
                 return;
@@ -463,7 +463,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
             /// Copy constructor
             /// </summary>
             /// <param name="source">Source instance</param>
-            public RandomTopology(RandomTopology source)
+            public RandomTopologySettings(RandomTopologySettings source)
             {
                 ConnectionsDensity = source.ConnectionsDensity;
                 return;
@@ -472,9 +472,9 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
             /// <summary>
             /// Creates the instance itialized from xml
             /// </summary>
-            public RandomTopology(XElement randomTopologyElem)
+            public RandomTopologySettings(XElement randomTopologyElem)
             {
-                ConnectionsDensity = double.Parse(randomTopologyElem.Attribute("ConnectionsDensity").Value, CultureInfo.InvariantCulture);
+                ConnectionsDensity = double.Parse(randomTopologyElem.Attribute("connectionsDensity").Value, CultureInfo.InvariantCulture);
                 return;
             }
 
@@ -485,7 +485,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
             public override bool Equals(object obj)
             {
                 if (obj == null) return false;
-                RandomTopology cmpSettings = obj as RandomTopology;
+                RandomTopologySettings cmpSettings = obj as RandomTopologySettings;
                 if (ConnectionsDensity != cmpSettings.ConnectionsDensity)
                 {
                     return false;
@@ -501,13 +501,13 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
                 return base.GetHashCode();
             }
 
-        }//RandomTopology
+        }//RandomTopologySettings
 
         /// <summary>
         /// Additional setup parameters for Ring reservoir topology
         /// </summary>
         [Serializable]
-        public class RingTopology
+        public class RingTopologySettings
         {
             //Attributes
             /// <summary>
@@ -529,7 +529,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
             /// <summary>
             /// Creates an unitialized instance
             /// </summary>
-            public RingTopology()
+            public RingTopologySettings()
             {
                 Bidirectional = false;
                 SelfConnectionsDensity = 0;
@@ -541,7 +541,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
             /// Copy constructor
             /// </summary>
             /// <param name="source">Source instance</param>
-            public RingTopology(RingTopology source)
+            public RingTopologySettings(RingTopologySettings source)
             {
                 Bidirectional = source.Bidirectional;
                 SelfConnectionsDensity = source.SelfConnectionsDensity;
@@ -552,11 +552,11 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
             /// <summary>
             /// Creates the instance itialized from xml
             /// </summary>
-            public RingTopology(XElement ringTopologyElem)
+            public RingTopologySettings(XElement ringTopologyElem)
             {
-                Bidirectional = bool.Parse(ringTopologyElem.Attribute("Bidirectional").Value);
-                SelfConnectionsDensity = double.Parse(ringTopologyElem.Attribute("SelfConnectionsDensity").Value, CultureInfo.InvariantCulture);
-                InterConnectionsDensity = double.Parse(ringTopologyElem.Attribute("InterConnectionsDensity").Value, CultureInfo.InvariantCulture);
+                Bidirectional = bool.Parse(ringTopologyElem.Attribute("bidirectional").Value);
+                SelfConnectionsDensity = double.Parse(ringTopologyElem.Attribute("selfConnectionsDensity").Value, CultureInfo.InvariantCulture);
+                InterConnectionsDensity = double.Parse(ringTopologyElem.Attribute("interConnectionsDensity").Value, CultureInfo.InvariantCulture);
                 return;
             }
 
@@ -567,7 +567,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
             public override bool Equals(object obj)
             {
                 if (obj == null) return false;
-                RingTopology cmpSettings = obj as RingTopology;
+                RingTopologySettings cmpSettings = obj as RingTopologySettings;
                 if (Bidirectional != cmpSettings.Bidirectional ||
                    SelfConnectionsDensity != cmpSettings.SelfConnectionsDensity ||
                    InterConnectionsDensity != cmpSettings.InterConnectionsDensity
@@ -586,13 +586,13 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
                 return base.GetHashCode();
             }
 
-        }//RingTopology
+        }//RingTopologySettings
 
         /// <summary>
         /// Additional setup parameters for DTT reservoir topology
         /// </summary>
         [Serializable]
-        public class DTTTopology
+        public class DTTTopologySettings
         {
             //Attributes
             /// <summary>
@@ -605,7 +605,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
             /// <summary>
             /// Creates an unitialized instance
             /// </summary>
-            public DTTTopology()
+            public DTTTopologySettings()
             {
                 SelfConnectionsDensity = 0;
                 return;
@@ -615,7 +615,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
             /// Copy constructor
             /// </summary>
             /// <param name="source">Source instance</param>
-            public DTTTopology(DTTTopology source)
+            public DTTTopologySettings(DTTTopologySettings source)
             {
                 SelfConnectionsDensity = source.SelfConnectionsDensity;
                 return;
@@ -624,9 +624,9 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
             /// <summary>
             /// Creates the instance itialized from xml
             /// </summary>
-            public DTTTopology(XElement dttTopologyElem)
+            public DTTTopologySettings(XElement dttTopologyElem)
             {
-                SelfConnectionsDensity = double.Parse(dttTopologyElem.Attribute("SelfConnectionsDensity").Value, CultureInfo.InvariantCulture);
+                SelfConnectionsDensity = double.Parse(dttTopologyElem.Attribute("selfConnectionsDensity").Value, CultureInfo.InvariantCulture);
                 return;
             }
 
@@ -637,7 +637,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
             public override bool Equals(object obj)
             {
                 if (obj == null) return false;
-                DTTTopology cmpSettings = obj as DTTTopology;
+                DTTTopologySettings cmpSettings = obj as DTTTopologySettings;
                 if (SelfConnectionsDensity != cmpSettings.SelfConnectionsDensity)
                 {
                     return false;
@@ -653,7 +653,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
                 return base.GetHashCode();
             }
 
-        }//DTTTopology
+        }//DTTTopologySettings
 
     }//AnalogReservoirSettings
 

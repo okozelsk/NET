@@ -115,7 +115,7 @@ namespace RCNet.Demo
         /// </summary>
         /// <param name="log">Into this interface are written output messages</param>
         /// <param name="demoCaseParams">An instance of EsnDemoSettings.EsnDemoCaseSettings to be performed</param>
-        public static void PerformDemoCase(IOutputLog log, EsnDemoSettings.EsnDemoCaseSettings demoCaseParams)
+        public static void PerformDemoCase(IOutputLog log, EsnDemoSettings.CaseSettings demoCaseParams)
         {
             //For demo purposes is allowed only the normalization range (-1, 1)
             Interval normRange = new Interval(-1, 1);
@@ -127,18 +127,18 @@ namespace RCNet.Demo
             double[] predictionInputVector = null;
             
             //Instantiate an Esn
-            Esn esn = new Esn(demoCaseParams.EsnConfiguration);
+            Esn esn = new Esn(demoCaseParams.EsnCfg);
 
             //Prepare regression stage input object
             log.Write(" ", false);
             Esn.RegressionStageInput rsi = null;
-            if (demoCaseParams.EsnConfiguration.TaskType == CommonTypes.TaskType.Prediction)
+            if (demoCaseParams.EsnCfg.TaskType == CommonTypes.TaskType.Prediction)
             {
                 //Time series prediction task
                 //Load data bundle from csv file
-                PredictionBundle data = TimeSeriesDataLoader.Load(demoCaseParams.CsvDataFileName,
-                                                                   demoCaseParams.EsnConfiguration.InputFieldNameCollection,
-                                                                   demoCaseParams.EsnConfiguration.ReadoutLayerConfig.OutputFieldNameCollection,
+                PredictionBundle data = TimeSeriesDataLoader.Load(demoCaseParams.FileName,
+                                                                   demoCaseParams.EsnCfg.InputFieldNameCollection,
+                                                                   demoCaseParams.EsnCfg.ReadoutLayerConfig.OutputFieldNameCollection,
                                                                    normRange,
                                                                    demoCaseParams.NormalizerReserveRatio,
                                                                    true,
@@ -152,9 +152,9 @@ namespace RCNet.Demo
             {
                 //Classification task
                 //Load data bundle from csv file
-                ClassificationBundle data = PatternDataLoader.Load(demoCaseParams.CsvDataFileName,
-                                                                      demoCaseParams.EsnConfiguration.InputFieldNameCollection,
-                                                                      demoCaseParams.EsnConfiguration.ReadoutLayerConfig.OutputFieldNameCollection,
+                ClassificationBundle data = PatternDataLoader.Load(demoCaseParams.FileName,
+                                                                      demoCaseParams.EsnCfg.InputFieldNameCollection,
+                                                                      demoCaseParams.EsnCfg.ReadoutLayerConfig.OutputFieldNameCollection,
                                                                       normRange,
                                                                       demoCaseParams.NormalizerReserveRatio,
                                                                       true,
@@ -172,7 +172,7 @@ namespace RCNet.Demo
 
             //Perform prediction if the task type is Prediction
             double[] predictionOutputVector = null;
-            if(demoCaseParams.EsnConfiguration.TaskType == CommonTypes.TaskType.Prediction)
+            if(demoCaseParams.EsnCfg.TaskType == CommonTypes.TaskType.Prediction)
             {
                 //Note that there is not necessary to call PushFeedback function immediately after training.
                 //Feedback was already pushed during the Esn training.
@@ -186,13 +186,13 @@ namespace RCNet.Demo
             log.Write("    Results", false);
             List<ReadoutLayer.ClusterErrStatistics> clusterErrStatisticsCollection = esn.ClusterErrStatisticsCollection;
             //Classification results
-            for (int outputIdx = 0; outputIdx < demoCaseParams.EsnConfiguration.ReadoutLayerConfig.OutputFieldNameCollection.Count; outputIdx++)
+            for (int outputIdx = 0; outputIdx < demoCaseParams.EsnCfg.ReadoutLayerConfig.OutputFieldNameCollection.Count; outputIdx++)
             {
                 ReadoutLayer.ClusterErrStatistics ces = clusterErrStatisticsCollection[outputIdx];
-                if (demoCaseParams.EsnConfiguration.TaskType == CommonTypes.TaskType.Classification)
+                if (demoCaseParams.EsnCfg.TaskType == CommonTypes.TaskType.Classification)
                 {
                     //Classification task report
-                    log.Write("            OutputField: " + demoCaseParams.EsnConfiguration.ReadoutLayerConfig.OutputFieldNameCollection[outputIdx], false);
+                    log.Write("            OutputField: " + demoCaseParams.EsnCfg.ReadoutLayerConfig.OutputFieldNameCollection[outputIdx], false);
                     log.Write("   Num of bin 0 samples: " + ces.BinaryErrStat.BinValErrStat[0].NumOfSamples.ToString(), false);
                     log.Write("     Bad bin 0 classif.: " + ces.BinaryErrStat.BinValErrStat[0].Sum.ToString(CultureInfo.InvariantCulture), false);
                     log.Write("       Bin 0 error rate: " + ces.BinaryErrStat.BinValErrStat[0].ArithAvg.ToString(CultureInfo.InvariantCulture), false);
@@ -209,7 +209,7 @@ namespace RCNet.Demo
                 else
                 {
                     //Prediction task report
-                    log.Write("            OutputField: " + demoCaseParams.EsnConfiguration.ReadoutLayerConfig.OutputFieldNameCollection[outputIdx], false);
+                    log.Write("            OutputField: " + demoCaseParams.EsnCfg.ReadoutLayerConfig.OutputFieldNameCollection[outputIdx], false);
                     log.Write("   Predicted next value: " + predictionOutputVector[outputIdx].ToString(CultureInfo.InvariantCulture), false);
                     log.Write("   Total num of samples: " + ces.PrecissionErrStat.NumOfSamples.ToString(), false);
                     log.Write("     Total Max Real Err: " + (bundleNormalizer.OutputFieldNormalizerRefCollection[outputIdx].ComputeNaturalSpan(ces.PrecissionErrStat.Max)).ToString(CultureInfo.InvariantCulture), false);
@@ -233,7 +233,7 @@ namespace RCNet.Demo
             //Instantiate demo settings from the xml file
             EsnDemoSettings demoSettings = new EsnDemoSettings(demoSettingsXmlFile);
             //Loop through all demo cases
-            foreach(EsnDemoSettings.EsnDemoCaseSettings demoCaseParams in demoSettings.DemoCaseParamsCollection)
+            foreach(EsnDemoSettings.CaseSettings demoCaseParams in demoSettings.CaseCfgCollection)
             {
                 //Execute the demo case
                 PerformDemoCase(log, demoCaseParams);

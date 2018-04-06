@@ -1,4 +1,4 @@
-The aim of the project is to make the reservoir computing methods easy to use and available for .net without dependency on external libraries.
+The aim of this project is to make the reservoir computing methods easy to use and available for .net without dependency on external libraries.
 
 Currently implemented components
 --------------------------------
@@ -15,9 +15,9 @@ Activation functions
 	Gaussian
 Feed Forward Network
 	Multiple hidden layers
-	Network Trainers
-		Linear regression trainer
+	Trainers
 		Resilient propagation trainer (iRPROP+ variant)
+		Linear regression trainer
 Analog Reservoir
 	Supported topologies:
 		Random
@@ -28,31 +28,39 @@ Analog Reservoir
 	Augmented states feature
 Echo State Network
 	Multiple internal reservoirs
-	Readout layer consists of the feed forward network for every output field
 	Esn does not support SpectralRadius parameter (low added value)
-		but provides the internal statistics
+		but provides useful internal statistics
 	Supported task types:
 		Prediction
 		Classification
 			Supports variable length of patterns
-Data loaders (csv)
-	csv data formats for specific task types
+Readout layer
+	Independent on predictors generator
+	Supports x-fold cross validation method
+	Clusters of readout units
+		Cluster of feed forward networks per each output field
 
 Bundle normalizer
-	Helper for data bundle efficient normalization
+	Helper for normalization of data in a bundle
+
+Data loaders (csv)
+	csv data format for specific task type
+		Prediction (time series)
+		Classification
+
 
 
 Demo application
 ----------------
-All the functionality is demonstrated in a simple demo application (/Demo/DemoConsoleApp). Application has no startup parameters, all necessary settins are specified in EsnDemoSettings.xml file. EsnDemoSettings.xml has to be in the same folder as the executable DemoConsoleApp.exe. Application performs sequence of demo cases defined in EsnDemoSettings.xml. Input data has to be stored in a file (csv format). You can simply modify EsnDemoSettings.xml and configure your own cases.
+Functionality and use is demonstrated in a simple demo application (/Demo/DemoConsoleApp). Application has no startup parameters, all necessary settins are specified in EsnDemoSettings.xml file. EsnDemoSettings.xml has to be in the same folder as the executable DemoConsoleApp.exe. Application performs sequence of demo cases defined in EsnDemoSettings.xml. Input data has to be stored in a file in csv format. You can simply modify EsnDemoSettings.xml and configure your own cases to be prformed.
 
 
 Other information
 -----------------
 Source code is written in C# 6.0.
-Very soon an official release will be published and from this point will be also kept the backward compatibility. Product documentation will be published on the associated wiki.
-Project's next ambition is to implement the Liquid State Machine (LSM).
-
+Backward compatibility is not guaranteed.
+Product documentation will be published on the associated wiki.
+Project's next step is to implement the Liquid State Machine (LSM).
 
 Contact:
 oldrich.kozelsky@email.cz

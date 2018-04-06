@@ -204,15 +204,15 @@ namespace RCNet.Neural.Network.FF
         }
 
         /// <summary>
-        /// Creates the copy of this network
+        /// Creates a deep copy of this network
         /// </summary>
-        public FeedForwardNetwork Clone()
+        public FeedForwardNetwork DeepClone()
         {
             FeedForwardNetwork clone = new FeedForwardNetwork(NumOfInputValues, NumOfOutputValues);
             clone._numOfNeurons = _numOfNeurons;
             foreach (Layer layer in LayerCollection)
             {
-                clone.LayerCollection.Add(layer.Clone());
+                clone.LayerCollection.Add(layer.DeepClone());
             }
             clone._flatWeights = (double[])_flatWeights.Clone();
             return clone;
@@ -404,7 +404,7 @@ namespace RCNet.Neural.Network.FF
             /// <summary>
             /// Creates a deep copy of this layer
             /// </summary>
-            internal Layer Clone()
+            internal Layer DeepClone()
             {
                 Layer clone = new Layer(_numOfLayerNeurons, Activation);
                 clone._numOfInputNodes = _numOfInputNodes;
@@ -509,8 +509,8 @@ namespace RCNet.Neural.Network.FF
         /// </param>
         public HiddenLayerSettings(XElement hiddenLayerElem)
         {
-            NumOfNeurons = int.Parse(hiddenLayerElem.Attribute("Neurons").Value);
-            ActivationType = ActivationFactory.ParseActivation(hiddenLayerElem.Attribute("Activation").Value);
+            NumOfNeurons = int.Parse(hiddenLayerElem.Attribute("neurons").Value);
+            ActivationType = ActivationFactory.ParseActivation(hiddenLayerElem.Attribute("activation").Value);
             return;
         }
 

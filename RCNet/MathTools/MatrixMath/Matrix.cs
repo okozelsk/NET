@@ -326,7 +326,7 @@ namespace RCNet.MathTools.MatrixMath
         /// <summary>
         /// Creates the deep copy
         /// </summary>
-        public Matrix Clone()
+        public Matrix DeepClone()
         {
             return new Matrix(this);
         }

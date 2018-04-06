@@ -76,7 +76,7 @@ namespace RCNet.MathTools
         /// <summary>
         /// Creates a deep copy of this instance
         /// </summary>
-        public WeightedAvg Clone()
+        public WeightedAvg DeepClone()
         {
             return new WeightedAvg(this);
         }

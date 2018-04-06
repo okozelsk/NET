@@ -152,13 +152,13 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
             switch (_settings.TopologyType)
             {
                 case AnalogReservoirSettings.ReservoirTopologyType.Random:
-                    SetupRandomTopology((AnalogReservoirSettings.RandomTopology)(_settings.TopologySettings), _settings.InternalWeightScale);
+                    SetupRandomTopology((AnalogReservoirSettings.RandomTopologySettings)(_settings.TopologySettings), _settings.InternalWeightScale);
                     break;
                 case AnalogReservoirSettings.ReservoirTopologyType.Ring:
-                    SetupRingTopology((AnalogReservoirSettings.RingTopology)(_settings.TopologySettings), _settings.InternalWeightScale);
+                    SetupRingTopology((AnalogReservoirSettings.RingTopologySettings)(_settings.TopologySettings), _settings.InternalWeightScale);
                     break;
                 case AnalogReservoirSettings.ReservoirTopologyType.DTT:
-                    SetupDTTTopology((AnalogReservoirSettings.DTTTopology)(_settings.TopologySettings), _settings.InternalWeightScale);
+                    SetupDTTTopology((AnalogReservoirSettings.DTTTopologySettings)(_settings.TopologySettings), _settings.InternalWeightScale);
                     break;
             }
             //Augmented states
@@ -365,7 +365,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
         /// </summary>
         /// <param name="cfg">Configuration parameters</param>
         /// <param name="weightScale">Scale of the connection weight</param>
-        private void SetupRandomTopology(AnalogReservoirSettings.RandomTopology cfg, double weightScale)
+        private void SetupRandomTopology(AnalogReservoirSettings.RandomTopologySettings cfg, double weightScale)
         {
             //Fully random connections setup
             SetRandomInterconnections(_neuronNeuronConnectionsCollection, _neurons.Length, cfg.ConnectionsDensity, weightScale, false);
@@ -377,7 +377,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
         /// </summary>
         /// <param name="cfg">Configuration parameters</param>
         /// <param name="weightScale">Scale of the connection weight</param>
-        private void SetupRingTopology(AnalogReservoirSettings.RingTopology cfg, double weightScale)
+        private void SetupRingTopology(AnalogReservoirSettings.RingTopologySettings cfg, double weightScale)
         {
             //Ring connections part
             SetRingConnections(weightScale, cfg.Bidirectional, false);
@@ -393,7 +393,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
         /// </summary>
         /// <param name="cfg">Configuration parameters</param>
         /// <param name="weightScale">Scale of the connection weight</param>
-        private void SetupDTTTopology(AnalogReservoirSettings.DTTTopology cfg, double weightScale)
+        private void SetupDTTTopology(AnalogReservoirSettings.DTTTopologySettings cfg, double weightScale)
         {
             //HTwist part (single direction ring)
             SetRingConnections(weightScale, false);

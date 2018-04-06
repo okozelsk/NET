@@ -58,15 +58,13 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
         /// </summary>
         public BasicStat OutputWeightsStat { get; set; }
         /// <summary>
-        /// Achieved combined error.
-        /// Formula for combined error calculation is Max(training error, testing error)
+        /// Achieved combined precision error.
         /// </summary>
-        public double CombinedError { get; set; }
+        public double CombinedPrecisionError { get; set; }
         /// <summary>
-        /// Achieved combined binary score.
-        /// Formula for combined binary score calculation is Min(training bin error stat.Score, testing bin error stat.Score)
+        /// Achieved combined binary error.
         /// </summary>
-        public double CombinedBinScore { get; set; }
+        public double CombinedBinaryError { get; set; }
 
         //Constructor
         /// <summary>
@@ -80,8 +78,8 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
             TestingErrorStat = null;
             TestingBinErrorStat = null;
             OutputWeightsStat = null;
-            CombinedError = -1;
-            CombinedBinScore = -1;
+            CombinedPrecisionError = -1;
+            CombinedBinaryError = -1;
             return;
         }
 
@@ -94,7 +92,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
             FFNet = null;
             if (source.FFNet != null)
             {
-                FFNet = source.FFNet.Clone();
+                FFNet = source.FFNet.DeepClone();
             }
             TrainingErrorStat = null;
             if (source.TrainingErrorStat != null)
@@ -121,8 +119,8 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
             {
                 OutputWeightsStat = new BasicStat(source.OutputWeightsStat);
             }
-            CombinedError = source.CombinedError;
-            CombinedBinScore = source.CombinedBinScore;
+            CombinedPrecisionError = source.CombinedPrecisionError;
+            CombinedBinaryError = source.CombinedBinaryError;
             return;
         }
 
@@ -146,13 +144,13 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
             switch(taskType)
             {
                 case CommonTypes.TaskType.Prediction:
-                    return (current.CombinedError < best.CombinedError);
+                    return (current.CombinedPrecisionError < best.CombinedPrecisionError);
                 case CommonTypes.TaskType.Classification:
-                    if(current.CombinedBinScore > best.CombinedBinScore)
+                    if(current.CombinedBinaryError < best.CombinedBinaryError)
                     {
                         return true;
                     }
-                    else if(current.CombinedBinScore == best.CombinedBinScore && current.CombinedError < best.CombinedError)
+                    else if(current.CombinedBinaryError == best.CombinedBinaryError && current.CombinedPrecisionError < best.CombinedPrecisionError)
                     {
                         return true;
                     }
@@ -250,23 +248,25 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
                     if(taskType == CommonTypes.TaskType.Classification)
                     {
                         currReadoutUnit.TrainingBinErrorStat = new BinErrStat(refBinDistr, trainingComputedOutputsCollection, trainingIdealOutputsCollection);
-                        currReadoutUnit.CombinedBinScore = currReadoutUnit.TrainingBinErrorStat.Score;
+                        //currReadoutUnit.CombinedBinaryError = currReadoutUnit.TrainingBinErrorStat.TotalErrStat.ArithAvg;
+                        currReadoutUnit.CombinedBinaryError = currReadoutUnit.TrainingBinErrorStat.ProportionalErr;
                     }
-                    currReadoutUnit.CombinedError = currReadoutUnit.TrainingErrorStat.ArithAvg;
+                    currReadoutUnit.CombinedPrecisionError = currReadoutUnit.TrainingErrorStat.ArithAvg;
                     if (testingPredictorsCollection != null && testingPredictorsCollection.Count > 0)
                     {
                         currReadoutUnit.TestingErrorStat = ffn.ComputeBatchErrorStat(testingPredictorsCollection, testingIdealOutputsCollection, out testingComputedOutputsCollection);
-                        currReadoutUnit.CombinedError = Math.Max(currReadoutUnit.CombinedError, currReadoutUnit.TestingErrorStat.ArithAvg);
+                        currReadoutUnit.CombinedPrecisionError = Math.Max(currReadoutUnit.CombinedPrecisionError, currReadoutUnit.TestingErrorStat.ArithAvg);
                         if (taskType == CommonTypes.TaskType.Classification)
                         {
                             currReadoutUnit.TestingBinErrorStat = new BinErrStat(refBinDistr, testingComputedOutputsCollection, testingIdealOutputsCollection);
-                            currReadoutUnit.CombinedBinScore = Math.Min(currReadoutUnit.CombinedBinScore, currReadoutUnit.TestingBinErrorStat.Score);
+                            //currReadoutUnit.CombinedBinaryError = Math.Max(currReadoutUnit.CombinedBinaryError, currReadoutUnit.TestingBinErrorStat.TotalErrStat.ArithAvg);
+                            currReadoutUnit.CombinedBinaryError = Math.Max(currReadoutUnit.CombinedBinaryError, currReadoutUnit.TestingBinErrorStat.ProportionalErr);
                         }
                     }
                     //Current results processing
                     bool better = false, stopTrainingCycle = false;
                     //Result first initialization
-                    if (bestReadoutUnit.CombinedError == -1)
+                    if (bestReadoutUnit.CombinedPrecisionError == -1)
                     {
                         //Adopt current regression results
                         bestReadoutUnit = currReadoutUnit.DeepClone();

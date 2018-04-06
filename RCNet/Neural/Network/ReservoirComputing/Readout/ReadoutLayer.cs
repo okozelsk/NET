@@ -95,11 +95,11 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
                 computedVectorCollection.Add(new double[idealOutputsCollection[0].Length]);
             }
             //Test dataset size
-            if (_settings.RatioOfTestData > MaxRatioOfTestData)
+            if (_settings.TestDataRatio > MaxRatioOfTestData)
             {
                 throw new ArgumentException($"Test dataset size is greater than {MaxRatioOfTestData.ToString(CultureInfo.InvariantCulture)}", "TestDataSetSize");
             }
-            int testDataSetLength = (int)Math.Round(idealOutputsCollection.Count * _settings.RatioOfTestData);
+            int testDataSetLength = (int)Math.Round(idealOutputsCollection.Count * _settings.TestDataRatio);
             if (testDataSetLength < MinLengthOfTestDataset)
             {
                 throw new ArgumentException($"Num of test samples is less than {MinLengthOfTestDataset.ToString(CultureInfo.InvariantCulture)}", "TestDataSetSize");

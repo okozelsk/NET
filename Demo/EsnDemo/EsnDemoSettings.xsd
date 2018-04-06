@@ -9,30 +9,30 @@
   <!-- SIMPLE TYPES -->
 
   <!-- COMPLEX TYPES -->
-  <!-- Sample data -->
-  <xs:complexType name="SampleData">
-    <xs:attribute type="xs:string" name="CsvDataFileName" use="required"/>
-    <xs:attribute type="xs:unsignedInt" name="NumOfBootSamples" use="optional" default="0"/>
-    <xs:attribute type="xs:boolean" name="SingleNormalizer" use="required"/>
-    <xs:attribute type="nst:UDouble" name="NormalizerReserveRatio" use="required"/>
+  <!-- Esn demo - sample data - configuration -->
+  <xs:complexType name="EsnDemoSampleDataCfgType">
+    <xs:attribute type="xs:string" name="fileName" use="required"/>
+    <xs:attribute type="xs:unsignedInt" name="bootSamples" use="optional" default="0"/>
+    <xs:attribute type="xs:boolean" name="singleNormalizer" use="required"/>
+    <xs:attribute type="nst:UDoubleType" name="normalizerReserve" use="required"/>
   </xs:complexType>
 
-  <!-- Case structure -->
-  <xs:complexType name="CaseStruct">
+  <!-- Esn demo - case -configuration -->
+  <xs:complexType name="EsnDemoCaseCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="SampleData" name="Samples" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="nst:EsnSettingsStruct" name="EsnSettings" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="EsnDemoSampleDataCfgType" name="samples" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="nst:EsnCfgType" name="esnCfg" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
-    <xs:attribute type="xs:string" name="Name" use="required"/>
+    <xs:attribute type="xs:string" name="name" use="required"/>
   </xs:complexType>
 
-  <!-- ESN demo settings xml document -->
-  <xs:element name="EsnDemoSettings">
+  <!-- Esn demo configuration xml document -->
+  <xs:element name="esnDemo">
     <xs:complexType>
       <xs:sequence minOccurs="1" maxOccurs="1">
-        <xs:element type="CaseStruct" name="DemoCase" minOccurs="1" maxOccurs="unbounded"/>
+        <xs:element type="EsnDemoCaseCfgType" name="case" minOccurs="1" maxOccurs="unbounded"/>
       </xs:sequence>
-      <xs:attribute type="xs:string" name="DataDir" use="required"/>
+      <xs:attribute type="xs:string" name="dataFolder" use="required"/>
     </xs:complexType>
   </xs:element>
 

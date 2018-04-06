@@ -115,47 +115,47 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
             validator.LoadXDocFromString(esnSettingsElem.ToString());
             //Parsing
             //Task type
-            TaskType = CommonTypes.ParseTaskType(esnSettingsElem.Attribute("TaskType").Value);
+            TaskType = CommonTypes.ParseTaskType(esnSettingsElem.Attribute("taskType").Value);
             //Randomizer seek
-            RandomizerSeek = int.Parse(esnSettingsElem.Attribute("RandomizerSeek").Value);
+            RandomizerSeek = int.Parse(esnSettingsElem.Attribute("randomizerSeek").Value);
             //Input fields
-            XElement inputFieldsElem = esnSettingsElem.Descendants("InputFields").First();
-            RouteInputToReadout = (inputFieldsElem.Attribute("RouteToReadout") == null) ? false : bool.Parse(inputFieldsElem.Attribute("RouteToReadout").Value);
+            XElement inputFieldsElem = esnSettingsElem.Descendants("inputFields").First();
+            RouteInputToReadout = (inputFieldsElem.Attribute("routeToReadout") == null) ? false : bool.Parse(inputFieldsElem.Attribute("routeToReadout").Value);
             if(TaskType == CommonTypes.TaskType.Classification && RouteInputToReadout)
             {
                 throw new Exception("For the classification task setup is not allowed to route input to readout because of possible variable length of the input.");
             }
             InputFieldNameCollection = new List<string>();
-            foreach(XElement inputFieldElem in inputFieldsElem.Descendants("Field"))
+            foreach(XElement inputFieldElem in inputFieldsElem.Descendants("field"))
             {
-                InputFieldNameCollection.Add(inputFieldElem.Attribute("Name").Value);
+                InputFieldNameCollection.Add(inputFieldElem.Attribute("name").Value);
             }
             //Collect available reservoir settings
             List<AnalogReservoirSettings> availableResSettings = new List<AnalogReservoirSettings>();
-            XElement reservoirSettingsContainerElem = esnSettingsElem.Descendants("ReservoirSettingsContainer").First();
-            foreach (XElement reservoirSettingsElem in reservoirSettingsContainerElem.Descendants("AnalogReservoirSettings"))
+            XElement reservoirSettingsContainerElem = esnSettingsElem.Descendants("reservoirCfgContainer").First();
+            foreach (XElement reservoirSettingsElem in reservoirSettingsContainerElem.Descendants("reservoirCfg"))
             {
                 availableResSettings.Add(new AnalogReservoirSettings(reservoirSettingsElem));
             }
             //Readout layer
-            XElement readoutLayerElem = esnSettingsElem.Descendants("ReadoutLayer").First();
+            XElement readoutLayerElem = esnSettingsElem.Descendants("readoutLayer").First();
             ReadoutLayerConfig = new ReadoutLayerSettings(readoutLayerElem);
             //Mapping of input fields to reservoir settings (future reservoir instance)
             ReservoirInstanceDefinitionCollection = new List<ReservoirInstanceDefinition>();
-            XElement reservoirInstancesContainerElem = esnSettingsElem.Descendants("ReservoirInstancesContainer").First();
-            foreach (XElement reservoirInstanceElem in reservoirInstancesContainerElem.Descendants("ReservoirInstance"))
+            XElement reservoirInstancesContainerElem = esnSettingsElem.Descendants("reservoirInstanceContainer").First();
+            foreach (XElement reservoirInstanceElem in reservoirInstancesContainerElem.Descendants("reservoirInstance"))
             {
                 ReservoirInstanceDefinition newMap = new ReservoirInstanceDefinition();
-                newMap.InstanceName = reservoirInstanceElem.Attribute("InstanceName").Value;
-                newMap.AugmentedStates = bool.Parse(reservoirInstanceElem.Attribute("AugmentedStates").Value);
+                newMap.InstanceName = reservoirInstanceElem.Attribute("name").Value;
+                newMap.AugmentedStates = bool.Parse(reservoirInstanceElem.Attribute("augmentedStates").Value);
                 //Select reservoir settings
                 newMap.ReservoirSettings = (from settings in availableResSettings
-                                            where settings.SettingsName == reservoirInstanceElem.Attribute("SettingsName").Value
+                                            where settings.SettingsName == reservoirInstanceElem.Attribute("cfg").Value
                                             select settings).First();
                 //Associated Esn input fields
-                foreach (XElement inputFieldElem in reservoirInstanceElem.Descendants("InputField"))
+                foreach (XElement inputFieldElem in reservoirInstanceElem.Descendants("inputField"))
                 {
-                    string inputFieldName = inputFieldElem.Attribute("Name").Value;
+                    string inputFieldName = inputFieldElem.Attribute("name").Value;
                     //Index in InputFieldsNames
                     int inputFieldIdx = InputFieldNameCollection.IndexOf(inputFieldName);
                     //Found?

@@ -73,7 +73,7 @@ namespace RCNet.Neural.Network.Data
             _inputFieldNameCollection = new List<string>();
             _outputFieldNameCollection = new List<string>();
             _outputFieldAdjustmentSwitches = null;
-            NormRange = normRange.Clone();
+            NormRange = normRange.DeepClone();
             ReserveRatio = normReserveRatio;
             InputStandardization = inputDataStandardization;
             OutputStandardization = outputDataStandardization;
