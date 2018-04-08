@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <esnDemo dataFolder=".\\Data">
   <!-- Modify/Tune existing or add your own cases -->
-  <case name="Classification task Libras Movement:  Single reservoir, Hidden layer, Resilient">
+  <case name="Classification task Libras Movement:  Single reservoir, Parallel Perceptron">
     <!-- Data converted from https://archive.ics.uci.edu/ml/datasets/Libras+Movement -->
     <samples fileName="LibrasMovement.csv" singleNormalizer="false" normalizerReserve="0.1"/>
     <esnCfg taskType="Classification" randomizerSeek="0">
@@ -48,7 +48,7 @@
       </readoutLayer>
     </esnCfg>
   </case>
-  <case name="Classification task Splice junctions gene sequence: Single reservoir, Hidden layer, Resilient">
+  <case name="Classification task Splice junctions gene sequence: Single reservoir, Feed Forward, Hidden layer, Resilient">
     <!-- Data converted from https://archive.ics.uci.edu/ml/datasets/Molecular+Biology+%28Splice-junction+Gene+Sequences%29 -->
     <samples fileName="SpliceJunctions.csv" singleNormalizer="false" normalizerReserve="0.1"/>
     <esnCfg taskType="Classification" randomizerSeek="0">
@@ -85,7 +85,7 @@
       </readoutLayer>
     </esnCfg>
   </case>
-  <case name="Prediction task High and Low prices of SPXL (Direxion Daily SP500 Bull 3X ETF): Reservoir instance for each input field, Resilient">
+  <case name="Prediction task High and Low prices of SPXL (Direxion Daily SP500 Bull 3X ETF): Reservoir instance for each input field, Feed Forward, Resilient">
     <!-- Data from https://finance.yahoo.com/quote/SPXL/history?p=SPXL -->
     <samples fileName="SPXL.csv" bootSamples="400" singleNormalizer="true" normalizerReserve="0.1"/>
     <esnCfg taskType="Prediction" randomizerSeek="0">
@@ -132,7 +132,7 @@
       </readoutLayer>
     </esnCfg>
   </case>
-  <case name="Prediction task High and Low prices of SPXL (Direxion Daily SP500 Bull 3X ETF): Single reservoir, Hidden layer, Resilient">
+  <case name="Prediction task High and Low prices of SPXL (Direxion Daily SP500 Bull 3X ETF): Single reservoir, Feed Forward, Hidden layer, Resilient">
     <!-- Data from https://finance.yahoo.com/quote/SPXL/history?p=SPXL -->
     <samples fileName="SPXL.csv" bootSamples="400" singleNormalizer="true" normalizerReserve="0.1"/>
     <esnCfg taskType="Prediction" randomizerSeek="0">
@@ -171,7 +171,7 @@
       </readoutLayer>
     </esnCfg>
   </case>
-  <case name="Prediction task High and Low prices of TTOO (T2 Biosystems, Inc.): Single reservoir, Linear regression">
+  <case name="Prediction task High and Low prices of TTOO (T2 Biosystems, Inc.): Single reservoir, Feed Forward, Linear regression">
     <!-- Data from https://finance.yahoo.com/quote/TTOO/history?p=TTOO -->
     <samples fileName="TTOO.csv" bootSamples="300" singleNormalizer="true" normalizerReserve="0.1"/>
     <esnCfg taskType="Prediction" randomizerSeek="0">
@@ -206,7 +206,7 @@
       </readoutLayer>
     </esnCfg>
   </case>
-  <case name="Prediction task Mackey Glass: Single reservoir, Linear regression">
+  <case name="Prediction task Mackey Glass: Single reservoir, Feed Forward, Linear regression">
     <samples fileName="MackeyGlass.csv" bootSamples="600" singleNormalizer="false" normalizerReserve="0.1"/>
     <esnCfg taskType="Prediction" randomizerSeek="0">
       <inputFields routeToReadout="false">
@@ -235,7 +235,7 @@
       </readoutLayer>
     </esnCfg>
   </case>
-  <case name="Prediction task Sinusoid: Single reservoir, Linear regression">
+  <case name="Prediction task Sinusoid: Single reservoir, Feed Forward, Linear regression">
     <samples fileName="Sinusoid.csv" bootSamples="400" singleNormalizer="false" normalizerReserve="0.1"/>
     <esnCfg taskType="Prediction" randomizerSeek="0">
       <inputFields routeToReadout="false">
