@@ -25,13 +25,17 @@ namespace RCNet.Neural.Network.Data
         /// </summary>
         public Interval NormRange { get; }
         /// <summary>
-        /// Reserve held by the normalizers to cover cases where future data exceeds a known range of sample data.
+        /// Reserve held by the input fields normalizers to cover cases where future data exceeds a known range of sample data.
         /// </summary>
-        public double ReserveRatio { get; }
+        public double InputNormReserveRatio { get; }
         /// <summary>
         /// Specifies whether to apply input data standardization
         /// </summary>
         public bool InputStandardization { get; }
+        /// <summary>
+        /// Reserve held by the output fields normalizers to cover cases where future data exceeds a known range of sample data.
+        /// </summary>
+        public double OutputNormReserveRatio { get; }
         /// <summary>
         /// Specifies whether to apply output data standardization
         /// </summary>
@@ -52,19 +56,23 @@ namespace RCNet.Neural.Network.Data
         /// <param name="normRange">
         /// Range of normalized values
         /// </param>
-        /// <param name="normReserveRatio">
-        /// Reserve held by the normalizers to cover cases where future data exceeds a known range of sample data.
+        /// <param name="inputNormReserveRatio">
+        /// Reserve held by the input fields normalizers to cover cases where future data exceeds a known range of sample data.
         /// </param>
         /// <param name="inputDataStandardization">
         /// Specifies whether to apply data standardization to input data
+        /// </param>
+        /// <param name="outputNormReserveRatio">
+        /// Reserve held by the output fields normalizers to cover cases where future data exceeds a known range of sample data.
         /// </param>
         /// <param name="outputDataStandardization">
         /// Specifies whether to apply data standardization to output data
         /// </param>
         public BundleNormalizer(Interval normRange,
-                                double normReserveRatio,
-                                bool inputDataStandardization = true,
-                                bool outputDataStandardization = true
+                                double inputNormReserveRatio,
+                                bool inputDataStandardization,
+                                double outputNormReserveRatio,
+                                bool outputDataStandardization
                                 )
         {
             _fieldTypeNormalizerCollection = new Dictionary<string, Normalizer>();
@@ -74,8 +82,9 @@ namespace RCNet.Neural.Network.Data
             _outputFieldNameCollection = new List<string>();
             _outputFieldAdjustmentSwitches = null;
             NormRange = normRange.DeepClone();
-            ReserveRatio = normReserveRatio;
+            InputNormReserveRatio = inputNormReserveRatio;
             InputStandardization = inputDataStandardization;
+            OutputNormReserveRatio = outputNormReserveRatio;
             OutputStandardization = outputDataStandardization;
             InputFieldNormalizerRefCollection = new List<Normalizer>();
             OutputFieldNormalizerRefCollection = new List<Normalizer>();
@@ -150,7 +159,7 @@ namespace RCNet.Neural.Network.Data
             //Instantiate a normalizer if necessary
             if(_fieldTypeNormalizerCollection[type] == null)
             {
-                _fieldTypeNormalizerCollection[type] = new Normalizer(NormRange, ReserveRatio, InputStandardization);
+                _fieldTypeNormalizerCollection[type] = new Normalizer(NormRange, InputNormReserveRatio, InputStandardization);
             }
             InputFieldNormalizerRefCollection.Add(_fieldTypeNormalizerCollection[type]);
             _inputFieldNameCollection.Add(name);
@@ -179,7 +188,7 @@ namespace RCNet.Neural.Network.Data
             //Instantiate a normalizer if necessary
             if (_fieldTypeNormalizerCollection[type] == null)
             {
-                _fieldTypeNormalizerCollection[type] = new Normalizer(NormRange, ReserveRatio, OutputStandardization);
+                _fieldTypeNormalizerCollection[type] = new Normalizer(NormRange, OutputNormReserveRatio, OutputStandardization);
             }
             OutputFieldNormalizerRefCollection.Add(_fieldTypeNormalizerCollection[type]);
             _outputFieldNameCollection.Add(name);
@@ -466,7 +475,7 @@ namespace RCNet.Neural.Network.Data
             CheckStructure();
             if (vectorCollection[0].Length != _fieldNameTypeCollection.Count)
             {
-                throw new ArgumentException($"Inconsistent number of fields in vectorCollection ({vectorCollection[0].Length}) and number of defined fields ({_fieldNameTypeCollection.Count}).", "vectorCollection");
+                throw new ArgumentException($"Inconsistent number of fields ({vectorCollection[0].Length}) in vectorCollection and number of defined fields ({_fieldNameTypeCollection.Count}).", "vectorCollection");
             }
             //Input field indexes
             int[] inputFieldIdxs = new int[_inputFieldNameCollection.Count];

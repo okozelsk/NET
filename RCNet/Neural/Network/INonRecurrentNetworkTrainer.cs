@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RCNet.Neural.Network.FF
+namespace RCNet.Neural.Network
 {
-    interface IFeedForwardNetworkTrainer
+    interface INonRecurrentNetworkTrainer
     {
         //Properties
         /// <summary>
@@ -18,15 +18,15 @@ namespace RCNet.Neural.Network.FF
         /// </summary>
         int Epoch { get; }
         /// <summary>
-        /// FF network beeing trained
+        /// Network beeing trained
         /// </summary>
-        FeedForwardNetwork Net { get; }
+        INonRecurrentNetwork Net { get; }
 
         /// <summary>
         /// Performs training iteration.
         /// </summary>
         void Iteration();
 
-    }//IFeedForwardNetworkTrainer
+    }//INonRecurrentNetworkTrainer
 
 }//Namespace

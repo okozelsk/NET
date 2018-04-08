@@ -386,6 +386,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
                 InternalWeightScale != cmpSettings.InternalWeightScale ||
                 BiasScale != cmpSettings.BiasScale ||
                 TopologyType != cmpSettings.TopologyType ||
+                !TopologySettings.Equals(cmpSettings.TopologySettings) ||
                 RetainmentNeuronsFeature != cmpSettings.RetainmentNeuronsFeature ||
                 RetainmentNeuronsDensity != cmpSettings.RetainmentNeuronsDensity ||
                 RetainmentMinRate != cmpSettings.RetainmentMinRate ||
@@ -401,18 +402,6 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
                 )
             {
                 return false;
-            }
-            switch (TopologyType)
-            {
-                case ReservoirTopologyType.Random:
-                    if (!((RandomTopologySettings)TopologySettings).Equals((RandomTopologySettings)cmpSettings.TopologySettings)) return false;
-                    break;
-                case ReservoirTopologyType.Ring:
-                    if (!((RingTopologySettings)TopologySettings).Equals((RingTopologySettings)cmpSettings.TopologySettings)) return false;
-                    break;
-                case ReservoirTopologyType.DTT:
-                    if (!((DTTTopologySettings)TopologySettings).Equals((DTTTopologySettings)cmpSettings.TopologySettings)) return false;
-                    break;
             }
             return true;
         }

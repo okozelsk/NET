@@ -70,7 +70,6 @@
     <Compile Include="Neural\Activation\IActivationFunction.cs" />
     <Compile Include="Neural\Activation\IdentityAF.cs" />
     <Compile Include="Neural\Activation\InverseSquareRootUnitAF.cs" />
-    <Compile Include="Neural\Activation\SigmoidAF.cs" />
     <Compile Include="Neural\Activation\SinusoidAF.cs" />
     <Compile Include="Neural\Activation\TanhAF.cs" />
     <Compile Include="Neural\CommonTypes.cs" />
@@ -78,13 +77,18 @@
     <Compile Include="Neural\Network\Data\ClassificationBundle.cs" />
     <Compile Include="Neural\Network\Data\ValidationBundle.cs" />
     <Compile Include="Neural\Network\Data\PredictionBundle.cs" />
+    <Compile Include="Neural\Network\PP\ParallelPerceptronSettings.cs" />
+    <Compile Include="Neural\Network\INonRecurrentNetwork.cs" />
+    <Compile Include="Neural\Network\PP\ParallelPerceptron.cs" />
+    <Compile Include="Neural\Network\PP\ParallelPerceptronTrainer.cs" />
     <Compile Include="Neural\Network\ReservoirComputing\EchoState\AnalogNeuron.cs" />
     <Compile Include="Neural\Network\ReservoirComputing\EchoState\AnalogReservoir.cs" />
+    <Compile Include="Neural\Network\FF\FeedForwardNetworkSettings.cs" />
     <Compile Include="Neural\Network\ReservoirComputing\EchoState\AnalogReservoirSettings.cs" />
     <Compile Include="Neural\Network\ReservoirComputing\EchoState\Esn.cs" />
     <Compile Include="Neural\Network\ReservoirComputing\EchoState\EsnSettings.cs" />
     <Compile Include="Neural\Network\FF\FeedForwardNetwork.cs" />
-    <Compile Include="Neural\Network\FF\IFeedForwardNetworkTrainer.cs" />
+    <Compile Include="Neural\Network\INonRecurrentNetworkTrainer.cs" />
     <Compile Include="Neural\Network\FF\LinRegrTrainer.cs" />
     <Compile Include="Neural\Network\FF\RPropTrainer.cs" />
     <Compile Include="Neural\Network\ReservoirComputing\Readout\ReadoutLayerSettings.cs" />
@@ -105,6 +109,12 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Neural\Network\ReservoirComputing\Readout\ReadoutLayerSettings.xsd" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Neural\Network\FF\FeedForwardNetworkSettings.xsd" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Neural\Network\PP\ParallelPerceptronSettings.xsd" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

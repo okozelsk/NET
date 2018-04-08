@@ -43,7 +43,7 @@ namespace RCNet.Neural.Network.FF
     /// FF network has to have only output layer with the Identity activation.
     /// </summary>
     [Serializable]
-    public class LinRegrTrainer : IFeedForwardNetworkTrainer
+    public class LinRegrTrainer : INonRecurrentNetworkTrainer
     {
         //Attributes
         private LinRegrParameters _parameters;
@@ -139,7 +139,7 @@ namespace RCNet.Neural.Network.FF
         /// <summary>
         /// FF network beeing trained
         /// </summary>
-        public FeedForwardNetwork Net { get { return _net; } }
+        public INonRecurrentNetwork Net { get { return _net; } }
 
         //Methods
         private Matrix PreparePredictors(double noiseIntensity)

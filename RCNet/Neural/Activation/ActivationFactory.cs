@@ -25,8 +25,6 @@ namespace RCNet.Neural.Activation
             TanH,
             /// <summary>"Inverse Square Root Unit" activation function</summary>
             ISRU,
-            /// <summary>"Sigmoid" (aka Logistic, Softstep) activation function</summary>
-            Sigmoid,
             /// <summary>"Gaussian" activation function</summary>
             Gaussian
         };
@@ -52,7 +50,6 @@ namespace RCNet.Neural.Activation
                 case ActivationType.Elliot: return new ElliotAF((double.IsNaN(p1) ? 1 : p1));
                 case ActivationType.TanH: return new TanhAF();
                 case ActivationType.ISRU: return new InverseSquareRootUnitAF((double.IsNaN(p1) ? 1 : p1));
-                case ActivationType.Sigmoid: return new SigmoidAF();
                 case ActivationType.Gaussian: return new GaussianAF();
                 default:
                     throw new ArgumentException($"Unsupported activation function type: {type}");
@@ -73,7 +70,6 @@ namespace RCNet.Neural.Activation
                 case "ELLIOT": return ActivationType.Elliot;
                 case "TANH": return ActivationType.TanH;
                 case "ISRU": return ActivationType.ISRU;
-                case "SIGMOID": return ActivationType.Sigmoid;
                 case "GAUSSIAN": return ActivationType.Gaussian;
                 default:
                     throw new ArgumentException($"Unsupported activation function code: {code}");

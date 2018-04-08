@@ -6,11 +6,12 @@ using System.Threading.Tasks;
 using RCNet.MathTools;
 using RCNet.Neural.Activation;
 using RCNet.Neural.Network.FF;
+using RCNet.Neural.Network.PP;
 
 namespace RCNet.Neural.Network.ReservoirComputing.Readout
 {
     /// <summary>
-    /// Contains the trained feed forward network associated with output field and related
+    /// Contains the trained unit associated with output field and related
     /// important error statistics.
     /// </summary>
     [Serializable]
@@ -20,7 +21,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
         /// <summary>
         /// This is the control function of the regression process and is called
         /// after the completion of each regression training epoch for the readout unit.
-        /// The goal of the regression process is to train a feed forward network
+        /// The goal of the regression process is to train a unit
         /// that will give good results both on the training data and the test data.
         /// RegressionControlInArgs object passed to the callback function contains the best error statistics so far
         /// and the latest statistics. The primary purpose of this function is to decide whether the latest statistics
@@ -34,9 +35,9 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
 
         //Attribute properties
         /// <summary>
-        /// Trained feed forward network
+        /// Trained network
         /// </summary>
-        public FeedForwardNetwork FFNet { get; set; }
+        public INonRecurrentNetwork Network { get; set; }
         /// <summary>
         /// Training error statistics
         /// </summary>
@@ -54,7 +55,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
         /// </summary>
         public BinErrStat TestingBinErrorStat { get; set; }
         /// <summary>
-        /// Statistics of the FF network weights
+        /// Statistics of the network weights
         /// </summary>
         public BasicStat OutputWeightsStat { get; set; }
         /// <summary>
@@ -72,7 +73,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
         /// </summary>
         public ReadoutUnit()
         {
-            FFNet = null;
+            Network = null;
             TrainingErrorStat = null;
             TrainingBinErrorStat = null;
             TestingErrorStat = null;
@@ -89,10 +90,10 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
         /// <param name="source">Source instance</param>
         public ReadoutUnit(ReadoutUnit source)
         {
-            FFNet = null;
-            if (source.FFNet != null)
+            Network = null;
+            if (source.Network != null)
             {
-                FFNet = source.FFNet.DeepClone();
+                Network = source.Network.DeepClone();
             }
             TrainingErrorStat = null;
             if (source.TrainingErrorStat != null)
@@ -161,6 +162,42 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
             return false;
         }
 
+        private static void CreateNetAndTreainer(ReadoutLayerSettings.ReadoutUnitSettings settings,
+                                                 List<double[]> trainingPredictorsCollection,
+                                                 List<double[]> trainingIdealOutputsCollection,
+                                                 Random rand,
+                                                 out INonRecurrentNetwork net,
+                                                 out INonRecurrentNetworkTrainer trainer
+                                                 )
+        {
+            if(settings.NetType == ReadoutLayerSettings.ReadoutUnitSettings.ReadoutUnitNetworkType.FF)
+            {
+                FeedForwardNetworkSettings netCfg = (FeedForwardNetworkSettings)settings.NetSettings;
+                FeedForwardNetwork ffn = new FeedForwardNetwork(trainingPredictorsCollection[0].Length, 1, netCfg);
+                net = ffn;
+                switch (netCfg.RegressionMethod)
+                {
+                    case FeedForwardNetworkSettings.TrainingMethodType.Linear:
+                        trainer = new LinRegrTrainer(ffn, trainingPredictorsCollection, trainingIdealOutputsCollection, settings.RegressionAttemptEpochs, rand);
+                        break;
+                    case FeedForwardNetworkSettings.TrainingMethodType.Resilient:
+                        trainer = new RPropTrainer(ffn, trainingPredictorsCollection, trainingIdealOutputsCollection);
+                        break;
+                    default:
+                        throw new ArgumentException($"Not supported regression method {netCfg.RegressionMethod}");
+                }
+            }
+            else
+            {
+                ParallelPerceptronSettings netCfg = (ParallelPerceptronSettings)settings.NetSettings;
+                ParallelPerceptron ppn = new ParallelPerceptron(trainingPredictorsCollection[0].Length, netCfg);
+                net = ppn;
+                trainer = new ParallelPerceptronTrainer(ppn, trainingPredictorsCollection, trainingIdealOutputsCollection);
+            }
+            net.RandomizeWeights(rand);
+            return;
+        }
+
         /// <summary>
         /// Prepares trained readout unit for specified output field and task.
         /// </summary>
@@ -175,12 +212,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
         /// <param name="testingPredictorsCollection">Collection of the predictors for testing</param>
         /// <param name="testingIdealOutputsCollection">Collection of ideal outputs for testing. Note that the double array always has only one member.</param>
         /// <param name="rand">Random object to be used</param>
-        /// <param name="hiddenLayerCollection">Collection of output FF network hidden layer settings</param>
-        /// <param name="outputNeuronActivation">Activation type of the FF output layer neuron</param>
-        /// <param name="regressionMethod">Regression method to be used</param>
-        /// <param name="regrAttempts">Number of regression attempts</param>
-        /// <param name="attemptEpochs">Number of epochs for each regression attempt</param>
-        /// <param name="stopMSE">The achieved training MSE when to terminate regression attempt</param>
+        /// <param name="readoutUnitSettings">Readout unit configuration parameters</param>
         /// <param name="controller">Regression controller</param>
         /// <param name="controllerUserObject">An user object to be passed to controller</param>
         /// <returns>Prepared readout unit</returns>
@@ -195,12 +227,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
                                                 List<double[]> testingPredictorsCollection,
                                                 List<double[]> testingIdealOutputsCollection,
                                                 Random rand,
-                                                List<HiddenLayerSettings> hiddenLayerCollection,
-                                                ActivationFactory.ActivationType outputNeuronActivation,
-                                                TrainingMethodType regressionMethod,
-                                                int regrAttempts,
-                                                int attemptEpochs,
-                                                double stopMSE,
+                                                ReadoutLayerSettings.ReadoutUnitSettings readoutUnitSettings,
                                                 RegressionCallbackDelegate controller = null,
                                                 Object controllerUserObject = null
                                                 )
@@ -208,43 +235,29 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
             ReadoutUnit bestReadoutUnit = new ReadoutUnit();
             //Regression attempts
             bool stopRegression = false;
-            for (int regrAttemptNumber = 1; regrAttemptNumber <= regrAttempts; regrAttemptNumber++)
+            for (int regrAttemptNumber = 1; regrAttemptNumber <= readoutUnitSettings.RegressionAttempts; regrAttemptNumber++)
             {
-                //Create FF network
-                FeedForwardNetwork ffn = new FeedForwardNetwork(trainingPredictorsCollection[0].Length, 1);
-                for (int i = 0; i < hiddenLayerCollection.Count; i++)
-                {
-                    ffn.AddLayer(hiddenLayerCollection[i].NumOfNeurons,
-                                 ActivationFactory.CreateActivationFunction(hiddenLayerCollection[i].ActivationType)
-                                 );
-                }
-                ffn.FinalizeStructure(ActivationFactory.CreateActivationFunction(outputNeuronActivation));
-                //Reset feed forward network's weights to random values
-                ffn.RandomizeWeights(rand);
-                //Create trainer object
-                IFeedForwardNetworkTrainer trainer = null;
-                switch (regressionMethod)
-                {
-                    case TrainingMethodType.Linear:
-                        trainer = new LinRegrTrainer(ffn, trainingPredictorsCollection, trainingIdealOutputsCollection, attemptEpochs, rand);
-                        break;
-                    case TrainingMethodType.Resilient:
-                        trainer = new RPropTrainer(ffn, trainingPredictorsCollection, trainingIdealOutputsCollection);
-                        break;
-                    default:
-                        throw new ArgumentException($"Not supported regression method {regressionMethod}");
-                }
+                //Create network and trainer
+                INonRecurrentNetwork net;
+                INonRecurrentNetworkTrainer trainer;
+                CreateNetAndTreainer(readoutUnitSettings,
+                                     trainingPredictorsCollection,
+                                     trainingIdealOutputsCollection,
+                                     rand,
+                                     out net,
+                                     out trainer
+                                     );
                 //Reference binary distribution
                 //Iterate training cycles
-                for (int epoch = 1; epoch <= attemptEpochs; epoch++)
+                for (int epoch = 1; epoch <= readoutUnitSettings.RegressionAttemptEpochs; epoch++)
                 {
                     trainer.Iteration();
                     List<double[]> trainingComputedOutputsCollection = null;
                     List<double[]> testingComputedOutputsCollection = null;
                     //Compute current error statistics after training iteration
                     ReadoutUnit currReadoutUnit = new ReadoutUnit();
-                    currReadoutUnit.FFNet = ffn;
-                    currReadoutUnit.TrainingErrorStat = ffn.ComputeBatchErrorStat(trainingPredictorsCollection, trainingIdealOutputsCollection, out trainingComputedOutputsCollection);
+                    currReadoutUnit.Network = net;
+                    currReadoutUnit.TrainingErrorStat = net.ComputeBatchErrorStat(trainingPredictorsCollection, trainingIdealOutputsCollection, out trainingComputedOutputsCollection);
                     if(taskType == CommonTypes.TaskType.Classification)
                     {
                         currReadoutUnit.TrainingBinErrorStat = new BinErrStat(refBinDistr, trainingComputedOutputsCollection, trainingIdealOutputsCollection);
@@ -254,7 +267,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
                     currReadoutUnit.CombinedPrecisionError = currReadoutUnit.TrainingErrorStat.ArithAvg;
                     if (testingPredictorsCollection != null && testingPredictorsCollection.Count > 0)
                     {
-                        currReadoutUnit.TestingErrorStat = ffn.ComputeBatchErrorStat(testingPredictorsCollection, testingIdealOutputsCollection, out testingComputedOutputsCollection);
+                        currReadoutUnit.TestingErrorStat = net.ComputeBatchErrorStat(testingPredictorsCollection, testingIdealOutputsCollection, out testingComputedOutputsCollection);
                         currReadoutUnit.CombinedPrecisionError = Math.Max(currReadoutUnit.CombinedPrecisionError, currReadoutUnit.TestingErrorStat.ArithAvg);
                         if (taskType == CommonTypes.TaskType.Classification)
                         {
@@ -283,9 +296,9 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
                         cbIn.FoldNum = foldNum;
                         cbIn.NumOfFolds = numOfFolds;
                         cbIn.RegrAttemptNumber = regrAttemptNumber;
-                        cbIn.RegrMaxAttempts = regrAttempts;
+                        cbIn.RegrMaxAttempts = readoutUnitSettings.RegressionAttempts;
                         cbIn.Epoch = epoch;
-                        cbIn.MaxEpochs = attemptEpochs;
+                        cbIn.MaxEpochs = readoutUnitSettings.RegressionAttemptEpochs;
                         cbIn.TrainingPredictorsCollection = trainingPredictorsCollection;
                         cbIn.TrainingIdealOutputsCollection = trainingIdealOutputsCollection;
                         cbIn.TrainingComputedOutputsCollection = trainingComputedOutputsCollection;
@@ -312,7 +325,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
                         bestReadoutUnit = currReadoutUnit.DeepClone();
                     }
                     //Training stop conditions
-                    if (currReadoutUnit.TrainingErrorStat.RootMeanSquare <= stopMSE ||
+                    if (currReadoutUnit.CombinedPrecisionError <= readoutUnitSettings.RegressionAttemptStopMSE ||
                         stopTrainingCycle ||
                         stopRegression
                         )
@@ -326,8 +339,8 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
                     break;
                 }
             }
-            //Create statistics of the best feed forward network weights
-            bestReadoutUnit.OutputWeightsStat = bestReadoutUnit.FFNet.ComputeWeightsStat();
+            //Create statistics of the best network weights
+            bestReadoutUnit.OutputWeightsStat = bestReadoutUnit.Network.ComputeWeightsStat();
             return bestReadoutUnit;
         }
 
@@ -401,12 +414,12 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
             /// </summary>
             public List<double[]> TestingComputedOutputsCollection { get; set; } = null;
             /// <summary>
-            /// Contains the current feed forward network and related
+            /// Contains the current network and related
             /// important error statistics.
             /// </summary>
             public ReadoutUnit CurrReadoutUnit { get; set; } = null;
             /// <summary>
-            /// Contains the best feed forward network for now and related
+            /// Contains the best network for now and related
             /// important error statistics.
             /// </summary>
             public ReadoutUnit BestReadoutUnit { get; set; } = null;

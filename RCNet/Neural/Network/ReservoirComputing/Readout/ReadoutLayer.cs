@@ -128,7 +128,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
                 if (_taskType == CommonTypes.TaskType.Classification)
                 {
                     //Reference binary distribution is relevant only for classification task
-                    refBinDistr = new BinDistribution(ActivationFactory.CreateActivationFunction(_settings.OutputNeuronActivation).Range.Mid);
+                    refBinDistr = new BinDistribution();
                 }
                 //Transformation to a single value vectors and data analysis
                 foreach (double[] idealVector in shuffledData.OutputVectorCollection)
@@ -187,12 +187,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
                                                                                             subBundleCollection[foldIdx].InputVectorCollection,
                                                                                             subBundleCollection[foldIdx].OutputVectorCollection,
                                                                                             _rand,
-                                                                                            _settings.HiddenLayerCollection,
-                                                                                            _settings.OutputNeuronActivation,
-                                                                                            _settings.RegressionMethod,
-                                                                                            _settings.RegressionAttempts,
-                                                                                            _settings.RegressionAttemptEpochs,
-                                                                                            _settings.RegressionAttemptStopMSE,
+                                                                                            _settings.ReadoutUnitCfg,
                                                                                             regressionController,
                                                                                             regressionControllerData
                                                                                             );
@@ -236,7 +231,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
             WeightedAvg wAvg = new WeightedAvg();
             for (int readoutUnitIdx = 0; readoutUnitIdx < _clusterCollection[clusterIdx].Length; readoutUnitIdx++)
             {
-                double[] outputValue = _clusterCollection[clusterIdx][readoutUnitIdx].FFNet.Compute(predictors);
+                double[] outputValue = _clusterCollection[clusterIdx][readoutUnitIdx].Network.Compute(predictors);
                 double weight = _clusterCollection[clusterIdx][readoutUnitIdx].TrainingErrorStat.NumOfSamples;
                 if(_clusterCollection[clusterIdx][readoutUnitIdx].TestingErrorStat != null)
                 {

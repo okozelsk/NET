@@ -5,9 +5,8 @@ using System.Globalization;
 using System.Xml.Linq;
 using System.Reflection;
 using System.IO;
-using RCNet.Extensions;
-using RCNet.Neural.Activation;
 using RCNet.Neural.Network.FF;
+using RCNet.Neural.Network.PP;
 using RCNet.XmlTools;
 
 namespace RCNet.Neural.Network.ReservoirComputing.Readout
@@ -19,6 +18,9 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
     [Serializable]
     public class ReadoutLayerSettings
     {
+        //Constants
+
+        //Attributes
         /// <summary>
         /// Parameter specifies how big part of available samples will be used for testing.
         /// </summary>
@@ -29,41 +31,14 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
         /// (x-fold cross-validation)
         /// https://en.wikipedia.org/wiki/Cross-validation_(statistics)
         /// Parameter has two options.
-        /// LE 0 - means auto setup to achieve full cross-validation if it is possible (related to specified RatioOfTestData)
+        /// LE 0 - means auto setup to achieve full cross-validation if it is possible (related to specified TestDataRatio)
         /// GT 0 - means exact number of the folds
         /// </summary>
         public int NumOfFolds { get; set; }
         /// <summary>
-        /// Collection of hidden layer definitions. Hidden layers are optional and can be used in the output
-        /// feed forward network that process predictors from reservoirs and computes output field
-        /// value (for each output field is instantiated and trained at least one feed forward network - readout unit).
+        /// Readout unit configuration
         /// </summary>
-        public List<HiddenLayerSettings> HiddenLayerCollection { get; set; }
-        /// <summary>
-        /// Activation function of the output neuron calculates the output value.
-        /// This neuron is the output layer of the feed forward network processing predictors
-        /// from the reservoirs (for each output field is instantiated and trained at least
-        /// one feed forward network - readout unit).
-        /// </summary>
-        public ActivationFactory.ActivationType OutputNeuronActivation { get; set; }
-        /// <summary>
-        /// The parameter specifies what method will be used for training
-        /// the output feed forward networks.
-        /// </summary>
-        public TrainingMethodType RegressionMethod { get; set; }
-        /// <summary>
-        /// Number of regression attempts.
-        /// </summary>
-        public int RegressionAttempts { get; set; }
-        /// <summary>
-        /// Number of iterations (epochs) during regression attempt.
-        /// </summary>
-        public int RegressionAttemptEpochs { get; set; }
-        /// <summary>
-        /// Regression attempt will be stopped after the specified
-        /// MSE on training dataset will be reached.
-        /// </summary>
-        public double RegressionAttemptStopMSE { get; set; }
+        public ReadoutUnitSettings ReadoutUnitCfg { get; set; }
         /// <summary>
         /// The collection of output field names in order of how they will be computed.
         /// </summary>
@@ -78,12 +53,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
             //Default settings
             TestDataRatio = 0;
             NumOfFolds = 0;
-            HiddenLayerCollection = new List<HiddenLayerSettings>();
-            OutputNeuronActivation = ActivationFactory.ActivationType.Identity;
-            RegressionMethod = TrainingMethodType.Linear;
-            RegressionAttempts = 0;
-            RegressionAttemptEpochs = 0;
-            RegressionAttemptStopMSE = 0;
+            ReadoutUnitCfg = new ReadoutUnitSettings();
             OutputFieldNameCollection = new List<string>();
             return;
         }
@@ -97,16 +67,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
             //Copy
             TestDataRatio = source.TestDataRatio;
             NumOfFolds = source.NumOfFolds;
-            HiddenLayerCollection = new List<HiddenLayerSettings>(source.HiddenLayerCollection.Count);
-            foreach (HiddenLayerSettings hiddenLayerSettings in source.HiddenLayerCollection)
-            {
-                HiddenLayerCollection.Add(hiddenLayerSettings.DeepClone());
-            }
-            OutputNeuronActivation = source.OutputNeuronActivation;
-            RegressionMethod = source.RegressionMethod;
-            RegressionAttempts = source.RegressionAttempts;
-            RegressionAttemptEpochs = source.RegressionAttemptEpochs;
-            RegressionAttemptStopMSE = source.RegressionAttemptStopMSE;
+            ReadoutUnitCfg = source.ReadoutUnitCfg.DeepClone();
             OutputFieldNameCollection = new List<string>(source.OutputFieldNameCollection);
             return;
         }
@@ -137,19 +98,11 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
             //Parsing
             TestDataRatio = double.Parse(readoutLayerSettingsElem.Attribute("testDataRatio").Value, CultureInfo.InvariantCulture);
             NumOfFolds = readoutLayerSettingsElem.Attribute("folds").Value == "Auto" ? 0 : int.Parse(readoutLayerSettingsElem.Attribute("folds").Value);
-            //Hidden layers
-            HiddenLayerCollection = new List<HiddenLayerSettings>();
-            foreach (XElement hiddenLayerElem in readoutLayerSettingsElem.Descendants("hiddenLayer"))
-            {
-                HiddenLayerCollection.Add(new HiddenLayerSettings(hiddenLayerElem));
-            }
+            //Readout unit
+            XElement readoutUnitElem = readoutLayerSettingsElem.Descendants("readoutUnit").First();
+            ReadoutUnitCfg = new ReadoutUnitSettings(readoutUnitElem);
             //Output fields
             XElement outputFieldsElem = readoutLayerSettingsElem.Descendants("outputFields").First();
-            OutputNeuronActivation = ActivationFactory.ParseActivation(outputFieldsElem.Attribute("activation").Value);
-            RegressionMethod = FeedForwardNetwork.ParseTrainingMethodType(outputFieldsElem.Attribute("regressionMethod").Value);
-            RegressionAttempts = int.Parse(outputFieldsElem.Attribute("attempts").Value);
-            RegressionAttemptEpochs = int.Parse(outputFieldsElem.Attribute("attemptEpochs").Value);
-            RegressionAttemptStopMSE = double.Parse(outputFieldsElem.Attribute("attemptStopMSE").Value, CultureInfo.InvariantCulture);
             OutputFieldNameCollection = new List<string>();
             foreach (XElement outputFieldElem in outputFieldsElem.Descendants("field"))
             {
@@ -168,19 +121,15 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
             ReadoutLayerSettings cmpSettings = obj as ReadoutLayerSettings;
             if (TestDataRatio != cmpSettings.TestDataRatio ||
                 NumOfFolds != cmpSettings.NumOfFolds ||
-                OutputNeuronActivation != cmpSettings.OutputNeuronActivation ||
-                RegressionMethod != cmpSettings.RegressionMethod ||
-                RegressionAttempts != cmpSettings.RegressionAttempts ||
-                RegressionAttemptEpochs != cmpSettings.RegressionAttemptEpochs ||
-                RegressionAttemptStopMSE != cmpSettings.RegressionAttemptStopMSE ||
-                HiddenLayerCollection.Count != cmpSettings.HiddenLayerCollection.Count
+                !ReadoutUnitCfg.Equals(cmpSettings.ReadoutUnitCfg) ||
+                OutputFieldNameCollection.Count != cmpSettings.OutputFieldNameCollection.Count
                 )
             {
                 return false;
             }
-            for (int i = 0; i < HiddenLayerCollection.Count; i++)
+            for (int i = 0; i < OutputFieldNameCollection.Count; i++)
             {
-                if (!HiddenLayerCollection[i].Equals(cmpSettings.HiddenLayerCollection[i]))
+                if(OutputFieldNameCollection[i] != cmpSettings.OutputFieldNameCollection[i])
                 {
                     return false;
                 }
@@ -204,6 +153,171 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
             ReadoutLayerSettings clone = new ReadoutLayerSettings(this);
             return clone;
         }
+
+        //Inner classes
+        /// <summary>
+        /// Readout unit settings
+        /// </summary>
+        [Serializable]
+        public class ReadoutUnitSettings
+        {
+            //Constants
+            /// <summary>
+            /// Supported types of readout unit networks
+            /// </summary>
+            public enum ReadoutUnitNetworkType
+            {
+                /// <summary>
+                /// Readout unit with feed forward network
+                /// </summary>
+                FF,
+                /// <summary>
+                /// Readout unit with parallel perceptron
+                /// </summary>
+                PP
+            }//ReadoutUnitNetworkType
+
+            //Attributes
+            /// <summary>
+            /// Type of readout unit network
+            /// </summary>
+            public ReadoutUnitNetworkType NetType { get; set; }
+            /// <summary>
+            /// Settings of readout unit network
+            /// </summary>
+            public object NetSettings { get; set; }
+            /// <summary>
+            /// Number of regression attempts.
+            /// </summary>
+            public int RegressionAttempts { get; set; }
+            /// <summary>
+            /// Number of iterations (epochs) during regression attempt.
+            /// </summary>
+            public int RegressionAttemptEpochs { get; set; }
+            /// <summary>
+            /// Regression attempt will be stopped after the specified
+            /// MSE on training dataset will be reached.
+            /// </summary>
+            public double RegressionAttemptStopMSE { get; set; }
+
+            //Constructors
+            /// <summary>
+            /// Creates an unitialized instance
+            /// </summary>
+            public ReadoutUnitSettings()
+            {
+                NetType = ReadoutUnitNetworkType.FF;
+                NetSettings = null;
+                RegressionAttempts = 0;
+                RegressionAttemptEpochs = 0;
+                RegressionAttemptStopMSE = 0;
+                return;
+            }
+
+            /// <summary>
+            /// Copy constructor
+            /// </summary>
+            /// <param name="source">Source instance</param>
+            public ReadoutUnitSettings(ReadoutUnitSettings source)
+            {
+                NetType = source.NetType;
+                NetSettings = null;
+                if (source.NetSettings != null)
+                {
+                    if (source.NetSettings.GetType() == typeof(FeedForwardNetworkSettings))
+                    {
+                        NetSettings = ((FeedForwardNetworkSettings)source.NetSettings).DeepClone();
+                    }
+                    else
+                    {
+                        NetSettings = ((ParallelPerceptronSettings)source.NetSettings).DeepClone();
+                    }
+                }
+                RegressionAttempts = source.RegressionAttempts;
+                RegressionAttemptEpochs = source.RegressionAttemptEpochs;
+                RegressionAttemptStopMSE = source.RegressionAttemptStopMSE;
+                return;
+            }
+
+            /// <summary>
+            /// Creates the instance and initializes it from given xml element.
+            /// </summary>
+            /// <param name="readoutUnitElem">
+            /// Xml data containing the settings.
+            /// </param>
+            public ReadoutUnitSettings(XElement readoutUnitElem)
+            {
+                RegressionAttempts = int.Parse(readoutUnitElem.Attribute("attempts").Value);
+                RegressionAttemptEpochs = int.Parse(readoutUnitElem.Attribute("attemptEpochs").Value);
+                RegressionAttemptStopMSE = double.Parse(readoutUnitElem.Attribute("attemptStopMSE").Value, CultureInfo.InvariantCulture);
+                //Net settings
+                List<XElement> netSettingsElems = new List<XElement>();
+                netSettingsElems.AddRange(readoutUnitElem.Descendants("ff"));
+                netSettingsElems.AddRange(readoutUnitElem.Descendants("pp"));
+                if (netSettingsElems.Count != 1)
+                {
+                    throw new Exception("Only one network configuration can be specified in readout unit settings.");
+                }
+                if (netSettingsElems.Count == 0)
+                {
+                    throw new Exception("Network configuration is not specified in readout unit settings.");
+                }
+                XElement netSettingsElem = netSettingsElems[0];
+                //FF?
+                if (netSettingsElem.Name == "ff")
+                {
+                    NetType = ReadoutUnitNetworkType.FF;
+                    NetSettings = new FeedForwardNetworkSettings(netSettingsElem);
+                }
+                else
+                {
+                    //PP
+                    NetType = ReadoutUnitNetworkType.PP;
+                    NetSettings = new ParallelPerceptronSettings(netSettingsElem);
+                }
+                return;
+            }
+
+            //Methods
+            /// <summary>
+            /// See the base.
+            /// </summary>
+            public override bool Equals(object obj)
+            {
+                if (obj == null) return false;
+                ReadoutUnitSettings cmpSettings = obj as ReadoutUnitSettings;
+                if (NetType != cmpSettings.NetType ||
+                    (NetSettings == null && cmpSettings.NetSettings != null) ||
+                    (NetSettings != null && cmpSettings.NetSettings == null) ||
+                    (NetSettings != null && cmpSettings.NetSettings != null && !NetSettings.Equals(cmpSettings.NetSettings)) ||
+                    RegressionAttempts != cmpSettings.RegressionAttempts ||
+                    RegressionAttemptEpochs != cmpSettings.RegressionAttemptEpochs ||
+                    RegressionAttemptStopMSE != cmpSettings.RegressionAttemptStopMSE
+                    )
+                {
+                    return false;
+                }
+                return true;
+            }
+
+            /// <summary>
+            /// See the base.
+            /// </summary>
+            public override int GetHashCode()
+            {
+                return base.GetHashCode();
+            }
+
+            /// <summary>
+            /// Creates the deep copy instance of this instance.
+            /// </summary>
+            public ReadoutUnitSettings DeepClone()
+            {
+                return new ReadoutUnitSettings(this);
+            }
+
+        }//ReadoutUnitSettings
+
 
     }//ReadoutLayerSettings
 

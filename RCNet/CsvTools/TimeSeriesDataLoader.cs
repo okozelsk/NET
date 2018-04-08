@@ -59,7 +59,7 @@ namespace RCNet.CsvTools
                                              )
         {
             PredictionBundle bundle = null;
-            bundleNormalizer = new BundleNormalizer(normRange, normReserveRatio, dataStandardization, dataStandardization);
+            bundleNormalizer = new BundleNormalizer(normRange, normReserveRatio, dataStandardization, normReserveRatio, dataStandardization);
             using (StreamReader streamReader = new StreamReader(new FileStream(fileName, FileMode.Open)))
             {
                 List<int> fieldIndexes = new List<int>();

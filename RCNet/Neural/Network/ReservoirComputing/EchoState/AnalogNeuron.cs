@@ -95,7 +95,15 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
         /// </summary>
         public void Compute(double signal, bool collectStatistics)
         {
-            _currentState = (_retainmentRate * _currentState) + (1d - _retainmentRate) * _activation.Compute(_bias + signal);
+            if (_previousState == 0 && _currentState == 0)
+            {
+                //First state computation, do not apply retainment
+                _currentState = _activation.Compute(_bias + signal);
+            }
+            else
+            {
+                _currentState = (_retainmentRate * _currentState) + (1d - _retainmentRate) * _activation.Compute(_bias + signal);
+            }
             if(collectStatistics)StatesStat.AddSampleValue(_currentState);
             return;
         }

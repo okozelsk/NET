@@ -17,16 +17,7 @@
       <xs:enumeration value="Sinusoid"/>
       <xs:enumeration value="TanH"/>
       <xs:enumeration value="ISRU"/>
-      <xs:enumeration value="Sigmoid"/>
       <xs:enumeration value="Gaussian"/>
-    </xs:restriction>
-  </xs:simpleType>
-
-  <!-- Regression methods enumeration -->
-  <xs:simpleType name="RegressionMethodType">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="Linear"/>
-      <xs:enumeration value="Resilient"/>
     </xs:restriction>
   </xs:simpleType>
 
@@ -88,29 +79,60 @@
   </xs:complexType>
 
   <!-- ________________________________________FF NETWORK TYPES_________________________________________________ -->
+  <!-- FF network - regression (training) methods - enumeration -->
+  <xs:simpleType name="FFNetRegressionMethodType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Linear"/>
+      <xs:enumeration value="Resilient"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <!-- FF network - hidden layer - configuration -->
   <xs:complexType name="FFNetHiddenLayerCfgType">
     <xs:attribute type="UIntGT0Type" name="neurons" use="required"/>
     <xs:attribute type="ActivationFunctionType" name="activation" use="required"/>
   </xs:complexType>
 
+  <!-- FF network configuration -->
+  <xs:complexType name="FFNetCfgType">
+    <xs:sequence minOccurs="0" maxOccurs="1">
+      <xs:element type="FFNetHiddenLayerCfgType" name="hiddenLayer" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute type="ActivationFunctionType" name="activation" use="required"/>
+    <xs:attribute type="FFNetRegressionMethodType" name="regressionMethod" use="required"/>
+  </xs:complexType>
+
+  <!-- ________________________________________PP NETWORK TYPES_________________________________________________ -->
+  <!-- Parallel Perceptron network configuration -->
+  <xs:complexType name="PPNetCfgType">
+    <xs:attribute type="UIntGT0Type" name="gates" use="required"/>
+    <xs:attribute type="UIntGT0Type" name="resolution" use="required"/>
+  </xs:complexType>
+
   <!-- ________________________________________READOUT LAYER TYPES_________________________________________________ -->
+
+  <!-- Readout unit configuration -->
+  <xs:complexType name="ROutLayerUnitCfgType">
+    <xs:choice minOccurs="1" maxOccurs="1">
+      <xs:element type="FFNetCfgType" name="ff" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="PPNetCfgType" name="pp" minOccurs="1" maxOccurs="1"/>
+    </xs:choice>
+    <xs:attribute type="UIntGT0Type" name="attempts" use="required"/>
+    <xs:attribute type="UIntGT0Type" name="attemptEpochs" use="required"/>
+    <xs:attribute type="UDoubleType" name="attemptStopMSE" use="required"/>
+  </xs:complexType>
+
   <!-- Readout layer - output fields - configuration -->
   <xs:complexType name="ROutLayerOutputFieldsCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="AloneNameType" name="field" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
-    <xs:attribute type="ActivationFunctionType" name="activation" use="required"/>
-    <xs:attribute type="RegressionMethodType" name="regressionMethod" use="required"/>
-    <xs:attribute type="UIntGT0Type" name="attempts" use="required"/>
-    <xs:attribute type="UIntGT0Type" name="attemptEpochs" use="required"/>
-    <xs:attribute type="UDoubleType" name="attemptStopMSE" use="required"/>
   </xs:complexType>
   
   <!-- Readout layer configuration -->
   <xs:complexType name="ROutLayerCfgType">
-    <xs:sequence minOccurs="0" maxOccurs="1">
-      <xs:element type="FFNetHiddenLayerCfgType" name="hiddenLayer" minOccurs="0" maxOccurs="unbounded"/>
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="ROutLayerUnitCfgType" name="readoutUnit" minOccurs="1" maxOccurs="1"/>
       <xs:element type="ROutLayerOutputFieldsCfgType" name="outputFields" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute name="testDataRatio" use="required">

@@ -11,13 +11,14 @@ Activation functions
 	Sinusoid
 	Identity (Linear)
 	ISRU (Inverse Squere Root Unit)
-	Sigmoid (Logistic, Softstep)
 	Gaussian
 Feed Forward Network
 	Multiple hidden layers
 	Trainers
 		Resilient propagation trainer (iRPROP+ variant)
 		Linear regression trainer
+Parallel Perceptron
+	p-delta rule
 Analog Reservoir
 	Supported topologies:
 		Random
@@ -38,8 +39,8 @@ Readout layer
 	Independent on predictors generator
 	Supports x-fold cross validation method
 	Clusters of readout units
-		Cluster of feed forward networks per each output field
-
+		Cluster of readout units per each output field
+			Feed Forward Network or Parallel Perceptron
 Bundle normalizer
 	Helper for normalization of data in a bundle
 
@@ -48,11 +49,9 @@ Data loaders (csv)
 		Prediction (time series)
 		Classification
 
-
-
 Demo application
 ----------------
-Functionality and use is demonstrated in a simple demo application (/Demo/DemoConsoleApp). Application has no startup parameters, all necessary settins are specified in EsnDemoSettings.xml file. EsnDemoSettings.xml has to be in the same folder as the executable DemoConsoleApp.exe. Application performs sequence of demo cases defined in EsnDemoSettings.xml. Input data has to be stored in a file in csv format. You can simply modify EsnDemoSettings.xml and configure your own cases to be prformed.
+Functionality is demonstrated in a simple demo application (/Demo/DemoConsoleApp). Application has no startup parameters, all necessary settins are specified in EsnDemoSettings.xml file. EsnDemoSettings.xml has to be in the same folder as the executable DemoConsoleApp.exe. Application performs sequence of demo cases defined in EsnDemoSettings.xml. Input data has to be stored in a file in csv format. You can simply modify EsnDemoSettings.xml and configure your own cases to be prformed.
 
 
 Other information

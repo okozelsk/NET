@@ -62,7 +62,7 @@ namespace RCNet.Demo
         /// <summary>
         /// This is the control function of the regression process and is called
         /// after the completion of each regression training epoch.
-        /// The goal of the regression process is for each Esn output field to train a feed forward network
+        /// The goal of the regression process is for each Esn output field to train a readout network
         /// that will give good results both on the training data and the test data.
         /// Regression.RegressionControlInArgs object passed to the function contains the best error statistics so far
         /// and the latest statistics. The primary purpose of the function is to decide whether the latest statistics

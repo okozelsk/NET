@@ -12,7 +12,7 @@ namespace RCNet.Neural.Network.FF
     /// Implements the feed forward network supporting multiple hidden layers
     /// </summary>
     [Serializable]
-    public class FeedForwardNetwork
+    public class FeedForwardNetwork : INonRecurrentNetwork
     {
         //Constants
         /// <summary>
@@ -38,7 +38,7 @@ namespace RCNet.Neural.Network.FF
 
         //Constructor
         /// <summary>
-        /// Instantiates a feed forward network
+        /// Instantiates an unitialized feed forward network
         /// </summary>
         /// <param name="numOfInputValues">Number of network's input values</param>
         /// <param name="numOfOutputValues">Number of network's output values</param>
@@ -54,6 +54,26 @@ namespace RCNet.Neural.Network.FF
             _flatWeights = null;
             //Nguyen Widrow initial randomization
             _isAllowedNguyenWidrowRandomization = false;
+            return;
+        }
+
+        /// <summary>
+        /// Instantiates an initialized feed forward network
+        /// </summary>
+        /// <param name="numOfInputValues">Number of network's input values</param>
+        /// <param name="numOfOutputValues">Number of network's output values</param>
+        /// <param name="settings">Configuration parameters</param>
+        public FeedForwardNetwork(int numOfInputValues, int numOfOutputValues, FeedForwardNetworkSettings settings)
+            :this(numOfInputValues, numOfOutputValues)
+        {
+            //Initialize FF network
+            for (int i = 0; i < settings.HiddenLayerCollection.Count; i++)
+            {
+                AddLayer(settings.HiddenLayerCollection[i].NumOfNeurons,
+                         ActivationFactory.CreateActivationFunction(settings.HiddenLayerCollection[i].ActivationType)
+                         );
+            }
+            FinalizeStructure(ActivationFactory.CreateActivationFunction(settings.OutputActivation));
             return;
         }
 
@@ -84,23 +104,6 @@ namespace RCNet.Neural.Network.FF
         public List<Layer> LayerCollection { get { return _layerCollection; } }
 
         //Methods
-        //Static methods
-        /// <summary>
-        /// Parses training method type from string code
-        /// </summary>
-        /// <param name="code">Code of the training method type</param>
-        public static TrainingMethodType ParseTrainingMethodType(string code)
-        {
-            switch (code.ToUpper())
-            {
-                case "LINEAR": return TrainingMethodType.Linear;
-                case "RESILIENT": return TrainingMethodType.Resilient;
-                default:
-                    throw new ArgumentException($"Unknown training method code {code}");
-            }
-        }
-
-        //Instance methods
         /// <summary>
         /// Adds the new hidden layer into this network
         /// </summary>
@@ -206,7 +209,7 @@ namespace RCNet.Neural.Network.FF
         /// <summary>
         /// Creates a deep copy of this network
         /// </summary>
-        public FeedForwardNetwork DeepClone()
+        public INonRecurrentNetwork DeepClone()
         {
             FeedForwardNetwork clone = new FeedForwardNetwork(NumOfInputValues, NumOfOutputValues);
             clone._numOfNeurons = _numOfNeurons;
@@ -444,107 +447,5 @@ namespace RCNet.Neural.Network.FF
 
         }//Layer
     }//FeedForwardNetwork
-
-    /// <summary>
-    /// Supported training methods
-    /// </summary>
-    public enum TrainingMethodType
-    {
-        /// <summary>
-        /// Linear regression
-        /// </summary>
-        Linear,
-        /// <summary>
-        /// Resilient backpropagation
-        /// </summary>
-        Resilient
-    }//TrainingMethodType
-
-    /// <summary>
-    /// Feed forward network hidden layer settings
-    /// </summary>
-    [Serializable]
-    public class HiddenLayerSettings
-    {
-        //Attributes
-        /// <summary>
-        /// Number of hidden layer neurons
-        /// </summary>
-        public int NumOfNeurons { get; set; }
-        /// <summary>
-        /// Type of activation function of the hidden layer neurons
-        /// </summary>
-        public ActivationFactory.ActivationType ActivationType { get; set; }
-
-        //Constructors
-        /// <summary>
-        /// Creates an initialized instance
-        /// </summary>
-        /// <param name="numOfNeurons">Number of hidden layer neurons</param>
-        /// <param name="activationType">Type of activation function of the hidden layer neurons</param>
-        public HiddenLayerSettings(int numOfNeurons, ActivationFactory.ActivationType activationType)
-        {
-            NumOfNeurons = numOfNeurons;
-            ActivationType = activationType;
-            return;
-        }
-
-        /// <summary>
-        /// Copy constructor
-        /// </summary>
-        /// <param name="source">Source instance</param>
-        public HiddenLayerSettings(HiddenLayerSettings source)
-        {
-            NumOfNeurons = source.NumOfNeurons;
-            ActivationType = source.ActivationType;
-            return;
-        }
-
-        /// <summary>
-        /// Creates the instance and initializes it from given xml element.
-        /// </summary>
-        /// <param name="hiddenLayerElem">
-        /// Xml data containing the settings.
-        /// Content of xml element is not validated against the xml schema.
-        /// </param>
-        public HiddenLayerSettings(XElement hiddenLayerElem)
-        {
-            NumOfNeurons = int.Parse(hiddenLayerElem.Attribute("neurons").Value);
-            ActivationType = ActivationFactory.ParseActivation(hiddenLayerElem.Attribute("activation").Value);
-            return;
-        }
-
-        //Methods
-        /// <summary>
-        /// See the base.
-        /// </summary>
-        public override bool Equals(object obj)
-        {
-            if (obj == null) return false;
-            HiddenLayerSettings cmpSettings = obj as HiddenLayerSettings;
-            if (NumOfNeurons != cmpSettings.NumOfNeurons || ActivationType != cmpSettings.ActivationType)
-            {
-                return false;
-            }
-            return true;
-        }
-
-        /// <summary>
-        /// See the base.
-        /// </summary>
-        public override int GetHashCode()
-        {
-            return NumOfNeurons.GetHashCode();
-        }
-
-        /// <summary>
-        /// Creates the deep copy instance of this instance.
-        /// </summary>
-        public HiddenLayerSettings DeepClone()
-        {
-            return new HiddenLayerSettings(this);
-        }
-
-    }//HiddenLayerSettings
 
 }//Namespace

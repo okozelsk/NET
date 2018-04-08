@@ -58,7 +58,7 @@ namespace RCNet.CsvTools
                                                    )
         {
             ClassificationBundle bundle = new ClassificationBundle();
-            bundleNormalizer = new BundleNormalizer(normRange, normReserveRatio, inputDataStandardization, false);
+            bundleNormalizer = new BundleNormalizer(normRange, normReserveRatio, inputDataStandardization, 0, false);
             using (StreamReader streamReader = new StreamReader(new FileStream(fileName, FileMode.Open)))
             {
                 //The first row contains the "#RepetitiveGroupOfAttributes" keyword followed by name(s) of attribute(s)

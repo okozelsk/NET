@@ -69,7 +69,7 @@ namespace RCNet.Neural.Network.FF
     /// Implements iRPROP+ method trainer
     /// </summary>
     [Serializable]
-    public class RPropTrainer : IFeedForwardNetworkTrainer
+    public class RPropTrainer : INonRecurrentNetworkTrainer
     {
         //Attributes
         private RPropParameters _parameters;
@@ -165,7 +165,7 @@ namespace RCNet.Neural.Network.FF
         /// <summary>
         /// FF network beeing trained
         /// </summary>
-        public FeedForwardNetwork Net { get { return _net; } }
+        public INonRecurrentNetwork Net { get { return _net; } }
 
         //Methods
 
@@ -264,7 +264,7 @@ namespace RCNet.Neural.Network.FF
                 double[] neuronsGradients = new double[_net.NumOfNeurons];
                 double[] derivations = new double[_net.NumOfNeurons];
                 List<double[]> layersInputs = new List<double[]>(_net.LayerCollection.Count);
-                //Go paralelly over all samples
+                //Go parallely over all samples
                 for (int row = range.FromRow; row <= range.ToRow; row++)
                 {
                     //Network computation (collect layers inputs and activation derivations)

@@ -36,8 +36,8 @@ namespace RCNet.MathTools
         /// <summary>
         /// Ctrates an uninitialized instance
         /// </summary>
-        /// <param name="binBorder">Binary 0/1 border. Double value LT this border is considered 0 and GE 1</param>
-        public BinDistribution(double binBorder)
+        /// <param name="binBorder">Binary 0/1 border. Double value LT this border is considered 0 and GE 1. Default is 0 for (-1,1)</param>
+        public BinDistribution(double binBorder = 0)
         {
             BinBorder = binBorder;
             NumOf = new int[2];
