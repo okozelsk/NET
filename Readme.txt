@@ -17,8 +17,8 @@ Feed Forward Network
 	Trainers
 		Resilient propagation trainer (iRPROP+ variant)
 		Linear regression trainer
-Parallel Perceptron
-	p-delta rule
+Parallel Perceptron Network
+	Parallel Perceptron Trainer (p-delta rule)
 Analog Reservoir
 	Supported topologies:
 		Random
