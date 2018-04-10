@@ -151,7 +151,7 @@ namespace RCNet.Neural.Network.FF
                 for(int col = 0; col < _net.NumOfInputValues; col++)
                 {
                     double predictor = _inputVectorCollection[row][col];
-                    predictors.Data[row][col] = predictor * (1d + _rand.NextBoundedUniformDoubleRS(0, noiseIntensity));
+                    predictors.Data[row][col] = predictor * (1d + _rand.NextDouble(0, noiseIntensity, true, RandomClassExtensions.DistributionType.Uniform));
                 }
                 //Add constant bias to predictors
                 predictors.Data[row][_net.NumOfInputValues] = 1;
@@ -191,8 +191,7 @@ namespace RCNet.Neural.Network.FF
             }
             //Set new weights and compute error
             _net.SetWeights(newWaights);
-            List<double[]> computedOutputCollection = null;
-            _mse = _net.ComputeBatchErrorStat(_inputVectorCollection, _outputVectorCollection, out computedOutputCollection).MeanSquare;
+            _mse = _net.ComputeBatchErrorStat(_inputVectorCollection, _outputVectorCollection).MeanSquare;
             return;
         }
 

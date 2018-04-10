@@ -2,18 +2,15 @@
 using RCNet.Demo;
 using RCNet.Demo.Log;
 
+using RCNet.Extensions;
+using RCNet.MathTools;
+
 namespace RCNet.DemoConsoleApp
 {
     class Program
     {
         static void Main(string[] args)
         {
-            //Logging the output to a console
-            IOutputLog demoOutputLog = new ConsoleLog();
-            //Esn demo
-            string esnDemoSettingsFile = @"EsnDemoSettings.xml";
-            EsnDemo.RunDemo(demoOutputLog, esnDemoSettingsFile);
-            /*
             try
             {
                 //Logging the output to a console
@@ -32,7 +29,6 @@ namespace RCNet.DemoConsoleApp
                 }
                 Console.WriteLine("Press Enter to continue");
             }
-            */
             Console.ReadLine();
             return;
         }

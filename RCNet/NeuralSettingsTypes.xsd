@@ -9,6 +9,14 @@
   <!-- ________________________________________LOW LEVEL TYPES_________________________________________________ -->
   <!-- SIMPLE TYPES -->
   <!-- ENUMERATION TYPES -->
+  <!-- Enumeration of random distribution -->
+  <xs:simpleType name="RandomDistributionType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Uniform"/>
+      <xs:enumeration value="Gaussian"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <!-- Enumeration of activation functions -->
   <xs:simpleType name="ActivationFunctionType">
     <xs:restriction base="xs:string">
@@ -26,6 +34,7 @@
     <xs:restriction base="xs:string">
       <xs:enumeration value="Prediction"/>
       <xs:enumeration value="Classification"/>
+      <xs:enumeration value="Hybrid"/>
     </xs:restriction>
   </xs:simpleType>
 
@@ -78,6 +87,14 @@
     <xs:attribute type="xs:string" name="name" use="required"/>
   </xs:complexType>
 
+  <!-- Random value element -->
+  <xs:complexType name="RandomValueType">
+    <xs:attribute type="xs:double" name="min" use="required"/>
+    <xs:attribute type="xs:double" name="max" use="required"/>
+    <xs:attribute type="xs:boolean" name="randomSign" use="optional" default="false"/>
+    <xs:attribute type="RandomDistributionType" name="distribution" use="optional" default="Uniform"/>
+  </xs:complexType>
+
   <!-- ________________________________________FF NETWORK TYPES_________________________________________________ -->
   <!-- FF network - regression (training) methods - enumeration -->
   <xs:simpleType name="FFNetRegressionMethodType">
@@ -119,7 +136,6 @@
     </xs:choice>
     <xs:attribute type="UIntGT0Type" name="attempts" use="required"/>
     <xs:attribute type="UIntGT0Type" name="attemptEpochs" use="required"/>
-    <xs:attribute type="UDoubleType" name="attemptStopMSE" use="required"/>
   </xs:complexType>
 
   <!-- Readout layer - output fields - configuration -->
@@ -149,8 +165,10 @@
   <!-- ________________________________________ANALOG RESERVOIR TYPES_________________________________________________ -->
   <!-- Analog reservoir - input - configuration -->
   <xs:complexType name="AnaResInputCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="RandomValueType" name="weight" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
     <xs:attribute type="UDoubleLE1Type" name="connectionDensity" use="required"/>
-    <xs:attribute type="UDoubleType" name="weightScale" use="required"/>
   </xs:complexType>
 
   <!-- Analog reservoir - random topology -configuration -->
@@ -179,10 +197,12 @@
 
   <!-- Analog reservoir - context neuron -configuration -->
   <xs:complexType name="AnaResCtxNeuronCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="RandomValueType" name="inputWeight" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="RandomValueType" name="feedbackWeight" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
     <xs:attribute type="ActivationFunctionType" name="activation" use="required"/>
-    <xs:attribute type="UDoubleType" name="inputWeight" use="required"/>
     <xs:attribute type="UDoubleLE1Type" name="feedbackDensity" use="required"/>
-    <xs:attribute type="UDoubleType" name="feedbackWeight" use="required"/>
   </xs:complexType>
 
   <!-- Analog reservoir - internal -configuration -->
@@ -193,22 +213,29 @@
         <xs:element type="AnaResRingTopoCfgType" name="topologyRing" minOccurs="1" maxOccurs="1"/>
         <xs:element type="AnaResDTTTopoCfgType" name="topologyDTT" minOccurs="1" maxOccurs="1"/>
       </xs:choice>
+      <xs:element type="RandomValueType" name="bias" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="RandomValueType" name="weight" minOccurs="1" maxOccurs="1"/>
       <xs:element type="AnaResRetNeuronsCfgType" name="retainmentNeurons" minOccurs="0" maxOccurs="1"/>
       <xs:element type="AnaResCtxNeuronCfgType" name="contextNeuron" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:unsignedInt" name="size" use="required" />
     <xs:attribute type="ActivationFunctionType" name="activation" use="required" />
-    <xs:attribute type="UDoubleType" name="biasScale" use="required"/>
-    <xs:attribute type="UDoubleType" name="weightScale" use="required"/>
+  </xs:complexType>
+
+  <!-- Analog reservoir - feedback fields - configuration -->
+  <xs:complexType name="AnaResFeedbackFieldsCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="AloneNameType" name="field" minOccurs="1" maxOccurs="unbounded"/>
+    </xs:sequence>
   </xs:complexType>
 
   <!-- Analog reservoir - feedback -configuration -->
   <xs:complexType name="AnaResFeedbackCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="AloneNameType" name="field" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element type="RandomValueType" name ="weight" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="AnaResFeedbackFieldsCfgType" name="feedbackFields" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="UDoubleLE1Type" name="density" use="required"/>
-    <xs:attribute type="UDoubleType" name="weightScale" use="required"/>
   </xs:complexType>
 
   <!-- Analog reservoir configuration -->
@@ -237,10 +264,17 @@
     </xs:sequence>
   </xs:complexType>
 
+  <!-- Esn - reservoir instance - input fields - configuration -->
+  <xs:complexType name="EsnAnaResInstanceInputFieldsCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="AloneNameType" name="field" minOccurs="1" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
   <!-- Esn - reservoir instance - configuration -->
   <xs:complexType name="EsnAnaResInstanceCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="AloneNameType" name="inputField" minOccurs="1" maxOccurs="unbounded"/>
+      <xs:element type="EsnAnaResInstanceInputFieldsCfgType" name="inputFields" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:string" name="name" use="required" />
     <xs:attribute type="xs:string" name="cfg" use="required" />

@@ -5,17 +5,16 @@ using RCNet.Extensions;
 namespace RCNet.Neural.Network.Data
 {
     /// <summary>
-    /// Bundle of input vector and desired output vector
+    /// Bundle of pattern and desired output vector
     /// </summary>
     [Serializable]
-    public class PredictionBundle
+    public class PatternBundle
     {
         //Attributes
         /// <summary>
-        /// Collection of input vectors
+        /// Collection of input patterns
         /// </summary>
-        public List<double[]> InputVectorCollection { get; }
-        
+        public List<List<double[]>> InputPatternCollection { get; }
         /// <summary>
         /// Collection of output vectors (desired values)
         /// </summary>
@@ -23,25 +22,14 @@ namespace RCNet.Neural.Network.Data
 
         //Constructors
         /// <summary>
-        /// Instantiates data bundle
-        /// </summary>
-        public PredictionBundle()
-        {
-            InputVectorCollection = new List<double[]>();
-            OutputVectorCollection = new List<double[]>();
-            return;
-        }
-
-        //Constructors
-        /// <summary>
         /// Instantiates data bundle.
         /// Creates shallow copy of given lists
         /// </summary>
-        /// <param name="inputVectorCollection">Collection of input vectors</param>
+        /// <param name="inputPatternCollection">Collection of input patterns</param>
         /// <param name="outputVectorCollection">Collection of output vectors</param>
-        public PredictionBundle(List<double[]> inputVectorCollection, List<double[]> outputVectorCollection)
+        public PatternBundle(List<List<double[]>> inputPatternCollection, List<double[]> outputVectorCollection)
         {
-            InputVectorCollection = new List<double[]>(inputVectorCollection);
+            InputPatternCollection = new List<List<double[]>>(inputPatternCollection);
             OutputVectorCollection = new List<double[]>(outputVectorCollection);
             return;
         }
@@ -49,22 +37,21 @@ namespace RCNet.Neural.Network.Data
         /// <summary>
         /// Instantiates data bundle
         /// </summary>
-        /// <param name="expectedNumOfPairs">Expected number of sample pairs</param>
-        public PredictionBundle(int expectedNumOfPairs)
+        public PatternBundle()
         {
-            InputVectorCollection = new List<double[]>(expectedNumOfPairs);
-            OutputVectorCollection = new List<double[]>(expectedNumOfPairs);
+            InputPatternCollection = new List<List<double[]>>();
+            OutputVectorCollection = new List<double[]>();
             return;
         }
 
         /// <summary>
-        /// Adds sample data pair into the bundle
+        /// Adds pattern/vector pair into the bundle
         /// </summary>
-        /// <param name="inputVector">Input vector</param>
+        /// <param name="pattern">Input pattern of vectors</param>
         /// <param name="outputVector">Output vector (ideal)</param>
-        public void AddPair(double[] inputVector, double[] outputVector)
+        public void AddPair(List<double[]> pattern, double[] outputVector)
         {
-            InputVectorCollection.Add(inputVector);
+            InputPatternCollection.Add(pattern);
             OutputVectorCollection.Add(outputVector);
             return;
         }
@@ -75,21 +62,20 @@ namespace RCNet.Neural.Network.Data
         /// <param name="rand">Random object</param>
         public void Shuffle(Random rand)
         {
-            List<double[]> l1 = new List<double[]>(InputVectorCollection);
+            List<List<double[]>> l1 = new List<List<double[]>>(InputPatternCollection);
             List<double[]> l2 = new List<double[]>(OutputVectorCollection);
-            InputVectorCollection.Clear();
+            InputPatternCollection.Clear();
             OutputVectorCollection.Clear();
             int[] shuffledIndices = new int[l2.Count];
             shuffledIndices.ShuffledIndices(rand);
             for (int i = 0; i < shuffledIndices.Length; i++)
             {
-                InputVectorCollection.Add(l1[shuffledIndices[i]]);
+                InputPatternCollection.Add(l1[shuffledIndices[i]]);
                 OutputVectorCollection.Add(l2[shuffledIndices[i]]);
             }
             return;
         }
 
-
-    }//PredictionBundle
+    }//PatternBundle
 
 }//Namespace

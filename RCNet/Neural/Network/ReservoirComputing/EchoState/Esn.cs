@@ -166,9 +166,9 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
         /// <returns>Computed output values</returns>
         public double[] Compute(List<double[]> inputPattern)
         {
-            if(_settings.TaskType != CommonTypes.TaskType.Classification)
+            if(_settings.TaskType == CommonTypes.TaskType.Prediction)
             {
-                throw new Exception("This version of Compute function is useable only for the classification task type.");
+                throw new Exception("This version of Compute function is useable only for the classification or hybrid task type.");
             }
             double[] predictors = PushInput(inputPattern);
             //Compute output
@@ -256,14 +256,14 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
         /// <param name="userObject">
         /// The user object to be passed to informativeCallback.
         /// </param>
-        public RegressionStageInput PrepareRegressionStageInput(ClassificationBundle dataSet,
+        public RegressionStageInput PrepareRegressionStageInput(PatternBundle dataSet,
                                                                 PredictorsCollectionCallbackDelegate informativeCallback = null,
                                                                 Object userObject = null
                                                                 )
         {
-            if (_settings.TaskType != CommonTypes.TaskType.Classification)
+            if (_settings.TaskType == CommonTypes.TaskType.Prediction)
             {
-                throw new Exception("This version of PrepareRegressionStageInput function is useable only for the classification task type.");
+                throw new Exception("This version of PrepareRegressionStageInput function is useable only for the classification or hybrid task type.");
             }
             //RegressionStageInput allocation
             RegressionStageInput rsi = new RegressionStageInput();
@@ -308,7 +308,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
         /// <param name="userObject">
         /// The user object to be passed to informativeCallback.
         /// </param>
-        public RegressionStageInput PrepareRegressionStageInput(PredictionBundle dataSet,
+        public RegressionStageInput PrepareRegressionStageInput(TimeSeriesBundle dataSet,
                                                                 int numOfBootSamples,
                                                                 PredictorsCollectionCallbackDelegate informativeCallback = null,
                                                                 Object userObject = null

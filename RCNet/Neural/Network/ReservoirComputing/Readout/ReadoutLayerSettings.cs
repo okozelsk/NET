@@ -76,11 +76,11 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
         /// Creates the instance and initializes it from given xml element.
         /// This is the preferred way to instantiate ReadoutLayer settings.
         /// </summary>
-        /// <param name="readoutLayerSettingsElem">
+        /// <param name="elem">
         /// Xml data containing ReadoutLayer settings.
         /// Content of xml element is always validated against the xml schema.
         /// </param>
-        public ReadoutLayerSettings(XElement readoutLayerSettingsElem)
+        public ReadoutLayerSettings(XElement elem)
         {
             //Validation
             //A very ugly validation. Xml schema does not support validation of the xml fragment against specific type.
@@ -94,7 +94,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
             {
                 validator.AddSchema(schemaStream);
             }
-            validator.LoadXDocFromString(readoutLayerSettingsElem.ToString());
+            XElement readoutLayerSettingsElem = validator.LoadXDocFromString(elem.ToString()).Root;
             //Parsing
             TestDataRatio = double.Parse(readoutLayerSettingsElem.Attribute("testDataRatio").Value, CultureInfo.InvariantCulture);
             NumOfFolds = readoutLayerSettingsElem.Attribute("folds").Value == "Auto" ? 0 : int.Parse(readoutLayerSettingsElem.Attribute("folds").Value);
@@ -194,11 +194,6 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
             /// Number of iterations (epochs) during regression attempt.
             /// </summary>
             public int RegressionAttemptEpochs { get; set; }
-            /// <summary>
-            /// Regression attempt will be stopped after the specified
-            /// MSE on training dataset will be reached.
-            /// </summary>
-            public double RegressionAttemptStopMSE { get; set; }
 
             //Constructors
             /// <summary>
@@ -210,7 +205,6 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
                 NetSettings = null;
                 RegressionAttempts = 0;
                 RegressionAttemptEpochs = 0;
-                RegressionAttemptStopMSE = 0;
                 return;
             }
 
@@ -235,7 +229,6 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
                 }
                 RegressionAttempts = source.RegressionAttempts;
                 RegressionAttemptEpochs = source.RegressionAttemptEpochs;
-                RegressionAttemptStopMSE = source.RegressionAttemptStopMSE;
                 return;
             }
 
@@ -249,7 +242,6 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
             {
                 RegressionAttempts = int.Parse(readoutUnitElem.Attribute("attempts").Value);
                 RegressionAttemptEpochs = int.Parse(readoutUnitElem.Attribute("attemptEpochs").Value);
-                RegressionAttemptStopMSE = double.Parse(readoutUnitElem.Attribute("attemptStopMSE").Value, CultureInfo.InvariantCulture);
                 //Net settings
                 List<XElement> netSettingsElems = new List<XElement>();
                 netSettingsElems.AddRange(readoutUnitElem.Descendants("ff"));
@@ -291,8 +283,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
                     (NetSettings != null && cmpSettings.NetSettings == null) ||
                     (NetSettings != null && cmpSettings.NetSettings != null && !NetSettings.Equals(cmpSettings.NetSettings)) ||
                     RegressionAttempts != cmpSettings.RegressionAttempts ||
-                    RegressionAttemptEpochs != cmpSettings.RegressionAttemptEpochs ||
-                    RegressionAttemptStopMSE != cmpSettings.RegressionAttemptStopMSE
+                    RegressionAttemptEpochs != cmpSettings.RegressionAttemptEpochs
                     )
                 {
                     return false;

@@ -46,7 +46,7 @@ namespace RCNet.XmlTools
         public XDocument LoadXDocFromFile(string filename)
         {
             XDocument xDoc = XDocument.Load(filename);
-            xDoc.Validate(_schemaSet, new ValidationEventHandler(XmlValidationCallback));
+            xDoc.Validate(_schemaSet, new ValidationEventHandler(XmlValidationCallback), true);
             return xDoc;
         }
 

@@ -94,11 +94,11 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
         /// Creates the instance and initializes it from given xml element.
         /// This is the preferred way to instantiate Esn settings.
         /// </summary>
-        /// <param name="esnSettingsElem">
+        /// <param name="elem">
         /// Xml data containing Esn settings.
         /// Content of xml element is always validated against the xml schema.
         /// </param>
-        public EsnSettings(XElement esnSettingsElem)
+        public EsnSettings(XElement elem)
         {
             //Validation
             //A very ugly validation. Xml schema does not support validation of the xml fragment against specific type.
@@ -112,7 +112,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
             {
                 validator.AddSchema(schemaStream);
             }
-            validator.LoadXDocFromString(esnSettingsElem.ToString());
+            XElement esnSettingsElem = validator.LoadXDocFromString(elem.ToString()).Root;
             //Parsing
             //Task type
             TaskType = CommonTypes.ParseTaskType(esnSettingsElem.Attribute("taskType").Value);
@@ -121,9 +121,9 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
             //Input fields
             XElement inputFieldsElem = esnSettingsElem.Descendants("inputFields").First();
             RouteInputToReadout = (inputFieldsElem.Attribute("routeToReadout") == null) ? false : bool.Parse(inputFieldsElem.Attribute("routeToReadout").Value);
-            if(TaskType == CommonTypes.TaskType.Classification && RouteInputToReadout)
+            if(TaskType != CommonTypes.TaskType.Prediction && RouteInputToReadout)
             {
-                throw new Exception("For the classification task setup is not allowed to route input to readout because of possible variable length of the input.");
+                throw new Exception("Routing input to readout is allowed for prediction task only.");
             }
             InputFieldNameCollection = new List<string>();
             foreach(XElement inputFieldElem in inputFieldsElem.Descendants("field"))
@@ -151,9 +151,13 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
                 //Select reservoir settings
                 newMap.ReservoirSettings = (from settings in availableResSettings
                                             where settings.SettingsName == reservoirInstanceElem.Attribute("cfg").Value
-                                            select settings).First();
+                                            select settings).FirstOrDefault();
+                if(newMap.ReservoirSettings == null)
+                {
+                    throw new Exception($"Reservoir settings '{reservoirInstanceElem.Attribute("cfg").Value}' was not found among available settings.");
+                }
                 //Associated Esn input fields
-                foreach (XElement inputFieldElem in reservoirInstanceElem.Descendants("inputField"))
+                foreach (XElement inputFieldElem in reservoirInstanceElem.Descendants("inputFields").First().Descendants("field"))
                 {
                     string inputFieldName = inputFieldElem.Attribute("name").Value;
                     //Index in InputFieldsNames
@@ -169,9 +173,9 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
                 //Associated Esn output fields tor feedback
                 foreach (string feedbackFieldName in newMap.ReservoirSettings.FeedbackFieldNameCollection)
                 {
-                    if(TaskType == CommonTypes.TaskType.Classification)
+                    if(TaskType != CommonTypes.TaskType.Prediction)
                     {
-                        throw new Exception($"Reservoir instance {newMap.InstanceName}: feedback fields are not allowed for classification task type.");
+                        throw new Exception($"Reservoir instance {newMap.InstanceName}: feedback fields are allowed for prediction task type only.");
                     }
                     //Index in OutputFieldsNames
                     int feedbackFieldIdx = ReadoutLayerConfig.OutputFieldNameCollection.IndexOf(feedbackFieldName);

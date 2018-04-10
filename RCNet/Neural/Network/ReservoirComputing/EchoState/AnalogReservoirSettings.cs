@@ -7,6 +7,7 @@ using System.Xml.Linq;
 using System.IO;
 using RCNet.XmlTools;
 using RCNet.Neural.Activation;
+using RCNet.Neural.Weight;
 
 namespace RCNet.Neural.Network.ReservoirComputing.EchoState
 {
@@ -51,10 +52,9 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
         /// </summary>
         public double InputConnectionDensity { get; set; }
         /// <summary>
-        /// A weight of each input field to reservoir's neuron connection will be randomly selected
-        /// from the open interval (-InputWeightScale, +InputWeightScale).
+        /// A weight of each input field to reservoir's neuron connection.
         /// </summary>
-        public double InputWeightScale { get; set; }
+        public RandomWeightSettings InputWeight { get; set; }
         /// <summary>
         /// Number of the neurons in the reservoir.
         /// </summary>
@@ -65,15 +65,13 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
         public ActivationFactory.ActivationType ReservoirNeuronActivation { get; set; }
         /// <summary>
         /// Each reservoir's neuron has its own constant input bias. Bias is always added to input signal of the neuron.
-        /// A constant bias value will be for each neuron selected randomly from the range (-BiasScale;+BiasScale).
-        /// To disable biasing specify 0.
+        /// A constant bias value will be for each neuron selected randomly.
         /// </summary>
-        public double BiasScale { get; set; }
+        public RandomWeightSettings Bias { get; set; }
         /// <summary>
-        /// Neurons in the reservoir are interconnected. The weight of the connection will be randomly selected
-        /// from the open interval (-InternalWeightScale, +InternalWeightScale).
+        /// Neurons in the reservoir are interconnected. The weight of the connection will be randomly selected.
         /// </summary>
-        public double InternalWeightScale { get; set; }
+        public RandomWeightSettings InternalWeight { get; set; }
         /// <summary>
         /// One of the supported reservoir topologies of internal neural networking.
         /// See the enumeration ReservoirTopologyType.
@@ -116,9 +114,9 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
         /// </summary>
         public ActivationFactory.ActivationType ContextNeuronActivation { get; set; }
         /// <summary>
-        /// Each weight of the connection from the reservoir neuron to the contex neuron will have this value
+        /// Each weight of the connection from the reservoir neuron to the contex neuron will be randomly selected.
         /// </summary>
-        public double ContextNeuronInputWeight { get; set; }
+        public RandomWeightSettings ContextNeuronInputWeight { get; set; }
         /// <summary>
         /// The parameter says how many neurons in the reservoir will receive the signal from the context neuron.
         /// Count = Size * Density
@@ -127,8 +125,10 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
         /// <summary>
         /// Weight of the feedback connection from the context neuron.
         /// </summary>
-        public double ContextNeuronFeedbackWeight { get; set; }
+        public RandomWeightSettings ContextNeuronFeedbackWeight { get; set; }
+        /// <summary>
         /// Indicates whether the feedback feature is used.
+        /// </summary>
         public bool FeedbackFeature { get; set; }
         /// <summary>
         /// Each feedback field will be connected by the random weight to the number of
@@ -137,10 +137,9 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
         /// </summary>
         public double FeedbackConnectionDensity { get; set; }
         /// <summary>
-        /// A weight of each feedback field to reservoir's neuron connection will be randomly selected
-        /// from the open interval (-FeedbackWeightScale, +FeedbackWeightScale).
+        /// A weight of each feedback field to reservoir's neuron connection will be randomly selected.
         /// </summary>
-        public double FeedbackWeightScale { get; set; }
+        public RandomWeightSettings FeedbackWeight { get; set; }
         /// <summary>
         /// Collection of feedback field names.
         /// </summary>
@@ -154,11 +153,11 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
         {
             SettingsName = string.Empty;
             InputConnectionDensity = 0;
-            InputWeightScale = 0;
+            InputWeight = new RandomWeightSettings();
             Size = 0;
             ReservoirNeuronActivation = ActivationFactory.ActivationType.TanH;
-            BiasScale = 0;
-            InternalWeightScale = 0;
+            Bias = new RandomWeightSettings();
+            InternalWeight = new RandomWeightSettings();
             TopologyType = ReservoirTopologyType.Random;
             TopologySettings = null;
             RetainmentNeuronsFeature = false;
@@ -167,12 +166,12 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
             RetainmentMaxRate = 0;
             ContextNeuronFeature = false;
             ContextNeuronActivation = ReservoirNeuronActivation;
-            ContextNeuronInputWeight = 0;
+            ContextNeuronInputWeight = new RandomWeightSettings();
             ContextNeuronFeedbackDensity = 0;
-            ContextNeuronFeedbackWeight = 0;
+            ContextNeuronFeedbackWeight = new RandomWeightSettings();
             FeedbackFeature = false;
             FeedbackConnectionDensity = 0;
-            FeedbackWeightScale = 0;
+            FeedbackWeight = new RandomWeightSettings();
             FeedbackFieldNameCollection = new List<string>();
             return;
         }
@@ -185,11 +184,11 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
         {
             SettingsName = source.SettingsName;
             InputConnectionDensity = source.InputConnectionDensity;
-            InputWeightScale = source.InputWeightScale;
+            InputWeight = new RandomWeightSettings(source.InputWeight);
             Size = source.Size;
             ReservoirNeuronActivation = source.ReservoirNeuronActivation;
-            BiasScale = source.BiasScale;
-            InternalWeightScale = source.InternalWeightScale;
+            Bias = new RandomWeightSettings(source.Bias);
+            InternalWeight = new RandomWeightSettings(source.InternalWeight);
             TopologyType = source.TopologyType;
             if (source.TopologySettings != null)
             {
@@ -212,12 +211,12 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
             RetainmentMaxRate = source.RetainmentMaxRate;
             ContextNeuronFeature = source.ContextNeuronFeature;
             ContextNeuronActivation = source.ContextNeuronActivation;
-            ContextNeuronInputWeight = source.ContextNeuronInputWeight;
+            ContextNeuronInputWeight = new RandomWeightSettings(source.ContextNeuronInputWeight);
             ContextNeuronFeedbackDensity = source.ContextNeuronFeedbackDensity;
-            ContextNeuronFeedbackWeight = source.ContextNeuronFeedbackWeight;
+            ContextNeuronFeedbackWeight = new RandomWeightSettings(source.ContextNeuronFeedbackWeight);
             FeedbackFeature = source.FeedbackFeature;
             FeedbackConnectionDensity = source.FeedbackConnectionDensity;
-            FeedbackWeightScale = source.FeedbackWeightScale;
+            FeedbackWeight = new RandomWeightSettings(source.FeedbackWeight);
             FeedbackFieldNameCollection = new List<string>(source.FeedbackFieldNameCollection);
             return;
         }
@@ -226,11 +225,11 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
         /// Creates the instance and initialize it from given xml element.
         /// This is the preferred way to instantiate reservoir settings.
         /// </summary>
-        /// <param name="reservoirSettingsElem">
+        /// <param name="elem">
         /// Xml data containing reservoir settings.
         /// Content of xml element is always validated against the xml schema.
         /// </param>
-        public AnalogReservoirSettings(XElement reservoirSettingsElem)
+        public AnalogReservoirSettings(XElement elem)
         {
             //Validation
             //A very ugly validation. Xml schema does not support validation of the xml fragment against specific type.
@@ -244,20 +243,20 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
             {
                 validator.AddSchema(schemaStream);
             }
-            validator.LoadXDocFromString(reservoirSettingsElem.ToString());
+            XElement reservoirSettingsElem = validator.LoadXDocFromString(elem.ToString()).Root;
             //Parsing
             //Settings name
             SettingsName = reservoirSettingsElem.Attribute("name").Value;
             //Input
             XElement inputElem = reservoirSettingsElem.Descendants("input").First();
             InputConnectionDensity = double.Parse(inputElem.Attribute("connectionDensity").Value, CultureInfo.InvariantCulture);
-            InputWeightScale = double.Parse(inputElem.Attribute("weightScale").Value, CultureInfo.InvariantCulture);
+            InputWeight = new RandomWeightSettings(inputElem.Descendants("weight").First());
             //Internal
             XElement internalElem = reservoirSettingsElem.Descendants("internal").First();
             Size = int.Parse(internalElem.Attribute("size").Value);
             ReservoirNeuronActivation = ActivationFactory.ParseActivation(internalElem.Attribute("activation").Value);
-            BiasScale = double.Parse(internalElem.Attribute("biasScale").Value, CultureInfo.InvariantCulture);
-            InternalWeightScale = double.Parse(internalElem.Attribute("weightScale").Value, CultureInfo.InvariantCulture);
+            Bias = new RandomWeightSettings(internalElem.Descendants("bias").First());
+            InternalWeight = new RandomWeightSettings(internalElem.Descendants("weight").First());
             //Topology
             List<XElement> topologyElems = new List<XElement>();
             topologyElems.AddRange(internalElem.Descendants("topologyRandom"));
@@ -314,20 +313,20 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
             if (ContextNeuronFeature)
             {
                 ContextNeuronActivation = ActivationFactory.ParseActivation(ctxNeuronElem.Attribute("activation").Value);
-                ContextNeuronInputWeight = double.Parse(ctxNeuronElem.Attribute("inputWeight").Value, CultureInfo.InvariantCulture);
+                ContextNeuronInputWeight = new RandomWeightSettings(ctxNeuronElem.Descendants("inputWeight").First());
                 ContextNeuronFeedbackDensity = double.Parse(ctxNeuronElem.Attribute("feedbackDensity").Value, CultureInfo.InvariantCulture);
-                ContextNeuronFeedbackWeight = double.Parse(ctxNeuronElem.Attribute("feedbackWeight").Value, CultureInfo.InvariantCulture);
+                ContextNeuronFeedbackWeight = new RandomWeightSettings(ctxNeuronElem.Descendants("feedbackWeight").First());
                 ContextNeuronFeature = (ContextNeuronFeedbackDensity > 0 &&
-                                        ContextNeuronInputWeight > 0 &&
-                                        ContextNeuronFeedbackWeight > 0
+                                        ContextNeuronInputWeight.Active &&
+                                        ContextNeuronFeedbackWeight.Active
                                         );
             }
             else
             {
                 ContextNeuronActivation = ReservoirNeuronActivation;
-                ContextNeuronInputWeight = 0;
+                ContextNeuronInputWeight = new RandomWeightSettings(0, 0);
                 ContextNeuronFeedbackDensity = 0;
-                ContextNeuronFeedbackWeight = 0;
+                ContextNeuronFeedbackWeight = new RandomWeightSettings(0, 0);
             }
             //Feedback
             XElement feedbackElem = reservoirSettingsElem.Descendants("feedback").FirstOrDefault();
@@ -336,8 +335,8 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
             if (FeedbackFeature)
             {
                 FeedbackConnectionDensity = double.Parse(feedbackElem.Attribute("density").Value, CultureInfo.InvariantCulture);
-                FeedbackWeightScale = double.Parse(feedbackElem.Attribute("weightScale").Value, CultureInfo.InvariantCulture);
-                foreach (XElement feedbackFieldElem in feedbackElem.Descendants("field"))
+                FeedbackWeight = new RandomWeightSettings(feedbackElem.Descendants("weight").First());
+                foreach (XElement feedbackFieldElem in feedbackElem.Descendants("feedbackFields").First().Descendants("field"))
                 {
                     FeedbackFieldNameCollection.Add(feedbackFieldElem.Attribute("name").Value);
                 }
@@ -346,7 +345,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
             else
             {
                 FeedbackConnectionDensity = 0;
-                FeedbackWeightScale = 0;
+                FeedbackWeight = new RandomWeightSettings(0, 0);
             }
             return;
         }
@@ -380,11 +379,11 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
             AnalogReservoirSettings cmpSettings = obj as AnalogReservoirSettings;
             if (SettingsName != cmpSettings.SettingsName ||
                 InputConnectionDensity != cmpSettings.InputConnectionDensity ||
-                InputWeightScale != cmpSettings.InputWeightScale ||
+                !InputWeight.Equals(cmpSettings.InputWeight) ||
                 Size != cmpSettings.Size ||
                 ReservoirNeuronActivation != cmpSettings.ReservoirNeuronActivation ||
-                InternalWeightScale != cmpSettings.InternalWeightScale ||
-                BiasScale != cmpSettings.BiasScale ||
+                !InternalWeight.Equals(cmpSettings.InternalWeight) ||
+                !Bias.Equals(cmpSettings.Bias) ||
                 TopologyType != cmpSettings.TopologyType ||
                 !TopologySettings.Equals(cmpSettings.TopologySettings) ||
                 RetainmentNeuronsFeature != cmpSettings.RetainmentNeuronsFeature ||
@@ -394,11 +393,11 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
                 ContextNeuronFeature != cmpSettings.ContextNeuronFeature ||
                 ContextNeuronFeedbackDensity != cmpSettings.ContextNeuronFeedbackDensity ||
                 ContextNeuronActivation != cmpSettings.ContextNeuronActivation ||
-                ContextNeuronInputWeight != cmpSettings.ContextNeuronInputWeight ||
-                ContextNeuronFeedbackWeight != cmpSettings.ContextNeuronFeedbackWeight ||
+                !ContextNeuronInputWeight.Equals(cmpSettings.ContextNeuronInputWeight) ||
+                !ContextNeuronFeedbackWeight.Equals(cmpSettings.ContextNeuronFeedbackWeight) ||
                 FeedbackFeature != cmpSettings.FeedbackFeature ||
                 FeedbackConnectionDensity != cmpSettings.FeedbackConnectionDensity ||
-                FeedbackWeightScale != cmpSettings.FeedbackWeightScale
+                !FeedbackWeight.Equals(cmpSettings.FeedbackWeight)
                 )
             {
                 return false;

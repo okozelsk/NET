@@ -47,7 +47,7 @@ namespace RCNet.CsvTools
         /// <param name="remainingInputVector">
         /// Returned the last input vector unused in the bundle.
         /// </param>
-        public static PredictionBundle Load(string fileName,
+        public static TimeSeriesBundle Load(string fileName,
                                              List<string> inputFieldNameCollection,
                                              List<string> outputFieldNameCollection,
                                              Interval normRange,
@@ -58,7 +58,7 @@ namespace RCNet.CsvTools
                                              out double[] remainingInputVector
                                              )
         {
-            PredictionBundle bundle = null;
+            TimeSeriesBundle bundle = null;
             bundleNormalizer = new BundleNormalizer(normRange, normReserveRatio, dataStandardization, normReserveRatio, dataStandardization);
             using (StreamReader streamReader = new StreamReader(new FileStream(fileName, FileMode.Open)))
             {

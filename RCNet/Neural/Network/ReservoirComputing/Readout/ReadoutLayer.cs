@@ -116,7 +116,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
                 }
             }
             //Create shuffled copy of the data
-            PredictionBundle shuffledData = new PredictionBundle(predictorsCollection, idealOutputsCollection);
+            TimeSeriesBundle shuffledData = new TimeSeriesBundle(predictorsCollection, idealOutputsCollection);
             shuffledData.Shuffle(_rand);
             //Data inspection, preparation of datasets and training of ReadoutUnits
             //Clusters of readout units (one cluster for each output field)
@@ -142,7 +142,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
                         refBinDistr.Update(value);
                     }
                 }
-                List<PredictionBundle> subBundleCollection = null;
+                List<TimeSeriesBundle> subBundleCollection = null;
                 //Datasets preparation is depending on the task type
                 if (_taskType == CommonTypes.TaskType.Classification)
                 {
@@ -155,11 +155,11 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
                 }
                 else
                 {
-                    //Prediction task
-                    subBundleCollection = DivideSamplesForPrediction(shuffledData.InputVectorCollection,
-                                                                     idealValueCollection,
-                                                                     testDataSetLength
-                                                                     );
+                    //Prediction or Hybrid task
+                    subBundleCollection = DivideSamplesForPredictionOrHybrid(shuffledData.InputVectorCollection,
+                                                                             idealValueCollection,
+                                                                             testDataSetLength
+                                                                             );
                 }
                 //Readout units in the cluster
                 for (int foldIdx = 0; foldIdx < numOfFolds; foldIdx++)
@@ -177,20 +177,20 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
                     }
                     //Call training regression for the single readout unit
                     _clusterCollection[clusterIdx][foldIdx] = ReadoutUnit.CreateTrained(_taskType,
-                                                                                            clusterIdx,
-                                                                                            _settings.OutputFieldNameCollection[clusterIdx],
-                                                                                            foldIdx + 1,
-                                                                                            numOfFolds,
-                                                                                            refBinDistr,
-                                                                                            trainingPredictorsCollection,
-                                                                                            trainingIdealValueCollection,
-                                                                                            subBundleCollection[foldIdx].InputVectorCollection,
-                                                                                            subBundleCollection[foldIdx].OutputVectorCollection,
-                                                                                            _rand,
-                                                                                            _settings.ReadoutUnitCfg,
-                                                                                            regressionController,
-                                                                                            regressionControllerData
-                                                                                            );
+                                                                                        clusterIdx,
+                                                                                        _settings.OutputFieldNameCollection[clusterIdx],
+                                                                                        foldIdx + 1,
+                                                                                        numOfFolds,
+                                                                                        refBinDistr,
+                                                                                        trainingPredictorsCollection,
+                                                                                        trainingIdealValueCollection,
+                                                                                        subBundleCollection[foldIdx].InputVectorCollection,
+                                                                                        subBundleCollection[foldIdx].OutputVectorCollection,
+                                                                                        _rand,
+                                                                                        _settings.ReadoutUnitCfg,
+                                                                                        regressionController,
+                                                                                        regressionControllerData
+                                                                                        );
                 }//foldIdx
                 //Cluster error statistics & data for validation bundle
                 ClusterErrStatistics ces = new ClusterErrStatistics(_taskType, numOfFolds, refBinDistr);
@@ -258,14 +258,14 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
             return outputVector;
         }
         
-        private List<PredictionBundle> DivideSamplesForClassification(List<double[]> predictorsCollection,
+        private List<TimeSeriesBundle> DivideSamplesForClassification(List<double[]> predictorsCollection,
                                                                        List<double[]> idealValueCollection,
                                                                        BinDistribution refBinDistr,
                                                                        int bundleSize
                                                                        )
         {
             int numOfBundles = idealValueCollection.Count / bundleSize;
-            List<PredictionBundle> bundleCollection = new List<PredictionBundle>(numOfBundles);
+            List<TimeSeriesBundle> bundleCollection = new List<TimeSeriesBundle>(numOfBundles);
             //Scan
             int[] bin0SampleIdxs = new int[refBinDistr.NumOf[0]];
             int bin0SamplesPos = 0;
@@ -298,7 +298,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
             bin1SamplesPos = 0;
             for(int bundleNum = 0; bundleNum < numOfBundles; bundleNum++)
             {
-                PredictionBundle bundle = new PredictionBundle();
+                TimeSeriesBundle bundle = new TimeSeriesBundle();
                 //Bin 0
                 for (int i = 0; i < bundleBin0Count; i++)
                 {
@@ -331,18 +331,18 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
             return bundleCollection;
         }
 
-        private List<PredictionBundle> DivideSamplesForPrediction(List<double[]> predictorsCollection,
-                                                                   List<double[]> idealValueCollection,
-                                                                   int bundleSize
-                                                                   )
+        private List<TimeSeriesBundle> DivideSamplesForPredictionOrHybrid(List<double[]> predictorsCollection,
+                                                                          List<double[]> idealValueCollection,
+                                                                          int bundleSize
+                                                                          )
         {
             int numOfBundles = idealValueCollection.Count / bundleSize;
-            List<PredictionBundle> bundleCollection = new List<PredictionBundle>(numOfBundles);
+            List<TimeSeriesBundle> bundleCollection = new List<TimeSeriesBundle>(numOfBundles);
             //Bundles creation
             int samplesPos = 0;
             for (int bundleNum = 0; bundleNum < numOfBundles; bundleNum++)
             {
-                PredictionBundle bundle = new PredictionBundle();
+                TimeSeriesBundle bundle = new TimeSeriesBundle();
                 for (int i = 0; i < bundleSize; i++)
                 {
                     bundle.InputVectorCollection.Add(predictorsCollection[samplesPos]);

@@ -80,11 +80,11 @@ namespace RCNet.Neural.Network.FF
         /// Creates the instance and initialize it from given xml element.
         /// This is the preferred way to instantiate reservoir settings.
         /// </summary>
-        /// <param name="feedForwardNetworkSettingsElem">
+        /// <param name="elem">
         /// Xml data containing feed forward network settings.
         /// Content of xml element is always validated against the xml schema.
         /// </param>
-        public FeedForwardNetworkSettings(XElement feedForwardNetworkSettingsElem)
+        public FeedForwardNetworkSettings(XElement elem)
         {
             //Validation
             //A very ugly validation. Xml schema does not support validation of the xml fragment against specific type.
@@ -98,7 +98,7 @@ namespace RCNet.Neural.Network.FF
             {
                 validator.AddSchema(schemaStream);
             }
-            validator.LoadXDocFromString(feedForwardNetworkSettingsElem.ToString());
+            XElement feedForwardNetworkSettingsElem = validator.LoadXDocFromString(elem.ToString()).Root;
             //Parsing
             OutputActivation = ActivationFactory.ParseActivation(feedForwardNetworkSettingsElem.Attribute("activation").Value);
             RegressionMethod = ParseTrainingMethodType(feedForwardNetworkSettingsElem.Attribute("regressionMethod").Value);

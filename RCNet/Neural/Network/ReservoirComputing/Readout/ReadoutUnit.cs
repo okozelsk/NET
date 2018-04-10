@@ -144,20 +144,30 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
         {
             switch(taskType)
             {
-                case CommonTypes.TaskType.Prediction:
-                    return (current.CombinedPrecisionError < best.CombinedPrecisionError);
                 case CommonTypes.TaskType.Classification:
                     if(current.CombinedBinaryError < best.CombinedBinaryError)
                     {
                         return true;
                     }
-                    else if(current.CombinedBinaryError == best.CombinedBinaryError && current.CombinedPrecisionError < best.CombinedPrecisionError)
+                    else if(current.CombinedBinaryError == best.CombinedBinaryError)
                     {
-                        return true;
+                        if(current.TestingBinErrorStat.TotalErrStat.Sum < best.TestingBinErrorStat.TotalErrStat.Sum)
+                        {
+                            return true;
+                        }
+                        else if (current.TrainingBinErrorStat.TotalErrStat.Sum < best.TrainingBinErrorStat.TotalErrStat.Sum)
+                        {
+                            return true;
+                        }
+                        else if (current.CombinedPrecisionError < best.CombinedPrecisionError)
+                        {
+                            return true;
+                        }
                     }
                     break;
                 default:
-                    break;
+                    //Prediction or hybrid task type
+                    return (current.CombinedPrecisionError < best.CombinedPrecisionError);
             }
             return false;
         }
@@ -192,7 +202,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
                 ParallelPerceptronSettings netCfg = (ParallelPerceptronSettings)settings.NetSettings;
                 ParallelPerceptron ppn = new ParallelPerceptron(trainingPredictorsCollection[0].Length, netCfg);
                 net = ppn;
-                trainer = new ParallelPerceptronTrainer(ppn, trainingPredictorsCollection, trainingIdealOutputsCollection);
+                trainer = new PDeltaRuleTrainer(ppn, trainingPredictorsCollection, trainingIdealOutputsCollection);
             }
             net.RandomizeWeights(rand);
             return;
@@ -261,8 +271,8 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
                     if(taskType == CommonTypes.TaskType.Classification)
                     {
                         currReadoutUnit.TrainingBinErrorStat = new BinErrStat(refBinDistr, trainingComputedOutputsCollection, trainingIdealOutputsCollection);
-                        //currReadoutUnit.CombinedBinaryError = currReadoutUnit.TrainingBinErrorStat.TotalErrStat.ArithAvg;
-                        currReadoutUnit.CombinedBinaryError = currReadoutUnit.TrainingBinErrorStat.ProportionalErr;
+                        currReadoutUnit.CombinedBinaryError = currReadoutUnit.TrainingBinErrorStat.TotalErrStat.Sum;
+                        //currReadoutUnit.CombinedBinaryError = currReadoutUnit.TrainingBinErrorStat.ProportionalErr;
                     }
                     currReadoutUnit.CombinedPrecisionError = currReadoutUnit.TrainingErrorStat.ArithAvg;
                     if (testingPredictorsCollection != null && testingPredictorsCollection.Count > 0)
@@ -272,8 +282,8 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
                         if (taskType == CommonTypes.TaskType.Classification)
                         {
                             currReadoutUnit.TestingBinErrorStat = new BinErrStat(refBinDistr, testingComputedOutputsCollection, testingIdealOutputsCollection);
-                            //currReadoutUnit.CombinedBinaryError = Math.Max(currReadoutUnit.CombinedBinaryError, currReadoutUnit.TestingBinErrorStat.TotalErrStat.ArithAvg);
-                            currReadoutUnit.CombinedBinaryError = Math.Max(currReadoutUnit.CombinedBinaryError, currReadoutUnit.TestingBinErrorStat.ProportionalErr);
+                            currReadoutUnit.CombinedBinaryError = Math.Max(currReadoutUnit.CombinedBinaryError, currReadoutUnit.TestingBinErrorStat.TotalErrStat.Sum);
+                            //currReadoutUnit.CombinedBinaryError = Math.Max(currReadoutUnit.CombinedBinaryError, currReadoutUnit.TestingBinErrorStat.ProportionalErr);
                         }
                     }
                     //Current results processing
@@ -325,10 +335,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
                         bestReadoutUnit = currReadoutUnit.DeepClone();
                     }
                     //Training stop conditions
-                    if (currReadoutUnit.CombinedPrecisionError <= readoutUnitSettings.RegressionAttemptStopMSE ||
-                        stopTrainingCycle ||
-                        stopRegression
-                        )
+                    if (stopTrainingCycle || stopRegression)
                     {
                         break;
                     }

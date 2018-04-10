@@ -53,11 +53,11 @@ namespace RCNet.Neural.Network.PP
         /// Creates the instance and initialize it from given xml element.
         /// This is the preferred way to instantiate reservoir settings.
         /// </summary>
-        /// <param name="parallelPerceptronSettingsElem">
+        /// <param name="elem">
         /// Xml data containing parallel perceptron settings.
         /// Content of xml element is always validated against the xml schema.
         /// </param>
-        public ParallelPerceptronSettings(XElement parallelPerceptronSettingsElem)
+        public ParallelPerceptronSettings(XElement elem)
         {
             //Validation
             //A very ugly validation. Xml schema does not support validation of the xml fragment against specific type.
@@ -71,7 +71,7 @@ namespace RCNet.Neural.Network.PP
             {
                 validator.AddSchema(schemaStream);
             }
-            validator.LoadXDocFromString(parallelPerceptronSettingsElem.ToString());
+            XElement parallelPerceptronSettingsElem = validator.LoadXDocFromString(elem.ToString()).Root;
             //Parsing
             NumOfGates = int.Parse(parallelPerceptronSettingsElem.Attribute("gates").Value, CultureInfo.InvariantCulture);
             Resolution = int.Parse(parallelPerceptronSettingsElem.Attribute("resolution").Value, CultureInfo.InvariantCulture);

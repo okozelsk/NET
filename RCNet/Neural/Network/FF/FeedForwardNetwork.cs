@@ -177,9 +177,9 @@ namespace RCNet.Neural.Network.FF
                 {
                     for (int inputNodeIdx = 0; inputNodeIdx < layer.NumOfInputNodes; inputNodeIdx++, weightFlatIndex++)
                     {
-                        _flatWeights[weightFlatIndex] = rand.NextBoundedUniformDouble(0, b);
+                        _flatWeights[weightFlatIndex] = rand.NextDouble(0, b, false, RandomClassExtensions.DistributionType.Uniform);
                     }
-                    _flatWeights[biasFlatIndex] = rand.NextBoundedUniformDouble(-b, b);
+                    _flatWeights[biasFlatIndex] = rand.NextDouble(-b, b, false, RandomClassExtensions.DistributionType.Uniform);
                 }
             }
             return;
@@ -201,7 +201,10 @@ namespace RCNet.Neural.Network.FF
             }
             else
             {
-                rand.FillUniformRS(_flatWeights, WeightDefaultIniMin, WeightDefaultIniMax);
+                for(int i = 0; i < _flatWeights.Length; i++)
+                {
+                    _flatWeights[i] = rand.NextDouble(WeightDefaultIniMin, WeightDefaultIniMax, true, RandomClassExtensions.DistributionType.Uniform);
+                }
             }
             return;
         }
@@ -286,6 +289,29 @@ namespace RCNet.Neural.Network.FF
                 }
             });
             computedOutputCollection = new List<double[]>(computedOutputs);
+            return errStat;
+        }
+
+        /// <summary>
+        /// Function goes through collection (batch) of the network inputs and for each of them computes the output.
+        /// Computed output is then compared with a corresponding ideal output.
+        /// The error Abs(ideal - computed) is passed to the result error statistics.
+        /// </summary>
+        /// <param name="inputCollection">Collection of the network inputs (batch)</param>
+        /// <param name="idealOutputCollection">Collection of the ideal outputs (batch)</param>
+        /// <returns>Error statistics</returns>
+        public BasicStat ComputeBatchErrorStat(List<double[]> inputCollection, List<double[]> idealOutputCollection)
+        {
+            BasicStat errStat = new BasicStat();
+            Parallel.For(0, inputCollection.Count, row =>
+            {
+                double[] computedOutputVector = Compute(inputCollection[row]);
+                for (int i = 0; i < _numOfOutputValues; i++)
+                {
+                    double error = idealOutputCollection[row][i] - computedOutputVector[i];
+                    errStat.AddSampleValue(Math.Abs(error));
+                }
+            });
             return errStat;
         }
 

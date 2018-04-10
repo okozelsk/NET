@@ -195,6 +195,29 @@ namespace RCNet.Neural.Network.PP
         }
 
         /// <summary>
+        /// Function goes through collection (batch) of the network inputs and for each of them computes the output.
+        /// Computed output is then compared with a corresponding ideal output.
+        /// The error Abs(ideal - computed) is passed to the result error statistics.
+        /// </summary>
+        /// <param name="inputCollection">Collection of the network inputs (batch)</param>
+        /// <param name="idealOutputCollection">Collection of the ideal outputs (batch)</param>
+        /// <returns>Error statistics</returns>
+        public BasicStat ComputeBatchErrorStat(List<double[]> inputCollection, List<double[]> idealOutputCollection)
+        {
+            BasicStat errStat = new BasicStat();
+            Parallel.For(0, inputCollection.Count, row =>
+            {
+                double[] computedOutputVector = Compute(inputCollection[row]);
+                for (int i = 0; i < 1; i++)
+                {
+                    double error = idealOutputCollection[row][i] - computedOutputVector[i];
+                    errStat.AddSampleValue(Math.Abs(error));
+                }
+            });
+            return errStat;
+        }
+
+        /// <summary>
         /// Returns copy of all network internal weights (in a flat format)
         /// </summary>
         public double[] GetWeights()
@@ -226,7 +249,7 @@ namespace RCNet.Neural.Network.PP
         public void RandomizeWeights(Random rand)
         {
             //Random values
-            rand.FillUniformRS(_flatWeights);
+            rand.Fill(_flatWeights, -1, 1, false, RandomClassExtensions.DistributionType.Uniform);
             NormalizeWeights();
             return;
         }

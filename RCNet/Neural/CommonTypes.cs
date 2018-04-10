@@ -23,7 +23,11 @@ namespace RCNet.Neural
             /// <summary>
             /// Classification (Categorization, Pattern recognition) task type
             /// </summary>
-            Classification
+            Classification,
+            /// <summary>
+            /// Prediction task type with input pattern
+            /// </summary>
+            Hybrid
         }
 
         /// <summary>
@@ -36,6 +40,7 @@ namespace RCNet.Neural
             {
                 case "PREDICTION": return TaskType.Prediction;
                 case "CLASSIFICATION": return TaskType.Classification;
+                case "HYBRID": return TaskType.Classification;
                 default:
                     throw new ArgumentException($"Unsupported task type {code}", "code");
             }

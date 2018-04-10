@@ -136,30 +136,31 @@ namespace RCNet.Demo
             {
                 //Time series prediction task
                 //Load data bundle from csv file
-                PredictionBundle data = TimeSeriesDataLoader.Load(demoCaseParams.FileName,
-                                                                   demoCaseParams.EsnCfg.InputFieldNameCollection,
-                                                                   demoCaseParams.EsnCfg.ReadoutLayerConfig.OutputFieldNameCollection,
-                                                                   normRange,
-                                                                   demoCaseParams.NormalizerReserveRatio,
-                                                                   true,
-                                                                   demoCaseParams.SingleNormalizer,
-                                                                   out bundleNormalizer,
-                                                                   out predictionInputVector
-                                                                   );
+                TimeSeriesBundle data = TimeSeriesDataLoader.Load(demoCaseParams.FileName,
+                                                                  demoCaseParams.EsnCfg.InputFieldNameCollection,
+                                                                  demoCaseParams.EsnCfg.ReadoutLayerConfig.OutputFieldNameCollection,
+                                                                  normRange,
+                                                                  demoCaseParams.NormalizerReserveRatio,
+                                                                  true,
+                                                                  demoCaseParams.SingleNormalizer,
+                                                                  out bundleNormalizer,
+                                                                  out predictionInputVector
+                                                                  );
                 rsi = esn.PrepareRegressionStageInput(data, demoCaseParams.NumOfBootSamples, PredictorsCollectionCallback, log);
             }
             else
             {
-                //Classification task
+                //Classification or hybrid task
                 //Load data bundle from csv file
-                ClassificationBundle data = PatternDataLoader.Load(demoCaseParams.FileName,
-                                                                      demoCaseParams.EsnCfg.InputFieldNameCollection,
-                                                                      demoCaseParams.EsnCfg.ReadoutLayerConfig.OutputFieldNameCollection,
-                                                                      normRange,
-                                                                      demoCaseParams.NormalizerReserveRatio,
-                                                                      true,
-                                                                      out bundleNormalizer
-                                                                      );
+                PatternBundle data = PatternDataLoader.Load(demoCaseParams.EsnCfg.TaskType == CommonTypes.TaskType.Classification,
+                                                            demoCaseParams.FileName,
+                                                            demoCaseParams.EsnCfg.InputFieldNameCollection,
+                                                            demoCaseParams.EsnCfg.ReadoutLayerConfig.OutputFieldNameCollection,
+                                                            normRange,
+                                                            demoCaseParams.NormalizerReserveRatio,
+                                                            true,
+                                                            out bundleNormalizer
+                                                            );
                 rsi = esn.PrepareRegressionStageInput(data, PredictorsCollectionCallback, log);
             }
             //Report reservoirs statistics

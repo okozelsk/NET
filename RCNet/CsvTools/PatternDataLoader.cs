@@ -11,21 +11,23 @@ using RCNet.Neural.Network.Data;
 namespace RCNet.CsvTools
 {
     /// <summary>
-    /// The class allows to upload sample data for a Classification task from an .csv file.
+    /// The class allows to upload sample data for a Classification or Hybrid task from a csv file.
     /// </summary>
     public static class PatternDataLoader
     {
         /// <summary>
-        /// Loads the data and prepares ClassificationBundle.
+        /// Loads the data and prepares PatternBundle.
         /// 1st row of the file must start with the #RepetitiveGroupOfAttributes keyword followed by
         /// attribute names.
-        /// 2nd row of the file must start with the #Classes keyword followed by
-        /// class names.
+        /// 2nd row of the file must start with the #Outputs keyword followed by
+        /// output field names.
         /// 3rd+ rows are the data rows.
         /// The data row must begin with at least one set of values for defined repetitive attributes.
-        /// Value groups may be more in sequence.
-        /// The data row must end with a value for each defined classification class.
+        /// The data row must end with a value for each defined output.
         /// </summary>
+        /// <param name="classification">
+        /// In case of classification the standardization and reserve ratio are not applied on output fields.
+        /// </param>
         /// <param name="fileName">
         /// Data file name
         /// </param>
@@ -41,24 +43,25 @@ namespace RCNet.CsvTools
         /// <param name="normReserveRatio">
         /// Reserve held by a normalizer to cover cases where future data exceeds a known range of sample data.
         /// </param>
-        /// <param name="inputDataStandardization">
+        /// <param name="dataStandardization">
         /// Specifies whether to apply data standardization to input data.
         /// Output data is never standardized.
         /// </param>
         /// <param name="bundleNormalizer">
         /// Returned initialized instance of BundleNormalizer.
         /// </param>
-        public static ClassificationBundle Load(string fileName,
-                                                   List<string> inputFieldNameCollection,
-                                                   List<string> outputFieldNameCollection,
-                                                   Interval normRange,
-                                                   double normReserveRatio,
-                                                   bool inputDataStandardization,
-                                                   out BundleNormalizer bundleNormalizer
-                                                   )
+        public static PatternBundle Load(bool classification,
+                                         string fileName,
+                                         List<string> inputFieldNameCollection,
+                                         List<string> outputFieldNameCollection,
+                                         Interval normRange,
+                                         double normReserveRatio,
+                                         bool dataStandardization,
+                                         out BundleNormalizer bundleNormalizer
+                                         )
         {
-            ClassificationBundle bundle = new ClassificationBundle();
-            bundleNormalizer = new BundleNormalizer(normRange, normReserveRatio, inputDataStandardization, 0, false);
+            PatternBundle bundle = new PatternBundle();
+            bundleNormalizer = new BundleNormalizer(normRange, normReserveRatio, dataStandardization, classification ? 0 : normReserveRatio, classification ? false : dataStandardization);
             using (StreamReader streamReader = new StreamReader(new FileStream(fileName, FileMode.Open)))
             {
                 //The first row contains the "#RepetitiveGroupOfAttributes" keyword followed by name(s) of attribute(s)
@@ -92,32 +95,32 @@ namespace RCNet.CsvTools
                         throw new FormatException($"Input field name {inputFieldName} was not found among the repetitive attributes specified in the file.");
                     }
                 }
-                //The second row contains the "#Classes" keyword followed by name(s) of classification class(es)
-                string delimitedClassNames = streamReader.ReadLine();
-                if (!delimitedClassNames.StartsWith("#Classes"))
+                //The second row contains the "#Outputs" keyword followed by name(s) of output class(es) or values(s)
+                string delimitedOutputNames = streamReader.ReadLine();
+                if (!delimitedOutputNames.StartsWith("#Outputs"))
                 {
-                    throw new FormatException("2nd row of the file doesn't start with the #Classes keyword.");
+                    throw new FormatException("2nd row of the file doesn't start with the #Outputs keyword.");
                 }
-                DelimitedStringValues classNames = new DelimitedStringValues(csvDelimiter);
-                classNames.LoadFromString(delimitedClassNames);
-                classNames.RemoveTrailingWhites();
-                //Check if the there is at least one classification class name
-                if (classNames.NumOfStringValues < 2)
+                DelimitedStringValues outputNames = new DelimitedStringValues(csvDelimiter);
+                outputNames.LoadFromString(delimitedOutputNames);
+                outputNames.RemoveTrailingWhites();
+                //Check if the there is at least one output name
+                if (outputNames.NumOfStringValues < 2)
                 {
-                    throw new FormatException("Missing classification class(es) name(es).");
+                    throw new FormatException("Missing output name(es).");
                 }
-                //Remove the #Classes keyword from the collection
-                classNames.RemoveAt(0);
-                //Check if class names match with the output fields collection
-                if (classNames.NumOfStringValues != outputFieldNameCollection.Count)
+                //Remove the #Outputs keyword from the collection
+                outputNames.RemoveAt(0);
+                //Check if output names match with the output fields collection
+                if (outputNames.NumOfStringValues != outputFieldNameCollection.Count)
                 {
-                    throw new FormatException("Different number of classes in the file and number of specified output fields.");
+                    throw new FormatException("Different number of outputs in the file and number of specified output fields.");
                 }
                 foreach (string outputFieldName in outputFieldNameCollection)
                 {
-                    if (classNames.IndexOf(outputFieldName) < 0)
+                    if (outputNames.IndexOf(outputFieldName) < 0)
                     {
-                        throw new FormatException($"Output field name {outputFieldName} was not found among the classes specified in the file.");
+                        throw new FormatException($"Output field name {outputFieldName} was not found among the outputs specified in the file.");
                     }
                 }
                 //Bundle handler setup
@@ -126,10 +129,10 @@ namespace RCNet.CsvTools
                     bundleNormalizer.DefineField(attrName, attrName);
                     bundleNormalizer.DefineInputField(attrName);
                 }
-                foreach (string className in classNames.StringValueCollection)
+                foreach (string outputName in outputNames.StringValueCollection)
                 {
-                    bundleNormalizer.DefineField(className, className);
-                    bundleNormalizer.DefineOutputField(className);
+                    bundleNormalizer.DefineField(outputName, outputName);
+                    bundleNormalizer.DefineOutputField(outputName);
                 }
                 bundleNormalizer.FinalizeStructure();
                 //Load data
@@ -139,14 +142,14 @@ namespace RCNet.CsvTools
                     dataRow.LoadFromString(streamReader.ReadLine());
                     dataRow.RemoveTrailingWhites();
                     //Check data length
-                    if (dataRow.NumOfStringValues < repetitiveGroupOfAttributes.NumOfStringValues + classNames.NumOfStringValues ||
-                       ((dataRow.NumOfStringValues - classNames.NumOfStringValues) % repetitiveGroupOfAttributes.NumOfStringValues)!= 0)
+                    if (dataRow.NumOfStringValues < repetitiveGroupOfAttributes.NumOfStringValues + outputNames.NumOfStringValues ||
+                       ((dataRow.NumOfStringValues - outputNames.NumOfStringValues) % repetitiveGroupOfAttributes.NumOfStringValues)!= 0)
                     {
                         throw new FormatException("Incorrect length of data row.");
                     }
                     //Pattern data
                     List<double[]> patternData = new List<double[]>();
-                    for(int grpIdx = 0; grpIdx < (dataRow.NumOfStringValues - classNames.NumOfStringValues) / repetitiveGroupOfAttributes.NumOfStringValues; grpIdx++)
+                    for(int grpIdx = 0; grpIdx < (dataRow.NumOfStringValues - outputNames.NumOfStringValues) / repetitiveGroupOfAttributes.NumOfStringValues; grpIdx++)
                     {
                         double[] inputVector = new double[repetitiveGroupOfAttributes.NumOfStringValues];
                         for(int attrIdx = 0; attrIdx < repetitiveGroupOfAttributes.NumOfStringValues; attrIdx++)
@@ -155,12 +158,12 @@ namespace RCNet.CsvTools
                         }//attrIdx
                         patternData.Add(inputVector);
                     }//grpIdx
-                    //Classification classes data
-                    double[] outputVector = new double[classNames.NumOfStringValues];
-                    for(int classIdx = (dataRow.NumOfStringValues - classNames.NumOfStringValues), i = 0; classIdx < dataRow.NumOfStringValues; classIdx++, i++)
+                    //Output data
+                    double[] outputVector = new double[outputNames.NumOfStringValues];
+                    for(int outputIdx = (dataRow.NumOfStringValues - outputNames.NumOfStringValues), i = 0; outputIdx < dataRow.NumOfStringValues; outputIdx++, i++)
                     {
-                        outputVector[i] = dataRow.GetValue(classIdx).ParseDouble(true, $"Can't parse double value {dataRow.GetValue(classIdx)}.");
-                    }//classIdx
+                        outputVector[i] = dataRow.GetValue(outputIdx).ParseDouble(true, $"Can't parse double value {dataRow.GetValue(outputIdx)}.");
+                    }//outputIdx
                     bundle.AddPair(patternData, outputVector);
                 }//while !EOF
             }//using streamReader

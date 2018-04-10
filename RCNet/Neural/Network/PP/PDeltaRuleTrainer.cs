@@ -63,7 +63,7 @@ namespace RCNet.Neural.Network.PP
     /// Implements parallel perceptron trainer (p-delta rule)
     /// </summary>
     [Serializable]
-    public class ParallelPerceptronTrainer : INonRecurrentNetworkTrainer
+    public class PDeltaRuleTrainer : INonRecurrentNetworkTrainer
     {
         //Attributes
         private PPTrainParameters _parameters;
@@ -85,17 +85,17 @@ namespace RCNet.Neural.Network.PP
 
         //Constructor
         /// <summary>
-        /// Constructs a parallel perceptron trainer
+        /// Constructs a parallel perceptron P-Delta rule trainer
         /// </summary>
         /// <param name="net">PP to be trained</param>
         /// <param name="inputVectorCollection">Predictors (input)</param>
         /// <param name="outputVectorCollection">Ideal outputs (the same number of rows as number of inputs)</param>
         /// <param name="parameters">Optional startup parameters of the trainer</param>
-        public ParallelPerceptronTrainer(ParallelPerceptron net,
-                                         List<double[]> inputVectorCollection,
-                                         List<double[]> outputVectorCollection,
-                                         PPTrainParameters parameters = null
-                                         )
+        public PDeltaRuleTrainer(ParallelPerceptron net,
+                                 List<double[]> inputVectorCollection,
+                                 List<double[]> outputVectorCollection,
+                                 PPTrainParameters parameters = null
+                                 )
         {
             //Parameters
             _parameters = parameters;
@@ -254,7 +254,7 @@ namespace RCNet.Neural.Network.PP
                     }
                 }
             });
-            //Adjust local weights
+            //Update original weights, affect workers accumulators.
             double glM = 0;
             foreach (WorkerRange worker in _workerRangeCollection)
             {
@@ -264,8 +264,7 @@ namespace RCNet.Neural.Network.PP
             //How it looks after weight changes?
             _net.SetWeights(adjustedNetworkWeights);
             _net.NormalizeWeights();
-            List<double[]> computedVectors = null;
-            _currMSE = _net.ComputeBatchErrorStat(_inputVectorCollection, _outputVectorCollection, out computedVectors).MeanSquare;
+            _currMSE = _net.ComputeBatchErrorStat(_inputVectorCollection, _outputVectorCollection).MeanSquare;
             //Adjust learning parameters and weights according to results
             AdjustLearning(glM / (double)_inputVectorCollection.Count);
             return;

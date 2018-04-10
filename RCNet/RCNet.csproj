@@ -74,13 +74,13 @@
     <Compile Include="Neural\Activation\TanhAF.cs" />
     <Compile Include="Neural\CommonTypes.cs" />
     <Compile Include="Neural\Network\Data\BundleNormalizer.cs" />
-    <Compile Include="Neural\Network\Data\ClassificationBundle.cs" />
+    <Compile Include="Neural\Network\Data\PatternBundle.cs" />
     <Compile Include="Neural\Network\Data\ValidationBundle.cs" />
-    <Compile Include="Neural\Network\Data\PredictionBundle.cs" />
+    <Compile Include="Neural\Network\Data\TimeSeriesBundle.cs" />
     <Compile Include="Neural\Network\PP\ParallelPerceptronSettings.cs" />
     <Compile Include="Neural\Network\INonRecurrentNetwork.cs" />
     <Compile Include="Neural\Network\PP\ParallelPerceptron.cs" />
-    <Compile Include="Neural\Network\PP\ParallelPerceptronTrainer.cs" />
+    <Compile Include="Neural\Network\PP\PDeltaRuleTrainer.cs" />
     <Compile Include="Neural\Network\ReservoirComputing\EchoState\AnalogNeuron.cs" />
     <Compile Include="Neural\Network\ReservoirComputing\EchoState\AnalogReservoir.cs" />
     <Compile Include="Neural\Network\FF\FeedForwardNetworkSettings.cs" />
@@ -94,6 +94,7 @@
     <Compile Include="Neural\Network\ReservoirComputing\Readout\ReadoutLayerSettings.cs" />
     <Compile Include="Neural\Network\ReservoirComputing\Readout\ReadoutLayer.cs" />
     <Compile Include="Neural\Network\ReservoirComputing\Readout\ReadoutUnit.cs" />
+    <Compile Include="Neural\Weight\RandomWeightSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Queue\SimpleQueue.cs" />
     <Compile Include="XmlTools\XmlValidator.cs" />
