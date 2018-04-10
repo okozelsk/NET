@@ -4,7 +4,7 @@ Currently implemented components
 --------------------------------
 Normalizer
 	Data normalization/denormalization
-	Gausse standardization
+	Gaussian standardization
 Activation functions
 	TanH
 	Elliot (Softsign)
@@ -12,13 +12,16 @@ Activation functions
 	Identity (Linear)
 	ISRU (Inverse Squere Root Unit)
 	Gaussian
+Random distributions
+	Uniform
+	Gaussian
 Feed Forward Network
 	Multiple hidden layers
 	Trainers
 		Resilient propagation trainer (iRPROP+ variant)
 		Linear regression trainer
 Parallel Perceptron Network
-	Parallel Perceptron Trainer (p-delta rule)
+	P-Delta Rule Trainer
 Analog Reservoir
 	Supported topologies:
 		Random
@@ -28,12 +31,15 @@ Analog Reservoir
 	Retainment neurons (leaky integrators) feature
 	Augmented states feature
 Echo State Network
+	Xml constructor
 	Multiple internal reservoirs
-	Esn does not support SpectralRadius parameter (low added value)
+	Esn does not support SpectralRadius parameter (high comp. cost)
 		but provides useful internal statistics
 	Supported task types:
 		Prediction
 		Classification
+			Supports variable length of patterns
+		Hybrid
 			Supports variable length of patterns
 Readout layer
 	Independent on predictors generator
@@ -42,12 +48,10 @@ Readout layer
 		Cluster of readout units per each output field
 			Feed Forward Network or Parallel Perceptron
 Bundle normalizer
-	Helper for normalization of data in a bundle
-
-Data loaders (csv)
-	csv data format for specific task type
-		Prediction (time series)
-		Classification
+	Helper for bundle of data normalization
+Bundle Data loaders (csv)
+	PatternDataLoader (Classification or Hybrid task)
+	TimeSeriesDataLoader (Prediction task)
 
 Demo application
 ----------------
