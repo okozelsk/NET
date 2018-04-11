@@ -380,6 +380,28 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
+        /// Function computes ArithAvg, Variance and StdDev for next hypothetical sample value.
+        /// Function does not change instance, it is a simulation only.
+        /// </summary>
+        /// <param name="simSampleValue">Next hypothetical sample value</param>
+        /// <param name="simArithAvg">Simulated ArithAvg</param>
+        /// <param name="simVariance">Simulated Variance</param>
+        /// <param name="simStdDev">Simulated StdDev</param>
+        public void SimulateNext(double simSampleValue, out double simArithAvg, out double simVariance, out double simStdDev)
+        {
+            lock (_lock)
+            {
+                Recompute();
+                simArithAvg = (_sum + simSampleValue) / (double)(_numOfSamples + 1);
+                simVariance = ((_sumOfSquares + simSampleValue.Power(2)) / (double)(_numOfSamples + 1)) - simArithAvg.Power(2);
+                simStdDev = Math.Sqrt(simVariance);
+            }
+            return;
+        }
+
+
+
+        /// <summary>
         /// Affects the sample value
         /// </summary>
         public void AddSampleValue(double value)

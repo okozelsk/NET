@@ -9,10 +9,10 @@ namespace RCNet.MathTools
     public class WeightedAvg
     {
         //Attributes
-        private double m_sumOfValues;
-        private double m_sumOfWeights;
-        private double m_avg;
-        private int m_numOfSamples;
+        private double _sumOfWeightedValues;
+        private double _sumOfWeights;
+        private double _avg;
+        private int _numOfSamples;
         
         //Constructors
         /// <summary>
@@ -38,23 +38,23 @@ namespace RCNet.MathTools
         /// <summary>
         /// Indicates the readyness
         /// </summary>
-        public bool Initialized { get { return (m_numOfSamples > 0); } }
+        public bool Initialized { get { return (_numOfSamples > 0); } }
         /// <summary>
         /// Number of considered samples
         /// </summary>
-        public int NumOfSamples { get { return m_numOfSamples; } }
+        public int NumOfSamples { get { return _numOfSamples; } }
         /// <summary>
         /// The weighted average
         /// </summary>
-        public double Avg { get { return m_avg; } }
+        public double Avg { get { return _avg; } }
         /// <summary>
         /// The sum of values
         /// </summary>
-        public double SumOfValues { get { return m_sumOfValues; } }
+        public double SumOfValues { get { return _sumOfWeightedValues; } }
         /// <summary>
         /// The sum of weights
         /// </summary>
-        public double SumOfWeights { get { return m_sumOfWeights; } }
+        public double SumOfWeights { get { return _sumOfWeights; } }
 
         //Methods
         /// <summary>
@@ -62,15 +62,15 @@ namespace RCNet.MathTools
         /// </summary>
         private double Compute()
         {
-            if (m_sumOfWeights != 0 && m_numOfSamples > 0)
+            if (_sumOfWeights != 0 && _numOfSamples > 0)
             {
-                m_avg = m_sumOfValues / m_sumOfWeights;
+                _avg = _sumOfWeightedValues / _sumOfWeights;
             }
             else
             {
-                m_avg = 0;
+                _avg = 0;
             }
-            return m_avg;
+            return _avg;
         }
 
         /// <summary>
@@ -86,10 +86,10 @@ namespace RCNet.MathTools
         /// </summary>
         public void Reset()
         {
-            m_sumOfValues = 0;
-            m_sumOfWeights = 0;
-            m_avg = 0;
-            m_numOfSamples = 0;
+            _sumOfWeightedValues = 0;
+            _sumOfWeights = 0;
+            _avg = 0;
+            _numOfSamples = 0;
             return;
         }
 
@@ -99,10 +99,10 @@ namespace RCNet.MathTools
         /// <param name="source">Source instance</param>
         public void Adopt(WeightedAvg source)
         {
-            m_sumOfValues = source.m_sumOfValues;
-            m_sumOfWeights = source.m_sumOfWeights;
-            m_avg = source.m_avg;
-            m_numOfSamples = source.m_numOfSamples;
+            _sumOfWeightedValues = source._sumOfWeightedValues;
+            _sumOfWeights = source._sumOfWeights;
+            _avg = source._avg;
+            _numOfSamples = source._numOfSamples;
             return;
         }
 
@@ -114,28 +114,51 @@ namespace RCNet.MathTools
         /// <returns>Weighted average</returns>
         public double AddSampleValue(double value, double weight = 1)
         {
-            m_sumOfValues += value * weight;
-            m_sumOfWeights += weight;
-            ++m_numOfSamples;
+            _sumOfWeightedValues += value * weight;
+            _sumOfWeights += weight;
+            ++_numOfSamples;
             return Compute();
         }
 
         /// <summary>
-        /// Changes or eliminates previously considered sample value
+        /// Removes the sample value and its weight from the weighted average
         /// </summary>
-        /// <param name="oldValue">Value to be changed</param>
-        /// <param name="oldWeight">Weight of the changing value</param>
-        /// <param name="newValue">New value</param>
-        /// <param name="newWeight">Weight of the new value</param>
+        /// <param name="value">Value</param>
+        /// <param name="weight">Weight</param>
         /// <returns>Weighted average</returns>
-        public double ChangeSampleValue(double oldValue, double oldWeight, double newValue, double newWeight)
+        public double RemoveSampleValue(double value, double weight = 1)
         {
-            m_sumOfValues -= (oldValue * oldWeight);
-            m_sumOfValues += (newValue * newWeight);
-            m_sumOfWeights -= oldWeight;
-            m_sumOfWeights += newWeight;
+            if (_numOfSamples > 0)
+            {
+                _sumOfWeightedValues -= value * weight;
+                _sumOfWeights -= weight;
+                --_numOfSamples;
+                if(_numOfSamples == 0)
+                {
+                    _sumOfWeightedValues = 0;
+                    _sumOfWeights = 0;
+                }
+            }
+            else
+            {
+                throw new Exception("Can't remove sample value because there is no samples.");
+            }
             return Compute();
         }
+
+        /// <summary>
+        /// Function computes weighted average for next hypothetical sample value.
+        /// Function does not change instance, it is a simulation only.
+        /// </summary>
+        /// <param name="simValue">Next hypothetical sample value</param>
+        /// <param name="simWeight">Next hypothetical sample value weight</param>
+        /// <returns>Weighted average</returns>
+        public double SimulateNext(double simValue, double simWeight = 1)
+        {
+            return (_sumOfWeightedValues + (simValue * simWeight)) / (_sumOfWeights + simWeight);
+        }
+
+
 
     }//WeightedAvg
 }//Namespace

@@ -59,6 +59,11 @@
     <Compile Include="MathTools\Bitwise.cs" />
     <Compile Include="MathTools\Combinatorics.cs" />
     <Compile Include="MathTools\Factorial.cs" />
+    <Compile Include="MathTools\Hurst\HurstExpVector.cs" />
+    <Compile Include="MathTools\Hurst\HurstExpEstim.cs" />
+    <Compile Include="MathTools\Hurst\RescalledRange.cs" />
+    <Compile Include="MathTools\Point2D.cs" />
+    <Compile Include="MathTools\LinearFit.cs" />
     <Compile Include="MathTools\Interval.cs" />
     <Compile Include="MathTools\MatrixMath\Matrix.cs" />
     <Compile Include="MathTools\MatrixMath\QRD.cs" />
