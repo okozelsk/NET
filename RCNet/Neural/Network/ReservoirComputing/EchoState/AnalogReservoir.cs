@@ -245,7 +245,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
                 }
             }
             EVD eigenvaluesDecomposition = new EVD(wMatrix);
-            return eigenvaluesDecomposition.MaxRealEigenvalue;
+            return eigenvaluesDecomposition.MaxAbsRealEigenvalue;
         }
         
         
