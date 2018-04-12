@@ -31,16 +31,16 @@ namespace RCNet.Neural
         }
 
         /// <summary>
-        /// Parses task type from string code
+        /// Parses the task type from a string code
         /// </summary>
-        /// <param name="code">A task type code</param>
+        /// <param name="code">Task type code</param>
         public static TaskType ParseTaskType(string code)
         {
             switch (code.ToUpper())
             {
                 case "PREDICTION": return TaskType.Prediction;
                 case "CLASSIFICATION": return TaskType.Classification;
-                case "HYBRID": return TaskType.Classification;
+                case "HYBRID": return TaskType.Hybrid;
                 default:
                     throw new ArgumentException($"Unsupported task type {code}", "code");
             }

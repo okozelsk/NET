@@ -38,7 +38,7 @@ namespace RCNet.MathTools.MatrixMath
                 double norm = 0d;
                 for (int i = k; i < _numOfRows; i++)
                 {
-                    norm = Hypotenuse(norm, _QRData[i][k]);
+                    norm = Matrix.Hypotenuse(norm, _QRData[i][k]);
                 }//i
                 if (norm != 0d)
                 {
@@ -192,29 +192,6 @@ namespace RCNet.MathTools.MatrixMath
         }
 
         //Methods
-        //Static methods
-        /// <summary>
-        /// Calculates hypotenuse.
-        /// https://en.wikipedia.org/wiki/Hypot
-        /// </summary>
-        /// <param name="x">The x value.</param>
-        /// <param name="y">The y value.</param>
-        public static double Hypotenuse(double x, double y)
-        {
-            if (Math.Abs(x) > Math.Abs(y))
-            {
-                return Math.Abs(x) * Math.Sqrt(1d + (y / x).Power(2));
-            }
-            else if (y != 0)
-            {
-                return Math.Abs(y) * Math.Sqrt(1d + (x / y).Power(2));
-            }
-            else
-            {
-                return 0;
-            }
-        }
-
         //Instance methods
         /// <summary>
         /// Least squares solution of A*X = B

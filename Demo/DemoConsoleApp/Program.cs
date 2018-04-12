@@ -3,11 +3,6 @@ using System.Collections.Generic;
 using RCNet.Demo;
 using RCNet.Demo.Log;
 
-using RCNet.Extensions;
-using RCNet.MathTools;
-using RCNet.MathTools.Hurst;
-using System.Security.Cryptography;
-
 namespace RCNet.DemoConsoleApp
 {
     class Program

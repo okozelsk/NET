@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Globalization;
 
 namespace RCNet.MathTools.Hurst
 {
     /// <summary>
-    /// The class implements an vector of Hurst exponents.
+    /// The class implements the Hurst exponent vector.
     /// </summary>
     [Serializable]
     public class HurstExpVector

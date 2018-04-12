@@ -62,6 +62,7 @@
     <Compile Include="MathTools\Hurst\HurstExpVector.cs" />
     <Compile Include="MathTools\Hurst\HurstExpEstim.cs" />
     <Compile Include="MathTools\Hurst\RescalledRange.cs" />
+    <Compile Include="MathTools\MatrixMath\EVD.cs" />
     <Compile Include="MathTools\Point2D.cs" />
     <Compile Include="MathTools\LinearFit.cs" />
     <Compile Include="MathTools\Interval.cs" />

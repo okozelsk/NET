@@ -64,6 +64,10 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
         /// </summary>
         public ActivationFactory.ActivationType ReservoirNeuronActivation { get; set; }
         /// <summary>
+        /// Spectral radius.
+        /// </summary>
+        public double SpectralRadius { get; set; }
+        /// <summary>
         /// Each reservoir's neuron has its own constant input bias. Bias is always added to input signal of the neuron.
         /// A constant bias value will be for each neuron selected randomly.
         /// </summary>
@@ -156,6 +160,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
             InputWeight = new RandomWeightSettings();
             Size = 0;
             ReservoirNeuronActivation = ActivationFactory.ActivationType.TanH;
+            SpectralRadius = -1;
             Bias = new RandomWeightSettings();
             InternalWeight = new RandomWeightSettings();
             TopologyType = ReservoirTopologyType.Random;
@@ -187,6 +192,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
             InputWeight = new RandomWeightSettings(source.InputWeight);
             Size = source.Size;
             ReservoirNeuronActivation = source.ReservoirNeuronActivation;
+            SpectralRadius = source.SpectralRadius;
             Bias = new RandomWeightSettings(source.Bias);
             InternalWeight = new RandomWeightSettings(source.InternalWeight);
             TopologyType = source.TopologyType;
@@ -255,6 +261,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
             XElement internalElem = reservoirSettingsElem.Descendants("internal").First();
             Size = int.Parse(internalElem.Attribute("size").Value);
             ReservoirNeuronActivation = ActivationFactory.ParseActivation(internalElem.Attribute("activation").Value);
+            SpectralRadius = internalElem.Attribute("spectralRadius").Value == "NA" ? -1d : double.Parse(internalElem.Attribute("spectralRadius").Value, CultureInfo.InvariantCulture);
             Bias = new RandomWeightSettings(internalElem.Descendants("bias").First());
             InternalWeight = new RandomWeightSettings(internalElem.Descendants("weight").First());
             //Topology
@@ -382,6 +389,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
                 !InputWeight.Equals(cmpSettings.InputWeight) ||
                 Size != cmpSettings.Size ||
                 ReservoirNeuronActivation != cmpSettings.ReservoirNeuronActivation ||
+                SpectralRadius != cmpSettings.SpectralRadius ||
                 !InternalWeight.Equals(cmpSettings.InternalWeight) ||
                 !Bias.Equals(cmpSettings.Bias) ||
                 TopologyType != cmpSettings.TopologyType ||

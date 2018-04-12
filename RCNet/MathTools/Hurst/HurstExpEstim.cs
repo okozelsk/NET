@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace RCNet.MathTools.Hurst
 {
     /// <summary>
-    /// Class implements Hurst exponent estimation calculation (rescalled range method)
+    /// Class implements calculation of the Hurst exponent estimation (rescalled range method)
     /// </summary>
     [Serializable]
     public class HurstExpEstim

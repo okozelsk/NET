@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using RCNet.MathTools;
+using RCNet.MathTools.MatrixMath;
 using RCNet.Extensions;
 using RCNet.Neural.Activation;
 using RCNet.Neural.Weight;
@@ -163,6 +164,32 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
                     SetupDTTTopology((AnalogReservoirSettings.DTTTopologySettings)(_settings.TopologySettings), _settings.InternalWeight);
                     break;
             }
+            //Spectral radius
+            if(_settings.SpectralRadius > 0)
+            {
+                double maxEigenvalue = ComputeMaxEigenValue();
+                if(maxEigenvalue == 0)
+                {
+                    throw new Exception("Invalid reservoir weights. Max eigenvalue is 0.");
+                }
+                double scale = _settings.SpectralRadius / maxEigenvalue;
+                //Scale internal weights
+                foreach(List<Connection> connCollection in _neuronNeuronConnectionsCollection)
+                {
+                    foreach(Connection conn in connCollection)
+                    {
+                        conn.Weight *= scale;
+                    }
+                }
+                if(_settings.ContextNeuronFeature)
+                {
+                    for(int i = 0; i < _neurons.Length; i++)
+                    {
+                        _contextNeuronInputWeights[i] *= scale;
+                        _contextNeuronFeedbackWeights[i] *= scale;
+                    }
+                }
+            }
             //Augmented states
             _augmentedStatesFeature = augmentedStates;
             return;
@@ -180,6 +207,48 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
         public int NumOfOutputPredictors { get { return _augmentedStatesFeature ? _neurons.Length * 2 : _neurons.Length; } }
 
         //Methods
+        /// <summary>
+        /// Computes max eigenvalue
+        /// </summary>
+        private double ComputeMaxEigenValue()
+        {
+            //Create weights matrix
+            Matrix wMatrix = new Matrix(_settings.Size + 1, _settings.Size + 1);
+            //Interconnections
+            for(int row = 0; row < _neuronNeuronConnectionsCollection.Length; row++)
+            {
+                for(int connIdx = 0; connIdx < _neuronNeuronConnectionsCollection[row].Count; connIdx++)
+                {
+                    int col = _neuronNeuronConnectionsCollection[row][connIdx].Idx;
+                    double weight = _neuronNeuronConnectionsCollection[row][connIdx].Weight;
+                    wMatrix.Data[row][col] = weight;
+                }
+            }
+            //Context neuron
+            if (_settings.ContextNeuronFeature)
+            {
+                //To context neuron
+                for (int col = 0; col < _contextNeuronInputWeights.Length; col++)
+                {
+                    if (_contextNeuronInputWeights[col] != 0)
+                    {
+                        wMatrix.Data[_settings.Size][col] = _contextNeuronInputWeights[col];
+                    }
+                }
+                //From context neuron
+                for (int row = 0; row < _contextNeuronFeedbackWeights.Length; row++)
+                {
+                    if (_contextNeuronFeedbackWeights[row] != 0)
+                    {
+                        wMatrix.Data[row][_settings.Size] = _contextNeuronFeedbackWeights[row];
+                    }
+                }
+            }
+            EVD eigenvaluesDecomposition = new EVD(wMatrix);
+            return eigenvaluesDecomposition.MaxRealEigenvalue;
+        }
+        
+        
         /// <summary>
         /// This general function checks the existency of the interconnection between the entity and a party entity
         /// </summary>

@@ -45,6 +45,13 @@
     </xs:restriction>
   </xs:simpleType>
 
+  <!-- NA option-->
+  <xs:simpleType name="NAOptionType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="NA"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <!-- NUMERIC TYPES -->
   <!-- Nonzero unsigned integer -->
   <xs:simpleType name="UIntGT0Type">
@@ -63,6 +70,18 @@
     <xs:restriction base="xs:double">
       <xs:minInclusive value="0" />
     </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Unsigned double GT 0-->
+  <xs:simpleType name="UDoubleGT0Type">
+    <xs:restriction base="xs:double">
+      <xs:minExclusive value="0" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- UDoubleGT0Type with NA option-->
+  <xs:simpleType name="UDoubleGT0NAOptionType">
+    <xs:union memberTypes="UDoubleGT0Type NAOptionType"/>
   </xs:simpleType>
 
   <!-- Unsigned double less than 1 -->
@@ -220,6 +239,7 @@
     </xs:sequence>
     <xs:attribute type="xs:unsignedInt" name="size" use="required" />
     <xs:attribute type="ActivationFunctionType" name="activation" use="required" />
+    <xs:attribute type="UDoubleGT0NAOptionType" name="spectralRadius" use="required" />
   </xs:complexType>
 
   <!-- Analog reservoir - feedback fields - configuration -->

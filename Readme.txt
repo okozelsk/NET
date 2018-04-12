@@ -33,16 +33,23 @@ Analog Reservoir
 Echo State Network
 	Xml constructor
 	Multiple internal reservoirs
-	Esn does not support SpectralRadius parameter (high comp. cost)
-		but provides useful internal statistics
+	Esn supports SpectralRadius parameter (high comp. cost)
+		It can be suppressed by specifying the NA code
+			Esn provides useful internal statistics
 	Supported task types:
 		Prediction
+			Time series input
+			Readout unit output is value prediction
 		Classification
-			Supports variable length of patterns
+			Pattern input
+				Supports variable length of patterns
+			Readout unit output is binary (class Yes/No)
 		Hybrid
-			Supports variable length of patterns
+			Pattern input
+				Supports variable length of patterns
+			Readout unit output is value prediction
 Readout layer
-	Independent on predictors generator
+	Independent on predictors generator (Esn, ...)
 	Supports x-fold cross validation method
 	Clusters of readout units
 		Cluster of readout units per each output field
