@@ -154,14 +154,14 @@ namespace RCNet.MathTools.MatrixMath
         /// <summary>
         /// Return the max real eigenvalue.
         /// </summary>
-        public double MaxRealEigenvalue
+        public double MaxAbsRealEigenvalue
         {
             get
             {
-                double max = _realEigenvalues[0];
+                double max = Math.Abs(_realEigenvalues[0]);
                 for(int i = 1; i < _realEigenvalues.Length; i++)
                 {
-                    max = Math.Max(max, _realEigenvalues[i]);
+                    max = Math.Max(max, Math.Abs(_realEigenvalues[i]));
                 }
                 return max;
             }
