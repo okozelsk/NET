@@ -1,6 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <esnDemo dataFolder=".\\Data">
   <!-- Modify/Tune existing or add your own cases -->
+  <case name="Prediction task High and Low prices of TTOO (T2 Biosystems, Inc.): Single reservoir, Feed Forward, Linear regression">
+    <!-- Data from https://finance.yahoo.com/quote/TTOO/history?p=TTOO -->
+    <samples fileName="TTOO.csv" bootSamples="300" singleNormalizer="true" normalizerReserve="0.1"/>
+    <esnCfg taskType="Prediction" randomizerSeek="0">
+      <inputFields routeToReadout="true">
+        <field name="High"/>
+        <field name="Low"/>
+        <field name="Adj Close"/>
+      </inputFields>
+      <reservoirCfgContainer>
+        <reservoirCfg name="Random topology of 300 TanH neurons">
+          <input connectionDensity="1">
+            <weight min="-0.4" max="0.4"/>
+          </input>
+          <internal size="300" activation="TanH" spectralRadius="0.8">
+            <topologyRandom connectionsDensity="0.1"/>
+            <bias min="0" max="0"/>
+            <weight min="-1" max="1"/>
+          </internal>
+        </reservoirCfg>
+      </reservoirCfgContainer>
+      <reservoirInstanceContainer>
+        <reservoirInstance name="Main" cfg="Random topology of 300 TanH neurons" augmentedStates="false">
+          <inputFields>
+            <field name="High"/>
+            <field name="Low"/>
+            <field name="Adj Close"/>
+          </inputFields>
+        </reservoirInstance>
+      </reservoirInstanceContainer>
+      <readoutLayer testDataRatio="0.1" folds="Auto">
+        <readoutUnit attempts="1" attemptEpochs="100">
+          <ff activation="Identity" regressionMethod="Linear">
+            <linRegrTrainer hiNoiseIntensity="0.2" maxStretch="6" zeroMargin="0.5"/>
+          </ff>
+        </readoutUnit>
+        <outputFields>
+          <field name="High"/>
+          <field name="Low"/>
+        </outputFields>
+      </readoutLayer>
+    </esnCfg>
+  </case>
   <case name="Prediction task High and Low prices of SPXL (Direxion Daily SP500 Bull 3X ETF): Single reservoir, Feed Forward, Hidden layer, Resilient">
     <!-- Data from https://finance.yahoo.com/quote/SPXL/history?p=SPXL -->
     <samples fileName="SPXL.csv" bootSamples="400" singleNormalizer="true" normalizerReserve="0.1"/>
@@ -168,49 +211,6 @@
           <field name="face-up curve"/>
           <field name="face-down curve"/>
           <field name="tremble"/>
-        </outputFields>
-      </readoutLayer>
-    </esnCfg>
-  </case>
-  <case name="Prediction task High and Low prices of TTOO (T2 Biosystems, Inc.): Single reservoir, Feed Forward, Linear regression">
-    <!-- Data from https://finance.yahoo.com/quote/TTOO/history?p=TTOO -->
-    <samples fileName="TTOO.csv" bootSamples="300" singleNormalizer="true" normalizerReserve="0.1"/>
-    <esnCfg taskType="Prediction" randomizerSeek="0">
-      <inputFields routeToReadout="true">
-        <field name="High"/>
-        <field name="Low"/>
-        <field name="Adj Close"/>
-      </inputFields>
-      <reservoirCfgContainer>
-        <reservoirCfg name="Random topology of 300 TanH neurons">
-          <input connectionDensity="1">
-            <weight min="-0.4" max="0.4"/>
-          </input>
-          <internal size="300" activation="TanH" spectralRadius="0.8">
-            <topologyRandom connectionsDensity="0.1"/>
-            <bias min="0" max="0"/>
-            <weight min="-1" max="1"/>
-          </internal>
-        </reservoirCfg>
-      </reservoirCfgContainer>
-      <reservoirInstanceContainer>
-        <reservoirInstance name="Main" cfg="Random topology of 300 TanH neurons" augmentedStates="false">
-          <inputFields>
-            <field name="High"/>
-            <field name="Low"/>
-            <field name="Adj Close"/>
-          </inputFields>
-        </reservoirInstance>
-      </reservoirInstanceContainer>
-      <readoutLayer testDataRatio="0.1" folds="Auto">
-        <readoutUnit attempts="1" attemptEpochs="50">
-          <ff activation="Identity" regressionMethod="Linear">
-            <linRegrTrainer hiNoiseIntensity="0.05" zeroMargin="0.5"/>
-          </ff>
-        </readoutUnit>
-        <outputFields>
-          <field name="High"/>
-          <field name="Low"/>
         </outputFields>
       </readoutLayer>
     </esnCfg>

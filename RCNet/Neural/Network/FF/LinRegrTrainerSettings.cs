@@ -16,10 +16,9 @@ namespace RCNet.Neural.Network.FF
     {
         //Constants
         /// <summary>
-        /// Maximum argument of TanH function
+        /// Default maximum stretch value of TanH function
         /// </summary>
-        public const double MaxTanHArgument = 18;
-
+        public const double DefaultMaxStretch = 8;
         /// <summary>
         /// Default value of the highest noise intensity
         /// </summary>
@@ -35,6 +34,10 @@ namespace RCNet.Neural.Network.FF
         /// </summary>
         public double HiNoiseIntensity { get; set; }
         /// <summary>
+        /// Maximum stretch value of TanH function
+        /// </summary>
+        public double MaxStretch { get; set; }
+        /// <summary>
         /// Margin of noise values from zero
         /// </summary>
         public double ZeroMargin { get; set; }
@@ -44,12 +47,15 @@ namespace RCNet.Neural.Network.FF
         /// Constructs an initialized instance
         /// </summary>
         /// <param name="hiNoiseIntensity">The highest white noise intensity. Between 0 and 1</param>
+        /// <param name="maxStretch">Maximum stretch value of TanH function. GT 1</param>
         /// <param name="zeroMargin">Margin of noise values from zero. Between 0 and 1.</param>
         public LinRegrTrainerSettings(double hiNoiseIntensity = DefaultHiNoiseIntensity,
+                                      double maxStretch = DefaultMaxStretch,
                                       double zeroMargin = DefaultZeroMargin
                                       )
         {
             HiNoiseIntensity = hiNoiseIntensity;
+            MaxStretch = maxStretch;
             ZeroMargin = zeroMargin;
             return;
         }
@@ -61,6 +67,7 @@ namespace RCNet.Neural.Network.FF
         public LinRegrTrainerSettings(LinRegrTrainerSettings source)
         {
             HiNoiseIntensity = source.HiNoiseIntensity;
+            MaxStretch = source.MaxStretch;
             ZeroMargin = source.ZeroMargin;
             return;
         }
@@ -72,6 +79,7 @@ namespace RCNet.Neural.Network.FF
         public LinRegrTrainerSettings(XElement elem)
         {
             HiNoiseIntensity = double.Parse(elem.Attribute("hiNoiseIntensity").Value, CultureInfo.InvariantCulture);
+            MaxStretch = double.Parse(elem.Attribute("maxStretch").Value, CultureInfo.InvariantCulture);
             ZeroMargin = double.Parse(elem.Attribute("zeroMargin").Value, CultureInfo.InvariantCulture);
             return;
         }
@@ -84,7 +92,10 @@ namespace RCNet.Neural.Network.FF
         {
             if (obj == null) return false;
             LinRegrTrainerSettings cmpSettings = obj as LinRegrTrainerSettings;
-            if (HiNoiseIntensity != cmpSettings.HiNoiseIntensity || ZeroMargin != cmpSettings.ZeroMargin)
+            if (HiNoiseIntensity != cmpSettings.HiNoiseIntensity ||
+                MaxStretch != cmpSettings.MaxStretch ||
+                ZeroMargin != cmpSettings.ZeroMargin
+                )
             {
                 return false;
             }

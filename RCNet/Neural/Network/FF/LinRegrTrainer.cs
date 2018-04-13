@@ -88,7 +88,7 @@ namespace RCNet.Neural.Network.FF
             _epoch = 0;
             _alphas = new double[_maxEpoch];
             //Plan the iterations alphas
-            double coeff = (maxEpoch > 1) ? LinRegrTrainerSettings.MaxTanHArgument / (maxEpoch - 1) : 0;
+            double coeff = (maxEpoch > 1) ? _settings.MaxStretch / (maxEpoch - 1) : 0;
             for (int i = 0; i < _maxEpoch; i++)
             {
                 _alphas[i] = _settings.HiNoiseIntensity - _settings.HiNoiseIntensity * Math.Tanh(i* coeff);

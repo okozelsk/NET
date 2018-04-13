@@ -146,6 +146,7 @@
   <!-- FF network - linear regression trainer - configuration -->
   <xs:complexType name="FFNetLinRegrTrainerCfgType">
     <xs:attribute type="UDoubleLT1Type" name="hiNoiseIntensity" use="required"/>
+    <xs:attribute type="UDoubleGT1Type" name="maxStretch" use="optional" default="8"/>
     <xs:attribute type="UDoubleLT1Type" name="zeroMargin" use="required"/>
   </xs:complexType>
 
