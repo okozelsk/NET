@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 
 namespace RCNet.Extensions
 {
@@ -104,14 +105,14 @@ namespace RCNet.Extensions
         public static void Populate<T>(this T[][] array, T value)
         {
             int vLength = array.GetUpperBound(0) + 1;
-            for (int i = 0; i < vLength; i++)
+            Parallel.For(0, vLength, i =>
             {
                 int hLength = array[i].GetUpperBound(0) + 1;
                 for (int j = 0; j < hLength; j++)
                 {
                     array[i][j] = value;
                 }
-            }
+            });
             return;
         }
 
@@ -124,7 +125,7 @@ namespace RCNet.Extensions
         {
             int vLength = array.GetUpperBound(0) + 1;
             T[][] clone = new T[vLength][];
-            for (int i = 0; i < vLength; i++)
+            Parallel.For(0, vLength, i =>
             {
                 if (array[i] == null)
                 {
@@ -134,7 +135,7 @@ namespace RCNet.Extensions
                 {
                     clone[i] = (T[])array[i].Clone();
                 }
-            }
+            });
             return clone;
         }
 

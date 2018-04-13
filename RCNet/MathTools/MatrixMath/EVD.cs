@@ -66,7 +66,7 @@ namespace RCNet.MathTools.MatrixMath
         /// <param name="matrix">Square matrix</param>
         public EVD(Matrix matrix)
         {
-            double[][] a = matrix.Data;
+            double[][] matrixData = matrix.Data;
             _dimension = matrix.NumOfCols;
             if(_dimension != matrix.NumOfRows)
             {
@@ -74,11 +74,11 @@ namespace RCNet.MathTools.MatrixMath
             }
 
             _eigenvectors = new double[_dimension][];
-            for (int row = 0; row < _dimension; row++)
+            Parallel.For(0, _dimension, row =>
             {
                 _eigenvectors[row] = new double[_dimension];
                 _eigenvectors[row].Populate(0);
-            }
+            });
 
             _realEigenvalues = new double[_dimension];
             _imaginaryEigenvalues = new double[_dimension];
@@ -88,19 +88,19 @@ namespace RCNet.MathTools.MatrixMath
             {
                 for (int i = 0; (i < _dimension) & _isSymmetric; i++)
                 {
-                    _isSymmetric = (a[i][j] == a[j][i]);
+                    _isSymmetric = (matrixData[i][j] == matrixData[j][i]);
                 }
             }
 
             if (_isSymmetric)
             {
-                for (int i = 0; i < _dimension; i++)
-                {
-                    for (int j = 0; j < _dimension; j++)
-                    {
-                        _eigenvectors[i][j] = a[i][j];
-                    }
-                }
+                Parallel.For(0, _dimension, i =>
+               {
+                   for (int j = 0; j < _dimension; j++)
+                   {
+                       _eigenvectors[i][j] = matrixData[i][j];
+                   }
+               });
 
                 // Tridiagonalize.
                 Tred2();
@@ -111,20 +111,20 @@ namespace RCNet.MathTools.MatrixMath
             else
             {
                 _hessenbergForm = new double[_dimension][];
-                for (int row = 0; row < _dimension; row++)
+                Parallel.For(0, _dimension, row =>
                 {
                     _hessenbergForm[row] = new double[_dimension];
                     _hessenbergForm[row].Populate(0);
-                }
+                });
                 _ort = new double[_dimension];
 
-                for (int j = 0; j < _dimension; j++)
+                Parallel.For(0, _dimension, i =>
                 {
-                    for (int i = 0; i < _dimension; i++)
+                    for (int j = 0; j < _dimension; j++)
                     {
-                        _hessenbergForm[i][j] = a[i][j];
+                        _hessenbergForm[i][j] = matrixData[i][j];
                     }
-                }
+                });
 
                 // Reduce to Hessenberg form.
                 Orthes();
@@ -553,13 +553,13 @@ namespace RCNet.MathTools.MatrixMath
 
             // Accumulate transformations (Algol's ortran).
 
-            for (int i = 0; i < _dimension; i++)
+            Parallel.For(0, _dimension, i =>
             {
                 for (int j = 0; j < _dimension; j++)
                 {
                     _eigenvectors[i][j] = (i == j ? 1.0 : 0.0);
                 }
-            }
+            });
 
             for (int m = high - 1; m >= low + 1; m--)
             {
@@ -614,7 +614,7 @@ namespace RCNet.MathTools.MatrixMath
         private void Hqr2()
         {
             // Initialize
-            int nn = this._dimension;
+            int nn = _dimension;
             int n = nn - 1;
             int low = 0;
             int high = nn - 1;

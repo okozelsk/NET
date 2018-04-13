@@ -7,34 +7,6 @@ using RCNet.MathTools.MatrixMath;
 namespace RCNet.Neural.Network.FF
 {
     /// <summary>
-    /// Startup parameters for the linear regression trainer
-    /// </summary>
-    [Serializable]
-    public class LinRegrParameters
-    {
-        //Constants
-        /// <summary>
-        /// Default value of the starting noise intensity
-        /// </summary>
-        public const double DefaultStartingNoiseIntensity = 0.05;
-        /// <summary>
-        /// Default maximum exponent of E (Math.Exp)
-        /// </summary>
-        public const double DeafaultMaxExpArgument = 30;
-
-        //Attributes
-        /// <summary>
-        /// Value of the starting noise intensity
-        /// </summary>
-        public double StartingNoiseIntensity { get; set; } = DefaultStartingNoiseIntensity;
-        /// <summary>
-        /// Maximum exponent of E (Math.Exp)
-        /// </summary>
-        public double MaxExpArgument { get; set; } = DeafaultMaxExpArgument;
-
-    }//LinRegrParameters
-
-    /// <summary>
     /// Implements the linear regression trainer.
     /// Principle is to add each iteration less and less piece of white-noise to predictors
     /// and then perform the standard linear regression.
@@ -46,7 +18,7 @@ namespace RCNet.Neural.Network.FF
     public class LinRegrTrainer : INonRecurrentNetworkTrainer
     {
         //Attributes
-        private LinRegrParameters _parameters;
+        private LinRegrTrainerSettings _settings;
         private FeedForwardNetwork _net;
         private List<double[]> _inputVectorCollection;
         private List<double[]> _outputVectorCollection;
@@ -66,13 +38,13 @@ namespace RCNet.Neural.Network.FF
         /// <param name="outputVectorCollection">Ideal outputs (the same number of rows as number of inputs)</param>
         /// <param name="maxEpoch">Maximum allowed training epochs</param>
         /// <param name="rand">Random object to be used for adding a white-noise to predictors</param>
-        /// <param name="parameters">Optional startup parameters of the trainer</param>
+        /// <param name="settings">Optional startup parameters of the trainer</param>
         public LinRegrTrainer(FeedForwardNetwork net,
                               List<double[]> inputVectorCollection,
                               List<double[]> outputVectorCollection,
                               int maxEpoch,
                               Random rand,
-                              LinRegrParameters parameters = null
+                              LinRegrTrainerSettings settings = null
                               )
         {
             //Check network readyness
@@ -91,11 +63,11 @@ namespace RCNet.Neural.Network.FF
                 throw new Exception("Can´t create LinRegr trainer. Insufficient number of training samples. Minimum is " + (inputVectorCollection[0].Length + 1).ToString() + ".");
             }
             //Parameters
-            _parameters = parameters;
-            if (_parameters == null)
+            _settings = settings;
+            if (_settings == null)
             {
                 //Default parameters
-                _parameters = new LinRegrParameters();
+                _settings = new LinRegrTrainerSettings();
             }
             _net = net;
             _inputVectorCollection = inputVectorCollection;
@@ -116,10 +88,10 @@ namespace RCNet.Neural.Network.FF
             _epoch = 0;
             _alphas = new double[_maxEpoch];
             //Plan the iterations alphas
-            double coeff = (maxEpoch > 1)? _parameters.MaxExpArgument / (maxEpoch - 1) : 0;
-            for (int i = 0; i < _maxEpoch - 1; i++)
+            double coeff = (maxEpoch > 1) ? LinRegrTrainerSettings.MaxTanHArgument / (maxEpoch - 1) : 0;
+            for (int i = 0; i < _maxEpoch; i++)
             {
-                _alphas[i] = _parameters.StartingNoiseIntensity * (1d/(Math.Exp((i - 1) * coeff)));
+                _alphas[i] = _settings.HiNoiseIntensity - _settings.HiNoiseIntensity * Math.Tanh(i* coeff);
                 _alphas[i] = Math.Max(0, _alphas[i]);
             }
             //Ensure the last alpha is zero
@@ -151,7 +123,7 @@ namespace RCNet.Neural.Network.FF
                 for(int col = 0; col < _net.NumOfInputValues; col++)
                 {
                     double predictor = _inputVectorCollection[row][col];
-                    predictors.Data[row][col] = predictor * (1d + _rand.NextDouble(0, noiseIntensity, true, RandomClassExtensions.DistributionType.Uniform));
+                    predictors.Data[row][col] = predictor * (1d + _rand.NextDouble(noiseIntensity * _settings.ZeroMargin, noiseIntensity, true, RandomClassExtensions.DistributionType.Uniform));
                 }
                 //Add constant bias to predictors
                 predictors.Data[row][_net.NumOfInputValues] = 1;

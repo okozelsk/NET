@@ -188,10 +188,10 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
                 switch (netCfg.RegressionMethod)
                 {
                     case FeedForwardNetworkSettings.TrainingMethodType.Linear:
-                        trainer = new LinRegrTrainer(ffn, trainingPredictorsCollection, trainingIdealOutputsCollection, settings.RegressionAttemptEpochs, rand);
+                        trainer = new LinRegrTrainer(ffn, trainingPredictorsCollection, trainingIdealOutputsCollection, settings.RegressionAttemptEpochs, rand, netCfg.LinRegrTrainerCfg);
                         break;
                     case FeedForwardNetworkSettings.TrainingMethodType.Resilient:
-                        trainer = new RPropTrainer(ffn, trainingPredictorsCollection, trainingIdealOutputsCollection);
+                        trainer = new RPropTrainer(ffn, trainingPredictorsCollection, trainingIdealOutputsCollection, netCfg.RPropTrainerCfg);
                         break;
                     default:
                         throw new ArgumentException($"Not supported regression method {netCfg.RegressionMethod}");
@@ -202,7 +202,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
                 ParallelPerceptronSettings netCfg = (ParallelPerceptronSettings)settings.NetSettings;
                 ParallelPerceptron ppn = new ParallelPerceptron(trainingPredictorsCollection[0].Length, netCfg);
                 net = ppn;
-                trainer = new PDeltaRuleTrainer(ppn, trainingPredictorsCollection, trainingIdealOutputsCollection);
+                trainer = new PDeltaRuleTrainer(ppn, trainingPredictorsCollection, trainingIdealOutputsCollection, netCfg.PDeltaRuleTrainerCfg);
             }
             net.RandomizeWeights(rand);
             return;

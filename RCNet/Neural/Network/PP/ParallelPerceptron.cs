@@ -48,7 +48,7 @@ namespace RCNet.Neural.Network.PP
                 throw new ArgumentException($"Invalid number of gates {numOfGates}", "numOfGates");
             }
             _resolution = resolution;
-            if (_resolution / 2 > _numOfGates)
+            if (_resolution < 2 || _resolution > _numOfGates * 2)
             {
                 throw new ArgumentException($"Invalid resolution {resolution}. Resolution must be GE 2 and LE to (number of gates * 2).", "resolution");
             }

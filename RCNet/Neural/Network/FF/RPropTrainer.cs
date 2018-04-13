@@ -7,72 +7,13 @@ using RCNet.Extensions;
 namespace RCNet.Neural.Network.FF
 {
     /// <summary>
-    /// Setup parameters for the resilient propagation trainer
-    /// </summary>
-    [Serializable]
-    public class RPropParameters
-    {
-        //Constants
-        /// <summary>
-        /// A default absolute value that is still considered zero
-        /// </summary>
-        public const double DefaultZeroTolerance = 1E-17d;
-        /// <summary>
-        /// Default positive Eta
-        /// </summary>
-        public const double DefaultPositiveEta = 1.2d;
-        /// <summary>
-        /// Default negative Eta
-        /// </summary>
-        public const double DefaultNegativeEta = 0.5d;
-        /// <summary>
-        /// Delta default initialization value
-        /// </summary>
-        public const double DefaultDeltaIni = 0.1d;
-        /// <summary>
-        /// Delta default minimum value
-        /// </summary>
-        public const double DefaultDeltaMin = 1E-6d;
-        /// <summary>
-        /// Delta default maximum value
-        /// </summary>
-        public const double DefaultDeltaMax = 50d;
-
-        //Attributes
-        /// <summary>
-        /// An absolute value that is still considered zero
-        /// </summary>
-        public double ZeroTolerance { get; set; } = DefaultZeroTolerance;
-        /// <summary>
-        /// Positive Eta
-        /// </summary>
-        public double PositiveEta { get; set; } = DefaultPositiveEta;
-        /// <summary>
-        /// Negative Eta
-        /// </summary>
-        public double NegativeEta { get; set; } = DefaultNegativeEta;
-        /// <summary>
-        /// Delta initialization value
-        /// </summary>
-        public double DeltaIni { get; set; } = DefaultDeltaIni;
-        /// <summary>
-        /// Delta minimum value
-        /// </summary>
-        public double DeltaMin { get; set; } = DefaultDeltaMin;
-        /// <summary>
-        /// Delta maximum value
-        /// </summary>
-        public double DeltaMax { get; set; } = DefaultDeltaMax;
-    }//RPropParameters
-
-    /// <summary>
     /// Implements iRPROP+ method trainer
     /// </summary>
     [Serializable]
     public class RPropTrainer : INonRecurrentNetworkTrainer
     {
         //Attributes
-        private RPropParameters _parameters;
+        private RPropTrainerSettings _settings;
         private FeedForwardNetwork _net;
         private List<double[]> _inputVectorCollection;
         private List<double[]> _outputVectorCollection;
@@ -99,23 +40,23 @@ namespace RCNet.Neural.Network.FF
         /// Collection of the desired outputs
         /// </param>
         /// Trainer parameters
-        /// <param name="parameters">
+        /// <param name="settings">
         /// </param>
         public RPropTrainer(FeedForwardNetwork net,
                             List<double[]> inputVectorCollection,
                             List<double[]> outputVectorCollection,
-                            RPropParameters parameters = null
+                            RPropTrainerSettings settings = null
                             )
         {
             if (!net.Finalized)
             {
                 throw new Exception("Can´t create trainer. Network structure was not finalized.");
             }
-            _parameters = parameters;
-            if (_parameters == null)
+            _settings = settings;
+            if (_settings == null)
             {
                 //Default parameters
-                _parameters = new RPropParameters();
+                _settings = new RPropTrainerSettings();
             }
             _net = net;
             _inputVectorCollection = inputVectorCollection;
@@ -125,7 +66,7 @@ namespace RCNet.Neural.Network.FF
             _weigthsPrevGradsAcc = new double[_net.NumOfWeights];
             _weigthsPrevGradsAcc.Populate(0);
             _weigthsPrevDeltas = new double[_net.NumOfWeights];
-            _weigthsPrevDeltas.Populate(_parameters.DeltaIni);
+            _weigthsPrevDeltas.Populate(_settings.IniDelta);
             _weigthsPrevChanges = new double[_net.NumOfWeights];
             _weigthsPrevChanges.Populate(0);
             _prevMSE = 0;
@@ -175,7 +116,7 @@ namespace RCNet.Neural.Network.FF
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private double Sign(double value)
         {
-            if (Math.Abs(value) <= _parameters.ZeroTolerance)
+            if (Math.Abs(value) <= _settings.ZeroTolerance)
             {
                 return 0;
             }
@@ -197,16 +138,16 @@ namespace RCNet.Neural.Network.FF
             if (gradSign > 0)
             {
                 //No sign change, increase delta
-                delta = _weigthsPrevDeltas[weightFlatIndex] * _parameters.PositiveEta;
-                if (delta > _parameters.DeltaMax) delta = _parameters.DeltaMax;
+                delta = _weigthsPrevDeltas[weightFlatIndex] * _settings.PositiveEta;
+                if (delta > _settings.MaxDelta) delta = _settings.MaxDelta;
                 _weigthsPrevDeltas[weightFlatIndex] = delta;
                 weightChange = Sign(_weigthsGradsAcc[weightFlatIndex]) * delta;
             }
             else if (gradSign < 0)
             {
                 //Grad changed sign, decrease delta
-                delta = _weigthsPrevDeltas[weightFlatIndex] * _parameters.NegativeEta;
-                if (delta < _parameters.DeltaMin) delta = _parameters.DeltaMin;
+                delta = _weigthsPrevDeltas[weightFlatIndex] * _settings.NegativeEta;
+                if (delta < _settings.MinDelta) delta = _settings.MinDelta;
                 _weigthsPrevDeltas[weightFlatIndex] = delta;
                 if (_lastMSE > _prevMSE)
                 {

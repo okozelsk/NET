@@ -60,7 +60,7 @@ namespace RCNet.XmlTools
         {
 
             XDocument xDoc = XDocument.Parse(xmlContent);
-            xDoc.Validate(_schemaSet, new ValidationEventHandler(XmlValidationCallback));
+            xDoc.Validate(_schemaSet, new ValidationEventHandler(XmlValidationCallback), true);
             return xDoc;
         }
 

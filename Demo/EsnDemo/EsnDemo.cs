@@ -51,10 +51,19 @@ namespace RCNet.Demo
             for (int resIdx = 0; resIdx < statisticsCollection.Count; resIdx++)
             {
                 log.Write($"      Neurons states statistics of reservoir instance {statisticsCollection[resIdx].ReservoirInstanceName} ({statisticsCollection[resIdx].ReservoirSettingsName})", false);
-                log.Write("            ABS-MAX Avg, Max, Min, SDdev: " + statisticsCollection[resIdx].NeuronsMaxAbsStatesStat.ArithAvg.ToString(CultureInfo.InvariantCulture) + " " + statisticsCollection[resIdx].NeuronsMaxAbsStatesStat.Max.ToString(CultureInfo.InvariantCulture) + " " + statisticsCollection[resIdx].NeuronsMaxAbsStatesStat.Min.ToString(CultureInfo.InvariantCulture) + " " + statisticsCollection[resIdx].NeuronsMaxAbsStatesStat.StdDev.ToString(CultureInfo.InvariantCulture), false);
-                log.Write("                RMS Avg, Max, Min, SDdev: " + statisticsCollection[resIdx].NeuronsRMSStatesStat.ArithAvg.ToString(CultureInfo.InvariantCulture) + " " + statisticsCollection[resIdx].NeuronsRMSStatesStat.Max.ToString(CultureInfo.InvariantCulture) + " " + statisticsCollection[resIdx].NeuronsRMSStatesStat.Min.ToString(CultureInfo.InvariantCulture) + " " + statisticsCollection[resIdx].NeuronsRMSStatesStat.StdDev.ToString(CultureInfo.InvariantCulture), false);
-                log.Write("               SPAN Avg, Max, Min, SDdev: " + statisticsCollection[resIdx].NeuronsStateSpansStat.ArithAvg.ToString(CultureInfo.InvariantCulture) + " " + statisticsCollection[resIdx].NeuronsStateSpansStat.Max.ToString(CultureInfo.InvariantCulture) + " " + statisticsCollection[resIdx].NeuronsStateSpansStat.Min.ToString(CultureInfo.InvariantCulture) + " " + statisticsCollection[resIdx].NeuronsStateSpansStat.StdDev.ToString(CultureInfo.InvariantCulture), false);
-                log.Write("               Context neuron states RMS: " + statisticsCollection[resIdx].CtxNeuronStatesRMS.ToString(CultureInfo.InvariantCulture), false);
+                log.Write("            ABS-MAX Avg, Max, Min, SDdev: " + statisticsCollection[resIdx].NeuronsMaxAbsStatesStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                       + statisticsCollection[resIdx].NeuronsMaxAbsStatesStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                       + statisticsCollection[resIdx].NeuronsMaxAbsStatesStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                       + statisticsCollection[resIdx].NeuronsMaxAbsStatesStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
+                log.Write("                RMS Avg, Max, Min, SDdev: " + statisticsCollection[resIdx].NeuronsRMSStatesStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                       + statisticsCollection[resIdx].NeuronsRMSStatesStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                       + statisticsCollection[resIdx].NeuronsRMSStatesStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                       + statisticsCollection[resIdx].NeuronsRMSStatesStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
+                log.Write("               SPAN Avg, Max, Min, SDdev: " + statisticsCollection[resIdx].NeuronsStateSpansStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                       + statisticsCollection[resIdx].NeuronsStateSpansStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                       + statisticsCollection[resIdx].NeuronsStateSpansStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                       + statisticsCollection[resIdx].NeuronsStateSpansStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
+                log.Write("               Context neuron states RMS: " + statisticsCollection[resIdx].CtxNeuronStatesRMS.ToString("N4", CultureInfo.InvariantCulture), false);
             }
             return;
         }

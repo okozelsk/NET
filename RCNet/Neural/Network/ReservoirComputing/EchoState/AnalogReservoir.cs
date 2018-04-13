@@ -215,15 +215,15 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
             //Create weights matrix
             Matrix wMatrix = new Matrix(_settings.Size + 1, _settings.Size + 1);
             //Interconnections
-            for(int row = 0; row < _neuronNeuronConnectionsCollection.Length; row++)
+            Parallel.For(0, _neuronNeuronConnectionsCollection.Length, row =>
             {
-                for(int connIdx = 0; connIdx < _neuronNeuronConnectionsCollection[row].Count; connIdx++)
+                for (int connIdx = 0; connIdx < _neuronNeuronConnectionsCollection[row].Count; connIdx++)
                 {
                     int col = _neuronNeuronConnectionsCollection[row][connIdx].Idx;
                     double weight = _neuronNeuronConnectionsCollection[row][connIdx].Weight;
                     wMatrix.Data[row][col] = weight;
                 }
-            }
+            });
             //Context neuron
             if (_settings.ContextNeuronFeature)
             {

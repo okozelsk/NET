@@ -1,6 +1,58 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <esnDemo dataFolder=".\\Data">
   <!-- Modify/Tune existing or add your own cases -->
+  <case name="Prediction task High and Low prices of SPXL (Direxion Daily SP500 Bull 3X ETF): Single reservoir, Feed Forward, Hidden layer, Resilient">
+    <!-- Data from https://finance.yahoo.com/quote/SPXL/history?p=SPXL -->
+    <samples fileName="SPXL.csv" bootSamples="400" singleNormalizer="true" normalizerReserve="0.1"/>
+    <esnCfg taskType="Prediction" randomizerSeek="0">
+      <inputFields routeToReadout="true">
+        <field name="High"/>
+        <field name="Low"/>
+        <field name="Adj Close"/>
+      </inputFields>
+      <reservoirCfgContainer>
+        <reservoirCfg name="Random topology of 200 TanH neurons">
+          <input connectionDensity="1">
+            <weight min="-0.5" max="0.5" randomSign="false" distribution="Uniform"/>
+          </input>
+          <internal size="200" activation="TanH" spectralRadius="0.79">
+            <topologyRandom connectionsDensity="0.1"/>
+            <bias min="0" max="0"/>
+            <weight min="-1" max="1"/>
+            <retainmentNeurons density="1" retainmentMinRate="0.25" retainmentMaxRate="0.75"/>
+            <contextNeuron activation="TanH" feedbackDensity="1">
+              <inputWeight min="-1" max="1"/>
+              <feedbackWeight min="-1" max="1"/>
+            </contextNeuron>
+          </internal>
+        </reservoirCfg>
+      </reservoirCfgContainer>
+      <reservoirInstanceContainer>
+        <reservoirInstance name="Main" cfg="Random topology of 200 TanH neurons" augmentedStates="false">
+          <inputFields>
+            <field name="High"/>
+            <field name="Low"/>
+            <field name="Adj Close"/>
+          </inputFields>
+        </reservoirInstance>
+      </reservoirInstanceContainer>
+      <readoutLayer testDataRatio="0.1" folds="Auto">
+        <readoutUnit attempts="2" attemptEpochs="700">
+          <ff activation="TanH" regressionMethod="Resilient">
+            <hiddenLayers>
+              <layer neurons="10" activation="TanH"/>
+              <layer neurons="10" activation="TanH"/>
+            </hiddenLayers>
+            <resPropTrainer zeroTolerance="1e-17" positiveEta="1.1" negativeEta="0.5" iniDelta="0.1" minDelta="1e-6" maxDelta="50"/>
+          </ff>
+        </readoutUnit>
+        <outputFields>
+          <field name="High"/>
+          <field name="Low"/>
+        </outputFields>
+      </readoutLayer>
+    </esnCfg>
+  </case>
   <case name="Prediction task High and Low prices of SPXL (Direxion Daily SP500 Bull 3X ETF): Reservoir instance for each input field, Feed Forward, Resilient">
     <!-- Data from https://finance.yahoo.com/quote/SPXL/history?p=SPXL -->
     <samples fileName="SPXL.csv" bootSamples="400" singleNormalizer="true" normalizerReserve="0.1"/>
@@ -62,50 +114,60 @@
       </readoutLayer>
     </esnCfg>
   </case>
-  <case name="Prediction task High and Low prices of SPXL (Direxion Daily SP500 Bull 3X ETF): Single reservoir, Feed Forward, Hidden layer, Resilient">
-    <!-- Data from https://finance.yahoo.com/quote/SPXL/history?p=SPXL -->
-    <samples fileName="SPXL.csv" bootSamples="400" singleNormalizer="true" normalizerReserve="0.1"/>
-    <esnCfg taskType="Prediction" randomizerSeek="0">
-      <inputFields routeToReadout="true">
-        <field name="High"/>
-        <field name="Low"/>
-        <field name="Adj Close"/>
+  <case name="Classification task Libras Movement:  Single reservoir, Parallel Perceptron">
+    <!-- Data converted from https://archive.ics.uci.edu/ml/datasets/Libras+Movement -->
+    <samples fileName="LibrasMovement.csv" singleNormalizer="false" normalizerReserve="0.1"/>
+    <esnCfg taskType="Classification" randomizerSeek="0">
+      <inputFields routeToReadout="false">
+        <field name="coord_abcissa"/>
+        <field name="coord_ordinate"/>
       </inputFields>
       <reservoirCfgContainer>
-        <reservoirCfg name="DTT topology of 400 TanH neurons">
+        <reservoirCfg name="Random topology of 400 TanH neurons">
           <input connectionDensity="1">
-            <weight min="-0.5" max="0.5" randomSign="false" distribution="Uniform"/>
+            <weight min="-0.6" max="0.6" randomSign="false" distribution="Uniform"/>
           </input>
           <internal size="400" activation="TanH" spectralRadius="NA">
-            <topologyDTT selfConnectionsDensity="1"/>
-            <bias min="0" max="0"/>
-            <weight min="-0.3" max="0.3"/>
-            <retainmentNeurons density="0.5" retainmentMinRate="0" retainmentMaxRate="0.75"/>
+            <topologyRandom connectionsDensity="0.1"/>
+            <bias min="-0.1" max="0.1"/>
+            <weight min="-0.6" max="0.6" randomSign="false" distribution="Gaussian"/>
             <contextNeuron activation="TanH" feedbackDensity="1">
-              <inputWeight min="0.05" max="0.05"/>
+              <inputWeight min="0.05" max="0.25"/>
               <feedbackWeight min="-0.3" max="0.3"/>
             </contextNeuron>
           </internal>
         </reservoirCfg>
       </reservoirCfgContainer>
       <reservoirInstanceContainer>
-        <reservoirInstance name="Main" cfg="DTT topology of 400 TanH neurons" augmentedStates="false">
+        <reservoirInstance name="Main" cfg="Random topology of 400 TanH neurons" augmentedStates="false">
           <inputFields>
-            <field name="High"/>
-            <field name="Low"/>
-            <field name="Adj Close"/>
+            <field name="coord_abcissa"/>
+            <field name="coord_ordinate"/>
           </inputFields>
         </reservoirInstance>
       </reservoirInstanceContainer>
-      <readoutLayer testDataRatio="0.1" folds="Auto">
-        <readoutUnit attempts="2" attemptEpochs="700">
-          <ff activation="Identity" regressionMethod="Resilient">
-            <hiddenLayer neurons="10" activation="TanH"/>
-          </ff>
+      <readoutLayer testDataRatio="0.25" folds="Auto">
+        <readoutUnit attempts="20" attemptEpochs="300">
+          <pp gates="3" resolution="2">
+            <pDeltaRuleTrainer iniLR="0.01" incLR="1.1" decLR="0.5" minLR="1e-4" maxLR="0.1"/>
+          </pp>
         </readoutUnit>
         <outputFields>
-          <field name="High"/>
-          <field name="Low"/>
+          <field name="curved swing"/>
+          <field name="horizontal swing"/>
+          <field name="vertical swing"/>
+          <field name="anti-clockwise arc"/>
+          <field name="clockwise arc"/>
+          <field name="circle"/>
+          <field name="horizontal straight-line"/>
+          <field name="vertical straight-line"/>
+          <field name="horizontal zigzag"/>
+          <field name="vertical zigzag"/>
+          <field name="horizontal wavy"/>
+          <field name="vertical wavy"/>
+          <field name="face-up curve"/>
+          <field name="face-down curve"/>
+          <field name="tremble"/>
         </outputFields>
       </readoutLayer>
     </esnCfg>
@@ -121,13 +183,13 @@
       </inputFields>
       <reservoirCfgContainer>
         <reservoirCfg name="Random topology of 300 TanH neurons">
-          <input connectionDensity="0.5">
+          <input connectionDensity="1">
             <weight min="-0.4" max="0.4"/>
           </input>
-          <internal size="300" activation="TanH" spectralRadius="NA">
+          <internal size="300" activation="TanH" spectralRadius="0.8">
             <topologyRandom connectionsDensity="0.1"/>
             <bias min="0" max="0"/>
-            <weight min="-0.4" max="0.4"/>
+            <weight min="-1" max="1"/>
           </internal>
         </reservoirCfg>
       </reservoirCfgContainer>
@@ -141,8 +203,10 @@
         </reservoirInstance>
       </reservoirInstanceContainer>
       <readoutLayer testDataRatio="0.1" folds="Auto">
-        <readoutUnit attempts="1" attemptEpochs="100">
-          <ff activation="Identity" regressionMethod="Linear"/>
+        <readoutUnit attempts="1" attemptEpochs="50">
+          <ff activation="Identity" regressionMethod="Linear">
+            <linRegrTrainer hiNoiseIntensity="0.05" zeroMargin="0.5"/>
+          </ff>
         </readoutUnit>
         <outputFields>
           <field name="High"/>
@@ -228,62 +292,6 @@
       </readoutLayer>
     </esnCfg>
   </case>
-  <case name="Classification task Libras Movement:  Single reservoir, Parallel Perceptron">
-    <!-- Data converted from https://archive.ics.uci.edu/ml/datasets/Libras+Movement -->
-    <samples fileName="LibrasMovement.csv" singleNormalizer="false" normalizerReserve="0.1"/>
-    <esnCfg taskType="Classification" randomizerSeek="0">
-      <inputFields routeToReadout="false">
-        <field name="coord_abcissa"/>
-        <field name="coord_ordinate"/>
-      </inputFields>
-      <reservoirCfgContainer>
-        <reservoirCfg name="Random topology of 400 TanH neurons">
-          <input connectionDensity="1">
-            <weight min="-0.6" max="0.6" randomSign="false" distribution="Uniform"/>
-          </input>
-          <internal size="400" activation="TanH" spectralRadius="NA">
-            <topologyRandom connectionsDensity="0.1"/>
-            <bias min="-0.1" max="0.1"/>
-            <weight min="-0.6" max="0.6" randomSign="false" distribution="Gaussian"/>
-            <contextNeuron activation="TanH" feedbackDensity="1">
-              <inputWeight min="0.05" max="0.25"/>
-              <feedbackWeight min="-0.3" max="0.3"/>
-            </contextNeuron>
-          </internal>
-        </reservoirCfg>
-      </reservoirCfgContainer>
-      <reservoirInstanceContainer>
-        <reservoirInstance name="Main" cfg="Random topology of 400 TanH neurons" augmentedStates="false">
-          <inputFields>
-            <field name="coord_abcissa"/>
-            <field name="coord_ordinate"/>
-          </inputFields>
-        </reservoirInstance>
-      </reservoirInstanceContainer>
-      <readoutLayer testDataRatio="0.25" folds="Auto">
-        <readoutUnit attempts="20" attemptEpochs="300">
-          <pp gates="3" resolution="2"/>
-        </readoutUnit>
-        <outputFields>
-          <field name="curved swing"/>
-          <field name="horizontal swing"/>
-          <field name="vertical swing"/>
-          <field name="anti-clockwise arc"/>
-          <field name="clockwise arc"/>
-          <field name="circle"/>
-          <field name="horizontal straight-line"/>
-          <field name="vertical straight-line"/>
-          <field name="horizontal zigzag"/>
-          <field name="vertical zigzag"/>
-          <field name="horizontal wavy"/>
-          <field name="vertical wavy"/>
-          <field name="face-up curve"/>
-          <field name="face-down curve"/>
-          <field name="tremble"/>
-        </outputFields>
-      </readoutLayer>
-    </esnCfg>
-  </case>
   <case name="Classification task Splice junctions gene sequence: Single reservoir, Feed Forward, Hidden layer, Resilient">
     <!-- Data converted from https://archive.ics.uci.edu/ml/datasets/Molecular+Biology+%28Splice-junction+Gene+Sequences%29 -->
     <samples fileName="SpliceJunctions.csv" singleNormalizer="false" normalizerReserve="0.1"/>
@@ -316,7 +324,9 @@
       <readoutLayer testDataRatio="0.1" folds="Auto">
         <readoutUnit attempts="5" attemptEpochs="1000">
           <ff activation="TanH" regressionMethod="Resilient">
-            <hiddenLayer neurons="40" activation="TanH"/>
+            <hiddenLayers>
+              <layer neurons="40" activation="TanH"/>
+            </hiddenLayers>
           </ff>
         </readoutUnit>
         <outputFields >

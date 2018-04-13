@@ -92,6 +92,13 @@
     </xs:restriction>
   </xs:simpleType>
 
+  <!-- Unsigned double greater than 1 -->
+  <xs:simpleType name="UDoubleGT1Type">
+    <xs:restriction base="xs:double">
+      <xs:minExclusive value="1" />
+    </xs:restriction>
+  </xs:simpleType>
+
   <!-- Unsigned double less than or equal 1 -->
   <xs:simpleType name="UDoubleLE1Type">
     <xs:restriction base="xs:double">
@@ -129,10 +136,37 @@
     <xs:attribute type="ActivationFunctionType" name="activation" use="required"/>
   </xs:complexType>
 
+  <!-- FF network - hidden layers - configuration -->
+  <xs:complexType name="FFNetHiddenLayersCfgType">
+    <xs:sequence minOccurs="0" maxOccurs="1">
+      <xs:element type="FFNetHiddenLayerCfgType" name="layer" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- FF network - linear regression trainer - configuration -->
+  <xs:complexType name="FFNetLinRegrTrainerCfgType">
+    <xs:attribute type="UDoubleLT1Type" name="hiNoiseIntensity" use="required"/>
+    <xs:attribute type="UDoubleLT1Type" name="zeroMargin" use="required"/>
+  </xs:complexType>
+
+  <!-- FF network - resilient propagation trainer - configuration -->
+  <xs:complexType name="FFNetRPropTrainerCfgType">
+    <xs:attribute type="UDoubleLT1Type" name="zeroTolerance" use="required"/>
+    <xs:attribute type="UDoubleGT1Type" name="positiveEta" use="required"/>
+    <xs:attribute type="UDoubleLT1Type" name="negativeEta" use="required"/>
+    <xs:attribute type="UDoubleType" name="iniDelta" use="required"/>
+    <xs:attribute type="UDoubleType" name="minDelta" use="required"/>
+    <xs:attribute type="UDoubleType" name="maxDelta" use="required"/>
+  </xs:complexType>
+
   <!-- FF network configuration -->
   <xs:complexType name="FFNetCfgType">
     <xs:sequence minOccurs="0" maxOccurs="1">
-      <xs:element type="FFNetHiddenLayerCfgType" name="hiddenLayer" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element type="FFNetHiddenLayersCfgType" name="hiddenLayers" minOccurs="0" maxOccurs="1"/>
+      <xs:choice minOccurs="0" maxOccurs="1">
+        <xs:element type="FFNetLinRegrTrainerCfgType" name="linRegrTrainer" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="FFNetRPropTrainerCfgType" name="resPropTrainer" minOccurs="1" maxOccurs="1"/>
+      </xs:choice>
     </xs:sequence>
     <xs:attribute type="ActivationFunctionType" name="activation" use="required"/>
     <xs:attribute type="FFNetRegressionMethodType" name="regressionMethod" use="required"/>
@@ -140,7 +174,21 @@
 
   <!-- ________________________________________PP NETWORK TYPES_________________________________________________ -->
   <!-- Parallel Perceptron network configuration -->
+
+  <!-- FF network - p-delta rule trainer - configuration -->
+  <xs:complexType name="PPNetPDeltaRuleTrainerCfgType">
+    <xs:attribute type="UDoubleLT1Type" name="iniLR" use="required"/>
+    <xs:attribute type="UDoubleGT1Type" name="incLR" use="required"/>
+    <xs:attribute type="UDoubleLT1Type" name="decLR" use="required"/>
+    <xs:attribute type="UDoubleLT1Type" name="minLR" use="required"/>
+    <xs:attribute type="UDoubleLT1Type" name="maxLR" use="required"/>
+  </xs:complexType>
+
+
   <xs:complexType name="PPNetCfgType">
+    <xs:sequence minOccurs="0" maxOccurs="1">
+      <xs:element type="PPNetPDeltaRuleTrainerCfgType" name="pDeltaRuleTrainer" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
     <xs:attribute type="UIntGT0Type" name="gates" use="required"/>
     <xs:attribute type="UIntGT0Type" name="resolution" use="required"/>
   </xs:complexType>

@@ -8,65 +8,13 @@ using RCNet.Extensions;
 namespace RCNet.Neural.Network.PP
 {
     /// <summary>
-    /// Startup parameters for the parallel perceptron trainer
-    /// </summary>
-    [Serializable]
-    public class PPTrainParameters
-    {
-        //Constants
-        /// <summary>
-        /// Default initial learning rate
-        /// </summary>
-        public const double DeafaultInitialLearningRate = 0.01d;
-        /// <summary>
-        /// Default learning rate increase
-        /// </summary>
-        public const double DeafaultLearningRateIncrease = 1.1d;
-        /// <summary>
-        /// Default learning rate decrease
-        /// </summary>
-        public const double DeafaultLearningRateDecrease = 0.5d;
-        /// <summary>
-        /// Default learning min rate
-        /// </summary>
-        public const double DeafaultLearningMinRate = 1E-4;
-        /// <summary>
-        /// Default learning max rate
-        /// </summary>
-        public const double DeafaultLearningMaxRate = 0.1d;
-
-        //Attributes
-        /// <summary>
-        /// Initial learning rate
-        /// </summary>
-        public double InitialLearningRate { get; set; } = DeafaultInitialLearningRate;
-        /// <summary>
-        /// Learning rate increase
-        /// </summary>
-        public double LearningRateIncrease { get; set; } = DeafaultLearningRateIncrease;
-        /// <summary>
-        /// Learning rate decrease
-        /// </summary>
-        public double LearningRateDecrease { get; set; } = DeafaultLearningRateDecrease;
-        /// <summary>
-        /// Learning rate minimum
-        /// </summary>
-        public double LearningMinRate { get; set; } = DeafaultLearningMinRate;
-        /// <summary>
-        /// Learning rate maximum
-        /// </summary>
-        public double LearningMaxRate { get; set; } = DeafaultLearningMaxRate;
-
-    }//PPTrainParameters
-
-    /// <summary>
     /// Implements parallel perceptron trainer (p-delta rule)
     /// </summary>
     [Serializable]
     public class PDeltaRuleTrainer : INonRecurrentNetworkTrainer
     {
         //Attributes
-        private PPTrainParameters _parameters;
+        private PDeltaRuleTrainerSettings _settings;
         private ParallelPerceptron _net;
         private List<double[]> _inputVectorCollection;
         private List<double[]> _outputVectorCollection;
@@ -89,20 +37,20 @@ namespace RCNet.Neural.Network.PP
         /// </summary>
         /// <param name="net">PP to be trained</param>
         /// <param name="inputVectorCollection">Predictors (input)</param>
-        /// <param name="outputVectorCollection">Ideal outputs (the same number of rows as number of inputs)</param>
-        /// <param name="parameters">Optional startup parameters of the trainer</param>
+        /// <param name="outputVectorCollection">Ideal outputs (the same number of rows as predictors rows)</param>
+        /// <param name="settings">Optional startup parameters of the trainer</param>
         public PDeltaRuleTrainer(ParallelPerceptron net,
                                  List<double[]> inputVectorCollection,
                                  List<double[]> outputVectorCollection,
-                                 PPTrainParameters parameters = null
+                                 PDeltaRuleTrainerSettings settings = null
                                  )
         {
             //Parameters
-            _parameters = parameters;
-            if (_parameters == null)
+            _settings = settings;
+            if (_settings == null)
             {
                 //Default parameters
-                _parameters = new PPTrainParameters();
+                _settings = new PDeltaRuleTrainerSettings();
             }
             _net = net;
             _inputVectorCollection = inputVectorCollection;
@@ -113,7 +61,7 @@ namespace RCNet.Neural.Network.PP
             _clearMargin = 0.05;
             _minM = _acceptableError * _resSquashCoeff;
             _maxM = 4d * _minM;
-            _learningRate = _parameters.InitialLearningRate;
+            _learningRate = _settings.IniLR;
             _prevWeights = _net.GetWeights();
             _prevMSE = 0;
             _currMSE = 0;
@@ -164,18 +112,18 @@ namespace RCNet.Neural.Network.PP
                 if (_prevMSE > _currMSE)
                 {
                     //Increase learning rate
-                    _learningRate *= _parameters.LearningRateIncrease;
-                    _learningRate = Math.Min(_parameters.LearningMaxRate, _learningRate);
+                    _learningRate *= _settings.IncLR;
+                    _learningRate = Math.Min(_settings.MaxLR, _learningRate);
                 }
                 else if (_prevMSE < _currMSE)
                 {
-                    if(_learningRate > _parameters.LearningMinRate)
+                    if(_learningRate > _settings.MinLR)
                     {
                         applyWeights = false;
                     }
                     //Decrease learning rate
-                    _learningRate *= _parameters.LearningRateDecrease;
-                    _learningRate = Math.Max(_parameters.LearningMinRate, _learningRate);
+                    _learningRate *= _settings.DecLR;
+                    _learningRate = Math.Max(_settings.MinLR, _learningRate);
                 }
             }
             if(applyWeights)

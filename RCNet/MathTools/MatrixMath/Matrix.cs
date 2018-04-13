@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using RCNet.Extensions;
 
 namespace RCNet.MathTools.MatrixMath
@@ -27,11 +28,11 @@ namespace RCNet.MathTools.MatrixMath
         public Matrix(int numOfRows, int numOfCols, double[] flatData = null)
         {
             _data = new double[numOfRows][];
-            for (int row = 0; row < numOfRows; row++)
+            Parallel.For(0, numOfRows, row =>
             {
                 _data[row] = new double[numOfCols];
                 _data[row].Populate(0);
-            }
+            });
             if (flatData != null)
             {
                 Set(flatData);
@@ -180,13 +181,13 @@ namespace RCNet.MathTools.MatrixMath
         /// <param name="source">Source matrix</param>
         public void Set(Matrix source)
         {
-            for (int i = 0; i < NumOfRows; i++)
+            Parallel.For(0, NumOfRows, i =>
             {
                 for (int j = 0; j < NumOfCols; j++)
                 {
                     _data[i][j] = source._data[i][j];
                 }
-            }
+            });
             return;
         }
 

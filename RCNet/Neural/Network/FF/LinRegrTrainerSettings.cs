@@ -1,0 +1,113 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Xml.Linq;
+using System.Globalization;
+
+namespace RCNet.Neural.Network.FF
+{
+    /// <summary>
+    /// Startup parameters for the linear regression trainer
+    /// </summary>
+    [Serializable]
+    public class LinRegrTrainerSettings
+    {
+        //Constants
+        /// <summary>
+        /// Maximum argument of TanH function
+        /// </summary>
+        public const double MaxTanHArgument = 18;
+
+        /// <summary>
+        /// Default value of the highest noise intensity
+        /// </summary>
+        public const double DefaultHiNoiseIntensity = 0.05;
+        /// <summary>
+        /// Default margin of noise values from zero
+        /// </summary>
+        public const double DefaultZeroMargin = 0.75;
+
+        //Attribute properties
+        /// <summary>
+        /// Value of the highest noise intensity
+        /// </summary>
+        public double HiNoiseIntensity { get; set; }
+        /// <summary>
+        /// Margin of noise values from zero
+        /// </summary>
+        public double ZeroMargin { get; set; }
+
+        //Constructors
+        /// <summary>
+        /// Constructs an initialized instance
+        /// </summary>
+        /// <param name="hiNoiseIntensity">The highest white noise intensity. Between 0 and 1</param>
+        /// <param name="zeroMargin">Margin of noise values from zero. Between 0 and 1.</param>
+        public LinRegrTrainerSettings(double hiNoiseIntensity = DefaultHiNoiseIntensity,
+                                      double zeroMargin = DefaultZeroMargin
+                                      )
+        {
+            HiNoiseIntensity = hiNoiseIntensity;
+            ZeroMargin = zeroMargin;
+            return;
+        }
+
+        /// <summary>
+        /// Deep copy constructor
+        /// </summary>
+        /// <param name="source">Source instance</param>
+        public LinRegrTrainerSettings(LinRegrTrainerSettings source)
+        {
+            HiNoiseIntensity = source.HiNoiseIntensity;
+            ZeroMargin = source.ZeroMargin;
+            return;
+        }
+
+        /// <summary>
+        /// Creates the instance and initializes it from given xml element.
+        /// </summary>
+        /// <param name="elem">Xml data containing linear regression trainer settings</param>
+        public LinRegrTrainerSettings(XElement elem)
+        {
+            HiNoiseIntensity = double.Parse(elem.Attribute("hiNoiseIntensity").Value, CultureInfo.InvariantCulture);
+            ZeroMargin = double.Parse(elem.Attribute("zeroMargin").Value, CultureInfo.InvariantCulture);
+            return;
+        }
+
+        //Methods
+        /// <summary>
+        /// See the base.
+        /// </summary>
+        public override bool Equals(object obj)
+        {
+            if (obj == null) return false;
+            LinRegrTrainerSettings cmpSettings = obj as LinRegrTrainerSettings;
+            if (HiNoiseIntensity != cmpSettings.HiNoiseIntensity || ZeroMargin != cmpSettings.ZeroMargin)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// See the base.
+        /// </summary>
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
+        /// <summary>
+        /// Creates the deep copy instance of this instance
+        /// </summary>
+        public LinRegrTrainerSettings DeepClone()
+        {
+            LinRegrTrainerSettings clone = new LinRegrTrainerSettings(this);
+            return clone;
+        }
+
+    }//LinRegrTrainerSettings
+
+}//Namespace

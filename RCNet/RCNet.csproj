@@ -83,6 +83,9 @@
     <Compile Include="Neural\Network\Data\PatternBundle.cs" />
     <Compile Include="Neural\Network\Data\ValidationBundle.cs" />
     <Compile Include="Neural\Network\Data\TimeSeriesBundle.cs" />
+    <Compile Include="Neural\Network\PP\PDeltaRuleTrainerSettings.cs" />
+    <Compile Include="Neural\Network\FF\RPropTrainerSettings.cs" />
+    <Compile Include="Neural\Network\FF\LinRegrTrainerSettings.cs" />
     <Compile Include="Neural\Network\PP\ParallelPerceptronSettings.cs" />
     <Compile Include="Neural\Network\INonRecurrentNetwork.cs" />
     <Compile Include="Neural\Network\PP\ParallelPerceptron.cs" />
