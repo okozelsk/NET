@@ -72,6 +72,7 @@
     <Compile Include="MathTools\WeightedAvg.cs" />
     <Compile Include="MiscTools\Utils.cs" />
     <Compile Include="Neural\Activation\ActivationFactory.cs" />
+    <Compile Include="Neural\Activation\ActivationSettings.cs" />
     <Compile Include="Neural\Activation\Sinc.cs" />
     <Compile Include="Neural\Activation\SoftExponential.cs" />
     <Compile Include="Neural\Activation\LeakyReLU.cs" />
@@ -80,7 +81,6 @@
     <Compile Include="Neural\Activation\IActivationFunction.cs" />
     <Compile Include="Neural\Activation\Identity.cs" />
     <Compile Include="Neural\Activation\ISRU.cs" />
-    <Compile Include="Neural\Activation\ActivationSettings.cs" />
     <Compile Include="Neural\Activation\BentIdentity.cs" />
     <Compile Include="Neural\Activation\SoftPlus.cs" />
     <Compile Include="Neural\Activation\Sinusoid.cs" />
