@@ -70,15 +70,23 @@
     <Compile Include="MathTools\MatrixMath\QRD.cs" />
     <Compile Include="MathTools\Normalizer.cs" />
     <Compile Include="MathTools\WeightedAvg.cs" />
+    <Compile Include="MiscTools\Utils.cs" />
     <Compile Include="Neural\Activation\ActivationFactory.cs" />
-    <Compile Include="Neural\Activation\ElliotAF.cs" />
-    <Compile Include="Neural\Activation\GaussianAF.cs" />
+    <Compile Include="Neural\Activation\Sinc.cs" />
+    <Compile Include="Neural\Activation\SoftExponential.cs" />
+    <Compile Include="Neural\Activation\LeakyReLU.cs" />
+    <Compile Include="Neural\Activation\Elliot.cs" />
+    <Compile Include="Neural\Activation\Gaussian.cs" />
     <Compile Include="Neural\Activation\IActivationFunction.cs" />
-    <Compile Include="Neural\Activation\IdentityAF.cs" />
-    <Compile Include="Neural\Activation\InverseSquareRootUnitAF.cs" />
-    <Compile Include="Neural\Activation\SinusoidAF.cs" />
-    <Compile Include="Neural\Activation\TanhAF.cs" />
-    <Compile Include="Neural\CommonTypes.cs" />
+    <Compile Include="Neural\Activation\Identity.cs" />
+    <Compile Include="Neural\Activation\ISRU.cs" />
+    <Compile Include="Neural\Activation\ActivationSettings.cs" />
+    <Compile Include="Neural\Activation\BentIdentity.cs" />
+    <Compile Include="Neural\Activation\SoftPlus.cs" />
+    <Compile Include="Neural\Activation\Sinusoid.cs" />
+    <Compile Include="Neural\Activation\Sigmoid.cs" />
+    <Compile Include="Neural\Activation\TanH.cs" />
+    <Compile Include="Neural\CommonEnums.cs" />
     <Compile Include="Neural\Network\Data\BundleNormalizer.cs" />
     <Compile Include="Neural\Network\Data\PatternBundle.cs" />
     <Compile Include="Neural\Network\Data\ValidationBundle.cs" />
@@ -103,10 +111,11 @@
     <Compile Include="Neural\Network\ReservoirComputing\Readout\ReadoutLayerSettings.cs" />
     <Compile Include="Neural\Network\ReservoirComputing\Readout\ReadoutLayer.cs" />
     <Compile Include="Neural\Network\ReservoirComputing\Readout\ReadoutUnit.cs" />
-    <Compile Include="Neural\Weight\RandomWeightSettings.cs" />
+    <Compile Include="Neural\Random\RandomValueSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Queue\SimpleQueue.cs" />
-    <Compile Include="XmlTools\XmlValidator.cs" />
+    <Compile Include="XmlTools\ElemValidator.cs" />
+    <Compile Include="XmlTools\DocValidator.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="NeuralSettingsTypes.xsd">
@@ -125,6 +134,21 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Neural\Network\PP\ParallelPerceptronSettings.xsd" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Neural\Random\RandomValueSettings.xsd" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Neural\Activation\ActivationSettings.xsd" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Neural\Network\PP\PDeltaRuleTrainerSettings.xsd" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Neural\Network\FF\LinRegrTrainerSettings.xsd" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Neural\Network\FF\RPropTrainerSettings.xsd" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

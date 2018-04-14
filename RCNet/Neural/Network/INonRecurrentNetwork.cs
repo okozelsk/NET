@@ -65,7 +65,7 @@ namespace RCNet.Neural.Network
         /// <summary>
         /// Randomizes internal weights
         /// </summary>
-        void RandomizeWeights(Random rand);
+        void RandomizeWeights(System.Random rand);
 
         /// <summary>
         /// Creates a deep copy

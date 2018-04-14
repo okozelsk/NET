@@ -6,8 +6,8 @@
            >
   <xs:import namespace="Neural-Settings-Types" />
 
-  <!-- Feed forward network configuration xml document -->
-  <xs:element name="ff" type="nst:FFNetCfgType"/>
+  <!-- Feed forward network configuration element -->
+  <xs:element name="rootElem" type="nst:FFNetCfgType"/>
 
 </xs:schema>
 

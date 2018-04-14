@@ -20,12 +20,18 @@
   <!-- Enumeration of activation functions -->
   <xs:simpleType name="ActivationFunctionType">
     <xs:restriction base="xs:string">
+      <xs:enumeration value="BentIdentity"/>
       <xs:enumeration value="Elliot"/>
-      <xs:enumeration value="Identity"/>
-      <xs:enumeration value="Sinusoid"/>
-      <xs:enumeration value="TanH"/>
-      <xs:enumeration value="ISRU"/>
       <xs:enumeration value="Gaussian"/>
+      <xs:enumeration value="Identity"/>
+      <xs:enumeration value="ISRU"/>
+      <xs:enumeration value="LeakyReLU"/>
+      <xs:enumeration value="Sigmoid"/>
+      <xs:enumeration value="Sinc"/>
+      <xs:enumeration value="Sinusoid"/>
+      <xs:enumeration value="SoftExponential"/>
+      <xs:enumeration value="SoftPlus"/>
+      <xs:enumeration value="TanH"/>
     </xs:restriction>
   </xs:simpleType>
 
@@ -79,6 +85,11 @@
     </xs:restriction>
   </xs:simpleType>
 
+  <!-- Double with NA option-->
+  <xs:simpleType name="DoubleNAOptionType">
+    <xs:union memberTypes="xs:double NAOptionType"/>
+  </xs:simpleType>
+
   <!-- UDoubleGT0Type with NA option-->
   <xs:simpleType name="UDoubleGT0NAOptionType">
     <xs:union memberTypes="UDoubleGT0Type NAOptionType"/>
@@ -108,6 +119,21 @@
   </xs:simpleType>
 
   <!-- COMPLEX TYPES -->
+  <!-- Activation element -->
+  <xs:complexType name="ActivationCfgType">
+    <xs:attribute type="ActivationFunctionType" name="function" use="required"/>
+    <xs:attribute type="DoubleNAOptionType" name="arg1" use="optional" default="NA"/>
+    <xs:attribute type="DoubleNAOptionType" name="arg2" use="optional" default="NA"/>
+    <xs:attribute type="DoubleNAOptionType" name="arg3" use="optional" default="NA"/>
+    <xs:attribute type="DoubleNAOptionType" name="arg4" use="optional" default="NA"/>
+    <xs:attribute type="DoubleNAOptionType" name="arg5" use="optional" default="NA"/>
+    <xs:attribute type="DoubleNAOptionType" name="arg6" use="optional" default="NA"/>
+    <xs:attribute type="DoubleNAOptionType" name="arg7" use="optional" default="NA"/>
+    <xs:attribute type="DoubleNAOptionType" name="arg8" use="optional" default="NA"/>
+    <xs:attribute type="DoubleNAOptionType" name="arg9" use="optional" default="NA"/>
+    <xs:attribute type="DoubleNAOptionType" name="arg10" use="optional" default="NA"/>
+  </xs:complexType>
+
   <!-- Alone name element -->
   <xs:complexType name="AloneNameType">
     <xs:attribute type="xs:string" name="name" use="required"/>
@@ -132,8 +158,10 @@
 
   <!-- FF network - hidden layer - configuration -->
   <xs:complexType name="FFNetHiddenLayerCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="ActivationCfgType" name="activation" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
     <xs:attribute type="UIntGT0Type" name="neurons" use="required"/>
-    <xs:attribute type="ActivationFunctionType" name="activation" use="required"/>
   </xs:complexType>
 
   <!-- FF network - hidden layers - configuration -->
@@ -163,13 +191,15 @@
   <!-- FF network configuration -->
   <xs:complexType name="FFNetCfgType">
     <xs:sequence minOccurs="0" maxOccurs="1">
-      <xs:element type="FFNetHiddenLayersCfgType" name="hiddenLayers" minOccurs="0" maxOccurs="1"/>
+      <xs:sequence minOccurs="1" maxOccurs="1">
+        <xs:element type="ActivationCfgType" name="outputActivation" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="FFNetHiddenLayersCfgType" name="hiddenLayers" minOccurs="0" maxOccurs="1"/>
+      </xs:sequence>
       <xs:choice minOccurs="0" maxOccurs="1">
         <xs:element type="FFNetLinRegrTrainerCfgType" name="linRegrTrainer" minOccurs="1" maxOccurs="1"/>
         <xs:element type="FFNetRPropTrainerCfgType" name="resPropTrainer" minOccurs="1" maxOccurs="1"/>
       </xs:choice>
     </xs:sequence>
-    <xs:attribute type="ActivationFunctionType" name="activation" use="required"/>
     <xs:attribute type="FFNetRegressionMethodType" name="regressionMethod" use="required"/>
   </xs:complexType>
 
@@ -266,10 +296,10 @@
   <!-- Analog reservoir - context neuron -configuration -->
   <xs:complexType name="AnaResCtxNeuronCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="ActivationCfgType" name="activation" minOccurs="1" maxOccurs="1"/>
       <xs:element type="RandomValueType" name="inputWeight" minOccurs="1" maxOccurs="1"/>
       <xs:element type="RandomValueType" name="feedbackWeight" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
-    <xs:attribute type="ActivationFunctionType" name="activation" use="required"/>
     <xs:attribute type="UDoubleLE1Type" name="feedbackDensity" use="required"/>
   </xs:complexType>
 
@@ -281,13 +311,13 @@
         <xs:element type="AnaResRingTopoCfgType" name="topologyRing" minOccurs="1" maxOccurs="1"/>
         <xs:element type="AnaResDTTTopoCfgType" name="topologyDTT" minOccurs="1" maxOccurs="1"/>
       </xs:choice>
+      <xs:element type="ActivationCfgType" name="activation" minOccurs="1" maxOccurs="1"/>
       <xs:element type="RandomValueType" name="bias" minOccurs="1" maxOccurs="1"/>
       <xs:element type="RandomValueType" name="weight" minOccurs="1" maxOccurs="1"/>
       <xs:element type="AnaResRetNeuronsCfgType" name="retainmentNeurons" minOccurs="0" maxOccurs="1"/>
       <xs:element type="AnaResCtxNeuronCfgType" name="contextNeuron" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:unsignedInt" name="size" use="required" />
-    <xs:attribute type="ActivationFunctionType" name="activation" use="required" />
     <xs:attribute type="UDoubleGT0NAOptionType" name="spectralRadius" use="required" />
   </xs:complexType>
 

@@ -246,7 +246,7 @@ namespace RCNet.Neural.Network.PP
         /// <summary>
         /// Randomizes internal weights
         /// </summary>
-        public void RandomizeWeights(Random rand)
+        public void RandomizeWeights(System.Random rand)
         {
             //Random values
             rand.Fill(_flatWeights, -1, 1, false, RandomClassExtensions.DistributionType.Uniform);

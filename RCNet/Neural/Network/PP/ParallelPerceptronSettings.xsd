@@ -6,8 +6,8 @@
            >
   <xs:import namespace="Neural-Settings-Types" />
 
-  <!-- Parallel perceptron configuration xml document -->
-  <xs:element name="pp" type="nst:PPNetCfgType"/>
+  <!-- Parallel perceptron configuration element -->
+  <xs:element name="rootElem" type="nst:PPNetCfgType"/>
 
 </xs:schema>
 

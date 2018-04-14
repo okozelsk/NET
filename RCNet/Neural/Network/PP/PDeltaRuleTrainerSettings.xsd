@@ -6,8 +6,8 @@
            >
   <xs:import namespace="Neural-Settings-Types" />
 
-  <!-- Readout layer settings element -->
-  <xs:element name="rootElem" type="nst:ROutLayerCfgType"/>
+  <!-- P-delte rule trainer settings element -->
+  <xs:element name="rootElem" type="nst:PPNetPDeltaRuleTrainerCfgType"/>
 
 </xs:schema>
 

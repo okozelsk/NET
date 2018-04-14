@@ -34,7 +34,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
         /// <summary>
         /// Type of the task
         /// </summary>
-        private CommonTypes.TaskType _taskType;
+        private CommonEnums.TaskType _taskType;
         /// <summary>
         /// Readout layer configuration
         /// </summary>
@@ -42,7 +42,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
         /// <summary>
         /// Random generator
         /// </summary>
-        private Random _rand;
+        private System.Random _rand;
         /// <summary>
         /// Collection of clusters of trained ReadoutUnits. One cluster per output field.
         /// </summary>
@@ -61,9 +61,9 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
         /// <param name="taskType">Type of the task</param>
         /// <param name="settings">Readout layer configuration</param>
         /// <param name="rand">Random object to be used</param>
-        public ReadoutLayer(CommonTypes.TaskType taskType,
+        public ReadoutLayer(CommonEnums.TaskType taskType,
                             ReadoutLayerSettings settings,
-                            Random rand
+                            System.Random rand
                             )
         {
             _taskType = taskType;
@@ -125,7 +125,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
                 _clusterCollection[clusterIdx] = new ReadoutUnit[numOfFolds];
                 List<double[]> idealValueCollection = new List<double[]>(idealOutputsCollection.Count);
                 BinDistribution refBinDistr = null;
-                if (_taskType == CommonTypes.TaskType.Classification)
+                if (_taskType == CommonEnums.TaskType.Classification)
                 {
                     //Reference binary distribution is relevant only for classification task
                     refBinDistr = new BinDistribution();
@@ -136,7 +136,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
                     double[] value = new double[1];
                     value[0] = idealVector[clusterIdx];
                     idealValueCollection.Add(value);
-                    if (_taskType == CommonTypes.TaskType.Classification)
+                    if (_taskType == CommonEnums.TaskType.Classification)
                     {
                         //Reference binary distribution is relevant only for classification task
                         refBinDistr.Update(value);
@@ -144,7 +144,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
                 }
                 List<TimeSeriesBundle> subBundleCollection = null;
                 //Datasets preparation is depending on the task type
-                if (_taskType == CommonTypes.TaskType.Classification)
+                if (_taskType == CommonEnums.TaskType.Classification)
                 {
                     //Classification task
                     subBundleCollection = DivideSamplesForClassification(shuffledData.InputVectorCollection,
@@ -372,7 +372,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
             /// <summary>
             /// Type of the solved neural task
             /// </summary>
-            public CommonTypes.TaskType TaskType { get; }
+            public CommonEnums.TaskType TaskType { get; }
             /// <summary>
             /// Number of readout units within the cluster
             /// </summary>
@@ -393,13 +393,13 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
             /// <param name="taskType"></param>
             /// <param name="numOfReadoutUnits"></param>
             /// <param name="refBinDistr"></param>
-            public ClusterErrStatistics(CommonTypes.TaskType taskType, int numOfReadoutUnits, BinDistribution refBinDistr)
+            public ClusterErrStatistics(CommonEnums.TaskType taskType, int numOfReadoutUnits, BinDistribution refBinDistr)
             {
                 TaskType = taskType;
                 NumOfReadoutUnits = numOfReadoutUnits;
                 PrecissionErrStat = new BasicStat();
                 BinaryErrStat = null;
-                if (TaskType == CommonTypes.TaskType.Classification)
+                if (TaskType == CommonEnums.TaskType.Classification)
                 {
                     BinaryErrStat = new BinErrStat(refBinDistr);
                 }
@@ -416,7 +416,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
                 NumOfReadoutUnits = source.NumOfReadoutUnits;
                 PrecissionErrStat = new BasicStat(source.PrecissionErrStat);
                 BinaryErrStat = null;
-                if (TaskType == CommonTypes.TaskType.Classification)
+                if (TaskType == CommonEnums.TaskType.Classification)
                 {
                     BinaryErrStat = new BinErrStat(source.BinaryErrStat);
                 }
@@ -431,7 +431,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
             public void Update(double computedValue, double idealValue)
             {
                 PrecissionErrStat.AddSampleValue(Math.Abs(computedValue - idealValue));
-                if (TaskType == CommonTypes.TaskType.Classification)
+                if (TaskType == CommonEnums.TaskType.Classification)
                 {
                     BinaryErrStat.Update(computedValue, idealValue);
                 }

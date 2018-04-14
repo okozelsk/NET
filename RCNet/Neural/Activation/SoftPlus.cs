@@ -5,16 +5,16 @@ using RCNet.MathTools;
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// TanH activation function
+    /// SoftPlus activation function
     /// </summary>
     [Serializable]
-    public class TanhAF : IActivationFunction
+    public class SoftPlus : IActivationFunction
     {
         //Properties
         /// <summary>
         /// The working range
         /// </summary>
-        public Interval Range { get { return new Interval(-1, 1); } }
+        public Interval Range { get { return new Interval(0, double.PositiveInfinity); } }
 
         //Methods
         /// <summary>
@@ -23,8 +23,7 @@ namespace RCNet.Neural.Activation
         /// <param name="x">Argument</param>
         public double Compute(double x)
         {
-            //Tanh
-            return 2d / (1d + Math.Exp(-2d * x)).Bound() - 1d; //Faster than Math.Tanh;
+            return Math.Log(1d + Math.Exp(x));
         }
 
         /// <summary>
@@ -32,11 +31,11 @@ namespace RCNet.Neural.Activation
         /// </summary>
         /// <param name="c">The result of the Compute method</param>
         /// <param name="x">The argument of the Compute method</param>
-        public double Derive(double c, double x = double.NaN)
+        public double Derive(double c, double x)
         {
-            return 1d - c.Power(2);
+            return 1d / (1d + Math.Exp(-x));
         }
 
-    }//TanhAF
+    }//SoftPlus
 
 }//Namespace

@@ -5,10 +5,10 @@ using RCNet.MathTools;
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Sinusoid activation function
+    /// TanH activation function
     /// </summary>
     [Serializable]
-    public class SinusoidAF : IActivationFunction
+    public class TanH : IActivationFunction
     {
         //Properties
         /// <summary>
@@ -23,7 +23,7 @@ namespace RCNet.Neural.Activation
         /// <param name="x">Argument</param>
         public double Compute(double x)
         {
-            return Math.Sin(2d * x).Bound();
+            return 2d / (1d + Math.Exp(-2d * x)).Bound() - 1d; //Faster than Math.Tanh;
         }
 
         /// <summary>
@@ -33,9 +33,9 @@ namespace RCNet.Neural.Activation
         /// <param name="x">The argument of the Compute method</param>
         public double Derive(double c, double x = double.NaN)
         {
-            return Math.Cos(2d * c).Bound();
+            return 1d - c.Power(2);
         }
 
-    }//SinusoidAF
+    }//TanH
 
 }//Namespace

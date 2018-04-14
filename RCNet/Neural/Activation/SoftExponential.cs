@@ -5,34 +5,30 @@ using RCNet.Extensions;
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Inverse Square Root Unit (ISRU) activation function
+    /// SoftExponential activation function
     /// </summary>
     [Serializable]
-    public class InverseSquareRootUnitAF : IActivationFunction
+    public class SoftExponential : IActivationFunction
     {
         //Constructor
         /// <summary>
-        /// Instantiates an Inverse Square Root Unit activation function
+        /// Instantiates an SoftExponential activation function
         /// </summary>
-        /// <param name="alpha">The Alpha</param>
-        public InverseSquareRootUnitAF(double alpha = 1)
+        /// <param name="alpha">Alpha</param>
+        public SoftExponential(double alpha)
         {
-            if(alpha <= 0)
-            {
-                throw new ArgumentOutOfRangeException("alpha", "Alpha must be GT 0");
-            }
             Alpha = alpha;
             return;
         }
 
         //Properties
         /// <summary>
-        /// The working range
+        /// THe working range
         /// </summary>
-        public Interval Range { get { return new Interval(-1 / Math.Sqrt(Alpha), 1 / Math.Sqrt(Alpha)); } }
+        public Interval Range { get { return new Interval(double.NegativeInfinity, double.PositiveInfinity); } }
 
         /// <summary>
-        /// The Alpha
+        /// Alpha
         /// </summary>
         public double Alpha { get; }
 
@@ -43,7 +39,18 @@ namespace RCNet.Neural.Activation
         /// <param name="x">Argument</param>
         public double Compute(double x)
         {
-            return x / (1d + Alpha * x.Power(2));
+            if(Alpha < 0)
+            {
+                return -(Math.Log(1 - Alpha * (x + Alpha)) / Alpha);
+            }
+            else if(Alpha == 0)
+            {
+                return x;
+            }
+            else
+            {
+                return (Math.Exp(Alpha * x) - 1) / Alpha + Alpha;
+            }
         }
 
         /// <summary>
@@ -53,10 +60,17 @@ namespace RCNet.Neural.Activation
         /// <param name="x">The argument of the Compute method</param>
         public double Derive(double c, double x)
         {
-            return (1d / Math.Sqrt(1d + Alpha * x.Power(2))).Power(3);
+            if(Alpha < 0)
+            {
+                return 1d  / (1d - Alpha * (Alpha + x));
+            }
+            else
+            {
+                return Math.Exp(Alpha * x);
+            }
         }
 
-    }//InverseSquareRootUnitAF
+    }//SoftExponential
 
 }//Namespace
 

@@ -5,36 +5,36 @@ using RCNet.Extensions;
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Elliot activation function (aka Softsign).
+    /// ISRU (Inverse Square Root Unit) activation function
     /// </summary>
     [Serializable]
-    public class ElliotAF : IActivationFunction
+    public class ISRU : IActivationFunction
     {
         //Constructor
         /// <summary>
-        /// Instantiates an Elliot activation function
+        /// Instantiates an Inverse Square Root Unit activation function
         /// </summary>
-        /// <param name="slope">The curve slope</param>
-        public ElliotAF(double slope = 1)
+        /// <param name="alpha">The Alpha</param>
+        public ISRU(double alpha = 1)
         {
-            if (slope <= 0)
+            if(alpha <= 0)
             {
-                throw new ArgumentOutOfRangeException("slope", "Slope must be GT 0");
+                throw new ArgumentOutOfRangeException("alpha", "Alpha must be GT 0");
             }
-            Slope = slope;
+            Alpha = alpha;
             return;
         }
 
         //Properties
         /// <summary>
-        /// THe working range
+        /// The working range
         /// </summary>
-        public Interval Range { get { return new Interval(-1, 1); } }
+        public Interval Range { get { return new Interval(-1 / Math.Sqrt(Alpha), 1 / Math.Sqrt(Alpha)); } }
 
         /// <summary>
-        /// The curve slope
+        /// The Alpha
         /// </summary>
-        public double Slope { get; }
+        public double Alpha { get; }
 
         //Methods
         /// <summary>
@@ -43,7 +43,7 @@ namespace RCNet.Neural.Activation
         /// <param name="x">Argument</param>
         public double Compute(double x)
         {
-            return (x * Slope) / (1d + Math.Abs(x * Slope));
+            return x / (1d + Alpha * x.Power(2));
         }
 
         /// <summary>
@@ -51,12 +51,12 @@ namespace RCNet.Neural.Activation
         /// </summary>
         /// <param name="c">The result of the Compute method</param>
         /// <param name="x">The argument of the Compute method</param>
-        public double Derive(double c, double x = double.NaN)
+        public double Derive(double c, double x)
         {
-            return (Slope * 1d) / ((1d + Math.Abs(c * Slope)).Power(2));
+            return (1d / Math.Sqrt(1d + Alpha * x.Power(2))).Power(3);
         }
 
-    }//ElliotAF
+    }//ISRU
 
 }//Namespace
 

@@ -6,23 +6,36 @@ Normalizer
 	Data normalization/denormalization
 	Gaussian standardization
 Activation functions
-	TanH
-	Elliot (Softsign)
-	Sinusoid
-	Identity (Linear)
-	ISRU (Inverse Squere Root Unit)
-	Gaussian
+      BentIdentity
+      Elliot
+      Gaussian
+      Identity
+      ISRU
+      LeakyReLU
+      Sigmoid
+      Sinc
+      Sinusoid
+      SoftExponential
+      SoftPlus
+      TanH
 Random distributions
 	Uniform
 	Gaussian
 Feed Forward Network
+	Xml constructor
 	Multiple hidden layers
 	Trainers
 		Resilient propagation trainer (iRPROP+ variant)
-		Linear regression trainer
+		Linear regression trainer (white noise stabilization)
 Parallel Perceptron Network
-	P-Delta Rule Trainer
+	Xml constructor
+	Trainers
+		P-Delta Rule Trainer
 Analog Reservoir
+	Xml constructor
+	Provides important internal statistics
+	Supports SpectralRadius parameter (but high comp. cost)
+		It can be suppressed by specifying the NA code
 	Supported topologies:
 		Random
 		Ring
@@ -33,9 +46,7 @@ Analog Reservoir
 Echo State Network
 	Xml constructor
 	Multiple internal reservoirs
-	Esn supports SpectralRadius parameter (high comp. cost)
-		It can be suppressed by specifying the NA code
-			Esn provides useful internal statistics
+	Provides important internal reservoirs statistics
 	Supported task types:
 		Prediction
 			Time series input
@@ -43,26 +54,31 @@ Echo State Network
 		Classification
 			Pattern input
 				Supports variable length of patterns
-			Readout unit output is binary (class Yes/No)
+			Readout unit output is probability of class
 		Hybrid
 			Pattern input
 				Supports variable length of patterns
 			Readout unit output is value prediction
 Readout layer
+	Xml constructor
 	Independent on predictors generator (Esn, ...)
 	Supports x-fold cross validation method
 	Clusters of readout units
 		Cluster of readout units per each output field
-			Feed Forward Network or Parallel Perceptron
+			Cluster of FF Networks or P-Perceptrons
 Bundle normalizer
-	Helper for bundle of data normalization
+	Helper for data bundle normalization
 Bundle Data loaders (csv)
 	PatternDataLoader (Classification or Hybrid task)
 	TimeSeriesDataLoader (Prediction task)
+Miscellaneous
+	Queue (thread safe)
+	Hurst exponent estimator (the toughest variant)
+	And others :-)
 
 Demo application
 ----------------
-Functionality is demonstrated in a simple demo application (/Demo/DemoConsoleApp). Application has no startup parameters, all necessary settins are specified in EsnDemoSettings.xml file. EsnDemoSettings.xml has to be in the same folder as the executable DemoConsoleApp.exe. Application performs sequence of demo cases defined in EsnDemoSettings.xml. Input data has to be stored in a file in csv format. You can simply modify EsnDemoSettings.xml and configure your own cases to be prformed.
+Main functionality is demonstrated in a simple demo application (/Demo/DemoConsoleApp). Application has no startup parameters, all necessary settins are specified in EsnDemoSettings.xml file. EsnDemoSettings.xml has to be in the same folder as the executable DemoConsoleApp.exe. Application performs sequence of demo cases defined in EsnDemoSettings.xml. Input data has to be stored in a file in csv format. You can simply modify EsnDemoSettings.xml and configure your own cases to be prformed.
 
 
 Other information

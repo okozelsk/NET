@@ -73,7 +73,7 @@ namespace RCNet.Neural.Network.Data
         /// Shuffles stored pairs
         /// </summary>
         /// <param name="rand">Random object</param>
-        public void Shuffle(Random rand)
+        public void Shuffle(System.Random rand)
         {
             List<double[]> l1 = new List<double[]>(InputVectorCollection);
             List<double[]> l2 = new List<double[]>(OutputVectorCollection);

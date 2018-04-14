@@ -70,10 +70,10 @@ namespace RCNet.Neural.Network.FF
             for (int i = 0; i < settings.HiddenLayerCollection.Count; i++)
             {
                 AddLayer(settings.HiddenLayerCollection[i].NumOfNeurons,
-                         ActivationFactory.CreateActivationFunction(settings.HiddenLayerCollection[i].ActivationType)
+                         ActivationFactory.CreateActivationFunction(settings.HiddenLayerCollection[i].Activation)
                          );
             }
-            FinalizeStructure(ActivationFactory.CreateActivationFunction(settings.OutputActivation));
+            FinalizeStructure(ActivationFactory.CreateActivationFunction(settings.OutputLayerActivation));
             return;
         }
 
@@ -146,8 +146,8 @@ namespace RCNet.Neural.Network.FF
                 neuronsFlatStartIdx += layer.NumOfLayerNeurons;
                 weightsFlatStartIdx += (layer.NumOfLayerNeurons * layer.NumOfInputNodes + layer.NumOfLayerNeurons);
                 numOfInputNodes = layer.NumOfLayerNeurons;
-                if(layer.Activation.GetType() != typeof(ElliotAF) &&
-                   layer.Activation.GetType() != typeof(TanhAF)
+                if(layer.Activation.GetType() != typeof(Elliot) &&
+                   layer.Activation.GetType() != typeof(TanH)
                    )
                 {
                     _isAllowedNguyenWidrowRandomization = false;
@@ -166,7 +166,7 @@ namespace RCNet.Neural.Network.FF
         /// Applies the Nguyen Widrow randomization method.
         /// </summary>
         /// <param name="rand">The random generator to be used</param>
-        private void RandomizeWeightsByNguyenWidrowMethod(Random rand)
+        private void RandomizeWeightsByNguyenWidrowMethod(System.Random rand)
         {
             foreach (Layer layer in _layerCollection)
             {
@@ -189,7 +189,7 @@ namespace RCNet.Neural.Network.FF
         /// Randomizes network's weights (this function must be called before the network training)
         /// </summary>
         /// <param name="rand">Random generator to be used</param>
-        public void RandomizeWeights(Random rand)
+        public void RandomizeWeights(System.Random rand)
         {
             if(!Finalized)
             {

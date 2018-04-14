@@ -1,21 +1,20 @@
 ﻿using System;
-using RCNet.MathTools;
 using RCNet.Extensions;
+using RCNet.MathTools;
 
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Identity activation function (aka Linear)
-    /// See the IActivationFunction.
+    /// Sinusoid activation function
     /// </summary>
     [Serializable]
-    public class IdentityAF : IActivationFunction
+    public class Sinusoid : IActivationFunction
     {
         //Properties
         /// <summary>
         /// The working range
         /// </summary>
-        public Interval Range { get { return new Interval(double.NegativeInfinity.Bound(), double.PositiveInfinity.Bound()); } }
+        public Interval Range { get { return new Interval(-1, 1); } }
 
         //Methods
         /// <summary>
@@ -24,8 +23,7 @@ namespace RCNet.Neural.Activation
         /// <param name="x">Argument</param>
         public double Compute(double x)
         {
-            //The same value
-            return x;
+            return Math.Sin(2d * x).Bound();
         }
 
         /// <summary>
@@ -35,11 +33,9 @@ namespace RCNet.Neural.Activation
         /// <param name="x">The argument of the Compute method</param>
         public double Derive(double c, double x = double.NaN)
         {
-            //Allways 1
-            return 1d;
+            return Math.Cos(2d * c).Bound();
         }
 
-    }//IdentityAF
+    }//Sinusoid
 
 }//Namespace
-

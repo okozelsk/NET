@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using System.Globalization;
+using System.Reflection;
+using RCNet.XmlTools;
 
 namespace RCNet.Neural.Network.FF
 {
@@ -110,16 +112,24 @@ namespace RCNet.Neural.Network.FF
 
         /// <summary>
         /// Creates the instance and initializes it from given xml element.
+        /// Content of xml element is always validated against the xml schema.
         /// </summary>
         /// <param name="elem">Xml data containing resilient propagation trainer settings</param>
         public RPropTrainerSettings(XElement elem)
         {
-            ZeroTolerance = double.Parse(elem.Attribute("zeroTolerance").Value, CultureInfo.InvariantCulture);
-            PositiveEta = double.Parse(elem.Attribute("positiveEta").Value, CultureInfo.InvariantCulture);
-            NegativeEta = double.Parse(elem.Attribute("negativeEta").Value, CultureInfo.InvariantCulture);
-            IniDelta = double.Parse(elem.Attribute("iniDelta").Value, CultureInfo.InvariantCulture);
-            MinDelta = double.Parse(elem.Attribute("minDelta").Value, CultureInfo.InvariantCulture);
-            MaxDelta = double.Parse(elem.Attribute("maxDelta").Value, CultureInfo.InvariantCulture);
+            //Validation
+            ElemValidator validator = new ElemValidator();
+            Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
+            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.FF.RPropTrainerSettings.xsd");
+            validator.AddXsdFromResources(assemblyRCNet, "RCNet.NeuralSettingsTypes.xsd");
+            XElement rPropTrainerSettingsElem = validator.Validate(elem, "rootElem");
+            //Parsing
+            ZeroTolerance = double.Parse(rPropTrainerSettingsElem.Attribute("zeroTolerance").Value, CultureInfo.InvariantCulture);
+            PositiveEta = double.Parse(rPropTrainerSettingsElem.Attribute("positiveEta").Value, CultureInfo.InvariantCulture);
+            NegativeEta = double.Parse(rPropTrainerSettingsElem.Attribute("negativeEta").Value, CultureInfo.InvariantCulture);
+            IniDelta = double.Parse(rPropTrainerSettingsElem.Attribute("iniDelta").Value, CultureInfo.InvariantCulture);
+            MinDelta = double.Parse(rPropTrainerSettingsElem.Attribute("minDelta").Value, CultureInfo.InvariantCulture);
+            MaxDelta = double.Parse(rPropTrainerSettingsElem.Attribute("maxDelta").Value, CultureInfo.InvariantCulture);
             return;
         }
 

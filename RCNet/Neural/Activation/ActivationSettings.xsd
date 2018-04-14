@@ -6,8 +6,8 @@
            >
   <xs:import namespace="Neural-Settings-Types" />
 
-  <!-- Readout layer settings element -->
-  <xs:element name="rootElem" type="nst:ROutLayerCfgType"/>
+  <!-- Activation settings element -->
+  <xs:element name="rootElem" type="nst:ActivationCfgType"/>
 
 </xs:schema>
 

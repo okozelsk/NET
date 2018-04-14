@@ -25,8 +25,8 @@ namespace RCNet.DemoConsoleApp
                     Console.WriteLine(e.Message);
                     e = e.InnerException;
                 }
-                Console.WriteLine("Press Enter to continue");
             }
+            Console.WriteLine("Press Enter.");
             Console.ReadLine();
             return;
         }

@@ -23,7 +23,7 @@ namespace RCNet.Neural.Network.FF
         private List<double[]> _inputVectorCollection;
         private List<double[]> _outputVectorCollection;
         private List<Matrix> _outputSingleColMatrixCollection;
-        private Random _rand;
+        private System.Random _rand;
         private double[] _alphas;
         private double _mse;
         private int _maxEpoch;
@@ -43,7 +43,7 @@ namespace RCNet.Neural.Network.FF
                               List<double[]> inputVectorCollection,
                               List<double[]> outputVectorCollection,
                               int maxEpoch,
-                              Random rand,
+                              System.Random rand,
                               LinRegrTrainerSettings settings = null
                               )
         {
@@ -53,7 +53,7 @@ namespace RCNet.Neural.Network.FF
                 throw new Exception("Can´t create LinRegr trainer. Network structure was not finalized.");
             }
             //Check network conditions
-            if (net.LayerCollection.Count != 1 || !(net.LayerCollection[0].Activation is IdentityAF))
+            if (net.LayerCollection.Count != 1 || !(net.LayerCollection[0].Activation is Identity))
             {
                 throw new Exception("Can´t create LinRegr trainer. Network structure is not complient (single layer having Identity activation).");
             }

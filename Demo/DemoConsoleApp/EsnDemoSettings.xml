@@ -1,6 +1,58 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <esnDemo dataFolder=".\\Data">
   <!-- Modify/Tune existing or add your own cases -->
+  <case name="Classification task Splice junctions gene sequence: Single reservoir, Feed Forward, Hidden layer, Resilient">
+    <!-- Data converted from https://archive.ics.uci.edu/ml/datasets/Molecular+Biology+%28Splice-junction+Gene+Sequences%29 -->
+    <samples fileName="SpliceJunctions.csv" singleNormalizer="false" normalizerReserve="0.1"/>
+    <esnCfg taskType="Classification" randomizerSeek="0">
+      <inputFields routeToReadout="false">
+        <field name="1st_Nucleotide"/>
+        <field name="2nd_Nucleotide"/>
+      </inputFields>
+      <reservoirCfgContainer>
+        <reservoirCfg name="Random topology of 200 TanH neurons">
+          <input connectionDensity="1">
+            <weight min="-0.6" max="0.6"/>
+          </input>
+          <internal size="200" spectralRadius="0.9">
+            <topologyRandom connectionsDensity="0.1"/>
+            <activation function="TanH"/>
+            <bias min="0" max="0"/>
+            <weight min="-1" max="1"/>
+            <retainmentNeurons density="1" retainmentMinRate="0.25" retainmentMaxRate="0.25"/>
+          </internal>
+        </reservoirCfg>
+      </reservoirCfgContainer>
+      <reservoirInstanceContainer>
+        <reservoirInstance name="RandMain" cfg="Random topology of 200 TanH neurons" augmentedStates="true">
+          <inputFields>
+            <field name="1st_Nucleotide"/>
+            <field name="2nd_Nucleotide"/>
+          </inputFields>
+        </reservoirInstance>
+      </reservoirInstanceContainer>
+      <readoutLayer testDataRatio="0.1" folds="Auto">
+        <readoutUnit attempts="2" attemptEpochs="2000">
+          <ff regressionMethod="Resilient">
+            <outputActivation function="TanH"/>
+            <hiddenLayers>
+              <layer neurons="40">
+                <activation function="TanH"/>
+              </layer>
+              <layer neurons="40">
+                <activation function="LeakyReLU" arg1="0.01"/>
+              </layer>
+            </hiddenLayers>
+          </ff>
+        </readoutUnit>
+        <outputFields >
+          <field name="EI"/>
+          <field name="IE"/>
+          <field name="Neither"/>
+        </outputFields>
+      </readoutLayer>
+    </esnCfg>
+  </case>
   <case name="Prediction task High and Low prices of TTOO (T2 Biosystems, Inc.): Single reservoir, Feed Forward, Linear regression">
     <!-- Data from https://finance.yahoo.com/quote/TTOO/history?p=TTOO -->
     <samples fileName="TTOO.csv" bootSamples="300" singleNormalizer="true" normalizerReserve="0.1"/>
@@ -15,8 +67,9 @@
           <input connectionDensity="1">
             <weight min="-0.4" max="0.4"/>
           </input>
-          <internal size="300" activation="TanH" spectralRadius="0.8">
+          <internal size="300" spectralRadius="0.8">
             <topologyRandom connectionsDensity="0.1"/>
+            <activation function="TanH"/>
             <bias min="0" max="0"/>
             <weight min="-1" max="1"/>
           </internal>
@@ -33,7 +86,8 @@
       </reservoirInstanceContainer>
       <readoutLayer testDataRatio="0.1" folds="Auto">
         <readoutUnit attempts="1" attemptEpochs="100">
-          <ff activation="Identity" regressionMethod="Linear">
+          <ff regressionMethod="Linear">
+            <outputActivation function="Identity"/>
             <linRegrTrainer hiNoiseIntensity="0.2" maxStretch="6" zeroMargin="0.5"/>
           </ff>
         </readoutUnit>
@@ -58,12 +112,14 @@
           <input connectionDensity="1">
             <weight min="-0.5" max="0.5" randomSign="false" distribution="Uniform"/>
           </input>
-          <internal size="200" activation="TanH" spectralRadius="0.79">
+          <internal size="200" spectralRadius="0.79">
             <topologyRandom connectionsDensity="0.1"/>
+            <activation function="TanH"/>
             <bias min="0" max="0"/>
             <weight min="-1" max="1"/>
             <retainmentNeurons density="1" retainmentMinRate="0.25" retainmentMaxRate="0.75"/>
-            <contextNeuron activation="TanH" feedbackDensity="1">
+            <contextNeuron feedbackDensity="1">
+              <activation function="TanH"/>
               <inputWeight min="-1" max="1"/>
               <feedbackWeight min="-1" max="1"/>
             </contextNeuron>
@@ -81,10 +137,15 @@
       </reservoirInstanceContainer>
       <readoutLayer testDataRatio="0.1" folds="Auto">
         <readoutUnit attempts="2" attemptEpochs="700">
-          <ff activation="TanH" regressionMethod="Resilient">
+          <ff regressionMethod="Resilient">
+            <outputActivation function="TanH"/>
             <hiddenLayers>
-              <layer neurons="10" activation="TanH"/>
-              <layer neurons="10" activation="TanH"/>
+              <layer neurons="10">
+                <activation function="TanH"/>
+              </layer>
+              <layer neurons="10">
+                <activation function="TanH"/>
+              </layer>
             </hiddenLayers>
             <resPropTrainer zeroTolerance="1e-17" positiveEta="1.1" negativeEta="0.5" iniDelta="0.1" minDelta="1e-6" maxDelta="50"/>
           </ff>
@@ -110,8 +171,9 @@
           <input connectionDensity="1">
             <weight min="-0.9" max="0.9"/>
           </input>
-          <internal size="200" activation="TanH" spectralRadius="0.79">
+          <internal size="200" spectralRadius="0.79">
             <topologyRandom connectionsDensity="0.1"/>
+            <activation function="TanH"/>
             <bias min="0" max="0"/>
             <weight min="-1" max="1"/>
             <retainmentNeurons density="1" retainmentMinRate="0" retainmentMaxRate="0.5"/>
@@ -121,8 +183,9 @@
           <input connectionDensity="1">
             <weight min="-0.9" max="0.9"/>
           </input>
-          <internal size="200" activation="TanH" spectralRadius="0.79">
+          <internal size="200" spectralRadius="0.79">
             <topologyDTT selfConnectionsDensity="0"/>
+            <activation function="TanH"/>
             <bias min="0" max="0"/>
             <weight min="-1" max="1"/>
             <retainmentNeurons density="1" retainmentMinRate="0" retainmentMaxRate="0.8"/>
@@ -148,7 +211,9 @@
       </reservoirInstanceContainer>
       <readoutLayer testDataRatio="0.1" folds="Auto">
         <readoutUnit attempts="5" attemptEpochs="200">
-          <ff activation="Identity" regressionMethod="Resilient"/>
+          <ff regressionMethod="Resilient">
+            <outputActivation function="Identity"/>
+          </ff>
         </readoutUnit>
         <outputFields >
           <field name="High"/>
@@ -170,11 +235,13 @@
           <input connectionDensity="1">
             <weight min="-0.6" max="0.6" randomSign="false" distribution="Uniform"/>
           </input>
-          <internal size="400" activation="TanH" spectralRadius="NA">
+          <internal size="400" spectralRadius="NA">
             <topologyRandom connectionsDensity="0.1"/>
+            <activation function="TanH"/>
             <bias min="-0.1" max="0.1"/>
             <weight min="-0.6" max="0.6" randomSign="false" distribution="Gaussian"/>
-            <contextNeuron activation="TanH" feedbackDensity="1">
+            <contextNeuron feedbackDensity="1">
+              <activation function="TanH"/>
               <inputWeight min="0.05" max="0.25"/>
               <feedbackWeight min="-0.3" max="0.3"/>
             </contextNeuron>
@@ -226,8 +293,9 @@
           <input connectionDensity="1">
             <weight min="-0.2" max="0.2"/>
           </input>
-          <internal size="300" activation="TanH" spectralRadius="NA">
+          <internal size="300" spectralRadius="NA">
             <topologyRandom connectionsDensity="0.15"/>
+            <activation function="TanH"/>
             <bias min="-0.1" max="0.1"/>
             <weight min="-0.2" max="0.2"/>
           </internal>
@@ -242,7 +310,9 @@
       </reservoirInstanceContainer>
       <readoutLayer testDataRatio="0.3" folds="1">
         <readoutUnit attempts="1" attemptEpochs="10">
-          <ff activation="Identity" regressionMethod="Linear"/>
+          <ff regressionMethod="Linear">
+            <outputActivation function="Identity"/>
+          </ff>
         </readoutUnit>
         <outputFields>
           <field name="Value"/>
@@ -261,8 +331,9 @@
           <input connectionDensity="1">
             <weight min="-0.2" max="0.2"/>
           </input>
-          <internal size="200" activation="TanH" spectralRadius="NA">
+          <internal size="200" spectralRadius="NA">
             <topologyRandom connectionsDensity="0.1"/>
+            <activation function="TanH"/>
             <bias min="-0.1" max="0.1"/>
             <weight min="-0.2" max="0.2"/>
           </internal>
@@ -284,55 +355,12 @@
       </reservoirInstanceContainer>
       <readoutLayer testDataRatio="0.3" folds="1">
         <readoutUnit attempts="1" attemptEpochs="1">
-          <ff activation="Identity" regressionMethod="Linear"/>
+          <ff regressionMethod="Linear">
+            <outputActivation function="Identity"/>
+          </ff>
         </readoutUnit>
         <outputFields>
           <field name="Value"/>
-        </outputFields>
-      </readoutLayer>
-    </esnCfg>
-  </case>
-  <case name="Classification task Splice junctions gene sequence: Single reservoir, Feed Forward, Hidden layer, Resilient">
-    <!-- Data converted from https://archive.ics.uci.edu/ml/datasets/Molecular+Biology+%28Splice-junction+Gene+Sequences%29 -->
-    <samples fileName="SpliceJunctions.csv" singleNormalizer="false" normalizerReserve="0.1"/>
-    <esnCfg taskType="Classification" randomizerSeek="0">
-      <inputFields routeToReadout="false">
-        <field name="1st_Nucleotide"/>
-        <field name="2nd_Nucleotide"/>
-      </inputFields>
-      <reservoirCfgContainer>
-        <reservoirCfg name="Random topology of 200 TanH neurons">
-          <input connectionDensity="0.3">
-            <weight min="-0.4" max="0.4"/>
-          </input>
-          <internal size="200" activation="TanH" spectralRadius="NA">
-            <topologyRandom connectionsDensity="0.2"/>
-            <bias min="0" max="0"/>
-            <weight min="-0.35" max="0.35"/>
-            <retainmentNeurons density="1" retainmentMinRate="0" retainmentMaxRate="0.8"/>
-          </internal>
-        </reservoirCfg>
-      </reservoirCfgContainer>
-      <reservoirInstanceContainer>
-        <reservoirInstance name="RandMain" cfg="Random topology of 200 TanH neurons" augmentedStates="true">
-          <inputFields>
-            <field name="1st_Nucleotide"/>
-            <field name="2nd_Nucleotide"/>
-          </inputFields>
-        </reservoirInstance>
-      </reservoirInstanceContainer>
-      <readoutLayer testDataRatio="0.1" folds="Auto">
-        <readoutUnit attempts="5" attemptEpochs="1000">
-          <ff activation="TanH" regressionMethod="Resilient">
-            <hiddenLayers>
-              <layer neurons="40" activation="TanH"/>
-            </hiddenLayers>
-          </ff>
-        </readoutUnit>
-        <outputFields >
-          <field name="EI"/>
-          <field name="IE"/>
-          <field name="Neither"/>
         </outputFields>
       </readoutLayer>
     </esnCfg>

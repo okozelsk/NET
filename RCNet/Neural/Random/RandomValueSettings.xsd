@@ -6,8 +6,8 @@
            >
   <xs:import namespace="Neural-Settings-Types" />
 
-  <!-- Readout layer settings element -->
-  <xs:element name="rootElem" type="nst:ROutLayerCfgType"/>
+  <!-- Random weight settings element -->
+  <xs:element name="rootElem" type="nst:RandomValueType"/>
 
 </xs:schema>
 

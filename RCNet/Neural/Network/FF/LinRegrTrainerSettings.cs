@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using System.Globalization;
+using System.Reflection;
+using RCNet.XmlTools;
 
 namespace RCNet.Neural.Network.FF
 {
@@ -74,13 +76,21 @@ namespace RCNet.Neural.Network.FF
 
         /// <summary>
         /// Creates the instance and initializes it from given xml element.
+        /// Content of xml element is always validated against the xml schema.
         /// </summary>
         /// <param name="elem">Xml data containing linear regression trainer settings</param>
         public LinRegrTrainerSettings(XElement elem)
         {
-            HiNoiseIntensity = double.Parse(elem.Attribute("hiNoiseIntensity").Value, CultureInfo.InvariantCulture);
-            MaxStretch = double.Parse(elem.Attribute("maxStretch").Value, CultureInfo.InvariantCulture);
-            ZeroMargin = double.Parse(elem.Attribute("zeroMargin").Value, CultureInfo.InvariantCulture);
+            //Validation
+            ElemValidator validator = new ElemValidator();
+            Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
+            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.FF.LinRegrTrainerSettings.xsd");
+            validator.AddXsdFromResources(assemblyRCNet, "RCNet.NeuralSettingsTypes.xsd");
+            XElement linRegrTrainerSettingsElem = validator.Validate(elem, "rootElem");
+            //Parsing
+            HiNoiseIntensity = double.Parse(linRegrTrainerSettingsElem.Attribute("hiNoiseIntensity").Value, CultureInfo.InvariantCulture);
+            MaxStretch = double.Parse(linRegrTrainerSettingsElem.Attribute("maxStretch").Value, CultureInfo.InvariantCulture);
+            ZeroMargin = double.Parse(linRegrTrainerSettingsElem.Attribute("zeroMargin").Value, CultureInfo.InvariantCulture);
             return;
         }
 

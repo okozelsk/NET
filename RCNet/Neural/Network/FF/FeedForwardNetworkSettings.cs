@@ -36,9 +36,9 @@ namespace RCNet.Neural.Network.FF
 
         //Attribute properties
         /// <summary>
-        /// Activation function of the output layer.
+        /// Activation function settings of the output layer.
         /// </summary>
-        public ActivationFactory.ActivationType OutputActivation { get; set; }
+        public ActivationSettings OutputLayerActivation { get; set; }
         /// <summary>
         /// The parameter specifies what method will be used for training
         /// </summary>
@@ -62,7 +62,7 @@ namespace RCNet.Neural.Network.FF
         /// </summary>
         public FeedForwardNetworkSettings()
         {
-            OutputActivation = ActivationFactory.ActivationType.Identity;
+            OutputLayerActivation = null;
             RegressionMethod = TrainingMethodType.Resilient;
             HiddenLayerCollection = new List<HiddenLayerSettings>();
             LinRegrTrainerCfg = null;
@@ -76,7 +76,11 @@ namespace RCNet.Neural.Network.FF
         /// <param name="source">Source instance</param>
         public FeedForwardNetworkSettings(FeedForwardNetworkSettings source)
         {
-            OutputActivation = source.OutputActivation;
+            OutputLayerActivation = null;
+            if (source.OutputLayerActivation != null)
+            {
+                OutputLayerActivation = source.OutputLayerActivation.DeepClone();
+            }
             RegressionMethod = source.RegressionMethod;
             HiddenLayerCollection = new List<HiddenLayerSettings>(source.HiddenLayerCollection.Count);
             foreach(HiddenLayerSettings shls in source.HiddenLayerCollection)
@@ -107,20 +111,13 @@ namespace RCNet.Neural.Network.FF
         public FeedForwardNetworkSettings(XElement elem)
         {
             //Validation
-            //A very ugly validation. Xml schema does not support validation of the xml fragment against specific type.
-            XmlValidator validator = new XmlValidator();
+            ElemValidator validator = new ElemValidator();
             Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            using (Stream schemaStream = assemblyRCNet.GetManifestResourceStream("RCNet.Neural.Network.FF.FeedForwardNetworkSettings.xsd"))
-            {
-                validator.AddSchema(schemaStream);
-            }
-            using (Stream schemaStream = assemblyRCNet.GetManifestResourceStream("RCNet.NeuralSettingsTypes.xsd"))
-            {
-                validator.AddSchema(schemaStream);
-            }
-            XElement feedForwardNetworkSettingsElem = validator.LoadXDocFromString(elem.ToString()).Root;
+            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.FF.FeedForwardNetworkSettings.xsd");
+            validator.AddXsdFromResources(assemblyRCNet, "RCNet.NeuralSettingsTypes.xsd");
+            XElement feedForwardNetworkSettingsElem = validator.Validate(elem, "rootElem");
             //Parsing
-            OutputActivation = ActivationFactory.ParseActivation(feedForwardNetworkSettingsElem.Attribute("activation").Value);
+            OutputLayerActivation = new ActivationSettings(feedForwardNetworkSettingsElem.Descendants("outputActivation").First());
             RegressionMethod = ParseTrainingMethodType(feedForwardNetworkSettingsElem.Attribute("regressionMethod").Value);
             //Hidden layers
             HiddenLayerCollection = new List<HiddenLayerSettings>();
@@ -188,15 +185,11 @@ namespace RCNet.Neural.Network.FF
         {
             if (obj == null) return false;
             FeedForwardNetworkSettings cmpSettings = obj as FeedForwardNetworkSettings;
-            if (OutputActivation != cmpSettings.OutputActivation ||
+            if (!Equals(OutputLayerActivation, cmpSettings.OutputLayerActivation) ||
                 RegressionMethod != cmpSettings.RegressionMethod ||
                 HiddenLayerCollection.Count != cmpSettings.HiddenLayerCollection.Count ||
-                (LinRegrTrainerCfg == null && cmpSettings.LinRegrTrainerCfg != null) ||
-                (LinRegrTrainerCfg != null && cmpSettings.LinRegrTrainerCfg == null) ||
-                (LinRegrTrainerCfg != null && !LinRegrTrainerCfg.Equals(cmpSettings.LinRegrTrainerCfg)) ||
-                (RPropTrainerCfg == null && cmpSettings.RPropTrainerCfg != null) ||
-                (RPropTrainerCfg != null && cmpSettings.RPropTrainerCfg == null) ||
-                (RPropTrainerCfg != null && !RPropTrainerCfg.Equals(cmpSettings.RPropTrainerCfg))
+                !Equals(LinRegrTrainerCfg, cmpSettings.LinRegrTrainerCfg) ||
+                !Equals(RPropTrainerCfg, cmpSettings.RPropTrainerCfg)
                 )
             {
                 return false;
@@ -242,20 +235,18 @@ namespace RCNet.Neural.Network.FF
             /// </summary>
             public int NumOfNeurons { get; set; }
             /// <summary>
-            /// Type of activation function of the hidden layer neurons
+            /// Settings of activation function of the hidden layer neurons
             /// </summary>
-            public ActivationFactory.ActivationType ActivationType { get; set; }
+            public ActivationSettings Activation { get; set; }
 
             //Constructors
             /// <summary>
-            /// Creates an initialized instance
+            /// Creates an uninitialized instance
             /// </summary>
-            /// <param name="numOfNeurons">Number of hidden layer neurons</param>
-            /// <param name="activationType">Type of activation function of the hidden layer neurons</param>
-            public HiddenLayerSettings(int numOfNeurons, ActivationFactory.ActivationType activationType)
+            public HiddenLayerSettings()
             {
-                NumOfNeurons = numOfNeurons;
-                ActivationType = activationType;
+                NumOfNeurons = 0;
+                Activation = null;
                 return;
             }
 
@@ -266,7 +257,11 @@ namespace RCNet.Neural.Network.FF
             public HiddenLayerSettings(HiddenLayerSettings source)
             {
                 NumOfNeurons = source.NumOfNeurons;
-                ActivationType = source.ActivationType;
+                Activation = null;
+                if (source.Activation != null)
+                {
+                    Activation = source.Activation.DeepClone();
+                }
                 return;
             }
 
@@ -279,7 +274,7 @@ namespace RCNet.Neural.Network.FF
             public HiddenLayerSettings(XElement elem)
             {
                 NumOfNeurons = int.Parse(elem.Attribute("neurons").Value);
-                ActivationType = ActivationFactory.ParseActivation(elem.Attribute("activation").Value);
+                Activation = new ActivationSettings(elem.Descendants("activation").First());
                 return;
             }
 
@@ -291,7 +286,9 @@ namespace RCNet.Neural.Network.FF
             {
                 if (obj == null) return false;
                 HiddenLayerSettings cmpSettings = obj as HiddenLayerSettings;
-                if (NumOfNeurons != cmpSettings.NumOfNeurons || ActivationType != cmpSettings.ActivationType)
+                if (NumOfNeurons != cmpSettings.NumOfNeurons ||
+                    !Equals(Activation, cmpSettings.Activation)
+                    )
                 {
                     return false;
                 }

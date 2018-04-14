@@ -4,10 +4,7 @@ using System.Linq;
 using System.Globalization;
 using System.Xml.Linq;
 using System.Reflection;
-using System.IO;
 using RCNet.Extensions;
-using RCNet.Neural.Activation;
-using RCNet.Neural.Network.FF;
 using RCNet.Neural.Network.ReservoirComputing.Readout;
 using RCNet.XmlTools;
 
@@ -26,7 +23,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
         /// <summary>
         /// Type of the task for which is Esn designed
         /// </summary>
-        public CommonTypes.TaskType TaskType { get; set; }
+        public CommonEnums.TaskType TaskType { get; set; }
         /// <summary>
         /// A value greater than or equal to 0 will always ensure the same initialization of the internal
         /// random number generator and therefore the same network structure, which is good for tuning
@@ -61,7 +58,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
         public EsnSettings()
         {
             //Default settings
-            TaskType = CommonTypes.TaskType.Prediction;
+            TaskType = CommonEnums.TaskType.Prediction;
             RandomizerSeek = 0;
             InputFieldNameCollection = new List<string>();
             ReservoirInstanceDefinitionCollection = new List<ReservoirInstanceDefinition>();
@@ -101,27 +98,20 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
         public EsnSettings(XElement elem)
         {
             //Validation
-            //A very ugly validation. Xml schema does not support validation of the xml fragment against specific type.
-            XmlValidator validator = new XmlValidator();
+            ElemValidator validator = new ElemValidator();
             Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            using (Stream schemaStream = assemblyRCNet.GetManifestResourceStream("RCNet.Neural.Network.ReservoirComputing.EchoState.EsnSettings.xsd"))
-            {
-                validator.AddSchema(schemaStream);
-            }
-            using (Stream schemaStream = assemblyRCNet.GetManifestResourceStream("RCNet.NeuralSettingsTypes.xsd"))
-            {
-                validator.AddSchema(schemaStream);
-            }
-            XElement esnSettingsElem = validator.LoadXDocFromString(elem.ToString()).Root;
+            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.ReservoirComputing.EchoState.EsnSettings.xsd");
+            validator.AddXsdFromResources(assemblyRCNet, "RCNet.NeuralSettingsTypes.xsd");
+            XElement esnSettingsElem = validator.Validate(elem, "rootElem");
             //Parsing
             //Task type
-            TaskType = CommonTypes.ParseTaskType(esnSettingsElem.Attribute("taskType").Value);
+            TaskType = CommonEnums.ParseTaskType(esnSettingsElem.Attribute("taskType").Value);
             //Randomizer seek
             RandomizerSeek = int.Parse(esnSettingsElem.Attribute("randomizerSeek").Value);
             //Input fields
             XElement inputFieldsElem = esnSettingsElem.Descendants("inputFields").First();
             RouteInputToReadout = (inputFieldsElem.Attribute("routeToReadout") == null) ? false : bool.Parse(inputFieldsElem.Attribute("routeToReadout").Value);
-            if(TaskType != CommonTypes.TaskType.Prediction && RouteInputToReadout)
+            if(TaskType != CommonEnums.TaskType.Prediction && RouteInputToReadout)
             {
                 throw new Exception("Routing input to readout is allowed for prediction task only.");
             }
@@ -171,21 +161,24 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
                     newMap.InputFieldMappingCollection.Add(inputFieldIdx);
                 }
                 //Associated Esn output fields tor feedback
-                foreach (string feedbackFieldName in newMap.ReservoirSettings.FeedbackFieldNameCollection)
+                if (newMap.ReservoirSettings.FeedbackFeature)
                 {
-                    if(TaskType != CommonTypes.TaskType.Prediction)
+                    foreach (string feedbackFieldName in newMap.ReservoirSettings.FeedbackFieldNameCollection)
                     {
-                        throw new Exception($"Reservoir instance {newMap.InstanceName}: feedback fields are allowed for prediction task type only.");
+                        if (TaskType != CommonEnums.TaskType.Prediction)
+                        {
+                            throw new Exception($"Reservoir instance {newMap.InstanceName}: feedback fields are allowed for prediction task type only.");
+                        }
+                        //Index in OutputFieldsNames
+                        int feedbackFieldIdx = ReadoutLayerConfig.OutputFieldNameCollection.IndexOf(feedbackFieldName);
+                        //Found?
+                        if (feedbackFieldIdx < 0)
+                        {
+                            //Not found
+                            throw new Exception($"Reservoir instance {newMap.InstanceName}: feedback field {feedbackFieldName} is not defined among Esn output fields.");
+                        }
+                        newMap.FeedbackFieldMappingCollection.Add(feedbackFieldIdx);
                     }
-                    //Index in OutputFieldsNames
-                    int feedbackFieldIdx = ReadoutLayerConfig.OutputFieldNameCollection.IndexOf(feedbackFieldName);
-                    //Found?
-                    if (feedbackFieldIdx < 0)
-                    {
-                        //Not found
-                        throw new Exception($"Reservoir instance {newMap.InstanceName}: feedback field {feedbackFieldName} is not defined among Esn output fields.");
-                    }
-                    newMap.FeedbackFieldMappingCollection.Add(feedbackFieldIdx);
                 }
                 ReservoirInstanceDefinitionCollection.Add(newMap);
             }
@@ -206,7 +199,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
                 !InputFieldNameCollection.ToArray().ContainsEqualValues(cmpSettings.InputFieldNameCollection.ToArray()) ||
                 ReservoirInstanceDefinitionCollection.Count != cmpSettings.ReservoirInstanceDefinitionCollection.Count ||
                 RouteInputToReadout != cmpSettings.RouteInputToReadout ||
-                !ReadoutLayerConfig.Equals(cmpSettings.ReadoutLayerConfig)
+                !Equals(ReadoutLayerConfig, cmpSettings.ReadoutLayerConfig)
                 )
             {
                 return false;
@@ -325,25 +318,13 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
                 if (InputFieldMappingCollection.Count != cmpSettings.InputFieldMappingCollection.Count ||
                     FeedbackFieldMappingCollection.Count != cmpSettings.FeedbackFieldMappingCollection.Count ||
                     InstanceName != cmpSettings.InstanceName ||
-                    !ReservoirSettings.Equals(cmpSettings.ReservoirSettings) ||
-                    AugmentedStates != cmpSettings.AugmentedStates
+                    !Equals(ReservoirSettings, cmpSettings.ReservoirSettings) ||
+                    AugmentedStates != cmpSettings.AugmentedStates ||
+                    InputFieldMappingCollection.ToArray().ContainsEqualValues(cmpSettings.InputFieldMappingCollection.ToArray()) ||
+                    FeedbackFieldMappingCollection.ToArray().ContainsEqualValues(cmpSettings.FeedbackFieldMappingCollection.ToArray())
                     )
                 {
                     return false;
-                }
-                for (int i = 0; i < InputFieldMappingCollection.Count; i++)
-                {
-                    if (InputFieldMappingCollection[i] != cmpSettings.InputFieldMappingCollection[i])
-                    {
-                        return false;
-                    }
-                }
-                for (int i = 0; i < FeedbackFieldMappingCollection.Count; i++)
-                {
-                    if (FeedbackFieldMappingCollection[i] != cmpSettings.FeedbackFieldMappingCollection[i])
-                    {
-                        return false;
-                    }
                 }
                 return true;
             }

@@ -83,18 +83,11 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
         public ReadoutLayerSettings(XElement elem)
         {
             //Validation
-            //A very ugly validation. Xml schema does not support validation of the xml fragment against specific type.
-            XmlValidator validator = new XmlValidator();
+            ElemValidator validator = new ElemValidator();
             Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            using (Stream schemaStream = assemblyRCNet.GetManifestResourceStream("RCNet.Neural.Network.ReservoirComputing.Readout.ReadoutLayerSettings.xsd"))
-            {
-                validator.AddSchema(schemaStream);
-            }
-            using (Stream schemaStream = assemblyRCNet.GetManifestResourceStream("RCNet.NeuralSettingsTypes.xsd"))
-            {
-                validator.AddSchema(schemaStream);
-            }
-            XElement readoutLayerSettingsElem = validator.LoadXDocFromString(elem.ToString()).Root;
+            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.ReservoirComputing.Readout.ReadoutLayerSettings.xsd");
+            validator.AddXsdFromResources(assemblyRCNet, "RCNet.NeuralSettingsTypes.xsd");
+            XElement readoutLayerSettingsElem = validator.Validate(elem, "rootElem");
             //Parsing
             TestDataRatio = double.Parse(readoutLayerSettingsElem.Attribute("testDataRatio").Value, CultureInfo.InvariantCulture);
             NumOfFolds = readoutLayerSettingsElem.Attribute("folds").Value == "Auto" ? 0 : int.Parse(readoutLayerSettingsElem.Attribute("folds").Value);

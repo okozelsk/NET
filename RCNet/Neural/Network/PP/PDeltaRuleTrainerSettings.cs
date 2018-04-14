@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using System.Globalization;
+using System.Reflection;
+using RCNet.XmlTools;
 
 namespace RCNet.Neural.Network.PP
 {
@@ -98,15 +100,23 @@ namespace RCNet.Neural.Network.PP
 
         /// <summary>
         /// Creates the instance and initializes it from given xml element.
+        /// Content of xml element is always validated against the xml schema.
         /// </summary>
         /// <param name="elem">Xml data containing p-delta rule trainer settings</param>
         public PDeltaRuleTrainerSettings(XElement elem)
         {
-            IniLR = double.Parse(elem.Attribute("iniLR").Value, CultureInfo.InvariantCulture);
-            IncLR = double.Parse(elem.Attribute("incLR").Value, CultureInfo.InvariantCulture);
-            DecLR = double.Parse(elem.Attribute("decLR").Value, CultureInfo.InvariantCulture);
-            MinLR = double.Parse(elem.Attribute("minLR").Value, CultureInfo.InvariantCulture);
-            MaxLR = double.Parse(elem.Attribute("maxLR").Value, CultureInfo.InvariantCulture);
+            //Validation
+            ElemValidator validator = new ElemValidator();
+            Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
+            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.PP.PDeltaRuleTrainerSettings.xsd");
+            validator.AddXsdFromResources(assemblyRCNet, "RCNet.NeuralSettingsTypes.xsd");
+            XElement pDeltaRuleTrainerSettingsElem = validator.Validate(elem, "rootElem");
+            //Parsing
+            IniLR = double.Parse(pDeltaRuleTrainerSettingsElem.Attribute("iniLR").Value, CultureInfo.InvariantCulture);
+            IncLR = double.Parse(pDeltaRuleTrainerSettingsElem.Attribute("incLR").Value, CultureInfo.InvariantCulture);
+            DecLR = double.Parse(pDeltaRuleTrainerSettingsElem.Attribute("decLR").Value, CultureInfo.InvariantCulture);
+            MinLR = double.Parse(pDeltaRuleTrainerSettingsElem.Attribute("minLR").Value, CultureInfo.InvariantCulture);
+            MaxLR = double.Parse(pDeltaRuleTrainerSettingsElem.Attribute("maxLR").Value, CultureInfo.InvariantCulture);
             return;
         }
 

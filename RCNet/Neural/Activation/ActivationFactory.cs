@@ -11,48 +11,84 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Supported types of neuron activation function
         /// </summary>
-        public enum ActivationType
+        public enum FunctionType
         {
+            /// <summary>
+            /// "BentIdentity" activation function.
+            /// </summary>
+            BentIdentity,
+            /// <summary>
+            /// "Elliot" (aka Softsign) activation function
+            /// </summary>
+            Elliot,
+            /// <summary>
+            /// "Gaussian" activation function
+            /// </summary>
+            Gaussian,
             /// <summary>
             /// "Identity" (aka Linear) activation function.
             /// </summary>
             Identity,
-            /// <summary>"Sinusoid" activation function</summary>
-            Sinusoid,
-            /// <summary>"Elliot" (aka Softsign) activation function</summary>
-            Elliot,
-            /// <summary>"TanH" activation function</summary>
-            TanH,
-            /// <summary>"Inverse Square Root Unit" activation function</summary>
+            /// <summary>
+            /// "ISRU" (Inverse Square Root Unit) activation function
+            /// </summary>
             ISRU,
-            /// <summary>"Gaussian" activation function</summary>
-            Gaussian
+            /// <summary>
+            /// "Leaky ReLU" activation function.
+            /// Pure ReLU is a specific case of Leaky ReLU having negSlope = 0.
+            /// Leaky ReLU having negSlope = 1 is the same as Identity.
+            /// </summary>
+            LeakyReLU,
+            /// <summary>
+            /// "Sigmoid" activation function
+            /// </summary>
+            Sigmoid,
+            /// <summary>
+            /// "Sinc" activation function
+            /// </summary>
+            Sinc,
+            /// <summary>
+            /// "Sinusoid" activation function
+            /// </summary>
+            Sinusoid,
+            /// <summary>
+            /// "SoftExponential" activation function
+            /// </summary>
+            SoftExponential,
+            /// <summary>
+            /// "SoftPlus" activation function
+            /// </summary>
+            SoftPlus,
+            /// <summary>
+            /// "TanH" activation function
+            /// </summary>
+            TanH
         };
 
         /// <summary>
-        /// Returns the new instance of the specified activation function
+        /// Returns the new instance of the activation function
         /// </summary>
-        /// <param name="type">
-        /// Desired type of activation function
+        /// <param name="settings">
+        /// Specific activation settings
         /// </param>
-        /// <param name="p1">
-        /// A parameter for the activation constructor
-        /// </param>
-        /// <param name="p2">
-        /// A parameter for the activation constructor
-        /// </param>
-        public static IActivationFunction CreateActivationFunction(ActivationType type, double p1 = double.NaN, double p2 = double.NaN)
+        public static IActivationFunction CreateActivationFunction(ActivationSettings settings)
         {
-            switch (type)
+            switch (settings.FunctionType)
             {
-                case ActivationType.Identity: return new IdentityAF();
-                case ActivationType.Sinusoid: return new SinusoidAF();
-                case ActivationType.Elliot: return new ElliotAF((double.IsNaN(p1) ? 1 : p1));
-                case ActivationType.TanH: return new TanhAF();
-                case ActivationType.ISRU: return new InverseSquareRootUnitAF((double.IsNaN(p1) ? 1 : p1));
-                case ActivationType.Gaussian: return new GaussianAF();
+                case FunctionType.BentIdentity: return new BentIdentity();
+                case FunctionType.Elliot: return new Elliot((double.IsNaN(settings.Arg1) ? 1 : settings.Arg1));
+                case FunctionType.Gaussian: return new Gaussian();
+                case FunctionType.Identity: return new Identity();
+                case FunctionType.ISRU: return new ISRU((double.IsNaN(settings.Arg1) ? 1 : settings.Arg1));
+                case FunctionType.LeakyReLU: return new LeakyReLU((double.IsNaN(settings.Arg1) ? 0.01 : settings.Arg1));
+                case FunctionType.Sigmoid: return new Sigmoid();
+                case FunctionType.Sinc: return new Sinc();
+                case FunctionType.Sinusoid: return new Sinusoid();
+                case FunctionType.SoftExponential: return new SoftExponential((double.IsNaN(settings.Arg1) ? 0 : settings.Arg1));
+                case FunctionType.SoftPlus: return new SoftPlus();
+                case FunctionType.TanH: return new TanH();
                 default:
-                    throw new ArgumentException($"Unsupported activation function type: {type}");
+                    throw new ArgumentException($"Unsupported activation function type: {settings.FunctionType}");
             }
         }
 
@@ -61,16 +97,22 @@ namespace RCNet.Neural.Activation
         /// </summary>
         /// <param name="code">A code of the activation function type.</param>
         /// <returns>Parsed activation function type.</returns>
-        public static ActivationType ParseActivation(string code)
+        public static FunctionType ParseActivationFunctionType(string code)
         {
             switch (code.ToUpper())
             {
-                case "IDENTITY": return ActivationType.Identity;
-                case "SINUSOID": return ActivationType.Sinusoid;
-                case "ELLIOT": return ActivationType.Elliot;
-                case "TANH": return ActivationType.TanH;
-                case "ISRU": return ActivationType.ISRU;
-                case "GAUSSIAN": return ActivationType.Gaussian;
+                case "BENTIDENTITY": return FunctionType.BentIdentity;
+                case "ELLIOT": return FunctionType.Elliot;
+                case "GAUSSIAN": return FunctionType.Gaussian;
+                case "IDENTITY": return FunctionType.Identity;
+                case "ISRU": return FunctionType.ISRU;
+                case "LEAKYRELU": return FunctionType.LeakyReLU;
+                case "SIGMOID": return FunctionType.Sigmoid;
+                case "SINC": return FunctionType.Sinc;
+                case "SINUSOID": return FunctionType.Sinusoid;
+                case "SOFTEXPONENTIAL": return FunctionType.SoftExponential;
+                case "SOFTPLUS": return FunctionType.SoftPlus;
+                case "TANH": return FunctionType.TanH;
                 default:
                     throw new ArgumentException($"Unsupported activation function code: {code}");
             }

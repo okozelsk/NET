@@ -8,7 +8,7 @@ namespace RCNet.Neural.Activation
     /// Gaussian activation function
     /// </summary>
     [Serializable]
-    public class GaussianAF : IActivationFunction
+    public class Gaussian : IActivationFunction
     {
         //Properties
         /// <summary>
@@ -31,11 +31,11 @@ namespace RCNet.Neural.Activation
         /// </summary>
         /// <param name="c">The result of the Compute method</param>
         /// <param name="x">The argument of the Compute method</param>
-        public double Derive(double c, double x = double.NaN)
+        public double Derive(double c, double x)
         {
             return -2*x*c;
         }
 
-    }//GaussianAF
+    }//Gaussian
 
 }//Namespace

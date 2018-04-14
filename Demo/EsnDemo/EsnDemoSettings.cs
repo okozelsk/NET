@@ -36,7 +36,7 @@ namespace RCNet.Demo
         public EsnDemoSettings(string fileName)
         {
             //Validate xml file and load the document 
-            XmlValidator validator = new XmlValidator();
+            DocValidator validator = new DocValidator();
             Assembly esnDemoAssembly = Assembly.GetExecutingAssembly();
             Assembly assemblyRCNet = Assembly.Load("RCNet");
             using (Stream schemaStream = esnDemoAssembly.GetManifestResourceStream("RCNet.Demo.EsnDemoSettings.xsd"))

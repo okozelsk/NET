@@ -8,7 +8,7 @@ namespace RCNet.XmlTools
     /// <summary>
     /// The class provides the xml loading/validation functionalities
     /// </summary>
-    public class XmlValidator
+    public class DocValidator
     {
         //Constants
         //Attributes
@@ -18,7 +18,7 @@ namespace RCNet.XmlTools
         /// <summary>
         /// Instantiates a XmlValidator
         /// </summary>
-        public XmlValidator()
+        public DocValidator()
         {
             _schemaSet = new XmlSchemaSet();
             return;

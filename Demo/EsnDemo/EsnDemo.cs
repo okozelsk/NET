@@ -102,17 +102,17 @@ namespace RCNet.Demo
                     ", DSet-Sizes: (" + inArgs.CurrReadoutUnit.TrainingErrorStat.NumOfSamples.ToString() + ", " +
                                         inArgs.CurrReadoutUnit.TestingErrorStat.NumOfSamples.ToString() + ")" +
                     ", Best-Train: " + bestReadoutUnit.TrainingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture) +
-                                       (inArgs.TaskType == CommonTypes.TaskType.Classification ? "/" : string.Empty) +
-                                       (inArgs.TaskType == CommonTypes.TaskType.Classification ? bestReadoutUnit.TrainingBinErrorStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture) : string.Empty) +
+                                       (inArgs.TaskType == CommonEnums.TaskType.Classification ? "/" : string.Empty) +
+                                       (inArgs.TaskType == CommonEnums.TaskType.Classification ? bestReadoutUnit.TrainingBinErrorStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture) : string.Empty) +
                     ", Best-Test: " + bestReadoutUnit.TestingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture) +
-                                      (inArgs.TaskType == CommonTypes.TaskType.Classification ? "/" : string.Empty) +
-                                      (inArgs.TaskType == CommonTypes.TaskType.Classification ? bestReadoutUnit.TestingBinErrorStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture) : string.Empty) +
+                                      (inArgs.TaskType == CommonEnums.TaskType.Classification ? "/" : string.Empty) +
+                                      (inArgs.TaskType == CommonEnums.TaskType.Classification ? bestReadoutUnit.TestingBinErrorStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture) : string.Empty) +
                     ", Curr-Train: " + inArgs.CurrReadoutUnit.TrainingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture) +
-                                      (inArgs.TaskType == CommonTypes.TaskType.Classification ? "/" : string.Empty) +
-                                      (inArgs.TaskType == CommonTypes.TaskType.Classification ? inArgs.CurrReadoutUnit.TrainingBinErrorStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture) : string.Empty) +
+                                      (inArgs.TaskType == CommonEnums.TaskType.Classification ? "/" : string.Empty) +
+                                      (inArgs.TaskType == CommonEnums.TaskType.Classification ? inArgs.CurrReadoutUnit.TrainingBinErrorStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture) : string.Empty) +
                     ", Curr-Test: " + inArgs.CurrReadoutUnit.TestingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture) +
-                                      (inArgs.TaskType == CommonTypes.TaskType.Classification ? "/" : string.Empty) +
-                                      (inArgs.TaskType == CommonTypes.TaskType.Classification ? inArgs.CurrReadoutUnit.TestingBinErrorStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture) : string.Empty)
+                                      (inArgs.TaskType == CommonEnums.TaskType.Classification ? "/" : string.Empty) +
+                                      (inArgs.TaskType == CommonEnums.TaskType.Classification ? inArgs.CurrReadoutUnit.TestingBinErrorStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture) : string.Empty)
                     , !(inArgs.Epoch == 1 && inArgs.RegrAttemptNumber == 1));
             }
             return outArgs;
@@ -141,7 +141,7 @@ namespace RCNet.Demo
             //Prepare regression stage input object
             log.Write(" ", false);
             Esn.RegressionStageInput rsi = null;
-            if (demoCaseParams.EsnCfg.TaskType == CommonTypes.TaskType.Prediction)
+            if (demoCaseParams.EsnCfg.TaskType == CommonEnums.TaskType.Prediction)
             {
                 //Time series prediction task
                 //Load data bundle from csv file
@@ -161,7 +161,7 @@ namespace RCNet.Demo
             {
                 //Classification or hybrid task
                 //Load data bundle from csv file
-                PatternBundle data = PatternDataLoader.Load(demoCaseParams.EsnCfg.TaskType == CommonTypes.TaskType.Classification,
+                PatternBundle data = PatternDataLoader.Load(demoCaseParams.EsnCfg.TaskType == CommonEnums.TaskType.Classification,
                                                             demoCaseParams.FileName,
                                                             demoCaseParams.EsnCfg.InputFieldNameCollection,
                                                             demoCaseParams.EsnCfg.ReadoutLayerConfig.OutputFieldNameCollection,
@@ -182,7 +182,7 @@ namespace RCNet.Demo
 
             //Perform prediction if the task type is Prediction
             double[] predictionOutputVector = null;
-            if(demoCaseParams.EsnCfg.TaskType == CommonTypes.TaskType.Prediction)
+            if(demoCaseParams.EsnCfg.TaskType == CommonEnums.TaskType.Prediction)
             {
                 //Note that there is not necessary to call PushFeedback function immediately after training.
                 //Feedback was already pushed during the Esn training.
@@ -199,7 +199,7 @@ namespace RCNet.Demo
             for (int outputIdx = 0; outputIdx < demoCaseParams.EsnCfg.ReadoutLayerConfig.OutputFieldNameCollection.Count; outputIdx++)
             {
                 ReadoutLayer.ClusterErrStatistics ces = clusterErrStatisticsCollection[outputIdx];
-                if (demoCaseParams.EsnCfg.TaskType == CommonTypes.TaskType.Classification)
+                if (demoCaseParams.EsnCfg.TaskType == CommonEnums.TaskType.Classification)
                 {
                     //Classification task report
                     log.Write("            OutputField: " + demoCaseParams.EsnCfg.ReadoutLayerConfig.OutputFieldNameCollection[outputIdx], false);

@@ -32,7 +32,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
         /// <summary>
         /// Random generator
         /// </summary>
-        private Random _rand;
+        private System.Random _rand;
         /// <summary>
         /// Collection of reservoir instances.
         /// </summary>
@@ -55,8 +55,8 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
         {
             _settings = settings.DeepClone();
             //Random object
-            if (_settings.RandomizerSeek < 0) _rand = new Random();
-            else _rand = new Random(_settings.RandomizerSeek);
+            if (_settings.RandomizerSeek < 0) _rand = new System.Random();
+            else _rand = new System.Random(_settings.RandomizerSeek);
             //Build structure
             //Reservoir instance(s)
             _numOfPredictors = 0;
@@ -166,7 +166,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
         /// <returns>Computed output values</returns>
         public double[] Compute(List<double[]> inputPattern)
         {
-            if(_settings.TaskType == CommonTypes.TaskType.Prediction)
+            if(_settings.TaskType == CommonEnums.TaskType.Prediction)
             {
                 throw new Exception("This version of Compute function is useable only for the classification or hybrid task type.");
             }
@@ -183,7 +183,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
         /// <returns>Computed output values</returns>
         public double[] Compute(double[] inputVector)
         {
-            if (_settings.TaskType != CommonTypes.TaskType.Prediction)
+            if (_settings.TaskType != CommonEnums.TaskType.Prediction)
             {
                 throw new Exception("This version of Compute function is useable only for the prediction task type.");
             }
@@ -208,7 +208,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
         /// </param>
         public void PushFeedback(double[] lastRealValues)
         {
-            if (_settings.TaskType != CommonTypes.TaskType.Prediction)
+            if (_settings.TaskType != CommonEnums.TaskType.Prediction)
             {
                 throw new Exception("PushFeedback function is useable only for the prediction task type.");
             }
@@ -261,7 +261,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
                                                                 Object userObject = null
                                                                 )
         {
-            if (_settings.TaskType == CommonTypes.TaskType.Prediction)
+            if (_settings.TaskType == CommonEnums.TaskType.Prediction)
             {
                 throw new Exception("This version of PrepareRegressionStageInput function is useable only for the classification or hybrid task type.");
             }
@@ -314,7 +314,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
                                                                 Object userObject = null
                                                                 )
         {
-            if (_settings.TaskType != CommonTypes.TaskType.Prediction)
+            if (_settings.TaskType != CommonEnums.TaskType.Prediction)
             {
                 throw new Exception("This version of PrepareRegressionStageInput function is useable only for the prediction task type.");
             }

@@ -7,26 +7,27 @@ using System.Globalization;
 using System.Xml.Linq;
 using System.Reflection;
 using RCNet.Extensions;
+using RCNet.XmlTools;
 
-namespace RCNet.Neural.Weight
+namespace RCNet.Neural.Random
 {
     /// <summary>
-    /// Class specifies properties of randomly generated weight
+    /// Class specifies properties of randomly generated values
     /// </summary>
     [Serializable]
-    public class RandomWeightSettings
+    public class RandomValueSettings
     {
         //Attribute properties
         /// <summary>
-        /// Weight min value
+        /// Min random value
         /// </summary>
         public double Min { get; set; }
         /// <summary>
-        /// Weight max value
+        /// Max random value
         /// </summary>
         public double Max { get; set; }
         /// <summary>
-        /// Specifies whether to randomize weight value sign
+        /// Specifies whether to randomize value sign
         /// </summary>
         public bool RandomSign { get; set; }
         /// <summary>
@@ -38,11 +39,11 @@ namespace RCNet.Neural.Weight
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
-        /// <param name="min">Weight min value</param>
-        /// <param name="max">Weight max value</param>
-        /// <param name="randomSign">Specifies whether to randomize weight value sign</param>
+        /// <param name="min">Min random value</param>
+        /// <param name="max">Max random value</param>
+        /// <param name="randomSign">Specifies whether to randomize value sign</param>
         /// <param name="distrType">Specifies what distribution to use</param>
-        public RandomWeightSettings(double min = -1,
+        public RandomValueSettings(double min = -1,
                                     double max = 1,
                                     bool randomSign = false,
                                     RandomClassExtensions.DistributionType distrType = RandomClassExtensions.DistributionType.Uniform
@@ -59,7 +60,7 @@ namespace RCNet.Neural.Weight
         /// Copy constructor
         /// </summary>
         /// <param name="source">Source instance</param>
-        public RandomWeightSettings(RandomWeightSettings source)
+        public RandomValueSettings(RandomValueSettings source)
         {
             Min = source.Min;
             Max = source.Max;
@@ -71,16 +72,23 @@ namespace RCNet.Neural.Weight
         /// <summary>
         /// Creates an instance and initializes it from given xml element.
         /// </summary>
-        /// <param name="weightSettingsElem">
-        /// Xml data containing RandomWeightSettings settings.
+        /// <param name="elem">
+        /// Xml data containing RandomValueSettings settings.
+        /// Content of xml element is always validated against the xml schema.
         /// </param>
-        public RandomWeightSettings(XElement weightSettingsElem)
+        public RandomValueSettings(XElement elem)
         {
+            //Validation
+            ElemValidator validator = new ElemValidator();
+            Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
+            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Random.RandomValueSettings.xsd");
+            validator.AddXsdFromResources(assemblyRCNet, "RCNet.NeuralSettingsTypes.xsd");
+            XElement randomValueSettingsElem = validator.Validate(elem, "rootElem");
             //Parsing
-            Min = double.Parse(weightSettingsElem.Attribute("min").Value, CultureInfo.InvariantCulture);
-            Max = double.Parse(weightSettingsElem.Attribute("max").Value, CultureInfo.InvariantCulture);
-            RandomSign = bool.Parse(weightSettingsElem.Attribute("randomSign").Value);
-            DistrType = RandomClassExtensions.ParseDistributionType(weightSettingsElem.Attribute("distribution").Value);
+            Min = double.Parse(randomValueSettingsElem.Attribute("min").Value, CultureInfo.InvariantCulture);
+            Max = double.Parse(randomValueSettingsElem.Attribute("max").Value, CultureInfo.InvariantCulture);
+            RandomSign = bool.Parse(randomValueSettingsElem.Attribute("randomSign").Value);
+            DistrType = RandomClassExtensions.ParseDistributionType(randomValueSettingsElem.Attribute("distribution").Value);
             return;
         }
 
@@ -97,7 +105,7 @@ namespace RCNet.Neural.Weight
         public override bool Equals(object obj)
         {
             if (obj == null) return false;
-            RandomWeightSettings cmpSettings = obj as RandomWeightSettings;
+            RandomValueSettings cmpSettings = obj as RandomValueSettings;
             if (Min != cmpSettings.Min ||
                 Max != cmpSettings.Max ||
                 RandomSign != cmpSettings.RandomSign ||
@@ -120,12 +128,12 @@ namespace RCNet.Neural.Weight
         /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>
-        public RandomWeightSettings DeepClone()
+        public RandomValueSettings DeepClone()
         {
-            RandomWeightSettings clone = new RandomWeightSettings(this);
+            RandomValueSettings clone = new RandomValueSettings(this);
             return clone;
         }
 
-    }//RandomWeightSettings
+    }//RandomValueSettings
 
 }//Namespace

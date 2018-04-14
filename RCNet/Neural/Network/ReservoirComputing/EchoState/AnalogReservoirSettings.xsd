@@ -6,8 +6,8 @@
            >
   <xs:import namespace="Neural-Settings-Types" />
 
-  <!-- Analog reservoir configuration xml document -->
-  <xs:element name="reservoirCfg" type="nst:AnaResCfgType"/>
+  <!-- Analog reservoir configuration element -->
+  <xs:element name="rootElem" type="nst:AnaResCfgType"/>
 
 </xs:schema>
 

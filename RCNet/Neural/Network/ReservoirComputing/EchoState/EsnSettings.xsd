@@ -6,8 +6,8 @@
            >
   <xs:import namespace="Neural-Settings-Types" />
 
-  <!-- Esn configuration xml document -->
-  <xs:element name="esnCfg" type="nst:EsnCfgType"/>
+  <!-- Esn configuration element -->
+  <xs:element name="rootElem" type="nst:EsnCfgType"/>
 
 </xs:schema>
 

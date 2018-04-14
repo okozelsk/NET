@@ -6,7 +6,7 @@ using RCNet.MathTools;
 using RCNet.MathTools.MatrixMath;
 using RCNet.Extensions;
 using RCNet.Neural.Activation;
-using RCNet.Neural.Weight;
+using RCNet.Neural.Random;
 
 namespace RCNet.Neural.Network.ReservoirComputing.EchoState
 {
@@ -28,7 +28,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
         /// <summary>
         /// Random generator.
         /// </summary>
-        private Random _rand;
+        private System.Random _rand;
         /// <summary>
         /// Reservoir's neurons.
         /// </summary>
@@ -98,8 +98,8 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
                 _neuronFeedbackConnectionsCollection[n] = new List<Connection>();
             }
             //Random generator initialization
-            if (randomizerSeek < 0) _rand = new Random();
-            else _rand = new Random(randomizerSeek);
+            if (randomizerSeek < 0) _rand = new System.Random();
+            else _rand = new System.Random(randomizerSeek);
             //Allocation of reservoir neurons array and creation of the neurons
             _neurons = new AnalogNeuron[_settings.Size];
             //Neurons retainment rates
@@ -120,7 +120,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
             //Neurons creation
             for (int n = 0; n < _neurons.Length; n++)
             {
-                _neurons[n] = new AnalogNeuron(ActivationFactory.CreateActivationFunction(_settings.ReservoirNeuronActivation), biases[n], retainmentRates[n]);
+                _neurons[n] = new AnalogNeuron(ActivationFactory.CreateActivationFunction(_settings.ReservoirActivation), biases[n], retainmentRates[n]);
             }
             //Input
             SetGuaranteedRandomInterconnections(_neuronInputConnectionsCollection, _numOfInputNodes, _settings.InputConnectionDensity, _settings.InputWeight);
@@ -275,7 +275,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
         /// <param name="weightCfg">Random weight config</param>
         /// <param name="duplicityCheck">Indicates whether to check the interconnection existency before its creation</param>
         /// <returns>Success/Unsuccess</returns>
-        private bool AddInterconnection(List<Connection>[] entityConnectionsCollection, int entityIdx, int partyIdx, RandomWeightSettings weightCfg, bool duplicityCheck)
+        private bool AddInterconnection(List<Connection>[] entityConnectionsCollection, int entityIdx, int partyIdx, RandomValueSettings weightCfg, bool duplicityCheck)
         {
             if(duplicityCheck)
             {
@@ -298,7 +298,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
         /// <param name="numOfParties">Number of party entities to be interconnected with entities</param>
         /// <param name="density">Interconnection density</param>
         /// <param name="weightCfg">Random weight config</param>
-        private void SetGuaranteedRandomInterconnections(List<Connection>[] entityConnectionsCollection, int numOfParties, double density, RandomWeightSettings weightCfg)
+        private void SetGuaranteedRandomInterconnections(List<Connection>[] entityConnectionsCollection, int numOfParties, double density, RandomValueSettings weightCfg)
         {
             density = density.Bound(0, 1);
             int idealNumOfConnections = (int)Math.Round(entityConnectionsCollection.Length * numOfParties * density, 0);
@@ -364,7 +364,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
         /// <param name="density">Interconnection density</param>
         /// <param name="weightCfg">Random weight config</param>
         /// <param name="duplicityCheck">Indicates whether to check the interconnection existency before its creation</param>
-        private void SetRandomInterconnections(List<Connection>[] entityConnectionsCollection, int numOfParties, double density, RandomWeightSettings weightCfg, bool duplicityCheck)
+        private void SetRandomInterconnections(List<Connection>[] entityConnectionsCollection, int numOfParties, double density, RandomValueSettings weightCfg, bool duplicityCheck)
         {
             int[] allConnections = new int[entityConnectionsCollection.Length * numOfParties];
             int numOfConnections = (int)Math.Round(allConnections.Length * density, 0);
@@ -388,7 +388,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
         /// <param name="weightCfg">Connection weight config</param>
         /// <param name="bidirectional">Specifies whether the ring interconnection will be bidirectional.</param>
         /// <param name="duplicityCheck">Indicates whether to check the interconnection existency before its creation</param>
-        private void SetRingConnections(RandomWeightSettings weightCfg, bool bidirectional, bool duplicityCheck = true)
+        private void SetRingConnections(RandomValueSettings weightCfg, bool bidirectional, bool duplicityCheck = true)
         {
             for (int i = 0; i < _neurons.Length; i++)
             {
@@ -409,7 +409,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
         /// <param name="density">Specifies what part of neurons will be self-connected</param>
         /// <param name="weightCfg">Random weight config</param>
         /// <param name="duplicityCheck">Indicates whether to check the interconnection existency before its creation</param>
-        private void SetSelfConnections(double density, RandomWeightSettings weightCfg, bool duplicityCheck = true)
+        private void SetSelfConnections(double density, RandomValueSettings weightCfg, bool duplicityCheck = true)
         {
             int numOfConnections = (int)Math.Round((double)_neurons.Length * density);
             int[] indices = new int[_neurons.Length];
@@ -426,7 +426,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
         /// </summary>
         /// <param name="cfg">Configuration parameters</param>
         /// <param name="weightCfg">Connection weight config</param>
-        private void SetupRandomTopology(AnalogReservoirSettings.RandomTopologySettings cfg, RandomWeightSettings weightCfg)
+        private void SetupRandomTopology(AnalogReservoirSettings.RandomTopologySettings cfg, RandomValueSettings weightCfg)
         {
             //Fully random connections setup
             SetRandomInterconnections(_neuronNeuronConnectionsCollection, _neurons.Length, cfg.ConnectionsDensity, weightCfg, false);
@@ -438,7 +438,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
         /// </summary>
         /// <param name="cfg">Configuration parameters</param>
         /// <param name="weightCfg">Connection weight config</param>
-        private void SetupRingTopology(AnalogReservoirSettings.RingTopologySettings cfg, RandomWeightSettings weightCfg)
+        private void SetupRingTopology(AnalogReservoirSettings.RingTopologySettings cfg, RandomValueSettings weightCfg)
         {
             //Ring connections part
             SetRingConnections(weightCfg, cfg.Bidirectional, false);
@@ -454,7 +454,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
         /// </summary>
         /// <param name="cfg">Configuration parameters</param>
         /// <param name="weightCfg">Connection weight config</param>
-        private void SetupDTTTopology(AnalogReservoirSettings.DTTTopologySettings cfg, RandomWeightSettings weightCfg)
+        private void SetupDTTTopology(AnalogReservoirSettings.DTTTopologySettings cfg, RandomValueSettings weightCfg)
         {
             //HTwist part (single direction ring)
             SetRingConnections(weightCfg, false);

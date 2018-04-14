@@ -9,7 +9,7 @@ namespace RCNet.Neural
     /// <summary>
     /// Definitions of commonly used neural types and related support functions
     /// </summary>
-    public static class CommonTypes
+    public static class CommonEnums
     {
         /// <summary>
         /// Supported task types.

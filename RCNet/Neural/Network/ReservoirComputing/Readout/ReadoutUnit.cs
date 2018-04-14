@@ -140,11 +140,11 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
         /// <param name="taskType">Type of the task</param>
         /// <param name="current">Current readout unit</param>
         /// <param name="best">For now the best readout unit</param>
-        public static bool IsBetter(CommonTypes.TaskType taskType, ReadoutUnit current, ReadoutUnit best)
+        public static bool IsBetter(CommonEnums.TaskType taskType, ReadoutUnit current, ReadoutUnit best)
         {
             switch(taskType)
             {
-                case CommonTypes.TaskType.Classification:
+                case CommonEnums.TaskType.Classification:
                     if(current.CombinedBinaryError < best.CombinedBinaryError)
                     {
                         return true;
@@ -175,7 +175,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
         private static void CreateNetAndTreainer(ReadoutLayerSettings.ReadoutUnitSettings settings,
                                                  List<double[]> trainingPredictorsCollection,
                                                  List<double[]> trainingIdealOutputsCollection,
-                                                 Random rand,
+                                                 System.Random rand,
                                                  out INonRecurrentNetwork net,
                                                  out INonRecurrentNetworkTrainer trainer
                                                  )
@@ -226,7 +226,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
         /// <param name="controller">Regression controller</param>
         /// <param name="controllerUserObject">An user object to be passed to controller</param>
         /// <returns>Prepared readout unit</returns>
-        public static ReadoutUnit CreateTrained(CommonTypes.TaskType taskType,
+        public static ReadoutUnit CreateTrained(CommonEnums.TaskType taskType,
                                                 int readoutUnitIdx,
                                                 string outputFieldName,
                                                 int foldNum,
@@ -236,7 +236,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
                                                 List<double[]> trainingIdealOutputsCollection,
                                                 List<double[]> testingPredictorsCollection,
                                                 List<double[]> testingIdealOutputsCollection,
-                                                Random rand,
+                                                System.Random rand,
                                                 ReadoutLayerSettings.ReadoutUnitSettings readoutUnitSettings,
                                                 RegressionCallbackDelegate controller = null,
                                                 Object controllerUserObject = null
@@ -268,7 +268,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
                     ReadoutUnit currReadoutUnit = new ReadoutUnit();
                     currReadoutUnit.Network = net;
                     currReadoutUnit.TrainingErrorStat = net.ComputeBatchErrorStat(trainingPredictorsCollection, trainingIdealOutputsCollection, out trainingComputedOutputsCollection);
-                    if(taskType == CommonTypes.TaskType.Classification)
+                    if(taskType == CommonEnums.TaskType.Classification)
                     {
                         currReadoutUnit.TrainingBinErrorStat = new BinErrStat(refBinDistr, trainingComputedOutputsCollection, trainingIdealOutputsCollection);
                         currReadoutUnit.CombinedBinaryError = currReadoutUnit.TrainingBinErrorStat.TotalErrStat.Sum;
@@ -279,7 +279,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
                     {
                         currReadoutUnit.TestingErrorStat = net.ComputeBatchErrorStat(testingPredictorsCollection, testingIdealOutputsCollection, out testingComputedOutputsCollection);
                         currReadoutUnit.CombinedPrecisionError = Math.Max(currReadoutUnit.CombinedPrecisionError, currReadoutUnit.TestingErrorStat.ArithAvg);
-                        if (taskType == CommonTypes.TaskType.Classification)
+                        if (taskType == CommonEnums.TaskType.Classification)
                         {
                             currReadoutUnit.TestingBinErrorStat = new BinErrStat(refBinDistr, testingComputedOutputsCollection, testingIdealOutputsCollection);
                             currReadoutUnit.CombinedBinaryError = Math.Max(currReadoutUnit.CombinedBinaryError, currReadoutUnit.TestingBinErrorStat.TotalErrStat.Sum);
@@ -363,7 +363,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
             /// <summary>
             /// Type of the neural task
             /// </summary>
-            public CommonTypes.TaskType TaskType { get; set; } = CommonTypes.TaskType.Prediction;
+            public CommonEnums.TaskType TaskType { get; set; } = CommonEnums.TaskType.Prediction;
             /// <summary>
             /// Readout unit index for which the regression is performing (corresponds with output field index)
             /// </summary>
