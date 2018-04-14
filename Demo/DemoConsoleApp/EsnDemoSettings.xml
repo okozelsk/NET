@@ -1,58 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <esnDemo dataFolder=".\\Data">
   <!-- Modify/Tune existing or add your own cases -->
-  <case name="Classification task Splice junctions gene sequence: Single reservoir, Feed Forward, Hidden layer, Resilient">
-    <!-- Data converted from https://archive.ics.uci.edu/ml/datasets/Molecular+Biology+%28Splice-junction+Gene+Sequences%29 -->
-    <samples fileName="SpliceJunctions.csv" singleNormalizer="false" normalizerReserve="0.1"/>
-    <esnCfg taskType="Classification" randomizerSeek="0">
-      <inputFields routeToReadout="false">
-        <field name="1st_Nucleotide"/>
-        <field name="2nd_Nucleotide"/>
-      </inputFields>
-      <reservoirCfgContainer>
-        <reservoirCfg name="Random topology of 200 TanH neurons">
-          <input connectionDensity="1">
-            <weight min="-0.6" max="0.6"/>
-          </input>
-          <internal size="200" spectralRadius="0.9">
-            <topologyRandom connectionsDensity="0.1"/>
-            <activation function="TanH"/>
-            <bias min="0" max="0"/>
-            <weight min="-1" max="1"/>
-            <retainmentNeurons density="1" retainmentMinRate="0.25" retainmentMaxRate="0.25"/>
-          </internal>
-        </reservoirCfg>
-      </reservoirCfgContainer>
-      <reservoirInstanceContainer>
-        <reservoirInstance name="RandMain" cfg="Random topology of 200 TanH neurons" augmentedStates="true">
-          <inputFields>
-            <field name="1st_Nucleotide"/>
-            <field name="2nd_Nucleotide"/>
-          </inputFields>
-        </reservoirInstance>
-      </reservoirInstanceContainer>
-      <readoutLayer testDataRatio="0.1" folds="Auto">
-        <readoutUnit attempts="2" attemptEpochs="2000">
-          <ff regressionMethod="Resilient">
-            <outputActivation function="TanH"/>
-            <hiddenLayers>
-              <layer neurons="40">
-                <activation function="TanH"/>
-              </layer>
-              <layer neurons="40">
-                <activation function="LeakyReLU" arg1="0.01"/>
-              </layer>
-            </hiddenLayers>
-          </ff>
-        </readoutUnit>
-        <outputFields >
-          <field name="EI"/>
-          <field name="IE"/>
-          <field name="Neither"/>
-        </outputFields>
-      </readoutLayer>
-    </esnCfg>
-  </case>
   <case name="Prediction task High and Low prices of TTOO (T2 Biosystems, Inc.): Single reservoir, Feed Forward, Linear regression">
     <!-- Data from https://finance.yahoo.com/quote/TTOO/history?p=TTOO -->
     <samples fileName="TTOO.csv" bootSamples="300" singleNormalizer="true" normalizerReserve="0.1"/>
@@ -361,6 +309,58 @@
         </readoutUnit>
         <outputFields>
           <field name="Value"/>
+        </outputFields>
+      </readoutLayer>
+    </esnCfg>
+  </case>
+  <case name="Slow classification task Splice junctions gene sequence: Single reservoir, Feed Forward, Hidden layer, Resilient">
+    <!-- Data converted from https://archive.ics.uci.edu/ml/datasets/Molecular+Biology+%28Splice-junction+Gene+Sequences%29 -->
+    <samples fileName="SpliceJunctions.csv" singleNormalizer="false" normalizerReserve="0.1"/>
+    <esnCfg taskType="Classification" randomizerSeek="0">
+      <inputFields routeToReadout="false">
+        <field name="1st_Nucleotide"/>
+        <field name="2nd_Nucleotide"/>
+      </inputFields>
+      <reservoirCfgContainer>
+        <reservoirCfg name="Random topology of 200 TanH neurons">
+          <input connectionDensity="1">
+            <weight min="-0.6" max="0.6"/>
+          </input>
+          <internal size="200" spectralRadius="0.9">
+            <topologyRandom connectionsDensity="0.1"/>
+            <activation function="TanH"/>
+            <bias min="0" max="0"/>
+            <weight min="-1" max="1"/>
+            <retainmentNeurons density="1" retainmentMinRate="0.25" retainmentMaxRate="0.25"/>
+          </internal>
+        </reservoirCfg>
+      </reservoirCfgContainer>
+      <reservoirInstanceContainer>
+        <reservoirInstance name="RandMain" cfg="Random topology of 200 TanH neurons" augmentedStates="true">
+          <inputFields>
+            <field name="1st_Nucleotide"/>
+            <field name="2nd_Nucleotide"/>
+          </inputFields>
+        </reservoirInstance>
+      </reservoirInstanceContainer>
+      <readoutLayer testDataRatio="0.1" folds="Auto">
+        <readoutUnit attempts="2" attemptEpochs="2000">
+          <ff regressionMethod="Resilient">
+            <outputActivation function="TanH"/>
+            <hiddenLayers>
+              <layer neurons="40">
+                <activation function="TanH"/>
+              </layer>
+              <layer neurons="40">
+                <activation function="LeakyReLU" arg1="0.01"/>
+              </layer>
+            </hiddenLayers>
+          </ff>
+        </readoutUnit>
+        <outputFields >
+          <field name="EI"/>
+          <field name="IE"/>
+          <field name="Neither"/>
         </outputFields>
       </readoutLayer>
     </esnCfg>
