@@ -64,6 +64,27 @@ namespace RCNet.Demo
                                                                        + statisticsCollection[resIdx].NeuronsStateSpansStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
                                                                        + statisticsCollection[resIdx].NeuronsStateSpansStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
                 log.Write("               Context neuron states RMS: " + statisticsCollection[resIdx].CtxNeuronStatesRMS.ToString("N4", CultureInfo.InvariantCulture), false);
+                log.Write($"      Weights statistics of reservoir instance {statisticsCollection[resIdx].ReservoirInstanceName} ({statisticsCollection[resIdx].ReservoirSettingsName})", false);
+                log.Write("              Input Avg, Max, Min, SDdev: " + statisticsCollection[resIdx].InputWeightsStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                       + statisticsCollection[resIdx].InputWeightsStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                       + statisticsCollection[resIdx].InputWeightsStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                       + statisticsCollection[resIdx].InputWeightsStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
+                log.Write("           Internal Avg, Max, Min, SDdev: " + statisticsCollection[resIdx].InternalWeightsStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                       + statisticsCollection[resIdx].InternalWeightsStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                       + statisticsCollection[resIdx].InternalWeightsStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                       + statisticsCollection[resIdx].InternalWeightsStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
+                log.Write("          Ctx input Avg, Max, Min, SDdev: " + statisticsCollection[resIdx].CtxNeuronInputWeightsStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                       + statisticsCollection[resIdx].CtxNeuronInputWeightsStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                       + statisticsCollection[resIdx].CtxNeuronInputWeightsStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                       + statisticsCollection[resIdx].CtxNeuronInputWeightsStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
+                log.Write("       Ctx feedback Avg, Max, Min, SDdev: " + statisticsCollection[resIdx].CtxNeuronFeedbackWeightsStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                       + statisticsCollection[resIdx].CtxNeuronFeedbackWeightsStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                       + statisticsCollection[resIdx].CtxNeuronFeedbackWeightsStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                       + statisticsCollection[resIdx].CtxNeuronFeedbackWeightsStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
+                log.Write("           Feedback Avg, Max, Min, SDdev: " + statisticsCollection[resIdx].FeedbackWeightsStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                       + statisticsCollection[resIdx].FeedbackWeightsStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                       + statisticsCollection[resIdx].FeedbackWeightsStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                       + statisticsCollection[resIdx].FeedbackWeightsStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
             }
             return;
         }

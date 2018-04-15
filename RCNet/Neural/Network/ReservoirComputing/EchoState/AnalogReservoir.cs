@@ -481,6 +481,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
         public AnalogReservoirStat CollectStatistics()
         {
             AnalogReservoirStat stats = new AnalogReservoirStat(_instanceName, _settings.SettingsName);
+            //Neurons states statistics
             foreach (AnalogNeuron neuron in _neurons)
             {
                 stats.NeuronsMaxAbsStatesStat.AddSampleValue(Math.Max(Math.Abs(neuron.StatesStat.Max), Math.Abs(neuron.StatesStat.Min)));
@@ -493,7 +494,47 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
             }
             else
             {
-                stats.CtxNeuronStatesRMS = -1;
+                stats.CtxNeuronStatesRMS = 0;
+            }
+            //Weights statistics
+            //Input
+            foreach(List<Connection> connections in _neuronInputConnectionsCollection)
+            {
+                foreach(Connection connection in connections)
+                {
+                    stats.InputWeightsStat.AddSampleValue(connection.Weight);
+                }
+            }
+            //Internal
+            foreach (List<Connection> connections in _neuronNeuronConnectionsCollection)
+            {
+                foreach (Connection connection in connections)
+                {
+                    stats.InternalWeightsStat.AddSampleValue(connection.Weight);
+                }
+            }
+            if(_settings.ContextNeuronFeature)
+            {
+                //Context neuron input
+                stats.CtxNeuronInputWeightsStat.AddSampleValues(_contextNeuronInputWeights);
+                //Context neuron feedback
+                foreach (double weight in _contextNeuronFeedbackWeights)
+                {
+                    if(weight != 0)
+                    {
+                        stats.CtxNeuronFeedbackWeightsStat.AddSampleValue(weight);
+                    }
+                }
+            }
+            if(_settings.FeedbackFeature)
+            {
+                foreach (List<Connection> connections in _neuronFeedbackConnectionsCollection)
+                {
+                    foreach (Connection connection in connections)
+                    {
+                        stats.FeedbackWeightsStat.AddSampleValue(connection.Weight);
+                    }
+                }
             }
             return stats;
         }
@@ -671,6 +712,26 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
         /// RMS of the context neuron's states
         /// </summary>
         public double CtxNeuronStatesRMS { get; set; }
+        /// <summary>
+        /// Input weights statistics
+        /// </summary>
+        public BasicStat InputWeightsStat { get; }
+        /// <summary>
+        /// Internal weights statistics
+        /// </summary>
+        public BasicStat InternalWeightsStat { get; }
+        /// <summary>
+        /// Context neuron input weights statistics
+        /// </summary>
+        public BasicStat CtxNeuronInputWeightsStat { get; }
+        /// <summary>
+        /// Context neuron feedback weights statistics
+        /// </summary>
+        public BasicStat CtxNeuronFeedbackWeightsStat { get; }
+        /// <summary>
+        /// Feedback weights statistics
+        /// </summary>
+        public BasicStat FeedbackWeightsStat { get; }
 
         //Constructor
         /// <summary>
@@ -686,6 +747,11 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
             NeuronsRMSStatesStat = new BasicStat();
             NeuronsStateSpansStat = new BasicStat();
             CtxNeuronStatesRMS = 0;
+            InputWeightsStat = new BasicStat();
+            InternalWeightsStat = new BasicStat();
+            CtxNeuronInputWeightsStat = new BasicStat();
+            CtxNeuronFeedbackWeightsStat = new BasicStat();
+            FeedbackWeightsStat = new BasicStat();
             return;
         }
 
