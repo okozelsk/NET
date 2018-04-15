@@ -189,16 +189,16 @@ namespace RCNet.Neural.Activation
             if (obj == null) return false;
             ActivationSettings cmpSettings = obj as ActivationSettings;
             if (FunctionType != cmpSettings.FunctionType ||
-                Arg1 != cmpSettings.Arg1 ||
-                Arg2 != cmpSettings.Arg2 ||
-                Arg3 != cmpSettings.Arg3 ||
-                Arg4 != cmpSettings.Arg4 ||
-                Arg5 != cmpSettings.Arg5 ||
-                Arg6 != cmpSettings.Arg6 ||
-                Arg7 != cmpSettings.Arg7 ||
-                Arg8 != cmpSettings.Arg8 ||
-                Arg9 != cmpSettings.Arg9 ||
-                Arg10 != cmpSettings.Arg10
+                !Arg1.Equals(cmpSettings.Arg1) ||
+                !Arg2.Equals(cmpSettings.Arg2) ||
+                !Arg3.Equals(cmpSettings.Arg3) ||
+                !Arg4.Equals(cmpSettings.Arg4) ||
+                !Arg5.Equals(cmpSettings.Arg5) ||
+                !Arg6.Equals(cmpSettings.Arg6) ||
+                !Arg7.Equals(cmpSettings.Arg7) ||
+                !Arg8.Equals(cmpSettings.Arg8) ||
+                !Arg9.Equals(cmpSettings.Arg9) ||
+                !Arg10.Equals(cmpSettings.Arg10)
                 )
             {
                 return false;

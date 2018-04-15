@@ -316,12 +316,11 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
                 if (obj == null) return false;
                 ReservoirInstanceDefinition cmpSettings = obj as ReservoirInstanceDefinition;
                 if (InputFieldMappingCollection.Count != cmpSettings.InputFieldMappingCollection.Count ||
-                    FeedbackFieldMappingCollection.Count != cmpSettings.FeedbackFieldMappingCollection.Count ||
                     InstanceName != cmpSettings.InstanceName ||
                     !Equals(ReservoirSettings, cmpSettings.ReservoirSettings) ||
                     AugmentedStates != cmpSettings.AugmentedStates ||
-                    InputFieldMappingCollection.ToArray().ContainsEqualValues(cmpSettings.InputFieldMappingCollection.ToArray()) ||
-                    FeedbackFieldMappingCollection.ToArray().ContainsEqualValues(cmpSettings.FeedbackFieldMappingCollection.ToArray())
+                    !InputFieldMappingCollection.ToArray().ContainsEqualValues(cmpSettings.InputFieldMappingCollection.ToArray()) ||
+                    !FeedbackFieldMappingCollection.ToArray().ContainsEqualValues(cmpSettings.FeedbackFieldMappingCollection.ToArray())
                     )
                 {
                     return false;

@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Xml.Linq;
 using System.Reflection;
 using System.IO;
+using RCNet.Extensions;
 using RCNet.Neural.Network.FF;
 using RCNet.Neural.Network.PP;
 using RCNet.XmlTools;
@@ -115,17 +116,10 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
             if (TestDataRatio != cmpSettings.TestDataRatio ||
                 NumOfFolds != cmpSettings.NumOfFolds ||
                 !ReadoutUnitCfg.Equals(cmpSettings.ReadoutUnitCfg) ||
-                OutputFieldNameCollection.Count != cmpSettings.OutputFieldNameCollection.Count
+                !OutputFieldNameCollection.ToArray().ContainsEqualValues(cmpSettings.OutputFieldNameCollection.ToArray())
                 )
             {
                 return false;
-            }
-            for (int i = 0; i < OutputFieldNameCollection.Count; i++)
-            {
-                if(OutputFieldNameCollection[i] != cmpSettings.OutputFieldNameCollection[i])
-                {
-                    return false;
-                }
             }
             return true;
         }
@@ -272,9 +266,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.Readout
                 if (obj == null) return false;
                 ReadoutUnitSettings cmpSettings = obj as ReadoutUnitSettings;
                 if (NetType != cmpSettings.NetType ||
-                    (NetSettings == null && cmpSettings.NetSettings != null) ||
-                    (NetSettings != null && cmpSettings.NetSettings == null) ||
-                    (NetSettings != null && cmpSettings.NetSettings != null && !NetSettings.Equals(cmpSettings.NetSettings)) ||
+                    !Equals(NetSettings, cmpSettings.NetSettings) ||
                     RegressionAttempts != cmpSettings.RegressionAttempts ||
                     RegressionAttemptEpochs != cmpSettings.RegressionAttemptEpochs
                     )

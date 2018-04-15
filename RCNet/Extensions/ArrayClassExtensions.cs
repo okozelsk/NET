@@ -49,6 +49,13 @@ namespace RCNet.Extensions
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool ContainsEqualValues<T>(this T[] array, T[] cmpArray)
         {
+            if((array == null && cmpArray != null) ||
+               (array != null && cmpArray == null)
+               )
+            {
+                return false;
+            }
+            if (array == null && cmpArray == null) return true;
             if (array.Length != cmpArray.Length) return false;
             for (int i = 0; i < array.Length; i++)
             {

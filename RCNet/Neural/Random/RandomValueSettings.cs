@@ -8,6 +8,7 @@ using System.Xml.Linq;
 using System.Reflection;
 using RCNet.Extensions;
 using RCNet.XmlTools;
+using RCNet.MiscTools;
 
 namespace RCNet.Neural.Random
 {
