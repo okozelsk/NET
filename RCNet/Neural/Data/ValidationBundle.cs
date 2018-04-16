@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace RCNet.Neural.Network.Data
+namespace RCNet.Neural.Data
 {
     /// <summary>
     /// Bundle of computed vector and desired ideal vector

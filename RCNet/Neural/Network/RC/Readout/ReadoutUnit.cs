@@ -8,7 +8,7 @@ using RCNet.Neural.Activation;
 using RCNet.Neural.Network.FF;
 using RCNet.Neural.Network.PP;
 
-namespace RCNet.Neural.Network.ReservoirComputing.Readout
+namespace RCNet.Neural.Network.RC.Readout
 {
     /// <summary>
     /// Contains the trained unit associated with output field and related

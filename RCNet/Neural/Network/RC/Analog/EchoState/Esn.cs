@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using RCNet.Extensions;
 using RCNet.MathTools;
-using RCNet.Neural.Network.Data;
-using RCNet.Neural.Network.ReservoirComputing.Readout;
+using RCNet.Neural.Data;
+using RCNet.Neural.Network.RC.Readout;
 
-namespace RCNet.Neural.Network.ReservoirComputing.EchoState
+namespace RCNet.Neural.Network.RC.Analog.EchoState
 {
     /// <summary>
     /// Implements the Echo State Network.

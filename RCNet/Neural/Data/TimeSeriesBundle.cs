@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using RCNet.Extensions;
 
-namespace RCNet.Neural.Network.Data
+namespace RCNet.Neural.Data
 {
     /// <summary>
     /// Bundle of input vector and desired output vector

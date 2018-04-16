@@ -6,7 +6,7 @@ using System.Globalization;
 using System.Reflection;
 using System.IO;
 using RCNet.XmlTools;
-using RCNet.Neural.Network.ReservoirComputing.EchoState;
+using RCNet.Neural.Network.RC.Analog.EchoState;
 
 namespace RCNet.Demo
 {

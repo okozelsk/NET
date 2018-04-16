@@ -8,7 +8,7 @@ using RCNet.Extensions;
 using RCNet.Neural.Activation;
 using RCNet.Neural.Random;
 
-namespace RCNet.Neural.Network.ReservoirComputing.EchoState
+namespace RCNet.Neural.Network.RC.Analog.EchoState
 {
     /// <summary>
     /// Implements analog reservoir supporting several internal topologies and advanced features.

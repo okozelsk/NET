@@ -10,7 +10,7 @@ using RCNet.XmlTools;
 using RCNet.Neural.Activation;
 using RCNet.Neural.Random;
 
-namespace RCNet.Neural.Network.ReservoirComputing.EchoState
+namespace RCNet.Neural.Network.RC.Analog.EchoState
 {
     /// <summary>
     /// The class contains analog reservoir configuration parameters and also contains
@@ -255,7 +255,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
             //Validation
             ElemValidator validator = new ElemValidator();
             Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.ReservoirComputing.EchoState.AnalogReservoirSettings.xsd");
+            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.RC.Analog.EchoState.AnalogReservoirSettings.xsd");
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.NeuralSettingsTypes.xsd");
             XElement reservoirSettingsElem = validator.Validate(elem, "rootElem");
             //Parsing

@@ -5,10 +5,10 @@ using System.Globalization;
 using System.Xml.Linq;
 using System.Reflection;
 using RCNet.Extensions;
-using RCNet.Neural.Network.ReservoirComputing.Readout;
+using RCNet.Neural.Network.RC.Readout;
 using RCNet.XmlTools;
 
-namespace RCNet.Neural.Network.ReservoirComputing.EchoState
+namespace RCNet.Neural.Network.RC.Analog.EchoState
 {
     /// <summary>
     /// The class contains Esn (Echo State Network) configuration parameters and also contains
@@ -100,7 +100,7 @@ namespace RCNet.Neural.Network.ReservoirComputing.EchoState
             //Validation
             ElemValidator validator = new ElemValidator();
             Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.ReservoirComputing.EchoState.EsnSettings.xsd");
+            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.RC.Analog.EchoState.EsnSettings.xsd");
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.NeuralSettingsTypes.xsd");
             XElement esnSettingsElem = validator.Validate(elem, "rootElem");
             //Parsing

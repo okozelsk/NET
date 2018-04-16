@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 using System.Globalization;
 using RCNet.MathTools;
 using RCNet.Neural.Activation;
-using RCNet.Neural.Network.Data;
+using RCNet.Neural.Data;
 using RCNet.Extensions;
 
-namespace RCNet.Neural.Network.ReservoirComputing.Readout
+namespace RCNet.Neural.Network.RC.Readout
 {
     /// <summary>
     /// Class implements the common readout layer for the reservoir computing methods

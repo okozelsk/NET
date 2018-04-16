@@ -5,9 +5,9 @@ using System.Globalization;
 using RCNet.MathTools;
 using RCNet.Extensions;
 using RCNet.CsvTools;
-using RCNet.Neural.Network.Data;
-using RCNet.Neural.Network.ReservoirComputing.EchoState;
-using RCNet.Neural.Network.ReservoirComputing.Readout;
+using RCNet.Neural.Data;
+using RCNet.Neural.Network.RC.Analog.EchoState;
+using RCNet.Neural.Network.RC.Readout;
 using RCNet.Neural;
 using RCNet.Demo.Log;
 
@@ -86,6 +86,7 @@ namespace RCNet.Demo
                                                                        + statisticsCollection[resIdx].FeedbackWeightsStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
                                                                        + statisticsCollection[resIdx].FeedbackWeightsStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
             }
+            log.Write(" ", false);
             return;
         }
 

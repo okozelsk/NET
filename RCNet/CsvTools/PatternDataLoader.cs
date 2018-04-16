@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.IO;
 using RCNet.MathTools;
 using RCNet.Extensions;
-using RCNet.Neural.Network.Data;
+using RCNet.Neural.Data;
 
 namespace RCNet.CsvTools
 {

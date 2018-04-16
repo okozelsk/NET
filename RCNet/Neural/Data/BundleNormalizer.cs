@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using RCNet.MathTools;
 using RCNet.Extensions;
 
-namespace RCNet.Neural.Network.Data
+namespace RCNet.Neural.Data
 {
     /// <summary>
     /// Helper class for easy standardization and normalization/naturalization of sample data
