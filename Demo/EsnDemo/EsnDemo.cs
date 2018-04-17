@@ -6,8 +6,9 @@ using RCNet.MathTools;
 using RCNet.Extensions;
 using RCNet.CsvTools;
 using RCNet.Neural.Data;
-using RCNet.Neural.Network.RC.Analog.EchoState;
-using RCNet.Neural.Network.RC.Readout;
+using RCNet.Neural.Analog.Reservoir;
+using RCNet.Neural.Analog.Network.EchoState;
+using RCNet.Neural.Analog.Readout;
 using RCNet.Neural;
 using RCNet.Demo.Log;
 

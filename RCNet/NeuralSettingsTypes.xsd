@@ -17,8 +17,8 @@
     </xs:restriction>
   </xs:simpleType>
 
-  <!-- Enumeration of activation functions -->
-  <xs:simpleType name="ActivationFunctionType">
+  <!-- Enumeration of analog activation functions -->
+  <xs:simpleType name="AnalogActivationFunctionType">
     <xs:restriction base="xs:string">
       <xs:enumeration value="BentIdentity"/>
       <xs:enumeration value="Elliot"/>
@@ -119,9 +119,9 @@
   </xs:simpleType>
 
   <!-- COMPLEX TYPES -->
-  <!-- Activation element -->
-  <xs:complexType name="ActivationCfgType">
-    <xs:attribute type="ActivationFunctionType" name="function" use="required"/>
+  <!-- Analog activation element -->
+  <xs:complexType name="AnalogActivationCfgType">
+    <xs:attribute type="AnalogActivationFunctionType" name="function" use="required"/>
     <xs:attribute type="DoubleNAOptionType" name="arg1" use="optional" default="NA"/>
     <xs:attribute type="DoubleNAOptionType" name="arg2" use="optional" default="NA"/>
     <xs:attribute type="DoubleNAOptionType" name="arg3" use="optional" default="NA"/>
@@ -159,7 +159,7 @@
   <!-- FF network - hidden layer - configuration -->
   <xs:complexType name="FFNetHiddenLayerCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="ActivationCfgType" name="activation" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="AnalogActivationCfgType" name="activation" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="UIntGT0Type" name="neurons" use="required"/>
   </xs:complexType>
@@ -192,7 +192,7 @@
   <xs:complexType name="FFNetCfgType">
     <xs:sequence minOccurs="0" maxOccurs="1">
       <xs:sequence minOccurs="1" maxOccurs="1">
-        <xs:element type="ActivationCfgType" name="outputActivation" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="AnalogActivationCfgType" name="outputActivation" minOccurs="1" maxOccurs="1"/>
         <xs:element type="FFNetHiddenLayersCfgType" name="hiddenLayers" minOccurs="0" maxOccurs="1"/>
       </xs:sequence>
       <xs:choice minOccurs="0" maxOccurs="1">
@@ -296,7 +296,7 @@
   <!-- Analog reservoir - context neuron -configuration -->
   <xs:complexType name="AnaResCtxNeuronCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="ActivationCfgType" name="activation" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="AnalogActivationCfgType" name="activation" minOccurs="1" maxOccurs="1"/>
       <xs:element type="RandomValueType" name="inputWeight" minOccurs="1" maxOccurs="1"/>
       <xs:element type="RandomValueType" name="feedbackWeight" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
@@ -311,7 +311,7 @@
         <xs:element type="AnaResRingTopoCfgType" name="topologyRing" minOccurs="1" maxOccurs="1"/>
         <xs:element type="AnaResDTTTopoCfgType" name="topologyDTT" minOccurs="1" maxOccurs="1"/>
       </xs:choice>
-      <xs:element type="ActivationCfgType" name="activation" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="AnalogActivationCfgType" name="activation" minOccurs="1" maxOccurs="1"/>
       <xs:element type="RandomValueType" name="bias" minOccurs="1" maxOccurs="1"/>
       <xs:element type="RandomValueType" name="weight" minOccurs="1" maxOccurs="1"/>
       <xs:element type="AnaResRetNeuronsCfgType" name="retainmentNeurons" minOccurs="0" maxOccurs="1"/>

@@ -71,46 +71,47 @@
     <Compile Include="MathTools\Normalizer.cs" />
     <Compile Include="MathTools\WeightedAvg.cs" />
     <Compile Include="MiscTools\Utils.cs" />
-    <Compile Include="Neural\Activation\ActivationFactory.cs" />
-    <Compile Include="Neural\Activation\ActivationSettings.cs" />
-    <Compile Include="Neural\Activation\Sinc.cs" />
-    <Compile Include="Neural\Activation\SoftExponential.cs" />
-    <Compile Include="Neural\Activation\LeakyReLU.cs" />
-    <Compile Include="Neural\Activation\Elliot.cs" />
-    <Compile Include="Neural\Activation\Gaussian.cs" />
-    <Compile Include="Neural\Activation\IActivationFunction.cs" />
-    <Compile Include="Neural\Activation\Identity.cs" />
-    <Compile Include="Neural\Activation\ISRU.cs" />
-    <Compile Include="Neural\Activation\BentIdentity.cs" />
-    <Compile Include="Neural\Activation\SoftPlus.cs" />
-    <Compile Include="Neural\Activation\Sinusoid.cs" />
-    <Compile Include="Neural\Activation\Sigmoid.cs" />
-    <Compile Include="Neural\Activation\TanH.cs" />
+    <Compile Include="Neural\Analog\Activation\AnalogActivationFactory.cs" />
+    <Compile Include="Neural\Analog\Activation\AnalogActivationSettings.cs" />
+    <Compile Include="Neural\Analog\Activation\Sinc.cs" />
+    <Compile Include="Neural\Analog\Activation\SoftExponential.cs" />
+    <Compile Include="Neural\Analog\Activation\LeakyReLU.cs" />
+    <Compile Include="Neural\Analog\Activation\Elliot.cs" />
+    <Compile Include="Neural\Analog\Activation\Gaussian.cs" />
+    <Compile Include="Neural\Analog\Activation\IActivationFunction.cs" />
+    <Compile Include="Neural\Analog\Activation\Identity.cs" />
+    <Compile Include="Neural\Analog\Activation\ISRU.cs" />
+    <Compile Include="Neural\Analog\Activation\BentIdentity.cs" />
+    <Compile Include="Neural\Analog\Activation\SoftPlus.cs" />
+    <Compile Include="Neural\Analog\Activation\Sinusoid.cs" />
+    <Compile Include="Neural\Analog\Activation\Sigmoid.cs" />
+    <Compile Include="Neural\Analog\Activation\TanH.cs" />
     <Compile Include="Neural\CommonEnums.cs" />
     <Compile Include="Neural\Data\BundleNormalizer.cs" />
     <Compile Include="Neural\Data\PatternBundle.cs" />
     <Compile Include="Neural\Data\ValidationBundle.cs" />
     <Compile Include="Neural\Data\TimeSeriesBundle.cs" />
-    <Compile Include="Neural\Network\PP\PDeltaRuleTrainerSettings.cs" />
-    <Compile Include="Neural\Network\FF\RPropTrainerSettings.cs" />
-    <Compile Include="Neural\Network\FF\LinRegrTrainerSettings.cs" />
-    <Compile Include="Neural\Network\PP\ParallelPerceptronSettings.cs" />
-    <Compile Include="Neural\Network\INonRecurrentNetwork.cs" />
-    <Compile Include="Neural\Network\PP\ParallelPerceptron.cs" />
-    <Compile Include="Neural\Network\PP\PDeltaRuleTrainer.cs" />
-    <Compile Include="Neural\Network\RC\Analog\EchoState\AnalogNeuron.cs" />
-    <Compile Include="Neural\Network\RC\Analog\EchoState\AnalogReservoir.cs" />
-    <Compile Include="Neural\Network\FF\FeedForwardNetworkSettings.cs" />
-    <Compile Include="Neural\Network\RC\Analog\EchoState\AnalogReservoirSettings.cs" />
-    <Compile Include="Neural\Network\RC\Analog\EchoState\Esn.cs" />
-    <Compile Include="Neural\Network\RC\Analog\EchoState\EsnSettings.cs" />
-    <Compile Include="Neural\Network\FF\FeedForwardNetwork.cs" />
-    <Compile Include="Neural\Network\INonRecurrentNetworkTrainer.cs" />
-    <Compile Include="Neural\Network\FF\LinRegrTrainer.cs" />
-    <Compile Include="Neural\Network\FF\RPropTrainer.cs" />
-    <Compile Include="Neural\Network\RC\Readout\ReadoutLayerSettings.cs" />
-    <Compile Include="Neural\Network\RC\Readout\ReadoutLayer.cs" />
-    <Compile Include="Neural\Network\RC\Readout\ReadoutUnit.cs" />
+    <Compile Include="Neural\Analog\Network\PP\PDeltaRuleTrainerSettings.cs" />
+    <Compile Include="Neural\Analog\Network\FF\RPropTrainerSettings.cs" />
+    <Compile Include="Neural\Analog\Network\FF\LinRegrTrainerSettings.cs" />
+    <Compile Include="Neural\Analog\Network\PP\ParallelPerceptronSettings.cs" />
+    <Compile Include="Neural\INonRecurrentNetwork.cs" />
+    <Compile Include="Neural\Analog\Network\PP\ParallelPerceptron.cs" />
+    <Compile Include="Neural\Analog\Network\PP\PDeltaRuleTrainer.cs" />
+    <Compile Include="Neural\Analog\Reservoir\AnalogNeuron.cs" />
+    <Compile Include="Neural\Analog\Reservoir\AnalogReservoir.cs" />
+    <Compile Include="Neural\Analog\Network\FF\FeedForwardNetworkSettings.cs" />
+    <Compile Include="Neural\Analog\Reservoir\AnalogReservoirSettings.cs" />
+    <Compile Include="Neural\Analog\Network\EchoState\Esn.cs" />
+    <Compile Include="Neural\Analog\Network\EchoState\EsnSettings.cs" />
+    <Compile Include="Neural\Analog\Network\FF\FeedForwardNetwork.cs" />
+    <Compile Include="Neural\INonRecurrentNetworkTrainer.cs" />
+    <Compile Include="Neural\Analog\Network\FF\LinRegrTrainer.cs" />
+    <Compile Include="Neural\Analog\Network\FF\RPropTrainer.cs" />
+    <Compile Include="Neural\Analog\Readout\ReadoutLayerSettings.cs" />
+    <Compile Include="Neural\Analog\Readout\ReadoutLayer.cs" />
+    <Compile Include="Neural\Analog\Readout\ReadoutUnit.cs" />
+    <Compile Include="Neural\Spiking\MicroCircuit\MicroCircuitNeuron.cs" />
     <Compile Include="Neural\Random\RandomValueSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Queue\SimpleQueue.cs" />
@@ -123,36 +124,34 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Neural\Network\RC\Analog\EchoState\AnalogReservoirSettings.xsd" />
-    <EmbeddedResource Include="Neural\Network\RC\Analog\EchoState\EsnSettings.xsd" />
+    <EmbeddedResource Include="Neural\Analog\Reservoir\AnalogReservoirSettings.xsd" />
+    <EmbeddedResource Include="Neural\Analog\Network\EchoState\EsnSettings.xsd" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Neural\Network\RC\Readout\ReadoutLayerSettings.xsd" />
+    <EmbeddedResource Include="Neural\Analog\Readout\ReadoutLayerSettings.xsd" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Neural\Network\FF\FeedForwardNetworkSettings.xsd" />
+    <EmbeddedResource Include="Neural\Analog\Network\FF\FeedForwardNetworkSettings.xsd" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Neural\Network\PP\ParallelPerceptronSettings.xsd" />
+    <EmbeddedResource Include="Neural\Analog\Network\PP\ParallelPerceptronSettings.xsd" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Neural\Random\RandomValueSettings.xsd" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Neural\Activation\ActivationSettings.xsd" />
+    <EmbeddedResource Include="Neural\Analog\Activation\AnalogActivationSettings.xsd" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Neural\Network\PP\PDeltaRuleTrainerSettings.xsd" />
+    <EmbeddedResource Include="Neural\Analog\Network\PP\PDeltaRuleTrainerSettings.xsd" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Neural\Network\FF\LinRegrTrainerSettings.xsd" />
+    <EmbeddedResource Include="Neural\Analog\Network\FF\LinRegrTrainerSettings.xsd" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Neural\Network\FF\RPropTrainerSettings.xsd" />
+    <EmbeddedResource Include="Neural\Analog\Network\FF\RPropTrainerSettings.xsd" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Neural\Network\RC\Spiking\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
