@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 using System.IO;
 using RCNet.MathTools;
 using RCNet.Extensions;
-using RCNet.Neural.Data;
+using RCNet.CsvTools;
 
-namespace RCNet.CsvTools
+namespace RCNet.Neural.Data
 {
     /// <summary>
     /// The class allows to upload sample data for a Classification or Hybrid task from a csv file.

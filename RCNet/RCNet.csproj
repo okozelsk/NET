@@ -46,8 +46,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CsvTools\DelimitedStringValues.cs" />
-    <Compile Include="CsvTools\TimeSeriesDataLoader.cs" />
-    <Compile Include="CsvTools\PatternDataLoader.cs" />
+    <Compile Include="Neural\Data\TimeSeriesDataLoader.cs" />
+    <Compile Include="Neural\Data\PatternDataLoader.cs" />
     <Compile Include="Extensions\ArrayClassExtensions.cs" />
     <Compile Include="Extensions\DoubleClassExtensions.cs" />
     <Compile Include="Extensions\RandomClassExtensions.cs" />
