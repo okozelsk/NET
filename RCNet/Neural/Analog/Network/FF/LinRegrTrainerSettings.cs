@@ -85,7 +85,7 @@ namespace RCNet.Neural.Analog.Network.FF
             ElemValidator validator = new ElemValidator();
             Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Analog.Network.FF.LinRegrTrainerSettings.xsd");
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.NeuralSettingsTypes.xsd");
+            validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
             XElement linRegrTrainerSettingsElem = validator.Validate(elem, "rootElem");
             //Parsing
             HiNoiseIntensity = double.Parse(linRegrTrainerSettingsElem.Attribute("hiNoiseIntensity").Value, CultureInfo.InvariantCulture);

@@ -73,7 +73,7 @@ namespace RCNet.Neural.Analog.Network.PP
             ElemValidator validator = new ElemValidator();
             Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Analog.Network.PP.ParallelPerceptronSettings.xsd");
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.NeuralSettingsTypes.xsd");
+            validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
             XElement parallelPerceptronSettingsElem = validator.Validate(elem, "rootElem");
             //Parsing
             NumOfGates = int.Parse(parallelPerceptronSettingsElem.Attribute("gates").Value, CultureInfo.InvariantCulture);

@@ -114,7 +114,7 @@ namespace RCNet.Neural.Analog.Network.FF
             ElemValidator validator = new ElemValidator();
             Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Analog.Network.FF.FeedForwardNetworkSettings.xsd");
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.NeuralSettingsTypes.xsd");
+            validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
             XElement feedForwardNetworkSettingsElem = validator.Validate(elem, "rootElem");
             //Parsing
             OutputLayerActivation = new AnalogActivationSettings(feedForwardNetworkSettingsElem.Descendants("outputActivation").First());

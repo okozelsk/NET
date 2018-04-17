@@ -7,8 +7,8 @@ using System.Xml.Linq;
 using System.IO;
 using RCNet.Extensions;
 using RCNet.XmlTools;
+using RCNet.RandomValue;
 using RCNet.Neural.Analog.Activation;
-using RCNet.Neural.Random;
 
 namespace RCNet.Neural.Analog.Reservoir
 {
@@ -256,7 +256,7 @@ namespace RCNet.Neural.Analog.Reservoir
             ElemValidator validator = new ElemValidator();
             Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Analog.Reservoir.AnalogReservoirSettings.xsd");
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.NeuralSettingsTypes.xsd");
+            validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
             XElement reservoirSettingsElem = validator.Validate(elem, "rootElem");
             //Parsing
             //Settings name

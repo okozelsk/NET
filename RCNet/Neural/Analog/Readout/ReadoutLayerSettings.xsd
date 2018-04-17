@@ -1,13 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xs:schema attributeFormDefault="unqualified"
            elementFormDefault="unqualified"
-           xmlns:nst="Neural-Settings-Types"
+           xmlns:rcn="RCNetTypes"
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
            >
-  <xs:import namespace="Neural-Settings-Types" />
+  <xs:import namespace="RCNetTypes" />
 
   <!-- Readout layer settings element -->
-  <xs:element name="rootElem" type="nst:ROutLayerCfgType"/>
+  <xs:element name="rootElem" type="rcn:ROutLayerCfgType"/>
 
 </xs:schema>
 

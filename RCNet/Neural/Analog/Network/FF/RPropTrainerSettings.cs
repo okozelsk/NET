@@ -121,7 +121,7 @@ namespace RCNet.Neural.Analog.Network.FF
             ElemValidator validator = new ElemValidator();
             Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Analog.Network.FF.RPropTrainerSettings.xsd");
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.NeuralSettingsTypes.xsd");
+            validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
             XElement rPropTrainerSettingsElem = validator.Validate(elem, "rootElem");
             //Parsing
             ZeroTolerance = double.Parse(rPropTrainerSettingsElem.Attribute("zeroTolerance").Value, CultureInfo.InvariantCulture);

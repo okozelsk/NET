@@ -102,7 +102,7 @@ namespace RCNet.Neural.Analog.Network.EchoState
             ElemValidator validator = new ElemValidator();
             Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Analog.Network.EchoState.EsnSettings.xsd");
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.NeuralSettingsTypes.xsd");
+            validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
             XElement esnSettingsElem = validator.Validate(elem, "rootElem");
             //Parsing
             //Task type

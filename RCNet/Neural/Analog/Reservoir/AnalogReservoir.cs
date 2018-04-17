@@ -6,7 +6,7 @@ using RCNet.MathTools;
 using RCNet.MathTools.MatrixMath;
 using RCNet.Extensions;
 using RCNet.Neural.Analog.Activation;
-using RCNet.Neural.Random;
+using RCNet.RandomValue;
 
 namespace RCNet.Neural.Analog.Reservoir
 {

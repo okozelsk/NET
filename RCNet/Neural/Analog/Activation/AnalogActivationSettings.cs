@@ -139,7 +139,7 @@ namespace RCNet.Neural.Analog.Activation
             ElemValidator validator = new ElemValidator();
             Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Analog.Activation.AnalogActivationSettings.xsd");
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.NeuralSettingsTypes.xsd");
+            validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
             XElement activationSettingsElem = validator.Validate(elem, "rootElem");
             //Parsing
             FunctionType = AnalogActivationFactory.ParseActivationFunctionType(activationSettingsElem.Attribute("function").Value);

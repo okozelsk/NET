@@ -8,9 +8,8 @@ using System.Xml.Linq;
 using System.Reflection;
 using RCNet.Extensions;
 using RCNet.XmlTools;
-using RCNet.MiscTools;
 
-namespace RCNet.Neural.Random
+namespace RCNet.RandomValue
 {
     /// <summary>
     /// Class specifies properties of randomly generated values
@@ -82,8 +81,8 @@ namespace RCNet.Neural.Random
             //Validation
             ElemValidator validator = new ElemValidator();
             Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Random.RandomValueSettings.xsd");
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.NeuralSettingsTypes.xsd");
+            validator.AddXsdFromResources(assemblyRCNet, "RCNet.RandomValue.RandomValueSettings.xsd");
+            validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
             XElement randomValueSettingsElem = validator.Validate(elem, "rootElem");
             //Parsing
             Min = double.Parse(randomValueSettingsElem.Attribute("min").Value, CultureInfo.InvariantCulture);

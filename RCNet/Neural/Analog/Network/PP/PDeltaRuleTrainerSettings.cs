@@ -109,7 +109,7 @@ namespace RCNet.Neural.Analog.Network.PP
             ElemValidator validator = new ElemValidator();
             Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Analog.Network.PP.PDeltaRuleTrainerSettings.xsd");
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.NeuralSettingsTypes.xsd");
+            validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
             XElement pDeltaRuleTrainerSettingsElem = validator.Validate(elem, "rootElem");
             //Parsing
             IniLR = double.Parse(pDeltaRuleTrainerSettingsElem.Attribute("iniLR").Value, CultureInfo.InvariantCulture);

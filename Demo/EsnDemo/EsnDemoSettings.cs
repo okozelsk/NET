@@ -43,7 +43,7 @@ namespace RCNet.Demo
             {
                 validator.AddSchema(schemaStream);
             }
-            using (Stream schemaStream = assemblyRCNet.GetManifestResourceStream("RCNet.NeuralSettingsTypes.xsd"))
+            using (Stream schemaStream = assemblyRCNet.GetManifestResourceStream("RCNet.RCNetTypes.xsd"))
             {
                 validator.AddSchema(schemaStream);
             }
