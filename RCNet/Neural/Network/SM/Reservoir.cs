@@ -459,15 +459,16 @@ namespace RCNet.Neural.Network.SM
         /// </param>
         public void Compute(double[] input, bool updateStatistics)
         {
-            //Store all the reservoir neurons states
-            foreach(INeuron neuron in _neurons)
-            {
-                neuron.StoreSignal();
-            }
-            //Set input to input neurons
+            //Set input to input neurons and store signal
             for(int i = 0; i < input.Length; i++)
             {
                 _inputNeurons[i].Compute(input[i], updateStatistics);
+                _inputNeurons[i].StoreSignal();
+            }
+            //Store all the reservoir neurons states
+            foreach (INeuron neuron in _neurons)
+            {
+                neuron.StoreSignal();
             }
             //Perform computation cycles
             int compCyccles = 1 + _settings.RefractoryCycles;

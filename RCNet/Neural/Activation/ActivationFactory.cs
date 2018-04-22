@@ -178,6 +178,8 @@ namespace RCNet.Neural.Activation
             switch (code.ToUpper())
             {
                 case "BENTIDENTITY": return Function.BentIdentity;
+                case "BIEXPIF": return Function.BiExpIF;
+                case "BILIF": return Function.BiLIF;
                 case "ELLIOT": return Function.Elliot;
                 case "EXPIF": return Function.ExpIF;
                 case "GAUSSIAN": return Function.Gaussian;

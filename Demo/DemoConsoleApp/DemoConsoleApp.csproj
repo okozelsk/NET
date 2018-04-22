@@ -62,10 +62,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DemoSettings.cs">
-      <DependentUpon>DemoSettings.xsd</DependentUpon>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Compile>
+    <Compile Include="DemoSettings.cs" />
     <Compile Include="Log\ConsoleLog.cs" />
     <Compile Include="Log\IOutputLog.cs" />
     <Compile Include="Program.cs" />
@@ -88,10 +85,6 @@
     <ProjectReference Include="..\..\RCNet\RCNet.csproj">
       <Project>{7f44508e-0b06-4652-9631-4740ea97efe1}</Project>
       <Name>RCNet</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\ESNDemo\EsnDemo.csproj">
-      <Project>{4d350554-7031-41d8-af4b-0a642c048109}</Project>
-      <Name>EsnDemo</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

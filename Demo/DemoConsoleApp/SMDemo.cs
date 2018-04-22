@@ -3,18 +3,16 @@ using System.Collections.Generic;
 using System.IO;
 using System.Globalization;
 using RCNet.MathTools;
-using RCNet.Extensions;
-using RCNet.CsvTools;
+using RCNet.Neural;
 using RCNet.Neural.Data;
 using RCNet.Neural.Network.SM;
-using RCNet.Neural;
 using RCNet.DemoConsoleApp.Log;
 
 
 namespace RCNet.DemoConsoleApp
 {
     /// <summary>
-    /// Demonstrates the Esn usage.
+    /// Demonstrates the State Machine usage.
     /// It performs demo cases defined in xml file.
     /// Input data has to be stored in a file (csv format).
     /// </summary>
@@ -40,11 +38,11 @@ namespace RCNet.DemoConsoleApp
         }
 
         /// <summary>
-        /// Function displays Esn reservoirs statistics.
+        /// Function displays reservoirs statistics.
         /// </summary>
         /// <param name="statisticsCollection">Collection of reservoir statistics</param>
         /// <param name="log">Output log object</param>
-        private static void ReportEsnReservoirsStatistics(List<AnalogReservoirStat> statisticsCollection, IOutputLog log)
+        private static void ReportReservoirsStatistics(List<ReservoirStat> statisticsCollection, IOutputLog log)
         {
             log.Write("    Reservoir(s) info:", false);
             for (int resIdx = 0; resIdx < statisticsCollection.Count; resIdx++)
@@ -62,7 +60,6 @@ namespace RCNet.DemoConsoleApp
                                                                        + statisticsCollection[resIdx].NeuronsStateSpansStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
                                                                        + statisticsCollection[resIdx].NeuronsStateSpansStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
                                                                        + statisticsCollection[resIdx].NeuronsStateSpansStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
-                log.Write("               Context neuron states RMS: " + statisticsCollection[resIdx].CtxNeuronStatesRMS.ToString("N4", CultureInfo.InvariantCulture), false);
                 log.Write($"      Weights statistics of reservoir instance {statisticsCollection[resIdx].ReservoirInstanceName} ({statisticsCollection[resIdx].ReservoirSettingsName})", false);
                 log.Write("              Input Avg, Max, Min, SDdev: " + statisticsCollection[resIdx].InputWeightsStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
                                                                        + statisticsCollection[resIdx].InputWeightsStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
@@ -72,18 +69,6 @@ namespace RCNet.DemoConsoleApp
                                                                        + statisticsCollection[resIdx].InternalWeightsStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
                                                                        + statisticsCollection[resIdx].InternalWeightsStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
                                                                        + statisticsCollection[resIdx].InternalWeightsStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
-                log.Write("          Ctx input Avg, Max, Min, SDdev: " + statisticsCollection[resIdx].CtxNeuronInputWeightsStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                       + statisticsCollection[resIdx].CtxNeuronInputWeightsStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                       + statisticsCollection[resIdx].CtxNeuronInputWeightsStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                       + statisticsCollection[resIdx].CtxNeuronInputWeightsStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
-                log.Write("       Ctx feedback Avg, Max, Min, SDdev: " + statisticsCollection[resIdx].CtxNeuronFeedbackWeightsStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                       + statisticsCollection[resIdx].CtxNeuronFeedbackWeightsStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                       + statisticsCollection[resIdx].CtxNeuronFeedbackWeightsStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                       + statisticsCollection[resIdx].CtxNeuronFeedbackWeightsStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
-                log.Write("           Feedback Avg, Max, Min, SDdev: " + statisticsCollection[resIdx].FeedbackWeightsStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                       + statisticsCollection[resIdx].FeedbackWeightsStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                       + statisticsCollection[resIdx].FeedbackWeightsStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                       + statisticsCollection[resIdx].FeedbackWeightsStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
             }
             log.Write(" ", false);
             return;
@@ -92,7 +77,7 @@ namespace RCNet.DemoConsoleApp
         /// <summary>
         /// This is the control function of the regression process and is called
         /// after the completion of each regression training epoch.
-        /// The goal of the regression process is for each Esn output field to train a readout network
+        /// The goal of the regression process is for each output field to train a readout network
         /// that will give good results both on the training data and the test data.
         /// Regression.RegressionControlInArgs object passed to the function contains the best error statistics so far
         /// and the latest statistics. The primary purpose of the function is to decide whether the latest statistics
@@ -104,7 +89,7 @@ namespace RCNet.DemoConsoleApp
         /// </summary>
         /// <param name="inArgs">Contains all the necessary information to control the progress of the regression.</param>
         /// <returns>Instructions for the regression process.</returns>
-        public static ReadoutUnit.RegressionControlOutArgs EsnRegressionControl(ReadoutUnit.RegressionControlInArgs inArgs)
+        public static ReadoutUnit.RegressionControlOutArgs RegressionControl(ReadoutUnit.RegressionControlInArgs inArgs)
         {
             //Instantiate output object.
             ReadoutUnit.RegressionControlOutArgs outArgs = new ReadoutUnit.RegressionControlOutArgs();
@@ -144,7 +129,7 @@ namespace RCNet.DemoConsoleApp
         /// Loads and prepares sample data, trains Esn and displayes results
         /// </summary>
         /// <param name="log">Into this interface are written output messages</param>
-        /// <param name="demoCaseParams">An instance of EsnDemoSettings.EsnDemoCaseSettings to be performed</param>
+        /// <param name="demoCaseParams">An instance of DemoSettings.CaseSettings to be performed</param>
         public static void PerformDemoCase(IOutputLog log, DemoSettings.CaseSettings demoCaseParams)
         {
             //For demo purposes is allowed only the normalization range (-1, 1)
@@ -156,12 +141,12 @@ namespace RCNet.DemoConsoleApp
             //Prediction input vector (relevant only for time series prediction task)
             double[] predictionInputVector = null;
             
-            //Instantiate an Esn
-            Esn esn = new Esn(demoCaseParams.stateMachineCfg);
+            //Instantiate an State Machine
+            StateMachine stateMachine = new StateMachine(demoCaseParams.stateMachineCfg);
 
             //Prepare regression stage input object
             log.Write(" ", false);
-            Esn.RegressionStageInput rsi = null;
+            StateMachine.RegressionStageInput rsi = null;
             if (demoCaseParams.stateMachineCfg.TaskType == CommonEnums.TaskType.Prediction)
             {
                 //Time series prediction task
@@ -176,7 +161,7 @@ namespace RCNet.DemoConsoleApp
                                                                   out bundleNormalizer,
                                                                   out predictionInputVector
                                                                   );
-                rsi = esn.PrepareRegressionStageInput(data, demoCaseParams.NumOfBootSamples, PredictorsCollectionCallback, log);
+                rsi = stateMachine.PrepareRegressionStageInput(data, demoCaseParams.NumOfBootSamples, PredictorsCollectionCallback, log);
             }
             else
             {
@@ -191,23 +176,21 @@ namespace RCNet.DemoConsoleApp
                                                             true,
                                                             out bundleNormalizer
                                                             );
-                rsi = esn.PrepareRegressionStageInput(data, PredictorsCollectionCallback, log);
+                rsi = stateMachine.PrepareRegressionStageInput(data, PredictorsCollectionCallback, log);
             }
             //Report reservoirs statistics
-            ReportEsnReservoirsStatistics(rsi.ReservoirStatCollection, log);
+            ReportReservoirsStatistics(rsi.ReservoirStatCollection, log);
 
             //Regression stage
             log.Write("    Regression stage", false);
-            //Training - Esn regression stage
-            ValidationBundle vb = esn.RegressionStage(rsi, EsnRegressionControl, log);
+            //Training - State Machine regression stage
+            ValidationBundle vb = stateMachine.RegressionStage(rsi, RegressionControl, log);
 
             //Perform prediction if the task type is Prediction
             double[] predictionOutputVector = null;
             if(demoCaseParams.stateMachineCfg.TaskType == CommonEnums.TaskType.Prediction)
             {
-                //Note that there is not necessary to call PushFeedback function immediately after training.
-                //Feedback was already pushed during the Esn training.
-                predictionOutputVector = esn.Compute(predictionInputVector);
+                predictionOutputVector = stateMachine.Compute(predictionInputVector);
                 //Values are normalized so they have to be denormalized
                 bundleNormalizer.NaturalizeOutputVector(predictionOutputVector);
             }
@@ -215,7 +198,7 @@ namespace RCNet.DemoConsoleApp
             //Display results
             //Report training (regression) results and prediction
             log.Write("    Results", false);
-            List<ReadoutLayer.ClusterErrStatistics> clusterErrStatisticsCollection = esn.ClusterErrStatisticsCollection;
+            List<ReadoutLayer.ClusterErrStatistics> clusterErrStatisticsCollection = stateMachine.ClusterErrStatisticsCollection;
             //Classification results
             for (int outputIdx = 0; outputIdx < demoCaseParams.stateMachineCfg.ReadoutLayerConfig.OutputFieldNameCollection.Count; outputIdx++)
             {
@@ -253,14 +236,14 @@ namespace RCNet.DemoConsoleApp
         }
 
         /// <summary>
-        /// Runs ESN demo. This is the main function.
-        /// For each demo case defined in demoSettingsXmlFile function calls PerformDemoCase.
+        /// Runs State Machine demo. This is the main function.
+        /// For each demo case defined in xml file function calls PerformDemoCase.
         /// </summary>
         /// <param name="log">Into this interface demo writes output to be displayed</param>
         /// <param name="demoSettingsXmlFile">Xml file containing definitions of demo cases to be prformed</param>
         public static void RunDemo(IOutputLog log, string demoSettingsXmlFile)
         {
-            log.Write("ESN demo started", false);
+            log.Write("State Machine demo started", false);
             //Instantiate demo settings from the xml file
             DemoSettings demoSettings = new DemoSettings(demoSettingsXmlFile);
             //Loop through all demo cases
@@ -269,9 +252,9 @@ namespace RCNet.DemoConsoleApp
                 //Execute the demo case
                 PerformDemoCase(log, demoCaseParams);
             }
-            log.Write("ESN demo finished", false);
+            log.Write("State Machine demo finished", false);
             return;
         }
-    }//ESNDemo
+    }//SMDemo
 
 }//Namespace

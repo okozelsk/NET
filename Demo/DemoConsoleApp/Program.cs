@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using RCNet.Demo;
-using RCNet.Demo.Log;
+using RCNet.DemoConsoleApp.Log;
 
 namespace RCNet.DemoConsoleApp
 {

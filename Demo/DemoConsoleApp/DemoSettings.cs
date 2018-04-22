@@ -8,7 +8,7 @@ using System.IO;
 using RCNet.XmlTools;
 using RCNet.Neural.Network.SM;
 
-namespace RCNet.Demo
+namespace RCNet.DemoConsoleApp
 {
     /// <summary>
     /// The class implements State Machine demo configuration parameters.
@@ -39,7 +39,7 @@ namespace RCNet.Demo
             DocValidator validator = new DocValidator();
             Assembly demoAssembly = Assembly.GetExecutingAssembly();
             Assembly assemblyRCNet = Assembly.Load("RCNet");
-            using (Stream schemaStream = demoAssembly.GetManifestResourceStream("RCNet.Demo.DemoSettings.xsd"))
+            using (Stream schemaStream = demoAssembly.GetManifestResourceStream("RCNet.DemoConsoleApp.DemoSettings.xsd"))
             {
                 validator.AddSchema(schemaStream);
             }
