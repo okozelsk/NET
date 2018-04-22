@@ -331,140 +331,52 @@
     <xs:attribute type="UDoubleGT0NAOptionType" name="spectralRadius" use="required" />
   </xs:complexType>
 
-
-  <!-- ________________________________________ANALOG RESERVOIR TYPES_________________________________________________ -->
-  <!-- Analog reservoir - input - configuration -->
-  <xs:complexType name="AnaResInputCfgType">
-    <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="RandomValueType" name="weight" minOccurs="1" maxOccurs="1"/>
-    </xs:sequence>
-    <xs:attribute type="UDoubleLE1Type" name="connectionDensity" use="required"/>
-  </xs:complexType>
-
-  <!-- Analog reservoir - random topology -configuration -->
-  <xs:complexType name="AnaResRandTopoCfgType">
-    <xs:attribute type="UDoubleLE1Type" name="connectionsDensity" use="required"/>
-  </xs:complexType>
-
-  <!-- Analog reservoir - ring topology -configuration -->
-  <xs:complexType name="AnaResRingTopoCfgType">
-    <xs:attribute type="UDoubleLE1Type" name="selfConnectionsDensity" use="required"/>
-    <xs:attribute type="UDoubleLE1Type" name="interConnectionsDensity" use="required"/>
-    <xs:attribute type="xs:boolean" name="bidirectional" use="required"/>
-  </xs:complexType>
-
-  <!-- Analog reservoir - DTT (Doubly Twisted Thoroidal) topology -configuration -->
-  <xs:complexType name="AnaResDTTTopoCfgType">
-    <xs:attribute type="UDoubleLE1Type" name="selfConnectionsDensity" use="required"/>
-  </xs:complexType>
-
-  <!-- Analog reservoir - retainment neurons -configuration -->
-  <xs:complexType name="AnaResRetNeuronsCfgType">
-    <xs:attribute type="UDoubleLE1Type" name="density" use="required"/>
-    <xs:attribute type="UDoubleLT1Type" name="retainmentMinRate" use="required"/>
-    <xs:attribute type="UDoubleLT1Type" name="retainmentMaxRate" use="required"/>
-  </xs:complexType>
-
-  <!-- Analog reservoir - context neuron -configuration -->
-  <xs:complexType name="AnaResCtxNeuronCfgType">
-    <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="ActivationCfgType" name="activation" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="RandomValueType" name="inputWeight" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="RandomValueType" name="feedbackWeight" minOccurs="1" maxOccurs="1"/>
-    </xs:sequence>
-    <xs:attribute type="UDoubleLE1Type" name="feedbackDensity" use="required"/>
-  </xs:complexType>
-
-  <!-- Analog reservoir - internal -configuration -->
-  <xs:complexType name="AnaResInternalCfgType">
-    <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:choice minOccurs="1" maxOccurs="1">
-        <xs:element type="AnaResRandTopoCfgType" name="topologyRandom" minOccurs="1" maxOccurs="1"/>
-        <xs:element type="AnaResRingTopoCfgType" name="topologyRing" minOccurs="1" maxOccurs="1"/>
-        <xs:element type="AnaResDTTTopoCfgType" name="topologyDTT" minOccurs="1" maxOccurs="1"/>
-      </xs:choice>
-      <xs:element type="ActivationCfgType" name="activation" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="RandomValueType" name="bias" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="RandomValueType" name="weight" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="AnaResRetNeuronsCfgType" name="retainmentNeurons" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="AnaResCtxNeuronCfgType" name="contextNeuron" minOccurs="0" maxOccurs="1"/>
-    </xs:sequence>
-    <xs:attribute type="xs:unsignedInt" name="size" use="required" />
-    <xs:attribute type="UDoubleGT0NAOptionType" name="spectralRadius" use="required" />
-  </xs:complexType>
-
-  <!-- Analog reservoir - feedback fields - configuration -->
-  <xs:complexType name="AnaResFeedbackFieldsCfgType">
-    <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="AloneNameType" name="field" minOccurs="1" maxOccurs="unbounded"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <!-- Analog reservoir - feedback -configuration -->
-  <xs:complexType name="AnaResFeedbackCfgType">
-    <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="RandomValueType" name ="weight" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="AnaResFeedbackFieldsCfgType" name="feedbackFields" minOccurs="1" maxOccurs="1"/>
-    </xs:sequence>
-    <xs:attribute type="UDoubleLE1Type" name="density" use="required"/>
-  </xs:complexType>
-
-  <!-- Analog reservoir configuration -->
-  <xs:complexType name="AnaResCfgType">
-    <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="AnaResInputCfgType" name="input" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="AnaResInternalCfgType" name="internal" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="AnaResFeedbackCfgType" name="feedback" minOccurs="0" maxOccurs="1"/>
-    </xs:sequence>
-    <xs:attribute type="xs:string" name="name" use="required" />
-  </xs:complexType>
-
-  <!-- ________________________________________ESN TYPES_________________________________________________ -->
-  <!-- Esn - input fields -configuration -->
-  <xs:complexType name="EsnInpFieldsCfgType">
+  <!-- ________________________________________STATE MACHINE TYPES_________________________________________________ -->
+  <!-- StateMachine - input fields -configuration -->
+  <xs:complexType name="SMInpFieldsCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="AloneNameType" name="field" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
     <xs:attribute type="xs:boolean" name="routeToReadout" use="optional" default="false"/>
   </xs:complexType>
 
-  <!-- Esn - reservoirs configuration - container -->
-  <xs:complexType name="EsnAnaResCfgContainerType">
+  <!-- StateMachine - reservoirs configuration - container -->
+  <xs:complexType name="SMResCfgContainerType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="AnaResCfgType" name="reservoirCfg" minOccurs="1" maxOccurs="unbounded"/>
+      <xs:element type="ReservoirCfgType" name="reservoirCfg" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
-  <!-- Esn - reservoir instance - input fields - configuration -->
-  <xs:complexType name="EsnAnaResInstanceInputFieldsCfgType">
+  <!-- StateMachine - reservoir instance - input fields - configuration -->
+  <xs:complexType name="SMResInstanceInputFieldsCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="AloneNameType" name="field" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
-  <!-- Esn - reservoir instance - configuration -->
-  <xs:complexType name="EsnAnaResInstanceCfgType">
+  <!-- StateMachine - reservoir instance - configuration -->
+  <xs:complexType name="SMResInstanceCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="EsnAnaResInstanceInputFieldsCfgType" name="inputFields" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="SMResInstanceInputFieldsCfgType" name="inputFields" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:string" name="name" use="required" />
     <xs:attribute type="xs:string" name="cfg" use="required" />
     <xs:attribute type="xs:boolean" name="augmentedStates" use="required" />
   </xs:complexType>
 
-  <!-- Esn - reservoir instances - container -->
-  <xs:complexType name="EsnAnaResInstanceContainerType">
+  <!-- StateMachine - reservoir instances - container -->
+  <xs:complexType name="SMResInstanceContainerType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="EsnAnaResInstanceCfgType" name="reservoirInstance" minOccurs="1" maxOccurs="unbounded"/>
+      <xs:element type="SMResInstanceCfgType" name="reservoirInstance" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
-  <!-- Esn configuration -->
-  <xs:complexType name="EsnCfgType">
+  <!-- StateMachine configuration -->
+  <xs:complexType name="SMCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="EsnInpFieldsCfgType" name="inputFields" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="EsnAnaResCfgContainerType" name="reservoirCfgContainer" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="EsnAnaResInstanceContainerType" name="reservoirInstanceContainer" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="SMInpFieldsCfgType" name="inputFields" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="SMResCfgContainerType" name="reservoirCfgContainer" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="SMResInstanceContainerType" name="reservoirInstanceContainer" minOccurs="1" maxOccurs="1"/>
       <xs:element type="ROutLayerCfgType" name="readoutLayer" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="NeuralTaskType" name="taskType" use="required"/>
