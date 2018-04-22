@@ -8,7 +8,7 @@ namespace RCNet.Neural.Analog.Activation
     /// Gaussian activation function
     /// </summary>
     [Serializable]
-    public class Gaussian : IActivationFunction
+    public class Gaussian : IAnalogActivationFunction
     {
         //Properties
         /// <summary>

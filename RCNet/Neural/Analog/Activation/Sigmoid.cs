@@ -8,7 +8,7 @@ namespace RCNet.Neural.Analog.Activation
     /// Sigmoid activation function
     /// </summary>
     [Serializable]
-    public class Sigmoid : IActivationFunction
+    public class Sigmoid : IAnalogActivationFunction
     {
         //Properties
         /// <summary>

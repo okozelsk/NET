@@ -8,7 +8,7 @@ namespace RCNet.Neural.Analog.Activation
     /// LeakyReLU activation function
     /// </summary>
     [Serializable]
-    public class LeakyReLU : IActivationFunction
+    public class LeakyReLU : IAnalogActivationFunction
     {
         //Constructor
         /// <summary>

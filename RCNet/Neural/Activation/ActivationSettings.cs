@@ -10,19 +10,19 @@ using RCNet.Extensions;
 using RCNet.MathTools;
 using RCNet.XmlTools;
 
-namespace RCNet.Neural.Analog.Activation
+namespace RCNet.Neural.Activation
 {
     /// <summary>
     /// Class specifies properties of randomly generated values
     /// </summary>
     [Serializable]
-    public class AnalogActivationSettings
+    public class ActivationSettings
     {
         //Attribute properties
         /// <summary>
         /// Type of activation function
         /// </summary>
-        public AnalogActivationFactory.FunctionType FunctionType { get; set; }
+        public ActivationFactory.Function FunctionType { get; set; }
         /// <summary>
         /// Value of the argument to be passed to the activation function constructor
         /// </summary>
@@ -79,7 +79,7 @@ namespace RCNet.Neural.Analog.Activation
         /// <param name="arg8">Value of the argument to be passed to the activation function constructor</param>
         /// <param name="arg9">Value of the argument to be passed to the activation function constructor</param>
         /// <param name="arg10">Value of the argument to be passed to the activation function constructor</param>
-        public AnalogActivationSettings(AnalogActivationFactory.FunctionType functionType,
+        public ActivationSettings(ActivationFactory.Function functionType,
                                         double arg1 = double.NaN,
                                         double arg2 = double.NaN,
                                         double arg3 = double.NaN,
@@ -110,7 +110,7 @@ namespace RCNet.Neural.Analog.Activation
         /// Copy constructor
         /// </summary>
         /// <param name="source">Source instance</param>
-        public AnalogActivationSettings(AnalogActivationSettings source)
+        public ActivationSettings(ActivationSettings source)
         {
             FunctionType = source.FunctionType;
             Arg1 = source.Arg1;
@@ -133,16 +133,16 @@ namespace RCNet.Neural.Analog.Activation
         /// Xml data containing ActivationSettings settings.
         /// Content of xml element is always validated against the xml schema.
         /// </param>
-        public AnalogActivationSettings(XElement elem)
+        public ActivationSettings(XElement elem)
         {
             //Validation
             ElemValidator validator = new ElemValidator();
             Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Analog.Activation.AnalogActivationSettings.xsd");
+            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Activation.ActivationSettings.xsd");
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
             XElement activationSettingsElem = validator.Validate(elem, "rootElem");
             //Parsing
-            FunctionType = AnalogActivationFactory.ParseActivationFunctionType(activationSettingsElem.Attribute("function").Value);
+            FunctionType = ActivationFactory.ParseActivationFunctionType(activationSettingsElem.Attribute("function").Value);
             Arg1 = GetArgFromXml(activationSettingsElem, 1);
             Arg2 = GetArgFromXml(activationSettingsElem, 2);
             Arg3 = GetArgFromXml(activationSettingsElem, 3);
@@ -154,19 +154,6 @@ namespace RCNet.Neural.Analog.Activation
             Arg9 = GetArgFromXml(activationSettingsElem, 9);
             Arg10 = GetArgFromXml(activationSettingsElem, 10);
             return;
-        }
-
-        //Properties
-        /// <summary>
-        /// Returns working range interval of current activation function.
-        /// </summary>
-        public Interval WorkingRange
-        {
-            get
-            {
-                IAnalogActivationFunction af = AnalogActivationFactory.Create(this);
-                return af.Range;
-            }
         }
 
         //Methods
@@ -187,7 +174,7 @@ namespace RCNet.Neural.Analog.Activation
         public override bool Equals(object obj)
         {
             if (obj == null) return false;
-            AnalogActivationSettings cmpSettings = obj as AnalogActivationSettings;
+            ActivationSettings cmpSettings = obj as ActivationSettings;
             if (FunctionType != cmpSettings.FunctionType ||
                 !Arg1.Equals(cmpSettings.Arg1) ||
                 !Arg2.Equals(cmpSettings.Arg2) ||
@@ -217,9 +204,9 @@ namespace RCNet.Neural.Analog.Activation
         /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>
-        public AnalogActivationSettings DeepClone()
+        public ActivationSettings DeepClone()
         {
-            AnalogActivationSettings clone = new AnalogActivationSettings(this);
+            ActivationSettings clone = new ActivationSettings(this);
             return clone;
         }
 

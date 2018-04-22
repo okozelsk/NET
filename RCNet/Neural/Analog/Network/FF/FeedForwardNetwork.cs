@@ -70,10 +70,10 @@ namespace RCNet.Neural.Analog.Network.FF
             for (int i = 0; i < settings.HiddenLayerCollection.Count; i++)
             {
                 AddLayer(settings.HiddenLayerCollection[i].NumOfNeurons,
-                         AnalogActivationFactory.CreateActivationFunction(settings.HiddenLayerCollection[i].Activation)
+                         AnalogActivationFactory.Create(settings.HiddenLayerCollection[i].Activation)
                          );
             }
-            FinalizeStructure(AnalogActivationFactory.CreateActivationFunction(settings.OutputLayerActivation));
+            FinalizeStructure(AnalogActivationFactory.Create(settings.OutputLayerActivation));
             return;
         }
 
@@ -109,7 +109,7 @@ namespace RCNet.Neural.Analog.Network.FF
         /// </summary>
         /// <param name="numOfNeurons">Number of layer's neurons</param>
         /// <param name="activation">Each of layer's neuron will be activated by this activation function</param>
-        public void AddLayer(int numOfNeurons, IActivationFunction activation)
+        public void AddLayer(int numOfNeurons, IAnalogActivationFunction activation)
         {
             if (!Finalized)
             {
@@ -127,7 +127,7 @@ namespace RCNet.Neural.Analog.Network.FF
         /// Finalizes the network internal structure and locks it against further changes.
         /// </summary>
         /// <param name="outputActivation">Activation function of the output layer's neurons</param>
-        public void FinalizeStructure(IActivationFunction outputActivation)
+        public void FinalizeStructure(IAnalogActivationFunction outputActivation)
         {
             if (Finalized)
             {
@@ -352,7 +352,7 @@ namespace RCNet.Neural.Analog.Network.FF
             /// <summary>
             /// The activation function of the layer's neurons
             /// </summary>
-            public IActivationFunction Activation { get; }
+            public IAnalogActivationFunction Activation { get; }
             //Attributes
             private int _numOfInputNodes;
             private int _numOfLayerNeurons;
@@ -366,7 +366,7 @@ namespace RCNet.Neural.Analog.Network.FF
             /// </summary>
             /// <param name="numOfNeurons">Number of layer's neurons</param>
             /// <param name="activation">Each of the layer's neuron will be activated by this activation function</param>
-            public Layer(int numOfNeurons, IActivationFunction activation)
+            public Layer(int numOfNeurons, IAnalogActivationFunction activation)
             {
                 //Check correctness
                 if (numOfNeurons < 1)

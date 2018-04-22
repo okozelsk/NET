@@ -8,7 +8,7 @@ namespace RCNet.Neural.Analog.Activation
     /// SoftExponential activation function
     /// </summary>
     [Serializable]
-    public class SoftExponential : IActivationFunction
+    public class SoftExponential : IAnalogActivationFunction
     {
         //Constructor
         /// <summary>

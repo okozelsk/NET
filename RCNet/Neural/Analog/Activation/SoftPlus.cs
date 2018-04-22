@@ -8,7 +8,7 @@ namespace RCNet.Neural.Analog.Activation
     /// SoftPlus activation function
     /// </summary>
     [Serializable]
-    public class SoftPlus : IActivationFunction
+    public class SoftPlus : IAnalogActivationFunction
     {
         //Properties
         /// <summary>

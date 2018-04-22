@@ -47,6 +47,5 @@ namespace RCNet.Neural
         }
 
 
-
     }//CommonTypes
 }//Namespace

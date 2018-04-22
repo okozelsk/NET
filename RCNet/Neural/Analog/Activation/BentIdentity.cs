@@ -8,7 +8,7 @@ namespace RCNet.Neural.Analog.Activation
     /// BentIdentity activation function
     /// </summary>
     [Serializable]
-    public class BentIdentity : IActivationFunction
+    public class BentIdentity : IAnalogActivationFunction
     {
         //Properties
         /// <summary>

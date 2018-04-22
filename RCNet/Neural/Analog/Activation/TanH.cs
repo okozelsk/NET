@@ -8,7 +8,7 @@ namespace RCNet.Neural.Analog.Activation
     /// TanH activation function
     /// </summary>
     [Serializable]
-    public class TanH : IActivationFunction
+    public class TanH : IAnalogActivationFunction
     {
         //Properties
         /// <summary>

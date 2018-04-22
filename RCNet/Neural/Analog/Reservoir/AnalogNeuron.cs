@@ -21,7 +21,7 @@ namespace RCNet.Neural.Analog.Reservoir
         /// <summary>
         /// Neuron's activation function
         /// </summary>
-        private IActivationFunction _activation;
+        private IAnalogActivationFunction _activation;
         /// <summary>
         /// Neuron's bias
         /// </summary>
@@ -52,7 +52,7 @@ namespace RCNet.Neural.Analog.Reservoir
         /// <param name="activation">Neuron's activation function</param>
         /// <param name="bias">Neuron's bias value</param>
         /// <param name="retainmentRate">Neuron's retainment rate</param>
-        public AnalogNeuron(IActivationFunction activation, double bias, double retainmentRate = 0)
+        public AnalogNeuron(IAnalogActivationFunction activation, double bias, double retainmentRate = 0)
         {
             _activation = activation;
             _bias = bias;

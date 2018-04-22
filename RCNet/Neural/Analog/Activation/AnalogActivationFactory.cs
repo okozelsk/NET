@@ -71,7 +71,7 @@ namespace RCNet.Neural.Analog.Activation
         /// <param name="settings">
         /// Specific activation settings
         /// </param>
-        public static IActivationFunction CreateActivationFunction(AnalogActivationSettings settings)
+        public static IAnalogActivationFunction Create(AnalogActivationSettings settings)
         {
             switch (settings.FunctionType)
             {
@@ -118,7 +118,7 @@ namespace RCNet.Neural.Analog.Activation
             }
         }
 
-    }//ActivationFactory
+    }//AnalogActivationFactory
 
 }//Namespace
 

@@ -8,7 +8,7 @@ namespace RCNet.Neural.Analog.Activation
     /// Sinusoid activation function
     /// </summary>
     [Serializable]
-    public class Sinusoid : IActivationFunction
+    public class Sinusoid : IAnalogActivationFunction
     {
         //Properties
         /// <summary>

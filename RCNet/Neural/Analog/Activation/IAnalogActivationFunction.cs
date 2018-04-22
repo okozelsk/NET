@@ -10,7 +10,7 @@ namespace RCNet.Neural.Analog.Activation
     /// <summary>
     /// Interface of the activation function
     /// </summary>
-    public interface IActivationFunction
+    public interface IAnalogActivationFunction
     {
         //Properties
         /// <summary>
@@ -32,6 +32,6 @@ namespace RCNet.Neural.Analog.Activation
         /// <param name="x">The argument of the Compute method</param>
         double Derive(double c, double x);
 
-    }//IActivationFunction
+    }//IAnalogActivationFunction
 
 }//Namespace

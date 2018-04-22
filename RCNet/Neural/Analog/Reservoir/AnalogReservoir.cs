@@ -120,7 +120,7 @@ namespace RCNet.Neural.Analog.Reservoir
             //Neurons creation
             for (int n = 0; n < _neurons.Length; n++)
             {
-                _neurons[n] = new AnalogNeuron(AnalogActivationFactory.CreateActivationFunction(_settings.ReservoirActivation), biases[n], retainmentRates[n]);
+                _neurons[n] = new AnalogNeuron(AnalogActivationFactory.Create(_settings.ReservoirActivation), biases[n], retainmentRates[n]);
             }
             //Input
             SetGuaranteedRandomInterconnections(_neuronInputConnectionsCollection, _numOfInputNodes, _settings.InputConnectionDensity, _settings.InputWeight);
@@ -138,7 +138,7 @@ namespace RCNet.Neural.Analog.Reservoir
             _contextNeuronFeedbackWeights = null;
             if (_settings.ContextNeuronFeature)
             {
-                _contextNeuron = new AnalogNeuron(AnalogActivationFactory.CreateActivationFunction(_settings.ContextNeuronActivation), 0);
+                _contextNeuron = new AnalogNeuron(AnalogActivationFactory.Create(_settings.ContextNeuronActivation), 0);
                 _contextNeuronInputWeights = new double[_neurons.Length];
                 _rand.Fill(_contextNeuronInputWeights, _settings.ContextNeuronInputWeight.Min, _settings.ContextNeuronInputWeight.Max, _settings.ContextNeuronInputWeight.RandomSign, _settings.ContextNeuronInputWeight.DistrType);
                 _contextNeuronFeedbackWeights = new double[_neurons.Length];

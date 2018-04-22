@@ -8,7 +8,7 @@ namespace RCNet.Neural.Analog.Activation
     /// Elliot activation function (aka Softsign).
     /// </summary>
     [Serializable]
-    public class Elliot : IActivationFunction
+    public class Elliot : IAnalogActivationFunction
     {
         //Constructor
         /// <summary>

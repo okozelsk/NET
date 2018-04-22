@@ -8,7 +8,7 @@ namespace RCNet.Neural.Analog.Activation
     /// ISRU (Inverse Square Root Unit) activation function
     /// </summary>
     [Serializable]
-    public class ISRU : IActivationFunction
+    public class ISRU : IAnalogActivationFunction
     {
         //Constructor
         /// <summary>

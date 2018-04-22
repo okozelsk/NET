@@ -9,7 +9,7 @@ namespace RCNet.Neural.Analog.Activation
     /// See the IActivationFunction.
     /// </summary>
     [Serializable]
-    public class Identity : IActivationFunction
+    public class Identity : IAnalogActivationFunction
     {
         //Properties
         /// <summary>

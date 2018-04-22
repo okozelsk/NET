@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema attributeFormDefault="unqualified"
+           elementFormDefault="unqualified"
+           xmlns:rcn="RCNetTypes"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           >
+  <xs:import namespace="RCNetTypes" />
+
+  <!-- Analog reservoir configuration element -->
+  <xs:element name="rootElem" type="rcn:ReservoirCfgType"/>
+
+</xs:schema>
+

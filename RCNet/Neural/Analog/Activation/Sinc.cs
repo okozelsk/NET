@@ -8,7 +8,7 @@ namespace RCNet.Neural.Analog.Activation
     /// Sinc activation function
     /// </summary>
     [Serializable]
-    public class Sinc : IActivationFunction
+    public class Sinc : IAnalogActivationFunction
     {
         //Properties
         /// <summary>

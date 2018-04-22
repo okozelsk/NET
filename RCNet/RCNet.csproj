@@ -46,6 +46,34 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CsvTools\DelimitedStringValues.cs" />
+    <Compile Include="Neural\Activation\ActivationFactory.cs" />
+    <Compile Include="Neural\Activation\ActivationSettings.cs" />
+    <Compile Include="Neural\Activation\BentIdentity.cs" />
+    <Compile Include="Neural\Activation\Elliot.cs" />
+    <Compile Include="Neural\Activation\BiExpIF.cs" />
+    <Compile Include="Neural\Activation\Gaussian.cs" />
+    <Compile Include="Neural\Activation\IActivationFunction.cs" />
+    <Compile Include="Neural\Activation\Identity.cs" />
+    <Compile Include="Neural\Activation\ISRU.cs" />
+    <Compile Include="Neural\Activation\LeakyReLU.cs" />
+    <Compile Include="Neural\Activation\BiLIF.cs" />
+    <Compile Include="Neural\Activation\Sigmoid.cs" />
+    <Compile Include="Neural\Activation\Sinc.cs" />
+    <Compile Include="Neural\Activation\Sinusoid.cs" />
+    <Compile Include="Neural\Activation\SoftExponential.cs" />
+    <Compile Include="Neural\Activation\SoftPlus.cs" />
+    <Compile Include="Neural\Activation\TanH.cs" />
+    <Compile Include="Neural\Activation\ExpIF.cs" />
+    <Compile Include="Neural\Activation\LIF.cs" />
+    <Compile Include="Neural\Reservoir\Reservoir.cs" />
+    <Compile Include="Neural\Reservoir\ReservoirSettings.cs" />
+    <Compile Include="Neural\Reservoir\Pool\PoolDimensions.cs" />
+    <Compile Include="Neural\Reservoir\Pool\PoolSettings.cs" />
+    <Compile Include="Neural\Reservoir\INeuron.cs" />
+    <Compile Include="Neural\Reservoir\ReservoirNeuron.cs" />
+    <Compile Include="Neural\Reservoir\InputNeuron.cs" />
+    <Compile Include="Neural\Reservoir\ISynapse.cs" />
+    <Compile Include="Neural\Reservoir\StaticSynapse.cs" />
     <Compile Include="Neural\Data\TimeSeriesDataLoader.cs" />
     <Compile Include="Neural\Data\PatternDataLoader.cs" />
     <Compile Include="Extensions\ArrayClassExtensions.cs" />
@@ -78,7 +106,7 @@
     <Compile Include="Neural\Analog\Activation\LeakyReLU.cs" />
     <Compile Include="Neural\Analog\Activation\Elliot.cs" />
     <Compile Include="Neural\Analog\Activation\Gaussian.cs" />
-    <Compile Include="Neural\Analog\Activation\IActivationFunction.cs" />
+    <Compile Include="Neural\Analog\Activation\IAnalogActivationFunction.cs" />
     <Compile Include="Neural\Analog\Activation\Identity.cs" />
     <Compile Include="Neural\Analog\Activation\ISRU.cs" />
     <Compile Include="Neural\Analog\Activation\BentIdentity.cs" />
@@ -111,7 +139,7 @@
     <Compile Include="Neural\Analog\Readout\ReadoutLayerSettings.cs" />
     <Compile Include="Neural\Analog\Readout\ReadoutLayer.cs" />
     <Compile Include="Neural\Analog\Readout\ReadoutUnit.cs" />
-    <Compile Include="Neural\Spiking\MicroCircuit\MicroCircuitNeuron.cs" />
+    <Compile Include="Neural\Reservoir\NeuronPlacement.cs" />
     <Compile Include="RandomValue\RandomValueSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Queue\SimpleQueue.cs" />
@@ -151,7 +179,18 @@
   <ItemGroup>
     <EmbeddedResource Include="Neural\Analog\Network\FF\RPropTrainerSettings.xsd" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="Neural\Activation\ActivationSettings.xsd" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Neural\Reservoir\Pool\PoolSettings.xsd" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Neural\Reservoir\ReservoirSettings.xsd" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Neural\Network\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
