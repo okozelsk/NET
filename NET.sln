@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Express 14 for Windows Desktop
 VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DemoSupport", "Demo\DemoSupport\DemoSupport.csproj", "{D52159CE-BE0E-4977-BCFA-23194CF6D6ED}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EsnDemo", "Demo\ESNDemo\EsnDemo.csproj", "{4D350554-7031-41D8-AF4B-0A642C048109}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DemoConsoleApp", "Demo\DemoConsoleApp\DemoConsoleApp.csproj", "{D18DB05D-F4C4-4388-846A-52BA4B3722D1}"
@@ -23,10 +21,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{D52159CE-BE0E-4977-BCFA-23194CF6D6ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D52159CE-BE0E-4977-BCFA-23194CF6D6ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D52159CE-BE0E-4977-BCFA-23194CF6D6ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D52159CE-BE0E-4977-BCFA-23194CF6D6ED}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4D350554-7031-41D8-AF4B-0A642C048109}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4D350554-7031-41D8-AF4B-0A642C048109}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4D350554-7031-41D8-AF4B-0A642C048109}.Release|Any CPU.ActiveCfg = Release|Any CPU

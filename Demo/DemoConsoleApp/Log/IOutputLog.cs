@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace RCNet.Demo.Log
+namespace RCNet.DemoConsoleApp.Log
 {
     /// <summary>
     /// A simple output log interface

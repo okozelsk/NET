@@ -6,15 +6,15 @@ using System.Globalization;
 using System.Reflection;
 using System.IO;
 using RCNet.XmlTools;
-using RCNet.Neural.Analog.Network.EchoState;
+using RCNet.Neural.Network.SM;
 
 namespace RCNet.Demo
 {
     /// <summary>
-    /// The class implements Esn demo configuration parameters.
+    /// The class implements State Machine demo configuration parameters.
     /// One and only way to create an instance is to use the xml constructor.
     /// </summary>
-    public class EsnDemoSettings
+    public class DemoSettings
     {
         //Constants
         //Attribute properties
@@ -30,16 +30,16 @@ namespace RCNet.Demo
         //Constructor
         /// <summary>
         /// Creates instance and initialize it from given xml file.
-        /// This is the only way to instantiate Esn demo settings.
+        /// This is the only way to instantiate State Machine demo settings.
         /// </summary>
         /// <param name="fileName">Xml file containing definitions of demo cases to be prformed</param>
-        public EsnDemoSettings(string fileName)
+        public DemoSettings(string fileName)
         {
             //Validate xml file and load the document 
             DocValidator validator = new DocValidator();
-            Assembly esnDemoAssembly = Assembly.GetExecutingAssembly();
+            Assembly demoAssembly = Assembly.GetExecutingAssembly();
             Assembly assemblyRCNet = Assembly.Load("RCNet");
-            using (Stream schemaStream = esnDemoAssembly.GetManifestResourceStream("RCNet.Demo.EsnDemoSettings.xsd"))
+            using (Stream schemaStream = demoAssembly.GetManifestResourceStream("RCNet.Demo.DemoSettings.xsd"))
             {
                 validator.AddSchema(schemaStream);
             }
@@ -49,7 +49,7 @@ namespace RCNet.Demo
             }
             XDocument xmlDoc = validator.LoadXDocFromFile(fileName);
             //Parse DataDir
-            XElement root = xmlDoc.Descendants("esnDemo").First();
+            XElement root = xmlDoc.Descendants("demo").First();
             DataFolder = root.Attribute("dataFolder").Value;
             //Parse demo cases definitions
             CaseCfgCollection = new List<CaseSettings>();
@@ -94,7 +94,7 @@ namespace RCNet.Demo
             /// <summary>
             /// 
             /// </summary>
-            public EsnSettings EsnCfg { get; }
+            public StateMachineSettings stateMachineCfg { get; }
 
             //Constructor
             public CaseSettings(XElement demoCaseElem, string dir)
@@ -105,12 +105,12 @@ namespace RCNet.Demo
                 NumOfBootSamples = (samplesElem.Attribute("bootSamples") == null) ? 0 : int.Parse(samplesElem.Attribute("bootSamples").Value);
                 SingleNormalizer = bool.Parse(samplesElem.Attribute("singleNormalizer").Value);
                 NormalizerReserveRatio = double.Parse(samplesElem.Attribute("normalizerReserve").Value, CultureInfo.InvariantCulture);
-                EsnCfg = new EsnSettings(demoCaseElem.Descendants("esnCfg").First());
+                stateMachineCfg = new StateMachineSettings(demoCaseElem.Descendants("stateMachineCfg").First());
                 return;
             }
 
         }//CaseSettings
 
-    }//EsnDemoSettings
+    }//DemoSettings
 
 }//Namespace

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
 
-namespace RCNet.Demo.Log
+namespace RCNet.DemoConsoleApp.Log
 {
     /// <summary>
     /// Simple class implementing the IOutputLog interface.

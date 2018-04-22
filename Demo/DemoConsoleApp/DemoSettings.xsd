@@ -9,28 +9,28 @@
   <!-- SIMPLE TYPES -->
 
   <!-- COMPLEX TYPES -->
-  <!-- Esn demo - sample data - configuration -->
-  <xs:complexType name="EsnDemoSampleDataCfgType">
+  <!-- SM demo - sample data - configuration -->
+  <xs:complexType name="SampleDataCfgType">
     <xs:attribute type="xs:string" name="fileName" use="required"/>
     <xs:attribute type="xs:unsignedInt" name="bootSamples" use="optional" default="0"/>
     <xs:attribute type="xs:boolean" name="singleNormalizer" use="required"/>
     <xs:attribute type="rcn:UDoubleType" name="normalizerReserve" use="required"/>
   </xs:complexType>
 
-  <!-- Esn demo - case -configuration -->
-  <xs:complexType name="EsnDemoCaseCfgType">
+  <!-- SM demo - case -configuration -->
+  <xs:complexType name="CaseCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="EsnDemoSampleDataCfgType" name="samples" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="rcn:EsnCfgType" name="esnCfg" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="SampleDataCfgType" name="samples" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="rcn:SMCfgType" name="stateMachineCfg" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:string" name="name" use="required"/>
   </xs:complexType>
 
-  <!-- Esn demo configuration xml document -->
-  <xs:element name="esnDemo">
+  <!-- SM demo configuration xml document -->
+  <xs:element name="demo">
     <xs:complexType>
       <xs:sequence minOccurs="1" maxOccurs="1">
-        <xs:element type="EsnDemoCaseCfgType" name="case" minOccurs="1" maxOccurs="unbounded"/>
+        <xs:element type="CaseCfgType" name="case" minOccurs="1" maxOccurs="unbounded"/>
       </xs:sequence>
       <xs:attribute type="xs:string" name="dataFolder" use="required"/>
     </xs:complexType>

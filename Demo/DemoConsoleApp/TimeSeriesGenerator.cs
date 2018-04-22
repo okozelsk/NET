@@ -4,7 +4,7 @@ using System.Linq;
 using System.IO;
 using System.Globalization;
 
-namespace RCNet.Demo
+namespace RCNet.DemoConsoleApp
 {
     /// <summary>
     /// A tool for generating some frequently used time series and saving them to a csv file
