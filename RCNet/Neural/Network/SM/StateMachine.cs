@@ -50,7 +50,8 @@ namespace RCNet.Neural.Network.SM
         /// Constructs an instance of State Machine
         /// </summary>
         /// <param name="settings">State Machine settings</param>
-        public StateMachine(StateMachineSettings settings)
+        /// <param name="inputRange">Range of input values</param>
+        public StateMachine(StateMachineSettings settings, Interval inputRange)
         {
             _settings = settings.DeepClone();
             //Random object
@@ -62,7 +63,7 @@ namespace RCNet.Neural.Network.SM
             _reservoirInstanceCollection = new List<ReservoirInstance>(_settings.ReservoirInstanceDefinitionCollection.Count);
             foreach(StateMachineSettings.ReservoirInstanceDefinition instanceDefinition in _settings.ReservoirInstanceDefinitionCollection)
             {
-                ReservoirInstance reservoirInstance = new ReservoirInstance(instanceDefinition, _settings.RandomizerSeek);
+                ReservoirInstance reservoirInstance = new ReservoirInstance(instanceDefinition, _settings.RandomizerSeek, inputRange);
                 _reservoirInstanceCollection.Add(reservoirInstance);
                 _numOfPredictors += reservoirInstance.ReservoirObj.NumOfOutputPredictors;
             }
@@ -381,14 +382,14 @@ namespace RCNet.Neural.Network.SM
             public Reservoir ReservoirObj { get; }
 
             //Constructor
-            public ReservoirInstance(StateMachineSettings.ReservoirInstanceDefinition instanceDefinition, int randomizerSeek)
+            public ReservoirInstance(StateMachineSettings.ReservoirInstanceDefinition instanceDefinition, int randomizerSeek, Interval inputRange)
             {
                 //Store definition
                 InstanceDefinition = instanceDefinition;
                 //Create reservoir
                 ReservoirObj = new Reservoir(InstanceDefinition.InstanceName,
                                              InstanceDefinition.InputFieldMappingCollection.Count,
-                                             new Interval(-1, 1),
+                                             inputRange,
                                              InstanceDefinition.ReservoirSettings,
                                              InstanceDefinition.AugmentedStates,
                                              randomizerSeek

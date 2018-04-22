@@ -465,15 +465,15 @@ namespace RCNet.Neural.Network.SM
                 _inputNeurons[i].Compute(input[i], updateStatistics);
                 _inputNeurons[i].StoreSignal();
             }
-            //Store all the reservoir neurons states
-            foreach (INeuron neuron in _neurons)
-            {
-                neuron.StoreSignal();
-            }
             //Perform computation cycles
             int compCyccles = 1 + _settings.RefractoryCycles;
             for (int cycle = 0; cycle < compCyccles; cycle++)
             {
+                //Store all the reservoir neurons states
+                foreach (INeuron neuron in _neurons)
+                {
+                    neuron.StoreSignal();
+                }
                 //Compute new states of all reservoir neurons and fill the array of output predictors
                 Parallel.For(0, _neurons.Length, (neuronIdx) =>
                 {

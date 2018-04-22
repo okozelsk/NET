@@ -195,6 +195,10 @@ namespace RCNet.Neural.Network.SM
                 //Spiking activation or analog activation without leaky integration
                 //Compute signal and neuron state
                 _signal = _activation.Compute(stimuli);
+                if(_signal != 0 && _activation.TimeDependent)
+                {
+                    ;
+                }
                 _state = _activation.InternalState;
                 //Rescale computed neuron state
                 _rescaledState = _rescalledStateRange.Min + (((_state - _activation.InternalStateRange.Min) / _activation.InternalStateRange.Span) * _rescalledStateRange.Span);

@@ -142,7 +142,7 @@ namespace RCNet.DemoConsoleApp
             double[] predictionInputVector = null;
             
             //Instantiate an State Machine
-            StateMachine stateMachine = new StateMachine(demoCaseParams.stateMachineCfg);
+            StateMachine stateMachine = new StateMachine(demoCaseParams.stateMachineCfg, normRange);
 
             //Prepare regression stage input object
             log.Write(" ", false);

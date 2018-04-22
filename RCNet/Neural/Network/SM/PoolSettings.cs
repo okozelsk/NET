@@ -135,7 +135,7 @@ namespace RCNet.Neural.Network.SM
             {
                 Bias = source.Bias.DeepClone();
             }
-            InterconnectionDensity = source.InputConnectionDensity;
+            InterconnectionDensity = source.InterconnectionDensity;
             InterconnectionAvgDistance = source.InterconnectionAvgDistance;
             InterconnectionSynapseWeight = null;
             if(source.InterconnectionSynapseWeight != null)

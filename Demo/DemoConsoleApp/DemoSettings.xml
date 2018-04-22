@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <demo dataFolder=".\\Data">
   <!-- Modify/Tune existing or add your own cases -->
-  <case name="Prediction task High and Low prices of TTOO (T2 Biosystems, Inc.): Single mixed spiking and analog reservoir, Feed Forward, Linear regression">
+  <case name="Prediction task High and Low prices of TTOO (T2 Biosystems, Inc.): Experimental reservoir, Feed Forward, Linear regression">
     <!-- Data from https://finance.yahoo.com/quote/TTOO/history?p=TTOO -->
     <samples fileName="TTOO.csv" bootSamples="300" singleNormalizer="true" normalizerReserve="0.1"/>
     <stateMachineCfg taskType="Prediction" randomizerSeek="0">
@@ -11,37 +11,38 @@
         <field name="Adj Close"/>
       </inputFields>
       <reservoirCfgContainer>
-        <reservoirCfg name="1x spiking pool, 1x analog pool" refractoryCycles="1" spectralRadius="1">
-          <pool instanceName="SpikingBiLIFs" dimX="5" dimY="5" dimZ="4">
+        <reservoirCfg name="Spiking and Analog pools" refractoryCycles="1" spectralRadius="0.8">
+          <pool instanceName="SpikingBiExpIFs" dimX="5" dimY="5" dimZ="5">
             <input connectionDensity="1">
-              <weight min="-0.4" max="0.4"/>
+              <weight min="0" max="1" randomSign="true" distribution="Uniform"/>
             </input>
-            <activation function="BiLIF"/>
+            <activation function="BiExpIF"/>
             <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-            <interconnection density="0.25" avgDistance="NA">
-              <weight min="-1" max="1"/>
+            <interconnection density="0.3" avgDistance="1.5">
+              <weight min="0" max="1" randomSign="true" distribution="Uniform"/>
             </interconnection>
           </pool>
-          <pool instanceName="AnalogTanHs" dimX="5" dimY="5" dimZ="4">
+          <pool instanceName="AnalogTanHs" dimX="5" dimY="5" dimZ="5">
             <input connectionDensity="1">
-              <weight min="-0.4" max="0.4"/>
+              <weight min="0" max="1" randomSign="true" distribution="Uniform"/>
             </input>
             <activation function="TanH"/>
             <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
             <interconnection density="0.1" avgDistance="NA">
-              <weight min="-1" max="1"/>
+              <weight min="0" max="1" randomSign="true" distribution="Uniform"/>
             </interconnection>
+            <retainmentNeurons density="1" retainmentMinRate="0" retainmentMaxRate="0.5"/>
           </pool>
-          <poolsInterConn srcPool="SpikingBiLIFs" srcConnDensity="0.1" targetPool="AnalogTanHs" targetConnDensity="0.25">
-            <weight min="-1" max="1"/>
+          <poolsInterConn srcPool="SpikingBiExpIFs" srcConnDensity="0.1" targetPool="AnalogTanHs" targetConnDensity="0.25">
+            <weight min="0" max="1" randomSign="true" distribution="Uniform"/>
           </poolsInterConn>
-          <poolsInterConn srcPool="AnalogTanHs" srcConnDensity="0.1" targetPool="SpikingBiLIFs" targetConnDensity="0.25">
-            <weight min="-1" max="1"/>
+          <poolsInterConn srcPool="AnalogTanHs" srcConnDensity="0.1" targetPool="SpikingBiExpIFs" targetConnDensity="0.25">
+            <weight min="0" max="1" randomSign="true" distribution="Uniform"/>
           </poolsInterConn>
         </reservoirCfg>
       </reservoirCfgContainer>
       <reservoirInstanceContainer>
-        <reservoirInstance name="Main" cfg="1x spiking pool, 1x analog pool" augmentedStates="false">
+        <reservoirInstance name="Main" cfg="Spiking and Analog pools" augmentedStates="false">
           <inputFields>
             <field name="High"/>
             <field name="Low"/>
