@@ -117,13 +117,6 @@ namespace RCNet.Neural.Activation
         {
             x = x.Bound();
             double output = 0;
-            if (Math.Abs(_membraneV) == _firingTresholdV)
-            {
-                //Reset membrane potential and enter refractory periods
-                _membraneV = _resetV * Math.Sign(_membraneV);
-                _refractoryPeriod = 0;
-                _inRefractory = true;
-            }
             if (_inRefractory)
             {
                 ++_refractoryPeriod;
@@ -143,8 +136,10 @@ namespace RCNet.Neural.Activation
             //Output
             if (Math.Abs(_membraneV) >= _firingTresholdV)
             {
-                _membraneV = _firingTresholdV * Math.Sign(_membraneV);
                 output = Math.Sign(_membraneV);
+                _membraneV = _resetV * Math.Sign(_membraneV);
+                _refractoryPeriod = 0;
+                _inRefractory = true;
             }
             return output;
         }

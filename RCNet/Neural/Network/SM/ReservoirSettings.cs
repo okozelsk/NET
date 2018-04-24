@@ -111,15 +111,19 @@ namespace RCNet.Neural.Network.SM
             SpectralRadius = reservoirSettingsElem.Attribute("spectralRadius").Value == "NA" ? -1d : double.Parse(reservoirSettingsElem.Attribute("spectralRadius").Value, CultureInfo.InvariantCulture);
             //Pool settings collection
             PoolSettingsCollection = new List<PoolSettings>();
-            foreach (XElement poolSettingsElem in reservoirSettingsElem.Descendants("pool"))
+            foreach (XElement poolSettingsElem in reservoirSettingsElem.Descendants("pools").First().Descendants("pool"))
             {
                 PoolSettingsCollection.Add(new PoolSettings(poolSettingsElem));
             }
             //Pools interconnection settings
             PoolsInterconnectionCollection = new List<PoolsInterconnection>();
-            foreach (XElement poolsInterConnElem in reservoirSettingsElem.Descendants("poolsInterConn"))
+            XElement pool2PoolConnContainerElem = reservoirSettingsElem.Descendants("pool2PoolConns").FirstOrDefault();
+            if (pool2PoolConnContainerElem != null)
             {
-                PoolsInterconnectionCollection.Add(new PoolsInterconnection(poolsInterConnElem, PoolSettingsCollection));
+                foreach (XElement poolsInterConnElem in pool2PoolConnContainerElem.Descendants("pool2PoolConn"))
+                {
+                    PoolsInterconnectionCollection.Add(new PoolsInterconnection(poolsInterConnElem, PoolSettingsCollection));
+                }
             }
             return;
         }
@@ -198,19 +202,6 @@ namespace RCNet.Neural.Network.SM
         {
             //Attributes
             /// <summary>
-            /// Name of the source pool
-            /// </summary>
-            public string SourcePoolName { get; set; }
-            /// <summary>
-            /// Source pool ID
-            /// </summary>
-            public int SourcePoolID { get; }
-            /// <summary>
-            /// Determines how many neurons in the source pool will be connected to one or more neurons in target pool.
-            /// Count = SourcePool.Dim.Size * SourceConnectionDensity
-            /// </summary>
-            public double SourceConnectionDensity { get; set; }
-            /// <summary>
             /// Name of the target pool
             /// </summary>
             public string TargetPoolName { get; set; }
@@ -219,10 +210,23 @@ namespace RCNet.Neural.Network.SM
             /// </summary>
             public int TargetPoolID { get; }
             /// <summary>
-            /// Determines how many neurons in target pool will be connected with one source pool neuron
+            /// Determines how many randomly selected neurons in target pool will receive signal from source pool neurons
             /// Count = TargetPool.Dim.Size * TargetConnectionDensity
             /// </summary>
             public double TargetConnectionDensity { get; set; }
+            /// <summary>
+            /// Name of the source pool
+            /// </summary>
+            public string SourcePoolName { get; set; }
+            /// <summary>
+            /// Source pool ID
+            /// </summary>
+            public int SourcePoolID { get; }
+            /// <summary>
+            /// Determines how many randomly selected neurons in the source pool will be connected to one neuron in target pool.
+            /// Count = SourcePool.Dim.Size * SourceConnectionDensity
+            /// </summary>
+            public double SourceConnectionDensity { get; set; }
             /// <summary>
             /// Weight of source pool neuron to target pool neuron synapse.
             /// </summary>
@@ -267,22 +271,6 @@ namespace RCNet.Neural.Network.SM
             /// </summary>
             public PoolsInterconnection(XElement interConnElem, List<PoolSettings> poolSettingsCollection)
             {
-                SourcePoolName = interConnElem.Attribute("srcPool").Value;
-                SourcePoolID = -1;
-                //Find source pool ID (index)
-                for (int idx = 0; idx < poolSettingsCollection.Count; idx++)
-                {
-                    if(poolSettingsCollection[idx].InstanceName == SourcePoolName)
-                    {
-                        SourcePoolID = idx;
-                        break;
-                    }
-                }
-                if(SourcePoolID == -1)
-                {
-                    throw new Exception($"Pool {SourcePoolName} was not found.");
-                }
-                SourceConnectionDensity = double.Parse(interConnElem.Attribute("srcConnDensity").Value, CultureInfo.InvariantCulture);
                 TargetPoolName = interConnElem.Attribute("targetPool").Value;
                 TargetPoolID = -1;
                 //Find target pool ID (index)
@@ -298,11 +286,27 @@ namespace RCNet.Neural.Network.SM
                 {
                     throw new Exception($"Pool {TargetPoolName} was not found.");
                 }
-                if(SourcePoolID == TargetPoolID)
-                {
-                    throw new Exception($"Different pools have to be specified for interpool connection.");
-                }
                 TargetConnectionDensity = double.Parse(interConnElem.Attribute("targetConnDensity").Value, CultureInfo.InvariantCulture);
+                SourcePoolName = interConnElem.Attribute("srcPool").Value;
+                SourcePoolID = -1;
+                //Find source pool ID (index)
+                for (int idx = 0; idx < poolSettingsCollection.Count; idx++)
+                {
+                    if (poolSettingsCollection[idx].InstanceName == SourcePoolName)
+                    {
+                        SourcePoolID = idx;
+                        break;
+                    }
+                }
+                if (SourcePoolID == -1)
+                {
+                    throw new Exception($"Pool {SourcePoolName} was not found.");
+                }
+                SourceConnectionDensity = double.Parse(interConnElem.Attribute("srcConnDensity").Value, CultureInfo.InvariantCulture);
+                if (SourcePoolID == TargetPoolID)
+                {
+                    throw new Exception($"Two different pools have to be specified for interpool connection.");
+                }
                 SynapseWeight = new RandomValueSettings(interConnElem.Descendants("weight").First());
                 return;
             }

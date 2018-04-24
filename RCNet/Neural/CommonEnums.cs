@@ -46,6 +46,25 @@ namespace RCNet.Neural
             }
         }
 
+        /// <summary>
+        /// Type of neuron's signal
+        /// </summary>
+        public enum NeuronSignalType
+        {
+            /// <summary>
+            /// Excitatory. Outgoing synapses will allways have (+) sign.
+            /// </summary>
+            Excitatory,
+            /// <summary>
+            /// Inhibitory. Outgoing synapses will allways have (-) sign.
+            /// </summary>
+            Inhibitory,
+            /// <summary>
+            /// Neutral. Outgoing synapses will have random sign (probability 1:1).
+            /// </summary>
+            Neutral
+        }
+
 
     }//CommonTypes
 }//Namespace

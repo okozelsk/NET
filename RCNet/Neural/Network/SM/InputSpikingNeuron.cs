@@ -9,30 +9,19 @@ using RCNet.MathTools;
 namespace RCNet.Neural.Network.SM
 {
     /// <summary>
-    /// Input neuron is the special type of neuron. Its purpose is to preprocess input value to be deliverable as the
-    /// signal into the reservoir neurons by the standard way through a synapse.
+    /// Spiking input neuron is the special type of neuron. Its purpose is to preprocess input analog value
+    /// to be deliverable as the spike train signal into the reservoir neurons.
     /// </summary>
     [Serializable]
-    public class InputNeuron : INeuron
+    public class InputSpikingNeuron : INeuron
     {
-        //Attributes
         /// <summary>
-        /// State value range (allways between -1 and 1)
+        /// Analog to spikes train converter
         /// </summary>
-        private static readonly Interval _stateRange = new Interval(-1, 1);
+        private SpikeTrainConverter _signalConverter;
 
         /// <summary>
-        /// Signal value range (allways between -1 and 1)
-        /// </summary>
-        private static readonly Interval _signalRange = new Interval(-1, 1);
-
-        /// <summary>
-        /// Input data range
-        /// </summary>
-        private Interval _inputRange;
-
-        /// <summary>
-        /// Current signal of the neuron according to external input
+        /// Transmission signal of the neuron
         /// </summary>
         private double _signal;
 
@@ -44,7 +33,7 @@ namespace RCNet.Neural.Network.SM
         public NeuronPlacement Placement { get; }
 
         /// <summary>
-        /// Statistics of incoming stimulations (external input values)
+        /// Statistics of incoming stimulations (input values)
         /// </summary>
         public BasicStat StimuliStat { get; }
 
@@ -57,16 +46,12 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
-        /// <param name="inputFieldIdx">Index of correspondent reservoir input field.</param>
-        /// <param name="inputRange">
-        /// Range of input value.
-        /// It is very recommended to have input values normalized and standardized before
-        /// they are passed to input neuron.
-        /// </param>
-        public InputNeuron(int inputFieldIdx, Interval inputRange)
+        /// <param name="inputFieldIdx">Index of corresponding reservoir input field.</param>
+        /// <param name="signalConverter"> Analog to spike train converter (shared instance)</param>
+        public InputSpikingNeuron(int inputFieldIdx, SpikeTrainConverter signalConverter)
         {
             Placement = new NeuronPlacement(inputFieldIdx , - 1, inputFieldIdx, inputFieldIdx, 0, 0);
-            _inputRange = new Interval(inputRange.Min.Bound(), inputRange.Max.Bound());
+            _signalConverter = signalConverter;
             StimuliStat = new BasicStat();
             TransmissinSignalStat = new BasicStat();
             Reset(false);
@@ -80,12 +65,17 @@ namespace RCNet.Neural.Network.SM
         public double Bias { get { return 0; } }
 
         /// <summary>
+        /// Input spiking neuron is allways excitatory
+        /// </summary>
+        public CommonEnums.NeuronSignalType TransmissionSignalType { get { return CommonEnums.NeuronSignalType.Excitatory; } }
+
+        /// <summary>
         /// Statistics of neuron state values is a nonsense in case of input neuron
         /// </summary>
         public BasicStat StatesStat { get { return null; } }
 
         /// <summary>
-        /// Transmission signal
+        /// Neuron's transmission signal
         /// </summary>
         public double TransmissinSignal { get { return _signal; } }
 
@@ -116,9 +106,8 @@ namespace RCNet.Neural.Network.SM
         /// <param name="collectStatistics">Specifies whether to update internal statistics</param>
         public void PrepareTransmissionSignal(bool collectStatistics)
         {
-            //Signal is already prepared by compute function
-            //Statistics
-            if (collectStatistics)
+            _signal = _signalConverter.FetchSpike();
+            if(collectStatistics)
             {
                 TransmissinSignalStat.AddSampleValue(_signal);
             }
@@ -126,7 +115,7 @@ namespace RCNet.Neural.Network.SM
         }
 
         /// <summary>
-        /// Computes the neuron.
+        /// Computes the neuron
         /// </summary>
         /// <param name="stimuli">Input stimulation</param>
         /// <param name="collectStatistics">Specifies whether to update internal statistics</param>
@@ -137,11 +126,10 @@ namespace RCNet.Neural.Network.SM
             {
                 StimuliStat.AddSampleValue(stimuli);
             }
-            //Range transformation
-            _signal = _stateRange.Min + (((stimuli - _inputRange.Min) / _inputRange.Span) * _stateRange.Span);
+            _signalConverter.EncodeAnalogValue(stimuli);
             return;
         }
 
-    }//InputNeuron
+    }//InputSpikingNeuron
 
 }//Namespace

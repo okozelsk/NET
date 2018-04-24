@@ -9,9 +9,6 @@ namespace RCNet.Neural.Network.SM
 {
     /// <summary>
     /// Neuron is the basic unit of a neural network.
-    /// Neuron has to accept input stimuli within the range (-infinity, +infinity)
-    /// and has to produce output signal within the 
-    /// range (-1, 1)
     /// </summary>
     public interface INeuron
     {
@@ -26,49 +23,52 @@ namespace RCNet.Neural.Network.SM
         double Bias { get; }
 
         /// <summary>
-        /// Current state of the neuron
-        /// </summary>
-        double State { get; }
-
-        /// <summary>
-        /// Statistics of neuron states
-        /// </summary>
-        BasicStat StatesStat { get; }
-
-        /// <summary>
-        /// Statistics of incoming stimulations
+        /// Statistics of neuron stimulation signal
         /// </summary>
         BasicStat StimuliStat { get; }
 
         /// <summary>
-        /// Current signal according to current state
+        /// Statistics of neuron internal states
         /// </summary>
-        double CurrentSignal { get; }
+        BasicStat StatesStat { get; }
+
+        /*
+        /// <summary>
+        /// Determines whether neuron's signal is excitatory, inhibitory or neutral
+        /// </summary>
+        CommonEnums.NeuronSignalType TransmissionSignalType { get; }
+        */
 
         /// <summary>
-        /// Stored signal for transmission purposes
+        /// Neuron's transmission signal
         /// </summary>
-        double StoredSignal { get; }
+        double TransmissinSignal { get; }
 
         /// <summary>
-        /// Statistics of neuron output signals
+        /// Statistics of neuron's transmission signals
         /// </summary>
-        BasicStat SignalStat { get; }
+        BasicStat TransmissinSignalStat { get; }
+
+        /// <summary>
+        /// Value to be passed to readout layer as a predictor value
+        /// </summary>
+        double ReadoutPredictorValue { get; }
 
         //Methods
         /// <summary>
         /// Resets the neuron to its initial state
         /// </summary>
-        /// <param name="statistics">Specifies whether to reset also internal statistics</param>
-        void Reset(bool statistics);
-        
+        /// <param name="resetStatistics">Specifies whether to reset internal statistics</param>
+        void Reset(bool resetStatistics);
+
         /// <summary>
-        /// Stores current signal to be used for signal transmission
+        /// Prepares and stores transmission signal
         /// </summary>
-        void StoreSignal();
+        /// <param name="collectStatistics">Specifies whether to update internal statistics</param>
+        void PrepareTransmissionSignal(bool collectStatistics);
         
         /// <summary>
-        /// Computes neuron state and output signal.
+        /// Computes neuron's new state.
         /// </summary>
         /// <param name="stimuli">Input stimulation</param>
         /// <param name="collectStatistics">Specifies whether to update internal statistics</param>

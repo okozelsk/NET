@@ -65,6 +65,9 @@
     <Compile Include="Neural\Activation\TanH.cs" />
     <Compile Include="Neural\Activation\ExpIF.cs" />
     <Compile Include="Neural\Activation\LIF.cs" />
+    <Compile Include="Neural\Network\SM\InputAnalogNeuron.cs" />
+    <Compile Include="Neural\Network\SM\SpikeTrainConverter.cs" />
+    <Compile Include="Neural\Network\SM\InputSpikingNeuron.cs" />
     <Compile Include="Neural\Network\SM\Reservoir.cs" />
     <Compile Include="Neural\Network\SM\ReservoirSettings.cs" />
     <Compile Include="Neural\Network\SM\PoolDimensions.cs" />

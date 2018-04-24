@@ -11,38 +11,23 @@
         <field name="Adj Close"/>
       </inputFields>
       <reservoirCfgContainer>
-        <reservoirCfg name="Spiking and Analog pools" refractoryCycles="1" spectralRadius="0.8">
-          <pool instanceName="SpikingBiExpIFs" dimX="5" dimY="5" dimZ="5">
-            <input connectionDensity="1">
-              <weight min="0" max="1" randomSign="true" distribution="Uniform"/>
-            </input>
-            <activation function="BiExpIF"/>
-            <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-            <interconnection density="0.3" avgDistance="1.5">
-              <weight min="0" max="1" randomSign="true" distribution="Uniform"/>
-            </interconnection>
-          </pool>
-          <pool instanceName="AnalogTanHs" dimX="5" dimY="5" dimZ="5">
-            <input connectionDensity="1">
-              <weight min="0" max="1" randomSign="true" distribution="Uniform"/>
-            </input>
-            <activation function="TanH"/>
-            <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-            <interconnection density="0.1" avgDistance="NA">
-              <weight min="0" max="1" randomSign="true" distribution="Uniform"/>
-            </interconnection>
-            <retainmentNeurons density="1" retainmentMinRate="0" retainmentMaxRate="0.5"/>
-          </pool>
-          <poolsInterConn srcPool="SpikingBiExpIFs" srcConnDensity="0.1" targetPool="AnalogTanHs" targetConnDensity="0.25">
-            <weight min="0" max="1" randomSign="true" distribution="Uniform"/>
-          </poolsInterConn>
-          <poolsInterConn srcPool="AnalogTanHs" srcConnDensity="0.1" targetPool="SpikingBiExpIFs" targetConnDensity="0.25">
-            <weight min="0" max="1" randomSign="true" distribution="Uniform"/>
-          </poolsInterConn>
+        <reservoirCfg name="Experimental spiking" refractoryCycles="1" spectralRadius="0.9">
+          <pools>
+            <pool instanceName="BiSpiking" dimX="5" dimY="5" dimZ="5">
+              <input connectionDensity="1">
+                <weight min="0" max="5" randomSign="true" distribution="Uniform"/>
+              </input>
+              <activation function="BiLIF"/>
+              <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
+              <interconnection density="0.3" avgDistance="1.5" allowSelfConnection="false">
+                <weight min="0" max="1" randomSign="true" distribution="Uniform"/>
+              </interconnection>
+            </pool>
+          </pools>
         </reservoirCfg>
       </reservoirCfgContainer>
       <reservoirInstanceContainer>
-        <reservoirInstance name="Main" cfg="Spiking and Analog pools" augmentedStates="false">
+        <reservoirInstance name="Experimental" cfg="Experimental spiking" augmentedStates="false">
           <inputFields>
             <field name="High"/>
             <field name="Low"/>

@@ -60,6 +60,10 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         public double InterconnectionAvgDistance { get; set; }
         /// <summary>
+        /// Specifies whether to allow neurons to be self connected
+        /// </summary>
+        public bool InterconnectionAllowSelfConn { get; set; }
+        /// <summary>
         /// Neurons in the pool are interconnected. The weight of the connection synapse will be selected randomly.
         /// </summary>
         public RandomValueSettings InterconnectionSynapseWeight { get; set; }
@@ -185,6 +189,7 @@ namespace RCNet.Neural.Network.SM
             XElement interconnectionElem = poolSettingsElem.Descendants("interconnection").First();
             InterconnectionDensity = double.Parse(interconnectionElem.Attribute("density").Value, CultureInfo.InvariantCulture);
             InterconnectionAvgDistance = interconnectionElem.Attribute("avgDistance").Value == "NA" ? 0d : double.Parse(interconnectionElem.Attribute("avgDistance").Value, CultureInfo.InvariantCulture);
+            InterconnectionAllowSelfConn = bool.Parse(interconnectionElem.Attribute("allowSelfConnection").Value);
             InterconnectionSynapseWeight = new RandomValueSettings(interconnectionElem.Descendants("weight").First());
             //Retainment neurons
             XElement retainmentElem = poolSettingsElem.Descendants("retainmentNeurons").FirstOrDefault();

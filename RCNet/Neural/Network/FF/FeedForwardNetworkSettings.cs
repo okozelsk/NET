@@ -118,6 +118,10 @@ namespace RCNet.Neural.Network.FF
             XElement feedForwardNetworkSettingsElem = validator.Validate(elem, "rootElem");
             //Parsing
             OutputLayerActivation = new ActivationSettings(feedForwardNetworkSettingsElem.Descendants("outputActivation").First());
+            if(!IsAllowedActivation(OutputLayerActivation))
+            {
+                throw new ApplicationException($"Activation {OutputLayerActivation.FunctionType} can't be used in FF network. Activation has to be time independent and has to support derivation.");
+            }
             RegressionMethod = ParseTrainingMethodType(feedForwardNetworkSettingsElem.Attribute("regressionMethod").Value);
             //Hidden layers
             HiddenLayerCollection = new List<HiddenLayerSettings>();
@@ -162,6 +166,20 @@ namespace RCNet.Neural.Network.FF
 
         //Methods
         //Static methods
+        /// <summary>
+        /// Fuction checks if specified activation can be used in FF network 
+        /// </summary>
+        /// <param name="activationSettings">Activation settings</param>
+        /// <returns></returns>
+        public static bool IsAllowedActivation(ActivationSettings activationSettings)
+        {
+            IActivationFunction af = ActivationFactory.Create(activationSettings);
+            if(af.TimeDependent || !af.SupportsDerivation)
+            {
+                return false;
+            }
+            return true;
+        }
         /// <summary>
         /// Parses training method type from string code
         /// </summary>
@@ -275,6 +293,10 @@ namespace RCNet.Neural.Network.FF
             {
                 NumOfNeurons = int.Parse(elem.Attribute("neurons").Value);
                 Activation = new ActivationSettings(elem.Descendants("activation").First());
+                if (!IsAllowedActivation(Activation))
+                {
+                    throw new ApplicationException($"Activation {Activation.FunctionType} can't be used in FF network. Activation has to be time independent and has to support derivation.");
+                }
                 return;
             }
 

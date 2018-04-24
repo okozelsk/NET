@@ -117,12 +117,21 @@ namespace RCNet.Neural.Activation
                                        double.IsNaN(settings.Arg7) ? 2 : settings.Arg7,
                                        double.IsNaN(settings.Arg8) ? 1 : settings.Arg8
                                        );
+                    /*
                 case Function.BiLIF:
                     return new BiLIF(double.IsNaN(settings.Arg1) ? 8 : settings.Arg1,
                                      double.IsNaN(settings.Arg2) ? 10 : settings.Arg2,
                                      double.IsNaN(settings.Arg4) ? 5 : settings.Arg4,
                                      double.IsNaN(settings.Arg5) ? 20 : settings.Arg5,
-                                     double.IsNaN(settings.Arg6) ? 2 : settings.Arg6
+                                     double.IsNaN(settings.Arg6) ? 0 : settings.Arg6
+                                     );
+                                     */
+                case Function.BiLIF:
+                    return new BiLIF(double.IsNaN(settings.Arg1) ? 5 : settings.Arg1,
+                                     double.IsNaN(settings.Arg2) ? 2 : settings.Arg2,
+                                     double.IsNaN(settings.Arg4) ? 0 : settings.Arg4,
+                                     double.IsNaN(settings.Arg5) ? 1 : settings.Arg5,
+                                     double.IsNaN(settings.Arg6) ? 0 : settings.Arg6
                                      );
                 case Function.Elliot:
                     return new Elliot((double.IsNaN(settings.Arg1) ? 1 : settings.Arg1));

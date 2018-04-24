@@ -279,6 +279,7 @@
     </xs:sequence>
     <xs:attribute type="UDoubleLE1Type" name="density" use="required"/>
     <xs:attribute type="UDoubleGT0NAOptionType" name="avgDistance" use="required"/>
+    <xs:attribute type="xs:boolean" name="allowSelfConnection" use="required"/>
   </xs:complexType>
 
   <!-- Pool - retainment neurons -configuration -->
@@ -305,26 +306,36 @@
 
   <!-- ________________________________________RESERVOIR TYPES_________________________________________________ -->
 
-  <!-- Reservoir - pools interconnection - configuration -->
-  <xs:complexType name="PoolsInterConnCfgType">
+  <!-- Reservoir - pools container - configuration -->
+  <xs:complexType name="ReservoirPoolCfgContainerType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="PoolCfgType" name="pool" minOccurs="1" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Reservoir - pool to pool connection - configuration -->
+  <xs:complexType name="ReservoirPool2PoolConnCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="RandomValueType" name="weight" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
-    <xs:attribute type="xs:string" name="srcPool" use="required"/>
-    <xs:attribute type="UDoubleLE1Type" name="srcConnDensity" use="required"/>
     <xs:attribute type="xs:string" name="targetPool" use="required"/>
     <xs:attribute type="UDoubleLE1Type" name="targetConnDensity" use="required"/>
+    <xs:attribute type="xs:string" name="srcPool" use="required"/>
+    <xs:attribute type="UDoubleLE1Type" name="srcConnDensity" use="required"/>
+  </xs:complexType>
+
+  <!-- Reservoir - interpools interconnection container - configuration -->
+  <xs:complexType name="ReservoirPool2PoolConnCfgContainerType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="ReservoirPool2PoolConnCfgType" name="pool2PoolConn" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
   </xs:complexType>
 
   <!-- Reservoir configuration -->
   <xs:complexType name="ReservoirCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:sequence minOccurs="1" maxOccurs="1">
-        <xs:element type="PoolCfgType" name="pool" minOccurs="1" maxOccurs="unbounded"/>
-      </xs:sequence>
-      <xs:sequence minOccurs="0" maxOccurs="1">
-        <xs:element type="PoolsInterConnCfgType" name="poolsInterConn" minOccurs="1" maxOccurs="unbounded"/>
-      </xs:sequence>
+      <xs:element type="ReservoirPoolCfgContainerType" name="pools" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="ReservoirPool2PoolConnCfgContainerType" name="pool2PoolConns" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:string" name="name" use="required" />
     <xs:attribute type="xs:unsignedInt" name="refractoryCycles" use="required" />

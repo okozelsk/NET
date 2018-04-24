@@ -292,14 +292,19 @@ namespace RCNet.Neural.Network.SM
                 for (int targetNeuronIdx = 0; targetNeuronIdx < poolSettings.Dim.Size; targetNeuronIdx++)
                 {
                     _rand.Shuffle(indices);
-                    for (int i = 0; i < connectionsPerNeuron; i++)
+                    int addedSynapses = 0;
+                    for (int i = 0; i < indices.Length && addedSynapses < connectionsPerNeuron; i++)
                     {
                         int srcNeuronIdx = indices[i];
-                        StaticSynapse synapse = new StaticSynapse(_poolNeuronsCollection[poolID][srcNeuronIdx],
-                                                                  _poolNeuronsCollection[poolID][targetNeuronIdx],
-                                                                  _rand.NextDouble(poolSettings.InterconnectionSynapseWeight.Min, poolSettings.InterconnectionSynapseWeight.Max, poolSettings.InterconnectionSynapseWeight.RandomSign, poolSettings.InterconnectionSynapseWeight.DistrType)
-                                                                  );
-                        AddInterconnection(_neuronNeuronConnectionsCollection, synapse, false);
+                        if (poolSettings.InterconnectionAllowSelfConn || srcNeuronIdx != targetNeuronIdx)
+                        {
+                            StaticSynapse synapse = new StaticSynapse(_poolNeuronsCollection[poolID][srcNeuronIdx],
+                                                                      _poolNeuronsCollection[poolID][targetNeuronIdx],
+                                                                      _rand.NextDouble(poolSettings.InterconnectionSynapseWeight.Min, poolSettings.InterconnectionSynapseWeight.Max, poolSettings.InterconnectionSynapseWeight.RandomSign, poolSettings.InterconnectionSynapseWeight.DistrType)
+                                                                      );
+                            AddInterconnection(_neuronNeuronConnectionsCollection, synapse, false);
+                            ++addedSynapses;
+                        }
                     }
                 }
             }
@@ -349,14 +354,19 @@ namespace RCNet.Neural.Network.SM
             {
                 for (int targetNeuronIdx = 0; targetNeuronIdx < poolSettings.Dim.Size; targetNeuronIdx++)
                 {
-                    List<INeuron> srcNeurons = SelectNeuronsByDistance(_poolNeuronsCollection[poolID][targetNeuronIdx], _poolNeuronsCollection[poolID], poolSettings.InterconnectionAvgDistance, connectionsPerNeuron);
-                    for (int i = 0; i < srcNeurons.Count; i++)
+                    List<INeuron> srcNeurons = SelectNeuronsByDistance(_poolNeuronsCollection[poolID][targetNeuronIdx], _poolNeuronsCollection[poolID], poolSettings.InterconnectionAvgDistance, connectionsPerNeuron + (poolSettings.InterconnectionAllowSelfConn ? 0 : 1));
+                    int addedSynapses = 0;
+                    for (int i = 0; i < srcNeurons.Count && addedSynapses < connectionsPerNeuron; i++)
                     {
-                        StaticSynapse synapse = new StaticSynapse(srcNeurons[i],
-                                                                  _poolNeuronsCollection[poolID][targetNeuronIdx],
-                                                                  _rand.NextDouble(poolSettings.InterconnectionSynapseWeight.Min, poolSettings.InterconnectionSynapseWeight.Max, poolSettings.InterconnectionSynapseWeight.RandomSign, poolSettings.InterconnectionSynapseWeight.DistrType)
-                                                                  );
-                        AddInterconnection(_neuronNeuronConnectionsCollection, synapse, false);
+                        if (poolSettings.InterconnectionAllowSelfConn || srcNeurons[i] != _poolNeuronsCollection[poolID][targetNeuronIdx])
+                        {
+                            StaticSynapse synapse = new StaticSynapse(srcNeurons[i],
+                                                                      _poolNeuronsCollection[poolID][targetNeuronIdx],
+                                                                      _rand.NextDouble(poolSettings.InterconnectionSynapseWeight.Min, poolSettings.InterconnectionSynapseWeight.Max, poolSettings.InterconnectionSynapseWeight.RandomSign, poolSettings.InterconnectionSynapseWeight.DistrType)
+                                                                      );
+                            AddInterconnection(_neuronNeuronConnectionsCollection, synapse, false);
+                            ++addedSynapses;
+                        }
                     }
                 }
             }
@@ -365,24 +375,24 @@ namespace RCNet.Neural.Network.SM
 
         private void SetPool2PoolInterconnections(ReservoirSettings.PoolsInterconnection cfg)
         {
-            PoolSettings sourcePoolSettings = _settings.PoolSettingsCollection[cfg.SourcePoolID];
             PoolSettings targetPoolSettings = _settings.PoolSettingsCollection[cfg.TargetPoolID];
-
-            int[] srcIndices = new int[sourcePoolSettings.Dim.Size];
-            srcIndices.ShuffledIndices(_rand);
-            int numOfSrcNeurons = (int)Math.Round(sourcePoolSettings.Dim.Size * cfg.SourceConnectionDensity, 0);
+            PoolSettings sourcePoolSettings = _settings.PoolSettingsCollection[cfg.SourcePoolID];
 
             int[] targetIndices = new int[targetPoolSettings.Dim.Size];
-            targetIndices.Indices();
+            targetIndices.ShuffledIndices(_rand);
             int numOfTargetNeurons = (int)Math.Round(targetPoolSettings.Dim.Size * cfg.TargetConnectionDensity, 0);
 
-            for(int i = 0; i < numOfSrcNeurons; i++)
+            int[] srcIndices = new int[sourcePoolSettings.Dim.Size];
+            srcIndices.Indices();
+            int numOfSrcNeurons = (int)Math.Round(sourcePoolSettings.Dim.Size * cfg.SourceConnectionDensity, 0);
+
+            for(int i = 0; i < numOfTargetNeurons; i++)
             {
-                INeuron srcNeuron = _poolNeuronsCollection[cfg.SourcePoolID][srcIndices[i]];
-                _rand.Shuffle(targetIndices);
-                for(int j = 0; j < numOfTargetNeurons; j++)
+                INeuron targetneuron = _poolNeuronsCollection[cfg.TargetPoolID][targetIndices[i]];
+                _rand.Shuffle(srcIndices);
+                for(int j = 0; j < numOfSrcNeurons; j++)
                 {
-                    INeuron targetneuron = _poolNeuronsCollection[cfg.TargetPoolID][targetIndices[j]];
+                    INeuron srcNeuron = _poolNeuronsCollection[cfg.SourcePoolID][srcIndices[j]];
                     StaticSynapse synapse = new StaticSynapse(srcNeuron,
                                                               targetneuron,
                                                               _rand.NextDouble(cfg.SynapseWeight.Min, cfg.SynapseWeight.Max, cfg.SynapseWeight.RandomSign, cfg.SynapseWeight.DistrType)
@@ -463,39 +473,43 @@ namespace RCNet.Neural.Network.SM
             for(int i = 0; i < input.Length; i++)
             {
                 _inputNeurons[i].Compute(input[i], updateStatistics);
-                _inputNeurons[i].StoreSignal();
+                _inputNeurons[i].PrepareTransmissionSignal(true);
             }
             //Perform computation cycles
-            int compCyccles = 1 + _settings.RefractoryCycles;
-            for (int cycle = 0; cycle < compCyccles; cycle++)
+            int compCycles = 1 + _settings.RefractoryCycles;
+            for (int cycle = 0; cycle < compCycles; cycle++)
             {
-                //Store all the reservoir neurons states
-                foreach (INeuron neuron in _neurons)
-                {
-                    neuron.StoreSignal();
-                }
-                //Compute new states of all reservoir neurons and fill the array of output predictors
+                //Compute all reservoir neurons and fill the array of output predictors
                 Parallel.For(0, _neurons.Length, (neuronIdx) =>
                 {
                     //Input signal
                     double inputSignal = 0;
                     if (cycle == 0)
                     {
-                        //Input is affected only in the first cycle
+                        //Signal from input neurons is affected only in the first cycle
                         foreach (ISynapse synapse in _neuronInputConnectionsCollection[neuronIdx])
                         {
-                            inputSignal += synapse.ComputeSignal(updateStatistics);
+                            inputSignal += synapse.GetWeightedSignal();
                         }
                     }
                     //Signal from reservoir neurons
                     double reservoirSignal = 0;
                     foreach (ISynapse synapse in _neuronNeuronConnectionsCollection[neuronIdx])
                     {
-                        reservoirSignal += synapse.ComputeSignal(updateStatistics);
+                        reservoirSignal += synapse.GetWeightedSignal();
                     }
                     //Compute the new state of the reservoir neuron
                     _neurons[neuronIdx].Compute(inputSignal + reservoirSignal, updateStatistics);
                 });
+                //Prepare neurons signal for next computation
+                foreach (INeuron neuron in _neurons)
+                {
+                    neuron.PrepareTransmissionSignal(updateStatistics);
+                }
+            }
+            if(updateStatistics)
+            {
+                ;
             }
             return;
         }
@@ -508,7 +522,7 @@ namespace RCNet.Neural.Network.SM
             Parallel.For(0, _neurons.Length, n =>
             {
                 int buffIdx = fromOffset + n;
-                buffer[buffIdx] = _neurons[n].State;
+                buffer[buffIdx] = _neurons[n].ReadoutPredictorValue;
                 if (_augmentedStatesFeature)
                 {
                     buffer[buffIdx + _neurons.Length] = buffer[buffIdx] * buffer[buffIdx];
