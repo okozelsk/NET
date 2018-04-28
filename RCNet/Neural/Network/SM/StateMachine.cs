@@ -350,7 +350,7 @@ namespace RCNet.Neural.Network.SM
         public class RegressionStageInput
         {
             /// <summary>
-            /// Collection of Esn predictors
+            /// Collection of State Machine predictors
             /// </summary>
             public List<double[]> PredictorsCollection { get; set; } = null;
             /// <summary>
@@ -358,7 +358,7 @@ namespace RCNet.Neural.Network.SM
             /// </summary>
             public List<double[]> IdealOutputsCollection { get; set; } = null;
             /// <summary>
-            /// Collection of statistics of the Esn's reservoir(s)
+            /// Collection of statistics of the State Machine's reservoir(s)
             /// </summary>
             public List<ReservoirStat> ReservoirStatCollection { get; set; } = null;
 

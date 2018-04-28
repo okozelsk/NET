@@ -391,6 +391,11 @@ namespace RCNet.MathTools
             return false;
         }
 
+        public double Rescale(double value, Interval valueRange)
+        {
+            return _min + (((value - valueRange._min) / valueRange.Span) * Span);
+        }
+
     }//Interval
 
 }//Namespace

@@ -41,14 +41,27 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         public RandomValueSettings InputSynapseWeight { get; set; }
         /// <summary>
-        /// Activation settings of the neurons in the pool.
+        /// Density of inhibitory neurons in the pool.
         /// </summary>
-        public ActivationSettings Activation { get; set; }
+        public double InhibitoryNeuronsDensity { get; set; }
+        /// <summary>
+        /// Activation settings of the inhibitory neurons in the pool.
+        /// </summary>
+        public ActivationSettings InhibitoryActivation { get; set; }
         /// <summary>
         /// Each pool's neuron has its own constant input bias. Bias is always added to input signal of the neuron.
-        /// A constant bias value will be for each neuron selected randomly.
+        /// A constant bias value of the neuron will be selected randomly.
         /// </summary>
-        public RandomValueSettings Bias { get; set; }
+        public RandomValueSettings InhibitoryBias { get; set; }
+        /// <summary>
+        /// Activation settings of the excitatory neurons in the pool.
+        /// </summary>
+        public ActivationSettings ExcitatoryActivation { get; set; }
+        /// <summary>
+        /// Each pool's neuron has its own constant input bias. Bias is always added to input signal of the neuron.
+        /// A constant bias value of the neuron will be selected randomly.
+        /// </summary>
+        public RandomValueSettings ExcitatoryBias { get; set; }
         /// <summary>
         /// Density of interconnected neurons.
         /// Each pool neuron will be connected as a source neuron for Dim.Size * InterconnectionDensity neurons.
@@ -99,8 +112,11 @@ namespace RCNet.Neural.Network.SM
             Dim = null;
             InputConnectionDensity = 0;
             InputSynapseWeight = null;
-            Activation = null;
-            Bias = null;
+            InhibitoryNeuronsDensity = 0;
+            InhibitoryActivation = null;
+            InhibitoryBias = null;
+            ExcitatoryActivation = null;
+            ExcitatoryBias = null;
             InterconnectionDensity = 0;
             InterconnectionAvgDistance = 0;
             InterconnectionSynapseWeight = null;
@@ -129,15 +145,26 @@ namespace RCNet.Neural.Network.SM
             {
                 InputSynapseWeight = source.InputSynapseWeight.DeepClone();
             }
-            Activation = null;
-            if(source.Activation != null)
+            InhibitoryNeuronsDensity = source.InhibitoryNeuronsDensity;
+            InhibitoryActivation = null;
+            if(source.InhibitoryActivation != null)
             {
-                Activation = source.Activation.DeepClone();
+                InhibitoryActivation = source.InhibitoryActivation.DeepClone();
             }
-            Bias = null;
-            if(source.Bias != null)
+            InhibitoryBias = null;
+            if (source.InhibitoryBias != null)
             {
-                Bias = source.Bias.DeepClone();
+                InhibitoryBias = source.InhibitoryBias.DeepClone();
+            }
+            ExcitatoryActivation = null;
+            if (source.ExcitatoryActivation != null)
+            {
+                ExcitatoryActivation = source.ExcitatoryActivation.DeepClone();
+            }
+            ExcitatoryBias = null;
+            if(source.ExcitatoryBias != null)
+            {
+                ExcitatoryBias = source.ExcitatoryBias.DeepClone();
             }
             InterconnectionDensity = source.InterconnectionDensity;
             InterconnectionAvgDistance = source.InterconnectionAvgDistance;
@@ -181,10 +208,17 @@ namespace RCNet.Neural.Network.SM
             XElement inputElem = poolSettingsElem.Descendants("input").First();
             InputConnectionDensity = double.Parse(inputElem.Attribute("connectionDensity").Value, CultureInfo.InvariantCulture);
             InputSynapseWeight = new RandomValueSettings(inputElem.Descendants("weight").First());
-            //Activation
-            Activation = new ActivationSettings(poolSettingsElem.Descendants("activation").First());
-            //Bias
-            Bias = new RandomValueSettings(poolSettingsElem.Descendants("bias").First());
+            //Excitatory
+            XElement excitatoryElem = poolSettingsElem.Descendants("excitatory").First();
+            ExcitatoryActivation = new ActivationSettings(excitatoryElem.Descendants("activation").First());
+            ExcitatoryBias = new RandomValueSettings(excitatoryElem.Descendants("bias").First());
+            double excitatoryPortion = double.Parse(excitatoryElem.Attribute("portion").Value, CultureInfo.InvariantCulture);
+            //Inhibitory
+            XElement inhibitoryElem = poolSettingsElem.Descendants("inhibitory").First();
+            InhibitoryActivation = new ActivationSettings(inhibitoryElem.Descendants("activation").First());
+            InhibitoryBias = new RandomValueSettings(inhibitoryElem.Descendants("bias").First());
+            double inhibitoryPortion = double.Parse(inhibitoryElem.Attribute("portion").Value, CultureInfo.InvariantCulture);
+            InhibitoryNeuronsDensity = inhibitoryPortion / (inhibitoryPortion + excitatoryPortion);
             //Interconnection
             XElement interconnectionElem = poolSettingsElem.Descendants("interconnection").First();
             InterconnectionDensity = double.Parse(interconnectionElem.Attribute("density").Value, CultureInfo.InvariantCulture);
@@ -224,8 +258,11 @@ namespace RCNet.Neural.Network.SM
                 !Equals(Dim, cmpSettings.Dim) ||
                 InputConnectionDensity != cmpSettings.InputConnectionDensity ||
                 !Equals(InputSynapseWeight, cmpSettings.InputSynapseWeight) ||
-                !Equals(Activation, cmpSettings.Activation) ||
-                !Equals(Bias, cmpSettings.Bias) ||
+                !Equals(ExcitatoryActivation, cmpSettings.ExcitatoryActivation) ||
+                !Equals(ExcitatoryBias, cmpSettings.ExcitatoryBias) ||
+                !Equals(InhibitoryActivation, cmpSettings.InhibitoryActivation) ||
+                !Equals(InhibitoryBias, cmpSettings.InhibitoryBias) ||
+                InhibitoryNeuronsDensity != cmpSettings.InhibitoryNeuronsDensity ||
                 InterconnectionDensity != cmpSettings.InterconnectionDensity ||
                 InterconnectionAvgDistance != cmpSettings.InterconnectionAvgDistance ||
                 !Equals(InterconnectionSynapseWeight, cmpSettings.InterconnectionSynapseWeight) ||

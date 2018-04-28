@@ -14,13 +14,18 @@ namespace RCNet.Neural.Network.SM
     /// Reservoir neuron processes input stimuli and produces output signal.
     /// </summary>
     [Serializable]
-    public class ReservoirNeuron : INeuron
+    public class ReservoirAnalogNeuron : INeuron
     {
         //Attributes
         /// <summary>
-        /// Rescalled state value range (allways between -1 and 1)
+        /// Rescalled state value range allways (0,1)
         /// </summary>
-        private static readonly Interval _rescalledStateRange = new Interval(-1, 1);
+        private static readonly Interval _rescalledStateRange = new Interval(0, 1);
+
+        /// <summary>
+        /// Transmission signal range allways (0,1)
+        /// </summary>
+        private static Interval _transmissionSignalRange = new Interval(0, 1);
 
         /// <summary>
         /// Neuron's activation function (the heart of the neuron)
@@ -28,7 +33,6 @@ namespace RCNet.Neural.Network.SM
         private IActivationFunction _activation;
 
         /// <summary>
-        /// Relevant for analog neuron (time independent activation functions) only.
         /// If specified, neuron is the leaky intgrator
         /// </summary>
         private double _retainmentRatio;
@@ -39,7 +43,7 @@ namespace RCNet.Neural.Network.SM
         private int _numOfComputationCycles;
 
         /// <summary>
-        /// Current state of the neuron in activation function natural form
+        /// Current state of the neuron in activation function range
         /// </summary>
         private double _state;
 
@@ -49,14 +53,19 @@ namespace RCNet.Neural.Network.SM
         private double _rescaledState;
 
         /// <summary>
-        /// Current signal of the neuron
+        /// Computed signal of the neuron in _transmissionSignalRange
         /// </summary>
         private double _signal;
 
         /// <summary>
-        /// Transmission signal
+        /// Prepared transmission signal in _transmissionSignalRange
         /// </summary>
         private double _transmissionSignal;
+
+        /// <summary>
+        /// Computed readout value of the neuron in _rescalledStateRange
+        /// </summary>
+        private double _readout;
 
 
         //Attribute properties
@@ -81,24 +90,14 @@ namespace RCNet.Neural.Network.SM
         public BasicStat StatesStat { get; }
 
         /// <summary>
-        /// Statistics of neuron output signals
+        /// Determines whether neuron's signal is excitatory or inhibitory.
+        /// </summary>
+        public CommonEnums.NeuronSignalType TransmissionSignalType { get; }
+
+        /// <summary>
+        /// Statistics of neuron transmission signal in _transmissionSignalRange
         /// </summary>
         public BasicStat TransmissinSignalStat { get; }
-
-
-
-
-
-        /// <summary>
-        /// Statistics of neuron output positive signals
-        /// </summary>
-        public BasicStat PositiveTransmissinSignalStat { get; }
-
-        /// <summary>
-        /// Statistics of neuron output negative signals
-        /// </summary>
-        public BasicStat NegativeTransmissinSignalStat { get; }
-
 
 
         //Constructor
@@ -106,32 +105,36 @@ namespace RCNet.Neural.Network.SM
         /// Creates an initialized instance
         /// </summary>
         /// <param name="placement">Home pool identificator and neuron placement within the pool.</param>
+        /// <param name="signalType">Type of the neuron signal (inhibitory/excitatory).</param>
         /// <param name="activation">Instantiated activation function.</param>
-        /// <param name="retainmentRatio">Retainment ratio. Useable for time independent activations only.</param>
-        public ReservoirNeuron(NeuronPlacement placement,
-                               IActivationFunction activation,
-                               double bias,
-                               double retainmentRatio = 0
-                               )
+        /// <param name="bias">Constant bias.</param>
+        /// <param name="retainmentRatio">Retainment ratio.</param>
+        public ReservoirAnalogNeuron(NeuronPlacement placement,
+                                     CommonEnums.NeuronSignalType signalType,
+                                     IActivationFunction activation,
+                                     double bias,
+                                     double retainmentRatio = 0
+                                     )
         {
             Placement = placement;
             Bias = bias;
+            TransmissionSignalType = signalType;
+            //Check type of activation
+            if (activation.TimeDependent)
+            {
+                throw new ArgumentException("Time dependent activation is not allowed for analog neuron", "activation");
+            }
             //Check whether activation function input range meets the requirements
             if (activation.InputRange.Min != double.NegativeInfinity.Bound() ||
                 activation.InputRange.Max != double.PositiveInfinity.Bound()
                )
             {
-                throw new ArgumentException("Input range of the activation function does not meet ReservoirNeuron conditions.", "activation");
+                throw new ArgumentException("Input range of the activation function does not meet neuron conditions.", "activation");
             }
             //Check whether activation function output range meets the requirements
-            if (activation.OutputRange.Min != -1 || activation.OutputRange.Max != 1)
+            if (activation.OutputRange.Min <= double.NegativeInfinity.Bound() || activation.OutputRange.Max >= double.PositiveInfinity.Bound())
             {
-                throw new ArgumentException("Output range of the activation function does not meet ReservoirNeuron conditions.", "activation");
-            }
-            //Check retainment ratio and type of activation
-            if(activation.TimeDependent && retainmentRatio != 0)
-            {
-                throw new ArgumentException("For the time dependent activations must be retainmentRatio = 0.", "retainmentRatio");
+                throw new ArgumentException("Output range of the activation function does not meet neuron conditions.", "activation");
             }
             //Check retainment ratio
             if (retainmentRatio < 0)
@@ -143,8 +146,6 @@ namespace RCNet.Neural.Network.SM
             StimuliStat = new BasicStat();
             StatesStat = new BasicStat();
             TransmissinSignalStat = new BasicStat();
-            PositiveTransmissinSignalStat = new BasicStat();
-            NegativeTransmissinSignalStat = new BasicStat();
             Reset(false);
             return;
         }
@@ -158,23 +159,12 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// Value to be passed to readout layer as a predictor value
         /// </summary>
-        public double ReadoutPredictorValue
-        {
-            get
-            {
-                if(_activation.TimeDependent)
-                {
-                    //Spiking neuron
-                    //This is tricky a bit.
-                    return _rescaledState;
-                }
-                else
-                {
-                    //Analog neuron
-                    return _transmissionSignal;
-                }
-            }
-        }
+        public double ReadoutPredictorValue { get { return _readout; } }
+
+        /// <summary>
+        /// Value to be passed to readout layer as an augmented predictor value
+        /// </summary>
+        public double ReadoutAugmentedPredictorValue { get { return (_readout * _readout); } }
 
         //Methods
         /// <summary>
@@ -194,8 +184,6 @@ namespace RCNet.Neural.Network.SM
                 StimuliStat.Reset();
                 StatesStat.Reset();
                 TransmissinSignalStat.Reset();
-                PositiveTransmissinSignalStat.Reset();
-                NegativeTransmissinSignalStat.Reset();
             }
             return;
         }
@@ -203,21 +191,24 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// Prepares and stores transmission signal
         /// </summary>
-        /// <param name="collectStatistics">Specifies whether to update internal statistics</param>
-        public void PrepareTransmissionSignal(bool collectStatistics)
+        public void PrepareTransmissionSignal()
         {
             _transmissionSignal = _signal;
-            if (collectStatistics)
-            {
-                TransmissinSignalStat.AddSampleValue(_transmissionSignal);
-            }
-            NegativeTransmissinSignalStat.AddSampleValue(_transmissionSignal < 0 ? _transmissionSignal : 0);
-            PositiveTransmissinSignalStat.AddSampleValue(_transmissionSignal > 0 ? _transmissionSignal : 0);
+            TransmissinSignalStat.AddSampleValue(_transmissionSignal);
             return;
         }
 
         /// <summary>
-        /// Computes neuron state and output signal.
+        /// Prepares and stores readout value
+        /// </summary>
+        public void PrepareReadoutValue()
+        {
+            _readout = _transmissionSignal;
+            return;
+        }
+
+        /// <summary>
+        /// Computes the neuron.
         /// </summary>
         /// <param name="stimuli">Input stimulation</param>
         /// <param name="collectStatistics">Specifies whether to update internal statistics</param>
@@ -228,35 +219,22 @@ namespace RCNet.Neural.Network.SM
             {
                 StimuliStat.AddSampleValue(stimuli);
             }
-            if (_retainmentRatio == 0)
+
+            //Analog leaky integrator
+            if (_numOfComputationCycles == 0 || _retainmentRatio == 0)
             {
-                //Spiking activation or analog activation without leaky integration
-                //Compute signal and neuron state
-                _signal = _activation.Compute(stimuli);
-                //Store state
-                _state = _activation.InternalState;
-                //Compute rescaled state
-                _rescaledState = _rescalledStateRange.Min + (((_state - _activation.InternalStateRange.Min) / _activation.InternalStateRange.Span) * _rescalledStateRange.Span);
-                _rescaledState.Bound(_rescalledStateRange.Min, _rescalledStateRange.Max);
+                //In case of the first computation or zero retairment, retainment formula is not applied
+                _state = _activation.Compute(stimuli);
             }
             else
             {
-                //Analog leaky integrator
-                if (_numOfComputationCycles == 0)
-                {
-                    //In case of the first computation, retainment is not applied
-                    _state = _activation.Compute(stimuli);
-                }
-                else
-                {
-                    //Apply retainment
-                    _state = (_retainmentRatio * _state) + (1d - _retainmentRatio) * _activation.Compute(stimuli);
-                }
-                //Signal equals to state
-                _signal = _state;
-                //Rescaled state equals to state
-                _rescaledState = _state;
+                //Apply retainment
+                _state = (_retainmentRatio * _state) + (1d - _retainmentRatio) * _activation.Compute(stimuli);
             }
+            //Compute rescaled state
+            _rescaledState = _rescalledStateRange.Rescale(_state, _activation.InternalStateRange);
+            //Compute rescaled signal
+            _signal = _transmissionSignalRange.Rescale(_state, _activation.InternalStateRange);
             //Statistics
             if (collectStatistics)
             {
@@ -268,6 +246,6 @@ namespace RCNet.Neural.Network.SM
         }
 
 
-    }//InputNeuron
+    }//ReservoirAnalogNeuron
 
 }//Namespace

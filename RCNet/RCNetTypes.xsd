@@ -17,17 +17,33 @@
     </xs:restriction>
   </xs:simpleType>
 
+  <!-- Enumeration of neuron signal type -->
+  <xs:simpleType name="NeuronSignalType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Excitatory"/>
+      <xs:enumeration value="Inhibitory"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Enumeration of input coding type -->
+  <xs:simpleType name="InputCodingType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Analog"/>
+      <xs:enumeration value="SpikeTrain"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <!-- Enumeration of analog activation functions -->
   <xs:simpleType name="ActivationFunctionType">
     <xs:restriction base="xs:string">
       <xs:enumeration value="BentIdentity"/>
-      <xs:enumeration value="BiExpIF"/>
-      <xs:enumeration value="BiLIF"/>
       <xs:enumeration value="Elliot"/>
+      <xs:enumeration value="ExpIF"/>
       <xs:enumeration value="Gaussian"/>
       <xs:enumeration value="Identity"/>
       <xs:enumeration value="ISRU"/>
       <xs:enumeration value="LeakyReLU"/>
+      <xs:enumeration value="LIF"/>
       <xs:enumeration value="Sigmoid"/>
       <xs:enumeration value="Sinc"/>
       <xs:enumeration value="Sinusoid"/>
@@ -282,6 +298,16 @@
     <xs:attribute type="xs:boolean" name="allowSelfConnection" use="required"/>
   </xs:complexType>
 
+  <!-- Pool - neuron -configuration -->
+  <xs:complexType name="PoolNeuronCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="ActivationCfgType" name="activation" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="RandomValueType" name="bias" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+    <xs:attribute type="UDoubleType" name="portion" use="required"/>
+  </xs:complexType>
+
+
   <!-- Pool - retainment neurons -configuration -->
   <xs:complexType name="PoolRetNeuronsCfgType">
     <xs:attribute type="UDoubleLE1Type" name="density" use="required"/>
@@ -293,8 +319,8 @@
   <xs:complexType name="PoolCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="PoolInputCfgType" name="input" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="ActivationCfgType" name="activation" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="RandomValueType" name="bias" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="PoolNeuronCfgType" name="excitatory" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="PoolNeuronCfgType" name="inhibitory" minOccurs="1" maxOccurs="1"/>
       <xs:element type="PoolInterconnectionCfgType" name="interconnection" minOccurs="1" maxOccurs="1"/>
       <xs:element type="PoolRetNeuronsCfgType" name="retainmentNeurons" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
@@ -338,6 +364,8 @@
       <xs:element type="ReservoirPool2PoolConnCfgContainerType" name="pool2PoolConns" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:string" name="name" use="required" />
+    <xs:attribute type="InputCodingType" name="inputCoding" use="optional" default="Analog"/>
+    <xs:attribute type="UIntGT0Type" name="spikes" use="optional" default="1"/>
     <xs:attribute type="xs:unsignedInt" name="refractoryCycles" use="required" />
     <xs:attribute type="UDoubleGT0NAOptionType" name="spectralRadius" use="required" />
   </xs:complexType>

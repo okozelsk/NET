@@ -32,6 +32,16 @@ namespace RCNet.MathTools
 
         //Methods
         /// <summary>
+        /// Returns value of the bit on specified position
+        /// </summary>
+        /// <param name="bitNum">Bit position</param>
+        /// <returns></returns>
+        public static ulong BitVal(uint bitNum)
+        {
+            return _cacheOfBitValues[bitNum];
+        }
+
+        /// <summary>
         /// Sets the bit in a given number at the specified position and returns the result
         /// </summary>
         public static ulong SetBit(ulong number, uint bitPos)

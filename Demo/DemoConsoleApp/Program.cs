@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using RCNet.DemoConsoleApp.Log;
 
 using RCNet.MathTools;
+using RCNet.Neural.Activation;
 using RCNet.Neural.Network.SM;
 
 namespace RCNet.DemoConsoleApp
@@ -11,20 +12,25 @@ namespace RCNet.DemoConsoleApp
     {
         static void Main(string[] args)
         {
-            Interval inputRange = new Interval(-1, 1);
-            int spikeTrainLength = 24;
-            SpikeTrainConverter converter = new SpikeTrainConverter(inputRange, spikeTrainLength);
-
-            double numToEncode = -0.99587;
-            converter.EncodeAnalogValue(numToEncode);
-            Console.WriteLine(numToEncode);
-            Console.WriteLine(converter.FetchAnalogValue());
-            for (int i = 0; i < spikeTrainLength; i++)
+            LIF lif = new LIF(0.95, 15, -70, -68, -62, 0);
+            for(int i = 0; i < 500; i++)
             {
-                Console.WriteLine(converter.FetchSpike());
+                double signal = 0;
+                if (i < 100)
+                {
+                    signal = lif.Compute(0.1);
+                }
+                else
+                {
+                    signal = lif.Compute(0);
+                }
+                Console.WriteLine($"State {lif.InternalState} signal {signal}");
             }
-
             Console.ReadLine();
+
+
+
+
 
             //Logging the output to a console
             IOutputLog demoOutputLog = new ConsoleLog();
@@ -38,7 +44,7 @@ namespace RCNet.DemoConsoleApp
                 IOutputLog demoOutputLog = new ConsoleLog();
                 //Demo
                 string demoSettingsFile = @"DemoSettings.xml";
-                EsnDemo.RunDemo(demoOutputLog, demoSettingsFile);
+                SMDemo.RunDemo(demoOutputLog, demoSettingsFile);
             }
             catch(Exception e)
             {

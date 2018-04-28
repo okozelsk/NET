@@ -121,6 +121,12 @@ namespace RCNet.Neural.Activation
         {
             x = x.Bound();
             double output = 0;
+            if (_membraneV >= _firingTresholdV)
+            {
+                _membraneV = _resetV;
+                _refractoryPeriod = 0;
+                _inRefractory = true;
+            }
             if (_inRefractory)
             {
                 ++_refractoryPeriod;
@@ -137,17 +143,11 @@ namespace RCNet.Neural.Activation
             }
             //Compute membrane potential
             _membraneV += (-(_membraneV - _restV) + _sharpnessDeltaT * Math.Exp((_membraneV - _rheobaseV) / _sharpnessDeltaT) + _membraneResistance * x) / (_membraneTimeScale);
-            if (_membraneV < _restV)
-            {
-                _membraneV = _restV;
-            }
             //Output
-            if (Math.Abs(_membraneV) >= _firingTresholdV)
+            if (_membraneV >= _firingTresholdV)
             {
-                output = Math.Sign(_membraneV);
-                _membraneV = _resetV * Math.Sign(_membraneV);
-                _refractoryPeriod = 0;
-                _inRefractory = true;
+                output = 1;
+                _membraneV = _firingTresholdV;
             }
             return output;
         }
@@ -159,7 +159,7 @@ namespace RCNet.Neural.Activation
         /// <param name="x">The argument of the Compute method</param>
         public double Derive(double c = double.NaN, double x = double.NaN)
         {
-            throw new Exception("ExpLIF does not support derivation");
+            throw new Exception("ExpIF does not support derivation");
         }
 
 

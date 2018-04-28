@@ -16,9 +16,14 @@ namespace RCNet.Neural.Network.SM
     public class InputSpikingNeuron : INeuron
     {
         /// <summary>
+        /// Input data range
+        /// </summary>
+        private Interval _inputRange;
+
+        /// <summary>
         /// Analog to spikes train converter
         /// </summary>
-        private SpikeTrainConverter _signalConverter;
+        private SignalConverter _signalConverter;
 
         /// <summary>
         /// Transmission signal of the neuron
@@ -47,11 +52,17 @@ namespace RCNet.Neural.Network.SM
         /// Creates an initialized instance
         /// </summary>
         /// <param name="inputFieldIdx">Index of corresponding reservoir input field.</param>
-        /// <param name="signalConverter"> Analog to spike train converter (shared instance)</param>
-        public InputSpikingNeuron(int inputFieldIdx, SpikeTrainConverter signalConverter)
+        /// <param name="inputRange">
+        /// Range of input value.
+        /// It is very recommended to have input values normalized and standardized before
+        /// they are passed to input neuron.
+        /// </param>
+        /// <param name="numOfCodingSpikes">Number of coding spikes (see SpikeTrainConverter)</param>
+        public InputSpikingNeuron(int inputFieldIdx, Interval inputRange, int numOfCodingSpikes)
         {
             Placement = new NeuronPlacement(inputFieldIdx , - 1, inputFieldIdx, inputFieldIdx, 0, 0);
-            _signalConverter = signalConverter;
+            _inputRange = new Interval(inputRange.Min.Bound(), inputRange.Max.Bound());
+            _signalConverter = new SignalConverter(_inputRange, numOfCodingSpikes);
             StimuliStat = new BasicStat();
             TransmissinSignalStat = new BasicStat();
             Reset(false);
@@ -84,6 +95,11 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         public double ReadoutPredictorValue { get { return double.NaN; } }
 
+        /// <summary>
+        /// Value to be passed to readout layer as an augmented predictor value is a nonsense in case of input neuron
+        /// </summary>
+        public double ReadoutAugmentedPredictorValue { get { return double.NaN; } }
+
         //Methods
         /// <summary>
         /// Resets the neuron to its initial state
@@ -103,14 +119,19 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// Prepares and stores transmission signal
         /// </summary>
-        /// <param name="collectStatistics">Specifies whether to update internal statistics</param>
-        public void PrepareTransmissionSignal(bool collectStatistics)
+        public void PrepareTransmissionSignal()
         {
             _signal = _signalConverter.FetchSpike();
-            if(collectStatistics)
-            {
-                TransmissinSignalStat.AddSampleValue(_signal);
-            }
+            TransmissinSignalStat.AddSampleValue(_signal);
+            return;
+        }
+
+        /// <summary>
+        /// Prepares and stores readout value
+        /// </summary>
+        public void PrepareReadoutValue()
+        {
+            //Does nothing
             return;
         }
 

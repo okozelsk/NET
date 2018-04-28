@@ -9,17 +9,14 @@ using RCNet.MathTools;
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Bidirectional Leaky integrate and fire.
-    /// This is an innovative approach to allow +/- spikes.
-    /// Hopefully, this innovation, which does not have an analogy in nature, will allow
-    /// successful mutual cooperation between interconnected analog and spiking neurons.
+    /// Leaky integrate and fire
     /// </summary>
-    public class BiLIF : IActivationFunction
+    public class LIF_org : IActivationFunction
     {
         //Attributes
         //Static working ranges
         private static readonly Interval _inputRange = new Interval(double.NegativeInfinity.Bound(), double.PositiveInfinity.Bound());
-        private static readonly Interval _outputRange = new Interval(-1, 1);
+        private static readonly Interval _outputRange = new Interval(0, 1);
 
         //Parameters
         private Interval _stateRange;
@@ -40,23 +37,25 @@ namespace RCNet.Neural.Activation
         /// </summary>
         /// <param name="membraneTimeScale">(ms)</param>
         /// <param name="membraneResistance">(MOhm)</param>
-        /// <param name="resetV">Absolute value (mV)</param>
-        /// <param name="firingTresholdV">Absolute value (mV)</param>
+        /// <param name="restV">(mV)</param>
+        /// <param name="resetV">(mV)</param>
+        /// <param name="firingTresholdV">(mV)</param>
         /// <param name="refractoryPeriods">(ms)</param>
-        public BiLIF(double membraneTimeScale,
-                     double membraneResistance,
-                     double resetV,
-                     double firingTresholdV,
-                     double refractoryPeriods
-                     )
+        public LIF_org(double membraneTimeScale,
+                   double membraneResistance,
+                   double restV,
+                   double resetV,
+                   double firingTresholdV,
+                   double refractoryPeriods
+                   )
         {
             _membraneTimeScale = membraneTimeScale;
             _membraneResistance = membraneResistance;
-            _restV = 0;
-            _resetV = Math.Abs(resetV);
-            _firingTresholdV = Math.Abs(firingTresholdV);
+            _restV = restV;
+            _resetV = resetV;
+            _firingTresholdV = firingTresholdV;
             _refractoryPeriods = (int)refractoryPeriods;
-            _stateRange = new Interval(-_firingTresholdV, _firingTresholdV);
+            _stateRange = new Interval(_restV, _firingTresholdV);
             Reset();
             return;
         }
@@ -134,12 +133,26 @@ namespace RCNet.Neural.Activation
             //Compute membrane potential
             _membraneV += ((-(_membraneV - _restV) + _membraneResistance * x) / (_membraneTimeScale));
             //Output
-            if (Math.Abs(_membraneV) >= _firingTresholdV)
+            if (_membraneV >= _firingTresholdV)
             {
-                output = Math.Sign(_membraneV);
-                _membraneV = _resetV * Math.Sign(_membraneV);
+                /*
+                double spikeVoltage = (_membraneV - _resetV);
+                //Spike current
+                output = (spikeVoltage / _membraneResistance);
+                //Membrane potential after spike
+                _membraneV = _resetV;
                 _refractoryPeriod = 0;
                 _inRefractory = true;
+                */
+                output = 1;
+                _membraneV = _resetV;
+                /*
+                double spikeVoltage = (_membraneV - _resetV);
+                //Spike current
+                output = (spikeVoltage / _membraneResistance);
+                output = 1;
+                _membraneV = _firingTresholdV;
+                */
             }
             return output;
         }
@@ -151,9 +164,9 @@ namespace RCNet.Neural.Activation
         /// <param name="x">The argument of the Compute method</param>
         public double Derive(double c = double.NaN, double x = double.NaN)
         {
-            throw new Exception("BiLIF does not support derivation");
+            throw new Exception("LIF does not support derivation");
         }
 
-    }//BiLIF
+    }//LIF
 
 }//Namespace

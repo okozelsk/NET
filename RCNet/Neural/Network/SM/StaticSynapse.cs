@@ -47,13 +47,13 @@ namespace RCNet.Neural.Network.SM
             {
                 throw new ArgumentOutOfRangeException("weight", "Weight can't be equal to zero.");
             }
-            Weight = weight;
+            Weight = Math.Abs(weight) * (SourceNeuron.TransmissionSignalType == CommonEnums.NeuronSignalType.Inhibitory ? -1 : 1);
             return;
         }
 
         //Methods
         /// <summary>
-        /// Does nothing, this is a static synapse so weight remaining unchanged all the time.
+        /// Does nothing, this is a static synapse so weight remaining all the time unchanged.
         /// </summary>
         public void Adjust()
         {

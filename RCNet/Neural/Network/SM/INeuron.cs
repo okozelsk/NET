@@ -32,12 +32,10 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         BasicStat StatesStat { get; }
 
-        /*
         /// <summary>
-        /// Determines whether neuron's signal is excitatory, inhibitory or neutral
+        /// Determines whether neuron's signal is excitatory or inhibitory
         /// </summary>
         CommonEnums.NeuronSignalType TransmissionSignalType { get; }
-        */
 
         /// <summary>
         /// Neuron's transmission signal
@@ -54,6 +52,11 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         double ReadoutPredictorValue { get; }
 
+        /// <summary>
+        /// Value to be passed to readout layer as an augmented predictor value
+        /// </summary>
+        double ReadoutAugmentedPredictorValue { get; }
+
         //Methods
         /// <summary>
         /// Resets the neuron to its initial state
@@ -64,9 +67,13 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// Prepares and stores transmission signal
         /// </summary>
-        /// <param name="collectStatistics">Specifies whether to update internal statistics</param>
-        void PrepareTransmissionSignal(bool collectStatistics);
-        
+        void PrepareTransmissionSignal();
+
+        /// <summary>
+        /// Prepares and stores readout value
+        /// </summary>
+        void PrepareReadoutValue();
+
         /// <summary>
         /// Computes neuron's new state.
         /// </summary>

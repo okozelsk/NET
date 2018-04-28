@@ -13,6 +13,9 @@ namespace RCNet.Neural.Activation
     /// </summary>
     public class LIF : IActivationFunction
     {
+        //Constants
+        private const double SpikeCurrent = 1;
+        
         //Attributes
         //Static working ranges
         private static readonly Interval _inputRange = new Interval(double.NegativeInfinity.Bound(), double.PositiveInfinity.Bound());
@@ -20,7 +23,7 @@ namespace RCNet.Neural.Activation
 
         //Parameters
         private Interval _stateRange;
-        private double _membraneTimeScale;
+        private double _retainmentRate;
         private double _membraneResistance;
         private double _restV;
         private double _resetV;
@@ -35,27 +38,28 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Constructs an initialized instance
         /// </summary>
-        /// <param name="membraneTimeScale">(ms)</param>
+        /// <param name="retainmentRate"></param>
         /// <param name="membraneResistance">(MOhm)</param>
         /// <param name="restV">(mV)</param>
         /// <param name="resetV">(mV)</param>
         /// <param name="firingTresholdV">(mV)</param>
         /// <param name="refractoryPeriods">(ms)</param>
-        public LIF(double membraneTimeScale,
+        public LIF(double retainmentRate,
                    double membraneResistance,
                    double restV,
                    double resetV,
-                   double firingTresholdV = -50,
-                   double refractoryPeriods = 2
+                   double firingTresholdV,
+                   double refractoryPeriods
                    )
         {
-            _membraneTimeScale = membraneTimeScale;
+            _retainmentRate = retainmentRate;
             _membraneResistance = membraneResistance;
             _restV = restV;
             _resetV = resetV;
             _firingTresholdV = firingTresholdV;
             _refractoryPeriods = (int)refractoryPeriods;
             _stateRange = new Interval(_restV, _firingTresholdV);
+            //_membraneResistance = (_firingTresholdV - _resetV) / SpikeCurrent;
             Reset();
             return;
         }
@@ -116,6 +120,13 @@ namespace RCNet.Neural.Activation
         {
             x = x.Bound();
             double output = 0;
+            if (_membraneV >= _firingTresholdV)
+            {
+                //Membrane potential after spike
+                _membraneV = _resetV;
+                _refractoryPeriod = 0;
+                _inRefractory = true;
+            }
             if (_inRefractory)
             {
                 ++_refractoryPeriod;
@@ -131,18 +142,31 @@ namespace RCNet.Neural.Activation
                 }
             }
             //Compute membrane potential
-            _membraneV += ((-(_membraneV - _restV) + _membraneResistance * x) / (_membraneTimeScale));
-            if (_membraneV < _restV)
-            {
-                _membraneV = _restV;
-            }
+            _membraneV = _restV  + (_membraneV - _restV) * (_retainmentRate) + _membraneResistance * x;
             //Output
-            if (Math.Abs(_membraneV) >= _firingTresholdV)
+            if (_membraneV >= _firingTresholdV)
             {
-                output = Math.Sign(_membraneV);
-                _membraneV = _resetV * Math.Sign(_membraneV);
+                double spikeVoltage = (_membraneV - _resetV);
+                //Spike current
+                output = (spikeVoltage / _membraneResistance);
+                output = 1 / (1 + Math.Exp(-1 * output));
+                /*
+                double spikeVoltage = (_membraneV - _resetV);
+                //Spike current
+                output = (spikeVoltage / _membraneResistance);
+                //Membrane potential after spike
+                _membraneV = _resetV;
                 _refractoryPeriod = 0;
                 _inRefractory = true;
+                */
+                //output = SpikeCurrent;
+                /*
+                double spikeVoltage = (_membraneV - _resetV);
+                //Spike current
+                output = (spikeVoltage / _membraneResistance);
+                output = 1;
+                _membraneV = _firingTresholdV;
+                */
             }
             return output;
         }

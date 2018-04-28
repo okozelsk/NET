@@ -88,10 +88,10 @@ namespace RCNet.Neural.Network.SM
 
         /// <summary>
         /// Creates the instance and initializes it from given xml element.
-        /// This is the preferred way to instantiate Esn settings.
+        /// This is the preferred way to instantiate State Machine settings.
         /// </summary>
         /// <param name="elem">
-        /// Xml data containing Esn settings.
+        /// Xml data containing State Machine settings.
         /// Content of xml element is always validated against the xml schema.
         /// </param>
         public StateMachineSettings(XElement elem)
@@ -101,14 +101,14 @@ namespace RCNet.Neural.Network.SM
             Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.SM.StateMachineSettings.xsd");
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
-            XElement esnSettingsElem = validator.Validate(elem, "rootElem");
+            XElement stateMachineSettingsElem = validator.Validate(elem, "rootElem");
             //Parsing
             //Task type
-            TaskType = CommonEnums.ParseTaskType(esnSettingsElem.Attribute("taskType").Value);
+            TaskType = CommonEnums.ParseTaskType(stateMachineSettingsElem.Attribute("taskType").Value);
             //Randomizer seek
-            RandomizerSeek = int.Parse(esnSettingsElem.Attribute("randomizerSeek").Value);
+            RandomizerSeek = int.Parse(stateMachineSettingsElem.Attribute("randomizerSeek").Value);
             //Input fields
-            XElement inputFieldsElem = esnSettingsElem.Descendants("inputFields").First();
+            XElement inputFieldsElem = stateMachineSettingsElem.Descendants("inputFields").First();
             RouteInputToReadout = (inputFieldsElem.Attribute("routeToReadout") == null) ? false : bool.Parse(inputFieldsElem.Attribute("routeToReadout").Value);
             if(TaskType != CommonEnums.TaskType.Prediction && RouteInputToReadout)
             {
@@ -121,17 +121,17 @@ namespace RCNet.Neural.Network.SM
             }
             //Collect available reservoir settings
             List<ReservoirSettings> availableResSettings = new List<ReservoirSettings>();
-            XElement reservoirSettingsContainerElem = esnSettingsElem.Descendants("reservoirCfgContainer").First();
+            XElement reservoirSettingsContainerElem = stateMachineSettingsElem.Descendants("reservoirCfgContainer").First();
             foreach (XElement reservoirSettingsElem in reservoirSettingsContainerElem.Descendants("reservoirCfg"))
             {
                 availableResSettings.Add(new ReservoirSettings(reservoirSettingsElem));
             }
             //Readout layer
-            XElement readoutLayerElem = esnSettingsElem.Descendants("readoutLayer").First();
+            XElement readoutLayerElem = stateMachineSettingsElem.Descendants("readoutLayer").First();
             ReadoutLayerConfig = new ReadoutLayerSettings(readoutLayerElem);
             //Mapping of input fields to reservoir settings (future reservoir instance)
             ReservoirInstanceDefinitionCollection = new List<ReservoirInstanceDefinition>();
-            XElement reservoirInstancesContainerElem = esnSettingsElem.Descendants("reservoirInstanceContainer").First();
+            XElement reservoirInstancesContainerElem = stateMachineSettingsElem.Descendants("reservoirInstanceContainer").First();
             foreach (XElement reservoirInstanceElem in reservoirInstancesContainerElem.Descendants("reservoirInstance"))
             {
                 ReservoirInstanceDefinition newMap = new ReservoirInstanceDefinition();
@@ -145,7 +145,7 @@ namespace RCNet.Neural.Network.SM
                 {
                     throw new Exception($"Reservoir settings '{reservoirInstanceElem.Attribute("cfg").Value}' was not found among available settings.");
                 }
-                //Associated Esn input fields
+                //Associated State Machine input fields
                 foreach (XElement inputFieldElem in reservoirInstanceElem.Descendants("inputFields").First().Descendants("field"))
                 {
                     string inputFieldName = inputFieldElem.Attribute("name").Value;
@@ -155,7 +155,7 @@ namespace RCNet.Neural.Network.SM
                     if (inputFieldIdx < 0)
                     {
                         //Not found
-                        throw new Exception($"Reservoir instance {newMap.InstanceName}: input field {inputFieldName} is not defined among Esn input fields.");
+                        throw new Exception($"Reservoir instance {newMap.InstanceName}: input field {inputFieldName} is not defined among State Machine input fields.");
                     }
                     newMap.InputFieldMappingCollection.Add(inputFieldIdx);
                 }
@@ -212,23 +212,23 @@ namespace RCNet.Neural.Network.SM
 
         //Inner classes
         /// <summary>
-        /// Definition of future instance of Esn internal reservoir.
+        /// Definition of future instance of State Machine internal reservoir.
         /// Definition contains a specific setting for the reservoir and maps the input
-        /// fields of the reservoir to the input fields of the Esn network.
+        /// fields of the reservoir to the input fields of the State Machine network.
         /// </summary>
         [Serializable]
         public class ReservoirInstanceDefinition
         {
             //Attribute properties
             /// <summary>
-            /// Maps the reservoir input field to the input field of the Esn.
+            /// Maps the reservoir input field to the input field of the State Machine.
             /// Each collection entry means reservoir input field and int value
-            /// is the index of the field within EsnSettings.InputFieldNameCollection
+            /// is the index of the field within StateMachineSettings.InputFieldNameCollection
             /// </summary>
             public List<int> InputFieldMappingCollection {get; set;}
             /// <summary>
             /// Name of the reservoir instance. It is useful for logging and visualization
-            /// purposes so instance name should be unique within the Esn.
+            /// purposes so instance name should be unique within the State Machine.
             /// </summary>
             public string InstanceName { get; set; }
             /// <summary>

@@ -63,7 +63,7 @@ namespace RCNet.DemoConsoleApp
 
         //Inner classes
         /// <summary>
-        /// Holds the configuration of the single Esn demo case.
+        /// Holds the configuration of the single State Machine demo case.
         /// </summary>
         public class CaseSettings
         {
@@ -84,7 +84,7 @@ namespace RCNet.DemoConsoleApp
             /// </summary>
             public int NumOfBootSamples { get; }
             /// <summary>
-            /// Use true if all input and output Esn fields are about the same range of values.
+            /// Use true if all input and output State Machine fields are about the same range of values.
             /// </summary>
             public bool SingleNormalizer { get; }
             /// <summary>

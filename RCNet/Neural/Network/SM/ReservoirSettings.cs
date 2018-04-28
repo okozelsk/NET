@@ -27,6 +27,14 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         public string SettingsName { get; set; }
         /// <summary>
+        /// Specifies how will input value be presented to reservoir
+        /// </summary>
+        public CommonEnums.InputCodingType InputCoding { get; set; }
+        /// <summary>
+        /// How many spikes will code the input value.
+        /// </summary>
+        public int NumOfCodingSpikes { get; set; }
+        /// <summary>
         /// Specifies number of reservoir refractory cycles following each input cycle.
         /// Refractory cycle is a computation cycle without external (input) stimuli.
         /// </summary>
@@ -51,6 +59,8 @@ namespace RCNet.Neural.Network.SM
         public ReservoirSettings()
         {
             SettingsName = string.Empty;
+            InputCoding = CommonEnums.InputCodingType.Analog;
+            NumOfCodingSpikes = 0;
             RefractoryCycles = 0;
             SpectralRadius = -1;
             PoolSettingsCollection = null;
@@ -65,6 +75,8 @@ namespace RCNet.Neural.Network.SM
         public ReservoirSettings(ReservoirSettings source)
         {
             SettingsName = source.SettingsName;
+            InputCoding = source.InputCoding;
+            NumOfCodingSpikes = source.NumOfCodingSpikes;
             RefractoryCycles = source.RefractoryCycles;
             SpectralRadius = source.SpectralRadius;
             PoolSettingsCollection = null;
@@ -105,8 +117,9 @@ namespace RCNet.Neural.Network.SM
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
             XElement reservoirSettingsElem = validator.Validate(elem, "rootElem");
             //Parsing
-            //Settings name
             SettingsName = reservoirSettingsElem.Attribute("name").Value;
+            InputCoding = CommonEnums.ParseInputCodingType(reservoirSettingsElem.Attribute("inputCoding").Value);
+            NumOfCodingSpikes = int.Parse(reservoirSettingsElem.Attribute("spikes").Value, CultureInfo.InvariantCulture);
             RefractoryCycles = int.Parse(reservoirSettingsElem.Attribute("refractoryCycles").Value, CultureInfo.InvariantCulture);
             SpectralRadius = reservoirSettingsElem.Attribute("spectralRadius").Value == "NA" ? -1d : double.Parse(reservoirSettingsElem.Attribute("spectralRadius").Value, CultureInfo.InvariantCulture);
             //Pool settings collection
@@ -137,6 +150,8 @@ namespace RCNet.Neural.Network.SM
             if (obj == null) return false;
             ReservoirSettings cmpSettings = obj as ReservoirSettings;
             if (SettingsName != cmpSettings.SettingsName ||
+                InputCoding != cmpSettings.InputCoding ||
+                NumOfCodingSpikes != cmpSettings.NumOfCodingSpikes ||
                 RefractoryCycles != cmpSettings.RefractoryCycles ||
                 SpectralRadius != cmpSettings.SpectralRadius ||
                 (PoolSettingsCollection == null && cmpSettings.PoolSettingsCollection != null) ||

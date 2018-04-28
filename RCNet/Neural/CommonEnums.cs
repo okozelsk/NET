@@ -58,11 +58,37 @@ namespace RCNet.Neural
             /// <summary>
             /// Inhibitory. Outgoing synapses will allways have (-) sign.
             /// </summary>
-            Inhibitory,
+            Inhibitory
+        }
+
+        /// <summary>
+        /// Type of input coding
+        /// </summary>
+        public enum InputCodingType
+        {
             /// <summary>
-            /// Neutral. Outgoing synapses will have random sign (probability 1:1).
+            /// Analog. Input value is used as is.
             /// </summary>
-            Neutral
+            Analog,
+            /// <summary>
+            /// Spike train. Input value is converted to a spike train.
+            /// </summary>
+            SpikeTrain
+        }
+
+        /// <summary>
+        /// Parses type of input coding from a string code
+        /// </summary>
+        /// <param name="code">Input coding type code</param>
+        public static InputCodingType ParseInputCodingType(string code)
+        {
+            switch (code.ToUpper())
+            {
+                case "ANALOG": return InputCodingType.Analog;
+                case "SPIKETRAIN": return InputCodingType.SpikeTrain;
+                default:
+                    throw new ArgumentException($"Unsupported input coding type {code}", "code");
+            }
         }
 
 
