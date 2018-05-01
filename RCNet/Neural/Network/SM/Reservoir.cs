@@ -50,6 +50,10 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         private List<ISynapse>[] _neuronNeuronConnectionsCollection;
         /// <summary>
+        /// Number of output predictors
+        /// </summary>
+        private int _numOfPredictors;
+        /// <summary>
         /// Specifies whether to produce augmented states
         /// </summary>
         private bool _augmentedStatesFeature;
@@ -83,14 +87,17 @@ namespace RCNet.Neural.Network.SM
             {
                 if (_settings.InputCoding == CommonEnums.InputCodingType.Analog)
                 {
+                    //Analog input
                     _inputNeurons[i] = new InputAnalogNeuron(i, inputRange);
                 }
                 else
                 {
-                    _inputNeurons[i] = new InputSpikingNeuron(i, inputRange, _settings.NumOfCodingSpikes);
+                    //Spiking input
+                    _inputNeurons[i] = new InputSpikingNeuron(i, inputRange, _settings.InputCodingFractions);
                 }
             }
             //Pools
+            _numOfPredictors = 0;
             List<INeuron> allNeurons = new List<INeuron>();
             int neuronGlobalFlatIdx = 0;
             int totalNumOfNeurons = 0;
@@ -99,6 +106,7 @@ namespace RCNet.Neural.Network.SM
             {
                 PoolSettings poolSettings = _settings.PoolSettingsCollection[poolID];
                 totalNumOfNeurons += poolSettings.Dim.Size;
+                _numOfPredictors += poolSettings.RouteToReadout ? poolSettings.Dim.Size : 0;
                 INeuron[] poolNeurons = new INeuron[poolSettings.Dim.Size];
                 //Retainment rates
                 double[] retRates = new double[poolSettings.Dim.Size];
@@ -113,7 +121,7 @@ namespace RCNet.Neural.Network.SM
                         retRates[indices[i]] = _rand.NextDouble(poolSettings.RetainmentMinRate, poolSettings.RetainmentMaxRate, false, RandomClassExtensions.DistributionType.Uniform);
                     }
                 }
-                //Signal types
+                //Neuron signal types distribution
                 CommonEnums.NeuronSignalType[] sigTypes = new CommonEnums.NeuronSignalType[poolSettings.Dim.Size];
                 sigTypes.Populate(CommonEnums.NeuronSignalType.Excitatory);
                 int[] inhibitoryIndices = new int[poolSettings.Dim.Size];
@@ -136,25 +144,29 @@ namespace RCNet.Neural.Network.SM
                             double bias = 0;
                             if (sigTypes[neuronPoolIdx] == CommonEnums.NeuronSignalType.Excitatory)
                             {
+                                //Activation and bias for Excitatory neuron
                                 activation = ActivationFactory.Create(poolSettings.ExcitatoryActivation, _rand);
                                 bias = _rand.NextDouble(poolSettings.ExcitatoryBias.Min, poolSettings.ExcitatoryBias.Max, poolSettings.ExcitatoryBias.RandomSign, poolSettings.ExcitatoryBias.DistrType);
                             }
                             else
                             {
+                                //Activation and bias for Inhibitory neuron
                                 activation = ActivationFactory.Create(poolSettings.InhibitoryActivation, _rand);
                                 bias = _rand.NextDouble(poolSettings.InhibitoryBias.Min, poolSettings.InhibitoryBias.Max, poolSettings.InhibitoryBias.RandomSign, poolSettings.InhibitoryBias.DistrType);
                             }
-                            if (activation.TimeDependent)
+                            //Neuron instance
+                            if (activation.OutputType == ActivationFactory.FunctionOutputType.Spike)
                             {
+                                //Spiking neuron
                                 poolNeurons[neuronPoolIdx] = new ReservoirSpikingNeuron(placement,
                                                                                         sigTypes[neuronPoolIdx],
                                                                                         activation,
-                                                                                        bias,
-                                                                                        _settings.NumOfCodingSpikes
+                                                                                        bias
                                                                                         );
                             }
                             else
                             {
+                                //Analog neuron
                                 poolNeurons[neuronPoolIdx] = new ReservoirAnalogNeuron(placement,
                                                                                        sigTypes[neuronPoolIdx],
                                                                                        activation,
@@ -182,6 +194,8 @@ namespace RCNet.Neural.Network.SM
                 _neuronInputConnectionsCollection[n] = new List<ISynapse>();
                 _neuronNeuronConnectionsCollection[n] = new List<ISynapse>();
             }
+            //Wiring setup
+            //Pools internal connections
             for(int poolID = 0; poolID < _poolNeuronsCollection.Count; poolID++)
             {
                 //Input connection
@@ -198,7 +212,7 @@ namespace RCNet.Neural.Network.SM
                     SetPoolRandInterconnections(poolID, _settings.PoolSettingsCollection[poolID]);
                 }
             }
-            //Connections among pools
+            //Add pool to pool connections
             foreach(ReservoirSettings.PoolsInterconnection poolsInterConn in _settings.PoolsInterconnectionCollection)
             {
                 SetPool2PoolInterconnections(poolsInterConn);
@@ -207,12 +221,12 @@ namespace RCNet.Neural.Network.SM
             //Spectral radius
             if (_settings.SpectralRadius > 0)
             {
-                double maxEigenvalue = ComputeMaxEigenValue();
-                if(maxEigenvalue == 0)
+                double maxEigenValue = ComputeMaxEigenValue();
+                if(maxEigenValue == 0)
                 {
                     throw new Exception("Invalid reservoir weights. Max eigenvalue is 0.");
                 }
-                double scale = _settings.SpectralRadius / maxEigenvalue;
+                double scale = _settings.SpectralRadius / maxEigenValue;
                 //Scale internal weights
                 foreach(List<ISynapse> connCollection in _neuronNeuronConnectionsCollection)
                 {
@@ -234,9 +248,9 @@ namespace RCNet.Neural.Network.SM
         public int Size { get { return _neurons.Length; } }
 
         /// <summary>
-        /// Number of reservoir's output predictors (Size or Size*2 when augumented states are enabled).
+        /// Number of reservoir's output predictors
         /// </summary>
-        public int NumOfOutputPredictors { get { return _augmentedStatesFeature ? _neurons.Length * 2 : _neurons.Length; } }
+        public int NumOfOutputPredictors { get { return _augmentedStatesFeature ? _numOfPredictors * 2 : _numOfPredictors; } }
 
         //Methods
         /// <summary>
@@ -467,7 +481,10 @@ namespace RCNet.Neural.Network.SM
                     poolStat.NeuronsMaxStimuliStat.AddSampleValue(neuron.StimuliStat.Max);
                     poolStat.NeuronsMinStimuliStat.AddSampleValue(neuron.StimuliStat.Min);
                     poolStat.NeuronsStimuliSpansStat.AddSampleValue(neuron.StimuliStat.Span);
-                    poolStat.NeuronsAvgTransmissionSignalStat.AddSampleValue(neuron.TransmissinSignalStat.ArithAvg);
+                    poolStat.NeuronsAvgTransmissionSignalStat.AddSampleValue(neuron.TransmissionSignalStat.ArithAvg);
+                    poolStat.NeuronsMaxTransmissionSignalStat.AddSampleValue(neuron.TransmissionSignalStat.Max);
+                    poolStat.NeuronsMinTransmissionSignalStat.AddSampleValue(neuron.TransmissionSignalStat.Min);
+                    poolStat.NeuronsAvgTransmissionFreqStat.AddSampleValue(neuron.TransmissionFreqStat.ArithAvg);
                 }
                 //Weights statistics
                 //Input
@@ -536,7 +553,7 @@ namespace RCNet.Neural.Network.SM
                 _inputNeurons[i].Compute(input[i], updateStatistics);
             }
             //Perform computation cycles
-            int inputCycles = _settings.NumOfCodingSpikes;
+            int inputCycles = _settings.InputCodingFractions;
             int compCycles = inputCycles + _settings.RefractoryCycles;
             for (int cycle = 0; cycle < compCycles; cycle++)
             {
@@ -587,16 +604,23 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         public void CopyPredictorsTo(double[] buffer, int fromOffset)
         {
-            Parallel.For(0, _neurons.Length, n =>
+            int bufferIdx = fromOffset;
+            for (int poolID = 0; poolID < _poolNeuronsCollection.Count; poolID++)
             {
-                int buffIdx = fromOffset + n;
-                _neurons[n].PrepareReadoutValue();
-                buffer[buffIdx] = _neurons[n].ReadoutPredictorValue;
-                if (_augmentedStatesFeature)
+                if (_settings.PoolSettingsCollection[poolID].RouteToReadout)
                 {
-                    buffer[buffIdx + _neurons.Length] = _neurons[n].ReadoutAugmentedPredictorValue;
+                    for(int n = 0; n < _poolNeuronsCollection[poolID].Length; n++)
+                    {
+                        buffer[bufferIdx] = _poolNeuronsCollection[poolID][n].ReadoutValue;
+                        ++bufferIdx;
+                        if (_augmentedStatesFeature)
+                        {
+                            buffer[bufferIdx] = _poolNeuronsCollection[poolID][n].ReadoutAugmentedValue;
+                            ++bufferIdx;
+                        }
+                    }
                 }
-            });
+            }
             return;
         }
 
@@ -681,6 +705,18 @@ namespace RCNet.Neural.Network.SM
             /// </summary>
             public BasicStat NeuronsAvgTransmissionSignalStat { get; }
             /// <summary>
+            /// Statistics of max neurons' transmission signals
+            /// </summary>
+            public BasicStat NeuronsMaxTransmissionSignalStat { get; }
+            /// <summary>
+            /// Statistics of min neurons' transmission signals
+            /// </summary>
+            public BasicStat NeuronsMinTransmissionSignalStat { get; }
+            /// <summary>
+            /// Statistics of average neurons' transmission frequencies
+            /// </summary>
+            public BasicStat NeuronsAvgTransmissionFreqStat { get; }
+            /// <summary>
             /// Input weights statistics
             /// </summary>
             public BasicStat InputWeightsStat { get; }
@@ -705,6 +741,9 @@ namespace RCNet.Neural.Network.SM
                 NeuronsMinStimuliStat = new BasicStat();
                 NeuronsStimuliSpansStat = new BasicStat();
                 NeuronsAvgTransmissionSignalStat = new BasicStat();
+                NeuronsMaxTransmissionSignalStat = new BasicStat();
+                NeuronsMinTransmissionSignalStat = new BasicStat();
+                NeuronsAvgTransmissionFreqStat = new BasicStat();
                 InputWeightsStat = new BasicStat();
                 InternalWeightsStat = new BasicStat();
                 return;

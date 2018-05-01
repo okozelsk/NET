@@ -1,89 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <demo dataFolder=".\\Data">
   <!-- Modify/Tune existing or add your own cases -->
-  <case name="Prediction task Mackey Glass chaotic time series: Experimental reservoir, Feed Forward, Linear regression">
-    <samples fileName="MackeyGlass.csv" bootSamples="600" singleNormalizer="false" normalizerReserve="0.1"/>
-    <stateMachineCfg taskType="Prediction" randomizerSeek="0">
-      <inputFields routeToReadout="false">
-        <field name="Value"/>
-      </inputFields>
-      <reservoirCfgContainer>
-        <reservoirCfg name="Spiking" inputCoding="Analog" spikes="1" refractoryCycles="0" spectralRadius="0.999">
-          <pools>
-            <pool instanceName="Spiking pool" dimX="5" dimY="6" dimZ="10">
-              <input connectionDensity="1">
-                <weight min="0" max="0.2" randomSign="false" distribution="Uniform"/>
-              </input>
-              <excitatory portion="3">
-                <activation function="LIF"
-                            arg1="0.95"
-                            arg2="35"
-                            arg3="-70"
-                            arg4="-68"
-                            arg5="-62"
-                            arg6="0"
-                            />
-                <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-              </excitatory>
-              <inhibitory portion="1">
-                <activation function="LIF"
-                            arg1="0.95"
-                            arg2="35"
-                            arg3="-70"
-                            arg4="-68"
-                            arg5="-62"
-                            arg6="0"
-                            />
-                <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-              </inhibitory>
-              <interconnection density="0.1" avgDistance="NA" allowSelfConnection="false">
-                <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
-              </interconnection>
-            </pool>
-          </pools>
-        </reservoirCfg>
-        <reservoirCfg name="Analog" inputCoding="Analog" spikes="1" refractoryCycles="0" spectralRadius="0.999">
-          <pools>
-            <pool instanceName="Analog pool" dimX="5" dimY="6" dimZ="10">
-              <input connectionDensity="1">
-                <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
-              </input>
-              <excitatory portion="1">
-                <activation function="Sigmoid"/>
-                <bias min="0" max="0.4" randomSign="true" distribution="Uniform"/>
-              </excitatory>
-              <inhibitory portion="1">
-                <activation function="Gaussian"/>
-                <bias min="0" max="0.4" randomSign="true" distribution="Uniform"/>
-              </inhibitory>
-              <interconnection density="0.1" avgDistance="NA" allowSelfConnection="true">
-                <weight min="0" max="1" randomSign="true" distribution="Uniform"/>
-              </interconnection>
-              <retainmentNeurons density="1" retainmentMinRate="0.25" retainmentMaxRate="0.5"/>
-            </pool>
-          </pools>
-        </reservoirCfg>
-      </reservoirCfgContainer>
-      <reservoirInstanceContainer>
-        <reservoirInstance name="Experimental" cfg="Analog" augmentedStates="false">
-          <inputFields>
-            <field name="Value"/>
-          </inputFields>
-        </reservoirInstance>
-      </reservoirInstanceContainer>
-      <readoutLayer testDataRatio="0.3" folds="1">
-        <readoutUnit attempts="1" attemptEpochs="100">
-          <ff regressionMethod="Linear">
-            <outputActivation function="Identity"/>
-          </ff>
-        </readoutUnit>
-        <outputFields>
-          <field name="Value"/>
-        </outputFields>
-      </readoutLayer>
-    </stateMachineCfg>
-  </case>
-  <case name="Prediction task High and Low prices of TTOO (T2 Biosystems, Inc.): Experimental reservoir, Feed Forward, Linear regression">
+  <case name="Prediction task High and Low prices of TTOO (T2 Biosystems, Inc.): Experimental mixed reservoir, Feed Forward, Linear regression">
     <!-- Data from https://finance.yahoo.com/quote/TTOO/history?p=TTOO -->
     <samples fileName="TTOO.csv" bootSamples="300" singleNormalizer="true" normalizerReserve="0.1"/>
     <stateMachineCfg taskType="Prediction" randomizerSeek="0">
@@ -93,130 +11,63 @@
         <field name="Adj Close"/>
       </inputFields>
       <reservoirCfgContainer>
-        <reservoirCfg name="Spiking" inputCoding="Analog" spikes="1" refractoryCycles="0" spectralRadius="0.999">
+        <reservoirCfg name="Mixed" refractoryCycles="0" spectralRadius="0.999">
           <pools>
-            <pool instanceName="Spiking pool" dimX="5" dimY="5" dimZ="5">
+            <pool instanceName="Spiking pool" dimX="5" dimY="5" dimZ="5" routeToReadout="true">
               <input connectionDensity="1">
-                <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
+                <weight min="0" max="0.5" randomSign="false" distribution="Uniform"/>
               </input>
-              <excitatory portion="6">
+              <excitatory portion="3">
                 <activation function="LIF"
-                            arg1="2"
-                            arg2="10"
-                            arg3="-70"
-                            arg4="-64"
-                            arg5="-60"
-                            arg6="0"
+                            arg1="15"
+                            arg2="0.05"
+                            arg3="5"
+                            arg4="20"
+                            arg5="1"
                             />
                 <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
               </excitatory>
               <inhibitory portion="1">
                 <activation function="LIF"
-                            arg1="2"
-                            arg2="10"
-                            arg3="-70"
-                            arg4="-64"
-                            arg5="-60"
-                            arg6="0"
+                            arg1="15"
+                            arg2="0.05"
+                            arg3="5"
+                            arg4="20"
+                            arg5="1"
                             />
                 <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
               </inhibitory>
-              <interconnection density="0.3" avgDistance="1.5" allowSelfConnection="true">
+              <interconnection density="0.1" avgDistance="1.5" allowSelfConnection="true">
                 <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
               </interconnection>
             </pool>
-          </pools>
-        </reservoirCfg>
-        <reservoirCfg name="Analog" refractoryCycles="0" spectralRadius="0.999">
-          <pools>
-            <pool instanceName="Analog pool" dimX="5" dimY="5" dimZ="5">
+            <pool instanceName="Analog pool" dimX="5" dimY="5" dimZ="5" routeToReadout="true">
               <input connectionDensity="1">
-                <weight min="0" max="0.75" randomSign="false" distribution="Uniform"/>
+                <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
               </input>
               <excitatory portion="1">
-                <activation function="Sigmoid"/>
-                <bias min="0" max="0.4" randomSign="true" distribution="Uniform"/>
+                <activation function="TanH"/>
+                <bias min="-0.4" max="0.4" randomSign="false" distribution="Uniform"/>
               </excitatory>
               <inhibitory portion="1">
-                <activation function="Sigmoid"/>
-                <bias min="0" max="0.4" randomSign="true" distribution="Uniform"/>
+                <activation function="TanH"/>
+                <bias min="-0.4" max="0.4" randomSign="false" distribution="Uniform"/>
               </inhibitory>
               <interconnection density="0.1" avgDistance="NA" allowSelfConnection="true">
-                <weight min="0" max="1" randomSign="true" distribution="Uniform"/>
+                <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
               </interconnection>
               <retainmentNeurons density="1" retainmentMinRate="0.25" retainmentMaxRate="0.5"/>
             </pool>
           </pools>
-        </reservoirCfg>
-        <reservoirCfg name="Mixed" refractoryCycles="0" spectralRadius="0.999">
-          <pools>
-            <pool instanceName="Spiking pool" dimX="5" dimY="5" dimZ="5">
-              <input connectionDensity="1">
-                <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
-              </input>
-              <excitatory portion="6">
-                <activation function="LIF"
-                            arg1="2"
-                            arg2="10"
-                            arg3="-70"
-                            arg4="-64"
-                            arg5="-60"
-                            arg6="0"
-                            />
-                <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-              </excitatory>
-              <inhibitory portion="1">
-                <activation function="LIF"
-                            arg1="2"
-                            arg2="10"
-                            arg3="-70"
-                            arg4="-64"
-                            arg5="-60"
-                            arg6="0"
-                            />
-                <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-              </inhibitory>
-              <interconnection density="0.3" avgDistance="1.5" allowSelfConnection="true">
-                <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
-              </interconnection>
-            </pool>
-            <pool instanceName="Analog pool" dimX="5" dimY="5" dimZ="5">
-              <input connectionDensity="1">
-                <weight min="0" max="0.5" randomSign="false" distribution="Uniform"/>
-              </input>
-              <excitatory portion="6">
-                <activation function="Sigmoid"/>
-                <bias min="0" max="0" randomSign="true" distribution="Uniform"/>
-              </excitatory>
-              <inhibitory portion="1">
-                <activation function="Sigmoid"/>
-                <bias min="0" max="0" randomSign="true" distribution="Uniform"/>
-              </inhibitory>
-              <interconnection density="0.2" avgDistance="NA" allowSelfConnection="true">
-                <weight min="0" max="1" randomSign="true" distribution="Uniform"/>
-              </interconnection>
-              <retainmentNeurons density="1" retainmentMinRate="0" retainmentMaxRate="0.5"/>
-            </pool>
-          </pools>
           <pool2PoolConns>
-            <pool2PoolConn targetPool="Spiking pool" targetConnDensity="0.25" srcPool="Analog pool" srcConnDensity="0.1">
-              <weight min="0" max="0.3" randomSign="false" distribution="Uniform"/>
-            </pool2PoolConn>
-            <pool2PoolConn targetPool="Analog pool" targetConnDensity="0.25" srcPool="Spiking pool" srcConnDensity="0.25">
-              <weight min="0" max="0.3" randomSign="false" distribution="Uniform"/>
+            <pool2PoolConn targetPool="Analog pool" targetConnDensity="1" srcPool="Spiking pool" srcConnDensity="0.1">
+              <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
             </pool2PoolConn>
           </pool2PoolConns>
         </reservoirCfg>
       </reservoirCfgContainer>
       <reservoirInstanceContainer>
-        <reservoirInstance name="Experimental" cfg="Spiking" augmentedStates="false">
-          <inputFields>
-            <field name="High"/>
-            <field name="Low"/>
-            <field name="Adj Close"/>
-          </inputFields>
-        </reservoirInstance>
-        <reservoirInstance name="Experimental" cfg="Analog" augmentedStates="false">
+        <reservoirInstance name="Experimental" cfg="Mixed" augmentedStates="true">
           <inputFields>
             <field name="High"/>
             <field name="Low"/>
@@ -234,6 +85,219 @@
         <outputFields>
           <field name="High"/>
           <field name="Low"/>
+        </outputFields>
+      </readoutLayer>
+    </stateMachineCfg>
+  </case>
+  <case name="Classification task Libras Movement:  Single spiking reservoir, Parallel Perceptron">
+    <!-- Data converted from https://archive.ics.uci.edu/ml/datasets/Libras+Movement -->
+    <samples fileName="LibrasMovement.csv" singleNormalizer="false" normalizerReserve="0.1"/>
+    <stateMachineCfg taskType="Classification" randomizerSeek="0">
+      <inputFields routeToReadout="false">
+        <field name="coord_abcissa"/>
+        <field name="coord_ordinate"/>
+      </inputFields>
+      <reservoirCfgContainer>
+        <reservoirCfg name="Spiking" inputCoding="Analog" inputCodingFractions="1" refractoryCycles="0" spectralRadius="1">
+          <pools>
+            <pool instanceName="Spiking pool" dimX="5" dimY="10" dimZ="6" routeToReadout="true">
+              <input connectionDensity="1">
+                <weight min="0" max="0.7" randomSign="false" distribution="Uniform"/>
+              </input>
+              <excitatory portion="3">
+                <activation function="LIF"
+                            arg1="15"
+                            arg2="0.05"
+                            arg3="5"
+                            arg4="20"
+                            arg5="1"
+                            />
+                <bias min="-0.1" max="0.3" randomSign="false" distribution="Uniform"/>
+              </excitatory>
+              <inhibitory portion="1">
+                <activation function="LIF"
+                            arg1="15"
+                            arg2="0.05"
+                            arg3="5"
+                            arg4="20"
+                            arg5="1"
+                            />
+                <bias min="-0.1" max="0.3" randomSign="false" distribution="Uniform"/>
+              </inhibitory>
+              <interconnection density="0.1" avgDistance="1.5" allowSelfConnection="false">
+                <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
+              </interconnection>
+            </pool>
+          </pools>
+        </reservoirCfg>
+      </reservoirCfgContainer>
+      <reservoirInstanceContainer>
+        <reservoirInstance name="Experimental" cfg="Spiking" augmentedStates="true">
+          <inputFields>
+            <field name="coord_abcissa"/>
+            <field name="coord_ordinate"/>
+          </inputFields>
+        </reservoirInstance>
+      </reservoirInstanceContainer>
+      <readoutLayer testDataRatio="0.25" folds="Auto">
+        <readoutUnit attempts="20" attemptEpochs="300">
+          <pp gates="3" resolution="2">
+            <pDeltaRuleTrainer iniLR="0.01" incLR="1.1" decLR="0.5" minLR="1e-4" maxLR="0.1"/>
+          </pp>
+        </readoutUnit>
+        <outputFields>
+          <field name="curved swing"/>
+          <field name="horizontal swing"/>
+          <field name="vertical swing"/>
+          <field name="anti-clockwise arc"/>
+          <field name="clockwise arc"/>
+          <field name="circle"/>
+          <field name="horizontal straight-line"/>
+          <field name="vertical straight-line"/>
+          <field name="horizontal zigzag"/>
+          <field name="vertical zigzag"/>
+          <field name="horizontal wavy"/>
+          <field name="vertical wavy"/>
+          <field name="face-up curve"/>
+          <field name="face-down curve"/>
+          <field name="tremble"/>
+        </outputFields>
+      </readoutLayer>
+    </stateMachineCfg>
+  </case>
+  <case name="Prediction task Mackey Glass chaotic time series: Analog reservoir, Feed Forward, Linear regression">
+    <samples fileName="MackeyGlass.csv" bootSamples="600" singleNormalizer="false" normalizerReserve="0.1"/>
+    <stateMachineCfg taskType="Prediction" randomizerSeek="0">
+      <inputFields routeToReadout="false">
+        <field name="Value"/>
+      </inputFields>
+      <reservoirCfgContainer>
+        <reservoirCfg name="Analog" inputCoding="Analog" inputCodingFractions="1" refractoryCycles="0" spectralRadius="0.999">
+          <pools>
+            <pool instanceName="Analog pool" dimX="5" dimY="6" dimZ="10" routeToReadout="true">
+              <input connectionDensity="1">
+                <weight min="0" max="0.6" randomSign="false" distribution="Uniform"/>
+              </input>
+              <excitatory portion="1">
+                <activation function="Sigmoid"/>
+                <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
+              </excitatory>
+              <inhibitory portion="1">
+                <activation function="Gaussian"/>
+                <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
+              </inhibitory>
+              <interconnection density="0.1" avgDistance="1.5" allowSelfConnection="false">
+                <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
+              </interconnection>
+              <retainmentNeurons density="1" retainmentMinRate="0.25" retainmentMaxRate="0.5"/>
+            </pool>
+          </pools>
+        </reservoirCfg>
+      </reservoirCfgContainer>
+      <reservoirInstanceContainer>
+        <reservoirInstance name="Experimental" cfg="Analog" augmentedStates="true">
+          <inputFields>
+            <field name="Value"/>
+          </inputFields>
+        </reservoirInstance>
+      </reservoirInstanceContainer>
+      <readoutLayer testDataRatio="0.3" folds="1">
+        <readoutUnit attempts="1" attemptEpochs="100">
+          <ff regressionMethod="Linear">
+            <outputActivation function="Identity"/>
+          </ff>
+        </readoutUnit>
+        <outputFields>
+          <field name="Value"/>
+        </outputFields>
+      </readoutLayer>
+    </stateMachineCfg>
+  </case>
+  <case name="Classification task Splice junctions gene sequence: Single mixed reservoir, Hidden readout layers, Resilient">
+    <!-- Data converted from https://archive.ics.uci.edu/ml/datasets/Molecular+Biology+%28Splice-junction+Gene+Sequences%29 -->
+    <samples fileName="SpliceJunctions.csv" singleNormalizer="false" normalizerReserve="0"/>
+    <stateMachineCfg taskType="Classification" randomizerSeek="0">
+      <inputFields routeToReadout="false">
+        <field name="1st_Nucleotide"/>
+        <field name="2nd_Nucleotide"/>
+      </inputFields>
+      <reservoirCfgContainer>
+        <reservoirCfg name="Spiking" inputCoding="Analog" inputCodingFractions="1" refractoryCycles="0" spectralRadius="1">
+          <pools>
+            <pool instanceName="Spiking pool" dimX="4" dimY="5" dimZ="5" routeToReadout="true">
+              <input connectionDensity="1">
+                <weight min="0" max="0.8" randomSign="false" distribution="Uniform"/>
+              </input>
+              <excitatory portion="3">
+                <activation function="LIF"
+                            arg1="15"
+                            arg2="0.05"
+                            arg3="5"
+                            arg4="20"
+                            arg5="1"
+                            />
+                <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
+              </excitatory>
+              <inhibitory portion="1">
+                <activation function="LIF"
+                            arg1="15"
+                            arg2="0.05"
+                            arg3="5"
+                            arg4="20"
+                            arg5="1"
+                            />
+                <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
+              </inhibitory>
+              <interconnection density="0.1" avgDistance="1.5" allowSelfConnection="false">
+                <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
+              </interconnection>
+            </pool>
+            <pool instanceName="Analog pool" dimX="4" dimY="5" dimZ="5" routeToReadout="true">
+              <input connectionDensity="1">
+                <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
+              </input>
+              <excitatory portion="1">
+                <activation function="Sigmoid"/>
+                <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
+              </excitatory>
+              <inhibitory portion="1">
+                <activation function="Sigmoid"/>
+                <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
+              </inhibitory>
+              <interconnection density="0.1" avgDistance="NA" allowSelfConnection="true">
+                <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
+              </interconnection>
+              <retainmentNeurons density="0" retainmentMinRate="0.25" retainmentMaxRate="0.5"/>
+            </pool>
+          </pools>
+        </reservoirCfg>
+      </reservoirCfgContainer>
+      <reservoirInstanceContainer>
+        <reservoirInstance name="Experimental" cfg="Spiking" augmentedStates="true">
+          <inputFields>
+            <field name="1st_Nucleotide"/>
+            <field name="2nd_Nucleotide"/>
+          </inputFields>
+        </reservoirInstance>
+      </reservoirInstanceContainer>
+      <readoutLayer testDataRatio="0.25" folds="Auto">
+        <readoutUnit attempts="2" attemptEpochs="2000">
+          <ff regressionMethod="Resilient">
+            <outputActivation function="TanH"/>
+            <hiddenLayers>
+              <layer neurons="40">
+                <activation function="TanH"/>
+              </layer>
+              <layer neurons="40">
+                <activation function="LeakyReLU" arg1="0.01"/>
+              </layer>
+            </hiddenLayers>
+          </ff>
+        </readoutUnit>
+        <outputFields>
+          <field name="EI"/>
+          <field name="IE"/>
+          <field name="Neither"/>
         </outputFields>
       </readoutLayer>
     </stateMachineCfg>

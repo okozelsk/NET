@@ -18,9 +18,9 @@ namespace RCNet.Neural.Network.SM
         NeuronPlacement Placement { get; }
 
         /// <summary>
-        /// Constant bias of the neuron
+        /// Output range of associated activation function
         /// </summary>
-        double Bias { get; }
+        Interval ActivationOutputRange { get; }
 
         /// <summary>
         /// Statistics of neuron stimulation signal
@@ -40,39 +40,41 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// Neuron's transmission signal
         /// </summary>
-        double TransmissinSignal { get; }
+        double TransmissionSignal { get; }
 
         /// <summary>
-        /// Statistics of neuron's transmission signals
+        /// Statistics of neuron's transmission signal values
         /// </summary>
-        BasicStat TransmissinSignalStat { get; }
+        BasicStat TransmissionSignalStat { get; }
 
         /// <summary>
-        /// Value to be passed to readout layer as a predictor value
+        /// Statistics of neuron's transmission signal frequency
         /// </summary>
-        double ReadoutPredictorValue { get; }
+        BasicStat TransmissionFreqStat { get; }
+
+        /// <summary>
+        /// Value to be passed to readout layer as a predictor value.
+        /// Available after the execution of PrepareTransmissionSignal function.
+        /// </summary>
+        double ReadoutValue { get; }
 
         /// <summary>
         /// Value to be passed to readout layer as an augmented predictor value
+        /// Available after the execution of PrepareTransmissionSignal function.
         /// </summary>
-        double ReadoutAugmentedPredictorValue { get; }
+        double ReadoutAugmentedValue { get; }
 
         //Methods
         /// <summary>
-        /// Resets the neuron to its initial state
+        /// Resets neuron to its initial state
         /// </summary>
         /// <param name="resetStatistics">Specifies whether to reset internal statistics</param>
         void Reset(bool resetStatistics);
 
         /// <summary>
-        /// Prepares and stores transmission signal
+        /// Prepares neuron's transmission signal
         /// </summary>
         void PrepareTransmissionSignal();
-
-        /// <summary>
-        /// Prepares and stores readout value
-        /// </summary>
-        void PrepareReadoutValue();
 
         /// <summary>
         /// Computes neuron's new state.

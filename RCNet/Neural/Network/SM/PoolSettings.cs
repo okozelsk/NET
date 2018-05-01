@@ -31,6 +31,10 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         public PoolDimensions Dim { get; set; }
         /// <summary>
+        /// Determines whether to use neurons as the readout predictors
+        /// </summary>
+        public bool RouteToReadout { get; set; }
+        /// <summary>
         /// Each reservoir input neuron will be connected by the synapse to the number of
         /// pool neurons = (Dim.Size * Density).
         /// Typical InputConnectionDensity = 1 (it means the full connectivity).
@@ -139,6 +143,7 @@ namespace RCNet.Neural.Network.SM
             {
                 Dim = new PoolDimensions(source.Dim.X, source.Dim.Y, source.Dim.Z);
             }
+            RouteToReadout = source.RouteToReadout;
             InputConnectionDensity = source.InputConnectionDensity;
             InputSynapseWeight = null;
             if (source.InputSynapseWeight != null)
@@ -204,6 +209,7 @@ namespace RCNet.Neural.Network.SM
                                      int.Parse(poolSettingsElem.Attribute("dimY").Value, CultureInfo.InvariantCulture),
                                      int.Parse(poolSettingsElem.Attribute("dimZ").Value, CultureInfo.InvariantCulture)
                                      );
+            RouteToReadout = bool.Parse(poolSettingsElem.Attribute("routeToReadout").Value);
             //Input
             XElement inputElem = poolSettingsElem.Descendants("input").First();
             InputConnectionDensity = double.Parse(inputElem.Attribute("connectionDensity").Value, CultureInfo.InvariantCulture);
@@ -256,6 +262,7 @@ namespace RCNet.Neural.Network.SM
             PoolSettings cmpSettings = obj as PoolSettings;
             if (InstanceName != cmpSettings.InstanceName ||
                 !Equals(Dim, cmpSettings.Dim) ||
+                RouteToReadout != cmpSettings.RouteToReadout ||
                 InputConnectionDensity != cmpSettings.InputConnectionDensity ||
                 !Equals(InputSynapseWeight, cmpSettings.InputSynapseWeight) ||
                 !Equals(ExcitatoryActivation, cmpSettings.ExcitatoryActivation) ||

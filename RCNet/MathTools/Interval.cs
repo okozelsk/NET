@@ -391,6 +391,11 @@ namespace RCNet.MathTools
             return false;
         }
 
+        /// <summary>
+        /// Rescales given value to this interval
+        /// </summary>
+        /// <param name="value">Input value</param>
+        /// <param name="valueRange">Input value range</param>
         public double Rescale(double value, Interval valueRange)
         {
             return _min + (((value - valueRange._min) / valueRange.Span) * Span);

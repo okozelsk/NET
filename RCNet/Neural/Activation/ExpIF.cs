@@ -8,6 +8,9 @@ using RCNet.MathTools;
 
 namespace RCNet.Neural.Activation
 {
+    /// <summary>
+    /// Exponential Integrate and Fire neuron model.
+    /// </summary>
     public class ExpIF : IActivationFunction
     {
         //Attributes

@@ -38,7 +38,6 @@
     <xs:restriction base="xs:string">
       <xs:enumeration value="BentIdentity"/>
       <xs:enumeration value="Elliot"/>
-      <xs:enumeration value="ExpIF"/>
       <xs:enumeration value="Gaussian"/>
       <xs:enumeration value="Identity"/>
       <xs:enumeration value="ISRU"/>
@@ -328,6 +327,7 @@
     <xs:attribute type="xs:unsignedInt" name="dimX" use="required" />
     <xs:attribute type="xs:unsignedInt" name="dimY" use="required" />
     <xs:attribute type="xs:unsignedInt" name="dimZ" use="required" />
+    <xs:attribute type="xs:boolean" name="routeToReadout" use="optional" default="true"/>
   </xs:complexType>
 
   <!-- ________________________________________RESERVOIR TYPES_________________________________________________ -->
@@ -365,7 +365,7 @@
     </xs:sequence>
     <xs:attribute type="xs:string" name="name" use="required" />
     <xs:attribute type="InputCodingType" name="inputCoding" use="optional" default="Analog"/>
-    <xs:attribute type="UIntGT0Type" name="spikes" use="optional" default="1"/>
+    <xs:attribute type="UIntGT0Type" name="inputCodingFractions" use="optional" default="1"/>
     <xs:attribute type="xs:unsignedInt" name="refractoryCycles" use="required" />
     <xs:attribute type="UDoubleGT0NAOptionType" name="spectralRadius" use="required" />
   </xs:complexType>

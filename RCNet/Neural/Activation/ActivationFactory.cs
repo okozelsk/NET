@@ -22,10 +22,6 @@ namespace RCNet.Neural.Activation
             /// </summary>
             Elliot,
             /// <summary>
-            /// Exponential Integrate and Fire
-            /// </summary>
-            ExpIF,
-            /// <summary>
             /// Analog "Gaussian" activation function
             /// </summary>
             Gaussian,
@@ -38,15 +34,15 @@ namespace RCNet.Neural.Activation
             /// </summary>
             ISRU,
             /// <summary>
-            /// Leaky Integrate and Fire
-            /// </summary>
-            LIF,
-            /// <summary>
             /// Analog "Leaky ReLU" activation function.
             /// ReLU function is a specific case of this LeakyReLU having negSlope = 0.
             /// Identity function is a specific case of this LeakyReLU having negSlope = 1.
             /// </summary>
             LeakyReLU,
+            /// <summary>
+            /// Leaky integrate and fire
+            /// </summary>
+            LIF,
             /// <summary>
             /// Analog "Sigmoid" activation function
             /// </summary>
@@ -105,16 +101,6 @@ namespace RCNet.Neural.Activation
                     return new BentIdentity();
                 case Function.Elliot:
                     return new Elliot((double.IsNaN(settings.Arg1) ? 1 : settings.Arg1));
-                case Function.ExpIF:
-                    return new ExpIF(double.IsNaN(settings.Arg1) ? 12 : settings.Arg1, //membraneTimeScale (ms)
-                                     double.IsNaN(settings.Arg2) ? 20 : settings.Arg2, //membraneResistance (MOhm)
-                                     double.IsNaN(settings.Arg3) ? -65 : settings.Arg3, //restV (mV)
-                                     double.IsNaN(settings.Arg4) ? -60 : settings.Arg4, //resetV (mV)
-                                     double.IsNaN(settings.Arg5) ? -55 : settings.Arg5, //rheobaseV (mV)
-                                     double.IsNaN(settings.Arg6) ? -30 : settings.Arg6, //firingTresholdV (mV)
-                                     double.IsNaN(settings.Arg7) ? 2 : settings.Arg7, //sharpnessDeltaT (ms)
-                                     double.IsNaN(settings.Arg8) ? 0 : settings.Arg8 //refractoryPeriods (ms)
-                                     );
                 case Function.Gaussian:
                     return new Gaussian();
                 case Function.Identity:
@@ -123,23 +109,12 @@ namespace RCNet.Neural.Activation
                     return new ISRU((double.IsNaN(settings.Arg1) ? 1 : settings.Arg1));
                 case Function.LeakyReLU:
                     return new LeakyReLU((double.IsNaN(settings.Arg1) ? 0.01 : settings.Arg1));
-                    /* Original
                 case Function.LIF:
-                    return new LIF(double.IsNaN(settings.Arg1) ? 8 : settings.Arg1, //membraneTimeScale (ms)
-                                   double.IsNaN(settings.Arg2) ? 10 : settings.Arg2, //membraneResistance (MOhm)
-                                   double.IsNaN(settings.Arg3) ? -70 : settings.Arg3, //restV (mV)
-                                   double.IsNaN(settings.Arg4) ? -65 : settings.Arg4, //resetV (mV)
-                                   double.IsNaN(settings.Arg5) ? -50 : settings.Arg5, //firingTresholdV (mV)
-                                   double.IsNaN(settings.Arg6) ? 2 : settings.Arg6 //refractoryPeriods (ms)
-                                   );
-                                   */
-                case Function.LIF:
-                    return new LIF(double.IsNaN(settings.Arg1) ? 8 : settings.Arg1, //membraneTimeScale (ms)
-                                   double.IsNaN(settings.Arg2) ? 10 : settings.Arg2, //membraneResistance (MOhm)
-                                   double.IsNaN(settings.Arg3) ? -70 : settings.Arg3, //restV (mV)
-                                   double.IsNaN(settings.Arg4) ? -65 : settings.Arg4, //resetV (mV)
-                                   double.IsNaN(settings.Arg5) ? -50 : settings.Arg5, //firingTresholdV (mV)
-                                   double.IsNaN(settings.Arg6) ? 0 : settings.Arg6 //refractoryPeriods (ms)
+                    return new LIF(double.IsNaN(settings.Arg1) ? 15 : settings.Arg1, //membraneResistance (MOhm)
+                                   double.IsNaN(settings.Arg2) ? 0.05 : settings.Arg2, //membrane decay rate
+                                   double.IsNaN(settings.Arg3) ? 5 : settings.Arg3, //resetV (mV)
+                                   double.IsNaN(settings.Arg4) ? 20 : settings.Arg4, //firingTresholdV (mV)
+                                   double.IsNaN(settings.Arg5) ? 0 : settings.Arg5 //refractoryPeriods (ms)
                                    );
                 case Function.Sigmoid:
                     return new Sigmoid();
@@ -168,7 +143,6 @@ namespace RCNet.Neural.Activation
             {
                 case "BENTIDENTITY": return Function.BentIdentity;
                 case "ELLIOT": return Function.Elliot;
-                case "EXPIF": return Function.ExpIF;
                 case "GAUSSIAN": return Function.Gaussian;
                 case "IDENTITY": return Function.Identity;
                 case "ISRU": return Function.ISRU;

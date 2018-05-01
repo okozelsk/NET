@@ -17,31 +17,31 @@ namespace RCNet.Neural.Network.SM
     {
         //Constants
         /// <summary>
-        /// Min number of coding spikes
+        /// Min number of coding fractions
         /// </summary>
-        public const int MinCodingSpikes = 1;
+        public const int MinCodingFractions = 1;
         /// <summary>
-        /// Max number of coding spikes
+        /// Max number of coding fractions
         /// </summary>
-        public const int MaxCodingSpikes = 53;
+        public const int MaxCodingFractions = 53;
 
         //Attributes
         private Interval _analogRange;
         private ulong _buffer;
         private double _precision;
         private ulong _maxBuffValue;
-        private int _pendingSpikes;
+        private int _pendingFractions;
 
         //Attribute properties
         /// <summary>
-        /// Number of coding spikes
+        /// Number of coding fractions
         /// </summary>
-        public int NumOfCodingSpikes { get; }
+        public int NumOfCodingFractions { get; }
 
         /// <summary>
-        /// Return number of pending spikes to be fetched.
+        /// Return number of pending fractions to be fetched.
         /// </summary>
-        public int NumOfPendingSpikes { get { return _pendingSpikes; } }
+        public int NumOfPendingFractions { get { return _pendingFractions; } }
 
         /// <summary>
         /// Constructs an initialized instance.
@@ -49,19 +49,19 @@ namespace RCNet.Neural.Network.SM
         /// <param name="analogRange">
         /// Normalized range of analog values.
         /// </param>
-        /// <param name="numOfCodingSpikes">
-        /// Number of coding spikes.
-        /// As more coding spikes as higher accuracy.
-        /// One spike can differentiate 2 values, two spikes 4 values, 3 spikes 8 values, 4 spikes 16 values ....
+        /// <param name="numOfCodingFractions">
+        /// Number of coding bits.
+        /// As more coding bits as higher accuracy.
+        /// One bit can differentiate 2 values, two bits 4 values, 3 bits 8 values, 4 bits 16 values ....
         /// </param>
-        public SignalConverter(Interval analogRange, int numOfCodingSpikes)
+        public SignalConverter(Interval analogRange, int numOfCodingFractions)
         {
             _analogRange = analogRange.DeepClone();
-            NumOfCodingSpikes = Math.Max(Math.Min(numOfCodingSpikes, MaxCodingSpikes), MinCodingSpikes);
-            _precision = (1d / Math.Pow(2, NumOfCodingSpikes));
-            _maxBuffValue = (ulong)Math.Pow(2, numOfCodingSpikes) - 1;
+            NumOfCodingFractions = Math.Max(Math.Min(numOfCodingFractions, MaxCodingFractions), MinCodingFractions);
+            _precision = (1d / Math.Pow(2, NumOfCodingFractions));
+            _maxBuffValue = (ulong)Math.Pow(2, numOfCodingFractions) - 1;
             _buffer = 0;
-            _pendingSpikes = 0;
+            _pendingFractions = 0;
             return;
         }
 
@@ -74,7 +74,7 @@ namespace RCNet.Neural.Network.SM
             double rescaledAnalog = ((analogValue - _analogRange.Min) / _analogRange.Span).Bound(0, 1);
             double pieces = Math.Min(rescaledAnalog / _precision, _maxBuffValue);
             _buffer = (ulong)Math.Floor(pieces);
-            _pendingSpikes = NumOfCodingSpikes;
+            _pendingFractions = NumOfCodingFractions;
             return;
         }
 
@@ -84,28 +84,10 @@ namespace RCNet.Neural.Network.SM
         /// <returns>0/1 or throws exception if there is no pending spikes.</returns>
         public int FetchSpike()
         {
-            if (_pendingSpikes > 0)
+            if (_pendingFractions > 0)
             {
-                int spike = Bitwise.IsBitSet(_buffer, (uint)_pendingSpikes - 1) ? 1 : 0;
-                --_pendingSpikes;
-                return spike;
-            }
-            else
-            {
-                throw new Exception("No more spikes to be fetched.");
-            }
-        }
-
-        /// <summary>
-        /// Fetches next pending spike.
-        /// </summary>
-        /// <returns>0/1 or throws exception if there is no pending spikes.</returns>
-        public int FetchSpikeInReverseOrder()
-        {
-            if (_pendingSpikes > 0)
-            {
-                int spike = Bitwise.IsBitSet(_buffer, (uint)(NumOfCodingSpikes - _pendingSpikes)) ? 1 : 0;
-                --_pendingSpikes;
+                int spike = Bitwise.IsBitSet(_buffer, (uint)(NumOfCodingFractions - _pendingFractions)) ? 1 : 0;
+                --_pendingFractions;
                 return spike;
             }
             else
@@ -137,6 +119,7 @@ namespace RCNet.Neural.Network.SM
         /// Function mixes three analog values in the specified range into the one.
         /// Order of values: the first is the most important.
         /// </summary>
+        /// <param name="analogRange">Range of analog values</param>
         /// <param name="a1">Analog value 1</param>
         /// <param name="a2">Analog value 2</param>
         /// <param name="a3">Analog value 3</param>
@@ -154,7 +137,7 @@ namespace RCNet.Neural.Network.SM
                                  )
         {
             //Check spikes
-            if(s1 + s2 + s3 > MaxCodingSpikes)
+            if(s1 + s2 + s3 > MaxCodingFractions)
             {
                 throw new Exception("s1 + s2 +s3 > MaxCodingSpikes");
             }

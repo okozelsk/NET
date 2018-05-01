@@ -47,7 +47,10 @@ namespace RCNet.Neural.Network.SM
             {
                 throw new ArgumentOutOfRangeException("weight", "Weight can't be equal to zero.");
             }
-            Weight = Math.Abs(weight) * (SourceNeuron.TransmissionSignalType == CommonEnums.NeuronSignalType.Inhibitory ? -1 : 1);
+            //Weight absolute value
+            Weight = Math.Abs(weight);
+            //Weight sign
+            Weight *= (SourceNeuron.TransmissionSignalType == CommonEnums.NeuronSignalType.Excitatory) ? 1 : -1;
             return;
         }
 
@@ -61,11 +64,13 @@ namespace RCNet.Neural.Network.SM
         }
 
         /// <summary>
-        /// Computes weighted signal from source neuron to be delivered to target neuron.
+        /// Computes weighted signal of source neuron to be delivered to the target neuron.
         /// </summary>
         public double GetWeightedSignal()
         {
-            return SourceNeuron.TransmissinSignal * Weight;
+            double tSignal = TargetNeuron.ActivationOutputRange.Rescale(SourceNeuron.TransmissionSignal, SourceNeuron.ActivationOutputRange);
+            tSignal *= Weight;
+            return tSignal;
         }
 
     }//StaticSynapse

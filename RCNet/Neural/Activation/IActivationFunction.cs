@@ -7,6 +7,9 @@ using RCNet.MathTools;
 
 namespace RCNet.Neural.Activation
 {
+    /// <summary>
+    /// Each neuron activation function has to implement this interface
+    /// </summary>
     public interface IActivationFunction
     {
         //Properties

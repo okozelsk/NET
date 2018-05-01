@@ -55,7 +55,6 @@
     <Compile Include="Neural\Activation\Identity.cs" />
     <Compile Include="Neural\Activation\ISRU.cs" />
     <Compile Include="Neural\Activation\LeakyReLU.cs" />
-    <Compile Include="Neural\Activation\LIF_org.cs" />
     <Compile Include="Neural\Activation\Sigmoid.cs" />
     <Compile Include="Neural\Activation\Sinc.cs" />
     <Compile Include="Neural\Activation\Sinusoid.cs" />
@@ -64,16 +63,17 @@
     <Compile Include="Neural\Activation\TanH.cs" />
     <Compile Include="Neural\Activation\ExpIF.cs" />
     <Compile Include="Neural\Activation\LIF.cs" />
+    <Compile Include="Neural\Network\SM\FiringRate.cs" />
+    <Compile Include="Neural\Network\SM\InputAnalogNeuron.cs" />
+    <Compile Include="Neural\Network\SM\InputSpikingNeuron.cs" />
     <Compile Include="Neural\Network\SM\ReservoirAnalogNeuron.cs" />
     <Compile Include="Neural\Network\SM\ReservoirSpikingNeuron.cs" />
     <Compile Include="Neural\Network\SM\SignalConverter.cs" />
-    <Compile Include="Neural\Network\SM\InputSpikingNeuron.cs" />
     <Compile Include="Neural\Network\SM\Reservoir.cs" />
     <Compile Include="Neural\Network\SM\ReservoirSettings.cs" />
     <Compile Include="Neural\Network\SM\PoolDimensions.cs" />
     <Compile Include="Neural\Network\SM\PoolSettings.cs" />
     <Compile Include="Neural\Network\SM\INeuron.cs" />
-    <Compile Include="Neural\Network\SM\InputAnalogNeuron.cs" />
     <Compile Include="Neural\Network\SM\ISynapse.cs" />
     <Compile Include="Neural\Network\SM\StaticSynapse.cs" />
     <Compile Include="Neural\Data\TimeSeriesDataLoader.cs" />

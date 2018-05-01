@@ -16,12 +16,17 @@ namespace RCNet.Neural.Network.SM
     public class InputSpikingNeuron : INeuron
     {
         /// <summary>
+        /// Common output range 0/1 - no spike/spike
+        /// </summary>
+        private static Interval _activationOutputRange = new Interval(0, 1);
+
+        /// <summary>
         /// Input data range
         /// </summary>
         private Interval _inputRange;
 
         /// <summary>
-        /// Analog to spikes train converter
+        /// Analog input to spike train converter
         /// </summary>
         private SignalConverter _signalConverter;
 
@@ -45,7 +50,7 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// Statistics of neuron output signals
         /// </summary>
-        public BasicStat TransmissinSignalStat { get; }
+        public BasicStat TransmissionSignalStat { get; }
 
         //Constructor
         /// <summary>
@@ -57,19 +62,25 @@ namespace RCNet.Neural.Network.SM
         /// It is very recommended to have input values normalized and standardized before
         /// they are passed to input neuron.
         /// </param>
-        /// <param name="numOfCodingSpikes">Number of coding spikes (see SpikeTrainConverter)</param>
-        public InputSpikingNeuron(int inputFieldIdx, Interval inputRange, int numOfCodingSpikes)
+        /// <param name="inputCodingFractions">Number of coding fractions (see SpikeTrainConverter to understand)</param>
+        public InputSpikingNeuron(int inputFieldIdx, Interval inputRange, int inputCodingFractions)
         {
             Placement = new NeuronPlacement(inputFieldIdx , - 1, inputFieldIdx, inputFieldIdx, 0, 0);
             _inputRange = new Interval(inputRange.Min.Bound(), inputRange.Max.Bound());
-            _signalConverter = new SignalConverter(_inputRange, numOfCodingSpikes);
+            _signalConverter = new SignalConverter(_inputRange, inputCodingFractions);
             StimuliStat = new BasicStat();
-            TransmissinSignalStat = new BasicStat();
+            TransmissionSignalStat = new BasicStat();
             Reset(false);
             return;
         }
 
         //Properties
+        /// <summary>
+        /// Output range of associated activation function.
+        /// In case of input spiking neuron there is no activation function thus the range is in all cases the same (0/1).
+        /// </summary>
+        public Interval ActivationOutputRange { get { return _activationOutputRange; } }
+
         /// <summary>
         /// Constant bias of the input neuron is allways 0
         /// </summary>
@@ -88,17 +99,22 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// Neuron's transmission signal
         /// </summary>
-        public double TransmissinSignal { get { return _signal; } }
+        public double TransmissionSignal { get { return _signal; } }
+
+        /// <summary>
+        /// Statistics of neuron's transmission signal frequency
+        /// </summary>
+        public BasicStat TransmissionFreqStat { get { return TransmissionSignalStat; } }
 
         /// <summary>
         /// Value to be passed to readout layer as a predictor value is a nonsense in case of input neuron
         /// </summary>
-        public double ReadoutPredictorValue { get { return double.NaN; } }
+        public double ReadoutValue { get { return double.NaN; } }
 
         /// <summary>
         /// Value to be passed to readout layer as an augmented predictor value is a nonsense in case of input neuron
         /// </summary>
-        public double ReadoutAugmentedPredictorValue { get { return double.NaN; } }
+        public double ReadoutAugmentedValue { get { return double.NaN; } }
 
         //Methods
         /// <summary>
@@ -111,7 +127,7 @@ namespace RCNet.Neural.Network.SM
             if (resetStatistics)
             {
                 StimuliStat.Reset();
-                TransmissinSignalStat.Reset();
+                TransmissionSignalStat.Reset();
             }
             return;
         }
@@ -122,16 +138,7 @@ namespace RCNet.Neural.Network.SM
         public void PrepareTransmissionSignal()
         {
             _signal = _signalConverter.FetchSpike();
-            TransmissinSignalStat.AddSampleValue(_signal);
-            return;
-        }
-
-        /// <summary>
-        /// Prepares and stores readout value
-        /// </summary>
-        public void PrepareReadoutValue()
-        {
-            //Does nothing
+            TransmissionSignalStat.AddSampleValue(_signal);
             return;
         }
 

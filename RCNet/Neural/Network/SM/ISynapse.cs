@@ -13,7 +13,6 @@ namespace RCNet.Neural.Network.SM
     public interface ISynapse
     {
         //Properties
-        //Static in time
         /// <summary>
         /// Source neuron - signal emitor
         /// </summary>

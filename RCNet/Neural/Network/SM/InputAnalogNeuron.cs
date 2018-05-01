@@ -9,23 +9,18 @@ using RCNet.MathTools;
 namespace RCNet.Neural.Network.SM
 {
     /// <summary>
-    /// Input neuron is the special type of neuron. Its purpose is to preprocess input value to be deliverable as the
-    /// signal into the reservoir neurons by the standard way through a synapse.
+    /// Input neuron is the special type of very simple neuron. Its purpose is only to mediate
+    /// external stimulation for a synapse.
     /// </summary>
     [Serializable]
     public class InputAnalogNeuron : INeuron
     {
         //Attributes
         /// <summary>
-        /// Signal value range (allways between 0 and 1)
-        /// </summary>
-        private static readonly Interval _signalRange = new Interval(0, 1);
-
-        /// <summary>
-        /// Input data range
+        /// Range of the input stimuli
         /// </summary>
         private Interval _inputRange;
-
+        
         /// <summary>
         /// Current signal of the neuron according to external input
         /// </summary>
@@ -44,9 +39,9 @@ namespace RCNet.Neural.Network.SM
         public BasicStat StimuliStat { get; }
 
         /// <summary>
-        /// Statistics of neuron output signals
+        /// Statistics of neuron's transmission signal frequency
         /// </summary>
-        public BasicStat TransmissinSignalStat { get; }
+        public BasicStat TransmissionFreqStat { get; }
 
         //Constructor
         /// <summary>
@@ -56,19 +51,25 @@ namespace RCNet.Neural.Network.SM
         /// <param name="inputRange">
         /// Range of input value.
         /// It is very recommended to have input values normalized and standardized before
-        /// they are passed to input neuron.
+        /// they are passed as an input.
         /// </param>
         public InputAnalogNeuron(int inputFieldIdx, Interval inputRange)
         {
             Placement = new NeuronPlacement(inputFieldIdx , - 1, inputFieldIdx, inputFieldIdx, 0, 0);
-            _inputRange = new Interval(inputRange.Min.Bound(), inputRange.Max.Bound());
+            _inputRange = inputRange.DeepClone();
             StimuliStat = new BasicStat();
-            TransmissinSignalStat = new BasicStat();
+            TransmissionFreqStat = new BasicStat();
             Reset(false);
             return;
         }
 
         //Properties
+        /// <summary>
+        /// Output range of associated activation function.
+        /// In case of input neuron there is no activation function thus the range is the same as input range.
+        /// </summary>
+        public Interval ActivationOutputRange { get { return _inputRange; } }
+
         /// <summary>
         /// Constant bias of the input neuron is allways 0
         /// </summary>
@@ -88,17 +89,22 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// Transmission signal
         /// </summary>
-        public double TransmissinSignal { get { return _signal; } }
+        public double TransmissionSignal { get { return _signal; } }
+
+        /// <summary>
+        /// Statistics of neuron output signals is the same as stimuli stat.
+        /// </summary>
+        public BasicStat TransmissionSignalStat { get { return StimuliStat; } }
 
         /// <summary>
         /// Value to be passed to readout layer as a predictor value is a nonsense in case of input neuron
         /// </summary>
-        public double ReadoutPredictorValue { get { return double.NaN; } }
+        public double ReadoutValue { get { return double.NaN; } }
 
         /// <summary>
         /// Value to be passed to readout layer as an augmented predictor value is a nonsense in case of input neuron
         /// </summary>
-        public double ReadoutAugmentedPredictorValue { get { return double.NaN; } }
+        public double ReadoutAugmentedValue { get { return double.NaN; } }
 
         //Methods
         /// <summary>
@@ -111,7 +117,6 @@ namespace RCNet.Neural.Network.SM
             if (resetStatistics)
             {
                 StimuliStat.Reset();
-                TransmissinSignalStat.Reset();
             }
             return;
         }
@@ -121,9 +126,7 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         public void PrepareTransmissionSignal()
         {
-            //Signal is already prepared by compute function
-            //Statistics
-            TransmissinSignalStat.AddSampleValue(_signal);
+            //Does nothing. Signal is already prepared by compute function
             return;
         }
 
@@ -148,8 +151,8 @@ namespace RCNet.Neural.Network.SM
             {
                 StimuliStat.AddSampleValue(stimuli);
             }
-            //Range transformation
-            _signal = _signalRange.Rescale(stimuli, _inputRange);
+            _signal = stimuli;
+            TransmissionFreqStat.AddSampleValue((_signal == 0) ? 0 : 1);
             return;
         }
 

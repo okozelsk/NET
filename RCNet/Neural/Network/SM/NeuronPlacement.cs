@@ -35,6 +35,7 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         /// <param name="globalFlatIdx">Index of the neuron in a reservoir flat structure.</param>
         /// <param name="poolID">Parent pool index.</param>
+        /// <param name="poolFlatIdx">Index of the neuron in a pool flat structure.</param>
         /// <param name="x">Zero based X coordinate in a pool</param>
         /// <param name="y">Zero based Y coordinate in a pool</param>
         /// <param name="z">Zero based Z coordinate in a pool</param>

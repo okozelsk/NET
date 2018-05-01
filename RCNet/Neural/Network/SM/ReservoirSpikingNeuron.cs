@@ -10,42 +10,22 @@ using RCNet.Neural.Activation;
 namespace RCNet.Neural.Network.SM
 {
     /// <summary>
-    /// Reservoir neuron is the main type of the neuron.
-    /// Reservoir neuron processes input stimuli and produces output signal.
+    /// Reservoir neuron is the main type of the neuron processing input stimuli and emitting output signal.
+    /// Spiking neuron produces spikes.
     /// </summary>
     [Serializable]
     public class ReservoirSpikingNeuron : INeuron
     {
         //Attributes
         /// <summary>
-        /// Rescalled state value range allways (0,1)
+        /// Range of the rescalled state value. Allways (0,1)
         /// </summary>
         private static readonly Interval _rescalledStateRange = new Interval(0, 1);
-
-        /// <summary>
-        /// Transmission signal range allways (0,1)
-        /// </summary>
-        private static Interval _transmissionSignalRange = new Interval(0, 1);
 
         /// <summary>
         /// Neuron's activation function (the heart of the neuron)
         /// </summary>
         private IActivationFunction _activation;
-
-        /// <summary>
-        /// Number of passed neuron computations
-        /// </summary>
-        private int _numOfComputationCycles;
-
-        /// <summary>
-        /// Spikes history
-        /// </summary>
-        private ulong _spikes;
-
-        /// <summary>
-        /// Spikes history to analog signal converter
-        /// </summary>
-        private SignalConverter _converter;
 
         /// <summary>
         /// Current state of the neuron in activation function range
@@ -58,22 +38,31 @@ namespace RCNet.Neural.Network.SM
         private double _rescaledState;
 
         /// <summary>
-        /// Computed signal of the neuron in _transmissionSignalRange
+        /// Computed spike of the neuron
         /// </summary>
-        private double _signal;
+        private double _spike;
 
         /// <summary>
-        /// Computed readout value of the neuron in _rescalledStateRange
+        /// Firing rate computer
         /// </summary>
-        private double _readout;
+        private FiringRate _firingRate;
 
         /// <summary>
-        /// Prepared transmission signal in _transmissionSignalRange
+        /// Prepared transmission signal
         /// </summary>
         private double _transmissionSignal;
 
+        /// <summary>
+        /// Computed readout value of the neuron
+        /// </summary>
+        private double _readout;
 
         //Attribute properties
+        /// <summary>
+        /// Determines whether neuron's signal is excitatory or inhibitory.
+        /// </summary>
+        public CommonEnums.NeuronSignalType TransmissionSignalType { get; }
+
         /// <summary>
         /// Home pool identificator and neuron placement within the pool
         /// </summary>
@@ -88,21 +77,21 @@ namespace RCNet.Neural.Network.SM
         /// Statistics of incoming stimulations (input values)
         /// </summary>
         public BasicStat StimuliStat { get; }
-
+        
         /// <summary>
-        /// Statistics of neuron rescalled state values
+        /// Statistics of neuron's uniformly rescalled state values
         /// </summary>
         public BasicStat StatesStat { get; }
 
         /// <summary>
-        /// Determines whether neuron's signal is excitatory or inhibitory.
-        /// </summary>
-        public CommonEnums.NeuronSignalType TransmissionSignalType { get; }
-
-        /// <summary>
         /// Statistics of neuron transmission signal in _transmissionSignalRange
         /// </summary>
-        public BasicStat TransmissinSignalStat { get; }
+        public BasicStat TransmissionSignalStat { get; }
+
+        /// <summary>
+        /// Statistics of neuron's transmission signal frequency
+        /// </summary>
+        public BasicStat TransmissionFreqStat { get; }
 
 
         //Constructor
@@ -110,60 +99,60 @@ namespace RCNet.Neural.Network.SM
         /// Creates an initialized instance
         /// </summary>
         /// <param name="placement">Home pool identificator and neuron placement within the pool.</param>
-        /// <param name="signalType">Type of the neuron signal (inhibitory/excitatory).</param>
+        /// <param name="transmissionSignalType">Type of the neuron's signal (Excitatory/Inhibitory).</param>
         /// <param name="activation">Instantiated activation function.</param>
-        /// <param name="bias">Constant input bias.</param>
+        /// <param name="bias">Constant bias.</param>
         public ReservoirSpikingNeuron(NeuronPlacement placement,
-                                     CommonEnums.NeuronSignalType signalType,
-                                      IActivationFunction activation,
-                                      double bias,
-                                      int numOfCodingSpikes
-                                      )
+                                     CommonEnums.NeuronSignalType transmissionSignalType,
+                                     IActivationFunction activation,
+                                     double bias
+                                     )
         {
+            _firingRate = new FiringRate();
             Placement = placement;
+            TransmissionSignalType = transmissionSignalType;
             Bias = bias;
-            TransmissionSignalType = signalType;
-            //Check type of activation
-            if (!activation.TimeDependent)
+            //Check whether function is spiking
+            if (activation.OutputType != ActivationFactory.FunctionOutputType.Spike)
             {
-                throw new ArgumentException("Analog activation is not allowed for spiking neuron", "activation");
-            }
-            //Check whether activation function input range meets the requirements
-            if (activation.InputRange.Min != double.NegativeInfinity.Bound() ||
-                activation.InputRange.Max != double.PositiveInfinity.Bound()
-               )
-            {
-                throw new ArgumentException("Input range of the activation function does not meet neuron conditions.", "activation");
+                throw new ArgumentException("Activation function is not spiking.", "activation");
             }
             //Check whether activation function output range meets the requirements
-            if (activation.OutputRange.Min != 0 || activation.OutputRange.Max != 1)
+            if (activation.OutputRange.Min <= double.NegativeInfinity.Bound() || activation.OutputRange.Max >= double.PositiveInfinity.Bound())
             {
-                throw new ArgumentException("Output range of the activation function does not meet spiking neuron conditions.", "activation");
+                throw new ArgumentException("Output range of the activation function does not meet neuron conditions.", "activation");
             }
             _activation = activation;
-            _converter = new SignalConverter(new Interval(0, 1), numOfCodingSpikes);
             StimuliStat = new BasicStat();
             StatesStat = new BasicStat();
-            TransmissinSignalStat = new BasicStat();
+            TransmissionSignalStat = new BasicStat();
+            TransmissionFreqStat = new BasicStat();
             Reset(false);
             return;
         }
 
         //Properties
         /// <summary>
-        /// Stored output signal for transmission purposes
+        /// Output range of associated activation function
         /// </summary>
-        public double TransmissinSignal { get { return _transmissionSignal; } }
+        public Interval ActivationOutputRange { get { return _activation.OutputRange; } }
 
         /// <summary>
-        /// Value to be passed to readout layer as a predictor value
+        /// Neuron's transmission signal
         /// </summary>
-        public double ReadoutPredictorValue { get { return _readout; } }
+        public double TransmissionSignal { get { return _transmissionSignal; } }
+
+        /// <summary>
+        /// Value to be passed to readout layer as a predictor value.
+        /// Available after the execution of PrepareTransmissionSignal function.
+        /// </summary>
+        public double ReadoutValue { get { return _readout; } }
 
         /// <summary>
         /// Value to be passed to readout layer as an augmented predictor value
+        /// Available after the execution of PrepareTransmissionSignal function.
         /// </summary>
-        public double ReadoutAugmentedPredictorValue { get { return (_readout * _readout); } }
+        public double ReadoutAugmentedValue { get { return _rescaledState; } }
 
         //Methods
         /// <summary>
@@ -172,18 +161,18 @@ namespace RCNet.Neural.Network.SM
         /// <param name="statistics">Specifies whether to reset also internal statistics</param>
         public void Reset(bool statistics)
         {
-            _spikes = 0;
             _activation.Reset();
-            _numOfComputationCycles = 0;
-            _state = _activation.InternalState;
-            _rescaledState = _rescalledStateRange.Rescale(_state, _activation.InternalStateRange);
-            _signal = 0;
+            _state = 0;
+            _rescaledState = 0;
+            _spike = 0;
+            _firingRate.Reset();
             _transmissionSignal = 0;
             if (statistics)
             {
                 StimuliStat.Reset();
                 StatesStat.Reset();
-                TransmissinSignalStat.Reset();
+                TransmissionSignalStat.Reset();
+                TransmissionFreqStat.Reset();
             }
             return;
         }
@@ -193,46 +182,16 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         public void PrepareTransmissionSignal()
         {
-            _transmissionSignal = _signal;
-            TransmissinSignalStat.AddSampleValue(_transmissionSignal);
+            _transmissionSignal = _spike;
+            TransmissionSignalStat.AddSampleValue(_transmissionSignal);
+            TransmissionFreqStat.AddSampleValue((_transmissionSignal == 0) ? 0 : 1);
+            //Primary readout
+            _readout = _firingRate.GetRate();
             return;
         }
 
         /// <summary>
-        /// Prepares and stores readout value
-        /// </summary>
-        public void PrepareReadoutValue()
-        {
-            /*
-            //A bit tricky fusion of the neuron firing rate, recent spiking history and current rescaled membrane potential
-            double firingRate = TransmissinSignalStat.ArithAvg;
-            _converter.EncodeSpikeTrain(_spikes);
-            double recentSpikesValue = _converter.FetchAnalogValue();
-            double membraneValue = _rescaledState;
-            //Sigmoidal transformation
-            _readout = 1d / (1d + Math.Exp(-(firingRate + recentSpikesValue + membraneValue)));
-            */
-            double firingRate = TransmissinSignalStat.ArithAvg;
-            _converter.EncodeSpikeTrain(_spikes);
-            double recentSpikes = _converter.FetchAnalogValue();
-            _readout = SignalConverter.Mix(_rescalledStateRange,
-                                           _rescaledState,
-                                           firingRate,
-                                           recentSpikes,
-                                           32,
-                                           20,
-                                           1
-                                           );
-            if(TransmissinSignalStat.NumOfSamples >= 100)
-            {
-                ;
-            }
-            _readout = _rescaledState;
-            return;
-        }
-
-        /// <summary>
-        /// Computes neuron state and output signal.
+        /// Computes the neuron.
         /// </summary>
         /// <param name="stimuli">Input stimulation</param>
         /// <param name="collectStatistics">Specifies whether to update internal statistics</param>
@@ -243,18 +202,10 @@ namespace RCNet.Neural.Network.SM
             {
                 StimuliStat.AddSampleValue(stimuli);
             }
-            //Activation
-            //Compute signal and neuron state
-            _signal = _activation.Compute(stimuli);
-            //Update spikes
-            _spikes <<= 1;
-            if (_signal > 0)
-            {
-                //Neuron is firing
-                _spikes |= 1;
-            }
-            //Store membrane potential
+            //State and spike
+            _spike = _activation.Compute(stimuli);
             _state = _activation.InternalState;
+            _firingRate.Update(_spike > 0);
             //Compute rescaled state
             _rescaledState = _rescalledStateRange.Rescale(_state, _activation.InternalStateRange);
             //Statistics
@@ -262,8 +213,6 @@ namespace RCNet.Neural.Network.SM
             {
                 StatesStat.AddSampleValue(_rescaledState);
             }
-            //Cycles counter
-            ++_numOfComputationCycles;
             return;
         }
 
