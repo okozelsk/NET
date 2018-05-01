@@ -111,7 +111,7 @@ namespace RCNet.DemoConsoleApp
                 }
             }
             log.Write(" ", false);
-            Console.ReadLine();
+            //Console.ReadLine();
             return;
         }
 
