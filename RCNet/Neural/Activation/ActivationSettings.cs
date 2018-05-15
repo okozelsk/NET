@@ -63,6 +63,26 @@ namespace RCNet.Neural.Activation
         /// Value of the argument to be passed to the activation function constructor
         /// </summary>
         public double Arg10 { get; set; }
+        /// <summary>
+        /// Value of the argument to be passed to the activation function constructor
+        /// </summary>
+        public double Arg11 { get; set; }
+        /// <summary>
+        /// Value of the argument to be passed to the activation function constructor
+        /// </summary>
+        public double Arg12 { get; set; }
+        /// <summary>
+        /// Value of the argument to be passed to the activation function constructor
+        /// </summary>
+        public double Arg13 { get; set; }
+        /// <summary>
+        /// Value of the argument to be passed to the activation function constructor
+        /// </summary>
+        public double Arg14 { get; set; }
+        /// <summary>
+        /// Value of the argument to be passed to the activation function constructor
+        /// </summary>
+        public double Arg15 { get; set; }
 
         //Constructors
         /// <summary>
@@ -79,6 +99,11 @@ namespace RCNet.Neural.Activation
         /// <param name="arg8">Value of the argument to be passed to the activation function constructor</param>
         /// <param name="arg9">Value of the argument to be passed to the activation function constructor</param>
         /// <param name="arg10">Value of the argument to be passed to the activation function constructor</param>
+        /// <param name="arg11">Value of the argument to be passed to the activation function constructor</param>
+        /// <param name="arg12">Value of the argument to be passed to the activation function constructor</param>
+        /// <param name="arg13">Value of the argument to be passed to the activation function constructor</param>
+        /// <param name="arg14">Value of the argument to be passed to the activation function constructor</param>
+        /// <param name="arg15">Value of the argument to be passed to the activation function constructor</param>
         public ActivationSettings(ActivationFactory.Function functionType,
                                         double arg1 = double.NaN,
                                         double arg2 = double.NaN,
@@ -89,7 +114,12 @@ namespace RCNet.Neural.Activation
                                         double arg7 = double.NaN,
                                         double arg8 = double.NaN,
                                         double arg9 = double.NaN,
-                                        double arg10 = double.NaN
+                                        double arg10 = double.NaN,
+                                        double arg11 = double.NaN,
+                                        double arg12 = double.NaN,
+                                        double arg13 = double.NaN,
+                                        double arg14 = double.NaN,
+                                        double arg15 = double.NaN
                                         )
         {
             FunctionType = functionType;
@@ -103,6 +133,11 @@ namespace RCNet.Neural.Activation
             Arg8 = arg8;
             Arg9 = arg9;
             Arg10 = arg10;
+            Arg11 = arg11;
+            Arg12 = arg12;
+            Arg13 = arg13;
+            Arg14 = arg14;
+            Arg15 = arg15;
             return;
         }
 
@@ -123,6 +158,11 @@ namespace RCNet.Neural.Activation
             Arg8 = source.Arg8;
             Arg9 = source.Arg9;
             Arg10 = source.Arg10;
+            Arg11 = source.Arg11;
+            Arg12 = source.Arg12;
+            Arg13 = source.Arg13;
+            Arg14 = source.Arg14;
+            Arg15 = source.Arg15;
             return;
         }
 
@@ -153,6 +193,11 @@ namespace RCNet.Neural.Activation
             Arg8 = GetArgFromXml(activationSettingsElem, 8);
             Arg9 = GetArgFromXml(activationSettingsElem, 9);
             Arg10 = GetArgFromXml(activationSettingsElem, 10);
+            Arg11 = GetArgFromXml(activationSettingsElem, 11);
+            Arg12 = GetArgFromXml(activationSettingsElem, 12);
+            Arg13 = GetArgFromXml(activationSettingsElem, 13);
+            Arg14 = GetArgFromXml(activationSettingsElem, 14);
+            Arg15 = GetArgFromXml(activationSettingsElem, 15);
             return;
         }
 
@@ -185,7 +230,12 @@ namespace RCNet.Neural.Activation
                 !Arg7.Equals(cmpSettings.Arg7) ||
                 !Arg8.Equals(cmpSettings.Arg8) ||
                 !Arg9.Equals(cmpSettings.Arg9) ||
-                !Arg10.Equals(cmpSettings.Arg10)
+                !Arg10.Equals(cmpSettings.Arg10) ||
+                !Arg11.Equals(cmpSettings.Arg11) ||
+                !Arg12.Equals(cmpSettings.Arg12) ||
+                !Arg13.Equals(cmpSettings.Arg13) ||
+                !Arg14.Equals(cmpSettings.Arg14) ||
+                !Arg15.Equals(cmpSettings.Arg15)
                 )
             {
                 return false;

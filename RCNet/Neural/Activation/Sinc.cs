@@ -44,9 +44,9 @@ namespace RCNet.Neural.Activation
         public Interval OutputRange { get { return _outputRange; } }
 
         /// <summary>
-        /// Specifies whether the activation function supports derivation
+        /// Specifies whether the activation function supports derivative
         /// </summary>
-        public bool SupportsDerivation { get { return true; } }
+        public bool SupportsDerivative { get { return true; } }
 
         /// <summary>
         /// Specifies whether the activation function is depending on its previous states
@@ -94,11 +94,11 @@ namespace RCNet.Neural.Activation
         }
 
         /// <summary>
-        /// Computes the derivation
+        /// Computes derivative
         /// </summary>
         /// <param name="c">The result of the Compute method</param>
         /// <param name="x">The argument of the Compute method</param>
-        public double Derive(double c, double x)
+        public double ComputeDerivative(double c, double x)
         {
             x = x.Bound();
             if (x == 0)

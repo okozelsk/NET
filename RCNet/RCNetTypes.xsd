@@ -33,17 +33,21 @@
     </xs:restriction>
   </xs:simpleType>
 
-  <!-- Enumeration of analog activation functions -->
+  <!-- Enumeration of activation functions -->
   <xs:simpleType name="ActivationFunctionType">
     <xs:restriction base="xs:string">
+      <xs:enumeration value="AdExpIF"/>
+      <xs:enumeration value="AdSimpleIF"/>
       <xs:enumeration value="BentIdentity"/>
       <xs:enumeration value="Elliot"/>
+      <xs:enumeration value="ExpIF"/>
       <xs:enumeration value="Gaussian"/>
       <xs:enumeration value="Identity"/>
       <xs:enumeration value="ISRU"/>
+      <xs:enumeration value="LeakyIF"/>
       <xs:enumeration value="LeakyReLU"/>
-      <xs:enumeration value="LIF"/>
       <xs:enumeration value="Sigmoid"/>
+      <xs:enumeration value="SimpleIF"/>
       <xs:enumeration value="Sinc"/>
       <xs:enumeration value="Sinusoid"/>
       <xs:enumeration value="SoftExponential"/>
@@ -149,6 +153,11 @@
     <xs:attribute type="DoubleNAOptionType" name="arg8" use="optional" default="NA"/>
     <xs:attribute type="DoubleNAOptionType" name="arg9" use="optional" default="NA"/>
     <xs:attribute type="DoubleNAOptionType" name="arg10" use="optional" default="NA"/>
+    <xs:attribute type="DoubleNAOptionType" name="arg11" use="optional" default="NA"/>
+    <xs:attribute type="DoubleNAOptionType" name="arg12" use="optional" default="NA"/>
+    <xs:attribute type="DoubleNAOptionType" name="arg13" use="optional" default="NA"/>
+    <xs:attribute type="DoubleNAOptionType" name="arg14" use="optional" default="NA"/>
+    <xs:attribute type="DoubleNAOptionType" name="arg15" use="optional" default="NA"/>
   </xs:complexType>
 
   <!-- Alone name element -->
@@ -303,7 +312,7 @@
       <xs:element type="ActivationCfgType" name="activation" minOccurs="1" maxOccurs="1"/>
       <xs:element type="RandomValueType" name="bias" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
-    <xs:attribute type="UDoubleType" name="portion" use="required"/>
+    <xs:attribute type="UDoubleType" name="relShare" use="required"/>
   </xs:complexType>
 
 
@@ -365,8 +374,7 @@
     </xs:sequence>
     <xs:attribute type="xs:string" name="name" use="required" />
     <xs:attribute type="InputCodingType" name="inputCoding" use="optional" default="Analog"/>
-    <xs:attribute type="UIntGT0Type" name="inputCodingFractions" use="optional" default="1"/>
-    <xs:attribute type="xs:unsignedInt" name="refractoryCycles" use="required" />
+    <xs:attribute type="UIntGT0Type" name="inputDuration" use="optional" default="1"/>
     <xs:attribute type="UDoubleGT0NAOptionType" name="spectralRadius" use="required" />
   </xs:complexType>
 

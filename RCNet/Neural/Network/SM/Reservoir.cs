@@ -93,7 +93,7 @@ namespace RCNet.Neural.Network.SM
                 else
                 {
                     //Spiking input
-                    _inputNeurons[i] = new InputSpikingNeuron(i, inputRange, _settings.InputCodingFractions);
+                    _inputNeurons[i] = new InputSpikingNeuron(i, inputRange, _settings.InputDuration);
                 }
             }
             //Pools
@@ -547,39 +547,28 @@ namespace RCNet.Neural.Network.SM
         /// </param>
         public void Compute(double[] input, bool updateStatistics)
         {
-            //Set input to input neurons and store signal
+            //Set input to input neurons
             for(int i = 0; i < input.Length; i++)
             {
                 _inputNeurons[i].Compute(input[i], updateStatistics);
             }
             //Perform computation cycles
-            int inputCycles = _settings.InputCodingFractions;
-            int compCycles = inputCycles + _settings.RefractoryCycles;
-            for (int cycle = 0; cycle < compCycles; cycle++)
+            for (int cycle = 0; cycle < _settings.InputDuration; cycle++)
             {
                 //Prepare input signal
-                if (cycle < inputCycles)
+                for (int i = 0; i < input.Length; i++)
                 {
-                    for (int i = 0; i < input.Length; i++)
-                    {
-                        if (_settings.InputCoding == CommonEnums.InputCodingType.SpikeTrain)
-                        {
-                            _inputNeurons[i].PrepareTransmissionSignal();
-                        }
-                    }
+                    _inputNeurons[i].PrepareTransmissionSignal();
                 }
-                //Compute all reservoir neurons and fill the array of output predictors
+                //Compute all reservoir neurons
                 Parallel.For(0, _neurons.Length, (neuronIdx) =>
                 {
                     //Input signal
                     double inputSignal = 0;
-                    if (cycle < inputCycles)
+                    //Signal from input neurons
+                    foreach (ISynapse synapse in _neuronInputConnectionsCollection[neuronIdx])
                     {
-                        //Signal from input neurons
-                        foreach (ISynapse synapse in _neuronInputConnectionsCollection[neuronIdx])
-                        {
-                            inputSignal += synapse.GetWeightedSignal();
-                        }
+                        inputSignal += synapse.GetWeightedSignal();
                     }
                     //Signal from reservoir neurons
                     double reservoirSignal = 0;

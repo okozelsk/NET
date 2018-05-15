@@ -6,26 +6,29 @@ using System.Threading.Tasks;
 
 namespace RCNet.Neural.Network.SM
 {
+    /// <summary>
+    /// Class converts recent spikes to a number representing weighted firing rate
+    /// </summary>
     [Serializable]
     class FiringRate
     {
-        private const int SpikeBuffLength = 32;
+        private const int SpikeBuffLength = sizeof(ulong) * 8;
 
         //Static members
-        private static double[] _spikeValueCache;
-        private static double _sumOfSpikeValues;
+        private static decimal[] _spikeValueCache;
+        private static decimal _sumOfSpikeValues;
 
         //Instance members
-        private uint _spikes;
+        private ulong _spikes;
 
         //Static constructor
         static FiringRate()
         {
-            _sumOfSpikeValues = 0d;
-            _spikeValueCache = new double[SpikeBuffLength];
+            _sumOfSpikeValues = 0;
+            _spikeValueCache = new decimal[SpikeBuffLength];
             for(int i = 0; i < SpikeBuffLength; i++)
             {
-                double val = Math.Exp(-i);
+                decimal val = (decimal)Math.Exp(-i);
                 _spikeValueCache[i] = val;
                 _sumOfSpikeValues += val;
             }
@@ -49,14 +52,17 @@ namespace RCNet.Neural.Network.SM
         public void Update(bool spike)
         {
             _spikes <<= 1;
-            _spikes |= (uint)(spike ? 0x0001 : 0x0000);
+            if (spike)
+            {
+                _spikes |= 1;
+            }
             return;
         }
 
         public double GetRate()
         {
-            double rate = 0;
-            uint localCopy = _spikes;
+            decimal rate = 0;
+            ulong localCopy = _spikes;
             for(int i = 0; i < SpikeBuffLength; i++)
             {
                 if((localCopy & 1) > 0)
@@ -66,7 +72,7 @@ namespace RCNet.Neural.Network.SM
                 localCopy >>= 1;
             }
             //Rescale between 0-1
-            return rate / _sumOfSpikeValues;
+            return (double)(rate / _sumOfSpikeValues);
         }
 
 

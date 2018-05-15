@@ -46,23 +46,29 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CsvTools\DelimitedStringValues.cs" />
+    <Compile Include="MathTools\Differential\AutonomousODE.cs" />
+    <Compile Include="MathTools\PhysUnit.cs" />
     <Compile Include="Neural\Activation\ActivationFactory.cs" />
     <Compile Include="Neural\Activation\ActivationSettings.cs" />
     <Compile Include="Neural\Activation\BentIdentity.cs" />
     <Compile Include="Neural\Activation\Elliot.cs" />
+    <Compile Include="Neural\Activation\AdExpIF.cs" />
+    <Compile Include="Neural\Activation\SpikingMembrane.cs" />
+    <Compile Include="Neural\Activation\LeakyIF.cs" />
     <Compile Include="Neural\Activation\Gaussian.cs" />
     <Compile Include="Neural\Activation\IActivationFunction.cs" />
     <Compile Include="Neural\Activation\Identity.cs" />
     <Compile Include="Neural\Activation\ISRU.cs" />
     <Compile Include="Neural\Activation\LeakyReLU.cs" />
     <Compile Include="Neural\Activation\Sigmoid.cs" />
+    <Compile Include="Neural\Activation\AdSimpleIF.cs" />
     <Compile Include="Neural\Activation\Sinc.cs" />
     <Compile Include="Neural\Activation\Sinusoid.cs" />
     <Compile Include="Neural\Activation\SoftExponential.cs" />
     <Compile Include="Neural\Activation\SoftPlus.cs" />
     <Compile Include="Neural\Activation\TanH.cs" />
     <Compile Include="Neural\Activation\ExpIF.cs" />
-    <Compile Include="Neural\Activation\LIF.cs" />
+    <Compile Include="Neural\Activation\SimpleIF.cs" />
     <Compile Include="Neural\Network\SM\FiringRate.cs" />
     <Compile Include="Neural\Network\SM\InputAnalogNeuron.cs" />
     <Compile Include="Neural\Network\SM\InputSpikingNeuron.cs" />

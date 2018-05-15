@@ -249,18 +249,18 @@ namespace RCNet.Neural.Network.FF
         /// It must be an instantiated empty collection.
         /// Function will add inputs for each network layer into the collection.
         /// </param>
-        /// <param name="flatDerivations">
+        /// <param name="flatDerivatives">
         /// It must be an allocated array of length = NumOfNeurons (flat structure).
-        /// Function will set the activation derivations into the array.
+        /// Function will set the activation derivatives into the array.
         /// </param>
         /// <returns>Computed output values</returns>
-        public double[] Compute(double[] input, List<double[]> layerInputCollection, double[] flatDerivations)
+        public double[] Compute(double[] input, List<double[]> layerInputCollection, double[] flatDerivatives)
         {
             double[] result = input;
             foreach (FeedForwardNetwork.Layer layer in _layerCollection)
             {
                 layerInputCollection.Add(result);
-                result = layer.Compute(result, _flatWeights, flatDerivations);
+                result = layer.Compute(result, _flatWeights, flatDerivatives);
             }
             return result;
         }
@@ -448,9 +448,9 @@ namespace RCNet.Neural.Network.FF
             /// </summary>
             /// <param name="inputs">The inputs for this layer</param>
             /// <param name="flatWeights">Network's weights in a flat structure</param>
-            /// <param name="flatDerivations">Network's neuron state derivations in a flat structure</param>
+            /// <param name="flatDerivatives">Network's neuron state derivatives in a flat structure</param>
             /// <returns>The layer's neurons states</returns>
-            internal double[] Compute(double[] inputs, double[] flatWeights, double[] flatDerivations = null)
+            internal double[] Compute(double[] inputs, double[] flatWeights, double[] flatDerivatives = null)
             {
                 double[] result = new double[NumOfLayerNeurons];
                 int weightFlatIdx = _weightsStartFlatIdx;
@@ -463,9 +463,9 @@ namespace RCNet.Neural.Network.FF
                         sum += flatWeights[weightFlatIdx] * inputs[inputIdx];
                     }
                     result[neuronIdx] = Activation.Compute(sum);
-                    if(flatDerivations != null)
+                    if(flatDerivatives != null)
                     {
-                        flatDerivations[_neuronsStartFlatIdx + neuronIdx] = Activation.Derive(result[neuronIdx], sum);
+                        flatDerivatives[_neuronsStartFlatIdx + neuronIdx] = Activation.ComputeDerivative(result[neuronIdx], sum);
                     }
                 }
                 return result;

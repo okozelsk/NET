@@ -9,9 +9,9 @@ using RCNet.MathTools;
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Implements Leaky Integrate and Fire neuron model
+    /// Implements simple form of Adaptiva Leaky Integrate and Fire neuron model
     /// </summary>
-    public class LIF : IActivationFunction
+    public class AdSimpleIF : IActivationFunction
     {
         //Constants
         private double SpikeCurrent = 1d;
@@ -27,36 +27,35 @@ namespace RCNet.Neural.Activation
         private double _membraneDecayRate;
         private double _restV;
         private double _resetV;
-        private double _firingTresholdV;
-        private int _refractoryPeriods;
+        private double _firingThresholdV;
+        private double _initialStimuliCoeff;
+        private double _stimuliCoeff;
 
         //Operation
         private double _membraneV;
-        private bool _inRefractory;
-        private int _refractoryPeriod;
 
         /// <summary>
         /// Constructs an initialized instance
         /// </summary>
         /// <param name="membraneResistance">Membrane resisatance in MOhm.</param>
         /// <param name="membraneDecayRate">Membrane potential decay</param>
-        /// <param name="absResetV">Reset voltage in mV (positive value)</param>
-        /// <param name="absFiringTresholdV">Firing treshold voltage in mV (positive value)</param>
-        /// <param name="refractoryPeriods">Number of after spike computation cycles, when is ignored input stimuli.</param>
-        public LIF(double membraneResistance,
-                   double membraneDecayRate,
-                   double absResetV,
-                   double absFiringTresholdV,
-                   double refractoryPeriods
-                   )
+        /// <param name="resetV">Reset voltage in mV (positive value)</param>
+        /// <param name="firingThresholdV">Firing threshold voltage in mV (positive value)</param>
+        /// <param name="initialStimuliCoeff"></param>
+        public AdSimpleIF(double membraneResistance,
+                          double membraneDecayRate,
+                          double resetV,
+                          double firingThresholdV,
+                          double initialStimuliCoeff
+                          )
         {
             _membraneResistance = membraneResistance;
             _membraneDecayRate = membraneDecayRate;
             _restV = 0;
-            _resetV = Math.Abs(absResetV);
-            _firingTresholdV = Math.Abs(absFiringTresholdV);
-            _refractoryPeriods = (int)Math.Round(refractoryPeriods, 0);
-            _stateRange = new Interval(_restV, _firingTresholdV);
+            _resetV = Math.Abs(resetV);
+            _firingThresholdV = Math.Abs(firingThresholdV);
+            _initialStimuliCoeff = initialStimuliCoeff;
+            _stateRange = new Interval(_restV, _firingThresholdV);
             Reset();
             return;
         }
@@ -78,9 +77,9 @@ namespace RCNet.Neural.Activation
         public Interval OutputRange { get { return _outputRange; } }
 
         /// <summary>
-        /// Specifies whether the activation function supports derivation
+        /// Specifies whether the activation function supports derivative
         /// </summary>
-        public bool SupportsDerivation { get { return false; } }
+        public bool SupportsDerivative { get { return false; } }
 
         /// <summary>
         /// Specifies whether the activation function is depending on its previous states
@@ -103,9 +102,8 @@ namespace RCNet.Neural.Activation
         /// </summary>
         public void Reset()
         {
+            _stimuliCoeff = _initialStimuliCoeff;
             _membraneV = _restV;
-            _inRefractory = false;
-            _refractoryPeriod = 0;
             return;
         }
 
@@ -115,50 +113,47 @@ namespace RCNet.Neural.Activation
         /// <param name="x">Argument</param>
         public double Compute(double x)
         {
-            x = x.Bound();
+            x = (x * _stimuliCoeff).Bound();
             double spike = 0;
-            if (_membraneV >= _firingTresholdV)
+            if (_membraneV >= _firingThresholdV)
             {
                 //Membrane potential after spike
                 _membraneV = _resetV;
-                _refractoryPeriod = 0;
-                _inRefractory = true;
-            }
-            if (_inRefractory)
-            {
-                ++_refractoryPeriod;
-                if (_refractoryPeriod > _refractoryPeriods)
-                {
-                    _refractoryPeriod = 0;
-                    _inRefractory = false;
-                }
-                else
-                {
-                    //Ignore input stimuli
-                    x = 0;
-                }
             }
             //Compute membrane new potential
-            _membraneV = _restV + (_membraneV - _restV) * (1d - _membraneDecayRate) + _membraneResistance * x;
+            double inputVoltage = _membraneResistance * x;
+            _membraneV = _restV + (_membraneV - _restV) * (1d - _membraneDecayRate) + inputVoltage;
+            //Adaptation
+            if (inputVoltage > 0)
+            {
+                if (inputVoltage >= (_firingThresholdV - _resetV) / 2)
+                {
+                    _stimuliCoeff *= 0.5;
+                }
+                else if (inputVoltage <= (_firingThresholdV - _resetV) * 0.25)
+                {
+                    _stimuliCoeff *= 1.1;
+                }
+            }
             //Output
-            if (_membraneV >= _firingTresholdV)
+            if (_membraneV >= _firingThresholdV)
             {
                 spike = SpikeCurrent;
-                _membraneV = _firingTresholdV;
+                _membraneV = _firingThresholdV;
             }
             return spike;
         }
 
         /// <summary>
-        /// Derive is unsupported functionality
+        /// Unsupported functionality
         /// </summary>
         /// <param name="c">The result of the Compute method</param>
         /// <param name="x">The argument of the Compute method</param>
-        public double Derive(double c = double.NaN, double x = double.NaN)
+        public double ComputeDerivative(double c = double.NaN, double x = double.NaN)
         {
-            throw new Exception("LIF does not support derivation");
+            throw new Exception("AdSimpleIF does not support ComputeDerivative");
         }
 
-    }//LIF
+    }//AdSimpleIF
 
 }//Namespace

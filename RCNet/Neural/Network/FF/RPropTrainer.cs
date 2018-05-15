@@ -203,21 +203,21 @@ namespace RCNet.Neural.Network.FF
                 double[] weigthsGradsAccInput = new double[_net.NumOfWeights];
                 weigthsGradsAccInput.Populate(0);
                 double[] neuronsGradients = new double[_net.NumOfNeurons];
-                double[] derivations = new double[_net.NumOfNeurons];
+                double[] derivatives = new double[_net.NumOfNeurons];
                 List<double[]> layersInputs = new List<double[]>(_net.LayerCollection.Count);
                 //Go parallely over all samples
                 for (int row = range.FromRow; row <= range.ToRow; row++)
                 {
-                    //Network computation (collect layers inputs and activation derivations)
+                    //Network computation (collect layers inputs and activation derivatives)
                     layersInputs.Clear();
-                    double[] computedOutputs = _net.Compute(_inputVectorCollection[row], layersInputs, derivations);
+                    double[] computedOutputs = _net.Compute(_inputVectorCollection[row], layersInputs, derivatives);
                     //Compute network neurons gradients
                     //Compute output layer gradients and update last error
                     FeedForwardNetwork.Layer outputLayer = _net.LayerCollection[_net.LayerCollection.Count - 1];
                     for (int neuronIdx = 0, outputLayerNeuronsFlatIdx = outputLayer.NeuronsStartFlatIdx; neuronIdx < outputLayer.NumOfLayerNeurons; neuronIdx++, outputLayerNeuronsFlatIdx++)
                     {
                         double error = _outputVectorCollection[row][neuronIdx] - computedOutputs[neuronIdx];
-                        neuronsGradients[outputLayerNeuronsFlatIdx] = derivations[outputLayerNeuronsFlatIdx] * error;
+                        neuronsGradients[outputLayerNeuronsFlatIdx] = derivatives[outputLayerNeuronsFlatIdx] * error;
                         //Accumulate error
                         sumOfErrSquares += error * error;
                     }
@@ -235,7 +235,7 @@ namespace RCNet.Neural.Network.FF
                                 int nextLayerWeightFlatIdx = nextLayer.WeightsStartFlatIdx + nextLayerNeuronIdx * nextLayer.NumOfInputNodes + currLayerNeuronIdx;
                                 sum += neuronsGradients[nextLayer.NeuronsStartFlatIdx + nextLayerNeuronIdx] * networkFlatWeights[nextLayerWeightFlatIdx];
                             }
-                            neuronsGradients[currLayerNeuronFlatIdx] = derivations[currLayerNeuronFlatIdx] * sum;
+                            neuronsGradients[currLayerNeuronFlatIdx] = derivatives[currLayerNeuronFlatIdx] * sum;
                         }
                     }
                     //Compute increments for gradients accumulator

@@ -120,7 +120,7 @@ namespace RCNet.Neural.Network.FF
             OutputLayerActivation = new ActivationSettings(feedForwardNetworkSettingsElem.Descendants("outputActivation").First());
             if(!IsAllowedActivation(OutputLayerActivation))
             {
-                throw new ApplicationException($"Activation {OutputLayerActivation.FunctionType} can't be used in FF network. Activation has to be time independent and has to support derivation.");
+                throw new ApplicationException($"Activation {OutputLayerActivation.FunctionType} can't be used in FF network. Activation has to be time independent and has to support derivative.");
             }
             RegressionMethod = ParseTrainingMethodType(feedForwardNetworkSettingsElem.Attribute("regressionMethod").Value);
             //Hidden layers
@@ -174,7 +174,7 @@ namespace RCNet.Neural.Network.FF
         public static bool IsAllowedActivation(ActivationSettings activationSettings)
         {
             IActivationFunction af = ActivationFactory.Create(activationSettings);
-            if(af.TimeDependent || !af.SupportsDerivation)
+            if(af.TimeDependent || !af.SupportsDerivative)
             {
                 return false;
             }
@@ -295,7 +295,7 @@ namespace RCNet.Neural.Network.FF
                 Activation = new ActivationSettings(elem.Descendants("activation").First());
                 if (!IsAllowedActivation(Activation))
                 {
-                    throw new ApplicationException($"Activation {Activation.FunctionType} can't be used in FF network. Activation has to be time independent and has to support derivation.");
+                    throw new ApplicationException($"Activation {Activation.FunctionType} can't be used in FF network. Activation has to be time independent and has to support derivative.");
                 }
                 return;
             }

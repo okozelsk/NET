@@ -151,15 +151,23 @@ namespace RCNet.DemoConsoleApp
                     ", Best-Train: " + bestReadoutUnit.TrainingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture) +
                                        (inArgs.TaskType == CommonEnums.TaskType.Classification ? "/" : string.Empty) +
                                        (inArgs.TaskType == CommonEnums.TaskType.Classification ? bestReadoutUnit.TrainingBinErrorStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture) : string.Empty) +
+                                       (inArgs.TaskType == CommonEnums.TaskType.Classification ? "/" : string.Empty) +
+                                       (inArgs.TaskType == CommonEnums.TaskType.Classification ? bestReadoutUnit.TrainingBinErrorStat.BinValErrStat[1].Sum.ToString(CultureInfo.InvariantCulture) : string.Empty) +
                     ", Best-Test: " + bestReadoutUnit.TestingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture) +
                                       (inArgs.TaskType == CommonEnums.TaskType.Classification ? "/" : string.Empty) +
                                       (inArgs.TaskType == CommonEnums.TaskType.Classification ? bestReadoutUnit.TestingBinErrorStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture) : string.Empty) +
+                                      (inArgs.TaskType == CommonEnums.TaskType.Classification ? "/" : string.Empty) +
+                                      (inArgs.TaskType == CommonEnums.TaskType.Classification ? bestReadoutUnit.TestingBinErrorStat.BinValErrStat[1].Sum.ToString(CultureInfo.InvariantCulture) : string.Empty) +
                     ", Curr-Train: " + inArgs.CurrReadoutUnit.TrainingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture) +
                                       (inArgs.TaskType == CommonEnums.TaskType.Classification ? "/" : string.Empty) +
                                       (inArgs.TaskType == CommonEnums.TaskType.Classification ? inArgs.CurrReadoutUnit.TrainingBinErrorStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture) : string.Empty) +
+                                      (inArgs.TaskType == CommonEnums.TaskType.Classification ? "/" : string.Empty) +
+                                      (inArgs.TaskType == CommonEnums.TaskType.Classification ? inArgs.CurrReadoutUnit.TrainingBinErrorStat.BinValErrStat[1].Sum.ToString(CultureInfo.InvariantCulture) : string.Empty) +
                     ", Curr-Test: " + inArgs.CurrReadoutUnit.TestingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture) +
                                       (inArgs.TaskType == CommonEnums.TaskType.Classification ? "/" : string.Empty) +
-                                      (inArgs.TaskType == CommonEnums.TaskType.Classification ? inArgs.CurrReadoutUnit.TestingBinErrorStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture) : string.Empty)
+                                      (inArgs.TaskType == CommonEnums.TaskType.Classification ? inArgs.CurrReadoutUnit.TestingBinErrorStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture) : string.Empty) +
+                                      (inArgs.TaskType == CommonEnums.TaskType.Classification ? "/" : string.Empty) +
+                                      (inArgs.TaskType == CommonEnums.TaskType.Classification ? inArgs.CurrReadoutUnit.TestingBinErrorStat.BinValErrStat[1].Sum.ToString(CultureInfo.InvariantCulture) : string.Empty)
                     , !(inArgs.Epoch == 1 && inArgs.RegrAttemptNumber == 1));
             }
             return outArgs;

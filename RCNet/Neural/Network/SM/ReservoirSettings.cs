@@ -31,14 +31,10 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         public CommonEnums.InputCodingType InputCoding { get; set; }
         /// <summary>
-        /// How many spikes will code the input value.
+        /// In case of analog input coding this specifies number of ms of the sustain analog signal.
+        /// In case of spike train coding thes specifies how many spikes code the input value (each spike takes 1 ms).
         /// </summary>
-        public int InputCodingFractions { get; set; }
-        /// <summary>
-        /// Specifies number of reservoir refractory cycles following each input cycle.
-        /// Refractory cycle is a computation cycle without external (input) stimuli.
-        /// </summary>
-        public int RefractoryCycles { get; set; }
+        public int InputDuration { get; set; }
         /// <summary>
         /// Spectral radius.
         /// </summary>
@@ -60,8 +56,7 @@ namespace RCNet.Neural.Network.SM
         {
             SettingsName = string.Empty;
             InputCoding = CommonEnums.InputCodingType.Analog;
-            InputCodingFractions = 0;
-            RefractoryCycles = 0;
+            InputDuration = 0;
             SpectralRadius = -1;
             PoolSettingsCollection = null;
             PoolsInterconnectionCollection = null;
@@ -76,8 +71,7 @@ namespace RCNet.Neural.Network.SM
         {
             SettingsName = source.SettingsName;
             InputCoding = source.InputCoding;
-            InputCodingFractions = source.InputCodingFractions;
-            RefractoryCycles = source.RefractoryCycles;
+            InputDuration = source.InputDuration;
             SpectralRadius = source.SpectralRadius;
             PoolSettingsCollection = null;
             if(source.PoolSettingsCollection != null)
@@ -119,8 +113,7 @@ namespace RCNet.Neural.Network.SM
             //Parsing
             SettingsName = reservoirSettingsElem.Attribute("name").Value;
             InputCoding = CommonEnums.ParseInputCodingType(reservoirSettingsElem.Attribute("inputCoding").Value);
-            InputCodingFractions = int.Parse(reservoirSettingsElem.Attribute("inputCodingFractions").Value, CultureInfo.InvariantCulture);
-            RefractoryCycles = int.Parse(reservoirSettingsElem.Attribute("refractoryCycles").Value, CultureInfo.InvariantCulture);
+            InputDuration = int.Parse(reservoirSettingsElem.Attribute("inputDuration").Value, CultureInfo.InvariantCulture);
             SpectralRadius = reservoirSettingsElem.Attribute("spectralRadius").Value == "NA" ? -1d : double.Parse(reservoirSettingsElem.Attribute("spectralRadius").Value, CultureInfo.InvariantCulture);
             //Pool settings collection
             PoolSettingsCollection = new List<PoolSettings>();
@@ -151,8 +144,7 @@ namespace RCNet.Neural.Network.SM
             ReservoirSettings cmpSettings = obj as ReservoirSettings;
             if (SettingsName != cmpSettings.SettingsName ||
                 InputCoding != cmpSettings.InputCoding ||
-                InputCodingFractions != cmpSettings.InputCodingFractions ||
-                RefractoryCycles != cmpSettings.RefractoryCycles ||
+                InputDuration != cmpSettings.InputDuration ||
                 SpectralRadius != cmpSettings.SpectralRadius ||
                 (PoolSettingsCollection == null && cmpSettings.PoolSettingsCollection != null) ||
                 (PoolSettingsCollection != null && cmpSettings.PoolSettingsCollection == null) ||

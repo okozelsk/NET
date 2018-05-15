@@ -13,6 +13,10 @@ namespace RCNet.DemoConsoleApp
     {
         static void Main(string[] args)
         {
+            //Research
+            Research r = new Research();
+            r.Run();
+
             try
             {
                 //Logging the output to a console

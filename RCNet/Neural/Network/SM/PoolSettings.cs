@@ -218,13 +218,13 @@ namespace RCNet.Neural.Network.SM
             XElement excitatoryElem = poolSettingsElem.Descendants("excitatory").First();
             ExcitatoryActivation = new ActivationSettings(excitatoryElem.Descendants("activation").First());
             ExcitatoryBias = new RandomValueSettings(excitatoryElem.Descendants("bias").First());
-            double excitatoryPortion = double.Parse(excitatoryElem.Attribute("portion").Value, CultureInfo.InvariantCulture);
+            double excitatoryRelShare = double.Parse(excitatoryElem.Attribute("relShare").Value, CultureInfo.InvariantCulture);
             //Inhibitory
             XElement inhibitoryElem = poolSettingsElem.Descendants("inhibitory").First();
             InhibitoryActivation = new ActivationSettings(inhibitoryElem.Descendants("activation").First());
             InhibitoryBias = new RandomValueSettings(inhibitoryElem.Descendants("bias").First());
-            double inhibitoryPortion = double.Parse(inhibitoryElem.Attribute("portion").Value, CultureInfo.InvariantCulture);
-            InhibitoryNeuronsDensity = inhibitoryPortion / (inhibitoryPortion + excitatoryPortion);
+            double inhibitoryRelShare = double.Parse(inhibitoryElem.Attribute("relShare").Value, CultureInfo.InvariantCulture);
+            InhibitoryNeuronsDensity = inhibitoryRelShare / (inhibitoryRelShare + excitatoryRelShare);
             //Interconnection
             XElement interconnectionElem = poolSettingsElem.Descendants("interconnection").First();
             InterconnectionDensity = double.Parse(interconnectionElem.Attribute("density").Value, CultureInfo.InvariantCulture);
