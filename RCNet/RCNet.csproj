@@ -50,11 +50,11 @@
     <Compile Include="MathTools\PhysUnit.cs" />
     <Compile Include="Neural\Activation\ActivationFactory.cs" />
     <Compile Include="Neural\Activation\ActivationSettings.cs" />
+    <Compile Include="Neural\Activation\AdExpIF.cs" />
     <Compile Include="Neural\Activation\BentIdentity.cs" />
     <Compile Include="Neural\Activation\Elliot.cs" />
-    <Compile Include="Neural\Activation\AdExpIF.cs" />
-    <Compile Include="Neural\Activation\SpikingMembrane.cs" />
     <Compile Include="Neural\Activation\LeakyIF.cs" />
+    <Compile Include="Neural\Activation\SpikingMembrane.cs" />
     <Compile Include="Neural\Activation\Gaussian.cs" />
     <Compile Include="Neural\Activation\IActivationFunction.cs" />
     <Compile Include="Neural\Activation\Identity.cs" />
