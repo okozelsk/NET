@@ -4,7 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using RCNet.Extensions;
-using RCNet.MathTools.Differential;
+using RCNet.MathTools;
+using RCNet.MathTools.VectorMath;
 
 namespace RCNet.Neural.Activation
 {
@@ -13,6 +14,8 @@ namespace RCNet.Neural.Activation
     /// </summary>
     public class AdExpIF : SpikingMembrane
     {
+        //Constants
+        protected const int VarAdaptationOmega = 1;
         //Attributes
         //Parameter attributes
         private double _membraneTimeScale;
@@ -23,8 +26,6 @@ namespace RCNet.Neural.Activation
         private double _adaptationTimeConstant;
         private double _spikeTriggeredAdaptationIncrement;
 
-        //Operation attributes
-        private double _adaptationOmega;
 
         /// <summary>
         /// Constructs an initialized instance
@@ -39,7 +40,7 @@ namespace RCNet.Neural.Activation
         /// <param name="adaptationVoltageCoupling">(nS)</param>
         /// <param name="adaptationTimeConstant">(ms)</param>
         /// <param name="spikeTriggeredAdaptationIncrement">(pA)</param>
-        /// <param name="stimuliCoeff"></param>
+        /// <param name="stimuliCoeff">(pA)</param>
         public AdExpIF(double membraneTimeScale,
                        double membraneResistance,
                        double restV,
@@ -52,17 +53,23 @@ namespace RCNet.Neural.Activation
                        double spikeTriggeredAdaptationIncrement,
                        double stimuliCoeff
                        )
-            : base(restV, resetV, firingThresholdV, 0, stimuliCoeff)
+            : base(PhysUnit.ToBase(restV, PhysUnit.QPrefix.Milli),
+                   PhysUnit.ToBase(resetV, PhysUnit.QPrefix.Milli),
+                   PhysUnit.ToBase(firingThresholdV, PhysUnit.QPrefix.Milli),
+                   0,
+                   PhysUnit.ToBase(stimuliCoeff, PhysUnit.QPrefix.Piko),
+                   PhysUnit.ToBase(1, PhysUnit.QPrefix.Milli),
+                   2,
+                   2)
         {
-            _membraneTimeScale = membraneTimeScale;
-            _membraneResistance = membraneResistance;
-            _rheobaseThresholdV = rheobaseThresholdV;
-            _sharpnessDeltaT = sharpnessDeltaT;
-            _adaptationVoltageCoupling = adaptationVoltageCoupling;
-            _adaptationTimeConstant = adaptationTimeConstant;
-            _spikeTriggeredAdaptationIncrement = spikeTriggeredAdaptationIncrement;
-            _stimuliCoeff = stimuliCoeff;
-            _adaptationOmega = 0;
+            _membraneTimeScale = PhysUnit.ToBase(membraneTimeScale, PhysUnit.QPrefix.Milli);
+            _membraneResistance = PhysUnit.ToBase(membraneResistance, PhysUnit.QPrefix.Mega);
+            _rheobaseThresholdV = PhysUnit.ToBase(rheobaseThresholdV, PhysUnit.QPrefix.Milli);
+            _sharpnessDeltaT = PhysUnit.ToBase(sharpnessDeltaT, PhysUnit.QPrefix.Milli);
+            _adaptationVoltageCoupling = PhysUnit.ToBase(adaptationVoltageCoupling, PhysUnit.QPrefix.Nano);
+            _adaptationTimeConstant = PhysUnit.ToBase(adaptationTimeConstant, PhysUnit.QPrefix.Milli);
+            _spikeTriggeredAdaptationIncrement = PhysUnit.ToBase(spikeTriggeredAdaptationIncrement, PhysUnit.QPrefix.Piko);
+            _evolVars[VarAdaptationOmega] = 0;
             return;
         }
 
@@ -73,57 +80,32 @@ namespace RCNet.Neural.Activation
         public override void Reset()
         {
             base.Reset();
-            _adaptationOmega = 0;
+            _evolVars[VarAdaptationOmega] = 0;
             return;
         }
 
-        /// <summary>
-        /// Computes the result of the activation function
-        /// </summary>
-        /// <param name="x">Argument</param>
-        public override double Compute(double x)
+        protected override Vector MembraneDiffEq(double t, Vector v)
         {
-            _stimuli = (x * _stimuliCoeff).Bound();
-            double output = 0;
-            if (_membraneV >= _firingThresholdV)
-            {
-                _membraneV = _resetV;
-            }
-            //Compute adaptation
-            _adaptationOmega = AutonomousODE.Solve(AdaptationDiffEq, _adaptationOmega, 1, 10, AutonomousODE.Method.Euler);
-            //Compute membrane new potential
-            _membraneV = AutonomousODE.Solve(MembraneVoltageDiffEq, _membraneV, 1, 10, AutonomousODE.Method.Euler);
-            //Output
-            if (_membraneV >= _firingThresholdV)
-            {
-                output = 1;
-                _membraneV = _firingThresholdV;
-                //Adaptation
-                _adaptationOmega += _spikeTriggeredAdaptationIncrement;
-            }
-            return output;
-        }
-
-        /// <summary>
-        /// Adaptive Exponential Integrate and Fire membrane differential equation
-        /// </summary>
-        /// <param name="membraneV">Membrane voltage</param>
-        protected override double MembraneVoltageDiffEq(double membraneV)
-        {
+            Vector dvdt = new Vector(2);
             //Ensure numerical stability
-            double exponent = Math.Min((membraneV - _rheobaseThresholdV) / _sharpnessDeltaT, 20);
-            return ((-(membraneV - _restV) + _sharpnessDeltaT * Math.Exp(exponent) - _membraneResistance * _adaptationOmega + _membraneResistance * _stimuli)) / (_membraneTimeScale);
+            double exponent = Math.Min((v[VarMembraneV] - _rheobaseThresholdV) / _sharpnessDeltaT, 20);
+            dvdt[VarMembraneV] = (- (v[VarMembraneV] - _restV)
+                                  + _sharpnessDeltaT * Math.Exp(exponent)
+                                  - _membraneResistance * _evolVars[VarAdaptationOmega]
+                                  + _membraneResistance * _stimuli
+                                  ) / _membraneTimeScale;
+            dvdt[VarAdaptationOmega] = ((_adaptationVoltageCoupling * (_evolVars[VarMembraneV]- _restV)
+                                        - v[VarAdaptationOmega])
+                                        ) / _adaptationTimeConstant;
+            return dvdt;
         }
 
-        /// <summary>
-        /// Adaptive Exponential Integrate and Fire adaptation differential equation
-        /// </summary>
-        /// <param name="adaptationOmega">Membrane current adaptation</param>
-        private double AdaptationDiffEq(double adaptationOmega)
+        protected override void OnFiring()
         {
-            return ((_adaptationVoltageCoupling * (_membraneV - _restV) - adaptationOmega)) / _adaptationTimeConstant;
-
+            _evolVars[VarAdaptationOmega] += _spikeTriggeredAdaptationIncrement;
+            return;
         }
+
 
     }//AdExpIF
 

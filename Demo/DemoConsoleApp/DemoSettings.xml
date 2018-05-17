@@ -1,71 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <demo dataFolder=".\\Data">
-  <!-- Modify/Tune existing or add your own cases -->
-  <case name="Classification task Libras Movement:  Single TanH reservoir, Parallel Perceptron">
-    <!-- Data converted from https://archive.ics.uci.edu/ml/datasets/Libras+Movement -->
-    <samples fileName="LibrasMovement.csv" singleNormalizer="false" normalizerReserve="0.1"/>
-    <stateMachineCfg taskType="Classification" randomizerSeek="0">
-      <inputFields routeToReadout="false">
-        <field name="coord_abcissa"/>
-        <field name="coord_ordinate"/>
-      </inputFields>
-      <reservoirCfgContainer>
-        <reservoirCfg name="Analog" inputCoding="Analog" inputDuration="1" spectralRadius="0.999">
-          <pools>
-            <pool instanceName="Analog pool" dimX="5" dimY="10" dimZ="6" routeToReadout="true">
-              <input connectionDensity="1">
-                <weight min="0" max="0.7" randomSign="false" distribution="Uniform"/>
-              </input>
-              <excitatory relShare="1">
-                <activation function="TanH"/>
-                <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-              </excitatory>
-              <inhibitory relShare="1">
-                <activation function="TanH"/>
-                <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-              </inhibitory>
-              <interconnection density="0.1" avgDistance="NA" allowSelfConnection="true">
-                <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
-              </interconnection>
-              <retainmentNeurons density="0.5" retainmentMinRate="0" retainmentMaxRate="0.5"/>
-            </pool>
-          </pools>
-        </reservoirCfg>
-      </reservoirCfgContainer>
-      <reservoirInstanceContainer>
-        <reservoirInstance name="Experimental" cfg="Analog" augmentedStates="false">
-          <inputFields>
-            <field name="coord_abcissa"/>
-            <field name="coord_ordinate"/>
-          </inputFields>
-        </reservoirInstance>
-      </reservoirInstanceContainer>
-      <readoutLayer testDataRatio="0.25" folds="Auto">
-        <readoutUnit attempts="20" attemptEpochs="1000">
-          <pp gates="3" resolution="2">
-            <pDeltaRuleTrainer iniLR="0.01" incLR="1.1" decLR="0.5" minLR="1e-4" maxLR="0.1"/>
-          </pp>
-        </readoutUnit>
-        <outputFields>
-          <field name="curved swing"/>
-          <field name="horizontal swing"/>
-          <field name="vertical swing"/>
-          <field name="anti-clockwise arc"/>
-          <field name="clockwise arc"/>
-          <field name="circle"/>
-          <field name="horizontal straight-line"/>
-          <field name="vertical straight-line"/>
-          <field name="horizontal zigzag"/>
-          <field name="vertical zigzag"/>
-          <field name="horizontal wavy"/>
-          <field name="vertical wavy"/>
-          <field name="face-up curve"/>
-          <field name="face-down curve"/>
-          <field name="tremble"/>
-        </outputFields>
-      </readoutLayer>
-    </stateMachineCfg>
-  </case>
   <case name="Classification task Libras Movement:  Single AdSimpleIF spiking reservoir, Parallel Perceptron">
     <!-- Data converted from https://archive.ics.uci.edu/ml/datasets/Libras+Movement -->
     <samples fileName="LibrasMovement.csv" singleNormalizer="false" normalizerReserve="0.1"/>
@@ -169,7 +103,7 @@
                             arg8="0.5"
                             arg9="100"
                             arg10="7"
-                            arg11="7.5"
+                            arg11="200"
                             />
                 <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
               </excitatory>
@@ -185,7 +119,7 @@
                             arg8="0.5"
                             arg9="100"
                             arg10="7"
-                            arg11="7.5"
+                            arg11="200"
                             />
                 <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
               </inhibitory>
@@ -206,6 +140,72 @@
       </reservoirInstanceContainer>
       <readoutLayer testDataRatio="0.25" folds="Auto">
         <readoutUnit attempts="20" attemptEpochs="300">
+          <pp gates="3" resolution="2">
+            <pDeltaRuleTrainer iniLR="0.01" incLR="1.1" decLR="0.5" minLR="1e-4" maxLR="0.1"/>
+          </pp>
+        </readoutUnit>
+        <outputFields>
+          <field name="curved swing"/>
+          <field name="horizontal swing"/>
+          <field name="vertical swing"/>
+          <field name="anti-clockwise arc"/>
+          <field name="clockwise arc"/>
+          <field name="circle"/>
+          <field name="horizontal straight-line"/>
+          <field name="vertical straight-line"/>
+          <field name="horizontal zigzag"/>
+          <field name="vertical zigzag"/>
+          <field name="horizontal wavy"/>
+          <field name="vertical wavy"/>
+          <field name="face-up curve"/>
+          <field name="face-down curve"/>
+          <field name="tremble"/>
+        </outputFields>
+      </readoutLayer>
+    </stateMachineCfg>
+  </case>
+  <!-- Modify/Tune existing or add your own cases -->
+  <case name="Classification task Libras Movement:  Single TanH reservoir, Parallel Perceptron">
+    <!-- Data converted from https://archive.ics.uci.edu/ml/datasets/Libras+Movement -->
+    <samples fileName="LibrasMovement.csv" singleNormalizer="false" normalizerReserve="0.1"/>
+    <stateMachineCfg taskType="Classification" randomizerSeek="0">
+      <inputFields routeToReadout="false">
+        <field name="coord_abcissa"/>
+        <field name="coord_ordinate"/>
+      </inputFields>
+      <reservoirCfgContainer>
+        <reservoirCfg name="Analog" inputCoding="Analog" inputDuration="1" spectralRadius="0.999">
+          <pools>
+            <pool instanceName="Analog pool" dimX="5" dimY="10" dimZ="6" routeToReadout="true">
+              <input connectionDensity="1">
+                <weight min="0" max="0.7" randomSign="false" distribution="Uniform"/>
+              </input>
+              <excitatory relShare="1">
+                <activation function="TanH"/>
+                <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
+              </excitatory>
+              <inhibitory relShare="1">
+                <activation function="TanH"/>
+                <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
+              </inhibitory>
+              <interconnection density="0.1" avgDistance="NA" allowSelfConnection="true">
+                <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
+              </interconnection>
+              <retainmentNeurons density="0.5" retainmentMinRate="0" retainmentMaxRate="0.5"/>
+            </pool>
+          </pools>
+        </reservoirCfg>
+      </reservoirCfgContainer>
+      <reservoirInstanceContainer>
+        <reservoirInstance name="Experimental" cfg="Analog" augmentedStates="false">
+          <inputFields>
+            <field name="coord_abcissa"/>
+            <field name="coord_ordinate"/>
+          </inputFields>
+        </reservoirInstance>
+      </reservoirInstanceContainer>
+      <readoutLayer testDataRatio="0.25" folds="Auto">
+        <readoutUnit attempts="20" attemptEpochs="1000">
           <pp gates="3" resolution="2">
             <pDeltaRuleTrainer iniLR="0.01" incLR="1.1" decLR="0.5" minLR="1e-4" maxLR="0.1"/>
           </pp>

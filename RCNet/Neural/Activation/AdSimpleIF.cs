@@ -9,7 +9,7 @@ using RCNet.MathTools;
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Implements simple form of Adaptiva Leaky Integrate and Fire neuron model
+    /// Implements simple form of Adaptive Leaky Integrate and Fire neuron model
     /// </summary>
     public class AdSimpleIF : IActivationFunction
     {

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using RCNet.Extensions;
 using RCNet.MathTools;
 using RCNet.MathTools.Differential;
+using RCNet.MathTools.VectorMath;
 
 namespace RCNet.Neural.Activation
 {
@@ -15,6 +16,8 @@ namespace RCNet.Neural.Activation
     [Serializable]
     public abstract class SpikingMembrane : IActivationFunction
     {
+        //Constants
+        protected const int VarMembraneV = 0;
         //Attributes
         //Static working ranges
         protected static readonly Interval _inputRange = new Interval(double.NegativeInfinity.Bound(), double.PositiveInfinity.Bound());
@@ -27,9 +30,11 @@ namespace RCNet.Neural.Activation
         protected double _firingThresholdV;
         protected int _refractoryPeriods;
         protected double _stimuliCoeff;
+        protected double _timeStep;
+        protected int _subSteps;
 
         //Operation attributes
-        protected double _membraneV;
+        protected Vector _evolVars;
         protected bool _inRefractory;
         protected int _refractoryPeriod;
         protected double _stimuli;
@@ -37,16 +42,22 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Constructs an initialized instance
         /// </summary>
-        /// <param name="restV">Membrane rest voltage (mV)</param>
-        /// <param name="resetV">Membrane reset voltage (mV)</param>
-        /// <param name="firingThresholdV">Firing threshold (mV)</param>
-        /// <param name="refractoryPeriods">Refractory periods (ms)</param>
-        /// <param name="stimuliCoeff">Input stimuli coefficient (dimensionless)</param>
+        /// <param name="restV">Membrane rest voltage</param>
+        /// <param name="resetV">Membrane reset voltage</param>
+        /// <param name="firingThresholdV">Firing threshold</param>
+        /// <param name="refractoryPeriods">Refractory periods</param>
+        /// <param name="stimuliCoeff">Input stimuli coefficient</param>
+        /// <param name="timeStep">Time step of Compute method</param>
+        /// <param name="subSteps">Computation sub-steps of timeStep</param>
+        /// <param name="numOfEvolvingVars">Number of evolving variables</param>
         protected SpikingMembrane(double restV,
                                   double resetV,
                                   double firingThresholdV,
                                   double refractoryPeriods,
-                                  double stimuliCoeff
+                                  double stimuliCoeff,
+                                  double timeStep,
+                                  int subSteps,
+                                  int numOfEvolvingVars
                                   )
         {
             _restV = restV;
@@ -55,7 +66,10 @@ namespace RCNet.Neural.Activation
             _refractoryPeriods = (int)refractoryPeriods;
             _stimuliCoeff = stimuliCoeff;
             _stateRange = new Interval(_restV, _firingThresholdV);
-            _membraneV = _restV;
+            _evolVars = new Vector(numOfEvolvingVars);
+            _timeStep = timeStep;
+            _subSteps = subSteps;
+            _evolVars[VarMembraneV] = _restV;
             _inRefractory = false;
             _refractoryPeriod = 0;
             return;
@@ -95,7 +109,7 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Internal state
         /// </summary>
-        public double InternalState { get { return _membraneV; } }
+        public double InternalState { get { return _evolVars[VarMembraneV]; } }
 
         //Methods
         /// <summary>
@@ -103,7 +117,7 @@ namespace RCNet.Neural.Activation
         /// </summary>
         public virtual void Reset()
         {
-            _membraneV = _restV;
+            _evolVars[VarMembraneV] = _restV;
             _inRefractory = false;
             _refractoryPeriod = 0;
             return;
@@ -112,14 +126,14 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Computes the result of the activation function
         /// </summary>
-        /// <param name="x">Argument</param>
+        /// <param name="x">Input current</param>
         public virtual double Compute(double x)
         {
             _stimuli = (x * _stimuliCoeff).Bound();
             double output = 0;
-            if (_membraneV >= _firingThresholdV)
+            if (_evolVars[VarMembraneV] >= _firingThresholdV)
             {
-                _membraneV = _resetV;
+                _evolVars[VarMembraneV] = _resetV;
                 _refractoryPeriod = 0;
                 _inRefractory = true;
             }
@@ -137,18 +151,28 @@ namespace RCNet.Neural.Activation
                     _stimuli = 0;
                 }
             }
-            //Compute membrane potential
-            _membraneV = AutonomousODE.Solve(MembraneVoltageDiffEq, _membraneV, 1, 10, AutonomousODE.Method.Euler);
-            //Output
-            if (_membraneV >= _firingThresholdV)
+            //Compute membrane new potential
+            foreach(ODENumSolver.Estimation subResult in ODENumSolver.Solve(MembraneDiffEq, 0, _evolVars, _timeStep, _subSteps, ODENumSolver.Method.Euler))
             {
+                _evolVars = subResult.V;
+                if(_evolVars[VarMembraneV] >= _firingThresholdV)
+                {
+                    break;
+                }
+            }
+            //Output
+            if (_evolVars[VarMembraneV] >= _firingThresholdV)
+            {
+                OnFiring();
                 output = 1;
-                _membraneV = _firingThresholdV;
+                _evolVars[VarMembraneV] = _firingThresholdV;
             }
             return output;
         }
 
-        protected abstract double MembraneVoltageDiffEq(double membraneV);
+        protected abstract Vector MembraneDiffEq(double t, Vector v);
+
+        protected abstract void OnFiring();
 
         /// <summary>
         /// Unsupported functionality

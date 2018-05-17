@@ -9,6 +9,7 @@ using RCNet.Extensions;
 using RCNet.MathTools;
 using RCNet.Neural.Network.SM;
 using RCNet.MathTools.Differential;
+using RCNet.MathTools.VectorMath;
 
 namespace RCNet.DemoConsoleApp
 {
@@ -32,7 +33,7 @@ namespace RCNet.DemoConsoleApp
                                                  -65,
                                                  -50,
                                                  0,
-                                                 4.5
+                                                 5.5
                                                  );
             IActivationFunction af = new ExpIF(12,
                                                20,
@@ -42,7 +43,7 @@ namespace RCNet.DemoConsoleApp
                                                -30,
                                                2,
                                                0,
-                                               1
+                                               4.5
                                                );
             IActivationFunction af = new AdSimpleIF(15,
                                                     0.05,
@@ -60,23 +61,17 @@ namespace RCNet.DemoConsoleApp
                                                  0.5,
                                                  100,
                                                  7,
-                                                 7.5
+                                                 200
                                                  );
             */
-            IActivationFunction af = new AdExpIF(5,
-                                                 500,
-                                                 -70,
-                                                 -51,
-                                                 -50,
-                                                 -30,
-                                                 2,
-                                                 0.5,
-                                                 100,
-                                                 0.007,
-                                                 1
-                                                 );
-            TestActivation(af, 800, 0.065, 10, 190);
-            TestDEq();
+            //TestDEq();
+            IActivationFunction af = new AdSimpleIF(15,
+                                                    0.1,
+                                                    5,
+                                                    20,
+                                                    1
+                                                    );
+            TestActivation(af, 800, double.NaN, 10, 190);
             return;
         }
 
@@ -104,21 +99,25 @@ namespace RCNet.DemoConsoleApp
 
         private void TestDEq()
         {
-            double v = 5;
+            Vector v = new Vector(1);
+            v[0] = 5;
             double time = 0;
             double timeStep = 0.001d;
             for (int i = 0; i < 100; i++)
             {
-                v = AutonomousODE.Solve(DEq, v, timeStep, 10, AutonomousODE.Method.Euler);
+                foreach(ODENumSolver.Estimation subResult in ODENumSolver.Solve(DEq, time, v, timeStep, 10, ODENumSolver.Method.Euler))
+                {
+                    v = subResult.V;
+                }
                 time += timeStep;
-                Console.WriteLine($"{time}, v = {v}");
+                Console.WriteLine($"{time}, v = {v[0]}");
             }
             Console.ReadLine();
             return;
         }
 
 
-        private double DEq(double v)
+        private Vector DEq(double t, Vector v)
         {
             return v;
         }

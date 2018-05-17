@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using RCNet.Extensions;
-using RCNet.MathTools;
+using RCNet.MathTools.VectorMath;
 
 namespace RCNet.Neural.Activation
 {
@@ -36,7 +36,7 @@ namespace RCNet.Neural.Activation
                        double refractoryPeriods,
                        double stimuliCoeff
                        )
-            : base(resetV, resetV, firingThresholdV, refractoryPeriods, stimuliCoeff)
+            : base(restV, resetV, firingThresholdV, refractoryPeriods, stimuliCoeff, 1, 10, 1)
         {
             _membraneTimeScale = membraneTimeScale;
             _membraneResistance = membraneResistance;
@@ -44,14 +44,17 @@ namespace RCNet.Neural.Activation
         }
 
         //Methods
-        /// <summary>
-        /// Exponential Integrate and Fire differential equation
-        /// </summary>
-        /// <param name="membraneV">Membrane voltage</param>
-        protected override double MembraneVoltageDiffEq(double membraneV)
+        protected override Vector MembraneDiffEq(double t, Vector v)
         {
-            return (-(membraneV - _restV) + _membraneResistance * _stimuli) / _membraneTimeScale;
+            Vector dvdt = new Vector(1);
+            dvdt[VarMembraneV] = (-(v[VarMembraneV] - _restV) + _membraneResistance * _stimuli) / _membraneTimeScale;
+            return dvdt;
+        }
 
+        protected override void OnFiring()
+        {
+            //Does nothing
+            return;
         }
 
     }//LeakyIF

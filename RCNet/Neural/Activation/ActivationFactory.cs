@@ -124,11 +124,11 @@ namespace RCNet.Neural.Activation
                                        double.IsNaN(settings.Arg8) ? 0.5 : settings.Arg8, //adaptationVoltageCoupling (nS)
                                        double.IsNaN(settings.Arg9) ? 100 : settings.Arg9, //adaptationTimeConstant (ms)
                                        double.IsNaN(settings.Arg10) ? 7 : settings.Arg10, //spikeTriggeredAdaptationIncrement (pA)
-                                       double.IsNaN(settings.Arg11) ? 7.5 : settings.Arg11 //stimuliCoeff
+                                       double.IsNaN(settings.Arg11) ? 200 : settings.Arg11 //stimuliCoeff (pA)
                                        );
                 case Function.AdSimpleIF:
                     return new AdSimpleIF(double.IsNaN(settings.Arg1) ? 15 : settings.Arg1, //membraneResistance (MOhm)
-                                          double.IsNaN(settings.Arg2) ? 0.05 : settings.Arg2, //membrane decay rate
+                                          double.IsNaN(settings.Arg2) ? 0.1 : settings.Arg2, //membrane decay rate
                                           double.IsNaN(settings.Arg3) ? 5 : settings.Arg3, //resetV (mV)
                                           double.IsNaN(settings.Arg4) ? 20 : settings.Arg4, //firingThresholdV (mV)
                                           double.IsNaN(settings.Arg5) ? 1 : settings.Arg5 //initial stimuli coeff
