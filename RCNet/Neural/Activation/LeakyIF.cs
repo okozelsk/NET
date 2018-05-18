@@ -10,6 +10,7 @@ namespace RCNet.Neural.Activation
 {
     /// <summary>
     /// Implements Leaky Integrate and Fire neuron model.
+    /// For more information visit http://neuronaldynamics.epfl.ch/online/Ch1.S3.html
     /// </summary>
     [Serializable]
     public class LeakyIF : ODESpikingMembrane

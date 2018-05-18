@@ -86,16 +86,16 @@ namespace RCNet.Neural.Activation
         };
 
         /// <summary>
-        /// Activation function output
+        /// Activation function output signal
         /// </summary>
-        public enum FunctionOutputType
+        public enum FunctionOutputSignalType
         {
             /// <summary>
-            /// Function spikes
+            /// Function fires spikes when firing condition is met
             /// </summary>
             Spike,
             /// <summary>
-            /// Function has analog output
+            /// Function has continuous analog output
             /// </summary>
             Analog
         };
@@ -106,10 +106,7 @@ namespace RCNet.Neural.Activation
         /// <param name="settings">
         /// Specific activation settings
         /// </param>
-        /// <param name="rand">
-        /// Random generator
-        /// </param>
-        public static IActivationFunction Create(ActivationSettings settings, Random rand = null)
+        public static IActivationFunction Create(ActivationSettings settings)
         {
             switch (settings.FunctionType)
             {

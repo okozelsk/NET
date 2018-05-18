@@ -11,6 +11,7 @@ namespace RCNet.Neural.Activation
 {
     /// <summary>
     /// Implements Adaptive Exponential Integrate and Fire neuron model.
+    /// For more information visit http://neuronaldynamics.epfl.ch/online/Ch6.S1.html
     /// </summary>
     [Serializable]
     public class AdExpIF : ODESpikingMembrane
@@ -90,7 +91,7 @@ namespace RCNet.Neural.Activation
         /// AdExpIF couple of autonomous ordinary differential equations.
         /// </summary>
         /// <param name="t">Time. Not used in autonomous ODE.</param>
-        /// <param name="v">Membrane potential and Adaptation omega vector</param>
+        /// <param name="v">Membrane potential and Adaptation omega.</param>
         /// <returns>dvdt</returns>
         protected override Vector MembraneDiffEq(double t, Vector v)
         {
@@ -109,7 +110,7 @@ namespace RCNet.Neural.Activation
         }
 
         /// <summary>
-        /// Increments adaptation omega.
+        /// When firing, adjusts (increments) the adaptation omega.
         /// </summary>
         protected override void OnFiring()
         {

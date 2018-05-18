@@ -67,6 +67,7 @@
     <Compile Include="Neural\Activation\Sinusoid.cs" />
     <Compile Include="Neural\Activation\SoftExponential.cs" />
     <Compile Include="Neural\Activation\SoftPlus.cs" />
+    <Compile Include="Neural\Activation\AnalogActivationFunction.cs" />
     <Compile Include="Neural\Activation\TanH.cs" />
     <Compile Include="Neural\Activation\ExpIF.cs" />
     <Compile Include="Neural\Activation\SimpleIF.cs" />

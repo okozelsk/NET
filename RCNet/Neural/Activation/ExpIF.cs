@@ -10,6 +10,7 @@ namespace RCNet.Neural.Activation
 {
     /// <summary>
     /// Implements Exponential Integrate and Fire neuron model.
+    /// For more information visit http://neuronaldynamics.epfl.ch/online/Ch5.S2.html
     /// </summary>
     [Serializable]
     public class ExpIF : ODESpikingMembrane

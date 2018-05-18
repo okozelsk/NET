@@ -145,17 +145,17 @@ namespace RCNet.Neural.Network.SM
                             if (sigTypes[neuronPoolIdx] == CommonEnums.NeuronSignalType.Excitatory)
                             {
                                 //Activation and bias for Excitatory neuron
-                                activation = ActivationFactory.Create(poolSettings.ExcitatoryActivation, _rand);
+                                activation = ActivationFactory.Create(poolSettings.ExcitatoryActivation);
                                 bias = _rand.NextDouble(poolSettings.ExcitatoryBias.Min, poolSettings.ExcitatoryBias.Max, poolSettings.ExcitatoryBias.RandomSign, poolSettings.ExcitatoryBias.DistrType);
                             }
                             else
                             {
                                 //Activation and bias for Inhibitory neuron
-                                activation = ActivationFactory.Create(poolSettings.InhibitoryActivation, _rand);
+                                activation = ActivationFactory.Create(poolSettings.InhibitoryActivation);
                                 bias = _rand.NextDouble(poolSettings.InhibitoryBias.Min, poolSettings.InhibitoryBias.Max, poolSettings.InhibitoryBias.RandomSign, poolSettings.InhibitoryBias.DistrType);
                             }
                             //Neuron instance
-                            if (activation.OutputType == ActivationFactory.FunctionOutputType.Spike)
+                            if (activation.OutputSignalType == ActivationFactory.FunctionOutputSignalType.Spike)
                             {
                                 //Spiking neuron
                                 poolNeurons[neuronPoolIdx] = new ReservoirSpikingNeuron(placement,

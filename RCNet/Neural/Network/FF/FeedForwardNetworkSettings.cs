@@ -174,7 +174,7 @@ namespace RCNet.Neural.Network.FF
         public static bool IsAllowedActivation(ActivationSettings activationSettings)
         {
             IActivationFunction af = ActivationFactory.Create(activationSettings);
-            if(af.TimeDependent || !af.SupportsDerivative)
+            if(!af.Stateless || !af.SupportsComputeDerivativeMethod)
             {
                 return false;
             }

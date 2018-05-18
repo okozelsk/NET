@@ -11,7 +11,7 @@ using RCNet.MathTools.VectorMath;
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Base class for spiking neuron models using ODE(s).
+    /// Base class for spiking neuron models using ODE (Ordinary Differential Equation(s)) driving membrane state evolution.
     /// </summary>
     [Serializable]
     public abstract class ODESpikingMembrane : IActivationFunction
@@ -21,8 +21,6 @@ namespace RCNet.Neural.Activation
         protected const int VarMembraneV = 0;
 
         //Attributes
-        //Static working ranges
-        protected static readonly Interval _inputRange = new Interval(double.NegativeInfinity.Bound(), double.PositiveInfinity.Bound());
         protected static readonly Interval _outputRange = new Interval(0, 1);
 
         //Parameter attributes
@@ -53,14 +51,14 @@ namespace RCNet.Neural.Activation
         /// <param name="subSteps">Computation sub-steps of timeStep</param>
         /// <param name="numOfEvolvingVars">Number of evolving variables</param>
         protected ODESpikingMembrane(double restV,
-                                  double resetV,
-                                  double firingThresholdV,
-                                  double refractoryPeriods,
-                                  double stimuliCoeff,
-                                  double timeStep,
-                                  int subSteps,
-                                  int numOfEvolvingVars
-                                  )
+                                     double resetV,
+                                     double firingThresholdV,
+                                     double refractoryPeriods,
+                                     double stimuliCoeff,
+                                     double timeStep,
+                                     int subSteps,
+                                     int numOfEvolvingVars
+                                     )
         {
             _restV = restV;
             _resetV = resetV;
@@ -81,30 +79,25 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Type of the output
         /// </summary>
-        public ActivationFactory.FunctionOutputType OutputType { get { return ActivationFactory.FunctionOutputType.Spike; } }
-
-        /// <summary>
-        /// Accepted input signal range
-        /// </summary>
-        public Interval InputRange { get { return _inputRange; } }
+        public ActivationFactory.FunctionOutputSignalType OutputSignalType { get { return ActivationFactory.FunctionOutputSignalType.Spike; } }
 
         /// <summary>
         /// Output signal range
         /// </summary>
-        public Interval OutputRange { get { return _outputRange; } }
+        public Interval OutputSignalRange { get { return _outputRange; } }
 
         /// <summary>
-        /// Specifies whether the activation function supports derivative
+        /// Specifies whether the activation function supports derivative calculation
         /// </summary>
-        public bool SupportsDerivative { get { return false; } }
+        public bool SupportsComputeDerivativeMethod { get { return false; } }
 
         /// <summary>
-        /// Specifies whether the activation function is depending on its previous states
+        /// Specifies whether the activation function is independent on its previous states
         /// </summary>
-        public bool TimeDependent { get { return true; } }
+        public bool Stateless { get { return false; } }
 
         /// <summary>
-        /// Range of the internal state
+        /// Normal range of the internal state
         /// </summary>
         public Interval InternalStateRange { get { return _stateRange; } }
 
@@ -115,7 +108,7 @@ namespace RCNet.Neural.Activation
 
         //Methods
         /// <summary>
-        /// Resets membrane to initial state
+        /// Resets function to its initial state
         /// </summary>
         public virtual void Reset()
         {
@@ -126,9 +119,10 @@ namespace RCNet.Neural.Activation
         }
 
         /// <summary>
-        /// Computes the result of the activation function
+        /// Updates state of the membrane according to an input stimuli and when the firing
+        /// condition is met, it produces a spike
         /// </summary>
-        /// <param name="x">Input current</param>
+        /// <param name="x">Input stimuli (interpreted as an electric current)</param>
         public virtual double Compute(double x)
         {
             _stimuli = (x * _stimuliCoeff).Bound();
@@ -173,7 +167,7 @@ namespace RCNet.Neural.Activation
         }
 
         /// <summary>
-        /// Ordinary differential equation(s) evolving membrane variable(s)
+        /// Ordinary differential equation(s) evolving membrane's variable(s)
         /// </summary>
         /// <param name="t">Time</param>
         /// <param name="v">Vector of membrane variables</param>
@@ -181,7 +175,7 @@ namespace RCNet.Neural.Activation
         protected abstract Vector MembraneDiffEq(double t, Vector v);
 
         /// <summary>
-        /// Triggered on membrane firing a spike
+        /// Triggered when membrane is firing a spike
         /// </summary>
         protected virtual void OnFiring()
         {
@@ -190,16 +184,16 @@ namespace RCNet.Neural.Activation
         }
 
         /// <summary>
-        /// Unsupported functionality
+        /// Unsupported functionality!!!
+        /// Computes derivative of the activation input (does not change internal state)
         /// </summary>
-        /// <param name="c">The result of the Compute method</param>
-        /// <param name="x">The argument of the Compute method</param>
-        public double ComputeDerivative(double c = double.NaN, double x = double.NaN)
+        /// <param name="c">The result of the activation (Compute method)</param>
+        /// <param name="x">Activation input (x argument of the Compute method)</param>
+        public double ComputeDerivative(double c, double x)
         {
             throw new NotImplementedException("ComputeDerivative is unsupported method in case of spiking activation.");
         }
 
-
-    }//SpikingMembrane
+    }//ODESpikingMembrane
 
 }//Namespace

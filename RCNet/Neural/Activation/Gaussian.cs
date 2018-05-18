@@ -8,76 +8,38 @@ namespace RCNet.Neural.Activation
     /// Gaussian activation function
     /// </summary>
     [Serializable]
-    public class Gaussian : IActivationFunction
+    public class Gaussian : AnalogActivationFunction
     {
         //Attributes
-        //Static working ranges
-        private static readonly Interval _inputRange = new Interval(double.NegativeInfinity.Bound(), double.PositiveInfinity.Bound());
         private static readonly Interval _outputRange = new Interval(0, 1);
-        //Internal state
-        private double _state;
 
         //Constructor
         /// <summary>
         /// Instantiates Gaussian activation function
         /// </summary>
         public Gaussian()
+            :base()
         {
-            Reset();
             return;
         }
 
         //Properties
         /// <summary>
-        /// Type of the output
-        /// </summary>
-        public ActivationFactory.FunctionOutputType OutputType { get { return ActivationFactory.FunctionOutputType.Analog; } }
-
-        /// <summary>
-        /// Accepted input signal range
-        /// </summary>
-        public Interval InputRange { get { return _inputRange; } }
-
-        /// <summary>
         /// Output signal range
         /// </summary>
-        public Interval OutputRange { get { return _outputRange; } }
+        public override Interval OutputSignalRange { get { return _outputRange; } }
 
         /// <summary>
-        /// Specifies whether the activation function supports derivative
+        /// Normal range of the internal state
         /// </summary>
-        public bool SupportsDerivative { get { return true; } }
-
-        /// <summary>
-        /// Specifies whether the activation function is depending on its previous states
-        /// </summary>
-        public bool TimeDependent { get { return false; } }
-
-        /// <summary>
-        /// Range of the internal state
-        /// </summary>
-        public Interval InternalStateRange { get { return _outputRange; } }
-
-        /// <summary>
-        /// Internal state
-        /// </summary>
-        public double InternalState { get { return _state; } }
+        public override Interval InternalStateRange { get { return _outputRange; } }
 
         //Methods
         /// <summary>
-        /// Resets function to initial state
+        /// Computes output of the activation function (changes internal state)
         /// </summary>
-        public void Reset()
-        {
-            _state = 0;
-            return;
-        }
-
-        /// <summary>
-        /// Computes the result of the activation function
-        /// </summary>
-        /// <param name="x">Argument</param>
-        public double Compute(double x)
+        /// <param name="x">Activation input</param>
+        public override double Compute(double x)
         {
             x = x.Bound();
             _state = (Math.Exp(-(x.Power(2)))).Bound();
@@ -85,11 +47,11 @@ namespace RCNet.Neural.Activation
         }
 
         /// <summary>
-        /// Computes derivative
+        /// Computes derivative of the activation input (does not change internal state)
         /// </summary>
-        /// <param name="c">The result of the Compute method</param>
-        /// <param name="x">The argument of the Compute method</param>
-        public double ComputeDerivative(double c, double x)
+        /// <param name="c">The result of the activation (Compute method)</param>
+        /// <param name="x">Activation input (x argument of the Compute method)</param>
+        public override double ComputeDerivative(double c, double x)
         {
             c = c.Bound();
             x = x.Bound();

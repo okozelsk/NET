@@ -109,14 +109,9 @@ namespace RCNet.Neural.Network.SM
             TransmissionSignalType = transmissionSignalType;
             Bias = bias;
             //Check whether function is analog
-            if (activation.OutputType != ActivationFactory.FunctionOutputType.Analog)
+            if (activation.OutputSignalType != ActivationFactory.FunctionOutputSignalType.Analog)
             {
                 throw new ArgumentException("Activation function is not analog.", "activation");
-            }
-            //Check whether activation function output range meets the requirements
-            if (activation.OutputRange.Min <= double.NegativeInfinity.Bound() || activation.OutputRange.Max >= double.PositiveInfinity.Bound())
-            {
-                throw new ArgumentException("Output range of the activation function does not meet neuron conditions.", "activation");
             }
             _activation = activation;
             _retainmentRatio = retainmentRatio;
@@ -132,7 +127,7 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// Output range of associated activation function
         /// </summary>
-        public Interval ActivationOutputRange { get { return _activation.OutputRange; } }
+        public Interval ActivationOutputRange { get { return _activation.OutputSignalRange; } }
 
         /// <summary>
         /// Neuron's transmission signal

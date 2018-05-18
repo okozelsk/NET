@@ -22,11 +22,7 @@ namespace RCNet.Neural.Activation
         private const double StimuliDecrease = 0.5d;
 
         //Attributes
-        //Static working ranges
-        private static readonly Interval _inputRange = new Interval(double.NegativeInfinity.Bound(), double.PositiveInfinity.Bound());
         private static readonly Interval _outputRange = new Interval(0, 1);
-
-        //Parameters
         private Interval _stateRange;
         private double _membraneResistance;
         private double _membraneDecayRate;
@@ -35,8 +31,6 @@ namespace RCNet.Neural.Activation
         private double _firingThresholdV;
         private double _initialStimuliCoeff;
         private double _stimuliCoeff;
-
-        //Operation
         private double _membraneV;
 
         /// <summary>
@@ -69,30 +63,25 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Type of the output
         /// </summary>
-        public ActivationFactory.FunctionOutputType OutputType { get { return ActivationFactory.FunctionOutputType.Spike; } }
-
-        /// <summary>
-        /// Accepted input signal range
-        /// </summary>
-        public Interval InputRange { get { return _inputRange; } }
+        public ActivationFactory.FunctionOutputSignalType OutputSignalType { get { return ActivationFactory.FunctionOutputSignalType.Spike; } }
 
         /// <summary>
         /// Output signal range
         /// </summary>
-        public Interval OutputRange { get { return _outputRange; } }
+        public Interval OutputSignalRange { get { return _outputRange; } }
 
         /// <summary>
-        /// Specifies whether the activation function supports derivative
+        /// Specifies whether the activation function supports derivative calculation
         /// </summary>
-        public bool SupportsDerivative { get { return false; } }
+        public bool SupportsComputeDerivativeMethod { get { return false; } }
 
         /// <summary>
         /// Specifies whether the activation function is depending on its previous states
         /// </summary>
-        public bool TimeDependent { get { return true; } }
+        public bool Stateless { get { return false; } }
 
         /// <summary>
-        /// Range of the internal state
+        /// Normal range of the internal state
         /// </summary>
         public Interval InternalStateRange { get { return _stateRange; } }
 
@@ -103,7 +92,7 @@ namespace RCNet.Neural.Activation
 
         //Methods
         /// <summary>
-        /// Resets function to initial state
+        /// Resets function to its initial state
         /// </summary>
         public void Reset()
         {
@@ -113,9 +102,10 @@ namespace RCNet.Neural.Activation
         }
 
         /// <summary>
-        /// Computes the result of the activation function
+        /// Updates state of the membrane according to an input stimuli and when the firing
+        /// condition is met, it produces a spike
         /// </summary>
-        /// <param name="x">Argument</param>
+        /// <param name="x">Input stimuli (interpreted as an electric current)</param>
         public double Compute(double x)
         {
             x = (x * _stimuliCoeff).Bound();
@@ -150,10 +140,11 @@ namespace RCNet.Neural.Activation
         }
 
         /// <summary>
-        /// Unsupported functionality
+        /// Unsupported functionality!!!
+        /// Computes derivative of the activation input (does not change internal state)
         /// </summary>
-        /// <param name="c">The result of the Compute method</param>
-        /// <param name="x">The argument of the Compute method</param>
+        /// <param name="c">The result of the activation (Compute method)</param>
+        /// <param name="x">Activation input (x argument of the Compute method)</param>
         public double ComputeDerivative(double c = double.NaN, double x = double.NaN)
         {
             throw new NotImplementedException("ComputeDerivative is unsupported method in case of spiking activation.");
