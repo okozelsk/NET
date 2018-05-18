@@ -7,14 +7,14 @@ using System.Threading.Tasks;
 namespace RCNet.MathTools
 {
     /// <summary>
-    /// Encaptualates physical unit
+    /// Encaptualates SI physical unit
     /// </summary>
     public static class PhysUnit
     {
         /// <summary>
         /// SI base and derived units
         /// </summary>
-        public enum SI
+        public enum SIUnit
         {
             /// <summary>
             /// Length
@@ -135,9 +135,9 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Physical unit quantity prefixes
+        /// Metric prefixes
         /// </summary>
-        public enum QPrefix
+        public enum MetricPrefix
         {
             /// <summary>
             /// Base
@@ -194,126 +194,118 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Conversion to base of physical unit
+        /// Conversion to basic unit quantity
         /// </summary>
-        /// <param name="v">Value</param>
-        /// <param name="qPrefix">Unit quantity prefix</param>
-        /// <returns>Base value</returns>
-        public static double ToBase(double v, QPrefix qPrefix)
+        /// <param name="quantity">Quantity</param>
+        /// <param name="prefix">Metric prefix corresponding to specified quantity</param>
+        public static double ToBase(double quantity, MetricPrefix prefix)
         {
-            switch(qPrefix)
+            switch(prefix)
             {
-                case QPrefix.None: return v;
-                case QPrefix.Atto: return v * 1e-18;
-                case QPrefix.Femto: return v * 1e-15;
-                case QPrefix.Piko: return v * 1e-12;
-                case QPrefix.Nano: return v * 1e-9;
-                case QPrefix.Mikro: return v * 1e-6;
-                case QPrefix.Milli: return v * 1e-3;
-                case QPrefix.Kilo: return v * 1e3;
-                case QPrefix.Mega: return v * 1e6;
-                case QPrefix.Giga: return v * 1e9;
-                case QPrefix.Tera: return v * 1e12;
-                case QPrefix.Peta: return v * 1e15;
-                case QPrefix.Exa: return v * 1e18;
-                default: return v;
+                case MetricPrefix.None: return quantity;
+                case MetricPrefix.Atto: return quantity * 1e-18;
+                case MetricPrefix.Femto: return quantity * 1e-15;
+                case MetricPrefix.Piko: return quantity * 1e-12;
+                case MetricPrefix.Nano: return quantity * 1e-9;
+                case MetricPrefix.Mikro: return quantity * 1e-6;
+                case MetricPrefix.Milli: return quantity * 1e-3;
+                case MetricPrefix.Kilo: return quantity * 1e3;
+                case MetricPrefix.Mega: return quantity * 1e6;
+                case MetricPrefix.Giga: return quantity * 1e9;
+                case MetricPrefix.Tera: return quantity * 1e12;
+                case MetricPrefix.Peta: return quantity * 1e15;
+                case MetricPrefix.Exa: return quantity * 1e18;
+                default: return quantity;
             }
         }
 
         /// <summary>
-        /// Conversion from base of physical unit
+        /// Conversion from basic unit quantity to a multiple or fraction
         /// </summary>
-        /// <param name="v">Value</param>
-        /// <param name="qPrefix">Unit quantity prefix</param>
-        public static double FromBase(double v, QPrefix qPrefix)
+        /// <param name="quantity">Basic unit quantity</param>
+        /// <param name="prefix">Metric prefix corresponding to desired multiple or fraction</param>
+        public static double FromBase(double quantity, MetricPrefix prefix)
         {
-            switch (qPrefix)
+            switch (prefix)
             {
-                case QPrefix.None: return v;
-                case QPrefix.Atto: return v * 1e18;
-                case QPrefix.Femto: return v * 1e15;
-                case QPrefix.Piko: return v * 1e12;
-                case QPrefix.Nano: return v * 1e9;
-                case QPrefix.Mikro: return v * 1e6;
-                case QPrefix.Milli: return v * 1e3;
-                case QPrefix.Kilo: return v * 1e-3;
-                case QPrefix.Mega: return v * 1e-6;
-                case QPrefix.Giga: return v * 1e-9;
-                case QPrefix.Tera: return v * 1e-12;
-                case QPrefix.Peta: return v * 1e-15;
-                case QPrefix.Exa: return v * 1e-18;
-                default: return v;
+                case MetricPrefix.None: return quantity;
+                case MetricPrefix.Atto: return quantity * 1e18;
+                case MetricPrefix.Femto: return quantity * 1e15;
+                case MetricPrefix.Piko: return quantity * 1e12;
+                case MetricPrefix.Nano: return quantity * 1e9;
+                case MetricPrefix.Mikro: return quantity * 1e6;
+                case MetricPrefix.Milli: return quantity * 1e3;
+                case MetricPrefix.Kilo: return quantity * 1e-3;
+                case MetricPrefix.Mega: return quantity * 1e-6;
+                case MetricPrefix.Giga: return quantity * 1e-9;
+                case MetricPrefix.Tera: return quantity * 1e-12;
+                case MetricPrefix.Peta: return quantity * 1e-15;
+                case MetricPrefix.Exa: return quantity * 1e-18;
+                default: return quantity;
             }
         }
 
         /// <summary>
-        /// Value in physical unit
+        /// Represents quantity in physical unit
         /// </summary>
         [Serializable]
-        public class Value
+        public class Quantity
         {
             //Attributes
-            private SI _unit;
-            private double _base;
+            private SIUnit _unit;
+            private double _quantity;
 
             //Constructor
             /// <summary>
             /// Instantiates an uninitialized instance
             /// </summary>
-            /// <param name="unit">Physical SI unit</param>
-            public Value(SI unit)
+            /// <param name="unit">SI unit</param>
+            public Quantity(SIUnit unit)
             {
                 _unit = unit;
-                _base = 0;
+                _quantity = 0;
                 return;
             }
 
             /// <summary>
             /// Instantiates an initialized instance
             /// </summary>
-            /// <param name="v">Initial value</param>
-            /// <param name="qPrefix">Quantity prefix of v</param>
-            /// <param name="unit">Physical SI unit of v</param>
-            public Value(double v, QPrefix qPrefix, SI unit)
+            /// <param name="quantity">Quantity</param>
+            /// <param name="prefix">Metric prefix corresponding to specified quantity</param>
+            /// <param name="unit">Unit of specified quantity</param>
+            public Quantity(double quantity, MetricPrefix prefix, SIUnit unit)
             {
                 _unit = unit;
-                _base = ToBase(v, qPrefix);
+                _quantity = ToBase(quantity, prefix);
                 return;
             }
+
+            //Properties
+            public SIUnit BasicUnit { get { return _unit; } }
+            public double BasicUnitQuantity { get { return _quantity; } }
 
             //Methods
             /// <summary>
-            /// Returns converted base value
+            /// Returns multiple or fraction of the quantity
             /// </summary>
-            /// <param name="qPrefix">Quantity prefix</param>
-            public double Get(QPrefix qPrefix = QPrefix.None)
+            /// <param name="prefix">Metric prefix corresponding to desired multiple or fraction of the basic unit</param>
+            public double Get(MetricPrefix prefix = MetricPrefix.None)
             {
-                return FromBase(_base, qPrefix);
+                return FromBase(_quantity, prefix);
             }
 
             /// <summary>
-            /// Sets new base value
+            /// Sets new quantity
             /// </summary>
-            /// <param name="v">Value</param>
-            /// <param name="qPrefix">Quantity prefix</param>
-            public void Set(double v, QPrefix qPrefix)
+            /// <param name="quantity">Quantity</param>
+            /// <param name="prefix">Metric prefix corresponding to specified quantity</param>
+            public void Set(double quantity, MetricPrefix prefix = MetricPrefix.None)
             {
-                _base = ToBase(v, qPrefix);
+                _quantity = ToBase(quantity, prefix);
                 return;
             }
 
-            /// <summary>
-            /// Adds given value to base value
-            /// </summary>
-            /// <param name="v">Value</param>
-            /// <param name="qPrefix">Quantity prefix</param>
-            public void Add(double v, QPrefix qPrefix)
-            {
-                _base += ToBase(v, qPrefix);
-                return;
-            }
-
-        }//Value
+        }//Quantity
 
     }//PhysUnit
 }//Namespace

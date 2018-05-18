@@ -3,7 +3,7 @@
 namespace RCNet.MathTools
 {
     /// <summary>
-    /// Class for iterative computation of the weighted average.
+    /// Class implements iterative computation of the weighted average.
     /// </summary>
     [Serializable]
     public class WeightedAvg

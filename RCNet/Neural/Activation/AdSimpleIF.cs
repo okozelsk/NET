@@ -9,12 +9,17 @@ using RCNet.MathTools;
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Implements simple form of Adaptive Leaky Integrate and Fire neuron model
+    /// Implements simple form of Adaptive Integrate and Fire neuron model
     /// </summary>
+    [Serializable]
     public class AdSimpleIF : IActivationFunction
     {
         //Constants
-        private double SpikeCurrent = 1d;
+        private const double Spike = 1d;
+        private const double StimuliIncreaseThreshold = 0.1d;
+        private const double StimuliIncrease = 1.1d;
+        private const double StimuliDecreaseThreshold = 0.5d;
+        private const double StimuliDecrease = 0.5d;
 
         //Attributes
         //Static working ranges
@@ -37,11 +42,11 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Constructs an initialized instance
         /// </summary>
-        /// <param name="membraneResistance">Membrane resisatance in MOhm.</param>
+        /// <param name="membraneResistance">Membrane resisatance (Mohm).</param>
         /// <param name="membraneDecayRate">Membrane potential decay</param>
-        /// <param name="resetV">Reset voltage in mV (positive value)</param>
-        /// <param name="firingThresholdV">Firing threshold voltage in mV (positive value)</param>
-        /// <param name="initialStimuliCoeff"></param>
+        /// <param name="resetV">Membrane reset potential (mV)</param>
+        /// <param name="firingThresholdV">Membrane firing threshold (mV)</param>
+        /// <param name="stimuliCoeff">Input stimuli coefficient (nA)</param>
         public AdSimpleIF(double membraneResistance,
                           double membraneDecayRate,
                           double resetV,
@@ -126,19 +131,19 @@ namespace RCNet.Neural.Activation
             //Adaptation
             if (inputVoltage > 0)
             {
-                if (inputVoltage >= (_firingThresholdV - _resetV) / 2)
+                if (inputVoltage >= (_firingThresholdV - _resetV) * StimuliDecreaseThreshold)
                 {
-                    _stimuliCoeff *= 0.5;
+                    _stimuliCoeff *= StimuliDecrease;
                 }
-                else if (inputVoltage <= (_firingThresholdV - _resetV) * 0.25)
+                else if (inputVoltage <= (_firingThresholdV - _resetV) * StimuliIncreaseThreshold)
                 {
-                    _stimuliCoeff *= 1.1;
+                    _stimuliCoeff *= StimuliIncrease;
                 }
             }
             //Output
             if (_membraneV >= _firingThresholdV)
             {
-                spike = SpikeCurrent;
+                spike = Spike;
                 _membraneV = _firingThresholdV;
             }
             return spike;
@@ -151,7 +156,7 @@ namespace RCNet.Neural.Activation
         /// <param name="x">The argument of the Compute method</param>
         public double ComputeDerivative(double c = double.NaN, double x = double.NaN)
         {
-            throw new Exception("AdSimpleIF does not support ComputeDerivative");
+            throw new NotImplementedException("ComputeDerivative is unsupported method in case of spiking activation.");
         }
 
     }//AdSimpleIF

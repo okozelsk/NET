@@ -10,6 +10,7 @@ namespace RCNet.Neural.Network.SM
     /// <summary>
     /// Class represents dimensions of the neural pool
     /// </summary>
+    [Serializable]
     public class PoolDimensions
     {
         /// <summary>

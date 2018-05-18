@@ -9,12 +9,13 @@ using RCNet.MathTools;
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Implements simple form of Leaky Integrate and Fire neuron model
+    /// Implements simple form of Integrate and Fire neuron model
     /// </summary>
+    [Serializable]
     public class SimpleIF : IActivationFunction
     {
         //Constants
-        private double SpikeCurrent = 1d;
+        private const double Spike = 1d;
 
         //Attributes
         //Static working ranges
@@ -39,12 +40,12 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Constructs an initialized instance
         /// </summary>
-        /// <param name="membraneResistance">Membrane resisatance in MOhm.</param>
+        /// <param name="membraneResistance">Membrane resisatance (Mohm).</param>
         /// <param name="membraneDecayRate">Membrane potential decay</param>
-        /// <param name="resetV">Reset voltage in mV (positive value)</param>
-        /// <param name="firingThresholdV">Firing threshold voltage in mV (positive value)</param>
-        /// <param name="refractoryPeriods">Number of after spike computation cycles, while an input stimuli is ignored.</param>
-        /// <param name="stimuliCoeff"></param>
+        /// <param name="resetV">Membrane reset potential (mV)</param>
+        /// <param name="firingThresholdV">Membrane firing threshold (mV)</param>
+        /// <param name="refractoryPeriods">Number of after spike computation cycles while an input stimuli is ignored (ms).</param>
+        /// <param name="stimuliCoeff">Input stimuli coefficient (nA)</param>
         public SimpleIF(double membraneResistance,
                         double membraneDecayRate,
                         double resetV,
@@ -114,9 +115,9 @@ namespace RCNet.Neural.Activation
         }
 
         /// <summary>
-        /// Computes the result of the activation function
+        /// Computes the membrane new potential
         /// </summary>
-        /// <param name="x">Argument</param>
+        /// <param name="x">Stimuli</param>
         public double Compute(double x)
         {
             x = (x * _stimuliCoeff).Bound();
@@ -147,7 +148,7 @@ namespace RCNet.Neural.Activation
             //Output
             if (_membraneV >= _firingThresholdV)
             {
-                spike = SpikeCurrent;
+                spike = Spike;
                 _membraneV = _firingThresholdV;
             }
             return spike;
@@ -160,7 +161,7 @@ namespace RCNet.Neural.Activation
         /// <param name="x">The argument of the Compute method</param>
         public double ComputeDerivative(double c = double.NaN, double x = double.NaN)
         {
-            throw new Exception("SimpleIF does not support ComputeDerivative");
+            throw new NotImplementedException("ComputeDerivative is unsupported method in case of spiking activation.");
         }
 
     }//SimpleIF

@@ -8,8 +8,9 @@ using RCNet.Extensions;
 namespace RCNet.MathTools.VectorMath
 {
     /// <summary>
-    /// Represents a vector of double values and implements simple vector operations
+    /// Represents a vector and implements vector simple operations
     /// </summary>
+    [Serializable]
     public class Vector
     {
         private double[] _data;

@@ -11,13 +11,15 @@ using RCNet.MathTools.VectorMath;
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Base class for spiking neuron models.
+    /// Base class for spiking neuron models using ODE(s).
     /// </summary>
     [Serializable]
-    public abstract class SpikingMembrane : IActivationFunction
+    public abstract class ODESpikingMembrane : IActivationFunction
     {
         //Constants
+        protected const double Spike = 1;
         protected const int VarMembraneV = 0;
+
         //Attributes
         //Static working ranges
         protected static readonly Interval _inputRange = new Interval(double.NegativeInfinity.Bound(), double.PositiveInfinity.Bound());
@@ -50,7 +52,7 @@ namespace RCNet.Neural.Activation
         /// <param name="timeStep">Time step of Compute method</param>
         /// <param name="subSteps">Computation sub-steps of timeStep</param>
         /// <param name="numOfEvolvingVars">Number of evolving variables</param>
-        protected SpikingMembrane(double restV,
+        protected ODESpikingMembrane(double restV,
                                   double resetV,
                                   double firingThresholdV,
                                   double refractoryPeriods,
@@ -164,15 +166,28 @@ namespace RCNet.Neural.Activation
             if (_evolVars[VarMembraneV] >= _firingThresholdV)
             {
                 OnFiring();
-                output = 1;
+                output = Spike;
                 _evolVars[VarMembraneV] = _firingThresholdV;
             }
             return output;
         }
 
+        /// <summary>
+        /// Ordinary differential equation(s) evolving membrane variable(s)
+        /// </summary>
+        /// <param name="t">Time</param>
+        /// <param name="v">Vector of membrane variables</param>
+        /// <returns>dvdt</returns>
         protected abstract Vector MembraneDiffEq(double t, Vector v);
 
-        protected abstract void OnFiring();
+        /// <summary>
+        /// Triggered on membrane firing a spike
+        /// </summary>
+        protected virtual void OnFiring()
+        {
+            //Does nothing in base implementation
+            return;
+        }
 
         /// <summary>
         /// Unsupported functionality
@@ -181,7 +196,7 @@ namespace RCNet.Neural.Activation
         /// <param name="x">The argument of the Compute method</param>
         public double ComputeDerivative(double c = double.NaN, double x = double.NaN)
         {
-            throw new Exception("ComputeDerivative is unsupported method in case of spiking activation.");
+            throw new NotImplementedException("ComputeDerivative is unsupported method in case of spiking activation.");
         }
 
 

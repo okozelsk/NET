@@ -55,7 +55,7 @@
     <Compile Include="Neural\Activation\BentIdentity.cs" />
     <Compile Include="Neural\Activation\Elliot.cs" />
     <Compile Include="Neural\Activation\LeakyIF.cs" />
-    <Compile Include="Neural\Activation\SpikingMembrane.cs" />
+    <Compile Include="Neural\Activation\ODESpikingMembrane.cs" />
     <Compile Include="Neural\Activation\Gaussian.cs" />
     <Compile Include="Neural\Activation\IActivationFunction.cs" />
     <Compile Include="Neural\Activation\Identity.cs" />

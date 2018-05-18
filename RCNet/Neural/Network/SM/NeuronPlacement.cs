@@ -10,6 +10,7 @@ namespace RCNet.Neural.Network.SM
     /// <summary>
     /// Class represents neuron placement within the pool
     /// </summary>
+    [Serializable]
     public class NeuronPlacement
     {
         /// <summary>

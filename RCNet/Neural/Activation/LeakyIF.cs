@@ -9,9 +9,10 @@ using RCNet.MathTools.VectorMath;
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Leaky Integrate and Fire neuron model.
+    /// Implements Leaky Integrate and Fire neuron model.
     /// </summary>
-    public class LeakyIF : SpikingMembrane
+    [Serializable]
+    public class LeakyIF : ODESpikingMembrane
     {
         //Attributes
         //Parameters
@@ -21,13 +22,13 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Constructs an initialized instance
         /// </summary>
-        /// <param name="membraneTimeScale">(ms)</param>
-        /// <param name="membraneResistance">(MOhm)</param>
-        /// <param name="restV">(mV)</param>
-        /// <param name="resetV">(mV)</param>
-        /// <param name="firingThresholdV">(mV)</param>
-        /// <param name="refractoryPeriods">(ms)</param>
-        /// <param name="stimuliCoeff"></param>
+        /// <param name="membraneTimeScale">Membrane time scale (ms)</param>
+        /// <param name="membraneResistance">Membrane resistance (Mohm)</param>
+        /// <param name="restV">Membrane rest potential (mV)</param>
+        /// <param name="resetV">Membrane reset potential (mV)</param>
+        /// <param name="firingThresholdV">Membrane firing threshold (mV)</param>
+        /// <param name="refractoryPeriods">Number of after spike computation cycles while an input stimuli is ignored.</param>
+        /// <param name="stimuliCoeff">Input stimuli coefficient (nA)</param>
         public LeakyIF(double membraneTimeScale,
                        double membraneResistance,
                        double restV,
@@ -36,7 +37,7 @@ namespace RCNet.Neural.Activation
                        double refractoryPeriods,
                        double stimuliCoeff
                        )
-            : base(restV, resetV, firingThresholdV, refractoryPeriods, stimuliCoeff, 1, 10, 1)
+            : base(restV, resetV, firingThresholdV, refractoryPeriods, stimuliCoeff, 1, 2, 1)
         {
             _membraneTimeScale = membraneTimeScale;
             _membraneResistance = membraneResistance;
@@ -44,17 +45,17 @@ namespace RCNet.Neural.Activation
         }
 
         //Methods
+        /// <summary>
+        /// LeakyIF autonomous ordinary differential equation.
+        /// </summary>
+        /// <param name="t">Time. Not used in autonomous ODE.</param>
+        /// <param name="v">Membrane potential</param>
+        /// <returns>dvdt</returns>
         protected override Vector MembraneDiffEq(double t, Vector v)
         {
             Vector dvdt = new Vector(1);
             dvdt[VarMembraneV] = (-(v[VarMembraneV] - _restV) + _membraneResistance * _stimuli) / _membraneTimeScale;
             return dvdt;
-        }
-
-        protected override void OnFiring()
-        {
-            //Does nothing
-            return;
         }
 
     }//LeakyIF

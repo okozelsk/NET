@@ -260,6 +260,6 @@ namespace RCNet.Neural.Activation
             return clone;
         }
 
-    }//AnalogActivationSettings
+    }//ActivationSettings
 
 }//Namespace
