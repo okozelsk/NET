@@ -43,7 +43,7 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Specifies whether the activation function is independent on its previous states
         /// </summary>
-        public bool Stateless { get { return false; } }
+        public bool Stateless { get { return true; } }
 
         /// <summary>
         /// Normal range of the internal state

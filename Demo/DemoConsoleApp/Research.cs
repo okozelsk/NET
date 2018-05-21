@@ -27,6 +27,19 @@ namespace RCNet.DemoConsoleApp
         public void Run()
         {
             /*
+            IActivationFunction af = new SimpleIF(15,
+                                                  0.1,
+                                                  5,
+                                                  20,
+                                                  0,
+                                                  1
+                                                  );
+            IActivationFunction af = new AdSimpleIF(15,
+                                                    0.1,
+                                                    5,
+                                                    20,
+                                                    1
+                                                    );
             IActivationFunction af = new LeakyIF(8,
                                                  10,
                                                  -70,
@@ -45,12 +58,6 @@ namespace RCNet.DemoConsoleApp
                                                0,
                                                4.5
                                                );
-            IActivationFunction af = new AdSimpleIF(15,
-                                                    0.1,
-                                                    5,
-                                                    20,
-                                                    1
-                                                    );
             IActivationFunction af = new AdExpIF(5,
                                                  500,
                                                  -70,
@@ -65,14 +72,13 @@ namespace RCNet.DemoConsoleApp
                                                  );
             */
             //TestDEq();
-            IActivationFunction af = new LeakyIF(8,
-                                                 10,
-                                                 -70,
-                                                 -65,
-                                                 -50,
-                                                 0,
-                                                 5.5
-                                                 );
+            IActivationFunction af = new SimpleIF(15,
+                                                  0.1,
+                                                  5,
+                                                  20,
+                                                  0,
+                                                  1
+                                                  );
             TestActivation(af, 800, double.NaN, 10, 190);
             return;
         }

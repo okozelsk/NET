@@ -16,10 +16,10 @@ namespace RCNet.Neural.Activation
     {
         //Constants
         private const double Spike = 1d;
-        private const double StimuliIncreaseThreshold = 0.1d;
-        private const double StimuliIncrease = 1.1d;
-        private const double StimuliDecreaseThreshold = 0.5d;
-        private const double StimuliDecrease = 0.5d;
+        private const double StimuliIncreaseBorderCoeff = 0.1d;
+        private const double StimuliIncreaseAlpha = 1.1d;
+        private const double StimuliDecreaseBorderCoeff = 0.5d;
+        private const double StimuliDecreaseAlpha = 0.5d;
 
         //Attributes
         private static readonly Interval _outputRange = new Interval(0, 1);
@@ -40,7 +40,7 @@ namespace RCNet.Neural.Activation
         /// <param name="membraneDecayRate">Membrane potential decay</param>
         /// <param name="resetV">Membrane reset potential (mV)</param>
         /// <param name="firingThresholdV">Membrane firing threshold (mV)</param>
-        /// <param name="stimuliCoeff">Input stimuli coefficient (nA)</param>
+        /// <param name="initialStimuliCoeff">Initial input stimuli coefficient (nA)</param>
         public AdSimpleIF(double membraneResistance,
                           double membraneDecayRate,
                           double resetV,
@@ -121,13 +121,13 @@ namespace RCNet.Neural.Activation
             //Adaptation
             if (inputVoltage > 0)
             {
-                if (inputVoltage >= (_firingThresholdV - _resetV) * StimuliDecreaseThreshold)
+                if (inputVoltage >= (_firingThresholdV - _resetV) * StimuliDecreaseBorderCoeff)
                 {
-                    _stimuliCoeff *= StimuliDecrease;
+                    _stimuliCoeff *= StimuliDecreaseAlpha;
                 }
-                else if (inputVoltage <= (_firingThresholdV - _resetV) * StimuliIncreaseThreshold)
+                else if (inputVoltage <= (_firingThresholdV - _resetV) * StimuliIncreaseBorderCoeff)
                 {
-                    _stimuliCoeff *= StimuliIncrease;
+                    _stimuliCoeff *= StimuliIncreaseAlpha;
                 }
             }
             //Output
