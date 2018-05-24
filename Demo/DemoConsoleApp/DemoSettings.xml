@@ -1,56 +1,153 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <demo dataFolder=".\\Data">
-  <case name="Prediction task High and Low prices of TTOO (T2 Biosystems, Inc.): Analog reservoir, Feed Forward, Linear regression">
-    <!-- Data from https://finance.yahoo.com/quote/TTOO/history?p=TTOO -->
-    <samples fileName="TTOO.csv" bootSamples="250" singleNormalizer="true" normalizerReserve="0.1"/>
-    <stateMachineCfg taskType="Prediction" randomizerSeek="0">
-      <inputFields routeToReadout="true">
-        <field name="High"/>
-        <field name="Low"/>
-        <field name="Adj Close"/>
+  <case name="Classification task Libras Movement:  Single combined spiking reservoir, Parallel Perceptron">
+    <!-- Data converted from https://archive.ics.uci.edu/ml/datasets/Libras+Movement -->
+    <samples fileName="LibrasMovement.csv" singleNormalizer="false" normalizerReserve="0.1"/>
+    <stateMachineCfg taskType="Classification" randomizerSeek="0">
+      <inputFields routeToReadout="false">
+        <field name="coord_abcissa"/>
+        <field name="coord_ordinate"/>
       </inputFields>
       <reservoirCfgContainer>
-        <reservoirCfg name="Analog" spectralRadius="0.999">
+        <reservoirCfg name="Combined spiking neurons" inputCoding="Analog" inputDuration="1" spectralRadius="0.999">
           <pools>
-            <pool instanceName="Analog pool" dimX="5" dimY="10" dimZ="5" routeToReadout="true">
+            <pool instanceName="LeakyIF 100" dimX="5" dimY="4" dimZ="5" routeToReadout="true">
               <input connectionDensity="1">
-                <weight min="0" max="0.6" randomSign="false" distribution="Uniform"/>
+                <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
               </input>
-              <excitatory relShare="1">
-                <activation function="TanH"/>
+              <excitatory relShare="3">
+                <activation function="LeakyIF"
+                            arg1="8"
+                            arg2="15"
+                            arg3="-70"
+                            arg4="-65"
+                            arg5="-50"
+                            arg6="1"
+                            arg7="6"
+                            />
                 <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
               </excitatory>
               <inhibitory relShare="1">
-                <activation function="TanH"/>
+                <activation function="LeakyIF"
+                            arg1="8"
+                            arg2="15"
+                            arg3="-70"
+                            arg4="-65"
+                            arg5="-50"
+                            arg6="1"
+                            arg7="6"
+                            />
                 <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
               </inhibitory>
-              <interconnection density="0.1" avgDistance="NA" allowSelfConnection="true">
+              <interconnection density="0.3" avgDistance="1.5" allowSelfConnection="false">
                 <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
               </interconnection>
-              <retainmentNeurons density="1" retainmentMinRate="0.25" retainmentMaxRate="0.5"/>
+            </pool>
+            <pool instanceName="ExpIF 100" dimX="5" dimY="4" dimZ="5" routeToReadout="true">
+              <input connectionDensity="1">
+                <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
+              </input>
+              <excitatory relShare="3">
+                <activation function="ExpIF"
+                            arg1="12"
+                            arg2="20"
+                            arg3="-65"
+                            arg4="-60"
+                            arg5="-55"
+                            arg6="-30"
+                            arg7="2"
+                            arg8="1"
+                            arg9="5.5"
+                            />
+                <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
+              </excitatory>
+              <inhibitory relShare="1">
+                <activation function="ExpIF"
+                            arg1="12"
+                            arg2="20"
+                            arg3="-65"
+                            arg4="-60"
+                            arg5="-55"
+                            arg6="-30"
+                            arg7="2"
+                            arg8="1"
+                            arg9="5.5"
+                            />
+                <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
+              </inhibitory>
+              <interconnection density="0.3" avgDistance="1.5" allowSelfConnection="false">
+                <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
+              </interconnection>
+            </pool>
+            <pool instanceName="AdSimpleIF 100" dimX="5" dimY="4" dimZ="5" routeToReadout="true">
+              <input connectionDensity="0">
+                <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
+              </input>
+              <excitatory relShare="3">
+                <activation function="AdSimpleIF"
+                            arg1="15"
+                            arg2="0.05"
+                            arg3="5"
+                            arg4="20"
+                            arg5="1"
+                            />
+                <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
+              </excitatory>
+              <inhibitory relShare="1">
+                <activation function="AdSimpleIF"
+                            arg1="15"
+                            arg2="0.05"
+                            arg3="5"
+                            arg4="20"
+                            arg5="1"
+                            />
+                <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
+              </inhibitory>
+              <interconnection density="0.2" avgDistance="NA" allowSelfConnection="false">
+                <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
+              </interconnection>
             </pool>
           </pools>
+          <pool2PoolConns>
+            <pool2PoolConn targetPool="AdSimpleIF 100" targetConnDensity="1" srcPool="LeakyIF 100" srcConnDensity="0.1">
+              <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
+            </pool2PoolConn>
+            <pool2PoolConn targetPool="AdSimpleIF 100" targetConnDensity="1" srcPool="ExpIF 100" srcConnDensity="0.1">
+              <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
+            </pool2PoolConn>
+          </pool2PoolConns>
         </reservoirCfg>
       </reservoirCfgContainer>
       <reservoirInstanceContainer>
-        <reservoirInstance name="Experimental" cfg="Analog" augmentedStates="true">
+        <reservoirInstance name="Main" cfg="Combined spiking neurons" augmentedStates="false">
           <inputFields>
-            <field name="High"/>
-            <field name="Low"/>
-            <field name="Adj Close"/>
+            <field name="coord_abcissa"/>
+            <field name="coord_ordinate"/>
           </inputFields>
         </reservoirInstance>
       </reservoirInstanceContainer>
-      <readoutLayer testDataRatio="0.1" folds="Auto">
-        <readoutUnit attempts="1" attemptEpochs="100">
-          <ff regressionMethod="Linear">
-            <outputActivation function="Identity"/>
-            <linRegrTrainer hiNoiseIntensity="0.2" maxStretch="6" zeroMargin="0.5"/>
-          </ff>
+      <readoutLayer testDataRatio="0.25" folds="Auto">
+        <readoutUnit attempts="20" attemptEpochs="500">
+          <pp gates="3" resolution="2">
+            <pDeltaRuleTrainer iniLR="0.01" incLR="1.1" decLR="0.5" minLR="1e-4" maxLR="0.1"/>
+          </pp>
         </readoutUnit>
         <outputFields>
-          <field name="High"/>
-          <field name="Low"/>
+          <field name="curved swing"/>
+          <field name="horizontal swing"/>
+          <field name="vertical swing"/>
+          <field name="anti-clockwise arc"/>
+          <field name="clockwise arc"/>
+          <field name="circle"/>
+          <field name="horizontal straight-line"/>
+          <field name="vertical straight-line"/>
+          <field name="horizontal zigzag"/>
+          <field name="vertical zigzag"/>
+          <field name="horizontal wavy"/>
+          <field name="vertical wavy"/>
+          <field name="face-up curve"/>
+          <field name="face-down curve"/>
+          <field name="tremble"/>
         </outputFields>
       </readoutLayer>
     </stateMachineCfg>
@@ -187,553 +284,6 @@
         </readoutUnit>
         <outputFields>
           <field name="Value"/>
-        </outputFields>
-      </readoutLayer>
-    </stateMachineCfg>
-  </case>
-  <case name="Classification task Libras Movement:  Single reservoir of SimpleIF neurons, Parallel Perceptron at readout level">
-    <!-- Data converted from https://archive.ics.uci.edu/ml/datasets/Libras+Movement -->
-    <samples fileName="LibrasMovement.csv" singleNormalizer="false" normalizerReserve="0.1"/>
-    <stateMachineCfg taskType="Classification" randomizerSeek="0">
-      <inputFields routeToReadout="false">
-        <field name="coord_abcissa"/>
-        <field name="coord_ordinate"/>
-      </inputFields>
-      <reservoirCfgContainer>
-        <reservoirCfg name="Spiking" inputCoding="Analog" inputDuration="1" spectralRadius="0.999">
-          <pools>
-            <pool instanceName="Spiking pool" dimX="5" dimY="10" dimZ="6" routeToReadout="true">
-              <input connectionDensity="1">
-                <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
-              </input>
-              <excitatory relShare="3">
-                <activation function="SimpleIF"
-                            arg1="15"
-                            arg2="0.05"
-                            arg3="5"
-                            arg4="20"
-                            arg5="1"
-                            />
-                <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-              </excitatory>
-              <inhibitory relShare="1">
-                <activation function="SimpleIF"
-                            arg1="15"
-                            arg2="0.05"
-                            arg3="5"
-                            arg4="20"
-                            arg5="1"
-                            />
-                <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-              </inhibitory>
-              <interconnection density="0.3" avgDistance="1.5" allowSelfConnection="false">
-                <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
-              </interconnection>
-            </pool>
-          </pools>
-        </reservoirCfg>
-      </reservoirCfgContainer>
-      <reservoirInstanceContainer>
-        <reservoirInstance name="Experimental" cfg="Spiking" augmentedStates="true">
-          <inputFields>
-            <field name="coord_abcissa"/>
-            <field name="coord_ordinate"/>
-          </inputFields>
-        </reservoirInstance>
-      </reservoirInstanceContainer>
-      <readoutLayer testDataRatio="0.25" folds="Auto">
-        <readoutUnit attempts="20" attemptEpochs="300">
-          <pp gates="3" resolution="2">
-            <pDeltaRuleTrainer iniLR="0.01" incLR="1.1" decLR="0.5" minLR="1e-4" maxLR="0.1"/>
-          </pp>
-        </readoutUnit>
-        <outputFields>
-          <field name="curved swing"/>
-          <field name="horizontal swing"/>
-          <field name="vertical swing"/>
-          <field name="anti-clockwise arc"/>
-          <field name="clockwise arc"/>
-          <field name="circle"/>
-          <field name="horizontal straight-line"/>
-          <field name="vertical straight-line"/>
-          <field name="horizontal zigzag"/>
-          <field name="vertical zigzag"/>
-          <field name="horizontal wavy"/>
-          <field name="vertical wavy"/>
-          <field name="face-up curve"/>
-          <field name="face-down curve"/>
-          <field name="tremble"/>
-        </outputFields>
-      </readoutLayer>
-    </stateMachineCfg>
-  </case>
-  <case name="Classification task Libras Movement:  Single LeakeIF spiking reservoir, Parallel Perceptron">
-    <!-- Data converted from https://archive.ics.uci.edu/ml/datasets/Libras+Movement -->
-    <samples fileName="LibrasMovement.csv" singleNormalizer="false" normalizerReserve="0.1"/>
-    <stateMachineCfg taskType="Classification" randomizerSeek="0">
-      <inputFields routeToReadout="false">
-        <field name="coord_abcissa"/>
-        <field name="coord_ordinate"/>
-      </inputFields>
-      <reservoirCfgContainer>
-        <reservoirCfg name="Spiking" inputCoding="Analog" inputDuration="1" spectralRadius="0.999">
-          <pools>
-            <pool instanceName="Spiking pool" dimX="5" dimY="10" dimZ="6" routeToReadout="true">
-              <input connectionDensity="1">
-                <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
-              </input>
-              <excitatory relShare="3">
-                <activation function="LeakyIF"
-                            arg1="8"
-                            arg2="15"
-                            arg3="-70"
-                            arg4="-65"
-                            arg5="-50"
-                            arg6="1"
-                            arg7="6"
-                            />
-                <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-              </excitatory>
-              <inhibitory relShare="1">
-                <activation function="LeakyIF"
-                            arg1="8"
-                            arg2="15"
-                            arg3="-70"
-                            arg4="-65"
-                            arg5="-50"
-                            arg6="1"
-                            arg7="6"
-                            />
-                <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-              </inhibitory>
-              <interconnection density="0.3" avgDistance="1.5" allowSelfConnection="false">
-                <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
-              </interconnection>
-            </pool>
-          </pools>
-        </reservoirCfg>
-      </reservoirCfgContainer>
-      <reservoirInstanceContainer>
-        <reservoirInstance name="Experimental" cfg="Spiking" augmentedStates="false">
-          <inputFields>
-            <field name="coord_abcissa"/>
-            <field name="coord_ordinate"/>
-          </inputFields>
-        </reservoirInstance>
-      </reservoirInstanceContainer>
-      <readoutLayer testDataRatio="0.25" folds="Auto">
-        <readoutUnit attempts="20" attemptEpochs="300">
-          <pp gates="3" resolution="2">
-            <pDeltaRuleTrainer iniLR="0.01" incLR="1.1" decLR="0.5" minLR="1e-4" maxLR="0.1"/>
-          </pp>
-        </readoutUnit>
-        <outputFields>
-          <field name="curved swing"/>
-          <field name="horizontal swing"/>
-          <field name="vertical swing"/>
-          <field name="anti-clockwise arc"/>
-          <field name="clockwise arc"/>
-          <field name="circle"/>
-          <field name="horizontal straight-line"/>
-          <field name="vertical straight-line"/>
-          <field name="horizontal zigzag"/>
-          <field name="vertical zigzag"/>
-          <field name="horizontal wavy"/>
-          <field name="vertical wavy"/>
-          <field name="face-up curve"/>
-          <field name="face-down curve"/>
-          <field name="tremble"/>
-        </outputFields>
-      </readoutLayer>
-    </stateMachineCfg>
-  </case>
-  <case name="Classification task Splice junctions gene sequence: Single spiking reservoir, Hidden readout layers, Resilient">
-    <!-- Data converted from https://archive.ics.uci.edu/ml/datasets/Molecular+Biology+%28Splice-junction+Gene+Sequences%29 -->
-    <samples fileName="SpliceJunctions.csv" singleNormalizer="false" normalizerReserve="0"/>
-    <stateMachineCfg taskType="Classification" randomizerSeek="0">
-      <inputFields routeToReadout="false">
-        <field name="1st_Nucleotide"/>
-        <field name="2nd_Nucleotide"/>
-      </inputFields>
-      <reservoirCfgContainer>
-        <reservoirCfg name="Main-Spiking" inputCoding="Analog" inputDuration="1" spectralRadius="0.999">
-          <pools>
-            <pool instanceName="Spiking pool" dimX="4" dimY="8" dimZ="4" routeToReadout="true">
-              <input connectionDensity="1">
-                <weight min="0" max="0.6" randomSign="false" distribution="Uniform"/>
-              </input>
-              <excitatory relShare="3">
-                <activation function="ExpIF"
-                            arg1="12"
-                            arg2="20"
-                            arg3="-65"
-                            arg4="-60"
-                            arg5="-55"
-                            arg6="-30"
-                            arg7="2"
-                            arg8="1"
-                            arg9="5.5"
-                            />
-                <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-              </excitatory>
-              <inhibitory relShare="1">
-                <activation function="ExpIF"
-                            arg1="12"
-                            arg2="20"
-                            arg3="-65"
-                            arg4="-60"
-                            arg5="-55"
-                            arg6="-30"
-                            arg7="2"
-                            arg8="1"
-                            arg9="5.5"
-                            />
-                <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-              </inhibitory>
-              <interconnection density="0.3" avgDistance="1.5" allowSelfConnection="false">
-                <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
-              </interconnection>
-            </pool>
-          </pools>
-        </reservoirCfg>
-      </reservoirCfgContainer>
-      <reservoirInstanceContainer>
-        <reservoirInstance name="Experimental" cfg="Main-Spiking" augmentedStates="true">
-          <inputFields>
-            <field name="1st_Nucleotide"/>
-            <field name="2nd_Nucleotide"/>
-          </inputFields>
-        </reservoirInstance>
-      </reservoirInstanceContainer>
-      <readoutLayer testDataRatio="0.25" folds="Auto">
-        <readoutUnit attempts="6" attemptEpochs="900">
-          <ff regressionMethod="Resilient">
-            <outputActivation function="TanH"/>
-            <hiddenLayers>
-              <layer neurons="50">
-                <activation function="TanH"/>
-              </layer>
-            </hiddenLayers>
-          </ff>
-        </readoutUnit>
-        <outputFields>
-          <field name="EI"/>
-          <field name="IE"/>
-          <field name="Neither"/>
-        </outputFields>
-      </readoutLayer>
-    </stateMachineCfg>
-  </case>
-  <case name="Classification task Libras Movement:  Single ExpIF spiking reservoir, Parallel Perceptron">
-    <!-- Data converted from https://archive.ics.uci.edu/ml/datasets/Libras+Movement -->
-    <samples fileName="LibrasMovement.csv" singleNormalizer="false" normalizerReserve="0.1"/>
-    <stateMachineCfg taskType="Classification" randomizerSeek="0">
-      <inputFields routeToReadout="false">
-        <field name="coord_abcissa"/>
-        <field name="coord_ordinate"/>
-      </inputFields>
-      <reservoirCfgContainer>
-        <reservoirCfg name="Spiking" inputCoding="Analog" inputDuration="1" spectralRadius="0.999">
-          <pools>
-            <pool instanceName="Spiking pool" dimX="5" dimY="10" dimZ="6" routeToReadout="true">
-              <input connectionDensity="1">
-                <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
-              </input>
-              <excitatory relShare="3">
-                <activation function="ExpIF"
-                            arg1="12"
-                            arg2="20"
-                            arg3="-65"
-                            arg4="-60"
-                            arg5="-50"
-                            arg6="-30"
-                            arg7="2"
-                            arg8="1"
-                            arg9="5.5"
-                            />
-                <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-              </excitatory>
-              <inhibitory relShare="1">
-                <activation function="ExpIF"
-                            arg1="12"
-                            arg2="20"
-                            arg3="-65"
-                            arg4="-60"
-                            arg5="-50"
-                            arg6="-30"
-                            arg7="2"
-                            arg8="1"
-                            arg9="5.5"
-                            />
-                <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-              </inhibitory>
-              <interconnection density="0.3" avgDistance="1.5" allowSelfConnection="false">
-                <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
-              </interconnection>
-            </pool>
-          </pools>
-        </reservoirCfg>
-      </reservoirCfgContainer>
-      <reservoirInstanceContainer>
-        <reservoirInstance name="Experimental" cfg="Spiking" augmentedStates="true">
-          <inputFields>
-            <field name="coord_abcissa"/>
-            <field name="coord_ordinate"/>
-          </inputFields>
-        </reservoirInstance>
-      </reservoirInstanceContainer>
-      <readoutLayer testDataRatio="0.25" folds="Auto">
-        <readoutUnit attempts="20" attemptEpochs="300">
-          <pp gates="3" resolution="2">
-            <pDeltaRuleTrainer iniLR="0.01" incLR="1.1" decLR="0.5" minLR="1e-4" maxLR="0.1"/>
-          </pp>
-        </readoutUnit>
-        <outputFields>
-          <field name="curved swing"/>
-          <field name="horizontal swing"/>
-          <field name="vertical swing"/>
-          <field name="anti-clockwise arc"/>
-          <field name="clockwise arc"/>
-          <field name="circle"/>
-          <field name="horizontal straight-line"/>
-          <field name="vertical straight-line"/>
-          <field name="horizontal zigzag"/>
-          <field name="vertical zigzag"/>
-          <field name="horizontal wavy"/>
-          <field name="vertical wavy"/>
-          <field name="face-up curve"/>
-          <field name="face-down curve"/>
-          <field name="tremble"/>
-        </outputFields>
-      </readoutLayer>
-    </stateMachineCfg>
-  </case>
-  <case name="Classification task Libras Movement:  Single AdSimpleIF spiking reservoir, Parallel Perceptron">
-    <!-- Data converted from https://archive.ics.uci.edu/ml/datasets/Libras+Movement -->
-    <samples fileName="LibrasMovement.csv" singleNormalizer="false" normalizerReserve="0.1"/>
-    <stateMachineCfg taskType="Classification" randomizerSeek="0">
-      <inputFields routeToReadout="false">
-        <field name="coord_abcissa"/>
-        <field name="coord_ordinate"/>
-      </inputFields>
-      <reservoirCfgContainer>
-        <reservoirCfg name="Spiking" inputCoding="Analog" inputDuration="1" spectralRadius="0.999">
-          <pools>
-            <pool instanceName="Spiking pool" dimX="5" dimY="10" dimZ="6" routeToReadout="true">
-              <input connectionDensity="1">
-                <weight min="0" max="0.6" randomSign="false" distribution="Uniform"/>
-              </input>
-              <excitatory relShare="3">
-                <activation function="AdSimpleIF"
-                            arg1="15"
-                            arg2="0.1"
-                            arg3="5"
-                            arg4="20"
-                            arg5="1"
-                            />
-                <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-              </excitatory>
-              <inhibitory relShare="1">
-                <activation function="AdSimpleIF"
-                            arg1="15"
-                            arg2="0.1"
-                            arg3="5"
-                            arg4="20"
-                            arg5="1"
-                            />
-                <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-              </inhibitory>
-              <interconnection density="0.1" avgDistance="1.5" allowSelfConnection="false">
-                <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
-              </interconnection>
-            </pool>
-          </pools>
-        </reservoirCfg>
-      </reservoirCfgContainer>
-      <reservoirInstanceContainer>
-        <reservoirInstance name="Experimental" cfg="Spiking" augmentedStates="false">
-          <inputFields>
-            <field name="coord_abcissa"/>
-            <field name="coord_ordinate"/>
-          </inputFields>
-        </reservoirInstance>
-      </reservoirInstanceContainer>
-      <readoutLayer testDataRatio="0.25" folds="Auto">
-        <readoutUnit attempts="20" attemptEpochs="300">
-          <pp gates="3" resolution="2">
-            <pDeltaRuleTrainer iniLR="0.01" incLR="1.1" decLR="0.5" minLR="1e-4" maxLR="0.1"/>
-          </pp>
-        </readoutUnit>
-        <outputFields>
-          <field name="curved swing"/>
-          <field name="horizontal swing"/>
-          <field name="vertical swing"/>
-          <field name="anti-clockwise arc"/>
-          <field name="clockwise arc"/>
-          <field name="circle"/>
-          <field name="horizontal straight-line"/>
-          <field name="vertical straight-line"/>
-          <field name="horizontal zigzag"/>
-          <field name="vertical zigzag"/>
-          <field name="horizontal wavy"/>
-          <field name="vertical wavy"/>
-          <field name="face-up curve"/>
-          <field name="face-down curve"/>
-          <field name="tremble"/>
-        </outputFields>
-      </readoutLayer>
-    </stateMachineCfg>
-  </case>
-  <case name="Classification task Libras Movement:  Single AdExpIF spiking reservoir, Parallel Perceptron">
-    <!-- Data converted from https://archive.ics.uci.edu/ml/datasets/Libras+Movement -->
-    <samples fileName="LibrasMovement.csv" singleNormalizer="false" normalizerReserve="0.1"/>
-    <stateMachineCfg taskType="Classification" randomizerSeek="0">
-      <inputFields routeToReadout="false">
-        <field name="coord_abcissa"/>
-        <field name="coord_ordinate"/>
-      </inputFields>
-      <reservoirCfgContainer>
-        <reservoirCfg name="Spiking" inputCoding="Analog" inputDuration="1" spectralRadius="0.999">
-          <pools>
-            <pool instanceName="Spiking pool" dimX="5" dimY="10" dimZ="6" routeToReadout="true">
-              <input connectionDensity="1">
-                <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
-              </input>
-              <excitatory relShare="3">
-                <activation function="AdExpIF"
-                            arg1="5"
-                            arg2="500"
-                            arg3="-70"
-                            arg4="-51"
-                            arg5="-50"
-                            arg6="-30"
-                            arg7="2"
-                            arg8="0.5"
-                            arg9="100"
-                            arg10="7"
-                            arg11="200"
-                            />
-                <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-              </excitatory>
-              <inhibitory relShare="1">
-                <activation function="AdExpIF"
-                            arg1="5"
-                            arg2="500"
-                            arg3="-70"
-                            arg4="-51"
-                            arg5="-50"
-                            arg6="-30"
-                            arg7="2"
-                            arg8="0.5"
-                            arg9="100"
-                            arg10="7"
-                            arg11="200"
-                            />
-                <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-              </inhibitory>
-              <interconnection density="0.3" avgDistance="1.5" allowSelfConnection="false">
-                <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
-              </interconnection>
-            </pool>
-          </pools>
-        </reservoirCfg>
-      </reservoirCfgContainer>
-      <reservoirInstanceContainer>
-        <reservoirInstance name="Experimental" cfg="Spiking" augmentedStates="true">
-          <inputFields>
-            <field name="coord_abcissa"/>
-            <field name="coord_ordinate"/>
-          </inputFields>
-        </reservoirInstance>
-      </reservoirInstanceContainer>
-      <readoutLayer testDataRatio="0.25" folds="Auto">
-        <readoutUnit attempts="20" attemptEpochs="300">
-          <pp gates="3" resolution="2">
-            <pDeltaRuleTrainer iniLR="0.01" incLR="1.1" decLR="0.5" minLR="1e-4" maxLR="0.1"/>
-          </pp>
-        </readoutUnit>
-        <outputFields>
-          <field name="curved swing"/>
-          <field name="horizontal swing"/>
-          <field name="vertical swing"/>
-          <field name="anti-clockwise arc"/>
-          <field name="clockwise arc"/>
-          <field name="circle"/>
-          <field name="horizontal straight-line"/>
-          <field name="vertical straight-line"/>
-          <field name="horizontal zigzag"/>
-          <field name="vertical zigzag"/>
-          <field name="horizontal wavy"/>
-          <field name="vertical wavy"/>
-          <field name="face-up curve"/>
-          <field name="face-down curve"/>
-          <field name="tremble"/>
-        </outputFields>
-      </readoutLayer>
-    </stateMachineCfg>
-  </case>
-  <!-- Modify/Tune existing or add your own cases -->
-  <case name="Classification task Libras Movement:  Single TanH reservoir, Parallel Perceptron">
-    <!-- Data converted from https://archive.ics.uci.edu/ml/datasets/Libras+Movement -->
-    <samples fileName="LibrasMovement.csv" singleNormalizer="false" normalizerReserve="0.1"/>
-    <stateMachineCfg taskType="Classification" randomizerSeek="0">
-      <inputFields routeToReadout="false">
-        <field name="coord_abcissa"/>
-        <field name="coord_ordinate"/>
-      </inputFields>
-      <reservoirCfgContainer>
-        <reservoirCfg name="Analog" inputCoding="Analog" inputDuration="1" spectralRadius="0.999">
-          <pools>
-            <pool instanceName="Analog pool" dimX="5" dimY="10" dimZ="6" routeToReadout="true">
-              <input connectionDensity="1">
-                <weight min="0" max="0.7" randomSign="false" distribution="Uniform"/>
-              </input>
-              <excitatory relShare="1">
-                <activation function="TanH"/>
-                <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-              </excitatory>
-              <inhibitory relShare="1">
-                <activation function="TanH"/>
-                <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-              </inhibitory>
-              <interconnection density="0.1" avgDistance="NA" allowSelfConnection="true">
-                <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
-              </interconnection>
-              <retainmentNeurons density="0.5" retainmentMinRate="0" retainmentMaxRate="0.5"/>
-            </pool>
-          </pools>
-        </reservoirCfg>
-      </reservoirCfgContainer>
-      <reservoirInstanceContainer>
-        <reservoirInstance name="Experimental" cfg="Analog" augmentedStates="false">
-          <inputFields>
-            <field name="coord_abcissa"/>
-            <field name="coord_ordinate"/>
-          </inputFields>
-        </reservoirInstance>
-      </reservoirInstanceContainer>
-      <readoutLayer testDataRatio="0.25" folds="Auto">
-        <readoutUnit attempts="20" attemptEpochs="1000">
-          <pp gates="3" resolution="2">
-            <pDeltaRuleTrainer iniLR="0.01" incLR="1.1" decLR="0.5" minLR="1e-4" maxLR="0.1"/>
-          </pp>
-        </readoutUnit>
-        <outputFields>
-          <field name="curved swing"/>
-          <field name="horizontal swing"/>
-          <field name="vertical swing"/>
-          <field name="anti-clockwise arc"/>
-          <field name="clockwise arc"/>
-          <field name="circle"/>
-          <field name="horizontal straight-line"/>
-          <field name="vertical straight-line"/>
-          <field name="horizontal zigzag"/>
-          <field name="vertical zigzag"/>
-          <field name="horizontal wavy"/>
-          <field name="vertical wavy"/>
-          <field name="face-up curve"/>
-          <field name="face-down curve"/>
-          <field name="tremble"/>
         </outputFields>
       </readoutLayer>
     </stateMachineCfg>

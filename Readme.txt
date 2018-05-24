@@ -6,6 +6,10 @@ Normalizer
     Data normalization/denormalization
     Gaussian standardization
 
+Ordinary Differential Equations (ODE) Numerical Solver
+    Euler
+    RK4
+
 Activation functions
     Analog
         BentIdentity
@@ -21,8 +25,11 @@ Activation functions
         SoftPlus
         TanH
     Spiking
-        LIF (Leaky Integrate and Fire)
+        SimpleIF (Simple Integrate and Fire)
+        LeakyIF (Leaky Integrate and Fire)
         ExpIF (Exponential Integrate and Fire)
+        AdSimpleIF (Adaptive Simple Integrate and Fire)
+        AdExpIF (Adaptive Exponential Integrate and Fire)
 
 Random distributions
     Uniform
@@ -40,15 +47,16 @@ Parallel Perceptron Network
     Trainers
         P-Delta Rule Trainer
 
-Neuron
+Reservoir Neuron
     Input
         Analog
         Spiking
             Converts analog input to spike train
-    Reservoir
+    Hidden
+	    Augmented readout state feature
         Analog
             Retainment (leaky integrator) feature
-	    Augmented readout state feature
+            The second power as augmented readout state
         Spiking
             Firing rate as primary readout state
             Membrane potential as augmented readout state
@@ -58,8 +66,8 @@ Reservoir
     Provides important internal statistics
     Supports SpectralRadius parameter
     Multiple 3D pools of neurons
-	Pool internal connections
-            Supports Euklidean distance property
+	    Pool internal connections
+            Supports Euklidean Distance property
 	Pool to pool connections
     Supports mixing of analog and spiking neuron pools
         so it can work as
@@ -83,13 +91,14 @@ State Machine
                 Supports variable length of patterns
             Output is value prediction
 
+Readout unit
+	FF Network or P-Perceptron
+
 Readout layer
     Xml constructor
     Independent on predictors generator (State Machine)
     Supports x-fold cross validation method
-        Clusters of readout units
-            Cluster of readout units per each output field
-                Cluster of FF Networks or P-Perceptrons
+        Cluster of readout units per each output field
 
 Bundle normalizer
     Helper for data bundle normalization
@@ -101,7 +110,7 @@ Bundle Data loaders (csv)
 Miscellaneous
 	Queue (thread safe)
 	Hurst exponent estimator (the toughest variant)
-	And others :-)
+	(others)
 
 Demo application
 ----------------

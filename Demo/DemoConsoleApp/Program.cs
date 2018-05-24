@@ -2,11 +2,6 @@
 using System.Collections.Generic;
 using RCNet.DemoConsoleApp.Log;
 
-using RCNet.Extensions;
-using RCNet.MathTools;
-using RCNet.Neural.Activation;
-using RCNet.Neural.Network.SM;
-
 namespace RCNet.DemoConsoleApp
 {
     class Program
@@ -14,9 +9,10 @@ namespace RCNet.DemoConsoleApp
         static void Main(string[] args)
         {
             //Research
-            Research r = new Research();
-            r.Run();
+            //Research r = new Research();
+            //r.Run();
 
+            //Demo standard execution
             try
             {
                 //Logging the output to a console
