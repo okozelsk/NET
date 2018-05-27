@@ -35,7 +35,6 @@ Main RCNet functionality is demonstrated in a simple demo application (/Demo/Dem
 |Matrix|Class represents the mathematical matrix of double values|
 |EVD|Eigenvalues and eigenvectors of a real matrix|
 |QRD|QR Decomposition|
-|HurstExpEstim|Class implements calculation of the Hurst exponent estimation (rescalled range method). Class is not used by RCNet.|
 |PhysUnit|Encaptualates SI physical unit|
 
 ### Analog neuron activation functions
@@ -68,11 +67,11 @@ See the [wiki pages.](https://en.wikipedia.org/wiki/Biological_neuron_model)
 ### Non-recurrent Networks
 |Component|Description|
 |--|--|
-|FeedForwardNetwork|Implements the feed forward network supporting multiple hidden layers. (Xml constructor)|
-|LinRegrTrainer|Implements the linear regression trainer of the feed forward network. This is the special case trainer for FF network having no hidden layers and Identity output activation function. (Xml constructor)|
-|RPropTrainer|Resilient propagation trainer (iRPROP+ variant) of the feed forward network. (Xml constructor)|
-|ParallelPerceptron|Implements the parallel perceptron network. (Xml constructor)|
-|PDeltaRuleTrainer|P-Delta rule trainer of the parallel perceptron network. (Xml constructor)|
+|FeedForwardNetwork|Implements the feed forward network supporting multiple hidden layers|
+|LinRegrTrainer|Implements the linear regression trainer of the feed forward network. This is the special case trainer for FF network having no hidden layers and Identity output activation function|
+|RPropTrainer|Resilient propagation trainer (iRPROP+ variant) of the feed forward network|
+|ParallelPerceptron|Implements the parallel perceptron network|
+|PDeltaRuleTrainer|P-Delta rule trainer of the parallel perceptron network|
 
 ### State Machine Components
 |Component|Description|
@@ -82,8 +81,8 @@ See the [wiki pages.](https://en.wikipedia.org/wiki/Biological_neuron_model)
 |InputSpikingNeuron|Spiking input neuron is the special type of neuron. Its purpose is to preprocess input analog value to be deliverable as the spike train signal into the reservoir neurons through a synapse|
 |ReservoirAnalogNeuron|Reservoir neuron is the main type of the neuron processing input stimuli and emitting output signal. Analog neuron produces analog output. Main features: Retainment (leaky integrator), The second power as augmented readout state|
 |ReservoirSpikingNeuron|Reservoir neuron is the main type of the neuron processing input stimuli and emitting output signal. Spiking neuron produces spikes. Main features: Firing rate as primary readout state, Membrane potential as augmented readout state|
-|Reservoir|Implements reservoir supporting analog and spiking neurons working together. (Xml constructor). Main features: SpectralRadius, Multiple 3D pools of neurons, Pool to pool connections. It can work as the Echo State Network reservoir, Liquid State Machine reservoir or Mixed reservoir|
+|Reservoir|Implements reservoir supporting analog and spiking neurons working together. Main features: SpectralRadius, Multiple 3D pools of neurons, Pool to pool connections. It can work as the Echo State Network reservoir, Liquid State Machine reservoir or Mixed reservoir|
 |ReadoutUnit|Contains the trained unit associated with output field and related important error statistics. Trained unit can be the Feed Forward Network or the Parallel Perceptron Network|
-|ReadoutLayer|Class implements the common readout layer for the reservoir computing methods. (Xml constructor). Supports x-fold cross validation method.|
-|StateMachine|Implements the State Machine Network. (Xml constructor). Supports multiple internal reservoirs. Task types: Prediction, Classification, Hybrid|
+|ReadoutLayer|Class implements the common readout layer for the reservoir computing methods. Supports x-fold cross validation method.|
+|StateMachine|Implements the State Machine Network. Supports multiple internal reservoirs. Task types: Prediction, Classification, Hybrid|
 
