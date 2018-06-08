@@ -18,7 +18,7 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// Common output range 0/1 - no spike/spike
         /// </summary>
-        private static Interval _activationOutputRange = new Interval(0, 1);
+        private static Interval _transmissionSignalRange = new Interval(0, 1);
 
         /// <summary>
         /// Input data range
@@ -76,10 +76,10 @@ namespace RCNet.Neural.Network.SM
 
         //Properties
         /// <summary>
-        /// Output range of associated activation function.
-        /// In case of input spiking neuron there is no activation function thus the range is in all cases the same (0/1).
+        /// Output signal range.
+        /// In case of input spiking neuron there is no activation function thus the range is in all cases the same: 0(no spike)/1(spike).
         /// </summary>
-        public Interval ActivationOutputRange { get { return _activationOutputRange; } }
+        public Interval TransmissionSignalRange { get { return _transmissionSignalRange; } }
 
         /// <summary>
         /// Constant bias of the input neuron is allways 0

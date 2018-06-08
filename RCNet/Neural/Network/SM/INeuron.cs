@@ -18,11 +18,6 @@ namespace RCNet.Neural.Network.SM
         NeuronPlacement Placement { get; }
 
         /// <summary>
-        /// Output range of associated activation function
-        /// </summary>
-        Interval ActivationOutputRange { get; }
-
-        /// <summary>
         /// Statistics of neuron stimulation signal
         /// </summary>
         BasicStat StimuliStat { get; }
@@ -31,6 +26,11 @@ namespace RCNet.Neural.Network.SM
         /// Statistics of neuron internal states
         /// </summary>
         BasicStat StatesStat { get; }
+
+        /// <summary>
+        /// Output signal range
+        /// </summary>
+        Interval TransmissionSignalRange { get; }
 
         /// <summary>
         /// Determines whether neuron's signal is excitatory or inhibitory

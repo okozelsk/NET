@@ -65,10 +65,10 @@ namespace RCNet.Neural.Network.SM
 
         //Properties
         /// <summary>
-        /// Output range of associated activation function.
+        /// Output signal range.
         /// In case of input neuron there is no activation function thus the range is the same as input range.
         /// </summary>
-        public Interval ActivationOutputRange { get { return _inputRange; } }
+        public Interval TransmissionSignalRange { get { return _inputRange; } }
 
         /// <summary>
         /// Constant bias of the input neuron is allways 0

@@ -48,7 +48,7 @@ namespace RCNet.Neural.Network.SM
         private double _signal;
 
         /// <summary>
-        /// Prepared transmission signal
+        /// Signal ready for transmission
         /// </summary>
         private double _transmissionSignal;
 
@@ -127,7 +127,7 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// Output range of associated activation function
         /// </summary>
-        public Interval ActivationOutputRange { get { return _activation.OutputSignalRange; } }
+        public Interval TransmissionSignalRange { get { return _activation.OutputSignalRange; } }
 
         /// <summary>
         /// Neuron's transmission signal

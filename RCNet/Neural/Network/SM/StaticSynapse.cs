@@ -68,7 +68,7 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         public double GetWeightedSignal()
         {
-            double tSignal = TargetNeuron.ActivationOutputRange.Rescale(SourceNeuron.TransmissionSignal, SourceNeuron.ActivationOutputRange);
+            double tSignal = TargetNeuron.TransmissionSignalRange.Rescale(SourceNeuron.TransmissionSignal, SourceNeuron.TransmissionSignalRange);
             tSignal *= Weight;
             return tSignal;
         }
