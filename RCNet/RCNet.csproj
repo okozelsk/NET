@@ -178,6 +178,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Docs\Imgs\Pool.jpg" />
+    <Content Include="Docs\Imgs\PoolInterconnection.jpg" />
     <Content Include="Docs\Imgs\ReservoirComputing.jpg" />
     <Content Include="Docs\Imgs\StateMachineComponents.jpg" />
     <Content Include="Docs\Imgs\TanH.jpg" />
