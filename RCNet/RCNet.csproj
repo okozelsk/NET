@@ -177,6 +177,7 @@
     <EmbeddedResource Include="Neural\Network\SM\ReservoirSettings.xsd" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Docs\Imgs\EuclideanDistance.jpg" />
     <Content Include="Docs\Imgs\Pool.jpg" />
     <Content Include="Docs\Imgs\PoolInterconnection.jpg" />
     <Content Include="Docs\Imgs\ReservoirComputing.jpg" />
