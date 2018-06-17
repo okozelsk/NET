@@ -178,6 +178,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Docs\Imgs\EuclideanDistance.jpg" />
+    <Content Include="Docs\Imgs\ExcitatoryInhibitory.jpg" />
     <Content Include="Docs\Imgs\Pool.jpg" />
     <Content Include="Docs\Imgs\PoolInputConnection.jpg" />
     <Content Include="Docs\Imgs\PoolInterconnection.jpg" />
