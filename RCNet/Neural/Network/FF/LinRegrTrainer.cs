@@ -144,26 +144,46 @@ namespace RCNet.Neural.Network.FF
             //Adjusted predictors
             Matrix predictors = PreparePredictors((double)intensity);
             //Decomposition
-            QRD decomposition = new QRD(predictors);
-            //New waights
-            double[] newWaights = new double[_net.NumOfWeights];
-            //Regression for each output neuron
-            for (int outputIdx = 0; outputIdx < _net.NumOfOutputValues; outputIdx++)
+            QRD decomposition = null;
+            bool useableQRD = true;
+            try
             {
-                //Regression
-                Matrix solution = decomposition.Solve(_outputSingleColMatrixCollection[outputIdx]);
-                //Store weights
-                //Input weights
-                for (int i = 0; i < solution.NumOfRows - 1; i++)
-                {
-                    newWaights[outputIdx * _net.NumOfInputValues + i] = solution.Data[i][0];
-                }
-                //Bias weight
-                newWaights[_net.NumOfOutputValues * _net.NumOfInputValues + outputIdx] = solution.Data[solution.NumOfRows - 1][0];
+                //Try to create QRD. Any exception signals numerical unstability
+                decomposition = new QRD(predictors);
             }
-            //Set new weights and compute error
-            _net.SetWeights(newWaights);
-            _mse = _net.ComputeBatchErrorStat(_inputVectorCollection, _outputVectorCollection).MeanSquare;
+            catch(Exception e)
+            {
+                //Creation of QRD object throws exception. QRD object is not ready for use.
+                useableQRD = false;
+                if (_epoch == 1)
+                {
+                    //No previous successful epoch so stop training
+                    throw e;
+                }
+            }
+            if (useableQRD)
+            {
+                //QRD is ready for use (low probability of numerical unstability)
+                //New weights
+                double[] newWeights = new double[_net.NumOfWeights];
+                //Regression for each output neuron
+                for (int outputIdx = 0; outputIdx < _net.NumOfOutputValues; outputIdx++)
+                {
+                    //Regression
+                    Matrix solution = decomposition.Solve(_outputSingleColMatrixCollection[outputIdx]);
+                    //Store weights
+                    //Input weights
+                    for (int i = 0; i < solution.NumOfRows - 1; i++)
+                    {
+                        newWeights[outputIdx * _net.NumOfInputValues + i] = solution.Data[i][0];
+                    }
+                    //Bias weight
+                    newWeights[_net.NumOfOutputValues * _net.NumOfInputValues + outputIdx] = solution.Data[solution.NumOfRows - 1][0];
+                }
+                //Set new weights and compute error
+                _net.SetWeights(newWeights);
+                _mse = _net.ComputeBatchErrorStat(_inputVectorCollection, _outputVectorCollection).MeanSquare;
+            }
             return;
         }
 

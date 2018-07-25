@@ -111,18 +111,16 @@ namespace RCNet.MathTools.MatrixMath
         /// <param name="y">The y value.</param>
         public static double Hypotenuse(double x, double y)
         {
+            double hypot = 0d;
             if (Math.Abs(x) > Math.Abs(y))
             {
-                return Math.Abs(x) * Math.Sqrt(1d + (y / x).Power(2));
+                hypot = Math.Abs(x) * Math.Sqrt(1d + (y / x).Power(2));
             }
             else if (y != 0)
             {
-                return Math.Abs(y) * Math.Sqrt(1d + (x / y).Power(2));
+                hypot = Math.Abs(y) * Math.Sqrt(1d + (x / y).Power(2));
             }
-            else
-            {
-                return 0;
-            }
+            return hypot;
         }
 
         /// <summary>

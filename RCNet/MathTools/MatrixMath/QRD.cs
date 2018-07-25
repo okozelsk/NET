@@ -182,7 +182,8 @@ namespace RCNet.MathTools.MatrixMath
             {
                 for (int col = 0; col < _numOfCols; col++)
                 {
-                    if (_RDiagData[col] == 0)
+                    //Improvement of the original zero condition to "close to zero" for the stability
+                    if (Math.Abs(_RDiagData[col]) < 1E-20)
                     {
                         return false;
                     }
