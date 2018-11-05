@@ -17,26 +17,71 @@ namespace RCNet.Neural.Activation
     public abstract class ODESpikingMembrane : IActivationFunction
     {
         //Constants
+        /// <summary>
+        /// Spike value
+        /// </summary>
         protected const double Spike = 1;
+        /// <summary>
+        /// Index of MembraneV evolving variable
+        /// </summary>
         protected const int VarMembraneV = 0;
 
         //Attributes
+        /// <summary>
+        /// Output range
+        /// </summary>
         protected static readonly Interval _outputRange = new Interval(0, 1);
 
         //Parameter attributes
+        /// <summary>
+        /// Normal range of the internal state
+        /// </summary>
         protected Interval _stateRange;
+        /// <summary>
+        /// Membrane rest voltage
+        /// </summary>
         protected double _restV;
+        /// <summary>
+        /// Membrane after reset voltage
+        /// </summary>
         protected double _resetV;
+        /// <summary>
+        /// Membrane firing voltage
+        /// </summary>
         protected double _firingThresholdV;
+        /// <summary>
+        /// Refractory periods after firing
+        /// </summary>
         protected int _refractoryPeriods;
+        /// <summary>
+        /// Input strength modifier
+        /// </summary>
         protected double _stimuliCoeff;
-        protected double _timeStep;
+        /// <summary>
+        /// ODE numerical solver method
+        /// </summary>
+        protected ODENumSolver.Method _solvingMethod;
+        /// <summary>
+        /// Time sub-steps within the time step
+        /// </summary>
         protected int _subSteps;
 
         //Operation attributes
+        /// <summary>
+        /// Evolving variables
+        /// </summary>
         protected Vector _evolVars;
+        /// <summary>
+        /// Specifies whether the membrane is in refractory mode
+        /// </summary>
         protected bool _inRefractory;
+        /// <summary>
+        /// Specifies current refractory period of the membrane
+        /// </summary>
         protected int _refractoryPeriod;
+        /// <summary>
+        /// Adjusted (modified) input stimuli
+        /// </summary>
         protected double _stimuli;
 
         /// <summary>
@@ -47,15 +92,15 @@ namespace RCNet.Neural.Activation
         /// <param name="firingThresholdV">Firing threshold</param>
         /// <param name="refractoryPeriods">Refractory periods</param>
         /// <param name="stimuliCoeff">Input stimuli coefficient</param>
-        /// <param name="timeStep">Time step of Compute method</param>
-        /// <param name="subSteps">Computation sub-steps of timeStep</param>
+        /// <param name="solvingMethod">ODE numerical solver method</param>
+        /// <param name="subSteps">Computation sub-steps</param>
         /// <param name="numOfEvolvingVars">Number of evolving variables</param>
         protected ODESpikingMembrane(double restV,
                                      double resetV,
                                      double firingThresholdV,
-                                     double refractoryPeriods,
+                                     int refractoryPeriods,
                                      double stimuliCoeff,
-                                     double timeStep,
+                                     ODENumSolver.Method solvingMethod,
                                      int subSteps,
                                      int numOfEvolvingVars
                                      )
@@ -63,11 +108,11 @@ namespace RCNet.Neural.Activation
             _restV = restV;
             _resetV = resetV;
             _firingThresholdV = firingThresholdV;
-            _refractoryPeriods = (int)refractoryPeriods;
+            _refractoryPeriods = refractoryPeriods;
             _stimuliCoeff = stimuliCoeff;
             _stateRange = new Interval(_restV, _firingThresholdV);
             _evolVars = new Vector(numOfEvolvingVars);
-            _timeStep = timeStep;
+            _solvingMethod = solvingMethod;
             _subSteps = subSteps;
             _evolVars[VarMembraneV] = _restV;
             _inRefractory = false;
@@ -148,7 +193,8 @@ namespace RCNet.Neural.Activation
                 }
             }
             //Compute membrane new potential
-            foreach(ODENumSolver.Estimation subResult in ODENumSolver.Solve(MembraneDiffEq, 0, _evolVars, _timeStep, _subSteps, ODENumSolver.Method.Euler))
+            //PhysUnit.ToBase(1, PhysUnit.MetricPrefix.Milli)
+            foreach (ODENumSolver.Estimation subResult in ODENumSolver.Solve(MembraneDiffEq, 0, _evolVars, 1, _subSteps, _solvingMethod))
             {
                 _evolVars = subResult.V;
                 if(_evolVars[VarMembraneV] >= _firingThresholdV)

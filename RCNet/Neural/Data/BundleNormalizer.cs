@@ -12,6 +12,7 @@ namespace RCNet.Neural.Data
     public class BundleNormalizer
     {
         //Attributes
+        private Dictionary<string, Normalizer> _fieldTypeIniNormalizerCollection;
         private Dictionary<string, Normalizer> _fieldTypeNormalizerCollection;
         private Dictionary<string, string> _fieldNameTypeCollection;
         private List<string> _fieldNameCollection;
@@ -24,22 +25,6 @@ namespace RCNet.Neural.Data
         /// Range of normalized values
         /// </summary>
         public Interval NormRange { get; }
-        /// <summary>
-        /// Reserve held by the input fields normalizers to cover cases where future data exceeds a known range of sample data.
-        /// </summary>
-        public double InputNormReserveRatio { get; }
-        /// <summary>
-        /// Specifies whether to apply input data standardization
-        /// </summary>
-        public bool InputStandardization { get; }
-        /// <summary>
-        /// Reserve held by the output fields normalizers to cover cases where future data exceeds a known range of sample data.
-        /// </summary>
-        public double OutputNormReserveRatio { get; }
-        /// <summary>
-        /// Specifies whether to apply output data standardization
-        /// </summary>
-        public bool OutputStandardization { get; }
         /// <summary>
         /// Collection of input fields normalizers.
         /// </summary>
@@ -56,25 +41,9 @@ namespace RCNet.Neural.Data
         /// <param name="normRange">
         /// Range of normalized values
         /// </param>
-        /// <param name="inputNormReserveRatio">
-        /// Reserve held by the input fields normalizers to cover cases where future data exceeds a known range of sample data.
-        /// </param>
-        /// <param name="inputDataStandardization">
-        /// Specifies whether to apply data standardization to input data
-        /// </param>
-        /// <param name="outputNormReserveRatio">
-        /// Reserve held by the output fields normalizers to cover cases where future data exceeds a known range of sample data.
-        /// </param>
-        /// <param name="outputDataStandardization">
-        /// Specifies whether to apply data standardization to output data
-        /// </param>
-        public BundleNormalizer(Interval normRange,
-                                double inputNormReserveRatio,
-                                bool inputDataStandardization,
-                                double outputNormReserveRatio,
-                                bool outputDataStandardization
-                                )
+        public BundleNormalizer(Interval normRange)
         {
+            _fieldTypeIniNormalizerCollection = new Dictionary<string, Normalizer>();
             _fieldTypeNormalizerCollection = new Dictionary<string, Normalizer>();
             _fieldNameTypeCollection = new Dictionary<string, string>();
             _fieldNameCollection = new List<string>();
@@ -82,10 +51,6 @@ namespace RCNet.Neural.Data
             _outputFieldNameCollection = new List<string>();
             _outputFieldAdjustmentSwitches = null;
             NormRange = normRange.DeepClone();
-            InputNormReserveRatio = inputNormReserveRatio;
-            InputStandardization = inputDataStandardization;
-            OutputNormReserveRatio = outputNormReserveRatio;
-            OutputStandardization = outputDataStandardization;
             InputFieldNormalizerRefCollection = new List<Normalizer>();
             OutputFieldNormalizerRefCollection = new List<Normalizer>();
             return;
@@ -94,9 +59,9 @@ namespace RCNet.Neural.Data
         //Methods
         private void ResetNormalizers()
         {
-            foreach(Normalizer normalizer in _fieldTypeNormalizerCollection.Values)
+            foreach(string fieldType in _fieldTypeIniNormalizerCollection.Keys)
             {
-                normalizer.Reset();
+                _fieldTypeNormalizerCollection[fieldType].Adopt(_fieldTypeIniNormalizerCollection[fieldType]);
             }
             return;
         }
@@ -118,7 +83,11 @@ namespace RCNet.Neural.Data
         /// </summary>
         /// <param name="name">Field name</param>
         /// <param name="type">Field type</param>
-        public void DefineField(string name, string type)
+        /// <param name="normReserveRatio">Reserve held by the normalizer to cover cases where future data exceeds a known range of sample data.</param>
+        /// <param name="dataStandardization">Specifies whether to apply data standardization</param>
+        /// <param name="fixedMin">Normalizer fixed min</param>
+        /// <param name="fixedMax">Normalizer fixed max</param>
+        public void DefineField(string name, string type, double normReserveRatio, bool dataStandardization, double fixedMin = double.NaN, double fixedMax = double.NaN)
         {
             if (_outputFieldAdjustmentSwitches != null)
             {
@@ -128,9 +97,19 @@ namespace RCNet.Neural.Data
             {
                 throw new ArgumentException($"Field {name} is already defined", "name");
             }
-            if (!_fieldTypeNormalizerCollection.ContainsKey(type))
+            if (!_fieldTypeIniNormalizerCollection.ContainsKey(type))
             {
-                _fieldTypeNormalizerCollection.Add(type, null);
+                Normalizer iniNormalizer = new Normalizer(NormRange, normReserveRatio, dataStandardization);
+                if (fixedMin.IsValid())
+                {
+                    iniNormalizer.Adjust(fixedMin);
+                }
+                if (fixedMax.IsValid())
+                {
+                    iniNormalizer.Adjust(fixedMax);
+                }
+                _fieldTypeIniNormalizerCollection.Add(type, iniNormalizer);
+                _fieldTypeNormalizerCollection.Add(type, new Normalizer(iniNormalizer));
             }
             _fieldNameTypeCollection.Add(name, type);
             _fieldNameCollection.Add(name);
@@ -155,13 +134,7 @@ namespace RCNet.Neural.Data
             {
                 throw new ArgumentException($"Input field name {name} is already defined", "name");
             }
-            string type = _fieldNameTypeCollection[name];
-            //Instantiate a normalizer if necessary
-            if(_fieldTypeNormalizerCollection[type] == null)
-            {
-                _fieldTypeNormalizerCollection[type] = new Normalizer(NormRange, InputNormReserveRatio, InputStandardization);
-            }
-            InputFieldNormalizerRefCollection.Add(_fieldTypeNormalizerCollection[type]);
+            InputFieldNormalizerRefCollection.Add(_fieldTypeNormalizerCollection[_fieldNameTypeCollection[name]]);
             _inputFieldNameCollection.Add(name);
             return;
         }
@@ -184,13 +157,7 @@ namespace RCNet.Neural.Data
             {
                 throw new ArgumentException($"Output field name {name} is already defined", "name");
             }
-            string type = _fieldNameTypeCollection[name];
-            //Instantiate a normalizer if necessary
-            if (_fieldTypeNormalizerCollection[type] == null)
-            {
-                _fieldTypeNormalizerCollection[type] = new Normalizer(NormRange, OutputNormReserveRatio, OutputStandardization);
-            }
-            OutputFieldNormalizerRefCollection.Add(_fieldTypeNormalizerCollection[type]);
+            OutputFieldNormalizerRefCollection.Add(_fieldTypeNormalizerCollection[_fieldNameTypeCollection[name]]);
             _outputFieldNameCollection.Add(name);
             return;
         }
@@ -265,7 +232,8 @@ namespace RCNet.Neural.Data
         /// Adjusts internal normalizers
         /// </summary>
         /// <param name="bundle">Sample data bundle</param>
-        public void AdjustNormalizers(PatternBundle bundle)
+        /// <param name="predictionPattern">Optional prediction pattern</param>
+        public void AdjustNormalizers(PatternBundle bundle, List<double[]> predictionPattern = null)
         {
             ResetNormalizers();
             foreach (List<double[]> pattern in bundle.InputPatternCollection)
@@ -275,7 +243,14 @@ namespace RCNet.Neural.Data
                     AdjustInputNormalizers(inputVector);
                 }
             }
-            foreach(double[] outputVector in bundle.OutputVectorCollection)
+            if(predictionPattern != null)
+            {
+                foreach (double[] inputVector in predictionPattern)
+                {
+                    AdjustInputNormalizers(inputVector);
+                }
+            }
+            foreach (double[] outputVector in bundle.OutputVectorCollection)
             {
                 AdjustOutputNormalizers(outputVector);
             }
@@ -435,12 +410,17 @@ namespace RCNet.Neural.Data
         /// Normalizes all values in the sample data bundle
         /// </summary>
         /// <param name="bundle">Sample data bundle</param>
-        public void Normalize(PatternBundle bundle)
+        /// <param name="predictionPattern">Optional prediction pattern</param>
+        public void Normalize(PatternBundle bundle, List<double[]> predictionPattern = null)
         {
-            AdjustNormalizers(bundle);
+            AdjustNormalizers(bundle, predictionPattern);
             foreach (List<double[]> pattern in bundle.InputPatternCollection)
             {
                 NormalizeInputVectorCollection(pattern);
+            }
+            if(predictionPattern != null)
+            {
+                NormalizeInputVectorCollection(predictionPattern);
             }
             NormalizeOutputVectorCollection(bundle.OutputVectorCollection);
             return;

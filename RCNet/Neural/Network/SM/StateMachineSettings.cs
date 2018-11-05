@@ -134,14 +134,16 @@ namespace RCNet.Neural.Network.SM
             XElement reservoirInstancesContainerElem = stateMachineSettingsElem.Descendants("reservoirInstanceContainer").First();
             foreach (XElement reservoirInstanceElem in reservoirInstancesContainerElem.Descendants("reservoirInstance"))
             {
-                ReservoirInstanceDefinition newMap = new ReservoirInstanceDefinition();
-                newMap.InstanceName = reservoirInstanceElem.Attribute("name").Value;
-                newMap.AugmentedStates = bool.Parse(reservoirInstanceElem.Attribute("augmentedStates").Value);
-                //Select reservoir settings
-                newMap.ReservoirSettings = (from settings in availableResSettings
-                                            where settings.SettingsName == reservoirInstanceElem.Attribute("cfg").Value
-                                            select settings).FirstOrDefault();
-                if(newMap.ReservoirSettings == null)
+                ReservoirInstanceDefinition newMap = new ReservoirInstanceDefinition
+                {
+                    InstanceName = reservoirInstanceElem.Attribute("name").Value,
+                    AugmentedStates = bool.Parse(reservoirInstanceElem.Attribute("augmentedStates").Value),
+                    //Select reservoir settings
+                    ReservoirSettings = (from settings in availableResSettings
+                                         where settings.SettingsName == reservoirInstanceElem.Attribute("cfg").Value
+                                         select settings).FirstOrDefault()
+                };
+                if (newMap.ReservoirSettings == null)
                 {
                     throw new Exception($"Reservoir settings '{reservoirInstanceElem.Attribute("cfg").Value}' was not found among available settings.");
                 }

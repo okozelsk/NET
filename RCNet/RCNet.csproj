@@ -50,7 +50,23 @@
     <Compile Include="MathTools\PhysUnit.cs" />
     <Compile Include="MathTools\VectorMath\Vector.cs" />
     <Compile Include="Neural\Activation\ActivationFactory.cs" />
-    <Compile Include="Neural\Activation\ActivationSettings.cs" />
+    <Compile Include="Neural\Activation\TanHSettings.cs" />
+    <Compile Include="Neural\Activation\SoftPlusSettings.cs" />
+    <Compile Include="Neural\Activation\SoftExponentialSettings.cs" />
+    <Compile Include="Neural\Activation\SinusoidSettings.cs" />
+    <Compile Include="Neural\Activation\SincSettings.cs" />
+    <Compile Include="Neural\Activation\SimpleIFSettings.cs" />
+    <Compile Include="Neural\Activation\SigmoidSettings.cs" />
+    <Compile Include="Neural\Activation\LeakyReLUSettings.cs" />
+    <Compile Include="Neural\Activation\LeakyIFSettings.cs" />
+    <Compile Include="Neural\Activation\ISRUSettings.cs" />
+    <Compile Include="Neural\Activation\IdentitySettings.cs" />
+    <Compile Include="Neural\Activation\GaussianSettings.cs" />
+    <Compile Include="Neural\Activation\ExpIFSettings.cs" />
+    <Compile Include="Neural\Activation\ElliotSettings.cs" />
+    <Compile Include="Neural\Activation\BentIdentitySettings.cs" />
+    <Compile Include="Neural\Activation\AdSimpleIFSettings.cs" />
+    <Compile Include="Neural\Activation\AdExpIFSettings.cs" />
     <Compile Include="Neural\Activation\AdExpIF.cs" />
     <Compile Include="Neural\Activation\BentIdentity.cs" />
     <Compile Include="Neural\Activation\Elliot.cs" />
@@ -168,9 +184,6 @@
     <EmbeddedResource Include="Neural\Network\FF\RPropTrainerSettings.xsd" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Neural\Activation\ActivationSettings.xsd" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Neural\Network\SM\PoolSettings.xsd" />
   </ItemGroup>
   <ItemGroup>
@@ -188,6 +201,91 @@
     <Content Include="Docs\Imgs\SelfConnection.jpg" />
     <Content Include="Docs\Imgs\StateMachineComponents.jpg" />
     <Content Include="Docs\Imgs\TanH.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Neural\Activation\SimpleIFSettings.xsd">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Neural\Activation\AdSimpleIFSettings.xsd">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Neural\Activation\LeakyIFSettings.xsd">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Neural\Activation\ExpIFSettings.xsd">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Neural\Activation\AdExpIFSettings.xsd">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Neural\Activation\BentIdentitySettings.xsd">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Neural\Activation\ElliotSettings.xsd">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Neural\Activation\IdentitySettings.xsd">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Neural\Activation\GaussianSettings.xsd">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Neural\Activation\ISRUSettings.xsd">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Neural\Activation\LeakyReLUSettings.xsd">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Neural\Activation\SigmoidSettings.xsd">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Neural\Activation\SincSettings.xsd">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Neural\Activation\SinusoidSettings.xsd">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Neural\Activation\SoftExponentialSettings.xsd">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Neural\Activation\SoftPlusSettings.xsd">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Neural\Activation\TanHSettings.xsd">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

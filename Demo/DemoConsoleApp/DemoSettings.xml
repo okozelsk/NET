@@ -16,27 +16,29 @@
                 <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
               </input>
               <excitatory relShare="3">
-                <activation function="LeakyIF"
-                            arg1="8"
-                            arg2="15"
-                            arg3="-70"
-                            arg4="-65"
-                            arg5="-50"
-                            arg6="1"
-                            arg7="6"
-                            />
+                <LeakyIF stimuliCoeff="9"
+                         timeScale="8"
+                         resistance="15"
+                         restV="-70"
+                         resetV="-65"
+                         firingThresholdV="-50"
+                         refractoryPeriods="0"
+                         solverMethod="Euler"
+                         solverCompSteps="2"
+                         />
                 <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
               </excitatory>
               <inhibitory relShare="1">
-                <activation function="LeakyIF"
-                            arg1="8"
-                            arg2="15"
-                            arg3="-70"
-                            arg4="-65"
-                            arg5="-50"
-                            arg6="1"
-                            arg7="6"
-                            />
+                <LeakyIF stimuliCoeff="9"
+                         timeScale="8"
+                         resistance="15"
+                         restV="-70"
+                         resetV="-65"
+                         firingThresholdV="-50"
+                         refractoryPeriods="1"
+                         solverMethod="Euler"
+                         solverCompSteps="2"
+                         />
                 <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
               </inhibitory>
               <interconnection density="0.3" avgDistance="1.5" allowSelfConnection="false">
@@ -48,31 +50,33 @@
                 <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
               </input>
               <excitatory relShare="3">
-                <activation function="ExpIF"
-                            arg1="12"
-                            arg2="20"
-                            arg3="-65"
-                            arg4="-60"
-                            arg5="-55"
-                            arg6="-30"
-                            arg7="2"
-                            arg8="1"
-                            arg9="5.5"
-                            />
+                <ExpIF stimuliCoeff="5.5"
+                       timeScale="12"
+                       resistance="20"
+                       restV="-65"
+                       resetV="-60"
+                       rheobaseV="-55"
+                       firingThresholdV="-30"
+                       sharpnessDeltaT="2"
+                       refractoryPeriods="1"
+                       solverMethod="Euler"
+                       solverCompSteps="2"
+                       />
                 <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
               </excitatory>
               <inhibitory relShare="1">
-                <activation function="ExpIF"
-                            arg1="12"
-                            arg2="20"
-                            arg3="-65"
-                            arg4="-60"
-                            arg5="-55"
-                            arg6="-30"
-                            arg7="2"
-                            arg8="1"
-                            arg9="5.5"
-                            />
+                <ExpIF stimuliCoeff="5.5"
+                       timeScale="12"
+                       resistance="20"
+                       restV="-65"
+                       resetV="-60"
+                       rheobaseV="-55"
+                       firingThresholdV="-30"
+                       sharpnessDeltaT="2"
+                       refractoryPeriods="1"
+                       solverMethod="Euler"
+                       solverCompSteps="2"
+                       />
                 <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
               </inhibitory>
               <interconnection density="0.3" avgDistance="1.5" allowSelfConnection="false">
@@ -84,22 +88,20 @@
                 <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
               </input>
               <excitatory relShare="3">
-                <activation function="AdSimpleIF"
-                            arg1="15"
-                            arg2="0.05"
-                            arg3="5"
-                            arg4="20"
-                            arg5="1"
+                <AdSimpleIF stimuliCoeff="1"
+                            resistance="15"
+                            decayRate="0.05"
+                            resetV="5"
+                            firingThresholdV="20"
                             />
                 <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
               </excitatory>
               <inhibitory relShare="1">
-                <activation function="AdSimpleIF"
-                            arg1="15"
-                            arg2="0.05"
-                            arg3="5"
-                            arg4="20"
-                            arg5="1"
+                <AdSimpleIF stimuliCoeff="1"
+                            resistance="15"
+                            decayRate="0.05"
+                            resetV="5"
+                            firingThresholdV="20"
                             />
                 <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
               </inhibitory>
@@ -169,22 +171,20 @@
                 <weight min="0" max="0.5" randomSign="false" distribution="Uniform"/>
               </input>
               <excitatory relShare="3">
-                <activation function="AdSimpleIF"
-                            arg1="15"
-                            arg2="0.1"
-                            arg3="5"
-                            arg4="20"
-                            arg5="1"
+                <AdSimpleIF stimuliCoeff="1"
+                            resistance="15"
+                            decayRate="0.1"
+                            resetV="5"
+                            firingThresholdV="20"
                             />
                 <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
               </excitatory>
               <inhibitory relShare="1">
-                <activation function="AdSimpleIF"
-                            arg1="15"
-                            arg2="0.1"
-                            arg3="5"
-                            arg4="20"
-                            arg5="1"
+                <AdSimpleIF stimuliCoeff="1"
+                            resistance="15"
+                            decayRate="0.1"
+                            resetV="5"
+                            firingThresholdV="20"
                             />
                 <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
               </inhibitory>
@@ -197,11 +197,11 @@
                 <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
               </input>
               <excitatory relShare="1">
-                <activation function="TanH"/>
+                <TanH />
                 <bias min="-0.4" max="0.4" randomSign="false" distribution="Uniform"/>
               </excitatory>
               <inhibitory relShare="1">
-                <activation function="TanH"/>
+                <TanH />
                 <bias min="-0.4" max="0.4" randomSign="false" distribution="Uniform"/>
               </inhibitory>
               <interconnection density="0.1" avgDistance="NA" allowSelfConnection="true">
@@ -229,7 +229,7 @@
       <readoutLayer testDataRatio="0.1" folds="Auto">
         <readoutUnit attempts="1" attemptEpochs="100">
           <ff regressionMethod="Linear">
-            <outputActivation function="Identity"/>
+            <Identity />
             <linRegrTrainer hiNoiseIntensity="0.2" maxStretch="6" zeroMargin="0.5"/>
           </ff>
         </readoutUnit>
@@ -254,11 +254,11 @@
                 <weight min="0" max="0.6" randomSign="false" distribution="Uniform"/>
               </input>
               <excitatory relShare="1">
-                <activation function="Sigmoid"/>
+                <Sigmoid />
                 <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
               </excitatory>
               <inhibitory relShare="1">
-                <activation function="Gaussian"/>
+                <Gaussian />
                 <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
               </inhibitory>
               <interconnection density="0.1" avgDistance="1.5" allowSelfConnection="true">
@@ -279,7 +279,7 @@
       <readoutLayer testDataRatio="0.3" folds="1">
         <readoutUnit attempts="1" attemptEpochs="1">
           <ff regressionMethod="Linear">
-            <outputActivation function="Identity"/>
+            <Identity />
           </ff>
         </readoutUnit>
         <outputFields>

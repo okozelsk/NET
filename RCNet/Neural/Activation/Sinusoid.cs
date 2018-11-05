@@ -17,8 +17,9 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Instantiates Sinusoid activation function
         /// </summary>
-        public Sinusoid()
-            :base()
+        /// <param name="settings">Encapsulated arguments</param>
+        public Sinusoid(SinusoidSettings settings)
+            : base()
         {
             return;
         }

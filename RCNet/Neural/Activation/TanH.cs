@@ -17,8 +17,9 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Instantiates TanH activation function
         /// </summary>
-        public TanH()
-            :base()
+        /// <param name="settings">Encapsulated arguments</param>
+        public TanH(TanHSettings settings)
+            : base()
         {
             return;
         }

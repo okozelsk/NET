@@ -17,8 +17,9 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Instantiates Sigmoid activation function
         /// </summary>
-        public Sigmoid()
-            :base()
+        /// <param name="settings">Encapsulated arguments</param>
+        public Sigmoid(SigmoidSettings settings)
+            : base()
         {
             return;
         }

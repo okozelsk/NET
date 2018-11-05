@@ -51,7 +51,7 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// Activation settings of the inhibitory neurons in the pool.
         /// </summary>
-        public ActivationSettings InhibitoryActivation { get; set; }
+        public Object InhibitoryActivation { get; set; }
         /// <summary>
         /// Each pool's neuron has its own constant input bias. Bias is always added to input signal of the neuron.
         /// A constant bias value of the neuron will be selected randomly.
@@ -60,7 +60,7 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// Activation settings of the excitatory neurons in the pool.
         /// </summary>
-        public ActivationSettings ExcitatoryActivation { get; set; }
+        public Object ExcitatoryActivation { get; set; }
         /// <summary>
         /// Each pool's neuron has its own constant input bias. Bias is always added to input signal of the neuron.
         /// A constant bias value of the neuron will be selected randomly.
@@ -152,9 +152,9 @@ namespace RCNet.Neural.Network.SM
             }
             InhibitoryNeuronsDensity = source.InhibitoryNeuronsDensity;
             InhibitoryActivation = null;
-            if(source.InhibitoryActivation != null)
+            if (source.InhibitoryActivation != null)
             {
-                InhibitoryActivation = source.InhibitoryActivation.DeepClone();
+                InhibitoryActivation = ActivationFactory.GetDeepClone(source.InhibitoryActivation);
             }
             InhibitoryBias = null;
             if (source.InhibitoryBias != null)
@@ -164,7 +164,7 @@ namespace RCNet.Neural.Network.SM
             ExcitatoryActivation = null;
             if (source.ExcitatoryActivation != null)
             {
-                ExcitatoryActivation = source.ExcitatoryActivation.DeepClone();
+                ExcitatoryActivation = ActivationFactory.GetDeepClone(source.ExcitatoryActivation);
             }
             ExcitatoryBias = null;
             if(source.ExcitatoryBias != null)
@@ -216,12 +216,12 @@ namespace RCNet.Neural.Network.SM
             InputSynapseWeight = new RandomValueSettings(inputElem.Descendants("weight").First());
             //Excitatory
             XElement excitatoryElem = poolSettingsElem.Descendants("excitatory").First();
-            ExcitatoryActivation = new ActivationSettings(excitatoryElem.Descendants("activation").First());
+            ExcitatoryActivation = ActivationFactory.LoadSettings(excitatoryElem.Descendants().First());
             ExcitatoryBias = new RandomValueSettings(excitatoryElem.Descendants("bias").First());
             double excitatoryRelShare = double.Parse(excitatoryElem.Attribute("relShare").Value, CultureInfo.InvariantCulture);
             //Inhibitory
             XElement inhibitoryElem = poolSettingsElem.Descendants("inhibitory").First();
-            InhibitoryActivation = new ActivationSettings(inhibitoryElem.Descendants("activation").First());
+            InhibitoryActivation = ActivationFactory.LoadSettings(inhibitoryElem.Descendants().First());
             InhibitoryBias = new RandomValueSettings(inhibitoryElem.Descendants("bias").First());
             double inhibitoryRelShare = double.Parse(inhibitoryElem.Attribute("relShare").Value, CultureInfo.InvariantCulture);
             InhibitoryNeuronsDensity = inhibitoryRelShare / (inhibitoryRelShare + excitatoryRelShare);

@@ -11,7 +11,7 @@ namespace RCNet.Neural.Activation
     public class LeakyReLU : AnalogActivationFunction
     {
         //Attributes
-        private Interval _outputRange;
+        private readonly Interval _outputRange;
 
         //Attribute properties
         /// <summary>
@@ -23,15 +23,15 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Instantiates a LeakyReLU activation function
         /// </summary>
-        /// <param name="negSlope">The negative half-line slope</param>
-        public LeakyReLU(double negSlope = 0.01)
-            :base()
+        /// <param name="settings">Encapsulated arguments</param>
+        public LeakyReLU(LeakyReLUSettings settings)
+            : base()
         {
-            if (negSlope < 0)
+            if (settings.NegSlope < 0)
             {
                 throw new ArgumentOutOfRangeException("negSlope", "negSlope must be GE 0");
             }
-            NegSlope = negSlope.Bound();
+            NegSlope = settings.NegSlope.Bound();
             if (NegSlope > 0)
             {
                 _outputRange = new Interval(double.NegativeInfinity.Bound(), double.PositiveInfinity.Bound());

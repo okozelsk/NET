@@ -18,8 +18,9 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Instantiates Bent Identity activation function
         /// </summary>
-        public BentIdentity()
-            :base()
+        /// <param name="settings">Encapsulated arguments</param>
+        public BentIdentity(BentIdentitySettings settings)
+            : base()
         {
             return;
         }

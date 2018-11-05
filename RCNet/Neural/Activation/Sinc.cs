@@ -17,8 +17,9 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Instantiates Sinc activation function
         /// </summary>
-        public Sinc()
-            :base()
+        /// <param name="settings">Encapsulated arguments</param>
+        public Sinc(SincSettings settings)
+            : base()
         {
             Reset();
             return;

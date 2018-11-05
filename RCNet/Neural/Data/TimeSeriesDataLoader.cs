@@ -59,7 +59,7 @@ namespace RCNet.Neural.Data
                                              )
         {
             TimeSeriesBundle bundle = null;
-            bundleNormalizer = new BundleNormalizer(normRange, normReserveRatio, dataStandardization, normReserveRatio, dataStandardization);
+            bundleNormalizer = new BundleNormalizer(normRange);
             using (StreamReader streamReader = new StreamReader(new FileStream(fileName, FileMode.Open)))
             {
                 List<int> fieldIndexes = new List<int>();
@@ -81,7 +81,7 @@ namespace RCNet.Neural.Data
                 {
                     if (!bundleNormalizer.IsFieldDefined(name))
                     {
-                        bundleNormalizer.DefineField(name, singleNormalizer ? "COMMON" : name);
+                        bundleNormalizer.DefineField(name, singleNormalizer ? "COMMON" : name, normReserveRatio, dataStandardization);
                         fieldIndexes.Add(columnNames.IndexOf(name));
                     }
                     bundleNormalizer.DefineInputField(name);
@@ -90,7 +90,7 @@ namespace RCNet.Neural.Data
                 {
                     if (!bundleNormalizer.IsFieldDefined(name))
                     {
-                        bundleNormalizer.DefineField(name, singleNormalizer ? "COMMON" : name);
+                        bundleNormalizer.DefineField(name, singleNormalizer ? "COMMON" : name, normReserveRatio, dataStandardization);
                         fieldIndexes.Add(columnNames.IndexOf(name));
                     }
                     bundleNormalizer.DefineOutputField(name);

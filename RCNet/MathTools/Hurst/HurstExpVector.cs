@@ -44,6 +44,12 @@ namespace RCNet.MathTools.Hurst
             return;
         }
 
+        //Properties
+        /// <summary>
+        /// Size of the Hurst vector
+        /// </summary>
+        public int VectorSize { get { return _hurstExpEstimCollection.Length; } }
+
         //Methods
         /// <summary>
         /// Adds next vector to stored time series of vectors

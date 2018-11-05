@@ -17,8 +17,9 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Instantiates Identity activation function
         /// </summary>
-        public Identity()
-            :base()
+        /// <param name="settings">Encapsulated arguments</param>
+        public Identity(IdentitySettings settings)
+            : base()
         {
             return;
         }

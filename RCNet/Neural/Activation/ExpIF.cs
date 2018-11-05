@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using RCNet.Extensions;
+using RCNet.MathTools.Differential;
 using RCNet.MathTools.VectorMath;
 
 namespace RCNet.Neural.Activation
@@ -17,39 +18,23 @@ namespace RCNet.Neural.Activation
     {
         //Attributes
         //Parameter attributes
-        private double _membraneTimeScale;
-        private double _membraneResistance;
-        private double _rheobaseThresholdV;
-        private double _sharpnessDeltaT;
+        private readonly double _membraneTimeScale;
+        private readonly double _membraneResistance;
+        private readonly double _rheobaseThresholdV;
+        private readonly double _sharpnessDeltaT;
 
+        //Constructor
         /// <summary>
         /// Constructs an initialized instance
         /// </summary>
-        /// <param name="membraneTimeScale">Membrane time scale (ms)</param>
-        /// <param name="membraneResistance">Membrane resistance (Mohm)</param>
-        /// <param name="restV">Membrane rest potential (mV)</param>
-        /// <param name="resetV">Membrane reset potential (mV)</param>
-        /// <param name="rheobaseThresholdV">Membrane rheobase threshold (mV)</param>
-        /// <param name="firingThresholdV">Membrane firing threshold (mV)</param>
-        /// <param name="sharpnessDeltaT">Sharpness of membrane potential change (mV)</param>
-        /// <param name="refractoryPeriods">Number of after spike computation cycles while an input stimuli is ignored (ms).</param>
-        /// <param name="stimuliCoeff">Input stimuli coefficient (nA)</param>
-        public ExpIF(double membraneTimeScale,
-                     double membraneResistance,
-                     double restV,
-                     double resetV,
-                     double rheobaseThresholdV,
-                     double firingThresholdV,
-                     double sharpnessDeltaT,
-                     double refractoryPeriods,
-                     double stimuliCoeff
-                     )
-            :base(restV, resetV, firingThresholdV, refractoryPeriods, stimuliCoeff, 1, 2, 1)
+        /// <param name="settings">Encapsulated arguments</param>
+        public ExpIF(ExpIFSettings settings)
+            : base(settings.RestV, settings.ResetV, settings.FiringThresholdV, settings.RefractoryPeriods, settings.StimuliCoeff, settings.SolverMethod, settings.SolverCompSteps, 1)
         {
-            _membraneTimeScale = membraneTimeScale;
-            _membraneResistance = membraneResistance;
-            _rheobaseThresholdV = rheobaseThresholdV;
-            _sharpnessDeltaT = sharpnessDeltaT;
+            _membraneTimeScale = settings.TimeScale;
+            _membraneResistance = settings.Resistance;
+            _rheobaseThresholdV = settings.RheobaseThresholdV;
+            _sharpnessDeltaT = settings.SharpnessDeltaT;
             return;
         }
 

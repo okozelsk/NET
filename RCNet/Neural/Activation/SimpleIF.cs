@@ -19,42 +19,31 @@ namespace RCNet.Neural.Activation
 
         //Attributes
         private static readonly Interval _outputRange = new Interval(0, 1);
-        private Interval _stateRange;
-        private double _membraneResistance;
-        private double _membraneDecayRate;
-        private double _restV;
-        private double _resetV;
-        private double _firingThresholdV;
-        private int _refractoryPeriods;
-        private double _stimuliCoeff;
+        private readonly Interval _stateRange;
+        private readonly double _membraneResistance;
+        private readonly double _membraneDecayRate;
+        private readonly double _restV;
+        private readonly double _resetV;
+        private readonly double _firingThresholdV;
+        private readonly int _refractoryPeriods;
+        private readonly double _stimuliCoeff;
         private double _membraneV;
         private bool _inRefractory;
         private int _refractoryPeriod;
-
+        //Constructor
         /// <summary>
         /// Constructs an initialized instance
         /// </summary>
-        /// <param name="membraneResistance">Membrane resisatance (Mohm).</param>
-        /// <param name="membraneDecayRate">Membrane potential decay</param>
-        /// <param name="resetV">Membrane reset potential (mV)</param>
-        /// <param name="firingThresholdV">Membrane firing threshold (mV)</param>
-        /// <param name="refractoryPeriods">Number of after spike computation cycles while an input stimuli is ignored (ms).</param>
-        /// <param name="stimuliCoeff">Input stimuli coefficient (nA)</param>
-        public SimpleIF(double membraneResistance,
-                        double membraneDecayRate,
-                        double resetV,
-                        double firingThresholdV,
-                        double refractoryPeriods,
-                        double stimuliCoeff
-                        )
+        /// <param name="settings">Encapsulated arguments</param>
+        public SimpleIF(SimpleIFSettings settings)
         {
-            _membraneResistance = membraneResistance;
-            _membraneDecayRate = membraneDecayRate;
+            _membraneResistance = settings.Resistance;
+            _membraneDecayRate = settings.DecayRate;
             _restV = 0;
-            _resetV = Math.Abs(resetV);
-            _firingThresholdV = Math.Abs(firingThresholdV);
-            _refractoryPeriods = (int)Math.Round(refractoryPeriods, 0);
-            _stimuliCoeff = stimuliCoeff;
+            _resetV = Math.Abs(settings.ResetV);
+            _firingThresholdV = Math.Abs(settings.FiringThresholdV);
+            _refractoryPeriods = settings.RefractoryPeriods;
+            _stimuliCoeff = settings.StimuliCoeff;
             _stateRange = new Interval(_restV, _firingThresholdV);
             Reset();
             return;

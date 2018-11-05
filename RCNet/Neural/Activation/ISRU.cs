@@ -11,7 +11,7 @@ namespace RCNet.Neural.Activation
     public class ISRU : AnalogActivationFunction
     {
         //Attributes
-        private Interval _outputRange;
+        private readonly Interval _outputRange;
         
         //Attribute properties
         /// <summary>
@@ -23,15 +23,15 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Instantiates an Inverse Square Root Unit activation function
         /// </summary>
-        /// <param name="alpha">The Alpha</param>
-        public ISRU(double alpha = 1)
-            :base()
+        /// <param name="settings">Encapsulated arguments</param>
+        public ISRU(ISRUSettings settings)
+            : base()
         {
-            if(alpha <= 0)
+            if (settings.Alpha <= 0)
             {
                 throw new ArgumentOutOfRangeException("alpha", "Alpha must be GT 0");
             }
-            Alpha = alpha.Bound(); ;
+            Alpha = settings.Alpha.Bound(); ;
             _outputRange = new Interval(-1 / Math.Sqrt(Alpha), 1 / Math.Sqrt(Alpha));
             return;
         }

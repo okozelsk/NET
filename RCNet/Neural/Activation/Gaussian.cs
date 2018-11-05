@@ -17,8 +17,9 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Instantiates Gaussian activation function
         /// </summary>
-        public Gaussian()
-            :base()
+        /// <param name="settings">Encapsulated arguments</param>
+        public Gaussian(GaussianSettings settings)
+            : base()
         {
             return;
         }

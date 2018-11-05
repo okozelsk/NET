@@ -23,15 +23,15 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Instantiates Elliot activation function
         /// </summary>
-        /// <param name="slope">The curve slope</param>
-        public Elliot(double slope = 1)
-            :base()
+        /// <param name="settings">Encapsulated arguments</param>
+        public Elliot(ElliotSettings settings)
+            : base()
         {
-            if (slope <= 0)
+            if (settings.Slope <= 0)
             {
                 throw new ArgumentOutOfRangeException("slope", "Slope must be GT 0");
             }
-            Slope = slope.Bound();
+            Slope = settings.Slope.Bound();
             return;
         }
 

@@ -113,6 +113,18 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
+        /// Adopts data from the source normalizer
+        /// </summary>
+        public void Adopt(Normalizer source)
+        {
+            _standardization = source._standardization;
+            _reserveRatio = source._reserveRatio;
+            _samplesStat = new BasicStat(source._samplesStat);
+            _normRange = new Interval(source._normRange);
+            return;
+        }
+
+        /// <summary>
         /// Adapts to the sample value
         /// </summary>
         /// <param name="sampleValue">Sample value</param>

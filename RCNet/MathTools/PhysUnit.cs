@@ -252,7 +252,7 @@ namespace RCNet.MathTools
         public class Quantity
         {
             //Attributes
-            private SIUnit _unit;
+            private readonly SIUnit _unit;
             private double _quantity;
 
             //Constructor
@@ -281,7 +281,13 @@ namespace RCNet.MathTools
             }
 
             //Properties
+            /// <summary>
+            /// Basic SI unit
+            /// </summary>
             public SIUnit BasicUnit { get { return _unit; } }
+            /// <summary>
+            /// Quantity in base units
+            /// </summary>
             public double BasicUnitQuantity { get { return _quantity; } }
 
             //Methods

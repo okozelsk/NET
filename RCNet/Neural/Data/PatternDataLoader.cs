@@ -61,7 +61,7 @@ namespace RCNet.Neural.Data
                                          )
         {
             PatternBundle bundle = new PatternBundle();
-            bundleNormalizer = new BundleNormalizer(normRange, normReserveRatio, dataStandardization, classification ? 0 : normReserveRatio, classification ? false : dataStandardization);
+            bundleNormalizer = new BundleNormalizer(normRange);
             using (StreamReader streamReader = new StreamReader(new FileStream(fileName, FileMode.Open)))
             {
                 //The first row contains the "#RepetitiveGroupOfAttributes" keyword followed by name(s) of attribute(s)
@@ -126,12 +126,12 @@ namespace RCNet.Neural.Data
                 //Bundle handler setup
                 foreach (string attrName in repetitiveGroupOfAttributes.StringValueCollection)
                 {
-                    bundleNormalizer.DefineField(attrName, attrName);
+                    bundleNormalizer.DefineField(attrName, attrName, normReserveRatio, dataStandardization);
                     bundleNormalizer.DefineInputField(attrName);
                 }
                 foreach (string outputName in outputNames.StringValueCollection)
                 {
-                    bundleNormalizer.DefineField(outputName, outputName);
+                    bundleNormalizer.DefineField(outputName, outputName, classification ? 0 : normReserveRatio, classification ? false : dataStandardization);
                     bundleNormalizer.DefineOutputField(outputName);
                 }
                 bundleNormalizer.FinalizeStructure();

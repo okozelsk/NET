@@ -17,8 +17,9 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Instantiates SoftPlus activation function
         /// </summary>
-        public SoftPlus()
-            :base()
+        /// <param name="settings">Encapsulated arguments</param>
+        public SoftPlus(SoftPlusSettings settings)
+            : base()
         {
             return;
         }

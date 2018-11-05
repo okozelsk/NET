@@ -23,38 +23,28 @@ namespace RCNet.Neural.Activation
 
         //Attributes
         private static readonly Interval _outputRange = new Interval(0, 1);
-        private Interval _stateRange;
-        private double _membraneResistance;
-        private double _membraneDecayRate;
-        private double _restV;
-        private double _resetV;
-        private double _firingThresholdV;
-        private double _initialStimuliCoeff;
+        private readonly double _membraneResistance;
+        private readonly double _membraneDecayRate;
+        private readonly double _restV;
+        private readonly double _resetV;
+        private readonly double _firingThresholdV;
+        private readonly double _initialStimuliCoeff;
         private double _stimuliCoeff;
         private double _membraneV;
 
         /// <summary>
         /// Constructs an initialized instance
         /// </summary>
-        /// <param name="membraneResistance">Membrane resisatance (Mohm).</param>
-        /// <param name="membraneDecayRate">Membrane potential decay</param>
-        /// <param name="resetV">Membrane reset potential (mV)</param>
-        /// <param name="firingThresholdV">Membrane firing threshold (mV)</param>
-        /// <param name="initialStimuliCoeff">Initial input stimuli coefficient (nA)</param>
-        public AdSimpleIF(double membraneResistance,
-                          double membraneDecayRate,
-                          double resetV,
-                          double firingThresholdV,
-                          double initialStimuliCoeff
-                          )
+        /// <param name="settings">Encapsulated arguments</param>
+        public AdSimpleIF(AdSimpleIFSettings settings)
         {
-            _membraneResistance = membraneResistance;
-            _membraneDecayRate = membraneDecayRate;
+            _membraneResistance = settings.Resistance;
+            _membraneDecayRate = settings.DecayRate;
             _restV = 0;
-            _resetV = Math.Abs(resetV);
-            _firingThresholdV = Math.Abs(firingThresholdV);
-            _initialStimuliCoeff = initialStimuliCoeff;
-            _stateRange = new Interval(_restV, _firingThresholdV);
+            _resetV = Math.Abs(settings.ResetV);
+            _firingThresholdV = Math.Abs(settings.FiringThresholdV);
+            _initialStimuliCoeff = settings.StimuliCoeff;
+            InternalStateRange = new Interval(_restV, _firingThresholdV);
             Reset();
             return;
         }
@@ -83,7 +73,7 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Normal range of the internal state
         /// </summary>
-        public Interval InternalStateRange { get { return _stateRange; } }
+        public Interval InternalStateRange { get; }
 
         /// <summary>
         /// Internal state

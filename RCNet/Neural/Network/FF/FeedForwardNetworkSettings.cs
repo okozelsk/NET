@@ -38,7 +38,7 @@ namespace RCNet.Neural.Network.FF
         /// <summary>
         /// Activation function settings of the output layer.
         /// </summary>
-        public ActivationSettings OutputLayerActivation { get; set; }
+        public Object OutputLayerActivation { get; set; }
         /// <summary>
         /// The parameter specifies what method will be used for training
         /// </summary>
@@ -79,7 +79,7 @@ namespace RCNet.Neural.Network.FF
             OutputLayerActivation = null;
             if (source.OutputLayerActivation != null)
             {
-                OutputLayerActivation = source.OutputLayerActivation.DeepClone();
+                OutputLayerActivation = ActivationFactory.GetDeepClone(source.OutputLayerActivation);
             }
             RegressionMethod = source.RegressionMethod;
             HiddenLayerCollection = new List<HiddenLayerSettings>(source.HiddenLayerCollection.Count);
@@ -117,10 +117,10 @@ namespace RCNet.Neural.Network.FF
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
             XElement feedForwardNetworkSettingsElem = validator.Validate(elem, "rootElem");
             //Parsing
-            OutputLayerActivation = new ActivationSettings(feedForwardNetworkSettingsElem.Descendants("outputActivation").First());
+            OutputLayerActivation = ActivationFactory.LoadSettings(feedForwardNetworkSettingsElem.Descendants().First());
             if(!IsAllowedActivation(OutputLayerActivation))
             {
-                throw new ApplicationException($"Activation {OutputLayerActivation.FunctionType} can't be used in FF network. Activation function has to be stateless and has to support derivative calculation.");
+                throw new ApplicationException($"Activation can't be used in FF network. Activation function has to be stateless and has to support derivative calculation.");
             }
             RegressionMethod = ParseTrainingMethodType(feedForwardNetworkSettingsElem.Attribute("regressionMethod").Value);
             //Hidden layers
@@ -171,7 +171,7 @@ namespace RCNet.Neural.Network.FF
         /// </summary>
         /// <param name="activationSettings">Activation settings</param>
         /// <returns></returns>
-        public static bool IsAllowedActivation(ActivationSettings activationSettings)
+        public static bool IsAllowedActivation(Object activationSettings)
         {
             IActivationFunction af = ActivationFactory.Create(activationSettings);
             if(!af.Stateless || !af.SupportsComputeDerivativeMethod)
@@ -255,7 +255,7 @@ namespace RCNet.Neural.Network.FF
             /// <summary>
             /// Settings of activation function of the hidden layer neurons
             /// </summary>
-            public ActivationSettings Activation { get; set; }
+            public Object Activation { get; set; }
 
             //Constructors
             /// <summary>
@@ -278,7 +278,7 @@ namespace RCNet.Neural.Network.FF
                 Activation = null;
                 if (source.Activation != null)
                 {
-                    Activation = source.Activation.DeepClone();
+                    Activation = ActivationFactory.GetDeepClone(source.Activation);
                 }
                 return;
             }
@@ -292,10 +292,10 @@ namespace RCNet.Neural.Network.FF
             public HiddenLayerSettings(XElement elem)
             {
                 NumOfNeurons = int.Parse(elem.Attribute("neurons").Value);
-                Activation = new ActivationSettings(elem.Descendants("activation").First());
+                Activation = ActivationFactory.LoadSettings(elem.Descendants().First());
                 if (!IsAllowedActivation(Activation))
                 {
-                    throw new ApplicationException($"Activation {Activation.FunctionType} can't be used in FF network. Activation has to be time independent and has to support derivative.");
+                    throw new ApplicationException($"Activation can't be used in FF network. Activation has to be time independent and has to support derivative.");
                 }
                 return;
             }

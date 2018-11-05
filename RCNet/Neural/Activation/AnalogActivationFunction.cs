@@ -11,7 +11,9 @@ namespace RCNet.Neural.Activation
     public abstract class AnalogActivationFunction : IActivationFunction
     {
         //Attributes
-        //Internal state
+        /// <summary>
+        /// Internal state
+        /// </summary>
         protected double _state;
 
         //Constructor
