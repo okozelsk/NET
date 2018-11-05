@@ -84,5 +84,5 @@ See the [wiki pages.](https://en.wikipedia.org/wiki/Biological_neuron_model)
 |Reservoir|Implements recurrent network supporting analog and spiking neurons working together. Main features: SpectralRadius, Multiple 3D pools of neurons, Pool to pool connections. It can work as the Echo State Network reservoir, Liquid State Machine reservoir or Mixed reservoir|
 |ReadoutUnit|Contains the trained unit associated with output field and related important error statistics. Trained unit can be the Feed Forward Network or the Parallel Perceptron Network|
 |ReadoutLayer|Class implements the common readout layer for the reservoir computing methods. Supports x-fold cross validation method.|
-|StateMachine|Encaptulates the State Machine Network. Supports multiple internal recurrent reservoirs having mixed analog and spiking neuron pools. Task types: Prediction, Classification, Hybrid|
+|StateMachine|Encaptulates the State Machine Network. Supports multiple internal recurrent reservoirs having multiple interconnected/cooperating analog and spiking neuron pools. Solves task types: Prediction, Classification, Hybrid|
 
