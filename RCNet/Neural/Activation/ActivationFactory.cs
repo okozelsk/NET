@@ -37,39 +37,39 @@ namespace RCNet.Neural.Activation
         {
             switch (settingsElem.Name.LocalName)
             {
-                case "AdExpIF":
+                case "activationAdExpIF":
                     return new AdExpIFSettings(settingsElem);
-                case "AdSimpleIF":
+                case "activationAdSimpleIF":
                     return new AdSimpleIFSettings(settingsElem);
-                case "BentIdentity":
+                case "activationBentIdentity":
                     return new BentIdentitySettings(settingsElem);
-                case "Elliot":
+                case "activationElliot":
                     return new ElliotSettings(settingsElem);
-                case "ExpIF":
+                case "activationExpIF":
                     return new ExpIFSettings(settingsElem);
-                case "Gaussian":
+                case "activationGaussian":
                     return new GaussianSettings(settingsElem);
-                case "Identity":
+                case "activationIdentity":
                     return new IdentitySettings(settingsElem);
-                case "ISRU":
+                case "activationISRU":
                     return new ISRUSettings(settingsElem);
-                case "LeakyIF":
+                case "activationLeakyIF":
                     return new LeakyIFSettings(settingsElem);
-                case "LeakyReLU":
+                case "activationLeakyReLU":
                     return new LeakyReLUSettings(settingsElem);
-                case "Sigmoid":
+                case "activationSigmoid":
                     return new SigmoidSettings(settingsElem);
-                case "SimpleIF":
+                case "activationSimpleIF":
                     return new SimpleIFSettings(settingsElem);
-                case "Sinc":
+                case "activationSinc":
                     return new SincSettings(settingsElem);
-                case "Sinusoid":
+                case "activationSinusoid":
                     return new SinusoidSettings(settingsElem);
-                case "SoftExponential":
+                case "activationSoftExponential":
                     return new SoftExponentialSettings(settingsElem);
-                case "SoftPlus":
+                case "activationSoftPlus":
                     return new SoftPlusSettings(settingsElem);
-                case "TanH":
+                case "activationTanH":
                     return new TanHSettings(settingsElem);
                 default:
                     throw new ArgumentException($"Unsupported activation function settings: {settingsElem.Name}");

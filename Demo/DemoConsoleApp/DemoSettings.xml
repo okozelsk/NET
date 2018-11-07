@@ -16,7 +16,7 @@
                 <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
               </input>
               <excitatory relShare="3">
-                <LeakyIF stimuliCoeff="9"
+                <activationLeakyIF stimuliCoeff="9"
                          timeScale="8"
                          resistance="15"
                          restV="-70"
@@ -29,7 +29,7 @@
                 <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
               </excitatory>
               <inhibitory relShare="1">
-                <LeakyIF stimuliCoeff="9"
+                <activationLeakyIF stimuliCoeff="9"
                          timeScale="8"
                          resistance="15"
                          restV="-70"
@@ -50,7 +50,7 @@
                 <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
               </input>
               <excitatory relShare="3">
-                <ExpIF stimuliCoeff="5.5"
+                <activationExpIF stimuliCoeff="5.5"
                        timeScale="12"
                        resistance="20"
                        restV="-65"
@@ -65,7 +65,7 @@
                 <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
               </excitatory>
               <inhibitory relShare="1">
-                <ExpIF stimuliCoeff="5.5"
+                <activationExpIF stimuliCoeff="5.5"
                        timeScale="12"
                        resistance="20"
                        restV="-65"
@@ -88,7 +88,7 @@
                 <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
               </input>
               <excitatory relShare="3">
-                <AdSimpleIF stimuliCoeff="1"
+                <activationAdSimpleIF stimuliCoeff="1"
                             resistance="15"
                             decayRate="0.05"
                             resetV="5"
@@ -97,7 +97,7 @@
                 <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
               </excitatory>
               <inhibitory relShare="1">
-                <AdSimpleIF stimuliCoeff="1"
+                <activationAdSimpleIF stimuliCoeff="1"
                             resistance="15"
                             decayRate="0.05"
                             resetV="5"
@@ -171,7 +171,7 @@
                 <weight min="0" max="0.5" randomSign="false" distribution="Uniform"/>
               </input>
               <excitatory relShare="3">
-                <AdSimpleIF stimuliCoeff="1"
+                <activationAdSimpleIF stimuliCoeff="1"
                             resistance="15"
                             decayRate="0.1"
                             resetV="5"
@@ -180,7 +180,7 @@
                 <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
               </excitatory>
               <inhibitory relShare="1">
-                <AdSimpleIF stimuliCoeff="1"
+                <activationAdSimpleIF stimuliCoeff="1"
                             resistance="15"
                             decayRate="0.1"
                             resetV="5"
@@ -197,11 +197,11 @@
                 <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
               </input>
               <excitatory relShare="1">
-                <TanH />
+                <activationTanH />
                 <bias min="-0.4" max="0.4" randomSign="false" distribution="Uniform"/>
               </excitatory>
               <inhibitory relShare="1">
-                <TanH />
+                <activationTanH />
                 <bias min="-0.4" max="0.4" randomSign="false" distribution="Uniform"/>
               </inhibitory>
               <interconnection density="0.1" avgDistance="NA" allowSelfConnection="true">
@@ -229,7 +229,7 @@
       <readoutLayer testDataRatio="0.1" folds="Auto">
         <readoutUnit attempts="1" attemptEpochs="100">
           <ff regressionMethod="Linear">
-            <Identity />
+            <activationIdentity />
             <linRegrTrainer hiNoiseIntensity="0.2" maxStretch="6" zeroMargin="0.5"/>
           </ff>
         </readoutUnit>
@@ -254,11 +254,11 @@
                 <weight min="0" max="0.6" randomSign="false" distribution="Uniform"/>
               </input>
               <excitatory relShare="1">
-                <Sigmoid />
+                <activationSigmoid />
                 <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
               </excitatory>
               <inhibitory relShare="1">
-                <Gaussian />
+                <activationGaussian />
                 <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
               </inhibitory>
               <interconnection density="0.1" avgDistance="1.5" allowSelfConnection="true">
@@ -279,7 +279,7 @@
       <readoutLayer testDataRatio="0.3" folds="1">
         <readoutUnit attempts="1" attemptEpochs="1">
           <ff regressionMethod="Linear">
-            <Identity />
+            <activationIdentity />
           </ff>
         </readoutUnit>
         <outputFields>

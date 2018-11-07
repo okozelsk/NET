@@ -269,18 +269,18 @@
   <!-- FF network - hidden layer - configuration -->
   <xs:complexType name="FFNetHiddenLayerCfgType">
     <xs:choice minOccurs="0" maxOccurs="1">
-      <xs:element type="ActivationBentIdentityCfgType" name="BentIdentity" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="ActivationElliotCfgType" name="Elliot" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="ActivationGaussianCfgType" name="Gaussian" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="ActivationIdentityCfgType" name="Identity" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="ActivationISRUCfgType" name="ISRU" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="ActivationLeakyReLUCfgType" name="LeakyReLU" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="ActivationSigmoidCfgType" name="Sigmoid" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="ActivationSincCfgType" name="Sinc" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="ActivationSinusoidCfgType" name="Sinusoid" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="ActivationSoftExponentialCfgType" name="SoftExponential" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="ActivationSoftPlusCfgType" name="SoftPlus" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="ActivationTanHCfgType" name="TanH" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="ActivationBentIdentityCfgType" name="activationBentIdentity" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="ActivationElliotCfgType" name="activationElliot" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="ActivationGaussianCfgType" name="activationGaussian" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="ActivationIdentityCfgType" name="activationIdentity" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="ActivationISRUCfgType" name="activationISRU" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="ActivationLeakyReLUCfgType" name="activationLeakyReLU" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="ActivationSigmoidCfgType" name="activationSigmoid" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="ActivationSincCfgType" name="activationSinc" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="ActivationSinusoidCfgType" name="activationSinusoid" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="ActivationSoftExponentialCfgType" name="activationSoftExponential" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="ActivationSoftPlusCfgType" name="activationSoftPlus" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="ActivationTanHCfgType" name="activationTanH" minOccurs="1" maxOccurs="1"/>
     </xs:choice>
     <xs:attribute type="UIntGT0Type" name="neurons" use="required"/>
   </xs:complexType>
@@ -314,18 +314,18 @@
     <xs:sequence minOccurs="0" maxOccurs="1">
       <xs:sequence minOccurs="1" maxOccurs="1">
         <xs:choice minOccurs="0" maxOccurs="1">
-          <xs:element type="ActivationBentIdentityCfgType" name="BentIdentity" minOccurs="1" maxOccurs="1"/>
-          <xs:element type="ActivationElliotCfgType" name="Elliot" minOccurs="1" maxOccurs="1"/>
-          <xs:element type="ActivationGaussianCfgType" name="Gaussian" minOccurs="1" maxOccurs="1"/>
-          <xs:element type="ActivationIdentityCfgType" name="Identity" minOccurs="1" maxOccurs="1"/>
-          <xs:element type="ActivationISRUCfgType" name="ISRU" minOccurs="1" maxOccurs="1"/>
-          <xs:element type="ActivationLeakyReLUCfgType" name="LeakyReLU" minOccurs="1" maxOccurs="1"/>
-          <xs:element type="ActivationSigmoidCfgType" name="Sigmoid" minOccurs="1" maxOccurs="1"/>
-          <xs:element type="ActivationSincCfgType" name="Sinc" minOccurs="1" maxOccurs="1"/>
-          <xs:element type="ActivationSinusoidCfgType" name="Sinusoid" minOccurs="1" maxOccurs="1"/>
-          <xs:element type="ActivationSoftExponentialCfgType" name="SoftExponential" minOccurs="1" maxOccurs="1"/>
-          <xs:element type="ActivationSoftPlusCfgType" name="SoftPlus" minOccurs="1" maxOccurs="1"/>
-          <xs:element type="ActivationTanHCfgType" name="TanH" minOccurs="1" maxOccurs="1"/>
+          <xs:element type="ActivationBentIdentityCfgType" name="activationBentIdentity" minOccurs="1" maxOccurs="1"/>
+          <xs:element type="ActivationElliotCfgType" name="activationElliot" minOccurs="1" maxOccurs="1"/>
+          <xs:element type="ActivationGaussianCfgType" name="activationGaussian" minOccurs="1" maxOccurs="1"/>
+          <xs:element type="ActivationIdentityCfgType" name="activationIdentity" minOccurs="1" maxOccurs="1"/>
+          <xs:element type="ActivationISRUCfgType" name="activationISRU" minOccurs="1" maxOccurs="1"/>
+          <xs:element type="ActivationLeakyReLUCfgType" name="activationLeakyReLU" minOccurs="1" maxOccurs="1"/>
+          <xs:element type="ActivationSigmoidCfgType" name="activationSigmoid" minOccurs="1" maxOccurs="1"/>
+          <xs:element type="ActivationSincCfgType" name="activationSinc" minOccurs="1" maxOccurs="1"/>
+          <xs:element type="ActivationSinusoidCfgType" name="activationSinusoid" minOccurs="1" maxOccurs="1"/>
+          <xs:element type="ActivationSoftExponentialCfgType" name="activationSoftExponential" minOccurs="1" maxOccurs="1"/>
+          <xs:element type="ActivationSoftPlusCfgType" name="activationSoftPlus" minOccurs="1" maxOccurs="1"/>
+          <xs:element type="ActivationTanHCfgType" name="activationTanH" minOccurs="1" maxOccurs="1"/>
         </xs:choice>
         <xs:element type="FFNetHiddenLayersCfgType" name="hiddenLayers" minOccurs="0" maxOccurs="1"/>
       </xs:sequence>
@@ -418,23 +418,23 @@
   <xs:complexType name="PoolNeuronCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:choice minOccurs="0" maxOccurs="1">
-        <xs:element type="ActivationSimpleIFCfgType" name="SimpleIF" minOccurs="1" maxOccurs="1"/>
-        <xs:element type="ActivationAdSimpleIFCfgType" name="AdSimpleIF" minOccurs="1" maxOccurs="1"/>
-        <xs:element type="ActivationLeakyIFCfgType" name="LeakyIF" minOccurs="1" maxOccurs="1"/>
-        <xs:element type="ActivationExpIFCfgType" name="ExpIF" minOccurs="1" maxOccurs="1"/>
-        <xs:element type="ActivationAdExpIFCfgType" name="AdExpIF" minOccurs="1" maxOccurs="1"/>
-        <xs:element type="ActivationBentIdentityCfgType" name="BentIdentity" minOccurs="1" maxOccurs="1"/>
-        <xs:element type="ActivationElliotCfgType" name="Elliot" minOccurs="1" maxOccurs="1"/>
-        <xs:element type="ActivationGaussianCfgType" name="Gaussian" minOccurs="1" maxOccurs="1"/>
-        <xs:element type="ActivationIdentityCfgType" name="Identity" minOccurs="1" maxOccurs="1"/>
-        <xs:element type="ActivationISRUCfgType" name="ISRU" minOccurs="1" maxOccurs="1"/>
-        <xs:element type="ActivationLeakyReLUCfgType" name="LeakyReLU" minOccurs="1" maxOccurs="1"/>
-        <xs:element type="ActivationSigmoidCfgType" name="Sigmoid" minOccurs="1" maxOccurs="1"/>
-        <xs:element type="ActivationSincCfgType" name="Sinc" minOccurs="1" maxOccurs="1"/>
-        <xs:element type="ActivationSinusoidCfgType" name="Sinusoid" minOccurs="1" maxOccurs="1"/>
-        <xs:element type="ActivationSoftExponentialCfgType" name="SoftExponential" minOccurs="1" maxOccurs="1"/>
-        <xs:element type="ActivationSoftPlusCfgType" name="SoftPlus" minOccurs="1" maxOccurs="1"/>
-        <xs:element type="ActivationTanHCfgType" name="TanH" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="ActivationSimpleIFCfgType" name="activationSimpleIF" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="ActivationAdSimpleIFCfgType" name="activationAdSimpleIF" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="ActivationLeakyIFCfgType" name="activationLeakyIF" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="ActivationExpIFCfgType" name="activationExpIF" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="ActivationAdExpIFCfgType" name="activationAdExpIF" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="ActivationBentIdentityCfgType" name="activationBentIdentity" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="ActivationElliotCfgType" name="activationElliot" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="ActivationGaussianCfgType" name="activationGaussian" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="ActivationIdentityCfgType" name="activationIdentity" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="ActivationISRUCfgType" name="activationISRU" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="ActivationLeakyReLUCfgType" name="activationLeakyReLU" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="ActivationSigmoidCfgType" name="activationSigmoid" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="ActivationSincCfgType" name="activationSinc" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="ActivationSinusoidCfgType" name="activationSinusoid" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="ActivationSoftExponentialCfgType" name="activationSoftExponential" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="ActivationSoftPlusCfgType" name="activationSoftPlus" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="ActivationTanHCfgType" name="activationTanH" minOccurs="1" maxOccurs="1"/>
       </xs:choice>
       <xs:element type="RandomValueType" name="bias" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
