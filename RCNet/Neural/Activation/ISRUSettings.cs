@@ -7,7 +7,7 @@ using System.Globalization;
 using System.Xml.Linq;
 using System.Reflection;
 using RCNet.Extensions;
-using RCNet.MathTools;
+using RCNet.RandomValue;
 using RCNet.XmlTools;
 using RCNet.MathTools.Differential;
 
@@ -19,20 +19,24 @@ namespace RCNet.Neural.Activation
     [Serializable]
     public class ISRUSettings
     {
+        //Constants
+        //Typical values
+        public const double TypicalAlpha = 1;
+
         //Attribute properties
         /// <summary>
         /// The Alpha
         /// </summary>
-        public double Alpha { get; set; }
+        public RandomValueSettings Alpha { get; }
 
         //Constructors
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
         /// <param name="alpha">The Alpha</param>
-        public ISRUSettings(double alpha)
+        public ISRUSettings(RandomValueSettings alpha)
         {
-            Alpha = alpha;
+            Alpha = alpha.DeepClone();
             return;
         }
 
@@ -42,7 +46,7 @@ namespace RCNet.Neural.Activation
         /// <param name="source">Source instance</param>
         public ISRUSettings(ISRUSettings source)
         {
-            Alpha = source.Alpha;
+            Alpha = source.Alpha.DeepClone();
             return;
         }
 
@@ -62,7 +66,7 @@ namespace RCNet.Neural.Activation
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
             XElement activationSettingsElem = validator.Validate(elem, "rootElem");
             //Parsing
-            Alpha = double.Parse(activationSettingsElem.Attribute("alpha").Value, CultureInfo.InvariantCulture);
+            Alpha = new RandomValueSettings(activationSettingsElem.Descendants("alpha").FirstOrDefault());
             return;
         }
 
@@ -74,7 +78,7 @@ namespace RCNet.Neural.Activation
         {
             if (obj == null) return false;
             ISRUSettings cmpSettings = obj as ISRUSettings;
-            if (Alpha != cmpSettings.Alpha)
+            if (!Equals(Alpha, cmpSettings.Alpha))
             {
                 return false;
             }

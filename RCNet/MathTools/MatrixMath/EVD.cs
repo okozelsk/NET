@@ -587,7 +587,7 @@ namespace RCNet.MathTools.MatrixMath
             }
         }
 
-        private void cdiv(double xr, double xi, double yr, double yi)
+        private void CDiv(double xr, double xi, double yr, double yi)
         {
             double r, d;
             if (Math.Abs(yr) > Math.Abs(yi))
@@ -1023,7 +1023,7 @@ namespace RCNet.MathTools.MatrixMath
                     }
                     else
                     {
-                        cdiv(0.0, -_hessenbergForm[n - 1][n], _hessenbergForm[n - 1][n - 1] - p, q);
+                        CDiv(0.0, -_hessenbergForm[n - 1][n], _hessenbergForm[n - 1][n - 1] - p, q);
                         _hessenbergForm[n - 1][n - 1] = _cdivr;
                         _hessenbergForm[n - 1][n] = _cdivi;
                     }
@@ -1052,7 +1052,7 @@ namespace RCNet.MathTools.MatrixMath
                             l = i;
                             if (_imaginaryEigenvalues[i] == 0)
                             {
-                                cdiv(-ra, -sa, w, q);
+                                CDiv(-ra, -sa, w, q);
                                 _hessenbergForm[i][n - 1] = _cdivr;
                                 _hessenbergForm[i][n] = _cdivi;
                             }
@@ -1072,7 +1072,7 @@ namespace RCNet.MathTools.MatrixMath
                                            + Math.Abs(x) + Math.Abs(y) + Math
                                                                              .Abs(z));
                                 }
-                                cdiv(x * r - z * ra + q * sa, x * s - z * sa - q
+                                CDiv(x * r - z * ra + q * sa, x * s - z * sa - q
                                                         * ra, vr, vi);
                                 _hessenbergForm[i][n - 1] = _cdivr;
                                 _hessenbergForm[i][n] = _cdivi;
@@ -1087,7 +1087,7 @@ namespace RCNet.MathTools.MatrixMath
                                 }
                                 else
                                 {
-                                    cdiv(-r - y * _hessenbergForm[i][n - 1], -s - y * _hessenbergForm[i][n], z,
+                                    CDiv(-r - y * _hessenbergForm[i][n - 1], -s - y * _hessenbergForm[i][n], z,
                                          q);
                                     _hessenbergForm[i + 1][n - 1] = _cdivr;
                                     _hessenbergForm[i + 1][n] = _cdivi;

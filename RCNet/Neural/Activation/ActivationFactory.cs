@@ -39,14 +39,14 @@ namespace RCNet.Neural.Activation
             {
                 case "activationAdExpIF":
                     return new AdExpIFSettings(settingsElem);
-                case "activationAdSimpleIF":
-                    return new AdSimpleIFSettings(settingsElem);
                 case "activationBentIdentity":
                     return new BentIdentitySettings(settingsElem);
                 case "activationElliot":
                     return new ElliotSettings(settingsElem);
                 case "activationExpIF":
                     return new ExpIFSettings(settingsElem);
+                case "activationIzhikevichIF":
+                    return new IzhikevichIFSettings(settingsElem);
                 case "activationGaussian":
                     return new GaussianSettings(settingsElem);
                 case "activationIdentity":
@@ -79,19 +79,14 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Returns the new instance of the activation function
         /// </summary>
-        /// <param name="settings">
-        /// Specific activation function settings
-        /// </param>
-        public static IActivationFunction Create(Object settings)
+        /// <param name="settings">Specific activation function settings </param>
+        /// <param name="rand">Random object to be used for randomly generated parameters</param>
+        public static IActivationFunction Create(Object settings, Random rand)
         {
             Type settingsType = settings.GetType();
             if(settingsType == typeof(AdExpIFSettings))
             {
-                return new AdExpIF((AdExpIFSettings)settings);
-            }
-            else if(settingsType == typeof(AdSimpleIFSettings))
-            {
-                return new AdSimpleIF((AdSimpleIFSettings)settings);
+                return new AdExpIF((AdExpIFSettings)settings, rand);
             }
             else if (settingsType == typeof(BentIdentitySettings))
             {
@@ -99,11 +94,11 @@ namespace RCNet.Neural.Activation
             }
             else if (settingsType == typeof(ElliotSettings))
             {
-                return new Elliot((ElliotSettings)settings);
+                return new Elliot((ElliotSettings)settings, rand);
             }
             else if (settingsType == typeof(ExpIFSettings))
             {
-                return new ExpIF((ExpIFSettings)settings);
+                return new ExpIF((ExpIFSettings)settings, rand);
             }
             else if (settingsType == typeof(GaussianSettings))
             {
@@ -115,19 +110,19 @@ namespace RCNet.Neural.Activation
             }
             else if (settingsType == typeof(ISRUSettings))
             {
-                return new ISRU((ISRUSettings)settings);
+                return new ISRU((ISRUSettings)settings, rand);
+            }
+            else if (settingsType == typeof(IzhikevichIFSettings))
+            {
+                return new IzhikevichIF((IzhikevichIFSettings)settings, rand);
             }
             else if (settingsType == typeof(LeakyIFSettings))
             {
-                return new LeakyIF((LeakyIFSettings)settings);
+                return new LeakyIF((LeakyIFSettings)settings, rand);
             }
             else if (settingsType == typeof(LeakyReLUSettings))
             {
-                return new LeakyReLU((LeakyReLUSettings)settings);
-            }
-            else if (settingsType == typeof(LeakyReLUSettings))
-            {
-                return new LeakyReLU((LeakyReLUSettings)settings);
+                return new LeakyReLU((LeakyReLUSettings)settings, rand);
             }
             else if (settingsType == typeof(SigmoidSettings))
             {
@@ -135,7 +130,7 @@ namespace RCNet.Neural.Activation
             }
             else if (settingsType == typeof(SimpleIFSettings))
             {
-                return new SimpleIF((SimpleIFSettings)settings);
+                return new SimpleIF((SimpleIFSettings)settings, rand);
             }
             else if (settingsType == typeof(SincSettings))
             {
@@ -147,7 +142,7 @@ namespace RCNet.Neural.Activation
             }
             else if (settingsType == typeof(SoftExponentialSettings))
             {
-                return new SoftExponential((SoftExponentialSettings)settings);
+                return new SoftExponential((SoftExponentialSettings)settings, rand);
             }
             else if (settingsType == typeof(SoftPlusSettings))
             {
@@ -169,16 +164,12 @@ namespace RCNet.Neural.Activation
         /// <param name="settings">
         /// Specific activation function settings
         /// </param>
-        public static Object GetDeepClone(Object settings)
+        public static Object DeepCloneActivationSettings(Object settings)
         {
             Type settingsType = settings.GetType();
             if (settingsType == typeof(AdExpIFSettings))
             {
                 return ((AdExpIFSettings)settings).DeepClone();
-            }
-            else if (settingsType == typeof(AdSimpleIFSettings))
-            {
-                return ((AdSimpleIFSettings)settings).DeepClone();
             }
             else if (settingsType == typeof(BentIdentitySettings))
             {
@@ -203,6 +194,10 @@ namespace RCNet.Neural.Activation
             else if (settingsType == typeof(ISRUSettings))
             {
                 return ((ISRUSettings)settings).DeepClone();
+            }
+            else if (settingsType == typeof(IzhikevichIFSettings))
+            {
+                return ((IzhikevichIFSettings)settings).DeepClone();
             }
             else if (settingsType == typeof(LeakyIFSettings))
             {

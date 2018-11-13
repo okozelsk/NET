@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using RCNet.RandomValue;
 
 namespace RCNet.Extensions
 {
@@ -168,6 +169,16 @@ namespace RCNet.Extensions
                 value *= rand.NextSign();
             }
             return value;
+        }
+
+        /// <summary>
+        /// Returns random double following specified settings.
+        /// </summary>
+        /// <param name="rand"></param>
+        /// <param name="settings">Encapsulated settings</param>
+        public static double NextDouble(this Random rand, RandomValueSettings settings)
+        {
+            return NextDouble(rand, settings.Min, settings.Max, settings.RandomSign, settings.DistrType);
         }
 
         /// <summary>

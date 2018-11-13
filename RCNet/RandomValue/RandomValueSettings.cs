@@ -93,10 +93,6 @@ namespace RCNet.RandomValue
         }
 
         //Properties
-        /// <summary>
-        /// Determines whether this settings produce nonzero weights
-        /// </summary>
-        public bool Active { get { return (Min != 0 || Max != 0); } }
 
         //Methods
         /// <summary>

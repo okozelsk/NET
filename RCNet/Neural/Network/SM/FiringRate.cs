@@ -15,8 +15,8 @@ namespace RCNet.Neural.Network.SM
         private const int SpikeBuffLength = sizeof(ulong) * 8;
 
         //Static members
-        private static decimal[] _spikeValueCache;
-        private static decimal _sumOfSpikeValues;
+        private static readonly decimal[] _spikeValueCache;
+        private static readonly decimal _sumOfSpikeValues;
 
         //Instance members
         private ulong _spikes;

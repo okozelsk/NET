@@ -99,7 +99,7 @@ namespace RCNet.Neural.Network.SM
             {
                 throw new ArgumentException($"Test dataset size is greater than {MaxRatioOfTestData.ToString(CultureInfo.InvariantCulture)}", "TestDataSetSize");
             }
-            int testDataSetLength = (int)Math.Round(idealOutputsCollection.Count * _settings.TestDataRatio);
+            int testDataSetLength = (int)Math.Round(idealOutputsCollection.Count * _settings.TestDataRatio, 0);
             if (testDataSetLength < MinLengthOfTestDataset)
             {
                 throw new ArgumentException($"Num of test samples is less than {MinLengthOfTestDataset.ToString(CultureInfo.InvariantCulture)}", "TestDataSetSize");
@@ -343,7 +343,7 @@ namespace RCNet.Neural.Network.SM
             for (int bundleNum = 0; bundleNum < numOfBundles; bundleNum++)
             {
                 TimeSeriesBundle bundle = new TimeSeriesBundle();
-                for (int i = 0; i < bundleSize; i++)
+                for (int i = 0; i < bundleSize && samplesPos < idealValueCollection.Count; i++)
                 {
                     bundle.InputVectorCollection.Add(predictorsCollection[samplesPos]);
                     bundle.OutputVectorCollection.Add(idealValueCollection[samplesPos]);

@@ -31,7 +31,7 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// Random generator
         /// </summary>
-        private System.Random _rand;
+        private readonly System.Random _rand;
         /// <summary>
         /// Collection of reservoir instances.
         /// </summary>
@@ -39,7 +39,7 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// Number of State Machine predictors
         /// </summary>
-        private int _numOfPredictors;
+        private readonly int _numOfPredictors;
         /// <summary>
         /// Readout layer.
         /// </summary>
@@ -112,10 +112,10 @@ namespace RCNet.Neural.Network.SM
             //Compute reservoir(s)
             foreach (ReservoirInstance resInstance in _reservoirInstanceCollection)
             {
-                double[] reservoirInput = new double[resInstance.InstanceDefinition.InputFieldMappingCollection.Count];
-                for(int i = 0; i < resInstance.InstanceDefinition.InputFieldMappingCollection.Count; i++)
+                double[] reservoirInput = new double[resInstance.InstanceDefinition.InputFieldIdxCollection.Count];
+                for(int i = 0; i < resInstance.InstanceDefinition.InputFieldIdxCollection.Count; i++)
                 {
-                    reservoirInput[i] = inputValues[resInstance.InstanceDefinition.InputFieldMappingCollection[i]];
+                    reservoirInput[i] = inputValues[resInstance.InstanceDefinition.InputFieldIdxCollection[i]];
                 }
                 //Compute reservoir
                 resInstance.ReservoirObj.Compute(reservoirInput, collectStatesStatistics);
@@ -142,12 +142,12 @@ namespace RCNet.Neural.Network.SM
             {
                 //Reset reservoir states but keep internal statistics
                 resInstance.Reset(false);
-                double[] reservoirInput = new double[resInstance.InstanceDefinition.InputFieldMappingCollection.Count];
+                double[] reservoirInput = new double[resInstance.InstanceDefinition.InputFieldIdxCollection.Count];
                 foreach (double[] inputVector in inputPattern)
                 {
-                    for (int i = 0; i < resInstance.InstanceDefinition.InputFieldMappingCollection.Count; i++)
+                    for (int i = 0; i < resInstance.InstanceDefinition.InputFieldIdxCollection.Count; i++)
                     {
-                        reservoirInput[i] = inputVector[resInstance.InstanceDefinition.InputFieldMappingCollection[i]];
+                        reservoirInput[i] = inputVector[resInstance.InstanceDefinition.InputFieldIdxCollection[i]];
                     }
                     //Compute the reservoir
                     resInstance.ReservoirObj.Compute(reservoirInput, true);
@@ -387,11 +387,8 @@ namespace RCNet.Neural.Network.SM
                 //Store definition
                 InstanceDefinition = instanceDefinition;
                 //Create reservoir
-                ReservoirObj = new Reservoir(InstanceDefinition.InstanceName,
-                                             InstanceDefinition.InputFieldMappingCollection.Count,
+                ReservoirObj = new Reservoir(InstanceDefinition,
                                              inputRange,
-                                             InstanceDefinition.ReservoirSettings,
-                                             InstanceDefinition.AugmentedStates,
                                              randomizerSeek
                                              );
                 return;

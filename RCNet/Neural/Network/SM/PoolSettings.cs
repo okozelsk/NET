@@ -23,9 +23,9 @@ namespace RCNet.Neural.Network.SM
     {
         //Attribute properties
         /// <summary>
-        /// Instance name of this pool
+        /// Name of this pool
         /// </summary>
-        public string InstanceName { get; set; }
+        public string Name { get; set; }
         /// <summary>
         /// Pool dimensions. Pool is 3D.
         /// </summary>
@@ -35,37 +35,9 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         public bool RouteToReadout { get; set; }
         /// <summary>
-        /// Each reservoir input neuron will be connected by the synapse to the number of
-        /// pool neurons = (Dim.Size * Density).
-        /// Typical InputConnectionDensity = 1 (it means the full connectivity).
+        /// Settings of the neuron groups in the pool.
         /// </summary>
-        public double InputConnectionDensity { get; set; }
-        /// <summary>
-        /// A weight of input neuron to pool's neuron synapse.
-        /// </summary>
-        public RandomValueSettings InputSynapseWeight { get; set; }
-        /// <summary>
-        /// Density of inhibitory neurons in the pool.
-        /// </summary>
-        public double InhibitoryNeuronsDensity { get; set; }
-        /// <summary>
-        /// Activation settings of the inhibitory neurons in the pool.
-        /// </summary>
-        public Object InhibitoryActivation { get; set; }
-        /// <summary>
-        /// Each pool's neuron has its own constant input bias. Bias is always added to input signal of the neuron.
-        /// A constant bias value of the neuron will be selected randomly.
-        /// </summary>
-        public RandomValueSettings InhibitoryBias { get; set; }
-        /// <summary>
-        /// Activation settings of the excitatory neurons in the pool.
-        /// </summary>
-        public Object ExcitatoryActivation { get; set; }
-        /// <summary>
-        /// Each pool's neuron has its own constant input bias. Bias is always added to input signal of the neuron.
-        /// A constant bias value of the neuron will be selected randomly.
-        /// </summary>
-        public RandomValueSettings ExcitatoryBias { get; set; }
+        public List<NeuronGroupSettings> NeuronGroups { get; set; }
         /// <summary>
         /// Density of interconnected neurons.
         /// Each pool neuron will be connected as a source neuron for Dim.Size * InterconnectionDensity neurons.
@@ -97,14 +69,9 @@ namespace RCNet.Neural.Network.SM
         public double RetainmentNeuronsDensity { get; set; }
         /// <summary>
         /// If the pool neuron is selected to have the Retainment property then its retainment rate will be randomly selected
-        /// from the closed interval (RetainmentMinRate, RetainmentMaxRate).
+        /// following specified settings
         /// </summary>
-        public double RetainmentMinRate { get; set; }
-        /// <summary>
-        /// If the pool neuron is selected to have the Retainment property then its retainment rate will be randomly selected
-        /// from the closed interval (RetainmentMinRate, RetainmentMaxRate).
-        /// </summary>
-        public double RetainmentMaxRate { get; set; }
+        public RandomValueSettings RetainmentRate { get; set; }
 
         //Constructors
         /// <summary>
@@ -112,22 +79,15 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         public PoolSettings()
         {
-            InstanceName = string.Empty;
+            Name = string.Empty;
             Dim = null;
-            InputConnectionDensity = 0;
-            InputSynapseWeight = null;
-            InhibitoryNeuronsDensity = 0;
-            InhibitoryActivation = null;
-            InhibitoryBias = null;
-            ExcitatoryActivation = null;
-            ExcitatoryBias = null;
+            NeuronGroups = null;
             InterconnectionDensity = 0;
             InterconnectionAvgDistance = 0;
             InterconnectionSynapseWeight = null;
             RetainmentNeuronsFeature = false;
             RetainmentNeuronsDensity = 0;
-            RetainmentMinRate = 0;
-            RetainmentMaxRate = 0;
+            RetainmentRate = null;
             return;
         }
 
@@ -137,39 +97,17 @@ namespace RCNet.Neural.Network.SM
         /// <param name="source">Source instance</param>
         public PoolSettings(PoolSettings source)
         {
-            InstanceName = source.InstanceName;
+            Name = source.Name;
             Dim = null;
             if(source.Dim != null)
             {
                 Dim = new PoolDimensions(source.Dim.X, source.Dim.Y, source.Dim.Z);
             }
             RouteToReadout = source.RouteToReadout;
-            InputConnectionDensity = source.InputConnectionDensity;
-            InputSynapseWeight = null;
-            if (source.InputSynapseWeight != null)
+            NeuronGroups = new List<NeuronGroupSettings>(source.NeuronGroups.Count);
+            foreach(NeuronGroupSettings item in source.NeuronGroups)
             {
-                InputSynapseWeight = source.InputSynapseWeight.DeepClone();
-            }
-            InhibitoryNeuronsDensity = source.InhibitoryNeuronsDensity;
-            InhibitoryActivation = null;
-            if (source.InhibitoryActivation != null)
-            {
-                InhibitoryActivation = ActivationFactory.GetDeepClone(source.InhibitoryActivation);
-            }
-            InhibitoryBias = null;
-            if (source.InhibitoryBias != null)
-            {
-                InhibitoryBias = source.InhibitoryBias.DeepClone();
-            }
-            ExcitatoryActivation = null;
-            if (source.ExcitatoryActivation != null)
-            {
-                ExcitatoryActivation = ActivationFactory.GetDeepClone(source.ExcitatoryActivation);
-            }
-            ExcitatoryBias = null;
-            if(source.ExcitatoryBias != null)
-            {
-                ExcitatoryBias = source.ExcitatoryBias.DeepClone();
+                NeuronGroups.Add(item.DeepClone());
             }
             InterconnectionDensity = source.InterconnectionDensity;
             InterconnectionAvgDistance = source.InterconnectionAvgDistance;
@@ -180,8 +118,14 @@ namespace RCNet.Neural.Network.SM
             }
             RetainmentNeuronsFeature = source.RetainmentNeuronsFeature;
             RetainmentNeuronsDensity = source.RetainmentNeuronsDensity;
-            RetainmentMinRate = source.RetainmentMinRate;
-            RetainmentMaxRate = source.RetainmentMaxRate;
+            if (RetainmentNeuronsFeature)
+            {
+                RetainmentRate = source.RetainmentRate.DeepClone();
+            }
+            else
+            {
+                RetainmentRate = null;
+            }
             return;
         }
 
@@ -203,28 +147,54 @@ namespace RCNet.Neural.Network.SM
             XElement poolSettingsElem = validator.Validate(elem, "rootElem");
             //Parsing
             //Name
-            InstanceName = poolSettingsElem.Attribute("instanceName").Value;
+            Name = poolSettingsElem.Attribute("name").Value;
             //Dimensions
             Dim = new PoolDimensions(int.Parse(poolSettingsElem.Attribute("dimX").Value, CultureInfo.InvariantCulture),
                                      int.Parse(poolSettingsElem.Attribute("dimY").Value, CultureInfo.InvariantCulture),
                                      int.Parse(poolSettingsElem.Attribute("dimZ").Value, CultureInfo.InvariantCulture)
                                      );
             RouteToReadout = bool.Parse(poolSettingsElem.Attribute("routeToReadout").Value);
-            //Input
-            XElement inputElem = poolSettingsElem.Descendants("input").First();
-            InputConnectionDensity = double.Parse(inputElem.Attribute("connectionDensity").Value, CultureInfo.InvariantCulture);
-            InputSynapseWeight = new RandomValueSettings(inputElem.Descendants("weight").First());
-            //Excitatory
-            XElement excitatoryElem = poolSettingsElem.Descendants("excitatory").First();
-            ExcitatoryActivation = ActivationFactory.LoadSettings(excitatoryElem.Descendants().First());
-            ExcitatoryBias = new RandomValueSettings(excitatoryElem.Descendants("bias").First());
-            double excitatoryRelShare = double.Parse(excitatoryElem.Attribute("relShare").Value, CultureInfo.InvariantCulture);
-            //Inhibitory
-            XElement inhibitoryElem = poolSettingsElem.Descendants("inhibitory").First();
-            InhibitoryActivation = ActivationFactory.LoadSettings(inhibitoryElem.Descendants().First());
-            InhibitoryBias = new RandomValueSettings(inhibitoryElem.Descendants("bias").First());
-            double inhibitoryRelShare = double.Parse(inhibitoryElem.Attribute("relShare").Value, CultureInfo.InvariantCulture);
-            InhibitoryNeuronsDensity = inhibitoryRelShare / (inhibitoryRelShare + excitatoryRelShare);
+            //NeuronGroups
+            XElement neuronGroupsElem = poolSettingsElem.Descendants("neuronGroups").First();
+            double totalRelShare = 0;
+            NeuronGroups = new List<NeuronGroupSettings>();
+            foreach(XElement neuronGroupElem in neuronGroupsElem.Descendants("neuronGroup"))
+            {
+                NeuronGroupSettings ngs = new NeuronGroupSettings(neuronGroupElem);
+                if (ngs.RelativeShare > 0)
+                {
+                    NeuronGroups.Add(ngs);
+                    totalRelShare += ngs.RelativeShare;
+                }
+            }
+            //Neuron groups counts
+            int totalCount = 0;
+            foreach(NeuronGroupSettings ngs in NeuronGroups)
+            {
+                double ratio = ngs.RelativeShare / totalRelShare;
+                ngs.Count = (int)Math.Round(((double)Dim.Size) * ratio, 0);
+                totalCount += ngs.Count;
+            }
+            while(totalCount != Dim.Size)
+            {
+                //Correction of neuron counts
+                int sign = Math.Sign(Dim.Size - totalCount);
+                if (sign < 0)
+                {
+                    NeuronGroups.Sort(NeuronGroupSettings.Comparer_desc);
+                }
+                else
+                {
+                    NeuronGroups.Sort(NeuronGroupSettings.Comparer_asc);
+                }
+                NeuronGroups[0].Count += sign;
+                totalCount += sign;
+                if (NeuronGroups[0].Count < 0)
+                {
+                    throw new Exception("Can't set proper neuron absolute counts for the neuron groups.");
+                }
+            }
+            
             //Interconnection
             XElement interconnectionElem = poolSettingsElem.Descendants("interconnection").First();
             InterconnectionDensity = double.Parse(interconnectionElem.Attribute("density").Value, CultureInfo.InvariantCulture);
@@ -237,17 +207,14 @@ namespace RCNet.Neural.Network.SM
             if (RetainmentNeuronsFeature)
             {
                 RetainmentNeuronsDensity = double.Parse(retainmentElem.Attribute("density").Value, CultureInfo.InvariantCulture);
-                RetainmentMinRate = double.Parse(retainmentElem.Attribute("retainmentMinRate").Value, CultureInfo.InvariantCulture);
-                RetainmentMaxRate = double.Parse(retainmentElem.Attribute("retainmentMaxRate").Value, CultureInfo.InvariantCulture);
+                RetainmentRate = new RandomValueSettings(retainmentElem.Descendants("rate").First());
                 RetainmentNeuronsFeature = (RetainmentNeuronsDensity > 0 &&
-                                            RetainmentMaxRate > 0
+                                            RetainmentRate.Max > 0
                                             );
             }
             else
             {
                 RetainmentNeuronsDensity = 0;
-                RetainmentMinRate = 0;
-                RetainmentMaxRate = 0;
             }
             return;
         }
@@ -260,26 +227,26 @@ namespace RCNet.Neural.Network.SM
         {
             if (obj == null) return false;
             PoolSettings cmpSettings = obj as PoolSettings;
-            if (InstanceName != cmpSettings.InstanceName ||
+            if (Name != cmpSettings.Name ||
                 !Equals(Dim, cmpSettings.Dim) ||
                 RouteToReadout != cmpSettings.RouteToReadout ||
-                InputConnectionDensity != cmpSettings.InputConnectionDensity ||
-                !Equals(InputSynapseWeight, cmpSettings.InputSynapseWeight) ||
-                !Equals(ExcitatoryActivation, cmpSettings.ExcitatoryActivation) ||
-                !Equals(ExcitatoryBias, cmpSettings.ExcitatoryBias) ||
-                !Equals(InhibitoryActivation, cmpSettings.InhibitoryActivation) ||
-                !Equals(InhibitoryBias, cmpSettings.InhibitoryBias) ||
-                InhibitoryNeuronsDensity != cmpSettings.InhibitoryNeuronsDensity ||
+                !Equals(NeuronGroups.Count, cmpSettings.NeuronGroups.Count) ||
                 InterconnectionDensity != cmpSettings.InterconnectionDensity ||
                 InterconnectionAvgDistance != cmpSettings.InterconnectionAvgDistance ||
                 !Equals(InterconnectionSynapseWeight, cmpSettings.InterconnectionSynapseWeight) ||
                 RetainmentNeuronsFeature != cmpSettings.RetainmentNeuronsFeature ||
                 RetainmentNeuronsDensity != cmpSettings.RetainmentNeuronsDensity ||
-                RetainmentMinRate != cmpSettings.RetainmentMinRate ||
-                RetainmentMaxRate != cmpSettings.RetainmentMaxRate
+                !Equals(RetainmentRate, cmpSettings.RetainmentRate)
                 )
             {
                 return false;
+            }
+            for (int i = 0; i < NeuronGroups.Count; i++)
+            {
+                if(!Equals(NeuronGroups[i], cmpSettings.NeuronGroups[i]))
+                {
+                    return false;
+                }
             }
             return true;
         }
@@ -289,7 +256,7 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         public override int GetHashCode()
         {
-            return InstanceName.GetHashCode();
+            return Name.GetHashCode();
         }
 
         /// <summary>
@@ -300,6 +267,152 @@ namespace RCNet.Neural.Network.SM
             PoolSettings clone = new PoolSettings(this);
             return clone;
         }
+
+        //Inner classes
+        /// <summary>
+        /// Class encapsulates specification of the groupped (excitatory or inhibitory) neurons
+        /// </summary>
+        [Serializable]
+        public class NeuronGroupSettings
+        {
+            //Constants
+            //Attribute properties
+            /// <summary>
+            /// Excitatory or Inhibitory role of the neurons
+            /// </summary>
+            public CommonEnums.NeuronRole Role { get; set; }
+            /// <summary>
+            /// Used to compute Density attribute (how big relative portion of pool's neurons is formed by this group of the neurons)
+            /// </summary>
+            public double RelativeShare { get; set; }
+            /// <summary>
+            /// Computed attribute. What count of pool's neurons is formed by this group of the neurons
+            /// </summary>
+            public int Count { get; set; }
+            /// <summary>
+            /// Activation settings of the groupped neurons
+            /// </summary>
+            public Object ActivationSettings { get; set; }
+            /// <summary>
+            /// Each pool's neuron has its own constant input bias. Bias is always added to input signal of the neuron.
+            /// A constant bias value of the neuron will be selected randomly.
+            /// </summary>
+            public RandomValueSettings BiasSettings { get; set; }
+
+            //Constructors
+            /// <summary>
+            /// Creates an uninitialized instance
+            /// </summary>
+            public NeuronGroupSettings()
+            {
+                Role = CommonEnums.NeuronRole.Excitatory;
+                RelativeShare = 0;
+                Count = 0;
+                ActivationSettings = null;
+                BiasSettings = null;
+                return;
+            }
+
+            /// <summary>
+            /// The deep copy constructor
+            /// </summary>
+            /// <param name="source">Source instance</param>
+            public NeuronGroupSettings(NeuronGroupSettings source)
+            {
+                Role = source.Role;
+                RelativeShare = source.RelativeShare;
+                Count = source.Count;
+                ActivationSettings = ActivationFactory.DeepCloneActivationSettings(source.ActivationSettings);
+                BiasSettings = source.BiasSettings.DeepClone();
+                return;
+            }
+
+            /// <summary>
+            /// Creates the instance and initialize it from given xml element.
+            /// </summary>
+            /// <param name="elem">
+            /// Xml data containing settings.
+            /// Content of xml element is always validated against the xml schema.
+            /// </param>
+            public NeuronGroupSettings(XElement elem)
+            {
+                //Validation
+                ElemValidator validator = new ElemValidator();
+                Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
+                validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.SM.PoolNeuronGroupSettings.xsd");
+                validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
+                XElement settingsElem = validator.Validate(elem, "rootElem");
+                //Parsing
+                //Role
+                Role = CommonEnums.ParseNeuronRole(settingsElem.Attribute("role").Value);
+                //Relative share
+                RelativeShare = double.Parse(settingsElem.Attribute("relShare").Value, CultureInfo.InvariantCulture);
+                //Activation settings
+                ActivationSettings = ActivationFactory.LoadSettings(settingsElem.Descendants().First());
+                //Bias
+                BiasSettings = new RandomValueSettings(settingsElem.Descendants("bias").First());
+                return;
+            }
+
+            //Methods
+            /// <summary>
+            /// Ascending comparer for the sort operation
+            /// </summary>
+            /// <param name="item1">Instance 1</param>
+            /// <param name="item2">Instance 2</param>
+            public static int Comparer_asc(NeuronGroupSettings item1, NeuronGroupSettings item2)
+            {
+                return Math.Sign(item1.Count - item2.Count);
+            }
+
+            /// <summary>
+            /// Descending comparer for the sort operation
+            /// </summary>
+            /// <param name="item1">Instance 1</param>
+            /// <param name="item2">Instance 2</param>
+            public static int Comparer_desc(NeuronGroupSettings item1, NeuronGroupSettings item2)
+            {
+                return Math.Sign(item2.Count - item1.Count);
+            }
+
+            /// <summary>
+            /// See the base.
+            /// </summary>
+            public override bool Equals(object obj)
+            {
+                if (obj == null) return false;
+                NeuronGroupSettings cmpSettings = obj as NeuronGroupSettings;
+                if (Role != cmpSettings.Role ||
+                    RelativeShare != cmpSettings.RelativeShare ||
+                    Count != cmpSettings.Count ||
+                    !Equals(ActivationSettings, cmpSettings.ActivationSettings) ||
+                    !Equals(BiasSettings, cmpSettings.BiasSettings)
+                    )
+                {
+                    return false;
+                }
+                return true;
+            }
+
+            /// <summary>
+            /// See the base.
+            /// </summary>
+            public override int GetHashCode()
+            {
+                return base.GetHashCode();
+            }
+
+            /// <summary>
+            /// Creates the deep copy instance of this instance
+            /// </summary>
+            public NeuronGroupSettings DeepClone()
+            {
+                NeuronGroupSettings clone = new NeuronGroupSettings(this);
+                return clone;
+            }
+
+
+        }//NeuronGroup
 
     }//PoolSettings
 

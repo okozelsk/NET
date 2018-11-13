@@ -81,10 +81,10 @@ namespace RCNet.Neural.Network.SM
         public BasicStat StatesStat { get { return null; } }
 
         /// <summary>
-        /// Determines whether neuron's signal is excitatory or inhibitory.
+        /// Determines whether neuron's signal role is excitatory or inhibitory.
         /// Input neuron is allways excitatory
         /// </summary>
-        public CommonEnums.NeuronSignalType TransmissionSignalType { get { return CommonEnums.NeuronSignalType.Excitatory; } }
+        public CommonEnums.NeuronRole Role { get { return CommonEnums.NeuronRole.Excitatory; } }
 
         /// <summary>
         /// Transmission signal

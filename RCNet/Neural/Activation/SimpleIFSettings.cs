@@ -10,6 +10,7 @@ using RCNet.Extensions;
 using RCNet.MathTools;
 using RCNet.XmlTools;
 using RCNet.MathTools.Differential;
+using RCNet.RandomValue;
 
 namespace RCNet.Neural.Activation
 {
@@ -19,31 +20,39 @@ namespace RCNet.Neural.Activation
     [Serializable]
     public class SimpleIFSettings
     {
+        //Constants
+        //Typical values
+        public const double TypicalStimuliCoeff = 1;
+        public const double TypicalResistance = 15;
+        public const double TypicalDecayRate = 0.05;
+        public const double TypicalResetV = 5;
+        public const double TypicalFiringThresholdV = 20;
+
         //Attribute properties
         /// <summary>
         /// Initial input stimuli coefficient (pA)
         /// </summary>
-        public double StimuliCoeff { get; set; }
+        public double StimuliCoeff { get; }
         /// <summary>
         /// Membrane resistance (Mohm)
         /// </summary>
-        public double Resistance { get; set; }
+        public RandomValueSettings Resistance { get; }
         /// <summary>
         /// Membrane potential decay rate
         /// </summary>
-        public double DecayRate { get; set; }
+        public RandomValueSettings DecayRate { get; }
         /// <summary>
         /// Membrane reset potential (mV)
         /// </summary>
-        public double ResetV { get; set; }
+        public RandomValueSettings ResetV { get; }
         /// <summary>
         /// Membrane firing threshold (mV)
         /// </summary>
-        public double FiringThresholdV { get; set; }
+        public RandomValueSettings FiringThresholdV { get; }
         /// <summary>
         /// Number of after spike computation cycles while an input stimuli is ignored (ms)
         /// </summary>
-        public int RefractoryPeriods { get; set; }
+        public int RefractoryPeriods { get; }
 
         //Constructors
         /// <summary>
@@ -56,18 +65,18 @@ namespace RCNet.Neural.Activation
         /// <param name="firingThresholdV">Membrane firing threshold (mV)</param>
         /// <param name="refractoryPeriods">Number of after spike computation cycles while an input stimuli is ignored (ms)</param>
         public SimpleIFSettings(double stimuliCoeff,
-                                  double resistance,
-                                  double decayRate,
-                                  double resetV,
-                                  double firingThresholdV,
-                                  int refractoryPeriods
-                                  )
+                                RandomValueSettings resistance,
+                                RandomValueSettings decayRate,
+                                RandomValueSettings resetV,
+                                RandomValueSettings firingThresholdV,
+                                int refractoryPeriods
+                                )
         {
             StimuliCoeff = stimuliCoeff;
-            Resistance = resistance;
-            DecayRate = decayRate;
-            ResetV = resetV;
-            FiringThresholdV = firingThresholdV;
+            Resistance = resistance.DeepClone();
+            DecayRate = decayRate.DeepClone();
+            ResetV = resetV.DeepClone();
+            FiringThresholdV = firingThresholdV.DeepClone();
             RefractoryPeriods = refractoryPeriods;
             return;
         }
@@ -79,10 +88,10 @@ namespace RCNet.Neural.Activation
         public SimpleIFSettings(SimpleIFSettings source)
         {
             StimuliCoeff = source.StimuliCoeff;
-            Resistance = source.Resistance;
-            DecayRate = source.DecayRate;
-            ResetV = source.ResetV;
-            FiringThresholdV = source.FiringThresholdV;
+            Resistance = source.Resistance.DeepClone();
+            DecayRate = source.DecayRate.DeepClone();
+            ResetV = source.ResetV.DeepClone();
+            FiringThresholdV = source.FiringThresholdV.DeepClone();
             RefractoryPeriods = source.RefractoryPeriods;
             return;
         }
@@ -104,10 +113,10 @@ namespace RCNet.Neural.Activation
             XElement activationSettingsElem = validator.Validate(elem, "rootElem");
             //Parsing
             StimuliCoeff = double.Parse(activationSettingsElem.Attribute("stimuliCoeff").Value, CultureInfo.InvariantCulture);
-            Resistance = double.Parse(activationSettingsElem.Attribute("resistance").Value, CultureInfo.InvariantCulture);
-            DecayRate = double.Parse(activationSettingsElem.Attribute("decayRate").Value, CultureInfo.InvariantCulture);
-            ResetV = double.Parse(activationSettingsElem.Attribute("resetV").Value, CultureInfo.InvariantCulture);
-            FiringThresholdV = double.Parse(activationSettingsElem.Attribute("firingThresholdV").Value, CultureInfo.InvariantCulture);
+            Resistance = new RandomValueSettings(activationSettingsElem.Descendants("resistance").FirstOrDefault());
+            DecayRate = new RandomValueSettings(activationSettingsElem.Descendants("decayRate").FirstOrDefault());
+            ResetV = new RandomValueSettings(activationSettingsElem.Descendants("resetV").FirstOrDefault());
+            FiringThresholdV = new RandomValueSettings(activationSettingsElem.Descendants("firingThresholdV").FirstOrDefault());
             RefractoryPeriods = int.Parse(activationSettingsElem.Attribute("refractoryPeriods").Value, CultureInfo.InvariantCulture);
             return;
         }
@@ -121,10 +130,10 @@ namespace RCNet.Neural.Activation
             if (obj == null) return false;
             SimpleIFSettings cmpSettings = obj as SimpleIFSettings;
             if (StimuliCoeff != cmpSettings.StimuliCoeff ||
-                Resistance != cmpSettings.Resistance ||
-                DecayRate != cmpSettings.DecayRate ||
-                ResetV != cmpSettings.ResetV ||
-                FiringThresholdV != cmpSettings.FiringThresholdV ||
+                !Equals(Resistance, cmpSettings.Resistance) ||
+                !Equals(DecayRate, cmpSettings.DecayRate) ||
+                !Equals(ResetV, cmpSettings.ResetV) ||
+                !Equals(FiringThresholdV, cmpSettings.FiringThresholdV) ||
                 RefractoryPeriods != cmpSettings.RefractoryPeriods
                 )
             {

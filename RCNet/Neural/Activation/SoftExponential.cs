@@ -24,10 +24,11 @@ namespace RCNet.Neural.Activation
         /// Instantiates SoftExponential activation function
         /// </summary>
         /// <param name="settings">Encapsulated arguments</param>
-        public SoftExponential(SoftExponentialSettings settings)
+        /// <param name="rand">Random object to be used for randomly generated parameters</param>
+        public SoftExponential(SoftExponentialSettings settings, Random rand)
             : base()
         {
-            Alpha = settings.Alpha.Bound();
+            Alpha = rand.NextDouble(settings.Alpha).Bound();
             return;
         }
 

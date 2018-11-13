@@ -24,14 +24,15 @@ namespace RCNet.Neural.Activation
         /// Instantiates a LeakyReLU activation function
         /// </summary>
         /// <param name="settings">Encapsulated arguments</param>
-        public LeakyReLU(LeakyReLUSettings settings)
+        /// <param name="rand">Random object to be used for randomly generated parameters</param>
+        public LeakyReLU(LeakyReLUSettings settings, Random rand)
             : base()
         {
-            if (settings.NegSlope < 0)
+            NegSlope = rand.NextDouble(settings.NegSlope).Bound();
+            if (NegSlope < 0)
             {
                 throw new ArgumentOutOfRangeException("negSlope", "negSlope must be GE 0");
             }
-            NegSlope = settings.NegSlope.Bound();
             if (NegSlope > 0)
             {
                 _outputRange = new Interval(double.NegativeInfinity.Bound(), double.PositiveInfinity.Bound());

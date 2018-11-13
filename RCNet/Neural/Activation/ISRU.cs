@@ -24,14 +24,15 @@ namespace RCNet.Neural.Activation
         /// Instantiates an Inverse Square Root Unit activation function
         /// </summary>
         /// <param name="settings">Encapsulated arguments</param>
-        public ISRU(ISRUSettings settings)
+        /// <param name="rand">Random object to be used for randomly generated parameters</param>
+        public ISRU(ISRUSettings settings, Random rand)
             : base()
         {
-            if (settings.Alpha <= 0)
+            Alpha = rand.NextDouble(settings.Alpha).Bound();
+            if (Alpha <= 0)
             {
                 throw new ArgumentOutOfRangeException("alpha", "Alpha must be GT 0");
             }
-            Alpha = settings.Alpha.Bound(); ;
             _outputRange = new Interval(-1 / Math.Sqrt(Alpha), 1 / Math.Sqrt(Alpha));
             return;
         }

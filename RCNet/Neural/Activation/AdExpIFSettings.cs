@@ -7,7 +7,7 @@ using System.Globalization;
 using System.Xml.Linq;
 using System.Reflection;
 using RCNet.Extensions;
-using RCNet.MathTools;
+using RCNet.RandomValue;
 using RCNet.XmlTools;
 using RCNet.MathTools.Differential;
 
@@ -19,59 +19,73 @@ namespace RCNet.Neural.Activation
     [Serializable]
     public class AdExpIFSettings
     {
+        //Constants
+        //Typical values
+        public const double TypicalStimuliCoeff = 150;
+        public const double TypicalTimeScale = 5;
+        public const double TypicalResistance = 500;
+        public const double TypicalRestV = -70;
+        public const double TypicalResetV = -51;
+        public const double TypicalRheobaseV = -50;
+        public const double TypicalFiringThresholdV = -30;
+        public const double TypicalSharpnessDeltaT = 2;
+        public const double TypicalAdaptationVoltageCoupling = 0.5;
+        public const double TypicalAdaptationTimeConstant = 100;
+        public const double TypicalAdaptationSpikeTriggeredIncrement = 7;
+
         //Attribute properties
         /// <summary>
         /// Input stimuli coefficient (pA)
         /// </summary>
-        public double StimuliCoeff { get; set; }
+        public double StimuliCoeff { get; }
         /// <summary>
         /// Membrane time scale (ms)
         /// </summary>
-        public double TimeScale { get; set; }
+        public RandomValueSettings TimeScale { get; }
         /// <summary>
         /// Membrane resistance (Mohm)
         /// </summary>
-        public double Resistance { get; set; }
+        public RandomValueSettings Resistance { get; }
         /// <summary>
         /// Membrane rest potential (mV)
         /// </summary>
-        public double RestV { get; set; }
+        public RandomValueSettings RestV { get; }
         /// <summary>
         /// Membrane reset potential (mV)
         /// </summary>
-        public double ResetV { get; set; }
+        public RandomValueSettings ResetV { get; }
         /// <summary>
         /// Membrane rheobase threshold (mV)
         /// </summary>
-        public double RheobaseThresholdV { get; set; }
+        public RandomValueSettings RheobaseV { get; }
         /// <summary>
         /// Membrane firing threshold (mV)
         /// </summary>
-        public double FiringThresholdV { get; set; }
+        public RandomValueSettings FiringThresholdV { get; }
         /// <summary>
         /// Sharpness of membrane potential change (mV)
         /// </summary>
-        public double SharpnessDeltaT { get; set; }
+        public RandomValueSettings SharpnessDeltaT { get; }
         /// <summary>
         /// Adaptation voltage coupling (nS)
         /// </summary>
-        public double AdaptationVoltageCoupling { get; set; }
+        public RandomValueSettings AdaptationVoltageCoupling { get; }
         /// <summary>
         /// Adaptation time constant (ms)
         /// </summary>
-        public double AdaptationTimeConstant { get; set; }
+        public RandomValueSettings AdaptationTimeConstant { get; }
         /// <summary>
         /// Spike triggered adaptation increment (pA)
         /// </summary>
-        public double SpikeTriggeredAdaptationIncrement { get; set; }
+        public RandomValueSettings AdaptationSpikeTriggeredIncrement { get; }
         /// <summary>
         /// ODE numerical solver method
         /// </summary>
-        public ODENumSolver.Method SolverMethod { get; set; }
+        public ODENumSolver.Method SolverMethod { get; }
         /// <summary>
         /// ODE numerical solver computation steps of the time step 
         /// </summary>
-        public int SolverCompSteps { get; set; }
+        public int SolverCompSteps { get; }
 
 
         //Constructors
@@ -83,40 +97,40 @@ namespace RCNet.Neural.Activation
         /// <param name="resistance">Membrane resistance (Mohm)</param>
         /// <param name="restV">Membrane rest potential (mV)</param>
         /// <param name="resetV">Membrane reset potential (mV)</param>
-        /// <param name="rheobaseThresholdV">Membrane rheobase threshold (mV)</param>
+        /// <param name="rheobaseV">Membrane rheobase threshold (mV)</param>
         /// <param name="firingThresholdV">Membrane firing threshold (mV)</param>
         /// <param name="sharpnessDeltaT">Sharpness of membrane potential change (mV)</param>
         /// <param name="adaptationVoltageCoupling">Adaptation voltage coupling (nS)</param>
         /// <param name="adaptationTimeConstant">Adaptation time constant (ms)</param>
-        /// <param name="spikeTriggeredAdaptationIncrement">Spike triggered adaptation increment (pA)</param>
+        /// <param name="adaptationSpikeTriggeredIncrement">Spike triggered adaptation increment (pA)</param>
         /// <param name="solverMethod">ODE numerical solver method</param>
         /// <param name="solverCompSteps">ODE numerical solver computation steps of the time step</param>
         public AdExpIFSettings(double stimuliCoeff,
-                               double timeScale,
-                               double resistance,
-                               double restV,
-                               double resetV,
-                               double rheobaseThresholdV,
-                               double firingThresholdV,
-                               double sharpnessDeltaT,
-                               double adaptationVoltageCoupling,
-                               double adaptationTimeConstant,
-                               double spikeTriggeredAdaptationIncrement,
+                               RandomValueSettings timeScale,
+                               RandomValueSettings resistance,
+                               RandomValueSettings restV,
+                               RandomValueSettings resetV,
+                               RandomValueSettings rheobaseV,
+                               RandomValueSettings firingThresholdV,
+                               RandomValueSettings sharpnessDeltaT,
+                               RandomValueSettings adaptationVoltageCoupling,
+                               RandomValueSettings adaptationTimeConstant,
+                               RandomValueSettings adaptationSpikeTriggeredIncrement,
                                ODENumSolver.Method solverMethod,
                                int solverCompSteps
                                )
         {
             StimuliCoeff = stimuliCoeff;
-            TimeScale = timeScale;
-            Resistance = resistance;
-            RestV = restV;
-            ResetV = resetV;
-            RheobaseThresholdV = rheobaseThresholdV;
-            FiringThresholdV = firingThresholdV;
-            SharpnessDeltaT = sharpnessDeltaT;
-            AdaptationVoltageCoupling = adaptationVoltageCoupling;
-            AdaptationTimeConstant = adaptationTimeConstant;
-            SpikeTriggeredAdaptationIncrement = spikeTriggeredAdaptationIncrement;
+            TimeScale = timeScale.DeepClone();
+            Resistance = resistance.DeepClone();
+            RestV = restV.DeepClone();
+            ResetV = resetV.DeepClone();
+            RheobaseV = rheobaseV.DeepClone();
+            FiringThresholdV = firingThresholdV.DeepClone();
+            SharpnessDeltaT = sharpnessDeltaT.DeepClone();
+            AdaptationVoltageCoupling = adaptationVoltageCoupling.DeepClone();
+            AdaptationTimeConstant = adaptationTimeConstant.DeepClone();
+            AdaptationSpikeTriggeredIncrement = adaptationSpikeTriggeredIncrement.DeepClone();
             SolverMethod = solverMethod;
             SolverCompSteps = solverCompSteps;
             return;
@@ -129,16 +143,16 @@ namespace RCNet.Neural.Activation
         public AdExpIFSettings(AdExpIFSettings source)
         {
             StimuliCoeff = source.StimuliCoeff;
-            TimeScale = source.TimeScale;
-            Resistance = source.Resistance;
-            RestV = source.RestV;
-            ResetV = source.ResetV;
-            RheobaseThresholdV = source.RheobaseThresholdV;
-            FiringThresholdV = source.FiringThresholdV;
-            SharpnessDeltaT = source.SharpnessDeltaT;
-            AdaptationVoltageCoupling = source.AdaptationVoltageCoupling;
-            AdaptationTimeConstant = source.AdaptationTimeConstant;
-            SpikeTriggeredAdaptationIncrement = source.SpikeTriggeredAdaptationIncrement;
+            TimeScale = source.TimeScale.DeepClone();
+            Resistance = source.Resistance.DeepClone();
+            RestV = source.RestV.DeepClone();
+            ResetV = source.ResetV.DeepClone();
+            RheobaseV = source.RheobaseV.DeepClone();
+            FiringThresholdV = source.FiringThresholdV.DeepClone();
+            SharpnessDeltaT = source.SharpnessDeltaT.DeepClone();
+            AdaptationVoltageCoupling = source.AdaptationVoltageCoupling.DeepClone();
+            AdaptationTimeConstant = source.AdaptationTimeConstant.DeepClone();
+            AdaptationSpikeTriggeredIncrement = source.AdaptationSpikeTriggeredIncrement.DeepClone();
             SolverMethod = source.SolverMethod;
             SolverCompSteps = source.SolverCompSteps;
             return;
@@ -161,16 +175,16 @@ namespace RCNet.Neural.Activation
             XElement activationSettingsElem = validator.Validate(elem, "rootElem");
             //Parsing
             StimuliCoeff = double.Parse(activationSettingsElem.Attribute("stimuliCoeff").Value, CultureInfo.InvariantCulture);
-            TimeScale = double.Parse(activationSettingsElem.Attribute("timeScale").Value, CultureInfo.InvariantCulture);
-            Resistance = double.Parse(activationSettingsElem.Attribute("resistance").Value, CultureInfo.InvariantCulture);
-            RestV = double.Parse(activationSettingsElem.Attribute("restV").Value, CultureInfo.InvariantCulture);
-            ResetV = double.Parse(activationSettingsElem.Attribute("resetV").Value, CultureInfo.InvariantCulture);
-            RheobaseThresholdV = double.Parse(activationSettingsElem.Attribute("rheobaseV").Value, CultureInfo.InvariantCulture);
-            FiringThresholdV = double.Parse(activationSettingsElem.Attribute("firingThresholdV").Value, CultureInfo.InvariantCulture);
-            SharpnessDeltaT = double.Parse(activationSettingsElem.Attribute("sharpnessDeltaT").Value, CultureInfo.InvariantCulture);
-            AdaptationVoltageCoupling = double.Parse(activationSettingsElem.Attribute("adaptationVoltageCoupling").Value, CultureInfo.InvariantCulture);
-            AdaptationTimeConstant = double.Parse(activationSettingsElem.Attribute("adaptationTimeConstant").Value, CultureInfo.InvariantCulture);
-            SpikeTriggeredAdaptationIncrement = double.Parse(activationSettingsElem.Attribute("spikeTriggeredAdaptationIncrement").Value, CultureInfo.InvariantCulture);
+            TimeScale = new RandomValueSettings(activationSettingsElem.Descendants("timeScale").FirstOrDefault());
+            Resistance = new RandomValueSettings(activationSettingsElem.Descendants("resistance").FirstOrDefault());
+            RestV = new RandomValueSettings(activationSettingsElem.Descendants("restV").FirstOrDefault());
+            ResetV = new RandomValueSettings(activationSettingsElem.Descendants("resetV").FirstOrDefault());
+            RheobaseV = new RandomValueSettings(activationSettingsElem.Descendants("rheobaseV").FirstOrDefault());
+            FiringThresholdV = new RandomValueSettings(activationSettingsElem.Descendants("firingThresholdV").FirstOrDefault());
+            SharpnessDeltaT = new RandomValueSettings(activationSettingsElem.Descendants("sharpnessDeltaT").FirstOrDefault());
+            AdaptationVoltageCoupling = new RandomValueSettings(activationSettingsElem.Descendants("adaptationVoltageCoupling").FirstOrDefault());
+            AdaptationTimeConstant = new RandomValueSettings(activationSettingsElem.Descendants("adaptationTimeConstant").FirstOrDefault());
+            AdaptationSpikeTriggeredIncrement = new RandomValueSettings(activationSettingsElem.Descendants("adaptationSpikeTriggeredIncrement").FirstOrDefault());
             SolverMethod = ODENumSolver.ParseComputationMethodType(activationSettingsElem.Attribute("solverMethod").Value);
             SolverCompSteps = int.Parse(activationSettingsElem.Attribute("solverCompSteps").Value, CultureInfo.InvariantCulture);
             return;
@@ -185,16 +199,16 @@ namespace RCNet.Neural.Activation
             if (obj == null) return false;
             AdExpIFSettings cmpSettings = obj as AdExpIFSettings;
             if (StimuliCoeff != cmpSettings.StimuliCoeff ||
-                TimeScale != cmpSettings.TimeScale ||
-                Resistance != cmpSettings.Resistance ||
-                RestV != cmpSettings.RestV ||
-                ResetV != cmpSettings.ResetV ||
-                RheobaseThresholdV != cmpSettings.RheobaseThresholdV ||
-                FiringThresholdV != cmpSettings.FiringThresholdV ||
-                SharpnessDeltaT != cmpSettings.SharpnessDeltaT ||
-                AdaptationVoltageCoupling != cmpSettings.AdaptationVoltageCoupling ||
-                AdaptationTimeConstant != cmpSettings.AdaptationTimeConstant ||
-                SpikeTriggeredAdaptationIncrement != cmpSettings.SpikeTriggeredAdaptationIncrement ||
+                !Equals(TimeScale, cmpSettings.TimeScale) ||
+                !Equals(Resistance, cmpSettings.Resistance) ||
+                !Equals(RestV, cmpSettings.RestV) ||
+                !Equals(ResetV, cmpSettings.ResetV) ||
+                !Equals(RheobaseV, cmpSettings.RheobaseV) ||
+                !Equals(FiringThresholdV, cmpSettings.FiringThresholdV) ||
+                !Equals(SharpnessDeltaT, cmpSettings.SharpnessDeltaT) ||
+                !Equals(AdaptationVoltageCoupling, cmpSettings.AdaptationVoltageCoupling) ||
+                !Equals(AdaptationTimeConstant, cmpSettings.AdaptationTimeConstant) ||
+                !Equals(AdaptationSpikeTriggeredIncrement, cmpSettings.AdaptationSpikeTriggeredIncrement) ||
                 SolverMethod != cmpSettings.SolverMethod ||
                 SolverCompSteps != cmpSettings.SolverCompSteps
                 )

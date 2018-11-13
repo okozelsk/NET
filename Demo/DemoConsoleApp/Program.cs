@@ -12,6 +12,7 @@ namespace RCNet.DemoConsoleApp
             //Research r = new Research();
             //r.Run();
 
+
             //Demo standard execution
             try
             {

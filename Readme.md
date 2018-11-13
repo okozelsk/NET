@@ -63,10 +63,10 @@ See the [wiki pages.](https://en.wikipedia.org/wiki/Activation_function)
 |Component|Description|
 |--|--|
 |SimpleIF|Simple Integrate and Fire activation function|
-|AdSimpleIF|Adaptive Simple Integrate and Fire activation function|
 |LeakyIF|Leaky Integrate and Fire activation function|
 |ExpIF|Exponential Integrate and Fire activation function|
 |AdExpIF|Adaptive Exponential Integrate and Fire activation function|
+|IzhikevichIF|Izhikevich Integrate and Fire activation function (model "one fits all")|
 See the [wiki pages.](https://en.wikipedia.org/wiki/Biological_neuron_model)
 
 ### Non-recurrent Networks

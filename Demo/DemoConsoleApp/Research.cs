@@ -10,6 +10,7 @@ using RCNet.MathTools;
 using RCNet.Neural.Network.SM;
 using RCNet.MathTools.Differential;
 using RCNet.MathTools.VectorMath;
+using RCNet.RandomValue;
 
 namespace RCNet.DemoConsoleApp
 {
@@ -27,9 +28,36 @@ namespace RCNet.DemoConsoleApp
         public void Run()
         {
             //TestDEq();
-            SimpleIFSettings settings = new SimpleIFSettings(1, 15, 0.1, 5, 20, 0);
-            IActivationFunction af = new SimpleIF(settings);
-            TestActivation(af, 800, double.NaN, 10, 190);
+            //IzhikevichIFSettings settings = new IzhikevichIFSettings(10, 0.1, 0.25, 2, -70, -65, 30, 0, ODENumSolver.Method.Euler, 2);
+            //IActivationFunction af = new IzhikevichIF(settings);
+
+            AdExpIFSettings settings = new AdExpIFSettings(150,
+                                                           new RandomValueSettings(5, 5),
+                                                           new RandomValueSettings(500, 500),
+                                                           new RandomValueSettings(-70, -70),
+                                                           new RandomValueSettings(-51, -51),
+                                                           new RandomValueSettings(-50, -50),
+                                                           new RandomValueSettings(-30, -30),
+                                                           new RandomValueSettings(2, 2),
+                                                           new RandomValueSettings(0.5, 0.5),
+                                                           new RandomValueSettings(100, 100),
+                                                           new RandomValueSettings(7, 7),
+                                                           ODENumSolver.Method.Euler,
+                                                           2
+                                                           );
+            IActivationFunction af = new AdExpIF(settings, new Random(0));
+
+            /*
+            SimpleIFSettings settings = new SimpleIFSettings(1,
+                                                             new RandomValueSettings(15, 15),
+                                                             new RandomValueSettings(0.05, 0.05),
+                                                             new RandomValueSettings(5, 5),
+                                                             new RandomValueSettings(20, 20),
+                                                             0
+                                                             );
+            IActivationFunction af = new SimpleIF(settings, new Random(0));
+            */
+            TestActivation(af, 800, 0.65, 10, 600);
             return;
         }
 

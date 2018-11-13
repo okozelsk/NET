@@ -17,10 +17,10 @@ namespace RCNet.Neural.Activation
     public class ExpIF : ODESpikingMembrane
     {
         //Attributes
-        //Parameter attributes
-        private readonly double _membraneTimeScale;
-        private readonly double _membraneResistance;
-        private readonly double _rheobaseThresholdV;
+        //Parameters
+        private readonly double _timeScale;
+        private readonly double _resistance;
+        private readonly double _rheobaseV;
         private readonly double _sharpnessDeltaT;
 
         //Constructor
@@ -28,13 +28,23 @@ namespace RCNet.Neural.Activation
         /// Constructs an initialized instance
         /// </summary>
         /// <param name="settings">Encapsulated arguments</param>
-        public ExpIF(ExpIFSettings settings)
-            : base(settings.RestV, settings.ResetV, settings.FiringThresholdV, settings.RefractoryPeriods, settings.StimuliCoeff, settings.SolverMethod, settings.SolverCompSteps, 1)
+        /// <param name="rand">Random object to be used for randomly generated parameters</param>
+        public ExpIF(ExpIFSettings settings, Random rand)
+            : base(rand.NextDouble(settings.RestV),
+                   rand.NextDouble(settings.ResetV),
+                   rand.NextDouble(settings.FiringThresholdV),
+                   settings.RefractoryPeriods,
+                   settings.StimuliCoeff,
+                   settings.SolverMethod,
+                   1,
+                   settings.SolverCompSteps,
+                   1
+                   )
         {
-            _membraneTimeScale = settings.TimeScale;
-            _membraneResistance = settings.Resistance;
-            _rheobaseThresholdV = settings.RheobaseThresholdV;
-            _sharpnessDeltaT = settings.SharpnessDeltaT;
+            _timeScale = rand.NextDouble(settings.TimeScale);
+            _resistance = rand.NextDouble(settings.Resistance);
+            _rheobaseV = rand.NextDouble(settings.RheobaseV);
+            _sharpnessDeltaT = rand.NextDouble(settings.SharpnessDeltaT);
             return;
         }
 
@@ -49,11 +59,11 @@ namespace RCNet.Neural.Activation
         {
             Vector dvdt = new Vector(1);
             //Ensure numerical stability
-            double exponent = Math.Min((v[VarMembraneV] - _rheobaseThresholdV) / _sharpnessDeltaT, 20);
-            dvdt[VarMembraneV] = (- (v[VarMembraneV] - _restV)
+            double exponent = Math.Min((v[VarMembraneVIdx] - _rheobaseV) / _sharpnessDeltaT, 20);
+            dvdt[VarMembraneVIdx] = (- (v[VarMembraneVIdx] - _restV)
                                   + _sharpnessDeltaT * Math.Exp(exponent)
-                                  + _membraneResistance * _stimuli
-                                  ) / _membraneTimeScale;
+                                  + _resistance * _stimuli
+                                  ) / _timeScale;
             return dvdt;
         }
 

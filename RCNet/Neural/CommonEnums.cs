@@ -47,9 +47,9 @@ namespace RCNet.Neural
         }
 
         /// <summary>
-        /// Type of neuron's signal
+        /// Role of the neuron
         /// </summary>
-        public enum NeuronSignalType
+        public enum NeuronRole
         {
             /// <summary>
             /// Excitatory. Outgoing synapses will allways have (+) sign.
@@ -91,6 +91,20 @@ namespace RCNet.Neural
             }
         }
 
+        /// <summary>
+        /// Parses neuron role from a string code
+        /// </summary>
+        /// <param name="code">Neuron role code</param>
+        public static NeuronRole ParseNeuronRole(string code)
+        {
+            switch (code.ToUpper())
+            {
+                case "EXCITATORY": return NeuronRole.Excitatory;
+                case "INHIBITORY": return NeuronRole.Inhibitory;
+                default:
+                    throw new ArgumentException($"Unsupported neuron role {code}", "code");
+            }
+        }
 
     }//CommonTypes
 }//Namespace

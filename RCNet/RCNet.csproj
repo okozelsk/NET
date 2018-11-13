@@ -50,6 +50,8 @@
     <Compile Include="MathTools\PhysUnit.cs" />
     <Compile Include="MathTools\VectorMath\Vector.cs" />
     <Compile Include="Neural\Activation\ActivationFactory.cs" />
+    <Compile Include="Neural\Activation\IzhikevichIFSettings.cs" />
+    <Compile Include="Neural\Activation\IzhikevichIF.cs" />
     <Compile Include="Neural\Activation\TanHSettings.cs" />
     <Compile Include="Neural\Activation\SoftPlusSettings.cs" />
     <Compile Include="Neural\Activation\SoftExponentialSettings.cs" />
@@ -65,7 +67,6 @@
     <Compile Include="Neural\Activation\ExpIFSettings.cs" />
     <Compile Include="Neural\Activation\ElliotSettings.cs" />
     <Compile Include="Neural\Activation\BentIdentitySettings.cs" />
-    <Compile Include="Neural\Activation\AdSimpleIFSettings.cs" />
     <Compile Include="Neural\Activation\AdExpIFSettings.cs" />
     <Compile Include="Neural\Activation\AdExpIF.cs" />
     <Compile Include="Neural\Activation\BentIdentity.cs" />
@@ -78,7 +79,6 @@
     <Compile Include="Neural\Activation\ISRU.cs" />
     <Compile Include="Neural\Activation\LeakyReLU.cs" />
     <Compile Include="Neural\Activation\Sigmoid.cs" />
-    <Compile Include="Neural\Activation\AdSimpleIF.cs" />
     <Compile Include="Neural\Activation\Sinc.cs" />
     <Compile Include="Neural\Activation\Sinusoid.cs" />
     <Compile Include="Neural\Activation\SoftExponential.cs" />
@@ -208,11 +208,6 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Neural\Activation\AdSimpleIFSettings.xsd">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Neural\Activation\LeakyIFSettings.xsd">
       <SubType>Designer</SubType>
     </EmbeddedResource>
@@ -284,6 +279,16 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Neural\Activation\TanHSettings.xsd">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Neural\Activation\IzhikevichIFSettings.xsd">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Neural\Network\SM\PoolNeuronGroupSettings.xsd">
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>

@@ -20,8 +20,8 @@ namespace RCNet.Neural.Activation
         //Attributes
         private static readonly Interval _outputRange = new Interval(0, 1);
         private readonly Interval _stateRange;
-        private readonly double _membraneResistance;
-        private readonly double _membraneDecayRate;
+        private readonly double _resistance;
+        private readonly double _decayRate;
         private readonly double _restV;
         private readonly double _resetV;
         private readonly double _firingThresholdV;
@@ -30,18 +30,20 @@ namespace RCNet.Neural.Activation
         private double _membraneV;
         private bool _inRefractory;
         private int _refractoryPeriod;
+
         //Constructor
         /// <summary>
         /// Constructs an initialized instance
         /// </summary>
-        /// <param name="settings">Encapsulated arguments</param>
-        public SimpleIF(SimpleIFSettings settings)
+        /// <param name="settings">Encapsulated arguments settings</param>
+        /// <param name="rand">Random object to be used for randomly generated parameters</param>
+        public SimpleIF(SimpleIFSettings settings, Random rand)
         {
-            _membraneResistance = settings.Resistance;
-            _membraneDecayRate = settings.DecayRate;
+            _resistance = rand.NextDouble(settings.Resistance);
+            _decayRate = rand.NextDouble(settings.DecayRate);
             _restV = 0;
-            _resetV = Math.Abs(settings.ResetV);
-            _firingThresholdV = Math.Abs(settings.FiringThresholdV);
+            _resetV = Math.Abs(rand.NextDouble(settings.ResetV));
+            _firingThresholdV = Math.Abs(rand.NextDouble(settings.FiringThresholdV));
             _refractoryPeriods = settings.RefractoryPeriods;
             _stimuliCoeff = settings.StimuliCoeff;
             _stateRange = new Interval(_restV, _firingThresholdV);
@@ -68,7 +70,7 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Specifies whether the activation function is independent on its previous states
         /// </summary>
-        public bool Stateless { get { return true; } }
+        public bool Stateless { get { return false; } }
 
         /// <summary>
         /// Normal range of the internal state
@@ -123,7 +125,7 @@ namespace RCNet.Neural.Activation
                 }
             }
             //Compute membrane new potential
-            _membraneV = _restV + (_membraneV - _restV) * (1d - _membraneDecayRate) + _membraneResistance * x;
+            _membraneV = _restV + (_membraneV - _restV) * (1d - _decayRate) + _resistance * x;
             //Output
             if (_membraneV >= _firingThresholdV)
             {

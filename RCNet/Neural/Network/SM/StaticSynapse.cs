@@ -50,7 +50,7 @@ namespace RCNet.Neural.Network.SM
             //Weight absolute value
             Weight = Math.Abs(weight);
             //Weight sign
-            Weight *= (SourceNeuron.TransmissionSignalType == CommonEnums.NeuronSignalType.Excitatory) ? 1 : -1;
+            Weight *= (SourceNeuron.Role == CommonEnums.NeuronRole.Excitatory) ? 1 : -1;
             return;
         }
 

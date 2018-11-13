@@ -14,21 +14,20 @@ using RCNet.MathTools.Differential;
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Class encaptulates arguments of the ExpIF activation function
+    /// Class encaptulates arguments of the IzhikevichIF activation function
     /// </summary>
     [Serializable]
-    public class ExpIFSettings
+    public class IzhikevichIFSettings
     {
         //Constants
         //Typical values
-        public const double TypicalStimuliCoeff = 5.5;
-        public const double TypicalTimeScale = 12;
-        public const double TypicalResistance = 20;
-        public const double TypicalRestV = -65;
-        public const double TypicalResetV = -60;
-        public const double TypicalRheobaseV = -55;
-        public const double TypicalFiringThresholdV = -30;
-        public const double TypicalSharpnessDeltaT = 2;
+        public const double TypicalStimuliCoeff = 10;
+        public const double TypicalRecoveryTimeScale = 0.02;
+        public const double TypicalRecoverySensitivity = 0.2;
+        public const double TypicalRecoveryReset = 2;
+        public const double TypicalRestV = -70;
+        public const double TypicalResetV = -65;
+        public const double TypicalFiringThresholdV = 30;
 
         //Attribute properties
         /// <summary>
@@ -36,33 +35,33 @@ namespace RCNet.Neural.Activation
         /// </summary>
         public double StimuliCoeff { get; }
         /// <summary>
-        /// Membrane time scale (ms)
+        /// Dimensionless. Describes the time scale of the recovery variable. Smaller values result in slower recovery.
+        /// (parameter a in original model)
         /// </summary>
-        public RandomValueSettings TimeScale { get; }
+        public RandomValueSettings RecoveryTimeScale { get; }
         /// <summary>
-        /// Membrane resistance (Mohm)
+        /// Dimensionless. Describes the sensitivity of the recovery variable to the subthreshold fluctuations of the membrane potential.
+        /// (parameter b in original model)
         /// </summary>
-        public RandomValueSettings Resistance { get; }
+        public RandomValueSettings RecoverySensitivity { get; }
+        /// <summary>
+        /// Dimensionless. Describes after-spike reset of the recovery variable.
+        /// (parameter d in original model)
+        /// </summary>
+        public RandomValueSettings RecoveryReset { get; }
         /// <summary>
         /// Membrane rest potential (mV)
         /// </summary>
         public RandomValueSettings RestV { get; }
         /// <summary>
         /// Membrane reset potential (mV)
+        /// (parameter c in original model)
         /// </summary>
         public RandomValueSettings ResetV { get; }
-        /// <summary>
-        /// Membrane rheobase threshold (mV)
-        /// </summary>
-        public RandomValueSettings RheobaseV { get; }
         /// <summary>
         /// Membrane firing threshold (mV)
         /// </summary>
         public RandomValueSettings FiringThresholdV { get; }
-        /// <summary>
-        /// Sharpness of membrane potential change (mV)
-        /// </summary>
-        public RandomValueSettings SharpnessDeltaT { get; }
         /// <summary>
         /// Number of after spike computation cycles while an input stimuli is ignored (ms)
         /// </summary>
@@ -82,37 +81,34 @@ namespace RCNet.Neural.Activation
         /// Creates an initialized instance
         /// </summary>
         /// <param name="stimuliCoeff">Input stimuli coefficient (pA)</param>
-        /// <param name="timeScale">Membrane time scale (ms)</param>
-        /// <param name="resistance">Membrane resistance (Mohm)</param>
+        /// <param name="recoveryTimeScale">Time scale of the recovery variable</param>
+        /// <param name="recoverySensitivity">Sensitivity of the recovery variable to the subthreshold fluctuations of the membrane potential</param>
+        /// <param name="recoveryReset">After-spike reset of the recovery variable</param>
         /// <param name="restV">Membrane rest potential (mV)</param>
         /// <param name="resetV">Membrane reset potential (mV)</param>
-        /// <param name="rheobaseV">Membrane rheobase threshold (mV)</param>
         /// <param name="firingThresholdV">Membrane firing threshold (mV)</param>
-        /// <param name="sharpnessDeltaT">Sharpness of membrane potential change (mV)</param>
         /// <param name="refractoryPeriods">Number of after spike computation cycles while an input stimuli is ignored (ms)</param>
         /// <param name="solverMethod">ODE numerical solver method</param>
         /// <param name="solverCompSteps">ODE numerical solver computation steps of the time step</param>
-        public ExpIFSettings(double stimuliCoeff,
-                             RandomValueSettings timeScale,
-                             RandomValueSettings resistance,
-                             RandomValueSettings restV,
-                             RandomValueSettings resetV,
-                             RandomValueSettings rheobaseV,
-                             RandomValueSettings firingThresholdV,
-                             RandomValueSettings sharpnessDeltaT,
-                             int refractoryPeriods,
-                             ODENumSolver.Method solverMethod,
-                             int solverCompSteps
-                             )
+        public IzhikevichIFSettings(double stimuliCoeff,
+                                    RandomValueSettings recoveryTimeScale,
+                                    RandomValueSettings recoverySensitivity,
+                                    RandomValueSettings recoveryReset,
+                                    RandomValueSettings restV,
+                                    RandomValueSettings resetV,
+                                    RandomValueSettings firingThresholdV,
+                                    int refractoryPeriods,
+                                    ODENumSolver.Method solverMethod,
+                                    int solverCompSteps
+                                    )
         {
             StimuliCoeff = stimuliCoeff;
-            TimeScale = timeScale.DeepClone();
-            Resistance = resistance.DeepClone();
+            RecoveryTimeScale = recoveryTimeScale.DeepClone();
+            RecoverySensitivity = recoverySensitivity.DeepClone();
+            RecoveryReset = recoveryReset.DeepClone();
             RestV = restV.DeepClone();
             ResetV = resetV.DeepClone();
-            RheobaseV = rheobaseV.DeepClone();
             FiringThresholdV = firingThresholdV.DeepClone();
-            SharpnessDeltaT = sharpnessDeltaT.DeepClone();
             RefractoryPeriods = refractoryPeriods;
             SolverMethod = solverMethod;
             SolverCompSteps = solverCompSteps;
@@ -123,16 +119,15 @@ namespace RCNet.Neural.Activation
         /// Copy constructor
         /// </summary>
         /// <param name="source">Source instance</param>
-        public ExpIFSettings(ExpIFSettings source)
+        public IzhikevichIFSettings(IzhikevichIFSettings source)
         {
             StimuliCoeff = source.StimuliCoeff;
-            TimeScale = source.TimeScale.DeepClone();
-            Resistance = source.Resistance.DeepClone();
+            RecoveryTimeScale = source.RecoveryTimeScale.DeepClone();
+            RecoverySensitivity = source.RecoverySensitivity.DeepClone();
+            RecoveryReset = source.RecoveryReset.DeepClone();
             RestV = source.RestV.DeepClone();
             ResetV = source.ResetV.DeepClone();
-            RheobaseV = source.RheobaseV.DeepClone();
             FiringThresholdV = source.FiringThresholdV.DeepClone();
-            SharpnessDeltaT = source.SharpnessDeltaT.DeepClone();
             RefractoryPeriods = source.RefractoryPeriods;
             SolverMethod = source.SolverMethod;
             SolverCompSteps = source.SolverCompSteps;
@@ -143,26 +138,25 @@ namespace RCNet.Neural.Activation
         /// Creates an instance and initializes it from given xml element.
         /// </summary>
         /// <param name="elem">
-        /// Xml data containing ExpIF activation settings.
+        /// Xml data containing IzhikevichIF activation settings.
         /// Content of xml element is always validated against the xml schema.
         /// </param>
-        public ExpIFSettings(XElement elem)
+        public IzhikevichIFSettings(XElement elem)
         {
             //Validation
             ElemValidator validator = new ElemValidator();
             Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Activation.ExpIFSettings.xsd");
+            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Activation.IzhikevichIFSettings.xsd");
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
             XElement activationSettingsElem = validator.Validate(elem, "rootElem");
             //Parsing
             StimuliCoeff = double.Parse(activationSettingsElem.Attribute("stimuliCoeff").Value, CultureInfo.InvariantCulture);
-            TimeScale = new RandomValueSettings(activationSettingsElem.Descendants("timeScale").FirstOrDefault());
-            Resistance = new RandomValueSettings(activationSettingsElem.Descendants("resistance").FirstOrDefault());
+            RecoveryTimeScale = new RandomValueSettings(activationSettingsElem.Descendants("recoveryTimeScale").FirstOrDefault());
+            RecoverySensitivity = new RandomValueSettings(activationSettingsElem.Descendants("recoverySensitivity").FirstOrDefault());
+            RecoveryReset = new RandomValueSettings(activationSettingsElem.Descendants("recoveryReset").FirstOrDefault());
             RestV = new RandomValueSettings(activationSettingsElem.Descendants("restV").FirstOrDefault());
             ResetV = new RandomValueSettings(activationSettingsElem.Descendants("resetV").FirstOrDefault());
-            RheobaseV = new RandomValueSettings(activationSettingsElem.Descendants("rheobaseV").FirstOrDefault());
             FiringThresholdV = new RandomValueSettings(activationSettingsElem.Descendants("firingThresholdV").FirstOrDefault());
-            SharpnessDeltaT = new RandomValueSettings(activationSettingsElem.Descendants("sharpnessDeltaT").FirstOrDefault());
             RefractoryPeriods = int.Parse(activationSettingsElem.Attribute("refractoryPeriods").Value, CultureInfo.InvariantCulture);
             SolverMethod = ODENumSolver.ParseComputationMethodType(activationSettingsElem.Attribute("solverMethod").Value);
             SolverCompSteps = int.Parse(activationSettingsElem.Attribute("solverCompSteps").Value, CultureInfo.InvariantCulture);
@@ -176,16 +170,15 @@ namespace RCNet.Neural.Activation
         public override bool Equals(object obj)
         {
             if (obj == null) return false;
-            ExpIFSettings cmpSettings = obj as ExpIFSettings;
+            IzhikevichIFSettings cmpSettings = obj as IzhikevichIFSettings;
             if (StimuliCoeff != cmpSettings.StimuliCoeff ||
-                !Equals(TimeScale, cmpSettings.TimeScale) ||
-                !Equals(Resistance, cmpSettings.Resistance) ||
+                !Equals(RecoveryTimeScale, cmpSettings.RecoveryTimeScale) ||
+                !Equals(RecoverySensitivity, cmpSettings.RecoverySensitivity) ||
+                !Equals(RecoveryReset, cmpSettings.RecoveryReset) ||
                 !Equals(RestV, cmpSettings.RestV) ||
                 !Equals(ResetV, cmpSettings.ResetV) ||
-                !Equals(RheobaseV, cmpSettings.RheobaseV) ||
                 !Equals(FiringThresholdV, cmpSettings.FiringThresholdV) ||
-                !Equals(SharpnessDeltaT, cmpSettings.SharpnessDeltaT) ||
-                RefractoryPeriods != cmpSettings.RefractoryPeriods||
+                RefractoryPeriods != cmpSettings.RefractoryPeriods ||
                 SolverMethod != cmpSettings.SolverMethod ||
                 SolverCompSteps != cmpSettings.SolverCompSteps
                 )
@@ -206,12 +199,12 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>
-        public ExpIFSettings DeepClone()
+        public IzhikevichIFSettings DeepClone()
         {
-            ExpIFSettings clone = new ExpIFSettings(this);
+            IzhikevichIFSettings clone = new IzhikevichIFSettings(this);
             return clone;
         }
 
-    }//ExpIFSettings
+    }//IzhikevichIFSettings
 
 }//Namespace

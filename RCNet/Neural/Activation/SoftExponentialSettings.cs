@@ -9,7 +9,7 @@ using System.Reflection;
 using RCNet.Extensions;
 using RCNet.MathTools;
 using RCNet.XmlTools;
-using RCNet.MathTools.Differential;
+using RCNet.RandomValue;
 
 namespace RCNet.Neural.Activation
 {
@@ -19,20 +19,24 @@ namespace RCNet.Neural.Activation
     [Serializable]
     public class SoftExponentialSettings
     {
+        //Constants
+        //Typical values
+        public const double TypicalAlpha = 1;
+
         //Attribute properties
         /// <summary>
         /// The Alpha
         /// </summary>
-        public double Alpha { get; set; }
+        public RandomValueSettings Alpha { get; }
 
         //Constructors
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
         /// <param name="alpha">The Alpha</param>
-        public SoftExponentialSettings(double alpha)
+        public SoftExponentialSettings(RandomValueSettings alpha)
         {
-            Alpha = alpha;
+            Alpha = alpha.DeepClone();
             return;
         }
 
@@ -42,7 +46,7 @@ namespace RCNet.Neural.Activation
         /// <param name="source">Source instance</param>
         public SoftExponentialSettings(SoftExponentialSettings source)
         {
-            Alpha = source.Alpha;
+            Alpha = source.Alpha.DeepClone();
             return;
         }
 
@@ -62,7 +66,7 @@ namespace RCNet.Neural.Activation
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
             XElement activationSettingsElem = validator.Validate(elem, "rootElem");
             //Parsing
-            Alpha = double.Parse(activationSettingsElem.Attribute("alpha").Value, CultureInfo.InvariantCulture);
+            Alpha = new RandomValueSettings(activationSettingsElem.Descendants("alpha").FirstOrDefault());
             return;
         }
 
@@ -74,7 +78,7 @@ namespace RCNet.Neural.Activation
         {
             if (obj == null) return false;
             SoftExponentialSettings cmpSettings = obj as SoftExponentialSettings;
-            if (Alpha != cmpSettings.Alpha)
+            if (!Equals(Alpha, cmpSettings.Alpha))
             {
                 return false;
             }

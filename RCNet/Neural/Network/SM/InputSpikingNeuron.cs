@@ -89,7 +89,7 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// Input spiking neuron is allways excitatory
         /// </summary>
-        public CommonEnums.NeuronSignalType TransmissionSignalType { get { return CommonEnums.NeuronSignalType.Excitatory; } }
+        public CommonEnums.NeuronRole Role { get { return CommonEnums.NeuronRole.Excitatory; } }
 
         /// <summary>
         /// Statistics of neuron state values is a nonsense in case of input neuron

@@ -33,9 +33,9 @@ namespace RCNet.Neural.Network.SM
         Interval TransmissionSignalRange { get; }
 
         /// <summary>
-        /// Determines whether neuron's signal is excitatory or inhibitory
+        /// Determines whether neuron's signal role is excitatory or inhibitory
         /// </summary>
-        CommonEnums.NeuronSignalType TransmissionSignalType { get; }
+        CommonEnums.NeuronRole Role { get; }
 
         /// <summary>
         /// Neuron's transmission signal

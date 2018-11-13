@@ -18,13 +18,16 @@ namespace RCNet.Neural.Activation
     public class AdExpIF : ODESpikingMembrane
     {
         //Constants
-        private const int VarAdaptationOmega = 1;
+        /// <summary>
+        /// Index of AdaptationOmega evolving variable
+        /// </summary>
+        private const int VarAdaptationOmegaIdx = 1;
 
         //Attributes
-        //Parameter attributes
-        private readonly double _membraneTimeScale;
-        private readonly double _membraneResistance;
-        private readonly double _rheobaseThresholdV;
+        //Parameters
+        private readonly double _timeScale;
+        private readonly double _resistance;
+        private readonly double _rheobaseV;
         private readonly double _sharpnessDeltaT;
         private readonly double _adaptationVoltageCoupling;
         private readonly double _adaptationTimeConstant;
@@ -35,24 +38,27 @@ namespace RCNet.Neural.Activation
         /// Constructs an initialized instance
         /// </summary>
         /// <param name="settings">Encapsulated arguments</param>
-        public AdExpIF(AdExpIFSettings settings)
-            : base(PhysUnit.ToBase(settings.RestV, PhysUnit.MetricPrefix.Milli),
-                   PhysUnit.ToBase(settings.ResetV, PhysUnit.MetricPrefix.Milli),
-                   PhysUnit.ToBase(settings.FiringThresholdV, PhysUnit.MetricPrefix.Milli),
+        /// <param name="rand">Random object to be used for randomly generated parameters</param>
+
+        public AdExpIF(AdExpIFSettings settings, Random rand)
+            : base(PhysUnit.ToBase(rand.NextDouble(settings.RestV), PhysUnit.MetricPrefix.Milli),
+                   PhysUnit.ToBase(rand.NextDouble(settings.ResetV), PhysUnit.MetricPrefix.Milli),
+                   PhysUnit.ToBase(rand.NextDouble(settings.FiringThresholdV), PhysUnit.MetricPrefix.Milli),
                    0,
                    PhysUnit.ToBase(settings.StimuliCoeff, PhysUnit.MetricPrefix.Piko),
                    settings.SolverMethod,
+                   PhysUnit.ToBase(1, PhysUnit.MetricPrefix.Milli),
                    settings.SolverCompSteps,
                    2)
         {
-            _membraneTimeScale = PhysUnit.ToBase(settings.TimeScale, PhysUnit.MetricPrefix.Milli);
-            _membraneResistance = PhysUnit.ToBase(settings.Resistance, PhysUnit.MetricPrefix.Mega);
-            _rheobaseThresholdV = PhysUnit.ToBase(settings.RheobaseThresholdV, PhysUnit.MetricPrefix.Milli);
-            _sharpnessDeltaT = PhysUnit.ToBase(settings.SharpnessDeltaT, PhysUnit.MetricPrefix.Milli);
-            _adaptationVoltageCoupling = PhysUnit.ToBase(settings.AdaptationVoltageCoupling, PhysUnit.MetricPrefix.Nano);
-            _adaptationTimeConstant = PhysUnit.ToBase(settings.AdaptationTimeConstant, PhysUnit.MetricPrefix.Milli);
-            _spikeTriggeredAdaptationIncrement = PhysUnit.ToBase(settings.SpikeTriggeredAdaptationIncrement, PhysUnit.MetricPrefix.Piko);
-            _evolVars[VarAdaptationOmega] = 0;
+            _timeScale = PhysUnit.ToBase(rand.NextDouble(settings.TimeScale), PhysUnit.MetricPrefix.Milli);
+            _resistance = PhysUnit.ToBase(rand.NextDouble(settings.Resistance), PhysUnit.MetricPrefix.Mega);
+            _rheobaseV = PhysUnit.ToBase(rand.NextDouble(settings.RheobaseV), PhysUnit.MetricPrefix.Milli);
+            _sharpnessDeltaT = PhysUnit.ToBase(rand.NextDouble(settings.SharpnessDeltaT), PhysUnit.MetricPrefix.Milli);
+            _adaptationVoltageCoupling = PhysUnit.ToBase(rand.NextDouble(settings.AdaptationVoltageCoupling), PhysUnit.MetricPrefix.Nano);
+            _adaptationTimeConstant = PhysUnit.ToBase(rand.NextDouble(settings.AdaptationTimeConstant), PhysUnit.MetricPrefix.Milli);
+            _spikeTriggeredAdaptationIncrement = PhysUnit.ToBase(rand.NextDouble(settings.AdaptationSpikeTriggeredIncrement), PhysUnit.MetricPrefix.Piko);
+            _evolVars[VarAdaptationOmegaIdx] = 0;
             return;
         }
 
@@ -63,7 +69,7 @@ namespace RCNet.Neural.Activation
         public override void Reset()
         {
             base.Reset();
-            _evolVars[VarAdaptationOmega] = 0;
+            _evolVars[VarAdaptationOmegaIdx] = 0;
             return;
         }
 
@@ -76,15 +82,17 @@ namespace RCNet.Neural.Activation
         protected override Vector MembraneDiffEq(double t, Vector v)
         {
             Vector dvdt = new Vector(2);
+            double exponent = (v[VarMembraneVIdx] - _rheobaseV) / _sharpnessDeltaT;
             //Ensure numerical stability
-            double exponent = Math.Min((v[VarMembraneV] - _rheobaseThresholdV) / _sharpnessDeltaT, 20);
-            dvdt[VarMembraneV] = (- (v[VarMembraneV] - _restV)
-                                  + _sharpnessDeltaT * Math.Exp(exponent)
-                                  - _membraneResistance * _evolVars[VarAdaptationOmega]
-                                  + _membraneResistance * _stimuli
-                                  ) / _membraneTimeScale;
-            dvdt[VarAdaptationOmega] = ((_adaptationVoltageCoupling * (_evolVars[VarMembraneV]- _restV)
-                                        - v[VarAdaptationOmega])
+            exponent = Math.Max(Math.Min(exponent, 20), -20);
+            //Compute deltas
+            dvdt[VarMembraneVIdx] = (-(v[VarMembraneVIdx] - _restV)
+                                  + (_sharpnessDeltaT * Math.Exp(exponent))
+                                  - (_resistance * v[VarAdaptationOmegaIdx])
+                                  + (_resistance * _stimuli)
+                                  ) / _timeScale;
+            dvdt[VarAdaptationOmegaIdx] = ((_adaptationVoltageCoupling * (v[VarMembraneVIdx] - _restV)
+                                        - v[VarAdaptationOmegaIdx])
                                         ) / _adaptationTimeConstant;
             return dvdt;
         }
@@ -94,7 +102,7 @@ namespace RCNet.Neural.Activation
         /// </summary>
         protected override void OnFiring()
         {
-            _evolVars[VarAdaptationOmega] += _spikeTriggeredAdaptationIncrement;
+            _evolVars[VarAdaptationOmegaIdx] += _spikeTriggeredAdaptationIncrement;
             return;
         }
 

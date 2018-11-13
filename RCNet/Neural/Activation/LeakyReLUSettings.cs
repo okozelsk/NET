@@ -9,7 +9,7 @@ using System.Reflection;
 using RCNet.Extensions;
 using RCNet.MathTools;
 using RCNet.XmlTools;
-using RCNet.MathTools.Differential;
+using RCNet.RandomValue;
 
 namespace RCNet.Neural.Activation
 {
@@ -19,20 +19,24 @@ namespace RCNet.Neural.Activation
     [Serializable]
     public class LeakyReLUSettings
     {
+        //Constants
+        //Typical values
+        public const double TypicalNegSlope = 0.05;
+
         //Attribute properties
         /// <summary>
         /// The negative slope
         /// </summary>
-        public double NegSlope { get; set; }
+        public RandomValueSettings NegSlope { get; set; }
 
         //Constructors
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
         /// <param name="negSlope">The negative slope</param>
-        public LeakyReLUSettings(double negSlope)
+        public LeakyReLUSettings(RandomValueSettings negSlope)
         {
-            NegSlope = negSlope;
+            NegSlope = negSlope.DeepClone();
             return;
         }
 
@@ -42,7 +46,7 @@ namespace RCNet.Neural.Activation
         /// <param name="source">Source instance</param>
         public LeakyReLUSettings(LeakyReLUSettings source)
         {
-            NegSlope = source.NegSlope;
+            NegSlope = source.NegSlope.DeepClone();
             return;
         }
 
@@ -62,7 +66,7 @@ namespace RCNet.Neural.Activation
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
             XElement activationSettingsElem = validator.Validate(elem, "rootElem");
             //Parsing
-            NegSlope = double.Parse(activationSettingsElem.Attribute("negSlope").Value, CultureInfo.InvariantCulture);
+            NegSlope = new RandomValueSettings(activationSettingsElem.Descendants("negSlope").FirstOrDefault());
             return;
         }
 
@@ -74,7 +78,7 @@ namespace RCNet.Neural.Activation
         {
             if (obj == null) return false;
             LeakyReLUSettings cmpSettings = obj as LeakyReLUSettings;
-            if (NegSlope != cmpSettings.NegSlope)
+            if (!Equals(NegSlope, cmpSettings.NegSlope))
             {
                 return false;
             }

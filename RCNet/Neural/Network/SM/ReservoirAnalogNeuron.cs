@@ -54,9 +54,9 @@ namespace RCNet.Neural.Network.SM
 
         //Attribute properties
         /// <summary>
-        /// Determines whether neuron's signal is excitatory or inhibitory.
+        /// Determines whether neuron's signal role is excitatory or inhibitory.
         /// </summary>
-        public CommonEnums.NeuronSignalType TransmissionSignalType { get; }
+        public CommonEnums.NeuronRole Role { get; }
 
         /// <summary>
         /// Home pool identificator and neuron placement within the pool
@@ -94,19 +94,19 @@ namespace RCNet.Neural.Network.SM
         /// Creates an initialized instance
         /// </summary>
         /// <param name="placement">Home pool identificator and neuron placement within the pool.</param>
-        /// <param name="transmissionSignalType">Type of the neuron's signal (Excitatory/Inhibitory).</param>
+        /// <param name="role">Neuron's signal role (Excitatory/Inhibitory).</param>
         /// <param name="activation">Instantiated activation function.</param>
         /// <param name="bias">Constant bias.</param>
         /// <param name="retainmentRatio">Retainment ratio.</param>
         public ReservoirAnalogNeuron(NeuronPlacement placement,
-                                     CommonEnums.NeuronSignalType transmissionSignalType,
+                                     CommonEnums.NeuronRole role,
                                      IActivationFunction activation,
                                      double bias,
                                      double retainmentRatio
                                      )
         {
             Placement = placement;
-            TransmissionSignalType = transmissionSignalType;
+            Role = role;
             Bias = bias;
             //Check whether function is analog
             if (activation.OutputSignalType != ActivationFactory.FunctionOutputSignalType.Analog)

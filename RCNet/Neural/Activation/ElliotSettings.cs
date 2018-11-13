@@ -7,7 +7,7 @@ using System.Globalization;
 using System.Xml.Linq;
 using System.Reflection;
 using RCNet.Extensions;
-using RCNet.MathTools;
+using RCNet.RandomValue;
 using RCNet.XmlTools;
 using RCNet.MathTools.Differential;
 
@@ -19,20 +19,24 @@ namespace RCNet.Neural.Activation
     [Serializable]
     public class ElliotSettings
     {
+        //Constants
+        //Typical values
+        public const double TypicalSlope = 1;
+
         //Attribute properties
         /// <summary>
         /// The curve slope
         /// </summary>
-        public double Slope { get; set; }
+        public RandomValueSettings Slope { get; }
 
         //Constructors
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
         /// <param name="slope">The curve slope</param>
-        public ElliotSettings(double slope)
+        public ElliotSettings(RandomValueSettings slope)
         {
-            Slope = slope;
+            Slope = slope.DeepClone();
             return;
         }
 
@@ -42,7 +46,7 @@ namespace RCNet.Neural.Activation
         /// <param name="source">Source instance</param>
         public ElliotSettings(ElliotSettings source)
         {
-            Slope = source.Slope;
+            Slope = source.Slope.DeepClone();
             return;
         }
 
@@ -62,7 +66,7 @@ namespace RCNet.Neural.Activation
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
             XElement activationSettingsElem = validator.Validate(elem, "rootElem");
             //Parsing
-            Slope = double.Parse(activationSettingsElem.Attribute("slope").Value, CultureInfo.InvariantCulture);
+            Slope = new RandomValueSettings(activationSettingsElem.Descendants("slope").FirstOrDefault());
             return;
         }
 
@@ -74,7 +78,7 @@ namespace RCNet.Neural.Activation
         {
             if (obj == null) return false;
             ElliotSettings cmpSettings = obj as ElliotSettings;
-            if (Slope != cmpSettings.Slope)
+            if (!Equals(Slope, cmpSettings.Slope))
             {
                 return false;
             }

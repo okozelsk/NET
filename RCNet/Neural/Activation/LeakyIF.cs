@@ -18,18 +18,29 @@ namespace RCNet.Neural.Activation
     {
         //Attributes
         //Parameters
-        private readonly double _membraneTimeScale;
-        private readonly double _membraneResistance;
+        private readonly double _timeScale;
+        private readonly double _resistance;
 
+        //Constructor
         /// <summary>
         /// Constructs an initialized instance
         /// </summary>
         /// <param name="settings">Encapsulated arguments</param>
-        public LeakyIF(LeakyIFSettings settings)
-            : base(settings.RestV, settings.ResetV, settings.FiringThresholdV, settings.RefractoryPeriods, settings.StimuliCoeff, settings.SolverMethod, settings.SolverCompSteps, 1)
+        /// <param name="rand">Random object to be used for randomly generated parameters</param>
+        public LeakyIF(LeakyIFSettings settings, Random rand)
+            : base(rand.NextDouble(settings.RestV),
+                   rand.NextDouble(settings.ResetV),
+                   rand.NextDouble(settings.FiringThresholdV),
+                   settings.RefractoryPeriods,
+                   settings.StimuliCoeff,
+                   settings.SolverMethod,
+                   1,
+                   settings.SolverCompSteps,
+                   1
+                   )
         {
-            _membraneTimeScale = settings.TimeScale;
-            _membraneResistance = settings.Resistance;
+            _timeScale = rand.NextDouble(settings.TimeScale);
+            _resistance = rand.NextDouble(settings.Resistance);
             return;
         }
 
@@ -43,7 +54,7 @@ namespace RCNet.Neural.Activation
         protected override Vector MembraneDiffEq(double t, Vector v)
         {
             Vector dvdt = new Vector(1);
-            dvdt[VarMembraneV] = (-(v[VarMembraneV] - _restV) + _membraneResistance * _stimuli) / _membraneTimeScale;
+            dvdt[VarMembraneVIdx] = (-(v[VarMembraneVIdx] - _restV) + _resistance * _stimuli) / _timeScale;
             return dvdt;
         }
 

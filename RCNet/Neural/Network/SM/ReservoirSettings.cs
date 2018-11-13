@@ -32,7 +32,7 @@ namespace RCNet.Neural.Network.SM
         public CommonEnums.InputCodingType InputCoding { get; set; }
         /// <summary>
         /// In case of analog input coding this specifies number of ms of the sustain analog signal.
-        /// In case of spike train coding thes specifies how many spikes code the input value (each spike takes 1 ms).
+        /// In case of spike train coding this specifies how many spikes code the input value (each spike takes 1 ms).
         /// </summary>
         public int InputDuration { get; set; }
         /// <summary>
@@ -283,7 +283,7 @@ namespace RCNet.Neural.Network.SM
                 //Find target pool ID (index)
                 for (int idx = 0; idx < poolSettingsCollection.Count; idx++)
                 {
-                    if (poolSettingsCollection[idx].InstanceName == TargetPoolName)
+                    if (poolSettingsCollection[idx].Name == TargetPoolName)
                     {
                         TargetPoolID = idx;
                         break;
@@ -299,7 +299,7 @@ namespace RCNet.Neural.Network.SM
                 //Find source pool ID (index)
                 for (int idx = 0; idx < poolSettingsCollection.Count; idx++)
                 {
-                    if (poolSettingsCollection[idx].InstanceName == SourcePoolName)
+                    if (poolSettingsCollection[idx].Name == SourcePoolName)
                     {
                         SourcePoolID = idx;
                         break;

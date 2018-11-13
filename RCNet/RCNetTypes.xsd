@@ -17,8 +17,8 @@
     </xs:restriction>
   </xs:simpleType>
 
-  <!-- Enumeration of neuron signal type -->
-  <xs:simpleType name="NeuronSignalType">
+  <!-- Enumeration of neuron role -->
+  <xs:simpleType name="NeuronRole">
     <xs:restriction base="xs:string">
       <xs:enumeration value="Excitatory"/>
       <xs:enumeration value="Inhibitory"/>
@@ -141,31 +141,26 @@
   <!-- Spiking activation functions configurations-->
   <!-- Activation SimpleIF configuration element -->
   <xs:complexType name="ActivationSimpleIFCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="RandomValueType" name="resistance" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="RandomValueType" name="decayRate" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="RandomValueType" name="resetV" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="RandomValueType" name="firingThresholdV" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
     <xs:attribute type="UDoubleType" name="stimuliCoeff" use="optional" default="1"/>
-    <xs:attribute type="UDoubleType" name="resistance" use="optional" default="15"/>
-    <xs:attribute type="UDoubleType" name="decayRate" use="optional" default="0.05"/>
-    <xs:attribute type="UDoubleType" name="resetV" use="optional" default="5"/>
-    <xs:attribute type="UDoubleType" name="firingThresholdV" use="optional" default="20"/>
     <xs:attribute type="xs:unsignedInt" name="refractoryPeriods" use="optional" default="0"/>
-  </xs:complexType>
-
-  <!-- Activation AdSimpleIF configuration element -->
-  <xs:complexType name="ActivationAdSimpleIFCfgType">
-    <xs:attribute type="UDoubleType" name="stimuliCoeff" use="optional" default="1"/>
-    <xs:attribute type="UDoubleType" name="resistance" use="optional" default="15"/>
-    <xs:attribute type="UDoubleType" name="decayRate" use="optional" default="0.05"/>
-    <xs:attribute type="UDoubleType" name="resetV" use="optional" default="5"/>
-    <xs:attribute type="UDoubleType" name="firingThresholdV" use="optional" default="20"/>
   </xs:complexType>
 
   <!-- Activation LeakyIF configuration element -->
   <xs:complexType name="ActivationLeakyIFCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="RandomValueType" name="timeScale" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="RandomValueType" name="resistance" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="RandomValueType" name="restV" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="RandomValueType" name="resetV" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="RandomValueType" name="firingThresholdV" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
     <xs:attribute type="UDoubleType" name="stimuliCoeff" use="optional" default="5.5"/>
-    <xs:attribute type="UDoubleType" name="timeScale" use="optional" default="8"/>
-    <xs:attribute type="UDoubleType" name="resistance" use="optional" default="10"/>
-    <xs:attribute type="xs:double" name="restV" use="optional" default="-70"/>
-    <xs:attribute type="xs:double" name="resetV" use="optional" default="-65"/>
-    <xs:attribute type="xs:double" name="firingThresholdV" use="optional" default="-50"/>
     <xs:attribute type="xs:unsignedInt" name="refractoryPeriods" use="optional" default="1"/>
     <xs:attribute type="ODENumSolverMethodType" name="solverMethod" use="optional" default="Euler"/>
     <xs:attribute type="UIntGT0Type" name="solverCompSteps" use="optional" default="2"/>
@@ -173,14 +168,16 @@
 
   <!-- Activation ExpIF configuration element -->
   <xs:complexType name="ActivationExpIFCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="RandomValueType" name="timeScale" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="RandomValueType" name="resistance" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="RandomValueType" name="restV" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="RandomValueType" name="resetV" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="RandomValueType" name="rheobaseV" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="RandomValueType" name="firingThresholdV" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="RandomValueType" name="sharpnessDeltaT" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
     <xs:attribute type="UDoubleType" name="stimuliCoeff" use="optional" default="5.5"/>
-    <xs:attribute type="UDoubleType" name="timeScale" use="optional" default="12"/>
-    <xs:attribute type="UDoubleType" name="resistance" use="optional" default="20"/>
-    <xs:attribute type="xs:double" name="restV" use="optional" default="-65"/>
-    <xs:attribute type="xs:double" name="resetV" use="optional" default="-60"/>
-    <xs:attribute type="xs:double" name="rheobaseV" use="optional" default="-55"/>
-    <xs:attribute type="xs:double" name="firingThresholdV" use="optional" default="-30"/>
-    <xs:attribute type="UDoubleType" name="sharpnessDeltaT" use="optional" default="2"/>
     <xs:attribute type="xs:unsignedInt" name="refractoryPeriods" use="optional" default="1"/>
     <xs:attribute type="ODENumSolverMethodType" name="solverMethod" use="optional" default="Euler"/>
     <xs:attribute type="UIntGT0Type" name="solverCompSteps" use="optional" default="2"/>
@@ -188,19 +185,37 @@
 
   <!-- Activation AdExpIF configuration element -->
   <xs:complexType name="ActivationAdExpIFCfgType">
-    <xs:attribute type="UDoubleType" name="stimuliCoeff" use="optional" default="200"/>
-    <xs:attribute type="UDoubleType" name="timeScale" use="optional" default="5"/>
-    <xs:attribute type="UDoubleType" name="resistance" use="optional" default="500"/>
-    <xs:attribute type="xs:double" name="restV" use="optional" default="-70"/>
-    <xs:attribute type="xs:double" name="resetV" use="optional" default="-51"/>
-    <xs:attribute type="xs:double" name="rheobaseThresholdV" use="optional" default="-50"/>
-    <xs:attribute type="xs:double" name="firingThresholdV" use="optional" default="-30"/>
-    <xs:attribute type="UDoubleType" name="sharpnessDeltaT" use="optional" default="2"/>
-    <xs:attribute type="UDoubleType" name="adaptationVoltageCoupling" use="optional" default="0.5"/>
-    <xs:attribute type="UDoubleType" name="adaptationTimeConstant" use="optional" default="100"/>
-    <xs:attribute type="UDoubleType" name="spikeTriggeredAdaptationIncrement" use="optional" default="7"/>
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="RandomValueType" name="timeScale" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="RandomValueType" name="resistance" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="RandomValueType" name="restV" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="RandomValueType" name="resetV" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="RandomValueType" name="rheobaseV" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="RandomValueType" name="firingThresholdV" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="RandomValueType" name="sharpnessDeltaT" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="RandomValueType" name="adaptationVoltageCoupling" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="RandomValueType" name="adaptationTimeConstant" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="RandomValueType" name="adaptationSpikeTriggeredIncrement" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+    <xs:attribute type="UDoubleType" name="stimuliCoeff" use="optional" default="150"/>
     <xs:attribute type="ODENumSolverMethodType" name="solverMethod" use="optional" default="Euler"/>
     <xs:attribute type="UIntGT0Type" name="solverCompSteps" use="optional" default="2"/>
+  </xs:complexType>
+
+  <!-- Activation IzhikevichIF configuration element -->
+  <xs:complexType name="ActivationIzhikevichIFCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="RandomValueType" name="recoveryTimeScale" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="RandomValueType" name="recoverySensitivity" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="RandomValueType" name="recoveryReset" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="RandomValueType" name="restV" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="RandomValueType" name="resetV" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="RandomValueType" name="firingThresholdV" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+    <xs:attribute type="UDoubleType" name="stimuliCoeff" use="optional" default="10"/>
+    <xs:attribute type="xs:unsignedInt" name="refractoryPeriods" use="optional" default="0"/>
+    <xs:attribute type="ODENumSolverMethodType" name="solverMethod" use="optional" default="Euler"/>
+    <xs:attribute type="UIntGT0Type" name="solverCompSteps" use="optional" default="1"/>
   </xs:complexType>
 
   <!-- Analog activation functions configurations-->
@@ -210,7 +225,9 @@
 
   <!-- Activation Elliot configuration element -->
   <xs:complexType name="ActivationElliotCfgType">
-    <xs:attribute type="UDoubleGT0Type" name="Slope" use="optional" default="1"/>
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="RandomValueType" name="slope" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
   </xs:complexType>
 
   <!-- Activation Gaussian configuration element -->
@@ -223,12 +240,16 @@
 
   <!-- Activation ISRU configuration element -->
   <xs:complexType name="ActivationISRUCfgType">
-    <xs:attribute type="xs:double" name="Alpha" use="optional" default="1"/>
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="RandomValueType" name="alpha" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
   </xs:complexType>
 
   <!-- Activation LeakyReLU configuration element -->
   <xs:complexType name="ActivationLeakyReLUCfgType">
-    <xs:attribute type="UDoubleType" name="NegSlope" use="optional" default="0.05"/>
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="RandomValueType" name="negSlope" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
   </xs:complexType>
 
   <!-- Activation Sigmoid configuration element -->
@@ -245,7 +266,9 @@
 
   <!-- Activation SoftExponential configuration element -->
   <xs:complexType name="ActivationSoftExponentialCfgType">
-    <xs:attribute type="xs:double" name="Alpha" use="optional" default="1"/>
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="RandomValueType" name="alpha" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
   </xs:complexType>
 
   <!-- Activation SoftPlus configuration element -->
@@ -414,15 +437,15 @@
     <xs:attribute type="xs:boolean" name="allowSelfConnection" use="required"/>
   </xs:complexType>
 
-  <!-- Pool - neuron -configuration -->
-  <xs:complexType name="PoolNeuronCfgType">
+  <!-- Pool - neuron group - configuration -->
+  <xs:complexType name="PoolNeuronGroupCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:choice minOccurs="0" maxOccurs="1">
         <xs:element type="ActivationSimpleIFCfgType" name="activationSimpleIF" minOccurs="1" maxOccurs="1"/>
-        <xs:element type="ActivationAdSimpleIFCfgType" name="activationAdSimpleIF" minOccurs="1" maxOccurs="1"/>
         <xs:element type="ActivationLeakyIFCfgType" name="activationLeakyIF" minOccurs="1" maxOccurs="1"/>
         <xs:element type="ActivationExpIFCfgType" name="activationExpIF" minOccurs="1" maxOccurs="1"/>
         <xs:element type="ActivationAdExpIFCfgType" name="activationAdExpIF" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="ActivationIzhikevichIFCfgType" name="activationIzhikevichIF" minOccurs="1" maxOccurs="1"/>
         <xs:element type="ActivationBentIdentityCfgType" name="activationBentIdentity" minOccurs="1" maxOccurs="1"/>
         <xs:element type="ActivationElliotCfgType" name="activationElliot" minOccurs="1" maxOccurs="1"/>
         <xs:element type="ActivationGaussianCfgType" name="activationGaussian" minOccurs="1" maxOccurs="1"/>
@@ -438,27 +461,33 @@
       </xs:choice>
       <xs:element type="RandomValueType" name="bias" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
+    <xs:attribute type="NeuronRole" name="role" use="required"/>
     <xs:attribute type="UDoubleType" name="relShare" use="required"/>
   </xs:complexType>
 
+  <!-- Pool - neuron groups - configuration -->
+  <xs:complexType name="PoolNeuronGroupsCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="PoolNeuronGroupCfgType" name="neuronGroup" minOccurs="1" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
 
   <!-- Pool - retainment neurons -configuration -->
   <xs:complexType name="PoolRetNeuronsCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="RandomValueType" name="rate" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
     <xs:attribute type="UDoubleLE1Type" name="density" use="required"/>
-    <xs:attribute type="UDoubleLT1Type" name="retainmentMinRate" use="required"/>
-    <xs:attribute type="UDoubleLT1Type" name="retainmentMaxRate" use="required"/>
   </xs:complexType>
 
   <!-- Pool configuration -->
   <xs:complexType name="PoolCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="PoolInputCfgType" name="input" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="PoolNeuronCfgType" name="excitatory" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="PoolNeuronCfgType" name="inhibitory" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="PoolNeuronGroupsCfgType" name="neuronGroups" minOccurs="1" maxOccurs="unbounded"/>
       <xs:element type="PoolInterconnectionCfgType" name="interconnection" minOccurs="1" maxOccurs="1"/>
       <xs:element type="PoolRetNeuronsCfgType" name="retainmentNeurons" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
-    <xs:attribute type="xs:string" name="instanceName" use="required" />
+    <xs:attribute type="xs:string" name="name" use="required" />
     <xs:attribute type="xs:unsignedInt" name="dimX" use="required" />
     <xs:attribute type="xs:unsignedInt" name="dimY" use="required" />
     <xs:attribute type="xs:unsignedInt" name="dimZ" use="required" />
@@ -520,17 +549,27 @@
     </xs:sequence>
   </xs:complexType>
 
-  <!-- StateMachine - reservoir instance - input fields - configuration -->
-  <xs:complexType name="SMResInstanceInputFieldsCfgType">
+  <!-- StateMachine - reservoir instance - input field assignment configuration -->
+  <xs:complexType name="SMResInstanceInputFieldAssignmentCfg">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="AloneNameType" name="field" minOccurs="1" maxOccurs="unbounded"/>
+      <xs:element type="RandomValueType" name="weight" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+    <xs:attribute type="xs:string" name="inputFieldName" use="required"/>
+    <xs:attribute type="xs:string" name="poolName" use="required"/>
+    <xs:attribute type="UDoubleGT0Type" name="density" use="required"/>
+  </xs:complexType>
+
+  <!-- StateMachine - reservoir instance - input field(s) assignment(s) - configuration -->
+  <xs:complexType name="SMResInstanceInputFieldAssignmentsCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="unbounded">
+      <xs:element type="SMResInstanceInputFieldAssignmentCfg" name="inputFieldAssignment" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
   <!-- StateMachine - reservoir instance - configuration -->
   <xs:complexType name="SMResInstanceCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="SMResInstanceInputFieldsCfgType" name="inputFields" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="SMResInstanceInputFieldAssignmentsCfgType" name="inputFieldAssignments" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:string" name="name" use="required" />
     <xs:attribute type="xs:string" name="cfg" use="required" />

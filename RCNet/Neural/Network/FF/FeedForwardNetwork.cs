@@ -29,8 +29,8 @@ namespace RCNet.Neural.Network.FF
         public const double WeightDefaultIniMax = 0.05;
         
         //Attributes
-        private int _numOfInputValues;
-        private int _numOfOutputValues;
+        private readonly int _numOfInputValues;
+        private readonly int _numOfOutputValues;
         private int _numOfNeurons;
         private List<Layer> _layerCollection;
         private double[] _flatWeights;
@@ -66,14 +66,15 @@ namespace RCNet.Neural.Network.FF
         public FeedForwardNetwork(int numOfInputValues, int numOfOutputValues, FeedForwardNetworkSettings settings)
             :this(numOfInputValues, numOfOutputValues)
         {
+            Random rand = new Random(0);
             //Initialize FF network
             for (int i = 0; i < settings.HiddenLayerCollection.Count; i++)
             {
                 AddLayer(settings.HiddenLayerCollection[i].NumOfNeurons,
-                         ActivationFactory.Create(settings.HiddenLayerCollection[i].Activation)
+                         ActivationFactory.Create(settings.HiddenLayerCollection[i].Activation, rand)
                          );
             }
-            FinalizeStructure(ActivationFactory.Create(settings.OutputLayerActivation));
+            FinalizeStructure(ActivationFactory.Create(settings.OutputLayerActivation, rand));
             return;
         }
 
@@ -355,7 +356,7 @@ namespace RCNet.Neural.Network.FF
             public IActivationFunction Activation { get; }
             //Attributes
             private int _numOfInputNodes;
-            private int _numOfLayerNeurons;
+            private readonly int _numOfLayerNeurons;
             private int _weightsStartFlatIdx;
             private int _biasesStartFlatIdx;
             private int _neuronsStartFlatIdx;

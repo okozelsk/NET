@@ -6,6 +6,7 @@ using System.Xml.Linq;
 using System.Reflection;
 using RCNet.Extensions;
 using RCNet.XmlTools;
+using RCNet.RandomValue;
 
 namespace RCNet.Neural.Network.SM
 {
@@ -36,8 +37,7 @@ namespace RCNet.Neural.Network.SM
         public List<string> InputFieldNameCollection { get; set; }
         /// <summary>
         /// Collection of definitions for future instances of internal reservoirs.
-        /// Each definition contains a specific setting for the reservoir and maps the input
-        /// fields of the reservoir to the input fields of the network.
+        /// Each definition contains a specific setting for the reservoir and mapping of the input fields
         /// </summary>
         public List<ReservoirInstanceDefinition> ReservoirInstanceDefinitionCollection { get; set; }
         /// <summary>
@@ -134,34 +134,81 @@ namespace RCNet.Neural.Network.SM
             XElement reservoirInstancesContainerElem = stateMachineSettingsElem.Descendants("reservoirInstanceContainer").First();
             foreach (XElement reservoirInstanceElem in reservoirInstancesContainerElem.Descendants("reservoirInstance"))
             {
-                ReservoirInstanceDefinition newMap = new ReservoirInstanceDefinition
+                ReservoirInstanceDefinition reservoirInstanceDefinition = new ReservoirInstanceDefinition
                 {
                     InstanceName = reservoirInstanceElem.Attribute("name").Value,
                     AugmentedStates = bool.Parse(reservoirInstanceElem.Attribute("augmentedStates").Value),
                     //Select reservoir settings
-                    ReservoirSettings = (from settings in availableResSettings
+                    Settings = (from settings in availableResSettings
                                          where settings.SettingsName == reservoirInstanceElem.Attribute("cfg").Value
                                          select settings).FirstOrDefault()
                 };
-                if (newMap.ReservoirSettings == null)
+                if (reservoirInstanceDefinition.Settings == null)
                 {
                     throw new Exception($"Reservoir settings '{reservoirInstanceElem.Attribute("cfg").Value}' was not found among available settings.");
                 }
-                //Associated State Machine input fields
-                foreach (XElement inputFieldElem in reservoirInstanceElem.Descendants("inputFields").First().Descendants("field"))
+
+                //Reservoir's input fields aggregation
+                List<string> resInpFieldNameCollection = new List<string>();
+                foreach (XElement inputFieldAssignmentElem in reservoirInstanceElem.Descendants("inputFieldAssignments").First().Descendants("inputFieldAssignment"))
                 {
-                    string inputFieldName = inputFieldElem.Attribute("name").Value;
-                    //Index in InputFieldsNames
+                    //Input field name
+                    string inputFieldName = inputFieldAssignmentElem.Attribute("inputFieldName").Value;
+                    //Index in InputFieldNameCollection
                     int inputFieldIdx = InputFieldNameCollection.IndexOf(inputFieldName);
                     //Found?
                     if (inputFieldIdx < 0)
                     {
                         //Not found
-                        throw new Exception($"Reservoir instance {newMap.InstanceName}: input field {inputFieldName} is not defined among State Machine input fields.");
+                        throw new Exception($"Reservoir instance {reservoirInstanceDefinition.InstanceName}: input field {inputFieldName} is not defined among State Machine input fields.");
                     }
-                    newMap.InputFieldMappingCollection.Add(inputFieldIdx);
+                    //Add distinct name to the collection
+                    if(resInpFieldNameCollection.IndexOf(inputFieldName) < 0)
+                    {
+                        reservoirInstanceDefinition.InputFieldIdxCollection.Add(inputFieldIdx);
+                        resInpFieldNameCollection.Add(inputFieldName);
+                    }
                 }
-                ReservoirInstanceDefinitionCollection.Add(newMap);
+
+                //Assignments of the reservoir's input fields to the pools
+                foreach (XElement inputFieldAssignmentElem in reservoirInstanceElem.Descendants("inputFieldAssignments").First().Descendants("inputFieldAssignment"))
+                {
+                    //Input field
+                    string inputFieldName = inputFieldAssignmentElem.Attribute("inputFieldName").Value;
+                    //Index in resInpFieldNameCollection
+                    int inputFieldIdx = resInpFieldNameCollection.IndexOf(inputFieldName);
+                    //Found?
+                    if (inputFieldIdx < 0)
+                    {
+                        //Not found
+                        throw new Exception($"Reservoir instance {reservoirInstanceDefinition.InstanceName}: input field {inputFieldName} is not defined among Reservoir's input fields.");
+                    }
+                    //Target pool
+                    string targetPoolName = inputFieldAssignmentElem.Attribute("poolName").Value;
+                    int targetPoolID = -1;
+                    //Find target pool ID (index)
+                    for (int idx = 0; idx < reservoirInstanceDefinition.Settings.PoolSettingsCollection.Count; idx++)
+                    {
+                        if (reservoirInstanceDefinition.Settings.PoolSettingsCollection[idx].Name == targetPoolName)
+                        {
+                            targetPoolID = idx;
+                            break;
+                        }
+                    }
+                    //Found?
+                    if (targetPoolID < 0)
+                    {
+                        //Not found
+                        throw new Exception($"Reservoir instance {reservoirInstanceDefinition.InstanceName}: pool {targetPoolName} is not defined among Reservoir pools.");
+                    }
+                    //Density
+                    double density = double.Parse(inputFieldAssignmentElem.Attribute("density").Value, CultureInfo.InvariantCulture);
+                    //Synapse weight
+                    RandomValueSettings synapseWeight = new RandomValueSettings(inputFieldAssignmentElem.Descendants("weight").First());
+                    //Add new assignment
+                    reservoirInstanceDefinition.InputFieldAssignmentCollection.Add(new ReservoirInstanceDefinition.InputFieldAssignment(inputFieldIdx, targetPoolID, density, synapseWeight));
+                }
+                ReservoirInstanceDefinitionCollection.Add(reservoirInstanceDefinition);
             }
 
             return;
@@ -223,12 +270,6 @@ namespace RCNet.Neural.Network.SM
         {
             //Attribute properties
             /// <summary>
-            /// Maps the reservoir input field to the input field of the State Machine.
-            /// Each collection entry means reservoir input field and int value
-            /// is the index of the field within StateMachineSettings.InputFieldNameCollection
-            /// </summary>
-            public List<int> InputFieldMappingCollection {get; set;}
-            /// <summary>
             /// Name of the reservoir instance. It is useful for logging and visualization
             /// purposes so instance name should be unique within the State Machine.
             /// </summary>
@@ -236,7 +277,7 @@ namespace RCNet.Neural.Network.SM
             /// <summary>
             /// ReservoirSettings of the reservoir instance.
             /// </summary>
-            public ReservoirSettings ReservoirSettings { get; set; }
+            public ReservoirSettings Settings { get; set; }
             /// <summary>
             /// The parameter specifies whether, in addition to the standard neuron states,
             /// augmented states of reservoir neurons will be added to the reservoir output predictors.
@@ -244,6 +285,14 @@ namespace RCNet.Neural.Network.SM
             /// The augmented state of the neuron is its squared state.
             /// </summary>
             public bool AugmentedStates { get; set; }
+            /// <summary>
+            /// Reservoir's input fields indexes in State Machine input fields.
+            /// </summary>
+            public List<int> InputFieldIdxCollection { get; set; }
+            /// <summary>
+            /// Mapping of the Reservoir's input fields to the Reservoir's pools.
+            /// </summary>
+            public List<InputFieldAssignment> InputFieldAssignmentCollection { get; set; }
 
             //Constructors
             /// <summary>
@@ -251,10 +300,11 @@ namespace RCNet.Neural.Network.SM
             /// </summary>
             public ReservoirInstanceDefinition()
             {
-                InputFieldMappingCollection = new List<int>();
                 InstanceName = string.Empty;
-                ReservoirSettings = null;
+                Settings = null;
                 AugmentedStates = false;
+                InputFieldIdxCollection = new List<int>();
+                InputFieldAssignmentCollection = new List<InputFieldAssignment>();
                 return;
             }
 
@@ -264,10 +314,15 @@ namespace RCNet.Neural.Network.SM
             /// <param name="source">Source instance</param>
             public ReservoirInstanceDefinition(ReservoirInstanceDefinition source)
             {
-                InputFieldMappingCollection = new List<int>(source.InputFieldMappingCollection);
                 InstanceName = source.InstanceName;
-                ReservoirSettings = source.ReservoirSettings.DeepClone();
+                Settings = source.Settings.DeepClone();
                 AugmentedStates = source.AugmentedStates;
+                InputFieldIdxCollection = new List<int>(source.InputFieldIdxCollection);
+                InputFieldAssignmentCollection = new List<InputFieldAssignment>(source.InputFieldAssignmentCollection.Count);
+                foreach(InputFieldAssignment ifa in source.InputFieldAssignmentCollection)
+                {
+                    InputFieldAssignmentCollection.Add(ifa.DeepClone());
+                }
                 return;
             }
             
@@ -288,14 +343,22 @@ namespace RCNet.Neural.Network.SM
             {
                 if (obj == null) return false;
                 ReservoirInstanceDefinition cmpSettings = obj as ReservoirInstanceDefinition;
-                if (InputFieldMappingCollection.Count != cmpSettings.InputFieldMappingCollection.Count ||
-                    InstanceName != cmpSettings.InstanceName ||
-                    !Equals(ReservoirSettings, cmpSettings.ReservoirSettings) ||
+                if (InstanceName != cmpSettings.InstanceName ||
+                    !Equals(Settings, cmpSettings.Settings) ||
                     AugmentedStates != cmpSettings.AugmentedStates ||
-                    !InputFieldMappingCollection.ToArray().ContainsEqualValues(cmpSettings.InputFieldMappingCollection.ToArray())
+                    InputFieldIdxCollection.Count != cmpSettings.InputFieldIdxCollection.Count ||
+                    !InputFieldIdxCollection.ToArray().ContainsEqualValues(cmpSettings.InputFieldIdxCollection.ToArray()) ||
+                    InputFieldAssignmentCollection.Count != cmpSettings.InputFieldAssignmentCollection.Count
                     )
                 {
                     return false;
+                }
+                for(int i = 0; i < InputFieldAssignmentCollection.Count; i++)
+                {
+                    if(!Equals(InputFieldAssignmentCollection[i], cmpSettings.InputFieldAssignmentCollection[i]))
+                    {
+                        return false;
+                    }
                 }
                 return true;
             }
@@ -307,6 +370,98 @@ namespace RCNet.Neural.Network.SM
             {
                 return InstanceName.GetHashCode();
             }
+
+            //Inner classes
+            [Serializable]
+            public class InputFieldAssignment
+            {
+                //Attribute properties
+                /// <summary>
+                /// Index of the reservoir input field
+                /// </summary>
+                public int FieldIdx;
+                /// <summary>
+                /// ID of the pool
+                /// </summary>
+                public int PoolID;
+                /// <summary>
+                /// Each reservoir input neuron will be connected by the synapse to the number of
+                /// pool neurons = (Dim.Size * Density).
+                /// Typical InputConnectionDensity = 1 (it means the full connectivity).
+                /// </summary>
+                public double Density { get; set; }
+                /// <summary>
+                /// A weight of input neuron to pool's neuron synapse.
+                /// </summary>
+                public RandomValueSettings SynapseWeight { get; set; }
+
+                //Constructors
+                /// <summary>
+                /// Creates an itialized instance.
+                /// </summary>
+                /// <param name="fieldIdx">Index of the reservoir input field</param>
+                /// <param name="poolID">ID of the target pool</param>
+                /// <param name="density">Input field connection density</param>
+                /// <param name="synapseWeight">A weight of input neuron to pool's neuron synapse</param>
+                public InputFieldAssignment(int fieldIdx, int poolID, double density, RandomValueSettings synapseWeight)
+                {
+                    FieldIdx = fieldIdx;
+                    PoolID = poolID;
+                    Density = density;
+                    SynapseWeight = synapseWeight;
+                    return;
+                }
+
+                /// <summary>
+                /// The deep copy constructor.
+                /// </summary>
+                /// <param name="source">Source instance</param>
+                public InputFieldAssignment(InputFieldAssignment source)
+                {
+                    FieldIdx = source.FieldIdx;
+                    PoolID = source.PoolID;
+                    Density = source.Density;
+                    SynapseWeight = source.SynapseWeight.DeepClone();
+                    return;
+                }
+
+                //Methods
+                /// <summary>
+                /// Creates the deep copy instance of this instance
+                /// </summary>
+                /// <returns></returns>
+                public InputFieldAssignment DeepClone()
+                {
+                    return new InputFieldAssignment(this);
+                }
+
+                /// <summary>
+                /// See the base.
+                /// </summary>
+                public override bool Equals(object obj)
+                {
+                    if (obj == null) return false;
+                    InputFieldAssignment cmpSettings = obj as InputFieldAssignment;
+                    if (FieldIdx != cmpSettings.FieldIdx ||
+                        PoolID != cmpSettings.PoolID ||
+                        Density != cmpSettings.Density ||
+                        !Equals(SynapseWeight, cmpSettings.SynapseWeight)
+                        )
+                    {
+                        return false;
+                    }
+                    return true;
+                }
+
+                /// <summary>
+                /// See the base.
+                /// </summary>
+                public override int GetHashCode()
+                {
+                    return base.GetHashCode();
+                }
+
+            }//InputFieldAssignment
 
         }//ReservoirInstanceDefinition
 

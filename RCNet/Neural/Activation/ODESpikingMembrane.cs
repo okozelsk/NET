@@ -24,7 +24,7 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Index of MembraneV evolving variable
         /// </summary>
-        protected const int VarMembraneV = 0;
+        protected const int VarMembraneVIdx = 0;
 
         //Attributes
         /// <summary>
@@ -32,7 +32,7 @@ namespace RCNet.Neural.Activation
         /// </summary>
         protected static readonly Interval _outputRange = new Interval(0, 1);
 
-        //Parameter attributes
+        //Parameters
         /// <summary>
         /// Normal range of the internal state
         /// </summary>
@@ -62,7 +62,11 @@ namespace RCNet.Neural.Activation
         /// </summary>
         protected ODENumSolver.Method _solvingMethod;
         /// <summary>
-        /// Time sub-steps within the time step
+        /// Computation step time scale
+        /// </summary>
+        protected double _stepTimeScale;
+        /// <summary>
+        /// Time sub-steps within the computation step
         /// </summary>
         protected int _subSteps;
 
@@ -83,6 +87,10 @@ namespace RCNet.Neural.Activation
         /// Adjusted (modified) input stimuli
         /// </summary>
         protected double _stimuli;
+        /// <summary>
+        /// Minimal allowed membrane potential
+        /// </summary>
+        protected double _minPotential;
 
         /// <summary>
         /// Constructs an initialized instance
@@ -93,6 +101,7 @@ namespace RCNet.Neural.Activation
         /// <param name="refractoryPeriods">Refractory periods</param>
         /// <param name="stimuliCoeff">Input stimuli coefficient</param>
         /// <param name="solvingMethod">ODE numerical solver method</param>
+        /// <param name="stepTimeScale">Computation step time scale</param>
         /// <param name="subSteps">Computation sub-steps</param>
         /// <param name="numOfEvolvingVars">Number of evolving variables</param>
         protected ODESpikingMembrane(double restV,
@@ -101,20 +110,23 @@ namespace RCNet.Neural.Activation
                                      int refractoryPeriods,
                                      double stimuliCoeff,
                                      ODENumSolver.Method solvingMethod,
+                                     double stepTimeScale,
                                      int subSteps,
                                      int numOfEvolvingVars
                                      )
         {
             _restV = restV;
             _resetV = resetV;
+            _minPotential = Math.Min(_resetV, _restV);
             _firingThresholdV = firingThresholdV;
             _refractoryPeriods = refractoryPeriods;
             _stimuliCoeff = stimuliCoeff;
-            _stateRange = new Interval(_restV, _firingThresholdV);
+            _stateRange = new Interval(_minPotential, _firingThresholdV);
             _evolVars = new Vector(numOfEvolvingVars);
             _solvingMethod = solvingMethod;
+            _stepTimeScale = stepTimeScale;
             _subSteps = subSteps;
-            _evolVars[VarMembraneV] = _restV;
+            _evolVars[VarMembraneVIdx] = _minPotential;
             _inRefractory = false;
             _refractoryPeriod = 0;
             return;
@@ -149,7 +161,7 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Internal state
         /// </summary>
-        public double InternalState { get { return _evolVars[VarMembraneV]; } }
+        public double InternalState { get { return _evolVars[VarMembraneVIdx]; } }
 
         //Methods
         /// <summary>
@@ -157,7 +169,7 @@ namespace RCNet.Neural.Activation
         /// </summary>
         public virtual void Reset()
         {
-            _evolVars[VarMembraneV] = _restV;
+            _evolVars[VarMembraneVIdx] = _resetV;
             _inRefractory = false;
             _refractoryPeriod = 0;
             return;
@@ -172,9 +184,9 @@ namespace RCNet.Neural.Activation
         {
             _stimuli = (x * _stimuliCoeff).Bound();
             double output = 0;
-            if (_evolVars[VarMembraneV] >= _firingThresholdV)
+            if (_evolVars[VarMembraneVIdx] >= _firingThresholdV)
             {
-                _evolVars[VarMembraneV] = _resetV;
+                _evolVars[VarMembraneVIdx] = _resetV;
                 _refractoryPeriod = 0;
                 _inRefractory = true;
             }
@@ -194,20 +206,24 @@ namespace RCNet.Neural.Activation
             }
             //Compute membrane new potential
             //PhysUnit.ToBase(1, PhysUnit.MetricPrefix.Milli)
-            foreach (ODENumSolver.Estimation subResult in ODENumSolver.Solve(MembraneDiffEq, 0, _evolVars, 1, _subSteps, _solvingMethod))
+            foreach (ODENumSolver.Estimation subResult in ODENumSolver.Solve(MembraneDiffEq, 0, _evolVars, _stepTimeScale, _subSteps, _solvingMethod))
             {
                 _evolVars = subResult.V;
-                if(_evolVars[VarMembraneV] >= _firingThresholdV)
+                if (_evolVars[VarMembraneVIdx] >= _firingThresholdV)
                 {
                     break;
                 }
+                else if (_evolVars[VarMembraneVIdx] < _minPotential)
+                {
+                    _evolVars[VarMembraneVIdx] = _minPotential;
+                }
             }
             //Output
-            if (_evolVars[VarMembraneV] >= _firingThresholdV)
+            if (_evolVars[VarMembraneVIdx] >= _firingThresholdV)
             {
                 OnFiring();
                 output = Spike;
-                _evolVars[VarMembraneV] = _firingThresholdV;
+                _evolVars[VarMembraneVIdx] = _firingThresholdV;
             }
             return output;
         }

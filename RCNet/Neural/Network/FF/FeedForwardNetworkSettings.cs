@@ -79,7 +79,7 @@ namespace RCNet.Neural.Network.FF
             OutputLayerActivation = null;
             if (source.OutputLayerActivation != null)
             {
-                OutputLayerActivation = ActivationFactory.GetDeepClone(source.OutputLayerActivation);
+                OutputLayerActivation = ActivationFactory.DeepCloneActivationSettings(source.OutputLayerActivation);
             }
             RegressionMethod = source.RegressionMethod;
             HiddenLayerCollection = new List<HiddenLayerSettings>(source.HiddenLayerCollection.Count);
@@ -173,7 +173,7 @@ namespace RCNet.Neural.Network.FF
         /// <returns></returns>
         public static bool IsAllowedActivation(Object activationSettings)
         {
-            IActivationFunction af = ActivationFactory.Create(activationSettings);
+            IActivationFunction af = ActivationFactory.Create(activationSettings, new Random());
             if(!af.Stateless || !af.SupportsComputeDerivativeMethod)
             {
                 return false;
@@ -278,7 +278,7 @@ namespace RCNet.Neural.Network.FF
                 Activation = null;
                 if (source.Activation != null)
                 {
-                    Activation = ActivationFactory.GetDeepClone(source.Activation);
+                    Activation = ActivationFactory.DeepCloneActivationSettings(source.Activation);
                 }
                 return;
             }
