@@ -29,9 +29,13 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         private StateMachineSettings _settings;
         /// <summary>
+        /// Data range. Data range has to be always -1,1
+        /// </summary>
+        private readonly Interval _dataRange;
+        /// <summary>
         /// Random generator
         /// </summary>
-        private readonly System.Random _rand;
+        private readonly Random _rand;
         /// <summary>
         /// Collection of reservoir instances.
         /// </summary>
@@ -50,20 +54,21 @@ namespace RCNet.Neural.Network.SM
         /// Constructs an instance of State Machine
         /// </summary>
         /// <param name="settings">State Machine settings</param>
-        /// <param name="inputRange">Range of input values</param>
-        public StateMachine(StateMachineSettings settings, Interval inputRange)
+        public StateMachine(StateMachineSettings settings)
         {
             _settings = settings.DeepClone();
+            //Data range has to be always <-1,1>
+            _dataRange = CommonEnums.GetDataNormalizationRange(CommonEnums.DataNormalizationRange.Inclusive_Neg1_Pos1);
             //Random object
-            if (_settings.RandomizerSeek < 0) _rand = new System.Random();
-            else _rand = new System.Random(_settings.RandomizerSeek);
+            if (_settings.RandomizerSeek < 0) _rand = new Random();
+            else _rand = new Random(_settings.RandomizerSeek);
             //Build structure
             //Reservoir instance(s)
             _numOfPredictors = 0;
             _reservoirInstanceCollection = new List<ReservoirInstance>(_settings.ReservoirInstanceDefinitionCollection.Count);
             foreach(StateMachineSettings.ReservoirInstanceDefinition instanceDefinition in _settings.ReservoirInstanceDefinitionCollection)
             {
-                ReservoirInstance reservoirInstance = new ReservoirInstance(instanceDefinition, _settings.RandomizerSeek, inputRange);
+                ReservoirInstance reservoirInstance = new ReservoirInstance(instanceDefinition, _settings.RandomizerSeek, _dataRange);
                 _reservoirInstanceCollection.Add(reservoirInstance);
                 _numOfPredictors += reservoirInstance.ReservoirObj.NumOfOutputPredictors;
             }
@@ -72,7 +77,7 @@ namespace RCNet.Neural.Network.SM
                 _numOfPredictors += _settings.InputFieldNameCollection.Count;
             }
             //Readout layer
-            _readoutLayer = new ReadoutLayer(_settings.TaskType, _settings.ReadoutLayerConfig, _rand);
+            _readoutLayer = new ReadoutLayer(_settings.TaskType, _settings.ReadoutLayerConfig, _dataRange, _rand);
             return;
         }
 

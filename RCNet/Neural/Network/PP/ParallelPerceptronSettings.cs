@@ -6,7 +6,7 @@ using System.Globalization;
 using System.Xml.Linq;
 using System.IO;
 using RCNet.XmlTools;
-using RCNet.Neural.Activation;
+using RCNet.MathTools;
 
 namespace RCNet.Neural.Network.PP
 {
@@ -27,6 +27,10 @@ namespace RCNet.Neural.Network.PP
         /// </summary>
         public int Resolution { get; set; }
         /// <summary>
+        /// Network output values range.
+        /// </summary>
+        public Interval OutputRange { get; }
+        /// <summary>
         /// Startup parameters for the parallel perceptron p-delta rule trainer
         /// </summary>
         public PDeltaRuleTrainerSettings PDeltaRuleTrainerCfg { get; set; }
@@ -39,6 +43,7 @@ namespace RCNet.Neural.Network.PP
         {
             NumOfGates = 0;
             Resolution = 0;
+            OutputRange = new Interval(-1, 1);
             PDeltaRuleTrainerCfg = new PDeltaRuleTrainerSettings();
             return;
         }
@@ -51,6 +56,7 @@ namespace RCNet.Neural.Network.PP
         {
             NumOfGates = source.NumOfGates;
             Resolution = source.Resolution;
+            OutputRange = source.OutputRange.DeepClone();
             PDeltaRuleTrainerCfg = null;
             if (source.PDeltaRuleTrainerCfg != null)
             {
@@ -78,6 +84,7 @@ namespace RCNet.Neural.Network.PP
             //Parsing
             NumOfGates = int.Parse(parallelPerceptronSettingsElem.Attribute("gates").Value, CultureInfo.InvariantCulture);
             Resolution = int.Parse(parallelPerceptronSettingsElem.Attribute("resolution").Value, CultureInfo.InvariantCulture);
+            OutputRange = new Interval(-1, 1);
             XElement pDeltaRuleTrainerElem = parallelPerceptronSettingsElem.Descendants("pDeltaRuleTrainer").FirstOrDefault();
             if(pDeltaRuleTrainerElem != null)
             {
@@ -100,6 +107,7 @@ namespace RCNet.Neural.Network.PP
             ParallelPerceptronSettings cmpSettings = obj as ParallelPerceptronSettings;
             if (NumOfGates != cmpSettings.NumOfGates ||
                 Resolution != cmpSettings.Resolution ||
+                !Equals(OutputRange, cmpSettings.OutputRange) ||
                 (PDeltaRuleTrainerCfg == null && cmpSettings.PDeltaRuleTrainerCfg != null) ||
                 (PDeltaRuleTrainerCfg != null && cmpSettings.PDeltaRuleTrainerCfg == null) ||
                 (PDeltaRuleTrainerCfg != null && !PDeltaRuleTrainerCfg.Equals(cmpSettings.PDeltaRuleTrainerCfg))

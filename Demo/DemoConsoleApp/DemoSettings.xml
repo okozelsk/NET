@@ -1,6 +1,58 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <demo dataFolder=".\\Data">
-  <case name="Prediction task High and Low prices of TTOO (T2 Biosystems, Inc.): Mixed reservoir (spiking pool, analog pool), Feed Forward, Linear regression">
+  <case name="Prediction task Mackey Glass chaotic time series: Analog reservoir, Linear regression">
+    <samples fileName="MackeyGlass.csv" bootSamples="500" singleNormalizer="false" normalizerReserve="0.1"/>
+    <stateMachineCfg taskType="Prediction" randomizerSeek="0">
+      <inputFields routeToReadout="false">
+        <field name="Value"/>
+      </inputFields>
+      <reservoirCfgContainer>
+        <reservoirCfg name="Analog" inputCoding="Analog" inputDuration="1" spectralRadius="0.99">
+          <pools>
+            <pool name="Analog pool" dimX="8" dimY="8" dimZ="8" routeToReadout="true">
+              <neuronGroups>
+                <neuronGroup role="Excitatory" relShare="1">
+                  <activationTanH/>
+                  <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
+                </neuronGroup>
+                <neuronGroup role="Inhibitory" relShare="1">
+                  <activationTanH/>
+                  <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
+                </neuronGroup>
+              </neuronGroups>
+              <interconnection density="0.1" avgDistance="NA" allowSelfConnection="true">
+                <weight min="0.1" max="0.9" randomSign="false" distribution="Uniform"/>
+              </interconnection>
+              <retainmentNeurons density="0.6">
+                <rate min="0.4" max="0.75" randomSign="false" distribution="Uniform"/>
+              </retainmentNeurons>
+            </pool>
+          </pools>
+        </reservoirCfg>
+      </reservoirCfgContainer>
+      <reservoirInstanceContainer>
+        <reservoirInstance name="Experimental" cfg="Analog" augmentedStates="true">
+          <inputFieldAssignments>
+            <inputFieldAssignment inputFieldName="Value" poolName="Analog pool" density="1">
+              <weight min="0" max="0.6" randomSign="false" distribution="Uniform"/>
+            </inputFieldAssignment>
+          </inputFieldAssignments>
+        </reservoirInstance>
+      </reservoirInstanceContainer>
+      <readoutLayer testDataRatio="0.3" folds="1">
+        <readoutUnit attempts="1" attemptEpochs="1">
+          <ff regressionMethod="Linear">
+            <activationIdentity />
+          </ff>
+        </readoutUnit>
+        <outputFields>
+          <field name="Value"/>
+        </outputFields>
+      </readoutLayer>
+    </stateMachineCfg>
+  </case>
+
+<case name="Prediction task High and Low prices of TTOO (T2 Biosystems, Inc.): Mixed reservoir (spiking pool, analog pool), Feed Forward, Linear regression">
     <!-- Data from https://finance.yahoo.com/quote/TTOO/history?p=TTOO -->
     <samples fileName="TTOO.csv" bootSamples="250" singleNormalizer="true" normalizerReserve="0.1"/>
     <stateMachineCfg taskType="Prediction" randomizerSeek="0">
@@ -15,25 +67,11 @@
             <pool name="Spiking pool" dimX="5" dimY="5" dimZ="5" routeToReadout="true">
               <neuronGroups>
                 <neuronGroup role="Excitatory" relShare="4">
-                  <activationIzhikevichIF stimuliCoeff="10" refractoryPeriods="0" solverMethod="RK4" solverCompSteps="2">
-                    <recoveryTimeScale min="0.1" max="0.1" randomSign="false" distribution="Uniform"/>
-                    <recoverySensitivity min="0.25" max="0.25" randomSign="false" distribution="Uniform"/>
-                    <recoveryReset min="2" max="2" randomSign="false" distribution="Uniform"/>
-                    <restV min="-70" max="-70" randomSign="false" distribution="Uniform"/>
-                    <resetV min="-65" max="-65" randomSign="false" distribution="Uniform"/>
-                    <firingThresholdV min="30" max="30" randomSign="false" distribution="Uniform"/>
-                  </activationIzhikevichIF>
+                  <activationAutoIzhikevichIF stimuliCoeff="35" role="Excitatory" refractoryPeriods="0" solverMethod="RK4" solverCompSteps="2"/>
                   <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
                 </neuronGroup>
                 <neuronGroup role="Inhibitory" relShare="1">
-                  <activationIzhikevichIF stimuliCoeff="10" refractoryPeriods="0" solverMethod="RK4" solverCompSteps="2">
-                    <recoveryTimeScale min="0.1" max="0.1" randomSign="false" distribution="Uniform"/>
-                    <recoverySensitivity min="0.25" max="0.25" randomSign="false" distribution="Uniform"/>
-                    <recoveryReset min="2" max="2" randomSign="false" distribution="Uniform"/>
-                    <restV min="-70" max="-70" randomSign="false" distribution="Uniform"/>
-                    <resetV min="-65" max="-65" randomSign="false" distribution="Uniform"/>
-                    <firingThresholdV min="30" max="30" randomSign="false" distribution="Uniform"/>
-                  </activationIzhikevichIF>
+                  <activationAutoIzhikevichIF stimuliCoeff="35" role="Inhibitory" refractoryPeriods="0" solverMethod="RK4" solverCompSteps="2"/>
                   <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
                 </neuronGroup>
               </neuronGroups>
@@ -120,14 +158,7 @@
             <pool name="Alpha (supermix)" dimX="4" dimY="4" dimZ="4" routeToReadout="true">
               <neuronGroups>
                 <neuronGroup role="Excitatory" relShare="4">
-                  <activationIzhikevichIF stimuliCoeff="10" refractoryPeriods="0" solverMethod="RK4" solverCompSteps="2">
-                    <recoveryTimeScale min="0.1" max="0.1" randomSign="false" distribution="Uniform"/>
-                    <recoverySensitivity min="0.25" max="0.25" randomSign="false" distribution="Uniform"/>
-                    <recoveryReset min="2" max="2" randomSign="false" distribution="Uniform"/>
-                    <restV min="-70" max="-70" randomSign="false" distribution="Uniform"/>
-                    <resetV min="-65" max="-65" randomSign="false" distribution="Uniform"/>
-                    <firingThresholdV min="30" max="30" randomSign="false" distribution="Uniform"/>
-                  </activationIzhikevichIF>
+                  <activationAutoIzhikevichIF stimuliCoeff="35" role="Excitatory" refractoryPeriods="0" solverMethod="RK4" solverCompSteps="2"/>
                   <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
                 </neuronGroup>
                 <neuronGroup role="Excitatory" relShare="4">
@@ -150,14 +181,7 @@
                   <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
                 </neuronGroup>
                 <neuronGroup role="Inhibitory" relShare="1">
-                  <activationIzhikevichIF stimuliCoeff="10" refractoryPeriods="0" solverMethod="RK4" solverCompSteps="2">
-                    <recoveryTimeScale min="0.1" max="0.1" randomSign="false" distribution="Uniform"/>
-                    <recoverySensitivity min="0.25" max="0.25" randomSign="false" distribution="Uniform"/>
-                    <recoveryReset min="2" max="2" randomSign="false" distribution="Uniform"/>
-                    <restV min="-70" max="-70" randomSign="false" distribution="Uniform"/>
-                    <resetV min="-65" max="-65" randomSign="false" distribution="Uniform"/>
-                    <firingThresholdV min="30" max="30" randomSign="false" distribution="Uniform"/>
-                  </activationIzhikevichIF>
+                  <activationAutoIzhikevichIF stimuliCoeff="35" role="Inhibitory" refractoryPeriods="0" solverMethod="RK4" solverCompSteps="2"/>
                   <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
                 </neuronGroup>
                 <neuronGroup role="Inhibitory" relShare="1">

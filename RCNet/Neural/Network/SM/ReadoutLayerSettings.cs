@@ -9,6 +9,7 @@ using RCNet.Extensions;
 using RCNet.Neural.Network.FF;
 using RCNet.Neural.Network.PP;
 using RCNet.XmlTools;
+using RCNet.MathTools;
 
 namespace RCNet.Neural.Network.SM
 {
@@ -174,6 +175,10 @@ namespace RCNet.Neural.Network.SM
             /// </summary>
             public object NetSettings { get; set; }
             /// <summary>
+            /// Unit's output values range.
+            /// </summary>
+            public Interval OutputRange { get; }
+            /// <summary>
             /// Number of regression attempts.
             /// </summary>
             public int RegressionAttempts { get; set; }
@@ -190,6 +195,7 @@ namespace RCNet.Neural.Network.SM
             {
                 NetType = ReadoutUnitNetworkType.FF;
                 NetSettings = null;
+                OutputRange = null;
                 RegressionAttempts = 0;
                 RegressionAttemptEpochs = 0;
                 return;
@@ -203,16 +209,18 @@ namespace RCNet.Neural.Network.SM
             {
                 NetType = source.NetType;
                 NetSettings = null;
+                OutputRange = null;
                 if (source.NetSettings != null)
                 {
                     if (source.NetSettings.GetType() == typeof(FeedForwardNetworkSettings))
                     {
-                        NetSettings = ((FeedForwardNetworkSettings)source.NetSettings).DeepClone();
+                        NetSettings = ((FeedForwardNetworkSettings)(source.NetSettings)).DeepClone();
                     }
                     else
                     {
-                        NetSettings = ((ParallelPerceptronSettings)source.NetSettings).DeepClone();
+                        NetSettings = ((ParallelPerceptronSettings)(source.NetSettings)).DeepClone();
                     }
+                    OutputRange = source.OutputRange.DeepClone();
                 }
                 RegressionAttempts = source.RegressionAttempts;
                 RegressionAttemptEpochs = source.RegressionAttemptEpochs;
@@ -247,12 +255,14 @@ namespace RCNet.Neural.Network.SM
                 {
                     NetType = ReadoutUnitNetworkType.FF;
                     NetSettings = new FeedForwardNetworkSettings(netSettingsElem);
+                    OutputRange = ((FeedForwardNetworkSettings)NetSettings).OutputRange.DeepClone();
                 }
                 else
                 {
                     //PP
                     NetType = ReadoutUnitNetworkType.PP;
                     NetSettings = new ParallelPerceptronSettings(netSettingsElem);
+                    OutputRange = ((ParallelPerceptronSettings)NetSettings).OutputRange.DeepClone();
                 }
                 return;
             }
@@ -267,6 +277,7 @@ namespace RCNet.Neural.Network.SM
                 ReadoutUnitSettings cmpSettings = obj as ReadoutUnitSettings;
                 if (NetType != cmpSettings.NetType ||
                     !Equals(NetSettings, cmpSettings.NetSettings) ||
+                    !Equals(OutputRange, cmpSettings.OutputRange) ||
                     RegressionAttempts != cmpSettings.RegressionAttempts ||
                     RegressionAttemptEpochs != cmpSettings.RegressionAttemptEpochs
                     )

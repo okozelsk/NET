@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using RCNet.Extensions;
-using RCNet.MathTools.Differential;
+using RCNet.RandomValue;
 using RCNet.MathTools.VectorMath;
 
 namespace RCNet.Neural.Activation
@@ -52,6 +52,51 @@ namespace RCNet.Neural.Activation
         }
 
         //Methods
+        /// <summary>
+        /// Creates instance having randomly selected parameters within borders according to the neuron role.
+        /// </summary>
+        /// <param name="settings">Encapsulated arguments</param>
+        /// <param name="rand">Random object to be used for randomly generated parameters</param>
+        /// <returns></returns>
+        public static IzhikevichIF AutoCreate(AutoIzhikevichIFSettings settings, Random rand)
+        {
+            double randomValue = rand.NextBoundedUniformDouble(0, 1);
+            IzhikevichIFSettings targetSettings = null;
+            switch(settings.Role)
+            {
+                case CommonEnums.NeuronRole.Excitatory:
+                    targetSettings = new IzhikevichIFSettings(settings.StimuliCoeff,
+                                                              new RandomValueSettings(0.02, 0.02),
+                                                              new RandomValueSettings(0.2, 0.2),
+                                                              new RandomValueSettings(8 + (-6 * randomValue.Power(2)), 8 + (-6 * randomValue.Power(2))),
+                                                              new RandomValueSettings(-70, -70),
+                                                              new RandomValueSettings(-65 + (15 * randomValue.Power(2)), -65 + (15 * randomValue.Power(2))),
+                                                              new RandomValueSettings(30, 30),
+                                                              settings.RefractoryPeriods,
+                                                              settings.SolverMethod,
+                                                              settings.SolverCompSteps
+                                                              );
+                    break;
+                case CommonEnums.NeuronRole.Inhibitory:
+                    targetSettings = new IzhikevichIFSettings(settings.StimuliCoeff,
+                                                              new RandomValueSettings(0.02 + 0.08 * randomValue, 0.02 + 0.08 * randomValue),
+                                                              new RandomValueSettings(0.25 - 0.05 * randomValue, 0.25 - 0.05 * randomValue),
+                                                              new RandomValueSettings(2, 2),
+                                                              new RandomValueSettings(-70, -70),
+                                                              new RandomValueSettings(-65, -65),
+                                                              new RandomValueSettings(30, 30),
+                                                              settings.RefractoryPeriods,
+                                                              settings.SolverMethod,
+                                                              settings.SolverCompSteps
+                                                              );
+                    break;
+                default:
+                    break;
+            }
+
+            return new IzhikevichIF(targetSettings, rand);
+        }
+
         /// <summary>
         /// Resets function to its initial state
         /// </summary>

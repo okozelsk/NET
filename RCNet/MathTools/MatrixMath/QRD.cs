@@ -15,9 +15,9 @@ namespace RCNet.MathTools.MatrixMath
     {
         //Attributes
         private int _numOfRows;
-        private int _numOfCols;
+        private readonly int _numOfCols;
         private double[][] _QRData;
-        private double[] _RDiagData;
+        private readonly double[] _RDiagData;
 
         //Constructor
         /// <summary>

@@ -9,6 +9,14 @@
   <!-- ________________________________________LOW LEVEL TYPES_________________________________________________ -->
   <!-- SIMPLE TYPES -->
   <!-- ENUMERATION TYPES -->
+  <!-- Enumeration of data normalization range -->
+  <xs:simpleType name="DataNormalizationRangeType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Inclusive_0_Pos1"/>
+      <xs:enumeration value="Inclusive_Neg1_Pos1"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <!-- Enumeration of random distribution -->
   <xs:simpleType name="RandomDistributionType">
     <xs:restriction base="xs:string">
@@ -18,7 +26,7 @@
   </xs:simpleType>
 
   <!-- Enumeration of neuron role -->
-  <xs:simpleType name="NeuronRole">
+  <xs:simpleType name="NeuronRoleType">
     <xs:restriction base="xs:string">
       <xs:enumeration value="Excitatory"/>
       <xs:enumeration value="Inhibitory"/>
@@ -213,6 +221,15 @@
       <xs:element type="RandomValueType" name="firingThresholdV" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="UDoubleType" name="stimuliCoeff" use="optional" default="10"/>
+    <xs:attribute type="xs:unsignedInt" name="refractoryPeriods" use="optional" default="0"/>
+    <xs:attribute type="ODENumSolverMethodType" name="solverMethod" use="optional" default="Euler"/>
+    <xs:attribute type="UIntGT0Type" name="solverCompSteps" use="optional" default="1"/>
+  </xs:complexType>
+
+  <!-- Activation AutoIzhikevichIF configuration element -->
+  <xs:complexType name="ActivationAutoIzhikevichIFCfgType">
+    <xs:attribute type="UDoubleType" name="stimuliCoeff" use="optional" default="35"/>
+    <xs:attribute type="NeuronRoleType" name="role" use="required"/>
     <xs:attribute type="xs:unsignedInt" name="refractoryPeriods" use="optional" default="0"/>
     <xs:attribute type="ODENumSolverMethodType" name="solverMethod" use="optional" default="Euler"/>
     <xs:attribute type="UIntGT0Type" name="solverCompSteps" use="optional" default="1"/>
@@ -446,22 +463,18 @@
         <xs:element type="ActivationExpIFCfgType" name="activationExpIF" minOccurs="1" maxOccurs="1"/>
         <xs:element type="ActivationAdExpIFCfgType" name="activationAdExpIF" minOccurs="1" maxOccurs="1"/>
         <xs:element type="ActivationIzhikevichIFCfgType" name="activationIzhikevichIF" minOccurs="1" maxOccurs="1"/>
-        <xs:element type="ActivationBentIdentityCfgType" name="activationBentIdentity" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="ActivationAutoIzhikevichIFCfgType" name="activationAutoIzhikevichIF" minOccurs="1" maxOccurs="1"/>
         <xs:element type="ActivationElliotCfgType" name="activationElliot" minOccurs="1" maxOccurs="1"/>
         <xs:element type="ActivationGaussianCfgType" name="activationGaussian" minOccurs="1" maxOccurs="1"/>
-        <xs:element type="ActivationIdentityCfgType" name="activationIdentity" minOccurs="1" maxOccurs="1"/>
         <xs:element type="ActivationISRUCfgType" name="activationISRU" minOccurs="1" maxOccurs="1"/>
-        <xs:element type="ActivationLeakyReLUCfgType" name="activationLeakyReLU" minOccurs="1" maxOccurs="1"/>
         <xs:element type="ActivationSigmoidCfgType" name="activationSigmoid" minOccurs="1" maxOccurs="1"/>
         <xs:element type="ActivationSincCfgType" name="activationSinc" minOccurs="1" maxOccurs="1"/>
         <xs:element type="ActivationSinusoidCfgType" name="activationSinusoid" minOccurs="1" maxOccurs="1"/>
-        <xs:element type="ActivationSoftExponentialCfgType" name="activationSoftExponential" minOccurs="1" maxOccurs="1"/>
-        <xs:element type="ActivationSoftPlusCfgType" name="activationSoftPlus" minOccurs="1" maxOccurs="1"/>
         <xs:element type="ActivationTanHCfgType" name="activationTanH" minOccurs="1" maxOccurs="1"/>
       </xs:choice>
       <xs:element type="RandomValueType" name="bias" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
-    <xs:attribute type="NeuronRole" name="role" use="required"/>
+    <xs:attribute type="NeuronRoleType" name="role" use="required"/>
     <xs:attribute type="UDoubleType" name="relShare" use="required"/>
   </xs:complexType>
 

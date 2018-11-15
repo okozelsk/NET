@@ -21,12 +21,12 @@ namespace RCNet.Neural.Network.PP
         public const double BiasValue = 1d;
 
         //Attributes
-        private int _numOfInputs;
-        private int _numOfGates;
+        private readonly int _numOfInputs;
+        private readonly int _numOfGates;
         private int _numOfGateWeights;
         private double[] _flatWeights;
-        private int _resolution;
-        private double _resSquashCoeff;
+        private readonly int _resolution;
+        private readonly double _resSquashCoeff;
 
         //Constructors
         /// <summary>

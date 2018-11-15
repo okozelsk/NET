@@ -82,23 +82,23 @@ namespace RCNet.DemoConsoleApp
                                                                              + poolStat.NeuronsStimuliSpansStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
                                                                              + poolStat.NeuronsStimuliSpansStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
                     log.Write($"          Neurons transmission signals", false);
-                    log.Write("                  AVG Avg, Max, Min, SDdev: " + poolStat.NeuronsAvgTransmissionSignalStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + poolStat.NeuronsAvgTransmissionSignalStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + poolStat.NeuronsAvgTransmissionSignalStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + poolStat.NeuronsAvgTransmissionSignalStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
-                    log.Write("                  MAX Avg, Max, Min, SDdev: " + poolStat.NeuronsMaxTransmissionSignalStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + poolStat.NeuronsMaxTransmissionSignalStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + poolStat.NeuronsMaxTransmissionSignalStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + poolStat.NeuronsMaxTransmissionSignalStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
-                    log.Write("                  MIN Avg, Max, Min, SDdev: " + poolStat.NeuronsMinTransmissionSignalStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + poolStat.NeuronsMinTransmissionSignalStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + poolStat.NeuronsMinTransmissionSignalStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + poolStat.NeuronsMinTransmissionSignalStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
+                    log.Write("                  AVG Avg, Max, Min, SDdev: " + poolStat.NeuronsAvgOutputSignalStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                             + poolStat.NeuronsAvgOutputSignalStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                             + poolStat.NeuronsAvgOutputSignalStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                             + poolStat.NeuronsAvgOutputSignalStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
+                    log.Write("                  MAX Avg, Max, Min, SDdev: " + poolStat.NeuronsMaxOutputSignalStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                             + poolStat.NeuronsMaxOutputSignalStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                             + poolStat.NeuronsMaxOutputSignalStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                             + poolStat.NeuronsMaxOutputSignalStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
+                    log.Write("                  MIN Avg, Max, Min, SDdev: " + poolStat.NeuronsMinOutputSignalStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                             + poolStat.NeuronsMinOutputSignalStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                             + poolStat.NeuronsMinOutputSignalStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                             + poolStat.NeuronsMinOutputSignalStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
                     log.Write($"          Neurons transmission frequencies", false);
-                    log.Write("                  AVG Avg, Max, Min, SDdev: " + poolStat.NeuronsAvgTransmissionFreqStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + poolStat.NeuronsAvgTransmissionFreqStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + poolStat.NeuronsAvgTransmissionFreqStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + poolStat.NeuronsAvgTransmissionFreqStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
+                    log.Write("                  AVG Avg, Max, Min, SDdev: " + poolStat.NeuronsAvgOutputFreqStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                             + poolStat.NeuronsAvgOutputFreqStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                             + poolStat.NeuronsAvgOutputFreqStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                             + poolStat.NeuronsAvgOutputFreqStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
                     log.Write($"          Weights statistics", false);
                     log.Write("                Input Avg, Max, Min, SDdev: " + poolStat.InputWeightsStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
                                                                              + poolStat.InputWeightsStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
@@ -181,17 +181,16 @@ namespace RCNet.DemoConsoleApp
         /// <param name="demoCaseParams">An instance of DemoSettings.CaseSettings to be performed</param>
         public static void PerformDemoCase(IOutputLog log, DemoSettings.CaseSettings demoCaseParams)
         {
-            //For demo purposes is allowed only the normalization range (-1, 1)
-            Interval normRange = new Interval(-1, 1);
             log.Write("  Performing demo case " + demoCaseParams.Name, false);
-            
+            //Input/Output data for the State Machine has to be always normalized within the range -1 and 1
+            Interval normalizationRange = CommonEnums.GetDataNormalizationRange(CommonEnums.DataNormalizationRange.Inclusive_Neg1_Pos1);
             //Bundle normalizer object
             BundleNormalizer bundleNormalizer = null;
             //Prediction input vector (relevant only for time series prediction task)
             double[] predictionInputVector = null;
             
             //Instantiate an State Machine
-            StateMachine stateMachine = new StateMachine(demoCaseParams.stateMachineCfg, normRange);
+            StateMachine stateMachine = new StateMachine(demoCaseParams.stateMachineCfg);
 
             //Prepare regression stage input object
             log.Write(" ", false);
@@ -203,7 +202,7 @@ namespace RCNet.DemoConsoleApp
                 TimeSeriesBundle data = TimeSeriesDataLoader.Load(demoCaseParams.FileName,
                                                                   demoCaseParams.stateMachineCfg.InputFieldNameCollection,
                                                                   demoCaseParams.stateMachineCfg.ReadoutLayerConfig.OutputFieldNameCollection,
-                                                                  normRange,
+                                                                  normalizationRange,
                                                                   demoCaseParams.NormalizerReserveRatio,
                                                                   true,
                                                                   demoCaseParams.SingleNormalizer,
@@ -220,7 +219,7 @@ namespace RCNet.DemoConsoleApp
                                                             demoCaseParams.FileName,
                                                             demoCaseParams.stateMachineCfg.InputFieldNameCollection,
                                                             demoCaseParams.stateMachineCfg.ReadoutLayerConfig.OutputFieldNameCollection,
-                                                            normRange,
+                                                            normalizationRange,
                                                             demoCaseParams.NormalizerReserveRatio,
                                                             true,
                                                             out bundleNormalizer

@@ -5,58 +5,85 @@ using System.Text;
 using System.Threading.Tasks;
 using RCNet.Extensions;
 using RCNet.MathTools;
+using RCNet.Neural.Activation;
 
 namespace RCNet.Neural.Network.SM
 {
     /// <summary>
-    /// Spiking input neuron is the special type of neuron. Its purpose is to preprocess input analog value
+    /// Spiking input neuron is the special type of neuron. Its purpose is to preprocess input analog data
     /// to be deliverable as the spike train signal into the reservoir neurons.
     /// </summary>
     [Serializable]
     public class InputSpikingNeuron : INeuron
     {
+        //Static attributes
         /// <summary>
         /// Common output range 0/1 - no spike/spike
         /// </summary>
-        private static Interval _transmissionSignalRange = new Interval(0, 1);
-
-        /// <summary>
-        /// Input data range
-        /// </summary>
-        private Interval _inputRange;
-
-        /// <summary>
-        /// Analog input to spike train converter
-        /// </summary>
-        private SignalConverter _signalConverter;
-
-        /// <summary>
-        /// Transmission signal of the neuron
-        /// </summary>
-        private double _signal;
+        private static readonly Interval _outputRange = new Interval(0, 1);
 
         //Attribute properties
         /// <summary>
-        /// Input neuron placement is a special case. Input neuron does not belong to a physical pool.
-        /// PoolID is allways -1.
+        /// Home pool identificator and neuron placement within the pool
+        /// Note that Input neuron home PoolID is always -1, because Input neurons do not belong to a physical pool.
         /// </summary>
         public NeuronPlacement Placement { get; }
 
         /// <summary>
-        /// Statistics of incoming stimulations (input values)
+        /// Neuron's key statistics
         /// </summary>
-        public BasicStat StimuliStat { get; }
+        public NeuronStatistics Statistics { get; }
 
         /// <summary>
-        /// Statistics of neuron output signals
+        /// Neuron's role within the reservoir (excitatory or inhibitory)
+        /// Note that Input neuron is always excitatory.
         /// </summary>
-        public BasicStat TransmissionSignalStat { get; }
+        public CommonEnums.NeuronRole Role { get { return CommonEnums.NeuronRole.Excitatory; } }
+
+        /// <summary>
+        /// Type of the output signal (spike or analog)
+        /// This is a spiking neuron.
+        /// </summary>
+        public ActivationFactory.FunctionOutputSignalType OutputType { get { return ActivationFactory.FunctionOutputSignalType.Spike; } }
+
+        /// <summary>
+        /// Output signal range
+        /// </summary>
+        public Interval OutputRange { get { return _outputRange; } }
+
+        /// <summary>
+        /// Constant bias.
+        /// Note that Input neuron has bias always 0.
+        /// </summary>
+        public double Bias { get { return 0; } }
+
+        /// <summary>
+        /// Output signal
+        /// </summary>
+        public double OutputSignal { get; private set; }
+
+        /// <summary>
+        /// Value to be passed to readout layer as a primary predictor.
+        /// Predictor value does not make sense in case of Input neuron.
+        /// </summary>
+        public double PrimaryPredictor { get { return double.NaN; } }
+
+        /// <summary>
+        /// Value to be passed to readout layer as an augmented predictor.
+        /// Augmented predictor value does not make sense in case of Input neuron.
+        /// </summary>
+        public double SecondaryPredictor { get { return double.NaN; } }
+
+        //Attributes
+        private Interval _inputRange;
+        private double _stimuli;
+        private SignalConverter _signalConverter;
 
         //Constructor
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
-        /// <param name="inputFieldIdx">Index of corresponding reservoir input field.</param>
+        /// <param name="inputFieldIdx">Index of the corresponding reservoir's input field.</param>
         /// <param name="inputRange">
         /// Range of input value.
         /// It is very recommended to have input values normalized and standardized before
@@ -66,95 +93,50 @@ namespace RCNet.Neural.Network.SM
         public InputSpikingNeuron(int inputFieldIdx, Interval inputRange, int inputCodingFractions)
         {
             Placement = new NeuronPlacement(inputFieldIdx , - 1, inputFieldIdx, inputFieldIdx, 0, 0);
-            _inputRange = new Interval(inputRange.Min.Bound(), inputRange.Max.Bound());
+            Statistics = new NeuronStatistics();
+            _inputRange = inputRange.DeepClone();
             _signalConverter = new SignalConverter(_inputRange, inputCodingFractions);
-            StimuliStat = new BasicStat();
-            TransmissionSignalStat = new BasicStat();
             Reset(false);
             return;
         }
 
-        //Properties
-        /// <summary>
-        /// Output signal range.
-        /// In case of input spiking neuron there is no activation function thus the range is in all cases the same: 0(no spike)/1(spike).
-        /// </summary>
-        public Interval TransmissionSignalRange { get { return _transmissionSignalRange; } }
-
-        /// <summary>
-        /// Constant bias of the input neuron is allways 0
-        /// </summary>
-        public double Bias { get { return 0; } }
-
-        /// <summary>
-        /// Input spiking neuron is allways excitatory
-        /// </summary>
-        public CommonEnums.NeuronRole Role { get { return CommonEnums.NeuronRole.Excitatory; } }
-
-        /// <summary>
-        /// Statistics of neuron state values is a nonsense in case of input neuron
-        /// </summary>
-        public BasicStat StatesStat { get { return null; } }
-
-        /// <summary>
-        /// Neuron's transmission signal
-        /// </summary>
-        public double TransmissionSignal { get { return _signal; } }
-
-        /// <summary>
-        /// Statistics of neuron's transmission signal frequency
-        /// </summary>
-        public BasicStat TransmissionFreqStat { get { return TransmissionSignalStat; } }
-
-        /// <summary>
-        /// Value to be passed to readout layer as a predictor value is a nonsense in case of input neuron
-        /// </summary>
-        public double ReadoutValue { get { return double.NaN; } }
-
-        /// <summary>
-        /// Value to be passed to readout layer as an augmented predictor value is a nonsense in case of input neuron
-        /// </summary>
-        public double ReadoutAugmentedValue { get { return double.NaN; } }
-
         //Methods
         /// <summary>
-        /// Resets the neuron to its initial state
+        /// Resets neuron to its initial state
         /// </summary>
-        /// <param name="resetStatistics">Specifies whether to reset internal statistics</param>
-        public void Reset(bool resetStatistics)
+        /// <param name="statistics">Specifies whether to reset internal statistics</param>
+        public void Reset(bool statistics)
         {
-            _signal = 0;
-            if (resetStatistics)
+            _stimuli = 0;
+            if (statistics)
             {
-                StimuliStat.Reset();
-                TransmissionSignalStat.Reset();
+                Statistics.Reset();
             }
             return;
         }
 
         /// <summary>
-        /// Prepares and stores transmission signal
-        /// </summary>
-        public void PrepareTransmissionSignal()
-        {
-            _signal = _signalConverter.FetchSpike();
-            TransmissionSignalStat.AddSampleValue(_signal);
-            return;
-        }
-
-        /// <summary>
-        /// Computes the neuron
+        /// Stores new incoming stimulation.
         /// </summary>
         /// <param name="stimuli">Input stimulation</param>
-        /// <param name="collectStatistics">Specifies whether to update internal statistics</param>
-        public void Compute(double stimuli, bool collectStatistics)
+        public void NewStimuli(double stimuli)
         {
-            stimuli = stimuli.Bound();
+            _stimuli = stimuli.Bound();
+            _signalConverter.EncodeAnalogValue(_stimuli);
+            return;
+        }
+
+        /// <summary>
+        /// Computes neuron's new output signal and updates statistics
+        /// </summary>
+        /// <param name="collectStatistics">Specifies whether to update internal statistics</param>
+        public void NewState(bool collectStatistics)
+        {
+            OutputSignal = _signalConverter.FetchSpike();
             if (collectStatistics)
             {
-                StimuliStat.AddSampleValue(stimuli);
+                Statistics.Update(_stimuli, NeuronStatistics.NormalizedStateRange.Rescale(OutputSignal, OutputRange), OutputSignal);
             }
-            _signalConverter.EncodeAnalogValue(stimuli);
             return;
         }
 

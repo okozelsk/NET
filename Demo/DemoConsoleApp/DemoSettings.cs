@@ -6,7 +6,9 @@ using System.Globalization;
 using System.Reflection;
 using System.IO;
 using RCNet.XmlTools;
+using RCNet.Neural;
 using RCNet.Neural.Network.SM;
+using RCNet.MathTools;
 
 namespace RCNet.DemoConsoleApp
 {
@@ -92,7 +94,7 @@ namespace RCNet.DemoConsoleApp
             /// </summary>
             public double NormalizerReserveRatio { get; }
             /// <summary>
-            /// 
+            /// State machine configuration
             /// </summary>
             public StateMachineSettings stateMachineCfg { get; }
 

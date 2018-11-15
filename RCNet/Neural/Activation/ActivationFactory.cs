@@ -47,6 +47,8 @@ namespace RCNet.Neural.Activation
                     return new ExpIFSettings(settingsElem);
                 case "activationIzhikevichIF":
                     return new IzhikevichIFSettings(settingsElem);
+                case "activationAutoIzhikevichIF":
+                    return new AutoIzhikevichIFSettings(settingsElem);
                 case "activationGaussian":
                     return new GaussianSettings(settingsElem);
                 case "activationIdentity":
@@ -115,6 +117,10 @@ namespace RCNet.Neural.Activation
             else if (settingsType == typeof(IzhikevichIFSettings))
             {
                 return new IzhikevichIF((IzhikevichIFSettings)settings, rand);
+            }
+            else if (settingsType == typeof(AutoIzhikevichIFSettings))
+            {
+                return IzhikevichIF.AutoCreate((AutoIzhikevichIFSettings)settings, rand);
             }
             else if (settingsType == typeof(LeakyIFSettings))
             {
@@ -198,6 +204,10 @@ namespace RCNet.Neural.Activation
             else if (settingsType == typeof(IzhikevichIFSettings))
             {
                 return ((IzhikevichIFSettings)settings).DeepClone();
+            }
+            else if (settingsType == typeof(AutoIzhikevichIFSettings))
+            {
+                return ((AutoIzhikevichIFSettings)settings).DeepClone();
             }
             else if (settingsType == typeof(LeakyIFSettings))
             {

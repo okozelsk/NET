@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RCNet.MathTools;
 
 namespace RCNet.Neural
 {
@@ -11,6 +12,51 @@ namespace RCNet.Neural
     /// </summary>
     public static class CommonEnums
     {
+        /// <summary>
+        /// Supported data normalization ranges
+        /// </summary>
+        public enum DataNormalizationRange
+        {
+            /// <summary>
+            /// Range 0;1
+            /// </summary>
+            Inclusive_0_Pos1,
+            /// Range -1;1
+            /// </summary>
+            Inclusive_Neg1_Pos1
+        }
+
+        /// <summary>
+        /// Parses the normalization range from a string code
+        /// </summary>
+        /// <param name="code">Normalization range code</param>
+        public static DataNormalizationRange ParseDataNormalizationRange(string code)
+        {
+            switch (code.ToUpper())
+            {
+                case "INCLUSIVE_0_POS1": return DataNormalizationRange.Inclusive_0_Pos1;
+                case "INCLUSIVE_NEG1_POS1": return DataNormalizationRange.Inclusive_Neg1_Pos1;
+                default:
+                    throw new ArgumentException($"Unsupported normalization range {code}", "code");
+            }
+        }
+
+        /// <summary>
+        /// Returns interval according to the specified normalization range
+        /// </summary>
+        /// <param name="code">Normalization range code</param>
+        public static Interval GetDataNormalizationRange(DataNormalizationRange range)
+        {
+            switch (range)
+            {
+                case DataNormalizationRange.Inclusive_0_Pos1: return new Interval(0, 1);
+                case DataNormalizationRange.Inclusive_Neg1_Pos1: return new Interval(-1, 1);
+                default:
+                    throw new ArgumentException($"Unsupported normalization range {range}", "range");
+            }
+        }
+
+
         /// <summary>
         /// Supported task types.
         /// </summary>

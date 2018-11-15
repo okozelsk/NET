@@ -19,6 +19,10 @@ namespace RCNet.Neural.Network.SM
     {
         //Constants
         /// <summary>
+        /// Data range
+        /// </summary>
+        private readonly Interval _dataRange;
+        /// <summary>
         /// Maximum number of the folds
         /// </summary>
         public const int MaxNumOfFolds = 100;
@@ -42,7 +46,7 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// Random generator
         /// </summary>
-        private System.Random _rand;
+        private Random _rand;
         /// <summary>
         /// Collection of clusters of trained ReadoutUnits. One cluster per output field.
         /// </summary>
@@ -60,14 +64,21 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         /// <param name="taskType">Type of the task</param>
         /// <param name="settings">Readout layer configuration</param>
+        /// <param name="dataRange">Range of input/output data</param>
         /// <param name="rand">Random object to be used</param>
         public ReadoutLayer(CommonEnums.TaskType taskType,
                             ReadoutLayerSettings settings,
-                            System.Random rand
+                            Interval dataRange,
+                            Random rand
                             )
         {
             _taskType = taskType;
             _settings = settings.DeepClone();
+            _dataRange = dataRange.DeepClone();
+            if(!_settings.ReadoutUnitCfg.OutputRange.BelongsTo(_dataRange.Min) || !_settings.ReadoutUnitCfg.OutputRange.BelongsTo(_dataRange.Max))
+            {
+                throw new Exception($"Readout unit does not support data range <{_dataRange.Min}; {_dataRange.Max}>.");
+            }
             _rand = rand;
             _clusterCollection = new ReadoutUnit[_settings.OutputFieldNameCollection.Count][];
             _clusterErrStatisticsCollection = new List<ClusterErrStatistics>();
@@ -128,7 +139,7 @@ namespace RCNet.Neural.Network.SM
                 if (_taskType == CommonEnums.TaskType.Classification)
                 {
                     //Reference binary distribution is relevant only for classification task
-                    refBinDistr = new BinDistribution();
+                    refBinDistr = new BinDistribution(_dataRange.Mid);
                 }
                 //Transformation to a single value vectors and data analysis
                 foreach (double[] idealVector in shuffledData.OutputVectorCollection)

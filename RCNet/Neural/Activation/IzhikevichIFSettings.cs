@@ -22,11 +22,11 @@ namespace RCNet.Neural.Activation
         //Constants
         //Typical values
         public const double TypicalStimuliCoeff = 10;
-        public const double TypicalRecoveryTimeScale = 0.02;
-        public const double TypicalRecoverySensitivity = 0.2;
-        public const double TypicalRecoveryReset = 2;
+        public const double TypicalRecoveryTimeScale = 0.02; //Parameter "a" in the original Izhikevich model
+        public const double TypicalRecoverySensitivity = 0.2; //Parameter "b" in the original Izhikevich model
+        public const double TypicalRecoveryReset = 2; //Parameter "d" in the original Izhikevich model
         public const double TypicalRestV = -70;
-        public const double TypicalResetV = -65;
+        public const double TypicalResetV = -65; //Parameter "c" in the original Izhikevich model
         public const double TypicalFiringThresholdV = 30;
 
         //Attribute properties

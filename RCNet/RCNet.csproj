@@ -50,6 +50,7 @@
     <Compile Include="MathTools\PhysUnit.cs" />
     <Compile Include="MathTools\VectorMath\Vector.cs" />
     <Compile Include="Neural\Activation\ActivationFactory.cs" />
+    <Compile Include="Neural\Activation\AutoIzhikevichIFSettings.cs" />
     <Compile Include="Neural\Activation\IzhikevichIFSettings.cs" />
     <Compile Include="Neural\Activation\IzhikevichIF.cs" />
     <Compile Include="Neural\Activation\TanHSettings.cs" />
@@ -90,6 +91,7 @@
     <Compile Include="Neural\Network\SM\FiringRate.cs" />
     <Compile Include="Neural\Network\SM\InputAnalogNeuron.cs" />
     <Compile Include="Neural\Network\SM\InputSpikingNeuron.cs" />
+    <Compile Include="Neural\Network\SM\NeuronStatistics.cs" />
     <Compile Include="Neural\Network\SM\ReservoirAnalogNeuron.cs" />
     <Compile Include="Neural\Network\SM\ReservoirSpikingNeuron.cs" />
     <Compile Include="Neural\Network\SM\SignalConverter.cs" />
@@ -289,6 +291,11 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Neural\Network\SM\PoolNeuronGroupSettings.xsd">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Neural\Activation\AutoIzhikevichIFSettings.xsd">
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>

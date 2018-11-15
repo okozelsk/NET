@@ -7,6 +7,7 @@ using System.Xml.Linq;
 using System.IO;
 using RCNet.XmlTools;
 using RCNet.Neural.Activation;
+using RCNet.MathTools;
 
 namespace RCNet.Neural.Network.FF
 {
@@ -40,6 +41,10 @@ namespace RCNet.Neural.Network.FF
         /// </summary>
         public Object OutputLayerActivation { get; set; }
         /// <summary>
+        /// Network output values range.
+        /// </summary>
+        public Interval OutputRange { get; set; }
+        /// <summary>
         /// The parameter specifies what method will be used for training
         /// </summary>
         public TrainingMethodType RegressionMethod { get; set; }
@@ -63,6 +68,7 @@ namespace RCNet.Neural.Network.FF
         public FeedForwardNetworkSettings()
         {
             OutputLayerActivation = null;
+            OutputRange = null;
             RegressionMethod = TrainingMethodType.Resilient;
             HiddenLayerCollection = new List<HiddenLayerSettings>();
             LinRegrTrainerCfg = null;
@@ -77,9 +83,11 @@ namespace RCNet.Neural.Network.FF
         public FeedForwardNetworkSettings(FeedForwardNetworkSettings source)
         {
             OutputLayerActivation = null;
+            OutputRange = null;
             if (source.OutputLayerActivation != null)
             {
                 OutputLayerActivation = ActivationFactory.DeepCloneActivationSettings(source.OutputLayerActivation);
+                OutputRange = source.OutputRange.DeepClone();
             }
             RegressionMethod = source.RegressionMethod;
             HiddenLayerCollection = new List<HiddenLayerSettings>(source.HiddenLayerCollection.Count);
@@ -118,10 +126,12 @@ namespace RCNet.Neural.Network.FF
             XElement feedForwardNetworkSettingsElem = validator.Validate(elem, "rootElem");
             //Parsing
             OutputLayerActivation = ActivationFactory.LoadSettings(feedForwardNetworkSettingsElem.Descendants().First());
-            if(!IsAllowedActivation(OutputLayerActivation))
+            Interval outputRange = null;
+            if(!IsAllowedActivation(OutputLayerActivation, out outputRange))
             {
                 throw new ApplicationException($"Activation can't be used in FF network. Activation function has to be stateless and has to support derivative calculation.");
             }
+            OutputRange = outputRange;
             RegressionMethod = ParseTrainingMethodType(feedForwardNetworkSettingsElem.Attribute("regressionMethod").Value);
             //Hidden layers
             HiddenLayerCollection = new List<HiddenLayerSettings>();
@@ -171,10 +181,11 @@ namespace RCNet.Neural.Network.FF
         /// </summary>
         /// <param name="activationSettings">Activation settings</param>
         /// <returns></returns>
-        public static bool IsAllowedActivation(Object activationSettings)
+        public static bool IsAllowedActivation(Object activationSettings, out Interval outputRange)
         {
             IActivationFunction af = ActivationFactory.Create(activationSettings, new Random());
-            if(!af.Stateless || !af.SupportsComputeDerivativeMethod)
+            outputRange = af.OutputSignalRange.DeepClone();
+            if (!af.Stateless || !af.SupportsComputeDerivativeMethod)
             {
                 return false;
             }
@@ -204,6 +215,7 @@ namespace RCNet.Neural.Network.FF
             if (obj == null) return false;
             FeedForwardNetworkSettings cmpSettings = obj as FeedForwardNetworkSettings;
             if (!Equals(OutputLayerActivation, cmpSettings.OutputLayerActivation) ||
+                !Equals(OutputRange, cmpSettings.OutputRange) ||
                 RegressionMethod != cmpSettings.RegressionMethod ||
                 HiddenLayerCollection.Count != cmpSettings.HiddenLayerCollection.Count ||
                 !Equals(LinRegrTrainerCfg, cmpSettings.LinRegrTrainerCfg) ||
@@ -293,7 +305,8 @@ namespace RCNet.Neural.Network.FF
             {
                 NumOfNeurons = int.Parse(elem.Attribute("neurons").Value);
                 Activation = ActivationFactory.LoadSettings(elem.Descendants().First());
-                if (!IsAllowedActivation(Activation))
+                Interval outputRange = null;
+                if (!IsAllowedActivation(Activation, out outputRange))
                 {
                     throw new ApplicationException($"Activation can't be used in FF network. Activation has to be time independent and has to support derivative.");
                 }

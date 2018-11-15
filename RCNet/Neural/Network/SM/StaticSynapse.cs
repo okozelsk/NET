@@ -8,12 +8,15 @@ using RCNet.MathTools;
 namespace RCNet.Neural.Network.SM
 {
     /// <summary>
-    /// Static synapse computes constantly weighted signal from source to target neuron.
+    /// Static synapse computes and moderates constantly weighted signal from source to target neuron.
     /// </summary>
     [Serializable]
     public class StaticSynapse : ISynapse
     {
-        //Properties
+        //Static attributes
+        private static Interval _mediationRange = new Interval(0, 1);
+        
+        //Attribute properties
         /// <summary>
         /// Source neuron - signal emitor
         /// </summary>
@@ -43,10 +46,6 @@ namespace RCNet.Neural.Network.SM
         {
             SourceNeuron = sourceNeuron;
             TargetNeuron = targetNeuron;
-            if(weight == 0)
-            {
-                throw new ArgumentOutOfRangeException("weight", "Weight can't be equal to zero.");
-            }
             //Weight absolute value
             Weight = Math.Abs(weight);
             //Weight sign
@@ -56,7 +55,7 @@ namespace RCNet.Neural.Network.SM
 
         //Methods
         /// <summary>
-        /// Does nothing, this is a static synapse so weight remaining all the time unchanged.
+        /// Does nothing, this is a static synapse so weight is keeping all the time unchanged.
         /// </summary>
         public void Adjust()
         {
@@ -64,11 +63,11 @@ namespace RCNet.Neural.Network.SM
         }
 
         /// <summary>
-        /// Computes weighted signal of source neuron to be delivered to the target neuron.
+        /// Computes signal to be delivered from the source neuron to the target neuron.
         /// </summary>
         public double GetWeightedSignal()
         {
-            double tSignal = TargetNeuron.TransmissionSignalRange.Rescale(SourceNeuron.TransmissionSignal, SourceNeuron.TransmissionSignalRange);
+            double tSignal = _mediationRange.Rescale(SourceNeuron.OutputSignal, SourceNeuron.OutputRange);
             tSignal *= Weight;
             return tSignal;
         }

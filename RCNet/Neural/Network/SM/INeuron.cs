@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using RCNet.MathTools;
+using RCNet.Neural.Activation;
 
 namespace RCNet.Neural.Network.SM
 {
@@ -12,76 +13,70 @@ namespace RCNet.Neural.Network.SM
     /// </summary>
     public interface INeuron
     {
+        //Attribute properties
         /// <summary>
         /// Home pool identificator and neuron placement within the pool
         /// </summary>
         NeuronPlacement Placement { get; }
 
         /// <summary>
-        /// Statistics of neuron stimulation signal
+        /// Neuron's key statistics
         /// </summary>
-        BasicStat StimuliStat { get; }
+        NeuronStatistics Statistics { get; }
 
         /// <summary>
-        /// Statistics of neuron internal states
-        /// </summary>
-        BasicStat StatesStat { get; }
-
-        /// <summary>
-        /// Output signal range
-        /// </summary>
-        Interval TransmissionSignalRange { get; }
-
-        /// <summary>
-        /// Determines whether neuron's signal role is excitatory or inhibitory
+        /// Neuron's role within the reservoir (excitatory or inhibitory)
         /// </summary>
         CommonEnums.NeuronRole Role { get; }
 
         /// <summary>
-        /// Neuron's transmission signal
+        /// Type of the output signal (spike or analog)
         /// </summary>
-        double TransmissionSignal { get; }
+        ActivationFactory.FunctionOutputSignalType OutputType { get; }
 
         /// <summary>
-        /// Statistics of neuron's transmission signal values
+        /// Output signal range
         /// </summary>
-        BasicStat TransmissionSignalStat { get; }
+        Interval OutputRange { get; }
 
         /// <summary>
-        /// Statistics of neuron's transmission signal frequency
+        /// Constant bias
         /// </summary>
-        BasicStat TransmissionFreqStat { get; }
+        double Bias { get; }
 
         /// <summary>
-        /// Value to be passed to readout layer as a predictor value.
-        /// Available after the execution of PrepareTransmissionSignal function.
+        /// Output signal
         /// </summary>
-        double ReadoutValue { get; }
+        double OutputSignal { get; }
 
         /// <summary>
-        /// Value to be passed to readout layer as an augmented predictor value
-        /// Available after the execution of PrepareTransmissionSignal function.
+        /// Value to be passed to readout layer as a primary predictor.
         /// </summary>
-        double ReadoutAugmentedValue { get; }
+        double PrimaryPredictor { get; }
+
+        /// <summary>
+        /// Value to be passed to readout layer as an augmented predictor.
+        /// </summary>
+        double SecondaryPredictor { get; }
 
         //Methods
         /// <summary>
         /// Resets neuron to its initial state
         /// </summary>
-        /// <param name="resetStatistics">Specifies whether to reset internal statistics</param>
-        void Reset(bool resetStatistics);
+        /// <param name="statistics">Specifies whether to reset internal statistics</param>
+        void Reset(bool statistics);
 
         /// <summary>
-        /// Prepares neuron's transmission signal
-        /// </summary>
-        void PrepareTransmissionSignal();
-
-        /// <summary>
-        /// Computes neuron's new state.
+        /// Stores new incoming stimulation.
         /// </summary>
         /// <param name="stimuli">Input stimulation</param>
+        void NewStimuli(double stimuli);
+
+        /// <summary>
+        /// Computes neuron's new output signal and updates statistics
+        /// </summary>
         /// <param name="collectStatistics">Specifies whether to update internal statistics</param>
-        void Compute(double stimuli, bool collectStatistics);
+        void NewState(bool collectStatistics);
 
     }//INeuron
 

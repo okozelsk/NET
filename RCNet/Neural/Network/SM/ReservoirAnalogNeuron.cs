@@ -16,12 +16,54 @@ namespace RCNet.Neural.Network.SM
     [Serializable]
     public class ReservoirAnalogNeuron : INeuron
     {
-        //Attributes
+        //Attribute properties
         /// <summary>
-        /// Range of the rescalled state value. Allways (0,1)
+        /// Home pool identificator and neuron placement within the pool
         /// </summary>
-        private static readonly Interval _rescalledStateRange = new Interval(0, 1);
+        public NeuronPlacement Placement { get; }
 
+        /// <summary>
+        /// Neuron's key statistics
+        /// </summary>
+        public NeuronStatistics Statistics { get; }
+
+        /// <summary>
+        /// Neuron's role within the reservoir (excitatory or inhibitory)
+        /// </summary>
+        public CommonEnums.NeuronRole Role { get; }
+
+        /// <summary>
+        /// Type of the output signal (spike or analog)
+        /// This neuron is analog
+        /// </summary>
+        public ActivationFactory.FunctionOutputSignalType OutputType { get { return _activation.OutputSignalType; } }
+
+        /// <summary>
+        /// Output signal range
+        /// </summary>
+        public Interval OutputRange { get { return _activation.OutputSignalRange; } }
+
+        /// <summary>
+        /// Constant bias
+        /// </summary>
+        public double Bias { get; }
+
+        /// <summary>
+        /// Output signal
+        /// </summary>
+        public double OutputSignal { get; private set; }
+
+        /// <summary>
+        /// Value to be passed to readout layer as a primary predictor.
+        /// </summary>
+        public double PrimaryPredictor { get { return OutputSignal; } }
+
+        /// <summary>
+        /// Value to be passed to readout layer as an augmented predictor.
+        /// </summary>
+        public double SecondaryPredictor { get { return OutputSignal * OutputSignal; } }
+
+        //Attributes
         /// <summary>
         /// Neuron's activation function (the heart of the neuron)
         /// </summary>
@@ -33,61 +75,9 @@ namespace RCNet.Neural.Network.SM
         private double _retainmentRatio;
 
         /// <summary>
-        /// Current state of the neuron in activation function range
+        /// Input stimulation
         /// </summary>
-        private double _state;
-
-        /// <summary>
-        /// Current state of the neuron rescaled to uniform range
-        /// </summary>
-        private double _rescaledState;
-
-        /// <summary>
-        /// Computed signal of the neuron in _transmissionSignalRange
-        /// </summary>
-        private double _signal;
-
-        /// <summary>
-        /// Signal ready for transmission
-        /// </summary>
-        private double _transmissionSignal;
-
-        //Attribute properties
-        /// <summary>
-        /// Determines whether neuron's signal role is excitatory or inhibitory.
-        /// </summary>
-        public CommonEnums.NeuronRole Role { get; }
-
-        /// <summary>
-        /// Home pool identificator and neuron placement within the pool
-        /// </summary>
-        public NeuronPlacement Placement { get; }
-
-        /// <summary>
-        /// Constant bias of the neuron
-        /// </summary>
-        public double Bias { get; }
-
-        /// <summary>
-        /// Statistics of incoming stimulations (input values)
-        /// </summary>
-        public BasicStat StimuliStat { get; }
-        
-        /// <summary>
-        /// Statistics of neuron's uniformly rescalled state values
-        /// </summary>
-        public BasicStat StatesStat { get; }
-
-        /// <summary>
-        /// Statistics of neuron transmission signal in _transmissionSignalRange
-        /// </summary>
-        public BasicStat TransmissionSignalStat { get; }
-
-        /// <summary>
-        /// Statistics of neuron's transmission signal frequency
-        /// </summary>
-        public BasicStat TransmissionFreqStat { get; }
-
+        private double _stimuli;
 
         //Constructor
         /// <summary>
@@ -106,6 +96,7 @@ namespace RCNet.Neural.Network.SM
                                      )
         {
             Placement = placement;
+            Statistics = new NeuronStatistics();
             Role = role;
             Bias = bias;
             //Check whether function is analog
@@ -115,36 +106,10 @@ namespace RCNet.Neural.Network.SM
             }
             _activation = activation;
             _retainmentRatio = retainmentRatio;
-            StimuliStat = new BasicStat();
-            StatesStat = new BasicStat();
-            TransmissionSignalStat = new BasicStat();
-            TransmissionFreqStat = new BasicStat();
             Reset(false);
             return;
         }
 
-        //Properties
-        /// <summary>
-        /// Output range of associated activation function
-        /// </summary>
-        public Interval TransmissionSignalRange { get { return _activation.OutputSignalRange; } }
-
-        /// <summary>
-        /// Neuron's transmission signal
-        /// </summary>
-        public double TransmissionSignal { get { return _transmissionSignal; } }
-
-        /// <summary>
-        /// Value to be passed to readout layer as a predictor value.
-        /// Available after the execution of PrepareTransmissionSignal function.
-        /// </summary>
-        public double ReadoutValue { get { return _transmissionSignal; } }
-
-        /// <summary>
-        /// Value to be passed to readout layer as an augmented predictor value
-        /// Available after the execution of PrepareTransmissionSignal function.
-        /// </summary>
-        public double ReadoutAugmentedValue { get { return _transmissionSignal * _transmissionSignal; } }
 
         //Methods
         /// <summary>
@@ -154,54 +119,39 @@ namespace RCNet.Neural.Network.SM
         public void Reset(bool statistics)
         {
             _activation.Reset();
-            _state = 0;
-            _rescaledState = 0;
-            _transmissionSignal = 0;
+            _stimuli = 0;
+            OutputSignal = 0;
             if (statistics)
             {
-                StimuliStat.Reset();
-                StatesStat.Reset();
-                TransmissionSignalStat.Reset();
-                TransmissionFreqStat.Reset();
+                Statistics.Reset();
             }
             return;
         }
 
         /// <summary>
-        /// Prepares and stores transmission signal
-        /// </summary>
-        public void PrepareTransmissionSignal()
-        {
-            _transmissionSignal = _signal;
-            TransmissionSignalStat.AddSampleValue(_transmissionSignal);
-            TransmissionFreqStat.AddSampleValue((_transmissionSignal == 0) ? 0 : 1);
-            return;
-        }
-
-        /// <summary>
-        /// Computes the neuron.
+        /// Stores new incoming stimulation.
         /// </summary>
         /// <param name="stimuli">Input stimulation</param>
-        /// <param name="collectStatistics">Specifies whether to update internal statistics</param>
-        public void Compute(double stimuli, bool collectStatistics)
+        public void NewStimuli(double stimuli)
         {
-            stimuli = (stimuli + Bias).Bound();
+            _stimuli = (stimuli + Bias).Bound();
+            return;
+        }
+
+        /// <summary>
+        /// Computes neuron's new output signal and updates statistics
+        /// </summary>
+        /// <param name="collectStatistics">Specifies whether to update internal statistics</param>
+        public void NewState(bool collectStatistics)
+        {
+            OutputSignal = (_retainmentRatio * OutputSignal) + (1d - _retainmentRatio) * _activation.Compute(_stimuli);
             if (collectStatistics)
             {
-                StimuliStat.AddSampleValue(stimuli);
-            }
-            //State and signal
-            _signal = (_retainmentRatio * _state) + (1d - _retainmentRatio) * _activation.Compute(stimuli);
-            _state = _signal;
-            //Compute rescaled state
-            _rescaledState = _rescalledStateRange.Rescale(_state, _activation.InternalStateRange);
-            //Statistics
-            if (collectStatistics)
-            {
-                StatesStat.AddSampleValue(_rescaledState);
+                Statistics.Update(_stimuli, NeuronStatistics.NormalizedStateRange.Rescale(OutputSignal, OutputRange), OutputSignal);
             }
             return;
         }
+
 
     }//ReservoirAnalogNeuron
 
