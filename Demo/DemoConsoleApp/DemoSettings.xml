@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <demo dataFolder=".\\Data">
-  <case name="Prediction task Mackey Glass chaotic time series: Analog reservoir, Linear regression">
+  <case name="Prediction task Mackey Glass chaotic time series: Analog reservoir (ESN), Linear regression">
     <samples fileName="MackeyGlass.csv" bootSamples="500" singleNormalizer="false" normalizerReserve="0.1"/>
     <stateMachineCfg taskType="Prediction" randomizerSeek="0">
       <inputFields routeToReadout="false">
         <field name="Value"/>
       </inputFields>
       <reservoirCfgContainer>
-        <reservoirCfg name="Analog" inputCoding="Analog" inputDuration="1" spectralRadius="0.99">
+        <reservoirCfg name="Analog (ESN)" inputCoding="Analog" inputDuration="1" spectralRadius="0.99">
           <pools>
             <pool name="Analog pool" dimX="8" dimY="8" dimZ="8" routeToReadout="true">
               <neuronGroups>
@@ -31,7 +31,7 @@
         </reservoirCfg>
       </reservoirCfgContainer>
       <reservoirInstanceContainer>
-        <reservoirInstance name="Experimental" cfg="Analog" augmentedStates="true">
+        <reservoirInstance name="Fully analog reservoir " cfg="Analog (ESN)" augmentedStates="true">
           <inputFieldAssignments>
             <inputFieldAssignment inputFieldName="Value" poolName="Analog pool" density="1">
               <weight min="0" max="0.6" randomSign="false" distribution="Uniform"/>

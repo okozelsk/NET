@@ -81,7 +81,7 @@ namespace RCNet.DemoConsoleApp
                                                                              + poolStat.NeuronsStimuliSpansStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
                                                                              + poolStat.NeuronsStimuliSpansStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
                                                                              + poolStat.NeuronsStimuliSpansStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
-                    log.Write($"          Neurons transmission signals", false);
+                    log.Write($"          Neurons output signal", false);
                     log.Write("                  AVG Avg, Max, Min, SDdev: " + poolStat.NeuronsAvgOutputSignalStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
                                                                              + poolStat.NeuronsAvgOutputSignalStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
                                                                              + poolStat.NeuronsAvgOutputSignalStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
@@ -94,7 +94,7 @@ namespace RCNet.DemoConsoleApp
                                                                              + poolStat.NeuronsMinOutputSignalStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
                                                                              + poolStat.NeuronsMinOutputSignalStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
                                                                              + poolStat.NeuronsMinOutputSignalStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
-                    log.Write($"          Neurons transmission frequencies", false);
+                    log.Write($"          Neurons output signal frequency", false);
                     log.Write("                  AVG Avg, Max, Min, SDdev: " + poolStat.NeuronsAvgOutputFreqStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
                                                                              + poolStat.NeuronsAvgOutputFreqStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
                                                                              + poolStat.NeuronsAvgOutputFreqStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "

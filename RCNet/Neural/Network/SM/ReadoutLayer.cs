@@ -93,17 +93,23 @@ namespace RCNet.Neural.Network.SM
         /// <param name="idealOutputsCollection">Collection of all available desired outputs related to predictors</param>
         /// <param name="regressionController">Regression controller delegate</param>
         /// <param name="regressionControllerData">An user object</param>
+        /// <returns>Returned ValidationBundle is something like a protocol.
+        /// There is recorded fold by fold (unit by unit) predicted and corresponding ideal values.
+        /// This is the pesimistic approach. Real results on unseen data could be better due to the clustering synergy.
+        /// </returns>
         public ValidationBundle Build(List<double[]> predictorsCollection,
                                       List<double[]> idealOutputsCollection,
                                       ReadoutUnit.RegressionCallbackDelegate regressionController,
                                       Object regressionControllerData
                                       )
         {
-            //Allocation of computed vectors for validation bundle
-            List<double[]> computedVectorCollection = new List<double[]>(idealOutputsCollection.Count);
-            for(int i = 0; i < idealOutputsCollection.Count; i++)
+            //Allocation of computed and ideal vectors for validation bundle
+            List<double[]> validationComputedVectorCollection = new List<double[]>(idealOutputsCollection.Count);
+            List<double[]> validationIdealVectorCollection = new List<double[]>(idealOutputsCollection.Count);
+            for (int i = 0; i < idealOutputsCollection.Count; i++)
             {
-                computedVectorCollection.Add(new double[idealOutputsCollection[0].Length]);
+                validationComputedVectorCollection.Add(new double[idealOutputsCollection[0].Length]);
+                validationIdealVectorCollection.Add(new double[idealOutputsCollection[0].Length]);
             }
             //Test dataset size
             if (_settings.TestDataRatio > MaxRatioOfTestData)
@@ -172,7 +178,9 @@ namespace RCNet.Neural.Network.SM
                                                                              testDataSetLength
                                                                              );
                 }
-                //Readout units in the cluster
+                //Best predicting unit per each fold in the cluster.
+                ClusterErrStatistics ces = new ClusterErrStatistics(_taskType, numOfFolds, refBinDistr);
+                int arrayPos = 0;
                 for (int foldIdx = 0; foldIdx < numOfFolds; foldIdx++)
                 {
                     //Build training samples
@@ -186,7 +194,8 @@ namespace RCNet.Neural.Network.SM
                             trainingIdealValueCollection.AddRange(subBundleCollection[bundleIdx].OutputVectorCollection);
                         }
                     }
-                    //Call training regression for the single readout unit
+                    //Call training regression to get the best fold's readout unit.
+                    //The best unit becomes to be the predicting cluster member.
                     _clusterCollection[clusterIdx][foldIdx] = ReadoutUnit.CreateTrained(_taskType,
                                                                                         clusterIdx,
                                                                                         _settings.OutputFieldNameCollection[clusterIdx],
@@ -202,20 +211,23 @@ namespace RCNet.Neural.Network.SM
                                                                                         regressionController,
                                                                                         regressionControllerData
                                                                                         );
+                    //Cluster error statistics & data for validation bundle (pesimistic approach)
+                    for (int sampleIdx = 0; sampleIdx < subBundleCollection[foldIdx].OutputVectorCollection.Count; sampleIdx++)
+                    {
+                        
+                        double value = _clusterCollection[clusterIdx][foldIdx].Network.Compute(subBundleCollection[foldIdx].InputVectorCollection[sampleIdx])[0];
+                        ces.Update(value, subBundleCollection[foldIdx].OutputVectorCollection[sampleIdx][0]);
+                        validationIdealVectorCollection[arrayPos][clusterIdx] = subBundleCollection[foldIdx].OutputVectorCollection[sampleIdx][0];
+                        validationComputedVectorCollection[arrayPos][clusterIdx] = value;
+                        ++arrayPos;
+                    }
+
                 }//foldIdx
-                //Cluster error statistics & data for validation bundle
-                ClusterErrStatistics ces = new ClusterErrStatistics(_taskType, numOfFolds, refBinDistr);
-                for (int sampleIdx = 0; sampleIdx < idealOutputsCollection.Count; sampleIdx++)
-                {
-                    double value = Compute(predictorsCollection[sampleIdx], clusterIdx);
-                    ces.Update(value, idealOutputsCollection[sampleIdx][clusterIdx]);
-                    computedVectorCollection[sampleIdx][clusterIdx] = value;
-                }
                 _clusterErrStatisticsCollection.Add(ces);
 
             }//clusterIdx
-
-            return new ValidationBundle(computedVectorCollection, idealOutputsCollection);
+            //Validation bundle is returned. 
+            return new ValidationBundle(validationComputedVectorCollection, validationIdealVectorCollection);
         }
 
         //Properties
