@@ -24,9 +24,9 @@ namespace RCNet.Neural.Network.FF
         private List<double[]> _outputVectorCollection;
         private List<Matrix> _outputSingleColMatrixCollection;
         private System.Random _rand;
-        private double[] _alphas;
+        private readonly double[] _alphas;
         private double _mse;
-        private int _maxEpoch;
+        private readonly int _maxEpoch;
         private int _epoch;
 
         //Constructor
@@ -151,14 +151,14 @@ namespace RCNet.Neural.Network.FF
                 //Try to create QRD. Any exception signals numerical unstability
                 decomposition = new QRD(predictors);
             }
-            catch(Exception e)
+            catch
             {
                 //Creation of QRD object throws exception. QRD object is not ready for use.
                 useableQRD = false;
                 if (_epoch == 1)
                 {
                     //No previous successful epoch so stop training
-                    throw e;
+                    throw;
                 }
             }
             if (useableQRD)

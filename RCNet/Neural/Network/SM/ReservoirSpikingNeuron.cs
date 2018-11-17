@@ -39,6 +39,11 @@ namespace RCNet.Neural.Network.SM
         public CommonEnums.NeuronRole Role { get; }
 
         /// <summary>
+        /// Specifies whether to use neuron's secondary predictor.
+        /// </summary>
+        public bool UseSecondaryPredictor { get; }
+
+        /// <summary>
         /// Type of the output signal (spike or analog)
         /// This neuron is spiking.
         /// </summary>
@@ -94,10 +99,12 @@ namespace RCNet.Neural.Network.SM
         /// <param name="role">Neuron's signal role (Excitatory/Inhibitory).</param>
         /// <param name="activation">Instantiated activation function.</param>
         /// <param name="bias">Constant bias.</param>
+        /// <param name="useSecondaryPredictor">Specifies whether to use neuron's secondary predictor.</param>
         public ReservoirSpikingNeuron(NeuronPlacement placement,
                                      CommonEnums.NeuronRole role,
                                      IActivationFunction activation,
-                                     double bias
+                                     double bias,
+                                     bool useSecondaryPredictor
                                      )
         {
             Placement = placement;
@@ -111,6 +118,7 @@ namespace RCNet.Neural.Network.SM
             }
             _activation = activation;
             _firingRate = new FiringRate();
+            UseSecondaryPredictor = useSecondaryPredictor;
             Reset(false);
             return;
         }

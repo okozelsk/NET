@@ -22,7 +22,7 @@ namespace RCNet.Neural.Activation
         /// </summary>
         protected AnalogActivationFunction()
         {
-            Reset();
+            _state = 0;
             return;
         }
 

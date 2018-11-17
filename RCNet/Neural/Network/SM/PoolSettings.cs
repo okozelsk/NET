@@ -278,6 +278,10 @@ namespace RCNet.Neural.Network.SM
             //Constants
             //Attribute properties
             /// <summary>
+            /// Name of the neuron group
+            /// </summary>
+            public string Name { get; set; }
+            /// <summary>
             /// Excitatory or Inhibitory role of the neurons
             /// </summary>
             public CommonEnums.NeuronRole Role { get; set; }
@@ -285,6 +289,10 @@ namespace RCNet.Neural.Network.SM
             /// Used to compute Density attribute (how big relative portion of pool's neurons is formed by this group of the neurons)
             /// </summary>
             public double RelativeShare { get; set; }
+            /// <summary>
+            /// Specifies, whether neurons within the group generate secondary predictors
+            /// </summary>
+            public bool AugmentedStates { get; set; }
             /// <summary>
             /// Computed attribute. What count of pool's neurons is formed by this group of the neurons
             /// </summary>
@@ -305,8 +313,10 @@ namespace RCNet.Neural.Network.SM
             /// </summary>
             public NeuronGroupSettings()
             {
+                Name = string.Empty;
                 Role = CommonEnums.NeuronRole.Excitatory;
                 RelativeShare = 0;
+                AugmentedStates = false;
                 Count = 0;
                 ActivationSettings = null;
                 BiasSettings = null;
@@ -319,8 +329,10 @@ namespace RCNet.Neural.Network.SM
             /// <param name="source">Source instance</param>
             public NeuronGroupSettings(NeuronGroupSettings source)
             {
+                Name = source.Name;
                 Role = source.Role;
                 RelativeShare = source.RelativeShare;
+                AugmentedStates = source.AugmentedStates;
                 Count = source.Count;
                 ActivationSettings = ActivationFactory.DeepCloneActivationSettings(source.ActivationSettings);
                 BiasSettings = source.BiasSettings.DeepClone();
@@ -343,10 +355,14 @@ namespace RCNet.Neural.Network.SM
                 validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
                 XElement settingsElem = validator.Validate(elem, "rootElem");
                 //Parsing
+                //Name
+                Name = settingsElem.Attribute("name").Value;
                 //Role
                 Role = CommonEnums.ParseNeuronRole(settingsElem.Attribute("role").Value);
                 //Relative share
                 RelativeShare = double.Parse(settingsElem.Attribute("relShare").Value, CultureInfo.InvariantCulture);
+                //Augmented states
+                AugmentedStates = bool.Parse(settingsElem.Attribute("augmentedStates").Value);
                 //Activation settings
                 ActivationSettings = ActivationFactory.LoadSettings(settingsElem.Descendants().First());
                 //Bias
@@ -382,8 +398,10 @@ namespace RCNet.Neural.Network.SM
             {
                 if (obj == null) return false;
                 NeuronGroupSettings cmpSettings = obj as NeuronGroupSettings;
-                if (Role != cmpSettings.Role ||
+                if (Name != cmpSettings.Name ||
+                    Role != cmpSettings.Role ||
                     RelativeShare != cmpSettings.RelativeShare ||
+                    AugmentedStates != cmpSettings.AugmentedStates ||
                     Count != cmpSettings.Count ||
                     !Equals(ActivationSettings, cmpSettings.ActivationSettings) ||
                     !Equals(BiasSettings, cmpSettings.BiasSettings)

@@ -33,6 +33,11 @@ namespace RCNet.Neural.Network.SM
         public CommonEnums.NeuronRole Role { get; }
 
         /// <summary>
+        /// Specifies whether to use neuron's secondary predictor.
+        /// </summary>
+        public bool UseSecondaryPredictor { get; }
+
+        /// <summary>
         /// Type of the output signal (spike or analog)
         /// This neuron is analog
         /// </summary>
@@ -72,7 +77,7 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// If specified, neuron is the leaky intgrator
         /// </summary>
-        private double _retainmentRatio;
+        private readonly double _retainmentRatio;
 
         /// <summary>
         /// Input stimulation
@@ -88,11 +93,13 @@ namespace RCNet.Neural.Network.SM
         /// <param name="activation">Instantiated activation function.</param>
         /// <param name="bias">Constant bias.</param>
         /// <param name="retainmentRatio">Retainment ratio.</param>
+        /// <param name="useSecondaryPredictor">Specifies whether to use neuron's secondary predictor.</param>
         public ReservoirAnalogNeuron(NeuronPlacement placement,
                                      CommonEnums.NeuronRole role,
                                      IActivationFunction activation,
                                      double bias,
-                                     double retainmentRatio
+                                     double retainmentRatio,
+                                     bool useSecondaryPredictor
                                      )
         {
             Placement = placement;
@@ -106,6 +113,7 @@ namespace RCNet.Neural.Network.SM
             }
             _activation = activation;
             _retainmentRatio = retainmentRatio;
+            UseSecondaryPredictor = useSecondaryPredictor;
             Reset(false);
             return;
         }

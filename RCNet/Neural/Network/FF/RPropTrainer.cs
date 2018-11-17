@@ -16,9 +16,10 @@ namespace RCNet.Neural.Network.FF
         private RPropTrainerSettings _settings;
         private FeedForwardNetwork _net;
         private List<double[]> _inputVectorCollection;
-        private List<double[]> _outputVectorCollection;
+        private readonly List<double[]> _outputVectorCollection;
         private double[] _weigthsGradsAcc;
         private double[] _weigthsPrevGradsAcc;
+        private readonly Object _weigthsGradsAccLocker;
         private double[] _weigthsPrevDeltas;
         private double[] _weigthsPrevChanges;
         private double _prevMSE;
@@ -65,6 +66,7 @@ namespace RCNet.Neural.Network.FF
             _weigthsGradsAcc.Populate(0);
             _weigthsPrevGradsAcc = new double[_net.NumOfWeights];
             _weigthsPrevGradsAcc.Populate(0);
+            _weigthsGradsAccLocker = new object();
             _weigthsPrevDeltas = new double[_net.NumOfWeights];
             _weigthsPrevDeltas.Populate(_settings.IniDelta);
             _weigthsPrevChanges = new double[_net.NumOfWeights];
@@ -169,7 +171,7 @@ namespace RCNet.Neural.Network.FF
 
         private void ProcessGradientWorkerOutputs(double[] weigthsGradsAccInput, double sumOfErrorSquares)
         {
-            lock (_weigthsGradsAcc)
+            lock (_weigthsGradsAccLocker)
             {
                 for (int i = 0; i < weigthsGradsAccInput.Length; i++)
                 {

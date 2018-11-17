@@ -30,6 +30,11 @@ namespace RCNet.Neural.Network.SM
         CommonEnums.NeuronRole Role { get; }
 
         /// <summary>
+        /// Specifies whether to use neuron's secondary predictor
+        /// </summary>
+        bool UseSecondaryPredictor { get; }
+
+        /// <summary>
         /// Type of the output signal (spike or analog)
         /// </summary>
         ActivationFactory.FunctionOutputSignalType OutputType { get; }

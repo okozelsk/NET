@@ -35,6 +35,12 @@ namespace RCNet.Neural.Network.SM
         public CommonEnums.NeuronRole Role { get { return CommonEnums.NeuronRole.Excitatory; } }
 
         /// <summary>
+        /// Specifies whether to use neuron's secondary predictor.
+        /// Input neuron never generates secondary predictor
+        /// </summary>
+        public bool UseSecondaryPredictor { get { return false; } }
+
+        /// <summary>
         /// Type of the output signal (spike or analog)
         /// This is an analog neuron.
         /// </summary>
@@ -83,7 +89,7 @@ namespace RCNet.Neural.Network.SM
         /// </param>
         public InputAnalogNeuron(int inputFieldIdx, Interval inputRange)
         {
-            Placement = new NeuronPlacement(inputFieldIdx, - 1, inputFieldIdx, inputFieldIdx, 0, 0);
+            Placement = new NeuronPlacement(inputFieldIdx, - 1, inputFieldIdx, 0, inputFieldIdx, 0, 0);
             Statistics = new NeuronStatistics();
             OutputRange = inputRange.DeepClone();
             Reset(false);

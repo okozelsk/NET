@@ -21,7 +21,6 @@ namespace RCNet.Neural.Activation
         public Sinc(SincSettings settings)
             : base()
         {
-            Reset();
             return;
         }
 

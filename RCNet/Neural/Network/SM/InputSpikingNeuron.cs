@@ -41,6 +41,12 @@ namespace RCNet.Neural.Network.SM
         public CommonEnums.NeuronRole Role { get { return CommonEnums.NeuronRole.Excitatory; } }
 
         /// <summary>
+        /// Specifies whether to use neuron's secondary predictor.
+        /// Input neuron never generates secondary predictor
+        /// </summary>
+        public bool UseSecondaryPredictor { get { return false; } }
+
+        /// <summary>
         /// Type of the output signal (spike or analog)
         /// This is a spiking neuron.
         /// </summary>
@@ -75,7 +81,7 @@ namespace RCNet.Neural.Network.SM
         public double SecondaryPredictor { get { return double.NaN; } }
 
         //Attributes
-        private Interval _inputRange;
+        private readonly Interval _inputRange;
         private double _stimuli;
         private SignalConverter _signalConverter;
 
@@ -92,7 +98,7 @@ namespace RCNet.Neural.Network.SM
         /// <param name="inputCodingFractions">Number of coding fractions (see SpikeTrainConverter to understand)</param>
         public InputSpikingNeuron(int inputFieldIdx, Interval inputRange, int inputCodingFractions)
         {
-            Placement = new NeuronPlacement(inputFieldIdx , - 1, inputFieldIdx, inputFieldIdx, 0, 0);
+            Placement = new NeuronPlacement(inputFieldIdx , - 1, inputFieldIdx, 0, inputFieldIdx, 0, 0);
             Statistics = new NeuronStatistics();
             _inputRange = inputRange.DeepClone();
             _signalConverter = new SignalConverter(_inputRange, inputCodingFractions);

@@ -38,7 +38,7 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// Type of the task
         /// </summary>
-        private CommonEnums.TaskType _taskType;
+        private readonly CommonEnums.TaskType _taskType;
         /// <summary>
         /// Readout layer configuration
         /// </summary>
@@ -46,7 +46,7 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// Random generator
         /// </summary>
-        private Random _rand;
+        private readonly Random _rand;
         /// <summary>
         /// Collection of clusters of trained ReadoutUnits. One cluster per output field.
         /// </summary>

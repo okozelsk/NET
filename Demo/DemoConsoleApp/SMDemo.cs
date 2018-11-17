@@ -50,64 +50,68 @@ namespace RCNet.DemoConsoleApp
                 log.Write($"      Statistics of reservoir instance: {resStat.ReservoirInstanceName} ({resStat.ReservoirSettingsName})", false);
                 foreach (ReservoirStat.PoolStat poolStat in resStat.PoolStatCollection)
                 {
-                    log.Write($"        Statistics of pool instance: {poolStat.PoolInstanceName}", false);
-                    log.Write($"          Neurons states", false);
-                    log.Write("                  AVG Avg, Max, Min, SDdev: " + poolStat.NeuronsAvgStatesStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + poolStat.NeuronsAvgStatesStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + poolStat.NeuronsAvgStatesStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + poolStat.NeuronsAvgStatesStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
-                    log.Write("                  MAX Avg, Max, Min, SDdev: " + poolStat.NeuronsMaxStatesStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + poolStat.NeuronsMaxStatesStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + poolStat.NeuronsMaxStatesStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + poolStat.NeuronsMaxStatesStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
-                    log.Write("                 SPAN Avg, Max, Min, SDdev: " + poolStat.NeuronsStateSpansStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + poolStat.NeuronsStateSpansStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + poolStat.NeuronsStateSpansStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + poolStat.NeuronsStateSpansStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
-                    log.Write($"          Neurons stimuli", false);
-                    log.Write("                  AVG Avg, Max, Min, SDdev: " + poolStat.NeuronsAvgStimuliStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + poolStat.NeuronsAvgStimuliStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + poolStat.NeuronsAvgStimuliStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + poolStat.NeuronsAvgStimuliStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
-                    log.Write("                  MAX Avg, Max, Min, SDdev: " + poolStat.NeuronsMaxStimuliStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + poolStat.NeuronsMaxStimuliStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + poolStat.NeuronsMaxStimuliStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + poolStat.NeuronsMaxStimuliStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
-                    log.Write("                  MIN Avg, Max, Min, SDdev: " + poolStat.NeuronsMinStimuliStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + poolStat.NeuronsMinStimuliStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + poolStat.NeuronsMinStimuliStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + poolStat.NeuronsMinStimuliStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
-                    log.Write("                 SPAN Avg, Max, Min, SDdev: " + poolStat.NeuronsStimuliSpansStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + poolStat.NeuronsStimuliSpansStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + poolStat.NeuronsStimuliSpansStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + poolStat.NeuronsStimuliSpansStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
-                    log.Write($"          Neurons output signal", false);
-                    log.Write("                  AVG Avg, Max, Min, SDdev: " + poolStat.NeuronsAvgOutputSignalStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + poolStat.NeuronsAvgOutputSignalStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + poolStat.NeuronsAvgOutputSignalStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + poolStat.NeuronsAvgOutputSignalStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
-                    log.Write("                  MAX Avg, Max, Min, SDdev: " + poolStat.NeuronsMaxOutputSignalStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + poolStat.NeuronsMaxOutputSignalStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + poolStat.NeuronsMaxOutputSignalStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + poolStat.NeuronsMaxOutputSignalStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
-                    log.Write("                  MIN Avg, Max, Min, SDdev: " + poolStat.NeuronsMinOutputSignalStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + poolStat.NeuronsMinOutputSignalStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + poolStat.NeuronsMinOutputSignalStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + poolStat.NeuronsMinOutputSignalStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
-                    log.Write($"          Neurons output signal frequency", false);
-                    log.Write("                  AVG Avg, Max, Min, SDdev: " + poolStat.NeuronsAvgOutputFreqStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + poolStat.NeuronsAvgOutputFreqStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + poolStat.NeuronsAvgOutputFreqStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + poolStat.NeuronsAvgOutputFreqStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
+                    log.Write($"        Statistics of pool: {poolStat.PoolName}", false);
+                    foreach (ReservoirStat.PoolStat.NeuronGroupStat groupStat in poolStat.NeuronGroupStatCollection)
+                    {
+                        log.Write($"          Statistics of group: {groupStat.GroupName}", false);
+                        log.Write($"            Neurons states", false);
+                        log.Write("              AVG Avg, Max, Min, SDdev: " + groupStat.NeuronsAvgStatesStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                             + groupStat.NeuronsAvgStatesStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                             + groupStat.NeuronsAvgStatesStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                             + groupStat.NeuronsAvgStatesStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
+                        log.Write("              MAX Avg, Max, Min, SDdev: " + groupStat.NeuronsMaxStatesStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                             + groupStat.NeuronsMaxStatesStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                             + groupStat.NeuronsMaxStatesStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                             + groupStat.NeuronsMaxStatesStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
+                        log.Write("             SPAN Avg, Max, Min, SDdev: " + groupStat.NeuronsStateSpansStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                             + groupStat.NeuronsStateSpansStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                             + groupStat.NeuronsStateSpansStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                             + groupStat.NeuronsStateSpansStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
+                        log.Write($"            Neurons stimuli", false);
+                        log.Write("              AVG Avg, Max, Min, SDdev: " + groupStat.NeuronsAvgStimuliStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                             + groupStat.NeuronsAvgStimuliStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                             + groupStat.NeuronsAvgStimuliStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                             + groupStat.NeuronsAvgStimuliStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
+                        log.Write("              MAX Avg, Max, Min, SDdev: " + groupStat.NeuronsMaxStimuliStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                             + groupStat.NeuronsMaxStimuliStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                             + groupStat.NeuronsMaxStimuliStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                             + groupStat.NeuronsMaxStimuliStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
+                        log.Write("              MIN Avg, Max, Min, SDdev: " + groupStat.NeuronsMinStimuliStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                             + groupStat.NeuronsMinStimuliStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                             + groupStat.NeuronsMinStimuliStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                             + groupStat.NeuronsMinStimuliStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
+                        log.Write("             SPAN Avg, Max, Min, SDdev: " + groupStat.NeuronsStimuliSpansStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                             + groupStat.NeuronsStimuliSpansStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                             + groupStat.NeuronsStimuliSpansStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                             + groupStat.NeuronsStimuliSpansStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
+                        log.Write($"            Neurons output signal", false);
+                        log.Write("              AVG Avg, Max, Min, SDdev: " + groupStat.NeuronsAvgOutputSignalStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                             + groupStat.NeuronsAvgOutputSignalStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                             + groupStat.NeuronsAvgOutputSignalStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                             + groupStat.NeuronsAvgOutputSignalStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
+                        log.Write("              MAX Avg, Max, Min, SDdev: " + groupStat.NeuronsMaxOutputSignalStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                             + groupStat.NeuronsMaxOutputSignalStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                             + groupStat.NeuronsMaxOutputSignalStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                             + groupStat.NeuronsMaxOutputSignalStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
+                        log.Write("              MIN Avg, Max, Min, SDdev: " + groupStat.NeuronsMinOutputSignalStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                             + groupStat.NeuronsMinOutputSignalStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                             + groupStat.NeuronsMinOutputSignalStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                             + groupStat.NeuronsMinOutputSignalStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
+                        log.Write($"            Neurons output signal frequency", false);
+                        log.Write("              AVG Avg, Max, Min, SDdev: " + groupStat.NeuronsAvgOutputFreqStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                             + groupStat.NeuronsAvgOutputFreqStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                             + groupStat.NeuronsAvgOutputFreqStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                             + groupStat.NeuronsAvgOutputFreqStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
+                    }
                     log.Write($"          Weights statistics", false);
-                    log.Write("                Input Avg, Max, Min, SDdev: " + poolStat.InputWeightsStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + poolStat.InputWeightsStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + poolStat.InputWeightsStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + poolStat.InputWeightsStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
-                    log.Write("             Internal Avg, Max, Min, SDdev: " + poolStat.InternalWeightsStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + poolStat.InternalWeightsStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + poolStat.InternalWeightsStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + poolStat.InternalWeightsStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
+                    log.Write("            Input Avg, Max, Min, SDdev: " + poolStat.InputWeightsStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                         + poolStat.InputWeightsStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                         + poolStat.InputWeightsStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                         + poolStat.InputWeightsStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
+                    log.Write("         Internal Avg, Max, Min, SDdev: " + poolStat.InternalWeightsStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                         + poolStat.InternalWeightsStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                         + poolStat.InternalWeightsStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
+                                                                         + poolStat.InternalWeightsStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
                 }
             }
             log.Write(" ", false);
