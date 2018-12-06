@@ -55,6 +55,11 @@ namespace RCNet.Neural.Network.SM
         double OutputSignal { get; }
 
         /// <summary>
+        /// Computation cycles left without output signal
+        /// </summary>
+        int NoSignalCycles { get; }
+
+        /// <summary>
         /// Value to be passed to readout layer as a primary predictor.
         /// </summary>
         double PrimaryPredictor { get; }
@@ -74,8 +79,9 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// Stores new incoming stimulation.
         /// </summary>
-        /// <param name="stimuli">Input stimulation</param>
-        void NewStimuli(double stimuli);
+        /// <param name="externalStimuli">Stimulation comming from input neurons</param>
+        /// <param name="internalStimuli">Stimulation comming from reservoir neurons</param>
+        void NewStimuli(double externalStimuli, double internalStimuli);
 
         /// <summary>
         /// Computes neuron's new output signal and updates statistics

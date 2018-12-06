@@ -41,7 +41,8 @@ namespace RCNet.Neural.Activation
         /// <param name="rand">Random object to be used for randomly generated parameters</param>
 
         public AdExpIF(AdExpIFSettings settings, Random rand)
-            : base(PhysUnit.ToBase(rand.NextDouble(settings.RestV), PhysUnit.MetricPrefix.Milli),
+            : base(rand,
+                   PhysUnit.ToBase(rand.NextDouble(settings.RestV), PhysUnit.MetricPrefix.Milli),
                    PhysUnit.ToBase(rand.NextDouble(settings.ResetV), PhysUnit.MetricPrefix.Milli),
                    PhysUnit.ToBase(rand.NextDouble(settings.FiringThresholdV), PhysUnit.MetricPrefix.Milli),
                    0,

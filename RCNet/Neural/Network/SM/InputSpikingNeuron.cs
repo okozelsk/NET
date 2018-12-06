@@ -35,10 +35,10 @@ namespace RCNet.Neural.Network.SM
         public NeuronStatistics Statistics { get; }
 
         /// <summary>
-        /// Neuron's role within the reservoir (excitatory or inhibitory)
-        /// Note that Input neuron is always excitatory.
+        /// Neuron's role within the reservoir (input, excitatory or inhibitory)
+        /// Note that Input neuron is always input.
         /// </summary>
-        public CommonEnums.NeuronRole Role { get { return CommonEnums.NeuronRole.Excitatory; } }
+        public CommonEnums.NeuronRole Role { get { return CommonEnums.NeuronRole.Input; } }
 
         /// <summary>
         /// Specifies whether to use neuron's secondary predictor.
@@ -67,6 +67,11 @@ namespace RCNet.Neural.Network.SM
         /// Output signal
         /// </summary>
         public double OutputSignal { get; private set; }
+
+        /// <summary>
+        /// Computation cycles left without output signal
+        /// </summary>
+        public int NoSignalCycles { get; private set; }
 
         /// <summary>
         /// Value to be passed to readout layer as a primary predictor.
@@ -98,10 +103,10 @@ namespace RCNet.Neural.Network.SM
         /// <param name="inputCodingFractions">Number of coding fractions (see SpikeTrainConverter to understand)</param>
         public InputSpikingNeuron(int inputFieldIdx, Interval inputRange, int inputCodingFractions)
         {
-            Placement = new NeuronPlacement(inputFieldIdx , - 1, inputFieldIdx, 0, inputFieldIdx, 0, 0);
-            Statistics = new NeuronStatistics();
+            Placement = new NeuronPlacement(inputFieldIdx , - 1, null, inputFieldIdx, 0, inputFieldIdx, 0, 0);
             _inputRange = inputRange.DeepClone();
             _signalConverter = new SignalConverter(_inputRange, inputCodingFractions);
+            Statistics = new NeuronStatistics(_outputRange);
             Reset(false);
             return;
         }
@@ -118,16 +123,19 @@ namespace RCNet.Neural.Network.SM
             {
                 Statistics.Reset();
             }
+            //Set initially -1 to counter (no one spike spiked)
+            NoSignalCycles = -1;
             return;
         }
 
         /// <summary>
         /// Stores new incoming stimulation.
         /// </summary>
-        /// <param name="stimuli">Input stimulation</param>
-        public void NewStimuli(double stimuli)
+        /// <param name="externalStimuli">Stimulation comming from input neurons</param>
+        /// <param name="internalStimuli">Stimulation comming from reservoir neurons</param>
+        public void NewStimuli(double externalStimuli, double internalStimuli)
         {
-            _stimuli = stimuli.Bound();
+            _stimuli = (externalStimuli + internalStimuli).Bound();
             _signalConverter.EncodeAnalogValue(_stimuli);
             return;
         }
@@ -139,9 +147,23 @@ namespace RCNet.Neural.Network.SM
         public void NewState(bool collectStatistics)
         {
             OutputSignal = _signalConverter.FetchSpike();
+            if (OutputSignal > 0)
+            {
+                //Spike, so reset the counter
+                NoSignalCycles = 0;
+            }
+            else
+            {
+                //No spike
+                if (NoSignalCycles != -1)
+                {
+                    //Neuron has already spiked, so standardly increment counter
+                    ++NoSignalCycles;
+                }
+            }
             if (collectStatistics)
             {
-                Statistics.Update(_stimuli, NeuronStatistics.NormalizedStateRange.Rescale(OutputSignal, OutputRange), OutputSignal);
+                Statistics.Update(_stimuli, OutputSignal, OutputSignal);
             }
             return;
         }

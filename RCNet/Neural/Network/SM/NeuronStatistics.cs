@@ -19,36 +19,36 @@ namespace RCNet.Neural.Network.SM
 
         //Attribute properties
         /// <summary>
-        /// Statistics of incoming stimulations (input values)
+        /// Statistics of neuron's input stimulation
         /// </summary>
-        public BasicStat IncomingStimuli { get; }
+        public BasicStat StimuliStat { get; }
 
         /// <summary>
-        /// Statistics of neuron's uniformly rescalled state values
+        /// Neuron's normal states min max interval
         /// </summary>
-        public BasicStat NormalizedState { get; }
+        public Interval ActivationStateRange { get; }
 
         /// <summary>
-        /// Statistics of neuron transmission signal in _transmissionSignalRange
+        /// Statistics of neuron's states, uniformly rescalled to range NormalizedStateRange
         /// </summary>
-        public BasicStat OutgoingSignal { get; }
+        public BasicStat NormalizedActivationStateStat { get; }
 
         /// <summary>
-        /// Statistics of neuron's transmission signal frequency
+        /// Statistics of neuron's output signal
         /// </summary>
-        public BasicStat OutgoingSignalFreq { get; }
+        public BasicStat OutputSignalStat { get; }
 
 
         //Constructor
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
-        public NeuronStatistics()
+        public NeuronStatistics(Interval neuronStateRange)
         {
-            IncomingStimuli = new BasicStat();
-            NormalizedState = new BasicStat();
-            OutgoingSignal = new BasicStat();
-            OutgoingSignalFreq = new BasicStat();
+            StimuliStat = new BasicStat();
+            ActivationStateRange = neuronStateRange.DeepClone();
+            NormalizedActivationStateStat = new BasicStat();
+            OutputSignalStat = new BasicStat();
             return;
         }
 
@@ -58,10 +58,9 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         public void Reset()
         {
-            IncomingStimuli.Reset();
-            NormalizedState.Reset();
-            OutgoingSignal.Reset();
-            OutgoingSignalFreq.Reset();
+            StimuliStat.Reset();
+            NormalizedActivationStateStat.Reset();
+            OutputSignalStat.Reset();
             return;
         }
 
@@ -69,14 +68,13 @@ namespace RCNet.Neural.Network.SM
         /// Updates statistics
         /// </summary>
         /// <param name="stimuli">Incoming stimuli</param>
-        /// <param name="state">Neuron normalized state</param>
-        /// <param name="signal">Outgoing signal</param>
-        public void Update(double stimuli, double state, double signal)
+        /// <param name="activationState">Neuron's activation function state</param>
+        /// <param name="outputSignal">Neuron's output signal</param>
+        public void Update(double stimuli, double activationState, double outputSignal)
         {
-            IncomingStimuli.AddSampleValue(stimuli);
-            NormalizedState.AddSampleValue(state);
-            OutgoingSignal.AddSampleValue(signal);
-            OutgoingSignalFreq.AddSampleValue((signal == 0) ? 0 : 1);
+            StimuliStat.AddSampleValue(stimuli);
+            NormalizedActivationStateStat.AddSampleValue(NormalizedStateRange.Rescale(activationState, ActivationStateRange));
+            OutputSignalStat.AddSampleValue(outputSignal);
             return;
         }
 

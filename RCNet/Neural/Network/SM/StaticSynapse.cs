@@ -3,73 +3,52 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using RCNet.MathTools;
+using RCNet.Queue;
 
 namespace RCNet.Neural.Network.SM
 {
     /// <summary>
-    /// Static synapse computes and moderates constantly weighted signal from source to target neuron.
+    /// Static synapse deliveres constantly weighted signal from source to target neuron.
+    /// Signal delivery can be delayed depending on Euclidean distance between source and target neuron.
     /// </summary>
     [Serializable]
-    public class StaticSynapse : ISynapse
+    public class StaticSynapse : Synapse
     {
-        //Static attributes
-        private static Interval _mediationRange = new Interval(0, 1);
-        
-        //Attribute properties
-        /// <summary>
-        /// Source neuron - signal emitor
-        /// </summary>
-        public INeuron SourceNeuron { get; }
-
-        /// <summary>
-        /// Target neuron - signal receiver
-        /// </summary>
-        public INeuron TargetNeuron { get; }
-        
-        /// <summary>
-        /// Weight of the synapse
-        /// </summary>
-        public double Weight { get; set; }
-
         //Constructor
         /// <summary>
         /// Creates initialized instance
         /// </summary>
         /// <param name="sourceNeuron">Source neuron</param>
         /// <param name="targetNeuron">Target neuron</param>
-        /// <param name="weight">Synapse weight (unsigned)</param>
+        /// <param name="weight">Synapse weight</param>
+        /// <param name="maxDelay">Maximum delay (in cycles) of the signal delivery</param>
         public StaticSynapse(INeuron sourceNeuron,
                              INeuron targetNeuron,
-                             double weight
+                             double weight,
+                             int maxDelay
                              )
+            :base(sourceNeuron, targetNeuron, weight, maxDelay)
         {
-            SourceNeuron = sourceNeuron;
-            TargetNeuron = targetNeuron;
-            //Weight absolute value
-            Weight = Math.Abs(weight);
-            //Weight sign
-            Weight *= (SourceNeuron.Role == CommonEnums.NeuronRole.Excitatory) ? 1 : -1;
             return;
         }
 
         //Methods
         /// <summary>
-        /// Does nothing, this is a static synapse so weight is keeping all the time unchanged.
+        /// Resets synapse.
         /// </summary>
-        public void Adjust()
+        public override void Reset()
         {
+            //Does nothing in case of the static synapse
             return;
         }
 
         /// <summary>
-        /// Computes signal to be delivered from the source neuron to the target neuron.
+        /// Computes weighted signal and puts it into the internal queue
         /// </summary>
-        public double GetWeightedSignal()
+        protected override void EnqueueSignal()
         {
-            double tSignal = _mediationRange.Rescale(SourceNeuron.OutputSignal, SourceNeuron.OutputRange);
-            tSignal *= Weight;
-            return tSignal;
+            _qSig.Enqueue(((SourceNeuron.OutputSignal + _add) / _div) * Weight);
+            return;
         }
 
     }//StaticSynapse

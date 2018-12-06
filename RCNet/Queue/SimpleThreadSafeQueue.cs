@@ -3,30 +3,33 @@
 namespace RCNet.Queue
 {
     /// <summary>
-    /// Implements a simple FIFO queue template
+    /// Implements a simple thread safe FIFO queue template
     /// </summary>
     [Serializable]
-    public class SimpleQueue<T>
+    public class SimpleThreadSafeQueue<T>
     {
         //Constants
         //Attributes
+        private readonly Object _lock;
         private readonly int _capacity;
         private readonly T[] _queue;
         private int _enqueueOffset;
         private int _dequeueOffset;
+        private int _count;
 
         //Constructor
         /// <summary>
         /// Instantiate a simple queue
         /// </summary>
         /// <param name="capacity">Maximum capacity of the queue</param>
-        public SimpleQueue(int capacity)
+        public SimpleThreadSafeQueue(int capacity)
         {
+            _lock = new Object();
             _capacity = capacity;
             _queue = new T[_capacity];
             _enqueueOffset = 0;
             _dequeueOffset = 0;
-            Count = 0;
+            _count = 0;
             return;
         }
 
@@ -34,12 +37,30 @@ namespace RCNet.Queue
         /// <summary>
         /// Number of enqueued items
         /// </summary>
-        public int Count { get; private set; }
+        public int Count
+        {
+            get
+            {
+                lock(_lock)
+                {
+                    return _count;
+                }
+            }
+        }
 
         /// <summary>
         /// Is the queue full?
         /// </summary>
-        public bool Full { get { return (Count == _capacity); } }
+        public bool Full
+        {
+            get
+            {
+                lock (_lock)
+                {
+                    return (_count == _capacity);
+                }
+            }
+        }
 
         //Methods
         /// <summary>
@@ -49,16 +70,19 @@ namespace RCNet.Queue
         /// <returns>False if queue is full, True if success</returns>
         public bool Enqueue(T item)
         {
-            if (Count < _capacity)
+            lock(_lock)
             {
-                _queue[_enqueueOffset] = item;
-                ++_enqueueOffset;
-                if (_enqueueOffset == _capacity)
+                if (_count < _capacity)
                 {
-                    _enqueueOffset = 0;
+                    _queue[_enqueueOffset] = item;
+                    ++_enqueueOffset;
+                    if (_enqueueOffset == _capacity)
+                    {
+                        _enqueueOffset = 0;
+                    }
+                    ++_count;
+                    return true;
                 }
-                ++Count;
-                return true;
             }
             return false;
         }
@@ -69,21 +93,24 @@ namespace RCNet.Queue
         /// <returns>The item if success or the Default(T) if queue is empty.</returns>
         public T Dequeue()
         {
-            if (Count > 0)
+            lock(_lock)
             {
-                T item = _queue[_dequeueOffset];
-                ++_dequeueOffset;
-                if (_dequeueOffset == _capacity)
+                if (_count > 0)
                 {
-                    _dequeueOffset = 0;
+                    T item = _queue[_dequeueOffset];
+                    ++_dequeueOffset;
+                    if (_dequeueOffset == _capacity)
+                    {
+                        _dequeueOffset = 0;
+                    }
+                    --_count;
+                    return item;
                 }
-                --Count;
-                return item;
             }
             return default(T);
         }
 
-    }//SimpleQueue
+    }//SimpleThreadSafeQueue
 
 }//Namespace
 

@@ -277,7 +277,7 @@ namespace RCNet.Neural.Network.FF
         /// <returns>Error statistics</returns>
         public BasicStat ComputeBatchErrorStat(List<double[]> inputCollection, List<double[]> idealOutputCollection, out List<double[]> computedOutputCollection)
         {
-            BasicStat errStat = new BasicStat();
+            BasicStat errStat = new BasicStat(true);
             double[][] computedOutputs = new double[idealOutputCollection.Count][];
             Parallel.For(0, inputCollection.Count, row =>
             {
@@ -303,7 +303,7 @@ namespace RCNet.Neural.Network.FF
         /// <returns>Error statistics</returns>
         public BasicStat ComputeBatchErrorStat(List<double[]> inputCollection, List<double[]> idealOutputCollection)
         {
-            BasicStat errStat = new BasicStat();
+            BasicStat errStat = new BasicStat(true);
             Parallel.For(0, inputCollection.Count, row =>
             {
                 double[] computedOutputVector = Compute(inputCollection[row]);

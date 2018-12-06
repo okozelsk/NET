@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RCNet.MathTools;
 
 namespace RCNet.Neural.Network.SM
 {
@@ -12,9 +13,11 @@ namespace RCNet.Neural.Network.SM
     [Serializable]
     class FiringRate
     {
+        //Constants
         private const int SpikeBuffLength = sizeof(ulong) * 8;
 
         //Static members
+        private static readonly Normalizer _outputNormalizer;
         private static readonly decimal[] _spikeValueCache;
         private static readonly decimal _sumOfSpikeValues;
 
@@ -32,6 +35,9 @@ namespace RCNet.Neural.Network.SM
                 _spikeValueCache[i] = val;
                 _sumOfSpikeValues += val;
             }
+            _outputNormalizer = new Normalizer(new Interval(-1, 1), 0, false);
+            _outputNormalizer.Adjust(0);
+            _outputNormalizer.Adjust(1);
             return;
         }
 
@@ -71,8 +77,8 @@ namespace RCNet.Neural.Network.SM
                 }
                 localCopy >>= 1;
             }
-            //Rescale between 0-1
-            return (double)(rate / _sumOfSpikeValues);
+            //Normalize between -1 and 1
+            return _outputNormalizer.Normalize((double)(rate / _sumOfSpikeValues));
         }
 
 

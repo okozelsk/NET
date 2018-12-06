@@ -47,6 +47,7 @@
   <ItemGroup>
     <Compile Include="CsvTools\DelimitedStringValues.cs" />
     <Compile Include="MathTools\Differential\ODENumSolver.cs" />
+    <Compile Include="MathTools\MatrixMath\SVD.cs" />
     <Compile Include="MathTools\PhysUnit.cs" />
     <Compile Include="MathTools\VectorMath\Vector.cs" />
     <Compile Include="Neural\Activation\ActivationFactory.cs" />
@@ -88,6 +89,7 @@
     <Compile Include="Neural\Activation\TanH.cs" />
     <Compile Include="Neural\Activation\ExpIF.cs" />
     <Compile Include="Neural\Activation\SimpleIF.cs" />
+    <Compile Include="Neural\Network\SM\DynSTPSynapse.cs" />
     <Compile Include="Neural\Network\SM\FiringRate.cs" />
     <Compile Include="Neural\Network\SM\InputAnalogNeuron.cs" />
     <Compile Include="Neural\Network\SM\InputSpikingNeuron.cs" />
@@ -101,7 +103,9 @@
     <Compile Include="Neural\Network\SM\PoolSettings.cs" />
     <Compile Include="Neural\Network\SM\INeuron.cs" />
     <Compile Include="Neural\Network\SM\ISynapse.cs" />
+    <Compile Include="Neural\Network\SM\DynDecaySynapse.cs" />
     <Compile Include="Neural\Network\SM\StaticSynapse.cs" />
+    <Compile Include="Neural\Network\SM\Synapse.cs" />
     <Compile Include="Neural\Data\TimeSeriesDataLoader.cs" />
     <Compile Include="Neural\Data\PatternDataLoader.cs" />
     <Compile Include="Extensions\ArrayClassExtensions.cs" />
@@ -126,7 +130,6 @@
     <Compile Include="MathTools\MatrixMath\QRD.cs" />
     <Compile Include="MathTools\Normalizer.cs" />
     <Compile Include="MathTools\WeightedAvg.cs" />
-    <Compile Include="MiscTools\Utils.cs" />
     <Compile Include="Neural\CommonEnums.cs" />
     <Compile Include="Neural\Data\BundleNormalizer.cs" />
     <Compile Include="Neural\Data\PatternBundle.cs" />
@@ -150,6 +153,7 @@
     <Compile Include="Neural\Network\SM\ReadoutLayer.cs" />
     <Compile Include="Neural\Network\SM\ReadoutUnit.cs" />
     <Compile Include="Neural\Network\SM\NeuronPlacement.cs" />
+    <Compile Include="Queue\SimpleThreadSafeQueue.cs" />
     <Compile Include="RandomValue\RandomValueSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Queue\SimpleQueue.cs" />

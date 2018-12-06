@@ -3,7 +3,7 @@
 namespace RCNet.MathTools
 {
     /// <summary>
-    /// Implements the thread safe normalizer and denormalizer. Scales the input to desired normalized range and vice versa.
+    /// Implements thread safe (if required) normalizer and denormalizer. Scales the input to desired normalized range and vice versa.
     /// Normalizer supports gausse data standardization
     /// </summary>
     [Serializable]
@@ -19,23 +19,36 @@ namespace RCNet.MathTools
         /// </summary>
         public const double DefaultNormRangeMax = 1;
 
-        //Attributes
-        private bool _standardization;
-        private double _reserveRatio;
-        private BasicStat _samplesStat;
-        private Interval _normRange;
+        //Attribute properties
+        /// <summary>
+        /// Reserve held by a normalizer to cover cases where future data exceeds a known range of sample data.
+        /// </summary>
+        public double ReserveRatio { get; private set; }
+        /// <summary>
+        /// Indicates whether the data standardization is applied
+        /// </summary>
+        public bool Standardization { get; private set; }
+        /// <summary>
+        /// The normalization range
+        /// </summary>
+        public Interval NormRange { get; private set; }
+        /// <summary>
+        /// The statistics of the sample data
+        /// </summary>
+        public BasicStat SamplesStat { get; private set; }
 
         //Constructors
         /// <summary>
         /// A deep copy constructor
         /// </summary>
         /// <param name="source">Source instance</param>
-        public Normalizer(Normalizer source)
+        /// <param name="threadSafe">Specifies if to create thread safe instance</param>
+        public Normalizer(Normalizer source, bool threadSafe = false)
         {
-            _standardization = source._standardization;
-            _reserveRatio = source._reserveRatio;
-            _samplesStat = new BasicStat(source._samplesStat);
-            _normRange = new Interval(source._normRange);
+            Standardization = source.Standardization;
+            ReserveRatio = source.ReserveRatio;
+            SamplesStat = new BasicStat(source.SamplesStat, threadSafe);
+            NormRange = new Interval(source.NormRange, threadSafe);
             return;
         }
 
@@ -48,12 +61,13 @@ namespace RCNet.MathTools
         /// <param name="standardize">
         /// Specifies whether to apply data standardization
         /// </param>
-        public Normalizer(double reserveRatio, bool standardize = true)
+        /// <param name="threadSafe">Specifies if to create thread safe instance</param>
+        public Normalizer(double reserveRatio, bool standardize = true, bool threadSafe = false)
         {
-            _standardization = standardize;
-            _normRange = new Interval(DefaultNormRangeMin, DefaultNormRangeMax);
-            _samplesStat = new BasicStat();
-            _reserveRatio = reserveRatio;
+            Standardization = standardize;
+            NormRange = new Interval(DefaultNormRangeMin, DefaultNormRangeMax, threadSafe);
+            SamplesStat = new BasicStat(threadSafe);
+            ReserveRatio = reserveRatio;
             return;
         }
 
@@ -69,12 +83,13 @@ namespace RCNet.MathTools
         /// <param name="standardize">
         /// Specifies whether to apply data standardization
         /// </param>
-        public Normalizer(Interval normRange, double reserveRatio, bool standardize = true)
+        /// <param name="threadSafe">Specifies if to create thread safe instance</param>
+        public Normalizer(Interval normRange, double reserveRatio, bool standardize = true, bool threadSafe = false)
         {
-            _standardization = standardize;
-            _normRange = new Interval(normRange);
-            _samplesStat = new BasicStat();
-            _reserveRatio = reserveRatio;
+            Standardization = standardize;
+            NormRange = new Interval(normRange, threadSafe);
+            SamplesStat = new BasicStat(threadSafe);
+            ReserveRatio = reserveRatio;
             return;
         }
 
@@ -82,25 +97,9 @@ namespace RCNet.MathTools
         /// <summary>
         /// Indicates whether the normalizer is properly initialized
         /// </summary>
-        public bool Initialized { get { return (_samplesStat.NumOfSamples > 0 && _samplesStat.Min != _samplesStat.Max); } }
-        /// <summary>
-        /// Reserve held by a normalizer to cover cases where future data exceeds a known range of sample data.
-        /// </summary>
-        public double ReserveRatio { get { return _reserveRatio; } }
-        /// <summary>
-        /// Indicates whether the data standardization is applied
-        /// </summary>
-        public bool Standardization { get { return _standardization; } }
-        /// <summary>
-        /// The normalization range
-        /// </summary>
-        public Interval NormRange { get { return _normRange; } }
-        /// <summary>
-        /// The statistics of the sample data
-        /// </summary>
-        public BasicStat SamplesStat { get { return _samplesStat; } }
-        private double VMin { get { return _samplesStat.Min - ((_samplesStat.Span * _reserveRatio) / 2); } }
-        private double VMax { get { return _samplesStat.Max + ((_samplesStat.Span * _reserveRatio) / 2); } }
+        public bool Initialized { get { return (SamplesStat.NumOfSamples > 0 && SamplesStat.Min != SamplesStat.Max); } }
+        private double VMin { get { return SamplesStat.Min - ((SamplesStat.Span * ReserveRatio) / 2); } }
+        private double VMax { get { return SamplesStat.Max + ((SamplesStat.Span * ReserveRatio) / 2); } }
 
         //Methods
         /// <summary>
@@ -108,7 +107,7 @@ namespace RCNet.MathTools
         /// </summary>
         public void Reset()
         {
-            _samplesStat.Reset();
+            SamplesStat.Reset();
             return;
         }
 
@@ -117,10 +116,10 @@ namespace RCNet.MathTools
         /// </summary>
         public void Adopt(Normalizer source)
         {
-            _standardization = source._standardization;
-            _reserveRatio = source._reserveRatio;
-            _samplesStat = new BasicStat(source._samplesStat);
-            _normRange = new Interval(source._normRange);
+            Standardization = source.Standardization;
+            ReserveRatio = source.ReserveRatio;
+            SamplesStat = new BasicStat(source.SamplesStat);
+            NormRange = new Interval(source.NormRange);
             return;
         }
 
@@ -130,7 +129,7 @@ namespace RCNet.MathTools
         /// <param name="sampleValue">Sample value</param>
         public void Adjust(double sampleValue)
         {
-            _samplesStat.AddSampleValue(sampleValue);
+            SamplesStat.AddSampleValue(sampleValue);
             return;
         }
 
@@ -143,7 +142,7 @@ namespace RCNet.MathTools
         /// <returns>Normalized v</returns>
         private double Normalize(double min, double max, double v)
         {
-            return _normRange.Min + _normRange.Span * ((v - min) / (max - min));
+            return NormRange.Min + NormRange.Span * ((v - min) / (max - min));
         }
 
         /// <summary>
@@ -155,7 +154,7 @@ namespace RCNet.MathTools
         /// <returns>Natural value</returns>
         private double Naturalize(double min, double max, double n)
         {
-            return min + (max - min) * ((n - _normRange.Min) / _normRange.Span);
+            return min + (max - min) * ((n - NormRange.Min) / NormRange.Span);
         }
 
         /// <summary>
@@ -176,8 +175,8 @@ namespace RCNet.MathTools
         /// <returns>The half of a gausse interval</returns>
         private double ComputeGausseHalfInterval()
         {
-            double gausseLo = Math.Abs((VMin - _samplesStat.ArithAvg) / _samplesStat.StdDev);
-            double gausseHi = Math.Abs((VMax - _samplesStat.ArithAvg) / _samplesStat.StdDev);
+            double gausseLo = Math.Abs((VMin - SamplesStat.ArithAvg) / SamplesStat.StdDev);
+            double gausseHi = Math.Abs((VMax - SamplesStat.ArithAvg) / SamplesStat.StdDev);
             return Math.Max(gausseLo, gausseHi);
         }
 
@@ -191,11 +190,11 @@ namespace RCNet.MathTools
             //Check readiness
             CheckInitiated();
             //Value preprocessing
-            if (_standardization)
+            if (Standardization)
             {
                 //Gausse standardization
                 double gausseHalfInt = ComputeGausseHalfInterval();
-                double gausseValue = (naturalValue - _samplesStat.ArithAvg) / _samplesStat.StdDev;
+                double gausseValue = (naturalValue - SamplesStat.ArithAvg) / SamplesStat.StdDev;
                 //Normalization
                 return Normalize(-gausseHalfInt, gausseHalfInt, gausseValue);
             }
@@ -216,13 +215,13 @@ namespace RCNet.MathTools
             //Check readiness
             CheckInitiated();
             //Value preprocessing
-            if (_standardization)
+            if (Standardization)
             {
                 //Denormalization
                 double gausseHalfInt = ComputeGausseHalfInterval();
                 double standardizedGausse = Naturalize(-gausseHalfInt, gausseHalfInt, normValue);
                 //Destandardization -> natural value
-                return (standardizedGausse * _samplesStat.StdDev) + _samplesStat.ArithAvg;
+                return (standardizedGausse * SamplesStat.StdDev) + SamplesStat.ArithAvg;
             }
             else
             {
@@ -239,7 +238,7 @@ namespace RCNet.MathTools
         public double ComputeNaturalSpan(double normSpan)
         {
             CheckInitiated();
-            return ((VMax - VMin) * Math.Abs(normSpan)) * (1 - _reserveRatio);
+            return ((VMax - VMin) * Math.Abs(normSpan)) * (1 - ReserveRatio);
         }
 
     }//Normalizer

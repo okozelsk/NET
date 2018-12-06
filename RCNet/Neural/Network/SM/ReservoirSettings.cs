@@ -238,6 +238,10 @@ namespace RCNet.Neural.Network.SM
             /// Weight of source pool neuron to target pool neuron synapse.
             /// </summary>
             public RandomValueSettings SynapseWeight { get; set; }
+            /// <summary>
+            /// Specifies whether to keep for each neuron constant number of incoming interconnections
+            /// </summary>
+            public bool ConstantNumOfConnections { get; set; }
 
             //Constructors
             /// <summary>
@@ -250,6 +254,7 @@ namespace RCNet.Neural.Network.SM
                 TargetPoolName = string.Empty;
                 TargetConnectionDensity = 0;
                 SynapseWeight = null;
+                ConstantNumOfConnections = true;
                 return;
             }
 
@@ -270,6 +275,7 @@ namespace RCNet.Neural.Network.SM
                 {
                     SynapseWeight = source.SynapseWeight.DeepClone();
                 }
+                ConstantNumOfConnections = source.ConstantNumOfConnections;
                 return;
             }
 
@@ -315,6 +321,7 @@ namespace RCNet.Neural.Network.SM
                     throw new Exception($"Two different pools have to be specified for interpool connection.");
                 }
                 SynapseWeight = new RandomValueSettings(interConnElem.Descendants("weight").First());
+                ConstantNumOfConnections = bool.Parse(interConnElem.Attribute("constantNumOfConnections").Value);
                 return;
             }
 
@@ -330,7 +337,8 @@ namespace RCNet.Neural.Network.SM
                     SourceConnectionDensity != cmpSettings.SourceConnectionDensity ||
                     TargetPoolName != cmpSettings.TargetPoolName ||
                     TargetConnectionDensity != cmpSettings.TargetConnectionDensity ||
-                    !Equals(SynapseWeight, cmpSettings.SynapseWeight)
+                    !Equals(SynapseWeight, cmpSettings.SynapseWeight) ||
+                    ConstantNumOfConnections != cmpSettings.ConstantNumOfConnections
                     )
                 {
                     return false;

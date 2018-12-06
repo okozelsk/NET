@@ -1,13 +1,485 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <demo dataFolder=".\\Data">
-  <case name="Prediction task Mackey Glass chaotic time series: Analog reservoir (ESN), Linear regression">
-    <samples fileName="MackeyGlass.csv" bootSamples="500" singleNormalizer="false" normalizerReserve="0.1"/>
+  <case name="Classification task Libras Movement:  Single spiking reservoir, Perceptron (5 gates) classifier">
+    <!-- Data converted from https://archive.ics.uci.edu/ml/datasets/Libras+Movement -->
+    <samples fileName="LibrasMovement.csv" singleNormalizer="false" normalizerReserve="0.1"/>
+    <stateMachineCfg taskType="Classification" randomizerSeek="0">
+      <inputFields routeToReadout="false">
+        <field name="coord_abcissa"/>
+        <field name="coord_ordinate"/>
+      </inputFields>
+      <reservoirCfgContainer>
+        <reservoirCfg name="Single spiking pool" inputCoding="Analog" inputDuration="1" spectralRadius="0.999">
+          <pools>
+            <pool name="SimpleIF pool" dimX="7" dimY="7" dimZ="7" routeToReadout="true">
+              <neuronGroups>
+                <neuronGroup name="Exc-SimpleIF" role="Excitatory" relShare="4" augmentedStates="true">
+                  <activationSimpleIF stimuliCoeff="0.5" refractoryPeriods="1">
+                    <resistance min="15" max="15"/>
+                    <decayRate min="0.05" max="0.05"/>
+                    <resetV min="5" max="5"/>
+                    <firingThresholdV min="20" max="20"/>
+                  </activationSimpleIF>
+                  <bias min="0.2" max="0.3" randomSign="false" distribution="Uniform"/>
+                </neuronGroup>
+                <neuronGroup name="Inh-SimpleIF" role="Inhibitory" relShare="1" augmentedStates="true">
+                  <activationSimpleIF stimuliCoeff="1" refractoryPeriods="2">
+                    <resistance min="15" max="15"/>
+                    <decayRate min="0.05" max="0.05"/>
+                    <resetV min="5" max="5"/>
+                    <firingThresholdV min="20" max="20"/>
+                  </activationSimpleIF>
+                  <bias min="0.2" max="0.3" randomSign="false" distribution="Uniform"/>
+                </neuronGroup>
+              </neuronGroups>
+              <interconnection density="0.1" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
+                <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
+              </interconnection>
+            </pool>
+          </pools>
+        </reservoirCfg>
+      </reservoirCfgContainer>
+      <reservoirInstanceContainer>
+        <reservoirInstance name="Main" cfg="Single spiking pool" augmentedStates="false">
+          <inputFieldAssignments>
+            <inputFieldAssignment inputFieldName="coord_abcissa" poolName="SimpleIF pool" density="1">
+              <weight min="0" max="0.3" randomSign="false" distribution="Uniform"/>
+            </inputFieldAssignment>
+            <inputFieldAssignment inputFieldName="coord_ordinate" poolName="SimpleIF pool" density="1">
+              <weight min="0" max="0.3" randomSign="false" distribution="Uniform"/>
+            </inputFieldAssignment>
+          </inputFieldAssignments>
+        </reservoirInstance>
+      </reservoirInstanceContainer>
+      <readoutLayer testDataRatio="0.1" folds="Auto">
+        <readoutUnit attempts="20" attemptEpochs="500">
+          <pp gates="5" resolution="2">
+            <pDeltaRuleTrainer iniLR="0.01" incLR="1.1" decLR="0.5" minLR="1e-4" maxLR="0.1"/>
+          </pp>
+        </readoutUnit>
+        <outputFields>
+          <field name="curved swing"/>
+          <field name="horizontal swing"/>
+          <field name="vertical swing"/>
+          <field name="anti-clockwise arc"/>
+          <field name="clockwise arc"/>
+          <field name="circle"/>
+          <field name="horizontal straight-line"/>
+          <field name="vertical straight-line"/>
+          <field name="horizontal zigzag"/>
+          <field name="vertical zigzag"/>
+          <field name="horizontal wavy"/>
+          <field name="vertical wavy"/>
+          <field name="face-up curve"/>
+          <field name="face-down curve"/>
+          <field name="tremble"/>
+        </outputFields>
+      </readoutLayer>
+    </stateMachineCfg>
+  </case>
+
+  <case name="Classification task Libras Movement:  Single spiking reservoir, Perceptron (5 gates) classifier">
+    <!-- Data converted from https://archive.ics.uci.edu/ml/datasets/Libras+Movement -->
+    <samples fileName="LibrasMovement.csv" singleNormalizer="false" normalizerReserve="0.1"/>
+    <stateMachineCfg taskType="Classification" randomizerSeek="0">
+      <inputFields routeToReadout="false">
+        <field name="coord_abcissa"/>
+        <field name="coord_ordinate"/>
+      </inputFields>
+      <reservoirCfgContainer>
+        <reservoirCfg name="MainCfg" inputCoding="Analog" inputDuration="1" spectralRadius="0.999">
+          <pools>
+            <pool name="Spiking pool" dimX="5" dimY="5" dimZ="5" routeToReadout="true">
+              <neuronGroups>
+                <neuronGroup name="Exc-LIF" role="Excitatory" relShare="4" augmentedStates="true">
+                  <activationLeakyIF stimuliCoeff="5.5" refractoryPeriods="0" solverMethod="Euler" solverCompSteps="2">
+                    <timeScale min="8" max="8" randomSign="false" distribution="Uniform"/>
+                    <resistance min="10" max="10" randomSign="false" distribution="Uniform"/>
+                    <restV min="-70" max="-70" randomSign="false" distribution="Uniform"/>
+                    <resetV min="-65" max="-65" randomSign="false" distribution="Uniform"/>
+                    <firingThresholdV min="-50" max="-50" randomSign="false" distribution="Uniform"/>
+                  </activationLeakyIF>
+                  <bias min="0.3" max="0.5" randomSign="false" distribution="Uniform"/>
+                </neuronGroup>
+                <neuronGroup name="Inh-LIF" role="Inhibitory" relShare="1" augmentedStates="true">
+                  <activationLeakyIF stimuliCoeff="5.5" refractoryPeriods="0" solverMethod="Euler" solverCompSteps="2">
+                    <timeScale min="8" max="8" randomSign="false" distribution="Uniform"/>
+                    <resistance min="10" max="10" randomSign="false" distribution="Uniform"/>
+                    <restV min="-70" max="-70" randomSign="false" distribution="Uniform"/>
+                    <resetV min="-65" max="-65" randomSign="false" distribution="Uniform"/>
+                    <firingThresholdV min="-50" max="-50" randomSign="false" distribution="Uniform"/>
+                  </activationLeakyIF>
+                  <bias min="0.3" max="0.5" randomSign="false" distribution="Uniform"/>
+                </neuronGroup>
+              </neuronGroups>
+              <interconnection density="0.1" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="true">
+                <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
+              </interconnection>
+            </pool>
+          </pools>
+        </reservoirCfg>
+      </reservoirCfgContainer>
+      <reservoirInstanceContainer>
+        <reservoirInstance name="MainRes" cfg="MainCfg" augmentedStates="false">
+          <inputFieldAssignments>
+            <inputFieldAssignment inputFieldName="coord_abcissa" poolName="Spiking pool" density="1">
+              <weight min="0.1" max="0.7" randomSign="false" distribution="Uniform"/>
+            </inputFieldAssignment>
+            <inputFieldAssignment inputFieldName="coord_ordinate" poolName="Spiking pool" density="1">
+              <weight min="0.1" max="0.7" randomSign="false" distribution="Uniform"/>
+            </inputFieldAssignment>
+          </inputFieldAssignments>
+        </reservoirInstance>
+      </reservoirInstanceContainer>
+      <readoutLayer testDataRatio="0.25" folds="Auto">
+        <readoutUnit attempts="1" attemptEpochs="100">
+          <ff regressionMethod="Linear">
+            <activationIdentity/>
+          </ff>
+        </readoutUnit>
+        <outputFields>
+          <field name="curved swing"/>
+          <field name="horizontal swing"/>
+          <field name="vertical swing"/>
+          <field name="anti-clockwise arc"/>
+          <field name="clockwise arc"/>
+          <field name="circle"/>
+          <field name="horizontal straight-line"/>
+          <field name="vertical straight-line"/>
+          <field name="horizontal zigzag"/>
+          <field name="vertical zigzag"/>
+          <field name="horizontal wavy"/>
+          <field name="vertical wavy"/>
+          <field name="face-up curve"/>
+          <field name="face-down curve"/>
+          <field name="tremble"/>
+        </outputFields>
+      </readoutLayer>
+    </stateMachineCfg>
+  </case>
+
+
+  <case name="Classification task Libras Movement:  Single spiking reservoir, Perceptron (5 gates) classifier">
+    <!-- Data converted from https://archive.ics.uci.edu/ml/datasets/Libras+Movement -->
+    <samples fileName="LibrasMovement.csv" singleNormalizer="false" normalizerReserve="0.1"/>
+    <stateMachineCfg taskType="Classification" randomizerSeek="0">
+      <inputFields routeToReadout="false">
+        <field name="coord_abcissa"/>
+        <field name="coord_ordinate"/>
+      </inputFields>
+      <reservoirCfgContainer>
+        <reservoirCfg name="Single spiking pool" inputCoding="Analog" inputDuration="1" spectralRadius="0.9">
+          <pools>
+            <pool name="SimpleIF pool" dimX="8" dimY="8" dimZ="8" routeToReadout="true">
+              <neuronGroups>
+                <neuronGroup name="Exc-SimpleIF" role="Excitatory" relShare="4" augmentedStates="true">
+                  <activationSimpleIF stimuliCoeff="1" refractoryPeriods="0">
+                    <resistance min="15" max="15"/>
+                    <decayRate min="0" max="0"/>
+                    <resetV min="5" max="5"/>
+                    <firingThresholdV min="20" max="60"/>
+                  </activationSimpleIF>
+                  <bias min="0" max="0.5" randomSign="false" distribution="Uniform"/>
+                </neuronGroup>
+                <neuronGroup name="Inh-SimpleIF" role="Inhibitory" relShare="1" augmentedStates="true">
+                  <activationSimpleIF stimuliCoeff="1" refractoryPeriods="0">
+                    <resistance min="15" max="15"/>
+                    <decayRate min="0" max="0"/>
+                    <resetV min="5" max="5"/>
+                    <firingThresholdV min="20" max="20"/>
+                  </activationSimpleIF>
+                  <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
+                </neuronGroup>
+              </neuronGroups>
+              <interconnection density="0.4" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
+                <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
+              </interconnection>
+            </pool>
+          </pools>
+        </reservoirCfg>
+      </reservoirCfgContainer>
+      <reservoirInstanceContainer>
+        <reservoirInstance name="Main" cfg="Single spiking pool" augmentedStates="false">
+          <inputFieldAssignments>
+            <inputFieldAssignment inputFieldName="coord_abcissa" poolName="SimpleIF pool" density="1">
+              <weight min="0" max="0.3" randomSign="false" distribution="Uniform"/>
+            </inputFieldAssignment>
+            <inputFieldAssignment inputFieldName="coord_ordinate" poolName="SimpleIF pool" density="1">
+              <weight min="0" max="0.3" randomSign="false" distribution="Uniform"/>
+            </inputFieldAssignment>
+          </inputFieldAssignments>
+        </reservoirInstance>
+      </reservoirInstanceContainer>
+      <readoutLayer testDataRatio="0.25" folds="Auto">
+        <readoutUnit attempts="20" attemptEpochs="500">
+          <pp gates="5" resolution="2">
+            <pDeltaRuleTrainer iniLR="0.01" incLR="1.1" decLR="0.5" minLR="1e-4" maxLR="0.1"/>
+          </pp>
+        </readoutUnit>
+        <outputFields>
+          <field name="curved swing"/>
+          <field name="horizontal swing"/>
+          <field name="vertical swing"/>
+          <field name="anti-clockwise arc"/>
+          <field name="clockwise arc"/>
+          <field name="circle"/>
+          <field name="horizontal straight-line"/>
+          <field name="vertical straight-line"/>
+          <field name="horizontal zigzag"/>
+          <field name="vertical zigzag"/>
+          <field name="horizontal wavy"/>
+          <field name="vertical wavy"/>
+          <field name="face-up curve"/>
+          <field name="face-down curve"/>
+          <field name="tremble"/>
+        </outputFields>
+      </readoutLayer>
+    </stateMachineCfg>
+  </case>
+
+
+
+
+  <case name="Prediction task High and Low prices of TTOO (T2 Biosystems, Inc.): Directly mixed reservoir (Experimental), Linear regression">
+    <!-- Data from https://finance.yahoo.com/quote/TTOO/history?p=TTOO -->
+    <samples fileName="TTOO.csv" bootSamples="150" singleNormalizer="true" normalizerReserve="0.1"/>
+    <stateMachineCfg taskType="Prediction" randomizerSeek="0">
+      <inputFields routeToReadout="true">
+        <field name="High"/>
+        <field name="Low"/>
+        <field name="Adj Close"/>
+      </inputFields>
+      <reservoirCfgContainer>
+        <reservoirCfg name="Directly mixed" spectralRadius="0.9">
+          <pools>
+            <pool name="Mixed pool" dimX="150" dimY="1" dimZ="1" routeToReadout="true">
+              <neuronGroups>
+                <neuronGroup name="Exc-TanH" role="Excitatory" relShare="10" augmentedStates="true">
+                  <activationTanH />
+                  <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
+                </neuronGroup>
+                <neuronGroup name="Inh-TanH" role="Inhibitory" relShare="5" augmentedStates="true">
+                  <activationTanH />
+                  <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
+                </neuronGroup>
+                <neuronGroup name="Exc-AutoIzhikevichIF" role="Excitatory" relShare="2" augmentedStates="true">
+                  <activationAutoIzhikevichIF stimuliCoeff="70" role="Excitatory" refractoryPeriods="0" solverMethod="RK4" solverCompSteps="2"/>
+                  <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
+                </neuronGroup>
+                <neuronGroup name="Inh-AutoIzhikevichIF" role="Inhibitory" relShare="1" augmentedStates="true">
+                  <activationAutoIzhikevichIF stimuliCoeff="20" role="Inhibitory" refractoryPeriods="0" solverMethod="RK4" solverCompSteps="2"/>
+                  <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
+                </neuronGroup>
+              </neuronGroups>
+              <interconnection density="0.2" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
+                <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
+              </interconnection>
+              <retainmentNeurons density="1">
+                <rate min="0.25" max="0.75" randomSign="false" distribution="Uniform"/>
+              </retainmentNeurons>
+            </pool>
+          </pools>
+        </reservoirCfg>
+      </reservoirCfgContainer>
+      <reservoirInstanceContainer>
+        <reservoirInstance name="Main reservoir" cfg="Directly mixed" augmentedStates="false">
+          <inputFieldAssignments>
+            <inputFieldAssignment inputFieldName="High" poolName="Mixed pool" density="1">
+              <weight min="0" max="0.15" randomSign="true" distribution="Uniform"/>
+            </inputFieldAssignment>
+            <inputFieldAssignment inputFieldName="Low" poolName="Mixed pool" density="1">
+              <weight min="0" max="0.15" randomSign="true" distribution="Uniform"/>
+            </inputFieldAssignment>
+            <inputFieldAssignment inputFieldName="Adj Close" poolName="Mixed pool" density="1">
+              <weight min="0" max="0.15" randomSign="true" distribution="Uniform"/>
+            </inputFieldAssignment>
+          </inputFieldAssignments>
+        </reservoirInstance>
+      </reservoirInstanceContainer>
+      <readoutLayer testDataRatio="0.1" folds="Auto">
+        <readoutUnit attempts="1" attemptEpochs="100">
+          <ff regressionMethod="Linear">
+            <activationIdentity />
+            <linRegrTrainer hiNoiseIntensity="0.2" maxStretch="6" zeroMargin="0.5"/>
+          </ff>
+        </readoutUnit>
+        <outputFields>
+          <field name="High"/>
+          <field name="Low"/>
+        </outputFields>
+      </readoutLayer>
+    </stateMachineCfg>
+  </case>
+
+
+  <case name="Prediction task High and Low prices of TTOO (T2 Biosystems, Inc.): Analog reservoir (ESN), Linear regression">
+    <!-- Data from https://finance.yahoo.com/quote/TTOO/history?p=TTOO -->
+    <samples fileName="TTOO.csv" bootSamples="200" singleNormalizer="true" normalizerReserve="0.1"/>
+    <stateMachineCfg taskType="Prediction" randomizerSeek="0">
+      <inputFields routeToReadout="true">
+        <field name="High"/>
+        <field name="Low"/>
+        <field name="Adj Close"/>
+      </inputFields>
+      <reservoirCfgContainer>
+        <reservoirCfg name="Pure analog" spectralRadius="0.9">
+          <pools>
+            <pool name="Analog pool" dimX="300" dimY="1" dimZ="1" routeToReadout="true">
+              <neuronGroups>
+                <neuronGroup name="Exc-TanH" role="Excitatory" relShare="1" augmentedStates="true">
+                  <activationTanH />
+                  <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
+                </neuronGroup>
+                <neuronGroup name="Inh-TanH" role="Inhibitory" relShare="1" augmentedStates="true">
+                  <activationTanH />
+                  <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
+                </neuronGroup>
+              </neuronGroups>
+              <interconnection density="0.1" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
+                <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
+              </interconnection>
+              <retainmentNeurons density="1">
+                <rate min="0.25" max="0.75" randomSign="false" distribution="Uniform"/>
+              </retainmentNeurons>
+            </pool>
+          </pools>
+        </reservoirCfg>
+      </reservoirCfgContainer>
+      <reservoirInstanceContainer>
+        <reservoirInstance name="Main reservoir" cfg="Pure analog" augmentedStates="false">
+          <inputFieldAssignments>
+            <inputFieldAssignment inputFieldName="High" poolName="Analog pool" density="1">
+              <weight min="0" max="0.45" randomSign="true" distribution="Uniform"/>
+            </inputFieldAssignment>
+            <inputFieldAssignment inputFieldName="Low" poolName="Analog pool" density="1">
+              <weight min="0" max="0.45" randomSign="true" distribution="Uniform"/>
+            </inputFieldAssignment>
+            <inputFieldAssignment inputFieldName="Adj Close" poolName="Analog pool" density="1">
+              <weight min="0" max="0.45" randomSign="true" distribution="Uniform"/>
+            </inputFieldAssignment>
+          </inputFieldAssignments>
+        </reservoirInstance>
+      </reservoirInstanceContainer>
+      <readoutLayer testDataRatio="0.1" folds="Auto">
+        <readoutUnit attempts="1" attemptEpochs="100">
+          <ff regressionMethod="Linear">
+            <activationIdentity />
+            <linRegrTrainer hiNoiseIntensity="0.2" maxStretch="6" zeroMargin="0.5"/>
+          </ff>
+        </readoutUnit>
+        <outputFields>
+          <field name="High"/>
+          <field name="Low"/>
+        </outputFields>
+      </readoutLayer>
+    </stateMachineCfg>
+  </case>
+
+
+
+
+
+
+  <case name="Prediction task High and Low prices of TTOO (T2 Biosystems, Inc.): Mixed reservoir (spiking pool, analog pool), Feed Forward, Linear regression">
+    <!-- Data from https://finance.yahoo.com/quote/TTOO/history?p=TTOO -->
+    <samples fileName="TTOO.csv" bootSamples="150" singleNormalizer="true" normalizerReserve="0.1"/>
+    <stateMachineCfg taskType="Prediction" randomizerSeek="0">
+      <inputFields routeToReadout="true">
+        <field name="High"/>
+        <field name="Low"/>
+        <field name="Adj Close"/>
+      </inputFields>
+      <reservoirCfgContainer>
+        <reservoirCfg name="Mixed" spectralRadius="0.999">
+          <pools>
+            <pool name="Spiking pool" dimX="6" dimY="5" dimZ="5" routeToReadout="true">
+              <neuronGroups>
+                <neuronGroup name="Exc-AutoIzhikevichIF" role="Excitatory" relShare="4" augmentedStates="true">
+                  <activationAutoIzhikevichIF stimuliCoeff="35" role="Excitatory" refractoryPeriods="0" solverMethod="RK4" solverCompSteps="2"/>
+                  <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
+                </neuronGroup>
+                <neuronGroup name="Inh-AutoIzhikevichIF" role="Inhibitory" relShare="1" augmentedStates="true">
+                  <activationAutoIzhikevichIF stimuliCoeff="35" role="Inhibitory" refractoryPeriods="0" solverMethod="RK4" solverCompSteps="2"/>
+                  <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
+                </neuronGroup>
+              </neuronGroups>
+              <interconnection density="0.3" avgDistance="1.5" allowSelfConnection="false" constantNumOfConnections="false">
+                <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
+              </interconnection>
+            </pool>
+            <pool name="Analog pool" dimX="150" dimY="1" dimZ="1" routeToReadout="true">
+              <neuronGroups>
+                <neuronGroup name="Exc-TanH" role="Excitatory" relShare="1" augmentedStates="true">
+                  <activationTanH />
+                  <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
+                </neuronGroup>
+                <neuronGroup name="Inh-TanH" role="Inhibitory" relShare="1" augmentedStates="true">
+                  <activationTanH />
+                  <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
+                </neuronGroup>
+              </neuronGroups>
+              <interconnection density="0.12" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
+                <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
+              </interconnection>
+              <retainmentNeurons density="1">
+                <rate min="0" max="0.25" randomSign="false" distribution="Uniform"/>
+              </retainmentNeurons>
+            </pool>
+          </pools>
+          <pool2PoolConns>
+            <pool2PoolConn targetPool="Spiking pool" targetConnDensity="1" srcPool="Analog pool" srcConnDensity="0" constantNumOfConnections="false">
+              <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
+            </pool2PoolConn>
+          </pool2PoolConns>
+        </reservoirCfg>
+      </reservoirCfgContainer>
+      <reservoirInstanceContainer>
+        <reservoirInstance name="Mixed spiking and analog pools" cfg="Mixed" augmentedStates="false">
+          <inputFieldAssignments>
+            <inputFieldAssignment inputFieldName="High" poolName="Spiking pool" density="1">
+              <weight min="0" max="0.75" randomSign="false" distribution="Uniform"/>
+            </inputFieldAssignment>
+            <inputFieldAssignment inputFieldName="Low" poolName="Spiking pool" density="1">
+              <weight min="0" max="0.75" randomSign="false" distribution="Uniform"/>
+            </inputFieldAssignment>
+            <inputFieldAssignment inputFieldName="Adj Close" poolName="Spiking pool" density="1">
+              <weight min="0" max="0.75" randomSign="false" distribution="Uniform"/>
+            </inputFieldAssignment>
+            <inputFieldAssignment inputFieldName="High" poolName="Analog pool" density="1">
+              <weight min="0" max="0.5" randomSign="true" distribution="Uniform"/>
+            </inputFieldAssignment>
+            <inputFieldAssignment inputFieldName="Low" poolName="Analog pool" density="1">
+              <weight min="0" max="0.5" randomSign="true" distribution="Uniform"/>
+            </inputFieldAssignment>
+            <inputFieldAssignment inputFieldName="Adj Close" poolName="Analog pool" density="1">
+              <weight min="0" max="0.5" randomSign="true" distribution="Uniform"/>
+            </inputFieldAssignment>
+          </inputFieldAssignments>
+        </reservoirInstance>
+      </reservoirInstanceContainer>
+      <readoutLayer testDataRatio="0.1" folds="Auto">
+        <readoutUnit attempts="1" attemptEpochs="100">
+          <ff regressionMethod="Linear">
+            <activationIdentity />
+            <linRegrTrainer hiNoiseIntensity="0.2" maxStretch="6" zeroMargin="0.5"/>
+          </ff>
+        </readoutUnit>
+        <outputFields>
+          <field name="High"/>
+          <field name="Low"/>
+        </outputFields>
+      </readoutLayer>
+    </stateMachineCfg>
+  </case>
+
+  <case name="Prediction task Mackey Glass chaotic time series: Analog reservoir (ESN), Linear regression output">
+    <samples fileName="MackeyGlass.csv" bootSamples="400" singleNormalizer="false" normalizerReserve="0.1"/>
     <stateMachineCfg taskType="Prediction" randomizerSeek="0">
       <inputFields routeToReadout="false">
         <field name="Value"/>
       </inputFields>
       <reservoirCfgContainer>
-        <reservoirCfg name="Analog (ESN)" inputCoding="Analog" inputDuration="1" spectralRadius="0.99">
+        <reservoirCfg name="Analog (ESN)" inputCoding="Analog" inputDuration="1" spectralRadius="0.85">
           <pools>
             <pool name="Analog pool" dimX="8" dimY="8" dimZ="8" routeToReadout="true">
               <neuronGroups>
@@ -20,29 +492,29 @@
                   <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
                 </neuronGroup>
               </neuronGroups>
-              <interconnection density="0.1" avgDistance="NA" allowSelfConnection="true">
-                <weight min="0.1" max="0.9" randomSign="false" distribution="Uniform"/>
+              <interconnection density="0.12" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
+                <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
               </interconnection>
-              <retainmentNeurons density="0.6">
-                <rate min="0.4" max="0.75" randomSign="false" distribution="Uniform"/>
+              <retainmentNeurons density="1">
+                <rate min="0" max="0.25" randomSign="false" distribution="Uniform"/>
               </retainmentNeurons>
             </pool>
           </pools>
         </reservoirCfg>
       </reservoirCfgContainer>
       <reservoirInstanceContainer>
-        <reservoirInstance name="Fully analog reservoir " cfg="Analog (ESN)" augmentedStates="true">
+        <reservoirInstance name="Fully analog reservoir" cfg="Analog (ESN)" augmentedStates="true">
           <inputFieldAssignments>
             <inputFieldAssignment inputFieldName="Value" poolName="Analog pool" density="1">
-              <weight min="0" max="0.6" randomSign="false" distribution="Uniform"/>
+              <weight min="-0.2" max="0.2" randomSign="false" distribution="Uniform"/>
             </inputFieldAssignment>
           </inputFieldAssignments>
         </reservoirInstance>
       </reservoirInstanceContainer>
-      <readoutLayer testDataRatio="0.3" folds="1">
+      <readoutLayer testDataRatio="0.1" folds="1">
         <readoutUnit attempts="1" attemptEpochs="1">
           <ff regressionMethod="Linear">
-            <activationIdentity />
+            <activationIdentity/>
           </ff>
         </readoutUnit>
         <outputFields>
@@ -52,7 +524,7 @@
     </stateMachineCfg>
   </case>
 
-<case name="Prediction task High and Low prices of TTOO (T2 Biosystems, Inc.): Mixed reservoir (spiking pool, analog pool), Feed Forward, Linear regression">
+  <case name="Prediction task High and Low prices of TTOO (T2 Biosystems, Inc.): Mixed reservoir (spiking pool, analog pool), Feed Forward, Linear regression">
     <!-- Data from https://finance.yahoo.com/quote/TTOO/history?p=TTOO -->
     <samples fileName="TTOO.csv" bootSamples="250" singleNormalizer="true" normalizerReserve="0.1"/>
     <stateMachineCfg taskType="Prediction" randomizerSeek="0">
@@ -75,7 +547,7 @@
                   <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
                 </neuronGroup>
               </neuronGroups>
-              <interconnection density="0.25" avgDistance="1.5" allowSelfConnection="false">
+              <interconnection density="0.25" avgDistance="1.5" allowSelfConnection="false" constantNumOfConnections="false">
                 <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
               </interconnection>
             </pool>
@@ -90,7 +562,345 @@
                   <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
                 </neuronGroup>
               </neuronGroups>
-              <interconnection density="0.1" avgDistance="NA" allowSelfConnection="true">
+              <interconnection density="0.12" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
+                <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
+              </interconnection>
+              <retainmentNeurons density="1">
+                <rate min="0" max="0.25" randomSign="false" distribution="Uniform"/>
+              </retainmentNeurons>
+            </pool>
+          </pools>
+          <pool2PoolConns>
+            <pool2PoolConn targetPool="Spiking pool" targetConnDensity="1" srcPool="Analog pool" srcConnDensity="0.05" constantNumOfConnections="false">
+              <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
+            </pool2PoolConn>
+          </pool2PoolConns>
+        </reservoirCfg>
+      </reservoirCfgContainer>
+      <reservoirInstanceContainer>
+        <reservoirInstance name="Mixed spiking and analog pools" cfg="Mixed" augmentedStates="false">
+          <inputFieldAssignments>
+            <inputFieldAssignment inputFieldName="High" poolName="Spiking pool" density="1">
+              <weight min="0" max="0.75" randomSign="false" distribution="Uniform"/>
+            </inputFieldAssignment>
+            <inputFieldAssignment inputFieldName="Low" poolName="Spiking pool" density="1">
+              <weight min="0" max="0.75" randomSign="false" distribution="Uniform"/>
+            </inputFieldAssignment>
+            <inputFieldAssignment inputFieldName="Adj Close" poolName="Spiking pool" density="1">
+              <weight min="0" max="0.75" randomSign="false" distribution="Uniform"/>
+            </inputFieldAssignment>
+            <inputFieldAssignment inputFieldName="High" poolName="Analog pool" density="1">
+              <weight min="-0.2" max="0.2" randomSign="false" distribution="Uniform"/>
+            </inputFieldAssignment>
+            <inputFieldAssignment inputFieldName="Low" poolName="Analog pool" density="1">
+              <weight min="-0.2" max="0.2" randomSign="false" distribution="Uniform"/>
+            </inputFieldAssignment>
+            <inputFieldAssignment inputFieldName="Adj Close" poolName="Analog pool" density="1">
+              <weight min="-0.2" max="0.2" randomSign="false" distribution="Uniform"/>
+            </inputFieldAssignment>
+          </inputFieldAssignments>
+        </reservoirInstance>
+      </reservoirInstanceContainer>
+      <readoutLayer testDataRatio="0.1" folds="Auto">
+        <readoutUnit attempts="1" attemptEpochs="100">
+          <ff regressionMethod="Linear">
+            <activationIdentity />
+            <linRegrTrainer hiNoiseIntensity="0.2" maxStretch="6" zeroMargin="0.5"/>
+          </ff>
+        </readoutUnit>
+        <outputFields>
+          <field name="High"/>
+          <field name="Low"/>
+        </outputFields>
+      </readoutLayer>
+    </stateMachineCfg>
+  </case>
+
+
+
+
+
+
+
+
+
+
+  <case name="Prediction task Mackey Glass chaotic time series: Analog reservoir (ESN), Linear regression output">
+    <samples fileName="MackeyGlass.csv" bootSamples="500" singleNormalizer="false" normalizerReserve="0.1"/>
+    <stateMachineCfg taskType="Prediction" randomizerSeek="0">
+      <inputFields routeToReadout="false">
+        <field name="Value"/>
+      </inputFields>
+      <reservoirCfgContainer>
+        <reservoirCfg name="Analog (ESN)" inputCoding="Analog" inputDuration="1" spectralRadius="0.9">
+          <pools>
+            <pool name="Analog pool" dimX="500" dimY="1" dimZ="1" routeToReadout="true">
+              <neuronGroups>
+                <neuronGroup name="Exc-TanH" role="Excitatory" relShare="1" augmentedStates="true">
+                  <activationTanH/>
+                  <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
+                </neuronGroup>
+                <neuronGroup name="Inh-TanH" role="Inhibitory" relShare="1" augmentedStates="true">
+                  <activationTanH/>
+                  <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
+                </neuronGroup>
+              </neuronGroups>
+              <interconnection density="0.1" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
+                <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
+              </interconnection>
+              <retainmentNeurons density="0">
+                <rate min="0" max="0.75" randomSign="false" distribution="Uniform"/>
+              </retainmentNeurons>
+            </pool>
+          </pools>
+        </reservoirCfg>
+      </reservoirCfgContainer>
+      <reservoirInstanceContainer>
+        <reservoirInstance name="Fully analog reservoir" cfg="Analog (ESN)" augmentedStates="true">
+          <inputFieldAssignments>
+            <inputFieldAssignment inputFieldName="Value" poolName="Analog pool" density="1">
+              <weight min="-0.23" max="0.23" randomSign="false" distribution="Uniform"/>
+            </inputFieldAssignment>
+          </inputFieldAssignments>
+        </reservoirInstance>
+      </reservoirInstanceContainer>
+      <readoutLayer testDataRatio="0.3" folds="1">
+        <readoutUnit attempts="1" attemptEpochs="1">
+          <ff regressionMethod="Linear">
+            <activationIdentity/>
+          </ff>
+        </readoutUnit>
+        <outputFields>
+          <field name="Value"/>
+        </outputFields>
+      </readoutLayer>
+    </stateMachineCfg>
+  </case>
+
+
+
+  <case name="Classification task Epileptic Seizure Activity:  Single spiking reservoir, 3-gates Parallel Perceptron classifier">
+    <!-- Data converted from https://archive.ics.uci.edu/ml/datasets/Epileptic+Seizure+Recognition -->
+    <!-- This dataset is a pre-processed and re-structured/reshaped version of a very commonly used dataset featuring epileptic seizure detection. -->
+    <samples fileName="EpilepticSeizureActivity.csv" singleNormalizer="false" normalizerReserve="0.1"/>
+    <stateMachineCfg taskType="Classification" randomizerSeek="0">
+      <inputFields routeToReadout="false">
+        <field name="EEG"/>
+      </inputFields>
+      <reservoirCfgContainer>
+        <reservoirCfg name="All pools" inputCoding="Analog" inputDuration="1" spectralRadius="0.9">
+          <pools>
+            <pool name="Analog pool" dimX="8" dimY="8" dimZ="8" routeToReadout="true">
+              <neuronGroups>
+                <neuronGroup name="Exc-TanH" role="Excitatory" relShare="1" augmentedStates="true">
+                  <activationTanH/>
+                  <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
+                </neuronGroup>
+                <neuronGroup name="Inh-TanH" role="Inhibitory" relShare="1" augmentedStates="true">
+                  <activationTanH/>
+                  <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
+                </neuronGroup>
+              </neuronGroups>
+              <interconnection density="0.1" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
+                <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
+              </interconnection>
+              <retainmentNeurons density="1">
+                <rate min="0" max="0.5" randomSign="false" distribution="Uniform"/>
+              </retainmentNeurons>
+            </pool>
+          </pools>
+        </reservoirCfg>
+      </reservoirCfgContainer>
+      <reservoirInstanceContainer>
+        <reservoirInstance name="Main" cfg="All pools" augmentedStates="false">
+          <inputFieldAssignments>
+            <inputFieldAssignment inputFieldName="EEG" poolName="Analog pool" density="1">
+              <weight min="0" max="0.5" randomSign="false" distribution="Uniform"/>
+            </inputFieldAssignment>
+          </inputFieldAssignments>
+        </reservoirInstance>
+      </reservoirInstanceContainer>
+      <readoutLayer testDataRatio="0.25" folds="Auto">
+        <readoutUnit attempts="5" attemptEpochs="10000">
+          <ff regressionMethod="Resilient">
+            <activationTanH/>
+          </ff>
+        </readoutUnit>
+        <outputFields>
+          <field name="EpilepticSeizure"/>
+        </outputFields>
+      </readoutLayer>
+    </stateMachineCfg>
+  </case>
+
+  <case name="Classification task Epileptic Seizure Activity:  Single spiking reservoir, 3-gates Parallel Perceptron classifier">
+    <!-- Data converted from https://archive.ics.uci.edu/ml/datasets/Epileptic+Seizure+Recognition -->
+    <!-- This dataset is a pre-processed and re-structured/reshaped version of a very commonly used dataset featuring epileptic seizure detection. -->
+    <samples fileName="EpilepticSeizureActivity.csv" singleNormalizer="false" normalizerReserve="0.1"/>
+    <stateMachineCfg taskType="Classification" randomizerSeek="0">
+      <inputFields routeToReadout="false">
+        <field name="EEG"/>
+      </inputFields>
+      <reservoirCfgContainer>
+        <reservoirCfg name="Single spiking pool" inputCoding="Analog" inputDuration="1" spectralRadius="0.9">
+          <pools>
+            <pool name="Spiking pool" dimX="8" dimY="8" dimZ="8" routeToReadout="true">
+              <neuronGroups>
+                <neuronGroup name="Exc-AutoIzhikevichIF" role="Excitatory" relShare="4" augmentedStates="true">
+                  <activationAutoIzhikevichIF stimuliCoeff="50" role="Excitatory" refractoryPeriods="0" solverMethod="RK4" solverCompSteps="2"/>
+                  <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
+                </neuronGroup>
+                <neuronGroup name="Inh-AutoIzhikevichIF" role="Inhibitory" relShare="1" augmentedStates="true">
+                  <activationAutoIzhikevichIF stimuliCoeff="50" role="Inhibitory" refractoryPeriods="0" solverMethod="RK4" solverCompSteps="2"/>
+                  <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
+                </neuronGroup>
+              </neuronGroups>
+              <interconnection density="0.3" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
+                <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
+              </interconnection>
+            </pool>
+          </pools>
+        </reservoirCfg>
+      </reservoirCfgContainer>
+      <reservoirInstanceContainer>
+        <reservoirInstance name="Main" cfg="Single spiking pool" augmentedStates="false">
+          <inputFieldAssignments>
+            <inputFieldAssignment inputFieldName="EEG" poolName="Spiking pool" density="1">
+              <weight min="0" max="0.5" randomSign="false" distribution="Uniform"/>
+            </inputFieldAssignment>
+          </inputFieldAssignments>
+        </reservoirInstance>
+      </reservoirInstanceContainer>
+      <readoutLayer testDataRatio="0.25" folds="Auto">
+        <readoutUnit attempts="5" attemptEpochs="10000">
+          <ff regressionMethod="Resilient">
+            <activationTanH/>
+          </ff>
+        </readoutUnit>
+        <outputFields>
+          <field name="EpilepticSeizure"/>
+        </outputFields>
+      </readoutLayer>
+    </stateMachineCfg>
+  </case>
+
+  <case name="Classification task Libras Movement:  Single spiking reservoir, Perceptron (5 gates) classifier">
+    <!-- Data converted from https://archive.ics.uci.edu/ml/datasets/Libras+Movement -->
+    <samples fileName="LibrasMovement.csv" singleNormalizer="false" normalizerReserve="0.1"/>
+    <stateMachineCfg taskType="Classification" randomizerSeek="0">
+      <inputFields routeToReadout="false">
+        <field name="coord_abcissa"/>
+        <field name="coord_ordinate"/>
+      </inputFields>
+      <reservoirCfgContainer>
+        <reservoirCfg name="Single spiking pool" inputCoding="Analog" inputDuration="1" spectralRadius="0.9">
+          <pools>
+            <pool name="SimpleIF pool" dimX="6" dimY="6" dimZ="6" routeToReadout="true">
+              <neuronGroups>
+                <neuronGroup name="Exc-SimpleIF" role="Excitatory" relShare="3" augmentedStates="true">
+                  <activationSimpleIF stimuliCoeff="1" refractoryPeriods="2">
+                    <resistance min="15" max="15"/>
+                    <decayRate min="0" max="0"/>
+                    <resetV min="5" max="5"/>
+                    <firingThresholdV min="20" max="20"/>
+                  </activationSimpleIF>
+                  <bias min="0.1" max="0.5" randomSign="false" distribution="Uniform"/>
+                </neuronGroup>
+                <neuronGroup name="Inh-SimpleIF" role="Inhibitory" relShare="1" augmentedStates="true">
+                  <activationSimpleIF stimuliCoeff="1" refractoryPeriods="2">
+                    <resistance min="15" max="15"/>
+                    <decayRate min="0" max="0"/>
+                    <resetV min="5" max="5"/>
+                    <firingThresholdV min="15" max="15"/>
+                  </activationSimpleIF>
+                  <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
+                </neuronGroup>
+              </neuronGroups>
+              <interconnection density="0.4" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
+                <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
+              </interconnection>
+            </pool>
+          </pools>
+        </reservoirCfg>
+      </reservoirCfgContainer>
+      <reservoirInstanceContainer>
+        <reservoirInstance name="Main" cfg="Single spiking pool" augmentedStates="true">
+          <inputFieldAssignments>
+            <inputFieldAssignment inputFieldName="coord_abcissa" poolName="SimpleIF pool" density="0.3">
+              <weight min="0" max="0.3" randomSign="false" distribution="Uniform"/>
+            </inputFieldAssignment>
+            <inputFieldAssignment inputFieldName="coord_ordinate" poolName="SimpleIF pool" density="0.3">
+              <weight min="0" max="0.3" randomSign="false" distribution="Uniform"/>
+            </inputFieldAssignment>
+          </inputFieldAssignments>
+        </reservoirInstance>
+      </reservoirInstanceContainer>
+      <readoutLayer testDataRatio="0.25" folds="Auto">
+        <readoutUnit attempts="10" attemptEpochs="750">
+          <pp gates="5" resolution="2">
+            <pDeltaRuleTrainer iniLR="0.01" incLR="1.1" decLR="0.5" minLR="1e-4" maxLR="0.1"/>
+          </pp>
+        </readoutUnit>
+        <outputFields>
+          <field name="curved swing"/>
+          <field name="horizontal swing"/>
+          <field name="vertical swing"/>
+          <field name="anti-clockwise arc"/>
+          <field name="clockwise arc"/>
+          <field name="circle"/>
+          <field name="horizontal straight-line"/>
+          <field name="vertical straight-line"/>
+          <field name="horizontal zigzag"/>
+          <field name="vertical zigzag"/>
+          <field name="horizontal wavy"/>
+          <field name="vertical wavy"/>
+          <field name="face-up curve"/>
+          <field name="face-down curve"/>
+          <field name="tremble"/>
+        </outputFields>
+      </readoutLayer>
+    </stateMachineCfg>
+  </case>
+
+  <case name="Prediction task High and Low prices of TTOO (T2 Biosystems, Inc.): Mixed reservoir (spiking pool, analog pool), Feed Forward, Linear regression">
+    <!-- Data from https://finance.yahoo.com/quote/TTOO/history?p=TTOO -->
+    <samples fileName="TTOO.csv" bootSamples="250" singleNormalizer="true" normalizerReserve="0.1"/>
+    <stateMachineCfg taskType="Prediction" randomizerSeek="0">
+      <inputFields routeToReadout="true">
+        <field name="High"/>
+        <field name="Low"/>
+        <field name="Adj Close"/>
+      </inputFields>
+      <reservoirCfgContainer>
+        <reservoirCfg name="Mixed" spectralRadius="0.999">
+          <pools>
+            <pool name="Spiking pool" dimX="5" dimY="5" dimZ="5" routeToReadout="true">
+              <neuronGroups>
+                <neuronGroup name="Exc-AutoIzhikevichIF" role="Excitatory" relShare="4" augmentedStates="true">
+                  <activationAutoIzhikevichIF stimuliCoeff="35" role="Excitatory" refractoryPeriods="0" solverMethod="RK4" solverCompSteps="2"/>
+                  <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
+                </neuronGroup>
+                <neuronGroup name="Inh-AutoIzhikevichIF" role="Inhibitory" relShare="1" augmentedStates="true">
+                  <activationAutoIzhikevichIF stimuliCoeff="35" role="Inhibitory" refractoryPeriods="0" solverMethod="RK4" solverCompSteps="2"/>
+                  <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
+                </neuronGroup>
+              </neuronGroups>
+              <interconnection density="0.25" avgDistance="1.5" allowSelfConnection="false" constantNumOfConnections="false">
+                <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
+              </interconnection>
+            </pool>
+            <pool name="Analog pool" dimX="6" dimY="5" dimZ="5" routeToReadout="true">
+              <neuronGroups>
+                <neuronGroup name="Exc-Sigmoid" role="Excitatory" relShare="4" augmentedStates="true">
+                  <activationSigmoid />
+                  <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
+                </neuronGroup>
+                <neuronGroup name="Inh-Sigmoid" role="Inhibitory" relShare="1" augmentedStates="true">
+                  <activationSigmoid />
+                  <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
+                </neuronGroup>
+              </neuronGroups>
+              <interconnection density="0.1" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
                 <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
               </interconnection>
               <retainmentNeurons density="1">
@@ -99,7 +909,7 @@
             </pool>
           </pools>
           <pool2PoolConns>
-            <pool2PoolConn targetPool="Spiking pool" targetConnDensity="1" srcPool="Analog pool" srcConnDensity="0.05">
+            <pool2PoolConn targetPool="Spiking pool" targetConnDensity="1" srcPool="Analog pool" srcConnDensity="0.05" constantNumOfConnections="false">
               <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
             </pool2PoolConn>
           </pool2PoolConns>
@@ -144,6 +954,147 @@
     </stateMachineCfg>
   </case>
 
+  <case name="Prediction task Mackey Glass chaotic time series: Analog reservoir (ESN), Linear regression output">
+    <samples fileName="MackeyGlass.csv" bootSamples="500" singleNormalizer="false" normalizerReserve="0.1"/>
+    <stateMachineCfg taskType="Prediction" randomizerSeek="0">
+      <inputFields routeToReadout="false">
+        <field name="Value"/>
+      </inputFields>
+      <reservoirCfgContainer>
+        <reservoirCfg name="Analog (ESN)" inputCoding="Analog" inputDuration="1" spectralRadius="0.999">
+          <pools>
+            <pool name="Analog pool" dimX="500" dimY="1" dimZ="1" routeToReadout="true">
+              <neuronGroups>
+                <neuronGroup name="Exc-TanH" role="Excitatory" relShare="1" augmentedStates="true">
+                  <activationTanH/>
+                  <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
+                </neuronGroup>
+                <neuronGroup name="Inh-TanH" role="Inhibitory" relShare="1" augmentedStates="true">
+                  <activationTanH/>
+                  <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
+                </neuronGroup>
+              </neuronGroups>
+              <interconnection density="0.1" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
+                <weight min="0.1" max="0.9" randomSign="false" distribution="Uniform"/>
+              </interconnection>
+              <retainmentNeurons density="0.6">
+                <rate min="0.4" max="0.75" randomSign="false" distribution="Uniform"/>
+              </retainmentNeurons>
+            </pool>
+          </pools>
+        </reservoirCfg>
+      </reservoirCfgContainer>
+      <reservoirInstanceContainer>
+        <reservoirInstance name="Fully analog reservoir" cfg="Analog (ESN)" augmentedStates="true">
+          <inputFieldAssignments>
+            <inputFieldAssignment inputFieldName="Value" poolName="Analog pool" density="1">
+              <weight min="0.05" max="0.9" randomSign="false" distribution="Uniform"/>
+            </inputFieldAssignment>
+          </inputFieldAssignments>
+        </reservoirInstance>
+      </reservoirInstanceContainer>
+      <readoutLayer testDataRatio="0.3" folds="1">
+        <readoutUnit attempts="1" attemptEpochs="1">
+          <ff regressionMethod="Linear">
+            <activationIdentity/>
+          </ff>
+        </readoutUnit>
+        <outputFields>
+          <field name="Value"/>
+        </outputFields>
+      </readoutLayer>
+    </stateMachineCfg>
+  </case>
+
+  <case name="Classification task Libras Movement:  Single spiking reservoir, Multilayer TanH FF network as a classifier">
+    <!-- Data converted from https://archive.ics.uci.edu/ml/datasets/Libras+Movement -->
+    <samples fileName="LibrasMovement.csv" singleNormalizer="false" normalizerReserve="0.1"/>
+    <stateMachineCfg taskType="Classification" randomizerSeek="0">
+      <inputFields routeToReadout="false">
+        <field name="coord_abcissa"/>
+        <field name="coord_ordinate"/>
+      </inputFields>
+      <reservoirCfgContainer>
+        <reservoirCfg name="Single spiking pool" inputCoding="Analog" inputDuration="1" spectralRadius="0.999">
+          <pools>
+            <pool name="SimpleIF pool" dimX="6" dimY="6" dimZ="6" routeToReadout="true">
+              <neuronGroups>
+                <neuronGroup name="Exc-SimpleIF" role="Excitatory" relShare="4" augmentedStates="true">
+                  <activationSimpleIF stimuliCoeff="1" refractoryPeriods="1">
+                    <resistance min="15" max="15"/>
+                    <decayRate min="0" max="0"/>
+                    <resetV min="5" max="5"/>
+                    <firingThresholdV min="20" max="20"/>
+                  </activationSimpleIF>
+                  <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
+                </neuronGroup>
+                <neuronGroup name="Inh-SimpleIF" role="Inhibitory" relShare="1" augmentedStates="true">
+                  <activationSimpleIF stimuliCoeff="1" refractoryPeriods="2">
+                    <resistance min="15" max="15"/>
+                    <decayRate min="0" max="0"/>
+                    <resetV min="5" max="5"/>
+                    <firingThresholdV min="15" max="15"/>
+                  </activationSimpleIF>
+                  <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
+                </neuronGroup>
+              </neuronGroups>
+              <interconnection density="0.4" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
+                <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
+              </interconnection>
+            </pool>
+          </pools>
+        </reservoirCfg>
+      </reservoirCfgContainer>
+      <reservoirInstanceContainer>
+        <reservoirInstance name="Main" cfg="Single spiking pool" augmentedStates="false">
+          <inputFieldAssignments>
+            <inputFieldAssignment inputFieldName="coord_abcissa" poolName="SimpleIF pool" density="0.3">
+              <weight min="0" max="0.3" randomSign="false" distribution="Uniform"/>
+            </inputFieldAssignment>
+            <inputFieldAssignment inputFieldName="coord_ordinate" poolName="SimpleIF pool" density="0.3">
+              <weight min="0" max="0.3" randomSign="false" distribution="Uniform"/>
+            </inputFieldAssignment>
+          </inputFieldAssignments>
+        </reservoirInstance>
+      </reservoirInstanceContainer>
+      <readoutLayer testDataRatio="0.25" folds="Auto">
+        <readoutUnit attempts="15" attemptEpochs="200">
+          <ff regressionMethod="Resilient">
+            <activationTanH />
+            <hiddenLayers>
+              <layer neurons="5">
+                <activationTanH/>
+              </layer>
+              <layer neurons="5">
+                <activationTanH/>
+              </layer>
+            </hiddenLayers>
+          </ff>
+        </readoutUnit>
+        <outputFields>
+          <field name="curved swing"/>
+          <field name="horizontal swing"/>
+          <field name="vertical swing"/>
+          <field name="anti-clockwise arc"/>
+          <field name="clockwise arc"/>
+          <field name="circle"/>
+          <field name="horizontal straight-line"/>
+          <field name="vertical straight-line"/>
+          <field name="horizontal zigzag"/>
+          <field name="vertical zigzag"/>
+          <field name="horizontal wavy"/>
+          <field name="vertical wavy"/>
+          <field name="face-up curve"/>
+          <field name="face-down curve"/>
+          <field name="tremble"/>
+        </outputFields>
+      </readoutLayer>
+    </stateMachineCfg>
+  </case>
+
+
+
+
   <case name="Classification task Libras Movement:  Multiple reservoirs (mixing usage demo), Parallel Perceptron as a classifier">
     <!-- Data converted from https://archive.ics.uci.edu/ml/datasets/Libras+Movement -->
     <samples fileName="LibrasMovement.csv" singleNormalizer="false" normalizerReserve="0.1"/>
@@ -176,8 +1127,8 @@
                   </activationAdExpIF>
                   <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
                 </neuronGroup>
-                  <neuronGroup name="Exc-Sigmoid" role="Excitatory" relShare="4" augmentedStates="true">
-                    <activationSigmoid />
+                <neuronGroup name="Exc-Sigmoid" role="Excitatory" relShare="4" augmentedStates="true">
+                  <activationSigmoid />
                   <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
                 </neuronGroup>
                 <neuronGroup name="Inh-AutoIzhikevichIF" role="Inhibitory" relShare="1" augmentedStates="true">
@@ -204,7 +1155,7 @@
                   <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
                 </neuronGroup>
               </neuronGroups>
-              <interconnection density="0.3" avgDistance="1.5" allowSelfConnection="false">
+              <interconnection density="0.3" avgDistance="1.5" allowSelfConnection="false" constantNumOfConnections="false">
                 <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
               </interconnection>
             </pool>
@@ -233,7 +1184,7 @@
                   <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
                 </neuronGroup>
               </neuronGroups>
-              <interconnection density="0.3" avgDistance="1.5" allowSelfConnection="false">
+              <interconnection density="0.3" avgDistance="1.5" allowSelfConnection="false" constantNumOfConnections="false">
                 <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
               </interconnection>
             </pool>
@@ -270,16 +1221,16 @@
                   <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
                 </neuronGroup>
               </neuronGroups>
-              <interconnection density="0.3" avgDistance="1.5" allowSelfConnection="false">
+              <interconnection density="0.3" avgDistance="1.5" allowSelfConnection="false" constantNumOfConnections="false">
                 <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
               </interconnection>
             </pool>
           </pools>
           <pool2PoolConns>
-            <pool2PoolConn targetPool="Alpha (SimpleIF)" targetConnDensity="1" srcPool="Beta (AdExpIF)" srcConnDensity="0.05">
+            <pool2PoolConn targetPool="Alpha (SimpleIF)" targetConnDensity="1" srcPool="Beta (AdExpIF)" srcConnDensity="0.05" constantNumOfConnections="false">
               <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
             </pool2PoolConn>
-            <pool2PoolConn targetPool="Beta (AdExpIF)" targetConnDensity="1" srcPool="Alpha (SimpleIF)" srcConnDensity="0.05">
+            <pool2PoolConn targetPool="Beta (AdExpIF)" targetConnDensity="1" srcPool="Alpha (SimpleIF)" srcConnDensity="0.05" constantNumOfConnections="false">
               <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
             </pool2PoolConn>
           </pool2PoolConns>
@@ -297,7 +1248,7 @@
                   <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
                 </neuronGroup>
               </neuronGroups>
-              <interconnection density="0.1" avgDistance="1.5" allowSelfConnection="true">
+              <interconnection density="0.1" avgDistance="1.5" allowSelfConnection="true" constantNumOfConnections="false">
                 <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
               </interconnection>
               <retainmentNeurons density="1">
@@ -350,8 +1301,8 @@
         </reservoirInstance>
       </reservoirInstanceContainer>
       <readoutLayer testDataRatio="0.25" folds="Auto">
-        <readoutUnit attempts="20" attemptEpochs="500">
-          <pp gates="3" resolution="2">
+        <readoutUnit attempts="10" attemptEpochs="750">
+          <pp gates="5" resolution="2">
             <pDeltaRuleTrainer iniLR="0.01" incLR="1.1" decLR="0.5" minLR="1e-4" maxLR="0.1"/>
           </pp>
         </readoutUnit>
@@ -371,6 +1322,98 @@
           <field name="face-up curve"/>
           <field name="face-down curve"/>
           <field name="tremble"/>
+        </outputFields>
+      </readoutLayer>
+    </stateMachineCfg>
+  </case>
+
+  <case name="Prediction task High and Low prices of TTOO (T2 Biosystems, Inc.): Mixed reservoir (spiking pool, analog pool), Feed Forward, Linear regression">
+    <!-- Data from https://finance.yahoo.com/quote/TTOO/history?p=TTOO -->
+    <samples fileName="TTOO.csv" bootSamples="250" singleNormalizer="true" normalizerReserve="0.1"/>
+    <stateMachineCfg taskType="Prediction" randomizerSeek="0">
+      <inputFields routeToReadout="true">
+        <field name="High"/>
+        <field name="Low"/>
+        <field name="Adj Close"/>
+      </inputFields>
+      <reservoirCfgContainer>
+        <reservoirCfg name="Mixed" spectralRadius="0.999">
+          <pools>
+            <pool name="Spiking pool" dimX="5" dimY="5" dimZ="5" routeToReadout="true">
+              <neuronGroups>
+                <neuronGroup name="Exc-AutoIzhikevichIF" role="Excitatory" relShare="4" augmentedStates="true">
+                  <activationAutoIzhikevichIF stimuliCoeff="35" role="Excitatory" refractoryPeriods="0" solverMethod="RK4" solverCompSteps="2"/>
+                  <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
+                </neuronGroup>
+                <neuronGroup name="Inh-AutoIzhikevichIF" role="Inhibitory" relShare="1" augmentedStates="true">
+                  <activationAutoIzhikevichIF stimuliCoeff="35" role="Inhibitory" refractoryPeriods="0" solverMethod="RK4" solverCompSteps="2"/>
+                  <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
+                </neuronGroup>
+              </neuronGroups>
+              <interconnection density="0.25" avgDistance="1.5" allowSelfConnection="false" constantNumOfConnections="false">
+                <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
+              </interconnection>
+            </pool>
+            <pool name="Analog pool" dimX="6" dimY="5" dimZ="5" routeToReadout="true">
+              <neuronGroups>
+                <neuronGroup name="Exc-Sigmoid" role="Excitatory" relShare="4" augmentedStates="true">
+                  <activationSigmoid />
+                  <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
+                </neuronGroup>
+                <neuronGroup name="Inh-Sigmoid" role="Inhibitory" relShare="1" augmentedStates="true">
+                  <activationSigmoid />
+                  <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
+                </neuronGroup>
+              </neuronGroups>
+              <interconnection density="0.1" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
+                <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
+              </interconnection>
+              <retainmentNeurons density="1">
+                <rate min="0.25" max="0.75" randomSign="false" distribution="Uniform"/>
+              </retainmentNeurons>
+            </pool>
+          </pools>
+          <pool2PoolConns>
+            <pool2PoolConn targetPool="Spiking pool" targetConnDensity="1" srcPool="Analog pool" srcConnDensity="0.05" constantNumOfConnections="false">
+              <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
+            </pool2PoolConn>
+          </pool2PoolConns>
+        </reservoirCfg>
+      </reservoirCfgContainer>
+      <reservoirInstanceContainer>
+        <reservoirInstance name="Mixed spiking and analog pools" cfg="Mixed" augmentedStates="false">
+          <inputFieldAssignments>
+            <inputFieldAssignment inputFieldName="High" poolName="Spiking pool" density="1">
+              <weight min="0" max="0.75" randomSign="false" distribution="Uniform"/>
+            </inputFieldAssignment>
+            <inputFieldAssignment inputFieldName="Low" poolName="Spiking pool" density="1">
+              <weight min="0" max="0.75" randomSign="false" distribution="Uniform"/>
+            </inputFieldAssignment>
+            <inputFieldAssignment inputFieldName="Adj Close" poolName="Spiking pool" density="1">
+              <weight min="0" max="0.75" randomSign="false" distribution="Uniform"/>
+            </inputFieldAssignment>
+            <inputFieldAssignment inputFieldName="High" poolName="Analog pool" density="1">
+              <weight min="0" max="2" randomSign="false" distribution="Uniform"/>
+            </inputFieldAssignment>
+            <inputFieldAssignment inputFieldName="Low" poolName="Analog pool" density="1">
+              <weight min="0" max="2" randomSign="false" distribution="Uniform"/>
+            </inputFieldAssignment>
+            <inputFieldAssignment inputFieldName="Adj Close" poolName="Analog pool" density="1">
+              <weight min="0" max="2" randomSign="false" distribution="Uniform"/>
+            </inputFieldAssignment>
+          </inputFieldAssignments>
+        </reservoirInstance>
+      </reservoirInstanceContainer>
+      <readoutLayer testDataRatio="0.1" folds="Auto">
+        <readoutUnit attempts="1" attemptEpochs="100">
+          <ff regressionMethod="Linear">
+            <activationIdentity />
+            <linRegrTrainer hiNoiseIntensity="0.2" maxStretch="6" zeroMargin="0.5"/>
+          </ff>
+        </readoutUnit>
+        <outputFields>
+          <field name="High"/>
+          <field name="Low"/>
         </outputFields>
       </readoutLayer>
     </stateMachineCfg>
@@ -408,7 +1451,7 @@
                   <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
                 </neuronGroup>
               </neuronGroups>
-              <interconnection density="0.3" avgDistance="NA" allowSelfConnection="false">
+              <interconnection density="0.3" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="true">
                 <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
               </interconnection>
             </pool>

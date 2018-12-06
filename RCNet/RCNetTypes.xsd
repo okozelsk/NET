@@ -436,14 +436,6 @@
 
 
   <!-- ________________________________________NEURAL POOL TYPES_________________________________________________ -->
-  <!-- Pool - input - configuration -->
-  <xs:complexType name="PoolInputCfgType">
-    <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="RandomValueType" name="weight" minOccurs="1" maxOccurs="1"/>
-    </xs:sequence>
-    <xs:attribute type="UDoubleLE1Type" name="connectionDensity" use="required"/>
-  </xs:complexType>
-
   <!-- Pool - interconnection - configuration -->
   <xs:complexType name="PoolInterconnectionCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
@@ -452,6 +444,7 @@
     <xs:attribute type="UDoubleLE1Type" name="density" use="required"/>
     <xs:attribute type="UDoubleGT0NAOptionType" name="avgDistance" use="required"/>
     <xs:attribute type="xs:boolean" name="allowSelfConnection" use="required"/>
+    <xs:attribute type="xs:boolean" name="constantNumOfConnections" use="optional" default="true"/>
   </xs:complexType>
 
   <!-- Pool - neuron group - configuration -->
@@ -527,6 +520,7 @@
     <xs:attribute type="UDoubleLE1Type" name="targetConnDensity" use="required"/>
     <xs:attribute type="xs:string" name="srcPool" use="required"/>
     <xs:attribute type="UDoubleLE1Type" name="srcConnDensity" use="required"/>
+    <xs:attribute type="xs:boolean" name="constantNumOfConnections" use="optional" default="true"/>
   </xs:complexType>
 
   <!-- Reservoir - interpools interconnection container - configuration -->

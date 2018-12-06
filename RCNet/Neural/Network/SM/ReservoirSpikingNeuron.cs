@@ -20,7 +20,7 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// Range of the rescalled state value. Allways (0,1)
         /// </summary>
-        private static readonly Interval _rescalledStateRange = new Interval(0, 1);
+        private static readonly Interval _rescalledStateRange = new Interval(-1, 1);
         
         //Attribute properties
         /// <summary>
@@ -65,14 +65,21 @@ namespace RCNet.Neural.Network.SM
         public double OutputSignal { get; private set; }
 
         /// <summary>
-        /// Value to be passed to readout layer as a primary predictor.
+        /// Computation cycles between previous output signal and current output signal.
         /// </summary>
-        public double PrimaryPredictor { get { return _firingRate.GetRate(); } }
+        public int NoSignalCycles { get; private set; }
 
         /// <summary>
-        /// Value to be passed to readout layer as an augmented predictor.
+        /// Value to be passed to readout layer as a primary predictor
+        /// (rescalled internal state of the neuron - membrane potential)
         /// </summary>
-        public double SecondaryPredictor { get; private set; }
+        public double PrimaryPredictor { get { return _rescalledStateRange.Rescale(_activation.InternalState, _activation.InternalStateRange); } }
+
+        /// <summary>
+        /// Value to be passed to readout layer as an augmented predictor
+        /// (exponentially weighted firing rate)
+        /// </summary>
+        public double SecondaryPredictor { get { return _firingRate.GetRate(); } }
 
         //Attributes
         /// <summary>
@@ -90,6 +97,11 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         private double _stimuli;
 
+        /// <summary>
+        /// Local random generator
+        /// </summary>
+        private Random _rand;
+
 
         //Constructor
         /// <summary>
@@ -101,14 +113,13 @@ namespace RCNet.Neural.Network.SM
         /// <param name="bias">Constant bias.</param>
         /// <param name="useSecondaryPredictor">Specifies whether to use neuron's secondary predictor.</param>
         public ReservoirSpikingNeuron(NeuronPlacement placement,
-                                     CommonEnums.NeuronRole role,
-                                     IActivationFunction activation,
-                                     double bias,
-                                     bool useSecondaryPredictor
-                                     )
+                                      CommonEnums.NeuronRole role,
+                                      IActivationFunction activation,
+                                      double bias,
+                                      bool useSecondaryPredictor
+                                      )
         {
             Placement = placement;
-            Statistics = new NeuronStatistics();
             Role = role;
             Bias = bias;
             //Check whether function is spiking
@@ -119,6 +130,7 @@ namespace RCNet.Neural.Network.SM
             _activation = activation;
             _firingRate = new FiringRate();
             UseSecondaryPredictor = useSecondaryPredictor;
+            Statistics = new NeuronStatistics(_activation.InternalStateRange);
             Reset(false);
             return;
         }
@@ -133,21 +145,27 @@ namespace RCNet.Neural.Network.SM
             _activation.Reset();
             _firingRate.Reset();
             _stimuli = 0;
-            SecondaryPredictor = 0;
             if (statistics)
             {
                 Statistics.Reset();
             }
+            _rand = new Random(Placement.PoolFlatIdx);
+            //Set initially -1 to counter (no one spike spiked)
+            NoSignalCycles = -1;
             return;
         }
 
         /// <summary>
         /// Stores new incoming stimulation.
         /// </summary>
-        /// <param name="stimuli">Input stimulation</param>
-        public void NewStimuli(double stimuli)
+        /// <param name="externalStimuli">Stimulation comming from input neurons</param>
+        /// <param name="internalStimuli">Stimulation comming from reservoir neurons</param>
+        public void NewStimuli(double externalStimuli, double internalStimuli)
         {
-            _stimuli = (stimuli + Bias).Bound();
+            //double noiseStrength = 0.1;
+            double noise = _rand.NextGaussianDouble(0, 0.15);
+            noise *= _rand.NextSign();
+            _stimuli = (externalStimuli + internalStimuli + Bias + noise.Bound());
             return;
         }
 
@@ -159,10 +177,23 @@ namespace RCNet.Neural.Network.SM
         {
             OutputSignal = _activation.Compute(_stimuli);
             _firingRate.Update(OutputSignal > 0);
-            SecondaryPredictor = _rescalledStateRange.Rescale(_activation.InternalState, _activation.InternalStateRange);
+            if (OutputSignal > 0)
+            {
+                //Spike, so reset the counter
+                NoSignalCycles = 0;
+            }
+            else
+            {
+                //No spike
+                if (NoSignalCycles != -1)
+                {
+                    //Neuron has already spiked, so standardly increment counter
+                    ++NoSignalCycles;
+                }
+            }
             if (collectStatistics)
             {
-                Statistics.Update(_stimuli, NeuronStatistics.NormalizedStateRange.Rescale(_activation.InternalState, _activation.InternalStateRange), OutputSignal);
+                Statistics.Update(_stimuli, _activation.InternalState, OutputSignal);
             }
             return;
         }

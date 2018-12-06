@@ -59,6 +59,11 @@ namespace RCNet.Neural.Network.SM
         public double OutputSignal { get; private set; }
 
         /// <summary>
+        /// Computation cycles left without output signal
+        /// </summary>
+        public int NoSignalCycles { get; private set; }
+
+        /// <summary>
         /// Value to be passed to readout layer as a primary predictor.
         /// </summary>
         public double PrimaryPredictor { get { return OutputSignal; } }
@@ -103,7 +108,6 @@ namespace RCNet.Neural.Network.SM
                                      )
         {
             Placement = placement;
-            Statistics = new NeuronStatistics();
             Role = role;
             Bias = bias;
             //Check whether function is analog
@@ -114,6 +118,7 @@ namespace RCNet.Neural.Network.SM
             _activation = activation;
             _retainmentRatio = retainmentRatio;
             UseSecondaryPredictor = useSecondaryPredictor;
+            Statistics = new NeuronStatistics(OutputRange);
             Reset(false);
             return;
         }
@@ -128,21 +133,24 @@ namespace RCNet.Neural.Network.SM
         {
             _activation.Reset();
             _stimuli = 0;
-            OutputSignal = 0;
+            OutputSignal = _activation.Compute(_stimuli);
             if (statistics)
             {
                 Statistics.Reset();
             }
+            //Set initially -1 to counter (no one signal transmitted)
+            NoSignalCycles = -1;
             return;
         }
 
         /// <summary>
         /// Stores new incoming stimulation.
         /// </summary>
-        /// <param name="stimuli">Input stimulation</param>
-        public void NewStimuli(double stimuli)
+        /// <param name="externalStimuli">Stimulation comming from input neurons</param>
+        /// <param name="internalStimuli">Stimulation comming from reservoir neurons</param>
+        public void NewStimuli(double externalStimuli, double internalStimuli)
         {
-            _stimuli = (stimuli + Bias).Bound();
+            _stimuli = (externalStimuli + internalStimuli + Bias).Bound();
             return;
         }
 
@@ -152,10 +160,19 @@ namespace RCNet.Neural.Network.SM
         /// <param name="collectStatistics">Specifies whether to update internal statistics</param>
         public void NewState(bool collectStatistics)
         {
-            OutputSignal = (_retainmentRatio * OutputSignal) + (1d - _retainmentRatio) * _activation.Compute(_stimuli);
+            double state = _activation.Compute(_stimuli);
+            OutputSignal = (_retainmentRatio * OutputSignal) + (1d - _retainmentRatio) * state;
+            if(OutputSignal != _activation.OutputSignalRange.Mid)
+            {
+                NoSignalCycles = 0;
+            }
+            else
+            {
+                if (NoSignalCycles != -1) ++NoSignalCycles;
+            }
             if (collectStatistics)
             {
-                Statistics.Update(_stimuli, NeuronStatistics.NormalizedStateRange.Rescale(OutputSignal, OutputRange), OutputSignal);
+                Statistics.Update(_stimuli, state, OutputSignal);
             }
             return;
         }

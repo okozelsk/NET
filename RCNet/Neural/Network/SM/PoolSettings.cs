@@ -57,6 +57,10 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         public RandomValueSettings InterconnectionSynapseWeight { get; set; }
         /// <summary>
+        /// Specifies whether to keep for each neuron constant number of incoming interconnections
+        /// </summary>
+        public bool ConstantNumOfConnections { get; set; }
+        /// <summary>
         /// Indicates whether the retainment (leaky integrators) neurons feature is used.
         /// Relevant for neurons having time independent activation (analog)
         /// </summary>
@@ -85,6 +89,7 @@ namespace RCNet.Neural.Network.SM
             InterconnectionDensity = 0;
             InterconnectionAvgDistance = 0;
             InterconnectionSynapseWeight = null;
+            ConstantNumOfConnections = true;
             RetainmentNeuronsFeature = false;
             RetainmentNeuronsDensity = 0;
             RetainmentRate = null;
@@ -116,6 +121,7 @@ namespace RCNet.Neural.Network.SM
             {
                 InterconnectionSynapseWeight = source.InterconnectionSynapseWeight.DeepClone();
             }
+            ConstantNumOfConnections = source.ConstantNumOfConnections;
             RetainmentNeuronsFeature = source.RetainmentNeuronsFeature;
             RetainmentNeuronsDensity = source.RetainmentNeuronsDensity;
             if (RetainmentNeuronsFeature)
@@ -201,6 +207,7 @@ namespace RCNet.Neural.Network.SM
             InterconnectionAvgDistance = interconnectionElem.Attribute("avgDistance").Value == "NA" ? 0d : double.Parse(interconnectionElem.Attribute("avgDistance").Value, CultureInfo.InvariantCulture);
             InterconnectionAllowSelfConn = bool.Parse(interconnectionElem.Attribute("allowSelfConnection").Value);
             InterconnectionSynapseWeight = new RandomValueSettings(interconnectionElem.Descendants("weight").First());
+            ConstantNumOfConnections = bool.Parse(interconnectionElem.Attribute("constantNumOfConnections").Value);
             //Retainment neurons
             XElement retainmentElem = poolSettingsElem.Descendants("retainmentNeurons").FirstOrDefault();
             RetainmentNeuronsFeature = (retainmentElem != null);
@@ -234,6 +241,7 @@ namespace RCNet.Neural.Network.SM
                 InterconnectionDensity != cmpSettings.InterconnectionDensity ||
                 InterconnectionAvgDistance != cmpSettings.InterconnectionAvgDistance ||
                 !Equals(InterconnectionSynapseWeight, cmpSettings.InterconnectionSynapseWeight) ||
+                ConstantNumOfConnections != cmpSettings.ConstantNumOfConnections ||
                 RetainmentNeuronsFeature != cmpSettings.RetainmentNeuronsFeature ||
                 RetainmentNeuronsDensity != cmpSettings.RetainmentNeuronsDensity ||
                 !Equals(RetainmentRate, cmpSettings.RetainmentRate)

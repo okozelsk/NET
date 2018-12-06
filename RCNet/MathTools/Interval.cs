@@ -4,31 +4,31 @@ using System.Collections.Generic;
 namespace RCNet.MathTools
 {
     /// <summary>
-    /// Implements a simple thread safe class representing interval.
+    /// Implements a simple thread safe (if required) class representing interval.
     /// </summary>
     [Serializable]
     public class Interval
     {
         //Constants
         /// <summary>
-        /// Types of interval
+        /// Interval types
         /// </summary>
         public enum IntervalType
         {
             /// <summary>
-            /// LCRC
+            /// Left closed - Right closed
             /// </summary>
             LeftClosedRightClosed,
             /// <summary>
-            /// LCRO
+            /// Left closed - Right open
             /// </summary>
             LeftClosedRightOpen,
             /// <summary>
-            /// LORC
+            /// Left open - Right closed
             /// </summary>
             LeftOpenRightClosed,
             /// <summary>
-            /// LORO
+            /// Left open - Right open
             /// </summary>
             LeftOpenRightOpen
         }//IntervalType
@@ -36,6 +36,7 @@ namespace RCNet.MathTools
         //Attributes
         //Locker to ensure thread safe behaviour
         private Object _lock = new Object();
+        private readonly bool _threadSafe;
         //Initialization indicator
         private bool _initialized;
         //Interval borders
@@ -46,8 +47,10 @@ namespace RCNet.MathTools
         /// <summary>
         /// Construct an interval
         /// </summary>
-        public Interval()
+        /// <param name="threadSafe">Specifies if to create thread safe instance</param>
+        public Interval(bool threadSafe = false)
         {
+            _threadSafe = threadSafe;
             Reset();
             return;
         }
@@ -57,7 +60,9 @@ namespace RCNet.MathTools
         /// </summary>
         /// <param name="min">Left value</param>
         /// <param name="max">Right value</param>
-        public Interval(double min, double max)
+        /// <param name="threadSafe">Specifies if to create thread safe instance</param>
+        public Interval(double min, double max, bool threadSafe = false)
+            :this(threadSafe)
         {
             Set(min, max);
             return;
@@ -67,9 +72,10 @@ namespace RCNet.MathTools
         /// Constructs an interval
         /// </summary>
         /// <param name="values">Collection of the values from which are determined interval's min and max borders</param>
-        public Interval (IEnumerable<double> values)
+        /// <param name="threadSafe">Specifies if to create thread safe instance</param>
+        public Interval(IEnumerable<double> values, bool threadSafe = false)
+            : this(threadSafe)
         {
-            Reset();
             foreach (double value in values)
             {
                 Adjust(value);
@@ -81,7 +87,9 @@ namespace RCNet.MathTools
         /// Constructs an interval as a copy of source instance
         /// </summary>
         /// <param name="source">Source instance</param>
-        public Interval(Interval source)
+        /// <param name="threadSafe">Specifies if to create thread safe instance</param>
+        public Interval(Interval source, bool threadSafe = false)
+            : this(threadSafe)
         {
             CopyFrom(source);
             return;
@@ -95,7 +103,14 @@ namespace RCNet.MathTools
         {
             get
             {
-                lock (_lock)
+                if(_threadSafe)
+                {
+                    lock (_lock)
+                    {
+                        return _initialized;
+                    }
+                }
+                else
                 {
                     return _initialized;
                 }
@@ -109,7 +124,14 @@ namespace RCNet.MathTools
         {
             get
             {
-                lock (_lock)
+                if (_threadSafe)
+                {
+                    lock (_lock)
+                    {
+                        return _min;
+                    }
+                }
+                else
                 {
                     return _min;
                 }
@@ -123,7 +145,14 @@ namespace RCNet.MathTools
         {
             get
             {
-                lock (_lock)
+                if (_threadSafe)
+                {
+                    lock (_lock)
+                    {
+                        return _max;
+                    }
+                }
+                else
                 {
                     return _max;
                 }
@@ -137,7 +166,14 @@ namespace RCNet.MathTools
         {
             get
             {
-                lock (_lock)
+                if (_threadSafe)
+                {
+                    lock (_lock)
+                    {
+                        return _min + ((_max - _min) / 2d);
+                    }
+                }
+                else
                 {
                     return _min + ((_max - _min) / 2d);
                 }
@@ -151,7 +187,14 @@ namespace RCNet.MathTools
         {
             get
             {
-                lock (_lock)
+                if (_threadSafe)
+                {
+                    lock (_lock)
+                    {
+                        return _max - _min;
+                    }
+                }
+                else
                 {
                     return _max - _min;
                 }
@@ -166,7 +209,7 @@ namespace RCNet.MathTools
         {
             if (obj == null) return false;
             Interval cmpInterval = obj as Interval;
-            lock(_lock)
+            lock (_lock)
             {
                 return (_min == cmpInterval._min && _max == cmpInterval._max);
             }
@@ -191,12 +234,25 @@ namespace RCNet.MathTools
         /// </summary>
         public void Reset()
         {
-            lock(_lock)
+            if(_threadSafe)
             {
-                _initialized = false;
-                _min = 0;
-                _max = 0;
+                lock (_lock)
+                {
+                    ResetInternal();
+                }
             }
+            else
+            {
+                ResetInternal();
+            }
+            return;
+        }
+
+        private void ResetInternal()
+        {
+            _initialized = false;
+            _min = 0;
+            _max = 0;
             return;
         }
 
@@ -206,10 +262,16 @@ namespace RCNet.MathTools
         /// <returns></returns>
         public Interval DeepClone()
         {
-            lock (_lock)
+            if (_threadSafe)
             {
-                Interval clone = new Interval(this);
-                return clone;
+                lock (_lock)
+                {
+                    return new Interval(this);
+                }
+            }
+            else
+            {
+                return new Interval(this);
             }
         }
 
@@ -219,12 +281,25 @@ namespace RCNet.MathTools
         /// <param name="source">Source instance</param>
         public void CopyFrom(Interval source)
         {
-            lock (_lock)
+            if (_threadSafe)
             {
-                _min = source._min;
-                _max = source._max;
-                _initialized = source._initialized;
+                lock (source._lock)
+                {
+                    CopyFromInternal(source);
+                }
             }
+            else
+            {
+                CopyFromInternal(source);
+            }
+            return;
+        }
+
+        private void CopyFromInternal(Interval source)
+        {
+            _min = source._min;
+            _max = source._max;
+            _initialized = source._initialized;
             return;
         }
 
@@ -236,12 +311,25 @@ namespace RCNet.MathTools
         /// <param name="border2">The second border value</param>
         public void Set(double border1, double border2)
         {
-            lock (_lock)
+            if(_threadSafe)
             {
-                _min = Math.Min(border1, border2);
-                _max = Math.Max(border1, border2);
-                _initialized = true;
+                lock (_lock)
+                {
+                    SetInternal(border1, border2);
+                }
             }
+            else
+            {
+                SetInternal(border1, border2);
+            }
+            return;
+        }
+
+        private void SetInternal(double border1, double border2)
+        {
+            _min = Math.Min(border1, border2);
+            _max = Math.Max(border1, border2);
+            _initialized = true;
             return;
         }
 
@@ -251,24 +339,37 @@ namespace RCNet.MathTools
         /// <param name="sampleValue">Sample value</param>
         public void Adjust(double sampleValue)
         {
-            lock (_lock)
+            if(_threadSafe)
             {
-                if (!_initialized)
+                lock (_lock)
+                {
+                    AdjustInternal(sampleValue);
+                }
+            }
+            else
+            {
+                AdjustInternal(sampleValue);
+            }
+            return;
+        }
+
+        private void AdjustInternal(double sampleValue)
+        {
+            if (!_initialized)
+            {
+                _min = sampleValue;
+                _max = sampleValue;
+                _initialized = true;
+            }
+            else
+            {
+                if (sampleValue < _min)
                 {
                     _min = sampleValue;
-                    _max = sampleValue;
-                    _initialized = true;
                 }
-                else
+                else if (sampleValue > _max)
                 {
-                    if (sampleValue < _min)
-                    {
-                        _min = sampleValue;
-                    }
-                    else if (sampleValue > _max)
-                    {
-                        _max = sampleValue;
-                    }
+                    _max = sampleValue;
                 }
             }
             return;
@@ -280,7 +381,7 @@ namespace RCNet.MathTools
         /// <param name="sampleValueCollection">Collection of sample values</param>
         public void Adjust(IEnumerable<double> sampleValueCollection)
         {
-            foreach(double value in sampleValueCollection)
+            foreach (double value in sampleValueCollection)
             {
                 Adjust(value);
             }
@@ -372,21 +473,33 @@ namespace RCNet.MathTools
         /// <param name="intervalType">Type of interval to be considered</param>
         public bool BelongsTo(double value, IntervalType intervalType = IntervalType.LeftClosedRightClosed)
         {
-            lock (_lock)
+            if(_threadSafe)
             {
-                switch (intervalType)
+                lock (_lock)
                 {
-                    case IntervalType.LeftClosedRightClosed:
-                        return (value >= _min && value <= _max);
-                    case IntervalType.LeftClosedRightOpen:
-                        return (value >= _min && value < _max);
-                    case IntervalType.LeftOpenRightClosed:
-                        return (value > _min && value <= _max);
-                    case IntervalType.LeftOpenRightOpen:
-                        return (value > _min && value < _max);
-                    default:
-                        break;
+                    return BelongsToInternal(value, intervalType);
                 }
+            }
+            else
+            {
+                return BelongsToInternal(value, intervalType);
+            }
+        }
+
+        private bool BelongsToInternal(double value, IntervalType intervalType = IntervalType.LeftClosedRightClosed)
+        {
+            switch (intervalType)
+            {
+                case IntervalType.LeftClosedRightClosed:
+                    return (value >= _min && value <= _max);
+                case IntervalType.LeftClosedRightOpen:
+                    return (value >= _min && value < _max);
+                case IntervalType.LeftOpenRightClosed:
+                    return (value > _min && value <= _max);
+                case IntervalType.LeftOpenRightOpen:
+                    return (value > _min && value < _max);
+                default:
+                    break;
             }
             return false;
         }
@@ -398,8 +511,19 @@ namespace RCNet.MathTools
         /// <param name="valueRange">Input value range</param>
         public double Rescale(double value, Interval valueRange)
         {
-            return _min + (((value - valueRange._min) / valueRange.Span) * Span);
+            if(_threadSafe)
+            {
+                lock (_lock)
+                {
+                    return _min + (((value - valueRange._min) / valueRange.Span) * Span);
+                }
+            }
+            else
+            {
+                return _min + (((value - valueRange._min) / valueRange.Span) * Span);
+            }
         }
+
 
     }//Interval
 

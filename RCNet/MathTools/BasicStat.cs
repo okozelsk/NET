@@ -5,7 +5,7 @@ using RCNet.Extensions;
 namespace RCNet.MathTools
 {
     /// <summary>
-    /// Implements the simple and thread safe statistics.
+    /// Implements the simple and thread safe (if required) statistics.
     /// </summary>
     [Serializable]
     public class BasicStat
@@ -13,6 +13,7 @@ namespace RCNet.MathTools
         //Attributes
         //Locker to ensure thread safe behaviour
         private Object _lock = new Object();
+        private readonly bool _threadSafe;
         //Base values
         private double _sum;
         private double _sumOfSquares;
@@ -33,8 +34,10 @@ namespace RCNet.MathTools
         /// <summary>
         /// Creates an uninitialized instance
         /// </summary>
-        public BasicStat()
+        /// <param name="threadSafe">Specifies if to create thread safe instance</param>
+        public BasicStat(bool threadSafe = false)
         {
+            _threadSafe = threadSafe;
             Reset();
             return;
         }
@@ -42,7 +45,9 @@ namespace RCNet.MathTools
         /// <summary>
         /// Creates an instance and loads given sample values
         /// </summary>
-        public BasicStat(IEnumerable<double> sampleValueCollection)
+        /// <param name="threadSafe">Specifies if to create thread safe instance</param>
+        public BasicStat(IEnumerable<double> sampleValueCollection, bool threadSafe = false)
+            : this(threadSafe)
         {
             SetSampleValues(sampleValueCollection);
             return;
@@ -51,7 +56,9 @@ namespace RCNet.MathTools
         /// <summary>
         /// Creates an instance and loads given sample values
         /// </summary>
-        public BasicStat(IEnumerable<long> sampleValueCollection)
+        /// <param name="threadSafe">Specifies if to create thread safe instance</param>
+        public BasicStat(IEnumerable<long> sampleValueCollection, bool threadSafe = false)
+            : this(threadSafe)
         {
             SetSampleValues(sampleValueCollection);
             return;
@@ -60,7 +67,9 @@ namespace RCNet.MathTools
         /// <summary>
         /// Creates an instance and loads given sample values
         /// </summary>
-        public BasicStat(IEnumerable<ulong> sampleValueCollection)
+        /// <param name="threadSafe">Specifies if to create thread safe instance</param>
+        public BasicStat(IEnumerable<ulong> sampleValueCollection, bool threadSafe = false)
+            : this(threadSafe)
         {
             SetSampleValues(sampleValueCollection);
             return;
@@ -69,7 +78,9 @@ namespace RCNet.MathTools
         /// <summary>
         /// Creates an instance and loads given sample values
         /// </summary>
-        public BasicStat(IEnumerable<int> sampleValueCollection)
+        /// <param name="threadSafe">Specifies if to create thread safe instance</param>
+        public BasicStat(IEnumerable<int> sampleValueCollection, bool threadSafe = false)
+            : this(threadSafe)
         {
             SetSampleValues(sampleValueCollection);
             return;
@@ -78,7 +89,9 @@ namespace RCNet.MathTools
         /// <summary>
         /// Creates an instance and loads given sample values
         /// </summary>
-        public BasicStat(IEnumerable<uint> sampleValueCollection)
+        /// <param name="threadSafe">Specifies if to create thread safe instance</param>
+        public BasicStat(IEnumerable<uint> sampleValueCollection, bool threadSafe = false)
+            : this(threadSafe)
         {
             SetSampleValues(sampleValueCollection);
             return;
@@ -87,7 +100,9 @@ namespace RCNet.MathTools
         /// <summary>
         /// Creates an instance and loads given sample values
         /// </summary>
-        public BasicStat(IEnumerable<byte> sampleValueCollection)
+        /// <param name="threadSafe">Specifies if to create thread safe instance</param>
+        public BasicStat(IEnumerable<byte> sampleValueCollection, bool threadSafe = false)
+            : this(threadSafe)
         {
             SetSampleValues(sampleValueCollection);
             return;
@@ -96,7 +111,9 @@ namespace RCNet.MathTools
         /// <summary>
         /// The copy constructor
         /// </summary>
-        public BasicStat(BasicStat source)
+        /// <param name="threadSafe">Specifies if to create thread safe instance</param>
+        public BasicStat(BasicStat source, bool threadSafe = false)
+            : this(threadSafe)
         {
             CopyFrom(source);
             return;
@@ -110,7 +127,14 @@ namespace RCNet.MathTools
         {
             get
             {
-                lock(_lock)
+                if (_threadSafe)
+                {
+                    lock (_lock)
+                    {
+                        return _numOfSamples;
+                    }
+                }
+                else
                 {
                     return _numOfSamples;
                 }
@@ -124,7 +148,14 @@ namespace RCNet.MathTools
         {
             get
             {
-                lock (_lock)
+                if (_threadSafe)
+                {
+                    lock (_lock)
+                    {
+                        return _numOfNonzeroSamples;
+                    }
+                }
+                else
                 {
                     return _numOfNonzeroSamples;
                 }
@@ -138,7 +169,14 @@ namespace RCNet.MathTools
         {
             get
             {
-                lock (_lock)
+                if (_threadSafe)
+                {
+                    lock (_lock)
+                    {
+                        return _sum;
+                    }
+                }
+                else
                 {
                     return _sum;
                 }
@@ -152,7 +190,14 @@ namespace RCNet.MathTools
         {
             get
             {
-                lock (_lock)
+                if (_threadSafe)
+                {
+                    lock (_lock)
+                    {
+                        return _sumOfSquares;
+                    }
+                }
+                else
                 {
                     return _sumOfSquares;
                 }
@@ -166,7 +211,14 @@ namespace RCNet.MathTools
         {
             get
             {
-                lock (_lock)
+                if (_threadSafe)
+                {
+                    lock (_lock)
+                    {
+                        return _min;
+                    }
+                }
+                else
                 {
                     return _min;
                 }
@@ -180,7 +232,14 @@ namespace RCNet.MathTools
         {
             get
             {
-                lock (_lock)
+                if (_threadSafe)
+                {
+                    lock (_lock)
+                    {
+                        return _max;
+                    }
+                }
+                else
                 {
                     return _max;
                 }
@@ -194,7 +253,14 @@ namespace RCNet.MathTools
         {
             get
             {
-                lock (_lock)
+                if (_threadSafe)
+                {
+                    lock (_lock)
+                    {
+                        return _min + ((_max - _min) / 2d);
+                    }
+                }
+                else
                 {
                     return _min + ((_max - _min) / 2d);
                 }
@@ -208,7 +274,14 @@ namespace RCNet.MathTools
         {
             get
             {
-                lock (_lock)
+                if (_threadSafe)
+                {
+                    lock (_lock)
+                    {
+                        return (_max - _min);
+                    }
+                }
+                else
                 {
                     return (_max - _min);
                 }
@@ -222,7 +295,15 @@ namespace RCNet.MathTools
         {
             get
             {
-                lock (_lock)
+                if (_threadSafe)
+                {
+                    lock (_lock)
+                    {
+                        Recompute();
+                        return _arithAvg;
+                    }
+                }
+                else
                 {
                     Recompute();
                     return _arithAvg;
@@ -237,7 +318,15 @@ namespace RCNet.MathTools
         {
             get
             {
-                lock (_lock)
+                if (_threadSafe)
+                {
+                    lock (_lock)
+                    {
+                        Recompute();
+                        return _meanSquare;
+                    }
+                }
+                else
                 {
                     Recompute();
                     return _meanSquare;
@@ -252,7 +341,15 @@ namespace RCNet.MathTools
         {
             get
             {
-                lock (_lock)
+                if (_threadSafe)
+                {
+                    lock (_lock)
+                    {
+                        Recompute();
+                        return _rootMeanSquare;
+                    }
+                }
+                else
                 {
                     Recompute();
                     return _rootMeanSquare;
@@ -267,7 +364,15 @@ namespace RCNet.MathTools
         {
             get
             {
-                lock (_lock)
+                if (_threadSafe)
+                {
+                    lock (_lock)
+                    {
+                        Recompute();
+                        return _variance;
+                    }
+                }
+                else
                 {
                     Recompute();
                     return _variance;
@@ -282,7 +387,15 @@ namespace RCNet.MathTools
         {
             get
             {
-                lock (_lock)
+                if (_threadSafe)
+                {
+                    lock (_lock)
+                    {
+                        Recompute();
+                        return _stdDev;
+                    }
+                }
+                else
                 {
                     Recompute();
                     return _stdDev;
@@ -297,7 +410,15 @@ namespace RCNet.MathTools
         {
             get
             {
-                lock (_lock)
+                if (_threadSafe)
+                {
+                    lock (_lock)
+                    {
+                        Recompute();
+                        return _spanDev;
+                    }
+                }
+                else
                 {
                     Recompute();
                     return _spanDev;
@@ -311,17 +432,30 @@ namespace RCNet.MathTools
         /// </summary>
         public void Reset()
         {
-            lock(_lock)
+            if (_threadSafe)
             {
-                _sum = 0;
-                _sumOfSquares = 0;
-                _min = 0;
-                _max = 0;
-                _numOfSamples = 0;
-                _numOfNonzeroSamples = 0;
-                _recompute = true;
-                Recompute();
+                lock (_lock)
+                {
+                    ResetInternal();
+                }
             }
+            else
+            {
+                ResetInternal();
+            }
+            return;
+        }
+
+        private void ResetInternal()
+        {
+            _sum = 0;
+            _sumOfSquares = 0;
+            _min = 0;
+            _max = 0;
+            _numOfSamples = 0;
+            _numOfNonzeroSamples = 0;
+            _recompute = true;
+            Recompute();
             return;
         }
 
@@ -331,21 +465,34 @@ namespace RCNet.MathTools
         /// <param name="source">The source instance</param>
         public void CopyFrom(BasicStat source)
         {
-            lock(_lock)
+            if(_threadSafe)
             {
-                _sum = source._sum;
-                _sumOfSquares = source._sumOfSquares;
-                _min = source._min;
-                _max = source._max;
-                _numOfSamples = source._numOfSamples;
-                _numOfNonzeroSamples = source._numOfNonzeroSamples;
-                _recompute = source._recompute;
-                _arithAvg = source._arithAvg;
-                _rootMeanSquare = source._rootMeanSquare;
-                _variance = source._variance;
-                _stdDev = source._stdDev;
-                _spanDev = source._spanDev;
+                lock (source._lock)
+                {
+                    CopyFromInternal(source);
+                }
             }
+            else
+            {
+                CopyFromInternal(source);
+            }
+            return;
+        }
+
+        private void CopyFromInternal(BasicStat source)
+        {
+            _sum = source._sum;
+            _sumOfSquares = source._sumOfSquares;
+            _min = source._min;
+            _max = source._max;
+            _numOfSamples = source._numOfSamples;
+            _numOfNonzeroSamples = source._numOfNonzeroSamples;
+            _recompute = source._recompute;
+            _arithAvg = source._arithAvg;
+            _rootMeanSquare = source._rootMeanSquare;
+            _variance = source._variance;
+            _stdDev = source._stdDev;
+            _spanDev = source._spanDev;
             return;
         }
 
@@ -354,7 +501,7 @@ namespace RCNet.MathTools
         /// </summary>
         private void Recompute()
         {
-            if(_recompute)
+            if (_recompute)
             {
                 if (_numOfSamples > 0)
                 {
@@ -389,16 +536,28 @@ namespace RCNet.MathTools
         /// <param name="simStdDev">Simulated StdDev</param>
         public void SimulateNext(double simSampleValue, out double simArithAvg, out double simVariance, out double simStdDev)
         {
-            lock (_lock)
+            if (_threadSafe)
             {
-                Recompute();
-                simArithAvg = (_sum + simSampleValue) / (double)(_numOfSamples + 1);
-                simVariance = ((_sumOfSquares + simSampleValue.Power(2)) / (double)(_numOfSamples + 1)) - simArithAvg.Power(2);
-                simStdDev = Math.Sqrt(simVariance);
+                lock (_lock)
+                {
+                    SimulateNextInternal(simSampleValue, out simArithAvg, out simVariance, out simStdDev);
+                }
+            }
+            else
+            {
+                SimulateNextInternal(simSampleValue, out simArithAvg, out simVariance, out simStdDev);
             }
             return;
         }
 
+        private void SimulateNextInternal(double simSampleValue, out double simArithAvg, out double simVariance, out double simStdDev)
+        {
+            Recompute();
+            simArithAvg = (_sum + simSampleValue) / (double)(_numOfSamples + 1);
+            simVariance = ((_sumOfSquares + simSampleValue.Power(2)) / (double)(_numOfSamples + 1)) - simArithAvg.Power(2);
+            simStdDev = Math.Sqrt(simVariance);
+            return;
+        }
 
 
         /// <summary>
@@ -406,26 +565,39 @@ namespace RCNet.MathTools
         /// </summary>
         public void AddSampleValue(double value)
         {
-            lock(_lock)
+            if (_threadSafe)
             {
-                _sum += value;
-                _sumOfSquares += value.Power(2);
-                if (_numOfSamples == 0)
+                lock (_lock)
                 {
-                    _min = _max = value;
+                    AddSampleValueInternal(value);
                 }
-                else
-                {
-                    if (value < _min) _min = value;
-                    else if (value > _max) _max = value;
-                }
-                ++_numOfSamples;
-                if (value != 0)
-                {
-                    ++_numOfNonzeroSamples;
-                }
-                _recompute = true;
             }
+            else
+            {
+                AddSampleValueInternal(value);
+            }
+            return;
+        }
+
+        private void AddSampleValueInternal(double value)
+        {
+            _sum += value;
+            _sumOfSquares += value.Power(2);
+            if (_numOfSamples == 0)
+            {
+                _min = _max = value;
+            }
+            else
+            {
+                if (value < _min) _min = value;
+                else if (value > _max) _max = value;
+            }
+            ++_numOfSamples;
+            if (value != 0)
+            {
+                ++_numOfNonzeroSamples;
+            }
+            _recompute = true;
             return;
         }
 
@@ -434,7 +606,7 @@ namespace RCNet.MathTools
         /// </summary>
         public void AddSampleValues(IEnumerable<double> sampleValueCollection)
         {
-            foreach(double value in sampleValueCollection)
+            foreach (double value in sampleValueCollection)
             {
                 AddSampleValue(value);
             }

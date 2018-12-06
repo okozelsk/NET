@@ -20,6 +20,7 @@ namespace RCNet.Neural.Activation
         //Attributes
         private static readonly Interval _outputRange = new Interval(0, 1);
         private readonly Interval _stateRange;
+        private readonly double _initialPotential;
         private readonly double _resistance;
         private readonly double _decayRate;
         private readonly double _restV;
@@ -47,6 +48,7 @@ namespace RCNet.Neural.Activation
             _refractoryPeriods = settings.RefractoryPeriods;
             _stimuliCoeff = settings.StimuliCoeff;
             _stateRange = new Interval(_restV, _firingThresholdV);
+            _initialPotential = rand.NextBoundedUniformDouble(_resetV, _firingThresholdV);
             Reset();
             return;
         }
@@ -88,7 +90,7 @@ namespace RCNet.Neural.Activation
         /// </summary>
         public void Reset()
         {
-            _membraneV = _restV;
+            _membraneV = _initialPotential;
             _inRefractory = false;
             _refractoryPeriod = 0;
             return;
@@ -125,12 +127,14 @@ namespace RCNet.Neural.Activation
                 }
             }
             //Compute membrane new potential
-            _membraneV = _restV + (_membraneV - _restV) * (1d - _decayRate) + _resistance * x;
+            //Apply decay
+            _membraneV = _restV + (_membraneV - _restV) * (1d - _decayRate);
+            //Apply increment
+            _membraneV += _resistance * x;
             //Output
             if (_membraneV >= _firingThresholdV)
             {
                 spike = Spike;
-                _membraneV = _firingThresholdV;
             }
             return spike;
         }

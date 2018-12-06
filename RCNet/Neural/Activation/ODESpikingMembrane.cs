@@ -88,13 +88,14 @@ namespace RCNet.Neural.Activation
         /// </summary>
         protected double _stimuli;
         /// <summary>
-        /// Minimal allowed membrane potential
+        /// Membrane initial voltage
         /// </summary>
-        protected double _minPotential;
+        protected double _initialPotential;
 
         /// <summary>
         /// Constructs an initialized instance
         /// </summary>
+        /// <param name="rand">Random object to be used for the initalization of a starting membrane potential</param>
         /// <param name="restV">Membrane rest voltage</param>
         /// <param name="resetV">Membrane reset voltage</param>
         /// <param name="firingThresholdV">Firing threshold</param>
@@ -104,7 +105,8 @@ namespace RCNet.Neural.Activation
         /// <param name="stepTimeScale">Computation step time scale</param>
         /// <param name="subSteps">Computation sub-steps</param>
         /// <param name="numOfEvolvingVars">Number of evolving variables</param>
-        protected ODESpikingMembrane(double restV,
+        protected ODESpikingMembrane(Random rand,
+                                     double restV,
                                      double resetV,
                                      double firingThresholdV,
                                      int refractoryPeriods,
@@ -117,16 +119,17 @@ namespace RCNet.Neural.Activation
         {
             _restV = restV;
             _resetV = resetV;
-            _minPotential = Math.Min(_resetV, _restV);
             _firingThresholdV = firingThresholdV;
             _refractoryPeriods = refractoryPeriods;
             _stimuliCoeff = stimuliCoeff;
-            _stateRange = new Interval(_minPotential, _firingThresholdV);
+            _stateRange = new Interval(Math.Min(_resetV, _restV), _firingThresholdV);
             _evolVars = new Vector(numOfEvolvingVars);
             _solvingMethod = solvingMethod;
             _stepTimeScale = stepTimeScale;
             _subSteps = subSteps;
-            _evolVars[VarMembraneVIdx] = _minPotential;
+            //_initialPotential = rand.NextBoundedUniformDouble(_resetV, _firingThresholdV);
+            _initialPotential = _resetV;
+            _evolVars[VarMembraneVIdx] = _initialPotential;
             _inRefractory = false;
             _refractoryPeriod = 0;
             return;
@@ -169,7 +172,7 @@ namespace RCNet.Neural.Activation
         /// </summary>
         public virtual void Reset()
         {
-            _evolVars[VarMembraneVIdx] = _resetV;
+            _evolVars[VarMembraneVIdx] = _initialPotential;
             _inRefractory = false;
             _refractoryPeriod = 0;
             return;
@@ -205,7 +208,6 @@ namespace RCNet.Neural.Activation
                 }
             }
             //Compute membrane new potential
-            //PhysUnit.ToBase(1, PhysUnit.MetricPrefix.Milli)
             foreach (ODENumSolver.Estimation subResult in ODENumSolver.Solve(MembraneDiffEq, 0, _evolVars, _stepTimeScale, _subSteps, _solvingMethod))
             {
                 _evolVars = subResult.V;
@@ -213,17 +215,12 @@ namespace RCNet.Neural.Activation
                 {
                     break;
                 }
-                else if (_evolVars[VarMembraneVIdx] < _minPotential)
-                {
-                    _evolVars[VarMembraneVIdx] = _minPotential;
-                }
             }
             //Output
             if (_evolVars[VarMembraneVIdx] >= _firingThresholdV)
             {
                 OnFiring();
                 output = Spike;
-                _evolVars[VarMembraneVIdx] = _firingThresholdV;
             }
             return output;
         }
@@ -239,11 +236,7 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Triggered when membrane is firing a spike
         /// </summary>
-        protected virtual void OnFiring()
-        {
-            //Does nothing in base implementation
-            return;
-        }
+        protected abstract void OnFiring();
 
         /// <summary>
         /// Unsupported functionality!!!

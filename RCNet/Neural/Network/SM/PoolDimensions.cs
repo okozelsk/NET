@@ -56,8 +56,34 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         public int Z { get { return Dimensions[2]; } }
 
+        //Static methods
+        /// <summary>
+        /// Computes the Euclidean distance
+        /// </summary>
+        /// <param name="sCoordinates">Source 3D coordinates.</param>
+        /// <param name="tCoordinates">Target 3D coordinates.</param>
+        public static double ComputeEuclideanDistance(int[] sCoordinates, int[] tCoordinates)
+        {
+            double sum = 0;
+            for (int i = 0; i < sCoordinates.Length; i++)
+            {
+                sum += ((double)(sCoordinates[i] - tCoordinates[i])).Power(2);
+            }
+            return Math.Sqrt(sum);
+        }
+        
         //Methods
-        //Methods
+        /// <summary>
+        /// Computes maximal euclidean distance within the pool
+        /// </summary>
+        /// <returns></returns>
+        public double ComputeMaxDistance()
+        {
+            int[] sCoordinates = { 0, 0, 0 };
+            int[] tCoordinates = { Dimensions[0] - 1, Dimensions[1] - 1, Dimensions[2] - 1 };
+            return ComputeEuclideanDistance(sCoordinates, tCoordinates);
+        }
+        
         /// <summary>
         /// See the base.
         /// </summary>

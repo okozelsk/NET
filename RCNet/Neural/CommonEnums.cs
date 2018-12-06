@@ -98,13 +98,33 @@ namespace RCNet.Neural
         public enum NeuronRole
         {
             /// <summary>
-            /// Excitatory. Outgoing synapses will allways have (+) sign.
+            /// Outgoing synapse signal will have sign driven by input data value and target neuron range.
+            /// </summary>
+            Input,
+            /// <summary>
+            /// Excitatory. Outgoing synapse signal will allways have (+) sign.
             /// </summary>
             Excitatory,
             /// <summary>
-            /// Inhibitory. Outgoing synapses will allways have (-) sign.
+            /// Inhibitory. Outgoing synapse signal will allways have (-) sign.
             /// </summary>
             Inhibitory
+        }
+
+        /// <summary>
+        /// Parses neuron role from a string code
+        /// </summary>
+        /// <param name="code">Neuron role code</param>
+        public static NeuronRole ParseNeuronRole(string code)
+        {
+            switch (code.ToUpper())
+            {
+                case "INPUT": return NeuronRole.Input;
+                case "EXCITATORY": return NeuronRole.Excitatory;
+                case "INHIBITORY": return NeuronRole.Inhibitory;
+                default:
+                    throw new ArgumentException($"Unsupported neuron role {code}", "code");
+            }
         }
 
         /// <summary>
@@ -134,21 +154,6 @@ namespace RCNet.Neural
                 case "SPIKETRAIN": return InputCodingType.SpikeTrain;
                 default:
                     throw new ArgumentException($"Unsupported input coding type {code}", "code");
-            }
-        }
-
-        /// <summary>
-        /// Parses neuron role from a string code
-        /// </summary>
-        /// <param name="code">Neuron role code</param>
-        public static NeuronRole ParseNeuronRole(string code)
-        {
-            switch (code.ToUpper())
-            {
-                case "EXCITATORY": return NeuronRole.Excitatory;
-                case "INHIBITORY": return NeuronRole.Inhibitory;
-                default:
-                    throw new ArgumentException($"Unsupported neuron role {code}", "code");
             }
         }
 

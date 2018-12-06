@@ -29,10 +29,10 @@ namespace RCNet.Neural.Network.SM
         public NeuronStatistics Statistics { get; }
 
         /// <summary>
-        /// Neuron's role within the reservoir (excitatory or inhibitory)
-        /// Note that Input neuron is always excitatory.
+        /// Neuron's role within the reservoir (input, excitatory or inhibitory)
+        /// Note that Input neuron is always input.
         /// </summary>
-        public CommonEnums.NeuronRole Role { get { return CommonEnums.NeuronRole.Excitatory; } }
+        public CommonEnums.NeuronRole Role { get { return CommonEnums.NeuronRole.Input; } }
 
         /// <summary>
         /// Specifies whether to use neuron's secondary predictor.
@@ -63,6 +63,11 @@ namespace RCNet.Neural.Network.SM
         public double OutputSignal { get; private set; }
 
         /// <summary>
+        /// Computation cycles left without output signal
+        /// </summary>
+        public int NoSignalCycles { get; private set; }
+
+        /// <summary>
         /// Value to be passed to readout layer as a primary predictor.
         /// Predictor value does not make sense in case of Input neuron.
         /// </summary>
@@ -89,9 +94,9 @@ namespace RCNet.Neural.Network.SM
         /// </param>
         public InputAnalogNeuron(int inputFieldIdx, Interval inputRange)
         {
-            Placement = new NeuronPlacement(inputFieldIdx, - 1, inputFieldIdx, 0, inputFieldIdx, 0, 0);
-            Statistics = new NeuronStatistics();
+            Placement = new NeuronPlacement(inputFieldIdx, - 1, null, inputFieldIdx, 0, inputFieldIdx, 0, 0);
             OutputRange = inputRange.DeepClone();
+            Statistics = new NeuronStatistics(OutputRange);
             Reset(false);
             return;
         }
@@ -108,16 +113,19 @@ namespace RCNet.Neural.Network.SM
             {
                 Statistics.Reset();
             }
+            //Set initially -1 to counter (no one signal transmitted)
+            NoSignalCycles = -1;
             return;
         }
 
         /// <summary>
         /// Stores new incoming stimulation.
         /// </summary>
-        /// <param name="stimuli">Input stimulation</param>
-        public void NewStimuli(double stimuli)
+        /// <param name="externalStimuli">Stimulation comming from input neurons</param>
+        /// <param name="internalStimuli">Stimulation comming from reservoir neurons</param>
+        public void NewStimuli(double externalStimuli, double internalStimuli)
         {
-            _stimuli = stimuli.Bound();
+            _stimuli = (externalStimuli + internalStimuli).Bound();
             return;
         }
 
@@ -128,9 +136,17 @@ namespace RCNet.Neural.Network.SM
         public void NewState(bool collectStatistics)
         {
             OutputSignal = _stimuli;
+            if (OutputSignal != OutputRange.Mid)
+            {
+                NoSignalCycles = 0;
+            }
+            else
+            {
+                if (NoSignalCycles != -1) ++NoSignalCycles;
+            }
             if (collectStatistics)
             {
-                Statistics.Update(_stimuli, NeuronStatistics.NormalizedStateRange.Rescale(_stimuli, OutputRange), _stimuli);
+                Statistics.Update(_stimuli, _stimuli, _stimuli);
             }
             return;
         }

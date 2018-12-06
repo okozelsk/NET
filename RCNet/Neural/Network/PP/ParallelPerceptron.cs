@@ -19,14 +19,8 @@ namespace RCNet.Neural.Network.PP
         /// Dummy bias input value
         /// </summary>
         public const double BiasValue = 1d;
-
-        //Attributes
-        private readonly int _numOfInputs;
-        private readonly int _numOfGates;
-        private int _numOfGateWeights;
+        private readonly int _numOfGateWeights;
         private double[] _flatWeights;
-        private readonly int _resolution;
-        private readonly double _resSquashCoeff;
 
         //Constructors
         /// <summary>
@@ -37,24 +31,24 @@ namespace RCNet.Neural.Network.PP
         /// <param name="resolution">Requiered output resolution (number of distinct values)</param>
         public ParallelPerceptron(int numOfInputs, int numOfGates, int resolution)
         {
-            _numOfInputs = numOfInputs;
-            if (_numOfInputs < 1)
+            NumOfInputValues = numOfInputs;
+            if (NumOfInputValues < 1)
             {
                 throw new ArgumentException($"Invalid number of input values {numOfInputs}", "numOfInputs");
             }
-            _numOfGates = numOfGates;
-            if(_numOfGates < 1)
+            NumOfGates = numOfGates;
+            if(NumOfGates < 1)
             {
                 throw new ArgumentException($"Invalid number of gates {numOfGates}", "numOfGates");
             }
-            _resolution = resolution;
-            if (_resolution < 2 || _resolution > _numOfGates * 2)
+            Resolution = resolution;
+            if (Resolution < 2 || Resolution > NumOfGates * 2)
             {
                 throw new ArgumentException($"Invalid resolution {resolution}. Resolution must be GE 2 and LE to (number of gates * 2).", "resolution");
             }
-            _resSquashCoeff = (double)_resolution / 2d;
+            ResSquashCoeff = (double)Resolution / 2d;
             _numOfGateWeights = (numOfInputs + 1);
-            _flatWeights = new double[_numOfGates * _numOfGateWeights];
+            _flatWeights = new double[NumOfGates * _numOfGateWeights];
             return;
         }
 
@@ -73,22 +67,22 @@ namespace RCNet.Neural.Network.PP
         /// <summary>
         /// Number of network's input values
         /// </summary>
-        public int NumOfInputValues { get { return _numOfInputs; } }
+        public int NumOfInputValues { get; }
 
         /// <summary>
         /// Number of network's treshold gates
         /// </summary>
-        public int NumOfGates { get { return _numOfGates; } }
+        public int NumOfGates { get; }
 
         /// <summary>
         /// Network's output resolution
         /// </summary>
-        public int Resolution { get { return _resolution; } }
+        public int Resolution { get; }
 
         /// <summary>
         /// Output squash coeeficient (= Resolution / 2)
         /// </summary>
-        public double ResSquashCoeff { get { return _resSquashCoeff; } }
+        public double ResSquashCoeff { get; }
 
         /// <summary>
         /// Number of network's output values
@@ -108,7 +102,7 @@ namespace RCNet.Neural.Network.PP
         {
             int weightsStartFlatIdx = gateIdx * _numOfGateWeights;
             //Bias
-            sum = _flatWeights[weightsStartFlatIdx + _numOfInputs] * BiasValue;
+            sum = _flatWeights[weightsStartFlatIdx + NumOfInputValues] * BiasValue;
             //Inputs
             for(int i = 0, wIdx = weightsStartFlatIdx; i < input.Length; i++, wIdx++)
             {
@@ -120,17 +114,17 @@ namespace RCNet.Neural.Network.PP
         private double[] ComputeResult(double sum)
         {
             double[] output = new double[1];
-            if (sum < -_resSquashCoeff)
+            if (sum < -ResSquashCoeff)
             {
                 output[0] = -1;
             }
-            else if (sum > _resSquashCoeff)
+            else if (sum > ResSquashCoeff)
             {
                 output[0] = 1;
             }
             else
             {
-                output[0] = sum / _resSquashCoeff;
+                output[0] = sum / ResSquashCoeff;
             }
             return output;
         }
@@ -144,7 +138,7 @@ namespace RCNet.Neural.Network.PP
         {
             double sum = 0;
             double gateSum;
-            for (int i = 0; i < _numOfGates; i++)
+            for (int i = 0; i < NumOfGates; i++)
             {
                 sum += ComputeGate(i, input, out gateSum);
             }
@@ -160,7 +154,7 @@ namespace RCNet.Neural.Network.PP
         public double[] Compute(double[] input, double[] gateSums)
         {
             double sum = 0;
-            for(int i = 0; i < _numOfGates; i++)
+            for(int i = 0; i < NumOfGates; i++)
             {
                 sum += ComputeGate(i, input, out gateSums[i]);
             }
@@ -178,7 +172,7 @@ namespace RCNet.Neural.Network.PP
         /// <returns>Error statistics</returns>
         public BasicStat ComputeBatchErrorStat(List<double[]> inputCollection, List<double[]> idealOutputCollection, out List<double[]> computedOutputCollection)
         {
-            BasicStat errStat = new BasicStat();
+            BasicStat errStat = new BasicStat(true);
             double[][] computedOutputs = new double[idealOutputCollection.Count][];
             Parallel.For(0, inputCollection.Count, row =>
             {
@@ -204,7 +198,7 @@ namespace RCNet.Neural.Network.PP
         /// <returns>Error statistics</returns>
         public BasicStat ComputeBatchErrorStat(List<double[]> inputCollection, List<double[]> idealOutputCollection)
         {
-            BasicStat errStat = new BasicStat();
+            BasicStat errStat = new BasicStat(true);
             Parallel.For(0, inputCollection.Count, row =>
             {
                 double[] computedOutputVector = Compute(inputCollection[row]);
@@ -259,18 +253,18 @@ namespace RCNet.Neural.Network.PP
         /// </summary>
         public void NormalizeWeights()
         {
-            Parallel.For(0, _numOfGates, gateIdx =>
+            Parallel.For(0, NumOfGates, gateIdx =>
             {
-                int weightFlatIdx = gateIdx * (_numOfInputs + 1);
+                int weightFlatIdx = gateIdx * (NumOfInputValues + 1);
                 double norm = 0;
-                for (int i = 0; i < _numOfInputs + 1; i++)
+                for (int i = 0; i < NumOfInputValues + 1; i++)
                 {
                     norm += _flatWeights[weightFlatIdx + i].Power(2);
                 }
                 norm = Math.Sqrt(norm);
                 if (norm > 0)
                 {
-                    for (int i = 0; i < _numOfInputs + 1; i++)
+                    for (int i = 0; i < NumOfInputValues + 1; i++)
                     {
                         _flatWeights[weightFlatIdx + i] /= norm;
                     }
@@ -284,7 +278,7 @@ namespace RCNet.Neural.Network.PP
         /// </summary>
         public INonRecurrentNetwork DeepClone()
         {
-            ParallelPerceptron clone = new ParallelPerceptron(_numOfInputs, _numOfGates, _resolution);
+            ParallelPerceptron clone = new ParallelPerceptron(NumOfInputValues, NumOfGates, Resolution);
             clone.SetWeights(_flatWeights);
             return clone;
         }

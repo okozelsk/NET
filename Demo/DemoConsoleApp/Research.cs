@@ -7,6 +7,7 @@ using RCNet.DemoConsoleApp.Log;
 using RCNet.Neural.Activation;
 using RCNet.Extensions;
 using RCNet.MathTools;
+using RCNet.MathTools.MatrixMath;
 using RCNet.Neural.Network.SM;
 using RCNet.MathTools.Differential;
 using RCNet.MathTools.VectorMath;
@@ -31,21 +32,17 @@ namespace RCNet.DemoConsoleApp
             //IzhikevichIFSettings settings = new IzhikevichIFSettings(10, 0.1, 0.25, 2, -70, -65, 30, 0, ODENumSolver.Method.Euler, 2);
             //IActivationFunction af = new IzhikevichIF(settings);
 
-            AdExpIFSettings settings = new AdExpIFSettings(150,
-                                                           new RandomValueSettings(5, 5),
-                                                           new RandomValueSettings(500, 500),
+            LeakyIFSettings settings = new LeakyIFSettings(5.5,
+                                                           new RandomValueSettings(8, 8),
+                                                           new RandomValueSettings(10, 10),
                                                            new RandomValueSettings(-70, -70),
-                                                           new RandomValueSettings(-51, -51),
+                                                           new RandomValueSettings(-65, -65),
                                                            new RandomValueSettings(-50, -50),
-                                                           new RandomValueSettings(-30, -30),
-                                                           new RandomValueSettings(2, 2),
-                                                           new RandomValueSettings(0.5, 0.5),
-                                                           new RandomValueSettings(100, 100),
-                                                           new RandomValueSettings(7, 7),
+                                                           0,
                                                            ODENumSolver.Method.Euler,
                                                            2
                                                            );
-            IActivationFunction af = new AdExpIF(settings, new Random(0));
+            IActivationFunction af = new LeakyIF(settings, new Random(0));
 
             /*
             SimpleIFSettings settings = new SimpleIFSettings(1,
@@ -57,7 +54,7 @@ namespace RCNet.DemoConsoleApp
                                                              );
             IActivationFunction af = new SimpleIF(settings, new Random(0));
             */
-            TestActivation(af, 800, 0.65, 10, 600);
+            TestActivation(af, 800, 0.4, 10, 600);
             return;
         }
 

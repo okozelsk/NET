@@ -101,15 +101,26 @@ namespace RCNet.MathTools.MatrixMath
             }
         }
 
-        //Methods
-        //Static methods
         /// <summary>
-        /// Calculates hypotenuse.
-        /// https://en.wikipedia.org/wiki/Hypot
+        /// Checkes if the matrix is squared (equal number of rows and columns)
         /// </summary>
-        /// <param name="x">The x value.</param>
-        /// <param name="y">The y value.</param>
-        public static double Hypotenuse(double x, double y)
+        public bool IsSquared
+        {
+            get
+            {
+                return (NumOfCols == NumOfRows);
+            }
+        }
+
+    //Methods
+    //Static methods
+    /// <summary>
+    /// Calculates hypotenuse.
+    /// https://en.wikipedia.org/wiki/Hypot
+    /// </summary>
+    /// <param name="x">The x value.</param>
+    /// <param name="y">The y value.</param>
+    public static double Hypotenuse(double x, double y)
         {
             double hypot = 0d;
             if (Math.Abs(x) > Math.Abs(y))
@@ -350,6 +361,173 @@ namespace RCNet.MathTools.MatrixMath
         public Matrix DeepClone()
         {
             return new Matrix(this);
+        }
+
+        /// <summary>
+        /// See the base.
+        /// </summary>
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
+        /// <summary>
+        /// See the base.
+        /// </summary>
+        public override bool Equals(object obj)
+        {
+            if (obj == null) return false;
+            Matrix cmpMatrix = obj as Matrix;
+            if (NumOfCols != cmpMatrix.NumOfCols || NumOfRows != cmpMatrix.NumOfRows)
+            {
+                return false;
+            }
+            for(int i = 0; i < NumOfRows; i++)
+            {
+                for(int j = 0; j < NumOfCols; j++)
+                {
+                    if(_data[i][j] != cmpMatrix._data[i][j])
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Method uses power iteration method to estimate largest eigen value (in magnitude) and corresponding eigen vector.
+        /// Matrix must be squared.
+        /// </summary>
+        /// <param name="resultEigenVector">Returned corresponding eigen vector</param>
+        /// <param name="maxNumOfIterations">Maximum number of method's iterations</param>
+        /// <param name="stopDelta">Stopping corvengence delta between previous iteration and current iteration</param>
+        /// <returns>Estimated largest eigen value (in magnitude)</returns>
+        public double EstimateLargestEigenValue(out double[] resultEigenVector, int maxNumOfIterations = 1000, double stopDelta = 1e-6)
+        {
+            //Firstly check squared matrix
+            if (!IsSquared)
+            {
+                throw new Exception("Matrix must be squared.");
+            }
+            //Local variables
+            //Iteration initialization
+            int iteration = 0;
+            double iterationDelta = 0;
+            int n = NumOfRows;
+            double[] tmpVector = new double[n];
+            double eigenValue = 0;
+            double[] eigenVector = new double[n];
+            eigenVector.Populate(1);
+            //Results
+            double minDelta = double.MaxValue;
+            double resultEigenValue = 0;
+            resultEigenVector = new double[n];
+            //Convergence loop
+            do
+            {
+                Parallel.For(0, n, i =>
+                {
+                    tmpVector[i] = 0;
+                    for (int j = 0; j < n; j++)
+                    {
+                        tmpVector[i] += _data[i][j] * eigenVector[j];
+                    }
+                });
+
+                //Find element having max magnitude (= new eigen value)
+                double prevEigenValue = eigenValue;
+                eigenValue = tmpVector[0];
+                for (int i = 1; i < n; i++)
+                {
+                    if (Math.Abs(tmpVector[i]) > Math.Abs(eigenValue))
+                    {
+                        eigenValue = tmpVector[i];
+                    }
+                }
+
+                //Prepare new normalized eigenVector
+                for (int i = 0; i < n; i++)
+                {
+                    eigenVector[i] = tmpVector[i] / eigenValue;
+                }
+
+                //Iteration results
+                ++iteration;
+                iterationDelta = Math.Abs(eigenValue - prevEigenValue);
+                if(minDelta > iterationDelta)
+                {
+                    minDelta = iterationDelta;
+                    resultEigenValue = eigenValue;
+                    eigenVector.CopyTo(resultEigenVector, 0);
+                }
+
+            } while(iteration < maxNumOfIterations && iterationDelta > stopDelta);
+            return resultEigenValue;
+        }
+
+        /// <summary>
+        /// Method uses LU decomposition to solve system of the linear equations.
+        /// Matrix must be squared.
+        /// </summary>
+        /// <param name="rightPart">Desired results (right part of linear equations)</param>
+        /// <returns>Linear coefficients</returns>
+        public double[] SolveUsingLU(double[] rightPart)
+        {
+            //Firstly check squared matrix
+            if (!IsSquared)
+            {
+                throw new Exception("Matrix must be squared.");
+            }
+            int n = NumOfRows;
+            double[,] lu = new double[n, n];
+            double sum = 0;
+            //LU decomposition
+            for (int i = 0; i < n; i++)
+            {
+                for (int j = i; j < n; j++)
+                {
+                    sum = 0;
+                    for (int k = 0; k < i; k++)
+                    {
+                        sum += lu[i, k] * lu[k, j];
+                    }
+                    lu[i, j] = _data[i][j] - sum;
+                }
+                for (int j = i + 1; j < n; j++)
+                {
+                    sum = 0;
+                    for (int k = 0; k < i; k++)
+                    {
+                        sum += lu[j, k] * lu[k, i];
+                    }
+                    lu[j, i] = (1 / lu[i, i]) * (_data[j][i] - sum);
+                }
+            }
+            //Find solution of Ly = b
+            double[] y = new double[n];
+            for (int i = 0; i < n; i++)
+            {
+                sum = 0;
+                for (int k = 0; k < i; k++)
+                {
+                    sum += lu[i, k] * y[k];
+                }
+                y[i] = rightPart[i] - sum;
+            }
+            // find solution of Ux = y
+            double[] x = new double[n];
+            for (int i = n - 1; i >= 0; i--)
+            {
+                sum = 0;
+                for (int k = i + 1; k < n; k++)
+                {
+                    sum += lu[i, k] * x[k];
+                }
+                x[i] = (1 / lu[i, i]) * (y[i] - sum);
+            }
+            return x;
         }
 
     }//Matrix

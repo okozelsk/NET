@@ -30,7 +30,8 @@ namespace RCNet.Neural.Activation
         /// <param name="settings">Encapsulated arguments</param>
         /// <param name="rand">Random object to be used for randomly generated parameters</param>
         public ExpIF(ExpIFSettings settings, Random rand)
-            : base(rand.NextDouble(settings.RestV),
+            : base(rand,
+                   rand.NextDouble(settings.RestV),
                    rand.NextDouble(settings.ResetV),
                    rand.NextDouble(settings.FiringThresholdV),
                    settings.RefractoryPeriods,
@@ -49,6 +50,15 @@ namespace RCNet.Neural.Activation
         }
 
         //Methods
+        /// <summary>
+        /// Triggered when membrane is firing a spike
+        /// </summary>
+        protected override void OnFiring()
+        {
+            //Does nothing
+            return;
+        }
+
         /// <summary>
         /// ExpIF autonomous ordinary differential equation.
         /// </summary>

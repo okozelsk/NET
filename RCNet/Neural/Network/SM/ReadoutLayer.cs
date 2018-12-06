@@ -29,7 +29,7 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// Maximum part of available samples useable for test purposes
         /// </summary>
-        public const double MaxRatioOfTestData = 0.3333333333333333d;
+        public const double MaxRatioOfTestData = 1d/3d;
         /// <summary>
         /// Minimum length of the test dataset
         /// </summary>
@@ -282,10 +282,10 @@ namespace RCNet.Neural.Network.SM
         }
         
         private List<TimeSeriesBundle> DivideSamplesForClassification(List<double[]> predictorsCollection,
-                                                                       List<double[]> idealValueCollection,
-                                                                       BinDistribution refBinDistr,
-                                                                       int bundleSize
-                                                                       )
+                                                                      List<double[]> idealValueCollection,
+                                                                      BinDistribution refBinDistr,
+                                                                      int bundleSize
+                                                                      )
         {
             int numOfBundles = idealValueCollection.Count / bundleSize;
             List<TimeSeriesBundle> bundleCollection = new List<TimeSeriesBundle>(numOfBundles);

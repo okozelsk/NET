@@ -26,18 +26,24 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// Weight of the synapse
         /// </summary>
-        double Weight { get; set; }
+        double Weight { get; }
 
         //Methods
         /// <summary>
-        /// Adjusts synapse behavior.
+        /// Resets synapse.
         /// </summary>
-        void Adjust();
+        void Reset();
 
         /// <summary>
-        /// Computes weighted signal from source neuron to be delivered to target neuron.
+        /// Rescales the synapse weight.
         /// </summary>
-        double GetWeightedSignal();
+        /// <param name="scale">Scale factor</param>
+        void Rescale(double scale);
+
+        /// <summary>
+        /// Returns signal to be delivered to target neuron.
+        /// </summary>
+        double GetSignal();
 
     }//ISynapse
 

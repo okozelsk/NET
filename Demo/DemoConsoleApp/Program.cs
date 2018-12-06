@@ -9,9 +9,8 @@ namespace RCNet.DemoConsoleApp
         static void Main(string[] args)
         {
             //Research
-            //Research r = new Research();
-            //r.Run();
-
+            Research r = new Research();
+            r.Run();
 
             //Demo standard execution
             try
