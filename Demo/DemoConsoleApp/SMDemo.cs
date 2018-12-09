@@ -166,9 +166,11 @@ namespace RCNet.DemoConsoleApp
         public static ReadoutUnit.RegressionControlOutArgs RegressionControl(ReadoutUnit.RegressionControlInArgs inArgs)
         {
             //Instantiate output object.
-            ReadoutUnit.RegressionControlOutArgs outArgs = new ReadoutUnit.RegressionControlOutArgs();
-            //Call the default implementation of the judgement.
-            outArgs.CurrentIsBetter = ReadoutUnit.IsBetter(inArgs.TaskType, inArgs.CurrReadoutUnit, inArgs.BestReadoutUnit);
+            ReadoutUnit.RegressionControlOutArgs outArgs = new ReadoutUnit.RegressionControlOutArgs
+            {
+                //Call the default implementation of the judgement.
+                CurrentIsBetter = ReadoutUnit.IsBetter(inArgs.TaskType, inArgs.CurrReadoutUnit, inArgs.BestReadoutUnit)
+            };
             //Report the progress
             int reportInterval = Math.Max(inArgs.MaxEpochs / 100, 1);
             ReadoutUnit bestReadoutUnit = outArgs.CurrentIsBetter ? inArgs.CurrReadoutUnit : inArgs.BestReadoutUnit;

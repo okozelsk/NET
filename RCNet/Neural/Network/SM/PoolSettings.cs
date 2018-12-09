@@ -76,6 +76,10 @@ namespace RCNet.Neural.Network.SM
         /// following specified settings
         /// </summary>
         public RandomValueSettings RetainmentRate { get; set; }
+        /// <summary>
+        /// Pool's neurons can be continuously fed by input random noise.
+        /// </summary>
+        public RandomValueSettings NoiseModulatorCfg { get; set; }
 
         //Constructors
         /// <summary>
@@ -94,6 +98,7 @@ namespace RCNet.Neural.Network.SM
             RetainmentNeuronsFeature = false;
             RetainmentNeuronsDensity = 0;
             RetainmentRate = null;
+            NoiseModulatorCfg = null;
             return;
         }
 
@@ -132,6 +137,10 @@ namespace RCNet.Neural.Network.SM
             else
             {
                 RetainmentRate = null;
+            }
+            if(source.NoiseModulatorCfg != null)
+            {
+                NoiseModulatorCfg = source.NoiseModulatorCfg.DeepClone();
             }
             return;
         }
@@ -225,6 +234,8 @@ namespace RCNet.Neural.Network.SM
             {
                 RetainmentNeuronsDensity = 0;
             }
+            //Noise modulator
+            NoiseModulatorCfg = new RandomValueSettings(poolSettingsElem.Descendants("noiseModulator").First());
             return;
         }
 
@@ -246,7 +257,8 @@ namespace RCNet.Neural.Network.SM
                 ConstantNumOfConnections != cmpSettings.ConstantNumOfConnections ||
                 RetainmentNeuronsFeature != cmpSettings.RetainmentNeuronsFeature ||
                 RetainmentNeuronsDensity != cmpSettings.RetainmentNeuronsDensity ||
-                !Equals(RetainmentRate, cmpSettings.RetainmentRate)
+                !Equals(RetainmentRate, cmpSettings.RetainmentRate) ||
+                !Equals(NoiseModulatorCfg, cmpSettings.NoiseModulatorCfg)
                 )
             {
                 return false;
@@ -316,10 +328,6 @@ namespace RCNet.Neural.Network.SM
             /// A constant bias value of the neuron will be selected randomly according to the settings.
             /// </summary>
             public RandomValueSettings BiasCfg { get; set; }
-            /// <summary>
-            /// Each pool's neuron can be continuously fed by input random noise.
-            /// </summary>
-            public RandomValueSettings NoiseCfg { get; set; }
 
             //Constructors
             /// <summary>
@@ -334,7 +342,6 @@ namespace RCNet.Neural.Network.SM
                 Count = 0;
                 ActivationCfg = null;
                 BiasCfg = null;
-                NoiseCfg = null;
                 return;
             }
 
@@ -351,7 +358,6 @@ namespace RCNet.Neural.Network.SM
                 Count = source.Count;
                 ActivationCfg = ActivationFactory.DeepCloneActivationSettings(source.ActivationCfg);
                 BiasCfg = source.BiasCfg.DeepClone();
-                NoiseCfg = source.NoiseCfg.DeepClone();
                 return;
             }
 
@@ -383,8 +389,6 @@ namespace RCNet.Neural.Network.SM
                 ActivationCfg = ActivationFactory.LoadSettings(settingsElem.Descendants().First());
                 //Bias
                 BiasCfg = new RandomValueSettings(settingsElem.Descendants("bias").First());
-                //Noise
-                NoiseCfg = new RandomValueSettings(settingsElem.Descendants("noise").First());
                 return;
             }
 
@@ -422,8 +426,7 @@ namespace RCNet.Neural.Network.SM
                     AugmentedStates != cmpSettings.AugmentedStates ||
                     Count != cmpSettings.Count ||
                     !Equals(ActivationCfg, cmpSettings.ActivationCfg) ||
-                    !Equals(BiasCfg, cmpSettings.BiasCfg) ||
-                    !Equals(NoiseCfg, cmpSettings.NoiseCfg)
+                    !Equals(BiasCfg, cmpSettings.BiasCfg)
                     )
                 {
                     return false;

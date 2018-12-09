@@ -86,16 +86,6 @@ namespace RCNet.Neural.Network.SM
         private double _tStimuli;
         private double _rStimuli;
 
-        /// <summary>
-        /// Local random generator
-        /// </summary>
-        private Random _rand;
-
-        /// <summary>
-        /// Settings for noise generation
-        /// </summary>
-        private readonly RandomValueSettings _noiseCfg;
-
         //Constructor
         /// <summary>
         /// Creates an initialized instance
@@ -104,20 +94,17 @@ namespace RCNet.Neural.Network.SM
         /// <param name="role">Neuron's signal role (Excitatory/Inhibitory).</param>
         /// <param name="activation">Instantiated activation function.</param>
         /// <param name="bias">Constant bias.</param>
-        /// <param name="noiseCfg">Continuous random noise configuration parameters.</param>
         /// <param name="retainmentRatio">Retainment ratio.</param>
         public ReservoirAnalogNeuron(NeuronPlacement placement,
                                      CommonEnums.NeuronRole role,
                                      IActivationFunction activation,
                                      double bias,
-                                     RandomValueSettings noiseCfg,
                                      double retainmentRatio
                                      )
         {
             Placement = placement;
             Role = role;
             Bias = bias;
-            _noiseCfg = noiseCfg.DeepClone();
             //Check whether function is analog
             if (activation.OutputSignalType != ActivationFactory.FunctionOutputSignalType.Analog)
             {
@@ -146,7 +133,6 @@ namespace RCNet.Neural.Network.SM
             {
                 Statistics.Reset();
             }
-            _rand = new Random((Placement.PoolID + 1) * Placement.PoolFlatIdx);
             OutputSignalLeak = 0;
             return;
         }
@@ -158,7 +144,7 @@ namespace RCNet.Neural.Network.SM
         /// <param name="rStimuli">Stimulation comming from reservoir neurons</param>
         public void NewStimuli(double iStimuli, double rStimuli)
         {
-            _tStimuli = (iStimuli + rStimuli + Bias + _rand.NextDouble(_noiseCfg)).Bound();
+            _tStimuli = (iStimuli + rStimuli + Bias).Bound();
             _rStimuli = rStimuli;
             return;
         }

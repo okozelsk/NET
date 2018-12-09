@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <demo dataFolder=".\\Data">
-  <case name="Classification task Libras Movement:  Single spiking reservoir, Perceptron (5 gates) classifier">
+  <case name="Classification task Libras Movement:  Single spiking reservoir, Feed Forward multilayer network classifier">
     <!-- Data converted from https://archive.ics.uci.edu/ml/datasets/Libras+Movement -->
     <samples fileName="LibrasMovement.csv" singleNormalizer="false" normalizerReserve="0.1"/>
     <stateMachineCfg taskType="Classification" randomizerSeek="0">
@@ -21,9 +21,6 @@
                     <firingThresholdV min="20" max="20"/>
                   </activationSimpleIF>
                   <bias min="0.2" max="0.3" randomSign="false" distribution="Uniform"/>
-                  <noise min="0" max="0" randomSign="false" distribution="Gaussian">
-                    <gaussianDistr mean="0" stdDev="0.15"/>
-                  </noise>
                 </neuronGroup>
                 <neuronGroup name="Inh-SimpleIF" role="Inhibitory" relShare="1" augmentedStates="true">
                   <activationSimpleIF stimuliCoeff="0.5" refractoryPeriods="1">
@@ -33,14 +30,12 @@
                     <firingThresholdV min="20" max="20"/>
                   </activationSimpleIF>
                   <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-                  <noise min="0" max="0" randomSign="false" distribution="Gaussian">
-                    <gaussianDistr mean="0" stdDev="0.15"/>
-                  </noise>
                 </neuronGroup>
               </neuronGroups>
               <interconnection density="0.1" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
                 <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
               </interconnection>
+              <noiseModulator min="-0.8" max="0.8" randomSign="false" distribution="Uniform"/>
             </pool>
           </pools>
         </reservoirCfg>
@@ -49,104 +44,30 @@
         <reservoirInstance name="Main" cfg="Single spiking pool" augmentedStates="false">
           <inputFieldAssignments>
             <inputFieldAssignment inputFieldName="coord_abcissa" poolName="SimpleIF pool" density="1">
-              <weight min="0" max="0.4" randomSign="false" distribution="Uniform"/>
+              <weight min="0" max="0.3" randomSign="false" distribution="Uniform"/>
             </inputFieldAssignment>
             <inputFieldAssignment inputFieldName="coord_ordinate" poolName="SimpleIF pool" density="1">
-              <weight min="0" max="0.4" randomSign="false" distribution="Uniform"/>
+              <weight min="0" max="0.3" randomSign="false" distribution="Uniform"/>
             </inputFieldAssignment>
           </inputFieldAssignments>
         </reservoirInstance>
       </reservoirInstanceContainer>
       <readoutLayer testDataRatio="0.0825" folds="Auto">
-        <readoutUnit attempts="20" attemptEpochs="500">
-          <pp gates="5" resolution="2">
-            <pDeltaRuleTrainer iniLR="0.01" incLR="1.1" decLR="0.5" minLR="1e-4" maxLR="0.1"/>
-          </pp>
-        </readoutUnit>
-        <outputFields>
-          <field name="curved swing"/>
-          <field name="horizontal swing"/>
-          <field name="vertical swing"/>
-          <field name="anti-clockwise arc"/>
-          <field name="clockwise arc"/>
-          <field name="circle"/>
-          <field name="horizontal straight-line"/>
-          <field name="vertical straight-line"/>
-          <field name="horizontal zigzag"/>
-          <field name="vertical zigzag"/>
-          <field name="horizontal wavy"/>
-          <field name="vertical wavy"/>
-          <field name="face-up curve"/>
-          <field name="face-down curve"/>
-          <field name="tremble"/>
-        </outputFields>
-      </readoutLayer>
-    </stateMachineCfg>
-  </case>
-
-  <case name="Classification task Libras Movement:  Single spiking reservoir, Perceptron (5 gates) classifier">
-    <!-- Data converted from https://archive.ics.uci.edu/ml/datasets/Libras+Movement -->
-    <samples fileName="LibrasMovement.csv" singleNormalizer="false" normalizerReserve="0.1"/>
-    <stateMachineCfg taskType="Classification" randomizerSeek="0">
-      <inputFields routeToReadout="false">
-        <field name="coord_abcissa"/>
-        <field name="coord_ordinate"/>
-      </inputFields>
-      <reservoirCfgContainer>
-        <reservoirCfg name="MainCfg" inputCoding="Analog" inputDuration="1" spectralRadius="0.999">
-          <pools>
-            <pool name="Spiking pool" dimX="5" dimY="5" dimZ="5" readoutNeuronsDensity="1">
-              <neuronGroups>
-                <neuronGroup name="Exc-LIF" role="Excitatory" relShare="4" augmentedStates="true">
-                  <activationLeakyIF stimuliCoeff="5.5" refractoryPeriods="0" solverMethod="Euler" solverCompSteps="2">
-                    <timeScale min="8" max="8" randomSign="false" distribution="Uniform"/>
-                    <resistance min="10" max="10" randomSign="false" distribution="Uniform"/>
-                    <restV min="-70" max="-70" randomSign="false" distribution="Uniform"/>
-                    <resetV min="-65" max="-65" randomSign="false" distribution="Uniform"/>
-                    <firingThresholdV min="-50" max="-50" randomSign="false" distribution="Uniform"/>
-                  </activationLeakyIF>
-                  <bias min="0.3" max="0.5" randomSign="false" distribution="Uniform"/>
-                  <noise min="-0.2" max="0.2" randomSign="false" distribution="Gaussian">
-                    <gaussianDistr mean="0" stdDev="0.15"/>
-                  </noise>
-                </neuronGroup>
-                <neuronGroup name="Inh-LIF" role="Inhibitory" relShare="1" augmentedStates="true">
-                  <activationLeakyIF stimuliCoeff="5.5" refractoryPeriods="0" solverMethod="Euler" solverCompSteps="2">
-                    <timeScale min="8" max="8" randomSign="false" distribution="Uniform"/>
-                    <resistance min="10" max="10" randomSign="false" distribution="Uniform"/>
-                    <restV min="-70" max="-70" randomSign="false" distribution="Uniform"/>
-                    <resetV min="-65" max="-65" randomSign="false" distribution="Uniform"/>
-                    <firingThresholdV min="-50" max="-50" randomSign="false" distribution="Uniform"/>
-                  </activationLeakyIF>
-                  <bias min="0.3" max="0.5" randomSign="false" distribution="Uniform"/>
-                  <noise min="-0.2" max="0.2" randomSign="false" distribution="Gaussian">
-                    <gaussianDistr mean="0" stdDev="0.15"/>
-                  </noise>
-                </neuronGroup>
-              </neuronGroups>
-              <interconnection density="0.1" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="true">
-                <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
-              </interconnection>
-            </pool>
-          </pools>
-        </reservoirCfg>
-      </reservoirCfgContainer>
-      <reservoirInstanceContainer>
-        <reservoirInstance name="MainRes" cfg="MainCfg" augmentedStates="false">
-          <inputFieldAssignments>
-            <inputFieldAssignment inputFieldName="coord_abcissa" poolName="Spiking pool" density="1">
-              <weight min="0.1" max="0.7" randomSign="false" distribution="Uniform"/>
-            </inputFieldAssignment>
-            <inputFieldAssignment inputFieldName="coord_ordinate" poolName="Spiking pool" density="1">
-              <weight min="0.1" max="0.7" randomSign="false" distribution="Uniform"/>
-            </inputFieldAssignment>
-          </inputFieldAssignments>
-        </reservoirInstance>
-      </reservoirInstanceContainer>
-      <readoutLayer testDataRatio="0.25" folds="Auto">
-        <readoutUnit attempts="1" attemptEpochs="100">
-          <ff regressionMethod="Linear">
+        <readoutUnit attempts="10" attemptEpochs="1000">
+          <ff regressionMethod="Resilient">
             <activationIdentity/>
+            <hiddenLayers>
+              <layer neurons="8">
+                <activationLeakyReLU>
+                  <negSlope min="0.05" max="0.05"/>
+                </activationLeakyReLU>
+              </layer>
+              <layer neurons="8">
+                <activationLeakyReLU>
+                  <negSlope min="0.05" max="0.05"/>
+                </activationLeakyReLU>
+              </layer>
+            </hiddenLayers>
           </ff>
         </readoutUnit>
         <outputFields>
@@ -171,8 +92,6 @@
   </case>
 
 
-
-
   <case name="Prediction task High and Low prices of TTOO (T2 Biosystems, Inc.): Directly mixed reservoir (Experimental), Linear regression">
     <!-- Data from https://finance.yahoo.com/quote/TTOO/history?p=TTOO -->
     <samples fileName="TTOO.csv" bootSamples="150" singleNormalizer="true" normalizerReserve="0.1"/>
@@ -190,22 +109,18 @@
                 <neuronGroup name="Exc-TanH" role="Excitatory" relShare="10" augmentedStates="true">
                   <activationTanH />
                   <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-                  <noise min="0" max="0"/>
                 </neuronGroup>
                 <neuronGroup name="Inh-TanH" role="Inhibitory" relShare="5" augmentedStates="true">
                   <activationTanH />
                   <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-                  <noise min="0" max="0"/>
                 </neuronGroup>
                 <neuronGroup name="Exc-AutoIzhikevichIF" role="Excitatory" relShare="2" augmentedStates="true">
                   <activationAutoIzhikevichIF stimuliCoeff="70" role="Excitatory" refractoryPeriods="0" solverMethod="RK4" solverCompSteps="2"/>
                   <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-                  <noise min="0" max="0"/>
                 </neuronGroup>
                 <neuronGroup name="Inh-AutoIzhikevichIF" role="Inhibitory" relShare="1" augmentedStates="true">
                   <activationAutoIzhikevichIF stimuliCoeff="20" role="Inhibitory" refractoryPeriods="0" solverMethod="RK4" solverCompSteps="2"/>
                   <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-                  <noise min="0" max="0"/>
                 </neuronGroup>
               </neuronGroups>
               <interconnection density="0.2" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
@@ -214,6 +129,7 @@
               <retainmentNeurons density="1">
                 <rate min="0.25" max="0.75" randomSign="false" distribution="Uniform"/>
               </retainmentNeurons>
+              <noiseModulator min="0" max="0" randomSign="false" distribution="Uniform"/>
             </pool>
           </pools>
         </reservoirCfg>
@@ -266,12 +182,10 @@
                 <neuronGroup name="Exc-TanH" role="Excitatory" relShare="1" augmentedStates="true">
                   <activationTanH />
                   <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-                  <noise min="0" max="0"/>
                 </neuronGroup>
                 <neuronGroup name="Inh-TanH" role="Inhibitory" relShare="1" augmentedStates="true">
                   <activationTanH />
                   <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-                  <noise min="0" max="0"/>
                 </neuronGroup>
               </neuronGroups>
               <interconnection density="0.1" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
@@ -280,6 +194,7 @@
               <retainmentNeurons density="1">
                 <rate min="0.25" max="0.75" randomSign="false" distribution="Uniform"/>
               </retainmentNeurons>
+              <noiseModulator min="0" max="0" randomSign="false" distribution="Uniform"/>
             </pool>
           </pools>
         </reservoirCfg>
@@ -336,29 +251,26 @@
                 <neuronGroup name="Exc-AutoIzhikevichIF" role="Excitatory" relShare="4" augmentedStates="true">
                   <activationAutoIzhikevichIF stimuliCoeff="35" role="Excitatory" refractoryPeriods="0" solverMethod="RK4" solverCompSteps="2"/>
                   <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-                  <noise min="0" max="0"/>
                 </neuronGroup>
                 <neuronGroup name="Inh-AutoIzhikevichIF" role="Inhibitory" relShare="1" augmentedStates="true">
                   <activationAutoIzhikevichIF stimuliCoeff="35" role="Inhibitory" refractoryPeriods="0" solverMethod="RK4" solverCompSteps="2"/>
                   <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-                  <noise min="0" max="0"/>
                 </neuronGroup>
               </neuronGroups>
               <interconnection density="0.3" avgDistance="1.5" allowSelfConnection="false" constantNumOfConnections="false">
                 <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
               </interconnection>
+              <noiseModulator min="0" max="0" randomSign="false" distribution="Uniform"/>
             </pool>
             <pool name="Analog pool" dimX="150" dimY="1" dimZ="1" readoutNeuronsDensity="1">
               <neuronGroups>
                 <neuronGroup name="Exc-TanH" role="Excitatory" relShare="1" augmentedStates="true">
                   <activationTanH />
                   <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-                  <noise min="0" max="0"/>
                 </neuronGroup>
                 <neuronGroup name="Inh-TanH" role="Inhibitory" relShare="1" augmentedStates="true">
                   <activationTanH />
                   <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-                  <noise min="0" max="0"/>
                 </neuronGroup>
               </neuronGroups>
               <interconnection density="0.12" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
@@ -367,6 +279,7 @@
               <retainmentNeurons density="1">
                 <rate min="0" max="0.25" randomSign="false" distribution="Uniform"/>
               </retainmentNeurons>
+              <noiseModulator min="0" max="0" randomSign="false" distribution="Uniform"/>
             </pool>
           </pools>
           <pool2PoolConns>
@@ -429,12 +342,10 @@
                 <neuronGroup name="Exc-TanH" role="Excitatory" relShare="1" augmentedStates="true">
                   <activationTanH/>
                   <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-                  <noise min="0" max="0"/>
                 </neuronGroup>
                 <neuronGroup name="Inh-TanH" role="Inhibitory" relShare="1" augmentedStates="true">
                   <activationTanH/>
                   <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-                  <noise min="0" max="0"/>
                 </neuronGroup>
               </neuronGroups>
               <interconnection density="0.12" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
@@ -443,6 +354,7 @@
               <retainmentNeurons density="1">
                 <rate min="0" max="0.25" randomSign="false" distribution="Uniform"/>
               </retainmentNeurons>
+              <noiseModulator min="0" max="0" randomSign="false" distribution="Uniform"/>
             </pool>
           </pools>
         </reservoirCfg>
@@ -486,29 +398,26 @@
                 <neuronGroup name="Exc-AutoIzhikevichIF" role="Excitatory" relShare="4" augmentedStates="true">
                   <activationAutoIzhikevichIF stimuliCoeff="35" role="Excitatory" refractoryPeriods="0" solverMethod="RK4" solverCompSteps="2"/>
                   <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-                  <noise min="0" max="0"/>
                 </neuronGroup>
                 <neuronGroup name="Inh-AutoIzhikevichIF" role="Inhibitory" relShare="1" augmentedStates="true">
                   <activationAutoIzhikevichIF stimuliCoeff="35" role="Inhibitory" refractoryPeriods="0" solverMethod="RK4" solverCompSteps="2"/>
                   <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-                  <noise min="0" max="0"/>
                 </neuronGroup>
               </neuronGroups>
               <interconnection density="0.25" avgDistance="1.5" allowSelfConnection="false" constantNumOfConnections="false">
                 <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
               </interconnection>
+              <noiseModulator min="0" max="0" randomSign="false" distribution="Uniform"/>
             </pool>
             <pool name="Analog pool" dimX="6" dimY="5" dimZ="5" readoutNeuronsDensity="1">
               <neuronGroups>
                 <neuronGroup name="Exc-Sigmoid" role="Excitatory" relShare="4" augmentedStates="true">
                   <activationSigmoid />
                   <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-                  <noise min="0" max="0"/>
                 </neuronGroup>
                 <neuronGroup name="Inh-Sigmoid" role="Inhibitory" relShare="1" augmentedStates="true">
                   <activationSigmoid />
                   <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-                  <noise min="0" max="0"/>
                 </neuronGroup>
               </neuronGroups>
               <interconnection density="0.12" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
@@ -517,6 +426,7 @@
               <retainmentNeurons density="1">
                 <rate min="0" max="0.25" randomSign="false" distribution="Uniform"/>
               </retainmentNeurons>
+              <noiseModulator min="0" max="0" randomSign="false" distribution="Uniform"/>
             </pool>
           </pools>
           <pool2PoolConns>
@@ -588,12 +498,10 @@
                 <neuronGroup name="Exc-TanH" role="Excitatory" relShare="1" augmentedStates="true">
                   <activationTanH/>
                   <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-                  <noise min="0" max="0"/>
                 </neuronGroup>
                 <neuronGroup name="Inh-TanH" role="Inhibitory" relShare="1" augmentedStates="true">
                   <activationTanH/>
                   <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-                  <noise min="0" max="0"/>
                 </neuronGroup>
               </neuronGroups>
               <interconnection density="0.1" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
@@ -602,6 +510,7 @@
               <retainmentNeurons density="0">
                 <rate min="0" max="0.75" randomSign="false" distribution="Uniform"/>
               </retainmentNeurons>
+              <noiseModulator min="0" max="0" randomSign="false" distribution="Uniform"/>
             </pool>
           </pools>
         </reservoirCfg>
@@ -646,12 +555,10 @@
                 <neuronGroup name="Exc-TanH" role="Excitatory" relShare="1" augmentedStates="true">
                   <activationTanH/>
                   <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-                  <noise min="0" max="0"/>
                 </neuronGroup>
                 <neuronGroup name="Inh-TanH" role="Inhibitory" relShare="1" augmentedStates="true">
                   <activationTanH/>
                   <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-                  <noise min="0" max="0"/>
                 </neuronGroup>
               </neuronGroups>
               <interconnection density="0.1" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
@@ -660,6 +567,7 @@
               <retainmentNeurons density="1">
                 <rate min="0" max="0.5" randomSign="false" distribution="Uniform"/>
               </retainmentNeurons>
+              <noiseModulator min="0" max="0" randomSign="false" distribution="Uniform"/>
             </pool>
           </pools>
         </reservoirCfg>
@@ -702,17 +610,16 @@
                 <neuronGroup name="Exc-AutoIzhikevichIF" role="Excitatory" relShare="4" augmentedStates="true">
                   <activationAutoIzhikevichIF stimuliCoeff="50" role="Excitatory" refractoryPeriods="0" solverMethod="RK4" solverCompSteps="2"/>
                   <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-                  <noise min="0" max="0"/>
                 </neuronGroup>
                 <neuronGroup name="Inh-AutoIzhikevichIF" role="Inhibitory" relShare="1" augmentedStates="true">
                   <activationAutoIzhikevichIF stimuliCoeff="50" role="Inhibitory" refractoryPeriods="0" solverMethod="RK4" solverCompSteps="2"/>
                   <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-                  <noise min="0" max="0"/>
                 </neuronGroup>
               </neuronGroups>
               <interconnection density="0.3" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
                 <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
               </interconnection>
+              <noiseModulator min="0" max="0" randomSign="false" distribution="Uniform"/>
             </pool>
           </pools>
         </reservoirCfg>
