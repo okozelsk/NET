@@ -30,22 +30,22 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         /// <param name="sourceNeuron">Source neuron</param>
         /// <param name="targetNeuron">Target neuron</param>
-        /// <param name="maxWeight">Synapse weight (unsigned)</param>
-        /// <param name="maxDelay">Maximum delay (in cycles) of the signal delivery</param>
+        /// <param name="weight">Synapse weight (unsigned)</param>
+        /// <param name="delay">Synapse delay (in cycles) of the signal delivery</param>
         /// <param name="tauFacilitation">Synapse efficacy facilitation parameter</param>
         /// <param name="tauRecovery">Synapse efficacy recovery parameter</param>
         /// <param name="restingEfficacy">Synapse resting efficacy parameter</param>
         /// <param name="tauDecay">Decay shapness (lower = sharper)</param>
         public DynamicSynapse(INeuron sourceNeuron,
-                                INeuron targetNeuron,
-                                double maxWeight,
-                                int maxDelay,
-                                double tauFacilitation,
-                                double tauRecovery,
-                                double restingEfficacy,
-                                double tauDecay
-                                )
-            :base(sourceNeuron, targetNeuron, maxWeight, maxDelay)
+                              INeuron targetNeuron,
+                              double weight,
+                              int delay,
+                              double tauFacilitation,
+                              double tauRecovery,
+                              double restingEfficacy,
+                              double tauDecay
+                              )
+            :base(sourceNeuron, targetNeuron, weight, delay)
         {
             _tauFacilitation = tauFacilitation;
             _tauRecovery = tauRecovery;
@@ -101,6 +101,8 @@ namespace RCNet.Neural.Network.SM
             }
             return;
         }
+
+
 
     }//DynamicSynapse
 

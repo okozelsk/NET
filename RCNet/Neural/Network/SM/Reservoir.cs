@@ -361,24 +361,11 @@ namespace RCNet.Neural.Network.SM
                         for (int i = 0; i < connectionsPerInput; i++)
                         {
                             int targetNeuronIdx = indices[i];
-                            ///*
                             StaticSynapse synapse = new StaticSynapse(_inputNeuronCollection[assignment.FieldIdx],
                                                                       _poolNeuronsCollection[poolID][targetNeuronIdx],
-                                                                      rand.NextDouble(assignment.SynapseWeight),
-                                                                      0
+                                                                      rand.NextDouble(assignment.StaticSynapseCfg.WeightCfg),
+                                                                      rand.Next(assignment.StaticSynapseCfg.MaxDelay + 1)
                                                                       );
-                            //*/
-                            /*
-                            DynamicSynapse synapse = new DynamicSynapse(sourceNeuron: _inputNeuronCollection[assignment.FieldIdx],
-                                                                        targetNeuron: _poolNeuronsCollection[poolID][targetNeuronIdx],
-                                                                        maxWeight: _rand.NextDouble(assignment.SynapseWeight),
-                                                                        maxDelay: 5,
-                                                                        tauFacilitation: 10,
-                                                                        tauRecovery: 10,
-                                                                        restingEfficacy: 0.5,
-                                                                        tauDecay: 50
-                                                                        );
-                            */
                             AddInterconnection(_neuronInputConnectionsCollection, synapse, false);
                         }
                     }
@@ -430,7 +417,7 @@ namespace RCNet.Neural.Network.SM
             foreach (NeuronConnCount ncc in sourceNeuronCollection)
             {
                 //Number of connections for current source neuron
-                int connCount = poolSettings.ConstantNumOfConnections ? averageConnectionsPerNeuron : (int)Math.Round(rand.NextBoundedGaussianDouble(0, 2 * averageConnectionsPerNeuron));
+                int connCount = poolSettings.InterconnectionCfg.ConstantNumOfConnections ? averageConnectionsPerNeuron : (int)Math.Round(rand.NextBoundedGaussianDouble(0, 2 * averageConnectionsPerNeuron));
                 if (connCount > maxPhysicalConnCountPerNeuron) connCount = maxPhysicalConnCountPerNeuron;
                 if (connCount > connectionsCountDown) connCount = connectionsCountDown;
                 ncc.ConnCount = connCount;
@@ -496,15 +483,29 @@ namespace RCNet.Neural.Network.SM
                     //Remove targetNeuron from tmp collection
                     tmpRelTargetNeuronCollection.RemoveAt(targetNeuronIndex);
                     //Establish connection
-                    DynamicSynapse synapse = new DynamicSynapse(sourceNeuron: nccSource.Neuron,
-                                                                targetNeuron: targetNeuron,
-                                                                maxWeight: rand.NextDouble(poolSettings.InterconnectionSynapseWeight),
-                                                                maxDelay: 3,
-                                                                tauFacilitation: 500,
-                                                                tauRecovery: 5,
-                                                                restingEfficacy: 0.5,
-                                                                tauDecay: 10
-                                                                );
+                    ISynapse synapse = null;
+                    if (poolSettings.InterconnectionCfg.SynapseCfg.GetType() == typeof(StaticSynapse))
+                    {
+                        StaticSynapseSettings sss = (StaticSynapseSettings)poolSettings.InterconnectionCfg.SynapseCfg;
+                        synapse = new StaticSynapse(sourceNeuron: nccSource.Neuron,
+                                                    targetNeuron: targetNeuron,
+                                                    weight: rand.NextDouble(sss.WeightCfg),
+                                                    delay: rand.Next(sss.MaxDelay + 1)
+                                                    );
+                    }
+                    else
+                    {
+                        DynamicSynapseSettings dss = (DynamicSynapseSettings)poolSettings.InterconnectionCfg.SynapseCfg;
+                        synapse = new DynamicSynapse(sourceNeuron: nccSource.Neuron,
+                                                     targetNeuron: targetNeuron,
+                                                     weight: rand.NextDouble(dss.WeightCfg),
+                                                     delay: rand.Next(dss.MaxDelay + 1),
+                                                     tauFacilitation: dss.TauFacilitation,
+                                                     tauRecovery: dss.TauRecovery,
+                                                     restingEfficacy: dss.RestingEfficacy,
+                                                     tauDecay: dss.TauDecay
+                                                     );
+                    }
                     AddInterconnection(_neuronNeuronConnectionsCollection, synapse, false);
                 }//connNum
             }//nccSource
@@ -514,11 +515,11 @@ namespace RCNet.Neural.Network.SM
         private void SetPoolInterconnections(Random rand, int poolID, PoolSettings poolSettings)
         {
             //Determine counts
-            int totalNumOfSynapses = (int)(Math.Round(((double)poolSettings.Dim.Size)).Power(2) * poolSettings.InterconnectionDensity);
-            int countE2E = (int)Math.Round(0.3d * totalNumOfSynapses);
-            int countE2I = (int)Math.Round(0.2d * totalNumOfSynapses);
-            int countI2E = (int)Math.Round(0.4d * totalNumOfSynapses);
-            int countI2I = (int)Math.Round(0.1d * totalNumOfSynapses);
+            int totalNumOfSynapses = (int)(Math.Round(((double)poolSettings.Dim.Size)).Power(2) * poolSettings.InterconnectionCfg.Density);
+            int countE2E = (int)Math.Round(poolSettings.InterconnectionCfg.RatioEE * totalNumOfSynapses);
+            int countE2I = (int)Math.Round(poolSettings.InterconnectionCfg.RatioEI * totalNumOfSynapses);
+            int countI2E = (int)Math.Round(poolSettings.InterconnectionCfg.RatioIE * totalNumOfSynapses);
+            int countI2I = (int)Math.Round(poolSettings.InterconnectionCfg.RatioII * totalNumOfSynapses);
             totalNumOfSynapses = countE2E + countE2I + countI2E + countI2I;
             //Connections E2E
             ConnectPoolNeurons(rand,
@@ -527,8 +528,8 @@ namespace RCNet.Neural.Network.SM
                                CommonEnums.NeuronRole.Excitatory,
                                CommonEnums.NeuronRole.Excitatory,
                                countE2E,
-                               poolSettings.InterconnectionAllowSelfConn,
-                               poolSettings.InterconnectionAvgDistance
+                               poolSettings.InterconnectionCfg.AllowSelfConnection,
+                               poolSettings.InterconnectionCfg.AvgDistance
                                );
             //Connections E2I
             ConnectPoolNeurons(rand,
@@ -537,8 +538,8 @@ namespace RCNet.Neural.Network.SM
                                CommonEnums.NeuronRole.Excitatory,
                                CommonEnums.NeuronRole.Inhibitory,
                                countE2I,
-                               poolSettings.InterconnectionAllowSelfConn,
-                               poolSettings.InterconnectionAvgDistance
+                               poolSettings.InterconnectionCfg.AllowSelfConnection,
+                               poolSettings.InterconnectionCfg.AvgDistance
                                );
             //Connections I2E
             ConnectPoolNeurons(rand,
@@ -547,8 +548,8 @@ namespace RCNet.Neural.Network.SM
                                CommonEnums.NeuronRole.Inhibitory,
                                CommonEnums.NeuronRole.Excitatory,
                                countI2E,
-                               poolSettings.InterconnectionAllowSelfConn,
-                               poolSettings.InterconnectionAvgDistance
+                               poolSettings.InterconnectionCfg.AllowSelfConnection,
+                               poolSettings.InterconnectionCfg.AvgDistance
                                );
             //Connections I2I
             ConnectPoolNeurons(rand,
@@ -557,10 +558,9 @@ namespace RCNet.Neural.Network.SM
                                CommonEnums.NeuronRole.Inhibitory,
                                CommonEnums.NeuronRole.Inhibitory,
                                countI2I,
-                               poolSettings.InterconnectionAllowSelfConn,
-                               poolSettings.InterconnectionAvgDistance
+                               poolSettings.InterconnectionCfg.AllowSelfConnection,
+                               poolSettings.InterconnectionCfg.AvgDistance
                                );
-
             return;
         }
 

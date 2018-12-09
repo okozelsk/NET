@@ -203,10 +203,10 @@ namespace RCNet.Neural.Network.SM
                     }
                     //Density
                     double density = double.Parse(inputFieldAssignmentElem.Attribute("density").Value, CultureInfo.InvariantCulture);
-                    //Synapse weight
-                    RandomValueSettings synapseWeight = new RandomValueSettings(inputFieldAssignmentElem.Descendants("weight").First());
+                    //Static synapse settings
+                    StaticSynapseSettings synapseCfg = new StaticSynapseSettings(inputFieldAssignmentElem.Descendants("staticSynapse").First());
                     //Add new assignment
-                    reservoirInstanceDefinition.InputFieldAssignmentCollection.Add(new ReservoirInstanceDefinition.InputFieldAssignment(inputFieldIdx, targetPoolID, density, synapseWeight));
+                    reservoirInstanceDefinition.InputFieldAssignmentCollection.Add(new ReservoirInstanceDefinition.InputFieldAssignment(inputFieldIdx, targetPoolID, density, synapseCfg));
                 }
                 ReservoirInstanceDefinitionCollection.Add(reservoirInstanceDefinition);
             }
@@ -394,9 +394,9 @@ namespace RCNet.Neural.Network.SM
                 /// </summary>
                 public double Density { get; set; }
                 /// <summary>
-                /// A weight of input neuron to pool's neuron synapse.
+                /// Input neuron to pool's neuron synapse settings
                 /// </summary>
-                public RandomValueSettings SynapseWeight { get; set; }
+                public StaticSynapseSettings StaticSynapseCfg { get; set; }
 
                 //Constructors
                 /// <summary>
@@ -405,13 +405,13 @@ namespace RCNet.Neural.Network.SM
                 /// <param name="fieldIdx">Index of the reservoir input field</param>
                 /// <param name="poolID">ID of the target pool</param>
                 /// <param name="density">Input field connection density</param>
-                /// <param name="synapseWeight">A weight of input neuron to pool's neuron synapse</param>
-                public InputFieldAssignment(int fieldIdx, int poolID, double density, RandomValueSettings synapseWeight)
+                /// <param name="staticSynapseCfg">Input neuron to pool's neuron synapse settings</param>
+                public InputFieldAssignment(int fieldIdx, int poolID, double density, StaticSynapseSettings staticSynapseCfg)
                 {
                     FieldIdx = fieldIdx;
                     PoolID = poolID;
                     Density = density;
-                    SynapseWeight = synapseWeight;
+                    StaticSynapseCfg = staticSynapseCfg.DeepClone();
                     return;
                 }
 
@@ -424,7 +424,7 @@ namespace RCNet.Neural.Network.SM
                     FieldIdx = source.FieldIdx;
                     PoolID = source.PoolID;
                     Density = source.Density;
-                    SynapseWeight = source.SynapseWeight.DeepClone();
+                    StaticSynapseCfg = source.StaticSynapseCfg.DeepClone();
                     return;
                 }
 
@@ -448,7 +448,7 @@ namespace RCNet.Neural.Network.SM
                     if (FieldIdx != cmpSettings.FieldIdx ||
                         PoolID != cmpSettings.PoolID ||
                         Density != cmpSettings.Density ||
-                        !Equals(SynapseWeight, cmpSettings.SynapseWeight)
+                        !Equals(StaticSynapseCfg, cmpSettings.StaticSynapseCfg)
                         )
                     {
                         return false;

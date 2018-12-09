@@ -91,10 +91,14 @@
     <Compile Include="Neural\Activation\ExpIF.cs" />
     <Compile Include="Neural\Activation\SimpleIF.cs" />
     <Compile Include="Neural\Network\SM\DynamicSynapse.cs" />
+    <Compile Include="Neural\Network\SM\DynamicSynapseSettings.cs">
+      <DependentUpon>DynamicSynapseSettings.xsd</DependentUpon>
+    </Compile>
     <Compile Include="Neural\Network\SM\FiringRate.cs" />
     <Compile Include="Neural\Network\SM\InputAnalogNeuron.cs" />
     <Compile Include="Neural\Network\SM\InputSpikingNeuron.cs" />
     <Compile Include="Neural\Network\SM\NeuronStatistics.cs" />
+    <Compile Include="Neural\Network\SM\StaticSynapseSettings.cs" />
     <Compile Include="Neural\Network\SM\ReservoirAnalogNeuron.cs" />
     <Compile Include="Neural\Network\SM\ReservoirSpikingNeuron.cs" />
     <Compile Include="Neural\Network\SM\SignalConverter.cs" />
@@ -300,6 +304,21 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Neural\Activation\AutoIzhikevichIFSettings.xsd">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Neural\Network\SM\StaticSynapseSettings.xsd">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Neural\Network\SM\DynamicSynapseSettings.xsd">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Neural\Network\SM\PoolInterconnectionSettings.xsd">
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>

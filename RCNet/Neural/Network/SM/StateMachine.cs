@@ -237,9 +237,11 @@ namespace RCNet.Neural.Network.SM
                 throw new Exception("This version of PrepareRegressionStageInput function is useable only for the classification or hybrid task type.");
             }
             //RegressionStageInput allocation
-            RegressionStageInput rsi = new RegressionStageInput();
-            rsi.PredictorsCollection = new List<double[]>(dataSet.InputPatternCollection.Count);
-            rsi.IdealOutputsCollection = new List<double[]>(dataSet.OutputVectorCollection.Count);
+            RegressionStageInput rsi = new RegressionStageInput
+            {
+                PredictorsCollection = new List<double[]>(dataSet.InputPatternCollection.Count),
+                IdealOutputsCollection = new List<double[]>(dataSet.OutputVectorCollection.Count)
+            };
             //Collection
             for (int dataSetIdx = 0; dataSetIdx < dataSet.InputPatternCollection.Count; dataSetIdx++)
             {
@@ -249,10 +251,7 @@ namespace RCNet.Neural.Network.SM
                 //Add desired outputs
                 rsi.IdealOutputsCollection.Add(dataSet.OutputVectorCollection[dataSetIdx]);
                 //Informative callback
-                if(informativeCallback != null)
-                {
-                    informativeCallback(dataSet.InputPatternCollection.Count, dataSetIdx + 1, userObject);
-                }
+                informativeCallback?.Invoke(dataSet.InputPatternCollection.Count, dataSetIdx + 1, userObject);
             }
             //Collect reservoirs statistics
             rsi.ReservoirStatCollection = CollectReservoirInstancesStatatistics();
@@ -291,9 +290,11 @@ namespace RCNet.Neural.Network.SM
             }
             int dataSetLength = dataSet.InputVectorCollection.Count;
             //RegressionStageInput allocation
-            RegressionStageInput rsi = new RegressionStageInput();
-            rsi.PredictorsCollection = new List<double[]>(dataSetLength - numOfBootSamples);
-            rsi.IdealOutputsCollection = new List<double[]>(dataSetLength - numOfBootSamples);
+            RegressionStageInput rsi = new RegressionStageInput
+            {
+                PredictorsCollection = new List<double[]>(dataSetLength - numOfBootSamples),
+                IdealOutputsCollection = new List<double[]>(dataSetLength - numOfBootSamples)
+            };
             //Reset the internal states and statistics
             Reset(true);
             //Collection
@@ -311,10 +312,7 @@ namespace RCNet.Neural.Network.SM
                     rsi.IdealOutputsCollection.Add(dataSet.OutputVectorCollection[dataSetIdx]);
                 }
                 //An informative callback
-                if (informativeCallback != null)
-                {
-                    informativeCallback(dataSetLength, dataSetIdx + 1, userObject);
-                }
+                informativeCallback?.Invoke(dataSetLength, dataSetIdx + 1, userObject);
             }
 
             //Collect reservoirs statistics

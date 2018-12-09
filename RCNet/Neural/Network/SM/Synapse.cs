@@ -37,7 +37,7 @@ namespace RCNet.Neural.Network.SM
 
         //Attributes
         /// <summary>
-        /// Value to be added during the signal conversion
+        /// Synapse efficacy
         /// </summary>
         protected double _efficacy;
 
@@ -63,11 +63,11 @@ namespace RCNet.Neural.Network.SM
         /// <param name="sourceNeuron">Source neuron</param>
         /// <param name="targetNeuron">Target neuron</param>
         /// <param name="weight">Synapse weight</param>
-        /// <param name="maxDelay">Maximum delay (in cycles) of the signal delivery</param>
+        /// <param name="delay">Delay (in cycles) of the signal delivery</param>
         public Synapse(INeuron sourceNeuron,
                        INeuron targetNeuron,
                        double weight,
-                       int maxDelay
+                       int delay
                        )
         {
             SourceNeuron = sourceNeuron;
@@ -171,6 +171,7 @@ namespace RCNet.Neural.Network.SM
             }
             /////////////////////////////////////////////////////////
             //Delay
+            /*
             double maxDistance = targetNeuron.Placement.PoolDim.ComputeMaxDistance();
             int delay = 0;
             int[] sCoordinates = null;
@@ -197,6 +198,8 @@ namespace RCNet.Neural.Network.SM
             double distance = PoolDimensions.ComputeEuclideanDistance(sCoordinates, TargetNeuron.Placement.Coordinates);
             double relDistance = distance / maxDistance;
             delay = (int)Math.Round(maxDelay * relDistance);
+            */
+
             //Setup signal queue
             _qSig = new SimpleQueue<double>(delay + 1);
             //Efficacy

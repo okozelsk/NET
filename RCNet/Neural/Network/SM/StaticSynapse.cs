@@ -21,19 +21,18 @@ namespace RCNet.Neural.Network.SM
         /// <param name="sourceNeuron">Source neuron</param>
         /// <param name="targetNeuron">Target neuron</param>
         /// <param name="weight">Synapse weight</param>
-        /// <param name="maxDelay">Maximum delay (in cycles) of the signal delivery</param>
+        /// <param name="delay">Synapse delay (in cycles) of the signal delivery</param>
         public StaticSynapse(INeuron sourceNeuron,
                              INeuron targetNeuron,
                              double weight,
-                             int maxDelay
+                             int delay
                              )
-            :base(sourceNeuron, targetNeuron, weight, maxDelay)
+            :base(sourceNeuron, targetNeuron, weight, delay)
         {
             return;
         }
 
         //Methods
-
         /// <summary>
         /// Updates synapse efficacy (dynamic adaptation of the synapse)
         /// Does nothing in case of static synapse
@@ -42,6 +41,7 @@ namespace RCNet.Neural.Network.SM
         {
             return;
         }
+
 
     }//StaticSynapse
 

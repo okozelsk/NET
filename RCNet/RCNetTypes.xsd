@@ -444,17 +444,45 @@
     <xs:attribute type="UIntGT0AutoOptionType" name="folds" use="required"/>
   </xs:complexType>
 
+  <!-- ________________________________________SYNAPSE TYPES_________________________________________________ -->
 
-  <!-- ________________________________________NEURAL POOL TYPES_________________________________________________ -->
-  <!-- Pool - interconnection - configuration -->
-  <xs:complexType name="PoolInterconnectionCfgType">
+  <!-- Static synapse - configuration -->
+  <xs:complexType name="StaticSynapseCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="RandomValueType" name="weight" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
+    <xs:attribute type="xs:unsignedInt" name="maxDelay" use="required"/>
+  </xs:complexType>
+  
+  <!-- Dynamic synapse - configuration -->
+  <xs:complexType name="DynamicSynapseCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="RandomValueType" name="weight" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+    <xs:attribute type="xs:unsignedInt" name="maxDelay" use="required"/>
+    <xs:attribute type="UDoubleType" name="tauFacilitation" use="required"/>
+    <xs:attribute type="UDoubleType" name="tauRecovery" use="required"/>
+    <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="required"/>
+    <xs:attribute type="UDoubleType" name="tauDecay" use="required"/>
+  </xs:complexType>
+
+
+  <!-- ________________________________________NEURAL POOL TYPES_________________________________________________ -->
+
+  <!-- Pool - interconnection - configuration -->
+  <xs:complexType name="PoolInterconnectionCfgType">
+    <xs:choice minOccurs="1" maxOccurs="1">
+      <xs:element type="StaticSynapseCfgType" name="staticSynapse" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="DynamicSynapseCfgType" name="dynamicSynapse" minOccurs="1" maxOccurs="1"/>
+    </xs:choice>
     <xs:attribute type="UDoubleLE1Type" name="density" use="required"/>
-    <xs:attribute type="UDoubleGT0NAOptionType" name="avgDistance" use="required"/>
-    <xs:attribute type="xs:boolean" name="allowSelfConnection" use="required"/>
-    <xs:attribute type="xs:boolean" name="constantNumOfConnections" use="optional" default="true"/>
+    <xs:attribute type="UDoubleType" name="relShareEE" use="optional" default="0.3"/>
+    <xs:attribute type="UDoubleType" name="relShareEI" use="optional" default="0.2"/>
+    <xs:attribute type="UDoubleType" name="relShareIE" use="optional" default="0.4"/>
+    <xs:attribute type="UDoubleType" name="relShareII" use="optional" default="0.1"/>
+    <xs:attribute type="UDoubleGT0NAOptionType" name="avgDistance" use="optional" default="NA"/>
+    <xs:attribute type="xs:boolean" name="allowSelfConnection" use="optional" default="true"/>
+    <xs:attribute type="xs:boolean" name="constantNumOfConnections" use="optional" default="false"/>
   </xs:complexType>
 
   <!-- Pool - neuron group - configuration -->
@@ -524,14 +552,19 @@
 
   <!-- Reservoir - pool to pool connection - configuration -->
   <xs:complexType name="ReservoirPool2PoolConnCfgType">
-    <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="RandomValueType" name="weight" minOccurs="1" maxOccurs="1"/>
-    </xs:sequence>
+    <xs:choice minOccurs="1" maxOccurs="1">
+      <xs:element type="StaticSynapseCfgType" name="staticSynapse" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="DynamicSynapseCfgType" name="dynamicSynapse" minOccurs="1" maxOccurs="1"/>
+    </xs:choice>
     <xs:attribute type="xs:string" name="targetPool" use="required"/>
     <xs:attribute type="UDoubleLE1Type" name="targetConnDensity" use="required"/>
     <xs:attribute type="xs:string" name="srcPool" use="required"/>
     <xs:attribute type="UDoubleLE1Type" name="srcConnDensity" use="required"/>
-    <xs:attribute type="xs:boolean" name="constantNumOfConnections" use="optional" default="true"/>
+    <xs:attribute type="UDoubleType" name="relShareEE" use="optional" default="0.3"/>
+    <xs:attribute type="UDoubleType" name="relShareEI" use="optional" default="0.2"/>
+    <xs:attribute type="UDoubleType" name="relShareIE" use="optional" default="0.4"/>
+    <xs:attribute type="UDoubleType" name="relShareII" use="optional" default="0.1"/>
+    <xs:attribute type="xs:boolean" name="constantNumOfConnections" use="optional" default="false"/>
   </xs:complexType>
 
   <!-- Reservoir - interpools interconnection container - configuration -->
@@ -572,7 +605,7 @@
   <!-- StateMachine - reservoir instance - input field assignment configuration -->
   <xs:complexType name="SMResInstanceInputFieldAssignmentCfg">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="RandomValueType" name="weight" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="StaticSynapseCfgType" name="staticSynapse" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:string" name="inputFieldName" use="required"/>
     <xs:attribute type="xs:string" name="poolName" use="required"/>

@@ -39,27 +39,9 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         public List<NeuronGroupSettings> NeuronGroups { get; set; }
         /// <summary>
-        /// Density of interconnected neurons.
-        /// Each pool neuron will be connected as a source neuron for Dim.Size * InterconnectionDensity neurons.
+        /// Configuration of the pool's neurons interconnection
         /// </summary>
-        public double InterconnectionDensity { get; set; }
-        /// <summary>
-        /// Average distance of interconnected neurons.
-        /// 0 means random distance.
-        /// </summary>
-        public double InterconnectionAvgDistance { get; set; }
-        /// <summary>
-        /// Specifies whether to allow neurons to be self connected
-        /// </summary>
-        public bool InterconnectionAllowSelfConn { get; set; }
-        /// <summary>
-        /// Neurons in the pool are interconnected. The weight of the connection synapse will be selected randomly.
-        /// </summary>
-        public RandomValueSettings InterconnectionSynapseWeight { get; set; }
-        /// <summary>
-        /// Specifies whether to keep for each neuron constant number of incoming interconnections
-        /// </summary>
-        public bool ConstantNumOfConnections { get; set; }
+        public InterconnectionSettings InterconnectionCfg { get; set; }
         /// <summary>
         /// Indicates whether the retainment (leaky integrators) neurons feature is used.
         /// Relevant for neurons having time independent activation (analog)
@@ -91,10 +73,7 @@ namespace RCNet.Neural.Network.SM
             Dim = null;
             ReadoutNeuronsDensity = 1;
             NeuronGroups = null;
-            InterconnectionDensity = 0;
-            InterconnectionAvgDistance = 0;
-            InterconnectionSynapseWeight = null;
-            ConstantNumOfConnections = true;
+            InterconnectionCfg = null;
             RetainmentNeuronsFeature = false;
             RetainmentNeuronsDensity = 0;
             RetainmentRate = null;
@@ -120,14 +99,7 @@ namespace RCNet.Neural.Network.SM
             {
                 NeuronGroups.Add(item.DeepClone());
             }
-            InterconnectionDensity = source.InterconnectionDensity;
-            InterconnectionAvgDistance = source.InterconnectionAvgDistance;
-            InterconnectionSynapseWeight = null;
-            if(source.InterconnectionSynapseWeight != null)
-            {
-                InterconnectionSynapseWeight = source.InterconnectionSynapseWeight.DeepClone();
-            }
-            ConstantNumOfConnections = source.ConstantNumOfConnections;
+            InterconnectionCfg = source.InterconnectionCfg.DeepClone();
             RetainmentNeuronsFeature = source.RetainmentNeuronsFeature;
             RetainmentNeuronsDensity = source.RetainmentNeuronsDensity;
             if (RetainmentNeuronsFeature)
@@ -214,11 +186,7 @@ namespace RCNet.Neural.Network.SM
             
             //Interconnection
             XElement interconnectionElem = poolSettingsElem.Descendants("interconnection").First();
-            InterconnectionDensity = double.Parse(interconnectionElem.Attribute("density").Value, CultureInfo.InvariantCulture);
-            InterconnectionAvgDistance = interconnectionElem.Attribute("avgDistance").Value == "NA" ? 0d : double.Parse(interconnectionElem.Attribute("avgDistance").Value, CultureInfo.InvariantCulture);
-            InterconnectionAllowSelfConn = bool.Parse(interconnectionElem.Attribute("allowSelfConnection").Value);
-            InterconnectionSynapseWeight = new RandomValueSettings(interconnectionElem.Descendants("weight").First());
-            ConstantNumOfConnections = bool.Parse(interconnectionElem.Attribute("constantNumOfConnections").Value);
+            InterconnectionCfg = new InterconnectionSettings(interconnectionElem);
             //Retainment neurons
             XElement retainmentElem = poolSettingsElem.Descendants("retainmentNeurons").FirstOrDefault();
             RetainmentNeuronsFeature = (retainmentElem != null);
@@ -251,10 +219,7 @@ namespace RCNet.Neural.Network.SM
                 !Equals(Dim, cmpSettings.Dim) ||
                 ReadoutNeuronsDensity != cmpSettings.ReadoutNeuronsDensity ||
                 !Equals(NeuronGroups.Count, cmpSettings.NeuronGroups.Count) ||
-                InterconnectionDensity != cmpSettings.InterconnectionDensity ||
-                InterconnectionAvgDistance != cmpSettings.InterconnectionAvgDistance ||
-                !Equals(InterconnectionSynapseWeight, cmpSettings.InterconnectionSynapseWeight) ||
-                ConstantNumOfConnections != cmpSettings.ConstantNumOfConnections ||
+                !Equals(InterconnectionCfg, cmpSettings.InterconnectionCfg) ||
                 RetainmentNeuronsFeature != cmpSettings.RetainmentNeuronsFeature ||
                 RetainmentNeuronsDensity != cmpSettings.RetainmentNeuronsDensity ||
                 !Equals(RetainmentRate, cmpSettings.RetainmentRate) ||
@@ -452,7 +417,196 @@ namespace RCNet.Neural.Network.SM
             }
 
 
-        }//NeuronGroup
+        }//NeuronGroupSettings
+
+        /// <summary>
+        /// Class encapsulates specification of pool's neurons interconnection
+        /// </summary>
+        [Serializable]
+        public class InterconnectionSettings
+        {
+            //Constants
+            //Attribute properties
+            /// <summary>
+            /// Density of interconnected neurons.
+            /// Each pool neuron will be connected as a source neuron for Dim.Size * InterconnectionDensity neurons.
+            /// </summary>
+            public double Density { get; set; }
+            /// <summary>
+            /// EE synapses ratio
+            /// </summary>
+            public double RatioEE { get; set; }
+            /// <summary>
+            /// EI synapses ratio
+            /// </summary>
+            public double RatioEI { get; set; }
+            /// <summary>
+            /// IE synapses ratio
+            /// </summary>
+            public double RatioIE { get; set; }
+            /// <summary>
+            /// II synapses ratio
+            /// </summary>
+            public double RatioII { get; set; }
+            /// <summary>
+            /// Average distance of interconnected neurons.
+            /// 0 means random distance.
+            /// </summary>
+            public double AvgDistance { get; set; }
+            /// <summary>
+            /// Specifies whether to allow neurons to be self connected
+            /// </summary>
+            public bool AllowSelfConnection { get; set; }
+            /// <summary>
+            /// Specifies whether to keep for each neuron constant number of incoming interconnections
+            /// </summary>
+            public bool ConstantNumOfConnections { get; set; }
+            /// <summary>
+            /// Neurons in the pool are interconnected through synapses.
+            /// </summary>
+            public Object SynapseCfg { get; set; }
+
+            //Constructors
+            /// <summary>
+            /// Creates an uninitialized instance
+            /// </summary>
+            public InterconnectionSettings()
+            {
+                Density = 0;
+                RatioEE = 0.3;
+                RatioEI = 0.2;
+                RatioIE = 0.4;
+                RatioII = 0.1;
+                AvgDistance = 0;
+                AllowSelfConnection = true;
+                ConstantNumOfConnections = false;
+                SynapseCfg = null;
+                return;
+            }
+
+            /// <summary>
+            /// The deep copy constructor
+            /// </summary>
+            /// <param name="source">Source instance</param>
+            public InterconnectionSettings(InterconnectionSettings source)
+            {
+                Density = source.Density;
+                RatioEE = source.RatioEE;
+                RatioEI = source.RatioEI;
+                RatioIE = source.RatioIE;
+                RatioII = source.RatioII;
+                AvgDistance = source.AvgDistance;
+                AllowSelfConnection = source.AllowSelfConnection;
+                ConstantNumOfConnections = source.ConstantNumOfConnections;
+                SynapseCfg = null;
+                if(source.SynapseCfg != null)
+                {
+                    if(source.GetType() == typeof(StaticSynapse))
+                    {
+                        //Static synapse settings
+                        SynapseCfg = ((StaticSynapseSettings)source.SynapseCfg).DeepClone();
+                    }
+                    else
+                    {
+                        //Dynamic synapse settings
+                        SynapseCfg = ((DynamicSynapseSettings)source.SynapseCfg).DeepClone();
+                    }
+                }
+                return;
+            }
+
+            /// <summary>
+            /// Creates the instance and initialize it from given xml element.
+            /// </summary>
+            /// <param name="elem">
+            /// Xml data containing settings.
+            /// Content of xml element is always validated against the xml schema.
+            /// </param>
+            public InterconnectionSettings(XElement elem)
+            {
+                //Validation
+                ElemValidator validator = new ElemValidator();
+                Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
+                validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.SM.PoolInterconnectionSettings.xsd");
+                validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
+                XElement settingsElem = validator.Validate(elem, "rootElem");
+                //Parsing
+                //Density
+                Density = double.Parse(settingsElem.Attribute("density").Value, CultureInfo.InvariantCulture);
+                //Ratios
+                double relShareEE = double.Parse(settingsElem.Attribute("relShareEE").Value, CultureInfo.InvariantCulture);
+                double relShareEI = double.Parse(settingsElem.Attribute("relShareEI").Value, CultureInfo.InvariantCulture);
+                double relShareIE = double.Parse(settingsElem.Attribute("relShareIE").Value, CultureInfo.InvariantCulture);
+                double relShareII = double.Parse(settingsElem.Attribute("relShareII").Value, CultureInfo.InvariantCulture);
+                double sum = relShareEE + relShareEI + relShareIE + relShareII;
+                RatioEE = relShareEE / sum;
+                RatioEI = relShareEI / sum;
+                RatioIE = relShareIE / sum;
+                RatioII = relShareII / sum;
+                //Average distance
+                AvgDistance = settingsElem.Attribute("avgDistance").Value == "NA" ? 0d : double.Parse(settingsElem.Attribute("avgDistance").Value, CultureInfo.InvariantCulture);
+                //Allow self connections?
+                AllowSelfConnection = bool.Parse(settingsElem.Attribute("allowSelfConnection").Value);
+                //Will have each neuron the same number of connections?
+                ConstantNumOfConnections = bool.Parse(settingsElem.Attribute("constantNumOfConnections").Value);
+                //Synapse
+                XElement synapseCfgElem = settingsElem.Descendants().First();
+                if(synapseCfgElem.Name == "staticSynapse")
+                {
+                    SynapseCfg = new StaticSynapseSettings(synapseCfgElem);
+                }
+                else
+                {
+                    SynapseCfg = new DynamicSynapseSettings(synapseCfgElem);
+                }
+                return;
+            }
+
+            //Methods
+            /// <summary>
+            /// See the base.
+            /// </summary>
+            public override bool Equals(object obj)
+            {
+                if (obj == null) return false;
+                InterconnectionSettings cmpSettings = obj as InterconnectionSettings;
+                if (Density != cmpSettings.Density ||
+                    RatioEE != cmpSettings.RatioEE ||
+                    RatioEI != cmpSettings.RatioEI ||
+                    RatioIE != cmpSettings.RatioIE ||
+                    RatioII != cmpSettings.RatioII ||
+                    AvgDistance != cmpSettings.AvgDistance ||
+                    AllowSelfConnection != cmpSettings.AllowSelfConnection ||
+                    ConstantNumOfConnections != cmpSettings.ConstantNumOfConnections ||
+                    !Equals(SynapseCfg, cmpSettings.SynapseCfg)
+                    )
+                {
+                    return false;
+                }
+                return true;
+            }
+
+            /// <summary>
+            /// See the base.
+            /// </summary>
+            public override int GetHashCode()
+            {
+                return base.GetHashCode();
+            }
+
+            /// <summary>
+            /// Creates the deep copy instance of this instance
+            /// </summary>
+            public InterconnectionSettings DeepClone()
+            {
+                InterconnectionSettings clone = new InterconnectionSettings(this);
+                return clone;
+            }
+
+        }//InterconnectionSettings
+
+
+
 
     }//PoolSettings
 
