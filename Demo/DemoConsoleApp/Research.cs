@@ -32,6 +32,7 @@ namespace RCNet.DemoConsoleApp
             //IzhikevichIFSettings settings = new IzhikevichIFSettings(10, 0.1, 0.25, 2, -70, -65, 30, 0, ODENumSolver.Method.Euler, 2);
             //IActivationFunction af = new IzhikevichIF(settings);
 
+            /*
             LeakyIFSettings settings = new LeakyIFSettings(5.5,
                                                            new RandomValueSettings(8, 8),
                                                            new RandomValueSettings(10, 10),
@@ -43,8 +44,9 @@ namespace RCNet.DemoConsoleApp
                                                            2
                                                            );
             IActivationFunction af = new LeakyIF(settings, new Random(0));
+            */
 
-            /*
+            ///*
             SimpleIFSettings settings = new SimpleIFSettings(1,
                                                              new RandomValueSettings(15, 15),
                                                              new RandomValueSettings(0.05, 0.05),
@@ -53,8 +55,8 @@ namespace RCNet.DemoConsoleApp
                                                              0
                                                              );
             IActivationFunction af = new SimpleIF(settings, new Random(0));
-            */
-            TestActivation(af, 800, 0.4, 10, 600);
+            //*/
+            TestActivation(af, 800, 0.15, 10, 600);
             return;
         }
 

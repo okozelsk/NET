@@ -31,9 +31,9 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         public PoolDimensions Dim { get; set; }
         /// <summary>
-        /// Determines whether to use neurons as the readout predictors
+        /// Determines what ratio of the pool's neurons to use as the readout predictors
         /// </summary>
-        public bool RouteToReadout { get; set; }
+        public double ReadoutNeuronsDensity { get; set; }
         /// <summary>
         /// Settings of the neuron groups in the pool.
         /// </summary>
@@ -85,6 +85,7 @@ namespace RCNet.Neural.Network.SM
         {
             Name = string.Empty;
             Dim = null;
+            ReadoutNeuronsDensity = 1;
             NeuronGroups = null;
             InterconnectionDensity = 0;
             InterconnectionAvgDistance = 0;
@@ -108,7 +109,7 @@ namespace RCNet.Neural.Network.SM
             {
                 Dim = new PoolDimensions(source.Dim.X, source.Dim.Y, source.Dim.Z);
             }
-            RouteToReadout = source.RouteToReadout;
+            ReadoutNeuronsDensity = source.ReadoutNeuronsDensity;
             NeuronGroups = new List<NeuronGroupSettings>(source.NeuronGroups.Count);
             foreach(NeuronGroupSettings item in source.NeuronGroups)
             {
@@ -159,7 +160,8 @@ namespace RCNet.Neural.Network.SM
                                      int.Parse(poolSettingsElem.Attribute("dimY").Value, CultureInfo.InvariantCulture),
                                      int.Parse(poolSettingsElem.Attribute("dimZ").Value, CultureInfo.InvariantCulture)
                                      );
-            RouteToReadout = bool.Parse(poolSettingsElem.Attribute("routeToReadout").Value);
+            //Readout neurons density
+            ReadoutNeuronsDensity = double.Parse(poolSettingsElem.Attribute("readoutNeuronsDensity").Value, CultureInfo.InvariantCulture);
             //NeuronGroups
             XElement neuronGroupsElem = poolSettingsElem.Descendants("neuronGroups").First();
             double totalRelShare = 0;
@@ -236,7 +238,7 @@ namespace RCNet.Neural.Network.SM
             PoolSettings cmpSettings = obj as PoolSettings;
             if (Name != cmpSettings.Name ||
                 !Equals(Dim, cmpSettings.Dim) ||
-                RouteToReadout != cmpSettings.RouteToReadout ||
+                ReadoutNeuronsDensity != cmpSettings.ReadoutNeuronsDensity ||
                 !Equals(NeuronGroups.Count, cmpSettings.NeuronGroups.Count) ||
                 InterconnectionDensity != cmpSettings.InterconnectionDensity ||
                 InterconnectionAvgDistance != cmpSettings.InterconnectionAvgDistance ||
@@ -308,12 +310,16 @@ namespace RCNet.Neural.Network.SM
             /// <summary>
             /// Activation settings of the groupped neurons
             /// </summary>
-            public Object ActivationSettings { get; set; }
+            public Object ActivationCfg { get; set; }
             /// <summary>
             /// Each pool's neuron has its own constant input bias. Bias is always added to input signal of the neuron.
-            /// A constant bias value of the neuron will be selected randomly.
+            /// A constant bias value of the neuron will be selected randomly according to the settings.
             /// </summary>
-            public RandomValueSettings BiasSettings { get; set; }
+            public RandomValueSettings BiasCfg { get; set; }
+            /// <summary>
+            /// Each pool's neuron can be continuously fed by input random noise.
+            /// </summary>
+            public RandomValueSettings NoiseCfg { get; set; }
 
             //Constructors
             /// <summary>
@@ -326,8 +332,9 @@ namespace RCNet.Neural.Network.SM
                 RelativeShare = 0;
                 AugmentedStates = false;
                 Count = 0;
-                ActivationSettings = null;
-                BiasSettings = null;
+                ActivationCfg = null;
+                BiasCfg = null;
+                NoiseCfg = null;
                 return;
             }
 
@@ -342,8 +349,9 @@ namespace RCNet.Neural.Network.SM
                 RelativeShare = source.RelativeShare;
                 AugmentedStates = source.AugmentedStates;
                 Count = source.Count;
-                ActivationSettings = ActivationFactory.DeepCloneActivationSettings(source.ActivationSettings);
-                BiasSettings = source.BiasSettings.DeepClone();
+                ActivationCfg = ActivationFactory.DeepCloneActivationSettings(source.ActivationCfg);
+                BiasCfg = source.BiasCfg.DeepClone();
+                NoiseCfg = source.NoiseCfg.DeepClone();
                 return;
             }
 
@@ -372,9 +380,11 @@ namespace RCNet.Neural.Network.SM
                 //Augmented states
                 AugmentedStates = bool.Parse(settingsElem.Attribute("augmentedStates").Value);
                 //Activation settings
-                ActivationSettings = ActivationFactory.LoadSettings(settingsElem.Descendants().First());
+                ActivationCfg = ActivationFactory.LoadSettings(settingsElem.Descendants().First());
                 //Bias
-                BiasSettings = new RandomValueSettings(settingsElem.Descendants("bias").First());
+                BiasCfg = new RandomValueSettings(settingsElem.Descendants("bias").First());
+                //Noise
+                NoiseCfg = new RandomValueSettings(settingsElem.Descendants("noise").First());
                 return;
             }
 
@@ -411,8 +421,9 @@ namespace RCNet.Neural.Network.SM
                     RelativeShare != cmpSettings.RelativeShare ||
                     AugmentedStates != cmpSettings.AugmentedStates ||
                     Count != cmpSettings.Count ||
-                    !Equals(ActivationSettings, cmpSettings.ActivationSettings) ||
-                    !Equals(BiasSettings, cmpSettings.BiasSettings)
+                    !Equals(ActivationCfg, cmpSettings.ActivationCfg) ||
+                    !Equals(BiasCfg, cmpSettings.BiasCfg) ||
+                    !Equals(NoiseCfg, cmpSettings.NoiseCfg)
                     )
                 {
                     return false;

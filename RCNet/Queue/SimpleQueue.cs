@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 
 namespace RCNet.Queue
 {
@@ -24,9 +25,7 @@ namespace RCNet.Queue
         {
             _capacity = capacity;
             _queue = new T[_capacity];
-            _enqueueOffset = 0;
-            _dequeueOffset = 0;
-            Count = 0;
+            Reset();
             return;
         }
 
@@ -81,6 +80,17 @@ namespace RCNet.Queue
                 return item;
             }
             return default(T);
+        }
+
+        /// <summary>
+        /// Resets queue to its initial state
+        /// </summary>
+        public void Reset()
+        {
+            _enqueueOffset = 0;
+            _dequeueOffset = 0;
+            Count = 0;
+            return;
         }
 
     }//SimpleQueue

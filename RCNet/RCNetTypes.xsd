@@ -138,14 +138,24 @@
     <xs:attribute type="xs:string" name="name" use="required"/>
   </xs:complexType>
 
+  <!-- Gaussian distribution configuration element -->
+  <xs:complexType name="GaussianDistrCfgType">
+    <xs:attribute type="xs:double" name="mean" use="required"/>
+    <xs:attribute type="xs:double" name="stdDev" use="required"/>
+  </xs:complexType>
+
   <!-- Random value element -->
   <xs:complexType name="RandomValueType">
+    <xs:choice minOccurs="0" maxOccurs="1">
+      <xs:element type="GaussianDistrCfgType" name="gaussianDistr" minOccurs="1" maxOccurs="1"/>
+    </xs:choice>
     <xs:attribute type="xs:double" name="min" use="required"/>
     <xs:attribute type="xs:double" name="max" use="required"/>
     <xs:attribute type="xs:boolean" name="randomSign" use="optional" default="false"/>
     <xs:attribute type="RandomDistributionType" name="distribution" use="optional" default="Uniform"/>
   </xs:complexType>
-
+  
+  
   <!-- Spiking activation functions configurations-->
   <!-- Activation SimpleIF configuration element -->
   <xs:complexType name="ActivationSimpleIFCfgType">
@@ -308,7 +318,7 @@
 
   <!-- FF network - hidden layer - configuration -->
   <xs:complexType name="FFNetHiddenLayerCfgType">
-    <xs:choice minOccurs="0" maxOccurs="1">
+    <xs:choice minOccurs="1" maxOccurs="1">
       <xs:element type="ActivationBentIdentityCfgType" name="activationBentIdentity" minOccurs="1" maxOccurs="1"/>
       <xs:element type="ActivationElliotCfgType" name="activationElliot" minOccurs="1" maxOccurs="1"/>
       <xs:element type="ActivationGaussianCfgType" name="activationGaussian" minOccurs="1" maxOccurs="1"/>
@@ -353,7 +363,7 @@
   <xs:complexType name="FFNetCfgType">
     <xs:sequence minOccurs="0" maxOccurs="1">
       <xs:sequence minOccurs="1" maxOccurs="1">
-        <xs:choice minOccurs="0" maxOccurs="1">
+        <xs:choice minOccurs="1" maxOccurs="1">
           <xs:element type="ActivationBentIdentityCfgType" name="activationBentIdentity" minOccurs="1" maxOccurs="1"/>
           <xs:element type="ActivationElliotCfgType" name="activationElliot" minOccurs="1" maxOccurs="1"/>
           <xs:element type="ActivationGaussianCfgType" name="activationGaussian" minOccurs="1" maxOccurs="1"/>
@@ -450,7 +460,7 @@
   <!-- Pool - neuron group - configuration -->
   <xs:complexType name="PoolNeuronGroupCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:choice minOccurs="0" maxOccurs="1">
+      <xs:choice minOccurs="1" maxOccurs="1">
         <xs:element type="ActivationSimpleIFCfgType" name="activationSimpleIF" minOccurs="1" maxOccurs="1"/>
         <xs:element type="ActivationLeakyIFCfgType" name="activationLeakyIF" minOccurs="1" maxOccurs="1"/>
         <xs:element type="ActivationExpIFCfgType" name="activationExpIF" minOccurs="1" maxOccurs="1"/>
@@ -466,6 +476,7 @@
         <xs:element type="ActivationTanHCfgType" name="activationTanH" minOccurs="1" maxOccurs="1"/>
       </xs:choice>
       <xs:element type="RandomValueType" name="bias" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="RandomValueType" name="noise" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:string" name="name" use="required" />
     <xs:attribute type="NeuronRoleType" name="role" use="required"/>
@@ -499,7 +510,7 @@
     <xs:attribute type="xs:unsignedInt" name="dimX" use="required" />
     <xs:attribute type="xs:unsignedInt" name="dimY" use="required" />
     <xs:attribute type="xs:unsignedInt" name="dimZ" use="required" />
-    <xs:attribute type="xs:boolean" name="routeToReadout" use="optional" default="true"/>
+    <xs:attribute type="UDoubleType" name="readoutNeuronsDensity" use="required"/>
   </xs:complexType>
 
   <!-- ________________________________________RESERVOIR TYPES_________________________________________________ -->

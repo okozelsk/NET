@@ -15,13 +15,21 @@ namespace RCNet.Neural.Network.SM
     {
         //Constants
         //Static attribute properties
+        /// <summary>
+        /// Normalization range of the neuron internal state
+        /// </summary>
         public static Interval NormalizedStateRange { get; } = new Interval(0, 1);
 
         //Attribute properties
         /// <summary>
-        /// Statistics of neuron's input stimulation
+        /// Statistics of neuron's stimulation (all components together)
         /// </summary>
-        public BasicStat StimuliStat { get; }
+        public BasicStat TStimuliStat { get; }
+
+        /// <summary>
+        /// Statistics of neuron's stimulation (stimulation component related to part coming from connected reservoir's neurons)
+        /// </summary>
+        public BasicStat RStimuliStat { get; }
 
         /// <summary>
         /// Neuron's normal states min max interval
@@ -45,7 +53,8 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         public NeuronStatistics(Interval neuronStateRange)
         {
-            StimuliStat = new BasicStat();
+            TStimuliStat = new BasicStat();
+            RStimuliStat = new BasicStat();
             ActivationStateRange = neuronStateRange.DeepClone();
             NormalizedActivationStateStat = new BasicStat();
             OutputSignalStat = new BasicStat();
@@ -58,7 +67,8 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         public void Reset()
         {
-            StimuliStat.Reset();
+            TStimuliStat.Reset();
+            RStimuliStat.Reset();
             NormalizedActivationStateStat.Reset();
             OutputSignalStat.Reset();
             return;
@@ -67,12 +77,14 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// Updates statistics
         /// </summary>
-        /// <param name="stimuli">Incoming stimuli</param>
+        /// <param name="tStimuli">Incoming stimulation (all components together)</param>
+        /// <param name="rStimuli">Incoming stimulation component related to part coming from connected reservoir's neurons</param>
         /// <param name="activationState">Neuron's activation function state</param>
         /// <param name="outputSignal">Neuron's output signal</param>
-        public void Update(double stimuli, double activationState, double outputSignal)
+        public void Update(double tStimuli, double rStimuli, double activationState, double outputSignal)
         {
-            StimuliStat.AddSampleValue(stimuli);
+            TStimuliStat.AddSampleValue(tStimuli);
+            RStimuliStat.AddSampleValue(rStimuli);
             NormalizedActivationStateStat.AddSampleValue(NormalizedStateRange.Rescale(activationState, ActivationStateRange));
             OutputSignalStat.AddSampleValue(outputSignal);
             return;

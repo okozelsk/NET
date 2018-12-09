@@ -30,11 +30,6 @@ namespace RCNet.Neural.Network.SM
         CommonEnums.NeuronRole Role { get; }
 
         /// <summary>
-        /// Specifies whether to use neuron's secondary predictor
-        /// </summary>
-        bool UseSecondaryPredictor { get; }
-
-        /// <summary>
         /// Type of the output signal (spike or analog)
         /// </summary>
         ActivationFactory.FunctionOutputSignalType OutputType { get; }
@@ -55,9 +50,9 @@ namespace RCNet.Neural.Network.SM
         double OutputSignal { get; }
 
         /// <summary>
-        /// Computation cycles left without output signal
+        /// Computation cycles gone from the last emitted signal
         /// </summary>
-        int NoSignalCycles { get; }
+        int OutputSignalLeak { get; }
 
         /// <summary>
         /// Value to be passed to readout layer as a primary predictor.
@@ -79,9 +74,9 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// Stores new incoming stimulation.
         /// </summary>
-        /// <param name="externalStimuli">Stimulation comming from input neurons</param>
-        /// <param name="internalStimuli">Stimulation comming from reservoir neurons</param>
-        void NewStimuli(double externalStimuli, double internalStimuli);
+        /// <param name="iStimuli">Stimulation comming from input neurons</param>
+        /// <param name="rStimuli">Stimulation comming from reservoir neurons</param>
+        void NewStimuli(double iStimuli, double rStimuli);
 
         /// <summary>
         /// Computes neuron's new output signal and updates statistics

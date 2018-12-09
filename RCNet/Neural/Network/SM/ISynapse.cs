@@ -28,11 +28,17 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         double Weight { get; }
 
+        /// <summary>
+        /// Efficacy statistics of the synapse
+        /// </summary>
+        BasicStat EfficacyStat { get; }
+
         //Methods
         /// <summary>
         /// Resets synapse.
         /// </summary>
-        void Reset();
+        /// <param name="statistics">Specifies whether to reset also internal statistics</param>
+        void Reset(bool statistics);
 
         /// <summary>
         /// Rescales the synapse weight.
@@ -43,7 +49,8 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// Returns signal to be delivered to target neuron.
         /// </summary>
-        double GetSignal();
+        /// <param name="collectStatistics">Specifies whether to update internal statistics</param>
+        double GetSignal(bool collectStatistics);
 
     }//ISynapse
 

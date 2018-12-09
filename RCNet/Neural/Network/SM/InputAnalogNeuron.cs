@@ -35,12 +35,6 @@ namespace RCNet.Neural.Network.SM
         public CommonEnums.NeuronRole Role { get { return CommonEnums.NeuronRole.Input; } }
 
         /// <summary>
-        /// Specifies whether to use neuron's secondary predictor.
-        /// Input neuron never generates secondary predictor
-        /// </summary>
-        public bool UseSecondaryPredictor { get { return false; } }
-
-        /// <summary>
         /// Type of the output signal (spike or analog)
         /// This is an analog neuron.
         /// </summary>
@@ -63,9 +57,9 @@ namespace RCNet.Neural.Network.SM
         public double OutputSignal { get; private set; }
 
         /// <summary>
-        /// Computation cycles left without output signal
+        /// Computation cycles gone from the last emitted signal
         /// </summary>
-        public int NoSignalCycles { get; private set; }
+        public int OutputSignalLeak { get; private set; }
 
         /// <summary>
         /// Value to be passed to readout layer as a primary predictor.
@@ -80,7 +74,8 @@ namespace RCNet.Neural.Network.SM
         public double SecondaryPredictor { get { return double.NaN; } }
 
         //Attributes
-        private double _stimuli;
+        private double _tStimuli;
+        private double _rStimuli;
 
         //Constructor
         /// <summary>
@@ -108,24 +103,25 @@ namespace RCNet.Neural.Network.SM
         /// <param name="statistics">Specifies whether to reset internal statistics</param>
         public void Reset(bool statistics)
         {
-            _stimuli = 0;
-            if(statistics)
+            _tStimuli = 0;
+            _rStimuli = 0;
+            if (statistics)
             {
                 Statistics.Reset();
             }
-            //Set initially -1 to counter (no one signal transmitted)
-            NoSignalCycles = -1;
+            OutputSignalLeak = 0;
             return;
         }
 
         /// <summary>
         /// Stores new incoming stimulation.
         /// </summary>
-        /// <param name="externalStimuli">Stimulation comming from input neurons</param>
-        /// <param name="internalStimuli">Stimulation comming from reservoir neurons</param>
-        public void NewStimuli(double externalStimuli, double internalStimuli)
+        /// <param name="iStimuli">External input analog signal</param>
+        /// <param name="rStimuli">Stimulation comming from reservoir neurons. Should be always 0.</param>
+        public void NewStimuli(double iStimuli, double rStimuli)
         {
-            _stimuli = (externalStimuli + internalStimuli).Bound();
+            _tStimuli = (iStimuli + rStimuli).Bound();
+            _rStimuli = rStimuli;
             return;
         }
 
@@ -135,18 +131,20 @@ namespace RCNet.Neural.Network.SM
         /// <param name="collectStatistics">Specifies whether to update internal statistics</param>
         public void NewState(bool collectStatistics)
         {
-            OutputSignal = _stimuli;
+            //Output signal leak handling
             if (OutputSignal != OutputRange.Mid)
             {
-                NoSignalCycles = 0;
+                OutputSignalLeak = 1;
             }
             else
             {
-                if (NoSignalCycles != -1) ++NoSignalCycles;
+                if (OutputSignalLeak > 0) ++OutputSignalLeak;
             }
+            //New output signal
+            OutputSignal = _tStimuli;
             if (collectStatistics)
             {
-                Statistics.Update(_stimuli, _stimuli, _stimuli);
+                Statistics.Update(_tStimuli, _rStimuli, _tStimuli, _tStimuli);
             }
             return;
         }

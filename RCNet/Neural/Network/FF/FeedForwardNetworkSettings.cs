@@ -126,8 +126,7 @@ namespace RCNet.Neural.Network.FF
             XElement feedForwardNetworkSettingsElem = validator.Validate(elem, "rootElem");
             //Parsing
             OutputLayerActivation = ActivationFactory.LoadSettings(feedForwardNetworkSettingsElem.Descendants().First());
-            Interval outputRange = null;
-            if(!IsAllowedActivation(OutputLayerActivation, out outputRange))
+            if (!IsAllowedActivation(OutputLayerActivation, out Interval outputRange))
             {
                 throw new ApplicationException($"Activation can't be used in FF network. Activation function has to be stateless and has to support derivative calculation.");
             }
@@ -180,6 +179,7 @@ namespace RCNet.Neural.Network.FF
         /// Fuction checks if specified activation can be used in FF network 
         /// </summary>
         /// <param name="activationSettings">Activation settings</param>
+        /// <param name="outputRange">Returned range of the activation function</param>
         /// <returns></returns>
         public static bool IsAllowedActivation(Object activationSettings, out Interval outputRange)
         {
@@ -305,8 +305,7 @@ namespace RCNet.Neural.Network.FF
             {
                 NumOfNeurons = int.Parse(elem.Attribute("neurons").Value);
                 Activation = ActivationFactory.LoadSettings(elem.Descendants().First());
-                Interval outputRange = null;
-                if (!IsAllowedActivation(Activation, out outputRange))
+                if (!IsAllowedActivation(Activation, out Interval outputRange))
                 {
                     throw new ApplicationException($"Activation can't be used in FF network. Activation has to be time independent and has to support derivative.");
                 }

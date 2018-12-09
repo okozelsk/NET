@@ -41,12 +41,6 @@ namespace RCNet.Neural.Network.SM
         public CommonEnums.NeuronRole Role { get { return CommonEnums.NeuronRole.Input; } }
 
         /// <summary>
-        /// Specifies whether to use neuron's secondary predictor.
-        /// Input neuron never generates secondary predictor
-        /// </summary>
-        public bool UseSecondaryPredictor { get { return false; } }
-
-        /// <summary>
         /// Type of the output signal (spike or analog)
         /// This is a spiking neuron.
         /// </summary>
@@ -69,9 +63,9 @@ namespace RCNet.Neural.Network.SM
         public double OutputSignal { get; private set; }
 
         /// <summary>
-        /// Computation cycles left without output signal
+        /// Computation cycles gone from the last emitted signal
         /// </summary>
-        public int NoSignalCycles { get; private set; }
+        public int OutputSignalLeak { get; private set; }
 
         /// <summary>
         /// Value to be passed to readout layer as a primary predictor.
@@ -87,7 +81,8 @@ namespace RCNet.Neural.Network.SM
 
         //Attributes
         private readonly Interval _inputRange;
-        private double _stimuli;
+        private double _tStimuli;
+        private double _rStimuli;
         private SignalConverter _signalConverter;
 
         //Constructor
@@ -118,25 +113,26 @@ namespace RCNet.Neural.Network.SM
         /// <param name="statistics">Specifies whether to reset internal statistics</param>
         public void Reset(bool statistics)
         {
-            _stimuli = 0;
+            _tStimuli = 0;
+            _rStimuli = 0;
             if (statistics)
             {
                 Statistics.Reset();
             }
-            //Set initially -1 to counter (no one spike spiked)
-            NoSignalCycles = -1;
+            OutputSignalLeak = 0;
             return;
         }
 
         /// <summary>
         /// Stores new incoming stimulation.
         /// </summary>
-        /// <param name="externalStimuli">Stimulation comming from input neurons</param>
-        /// <param name="internalStimuli">Stimulation comming from reservoir neurons</param>
-        public void NewStimuli(double externalStimuli, double internalStimuli)
+        /// <param name="iStimuli">External input analog signal</param>
+        /// <param name="rStimuli">Stimulation comming from reservoir neurons. Should be always 0.</param>
+        public void NewStimuli(double iStimuli, double rStimuli)
         {
-            _stimuli = (externalStimuli + internalStimuli).Bound();
-            _signalConverter.EncodeAnalogValue(_stimuli);
+            _tStimuli = (iStimuli + rStimuli).Bound();
+            _rStimuli = rStimuli;
+            _signalConverter.EncodeAnalogValue(_tStimuli);
             return;
         }
 
@@ -146,24 +142,26 @@ namespace RCNet.Neural.Network.SM
         /// <param name="collectStatistics">Specifies whether to update internal statistics</param>
         public void NewState(bool collectStatistics)
         {
-            OutputSignal = _signalConverter.FetchSpike();
+            //Output signal leak handling
             if (OutputSignal > 0)
             {
-                //Spike, so reset the counter
-                NoSignalCycles = 0;
+                //Spike during previous cycle, so reset the counter
+                OutputSignalLeak = 1;
             }
             else
             {
-                //No spike
-                if (NoSignalCycles != -1)
+                //No spike during previous cycle
+                if (OutputSignalLeak > 0)
                 {
                     //Neuron has already spiked, so standardly increment counter
-                    ++NoSignalCycles;
+                    ++OutputSignalLeak;
                 }
             }
+            //New output signal
+            OutputSignal = _signalConverter.FetchSpike();
             if (collectStatistics)
             {
-                Statistics.Update(_stimuli, OutputSignal, OutputSignal);
+                Statistics.Update(_tStimuli, _rStimuli, OutputSignal, OutputSignal);
             }
             return;
         }

@@ -27,9 +27,7 @@ namespace RCNet.Queue
             _lock = new Object();
             _capacity = capacity;
             _queue = new T[_capacity];
-            _enqueueOffset = 0;
-            _dequeueOffset = 0;
-            _count = 0;
+            Reset();
             return;
         }
 
@@ -109,6 +107,21 @@ namespace RCNet.Queue
             }
             return default(T);
         }
+
+        /// <summary>
+        /// Resets queue to its initial state
+        /// </summary>
+        public void Reset()
+        {
+            lock (_lock)
+            {
+                _enqueueOffset = 0;
+                _dequeueOffset = 0;
+                _count = 0;
+            }
+            return;
+        }
+
 
     }//SimpleThreadSafeQueue
 

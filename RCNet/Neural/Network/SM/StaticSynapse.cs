@@ -33,21 +33,13 @@ namespace RCNet.Neural.Network.SM
         }
 
         //Methods
-        /// <summary>
-        /// Resets synapse.
-        /// </summary>
-        public override void Reset()
-        {
-            //Does nothing in case of the static synapse
-            return;
-        }
 
         /// <summary>
-        /// Computes weighted signal and puts it into the internal queue
+        /// Updates synapse efficacy (dynamic adaptation of the synapse)
+        /// Does nothing in case of static synapse
         /// </summary>
-        protected override void EnqueueSignal()
+        protected override void UpdateEfficacy()
         {
-            _qSig.Enqueue(((SourceNeuron.OutputSignal + _add) / _div) * Weight);
             return;
         }
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RCNet.MathTools;
 using RCNet.Queue;
 
 namespace RCNet.Neural.Network.SM
@@ -23,15 +24,36 @@ namespace RCNet.Neural.Network.SM
         /// Target neuron - signal receiver
         /// </summary>
         public INeuron TargetNeuron { get; }
-        
+
+        /// <summary>
+        /// Efficacy statistics of the synapse
+        /// </summary>
+        public BasicStat EfficacyStat { get; }
+
         /// <summary>
         /// Weight of the synapse
         /// </summary>
         public double Weight { get; private set; }
 
         //Attributes
+        /// <summary>
+        /// Value to be added during the signal conversion
+        /// </summary>
+        protected double _efficacy;
+
+        /// <summary>
+        /// Value to be added during the signal conversion
+        /// </summary>
         protected readonly double _add;
+
+        /// <summary>
+        /// Value to be divided by during the signal conversion
+        /// </summary>
         protected readonly double _div;
+        
+        /// <summary>
+        /// Signal queue
+        /// </summary>
         protected readonly SimpleQueue<double> _qSig;
 
         //Constructor
@@ -177,6 +199,9 @@ namespace RCNet.Neural.Network.SM
             delay = (int)Math.Round(maxDelay * relDistance);
             //Setup signal queue
             _qSig = new SimpleQueue<double>(delay + 1);
+            //Efficacy
+            _efficacy = 1d;
+            EfficacyStat = new BasicStat();
             return;
         }
 
@@ -184,7 +209,17 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// Resets synapse.
         /// </summary>
-        public abstract void Reset();
+        /// <param name="statistics">Specifies whether to reset also internal statistics</param>
+        public virtual void Reset(bool statistics)
+        {
+            _qSig.Reset();
+            _efficacy = 1d;
+            if (statistics)
+            {
+                EfficacyStat.Reset();
+            }
+            return;
+        }
 
         /// <summary>
         /// Rescales the synapse weight.
@@ -197,25 +232,34 @@ namespace RCNet.Neural.Network.SM
         }
 
         /// <summary>
-        /// Computes weighted signal and puts it into the internal queue
+        /// Updates synapse efficacy (dynamic adaptation of the synapse)
         /// </summary>
-        protected abstract void EnqueueSignal();
+        protected abstract void UpdateEfficacy();
 
         /// <summary>
         /// Returns signal to be delivered to target neuron.
-        /// Function has to be invoced only once!!!
+        /// Function has to be invoked only once/cycle !!!
         /// </summary>
-        public double GetSignal()
+        /// <param name="collectStatistics">Specifies whether to update internal statistics</param>
+        public double GetSignal(bool collectStatistics)
         {
-            EnqueueSignal();
+            //Compute efficacy
+            UpdateEfficacy();
+            if (collectStatistics)
+            {
+                EfficacyStat.AddSampleValue(_efficacy);
+            }
+            //Compute resulting weighted signal and put it into the queue
+            _qSig.Enqueue(((SourceNeuron.OutputSignal + _add) / _div) * Weight * _efficacy);
+            //Pick up signal from queue
             if (_qSig.Full)
             {
-                //Synapse is ready to deliver
+                //Queue is full, so synapse is ready to deliver
                 return _qSig.Dequeue();
             }
             else
             {
-                //Synapse is not ready
+                //No signal to be delivered, signal is "still on the road"
                 return 0;
             }
         }

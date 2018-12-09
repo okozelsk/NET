@@ -33,6 +33,7 @@
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Release\RCNet.XML</DocumentationFile>
     <UseVSHostingProcess>false</UseVSHostingProcess>
+    <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -89,7 +90,7 @@
     <Compile Include="Neural\Activation\TanH.cs" />
     <Compile Include="Neural\Activation\ExpIF.cs" />
     <Compile Include="Neural\Activation\SimpleIF.cs" />
-    <Compile Include="Neural\Network\SM\DynSTPSynapse.cs" />
+    <Compile Include="Neural\Network\SM\DynamicSynapse.cs" />
     <Compile Include="Neural\Network\SM\FiringRate.cs" />
     <Compile Include="Neural\Network\SM\InputAnalogNeuron.cs" />
     <Compile Include="Neural\Network\SM\InputSpikingNeuron.cs" />
@@ -103,7 +104,6 @@
     <Compile Include="Neural\Network\SM\PoolSettings.cs" />
     <Compile Include="Neural\Network\SM\INeuron.cs" />
     <Compile Include="Neural\Network\SM\ISynapse.cs" />
-    <Compile Include="Neural\Network\SM\DynDecaySynapse.cs" />
     <Compile Include="Neural\Network\SM\StaticSynapse.cs" />
     <Compile Include="Neural\Network\SM\Synapse.cs" />
     <Compile Include="Neural\Data\TimeSeriesDataLoader.cs" />

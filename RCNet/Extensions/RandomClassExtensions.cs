@@ -96,17 +96,25 @@ namespace RCNet.Extensions
             //Uniform(0,1] random doubles
             double u1 = 1.0 - rand.NextDouble();
             double u2 = 1.0 - rand.NextDouble();
-            //Random normal(mean = 0, stdDev = 1)
-            double randStdNormal = Math.Sqrt(-2.0 * Math.Log(u1)) * Math.Sin(2.0 * Math.PI * u2);
-            //Random normal(mean,stdDev^2)
-            return mean + stdDev * randStdNormal;
+            //Gaussian value construction
+            return mean + stdDev * Math.Sqrt(-2.0 * Math.Log(u1)) * Math.Sin(2.0 * Math.PI * u2);
         }
 
         /// <summary>
-        /// Returns random double following Gaussian distribution within min and max.
-        /// Warning: this function can lead to a bad perfomance. Perfomance depends on parameters.
+        /// Returns random double following Gaussian distribution.
         /// </summary>
-        public static double NextBoundedGaussianDouble(this Random rand, double min = -1, double max = 1)
+        /// <param name="rand"></param>
+        /// <param name="settings">Gaussian distribution parameters</param>
+        public static double NextGaussianDouble(this Random rand, RandomValueSettings.GaussianDistrSettings settings)
+        {
+            return NextGaussianDouble(rand, settings.Mean, settings.StdDev);
+        }
+        
+        /// <summary>
+        /// Returns random double following Gaussian distribution within min and max.
+        /// Warning: this function can lead to a bad performance. Performance depends on parameters.
+        /// </summary>
+        public static double NextBoundedGaussianDouble(this Random rand, double min = -1, double max = 1, double mean = double.NaN, double stdDev = double.NaN)
         {
             if (min == max)
             {
@@ -114,19 +122,25 @@ namespace RCNet.Extensions
             }
             else
             {
-                double mean = min + (max - min) / 2d;
-                double std = ((max - min)) / 6d;
+                if(double.IsNaN(mean))
+                {
+                    mean = min + (max - min) / 2d;
+                }
+                if(double.IsNaN(stdDev))
+                {
+                    stdDev = ((max - min)) / 6d;
+                }
                 double result = 0;
                 do
                 {
-                    result = NextGaussianDouble(rand, mean, std);
+                    result = rand.NextGaussianDouble(mean, stdDev);
                 } while (result < min || result > max || result == mean);
                 return result;
             }
         }
 
         /// <summary>
-        /// Returns random double within specified boundaries.
+        /// Returns random double within specified boundaries following uniform distribution.
         /// </summary>
         /// <param name="min">Min random double value</param>
         /// <param name="max">Max random double value</param>
@@ -178,7 +192,29 @@ namespace RCNet.Extensions
         /// <param name="settings">Encapsulated settings</param>
         public static double NextDouble(this Random rand, RandomValueSettings settings)
         {
-            return NextDouble(rand, settings.Min, settings.Max, settings.RandomSign, settings.DistrType);
+
+            double value = 0;
+            switch (settings.DistrType)
+            {
+                case DistributionType.Uniform:
+                    value = rand.NextBoundedUniformDouble(settings.Min, settings.Max);
+                    break;
+                case DistributionType.Gaussian:
+                    if(settings.GaussianDistrCfg != null)
+                    {
+                        value = rand.NextBoundedGaussianDouble(settings.Min, settings.Max, settings.GaussianDistrCfg.Mean, settings.GaussianDistrCfg.StdDev);
+                    }
+                    else
+                    {
+                        value = rand.NextBoundedGaussianDouble(settings.Min, settings.Max);
+                    }
+                    break;
+            }
+            if (settings.RandomSign)
+            {
+                value *= rand.NextSign();
+            }
+            return value;
         }
 
         /// <summary>
@@ -197,6 +233,23 @@ namespace RCNet.Extensions
             for (int i = 0; i < count; i++)
             {
                 array[i] = rand.NextDouble(min, max, randomSign, distrType);
+            }
+            return;
+        }
+
+        /// <summary>
+        /// Fills array with random values.
+        /// </summary>
+        /// <param name="rand"></param>
+        /// <param name="array">The array to be filled</param>
+        /// <param name="settings">Encapsulated settings</param>
+        /// <param name="count">Specifies how many elements of the array to be filled</param>
+        public static void Fill(this Random rand, double[] array, RandomValueSettings settings, int count = -1)
+        {
+            if (count < 0) count = array.Length;
+            for (int i = 0; i < count; i++)
+            {
+                array[i] = rand.NextDouble(settings);
             }
             return;
         }

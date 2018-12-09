@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using RCNet.Extensions;
 using RCNet.MathTools;
 using RCNet.Neural.Activation;
+using RCNet.RandomValue;
 
 namespace RCNet.Neural.Network.SM
 {
@@ -33,11 +34,6 @@ namespace RCNet.Neural.Network.SM
         public CommonEnums.NeuronRole Role { get; }
 
         /// <summary>
-        /// Specifies whether to use neuron's secondary predictor.
-        /// </summary>
-        public bool UseSecondaryPredictor { get; }
-
-        /// <summary>
         /// Type of the output signal (spike or analog)
         /// This neuron is analog
         /// </summary>
@@ -61,7 +57,7 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// Computation cycles left without output signal
         /// </summary>
-        public int NoSignalCycles { get; private set; }
+        public int OutputSignalLeak { get; private set; }
 
         /// <summary>
         /// Value to be passed to readout layer as a primary predictor.
@@ -87,7 +83,18 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// Input stimulation
         /// </summary>
-        private double _stimuli;
+        private double _tStimuli;
+        private double _rStimuli;
+
+        /// <summary>
+        /// Local random generator
+        /// </summary>
+        private Random _rand;
+
+        /// <summary>
+        /// Settings for noise generation
+        /// </summary>
+        private readonly RandomValueSettings _noiseCfg;
 
         //Constructor
         /// <summary>
@@ -97,19 +104,20 @@ namespace RCNet.Neural.Network.SM
         /// <param name="role">Neuron's signal role (Excitatory/Inhibitory).</param>
         /// <param name="activation">Instantiated activation function.</param>
         /// <param name="bias">Constant bias.</param>
+        /// <param name="noiseCfg">Continuous random noise configuration parameters.</param>
         /// <param name="retainmentRatio">Retainment ratio.</param>
-        /// <param name="useSecondaryPredictor">Specifies whether to use neuron's secondary predictor.</param>
         public ReservoirAnalogNeuron(NeuronPlacement placement,
                                      CommonEnums.NeuronRole role,
                                      IActivationFunction activation,
                                      double bias,
-                                     double retainmentRatio,
-                                     bool useSecondaryPredictor
+                                     RandomValueSettings noiseCfg,
+                                     double retainmentRatio
                                      )
         {
             Placement = placement;
             Role = role;
             Bias = bias;
+            _noiseCfg = noiseCfg.DeepClone();
             //Check whether function is analog
             if (activation.OutputSignalType != ActivationFactory.FunctionOutputSignalType.Analog)
             {
@@ -117,7 +125,6 @@ namespace RCNet.Neural.Network.SM
             }
             _activation = activation;
             _retainmentRatio = retainmentRatio;
-            UseSecondaryPredictor = useSecondaryPredictor;
             Statistics = new NeuronStatistics(OutputRange);
             Reset(false);
             return;
@@ -132,25 +139,27 @@ namespace RCNet.Neural.Network.SM
         public void Reset(bool statistics)
         {
             _activation.Reset();
-            _stimuli = 0;
-            OutputSignal = _activation.Compute(_stimuli);
+            _tStimuli = 0;
+            _rStimuli = 0;
+            OutputSignal = _activation.Compute(_tStimuli);
             if (statistics)
             {
                 Statistics.Reset();
             }
-            //Set initially -1 to counter (no one signal transmitted)
-            NoSignalCycles = -1;
+            _rand = new Random((Placement.PoolID + 1) * Placement.PoolFlatIdx);
+            OutputSignalLeak = 0;
             return;
         }
 
         /// <summary>
         /// Stores new incoming stimulation.
         /// </summary>
-        /// <param name="externalStimuli">Stimulation comming from input neurons</param>
-        /// <param name="internalStimuli">Stimulation comming from reservoir neurons</param>
-        public void NewStimuli(double externalStimuli, double internalStimuli)
+        /// <param name="iStimuli">Stimulation comming from input neurons</param>
+        /// <param name="rStimuli">Stimulation comming from reservoir neurons</param>
+        public void NewStimuli(double iStimuli, double rStimuli)
         {
-            _stimuli = (externalStimuli + internalStimuli + Bias).Bound();
+            _tStimuli = (iStimuli + rStimuli + Bias + _rand.NextDouble(_noiseCfg)).Bound();
+            _rStimuli = rStimuli;
             return;
         }
 
@@ -160,19 +169,21 @@ namespace RCNet.Neural.Network.SM
         /// <param name="collectStatistics">Specifies whether to update internal statistics</param>
         public void NewState(bool collectStatistics)
         {
-            double state = _activation.Compute(_stimuli);
-            OutputSignal = (_retainmentRatio * OutputSignal) + (1d - _retainmentRatio) * state;
-            if(OutputSignal != _activation.OutputSignalRange.Mid)
+            //Output signal leak handling
+            if (OutputSignal != _activation.OutputSignalRange.Mid)
             {
-                NoSignalCycles = 0;
+                OutputSignalLeak = 1;
             }
             else
             {
-                if (NoSignalCycles != -1) ++NoSignalCycles;
+                if (OutputSignalLeak > 0) ++OutputSignalLeak;
             }
+            //New output signal
+            double state = _activation.Compute(_tStimuli);
+            OutputSignal = (_retainmentRatio * OutputSignal) + (1d - _retainmentRatio) * state;
             if (collectStatistics)
             {
-                Statistics.Update(_stimuli, state, OutputSignal);
+                Statistics.Update(_tStimuli, _rStimuli, state, OutputSignal);
             }
             return;
         }

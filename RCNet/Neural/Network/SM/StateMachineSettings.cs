@@ -372,6 +372,9 @@ namespace RCNet.Neural.Network.SM
             }
 
             //Inner classes
+            /// <summary>
+            /// Assigmnment of input field to pool (connections)
+            /// </summary>
             [Serializable]
             public class InputFieldAssignment
             {

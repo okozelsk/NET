@@ -21,6 +21,7 @@ namespace RCNet.Neural
             /// Range 0;1
             /// </summary>
             Inclusive_0_Pos1,
+            /// <summary>
             /// Range -1;1
             /// </summary>
             Inclusive_Neg1_Pos1
@@ -44,7 +45,7 @@ namespace RCNet.Neural
         /// <summary>
         /// Returns interval according to the specified normalization range
         /// </summary>
-        /// <param name="code">Normalization range code</param>
+        /// <param name="range">Normalization range</param>
         public static Interval GetDataNormalizationRange(DataNormalizationRange range)
         {
             switch (range)

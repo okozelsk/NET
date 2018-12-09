@@ -21,6 +21,9 @@ namespace RCNet.Neural.Activation
     {
         //Constants
         //Typical values
+        /// <summary>
+        /// Curve slope
+        /// </summary>
         public const double TypicalSlope = 1;
 
         //Attribute properties

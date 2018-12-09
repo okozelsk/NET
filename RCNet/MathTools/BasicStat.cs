@@ -45,6 +45,7 @@ namespace RCNet.MathTools
         /// <summary>
         /// Creates an instance and loads given sample values
         /// </summary>
+        /// <param name="sampleValueCollection">Values to be pushed as the samples</param>
         /// <param name="threadSafe">Specifies if to create thread safe instance</param>
         public BasicStat(IEnumerable<double> sampleValueCollection, bool threadSafe = false)
             : this(threadSafe)
@@ -56,6 +57,7 @@ namespace RCNet.MathTools
         /// <summary>
         /// Creates an instance and loads given sample values
         /// </summary>
+        /// <param name="sampleValueCollection">Values to be pushed as the samples</param>
         /// <param name="threadSafe">Specifies if to create thread safe instance</param>
         public BasicStat(IEnumerable<long> sampleValueCollection, bool threadSafe = false)
             : this(threadSafe)
@@ -67,6 +69,7 @@ namespace RCNet.MathTools
         /// <summary>
         /// Creates an instance and loads given sample values
         /// </summary>
+        /// <param name="sampleValueCollection">Values to be pushed as the samples</param>
         /// <param name="threadSafe">Specifies if to create thread safe instance</param>
         public BasicStat(IEnumerable<ulong> sampleValueCollection, bool threadSafe = false)
             : this(threadSafe)
@@ -78,6 +81,7 @@ namespace RCNet.MathTools
         /// <summary>
         /// Creates an instance and loads given sample values
         /// </summary>
+        /// <param name="sampleValueCollection">Values to be pushed as the samples</param>
         /// <param name="threadSafe">Specifies if to create thread safe instance</param>
         public BasicStat(IEnumerable<int> sampleValueCollection, bool threadSafe = false)
             : this(threadSafe)
@@ -89,6 +93,7 @@ namespace RCNet.MathTools
         /// <summary>
         /// Creates an instance and loads given sample values
         /// </summary>
+        /// <param name="sampleValueCollection">Values to be pushed as the samples</param>
         /// <param name="threadSafe">Specifies if to create thread safe instance</param>
         public BasicStat(IEnumerable<uint> sampleValueCollection, bool threadSafe = false)
             : this(threadSafe)
@@ -100,6 +105,7 @@ namespace RCNet.MathTools
         /// <summary>
         /// Creates an instance and loads given sample values
         /// </summary>
+        /// <param name="sampleValueCollection">Values to be pushed as the samples</param>
         /// <param name="threadSafe">Specifies if to create thread safe instance</param>
         public BasicStat(IEnumerable<byte> sampleValueCollection, bool threadSafe = false)
             : this(threadSafe)
@@ -111,6 +117,7 @@ namespace RCNet.MathTools
         /// <summary>
         /// The copy constructor
         /// </summary>
+        /// <param name="source">Source instance</param>
         /// <param name="threadSafe">Specifies if to create thread safe instance</param>
         public BasicStat(BasicStat source, bool threadSafe = false)
             : this(threadSafe)
