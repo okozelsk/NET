@@ -235,13 +235,29 @@ namespace RCNet.Neural.Network.SM
             /// </summary>
             public double SourceConnectionDensity { get; set; }
             /// <summary>
-            /// Weight of source pool neuron to target pool neuron synapse.
+            /// EE synapses ratio
             /// </summary>
-            public RandomValueSettings SynapseWeight { get; set; }
+            public double RatioEE { get; set; }
+            /// <summary>
+            /// EI synapses ratio
+            /// </summary>
+            public double RatioEI { get; set; }
+            /// <summary>
+            /// IE synapses ratio
+            /// </summary>
+            public double RatioIE { get; set; }
+            /// <summary>
+            /// II synapses ratio
+            /// </summary>
+            public double RatioII { get; set; }
             /// <summary>
             /// Specifies whether to keep for each neuron constant number of incoming interconnections
             /// </summary>
             public bool ConstantNumOfConnections { get; set; }
+            /// <summary>
+            /// Neurons are interconnected through synapses.
+            /// </summary>
+            public Object SynapseCfg { get; set; }
 
             //Constructors
             /// <summary>
@@ -253,8 +269,12 @@ namespace RCNet.Neural.Network.SM
                 SourceConnectionDensity = 0;
                 TargetPoolName = string.Empty;
                 TargetConnectionDensity = 0;
-                SynapseWeight = null;
+                RatioEE = 0.3;
+                RatioEI = 0.2;
+                RatioIE = 0.4;
+                RatioII = 0.1;
                 ConstantNumOfConnections = true;
+                SynapseCfg = null;
                 return;
             }
 
@@ -270,21 +290,36 @@ namespace RCNet.Neural.Network.SM
                 TargetPoolName = source.TargetPoolName;
                 TargetPoolID = source.TargetPoolID;
                 TargetConnectionDensity = source.TargetConnectionDensity;
-                SynapseWeight = null;
-                if (source.SynapseWeight != null)
-                {
-                    SynapseWeight = source.SynapseWeight.DeepClone();
-                }
+                RatioEE = source.RatioEE;
+                RatioEI = source.RatioEI;
+                RatioIE = source.RatioIE;
+                RatioII = source.RatioII;
                 ConstantNumOfConnections = source.ConstantNumOfConnections;
+                SynapseCfg = null;
+                if (source.SynapseCfg != null)
+                {
+                    if (source.GetType() == typeof(StaticSynapse))
+                    {
+                        //Static synapse settings
+                        SynapseCfg = ((StaticSynapseSettings)source.SynapseCfg).DeepClone();
+                    }
+                    else
+                    {
+                        //Dynamic synapse settings
+                        SynapseCfg = ((DynamicSynapseSettings)source.SynapseCfg).DeepClone();
+                    }
+                }
                 return;
             }
 
             /// <summary>
-            /// Creates the instance itialized from xml
+            /// Creates the instance and initialize it from given xml element.
             /// </summary>
-            public PoolsInterconnection(XElement interConnElem, List<PoolSettings> poolSettingsCollection)
+            /// <param name="elem">Xml data containing settings.</param>
+            /// <param name="poolSettingsCollection">Collection of pool settings.</param>
+            public PoolsInterconnection(XElement elem, List<PoolSettings> poolSettingsCollection)
             {
-                TargetPoolName = interConnElem.Attribute("targetPool").Value;
+                TargetPoolName = elem.Attribute("targetPool").Value;
                 TargetPoolID = -1;
                 //Find target pool ID (index)
                 for (int idx = 0; idx < poolSettingsCollection.Count; idx++)
@@ -299,8 +334,8 @@ namespace RCNet.Neural.Network.SM
                 {
                     throw new Exception($"Pool {TargetPoolName} was not found.");
                 }
-                TargetConnectionDensity = double.Parse(interConnElem.Attribute("targetConnDensity").Value, CultureInfo.InvariantCulture);
-                SourcePoolName = interConnElem.Attribute("srcPool").Value;
+                TargetConnectionDensity = double.Parse(elem.Attribute("targetConnDensity").Value, CultureInfo.InvariantCulture);
+                SourcePoolName = elem.Attribute("srcPool").Value;
                 SourcePoolID = -1;
                 //Find source pool ID (index)
                 for (int idx = 0; idx < poolSettingsCollection.Count; idx++)
@@ -315,13 +350,33 @@ namespace RCNet.Neural.Network.SM
                 {
                     throw new Exception($"Pool {SourcePoolName} was not found.");
                 }
-                SourceConnectionDensity = double.Parse(interConnElem.Attribute("srcConnDensity").Value, CultureInfo.InvariantCulture);
+                SourceConnectionDensity = double.Parse(elem.Attribute("srcConnDensity").Value, CultureInfo.InvariantCulture);
                 if (SourcePoolID == TargetPoolID)
                 {
                     throw new Exception($"Two different pools have to be specified for interpool connection.");
                 }
-                SynapseWeight = new RandomValueSettings(interConnElem.Descendants("weight").First());
-                ConstantNumOfConnections = bool.Parse(interConnElem.Attribute("constantNumOfConnections").Value);
+                //Ratios
+                double relShareEE = double.Parse(elem.Attribute("relShareEE").Value, CultureInfo.InvariantCulture);
+                double relShareEI = double.Parse(elem.Attribute("relShareEI").Value, CultureInfo.InvariantCulture);
+                double relShareIE = double.Parse(elem.Attribute("relShareIE").Value, CultureInfo.InvariantCulture);
+                double relShareII = double.Parse(elem.Attribute("relShareII").Value, CultureInfo.InvariantCulture);
+                double sum = relShareEE + relShareEI + relShareIE + relShareII;
+                RatioEE = relShareEE / sum;
+                RatioEI = relShareEI / sum;
+                RatioIE = relShareIE / sum;
+                RatioII = relShareII / sum;
+                //Synapse
+                XElement synapseCfgElem = elem.Descendants().First();
+                if (synapseCfgElem.Name == "staticSynapse")
+                {
+                    SynapseCfg = new StaticSynapseSettings(synapseCfgElem);
+                }
+                else
+                {
+                    SynapseCfg = new DynamicSynapseSettings(synapseCfgElem);
+                }
+                //Constant number of neuron's connections
+                ConstantNumOfConnections = bool.Parse(elem.Attribute("constantNumOfConnections").Value);
                 return;
             }
 
@@ -337,7 +392,11 @@ namespace RCNet.Neural.Network.SM
                     SourceConnectionDensity != cmpSettings.SourceConnectionDensity ||
                     TargetPoolName != cmpSettings.TargetPoolName ||
                     TargetConnectionDensity != cmpSettings.TargetConnectionDensity ||
-                    !Equals(SynapseWeight, cmpSettings.SynapseWeight) ||
+                    RatioEE != cmpSettings.RatioEE ||
+                    RatioEI != cmpSettings.RatioEI ||
+                    RatioIE != cmpSettings.RatioIE ||
+                    RatioII != cmpSettings.RatioII ||
+                    !Equals(SynapseCfg, cmpSettings.SynapseCfg) ||
                     ConstantNumOfConnections != cmpSettings.ConstantNumOfConnections
                     )
                 {

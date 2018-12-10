@@ -587,17 +587,36 @@ namespace RCNet.Neural.Network.SM
             {
                 for (int i = 0; i < numOfTargetNeurons; i++)
                 {
-                    INeuron targetneuron = _poolNeuronsCollection[cfg.TargetPoolID][targetIndices[i]];
+                    INeuron targetNeuron = _poolNeuronsCollection[cfg.TargetPoolID][targetIndices[i]];
                     rand.Shuffle(srcIndices);
                     int connCount = cfg.ConstantNumOfConnections ? numOfSrcNeurons : (int)Math.Round(rand.NextBoundedGaussianDouble(1, 2 * numOfSrcNeurons));
                     for (int j = 0; j < connCount && j < srcIndices.Length; j++)
                     {
                         INeuron srcNeuron = _poolNeuronsCollection[cfg.SourcePoolID][srcIndices[j]];
-                        StaticSynapse synapse = new StaticSynapse(srcNeuron,
-                                                                  targetneuron,
-                                                                  rand.NextDouble(cfg.SynapseWeight),
-                                                                  0
-                                                                  );
+                        //Establish connection
+                        ISynapse synapse = null;
+                        if (cfg.SynapseCfg.GetType() == typeof(StaticSynapse))
+                        {
+                            StaticSynapseSettings sss = (StaticSynapseSettings)cfg.SynapseCfg;
+                            synapse = new StaticSynapse(sourceNeuron: srcNeuron,
+                                                        targetNeuron: targetNeuron,
+                                                        weight: rand.NextDouble(sss.WeightCfg),
+                                                        delay: rand.Next(sss.MaxDelay + 1)
+                                                        );
+                        }
+                        else
+                        {
+                            DynamicSynapseSettings dss = (DynamicSynapseSettings)cfg.SynapseCfg;
+                            synapse = new DynamicSynapse(sourceNeuron: srcNeuron,
+                                                         targetNeuron: targetNeuron,
+                                                         weight: rand.NextDouble(dss.WeightCfg),
+                                                         delay: rand.Next(dss.MaxDelay + 1),
+                                                         tauFacilitation: dss.TauFacilitation,
+                                                         tauRecovery: dss.TauRecovery,
+                                                         restingEfficacy: dss.RestingEfficacy,
+                                                         tauDecay: dss.TauDecay
+                                                         );
+                        }
                         AddInterconnection(_neuronNeuronConnectionsCollection, synapse, false);
                     }
                 }
