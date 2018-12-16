@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Globalization;
+using RCNet.Extensions;
 using RCNet.MathTools;
 using RCNet.Neural;
 using RCNet.Neural.Data;

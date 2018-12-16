@@ -19,13 +19,20 @@ namespace RCNet.Neural.Network.FF
         private readonly List<double[]> _outputVectorCollection;
         private double[] _weigthsGradsAcc;
         private double[] _weigthsPrevGradsAcc;
-        private readonly Object _weigthsGradsAccLocker;
         private double[] _weigthsPrevDeltas;
         private double[] _weigthsPrevChanges;
         private double _prevMSE;
-        private double _lastMSE;
-        private int _epoch;
-        private List<WorkerRange> _workerRangeCollection;
+        private List<GradientWorkerData> _gradientWorkerDataCollection;
+
+        //Attribute properties
+        /// <summary>
+        /// !Epoch-1 error (MSE).
+        /// </summary>
+        public double MSE { get; private set; }
+        /// <summary>
+        /// Current epoch (incemented by call of Iteration)
+        /// </summary>
+        public int Epoch { get; private set; }
 
         //Constructor
         /// <summary>
@@ -66,45 +73,31 @@ namespace RCNet.Neural.Network.FF
             _weigthsGradsAcc.Populate(0);
             _weigthsPrevGradsAcc = new double[_net.NumOfWeights];
             _weigthsPrevGradsAcc.Populate(0);
-            _weigthsGradsAccLocker = new object();
             _weigthsPrevDeltas = new double[_net.NumOfWeights];
             _weigthsPrevDeltas.Populate(_settings.IniDelta);
             _weigthsPrevChanges = new double[_net.NumOfWeights];
             _weigthsPrevChanges.Populate(0);
             _prevMSE = 0;
-            _lastMSE = 0;
-            _epoch = 0;
+            MSE = 0;
+            Epoch = 0;
             //Parallel gradient workers / batch ranges preparation
-            _workerRangeCollection = new List<WorkerRange>();
-            int numOfWorkers = Math.Min(Environment.ProcessorCount, _inputVectorCollection.Count);
-            numOfWorkers = Math.Max(1, numOfWorkers);
+            _gradientWorkerDataCollection = new List<GradientWorkerData>();
+            int numOfWorkers = Math.Max(1, Math.Min(Environment.ProcessorCount - 1, _inputVectorCollection.Count));
             int workerBatchSize = _inputVectorCollection.Count / numOfWorkers;
             for (int workerIdx = 0, fromRow = 0; workerIdx < numOfWorkers; workerIdx++, fromRow += workerBatchSize)
             {
-                WorkerRange workerRange = new WorkerRange();
-                workerRange.FromRow = fromRow;
-                if (workerIdx == numOfWorkers - 1)
-                {
-                    workerRange.ToRow = _inputVectorCollection.Count - 1;
-                }
-                else
-                {
-                    workerRange.ToRow = (fromRow + workerBatchSize) - 1;
-                }
-                _workerRangeCollection.Add(workerRange);
+                GradientWorkerData gwd = new GradientWorkerData
+                (
+                    fromRow: fromRow,
+                    toRow: (workerIdx == numOfWorkers - 1 ? _inputVectorCollection.Count - 1 : (fromRow + workerBatchSize) - 1),
+                    numOfWeights: _net.NumOfWeights
+                );
+                _gradientWorkerDataCollection.Add(gwd);
             }
             return;
         }
 
         //Properties
-        /// <summary>
-        /// !Epoch-1 error (MSE).
-        /// </summary>
-        public double MSE { get { return _lastMSE; } }
-        /// <summary>
-        /// Current epoch (incemented by call of Iteration)
-        /// </summary>
-        public int Epoch { get { return _epoch; } }
         /// <summary>
         /// FF network beeing trained
         /// </summary>
@@ -151,7 +144,7 @@ namespace RCNet.Neural.Network.FF
                 delta = _weigthsPrevDeltas[weightFlatIndex] * _settings.NegativeEta;
                 if (delta < _settings.MinDelta) delta = _settings.MinDelta;
                 _weigthsPrevDeltas[weightFlatIndex] = delta;
-                if (_lastMSE > _prevMSE)
+                if (MSE > _prevMSE)
                 {
                     weightChange = -_weigthsPrevChanges[weightFlatIndex];
                 }
@@ -169,16 +162,20 @@ namespace RCNet.Neural.Network.FF
             return;
         }
 
-        private void ProcessGradientWorkerOutputs(double[] weigthsGradsAccInput, double sumOfErrorSquares)
+        //Must not be parallel to ensure the same counting order (and also results)
+        private void ProcessGradientWorkersData()
         {
-            lock (_weigthsGradsAccLocker)
+            MSE = 0;
+            foreach (GradientWorkerData worker in _gradientWorkerDataCollection)
             {
-                for (int i = 0; i < weigthsGradsAccInput.Length; i++)
+                for (int i = 0; i < _weigthsGradsAcc.Length; i++)
                 {
-                    _weigthsGradsAcc[i] += weigthsGradsAccInput[i];
-                    _lastMSE += sumOfErrorSquares;
+                    _weigthsGradsAcc[i] += worker._weigthsGradsAcc[i];
                 }
+                MSE += worker._sumSquaredErr;
             }
+            //Finish the MSE computation
+            MSE /= (double)(_inputVectorCollection.Count * _net.NumOfOutputValues);
             return;
         }
 
@@ -188,100 +185,128 @@ namespace RCNet.Neural.Network.FF
         public void Iteration()
         {
             //Next epoch
-            ++_epoch;
+            ++Epoch;
             //Store previous iteration error
-            _prevMSE = _lastMSE;
-            //Reset iteration error
-            _lastMSE = 0;
-            //Accumulated weights gradients over all training data
+            _prevMSE = MSE;
+            //Store previously accumulated weight gradients
+            _weigthsGradsAcc.CopyTo(_weigthsPrevGradsAcc, 0);
+            //Reset accumulated weight gradients
             _weigthsGradsAcc.Populate(0);
             //Get copy of the network weights
             double[] networkFlatWeights = _net.GetWeights();
+            //Network output layer shortcut
+            FeedForwardNetwork.Layer outputLayer = _net.LayerCollection[_net.LayerCollection.Count - 1];
             //Process gradient workers threads
-            Parallel.ForEach(_workerRangeCollection, range =>
+            Parallel.ForEach(_gradientWorkerDataCollection, worker =>
             {
-                //Gradient worker variables
-                double sumOfErrSquares = 0;
-                double[] weigthsGradsAccInput = new double[_net.NumOfWeights];
-                weigthsGradsAccInput.Populate(0);
-                double[] neuronsGradients = new double[_net.NumOfNeurons];
+                //Gradient worker local variables
+                double[] gradients = new double[_net.NumOfNeurons];
                 double[] derivatives = new double[_net.NumOfNeurons];
-                List<double[]> layersInputs = new List<double[]>(_net.LayerCollection.Count);
-                //Go parallely over all samples
-                for (int row = range.FromRow; row <= range.ToRow; row++)
+                List<double[]> layerInputCollection = new List<double[]>(_net.LayerCollection.Count);
+                //Reset gradient worker data
+                worker.Reset();
+                //Loop over the planned range of samples
+                for (int row = worker._fromRow; row <= worker._toRow; row++)
                 {
+                    layerInputCollection.Clear();
+                    gradients.Populate(0);
                     //Network computation (collect layers inputs and activation derivatives)
-                    layersInputs.Clear();
-                    double[] computedOutputs = _net.Compute(_inputVectorCollection[row], layersInputs, derivatives);
-                    //Compute network neurons gradients
-                    //Compute output layer gradients and update last error
-                    FeedForwardNetwork.Layer outputLayer = _net.LayerCollection[_net.LayerCollection.Count - 1];
-                    for (int neuronIdx = 0, outputLayerNeuronsFlatIdx = outputLayer.NeuronsStartFlatIdx; neuronIdx < outputLayer.NumOfLayerNeurons; neuronIdx++, outputLayerNeuronsFlatIdx++)
+                    double[] computedOutputs = _net.Compute(_inputVectorCollection[row], layerInputCollection, derivatives);
+                    //Compute output layer gradients and update error
+                    for (int neuronIdx = 0, outputLayerNeuronsFlatIdx = outputLayer.NeuronsStartFlatIdx;
+                         neuronIdx < outputLayer.NumOfLayerNeurons;
+                         neuronIdx++, outputLayerNeuronsFlatIdx++
+                         )
                     {
                         double error = _outputVectorCollection[row][neuronIdx] - computedOutputs[neuronIdx];
-                        neuronsGradients[outputLayerNeuronsFlatIdx] = derivatives[outputLayerNeuronsFlatIdx] * error;
+                        gradients[outputLayerNeuronsFlatIdx] = derivatives[outputLayerNeuronsFlatIdx] * error;
                         //Accumulate error
-                        sumOfErrSquares += error * error;
-                    }
+                        worker._sumSquaredErr += error * error;
+                    }//neuronIdx
                     //Hidden layers gradients
                     for (int layerIdx = _net.LayerCollection.Count - 2; layerIdx >= 0; layerIdx--)
                     {
                         FeedForwardNetwork.Layer currLayer = _net.LayerCollection[layerIdx];
                         FeedForwardNetwork.Layer nextLayer = _net.LayerCollection[layerIdx + 1];
-                        int currLayerNeuronFlatIdx = currLayer.NeuronsStartFlatIdx;
-                        for (int currLayerNeuronIdx = 0; currLayerNeuronIdx < currLayer.NumOfLayerNeurons; currLayerNeuronIdx++, currLayerNeuronFlatIdx++)
+                        for (int currLayerNeuronIdx = 0, currLayerNeuronFlatIdx = currLayer.NeuronsStartFlatIdx;
+                             currLayerNeuronIdx < currLayer.NumOfLayerNeurons;
+                             currLayerNeuronIdx++, currLayerNeuronFlatIdx++
+                             )
                         {
                             double sum = 0;
                             for (int nextLayerNeuronIdx = 0; nextLayerNeuronIdx < nextLayer.NumOfLayerNeurons; nextLayerNeuronIdx++)
                             {
                                 int nextLayerWeightFlatIdx = nextLayer.WeightsStartFlatIdx + nextLayerNeuronIdx * nextLayer.NumOfInputNodes + currLayerNeuronIdx;
-                                sum += neuronsGradients[nextLayer.NeuronsStartFlatIdx + nextLayerNeuronIdx] * networkFlatWeights[nextLayerWeightFlatIdx];
-                            }
-                            neuronsGradients[currLayerNeuronFlatIdx] = derivatives[currLayerNeuronFlatIdx] * sum;
-                        }
-                    }
+                                sum += gradients[nextLayer.NeuronsStartFlatIdx + nextLayerNeuronIdx] * networkFlatWeights[nextLayerWeightFlatIdx];
+                            }//nextLayerNeuronIdx
+                            gradients[currLayerNeuronFlatIdx] = derivatives[currLayerNeuronFlatIdx] * sum;
+                        }//currLayerNeuronIdx
+                    }//layerIdx
                     //Compute increments for gradients accumulator
                     for (int layerIdx = 0; layerIdx < _net.LayerCollection.Count; layerIdx++)
                     {
                         FeedForwardNetwork.Layer layer = _net.LayerCollection[layerIdx];
-                        double[] layerInputs = layersInputs[layerIdx];
-                        int neuronFlatIdx = layer.NeuronsStartFlatIdx;
-                        int biasFlatIdx = layer.BiasesStartFlatIdx;
-                        int weightFlatIdx = layer.WeightsStartFlatIdx;
-                        for (int neuronIdx = 0; neuronIdx < layer.NumOfLayerNeurons; neuronIdx++, neuronFlatIdx++, biasFlatIdx++)
+                        double[] layerInputs = layerInputCollection[layerIdx];
+                        for (int neuronIdx = 0, neuronFlatIdx = layer.NeuronsStartFlatIdx, weightFlatIdx = layer.WeightsStartFlatIdx, biasFlatIdx = layer.BiasesStartFlatIdx;
+                             neuronIdx < layer.NumOfLayerNeurons;
+                             neuronIdx++, neuronFlatIdx++, biasFlatIdx++
+                             )
                         {
                             //Weights gradients accumulation
+                            //Layer's inputs
                             for (int inputIdx = 0; inputIdx < layer.NumOfInputNodes; inputIdx++, weightFlatIdx++)
                             {
-                                weigthsGradsAccInput[weightFlatIdx] += layerInputs[inputIdx] * neuronsGradients[neuronFlatIdx];
+                                worker._weigthsGradsAcc[weightFlatIdx] += layerInputs[inputIdx] * gradients[neuronFlatIdx];
                             }
-                            //Bias gradients accumulation
-                            weigthsGradsAccInput[biasFlatIdx] += neuronsGradients[neuronFlatIdx] * FeedForwardNetwork.BiasValue;
-                        }
-                    }
-                }//Worker loop
-                //Worker finish
-                ProcessGradientWorkerOutputs(weigthsGradsAccInput, sumOfErrSquares);
-            });
-            //Update all network weights and biases
+                            //Layer's input bias
+                            worker._weigthsGradsAcc[biasFlatIdx] += FeedForwardNetwork.BiasValue * gradients[neuronFlatIdx];
+                        }//neuronIdx
+                    }//layerIdx
+                }//Worker main loop
+            });//Worker finish
+            //Update of gradient accumulator and MSE by workers
+            ProcessGradientWorkersData();
+            //Update all weights and biases
             Parallel.For(0, networkFlatWeights.Length, weightFlatIdx =>
+            //for(int weightFlatIdx = 0; weightFlatIdx < networkFlatWeights.Length; weightFlatIdx++)
             {
                 PerformIRPropPlusWeightChange(networkFlatWeights, weightFlatIdx);
             });
+            //Set adjusted weights back into the network
             _net.SetWeights(networkFlatWeights);
-            //Store accumulated gradients for next iteration
-            _weigthsGradsAcc.CopyTo(_weigthsPrevGradsAcc, 0);
-            //Finish the MSE computation
-            _lastMSE /= (double)(_inputVectorCollection.Count * _net.NumOfOutputValues);
             return;
         }
 
+        //Inner classes
         [Serializable]
-        private class WorkerRange
+        private class GradientWorkerData
         {
-            public int FromRow { get; set; }
-            public int ToRow { get; set; }
-        }//WorkerRange
+            //Attribute properties
+            public int _fromRow;
+            public int _toRow;
+            public double _sumSquaredErr;
+            public double[] _weigthsGradsAcc;
+
+            //Constructor
+            public GradientWorkerData(int fromRow, int toRow, int numOfWeights)
+            {
+                _fromRow = fromRow;
+                _toRow = toRow;
+                _weigthsGradsAcc = new double[numOfWeights];
+                Reset();
+                return;
+            }
+
+            //Methods
+            public void Reset()
+            {
+                _sumSquaredErr = 0;
+                _weigthsGradsAcc.Populate(0);
+                return;
+            }
+
+        }//WorkerData
+
 
     }//RPropTrainer
 

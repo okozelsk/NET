@@ -33,13 +33,9 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         private readonly Interval _dataRange;
         /// <summary>
-        /// Random generator
-        /// </summary>
-        private readonly Random _rand;
-        /// <summary>
         /// Collection of reservoir instances.
         /// </summary>
-        private List<ReservoirInstance> _reservoirInstanceCollection;
+        private List<Reservoir> _reservoirCollection;
         /// <summary>
         /// Number of State Machine predictors
         /// </summary>
@@ -59,25 +55,22 @@ namespace RCNet.Neural.Network.SM
             _settings = settings.DeepClone();
             //Data range has to be always <-1,1>
             _dataRange = CommonEnums.GetDataNormalizationRange(CommonEnums.DataNormalizationRange.Inclusive_Neg1_Pos1);
-            //Random object
-            if (_settings.RandomizerSeek < 0) _rand = new Random();
-            else _rand = new Random(_settings.RandomizerSeek);
             //Build structure
             //Reservoir instance(s)
             _numOfPredictors = 0;
-            _reservoirInstanceCollection = new List<ReservoirInstance>(_settings.ReservoirInstanceDefinitionCollection.Count);
+            _reservoirCollection = new List<Reservoir>(_settings.ReservoirInstanceDefinitionCollection.Count);
             foreach(StateMachineSettings.ReservoirInstanceDefinition instanceDefinition in _settings.ReservoirInstanceDefinitionCollection)
             {
-                ReservoirInstance reservoirInstance = new ReservoirInstance(instanceDefinition, _settings.RandomizerSeek, _dataRange);
-                _reservoirInstanceCollection.Add(reservoirInstance);
-                _numOfPredictors += reservoirInstance.ReservoirObj.NumOfOutputPredictors;
+                Reservoir reservoir = new Reservoir(instanceDefinition, _dataRange, _settings.RandomizerSeek);
+                _reservoirCollection.Add(reservoir);
+                _numOfPredictors += reservoir.NumOfOutputPredictors;
             }
             if(_settings.RouteInputToReadout)
             {
                 _numOfPredictors += _settings.InputFieldNameCollection.Count;
             }
             //Readout layer
-            _readoutLayer = new ReadoutLayer(_settings.TaskType, _settings.ReadoutLayerConfig, _dataRange, _rand);
+            _readoutLayer = null;
             return;
         }
 
@@ -96,9 +89,9 @@ namespace RCNet.Neural.Network.SM
         /// <param name="resetStatistics">Specifies whether to reset internal statistics</param>
         private void Reset(bool resetStatistics)
         {
-            foreach(ReservoirInstance reservoirInstanceData in _reservoirInstanceCollection)
+            foreach(Reservoir reservoir in _reservoirCollection)
             {
-                reservoirInstanceData.Reset(resetStatistics);
+                reservoir.Reset(resetStatistics);
             }
             return;
         }
@@ -115,17 +108,17 @@ namespace RCNet.Neural.Network.SM
             double[] predictors = new double[_numOfPredictors];
             int predictorsIdx = 0;
             //Compute reservoir(s)
-            foreach (ReservoirInstance resInstance in _reservoirInstanceCollection)
+            foreach (Reservoir reservoir in _reservoirCollection)
             {
-                double[] reservoirInput = new double[resInstance.InstanceDefinition.InputFieldIdxCollection.Count];
-                for(int i = 0; i < resInstance.InstanceDefinition.InputFieldIdxCollection.Count; i++)
+                double[] reservoirInput = new double[reservoir.InstanceDefinition.InputFieldIdxCollection.Count];
+                for(int i = 0; i < reservoir.InstanceDefinition.InputFieldIdxCollection.Count; i++)
                 {
-                    reservoirInput[i] = inputValues[resInstance.InstanceDefinition.InputFieldIdxCollection[i]];
+                    reservoirInput[i] = inputValues[reservoir.InstanceDefinition.InputFieldIdxCollection[i]];
                 }
                 //Compute reservoir
-                resInstance.ReservoirObj.Compute(reservoirInput, collectStatesStatistics);
-                resInstance.ReservoirObj.CopyPredictorsTo(predictors, predictorsIdx);
-                predictorsIdx += resInstance.ReservoirObj.NumOfOutputPredictors;
+                reservoir.Compute(reservoirInput, collectStatesStatistics);
+                reservoir.CopyPredictorsTo(predictors, predictorsIdx);
+                predictorsIdx += reservoir.NumOfOutputPredictors;
             }
             if(_settings.RouteInputToReadout)
             {
@@ -143,22 +136,22 @@ namespace RCNet.Neural.Network.SM
             double[] predictors = new double[_numOfPredictors];
             int predictorsIdx = 0;
             //Compute reservoir(s)
-            foreach (ReservoirInstance resInstance in _reservoirInstanceCollection)
+            foreach (Reservoir reservoir in _reservoirCollection)
             {
                 //Reset reservoir states but keep internal statistics
-                resInstance.Reset(false);
-                double[] reservoirInput = new double[resInstance.InstanceDefinition.InputFieldIdxCollection.Count];
+                reservoir.Reset(false);
+                double[] reservoirInput = new double[reservoir.InstanceDefinition.InputFieldIdxCollection.Count];
                 foreach (double[] inputVector in inputPattern)
                 {
-                    for (int i = 0; i < resInstance.InstanceDefinition.InputFieldIdxCollection.Count; i++)
+                    for (int i = 0; i < reservoir.InstanceDefinition.InputFieldIdxCollection.Count; i++)
                     {
-                        reservoirInput[i] = inputVector[resInstance.InstanceDefinition.InputFieldIdxCollection[i]];
+                        reservoirInput[i] = inputVector[reservoir.InstanceDefinition.InputFieldIdxCollection[i]];
                     }
                     //Compute the reservoir
-                    resInstance.ReservoirObj.Compute(reservoirInput, true);
+                    reservoir.Compute(reservoirInput, true);
                 }
-                resInstance.ReservoirObj.CopyPredictorsTo(predictors, predictorsIdx);
-                predictorsIdx += resInstance.ReservoirObj.NumOfOutputPredictors;
+                reservoir.CopyPredictorsTo(predictors, predictorsIdx);
+                predictorsIdx += reservoir.NumOfOutputPredictors;
             }
             return predictors;
         }
@@ -207,9 +200,9 @@ namespace RCNet.Neural.Network.SM
         private List<ReservoirStat> CollectReservoirInstancesStatatistics()
         {
             List<ReservoirStat> stats = new List<ReservoirStat>();
-            foreach(ReservoirInstance resInstance in _reservoirInstanceCollection)
+            foreach(Reservoir reservoir in _reservoirCollection)
             {
-                stats.Add(resInstance.ReservoirObj.CollectStatistics());
+                stats.Add(reservoir.CollectStatistics());
             }
             return stats;
         }
@@ -242,6 +235,8 @@ namespace RCNet.Neural.Network.SM
                 PredictorsCollection = new List<double[]>(dataSet.InputPatternCollection.Count),
                 IdealOutputsCollection = new List<double[]>(dataSet.OutputVectorCollection.Count)
             };
+            //Reset the internal states and statistics
+            Reset(true);
             //Collection
             for (int dataSetIdx = 0; dataSetIdx < dataSet.InputPatternCollection.Count; dataSetIdx++)
             {
@@ -337,6 +332,9 @@ namespace RCNet.Neural.Network.SM
                                                 Object regressionControllerData = null
                                                 )
         {
+            //Readout layer instance
+            _readoutLayer = new ReadoutLayer(_settings.TaskType, _settings.ReadoutLayerConfig, _dataRange);
+            //Training
             return _readoutLayer.Build(rsi.PredictorsCollection,
                                        rsi.IdealOutputsCollection,
                                        regressionController,
@@ -366,49 +364,6 @@ namespace RCNet.Neural.Network.SM
             public List<ReservoirStat> ReservoirStatCollection { get; set; } = null;
 
         }//RegressionStageInput
-
-
-        /// <summary>
-        /// Holds the instantiated reservoir together with its definition.
-        /// </summary>
-        [Serializable]
-        private class ReservoirInstance
-        {
-            //Attribute properties
-            /// <summary>
-            /// Instance definition.
-            /// </summary>
-            public StateMachineSettings.ReservoirInstanceDefinition InstanceDefinition { get; }
-            /// <summary>
-            /// Instantiated reservoir.
-            /// </summary>
-            public Reservoir ReservoirObj { get; }
-
-            //Constructor
-            public ReservoirInstance(StateMachineSettings.ReservoirInstanceDefinition instanceDefinition, int randomizerSeek, Interval inputRange)
-            {
-                //Store definition
-                InstanceDefinition = instanceDefinition;
-                //Create reservoir
-                ReservoirObj = new Reservoir(InstanceDefinition,
-                                             inputRange,
-                                             randomizerSeek
-                                             );
-                return;
-            }
-
-            //Methods
-            /// <summary>
-            /// Resets reservoir internal state to the initial state.
-            /// </summary>
-            /// <param name="resetStatistics">Specifies whether to reset internal statistics</param>
-            public void Reset(bool resetStatistics)
-            {
-                ReservoirObj.Reset(resetStatistics);
-                return;
-            }
-
-        }//ReservoirInstance
 
     }//StateMachine
 }//Namespace

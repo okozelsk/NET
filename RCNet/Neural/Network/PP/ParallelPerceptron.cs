@@ -172,20 +172,20 @@ namespace RCNet.Neural.Network.PP
         /// <returns>Error statistics</returns>
         public BasicStat ComputeBatchErrorStat(List<double[]> inputCollection, List<double[]> idealOutputCollection, out List<double[]> computedOutputCollection)
         {
-            BasicStat errStat = new BasicStat(true);
+            double[] flatErrors = new double[inputCollection.Count * NumOfOutputValues];
             double[][] computedOutputs = new double[idealOutputCollection.Count][];
             Parallel.For(0, inputCollection.Count, row =>
             {
                 double[] computedOutputVector = Compute(inputCollection[row]);
                 computedOutputs[row] = computedOutputVector;
-                for (int i = 0; i < 1; i++)
+                for (int i = 0; i < NumOfOutputValues; i++)
                 {
                     double error = idealOutputCollection[row][i] - computedOutputVector[i];
-                    errStat.AddSampleValue(Math.Abs(error));
+                    flatErrors[row * NumOfOutputValues + i] = Math.Abs(error);
                 }
             });
             computedOutputCollection = new List<double[]>(computedOutputs);
-            return errStat;
+            return new BasicStat(flatErrors);
         }
 
         /// <summary>
@@ -198,17 +198,17 @@ namespace RCNet.Neural.Network.PP
         /// <returns>Error statistics</returns>
         public BasicStat ComputeBatchErrorStat(List<double[]> inputCollection, List<double[]> idealOutputCollection)
         {
-            BasicStat errStat = new BasicStat(true);
+            double[] flatErrors = new double[inputCollection.Count * NumOfOutputValues];
             Parallel.For(0, inputCollection.Count, row =>
             {
                 double[] computedOutputVector = Compute(inputCollection[row]);
-                for (int i = 0; i < 1; i++)
+                for (int i = 0; i < NumOfOutputValues; i++)
                 {
                     double error = idealOutputCollection[row][i] - computedOutputVector[i];
-                    errStat.AddSampleValue(Math.Abs(error));
+                    flatErrors[row * NumOfOutputValues + i] = Math.Abs(error);
                 }
             });
-            return errStat;
+            return new BasicStat(flatErrors);
         }
 
         /// <summary>
@@ -240,7 +240,7 @@ namespace RCNet.Neural.Network.PP
         /// <summary>
         /// Randomizes internal weights
         /// </summary>
-        public void RandomizeWeights(System.Random rand)
+        public void RandomizeWeights(Random rand)
         {
             //Random values
             rand.Fill(_flatWeights, -1, 1, false, RandomClassExtensions.DistributionType.Uniform);

@@ -44,10 +44,6 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         private ReadoutLayerSettings _settings;
         /// <summary>
-        /// Random generator
-        /// </summary>
-        private readonly Random _rand;
-        /// <summary>
         /// Collection of clusters of trained ReadoutUnits. One cluster per output field.
         /// </summary>
         private ReadoutUnit[][] _clusterCollection;
@@ -65,11 +61,9 @@ namespace RCNet.Neural.Network.SM
         /// <param name="taskType">Type of the task</param>
         /// <param name="settings">Readout layer configuration</param>
         /// <param name="dataRange">Range of input/output data</param>
-        /// <param name="rand">Random object to be used</param>
         public ReadoutLayer(CommonEnums.TaskType taskType,
                             ReadoutLayerSettings settings,
-                            Interval dataRange,
-                            Random rand
+                            Interval dataRange
                             )
         {
             _taskType = taskType;
@@ -79,7 +73,7 @@ namespace RCNet.Neural.Network.SM
             {
                 throw new Exception($"Readout unit does not support data range <{_dataRange.Min}; {_dataRange.Max}>.");
             }
-            _rand = rand;
+            //Clusters
             _clusterCollection = new ReadoutUnit[_settings.OutputFieldNameCollection.Count][];
             _clusterErrStatisticsCollection = new List<ClusterErrStatistics>();
             return;
@@ -103,6 +97,8 @@ namespace RCNet.Neural.Network.SM
                                       Object regressionControllerData
                                       )
         {
+            //Random object
+            Random rand = new Random(0);
             //Allocation of computed and ideal vectors for validation bundle
             List<double[]> validationComputedVectorCollection = new List<double[]>(idealOutputsCollection.Count);
             List<double[]> validationIdealVectorCollection = new List<double[]>(idealOutputsCollection.Count);
@@ -134,7 +130,7 @@ namespace RCNet.Neural.Network.SM
             }
             //Create shuffled copy of the data
             TimeSeriesBundle shuffledData = new TimeSeriesBundle(predictorsCollection, idealOutputsCollection);
-            shuffledData.Shuffle(_rand);
+            shuffledData.Shuffle(rand);
             //Data inspection, preparation of datasets and training of ReadoutUnits
             //Clusters of readout units (one cluster for each output field)
             for (int clusterIdx = 0; clusterIdx < _settings.OutputFieldNameCollection.Count; clusterIdx++)
@@ -206,7 +202,7 @@ namespace RCNet.Neural.Network.SM
                                                                                         trainingIdealValueCollection,
                                                                                         subBundleCollection[foldIdx].InputVectorCollection,
                                                                                         subBundleCollection[foldIdx].OutputVectorCollection,
-                                                                                        _rand,
+                                                                                        rand,
                                                                                         _settings.ReadoutUnitCfg,
                                                                                         regressionController,
                                                                                         regressionControllerData

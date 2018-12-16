@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using RCNet.Extensions;
 using RCNet.MathTools;
 using RCNet.Neural.Activation;
-using RCNet.RandomValue;
 
 namespace RCNet.Neural.Network.SM
 {
@@ -129,11 +128,11 @@ namespace RCNet.Neural.Network.SM
             _tStimuli = 0;
             _rStimuli = 0;
             OutputSignal = _activation.Compute(_tStimuli);
+            OutputSignalLeak = 0;
             if (statistics)
             {
                 Statistics.Reset();
             }
-            OutputSignalLeak = 0;
             return;
         }
 
@@ -158,12 +157,9 @@ namespace RCNet.Neural.Network.SM
             //Output signal leak handling
             if (OutputSignal != _activation.OutputSignalRange.Mid)
             {
-                OutputSignalLeak = 1;
+                OutputSignalLeak = 0;
             }
-            else
-            {
-                if (OutputSignalLeak > 0) ++OutputSignalLeak;
-            }
+            ++OutputSignalLeak;
             //New output signal
             double state = _activation.Compute(_tStimuli);
             OutputSignal = (_retainmentRatio * OutputSignal) + (1d - _retainmentRatio) * state;

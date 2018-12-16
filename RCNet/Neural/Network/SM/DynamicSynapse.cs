@@ -9,7 +9,7 @@ using RCNet.MathTools;
 namespace RCNet.Neural.Network.SM
 {
     /// <summary>
-    /// Inplements the Short-Term-Plasticity dynamic synapse.
+    /// Inplements the pre-synaptic Short-Term-Plasticity and post-synaptic dynamic decay of the efficacy of the synapse.
     /// </summary>
     [Serializable]
     public class DynamicSynapse : Synapse
@@ -18,9 +18,9 @@ namespace RCNet.Neural.Network.SM
         private readonly double _tauFacilitation;
         private readonly double _tauRecovery;
         private readonly double _restingEfficacy;
-        private readonly bool _applySTP;
+        private readonly bool _applyPreSynaptic;
         private readonly double _tauDecay;
-        private readonly bool _applyDecay;
+        private readonly bool _applyPostSynaptic;
         private double _efficacyUtilization;
         private double _efficacyAvailableFraction;
 
@@ -32,10 +32,10 @@ namespace RCNet.Neural.Network.SM
         /// <param name="targetNeuron">Target neuron</param>
         /// <param name="weight">Synapse weight (unsigned)</param>
         /// <param name="delay">Synapse delay (in cycles) of the signal delivery</param>
-        /// <param name="tauFacilitation">Synapse efficacy facilitation parameter</param>
-        /// <param name="tauRecovery">Synapse efficacy recovery parameter</param>
-        /// <param name="restingEfficacy">Synapse resting efficacy parameter</param>
-        /// <param name="tauDecay">Decay shapness (lower = sharper)</param>
+        /// <param name="tauFacilitation">Synapse efficacy facilitation parameter (pre-synaptic)</param>
+        /// <param name="tauRecovery">Synapse efficacy recovery parameter (pre-synaptic)</param>
+        /// <param name="restingEfficacy">Synapse resting efficacy parameter (pre-synaptic)</param>
+        /// <param name="tauDecay">Decay shapness (post-synaptic)</param>
         public DynamicSynapse(INeuron sourceNeuron,
                               INeuron targetNeuron,
                               double weight,
@@ -50,11 +50,11 @@ namespace RCNet.Neural.Network.SM
             _tauFacilitation = tauFacilitation;
             _tauRecovery = tauRecovery;
             _restingEfficacy = restingEfficacy;
-            _applySTP = (SourceNeuron.OutputType == Activation.ActivationFactory.FunctionOutputSignalType.Spike);
+            _applyPreSynaptic = (SourceNeuron.OutputType == Activation.ActivationFactory.FunctionOutputSignalType.Spike);
             _efficacyUtilization = _restingEfficacy;
             _efficacyAvailableFraction = 1;
             _tauDecay = tauDecay;
-            _applyDecay = (TargetNeuron.OutputType == Activation.ActivationFactory.FunctionOutputSignalType.Spike);
+            _applyPostSynaptic = (TargetNeuron.OutputType == Activation.ActivationFactory.FunctionOutputSignalType.Spike);
             return;
         }
 
@@ -72,36 +72,33 @@ namespace RCNet.Neural.Network.SM
         }
 
         /// <summary>
-        /// Updates synapse efficacy (dynamic adaptation of the synapse)
+        /// Computes synapse efficacy based on the pre-synaptic activity.
+        /// Implementation of the pre-synaptic Short-Term-Plasticity
         /// </summary>
-        protected override void UpdateEfficacy()
+        protected override double GetPreSynapticEfficacy()
         {
-            _efficacy = 1d;
-            if (SourceNeuron.OutputSignal > 0 && SourceNeuron.OutputSignalLeak > 0)
+            if(_applyPreSynaptic)
             {
-                //Adaptation is relevant when there is output from source neuron
-                double adaptationSTP = 1d;
-                //Short term synapse plasticity (pre-synaptic dependence)
-                if (_applySTP)
-                {
-                    double x = Math.Exp(-(SourceNeuron.OutputSignalLeak / _tauFacilitation));
-                    _efficacyUtilization = x + _restingEfficacy * (1d - x);
-                    double y = Math.Exp(-(SourceNeuron.OutputSignalLeak / _tauRecovery));
-                    _efficacyAvailableFraction = _efficacyAvailableFraction * (1d - _efficacyUtilization) * y + 1d - y;
-                    adaptationSTP = _efficacyUtilization * _efficacyAvailableFraction;
-                }
-                //Decay (post-synaptic dependence)
-                double adaptationDecay = 1d;
-                if (_applyDecay)
-                {
-                    adaptationDecay = Math.Exp(-(TargetNeuron.OutputSignalLeak / _tauDecay));
-                }
-                //Resulting efficacy
-                _efficacy = adaptationSTP * adaptationDecay;
+                double x = Math.Exp(-(SourceNeuron.OutputSignalLeak / _tauFacilitation));
+                _efficacyUtilization = x + _restingEfficacy * (1d - x);
+                double y = Math.Exp(-(SourceNeuron.OutputSignalLeak / _tauRecovery));
+                _efficacyAvailableFraction = _efficacyAvailableFraction * (1d - _efficacyUtilization) * y + 1d - y;
+                return _efficacyUtilization * _efficacyAvailableFraction;
             }
-            return;
+            return 1d;
         }
 
+        /// <summary>
+        /// Computes synapse efficacy based on the post-synaptic activity
+        /// </summary>
+        protected override double GetPostSynapticEfficacy()
+        {
+            if(_applyPostSynaptic)
+            {
+                return Math.Exp(-(TargetNeuron.OutputSignalLeak / _tauDecay));
+            }
+            return 1d;
+        }
 
 
     }//DynamicSynapse

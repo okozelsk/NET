@@ -23,7 +23,7 @@ namespace RCNet.Neural.Network.FF
         private List<double[]> _inputVectorCollection;
         private List<double[]> _outputVectorCollection;
         private List<Matrix> _outputSingleColMatrixCollection;
-        private System.Random _rand;
+        private Random _rand;
         private readonly double[] _alphas;
         private double _mse;
         private readonly int _maxEpoch;
@@ -43,7 +43,7 @@ namespace RCNet.Neural.Network.FF
                               List<double[]> inputVectorCollection,
                               List<double[]> outputVectorCollection,
                               int maxEpoch,
-                              System.Random rand,
+                              Random rand,
                               LinRegrTrainerSettings settings = null
                               )
         {

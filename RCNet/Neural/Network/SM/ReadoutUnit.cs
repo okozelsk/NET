@@ -175,7 +175,7 @@ namespace RCNet.Neural.Network.SM
         private static void CreateNetAndTreainer(ReadoutLayerSettings.ReadoutUnitSettings settings,
                                                  List<double[]> trainingPredictorsCollection,
                                                  List<double[]> trainingIdealOutputsCollection,
-                                                 System.Random rand,
+                                                 Random rand,
                                                  out INonRecurrentNetwork net,
                                                  out INonRecurrentNetworkTrainer trainer
                                                  )
@@ -236,7 +236,7 @@ namespace RCNet.Neural.Network.SM
                                                 List<double[]> trainingIdealOutputsCollection,
                                                 List<double[]> testingPredictorsCollection,
                                                 List<double[]> testingIdealOutputsCollection,
-                                                System.Random rand,
+                                                Random rand,
                                                 ReadoutLayerSettings.ReadoutUnitSettings readoutUnitSettings,
                                                 RegressionCallbackDelegate controller = null,
                                                 Object controllerUserObject = null
@@ -248,27 +248,26 @@ namespace RCNet.Neural.Network.SM
             for (int regrAttemptNumber = 1; regrAttemptNumber <= readoutUnitSettings.RegressionAttempts; regrAttemptNumber++)
             {
                 //Create network and trainer
-                INonRecurrentNetwork net;
-                INonRecurrentNetworkTrainer trainer;
                 CreateNetAndTreainer(readoutUnitSettings,
                                      trainingPredictorsCollection,
                                      trainingIdealOutputsCollection,
                                      rand,
-                                     out net,
-                                     out trainer
+                                     out INonRecurrentNetwork net,
+                                     out INonRecurrentNetworkTrainer trainer
                                      );
                 //Reference binary distribution
                 //Iterate training cycles
                 for (int epoch = 1; epoch <= readoutUnitSettings.RegressionAttemptEpochs; epoch++)
                 {
                     trainer.Iteration();
-                    List<double[]> trainingComputedOutputsCollection = null;
                     List<double[]> testingComputedOutputsCollection = null;
                     //Compute current error statistics after training iteration
-                    ReadoutUnit currReadoutUnit = new ReadoutUnit();
-                    currReadoutUnit.Network = net;
-                    currReadoutUnit.TrainingErrorStat = net.ComputeBatchErrorStat(trainingPredictorsCollection, trainingIdealOutputsCollection, out trainingComputedOutputsCollection);
-                    if(taskType == CommonEnums.TaskType.Classification)
+                    ReadoutUnit currReadoutUnit = new ReadoutUnit
+                    {
+                        Network = net,
+                        TrainingErrorStat = net.ComputeBatchErrorStat(trainingPredictorsCollection, trainingIdealOutputsCollection, out List<double[]> trainingComputedOutputsCollection)
+                    };
+                    if (taskType == CommonEnums.TaskType.Classification)
                     {
                         currReadoutUnit.TrainingBinErrorStat = new BinErrStat(refBinDistr, trainingComputedOutputsCollection, trainingIdealOutputsCollection);
                         currReadoutUnit.CombinedBinaryError = currReadoutUnit.TrainingBinErrorStat.TotalErrStat.Sum;
@@ -339,13 +338,13 @@ namespace RCNet.Neural.Network.SM
                     {
                         break;
                     }
-                }
+                }//epoch
                 //Regression stop conditions
                 if (stopRegression)
                 {
                     break;
                 }
-            }
+            }//regrAttemptNumber
             //Create statistics of the best network weights
             bestReadoutUnit.OutputWeightsStat = bestReadoutUnit.Network.ComputeWeightsStat();
             return bestReadoutUnit;

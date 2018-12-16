@@ -105,11 +105,12 @@ namespace RCNet.Neural.Network.SM
         {
             _tStimuli = 0;
             _rStimuli = 0;
+            OutputSignal = 0;
+            OutputSignalLeak = 0;
             if (statistics)
             {
                 Statistics.Reset();
             }
-            OutputSignalLeak = 0;
             return;
         }
 
@@ -134,12 +135,9 @@ namespace RCNet.Neural.Network.SM
             //Output signal leak handling
             if (OutputSignal != OutputRange.Mid)
             {
-                OutputSignalLeak = 1;
+                OutputSignalLeak = 0;
             }
-            else
-            {
-                if (OutputSignalLeak > 0) ++OutputSignalLeak;
-            }
+            ++OutputSignalLeak;
             //New output signal
             OutputSignal = _tStimuli;
             if (collectStatistics)

@@ -34,14 +34,22 @@ namespace RCNet.Neural.Network.SM
 
         //Methods
         /// <summary>
-        /// Updates synapse efficacy (dynamic adaptation of the synapse)
-        /// Does nothing in case of static synapse
+        /// Computes synapse efficacy based on the pre-synaptic activity.
+        /// In case of static synapse, the efficacy is always full (1)
         /// </summary>
-        protected override void UpdateEfficacy()
+        protected override double GetPreSynapticEfficacy()
         {
-            return;
+            return 1d;
         }
 
+        /// <summary>
+        /// Computes synapse efficacy based on the post-synaptic activity
+        /// In case of static synapse, the efficacy is always full (1)
+        /// </summary>
+        protected override double GetPostSynapticEfficacy()
+        {
+            return 1d;
+        }
 
     }//StaticSynapse
 

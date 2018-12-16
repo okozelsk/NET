@@ -9,14 +9,15 @@ using RCNet.Queue;
 namespace RCNet.Neural.Network.SM
 {
     /// <summary>
-    /// Base abstract class for various types of StateMachine synapses.
+    /// Abstract class covering the basic behaviour of StateMachine synapses.
+    /// (TODO - Consider removing the ISynapse interface)
     /// </summary>
     [Serializable]
     public abstract class Synapse : ISynapse
     {
         //Attribute properties
         /// <summary>
-        /// Source neuron - signal emitor
+        /// Source neuron - signal emitter
         /// </summary>
         public INeuron SourceNeuron { get; }
 
@@ -26,35 +27,31 @@ namespace RCNet.Neural.Network.SM
         public INeuron TargetNeuron { get; }
 
         /// <summary>
-        /// Efficacy statistics of the synapse
+        /// Resulting efficacy statistics of the synapse.
+        /// (product of Pre-synaptic and Post-synaptic)
         /// </summary>
         public BasicStat EfficacyStat { get; }
 
         /// <summary>
-        /// Weight of the synapse
+        /// Weight of the synapse (the maximum weight synapse can achieve)
         /// </summary>
         public double Weight { get; private set; }
 
         //Attributes
         /// <summary>
-        /// Synapse efficacy
-        /// </summary>
-        protected double _efficacy;
-
-        /// <summary>
-        /// Value to be added during the signal conversion
+        /// "Add" part of the signal conversion operation
         /// </summary>
         protected readonly double _add;
 
         /// <summary>
-        /// Value to be divided by during the signal conversion
+        /// "Divide by" part of the signal conversion operation
         /// </summary>
         protected readonly double _div;
         
         /// <summary>
-        /// Signal queue
+        /// Moving signal queue
         /// </summary>
-        protected readonly SimpleQueue<double> _qSig;
+        protected readonly SimpleQueue<Signal> _qSig;
 
         //Constructor
         /// <summary>
@@ -201,9 +198,8 @@ namespace RCNet.Neural.Network.SM
             */
 
             //Setup signal queue
-            _qSig = new SimpleQueue<double>(delay + 1);
-            //Efficacy
-            _efficacy = 1d;
+            _qSig = new SimpleQueue<Signal>(delay + 1);
+            //Efficacy statistics
             EfficacyStat = new BasicStat();
             return;
         }
@@ -216,7 +212,6 @@ namespace RCNet.Neural.Network.SM
         public virtual void Reset(bool statistics)
         {
             _qSig.Reset();
-            _efficacy = 1d;
             if (statistics)
             {
                 EfficacyStat.Reset();
@@ -235,37 +230,77 @@ namespace RCNet.Neural.Network.SM
         }
 
         /// <summary>
-        /// Updates synapse efficacy (dynamic adaptation of the synapse)
+        /// Computes synapse efficacy based on the pre-synaptic activity
         /// </summary>
-        protected abstract void UpdateEfficacy();
+        protected abstract double GetPreSynapticEfficacy();
+
+
+        /// <summary>
+        /// Computes synapse efficacy based on the post-synaptic activity
+        /// </summary>
+        protected abstract double GetPostSynapticEfficacy();
 
         /// <summary>
         /// Returns signal to be delivered to target neuron.
-        /// Function has to be invoked only once/cycle !!!
+        /// Note that this function has to be invoked only once per cycle !!!
         /// </summary>
         /// <param name="collectStatistics">Specifies whether to update internal statistics</param>
         public double GetSignal(bool collectStatistics)
         {
-            //Compute efficacy
-            UpdateEfficacy();
-            if (collectStatistics)
+            //We are getting source neuron signal
+            double sourceSignal = SourceNeuron.OutputSignal;
+            if(sourceSignal == 0)
             {
-                EfficacyStat.AddSampleValue(_efficacy);
-            }
-            //Compute resulting weighted signal and put it into the queue
-            _qSig.Enqueue(((SourceNeuron.OutputSignal + _add) / _div) * Weight * _efficacy);
-            //Pick up signal from queue
-            if (_qSig.Full)
-            {
-                //Queue is full, so synapse is ready to deliver
-                return _qSig.Dequeue();
+                //No need to adjust anything
+                _qSig.Enqueue(new Signal { _weightedSignal = 0d, _preSynapticEfficacy = 1d });
             }
             else
             {
-                //No signal to be delivered, signal is "still on the road"
+                //Compute pre-synaptic efficacy
+                double preSynapticEfficacy = GetPreSynapticEfficacy();
+                //Compute constantly weighted signal and pre-synaptic part of efficacy and put them into the queue simulating the signal traveling
+                _qSig.Enqueue(new Signal { _weightedSignal = ((SourceNeuron.OutputSignal + _add) / _div) * Weight, _preSynapticEfficacy = preSynapticEfficacy });
+            }
+            //Is there any signal to be delivered?
+            if (_qSig.Full)
+            {
+                //Queue is full, so synapse is ready to deliver
+                Signal signal = _qSig.Dequeue();
+                if (signal._weightedSignal == 0)
+                {
+                    //No need to adjust anything
+                    return 0;
+                }
+                else
+                {
+                    //Compute current post-synaptic efficacy
+                    double postSynapticEfficacy = GetPostSynapticEfficacy();
+                    double efficacy = signal._preSynapticEfficacy * postSynapticEfficacy;
+                    if (collectStatistics)
+                    {
+                        EfficacyStat.AddSampleValue(efficacy);
+                    }
+                    //Deliver the resulting signal
+                    return signal._weightedSignal * efficacy;
+                }
+            }
+            else
+            {
+                //No signal to be delivered, the first signal is "still on the road"
                 return 0;
             }
         }
+
+        //Inner classes
+        /// <summary>
+        /// Data to be queued
+        /// </summary>
+        [Serializable]
+        protected class Signal
+        {
+            public double _weightedSignal;
+            public double _preSynapticEfficacy;
+        }//Signal
 
     }//Synapse
 
