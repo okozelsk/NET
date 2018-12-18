@@ -12,35 +12,45 @@ To contact me use email address oldrich.kozelsky@email.cz
 
 ## Technical information
  - Source code is written in C# 6.0
- - Most components are serializable
- - Backward compatibility is not guaranteed
- - RCNet documentation is located on [wiki pages](https://github.com/okozelsk/NET/wiki)
+ - Necessary components are serializable
+ - Backward compatibility with earlier releases is not guaranteed, SW is still under dynamic development
+ - The documentation is delayed and does not match the current version
 
 ## Demo application
-Main RCNet functionality is demonstrated in a simple demo application (/Demo/DemoConsoleApp). Application has no startup parameters, all necessary settins are specified in DemoSettings.xml file. DemoSettings.xml has to be in the same folder as the executable DemoConsoleApp.exe. Application performs sequence of demo cases defined in DemoSettings.xml. The input data for each demo case must be stored in the csv file. You can modify DemoSettings.xml and configure your own tasks or modify and tune existing ones.
+Main RCNet functionality is demonstrated in a simple demo application (/Demo/DemoConsoleApp). Application has no startup parameters, all necessary settins are specified in DemoSettings.xml file. DemoSettings.xml has to be in the same folder as the executable DemoConsoleApp.exe. Application performs sequence of demo cases defined in DemoSettings.xml. The input data for each demo case must be stored in the csv file format. You can easily modify DemoSettings.xml and configure your own tasks or modify and tune existing ones.
 
 
-## Main implemented components
+## Overview of the main implemented components
 ### Data handling
 |Component|Description|
 |--|--|
-|BasicStat|Implements the simple and thread safe statistics|
-|Normalizer|Data normalization/denormalization, Gaussian standardization|
+|Normalizer|Data normalization/denormalization. Supports Gaussian data standardization|
 |PatternBundle|Bundle of pattern and desired output vector|
 |PatternDataLoader|The class allows to upload sample data for a Classification or Hybrid task from a csv file|
 |TimeSeriesBundle|Bundle of input vector and desired output vector|
 |TimeSeriesDataLoader|The class allows to upload sample data for a Prediction task from a csv file|
+|ValidationBundle|Bundle of computed vector and desired output vector|
 |BundleNormalizer|Helper class for easy standardization and normalization/naturalization of sample data bundle|
+
+### XML
+|Component|Description|
+|--|--|
+|ElemValidator|Implements ugly and unefficient method to validate element against specified xsd type. It complements the apparently missing .net method and is necessary to comply with the overall RCNet xml concept.|
+|DocValidator|Provides the xml loading/validation functionalities|
 
 ### Math
 |Component|Description|
 |--|--|
+|BasicStat|Implements the simple and thread safe statistics|
 |ODENumSolver|Ordinary Differential Equations (ODE) Numerical Solver (Euler and RK4 methods)|
-|Vector|Class represents the mathematical vector of double values|
-|Matrix|Class represents the mathematical matrix of double values|
-|EVD|Eigenvalues and eigenvectors of a real matrix|
-|QRD|QR Decomposition|
+|Vector|Class represents the mathematical vector of double values supporting basic operations|
+|Matrix|Class represents the mathematical matrix of double values supporting basic operations, LU and the Power Iteration method for the largest EV estimation|
+|EVD|Full eigen values and vectors decomposition of a matrix|
+|SVD|Singular values decomposition of a matrix|
+|QRD|QR decomposition of a matrix|
 |PhysUnit|Encaptualates SI physical unit|
+|"RandomValue"|Supported: Uniform and Gaussian distributions|
+|Others|BinErrStat, BinDistribution, Bitwise, Combinatorics, Factorial, WeightedAvg, HurstExpEstim, Normalizer, ...|
 
 ### Analog neuron activation functions
 |Component|Description|
@@ -69,7 +79,7 @@ See the [wiki pages.](https://en.wikipedia.org/wiki/Activation_function)
 |IzhikevichIF|Izhikevich Integrate and Fire activation function (model "one fits all")|
 See the [wiki pages.](https://en.wikipedia.org/wiki/Biological_neuron_model)
 
-### Non-recurrent Networks
+### Non-recurrent networks and trainers
 |Component|Description|
 |--|--|
 |FeedForwardNetwork|Implements the feed forward network supporting multiple hidden layers|
@@ -78,16 +88,17 @@ See the [wiki pages.](https://en.wikipedia.org/wiki/Biological_neuron_model)
 |ParallelPerceptron|Implements the parallel perceptron network|
 |PDeltaRuleTrainer|P-Delta rule trainer of the parallel perceptron network|
 
-### State Machine Components
+### State Machine components
 |Component|Description|
 |--|--|
-|StaticSynapse|Static synapse computes constantly weighted signal from source to target neuron|
+|StaticSynapse|Computes constantly weighted signal from source to target neuron. Supports signal delay|
+|DynamicSynapse|Computes dynamically weighted signal from source to target neuron using pre-synaptic and/or post-synaptic "Short-Term-Plasticity". Supports signal delay|
 |InputAnalogNeuron|Input neuron is the special type of very simple neuron. Its purpose is only to mediate input analog value for a synapse|
 |InputSpikingNeuron|Spiking input neuron is the special type of neuron. Its purpose is to preprocess input analog value to be deliverable as the spike train signal into the reservoir neurons through a synapse|
 |ReservoirAnalogNeuron|Reservoir neuron is the main type of the neuron processing input stimuli and emitting output signal. Analog neuron produces analog output. Main features: Retainment (leaky integrator), The second power as augmented readout state|
 |ReservoirSpikingNeuron|Reservoir neuron is the main type of the neuron processing input stimuli and emitting output signal. Spiking neuron produces spikes. Main features: Firing rate as primary readout state, Membrane potential as augmented readout state|
 |Reservoir|Implements recurrent network supporting analog and spiking neurons working together. Main features: SpectralRadius, Multiple 3D pools of neurons, Pool to pool connections. It can work as the Echo State Network reservoir, Liquid State Machine reservoir or Mixed reservoir|
 |ReadoutUnit|Contains the trained unit associated with output field and related important error statistics. Trained unit can be the Feed Forward Network or the Parallel Perceptron Network|
-|ReadoutLayer|Class implements the common readout layer for the reservoir computing methods. Supports x-fold cross validation method.|
+|ReadoutLayer|Class implements the common readout layer concept for the reservoir computing methods. Supports x-fold cross validation method and clustering of the trained readout units.|
 |StateMachine|Encaptulates the State Machine Network. Supports multiple internal recurrent reservoirs having multiple interconnected/cooperating analog and spiking neuron pools. Solves task types: Prediction, Classification, Hybrid|
 
