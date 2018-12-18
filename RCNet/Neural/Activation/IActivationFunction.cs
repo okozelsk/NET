@@ -17,16 +17,16 @@ namespace RCNet.Neural.Activation
         /// Type of the output signal
         /// </summary>
         ActivationFactory.FunctionOutputSignalType OutputSignalType { get; }
-        
+
         /// <summary>
-        /// Output signal range
+        /// Output range
         /// </summary>
-        Interval OutputSignalRange { get; }
+        Interval OutputRange { get; }
 
         /// <summary>
         /// Specifies whether the activation function supports derivative calculation
         /// </summary>
-        bool SupportsComputeDerivativeMethod { get; }
+        bool SupportsDerivative { get; }
 
         /// <summary>
         /// Specifies whether the activation function is independent on its previous states

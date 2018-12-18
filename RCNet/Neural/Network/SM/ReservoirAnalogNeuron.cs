@@ -41,7 +41,7 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// Output signal range
         /// </summary>
-        public Interval OutputRange { get { return _activation.OutputSignalRange; } }
+        public Interval OutputRange { get { return _activation.OutputRange; } }
 
         /// <summary>
         /// Constant bias
@@ -155,7 +155,7 @@ namespace RCNet.Neural.Network.SM
         public void NewState(bool collectStatistics)
         {
             //Output signal leak handling
-            if (OutputSignal != _activation.OutputSignalRange.Mid)
+            if (OutputSignal != _activation.OutputRange.Mid)
             {
                 OutputSignalLeak = 0;
             }

@@ -221,6 +221,7 @@ namespace RCNet.Neural.Network.FF
                 clone.LayerCollection.Add(layer.DeepClone());
             }
             clone._flatWeights = (double[])_flatWeights.Clone();
+            clone._isAllowedNguyenWidrowRandomization = _isAllowedNguyenWidrowRandomization;
             return clone;
         }
 
@@ -257,7 +258,7 @@ namespace RCNet.Neural.Network.FF
         public double[] Compute(double[] input, List<double[]> layerInputCollection, double[] flatDerivatives)
         {
             double[] result = input;
-            foreach (FeedForwardNetwork.Layer layer in LayerCollection)
+            foreach (Layer layer in LayerCollection)
             {
                 layerInputCollection.Add(result);
                 result = layer.Compute(result, _flatWeights, flatDerivatives);
@@ -284,8 +285,7 @@ namespace RCNet.Neural.Network.FF
                 computedOutputs[row] = computedOutputVector;
                 for (int i = 0; i < NumOfOutputValues; i++)
                 {
-                    double error = idealOutputCollection[row][i] - computedOutputVector[i];
-                    flatErrors[row * NumOfOutputValues + i] = Math.Abs(error);
+                    flatErrors[row * NumOfOutputValues + i] = Math.Abs(idealOutputCollection[row][i] - computedOutputVector[i]);
                 }
             });
             computedOutputCollection = new List<double[]>(computedOutputs);
@@ -308,8 +308,7 @@ namespace RCNet.Neural.Network.FF
                 double[] computedOutputVector = Compute(inputCollection[row]);
                 for (int i = 0; i < NumOfOutputValues; i++)
                 {
-                    double error = idealOutputCollection[row][i] - computedOutputVector[i];
-                    flatErrors[row * NumOfOutputValues + i] = Math.Abs(error);
+                    flatErrors[row * NumOfOutputValues + i] = Math.Abs(idealOutputCollection[row][i] - computedOutputVector[i]);
                 }
             });
             return new BasicStat(flatErrors);
@@ -318,7 +317,7 @@ namespace RCNet.Neural.Network.FF
         /// <summary>
         /// Returns copy of all network internal weights (in a flat format)
         /// </summary>
-        public double[] GetWeights()
+        public double[] GetWeightsCopy()
         {
             return (double[])_flatWeights.Clone();
         }
@@ -457,7 +456,7 @@ namespace RCNet.Neural.Network.FF
                         sum += flatWeights[weightFlatIdx] * inputs[inputIdx];
                     }
                     result[neuronIdx] = Activation.Compute(sum);
-                    if(flatDerivatives != null)
+                    if (flatDerivatives != null)
                     {
                         flatDerivatives[NeuronsStartFlatIdx + neuronIdx] = Activation.ComputeDerivative(result[neuronIdx], sum);
                     }

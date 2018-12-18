@@ -26,14 +26,9 @@ namespace RCNet.Neural.Activation
 
         //Properties
         /// <summary>
-        /// Output signal range
+        /// Output srange
         /// </summary>
-        public override Interval OutputSignalRange { get { return _outputRange; } }
-
-        /// <summary>
-        /// Normal range of the internal state
-        /// </summary>
-        public override Interval InternalStateRange { get { return _outputRange; } }
+        public override Interval OutputRange { get { return _outputRange; } }
 
         //Methods
         /// <summary>
@@ -43,8 +38,7 @@ namespace RCNet.Neural.Activation
         public override double Compute(double x)
         {
             x = x.Bound();
-            _state = (Math.Log(1d + Math.Exp(x))).Bound();
-            return _state;
+            return (Math.Log(1d + Math.Exp(x))).Bound();
         }
 
         /// <summary>

@@ -47,7 +47,7 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// Output signal range
         /// </summary>
-        public Interval OutputRange { get { return _activation.OutputSignalRange; } }
+        public Interval OutputRange { get { return _activation.OutputRange; } }
 
         /// <summary>
         /// Constant bias

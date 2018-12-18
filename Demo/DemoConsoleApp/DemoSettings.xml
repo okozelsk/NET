@@ -60,19 +60,12 @@
         </reservoirInstance>
       </reservoirInstanceContainer>
       <readoutLayer testDataRatio="0.0825" folds="Auto">
-        <readoutUnit attempts="10" attemptEpochs="1000">
+        <readoutUnit attempts="20" attemptEpochs="300">
           <ff regressionMethod="Resilient">
-            <activationIdentity/>
+            <activationTanH/>
             <hiddenLayers>
-              <layer neurons="8">
-                <activationLeakyReLU>
-                  <negSlope min="0.05" max="0.05"/>
-                </activationLeakyReLU>
-              </layer>
-              <layer neurons="8">
-                <activationLeakyReLU>
-                  <negSlope min="0.05" max="0.05"/>
-                </activationLeakyReLU>
+              <layer neurons="10">
+                <activationTanH/>
               </layer>
             </hiddenLayers>
           </ff>

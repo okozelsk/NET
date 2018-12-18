@@ -184,8 +184,8 @@ namespace RCNet.Neural.Network.FF
         public static bool IsAllowedActivation(Object activationSettings, out Interval outputRange)
         {
             IActivationFunction af = ActivationFactory.Create(activationSettings, new Random());
-            outputRange = af.OutputSignalRange.DeepClone();
-            if (!af.Stateless || !af.SupportsComputeDerivativeMethod)
+            outputRange = af.OutputRange.DeepClone();
+            if (!af.Stateless || !af.SupportsDerivative)
             {
                 return false;
             }

@@ -62,12 +62,12 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Output signal range
         /// </summary>
-        public Interval OutputSignalRange { get { return _outputRange; } }
+        public Interval OutputRange { get { return _outputRange; } }
 
         /// <summary>
         /// Specifies whether the activation function supports derivative calculation
         /// </summary>
-        public bool SupportsComputeDerivativeMethod { get { return false; } }
+        public bool SupportsDerivative { get { return false; } }
 
         /// <summary>
         /// Specifies whether the activation function is independent on its previous states

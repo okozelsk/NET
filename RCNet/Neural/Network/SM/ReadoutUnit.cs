@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using RCNet.MathTools;
-using RCNet.Neural.Activation;
+using RCNet.Extensions;
 using RCNet.Neural.Network.FF;
 using RCNet.Neural.Network.PP;
 
@@ -164,12 +164,11 @@ namespace RCNet.Neural.Network.SM
                             return true;
                         }
                     }
-                    break;
+                    return false;
                 default:
                     //Prediction or hybrid task type
                     return (current.CombinedPrecisionError < best.CombinedPrecisionError);
             }
-            return false;
         }
 
         private static void CreateNetAndTreainer(ReadoutLayerSettings.ReadoutUnitSettings settings,
@@ -242,7 +241,7 @@ namespace RCNet.Neural.Network.SM
                                                 Object controllerUserObject = null
                                                 )
         {
-            ReadoutUnit bestReadoutUnit = new ReadoutUnit();
+            ReadoutUnit bestReadoutUnit = null;
             //Regression attempts
             bool stopRegression = false;
             for (int regrAttemptNumber = 1; regrAttemptNumber <= readoutUnitSettings.RegressionAttempts; regrAttemptNumber++)
@@ -262,11 +261,9 @@ namespace RCNet.Neural.Network.SM
                     trainer.Iteration();
                     List<double[]> testingComputedOutputsCollection = null;
                     //Compute current error statistics after training iteration
-                    ReadoutUnit currReadoutUnit = new ReadoutUnit
-                    {
-                        Network = net,
-                        TrainingErrorStat = net.ComputeBatchErrorStat(trainingPredictorsCollection, trainingIdealOutputsCollection, out List<double[]> trainingComputedOutputsCollection)
-                    };
+                    ReadoutUnit currReadoutUnit = new ReadoutUnit();
+                    currReadoutUnit.Network = net;
+                    currReadoutUnit.TrainingErrorStat = net.ComputeBatchErrorStat(trainingPredictorsCollection, trainingIdealOutputsCollection, out List<double[]> trainingComputedOutputsCollection);
                     if (taskType == CommonEnums.TaskType.Classification)
                     {
                         currReadoutUnit.TrainingBinErrorStat = new BinErrStat(refBinDistr, trainingComputedOutputsCollection, trainingIdealOutputsCollection);
@@ -288,7 +285,7 @@ namespace RCNet.Neural.Network.SM
                     //Current results processing
                     bool better = false, stopTrainingCycle = false;
                     //Result first initialization
-                    if (bestReadoutUnit.CombinedPrecisionError == -1)
+                    if (bestReadoutUnit == null)
                     {
                         //Adopt current regression results
                         bestReadoutUnit = currReadoutUnit.DeepClone();
@@ -297,7 +294,7 @@ namespace RCNet.Neural.Network.SM
                     RegressionControlOutArgs cbOut = null;
                     if (controller != null)
                     {
-                        //Evaluation of the improvement is driven externaly
+                        //Evaluation of the improvement is driven externally
                         RegressionControlInArgs cbIn = new RegressionControlInArgs();
                         cbIn.TaskType = taskType;
                         cbIn.ReadoutUnitIdx = readoutUnitIdx;
@@ -317,7 +314,9 @@ namespace RCNet.Neural.Network.SM
                         cbIn.CurrReadoutUnit = currReadoutUnit;
                         cbIn.BestReadoutUnit = bestReadoutUnit;
                         cbIn.UserObject = controllerUserObject;
+                        //Call external controller
                         cbOut = controller(cbIn);
+                        //Pick up results
                         better = cbOut.CurrentIsBetter;
                         stopTrainingCycle = cbOut.StopCurrentAttempt;
                         stopRegression = cbOut.StopRegression;
