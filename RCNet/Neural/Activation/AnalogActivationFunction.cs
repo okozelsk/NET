@@ -1,5 +1,4 @@
 ﻿using System;
-using RCNet.Extensions;
 using RCNet.MathTools;
 
 namespace RCNet.Neural.Activation
@@ -10,16 +9,11 @@ namespace RCNet.Neural.Activation
     [Serializable]
     public abstract class AnalogActivationFunction : IActivationFunction
     {
-        //Attributes
-
         //Constructor
         /// <summary>
         /// Instantiates analog activation function
         /// </summary>
-        protected AnalogActivationFunction()
-        {
-            return;
-        }
+        protected AnalogActivationFunction(){ return; }
 
         //Properties
         /// <summary>
@@ -57,10 +51,7 @@ namespace RCNet.Neural.Activation
         /// Resets function to its initial state.
         /// Does nothing in case of analog activation function.
         /// </summary>
-        public void Reset()
-        {
-            return;
-        }
+        public void Reset(){ return; }
 
         /// <summary>
         /// Computes output of the activation function.

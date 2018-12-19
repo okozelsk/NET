@@ -112,15 +112,15 @@ namespace RCNet.MathTools.MatrixMath
             }
         }
 
-    //Methods
-    //Static methods
-    /// <summary>
-    /// Calculates hypotenuse.
-    /// https://en.wikipedia.org/wiki/Hypot
-    /// </summary>
-    /// <param name="x">The x value.</param>
-    /// <param name="y">The y value.</param>
-    public static double Hypotenuse(double x, double y)
+        //Methods
+        //Static methods
+        /// <summary>
+        /// Calculates hypotenuse.
+        /// https://en.wikipedia.org/wiki/Hypot
+        /// </summary>
+        /// <param name="x">The x value.</param>
+        /// <param name="y">The y value.</param>
+        public static double Hypotenuse(double x, double y)
         {
             double hypot = 0d;
             if (Math.Abs(x) > Math.Abs(y))

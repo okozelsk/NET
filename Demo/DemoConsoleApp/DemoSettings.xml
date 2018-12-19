@@ -1,5 +1,63 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <demo dataFolder=".\\Data">
+  <case name="Prediction task Mackey Glass chaotic time series: Analog reservoir (ESN), Linear regression output">
+    <samples fileName="MackeyGlass.csv" bootSamples="400" singleNormalizer="false" normalizerReserve="0.1"/>
+    <stateMachineCfg taskType="Prediction" randomizerSeek="0">
+      <inputFields routeToReadout="false">
+        <field name="Value"/>
+      </inputFields>
+      <reservoirCfgContainer>
+        <reservoirCfg name="ESN" inputCoding="Analog" inputDuration="1" spectralRadius="0.999">
+          <pools>
+            <pool name="Logistic pool" dimX="8" dimY="8" dimZ="8" readoutNeuronsDensity="1">
+              <neuronGroups>
+                <neuronGroup name="Exc-Logistic" role="Excitatory" relShare="4" augmentedStates="true">
+                  <activationTanH/>
+                  <bias min="-1" max="1" randomSign="false" distribution="Uniform"/>
+                </neuronGroup>
+                <neuronGroup name="Inh-Logistic" role="Inhibitory" relShare="1" augmentedStates="true">
+                  <activationTanH/>
+                  <bias min="-1" max="1" randomSign="false" distribution="Uniform"/>
+                </neuronGroup>
+              </neuronGroups>
+              <interconnection density="0.1" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
+                <dynamicSynapse maxDelay="0" restingEfficacy="0.5" tauFacilitation="500" tauRecovery="5" tauDecay="10">
+                  <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
+                </dynamicSynapse>
+              </interconnection>
+              <retainmentNeurons density="1">
+                <rate min="0" max="0.25" randomSign="false" distribution="Uniform"/>
+              </retainmentNeurons>
+              <noiseModulator min="0" max="0" randomSign="false" distribution="Uniform"/>
+            </pool>
+          </pools>
+        </reservoirCfg>
+      </reservoirCfgContainer>
+      <reservoirInstanceContainer>
+        <reservoirInstance name="Fully analog reservoir" cfg="ESN" augmentedStates="true">
+          <inputFieldAssignments>
+            <inputFieldAssignment inputFieldName="Value" poolName="Logistic pool" density="1">
+              <staticSynapse maxDelay="0">
+                <weight min="0" max="0.2" randomSign="false" distribution="Uniform"/>
+              </staticSynapse>
+            </inputFieldAssignment>
+          </inputFieldAssignments>
+        </reservoirInstance>
+      </reservoirInstanceContainer>
+      <readoutLayer testDataRatio="0.1" folds="1">
+        <readoutUnit attempts="1" attemptEpochs="1">
+          <ff regressionMethod="Linear">
+            <activationIdentity/>
+          </ff>
+        </readoutUnit>
+        <outputFields>
+          <field name="Value"/>
+        </outputFields>
+      </readoutLayer>
+    </stateMachineCfg>
+  </case>
+
 
   <case name="Classification task Libras Movement:  Single spiking reservoir, multilayer Feed Forward network classifier">
     <!-- Data converted from https://archive.ics.uci.edu/ml/datasets/Libras+Movement -->
@@ -91,63 +149,6 @@
     </stateMachineCfg>
   </case>
 
-
-  <case name="Prediction task Mackey Glass chaotic time series: Analog reservoir (ESN), Linear regression output">
-    <samples fileName="MackeyGlass.csv" bootSamples="400" singleNormalizer="false" normalizerReserve="0.1"/>
-    <stateMachineCfg taskType="Prediction" randomizerSeek="0">
-      <inputFields routeToReadout="false">
-        <field name="Value"/>
-      </inputFields>
-      <reservoirCfgContainer>
-        <reservoirCfg name="ESN" inputCoding="Analog" inputDuration="1" spectralRadius="0.999">
-          <pools>
-            <pool name="Logistic pool" dimX="8" dimY="8" dimZ="8" readoutNeuronsDensity="1">
-              <neuronGroups>
-                <neuronGroup name="Exc-Logistic" role="Excitatory" relShare="4" augmentedStates="true">
-                  <activationTanH/>
-                  <bias min="-1" max="1" randomSign="false" distribution="Uniform"/>
-                </neuronGroup>
-                <neuronGroup name="Inh-Logistic" role="Inhibitory" relShare="1" augmentedStates="true">
-                  <activationTanH/>
-                  <bias min="-1" max="1" randomSign="false" distribution="Uniform"/>
-                </neuronGroup>
-              </neuronGroups>
-              <interconnection density="0.1" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
-                <dynamicSynapse maxDelay="0" restingEfficacy="0.5" tauFacilitation="500" tauRecovery="5" tauDecay="10">
-                  <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
-                </dynamicSynapse>
-              </interconnection>
-              <retainmentNeurons density="1">
-                <rate min="0" max="0.25" randomSign="false" distribution="Uniform"/>
-              </retainmentNeurons>
-              <noiseModulator min="0" max="0" randomSign="false" distribution="Uniform"/>
-            </pool>
-          </pools>
-        </reservoirCfg>
-      </reservoirCfgContainer>
-      <reservoirInstanceContainer>
-        <reservoirInstance name="Fully analog reservoir" cfg="ESN" augmentedStates="true">
-          <inputFieldAssignments>
-            <inputFieldAssignment inputFieldName="Value" poolName="Logistic pool" density="1">
-              <staticSynapse maxDelay="0">
-                <weight min="0" max="0.2" randomSign="false" distribution="Uniform"/>
-              </staticSynapse>
-            </inputFieldAssignment>
-          </inputFieldAssignments>
-        </reservoirInstance>
-      </reservoirInstanceContainer>
-      <readoutLayer testDataRatio="0.1" folds="1">
-        <readoutUnit attempts="1" attemptEpochs="1">
-          <ff regressionMethod="Linear">
-            <activationIdentity/>
-          </ff>
-        </readoutUnit>
-        <outputFields>
-          <field name="Value"/>
-        </outputFields>
-      </readoutLayer>
-    </stateMachineCfg>
-  </case>
 
 
   <case name="Prediction task High and Low prices of TTOO (T2 Biosystems, Inc.): Small analog reservoir (ESN), Linear regression">

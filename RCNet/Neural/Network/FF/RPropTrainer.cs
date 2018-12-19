@@ -83,7 +83,6 @@ namespace RCNet.Neural.Network.FF
             Epoch = 0;
             //Parallel gradient workers (batch ranges) preparation
             int numOfWorkers = Math.Max(1, Math.Min(Environment.ProcessorCount - 1, _inputVectorCollection.Count));
-            //numOfWorkers = 1;
             _gradientWorkerDataCollection = new GradientWorkerData[numOfWorkers];
             int workerBatchSize = _inputVectorCollection.Count / numOfWorkers;
             for (int workerIdx = 0, fromRow = 0; workerIdx < numOfWorkers; workerIdx++, fromRow += workerBatchSize)
@@ -139,9 +138,9 @@ namespace RCNet.Neural.Network.FF
             }
             else if (gradMulSign < 0)
             {
-                //Grad changed sign, decrease delta
+                //Changed sign, decrease delta
                 _weigthsPrevDeltas[weightFlatIndex] = Math.Max(_weigthsPrevDeltas[weightFlatIndex] * _settings.NegativeEta, _settings.MinDelta);
-                //Force no change to delta in next iteration
+                //Ensure no change to delta in the next iteration
                 _weigthsGradsAcc[weightFlatIndex] = 0;
                 weightChange = (MSE > _prevMSE) ? -_weigthsPrevChanges[weightFlatIndex] : 0;
             }
@@ -270,7 +269,6 @@ namespace RCNet.Neural.Network.FF
             ProcessGradientWorkersData();
             //Update all weights and biases
             Parallel.For(0, networkFlatWeights.Length, weightFlatIdx =>
-            //for(int weightFlatIdx = 0; weightFlatIdx < networkFlatWeights.Length; weightFlatIdx++)
             {
                 AdjustWeight(networkFlatWeights, weightFlatIdx);
             });
