@@ -158,5 +158,35 @@ namespace RCNet.Neural
             }
         }
 
+        /// <summary>
+        /// Method to decide synapse delay
+        /// </summary>
+        public enum SynapticDelayMethod
+        {
+            /// <summary>
+            /// Synapse delay is decided randomly
+            /// </summary>
+            Random,
+            /// <summary>
+            /// Synapse delay is decided according to Euclidean distance
+            /// </summary>
+            Distance
+        }
+
+        /// <summary>
+        /// Parses method to decide synapse delay from a string code
+        /// </summary>
+        /// <param name="code">Method to decide synapse delay code</param>
+        public static SynapticDelayMethod ParseSynapticDelayMethod(string code)
+        {
+            switch (code.ToUpper())
+            {
+                case "RANDOM": return SynapticDelayMethod.Random;
+                case "DISTANCE": return SynapticDelayMethod.Distance;
+                default:
+                    throw new ArgumentException($"Unsupported synapse delay decision method: {code}", "code");
+            }
+        }
+
     }//CommonTypes
 }//Namespace

@@ -18,7 +18,7 @@ namespace RCNet.Neural.Network.SM
     {
         //Attribute properties
         /// <summary>
-        /// Home pool identificator and neuron placement within the pool
+        /// Home pool identificator and neuron placement within the reservoir
         /// Note that Input neuron home PoolID is always -1, because Input neurons do not belong to a physical pool.
         /// </summary>
         public NeuronPlacement Placement { get; }
@@ -81,15 +81,16 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
+        /// <param name="inputEntryPoint">Input entry point coordinates within the reservoir.</param>
         /// <param name="inputFieldIdx">Index of the corresponding reservoir's input field.</param>
         /// <param name="inputRange">
         /// Range of input value.
         /// It is very recommended to have input values normalized and standardized before
         /// they are passed as an input.
         /// </param>
-        public InputAnalogNeuron(int inputFieldIdx, Interval inputRange)
+        public InputAnalogNeuron(int[] inputEntryPoint, int inputFieldIdx, Interval inputRange)
         {
-            Placement = new NeuronPlacement(inputFieldIdx, - 1, null, inputFieldIdx, 0, inputFieldIdx, 0, 0);
+            Placement = new NeuronPlacement(inputFieldIdx, - 1, inputFieldIdx, 0, inputEntryPoint[0], inputEntryPoint[1], inputEntryPoint[2]);
             OutputRange = inputRange.DeepClone();
             Statistics = new NeuronStatistics(OutputRange);
             Reset(false);

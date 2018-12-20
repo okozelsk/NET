@@ -31,7 +31,6 @@ namespace RCNet.Neural.Network.SM
         /// <param name="sourceNeuron">Source neuron</param>
         /// <param name="targetNeuron">Target neuron</param>
         /// <param name="weight">Synapse weight (unsigned)</param>
-        /// <param name="delay">Synapse delay (in cycles) of the signal delivery</param>
         /// <param name="tauFacilitation">Synapse efficacy facilitation parameter (pre-synaptic)</param>
         /// <param name="tauRecovery">Synapse efficacy recovery parameter (pre-synaptic)</param>
         /// <param name="restingEfficacy">Synapse resting efficacy parameter (pre-synaptic)</param>
@@ -39,13 +38,12 @@ namespace RCNet.Neural.Network.SM
         public DynamicSynapse(INeuron sourceNeuron,
                               INeuron targetNeuron,
                               double weight,
-                              int delay,
                               double tauFacilitation,
                               double tauRecovery,
                               double restingEfficacy,
                               double tauDecay
                               )
-            :base(sourceNeuron, targetNeuron, weight, delay)
+            :base(sourceNeuron, targetNeuron, weight)
         {
             _tauFacilitation = tauFacilitation;
             _tauRecovery = tauRecovery;

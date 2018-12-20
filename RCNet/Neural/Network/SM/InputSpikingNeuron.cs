@@ -24,7 +24,7 @@ namespace RCNet.Neural.Network.SM
 
         //Attribute properties
         /// <summary>
-        /// Home pool identificator and neuron placement within the pool
+        /// Home pool identificator and neuron placement within the reservoir
         /// Note that Input neuron home PoolID is always -1, because Input neurons do not belong to a physical pool.
         /// </summary>
         public NeuronPlacement Placement { get; }
@@ -89,6 +89,7 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
+        /// <param name="inputEntryPoint">Input entry point coordinates within the reservoir.</param>
         /// <param name="inputFieldIdx">Index of the corresponding reservoir's input field.</param>
         /// <param name="inputRange">
         /// Range of input value.
@@ -96,9 +97,9 @@ namespace RCNet.Neural.Network.SM
         /// they are passed to input neuron.
         /// </param>
         /// <param name="inputCodingFractions">Number of coding fractions (see SpikeTrainConverter to understand)</param>
-        public InputSpikingNeuron(int inputFieldIdx, Interval inputRange, int inputCodingFractions)
+        public InputSpikingNeuron(int[] inputEntryPoint, int inputFieldIdx, Interval inputRange, int inputCodingFractions)
         {
-            Placement = new NeuronPlacement(inputFieldIdx , - 1, null, inputFieldIdx, 0, inputFieldIdx, 0, 0);
+            Placement = new NeuronPlacement(inputFieldIdx , - 1, inputFieldIdx, 0, inputEntryPoint[0], inputEntryPoint[1], inputEntryPoint[2]);
             _inputRange = inputRange.DeepClone();
             _signalConverter = new SignalConverter(_inputRange, inputCodingFractions);
             Statistics = new NeuronStatistics(_outputRange);

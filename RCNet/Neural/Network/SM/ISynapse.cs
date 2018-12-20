@@ -24,9 +24,19 @@ namespace RCNet.Neural.Network.SM
         INeuron TargetNeuron { get; }
 
         /// <summary>
+        /// Euclidean distance between SourceNeuron and TargetNeuron
+        /// </summary>
+        double Distance { get; }
+
+        /// <summary>
         /// Weight of the synapse
         /// </summary>
         double Weight { get; }
+
+        /// <summary>
+        /// Signal delay
+        /// </summary>
+        int Delay { get; }
 
         /// <summary>
         /// Efficacy statistics of the synapse
@@ -45,6 +55,12 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         /// <param name="scale">Scale factor</param>
         void Rescale(double scale);
+
+        /// <summary>
+        /// Sets the synapse delay
+        /// </summary>
+        /// <param name="delay">Signal delay (reservoir cycles)</param>
+        void SetDelay(int delay);
 
         /// <summary>
         /// Returns signal to be delivered to target neuron.

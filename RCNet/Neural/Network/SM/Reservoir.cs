@@ -8,6 +8,7 @@ using RCNet.Extensions;
 using RCNet.Neural.Activation;
 using System.Collections.Concurrent;
 using RCNet.RandomValue;
+using RCNet.Neural.Network.SM;
 
 namespace RCNet.Neural.Network.SM
 {
@@ -75,12 +76,12 @@ namespace RCNet.Neural.Network.SM
                 if (InstanceDefinition.Settings.InputCoding == CommonEnums.InputCodingType.Analog)
                 {
                     //Analog input
-                    _inputNeuronCollection[i] = new InputAnalogNeuron(i, inputRange);
+                    _inputNeuronCollection[i] = new InputAnalogNeuron(InstanceDefinition.Settings.InputEntryPoint, i, inputRange);
                 }
                 else
                 {
                     //Spiking input
-                    _inputNeuronCollection[i] = new InputSpikingNeuron(i, inputRange, InstanceDefinition.Settings.InputDuration);
+                    _inputNeuronCollection[i] = new InputSpikingNeuron(InstanceDefinition.Settings.InputEntryPoint, i, inputRange, InstanceDefinition.Settings.InputDuration);
                 }
             }
 
@@ -153,13 +154,13 @@ namespace RCNet.Neural.Network.SM
                 //Instantiate neurons
                 INeuron[] poolNeurons = new INeuron[poolSettings.Dim.Size];
                 int neuronPoolFlatIdx = 0;
-                for (int x = 0; x < poolSettings.Dim.X; x++)
+                for (int x = 0; x < poolSettings.Dim.DimX; x++)
                 {
-                    for (int y = 0; y < poolSettings.Dim.Y; y++)
+                    for (int y = 0; y < poolSettings.Dim.DimY; y++)
                     {
-                        for (int z = 0; z < poolSettings.Dim.Z; z++)
+                        for (int z = 0; z < poolSettings.Dim.DimZ; z++)
                         {
-                            NeuronPlacement placement = new NeuronPlacement(neuronGlobalFlatIdx, poolID, poolSettings.Dim, neuronPoolFlatIdx, neuronParamsCollection[neuronPoolFlatIdx].GroupID, x, y, z);
+                            NeuronPlacement placement = new NeuronPlacement(neuronGlobalFlatIdx, poolID, neuronPoolFlatIdx, neuronParamsCollection[neuronPoolFlatIdx].GroupID, poolSettings.Dim.X + x, poolSettings.Dim.Y + y, poolSettings.Dim.Z + z);
                             //Neuron instance
                             if (neuronParamsCollection[neuronPoolFlatIdx].Activation.OutputSignalType == ActivationFactory.FunctionOutputSignalType.Spike)
                             {
@@ -228,7 +229,57 @@ namespace RCNet.Neural.Network.SM
             {
                 SetPool2PoolInterconnections(rand, poolsInterConn);
             }
-            
+
+            //-----------------------------------------------------------------------------
+            //Setup of the synaptic delays
+            //Build the distances statistics
+            BasicStat distanceStat = new BasicStat();
+            foreach(List<ISynapse> synapses in _neuronInputConnectionsCollection)
+            {
+                distanceStat.AddSampleValues((from synapse in synapses select synapse.Distance));
+            }
+            foreach (List<ISynapse> synapses in _neuronNeuronConnectionsCollection)
+            {
+                distanceStat.AddSampleValues((from synapse in synapses select synapse.Distance));
+            }
+            //Delays setup
+            //Input synapses
+            foreach (List<ISynapse> synapses in _neuronInputConnectionsCollection)
+            {
+                foreach(ISynapse synapse in synapses)
+                {
+                    //Compute appropriate delay and set it to synapse
+                    if (instanceDefinition.Settings.SynapticDelayMethod == CommonEnums.SynapticDelayMethod.Distance)
+                    {
+                        double relDistance = (synapse.Distance - distanceStat.Min) / distanceStat.Span;
+                        int delay = (int)Math.Round(instanceDefinition.Settings.MaxInputDelay * relDistance);
+                        synapse.SetDelay(delay);
+                    }
+                    else
+                    {
+                        synapse.SetDelay(rand.Next(instanceDefinition.Settings.MaxInputDelay + 1));
+                    }
+                }
+            }
+            //Internal synapses
+            foreach (List<ISynapse> synapses in _neuronNeuronConnectionsCollection)
+            {
+                foreach (ISynapse synapse in synapses)
+                {
+                    //Compute appropriate delay and set it to synapse
+                    if (instanceDefinition.Settings.SynapticDelayMethod == CommonEnums.SynapticDelayMethod.Distance)
+                    {
+                        double relDistance = (synapse.Distance - distanceStat.Min) / distanceStat.Span;
+                        int delay = (int)Math.Round(instanceDefinition.Settings.MaxInternalDelay * relDistance);
+                        synapse.SetDelay(delay);
+                    }
+                    else
+                    {
+                        synapse.SetDelay(rand.Next(instanceDefinition.Settings.MaxInternalDelay + 1));
+                    }
+                }
+            }
+
             //-----------------------------------------------------------------------------
             //Spectral radius
             if (InstanceDefinition.Settings.SpectralRadius > 0)
@@ -363,8 +414,7 @@ namespace RCNet.Neural.Network.SM
                             int targetNeuronIdx = indices[i];
                             StaticSynapse synapse = new StaticSynapse(_inputNeuronCollection[assignment.FieldIdx],
                                                                       _poolNeuronsCollection[poolID][targetNeuronIdx],
-                                                                      rand.NextDouble(assignment.StaticSynapseCfg.WeightCfg),
-                                                                      rand.Next(assignment.StaticSynapseCfg.MaxDelay + 1)
+                                                                      rand.NextDouble(assignment.StaticSynapseCfg.WeightCfg)
                                                                       );
                             AddInterconnection(_neuronInputConnectionsCollection, synapse, false);
                         }
@@ -458,12 +508,7 @@ namespace RCNet.Neural.Network.SM
                     if (connectionsCountDown > 0 && ncc.ConnCount == minConnCount)
                     {
                         ++ncc.ConnCount;
-                        if (ncc.ConnCount > maxPhysicalConnCountPerNeuron)
-                        {
-                            //This should not happen
-                            ncc.ConnCount = maxPhysicalConnCountPerNeuron;
-                        }
-                         --connectionsCountDown;
+                        --connectionsCountDown;
                     }
                     newMinConnCount = Math.Min(newMinConnCount, ncc.ConnCount);
                 }
@@ -496,7 +541,7 @@ namespace RCNet.Neural.Network.SM
                         double minDiff = double.MaxValue;
                         for (int i = 0; i < tmpRelTargetNeuronCollection.Count; i++)
                         {
-                            double err = Math.Abs(tmpRelTargetNeuronCollection[i].Placement.ComputeEuclideanDistance(nccSource.Neuron.Placement) - gaussianDistance);
+                            double err = Math.Abs(EuclideanDistance.Compute(nccSource.Neuron.Placement.Coordinates, tmpRelTargetNeuronCollection[i].Placement.Coordinates) - gaussianDistance);
                             if (err < minDiff)
                             {
                                 targetNeuronIndex = i;
@@ -516,8 +561,7 @@ namespace RCNet.Neural.Network.SM
                         StaticSynapseSettings sss = (StaticSynapseSettings)synapseCfg;
                         synapse = new StaticSynapse(sourceNeuron: nccSource.Neuron,
                                                     targetNeuron: tmpRelTargetNeuronCollection[targetNeuronIndex],
-                                                    weight: rand.NextDouble(sss.WeightCfg),
-                                                    delay: rand.Next(sss.MaxDelay + 1)
+                                                    weight: rand.NextDouble(sss.WeightCfg)
                                                     );
                     }
                     else
@@ -526,7 +570,6 @@ namespace RCNet.Neural.Network.SM
                         synapse = new DynamicSynapse(sourceNeuron: nccSource.Neuron,
                                                      targetNeuron: tmpRelTargetNeuronCollection[targetNeuronIndex],
                                                      weight: rand.NextDouble(dss.WeightCfg),
-                                                     delay: rand.Next(dss.MaxDelay + 1),
                                                      tauFacilitation: dss.TauFacilitation,
                                                      tauRecovery: dss.TauRecovery,
                                                      restingEfficacy: dss.RestingEfficacy,
@@ -685,7 +728,7 @@ namespace RCNet.Neural.Network.SM
                     select new RelatedNeuron
                     {
                         Neuron = neuron,
-                        Distance = relatedNeuron.Placement.ComputeEuclideanDistance(neuron.Placement)
+                        Distance = EuclideanDistance.Compute(relatedNeuron.Placement.Coordinates, neuron.Placement.Coordinates)
                     }).ToList();
         }
 
@@ -785,8 +828,7 @@ namespace RCNet.Neural.Network.SM
                         StaticSynapseSettings sss = (StaticSynapseSettings)poolSettings.InterconnectionCfg.SynapseCfg;
                         synapse = new StaticSynapse(sourceNeuron: nccSource.Neuron,
                                                     targetNeuron: targetNeuron,
-                                                    weight: rand.NextDouble(sss.WeightCfg),
-                                                    delay: rand.Next(sss.MaxDelay + 1)
+                                                    weight: rand.NextDouble(sss.WeightCfg)
                                                     );
                     }
                     else
@@ -795,7 +837,6 @@ namespace RCNet.Neural.Network.SM
                         synapse = new DynamicSynapse(sourceNeuron: nccSource.Neuron,
                                                      targetNeuron: targetNeuron,
                                                      weight: rand.NextDouble(dss.WeightCfg),
-                                                     delay: rand.Next(dss.MaxDelay + 1),
                                                      tauFacilitation: dss.TauFacilitation,
                                                      tauRecovery: dss.TauRecovery,
                                                      restingEfficacy: dss.RestingEfficacy,
@@ -865,8 +906,7 @@ namespace RCNet.Neural.Network.SM
                             StaticSynapseSettings sss = (StaticSynapseSettings)cfg.SynapseCfg;
                             synapse = new StaticSynapse(sourceNeuron: srcNeuron,
                                                         targetNeuron: targetNeuron,
-                                                        weight: rand.NextDouble(sss.WeightCfg),
-                                                        delay: rand.Next(sss.MaxDelay + 1)
+                                                        weight: rand.NextDouble(sss.WeightCfg)
                                                         );
                         }
                         else
@@ -875,7 +915,6 @@ namespace RCNet.Neural.Network.SM
                             synapse = new DynamicSynapse(sourceNeuron: srcNeuron,
                                                          targetNeuron: targetNeuron,
                                                          weight: rand.NextDouble(dss.WeightCfg),
-                                                         delay: rand.Next(dss.MaxDelay + 1),
                                                          tauFacilitation: dss.TauFacilitation,
                                                          tauRecovery: dss.TauRecovery,
                                                          restingEfficacy: dss.RestingEfficacy,

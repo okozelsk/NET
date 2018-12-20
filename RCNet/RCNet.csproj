@@ -48,6 +48,7 @@
   <ItemGroup>
     <Compile Include="CsvTools\DelimitedStringValues.cs" />
     <Compile Include="MathTools\Differential\ODENumSolver.cs" />
+    <Compile Include="MathTools\EuclideanDistance.cs" />
     <Compile Include="MathTools\MatrixMath\SVD.cs" />
     <Compile Include="MathTools\PhysUnit.cs" />
     <Compile Include="MathTools\VectorMath\Vector.cs" />
@@ -91,14 +92,11 @@
     <Compile Include="Neural\Activation\ExpIF.cs" />
     <Compile Include="Neural\Activation\SimpleIF.cs" />
     <Compile Include="Neural\Network\SM\DynamicSynapse.cs" />
-    <Compile Include="Neural\Network\SM\DynamicSynapseSettings.cs">
-      <DependentUpon>DynamicSynapseSettings.xsd</DependentUpon>
-    </Compile>
+    <Compile Include="Neural\Network\SM\DynamicSynapseSettings.cs" />
     <Compile Include="Neural\Network\SM\FiringRate.cs" />
     <Compile Include="Neural\Network\SM\InputAnalogNeuron.cs" />
     <Compile Include="Neural\Network\SM\InputSpikingNeuron.cs" />
     <Compile Include="Neural\Network\SM\NeuronStatistics.cs" />
-    <Compile Include="Neural\Network\SM\StaticSynapseSettings.cs" />
     <Compile Include="Neural\Network\SM\ReservoirAnalogNeuron.cs" />
     <Compile Include="Neural\Network\SM\ReservoirSpikingNeuron.cs" />
     <Compile Include="Neural\Network\SM\SignalConverter.cs" />
@@ -109,6 +107,7 @@
     <Compile Include="Neural\Network\SM\INeuron.cs" />
     <Compile Include="Neural\Network\SM\ISynapse.cs" />
     <Compile Include="Neural\Network\SM\StaticSynapse.cs" />
+    <Compile Include="Neural\Network\SM\StaticSynapseSettings.cs" />
     <Compile Include="Neural\Network\SM\Synapse.cs" />
     <Compile Include="Neural\Data\TimeSeriesDataLoader.cs" />
     <Compile Include="Neural\Data\PatternDataLoader.cs" />
@@ -165,6 +164,9 @@
     <Compile Include="XmlTools\DocValidator.cs" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Neural\Network\SM\StaticSynapseSettings.xsd">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="RCNetTypes.xsd">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
@@ -308,17 +310,12 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Neural\Network\SM\StaticSynapseSettings.xsd">
+    <EmbeddedResource Include="Neural\Network\SM\PoolInterconnectionSettings.xsd">
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Neural\Network\SM\DynamicSynapseSettings.xsd">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Neural\Network\SM\PoolInterconnectionSettings.xsd">
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>

@@ -27,7 +27,7 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         public string Name { get; set; }
         /// <summary>
-        /// Pool dimensions. Pool is 3D.
+        /// Pool coordinates and dimensions. Pool is 3D.
         /// </summary>
         public PoolDimensions Dim { get; set; }
         /// <summary>
@@ -91,7 +91,7 @@ namespace RCNet.Neural.Network.SM
             Dim = null;
             if(source.Dim != null)
             {
-                Dim = new PoolDimensions(source.Dim.X, source.Dim.Y, source.Dim.Z);
+                Dim = new PoolDimensions(source.Dim.X, source.Dim.Y, source.Dim.Z, source.Dim.DimX, source.Dim.DimY, source.Dim.DimZ);
             }
             ReadoutNeuronsDensity = source.ReadoutNeuronsDensity;
             NeuronGroups = new List<NeuronGroupSettings>(source.NeuronGroups.Count);
@@ -137,7 +137,10 @@ namespace RCNet.Neural.Network.SM
             //Name
             Name = poolSettingsElem.Attribute("name").Value;
             //Dimensions
-            Dim = new PoolDimensions(int.Parse(poolSettingsElem.Attribute("dimX").Value, CultureInfo.InvariantCulture),
+            Dim = new PoolDimensions(int.Parse(poolSettingsElem.Attribute("x").Value, CultureInfo.InvariantCulture),
+                                     int.Parse(poolSettingsElem.Attribute("y").Value, CultureInfo.InvariantCulture),
+                                     int.Parse(poolSettingsElem.Attribute("z").Value, CultureInfo.InvariantCulture),
+                                     int.Parse(poolSettingsElem.Attribute("dimX").Value, CultureInfo.InvariantCulture),
                                      int.Parse(poolSettingsElem.Attribute("dimY").Value, CultureInfo.InvariantCulture),
                                      int.Parse(poolSettingsElem.Attribute("dimZ").Value, CultureInfo.InvariantCulture)
                                      );

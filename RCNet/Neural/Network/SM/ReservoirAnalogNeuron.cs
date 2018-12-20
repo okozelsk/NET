@@ -18,7 +18,7 @@ namespace RCNet.Neural.Network.SM
     {
         //Attribute properties
         /// <summary>
-        /// Home pool identificator and neuron placement within the pool
+        /// Home pool identificator and neuron placement within the reservoir
         /// </summary>
         public NeuronPlacement Placement { get; }
 

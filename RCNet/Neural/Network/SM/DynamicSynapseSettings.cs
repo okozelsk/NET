@@ -19,10 +19,6 @@ namespace RCNet.Neural.Network.SM
     {
         //Attribute properties
         /// <summary>
-        /// Maximum synapse delay
-        /// </summary>
-        public int MaxDelay { get; set; }
-        /// <summary>
         /// Synapse's resting efficacy
         /// </summary>
         public double RestingEfficacy { get; set; }
@@ -49,7 +45,6 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         public DynamicSynapseSettings()
         {
-            MaxDelay = 0;
             RestingEfficacy = 0;
             TauFacilitation = 0;
             TauRecovery = 0;
@@ -64,7 +59,6 @@ namespace RCNet.Neural.Network.SM
         /// <param name="source">Source instance</param>
         public DynamicSynapseSettings(DynamicSynapseSettings source)
         {
-            MaxDelay = source.MaxDelay;
             RestingEfficacy = source.RestingEfficacy;
             TauFacilitation = source.TauFacilitation;
             TauRecovery = source.TauRecovery;
@@ -93,8 +87,6 @@ namespace RCNet.Neural.Network.SM
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
             XElement settingsElem = validator.Validate(elem, "rootElem");
             //Parsing
-            //Max delay
-            MaxDelay = int.Parse(settingsElem.Attribute("maxDelay").Value, CultureInfo.InvariantCulture);
             //Resting efficacy
             RestingEfficacy = double.Parse(settingsElem.Attribute("restingEfficacy").Value, CultureInfo.InvariantCulture);
             //Efficacy facilitation
@@ -116,8 +108,7 @@ namespace RCNet.Neural.Network.SM
         {
             if (obj == null) return false;
             DynamicSynapseSettings cmpSettings = obj as DynamicSynapseSettings;
-            if (MaxDelay != cmpSettings.MaxDelay ||
-                RestingEfficacy != cmpSettings.RestingEfficacy ||
+            if (RestingEfficacy != cmpSettings.RestingEfficacy ||
                 TauFacilitation != cmpSettings.TauFacilitation ||
                 TauRecovery != cmpSettings.TauRecovery ||
                 TauDecay != cmpSettings.TauDecay ||

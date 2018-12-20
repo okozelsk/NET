@@ -21,13 +21,11 @@ namespace RCNet.Neural.Network.SM
         /// <param name="sourceNeuron">Source neuron</param>
         /// <param name="targetNeuron">Target neuron</param>
         /// <param name="weight">Synapse weight</param>
-        /// <param name="delay">Synapse delay (in cycles) of the signal delivery</param>
         public StaticSynapse(INeuron sourceNeuron,
                              INeuron targetNeuron,
-                             double weight,
-                             int delay
+                             double weight
                              )
-            :base(sourceNeuron, targetNeuron, weight, delay)
+            :base(sourceNeuron, targetNeuron, weight)
         {
             return;
         }

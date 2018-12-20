@@ -291,31 +291,32 @@ namespace RCNet.Neural.Network.SM
                         bestReadoutUnit = currReadoutUnit.DeepClone();
                     }
                     //Perform call back if it is defined
-                    RegressionControlOutArgs cbOut = null;
                     if (controller != null)
                     {
                         //Evaluation of the improvement is driven externally
-                        RegressionControlInArgs cbIn = new RegressionControlInArgs();
-                        cbIn.TaskType = taskType;
-                        cbIn.ReadoutUnitIdx = readoutUnitIdx;
-                        cbIn.OutputFieldName = outputFieldName;
-                        cbIn.FoldNum = foldNum;
-                        cbIn.NumOfFolds = numOfFolds;
-                        cbIn.RegrAttemptNumber = regrAttemptNumber;
-                        cbIn.RegrMaxAttempts = readoutUnitSettings.RegressionAttempts;
-                        cbIn.Epoch = epoch;
-                        cbIn.MaxEpochs = readoutUnitSettings.RegressionAttemptEpochs;
-                        cbIn.TrainingPredictorsCollection = trainingPredictorsCollection;
-                        cbIn.TrainingIdealOutputsCollection = trainingIdealOutputsCollection;
-                        cbIn.TrainingComputedOutputsCollection = trainingComputedOutputsCollection;
-                        cbIn.TestingPredictorsCollection = testingPredictorsCollection;
-                        cbIn.TestingIdealOutputsCollection = testingIdealOutputsCollection;
-                        cbIn.TestingComputedOutputsCollection = testingComputedOutputsCollection;
-                        cbIn.CurrReadoutUnit = currReadoutUnit;
-                        cbIn.BestReadoutUnit = bestReadoutUnit;
-                        cbIn.UserObject = controllerUserObject;
+                        RegressionControlInArgs cbIn = new RegressionControlInArgs
+                        {
+                            TaskType = taskType,
+                            ReadoutUnitIdx = readoutUnitIdx,
+                            OutputFieldName = outputFieldName,
+                            FoldNum = foldNum,
+                            NumOfFolds = numOfFolds,
+                            RegrAttemptNumber = regrAttemptNumber,
+                            RegrMaxAttempts = readoutUnitSettings.RegressionAttempts,
+                            Epoch = epoch,
+                            MaxEpochs = readoutUnitSettings.RegressionAttemptEpochs,
+                            TrainingPredictorsCollection = trainingPredictorsCollection,
+                            TrainingIdealOutputsCollection = trainingIdealOutputsCollection,
+                            TrainingComputedOutputsCollection = trainingComputedOutputsCollection,
+                            TestingPredictorsCollection = testingPredictorsCollection,
+                            TestingIdealOutputsCollection = testingIdealOutputsCollection,
+                            TestingComputedOutputsCollection = testingComputedOutputsCollection,
+                            CurrReadoutUnit = currReadoutUnit,
+                            BestReadoutUnit = bestReadoutUnit,
+                            UserObject = controllerUserObject
+                        };
                         //Call external controller
-                        cbOut = controller(cbIn);
+                        RegressionControlOutArgs cbOut = controller(cbIn);
                         //Pick up results
                         better = cbOut.CurrentIsBetter;
                         stopTrainingCycle = cbOut.StopCurrentAttempt;

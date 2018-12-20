@@ -22,10 +22,6 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         public int PoolID { get; }
         /// <summary>
-        /// Neuron's home pool dimensions
-        /// </summary>
-        public PoolDimensions PoolDim { get; }
-        /// <summary>
         /// Neuron index in a pool flat stucture
         /// </summary>
         public int PoolFlatIdx { get; }
@@ -34,7 +30,7 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         public int GroupID { get; }
         /// <summary>
-        /// Zero based coordinates (x,y,z) in a pool
+        /// Coordinates (x,y,z) within the reservoir
         /// </summary>
         public int[] Coordinates { get; }
 
@@ -44,15 +40,13 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         /// <param name="reservoirFlatIdx">Index of the neuron in a reservoir flat structure.</param>
         /// <param name="poolID">Home pool index.</param>
-        /// <param name="poolDim">Home pool dimensions.</param>
         /// <param name="poolFlatIdx">Index of the neuron in a pool flat structure.</param>
         /// <param name="groupID">Index of the neuron's group in a pool.</param>
-        /// <param name="x">Zero based X coordinate in a pool</param>
-        /// <param name="y">Zero based Y coordinate in a pool</param>
-        /// <param name="z">Zero based Z coordinate in a pool</param>
+        /// <param name="x">X coordinate in the reservoir</param>
+        /// <param name="y">Y coordinate in the reservoir</param>
+        /// <param name="z">Z coordinate in the reservoir</param>
         public NeuronPlacement(int reservoirFlatIdx,
                                int poolID,
-                               PoolDimensions poolDim,
                                int poolFlatIdx,
                                int groupID,
                                int x,
@@ -62,7 +56,6 @@ namespace RCNet.Neural.Network.SM
         {
             ReservoirFlatIdx = reservoirFlatIdx;
             PoolID = poolID;
-            PoolDim = poolDim;
             PoolFlatIdx = poolFlatIdx;
             GroupID = groupID;
             Coordinates = new int[3];
@@ -71,27 +64,6 @@ namespace RCNet.Neural.Network.SM
             Coordinates[2] = z;
             return;
         }
-
-
-        //Methods
-        /// <summary>
-        /// Computes the Euclidean distance
-        /// </summary>
-        /// <param name="tCoordinates">Target 3D coordinates.</param>
-        public double ComputeEuclideanDistance(int[] tCoordinates)
-        {
-            return PoolDimensions.ComputeEuclideanDistance(Coordinates, tCoordinates);
-        }
-
-        /// <summary>
-        /// Computes the Euclidean distance from/to another neuron within the pool
-        /// </summary>
-        /// <param name="party">Another neuron's placement.</param>
-        public double ComputeEuclideanDistance(NeuronPlacement party)
-        {
-            return ComputeEuclideanDistance(party.Coordinates);
-        }
-
     }//NeuronPlacement
 
 }//Namespace

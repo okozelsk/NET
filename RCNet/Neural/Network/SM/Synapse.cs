@@ -27,15 +27,25 @@ namespace RCNet.Neural.Network.SM
         public INeuron TargetNeuron { get; }
 
         /// <summary>
-        /// Resulting efficacy statistics of the synapse.
-        /// (product of Pre-synaptic and Post-synaptic)
+        /// Euclidean distance between SourceNeuron and TargetNeuron
         /// </summary>
-        public BasicStat EfficacyStat { get; }
+        public double Distance { get; }
 
         /// <summary>
         /// Weight of the synapse (the maximum weight synapse can achieve)
         /// </summary>
         public double Weight { get; private set; }
+
+        /// <summary>
+        /// Signal delay
+        /// </summary>
+        public int Delay { get; private set; }
+
+        /// <summary>
+        /// Resulting efficacy statistics of the synapse.
+        /// (product of Pre-synaptic and Post-synaptic)
+        /// </summary>
+        public BasicStat EfficacyStat { get; }
 
         //Attributes
         /// <summary>
@@ -47,11 +57,11 @@ namespace RCNet.Neural.Network.SM
         /// "Divide by" part of the signal conversion operation
         /// </summary>
         protected readonly double _div;
-        
+
         /// <summary>
         /// Moving signal queue
         /// </summary>
-        protected readonly SimpleQueue<Signal> _qSig;
+        protected SimpleQueue<Signal> _qSig;
 
         //Constructor
         /// <summary>
@@ -60,15 +70,16 @@ namespace RCNet.Neural.Network.SM
         /// <param name="sourceNeuron">Source neuron</param>
         /// <param name="targetNeuron">Target neuron</param>
         /// <param name="weight">Synapse weight</param>
-        /// <param name="delay">Delay (in cycles) of the signal delivery</param>
         public Synapse(INeuron sourceNeuron,
                        INeuron targetNeuron,
-                       double weight,
-                       int delay
+                       double weight
                        )
         {
+            //Neurons to be connected
             SourceNeuron = sourceNeuron;
             TargetNeuron = targetNeuron;
+            //Euclidean distance
+            Distance = EuclideanDistance.Compute(SourceNeuron.Placement.Coordinates, TargetNeuron.Placement.Coordinates);
             //Weight sign and signal range conversion rules
             if (SourceNeuron.Role == CommonEnums.NeuronRole.Input)
             {
@@ -166,39 +177,9 @@ namespace RCNet.Neural.Network.SM
                     }
                 }
             }
-            /////////////////////////////////////////////////////////
-            //Delay
-            /*
-            double maxDistance = targetNeuron.Placement.PoolDim.ComputeMaxDistance();
-            int delay = 0;
-            int[] sCoordinates = null;
-            if (SourceNeuron.Role == CommonEnums.NeuronRole.Input)
-            {
-                //Input to pool
-                //Consider input in the centre of the pool
-                sCoordinates = new int[3];
-                sCoordinates[0] = (int)Math.Round(TargetNeuron.Placement.PoolDim.X / 2d);
-                sCoordinates[1] = (int)Math.Round(TargetNeuron.Placement.PoolDim.Y / 2d);
-                sCoordinates[2] = (int)Math.Round(TargetNeuron.Placement.PoolDim.Z / 2d);
-            }
-            else if (SourceNeuron.Placement.PoolID != TargetNeuron.Placement.PoolID)
-            {
-                //Pool to another pool
-                //No delay
-                delay = 0;
-            }
-            else
-            {
-                //Within the pool
-                sCoordinates = SourceNeuron.Placement.Coordinates;
-            }
-            double distance = PoolDimensions.ComputeEuclideanDistance(sCoordinates, TargetNeuron.Placement.Coordinates);
-            double relDistance = distance / maxDistance;
-            delay = (int)Math.Round(maxDelay * relDistance);
-            */
-
-            //Setup signal queue
-            _qSig = new SimpleQueue<Signal>(delay + 1);
+            //Set Delay to 0 and nullify signal queue object. It will be instantiated later by SetDelay methods
+            Delay = 0;
+            _qSig = null;
             //Efficacy statistics
             EfficacyStat = new BasicStat();
             return;
@@ -226,6 +207,18 @@ namespace RCNet.Neural.Network.SM
         public void Rescale(double scale)
         {
             Weight *= scale;
+            return;
+        }
+
+        /// <summary>
+        /// Sets the synapse delay directly
+        /// </summary>
+        /// <param name="delay">Signal delay (reservoir cycles)</param>
+        public void SetDelay(int delay)
+        {
+            //Setup synapse signal delay
+            Delay = delay;
+            _qSig = new SimpleQueue<Signal>(delay + 1);
             return;
         }
 
@@ -298,8 +291,16 @@ namespace RCNet.Neural.Network.SM
         [Serializable]
         protected class Signal
         {
+            /// <summary>
+            /// Weighted signal with no adjustments
+            /// </summary>
             public double _weightedSignal;
+
+            /// <summary>
+            /// Computed synapse efficacy based on pre-synaptic activity
+            /// </summary>
             public double _preSynapticEfficacy;
+
         }//Signal
 
     }//Synapse

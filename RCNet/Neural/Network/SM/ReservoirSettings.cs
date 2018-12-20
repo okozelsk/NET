@@ -36,9 +36,25 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         public int InputDuration { get; set; }
         /// <summary>
+        /// Specifies how will be decided synaptic delay
+        /// </summary>
+        public CommonEnums.SynapticDelayMethod SynapticDelayMethod { get; set; }
+        /// <summary>
+        /// Maximum delay of the input synapses
+        /// </summary>
+        public int MaxInputDelay { get; set; }
+        /// <summary>
+        /// Maximum delay of the internal synapses
+        /// </summary>
+        public int MaxInternalDelay { get; set; }
+        /// <summary>
         /// Spectral radius.
         /// </summary>
         public double SpectralRadius { get; set; }
+        /// <summary>
+        /// Input entry point coordinates
+        /// </summary>
+        public int[] InputEntryPoint { get; set; }
         /// <summary>
         /// Collection of neural pools to be instantiated within the reservoir
         /// </summary>
@@ -57,7 +73,11 @@ namespace RCNet.Neural.Network.SM
             SettingsName = string.Empty;
             InputCoding = CommonEnums.InputCodingType.Analog;
             InputDuration = 0;
+            SynapticDelayMethod = CommonEnums.SynapticDelayMethod.Random;
+            MaxInputDelay = 0;
+            MaxInternalDelay = 0;
             SpectralRadius = -1;
+            InputEntryPoint = null;
             PoolSettingsCollection = null;
             PoolsInterconnectionCollection = null;
             return;
@@ -72,7 +92,15 @@ namespace RCNet.Neural.Network.SM
             SettingsName = source.SettingsName;
             InputCoding = source.InputCoding;
             InputDuration = source.InputDuration;
+            SynapticDelayMethod = source.SynapticDelayMethod;
+            MaxInputDelay = source.MaxInputDelay;
+            MaxInternalDelay = source.MaxInternalDelay;
             SpectralRadius = source.SpectralRadius;
+            InputEntryPoint = null;
+            if(source.InputEntryPoint != null)
+            {
+                InputEntryPoint = (int[])source.InputEntryPoint.Clone();
+            }
             PoolSettingsCollection = null;
             if(source.PoolSettingsCollection != null)
             {
@@ -114,7 +142,15 @@ namespace RCNet.Neural.Network.SM
             SettingsName = reservoirSettingsElem.Attribute("name").Value;
             InputCoding = CommonEnums.ParseInputCodingType(reservoirSettingsElem.Attribute("inputCoding").Value);
             InputDuration = int.Parse(reservoirSettingsElem.Attribute("inputDuration").Value, CultureInfo.InvariantCulture);
+            SynapticDelayMethod = CommonEnums.ParseSynapticDelayMethod(reservoirSettingsElem.Attribute("synapticDelayMethod").Value);
+            MaxInputDelay = int.Parse(reservoirSettingsElem.Attribute("maxInputDelay").Value, CultureInfo.InvariantCulture);
+            MaxInternalDelay = int.Parse(reservoirSettingsElem.Attribute("maxInternalDelay").Value, CultureInfo.InvariantCulture);
             SpectralRadius = reservoirSettingsElem.Attribute("spectralRadius").Value == "NA" ? -1d : double.Parse(reservoirSettingsElem.Attribute("spectralRadius").Value, CultureInfo.InvariantCulture);
+            //Input entry point
+            InputEntryPoint = new int[3];
+            InputEntryPoint[0] = int.Parse(reservoirSettingsElem.Descendants("inputEntryPoint").First().Attribute("x").Value, CultureInfo.InvariantCulture);
+            InputEntryPoint[1] = int.Parse(reservoirSettingsElem.Descendants("inputEntryPoint").First().Attribute("y").Value, CultureInfo.InvariantCulture);
+            InputEntryPoint[2] = int.Parse(reservoirSettingsElem.Descendants("inputEntryPoint").First().Attribute("z").Value, CultureInfo.InvariantCulture);
             //Pool settings collection
             PoolSettingsCollection = new List<PoolSettings>();
             foreach (XElement poolSettingsElem in reservoirSettingsElem.Descendants("pools").First().Descendants("pool"))
@@ -145,6 +181,9 @@ namespace RCNet.Neural.Network.SM
             if (SettingsName != cmpSettings.SettingsName ||
                 InputCoding != cmpSettings.InputCoding ||
                 InputDuration != cmpSettings.InputDuration ||
+                SynapticDelayMethod != cmpSettings.SynapticDelayMethod ||
+                MaxInputDelay != cmpSettings.MaxInputDelay ||
+                MaxInternalDelay != cmpSettings.MaxInternalDelay ||
                 SpectralRadius != cmpSettings.SpectralRadius ||
                 (PoolSettingsCollection == null && cmpSettings.PoolSettingsCollection != null) ||
                 (PoolSettingsCollection != null && cmpSettings.PoolSettingsCollection == null) ||

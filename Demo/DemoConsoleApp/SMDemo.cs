@@ -8,7 +8,7 @@ using RCNet.Neural;
 using RCNet.Neural.Data;
 using RCNet.Neural.Network.SM;
 using RCNet.DemoConsoleApp.Log;
-
+using System.Text;
 
 namespace RCNet.DemoConsoleApp
 {
@@ -173,38 +173,54 @@ namespace RCNet.DemoConsoleApp
                 CurrentIsBetter = ReadoutUnit.IsBetter(inArgs.TaskType, inArgs.CurrReadoutUnit, inArgs.BestReadoutUnit)
             };
             //Report the progress
-            int reportInterval = Math.Max(inArgs.MaxEpochs / 100, 1);
-            ReadoutUnit bestReadoutUnit = outArgs.CurrentIsBetter ? inArgs.CurrReadoutUnit : inArgs.BestReadoutUnit;
-            if (outArgs.CurrentIsBetter || (inArgs.Epoch % reportInterval) == 0 || inArgs.Epoch == inArgs.MaxEpochs || (inArgs.Epoch == 1 && inArgs.RegrAttemptNumber == 1))
+            if (outArgs.CurrentIsBetter || (inArgs.Epoch % 10) == 0 || inArgs.Epoch == inArgs.MaxEpochs || (inArgs.Epoch == 1 && inArgs.RegrAttemptNumber == 1))
             {
-                ((IOutputLog)inArgs.UserObject).Write(
-                    "      OutputField: " + inArgs.OutputFieldName +
-                    ", Fold/Attempt/Epoch: " + inArgs.FoldNum.ToString().PadLeft(inArgs.NumOfFolds.ToString().Length, '0') + "/" +
-                                               inArgs.RegrAttemptNumber.ToString().PadLeft(inArgs.RegrMaxAttempts.ToString().Length, '0') + "/" +
-                                               inArgs.Epoch.ToString().PadLeft(inArgs.MaxEpochs.ToString().Length, '0') +
-                    ", DSet-Sizes: (" + inArgs.CurrReadoutUnit.TrainingErrorStat.NumOfSamples.ToString() + ", " +
-                                        inArgs.CurrReadoutUnit.TestingErrorStat.NumOfSamples.ToString() + ")" +
-                    ", Best-Train: " + bestReadoutUnit.TrainingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture) +
-                                       (inArgs.TaskType == CommonEnums.TaskType.Classification ? "/" : string.Empty) +
-                                       (inArgs.TaskType == CommonEnums.TaskType.Classification ? bestReadoutUnit.TrainingBinErrorStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture) : string.Empty) +
-                                       (inArgs.TaskType == CommonEnums.TaskType.Classification ? "/" : string.Empty) +
-                                       (inArgs.TaskType == CommonEnums.TaskType.Classification ? bestReadoutUnit.TrainingBinErrorStat.BinValErrStat[1].Sum.ToString(CultureInfo.InvariantCulture) : string.Empty) +
-                    ", Best-Test: " + bestReadoutUnit.TestingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture) +
-                                      (inArgs.TaskType == CommonEnums.TaskType.Classification ? "/" : string.Empty) +
-                                      (inArgs.TaskType == CommonEnums.TaskType.Classification ? bestReadoutUnit.TestingBinErrorStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture) : string.Empty) +
-                                      (inArgs.TaskType == CommonEnums.TaskType.Classification ? "/" : string.Empty) +
-                                      (inArgs.TaskType == CommonEnums.TaskType.Classification ? bestReadoutUnit.TestingBinErrorStat.BinValErrStat[1].Sum.ToString(CultureInfo.InvariantCulture) : string.Empty) +
-                    ", Curr-Train: " + inArgs.CurrReadoutUnit.TrainingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture) +
-                                      (inArgs.TaskType == CommonEnums.TaskType.Classification ? "/" : string.Empty) +
-                                      (inArgs.TaskType == CommonEnums.TaskType.Classification ? inArgs.CurrReadoutUnit.TrainingBinErrorStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture) : string.Empty) +
-                                      (inArgs.TaskType == CommonEnums.TaskType.Classification ? "/" : string.Empty) +
-                                      (inArgs.TaskType == CommonEnums.TaskType.Classification ? inArgs.CurrReadoutUnit.TrainingBinErrorStat.BinValErrStat[1].Sum.ToString(CultureInfo.InvariantCulture) : string.Empty) +
-                    ", Curr-Test: " + inArgs.CurrReadoutUnit.TestingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture) +
-                                      (inArgs.TaskType == CommonEnums.TaskType.Classification ? "/" : string.Empty) +
-                                      (inArgs.TaskType == CommonEnums.TaskType.Classification ? inArgs.CurrReadoutUnit.TestingBinErrorStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture) : string.Empty) +
-                                      (inArgs.TaskType == CommonEnums.TaskType.Classification ? "/" : string.Empty) +
-                                      (inArgs.TaskType == CommonEnums.TaskType.Classification ? inArgs.CurrReadoutUnit.TestingBinErrorStat.BinValErrStat[1].Sum.ToString(CultureInfo.InvariantCulture) : string.Empty)
-                    , !(inArgs.Epoch == 1 && inArgs.RegrAttemptNumber == 1));
+                //Mark the currently best readout unit
+                ReadoutUnit bestReadoutUnit = outArgs.CurrentIsBetter ? inArgs.CurrReadoutUnit : inArgs.BestReadoutUnit;
+                //Build progress text message
+                StringBuilder progressText = new StringBuilder();
+                progressText.Append("      OutputField: ");
+                progressText.Append(inArgs.OutputFieldName);
+                progressText.Append(", Fold/Attempt/Epoch: ");
+                progressText.Append(inArgs.FoldNum.ToString().PadLeft(inArgs.NumOfFolds.ToString().Length, '0') + "/");
+                progressText.Append(inArgs.RegrAttemptNumber.ToString().PadLeft(inArgs.RegrMaxAttempts.ToString().Length, '0') + "/");
+                progressText.Append(inArgs.Epoch.ToString().PadLeft(inArgs.MaxEpochs.ToString().Length, '0'));
+                progressText.Append(", DSet-Sizes: (");
+                progressText.Append(inArgs.CurrReadoutUnit.TrainingErrorStat.NumOfSamples.ToString() + ", ");
+                progressText.Append(inArgs.CurrReadoutUnit.TestingErrorStat.NumOfSamples.ToString() + ")");
+                progressText.Append(", Best-Train: ");
+                progressText.Append(bestReadoutUnit.TrainingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture));
+                if (inArgs.TaskType == CommonEnums.TaskType.Classification)
+                {
+                    //Append binary errors
+                    progressText.Append("/" + bestReadoutUnit.TrainingBinErrorStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture));
+                    progressText.Append("/" + bestReadoutUnit.TrainingBinErrorStat.BinValErrStat[1].Sum.ToString(CultureInfo.InvariantCulture));
+                }
+                progressText.Append(", Best-Test: ");
+                progressText.Append(bestReadoutUnit.TestingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture));
+                if (inArgs.TaskType == CommonEnums.TaskType.Classification)
+                {
+                    //Append binary errors
+                    progressText.Append("/" + bestReadoutUnit.TestingBinErrorStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture));
+                    progressText.Append("/" + bestReadoutUnit.TestingBinErrorStat.BinValErrStat[1].Sum.ToString(CultureInfo.InvariantCulture));
+                }
+                progressText.Append(", Curr-Train: ");
+                progressText.Append(inArgs.CurrReadoutUnit.TrainingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture));
+                if (inArgs.TaskType == CommonEnums.TaskType.Classification)
+                {
+                    //Append binary errors
+                    progressText.Append("/" + inArgs.CurrReadoutUnit.TrainingBinErrorStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture));
+                    progressText.Append("/" + inArgs.CurrReadoutUnit.TrainingBinErrorStat.BinValErrStat[1].Sum.ToString(CultureInfo.InvariantCulture));
+                }
+                progressText.Append(", Curr-Test: ");
+                progressText.Append(inArgs.CurrReadoutUnit.TestingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture));
+                if (inArgs.TaskType == CommonEnums.TaskType.Classification)
+                {
+                    //Append binary errors
+                    progressText.Append("/" + inArgs.CurrReadoutUnit.TestingBinErrorStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture));
+                    progressText.Append("/" + inArgs.CurrReadoutUnit.TestingBinErrorStat.BinValErrStat[1].Sum.ToString(CultureInfo.InvariantCulture));
+                }
+                ((IOutputLog)inArgs.UserObject).Write(progressText.ToString(), !(inArgs.Epoch == 1 && inArgs.RegrAttemptNumber == 1));
             }
             return outArgs;
         }

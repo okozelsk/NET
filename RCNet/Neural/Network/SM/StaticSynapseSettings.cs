@@ -19,10 +19,6 @@ namespace RCNet.Neural.Network.SM
     {
         //Attribute properties
         /// <summary>
-        /// Maximum synapse delay
-        /// </summary>
-        public int MaxDelay { get; set; }
-        /// <summary>
         /// Synapse's random weight settings
         /// </summary>
         public RandomValueSettings WeightCfg { get; set; }
@@ -33,7 +29,6 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         public StaticSynapseSettings()
         {
-            MaxDelay = 0;
             WeightCfg = null;
             return;
         }
@@ -44,7 +39,6 @@ namespace RCNet.Neural.Network.SM
         /// <param name="source">Source instance</param>
         public StaticSynapseSettings(StaticSynapseSettings source)
         {
-            MaxDelay = source.MaxDelay;
             WeightCfg = null;
             if (source.WeightCfg != null)
             {
@@ -69,8 +63,6 @@ namespace RCNet.Neural.Network.SM
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
             XElement settingsElem = validator.Validate(elem, "rootElem");
             //Parsing
-            //Max delay
-            MaxDelay = int.Parse(settingsElem.Attribute("maxDelay").Value, CultureInfo.InvariantCulture);
             //Weight
             WeightCfg = new RandomValueSettings(settingsElem.Descendants("weight").First());
             return;
@@ -84,7 +76,7 @@ namespace RCNet.Neural.Network.SM
         {
             if (obj == null) return false;
             StaticSynapseSettings cmpSettings = obj as StaticSynapseSettings;
-            if (MaxDelay != cmpSettings.MaxDelay || !Equals(WeightCfg, cmpSettings.WeightCfg))
+            if (!Equals(WeightCfg, cmpSettings.WeightCfg))
             {
                 return false;
             }
