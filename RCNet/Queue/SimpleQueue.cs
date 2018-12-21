@@ -9,10 +9,19 @@ namespace RCNet.Queue
     [Serializable]
     public class SimpleQueue<T>
     {
-        //Constants
+        //Attribute properties
+        /// <summary>
+        /// Number of enqueued items
+        /// </summary>
+        public int Capacity { get; private set; }
+
+        /// <summary>
+        /// Number of enqueued items
+        /// </summary>
+        public int Count { get; private set; }
+
         //Attributes
-        private readonly int _capacity;
-        private readonly T[] _queue;
+        private T[] _queueBuffer;
         private int _enqueueOffset;
         private int _dequeueOffset;
 
@@ -23,24 +32,46 @@ namespace RCNet.Queue
         /// <param name="capacity">Maximum capacity of the queue</param>
         public SimpleQueue(int capacity)
         {
-            _capacity = capacity;
-            _queue = new T[_capacity];
+            Capacity = capacity;
+            _queueBuffer = new T[Capacity];
             Reset();
             return;
         }
 
         //Properties
         /// <summary>
-        /// Number of enqueued items
-        /// </summary>
-        public int Count { get; private set; }
-
-        /// <summary>
         /// Is the queue full?
         /// </summary>
-        public bool Full { get { return (Count == _capacity); } }
+        public bool Full { get { return (Count == Capacity); } }
 
         //Methods
+        /// <summary>
+        /// Resets queue to its initial state
+        /// </summary>
+        public void Reset()
+        {
+            _enqueueOffset = 0;
+            _dequeueOffset = 0;
+            Count = 0;
+            return;
+        }
+
+        /// <summary>
+        /// Resets queue and changes the queue capacity.
+        /// </summary>
+        /// <param name="newCapacity">New capacity of the queue</param>
+        /// <param name="forceShrink">Determines whether to reallocate queue buffer even if new capacity is smaller than queue buffer size</param>
+        public void Resize(int newCapacity, bool forceShrink = false)
+        {
+            Reset();
+            if(forceShrink || newCapacity > _queueBuffer.Length)
+            {
+                _queueBuffer = new T[newCapacity];
+            }
+            Capacity = newCapacity;
+            return;
+        }
+
         /// <summary>
         /// Adds a new item into the queue
         /// </summary>
@@ -48,11 +79,11 @@ namespace RCNet.Queue
         /// <returns>False if queue is full, True if success</returns>
         public bool Enqueue(T item)
         {
-            if (Count < _capacity)
+            if (Count < Capacity)
             {
-                _queue[_enqueueOffset] = item;
+                _queueBuffer[_enqueueOffset] = item;
                 ++_enqueueOffset;
-                if (_enqueueOffset == _capacity)
+                if (_enqueueOffset == Capacity)
                 {
                     _enqueueOffset = 0;
                 }
@@ -70,9 +101,9 @@ namespace RCNet.Queue
         {
             if (Count > 0)
             {
-                T item = _queue[_dequeueOffset];
+                T item = _queueBuffer[_dequeueOffset];
                 ++_dequeueOffset;
-                if (_dequeueOffset == _capacity)
+                if (_dequeueOffset == Capacity)
                 {
                     _dequeueOffset = 0;
                 }
@@ -80,17 +111,6 @@ namespace RCNet.Queue
                 return item;
             }
             return default(T);
-        }
-
-        /// <summary>
-        /// Resets queue to its initial state
-        /// </summary>
-        public void Reset()
-        {
-            _enqueueOffset = 0;
-            _dequeueOffset = 0;
-            Count = 0;
-            return;
         }
 
     }//SimpleQueue

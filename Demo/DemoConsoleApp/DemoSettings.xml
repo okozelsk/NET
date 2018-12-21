@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <demo dataFolder=".\\Data">
 
-  <case name="Classification task Libras Movement:  Single spiking reservoir, multilayer Feed Forward network classifier">
+  <case name="Classification task Libras Movement:  Mixed spiking and analog reservoir, Linear regression classifier">
     <!-- Data converted from https://archive.ics.uci.edu/ml/datasets/Libras+Movement -->
     <samples fileName="LibrasMovement.csv" singleNormalizer="false" normalizerReserve="0.1"/>
     <stateMachineCfg taskType="Classification" randomizerSeek="0">
@@ -104,14 +104,9 @@
         </reservoirInstance>
       </reservoirInstanceContainer>
       <readoutLayer testDataRatio="0.0825" folds="Auto">
-        <readoutUnit attempts="20" attemptEpochs="300">
-          <ff regressionMethod="Resilient">
-            <activationTanH/>
-            <hiddenLayers>
-              <layer neurons="10">
-                <activationTanH/>
-              </layer>
-            </hiddenLayers>
+        <readoutUnit attempts="10" attemptEpochs="100">
+          <ff regressionMethod="Linear">
+            <activationIdentity/>
           </ff>
         </readoutUnit>
         <outputFields>
@@ -134,6 +129,96 @@
       </readoutLayer>
     </stateMachineCfg>
   </case>
+
+
+
+  <case name="Classification task Libras Movement:  Single spiking reservoir, Linear regression classifier">
+    <!-- Data converted from https://archive.ics.uci.edu/ml/datasets/Libras+Movement -->
+    <samples fileName="LibrasMovement.csv" singleNormalizer="false" normalizerReserve="0.1"/>
+    <stateMachineCfg taskType="Classification" randomizerSeek="0">
+      <inputFields routeToReadout="false">
+        <field name="coord_abcissa"/>
+        <field name="coord_ordinate"/>
+      </inputFields>
+      <reservoirCfgContainer>
+        <reservoirCfg name="MainCfg" inputCoding="Analog" inputDuration="1" synapticDelayMethod="Random" maxInputDelay="0" maxInternalDelay="1" spectralRadius="0.999">
+          <inputEntryPoint x="0" y="0" z="0"/>
+          <pools>
+            <pool name="Spiking pool" x="0" y="0" z="0" dimX="6" dimY="6" dimZ="6" readoutNeuronsDensity="1">
+              <neuronGroups>
+                <neuronGroup name="Exc-SimpleIF" role="Excitatory" relShare="4" augmentedStates="true">
+                  <activationSimpleIF stimuliCoeff="1" refractoryPeriods="0">
+                    <resistance min="15" max="15"/>
+                    <decayRate min="0.05" max="0.05"/>
+                    <resetV min="5" max="5"/>
+                    <firingThresholdV min="20" max="20"/>
+                  </activationSimpleIF>
+                  <bias min="0.2" max="0.3" randomSign="false" distribution="Uniform"/>
+                </neuronGroup>
+                <neuronGroup name="Inh-SimpleIF" role="Inhibitory" relShare="1" augmentedStates="true">
+                  <activationSimpleIF stimuliCoeff="1" refractoryPeriods="1">
+                    <resistance min="15" max="15"/>
+                    <decayRate min="0.05" max="0.05"/>
+                    <resetV min="5" max="5"/>
+                    <firingThresholdV min="20" max="20"/>
+                  </activationSimpleIF>
+                  <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
+                </neuronGroup>
+              </neuronGroups>
+              <interconnection density="0.1" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
+                <dynamicSynapse restingEfficacy="0.5" tauFacilitation="500" tauRecovery="5" tauDecay="10">
+                  <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
+                </dynamicSynapse>
+              </interconnection>
+              <noiseModulator min="-0.8" max="0.8" randomSign="false" distribution="Uniform"/>
+            </pool>
+          </pools>
+        </reservoirCfg>
+      </reservoirCfgContainer>
+      <reservoirInstanceContainer>
+        <reservoirInstance name="Main" cfg="MainCfg" augmentedStates="false">
+          <inputFieldAssignments>
+            <inputFieldAssignment inputFieldName="coord_abcissa" poolName="Spiking pool" density="1">
+              <staticSynapse>
+                <weight min="0" max="0.3" randomSign="false" distribution="Uniform"/>
+              </staticSynapse>
+            </inputFieldAssignment>
+            <inputFieldAssignment inputFieldName="coord_ordinate" poolName="Spiking pool" density="1">
+              <staticSynapse>
+                <weight min="0" max="0.3" randomSign="false" distribution="Uniform"/>
+              </staticSynapse>
+            </inputFieldAssignment>
+          </inputFieldAssignments>
+        </reservoirInstance>
+      </reservoirInstanceContainer>
+      <readoutLayer testDataRatio="0.0825" folds="Auto">
+        <readoutUnit attempts="10" attemptEpochs="100">
+          <ff regressionMethod="Linear">
+            <activationIdentity/>
+          </ff>
+        </readoutUnit>
+        <outputFields>
+          <field name="curved swing"/>
+          <field name="horizontal swing"/>
+          <field name="vertical swing"/>
+          <field name="anti-clockwise arc"/>
+          <field name="clockwise arc"/>
+          <field name="circle"/>
+          <field name="horizontal straight-line"/>
+          <field name="vertical straight-line"/>
+          <field name="horizontal zigzag"/>
+          <field name="vertical zigzag"/>
+          <field name="horizontal wavy"/>
+          <field name="vertical wavy"/>
+          <field name="face-up curve"/>
+          <field name="face-down curve"/>
+          <field name="tremble"/>
+        </outputFields>
+      </readoutLayer>
+    </stateMachineCfg>
+  </case>
+
+
 
 
 

@@ -177,9 +177,9 @@ namespace RCNet.Neural.Network.SM
                     }
                 }
             }
-            //Set Delay to 0 and nullify signal queue object. It will be instantiated later by SetDelay methods
+            //Set Delay to 0 as default. It can be changed later by SetDelay method.
             Delay = 0;
-            _qSig = null;
+            _qSig = new SimpleQueue<Signal>(Delay + 1);
             //Efficacy statistics
             EfficacyStat = new BasicStat();
             return;
@@ -211,14 +211,14 @@ namespace RCNet.Neural.Network.SM
         }
 
         /// <summary>
-        /// Sets the synapse delay directly
+        /// Sets the synapse signal delay
         /// </summary>
         /// <param name="delay">Signal delay (reservoir cycles)</param>
         public void SetDelay(int delay)
         {
-            //Setup synapse signal delay
+            //Set synapse signal delay
             Delay = delay;
-            _qSig = new SimpleQueue<Signal>(delay + 1);
+            _qSig.Resize(Delay + 1);
             return;
         }
 
