@@ -91,6 +91,7 @@
     <Compile Include="Neural\Activation\TanH.cs" />
     <Compile Include="Neural\Activation\ExpIF.cs" />
     <Compile Include="Neural\Activation\SimpleIF.cs" />
+    <Compile Include="Neural\Data\Modulation\IModulator.cs" />
     <Compile Include="Neural\Network\SM\DynamicSynapse.cs" />
     <Compile Include="Neural\Network\SM\DynamicSynapseSettings.cs" />
     <Compile Include="Neural\Network\SM\FiringRate.cs" />
@@ -318,6 +319,7 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

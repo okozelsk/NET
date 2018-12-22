@@ -396,7 +396,7 @@ namespace RCNet.Neural.Network.SM
                 /// <summary>
                 /// Input neuron to pool's neuron synapse settings
                 /// </summary>
-                public StaticSynapseSettings StaticSynapseCfg { get; set; }
+                public Object SynapseCfg { get; set; }
 
                 //Constructors
                 /// <summary>
@@ -405,13 +405,24 @@ namespace RCNet.Neural.Network.SM
                 /// <param name="fieldIdx">Index of the reservoir input field</param>
                 /// <param name="poolID">ID of the target pool</param>
                 /// <param name="density">Input field connection density</param>
-                /// <param name="staticSynapseCfg">Input neuron to pool's neuron synapse settings</param>
-                public InputFieldAssignment(int fieldIdx, int poolID, double density, StaticSynapseSettings staticSynapseCfg)
+                /// <param name="synapseCfg">Input neuron to pool's neuron synapse settings</param>
+                public InputFieldAssignment(int fieldIdx, int poolID, double density, Object synapseCfg)
                 {
                     FieldIdx = fieldIdx;
                     PoolID = poolID;
                     Density = density;
-                    StaticSynapseCfg = staticSynapseCfg.DeepClone();
+                    SynapseCfg = null;
+                    if (synapseCfg != null)
+                    {
+                        if (synapseCfg.GetType() == typeof(StaticSynapseSettings))
+                        {
+                            SynapseCfg = ((StaticSynapseSettings)synapseCfg).DeepClone();
+                        }
+                        else
+                        {
+                            SynapseCfg = ((DynamicSynapseSettings)synapseCfg).DeepClone();
+                        }
+                    }
                     return;
                 }
 
@@ -424,7 +435,18 @@ namespace RCNet.Neural.Network.SM
                     FieldIdx = source.FieldIdx;
                     PoolID = source.PoolID;
                     Density = source.Density;
-                    StaticSynapseCfg = source.StaticSynapseCfg.DeepClone();
+                    SynapseCfg = null;
+                    if (source.SynapseCfg != null)
+                    {
+                        if (source.SynapseCfg.GetType() == typeof(StaticSynapseSettings))
+                        {
+                            SynapseCfg = ((StaticSynapseSettings)source.SynapseCfg).DeepClone();
+                        }
+                        else
+                        {
+                            SynapseCfg = ((DynamicSynapseSettings)source.SynapseCfg).DeepClone();
+                        }
+                    }
                     return;
                 }
 
@@ -448,7 +470,7 @@ namespace RCNet.Neural.Network.SM
                     if (FieldIdx != cmpSettings.FieldIdx ||
                         PoolID != cmpSettings.PoolID ||
                         Density != cmpSettings.Density ||
-                        !Equals(StaticSynapseCfg, cmpSettings.StaticSynapseCfg)
+                        !Equals(SynapseCfg, cmpSettings.SynapseCfg)
                         )
                     {
                         return false;

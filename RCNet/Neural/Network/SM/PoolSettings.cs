@@ -206,7 +206,12 @@ namespace RCNet.Neural.Network.SM
                 RetainmentNeuronsDensity = 0;
             }
             //Noise modulator
-            NoiseModulatorCfg = new RandomValueSettings(poolSettingsElem.Descendants("noiseModulator").First());
+            NoiseModulatorCfg = null;
+            XElement noiseModulatorElem = poolSettingsElem.Descendants("noiseModulator").FirstOrDefault();
+            if(noiseModulatorElem != null)
+            {
+                NoiseModulatorCfg = new RandomValueSettings(noiseModulatorElem);
+            }
             return;
         }
 
@@ -504,7 +509,7 @@ namespace RCNet.Neural.Network.SM
                 SynapseCfg = null;
                 if(source.SynapseCfg != null)
                 {
-                    if(source.GetType() == typeof(StaticSynapse))
+                    if(source.SynapseCfg.GetType() == typeof(StaticSynapseSettings))
                     {
                         //Static synapse settings
                         SynapseCfg = ((StaticSynapseSettings)source.SynapseCfg).DeepClone();

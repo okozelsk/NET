@@ -514,7 +514,7 @@
     <xs:attribute type="xs:string" name="name" use="required" />
     <xs:attribute type="NeuronRoleType" name="role" use="required"/>
     <xs:attribute type="UDoubleType" name="relShare" use="required"/>
-    <xs:attribute type="xs:boolean" name="augmentedStates" use="required" />
+    <xs:attribute type="xs:boolean" name="augmentedStates" use="optional" default="true" />
   </xs:complexType>
 
   <!-- Pool - neuron groups - configuration -->
@@ -538,16 +538,16 @@
       <xs:element type="PoolNeuronGroupsCfgType" name="neuronGroups" minOccurs="1" maxOccurs="unbounded"/>
       <xs:element type="PoolInterconnectionCfgType" name="interconnection" minOccurs="1" maxOccurs="1"/>
       <xs:element type="PoolRetNeuronsCfgType" name="retainmentNeurons" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="RandomValueType" name="noiseModulator" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="RandomValueType" name="noiseModulator" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:string" name="name" use="required" />
-    <xs:attribute type="xs:int" name="x" use="required" />
-    <xs:attribute type="xs:int" name="y" use="required" />
-    <xs:attribute type="xs:int" name="z" use="required" />
+    <xs:attribute type="xs:int" name="x" use="optional" default="0" />
+    <xs:attribute type="xs:int" name="y" use="optional" default="0" />
+    <xs:attribute type="xs:int" name="z" use="optional" default="0" />
     <xs:attribute type="xs:unsignedInt" name="dimX" use="required" />
     <xs:attribute type="xs:unsignedInt" name="dimY" use="required" />
     <xs:attribute type="xs:unsignedInt" name="dimZ" use="required" />
-    <xs:attribute type="UDoubleType" name="readoutNeuronsDensity" use="required"/>
+    <xs:attribute type="UDoubleType" name="readoutNeuronsDensity" use="optional" default="1"/>
   </xs:complexType>
 
   <!-- ________________________________________RESERVOIR TYPES_________________________________________________ -->
@@ -593,7 +593,7 @@
   <!-- Reservoir configuration -->
   <xs:complexType name="ReservoirCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="ReservoirInputEntryPointType" name="inputEntryPoint" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="ReservoirInputEntryPointType" name="inputEntryPoint" minOccurs="0" maxOccurs="1"/>
       <xs:element type="ReservoirPoolCfgContainerType" name="pools" minOccurs="1" maxOccurs="1"/>
       <xs:element type="ReservoirPool2PoolConnCfgContainerType" name="pool2PoolConns" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
@@ -624,9 +624,10 @@
 
   <!-- StateMachine - reservoir instance - input field assignment configuration -->
   <xs:complexType name="SMResInstanceInputFieldAssignmentCfg">
-    <xs:sequence minOccurs="1" maxOccurs="1">
+    <xs:choice minOccurs="1" maxOccurs="1">
       <xs:element type="StaticSynapseCfgType" name="staticSynapse" minOccurs="1" maxOccurs="1"/>
-    </xs:sequence>
+      <xs:element type="DynamicSynapseCfgType" name="dynamicSynapse" minOccurs="1" maxOccurs="1"/>
+    </xs:choice>
     <xs:attribute type="xs:string" name="inputFieldName" use="required"/>
     <xs:attribute type="xs:string" name="poolName" use="required"/>
     <xs:attribute type="UDoubleGT0Type" name="density" use="required"/>

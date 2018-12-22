@@ -148,9 +148,16 @@ namespace RCNet.Neural.Network.SM
             SpectralRadius = reservoirSettingsElem.Attribute("spectralRadius").Value == "NA" ? -1d : double.Parse(reservoirSettingsElem.Attribute("spectralRadius").Value, CultureInfo.InvariantCulture);
             //Input entry point
             InputEntryPoint = new int[3];
-            InputEntryPoint[0] = int.Parse(reservoirSettingsElem.Descendants("inputEntryPoint").First().Attribute("x").Value, CultureInfo.InvariantCulture);
-            InputEntryPoint[1] = int.Parse(reservoirSettingsElem.Descendants("inputEntryPoint").First().Attribute("y").Value, CultureInfo.InvariantCulture);
-            InputEntryPoint[2] = int.Parse(reservoirSettingsElem.Descendants("inputEntryPoint").First().Attribute("z").Value, CultureInfo.InvariantCulture);
+            if (reservoirSettingsElem.Descendants("inputEntryPoint").Count() > 0)
+            {
+                InputEntryPoint[0] = int.Parse(reservoirSettingsElem.Descendants("inputEntryPoint").First().Attribute("x").Value, CultureInfo.InvariantCulture);
+                InputEntryPoint[1] = int.Parse(reservoirSettingsElem.Descendants("inputEntryPoint").First().Attribute("y").Value, CultureInfo.InvariantCulture);
+                InputEntryPoint[2] = int.Parse(reservoirSettingsElem.Descendants("inputEntryPoint").First().Attribute("z").Value, CultureInfo.InvariantCulture);
+            }
+            else
+            {
+                InputEntryPoint.Populate(0);
+            }
             //Pool settings collection
             PoolSettingsCollection = new List<PoolSettings>();
             foreach (XElement poolSettingsElem in reservoirSettingsElem.Descendants("pools").First().Descendants("pool"))

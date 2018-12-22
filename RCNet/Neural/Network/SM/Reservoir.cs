@@ -412,10 +412,27 @@ namespace RCNet.Neural.Network.SM
                         for (int i = 0; i < connectionsPerInput; i++)
                         {
                             int targetNeuronIdx = indices[i];
-                            StaticSynapse synapse = new StaticSynapse(_inputNeuronCollection[assignment.FieldIdx],
-                                                                      _poolNeuronsCollection[poolID][targetNeuronIdx],
-                                                                      rand.NextDouble(assignment.StaticSynapseCfg.WeightCfg)
-                                                                      );
+                            ISynapse synapse = null;
+                            if(assignment.SynapseCfg.GetType() == typeof(StaticSynapseSettings))
+                            {
+                                StaticSynapseSettings sss = (StaticSynapseSettings)assignment.SynapseCfg;
+                                synapse = new StaticSynapse(sourceNeuron: _inputNeuronCollection[assignment.FieldIdx],
+                                                            targetNeuron: _poolNeuronsCollection[poolID][targetNeuronIdx],
+                                                            weight: rand.NextDouble(sss.WeightCfg)
+                                                            );
+                            }
+                            else
+                            {
+                                DynamicSynapseSettings dss = (DynamicSynapseSettings)assignment.SynapseCfg;
+                                synapse = new DynamicSynapse(sourceNeuron: _inputNeuronCollection[assignment.FieldIdx],
+                                                             targetNeuron: _poolNeuronsCollection[poolID][targetNeuronIdx],
+                                                             weight: rand.NextDouble(dss.WeightCfg),
+                                                             tauFacilitation: dss.TauFacilitation,
+                                                             tauRecovery: dss.TauRecovery,
+                                                             restingEfficacy: dss.RestingEfficacy,
+                                                             tauDecay: dss.TauDecay
+                                                             );
+                            }
                             AddInterconnection(_neuronInputConnectionsCollection, synapse, false);
                         }
                     }
@@ -556,7 +573,7 @@ namespace RCNet.Neural.Network.SM
                     }
                     //Establish connection
                     ISynapse synapse = null;
-                    if (synapseCfg.GetType() == typeof(StaticSynapse))
+                    if (synapseCfg.GetType() == typeof(StaticSynapseSettings))
                     {
                         StaticSynapseSettings sss = (StaticSynapseSettings)synapseCfg;
                         synapse = new StaticSynapse(sourceNeuron: nccSource.Neuron,
@@ -1057,8 +1074,14 @@ namespace RCNet.Neural.Network.SM
                 //Prepare input from noise generators
                 for (int i = 0; i < noiseInput.Length; i++)
                 {
-                    noiseInput[i] = _poolNoiseGeneratorCollection[i].NextDouble(InstanceDefinition.Settings.PoolSettingsCollection[i].NoiseModulatorCfg);
-                    //noiseInput[i] = 0;
+                    if (InstanceDefinition.Settings.PoolSettingsCollection[i].NoiseModulatorCfg != null)
+                    {
+                        noiseInput[i] = _poolNoiseGeneratorCollection[i].NextDouble(InstanceDefinition.Settings.PoolSettingsCollection[i].NoiseModulatorCfg);
+                    }
+                    else
+                    {
+                        noiseInput[i] = 0;
+                    }
                 }
                 //Collect new stimulation for each reservoir neuron
                 Parallel.ForEach(rangePartitioner, range =>
