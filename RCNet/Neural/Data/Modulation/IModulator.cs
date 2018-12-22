@@ -19,7 +19,6 @@ namespace RCNet.Neural.Data.Modulation
         /// <summary>
         /// Returns next signal value
         /// </summary>
-        /// <returns></returns>
         double Next();
 
     }//IModulator

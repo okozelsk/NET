@@ -162,9 +162,29 @@
     <xs:attribute type="xs:boolean" name="randomSign" use="optional" default="false"/>
     <xs:attribute type="RandomDistributionType" name="distribution" use="optional" default="Uniform"/>
   </xs:complexType>
-  
-  
-  <!-- Spiking activation functions configurations-->
+
+  <!-- ________________________________________SIGNAL MODULATOR TYPES_____________________________________________ -->
+  <!-- Const modulator configuration element -->
+  <xs:complexType name="ConstModulatorCfgType">
+    <xs:attribute type="xs:double" name="constSignal" use="required"/>
+  </xs:complexType>
+
+  <!-- Sinusoidal modulator configuration element -->
+  <xs:complexType name="SinusoidalModulatorCfgType">
+    <xs:attribute type="xs:double" name="phase" use="optional" default="0"/>
+    <xs:attribute type="xs:double" name="freq" use="optional" default="1"/>
+    <xs:attribute type="xs:double" name="ampl" use="optional" default="1"/>
+  </xs:complexType>
+
+  <!-- Mackey Glass modulator configuration element -->
+  <xs:complexType name="MackeyGlassModulatorCfgType">
+    <xs:attribute type="xs:unsignedInt" name="tau" use="optional" default="18"/>
+    <xs:attribute type="xs:double" name="b" use="optional" default="0.1"/>
+    <xs:attribute type="xs:double" name="c" use="optional" default="0.2"/>
+  </xs:complexType>
+
+
+  <!-- ________________________________________SPIKING ACTIVATION TYPES_____________________________________________ -->
   <!-- Activation SimpleIF configuration element -->
   <xs:complexType name="ActivationSimpleIFCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
@@ -253,7 +273,7 @@
     <xs:attribute type="UIntGT0Type" name="solverCompSteps" use="optional" default="1"/>
   </xs:complexType>
 
-  <!-- Analog activation functions configurations-->
+  <!-- ________________________________________ANALOG ACTIVATION TYPES_____________________________________________ -->
   <!-- Activation BentIdentity configuration element -->
   <xs:complexType name="ActivationBentIdentityCfgType">
   </xs:complexType>

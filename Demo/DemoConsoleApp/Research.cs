@@ -12,6 +12,7 @@ using RCNet.Neural.Network.SM;
 using RCNet.MathTools.Differential;
 using RCNet.MathTools.VectorMath;
 using RCNet.RandomValue;
+using RCNet.Neural.Data.Modulation;
 
 namespace RCNet.DemoConsoleApp
 {
@@ -28,6 +29,26 @@ namespace RCNet.DemoConsoleApp
         //Methods
         public void Run()
         {
+            MackeyGlassModulatorSettings modSettings = new MackeyGlassModulatorSettings(18, 0.1, 0.2);
+            IModulator modulator = new MackeyGlassModulator(modSettings);
+
+            int steps = 100;
+            for (int i = 0; i < steps; i++)
+            {
+                Console.WriteLine(modulator.Next());
+            }
+            Console.ReadLine();
+            modulator.Reset();
+            for (int i = 0; i < steps; i++)
+            {
+                Console.WriteLine(modulator.Next());
+            }
+            Console.ReadLine();
+
+
+
+
+
             //TestDEq();
             //IzhikevichIFSettings settings = new IzhikevichIFSettings(10, 0.1, 0.25, 2, -70, -65, 30, 0, ODENumSolver.Method.Euler, 2);
             //IActivationFunction af = new IzhikevichIF(settings);

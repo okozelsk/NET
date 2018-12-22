@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.IO;
 using System.Globalization;
+using RCNet.RandomValue;
+using RCNet.Neural.Data.Modulation;
 
 namespace RCNet.DemoConsoleApp
 {
@@ -12,58 +14,65 @@ namespace RCNet.DemoConsoleApp
     public static class TimeSeriesGenerator
     {
         /// <summary>
+        /// Generates time series of specified length based on specified signal modulator.
+        /// </summary>
+        /// <param name="modulator">One of the implemented modulators</param>
+        /// <param name="length">Time series target length</param>
+        /// <returns></returns>
+        public static List<double> GenTimeSeries(IModulator modulator, int length)
+        {
+            List<double> dataCollection = new List<double>(length);
+            for (int i = 0; i < length; i++)
+            {
+                dataCollection.Add(modulator.Next());
+            }
+            return dataCollection;
+        }
+
+        /// <summary>
         /// Generates a random time series of the numbers between 0 and 1.
         /// </summary>
         /// <param name="length">The required length</param>
-        /// <param name="randSeek">The random generator seek. Specify a value less than zero to obtain different results when you recall the function.</param>
-        /// <returns>The collection of generated values</returns>
-        public static List<double> GenRandomTimeSeries(int length, int randSeek = -1)
+        /// <param name="seek">
+        /// Initial seek of the random generator.
+        /// Specify seek less than 0 to obtain different initialization each time this function is invoked.
+        /// </param>
+        /// <returns>A collection of random values</returns>
+        public static List<double> GenRandomTimeSeries(int length, int seek = -1)
         {
-            Random rand = (randSeek < 0) ? new Random() : new Random(randSeek);
-            List<double> dataCollection = new List<double>(length);
-            for (int i = 0; i < length; i++)
-            {
-                dataCollection.Add(rand.NextDouble());
-            }
-            return dataCollection;
+            RandomValueSettings settings = new RandomValueSettings(0, 1, false, Extensions.RandomClassExtensions.DistributionType.Uniform);
+            RandomModulator modulator = new RandomModulator(settings, seek);
+            return GenTimeSeries(modulator, length);
         }
 
         /// <summary>
-        /// Generates a sinusoid time series
+        /// Generates a sinusoidal time series
         /// </summary>
         /// <param name="length">The required length</param>
-        /// <returns>The collection of generated values</returns>
-        public static List<double> GenSinusoidTimeSeries(int length)
+        /// <param name="phase">Phase shift</param>
+        /// <param name="freq">Frequency coefficient</param>
+        /// <param name="ampl">Amplitude coefficient</param>
+        /// <returns>A collection of sinusoidal values</returns>
+        public static List<double> GenSinusoidTimeSeries(int length, double phase = 0d, double freq = 1d, double ampl = 1d)
         {
-            List<double> dataCollection = new List<double>(length);
-            for (int i = 0; i < length; i++)
-            {
-                double sinVal = Math.Sin(Math.PI * i / 180.0);
-                dataCollection.Add(sinVal);
-            }
-            return dataCollection;
+            SinusoidalModulatorSettings settings = new SinusoidalModulatorSettings(phase, freq, ampl);
+            SinusoidalModulator modulator = new SinusoidalModulator(settings);
+            return GenTimeSeries(modulator, length);
         }
 
         /// <summary>
-        /// Generates the Mackey Glass time series
+        /// Generates the Mackey-Glass time series
         /// </summary>
         /// <param name="length">The required length</param>
-        /// <returns>The collection of generated values</returns>
-        public static List<double> GenMackeyGlassTimeSeries(int length)
+        /// <param name="tau">Tau (backward deepness 2-18)</param>
+        /// <param name="b">b coefficient</param>
+        /// <param name="c">c coefficient</param>
+        /// <returns>A collection of Mackey-Glass values</returns>
+        public static List<double> GenMackeyGlassTimeSeries(int length, int tau = 18, double b = 0.1, double c = 0.2)
         {
-            double[] genInitValues = { 0.9697, 0.9699, 0.9794, 1.0003, 1.0319, 1.0703, 1.1076, 1.1352, 1.1485, 1.1482, 1.1383, 1.1234, 1.1072, 1.0928, 1.0820, 1.0756, 1.0739, 1.0759 };
-            int tau = genInitValues.Length; //18
-            double b = 0.1d, c = 0.2d;
-            List<double> dataCollection = new List<double>(genInitValues);
-            for (int i = genInitValues.Length; i < genInitValues.Length + length; i++)
-            {
-                double refMGV = dataCollection[i - tau];
-                double lastMGV = dataCollection.Last();
-                double newMGV = lastMGV - b * lastMGV + c * refMGV / (1 + Math.Pow(refMGV, 10));
-                dataCollection.Add(newMGV);
-            }
-            dataCollection.RemoveRange(0, tau);
-            return dataCollection;
+            MackeyGlassModulatorSettings settings = new MackeyGlassModulatorSettings(tau, b, c);
+            MackeyGlassModulator modulator = new MackeyGlassModulator(settings);
+            return GenTimeSeries(modulator, length);
         }
 
         /// <summary>
