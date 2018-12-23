@@ -8,43 +8,43 @@ using System.Globalization;
 using System.Reflection;
 using RCNet.XmlTools;
 
-namespace RCNet.Neural.Data.Modulation
+namespace RCNet.Neural.Data.Generators
 {
     /// <summary>
-    /// Setup parameters for the Sinusoidal signal modulator
+    /// Setup parameters for the Mackey-Glass signal generator
     /// </summary>
     [Serializable]
-    public class SinusoidalModulatorSettings
+    public class MackeyGlassGeneratorSettings
     {
         //Attribute properties
         /// <summary>
-        /// Phase shift
+        /// Tau (backward deepness 2->18)
         /// </summary>
-        public double Phase { get; set; }
+        public int Tau { get; set; }
 
         /// <summary>
-        /// Frequency coefficient
+        /// b coefficient
         /// </summary>
-        public double Freq { get; set; }
+        public double B { get; set; }
 
         /// <summary>
-        /// Amplitude coefficient
+        /// c coefficient
         /// </summary>
-        public double Ampl { get; set; }
+        public double C { get; set; }
 
 
         //Constructors
         /// <summary>
         /// Constructs an initialized instance
         /// </summary>
-        /// <param name="phase">Phase shift</param>
-        /// <param name="freq">Frequency coefficient</param>
-        /// <param name="ampl">Amplitude coefficient</param>
-        public SinusoidalModulatorSettings(double phase, double freq, double ampl)
+        /// <param name="tau">Tau (backward deepness 2-18)</param>
+        /// <param name="b">b coefficient</param>
+        /// <param name="c">c coefficient</param>
+        public MackeyGlassGeneratorSettings(int tau, double b, double c)
         {
-            Phase = phase;
-            Freq = freq;
-            Ampl = ampl;
+            Tau = tau;
+            B = b;
+            C = c;
             return;
         }
 
@@ -52,11 +52,11 @@ namespace RCNet.Neural.Data.Modulation
         /// Deep copy constructor
         /// </summary>
         /// <param name="source">Source instance</param>
-        public SinusoidalModulatorSettings(SinusoidalModulatorSettings source)
+        public MackeyGlassGeneratorSettings(MackeyGlassGeneratorSettings source)
         {
-            Phase = source.Phase;
-            Freq = source.Freq;
-            Ampl = source.Ampl;
+            Tau = source.Tau;
+            B = source.B;
+            C = source.C;
             return;
         }
 
@@ -65,18 +65,18 @@ namespace RCNet.Neural.Data.Modulation
         /// Content of xml element is always validated against the xml schema.
         /// </summary>
         /// <param name="elem">Xml data containing settings</param>
-        public SinusoidalModulatorSettings(XElement elem)
+        public MackeyGlassGeneratorSettings(XElement elem)
         {
             //Validation
             ElemValidator validator = new ElemValidator();
             Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Data.Modulation.SinusoidalModulatorSettings.xsd");
+            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Data.Generators.MackeyGlassGeneratorSettings.xsd");
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
             XElement settingsElem = validator.Validate(elem, "rootElem");
             //Parsing
-            Phase = double.Parse(settingsElem.Attribute("phase").Value, CultureInfo.InvariantCulture);
-            Freq = double.Parse(settingsElem.Attribute("freq").Value, CultureInfo.InvariantCulture);
-            Ampl = double.Parse(settingsElem.Attribute("ampl").Value, CultureInfo.InvariantCulture);
+            Tau = int.Parse(settingsElem.Attribute("tau").Value, CultureInfo.InvariantCulture);
+            B = double.Parse(settingsElem.Attribute("b").Value, CultureInfo.InvariantCulture);
+            C = double.Parse(settingsElem.Attribute("c").Value, CultureInfo.InvariantCulture);
             return;
         }
 
@@ -87,10 +87,10 @@ namespace RCNet.Neural.Data.Modulation
         public override bool Equals(object obj)
         {
             if (obj == null) return false;
-            SinusoidalModulatorSettings cmpSettings = obj as SinusoidalModulatorSettings;
-            if (Phase != cmpSettings.Phase ||
-                Freq != cmpSettings.Freq ||
-                Ampl != cmpSettings.Ampl
+            MackeyGlassGeneratorSettings cmpSettings = obj as MackeyGlassGeneratorSettings;
+            if (Tau != cmpSettings.Tau ||
+                B != cmpSettings.B ||
+                C != cmpSettings.C
                 )
             {
                 return false;
@@ -109,11 +109,11 @@ namespace RCNet.Neural.Data.Modulation
         /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>
-        public SinusoidalModulatorSettings DeepClone()
+        public MackeyGlassGeneratorSettings DeepClone()
         {
-            return new SinusoidalModulatorSettings(this);
+            return new MackeyGlassGeneratorSettings(this);
         }
 
-    }//SinusoidalModulatorSettings
+    }//MackeyGlassGeneratorSettings
 
 }//Namespace

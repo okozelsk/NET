@@ -8,13 +8,13 @@ using System.Globalization;
 using System.Reflection;
 using RCNet.XmlTools;
 
-namespace RCNet.Neural.Data.Modulation
+namespace RCNet.Neural.Data.Generators
 {
     /// <summary>
-    /// Setup parameters for the Const signal modulator
+    /// Setup parameters for the Const signal generator
     /// </summary>
     [Serializable]
-    public class ConstModulatorSettings
+    public class ConstGeneratorSettings
     {
         //Attribute properties
         /// <summary>
@@ -27,7 +27,7 @@ namespace RCNet.Neural.Data.Modulation
         /// Constructs an initialized instance
         /// </summary>
         /// <param name="constSignal">Constant signal value</param>
-        public ConstModulatorSettings(double constSignal)
+        public ConstGeneratorSettings(double constSignal)
         {
             ConstSignal = constSignal;
             return;
@@ -37,7 +37,7 @@ namespace RCNet.Neural.Data.Modulation
         /// Deep copy constructor
         /// </summary>
         /// <param name="source">Source instance</param>
-        public ConstModulatorSettings(ConstModulatorSettings source)
+        public ConstGeneratorSettings(ConstGeneratorSettings source)
         {
             ConstSignal = source.ConstSignal;
             return;
@@ -48,12 +48,12 @@ namespace RCNet.Neural.Data.Modulation
         /// Content of xml element is always validated against the xml schema.
         /// </summary>
         /// <param name="elem">Xml data containing settings</param>
-        public ConstModulatorSettings(XElement elem)
+        public ConstGeneratorSettings(XElement elem)
         {
             //Validation
             ElemValidator validator = new ElemValidator();
             Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Data.Modulation.ConstModulatorSettings.xsd");
+            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Data.Generators.ConstGeneratorSettings.xsd");
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
             XElement settingsElem = validator.Validate(elem, "rootElem");
             //Parsing
@@ -68,7 +68,7 @@ namespace RCNet.Neural.Data.Modulation
         public override bool Equals(object obj)
         {
             if (obj == null) return false;
-            ConstModulatorSettings cmpSettings = obj as ConstModulatorSettings;
+            ConstGeneratorSettings cmpSettings = obj as ConstGeneratorSettings;
             if (ConstSignal != cmpSettings.ConstSignal)
             {
                 return false;
@@ -87,11 +87,11 @@ namespace RCNet.Neural.Data.Modulation
         /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>
-        public ConstModulatorSettings DeepClone()
+        public ConstGeneratorSettings DeepClone()
         {
-            return new ConstModulatorSettings(this);
+            return new ConstGeneratorSettings(this);
         }
 
-    }//ConstModulatorSettings
+    }//ConstGeneratorSettings
 
 }//Namespace

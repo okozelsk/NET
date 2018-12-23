@@ -6,8 +6,8 @@
            >
   <xs:import namespace="RCNetTypes" />
 
-  <!-- Const modulator configuration element -->
-  <xs:element name="rootElem" type="rcn:ConstModulatorCfgType"/>
+  <!-- Mackey-Glass generator configuration element -->
+  <xs:element name="rootElem" type="rcn:MackeyGlassGeneratorCfgType"/>
 
 </xs:schema>
 

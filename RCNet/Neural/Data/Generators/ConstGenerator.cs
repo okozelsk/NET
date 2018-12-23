@@ -4,13 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RCNet.Neural.Data.Modulation
+namespace RCNet.Neural.Data.Generators
 {
     /// <summary>
-    /// Modulates constant signal
+    /// Generates constant signal
     /// </summary>
     [Serializable]
-    public class ConstModulator : IModulator
+    public class ConstGenerator : IGenerator
     {
         //Attributes
         private readonly double _signal;
@@ -20,7 +20,7 @@ namespace RCNet.Neural.Data.Modulation
         /// Creates an initialized instance
         /// </summary>
         /// <param name="constSignal">Constant signal value</param>
-        public ConstModulator(double constSignal)
+        public ConstGenerator(double constSignal)
         {
             _signal = constSignal;
             return;
@@ -30,7 +30,7 @@ namespace RCNet.Neural.Data.Modulation
         /// Creates an initialized instance
         /// </summary>
         /// <param name="settings">Configuration</param>
-        public ConstModulator(ConstModulatorSettings settings)
+        public ConstGenerator(ConstGeneratorSettings settings)
         {
             _signal = settings.ConstSignal;
             return;
@@ -38,7 +38,7 @@ namespace RCNet.Neural.Data.Modulation
 
         //Methods
         /// <summary>
-        /// Resets modulator to its initial state
+        /// Resets generator to its initial state
         /// </summary>
         public void Reset()
         {
@@ -54,5 +54,5 @@ namespace RCNet.Neural.Data.Modulation
             return _signal;
         }
 
-    }//ConstModulator
+    }//ConstGenerator
 }//Namespace

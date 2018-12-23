@@ -163,21 +163,21 @@
     <xs:attribute type="RandomDistributionType" name="distribution" use="optional" default="Uniform"/>
   </xs:complexType>
 
-  <!-- ________________________________________SIGNAL MODULATOR TYPES_____________________________________________ -->
-  <!-- Const modulator configuration element -->
-  <xs:complexType name="ConstModulatorCfgType">
+  <!-- ________________________________________SIGNAL GENERATORS TYPES_____________________________________________ -->
+  <!-- Const generator configuration element -->
+  <xs:complexType name="ConstGeneratorCfgType">
     <xs:attribute type="xs:double" name="constSignal" use="required"/>
   </xs:complexType>
 
-  <!-- Sinusoidal modulator configuration element -->
-  <xs:complexType name="SinusoidalModulatorCfgType">
+  <!-- Sinusoidal generator configuration element -->
+  <xs:complexType name="SinusoidalGeneratorCfgType">
     <xs:attribute type="xs:double" name="phase" use="optional" default="0"/>
     <xs:attribute type="xs:double" name="freq" use="optional" default="1"/>
     <xs:attribute type="xs:double" name="ampl" use="optional" default="1"/>
   </xs:complexType>
 
-  <!-- Mackey Glass modulator configuration element -->
-  <xs:complexType name="MackeyGlassModulatorCfgType">
+  <!-- Mackey Glass generator configuration element -->
+  <xs:complexType name="MackeyGlassGeneratorCfgType">
     <xs:attribute type="xs:unsignedInt" name="tau" use="optional" default="18"/>
     <xs:attribute type="xs:double" name="b" use="optional" default="0.1"/>
     <xs:attribute type="xs:double" name="c" use="optional" default="0.2"/>
@@ -558,7 +558,6 @@
       <xs:element type="PoolNeuronGroupsCfgType" name="neuronGroups" minOccurs="1" maxOccurs="unbounded"/>
       <xs:element type="PoolInterconnectionCfgType" name="interconnection" minOccurs="1" maxOccurs="1"/>
       <xs:element type="PoolRetNeuronsCfgType" name="retainmentNeurons" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="RandomValueType" name="noiseModulator" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:string" name="name" use="required" />
     <xs:attribute type="xs:int" name="x" use="optional" default="0" />
@@ -628,10 +627,10 @@
   <!-- StateMachine - internal input field -configuration -->
   <xs:complexType name="SMInternalInpFieldCfgType">
     <xs:choice minOccurs="1" maxOccurs="1">
-      <xs:element type="ConstModulatorCfgType" name="constModulator" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="RandomValueType" name="randomModulator" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="SinusoidalModulatorCfgType" name="sinusoidalModulator" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="MackeyGlassModulatorCfgType" name="mackeyGlassModulator" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="ConstGeneratorCfgType" name="constGenerator" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="RandomValueType" name="randomGenerator" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="SinusoidalGeneratorCfgType" name="sinusoidalGenerator" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="MackeyGlassGeneratorCfgType" name="mackeyGlassGenerator" minOccurs="1" maxOccurs="1"/>
     </xs:choice>
     <xs:attribute type="xs:string" name="name" use="required"/>
   </xs:complexType>

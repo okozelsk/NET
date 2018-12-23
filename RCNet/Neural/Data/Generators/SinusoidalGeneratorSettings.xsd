@@ -6,8 +6,8 @@
            >
   <xs:import namespace="RCNetTypes" />
 
-  <!-- Sinusoidal modulator configuration element -->
-  <xs:element name="rootElem" type="rcn:SinusoidalModulatorCfgType"/>
+  <!-- Sinusoidal generator configuration element -->
+  <xs:element name="rootElem" type="rcn:SinusoidalGeneratorCfgType"/>
 
 </xs:schema>
 

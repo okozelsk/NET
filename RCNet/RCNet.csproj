@@ -91,14 +91,14 @@
     <Compile Include="Neural\Activation\TanH.cs" />
     <Compile Include="Neural\Activation\ExpIF.cs" />
     <Compile Include="Neural\Activation\SimpleIF.cs" />
-    <Compile Include="Neural\Data\Modulation\ConstModulator.cs" />
-    <Compile Include="Neural\Data\Modulation\MackeyGlassModulator.cs" />
-    <Compile Include="Neural\Data\Modulation\SinusoidalModulator.cs" />
-    <Compile Include="Neural\Data\Modulation\MackeyGlassModulatorSettings.cs" />
-    <Compile Include="Neural\Data\Modulation\SinusoidalModulatorSettings.cs" />
-    <Compile Include="Neural\Data\Modulation\IModulator.cs" />
-    <Compile Include="Neural\Data\Modulation\RandomModulator.cs" />
-    <Compile Include="Neural\Data\Modulation\ConstModulatorSettings.cs" />
+    <Compile Include="Neural\Data\Generators\ConstGenerator.cs" />
+    <Compile Include="Neural\Data\Generators\MackeyGlassGenerator.cs" />
+    <Compile Include="Neural\Data\Generators\SinusoidalGenerator.cs" />
+    <Compile Include="Neural\Data\Generators\MackeyGlassGeneratorSettings.cs" />
+    <Compile Include="Neural\Data\Generators\SinusoidalGeneratorSettings.cs" />
+    <Compile Include="Neural\Data\Generators\IGenerator.cs" />
+    <Compile Include="Neural\Data\Generators\RandomGenerator.cs" />
+    <Compile Include="Neural\Data\Generators\ConstGeneratorSettings.cs" />
     <Compile Include="Neural\Network\SM\Synapse\DynamicSynapse.cs" />
     <Compile Include="Neural\Network\SM\Synapse\DynamicSynapseSettings.cs" />
     <Compile Include="Neural\Network\SM\Neuron\FiringRate.cs" />
@@ -325,17 +325,17 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Neural\Data\Modulation\ConstModulatorSettings.xsd">
+    <EmbeddedResource Include="Neural\Data\Generators\ConstGeneratorSettings.xsd">
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Neural\Data\Modulation\SinusoidalModulatorSettings.xsd">
+    <EmbeddedResource Include="Neural\Data\Generators\SinusoidalGeneratorSettings.xsd">
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Neural\Data\Modulation\MackeyGlassModulatorSettings.xsd">
+    <EmbeddedResource Include="Neural\Data\Generators\MackeyGlassGeneratorSettings.xsd">
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>

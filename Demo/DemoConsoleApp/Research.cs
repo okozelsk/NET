@@ -12,7 +12,7 @@ using RCNet.Neural.Network.SM;
 using RCNet.MathTools.Differential;
 using RCNet.MathTools.VectorMath;
 using RCNet.RandomValue;
-using RCNet.Neural.Data.Modulation;
+using RCNet.Neural.Data.Generators;
 
 namespace RCNet.DemoConsoleApp
 {
@@ -29,19 +29,19 @@ namespace RCNet.DemoConsoleApp
         //Methods
         public void Run()
         {
-            MackeyGlassModulatorSettings modSettings = new MackeyGlassModulatorSettings(18, 0.1, 0.2);
-            IModulator modulator = new MackeyGlassModulator(modSettings);
+            MackeyGlassGeneratorSettings modSettings = new MackeyGlassGeneratorSettings(18, 0.1, 0.2);
+            IGenerator generator = new MackeyGlassGenerator(modSettings);
 
             int steps = 100;
             for (int i = 0; i < steps; i++)
             {
-                Console.WriteLine(modulator.Next());
+                Console.WriteLine(generator.Next());
             }
             Console.ReadLine();
-            modulator.Reset();
+            generator.Reset();
             for (int i = 0; i < steps; i++)
             {
-                Console.WriteLine(modulator.Next());
+                Console.WriteLine(generator.Next());
             }
             Console.ReadLine();
 

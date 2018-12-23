@@ -6,43 +6,37 @@ using System.Threading.Tasks;
 using RCNet.Extensions;
 using RCNet.RandomValue;
 
-namespace RCNet.Neural.Data.Modulation
+namespace RCNet.Neural.Data.Generators
 {
     /// <summary>
-    /// Modulates random signal
+    /// Generates sinusoidal signal
     /// </summary>
     [Serializable]
-    public class RandomModulator : IModulator
+    public class SinusoidalGenerator : IGenerator
     {
         //Attributes
-        private Random _rand;
-        private readonly int _seek;
-        private readonly RandomValueSettings _settings;
+        private double _step;
+        private readonly SinusoidalGeneratorSettings _settings;
 
         //Constructor
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
         /// <param name="settings">Configuration</param>
-        /// <param name="seek">
-        /// Initial seek of the random generator.
-        /// Specify seek less than 0 to obtain different initialization each time Reset is invoked.
-        /// </param>
-        public RandomModulator(RandomValueSettings settings, int seek = 0)
+        public SinusoidalGenerator(SinusoidalGeneratorSettings settings)
         {
             _settings = settings.DeepClone();
-            _seek = seek;
             Reset();
             return;
         }
 
         //Methods
         /// <summary>
-        /// Resets modulator to its initial state
+        /// Resets generator to its initial state
         /// </summary>
         public void Reset()
         {
-            _rand = (_seek < 0) ? new Random() : new Random(_seek);
+            _step = 0;
             return;
         }
 
@@ -51,8 +45,10 @@ namespace RCNet.Neural.Data.Modulation
         /// </summary>
         public double Next()
         {
-            return _rand.NextDouble(_settings);
+            double signal = _settings.Ampl * Math.Sin(Math.PI * ((_step * _settings.Freq + _settings.Phase) / 180d));
+            ++_step;
+            return signal;
         }
 
-    }//RandomModulator
+    }//SinusoidalGenerator
 }//Namespace

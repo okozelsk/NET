@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using RCNet.Extensions;
 using RCNet.MathTools;
 using RCNet.Neural.Data;
-using RCNet.Neural.Data.Modulation;
+using RCNet.Neural.Data.Generators;
 using RCNet.RandomValue;
 using RCNet.Neural.Network.SM.ReservoirStructure;
 using RCNet.Neural.Network.SM.Readout;
@@ -38,9 +38,9 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         private readonly Interval _dataRange;
         /// <summary>
-        /// Collection of the internal input modulators associated with the internal input fields
+        /// Collection of the internal input generators associated with the internal input fields
         /// </summary>
-        private readonly List<IModulator> _internalInputModulatorCollection;
+        private readonly List<IGenerator> _internalInputGeneratorCollection;
         /// <summary>
         /// Collection of reservoir instances.
         /// </summary>
@@ -64,29 +64,29 @@ namespace RCNet.Neural.Network.SM
             _settings = settings.DeepClone();
             //Data range has to be always <-1,1>
             _dataRange = CommonEnums.GetDataNormalizationRange(CommonEnums.DataNormalizationRange.Inclusive_Neg1_Pos1);
-            //Internal input modulators
-            _internalInputModulatorCollection = new List<IModulator>();
+            //Internal input generators
+            _internalInputGeneratorCollection = new List<IGenerator>();
             foreach(StateMachineSettings.InputSettings.InternalField field in _settings.InputConfig.InternalFieldCollection)
             {
-                if(field.ModulatorSettings.GetType() == typeof(ConstModulatorSettings))
+                if(field.GeneratorSettings.GetType() == typeof(ConstGeneratorSettings))
                 {
-                    _internalInputModulatorCollection.Add(new ConstModulator((ConstModulatorSettings)field.ModulatorSettings));
+                    _internalInputGeneratorCollection.Add(new ConstGenerator((ConstGeneratorSettings)field.GeneratorSettings));
                 }
-                else if (field.ModulatorSettings.GetType() == typeof(RandomValueSettings))
+                else if (field.GeneratorSettings.GetType() == typeof(RandomValueSettings))
                 {
-                    _internalInputModulatorCollection.Add(new RandomModulator((RandomValueSettings)field.ModulatorSettings));
+                    _internalInputGeneratorCollection.Add(new RandomGenerator((RandomValueSettings)field.GeneratorSettings));
                 }
-                else if (field.ModulatorSettings.GetType() == typeof(SinusoidalModulatorSettings))
+                else if (field.GeneratorSettings.GetType() == typeof(SinusoidalGeneratorSettings))
                 {
-                    _internalInputModulatorCollection.Add(new SinusoidalModulator((SinusoidalModulatorSettings)field.ModulatorSettings));
+                    _internalInputGeneratorCollection.Add(new SinusoidalGenerator((SinusoidalGeneratorSettings)field.GeneratorSettings));
                 }
-                else if (field.ModulatorSettings.GetType() == typeof(MackeyGlassModulatorSettings))
+                else if (field.GeneratorSettings.GetType() == typeof(MackeyGlassGeneratorSettings))
                 {
-                    _internalInputModulatorCollection.Add(new MackeyGlassModulator((MackeyGlassModulatorSettings)field.ModulatorSettings));
+                    _internalInputGeneratorCollection.Add(new MackeyGlassGenerator((MackeyGlassGeneratorSettings)field.GeneratorSettings));
                 }
                 else
                 {
-                    throw new Exception($"Unsupported internal signal modulator for field {field.Name}");
+                    throw new Exception($"Unsupported internal signal generator for field {field.Name}");
                 }
             }
             //Reservoir instance(s)
@@ -122,9 +122,9 @@ namespace RCNet.Neural.Network.SM
         /// <param name="resetStatistics">Specifies whether to reset internal statistics</param>
         private void Reset(bool resetStatistics)
         {
-            foreach(IModulator modulator in _internalInputModulatorCollection)
+            foreach(IGenerator generator in _internalInputGeneratorCollection)
             {
-                modulator.Reset();
+                generator.Reset();
             }
             foreach(Reservoir reservoir in _reservoirCollection)
             {
@@ -134,7 +134,7 @@ namespace RCNet.Neural.Network.SM
         }
 
         /// <summary>
-        /// Adds inputs from internal modulators to be used in reservoirs.
+        /// Adds inputs from internal generators to be used in reservoirs.
         /// </summary>
         /// <param name="externalInputVector">External input values</param>
         /// <returns></returns>
@@ -142,9 +142,9 @@ namespace RCNet.Neural.Network.SM
         {
             double[] smInput = new double[_settings.InputConfig.NumOfFields];
             externalInputVector.CopyTo(smInput, 0);
-            for(int i = 0; i < _internalInputModulatorCollection.Count; i++)
+            for(int i = 0; i < _internalInputGeneratorCollection.Count; i++)
             {
-                smInput[_settings.InputConfig.ExternalFieldCollection.Count + i] = _internalInputModulatorCollection[i].Next();
+                smInput[_settings.InputConfig.ExternalFieldCollection.Count + i] = _internalInputGeneratorCollection[i].Next();
             }
             return smInput;
         }

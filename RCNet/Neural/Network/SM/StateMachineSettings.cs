@@ -7,7 +7,7 @@ using System.Reflection;
 using RCNet.Extensions;
 using RCNet.XmlTools;
 using RCNet.RandomValue;
-using RCNet.Neural.Data.Modulation;
+using RCNet.Neural.Data.Generators;
 using RCNet.Neural.Network.SM.Synapse;
 using RCNet.Neural.Network.SM.ReservoirStructure;
 using RCNet.Neural.Network.SM.Readout;
@@ -307,7 +307,7 @@ namespace RCNet.Neural.Network.SM
             /// <summary>
             /// Creates an initialized instance
             /// </summary>
-            /// <param name="settingsElem">Xml element containing associated signal modulator settings</param>
+            /// <param name="settingsElem">Xml element containing settings</param>
             public InputSettings(XElement settingsElem)
                 :this()
             {
@@ -506,35 +506,35 @@ namespace RCNet.Neural.Network.SM
             {
                 //Attribute properties
                 /// <summary>
-                /// Signal modualtor configuration
+                /// Signal generator configuration
                 /// </summary>
-                public Object ModulatorSettings { get; set; }
+                public Object GeneratorSettings { get; set; }
 
                 //Constructors
                 /// <summary>
                 /// Creates an initialized instance
                 /// </summary>
                 /// <param name="name">Field name</param>
-                /// <param name="settingsElem">Xml element containing associated signal modulator settings</param>
+                /// <param name="settingsElem">Xml element containing associated signal generator settings</param>
                 public InternalField(string name, XElement settingsElem)
                     :base(name)
                 {
                     switch(settingsElem.Name.LocalName)
                     {
-                        case "constModulator":
-                            ModulatorSettings = new ConstModulatorSettings(settingsElem);
+                        case "constGenerator":
+                            GeneratorSettings = new ConstGeneratorSettings(settingsElem);
                             break;
-                        case "randomModulator":
-                            ModulatorSettings = new RandomValueSettings(settingsElem);
+                        case "randomGenerator":
+                            GeneratorSettings = new RandomValueSettings(settingsElem);
                             break;
-                        case "sinusoidalModulator":
-                            ModulatorSettings = new SinusoidalModulatorSettings(settingsElem);
+                        case "sinusoidalGenerator":
+                            GeneratorSettings = new SinusoidalGeneratorSettings(settingsElem);
                             break;
-                        case "mackeyGlassModulator":
-                            ModulatorSettings = new MackeyGlassModulatorSettings(settingsElem);
+                        case "mackeyGlassGenerator":
+                            GeneratorSettings = new MackeyGlassGeneratorSettings(settingsElem);
                             break;
                         default:
-                            throw new Exception($"Unknown modulator settings {settingsElem.Name.LocalName}");
+                            throw new Exception($"Unknown generator settings {settingsElem.Name.LocalName}");
                     }
                     return;
                 }
@@ -546,25 +546,25 @@ namespace RCNet.Neural.Network.SM
                 public InternalField(InternalField source)
                     :base(source)
                 {
-                    if(source.ModulatorSettings.GetType() == typeof(ConstModulatorSettings))
+                    if(source.GeneratorSettings.GetType() == typeof(ConstGeneratorSettings))
                     {
-                        ModulatorSettings = ((ConstModulatorSettings)source.ModulatorSettings).DeepClone();
+                        GeneratorSettings = ((ConstGeneratorSettings)source.GeneratorSettings).DeepClone();
                     }
-                    else if(source.ModulatorSettings.GetType() == typeof(RandomValueSettings))
+                    else if(source.GeneratorSettings.GetType() == typeof(RandomValueSettings))
                     {
-                        ModulatorSettings = ((RandomValueSettings)source.ModulatorSettings).DeepClone();
+                        GeneratorSettings = ((RandomValueSettings)source.GeneratorSettings).DeepClone();
                     }
-                    else if (source.ModulatorSettings.GetType() == typeof(SinusoidalModulatorSettings))
+                    else if (source.GeneratorSettings.GetType() == typeof(SinusoidalGeneratorSettings))
                     {
-                        ModulatorSettings = ((SinusoidalModulatorSettings)source.ModulatorSettings).DeepClone();
+                        GeneratorSettings = ((SinusoidalGeneratorSettings)source.GeneratorSettings).DeepClone();
                     }
-                    else if (source.ModulatorSettings.GetType() == typeof(MackeyGlassModulatorSettings))
+                    else if (source.GeneratorSettings.GetType() == typeof(MackeyGlassGeneratorSettings))
                     {
-                        ModulatorSettings = ((MackeyGlassModulatorSettings)source.ModulatorSettings).DeepClone();
+                        GeneratorSettings = ((MackeyGlassGeneratorSettings)source.GeneratorSettings).DeepClone();
                     }
                     else
                     {
-                        throw new Exception($"Unknown modulator settings {source.ModulatorSettings.ToString()}");
+                        throw new Exception($"Unknown generator settings {source.GeneratorSettings.ToString()}");
                     }
                     return;
                 }
@@ -587,7 +587,7 @@ namespace RCNet.Neural.Network.SM
                     if (obj == null) return false;
                     InternalField cmpSettings = obj as InternalField;
                     if (!base.Equals(obj) || 
-                        !Equals(ModulatorSettings, cmpSettings.ModulatorSettings)
+                        !Equals(GeneratorSettings, cmpSettings.GeneratorSettings)
                         )
                     {
                         return false;

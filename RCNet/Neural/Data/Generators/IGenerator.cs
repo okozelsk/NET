@@ -4,15 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RCNet.Neural.Data.Modulation
+namespace RCNet.Neural.Data.Generators
 {
     /// <summary>
-    /// Common interface for modulators of the internal input signal
+    /// Common interface for generators of the internal input signal
     /// </summary>
-    public interface IModulator
+    public interface IGenerator
     {
         /// <summary>
-        /// Resets modulator to its initial state
+        /// Resets generator to its initial state
         /// </summary>
         void Reset();
 
@@ -21,6 +21,6 @@ namespace RCNet.Neural.Data.Modulation
         /// </summary>
         double Next();
 
-    }//IModulator
+    }//IGenerator
 
 }//Namespace

@@ -4,7 +4,7 @@ using System.Linq;
 using System.IO;
 using System.Globalization;
 using RCNet.RandomValue;
-using RCNet.Neural.Data.Modulation;
+using RCNet.Neural.Data.Generators;
 
 namespace RCNet.DemoConsoleApp
 {
@@ -14,17 +14,17 @@ namespace RCNet.DemoConsoleApp
     public static class TimeSeriesGenerator
     {
         /// <summary>
-        /// Generates time series of specified length based on specified signal modulator.
+        /// Generates time series of specified length based on specified signal generator.
         /// </summary>
-        /// <param name="modulator">One of the implemented modulators</param>
+        /// <param name="generator">One of the implemented generators</param>
         /// <param name="length">Time series target length</param>
         /// <returns></returns>
-        public static List<double> GenTimeSeries(IModulator modulator, int length)
+        public static List<double> GenTimeSeries(IGenerator generator, int length)
         {
             List<double> dataCollection = new List<double>(length);
             for (int i = 0; i < length; i++)
             {
-                dataCollection.Add(modulator.Next());
+                dataCollection.Add(generator.Next());
             }
             return dataCollection;
         }
@@ -41,8 +41,8 @@ namespace RCNet.DemoConsoleApp
         public static List<double> GenRandomTimeSeries(int length, int seek = -1)
         {
             RandomValueSettings settings = new RandomValueSettings(0, 1, false, Extensions.RandomClassExtensions.DistributionType.Uniform);
-            RandomModulator modulator = new RandomModulator(settings, seek);
-            return GenTimeSeries(modulator, length);
+            RandomGenerator generator = new RandomGenerator(settings, seek);
+            return GenTimeSeries(generator, length);
         }
 
         /// <summary>
@@ -55,9 +55,9 @@ namespace RCNet.DemoConsoleApp
         /// <returns>A collection of sinusoidal values</returns>
         public static List<double> GenSinusoidTimeSeries(int length, double phase = 0d, double freq = 1d, double ampl = 1d)
         {
-            SinusoidalModulatorSettings settings = new SinusoidalModulatorSettings(phase, freq, ampl);
-            SinusoidalModulator modulator = new SinusoidalModulator(settings);
-            return GenTimeSeries(modulator, length);
+            SinusoidalGeneratorSettings settings = new SinusoidalGeneratorSettings(phase, freq, ampl);
+            SinusoidalGenerator generator = new SinusoidalGenerator(settings);
+            return GenTimeSeries(generator, length);
         }
 
         /// <summary>
@@ -70,9 +70,9 @@ namespace RCNet.DemoConsoleApp
         /// <returns>A collection of Mackey-Glass values</returns>
         public static List<double> GenMackeyGlassTimeSeries(int length, int tau = 18, double b = 0.1, double c = 0.2)
         {
-            MackeyGlassModulatorSettings settings = new MackeyGlassModulatorSettings(tau, b, c);
-            MackeyGlassModulator modulator = new MackeyGlassModulator(settings);
-            return GenTimeSeries(modulator, length);
+            MackeyGlassGeneratorSettings settings = new MackeyGlassGeneratorSettings(tau, b, c);
+            MackeyGlassGenerator generator = new MackeyGlassGenerator(settings);
+            return GenTimeSeries(generator, length);
         }
 
         /// <summary>

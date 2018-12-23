@@ -6,27 +6,27 @@ using System.Threading.Tasks;
 using RCNet.Extensions;
 using RCNet.RandomValue;
 
-namespace RCNet.Neural.Data.Modulation
+namespace RCNet.Neural.Data.Generators
 {
     /// <summary>
-    /// Modulates Mackey-Glass signal
+    /// Generates Mackey-Glass signal
     /// </summary>
     [Serializable]
-    public class MackeyGlassModulator : IModulator
+    public class MackeyGlassGenerator : IGenerator
     {
         //Constants
         private static readonly double[] IniValues = { 0.9697, 0.9699, 0.9794, 1.0003, 1.0319, 1.0703, 1.1076, 1.1352, 1.1485, 1.1482, 1.1383, 1.1234, 1.1072, 1.0928, 1.0820, 1.0756, 1.0739, 1.0759 };
 
         //Attributes
         private List<double> _lastValues;
-        private readonly MackeyGlassModulatorSettings _settings;
+        private readonly MackeyGlassGeneratorSettings _settings;
 
         //Constructor
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
         /// <param name="settings">Configuration</param>
-        public MackeyGlassModulator(MackeyGlassModulatorSettings settings)
+        public MackeyGlassGenerator(MackeyGlassGeneratorSettings settings)
         {
             _settings = settings.DeepClone();
             Reset();
@@ -35,7 +35,7 @@ namespace RCNet.Neural.Data.Modulation
 
         //Methods
         /// <summary>
-        /// Resets modulator to its initial state
+        /// Resets generator to its initial state
         /// </summary>
         public void Reset()
         {
@@ -56,5 +56,5 @@ namespace RCNet.Neural.Data.Modulation
             return nextMGV;
         }
 
-    }//MackeyGlassModulator
+    }//MackeyGlassGenerator
 }//Namespace

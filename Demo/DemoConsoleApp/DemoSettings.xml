@@ -27,13 +27,13 @@
         </external>
         <internal>
           <field name="noise">
-            <randomModulator min="-0.8" max="0.8" randomSign="false" distribution="Uniform"/>
+            <randomGenerator min="-0.8" max="0.8" randomSign="false" distribution="Uniform"/>
           </field>
           <field name="sin">
-            <sinusoidalModulator phase="90" freq="20" ampl="0.1" />
+            <sinusoidalGenerator phase="90" freq="20" ampl="0.1" />
           </field>
           <field name="mg">
-            <mackeyGlassModulator tau="18" b="0.1" c="0.2"/>
+            <mackeyGlassGenerator tau="18" b="0.1" c="0.2"/>
           </field>
         </internal>
       </input>
@@ -318,7 +318,7 @@
         </external>
         <internal>
           <field name="noise">
-            <randomModulator min="-0.8" max="0.8" randomSign="false" distribution="Uniform"/>
+            <randomGenerator min="-0.8" max="0.8" randomSign="false" distribution="Uniform"/>
           </field>
         </internal>
       </input>
@@ -416,7 +416,7 @@
         </external>
         <internal>
           <field name="noise">
-            <randomModulator min="-0.8" max="0.8" randomSign="false" distribution="Uniform"/>
+            <randomGenerator min="-0.8" max="0.8" randomSign="false" distribution="Uniform"/>
           </field>
         </internal>
       </input>
@@ -577,7 +577,7 @@
         </external>
         <internal>
           <field name="noise">
-            <randomModulator min="-0.8" max="0.8" randomSign="false" distribution="Uniform"/>
+            <randomGenerator min="-0.8" max="0.8" randomSign="false" distribution="Uniform"/>
           </field>
         </internal>
       </input>
