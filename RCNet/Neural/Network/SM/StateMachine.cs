@@ -90,11 +90,13 @@ namespace RCNet.Neural.Network.SM
                 }
             }
             //Reservoir instance(s)
+            //Random generator used for reservoir structure initialization
+            Random rand = (_settings.RandomizerSeek < 0 ? new Random() : new Random(_settings.RandomizerSeek));
             _numOfPredictors = 0;
             _reservoirCollection = new List<Reservoir>(_settings.ReservoirInstanceDefinitionCollection.Count);
             foreach(StateMachineSettings.ReservoirInstanceDefinition instanceDefinition in _settings.ReservoirInstanceDefinitionCollection)
             {
-                Reservoir reservoir = new Reservoir(instanceDefinition, _dataRange, _settings.RandomizerSeek);
+                Reservoir reservoir = new Reservoir(instanceDefinition, _dataRange, rand);
                 _reservoirCollection.Add(reservoir);
                 _numOfPredictors += reservoir.NumOfOutputPredictors;
             }

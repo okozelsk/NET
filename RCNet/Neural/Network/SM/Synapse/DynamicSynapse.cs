@@ -13,7 +13,7 @@ namespace RCNet.Neural.Network.SM.Synapse
     /// Inplements the pre-synaptic Short-Term-Plasticity and post-synaptic dynamic decay of the efficacy of the synapse.
     /// </summary>
     [Serializable]
-    public class DynamicSynapse : Synapse
+    public class DynamicSynapse : BaseSynapse
     {
         //Attributes
         private readonly double _tauFacilitation;

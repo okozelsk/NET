@@ -11,10 +11,10 @@ namespace RCNet.Neural.Network.SM.Synapse
 {
     /// <summary>
     /// Abstract class covering the basic behaviour of StateMachine synapses.
-    /// (TODO - Consider removing the ISynapse interface)
+    /// (TODO - Consider removal of the ISynapse interface)
     /// </summary>
     [Serializable]
-    public abstract class Synapse : ISynapse
+    public abstract class BaseSynapse : ISynapse
     {
         //Attribute properties
         /// <summary>
@@ -71,7 +71,7 @@ namespace RCNet.Neural.Network.SM.Synapse
         /// <param name="sourceNeuron">Source neuron</param>
         /// <param name="targetNeuron">Target neuron</param>
         /// <param name="weight">Synapse weight</param>
-        public Synapse(INeuron sourceNeuron,
+        public BaseSynapse(INeuron sourceNeuron,
                        INeuron targetNeuron,
                        double weight
                        )

@@ -13,7 +13,7 @@ namespace RCNet.Neural.Network.SM.Synapse
     /// Signal delivery can be delayed depending on Euclidean distance between source and target neuron.
     /// </summary>
     [Serializable]
-    public class StaticSynapse : Synapse
+    public class StaticSynapse : BaseSynapse
     {
         //Constructor
         /// <summary>

@@ -328,7 +328,7 @@ namespace RCNet.Neural.Network.SM.ReservoirStructure
                 SynapseCfg = null;
                 if (source.SynapseCfg != null)
                 {
-                    if (source.GetType() == typeof(StaticSynapse))
+                    if (source.SynapseCfg.GetType() == typeof(StaticSynapseSettings))
                     {
                         //Static synapse settings
                         SynapseCfg = ((StaticSynapseSettings)source.SynapseCfg).DeepClone();

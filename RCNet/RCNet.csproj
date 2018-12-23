@@ -114,7 +114,7 @@
     <Compile Include="Neural\Network\SM\Synapse\ISynapse.cs" />
     <Compile Include="Neural\Network\SM\Synapse\StaticSynapse.cs" />
     <Compile Include="Neural\Network\SM\Synapse\StaticSynapseSettings.cs" />
-    <Compile Include="Neural\Network\SM\Synapse\Synapse.cs" />
+    <Compile Include="Neural\Network\SM\Synapse\BaseSynapse.cs" />
     <Compile Include="Neural\Data\TimeSeriesDataLoader.cs" />
     <Compile Include="Neural\Data\PatternDataLoader.cs" />
     <Compile Include="Extensions\ArrayClassExtensions.cs" />

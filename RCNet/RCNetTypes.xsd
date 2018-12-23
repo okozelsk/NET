@@ -379,12 +379,12 @@
 
   <!-- FF network - resilient propagation trainer - configuration -->
   <xs:complexType name="FFNetRPropTrainerCfgType">
-    <xs:attribute type="UDoubleLT1Type" name="zeroTolerance" use="required"/>
-    <xs:attribute type="UDoubleGT1Type" name="positiveEta" use="required"/>
-    <xs:attribute type="UDoubleLT1Type" name="negativeEta" use="required"/>
-    <xs:attribute type="UDoubleType" name="iniDelta" use="required"/>
-    <xs:attribute type="UDoubleType" name="minDelta" use="required"/>
-    <xs:attribute type="UDoubleType" name="maxDelta" use="required"/>
+    <xs:attribute type="UDoubleLT1Type" name="zeroTolerance" use="optional" default="1E-17"/>
+    <xs:attribute type="UDoubleGT1Type" name="positiveEta" use="optional" default="1.2"/>
+    <xs:attribute type="UDoubleLT1Type" name="negativeEta" use="optional" default="0.5"/>
+    <xs:attribute type="UDoubleType" name="iniDelta" use="optional" default="0.1"/>
+    <xs:attribute type="UDoubleType" name="minDelta" use="optional" default="1E-6"/>
+    <xs:attribute type="UDoubleType" name="maxDelta" use="optional" default="50"/>
   </xs:complexType>
 
   <!-- FF network configuration -->
@@ -420,11 +420,11 @@
 
   <!-- FF network - p-delta rule trainer - configuration -->
   <xs:complexType name="PPNetPDeltaRuleTrainerCfgType">
-    <xs:attribute type="UDoubleLT1Type" name="iniLR" use="required"/>
-    <xs:attribute type="UDoubleGT1Type" name="incLR" use="required"/>
-    <xs:attribute type="UDoubleLT1Type" name="decLR" use="required"/>
-    <xs:attribute type="UDoubleLT1Type" name="minLR" use="required"/>
-    <xs:attribute type="UDoubleLT1Type" name="maxLR" use="required"/>
+    <xs:attribute type="UDoubleLT1Type" name="iniLR" use="optional" default="0.01"/>
+    <xs:attribute type="UDoubleGT1Type" name="incLR" use="optional" default="1.1"/>
+    <xs:attribute type="UDoubleLT1Type" name="decLR" use="optional" default="0.5"/>
+    <xs:attribute type="UDoubleLT1Type" name="minLR" use="optional" default="1e-4"/>
+    <xs:attribute type="UDoubleLT1Type" name="maxLR" use="optional" default="0.1"/>
   </xs:complexType>
 
 
@@ -486,10 +486,10 @@
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="RandomValueType" name="weight" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
-    <xs:attribute type="UDoubleType" name="tauFacilitation" use="required"/>
-    <xs:attribute type="UDoubleType" name="tauRecovery" use="required"/>
-    <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="required"/>
-    <xs:attribute type="UDoubleType" name="tauDecay" use="required"/>
+    <xs:attribute type="UDoubleType" name="tauFacilitation" use="optional" default="500"/>
+    <xs:attribute type="UDoubleType" name="tauRecovery" use="optional" default="5"/>
+    <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="optional" default="0.5"/>
+    <xs:attribute type="UDoubleType" name="tauDecay" use="optional" default="10"/>
   </xs:complexType>
 
 

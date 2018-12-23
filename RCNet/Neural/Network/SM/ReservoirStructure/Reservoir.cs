@@ -51,18 +51,12 @@ namespace RCNet.Neural.Network.SM.ReservoirStructure
         /// </summary>
         /// <param name="instanceDefinition">Reservoir instance definition</param>
         /// <param name="inputRange">Range of input values</param>
-        /// <param name="randomizerSeek">
-        /// A value greater than or equal to 0 will always ensure the same initialization of the internal
-        /// random number generator and therefore the same reservoir structure, which is good for tuning purposes.
-        /// A value less than 0 causes a fully random initialization each time creating a reservoir instance.
-        /// </param>
-        public Reservoir(StateMachineSettings.ReservoirInstanceDefinition instanceDefinition, Interval inputRange, int randomizerSeek = -1)
+        /// <param name="rand">Random object to be used for random part initialization </param>
+        public Reservoir(StateMachineSettings.ReservoirInstanceDefinition instanceDefinition, Interval inputRange, Random rand)
         {
             int numOfInputNodes = instanceDefinition.SMInputFieldIdxCollection.Count;
             //Copy settings
             InstanceDefinition = instanceDefinition.DeepClone();
-            //Random generator used for reservoir structure initialization
-            Random rand = (randomizerSeek < 0 ? new Random() : new Random(randomizerSeek));
             
             //-----------------------------------------------------------------------------
             //Initialization of neurons
@@ -1024,42 +1018,35 @@ namespace RCNet.Neural.Network.SM.ReservoirStructure
         /// </param>
         public void Compute(double[] input, bool updateStatistics)
         {
-            //Set input to input neurons
+            //Set input values to input neurons
             for (int i = 0; i < input.Length; i++)
             {
                 _inputNeuronCollection[i].NewStimuli(input[i], 0);
                 _inputNeuronCollection[i].NewState(updateStatistics);
             }
             //Perform reservoir's computation cycle
-            OrderablePartitioner<Tuple<int, int>> rangePartitioner = Partitioner.Create(0, _reservoirNeuronCollection.Length);
             //Collect new stimulation for each reservoir neuron
-            Parallel.ForEach(rangePartitioner, range =>
+            Parallel.For(0, _reservoirNeuronCollection.Length, neuronIdx =>
             {
-                for (int neuronIdx = range.Item1; neuronIdx < range.Item2; neuronIdx++)
+                //Stimulation from input neurons
+                double iStimuli = 0;
+                foreach (ISynapse synapse in _neuronInputConnectionsCollection[neuronIdx])
                 {
-                    //Stimulation from input neurons
-                    double iStimuli = 0;
-                    foreach (ISynapse synapse in _neuronInputConnectionsCollection[neuronIdx])
-                    {
-                        iStimuli += synapse.GetSignal(updateStatistics);
-                    }
-                    //Stimulation from connected reservoir neurons
-                    double rStimuli = 0;
-                    foreach (ISynapse synapse in _neuronNeuronConnectionsCollection[neuronIdx])
-                    {
-                        rStimuli += synapse.GetSignal(updateStatistics);
-                    }
-                    //Store new neuron's stimulation
-                    _reservoirNeuronCollection[neuronIdx].NewStimuli(iStimuli, rStimuli);
+                    iStimuli += synapse.GetSignal(updateStatistics);
                 }
+                //Stimulation from connected reservoir neurons
+                double rStimuli = 0;
+                foreach (ISynapse synapse in _neuronNeuronConnectionsCollection[neuronIdx])
+                {
+                    rStimuli += synapse.GetSignal(updateStatistics);
+                }
+                //Store new neuron's stimulation
+                _reservoirNeuronCollection[neuronIdx].NewStimuli(iStimuli, rStimuli);
             });
-            //Recompute all reservoir neurons
-            Parallel.ForEach(rangePartitioner, range =>
+            //Recompute state of all reservoir neurons
+            Parallel.For(0, _reservoirNeuronCollection.Length, neuronIdx =>
             {
-                for (int neuronIdx = range.Item1; neuronIdx < range.Item2; neuronIdx++)
-                {
-                    _reservoirNeuronCollection[neuronIdx].NewState(updateStatistics);
-                }
+                _reservoirNeuronCollection[neuronIdx].NewState(updateStatistics);
             });
             return;
         }

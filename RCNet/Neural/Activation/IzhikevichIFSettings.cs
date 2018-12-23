@@ -21,12 +21,33 @@ namespace RCNet.Neural.Activation
     {
         //Constants
         //Typical values
+        /// <summary>
+        /// Typical incoming stimulation coefficient
+        /// </summary>
         public const double TypicalStimuliCoeff = 10;
-        public const double TypicalRecoveryTimeScale = 0.02; //Parameter "a" in the original Izhikevich model
-        public const double TypicalRecoverySensitivity = 0.2; //Parameter "b" in the original Izhikevich model
-        public const double TypicalRecoveryReset = 2; //Parameter "d" in the original Izhikevich model
+        /// <summary>
+        /// Typical value of the parameter "a" in the original Izhikevich model
+        /// </summary>
+        public const double TypicalRecoveryTimeScale = 0.02;
+        /// <summary>
+        /// Typical value of the parameter "b" in the original Izhikevich model
+        /// </summary>
+        public const double TypicalRecoverySensitivity = 0.2;
+        /// <summary>
+        /// Typical value of the parameter "d" in the original Izhikevich model
+        /// </summary>
+        public const double TypicalRecoveryReset = 2;
+        /// <summary>
+        /// Typical value of the membrane resting potential
+        /// </summary>
         public const double TypicalRestV = -70;
-        public const double TypicalResetV = -65; //Parameter "c" in the original Izhikevich model
+        /// <summary>
+        /// Typical value of the parameter "c" in the original Izhikevich model
+        /// </summary>
+        public const double TypicalResetV = -65;
+        /// <summary>
+        /// Typical value of the membrane firing treshold
+        /// </summary>
         public const double TypicalFiringThresholdV = 30;
 
         //Attribute properties
