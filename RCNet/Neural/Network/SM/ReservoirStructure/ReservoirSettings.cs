@@ -11,7 +11,7 @@ using RCNet.RandomValue;
 using RCNet.Neural.Activation;
 using RCNet.Neural.Network.SM.Synapse;
 
-namespace RCNet.Neural.Network.SM
+namespace RCNet.Neural.Network.SM.ReservoirStructure
 {
     /// <summary>
     /// The class contains reservoir configuration parameters and also contains
@@ -123,7 +123,7 @@ namespace RCNet.Neural.Network.SM
             //Validation
             ElemValidator validator = new ElemValidator();
             Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.SM.ReservoirSettings.xsd");
+            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.SM.ReservoirStructure.ReservoirSettings.xsd");
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
             XElement reservoirSettingsElem = validator.Validate(elem, "rootElem");
             //Parsing

@@ -7,6 +7,8 @@ using RCNet.MathTools;
 using RCNet.Neural;
 using RCNet.Neural.Data;
 using RCNet.Neural.Network.SM;
+using RCNet.Neural.Network.SM.ReservoirStructure;
+using RCNet.Neural.Network.SM.Readout;
 using RCNet.DemoConsoleApp.Log;
 using System.Text;
 

@@ -83,7 +83,7 @@ See the [wiki pages.](https://en.wikipedia.org/wiki/Biological_neuron_model)
 |--|--|
 |FeedForwardNetwork|Implements the feed forward network supporting multiple hidden layers|
 |LinRegrTrainer|Implements the linear regression trainer of the feed forward network. This is the special case trainer for FF network having no hidden layers and Identity output activation function|
-|RPropTrainer|Resilient propagation trainer (iRPROP+ variant) of the feed forward network|
+|RPropTrainer|Resilient propagation (iRPROP+) trainer of the feed forward network|
 |ParallelPerceptron|Implements the parallel perceptron network|
 |PDeltaRuleTrainer|P-Delta rule trainer of the parallel perceptron network|
 

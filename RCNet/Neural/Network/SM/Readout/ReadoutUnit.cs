@@ -8,7 +8,7 @@ using RCNet.Extensions;
 using RCNet.Neural.Network.FF;
 using RCNet.Neural.Network.PP;
 
-namespace RCNet.Neural.Network.SM
+namespace RCNet.Neural.Network.SM.Readout
 {
     /// <summary>
     /// Contains the trained unit associated with output field and related

@@ -9,6 +9,8 @@ using RCNet.XmlTools;
 using RCNet.RandomValue;
 using RCNet.Neural.Data.Modulation;
 using RCNet.Neural.Network.SM.Synapse;
+using RCNet.Neural.Network.SM.ReservoirStructure;
+using RCNet.Neural.Network.SM.Readout;
 
 namespace RCNet.Neural.Network.SM
 {

@@ -11,7 +11,7 @@ using RCNet.Neural.Network.PP;
 using RCNet.XmlTools;
 using RCNet.MathTools;
 
-namespace RCNet.Neural.Network.SM
+namespace RCNet.Neural.Network.SM.Readout
 {
     /// <summary>
     /// The class contains readout layer configuration parameters.
@@ -87,7 +87,7 @@ namespace RCNet.Neural.Network.SM
             //Validation
             ElemValidator validator = new ElemValidator();
             Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.SM.ReadoutLayerSettings.xsd");
+            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.SM.Readout.ReadoutLayerSettings.xsd");
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
             XElement readoutLayerSettingsElem = validator.Validate(elem, "rootElem");
             //Parsing

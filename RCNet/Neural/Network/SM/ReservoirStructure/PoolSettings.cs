@@ -11,7 +11,7 @@ using RCNet.RandomValue;
 using RCNet.Neural.Activation;
 using RCNet.Neural.Network.SM.Synapse;
 
-namespace RCNet.Neural.Network.SM
+namespace RCNet.Neural.Network.SM.ReservoirStructure
 {
     /// <summary>
     /// The class contains neural pool configuration parameters and also contains
@@ -122,7 +122,7 @@ namespace RCNet.Neural.Network.SM
             //Validation
             ElemValidator validator = new ElemValidator();
             Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.SM.PoolSettings.xsd");
+            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.SM.ReservoirStructure.PoolSettings.xsd");
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
             XElement poolSettingsElem = validator.Validate(elem, "rootElem");
             //Parsing
@@ -330,7 +330,7 @@ namespace RCNet.Neural.Network.SM
                 //Validation
                 ElemValidator validator = new ElemValidator();
                 Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-                validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.SM.PoolNeuronGroupSettings.xsd");
+                validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.SM.ReservoirStructure.PoolNeuronGroupSettings.xsd");
                 validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
                 XElement settingsElem = validator.Validate(elem, "rootElem");
                 //Parsing
@@ -519,7 +519,7 @@ namespace RCNet.Neural.Network.SM
                 //Validation
                 ElemValidator validator = new ElemValidator();
                 Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-                validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.SM.PoolInterconnectionSettings.xsd");
+                validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.SM.ReservoirStructure.PoolInterconnectionSettings.xsd");
                 validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
                 XElement settingsElem = validator.Validate(elem, "rootElem");
                 //Parsing

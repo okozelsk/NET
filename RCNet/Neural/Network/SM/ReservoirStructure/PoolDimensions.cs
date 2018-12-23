@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using RCNet.Extensions;
 
-namespace RCNet.Neural.Network.SM
+namespace RCNet.Neural.Network.SM.ReservoirStructure
 {
     /// <summary>
     /// Class represents dimensions of the neural pool

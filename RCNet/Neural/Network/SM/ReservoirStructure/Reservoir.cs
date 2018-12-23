@@ -11,7 +11,7 @@ using RCNet.RandomValue;
 using RCNet.Neural.Network.SM.Neuron;
 using RCNet.Neural.Network.SM.Synapse;
 
-namespace RCNet.Neural.Network.SM
+namespace RCNet.Neural.Network.SM.ReservoirStructure
 {
     /// <summary>
     /// Implements reservoir supporting analog and spiking neurons working together.

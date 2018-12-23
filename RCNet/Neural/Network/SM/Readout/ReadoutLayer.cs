@@ -9,7 +9,7 @@ using RCNet.Neural.Activation;
 using RCNet.Neural.Data;
 using RCNet.Extensions;
 
-namespace RCNet.Neural.Network.SM
+namespace RCNet.Neural.Network.SM.Readout
 {
     /// <summary>
     /// Class implements the common readout layer for the reservoir computing methods
