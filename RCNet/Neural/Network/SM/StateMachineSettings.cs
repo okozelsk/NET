@@ -7,6 +7,8 @@ using System.Reflection;
 using RCNet.Extensions;
 using RCNet.XmlTools;
 using RCNet.RandomValue;
+using RCNet.Neural.Data.Modulation;
+using RCNet.Neural.Network.SM.Synapse;
 
 namespace RCNet.Neural.Network.SM
 {
@@ -32,19 +34,14 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         public int RandomizerSeek { get; set; }
         /// <summary>
-        /// The collection of input field names in order of how they will be pushed to the network.
+        /// Settings of this State Machine external and internal input
         /// </summary>
-        public List<string> InputFieldNameCollection { get; set; }
+        public InputSettings InputConfig { get; set; }
         /// <summary>
         /// Collection of definitions for future instances of internal reservoirs.
         /// Each definition contains a specific setting for the reservoir and mapping of the input fields
         /// </summary>
         public List<ReservoirInstanceDefinition> ReservoirInstanceDefinitionCollection { get; set; }
-        /// <summary>
-        /// The parameter specifies whether the input values will be forwarded to the regression
-        /// along with the predictors from the reservoirs.
-        /// </summary>
-        public bool RouteInputToReadout { get; set; }
         /// <summary>
         /// Configuration of the readout layer
         /// </summary>
@@ -59,9 +56,8 @@ namespace RCNet.Neural.Network.SM
             //Default settings
             TaskType = CommonEnums.TaskType.Prediction;
             RandomizerSeek = 0;
-            InputFieldNameCollection = new List<string>();
+            InputConfig = new InputSettings();
             ReservoirInstanceDefinitionCollection = new List<ReservoirInstanceDefinition>();
-            RouteInputToReadout = false;
             ReadoutLayerConfig = new ReadoutLayerSettings();
             return;
         }
@@ -75,13 +71,12 @@ namespace RCNet.Neural.Network.SM
             //Copy
             TaskType = source.TaskType;
             RandomizerSeek = source.RandomizerSeek;
-            InputFieldNameCollection = new List<string>(source.InputFieldNameCollection);
+            InputConfig = source.InputConfig.DeepClone();
             ReservoirInstanceDefinitionCollection = new List<ReservoirInstanceDefinition>(source.ReservoirInstanceDefinitionCollection.Count);
             foreach (ReservoirInstanceDefinition mapping in source.ReservoirInstanceDefinitionCollection)
             {
                 ReservoirInstanceDefinitionCollection.Add(mapping.DeepClone());
             }
-            RouteInputToReadout = source.RouteInputToReadout;
             ReadoutLayerConfig = new ReadoutLayerSettings(source.ReadoutLayerConfig);
             return;
         }
@@ -107,17 +102,11 @@ namespace RCNet.Neural.Network.SM
             TaskType = CommonEnums.ParseTaskType(stateMachineSettingsElem.Attribute("taskType").Value);
             //Randomizer seek
             RandomizerSeek = int.Parse(stateMachineSettingsElem.Attribute("randomizerSeek").Value);
-            //Input fields
-            XElement inputFieldsElem = stateMachineSettingsElem.Descendants("inputFields").First();
-            RouteInputToReadout = (inputFieldsElem.Attribute("routeToReadout") == null) ? false : bool.Parse(inputFieldsElem.Attribute("routeToReadout").Value);
-            if(TaskType != CommonEnums.TaskType.Prediction && RouteInputToReadout)
+            //Input
+            InputConfig = new InputSettings(stateMachineSettingsElem.Descendants("input").First());
+            if(TaskType != CommonEnums.TaskType.Prediction && InputConfig.RouteExternalInputToReadout)
             {
                 throw new Exception("Routing input to readout is allowed for prediction task only.");
-            }
-            InputFieldNameCollection = new List<string>();
-            foreach(XElement inputFieldElem in inputFieldsElem.Descendants("field"))
-            {
-                InputFieldNameCollection.Add(inputFieldElem.Attribute("name").Value);
             }
             //Collect available reservoir settings
             List<ReservoirSettings> availableResSettings = new List<ReservoirSettings>();
@@ -148,14 +137,14 @@ namespace RCNet.Neural.Network.SM
                     throw new Exception($"Reservoir settings '{reservoirInstanceElem.Attribute("cfg").Value}' was not found among available settings.");
                 }
 
-                //Reservoir's input fields aggregation
+                //Distinct input field names and corresponding indexes using by the reservoir instance
                 List<string> resInpFieldNameCollection = new List<string>();
                 foreach (XElement inputFieldAssignmentElem in reservoirInstanceElem.Descendants("inputFieldAssignments").First().Descendants("inputFieldAssignment"))
                 {
                     //Input field name
                     string inputFieldName = inputFieldAssignmentElem.Attribute("inputFieldName").Value;
-                    //Index in InputFieldNameCollection
-                    int inputFieldIdx = InputFieldNameCollection.IndexOf(inputFieldName);
+                    //Index in InputConfig
+                    int inputFieldIdx = InputConfig.IndexOf(inputFieldName);
                     //Found?
                     if (inputFieldIdx < 0)
                     {
@@ -165,7 +154,7 @@ namespace RCNet.Neural.Network.SM
                     //Add distinct name to the collection
                     if(resInpFieldNameCollection.IndexOf(inputFieldName) < 0)
                     {
-                        reservoirInstanceDefinition.InputFieldIdxCollection.Add(inputFieldIdx);
+                        reservoirInstanceDefinition.SMInputFieldIdxCollection.Add(inputFieldIdx);
                         resInpFieldNameCollection.Add(inputFieldName);
                     }
                 }
@@ -176,9 +165,9 @@ namespace RCNet.Neural.Network.SM
                     //Input field
                     string inputFieldName = inputFieldAssignmentElem.Attribute("inputFieldName").Value;
                     //Index in resInpFieldNameCollection
-                    int inputFieldIdx = resInpFieldNameCollection.IndexOf(inputFieldName);
+                    int resInputFieldIdx = resInpFieldNameCollection.IndexOf(inputFieldName);
                     //Found?
-                    if (inputFieldIdx < 0)
+                    if (resInputFieldIdx < 0)
                     {
                         //Not found
                         throw new Exception($"Reservoir instance {reservoirInstanceDefinition.InstanceName}: input field {inputFieldName} is not defined among Reservoir's input fields.");
@@ -206,7 +195,7 @@ namespace RCNet.Neural.Network.SM
                     //Static synapse settings
                     StaticSynapseSettings synapseCfg = new StaticSynapseSettings(inputFieldAssignmentElem.Descendants("staticSynapse").First());
                     //Add new assignment
-                    reservoirInstanceDefinition.InputFieldAssignmentCollection.Add(new ReservoirInstanceDefinition.InputFieldAssignment(inputFieldIdx, targetPoolID, density, synapseCfg));
+                    reservoirInstanceDefinition.InputFieldAssignmentCollection.Add(new ReservoirInstanceDefinition.InputFieldAssignment(resInputFieldIdx, targetPoolID, density, synapseCfg));
                 }
                 ReservoirInstanceDefinitionCollection.Add(reservoirInstanceDefinition);
             }
@@ -224,9 +213,8 @@ namespace RCNet.Neural.Network.SM
             StateMachineSettings cmpSettings = obj as StateMachineSettings;
             if (TaskType != cmpSettings.TaskType ||
                 RandomizerSeek != cmpSettings.RandomizerSeek ||
-                !InputFieldNameCollection.ToArray().ContainsEqualValues(cmpSettings.InputFieldNameCollection.ToArray()) ||
+                !Equals(InputConfig, cmpSettings.InputConfig) ||
                 ReservoirInstanceDefinitionCollection.Count != cmpSettings.ReservoirInstanceDefinitionCollection.Count ||
-                RouteInputToReadout != cmpSettings.RouteInputToReadout ||
                 !Equals(ReadoutLayerConfig, cmpSettings.ReadoutLayerConfig)
                 )
             {
@@ -261,6 +249,363 @@ namespace RCNet.Neural.Network.SM
 
         //Inner classes
         /// <summary>
+        /// Encapsulates State Machine input definition
+        /// </summary>
+        [Serializable]
+        public class InputSettings
+        {
+            //Attribute properties
+            /// <summary>
+            /// The parameter specifies whether the external input values will be forwarded to the regression
+            /// along with the predictors from the reservoirs.
+            /// </summary>
+            public bool RouteExternalInputToReadout { get; set; }
+
+            /// <summary>
+            /// External input data
+            /// </summary>
+            public List<Field> ExternalFieldCollection { get; set; }
+
+            /// <summary>
+            /// Internal (augmented) input data
+            /// </summary>
+            public List<InternalField> InternalFieldCollection { get; set; }
+
+            //Constructors
+            /// <summary>
+            /// Creates an uninitialized instance.
+            /// </summary>
+            public InputSettings()
+            {
+                RouteExternalInputToReadout = false;
+                ExternalFieldCollection = new List<Field>();
+                InternalFieldCollection = new List<InternalField>();
+                return;
+            }
+
+            /// <summary>
+            /// The deep copy constructor.
+            /// </summary>
+            /// <param name="source">Source instance</param>
+            public InputSettings(InputSettings source)
+                :this()
+            {
+                RouteExternalInputToReadout = source.RouteExternalInputToReadout;
+                foreach (Field field in source.ExternalFieldCollection)
+                {
+                    ExternalFieldCollection.Add(field.DeepClone());
+                }
+                foreach (InternalField field in source.InternalFieldCollection)
+                {
+                    InternalFieldCollection.Add((InternalField)field.DeepClone());
+                }
+                return;
+            }
+
+            /// <summary>
+            /// Creates an initialized instance
+            /// </summary>
+            /// <param name="settingsElem">Xml element containing associated signal modulator settings</param>
+            public InputSettings(XElement settingsElem)
+                :this()
+            {
+                Dictionary<string, string> uniquenessChecker = new Dictionary<string, string>();
+                //External fields
+                RouteExternalInputToReadout = bool.Parse(settingsElem.Descendants("external").First().Attribute("routeToReadout").Value);
+                foreach (XElement extFieldElem in settingsElem.Descendants("external").First().Descendants())
+                {
+                    string fieldName = extFieldElem.Attribute("name").Value;
+                    if(uniquenessChecker.ContainsKey(fieldName))
+                    {
+                        throw new Exception($"Duplicit input field name {fieldName}");
+                    }
+                    uniquenessChecker.Add(fieldName, fieldName);
+                    ExternalFieldCollection.Add(new Field(fieldName));
+                }
+                //Internal fields
+                XElement intFieldsElem = settingsElem.Descendants("internal").FirstOrDefault();
+                if (intFieldsElem != null)
+                {
+                    foreach (XElement intFieldElem in intFieldsElem.Descendants("field"))
+                    {
+                        string fieldName = intFieldElem.Attribute("name").Value;
+                        if (uniquenessChecker.ContainsKey(fieldName))
+                        {
+                            throw new Exception($"Duplicit input field name: {fieldName}");
+                        }
+                        uniquenessChecker.Add(fieldName, fieldName);
+                        InternalFieldCollection.Add(new InternalField(fieldName, intFieldElem.Descendants().First()));
+                    }
+                }
+                return;
+            }
+
+            //Properties
+            /// <summary>
+            /// Total number of SM input fields
+            /// </summary>
+            public int NumOfFields { get { return ExternalFieldCollection.Count + InternalFieldCollection.Count; } }
+
+            //Methods
+            /// <summary>
+            /// Function searches for index of the specified field among all SM input fields
+            /// </summary>
+            /// <param name="fieldName">Name of the searched field</param>
+            /// <returns>Zero based index of the field or -1 if searching fails</returns>
+            public int IndexOf(string fieldName)
+            {
+                for(int i = 0; i < ExternalFieldCollection.Count; i++)
+                {
+                    if(ExternalFieldCollection[i].Name == fieldName)
+                    {
+                        return i;
+                    }
+                }
+                for (int i = 0; i < InternalFieldCollection.Count; i++)
+                {
+                    if (InternalFieldCollection[i].Name == fieldName)
+                    {
+                        return ExternalFieldCollection.Count + i;
+                    }
+                }
+                return -1;
+            }
+
+            /// <summary>
+            /// Returns collection of external fields names
+            /// </summary>
+            /// <returns></returns>
+            public List<string> ExternalFieldNameCollection()
+            {
+                return (from item in ExternalFieldCollection select item.Name).ToList();
+            }
+
+            /// <summary>
+            /// Creates the deep copy instance of this instance
+            /// </summary>
+            /// <returns></returns>
+            public InputSettings DeepClone()
+            {
+                return new InputSettings(this);
+            }
+
+            /// <summary>
+            /// See the base.
+            /// </summary>
+            public override bool Equals(object obj)
+            {
+                if (obj == null) return false;
+                InputSettings cmpSettings = obj as InputSettings;
+                if (RouteExternalInputToReadout != cmpSettings.RouteExternalInputToReadout ||
+                    ExternalFieldCollection.Count != cmpSettings.ExternalFieldCollection.Count ||
+                    InternalFieldCollection.Count != cmpSettings.InternalFieldCollection.Count)
+                {
+                    return false;
+                }
+                for (int i = 0; i < ExternalFieldCollection.Count; i++)
+                {
+                    if(!Equals(ExternalFieldCollection[i], cmpSettings.ExternalFieldCollection[i]))
+                    {
+                        return false;
+                    }
+                }
+                for (int i = 0; i < InternalFieldCollection.Count; i++)
+                {
+                    if (!Equals(InternalFieldCollection[i], cmpSettings.InternalFieldCollection[i]))
+                    {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            /// <summary>
+            /// See the base.
+            /// </summary>
+            public override int GetHashCode()
+            {
+                return base.GetHashCode();
+            }
+
+
+            //Inner classes
+            /// <summary>
+            /// Represents simple input field
+            /// </summary>
+            [Serializable]
+            public class Field
+            {
+                //Attribute properties
+                /// <summary>
+                /// Field name
+                /// </summary>
+                public string Name { get; set; }
+
+                //Constructors
+                /// <summary>
+                /// Creates an initialized instance
+                /// </summary>
+                /// <param name="name">Field name</param>
+                public Field(string name)
+                {
+                    Name = name;
+                    return;
+                }
+
+                /// <summary>
+                /// The deep copy constructor.
+                /// </summary>
+                /// <param name="source">Source instance</param>
+                public Field(Field source)
+                {
+                    Name = source.Name;
+                    return;
+                }
+
+                //Methods
+                /// <summary>
+                /// Creates the deep copy instance of this instance
+                /// </summary>
+                /// <returns></returns>
+                public virtual Field DeepClone()
+                {
+                    return new Field(this);
+                }
+
+                /// <summary>
+                /// See the base.
+                /// </summary>
+                public override bool Equals(object obj)
+                {
+                    if (obj == null) return false;
+                    Field cmpSettings = obj as Field;
+                    if (Name != cmpSettings.Name)
+                    {
+                        return false;
+                    }
+                    return true;
+                }
+
+                /// <summary>
+                /// See the base.
+                /// </summary>
+                public override int GetHashCode()
+                {
+                    return Name.GetHashCode();
+                }
+
+            }//Field
+
+            /// <summary>
+            /// Represents input internal field
+            /// </summary>
+            [Serializable]
+            public class InternalField : Field
+            {
+                //Attribute properties
+                /// <summary>
+                /// Signal modualtor configuration
+                /// </summary>
+                public Object ModulatorSettings { get; set; }
+
+                //Constructors
+                /// <summary>
+                /// Creates an initialized instance
+                /// </summary>
+                /// <param name="name">Field name</param>
+                /// <param name="settingsElem">Xml element containing associated signal modulator settings</param>
+                public InternalField(string name, XElement settingsElem)
+                    :base(name)
+                {
+                    switch(settingsElem.Name.LocalName)
+                    {
+                        case "constModulator":
+                            ModulatorSettings = new ConstModulatorSettings(settingsElem);
+                            break;
+                        case "randomModulator":
+                            ModulatorSettings = new RandomValueSettings(settingsElem);
+                            break;
+                        case "sinusoidalModulator":
+                            ModulatorSettings = new SinusoidalModulatorSettings(settingsElem);
+                            break;
+                        case "mackeyGlassModulator":
+                            ModulatorSettings = new MackeyGlassModulatorSettings(settingsElem);
+                            break;
+                        default:
+                            throw new Exception($"Unknown modulator settings {settingsElem.Name.LocalName}");
+                    }
+                    return;
+                }
+
+                /// <summary>
+                /// The deep copy constructor.
+                /// </summary>
+                /// <param name="source">Source instance</param>
+                public InternalField(InternalField source)
+                    :base(source)
+                {
+                    if(source.ModulatorSettings.GetType() == typeof(ConstModulatorSettings))
+                    {
+                        ModulatorSettings = ((ConstModulatorSettings)source.ModulatorSettings).DeepClone();
+                    }
+                    else if(source.ModulatorSettings.GetType() == typeof(RandomValueSettings))
+                    {
+                        ModulatorSettings = ((RandomValueSettings)source.ModulatorSettings).DeepClone();
+                    }
+                    else if (source.ModulatorSettings.GetType() == typeof(SinusoidalModulatorSettings))
+                    {
+                        ModulatorSettings = ((SinusoidalModulatorSettings)source.ModulatorSettings).DeepClone();
+                    }
+                    else if (source.ModulatorSettings.GetType() == typeof(MackeyGlassModulatorSettings))
+                    {
+                        ModulatorSettings = ((MackeyGlassModulatorSettings)source.ModulatorSettings).DeepClone();
+                    }
+                    else
+                    {
+                        throw new Exception($"Unknown modulator settings {source.ModulatorSettings.ToString()}");
+                    }
+                    return;
+                }
+
+                //Methods
+                /// <summary>
+                /// Creates the deep copy instance of this instance
+                /// </summary>
+                /// <returns></returns>
+                public override Field DeepClone()
+                {
+                    return new InternalField(this);
+                }
+
+                /// <summary>
+                /// See the base.
+                /// </summary>
+                public override bool Equals(object obj)
+                {
+                    if (obj == null) return false;
+                    InternalField cmpSettings = obj as InternalField;
+                    if (!base.Equals(obj) || 
+                        !Equals(ModulatorSettings, cmpSettings.ModulatorSettings)
+                        )
+                    {
+                        return false;
+                    }
+                    return true;
+                }
+
+                /// <summary>
+                /// See the base.
+                /// </summary>
+                public override int GetHashCode()
+                {
+                    return base.GetHashCode();
+                }
+
+            }//InternalField
+
+        }//InputSettings
+
+        /// <summary>
         /// Definition of future instance of State Machine internal reservoir.
         /// Definition contains a specific setting for the reservoir and maps the input
         /// fields of the reservoir to the input fields of the State Machine network.
@@ -288,7 +633,7 @@ namespace RCNet.Neural.Network.SM
             /// <summary>
             /// Reservoir's input fields indexes in State Machine input fields.
             /// </summary>
-            public List<int> InputFieldIdxCollection { get; set; }
+            public List<int> SMInputFieldIdxCollection { get; set; }
             /// <summary>
             /// Mapping of the Reservoir's input fields to the Reservoir's pools.
             /// </summary>
@@ -303,7 +648,7 @@ namespace RCNet.Neural.Network.SM
                 InstanceName = string.Empty;
                 Settings = null;
                 AugmentedStates = false;
-                InputFieldIdxCollection = new List<int>();
+                SMInputFieldIdxCollection = new List<int>();
                 InputFieldAssignmentCollection = new List<InputFieldAssignment>();
                 return;
             }
@@ -317,7 +662,7 @@ namespace RCNet.Neural.Network.SM
                 InstanceName = source.InstanceName;
                 Settings = source.Settings.DeepClone();
                 AugmentedStates = source.AugmentedStates;
-                InputFieldIdxCollection = new List<int>(source.InputFieldIdxCollection);
+                SMInputFieldIdxCollection = new List<int>(source.SMInputFieldIdxCollection);
                 InputFieldAssignmentCollection = new List<InputFieldAssignment>(source.InputFieldAssignmentCollection.Count);
                 foreach(InputFieldAssignment ifa in source.InputFieldAssignmentCollection)
                 {
@@ -346,8 +691,8 @@ namespace RCNet.Neural.Network.SM
                 if (InstanceName != cmpSettings.InstanceName ||
                     !Equals(Settings, cmpSettings.Settings) ||
                     AugmentedStates != cmpSettings.AugmentedStates ||
-                    InputFieldIdxCollection.Count != cmpSettings.InputFieldIdxCollection.Count ||
-                    !InputFieldIdxCollection.ToArray().ContainsEqualValues(cmpSettings.InputFieldIdxCollection.ToArray()) ||
+                    SMInputFieldIdxCollection.Count != cmpSettings.SMInputFieldIdxCollection.Count ||
+                    !SMInputFieldIdxCollection.ToArray().ContainsEqualValues(cmpSettings.SMInputFieldIdxCollection.ToArray()) ||
                     InputFieldAssignmentCollection.Count != cmpSettings.InputFieldAssignmentCollection.Count
                     )
                 {
@@ -380,13 +725,13 @@ namespace RCNet.Neural.Network.SM
             {
                 //Attribute properties
                 /// <summary>
-                /// Index of the reservoir input field
+                /// Index of the reservoir's input field
                 /// </summary>
-                public int FieldIdx;
+                public int FieldIdx { get; set; }
                 /// <summary>
                 /// ID of the pool
                 /// </summary>
-                public int PoolID;
+                public int PoolID { get; set; }
                 /// <summary>
                 /// Each reservoir input neuron will be connected by the synapse to the number of
                 /// pool neurons = (Dim.Size * Density).

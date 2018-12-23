@@ -7,14 +7,13 @@ using RCNet.Extensions;
 using RCNet.MathTools;
 using RCNet.Neural.Activation;
 
-namespace RCNet.Neural.Network.SM
+namespace RCNet.Neural.Network.SM.Neuron
 {
     /// <summary>
-    /// Reservoir neuron is the main type of the neuron processing input stimuli and emitting output signal.
-    /// Spiking neuron produces spikes.
+    /// Spiking neuron has spiking activation function and produces spikes
     /// </summary>
     [Serializable]
-    public class ReservoirSpikingNeuron : INeuron
+    public class SpikingNeuron : INeuron
     {
         //Static attributes
         /// <summary>
@@ -101,7 +100,7 @@ namespace RCNet.Neural.Network.SM
         /// <param name="role">Neuron's signal role (Excitatory/Inhibitory).</param>
         /// <param name="activation">Instantiated activation function.</param>
         /// <param name="bias">Constant bias.</param>
-        public ReservoirSpikingNeuron(NeuronPlacement placement,
+        public SpikingNeuron(NeuronPlacement placement,
                                       CommonEnums.NeuronRole role,
                                       IActivationFunction activation,
                                       double bias

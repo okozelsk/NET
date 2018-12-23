@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using RCNet.Extensions;
 using RCNet.MathTools;
 using RCNet.Neural.Data;
+using RCNet.Neural.Data.Modulation;
+using RCNet.RandomValue;
 
 namespace RCNet.Neural.Network.SM
 {
@@ -29,9 +31,13 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         private StateMachineSettings _settings;
         /// <summary>
-        /// Data range. Data range has to be always -1,1
+        /// Data range. Data range has to be always between -1 and 1
         /// </summary>
         private readonly Interval _dataRange;
+        /// <summary>
+        /// Collection of the internal input modulators associated with the internal input fields
+        /// </summary>
+        private readonly List<IModulator> _internalInputModulatorCollection;
         /// <summary>
         /// Collection of reservoir instances.
         /// </summary>
@@ -55,7 +61,31 @@ namespace RCNet.Neural.Network.SM
             _settings = settings.DeepClone();
             //Data range has to be always <-1,1>
             _dataRange = CommonEnums.GetDataNormalizationRange(CommonEnums.DataNormalizationRange.Inclusive_Neg1_Pos1);
-            //Build structure
+            //Internal input modulators
+            _internalInputModulatorCollection = new List<IModulator>();
+            foreach(StateMachineSettings.InputSettings.InternalField field in _settings.InputConfig.InternalFieldCollection)
+            {
+                if(field.ModulatorSettings.GetType() == typeof(ConstModulatorSettings))
+                {
+                    _internalInputModulatorCollection.Add(new ConstModulator((ConstModulatorSettings)field.ModulatorSettings));
+                }
+                else if (field.ModulatorSettings.GetType() == typeof(RandomValueSettings))
+                {
+                    _internalInputModulatorCollection.Add(new RandomModulator((RandomValueSettings)field.ModulatorSettings));
+                }
+                else if (field.ModulatorSettings.GetType() == typeof(SinusoidalModulatorSettings))
+                {
+                    _internalInputModulatorCollection.Add(new SinusoidalModulator((SinusoidalModulatorSettings)field.ModulatorSettings));
+                }
+                else if (field.ModulatorSettings.GetType() == typeof(MackeyGlassModulatorSettings))
+                {
+                    _internalInputModulatorCollection.Add(new MackeyGlassModulator((MackeyGlassModulatorSettings)field.ModulatorSettings));
+                }
+                else
+                {
+                    throw new Exception($"Unsupported internal signal modulator for field {field.Name}");
+                }
+            }
             //Reservoir instance(s)
             _numOfPredictors = 0;
             _reservoirCollection = new List<Reservoir>(_settings.ReservoirInstanceDefinitionCollection.Count);
@@ -65,9 +95,9 @@ namespace RCNet.Neural.Network.SM
                 _reservoirCollection.Add(reservoir);
                 _numOfPredictors += reservoir.NumOfOutputPredictors;
             }
-            if(_settings.RouteInputToReadout)
+            if(_settings.InputConfig.RouteExternalInputToReadout)
             {
-                _numOfPredictors += _settings.InputFieldNameCollection.Count;
+                _numOfPredictors += _settings.InputConfig.ExternalFieldCollection.Count;
             }
             //Readout layer
             _readoutLayer = null;
@@ -89,6 +119,10 @@ namespace RCNet.Neural.Network.SM
         /// <param name="resetStatistics">Specifies whether to reset internal statistics</param>
         private void Reset(bool resetStatistics)
         {
+            foreach(IModulator modulator in _internalInputModulatorCollection)
+            {
+                modulator.Reset();
+            }
             foreach(Reservoir reservoir in _reservoirCollection)
             {
                 reservoir.Reset(resetStatistics);
@@ -97,32 +131,49 @@ namespace RCNet.Neural.Network.SM
         }
 
         /// <summary>
+        /// Adds inputs from internal modulators to be used in reservoirs.
+        /// </summary>
+        /// <param name="externalInputVector">External input values</param>
+        /// <returns></returns>
+        private double[] AddInternalInputVector(double[] externalInputVector)
+        {
+            double[] smInput = new double[_settings.InputConfig.NumOfFields];
+            externalInputVector.CopyTo(smInput, 0);
+            for(int i = 0; i < _internalInputModulatorCollection.Count; i++)
+            {
+                smInput[_settings.InputConfig.ExternalFieldCollection.Count + i] = _internalInputModulatorCollection[i].Next();
+            }
+            return smInput;
+        }
+
+        /// <summary>
         /// Pushes input values into the reservoirs and returns the predictors
         /// </summary>
-        /// <param name="inputValues">Input values</param>
+        /// <param name="externalInputVector">Input values</param>
         /// <param name="collectStatesStatistics">
         /// The parameter indicates whether to update internal statistics
         /// </param>
-        private double[] PushInput(double[] inputValues, bool collectStatesStatistics)
+        private double[] PushInput(double[] externalInputVector, bool collectStatesStatistics)
         {
+            double[] completedInputVector = AddInternalInputVector(externalInputVector);
             double[] predictors = new double[_numOfPredictors];
             int predictorsIdx = 0;
             //Compute reservoir(s)
             foreach (Reservoir reservoir in _reservoirCollection)
             {
-                double[] reservoirInput = new double[reservoir.InstanceDefinition.InputFieldIdxCollection.Count];
-                for(int i = 0; i < reservoir.InstanceDefinition.InputFieldIdxCollection.Count; i++)
+                double[] reservoirInput = new double[reservoir.InstanceDefinition.SMInputFieldIdxCollection.Count];
+                for(int i = 0; i < reservoir.InstanceDefinition.SMInputFieldIdxCollection.Count; i++)
                 {
-                    reservoirInput[i] = inputValues[reservoir.InstanceDefinition.InputFieldIdxCollection[i]];
+                    reservoirInput[i] = completedInputVector[reservoir.InstanceDefinition.SMInputFieldIdxCollection[i]];
                 }
                 //Compute reservoir
                 reservoir.Compute(reservoirInput, collectStatesStatistics);
                 reservoir.CopyPredictorsTo(predictors, predictorsIdx);
                 predictorsIdx += reservoir.NumOfOutputPredictors;
             }
-            if(_settings.RouteInputToReadout)
+            if(_settings.InputConfig.RouteExternalInputToReadout)
             {
-                inputValues.CopyTo(predictors, predictorsIdx);
+                completedInputVector.CopyTo(predictors, predictorsIdx);
             }
             return predictors;
         }
@@ -130,22 +181,28 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// Pushes input pattern into the reservoirs and returns the predictors
         /// </summary>
-        /// <param name="inputPattern">Input pattern</param>
-        private double[] PushInput(List<double[]> inputPattern)
+        /// <param name="externalInputPattern">Input pattern</param>
+        private double[] PushInput(List<double[]> externalInputPattern)
         {
             double[] predictors = new double[_numOfPredictors];
             int predictorsIdx = 0;
+            //Reset SM but keep statistics
+            Reset(false);
+            //Add internal input
+            List<double[]> completedInputPattern = new List<double[]>(externalInputPattern.Count);
+            foreach(double[] externalInputVector in externalInputPattern)
+            {
+                completedInputPattern.Add(AddInternalInputVector(externalInputVector));
+            }
             //Compute reservoir(s)
             foreach (Reservoir reservoir in _reservoirCollection)
             {
-                //Reset reservoir states but keep internal statistics
-                reservoir.Reset(false);
-                double[] reservoirInput = new double[reservoir.InstanceDefinition.InputFieldIdxCollection.Count];
-                foreach (double[] inputVector in inputPattern)
+                double[] reservoirInput = new double[reservoir.InstanceDefinition.SMInputFieldIdxCollection.Count];
+                foreach (double[] inputVector in completedInputPattern)
                 {
-                    for (int i = 0; i < reservoir.InstanceDefinition.InputFieldIdxCollection.Count; i++)
+                    for (int i = 0; i < reservoir.InstanceDefinition.SMInputFieldIdxCollection.Count; i++)
                     {
-                        reservoirInput[i] = inputVector[reservoir.InstanceDefinition.InputFieldIdxCollection[i]];
+                        reservoirInput[i] = inputVector[reservoir.InstanceDefinition.SMInputFieldIdxCollection[i]];
                     }
                     //Compute the reservoir
                     reservoir.Compute(reservoirInput, true);

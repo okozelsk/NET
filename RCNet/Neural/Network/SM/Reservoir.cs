@@ -8,7 +8,8 @@ using RCNet.Extensions;
 using RCNet.Neural.Activation;
 using System.Collections.Concurrent;
 using RCNet.RandomValue;
-using RCNet.Neural.Network.SM;
+using RCNet.Neural.Network.SM.Neuron;
+using RCNet.Neural.Network.SM.Synapse;
 
 namespace RCNet.Neural.Network.SM
 {
@@ -23,10 +24,6 @@ namespace RCNet.Neural.Network.SM
         /// Reservoir's input neurons.
         /// </summary>
         private readonly INeuron[] _inputNeuronCollection;
-        /// <summary>
-        /// Noise generators (one per pool).
-        /// </summary>
-        private readonly Random[] _poolNoiseGeneratorCollection;
         /// <summary>
         /// Neurons within the pools.
         /// </summary>
@@ -61,11 +58,12 @@ namespace RCNet.Neural.Network.SM
         /// </param>
         public Reservoir(StateMachineSettings.ReservoirInstanceDefinition instanceDefinition, Interval inputRange, int randomizerSeek = -1)
         {
-            int numOfInputNodes = instanceDefinition.InputFieldIdxCollection.Count;
+            int numOfInputNodes = instanceDefinition.SMInputFieldIdxCollection.Count;
             //Copy settings
             InstanceDefinition = instanceDefinition.DeepClone();
             //Random generator used for reservoir structure initialization
             Random rand = (randomizerSeek < 0 ? new Random() : new Random(randomizerSeek));
+            
             //-----------------------------------------------------------------------------
             //Initialization of neurons
             //-----------------------------------------------------------------------------
@@ -73,23 +71,8 @@ namespace RCNet.Neural.Network.SM
             _inputNeuronCollection = new INeuron[numOfInputNodes];
             for(int i = 0; i < numOfInputNodes; i++)
             {
-                if (InstanceDefinition.Settings.InputCoding == CommonEnums.InputCodingType.Analog)
-                {
-                    //Analog input
-                    _inputNeuronCollection[i] = new InputAnalogNeuron(InstanceDefinition.Settings.InputEntryPoint, i, inputRange);
-                }
-                else
-                {
-                    //Spiking input
-                    _inputNeuronCollection[i] = new InputSpikingNeuron(InstanceDefinition.Settings.InputEntryPoint, i, inputRange, InstanceDefinition.Settings.InputDuration);
-                }
+                _inputNeuronCollection[i] = new InputNeuron(InstanceDefinition.Settings.InputEntryPoint, i, inputRange);
             }
-
-            //-----------------------------------------------------------------------------
-            //Noise generators for the pools
-            //-----------------------------------------------------------------------------
-            _poolNoiseGeneratorCollection = new Random[InstanceDefinition.Settings.PoolSettingsCollection.Count];
-            ResetPoolNoiseGenerators();
 
             //-----------------------------------------------------------------------------
             //Reservoir neurons
@@ -165,7 +148,7 @@ namespace RCNet.Neural.Network.SM
                             if (neuronParamsCollection[neuronPoolFlatIdx].Activation.OutputSignalType == ActivationFactory.FunctionOutputSignalType.Spike)
                             {
                                 //Spiking neuron
-                                poolNeurons[neuronPoolFlatIdx] = new ReservoirSpikingNeuron(placement,
+                                poolNeurons[neuronPoolFlatIdx] = new SpikingNeuron(placement,
                                                                                             neuronParamsCollection[neuronPoolFlatIdx].Role,
                                                                                             neuronParamsCollection[neuronPoolFlatIdx].Activation,
                                                                                             neuronParamsCollection[neuronPoolFlatIdx].Bias
@@ -174,7 +157,7 @@ namespace RCNet.Neural.Network.SM
                             else
                             {
                                 //Analog neuron
-                                poolNeurons[neuronPoolFlatIdx] = new ReservoirAnalogNeuron(placement,
+                                poolNeurons[neuronPoolFlatIdx] = new AnalogNeuron(placement,
                                                                                            neuronParamsCollection[neuronPoolFlatIdx].Role,
                                                                                            neuronParamsCollection[neuronPoolFlatIdx].Activation,
                                                                                            neuronParamsCollection[neuronPoolFlatIdx].Bias,
@@ -320,18 +303,6 @@ namespace RCNet.Neural.Network.SM
         public int NumOfOutputPredictors { get; }
 
         //Methods
-        /// <summary>
-        /// Recreate noise generators to ensure initial states and thus the same following sequences
-        /// </summary>
-        private void ResetPoolNoiseGenerators()
-        {
-            for (int i = 0; i < InstanceDefinition.Settings.PoolSettingsCollection.Count; i++)
-            {
-                _poolNoiseGeneratorCollection[i] = new Random(i);
-            }
-            return;
-        }
-        
         /// <summary>
         /// Computes max eigenvalue
         /// </summary>
@@ -1038,8 +1009,6 @@ namespace RCNet.Neural.Network.SM
                     synapse.Reset(resetStatistics);
                 }
             });
-            //Noise generators
-            ResetPoolNoiseGenerators();
             return;
         }
 
@@ -1055,66 +1024,43 @@ namespace RCNet.Neural.Network.SM
         /// </param>
         public void Compute(double[] input, bool updateStatistics)
         {
-            OrderablePartitioner<Tuple<int, int>> rangePartitioner = Partitioner.Create(0, _reservoirNeuronCollection.Length);
             //Set input to input neurons
             for (int i = 0; i < input.Length; i++)
             {
                 _inputNeuronCollection[i].NewStimuli(input[i], 0);
+                _inputNeuronCollection[i].NewState(updateStatistics);
             }
-            //Buffer for input from noise generators
-            double[] noiseInput = new double[_poolNoiseGeneratorCollection.Length];
-            //Perform computation cycles
-            for (int cycle = 0; cycle < InstanceDefinition.Settings.InputDuration; cycle++)
+            //Perform reservoir's computation cycle
+            OrderablePartitioner<Tuple<int, int>> rangePartitioner = Partitioner.Create(0, _reservoirNeuronCollection.Length);
+            //Collect new stimulation for each reservoir neuron
+            Parallel.ForEach(rangePartitioner, range =>
             {
-                //Prepare input fetching
-                for (int i = 0; i < input.Length; i++)
+                for (int neuronIdx = range.Item1; neuronIdx < range.Item2; neuronIdx++)
                 {
-                    _inputNeuronCollection[i].NewState(updateStatistics);
+                    //Stimulation from input neurons
+                    double iStimuli = 0;
+                    foreach (ISynapse synapse in _neuronInputConnectionsCollection[neuronIdx])
+                    {
+                        iStimuli += synapse.GetSignal(updateStatistics);
+                    }
+                    //Stimulation from connected reservoir neurons
+                    double rStimuli = 0;
+                    foreach (ISynapse synapse in _neuronNeuronConnectionsCollection[neuronIdx])
+                    {
+                        rStimuli += synapse.GetSignal(updateStatistics);
+                    }
+                    //Store new neuron's stimulation
+                    _reservoirNeuronCollection[neuronIdx].NewStimuli(iStimuli, rStimuli);
                 }
-                //Prepare input from noise generators
-                for (int i = 0; i < noiseInput.Length; i++)
+            });
+            //Recompute all reservoir neurons
+            Parallel.ForEach(rangePartitioner, range =>
+            {
+                for (int neuronIdx = range.Item1; neuronIdx < range.Item2; neuronIdx++)
                 {
-                    if (InstanceDefinition.Settings.PoolSettingsCollection[i].NoiseModulatorCfg != null)
-                    {
-                        noiseInput[i] = _poolNoiseGeneratorCollection[i].NextDouble(InstanceDefinition.Settings.PoolSettingsCollection[i].NoiseModulatorCfg);
-                    }
-                    else
-                    {
-                        noiseInput[i] = 0;
-                    }
+                    _reservoirNeuronCollection[neuronIdx].NewState(updateStatistics);
                 }
-                //Collect new stimulation for each reservoir neuron
-                Parallel.ForEach(rangePartitioner, range =>
-                {
-                    for (int neuronIdx = range.Item1; neuronIdx < range.Item2; neuronIdx++)
-                    {
-                        //Stimulation from input neurons
-                        double iStimuli = 0;
-                        foreach (ISynapse synapse in _neuronInputConnectionsCollection[neuronIdx])
-                        {
-                            iStimuli += synapse.GetSignal(updateStatistics);
-                        }
-                        //Stimulation from noise generator
-                        double nStimuli = noiseInput[_reservoirNeuronCollection[neuronIdx].Placement.PoolID];
-                        //Stimulation from connected reservoir neurons
-                        double rStimuli = 0;
-                        foreach (ISynapse synapse in _neuronNeuronConnectionsCollection[neuronIdx])
-                        {
-                            rStimuli += synapse.GetSignal(updateStatistics);
-                        }
-                        //Store new neuron's stimulation
-                        _reservoirNeuronCollection[neuronIdx].NewStimuli(iStimuli + nStimuli, rStimuli);
-                    }
-                });
-                //Recompute all reservoir neurons
-                Parallel.ForEach(rangePartitioner, range =>
-                {
-                    for (int neuronIdx = range.Item1; neuronIdx < range.Item2; neuronIdx++)
-                    {
-                        _reservoirNeuronCollection[neuronIdx].NewState(updateStatistics);
-                    }
-                });
-            }
+            });
             return;
         }
 

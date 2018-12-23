@@ -20,12 +20,25 @@
   <case name="Classification task Libras Movement: Mixed spiking and analog reservoir, Linear regression classifier">
     <samples fileName="LibrasMovement.csv" singleNormalizer="false" normalizerReserve="0.1"/>
     <stateMachineCfg taskType="Classification" randomizerSeek="0">
-      <inputFields routeToReadout="false">
-        <field name="coord_abcissa"/>
-        <field name="coord_ordinate"/>
-      </inputFields>
+      <input>
+        <external routeToReadout="false">
+          <field name="coord_abcissa"/>
+          <field name="coord_ordinate"/>
+        </external>
+        <internal>
+          <field name="noise">
+            <randomModulator min="-0.8" max="0.8" randomSign="false" distribution="Uniform"/>
+          </field>
+          <field name="sin">
+            <sinusoidalModulator phase="90" freq="20" ampl="0.1" />
+          </field>
+          <field name="mg">
+            <mackeyGlassModulator tau="18" b="0.1" c="0.2"/>
+          </field>
+        </internal>
+      </input>
       <reservoirCfgContainer>
-        <reservoirCfg name="MainCfg" inputCoding="Analog" inputDuration="1" synapticDelayMethod="Random" maxInputDelay="0" maxInternalDelay="1" spectralRadius="0.999">
+        <reservoirCfg name="MainCfg" synapticDelayMethod="Random" maxInputDelay="0" maxInternalDelay="1" spectralRadius="0.999">
           <inputEntryPoint x="0" y="0" z="0"/>
           <pools>
             <pool name="Spiking pool" x="0" y="0" z="0" dimX="4" dimY="4" dimZ="4" readoutNeuronsDensity="1">
@@ -49,12 +62,11 @@
                   <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
                 </neuronGroup>
               </neuronGroups>
-              <interconnection density="0.1" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
+              <interconnection density="0.2" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
                 <dynamicSynapse restingEfficacy="0.5" tauFacilitation="500" tauRecovery="5" tauDecay="10">
                   <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
                 </dynamicSynapse>
               </interconnection>
-              <noiseModulator min="-0.8" max="0.8" randomSign="false" distribution="Uniform"/>
             </pool>
             <pool name="Logistic pool" x="0" y="0" z="0" dimX="5" dimY="5" dimZ="6" readoutNeuronsDensity="1">
               <neuronGroups>
@@ -72,10 +84,6 @@
                   <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
                 </dynamicSynapse>
               </interconnection>
-              <retainmentNeurons density="1">
-                <rate min="0" max="0" randomSign="false" distribution="Uniform"/>
-              </retainmentNeurons>
-              <noiseModulator min="-1.2" max="1.2" randomSign="false" distribution="Uniform"/>
             </pool>
           </pools>
           <pool2PoolConns>
@@ -105,6 +113,11 @@
                 <weight min="0" max="0.3" randomSign="false" distribution="Uniform"/>
               </staticSynapse>
             </inputFieldAssignment>
+            <inputFieldAssignment inputFieldName="sin" poolName="Spiking pool" density="1">
+              <staticSynapse>
+                <weight min="1" max="1" randomSign="false" distribution="Uniform"/>
+              </staticSynapse>
+            </inputFieldAssignment>
             <inputFieldAssignment inputFieldName="coord_abcissa" poolName="Logistic pool" density="1">
               <staticSynapse>
                 <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
@@ -113,6 +126,11 @@
             <inputFieldAssignment inputFieldName="coord_ordinate" poolName="Logistic pool" density="1">
               <staticSynapse>
                 <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
+              </staticSynapse>
+            </inputFieldAssignment>
+            <inputFieldAssignment inputFieldName="sin" poolName="Logistic pool" density="1">
+              <staticSynapse>
+                <weight min="1" max="1" randomSign="false" distribution="Uniform"/>
               </staticSynapse>
             </inputFieldAssignment>
           </inputFieldAssignments>
@@ -156,11 +174,13 @@
   <case name="Prediction task High and Low share prices of TTOO (T2 Biosystems, Inc.): Small analog reservoir (ESN), linear regression readout">
     <samples fileName="TTOO.csv" bootSamples="150" singleNormalizer="true" normalizerReserve="0.1"/>
     <stateMachineCfg taskType="Prediction" randomizerSeek="0">
-      <inputFields routeToReadout="true">
-        <field name="High"/>
-        <field name="Low"/>
-        <field name="Adj Close"/>
-      </inputFields>
+      <input>
+        <external routeToReadout="true">
+          <field name="High"/>
+          <field name="Low"/>
+          <field name="Adj Close"/>
+        </external>
+      </input>
       <reservoirCfgContainer>
         <reservoirCfg name="MainCfg" synapticDelayMethod="Random" maxInputDelay="0" maxInternalDelay="2" spectralRadius="0.999">
           <pools>
@@ -220,11 +240,13 @@
   <case name="Prediction task High and Low share prices of TTOO (T2 Biosystems, Inc.): Small analog reservoir (ESN), multilayer Feed Forward network readout">
     <samples fileName="TTOO.csv" bootSamples="150" singleNormalizer="true" normalizerReserve="0.1"/>
     <stateMachineCfg taskType="Prediction" randomizerSeek="0">
-      <inputFields routeToReadout="true">
-        <field name="High"/>
-        <field name="Low"/>
-        <field name="Adj Close"/>
-      </inputFields>
+      <input>
+        <external routeToReadout="true">
+          <field name="High"/>
+          <field name="Low"/>
+          <field name="Adj Close"/>
+        </external>
+      </input>
       <reservoirCfgContainer>
         <reservoirCfg name="MainCfg" synapticDelayMethod="Random" maxInputDelay="0" maxInternalDelay="2" spectralRadius="0.999">
           <pools>
@@ -289,12 +311,19 @@
     <!-- Data converted from https://archive.ics.uci.edu/ml/datasets/Libras+Movement -->
     <samples fileName="LibrasMovement.csv" singleNormalizer="false" normalizerReserve="0.1"/>
     <stateMachineCfg taskType="Classification" randomizerSeek="0">
-      <inputFields routeToReadout="false">
-        <field name="coord_abcissa"/>
-        <field name="coord_ordinate"/>
-      </inputFields>
+      <input>
+        <external routeToReadout="false">
+          <field name="coord_abcissa"/>
+          <field name="coord_ordinate"/>
+        </external>
+        <internal>
+          <field name="noise">
+            <randomModulator min="-0.8" max="0.8" randomSign="false" distribution="Uniform"/>
+          </field>
+        </internal>
+      </input>
       <reservoirCfgContainer>
-        <reservoirCfg name="MainCfg" inputCoding="Analog" inputDuration="1" synapticDelayMethod="Random" maxInputDelay="0" maxInternalDelay="1" spectralRadius="0.999">
+        <reservoirCfg name="MainCfg" synapticDelayMethod="Random" maxInputDelay="0" maxInternalDelay="1" spectralRadius="0.999">
           <inputEntryPoint x="0" y="0" z="0"/>
           <pools>
             <pool name="Spiking pool" x="0" y="0" z="0" dimX="6" dimY="6" dimZ="6" readoutNeuronsDensity="1">
@@ -323,7 +352,6 @@
                   <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
                 </dynamicSynapse>
               </interconnection>
-              <noiseModulator min="-0.8" max="0.8" randomSign="false" distribution="Uniform"/>
             </pool>
           </pools>
         </reservoirCfg>
@@ -381,12 +409,19 @@
     <!-- Data converted from https://archive.ics.uci.edu/ml/datasets/Libras+Movement -->
     <samples fileName="LibrasMovement.csv" singleNormalizer="false" normalizerReserve="0.1"/>
     <stateMachineCfg taskType="Classification" randomizerSeek="0">
-      <inputFields routeToReadout="false">
-        <field name="coord_abcissa"/>
-        <field name="coord_ordinate"/>
-      </inputFields>
+      <input>
+        <external routeToReadout="false">
+          <field name="coord_abcissa"/>
+          <field name="coord_ordinate"/>
+        </external>
+        <internal>
+          <field name="noise">
+            <randomModulator min="-0.8" max="0.8" randomSign="false" distribution="Uniform"/>
+          </field>
+        </internal>
+      </input>
       <reservoirCfgContainer>
-        <reservoirCfg name="MainCfg" inputCoding="Analog" inputDuration="1" synapticDelayMethod="Random" maxInputDelay="0" maxInternalDelay="1" spectralRadius="0.999">
+        <reservoirCfg name="MainCfg" synapticDelayMethod="Random" maxInputDelay="0" maxInternalDelay="1" spectralRadius="0.999">
           <inputEntryPoint x="0" y="0" z="0"/>
           <pools>
             <pool name="Spiking pool" x="0" y="0" z="0" dimX="6" dimY="6" dimZ="6" readoutNeuronsDensity="1">
@@ -415,7 +450,6 @@
                   <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
                 </dynamicSynapse>
               </interconnection>
-              <noiseModulator min="-0.8" max="0.8" randomSign="false" distribution="Uniform"/>
             </pool>
           </pools>
         </reservoirCfg>
@@ -475,11 +509,13 @@
   <case name="Prediction task Mackey Glass chaotic time series: Analog reservoir (ESN), Linear regression output">
     <samples fileName="MackeyGlass.csv" bootSamples="400" singleNormalizer="false" normalizerReserve="0.1"/>
     <stateMachineCfg taskType="Prediction" randomizerSeek="0">
-      <inputFields routeToReadout="false">
-        <field name="Value"/>
-      </inputFields>
+      <input>
+        <external routeToReadout="false">
+          <field name="Value"/>
+        </external>
+      </input>
       <reservoirCfgContainer>
-        <reservoirCfg name="ESN" inputCoding="Analog" inputDuration="1" synapticDelayMethod="Random" maxInputDelay="0" maxInternalDelay="1" spectralRadius="0.999">
+        <reservoirCfg name="ESN" synapticDelayMethod="Random" maxInputDelay="0" maxInternalDelay="1" spectralRadius="0.999">
           <inputEntryPoint x="0" y="0" z="0"/>
           <pools>
             <pool name="Logistic pool" x="0" y="0" z="0" dimX="8" dimY="8" dimZ="8" readoutNeuronsDensity="1">
@@ -501,7 +537,6 @@
               <retainmentNeurons density="1">
                 <rate min="0" max="0.25" randomSign="false" distribution="Uniform"/>
               </retainmentNeurons>
-              <noiseModulator min="0" max="0" randomSign="false" distribution="Uniform"/>
             </pool>
           </pools>
         </reservoirCfg>
@@ -535,12 +570,19 @@
     <!-- Data converted from https://archive.ics.uci.edu/ml/datasets/Libras+Movement -->
     <samples fileName="LibrasMovement.csv" singleNormalizer="false" normalizerReserve="0.1"/>
     <stateMachineCfg taskType="Classification" randomizerSeek="0">
-      <inputFields routeToReadout="false">
-        <field name="coord_abcissa"/>
-        <field name="coord_ordinate"/>
-      </inputFields>
+      <input>
+        <external routeToReadout="false">
+          <field name="coord_abcissa"/>
+          <field name="coord_ordinate"/>
+        </external>
+        <internal>
+          <field name="noise">
+            <randomModulator min="-0.8" max="0.8" randomSign="false" distribution="Uniform"/>
+          </field>
+        </internal>
+      </input>
       <reservoirCfgContainer>
-        <reservoirCfg name="Single spiking pool" inputCoding="Analog" inputDuration="1" synapticDelayMethod="Random" maxInputDelay="0" maxInternalDelay="1" spectralRadius="0.999">
+        <reservoirCfg name="Single spiking pool" synapticDelayMethod="Random" maxInputDelay="0" maxInternalDelay="1" spectralRadius="0.999">
           <inputEntryPoint x="0" y="0" z="0"/>
           <pools>
             <pool name="SimpleIF pool" x="0" y="0" z="0" dimX="6" dimY="6" dimZ="6" readoutNeuronsDensity="1">
@@ -569,7 +611,6 @@
                   <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
                 </dynamicSynapse>
               </interconnection>
-              <noiseModulator min="-0.8" max="0.8" randomSign="false" distribution="Uniform"/>
             </pool>
           </pools>
         </reservoirCfg>
@@ -628,13 +669,15 @@
     <!-- Data from https://finance.yahoo.com/quote/TTOO/history?p=TTOO -->
     <samples fileName="TTOO.csv" bootSamples="150" singleNormalizer="true" normalizerReserve="0.1"/>
     <stateMachineCfg taskType="Prediction" randomizerSeek="0">
-      <inputFields routeToReadout="true">
-        <field name="High"/>
-        <field name="Low"/>
-        <field name="Adj Close"/>
-      </inputFields>
+      <input>
+        <external routeToReadout="true">
+          <field name="High"/>
+          <field name="Low"/>
+          <field name="Adj Close"/>
+        </external>
+      </input>
       <reservoirCfgContainer>
-        <reservoirCfg name="Main" inputCoding="Analog" inputDuration="1" synapticDelayMethod="Random" maxInputDelay="0" maxInternalDelay="1" spectralRadius="0.999">
+        <reservoirCfg name="Main" synapticDelayMethod="Random" maxInputDelay="0" maxInternalDelay="1" spectralRadius="0.999">
           <inputEntryPoint x="0" y="0" z="0"/>
           <pools>
             <pool name="Logistic pool" x="0" y="0" z="0" dimX="4" dimY="4" dimZ="4" readoutNeuronsDensity="1">
@@ -656,7 +699,6 @@
               <retainmentNeurons density="0">
                 <rate min="0.05" max="0.5" randomSign="false" distribution="Uniform"/>
               </retainmentNeurons>
-              <noiseModulator min="0" max="0" randomSign="false" distribution="Uniform"/>
             </pool>
           </pools>
         </reservoirCfg>
@@ -702,13 +744,15 @@
     <!-- Data from https://finance.yahoo.com/quote/TTOO/history?p=TTOO -->
     <samples fileName="TTOO.csv" bootSamples="150" singleNormalizer="true" normalizerReserve="0.1"/>
     <stateMachineCfg taskType="Prediction" randomizerSeek="0">
-      <inputFields routeToReadout="true">
-        <field name="High"/>
-        <field name="Low"/>
-        <field name="Adj Close"/>
-      </inputFields>
+      <input>
+        <external routeToReadout="true">
+          <field name="High"/>
+          <field name="Low"/>
+          <field name="Adj Close"/>
+        </external>
+      </input>
       <reservoirCfgContainer>
-        <reservoirCfg name="MainCfg" inputCoding="Analog" inputDuration="1" synapticDelayMethod="Random" maxInputDelay="0" maxInternalDelay="1" spectralRadius="0.999">
+        <reservoirCfg name="MainCfg" synapticDelayMethod="Random" maxInputDelay="0" maxInternalDelay="1" spectralRadius="0.999">
           <inputEntryPoint x="0" y="0" z="0"/>
           <pools>
             <pool name="Spiking pool" x="0" y="0" z="0" dimX="4" dimY="4" dimZ="4" readoutNeuronsDensity="1">
@@ -737,7 +781,6 @@
                   <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
                 </dynamicSynapse>
               </interconnection>
-              <noiseModulator min="0" max="0" randomSign="false" distribution="Uniform"/>
             </pool>
             <pool name="Logistic pool" x="0" y="0" z="0" dimX="4" dimY="4" dimZ="4" readoutNeuronsDensity="1">
               <neuronGroups>
@@ -758,7 +801,6 @@
               <retainmentNeurons density="0">
                 <rate min="0.05" max="0.5" randomSign="false" distribution="Uniform"/>
               </retainmentNeurons>
-              <noiseModulator min="0" max="0" randomSign="false" distribution="Uniform"/>
             </pool>
           </pools>
         </reservoirCfg>
@@ -826,11 +868,13 @@
     <!-- This dataset is a pre-processed and re-structured/reshaped version of a very commonly used dataset featuring epileptic seizure detection. -->
     <samples fileName="EpilepticSeizureActivity.csv" singleNormalizer="false" normalizerReserve="0.1"/>
     <stateMachineCfg taskType="Classification" randomizerSeek="0">
-      <inputFields routeToReadout="false">
-        <field name="EEG"/>
-      </inputFields>
+      <input>
+        <external routeToReadout="false">
+          <field name="EEG"/>
+        </external>
+      </input>
       <reservoirCfgContainer>
-        <reservoirCfg name="All pools" inputCoding="Analog" inputDuration="1" synapticDelayMethod="Random" maxInputDelay="0" maxInternalDelay="1" spectralRadius="0.9">
+        <reservoirCfg name="All pools" synapticDelayMethod="Random" maxInputDelay="0" maxInternalDelay="1" spectralRadius="0.9">
           <inputEntryPoint x="0" y="0" z="0"/>
           <pools>
             <pool name="Analog pool" x="0" y="0" z="0" dimX="8" dimY="8" dimZ="8" readoutNeuronsDensity="1">
@@ -852,7 +896,6 @@
               <retainmentNeurons density="1">
                 <rate min="0" max="0.5" randomSign="false" distribution="Uniform"/>
               </retainmentNeurons>
-              <noiseModulator min="0" max="0" randomSign="false" distribution="Uniform"/>
             </pool>
           </pools>
         </reservoirCfg>

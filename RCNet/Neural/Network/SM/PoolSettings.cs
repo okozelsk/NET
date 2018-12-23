@@ -9,6 +9,7 @@ using RCNet.Extensions;
 using RCNet.XmlTools;
 using RCNet.RandomValue;
 using RCNet.Neural.Activation;
+using RCNet.Neural.Network.SM.Synapse;
 
 namespace RCNet.Neural.Network.SM
 {
@@ -58,10 +59,6 @@ namespace RCNet.Neural.Network.SM
         /// following specified settings
         /// </summary>
         public RandomValueSettings RetainmentRate { get; set; }
-        /// <summary>
-        /// Pool's neurons can be continuously fed by input random noise.
-        /// </summary>
-        public RandomValueSettings NoiseModulatorCfg { get; set; }
 
         //Constructors
         /// <summary>
@@ -77,7 +74,6 @@ namespace RCNet.Neural.Network.SM
             RetainmentNeuronsFeature = false;
             RetainmentNeuronsDensity = 0;
             RetainmentRate = null;
-            NoiseModulatorCfg = null;
             return;
         }
 
@@ -109,10 +105,6 @@ namespace RCNet.Neural.Network.SM
             else
             {
                 RetainmentRate = null;
-            }
-            if(source.NoiseModulatorCfg != null)
-            {
-                NoiseModulatorCfg = source.NoiseModulatorCfg.DeepClone();
             }
             return;
         }
@@ -205,13 +197,6 @@ namespace RCNet.Neural.Network.SM
             {
                 RetainmentNeuronsDensity = 0;
             }
-            //Noise modulator
-            NoiseModulatorCfg = null;
-            XElement noiseModulatorElem = poolSettingsElem.Descendants("noiseModulator").FirstOrDefault();
-            if(noiseModulatorElem != null)
-            {
-                NoiseModulatorCfg = new RandomValueSettings(noiseModulatorElem);
-            }
             return;
         }
 
@@ -230,8 +215,7 @@ namespace RCNet.Neural.Network.SM
                 !Equals(InterconnectionCfg, cmpSettings.InterconnectionCfg) ||
                 RetainmentNeuronsFeature != cmpSettings.RetainmentNeuronsFeature ||
                 RetainmentNeuronsDensity != cmpSettings.RetainmentNeuronsDensity ||
-                !Equals(RetainmentRate, cmpSettings.RetainmentRate) ||
-                !Equals(NoiseModulatorCfg, cmpSettings.NoiseModulatorCfg)
+                !Equals(RetainmentRate, cmpSettings.RetainmentRate)
                 )
             {
                 return false;

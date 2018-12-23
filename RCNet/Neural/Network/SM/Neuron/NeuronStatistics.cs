@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using RCNet.MathTools;
 
-namespace RCNet.Neural.Network.SM
+namespace RCNet.Neural.Network.SM.Neuron
 {
     /// <summary>
     /// Class encapsulates key statistics of the neuron

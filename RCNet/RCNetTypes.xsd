@@ -603,7 +603,7 @@
     <xs:attribute type="xs:boolean" name="constantNumOfConnections" use="optional" default="false"/>
   </xs:complexType>
 
-  <!-- Reservoir - interpools interconnection container - configuration -->
+  <!-- Reservoir - pools interconnection container - configuration -->
   <xs:complexType name="ReservoirPool2PoolConnCfgContainerType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="ReservoirPool2PoolConnCfgType" name="pool2PoolConn" minOccurs="0" maxOccurs="unbounded"/>
@@ -618,8 +618,6 @@
       <xs:element type="ReservoirPool2PoolConnCfgContainerType" name="pool2PoolConns" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:string" name="name" use="required" />
-    <xs:attribute type="InputCodingType" name="inputCoding" use="optional" default="Analog"/>
-    <xs:attribute type="UIntGT0Type" name="inputDuration" use="optional" default="1"/>
     <xs:attribute type="SynapticDelayMethodType" name="synapticDelayMethod" use="required"/>
     <xs:attribute type="xs:unsignedInt" name="maxInputDelay" use="required"/>
     <xs:attribute type="xs:unsignedInt" name="maxInternalDelay" use="required"/>
@@ -627,12 +625,40 @@
   </xs:complexType>
 
   <!-- ________________________________________STATE MACHINE TYPES_________________________________________________ -->
-  <!-- StateMachine - input fields -configuration -->
-  <xs:complexType name="SMInpFieldsCfgType">
+  <!-- StateMachine - internal input field -configuration -->
+  <xs:complexType name="SMInternalInpFieldCfgType">
+    <xs:choice minOccurs="1" maxOccurs="1">
+      <xs:element type="ConstModulatorCfgType" name="constModulator" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="RandomValueType" name="randomModulator" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="SinusoidalModulatorCfgType" name="sinusoidalModulator" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="MackeyGlassModulatorCfgType" name="mackeyGlassModulator" minOccurs="1" maxOccurs="1"/>
+    </xs:choice>
+    <xs:attribute type="xs:string" name="name" use="required"/>
+  </xs:complexType>
+
+
+  <!-- StateMachine - internal input fields -configuration -->
+  <xs:complexType name="SMInternalInpFieldsCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="SMInternalInpFieldCfgType" name="field" minOccurs="1" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+  
+  
+  <!-- StateMachine - external input fields -configuration -->
+  <xs:complexType name="SMExternalInpFieldsCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="AloneNameType" name="field" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
     <xs:attribute type="xs:boolean" name="routeToReadout" use="optional" default="false"/>
+  </xs:complexType>
+
+  <!-- StateMachine - input -configuration -->
+  <xs:complexType name="SMInputCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="SMExternalInpFieldsCfgType" name="external" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="SMInternalInpFieldsCfgType" name="internal" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
   </xs:complexType>
 
   <!-- StateMachine - reservoirs configuration - container -->
@@ -680,7 +706,7 @@
   <!-- StateMachine configuration -->
   <xs:complexType name="SMCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="SMInpFieldsCfgType" name="inputFields" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="SMInputCfgType" name="input" minOccurs="1" maxOccurs="1"/>
       <xs:element type="SMResCfgContainerType" name="reservoirCfgContainer" minOccurs="1" maxOccurs="1"/>
       <xs:element type="SMResInstanceContainerType" name="reservoirInstanceContainer" minOccurs="1" maxOccurs="1"/>
       <xs:element type="ROutLayerCfgType" name="readoutLayer" minOccurs="1" maxOccurs="1"/>

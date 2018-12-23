@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using RCNet.MathTools;
 using RCNet.Neural.Activation;
 
-namespace RCNet.Neural.Network.SM
+namespace RCNet.Neural.Network.SM.Neuron
 {
     /// <summary>
     /// Neuron is the basic unit of a neural network.

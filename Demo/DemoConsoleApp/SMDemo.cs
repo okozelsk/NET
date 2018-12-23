@@ -252,7 +252,7 @@ namespace RCNet.DemoConsoleApp
                 //Time series prediction task
                 //Load data bundle from csv file
                 TimeSeriesBundle data = TimeSeriesDataLoader.Load(demoCaseParams.FileName,
-                                                                  demoCaseParams.stateMachineCfg.InputFieldNameCollection,
+                                                                  demoCaseParams.stateMachineCfg.InputConfig.ExternalFieldNameCollection(),
                                                                   demoCaseParams.stateMachineCfg.ReadoutLayerConfig.OutputFieldNameCollection,
                                                                   normalizationRange,
                                                                   demoCaseParams.NormalizerReserveRatio,
@@ -269,7 +269,7 @@ namespace RCNet.DemoConsoleApp
                 //Load data bundle from csv file
                 PatternBundle data = PatternDataLoader.Load(demoCaseParams.stateMachineCfg.TaskType == CommonEnums.TaskType.Classification,
                                                             demoCaseParams.FileName,
-                                                            demoCaseParams.stateMachineCfg.InputFieldNameCollection,
+                                                            demoCaseParams.stateMachineCfg.InputConfig.ExternalFieldNameCollection(),
                                                             demoCaseParams.stateMachineCfg.ReadoutLayerConfig.OutputFieldNameCollection,
                                                             normalizationRange,
                                                             demoCaseParams.NormalizerReserveRatio,

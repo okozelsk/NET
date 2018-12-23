@@ -5,8 +5,9 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using RCNet.MathTools;
+using RCNet.Neural.Network.SM.Neuron;
 
-namespace RCNet.Neural.Network.SM
+namespace RCNet.Neural.Network.SM.Synapse
 {
     /// <summary>
     /// Inplements the pre-synaptic Short-Term-Plasticity and post-synaptic dynamic decay of the efficacy of the synapse.

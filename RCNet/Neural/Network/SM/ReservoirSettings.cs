@@ -9,6 +9,7 @@ using RCNet.Extensions;
 using RCNet.XmlTools;
 using RCNet.RandomValue;
 using RCNet.Neural.Activation;
+using RCNet.Neural.Network.SM.Synapse;
 
 namespace RCNet.Neural.Network.SM
 {
@@ -26,15 +27,6 @@ namespace RCNet.Neural.Network.SM
         /// Name of this configuration
         /// </summary>
         public string SettingsName { get; set; }
-        /// <summary>
-        /// Specifies how will input value be presented to reservoir
-        /// </summary>
-        public CommonEnums.InputCodingType InputCoding { get; set; }
-        /// <summary>
-        /// In case of analog input coding this specifies number of ms of the sustain analog signal.
-        /// In case of spike train coding this specifies how many spikes code the input value (each spike takes 1 ms).
-        /// </summary>
-        public int InputDuration { get; set; }
         /// <summary>
         /// Specifies how will be decided synaptic delay
         /// </summary>
@@ -71,8 +63,6 @@ namespace RCNet.Neural.Network.SM
         public ReservoirSettings()
         {
             SettingsName = string.Empty;
-            InputCoding = CommonEnums.InputCodingType.Analog;
-            InputDuration = 0;
             SynapticDelayMethod = CommonEnums.SynapticDelayMethod.Random;
             MaxInputDelay = 0;
             MaxInternalDelay = 0;
@@ -90,8 +80,6 @@ namespace RCNet.Neural.Network.SM
         public ReservoirSettings(ReservoirSettings source)
         {
             SettingsName = source.SettingsName;
-            InputCoding = source.InputCoding;
-            InputDuration = source.InputDuration;
             SynapticDelayMethod = source.SynapticDelayMethod;
             MaxInputDelay = source.MaxInputDelay;
             MaxInternalDelay = source.MaxInternalDelay;
@@ -140,8 +128,6 @@ namespace RCNet.Neural.Network.SM
             XElement reservoirSettingsElem = validator.Validate(elem, "rootElem");
             //Parsing
             SettingsName = reservoirSettingsElem.Attribute("name").Value;
-            InputCoding = CommonEnums.ParseInputCodingType(reservoirSettingsElem.Attribute("inputCoding").Value);
-            InputDuration = int.Parse(reservoirSettingsElem.Attribute("inputDuration").Value, CultureInfo.InvariantCulture);
             SynapticDelayMethod = CommonEnums.ParseSynapticDelayMethod(reservoirSettingsElem.Attribute("synapticDelayMethod").Value);
             MaxInputDelay = int.Parse(reservoirSettingsElem.Attribute("maxInputDelay").Value, CultureInfo.InvariantCulture);
             MaxInternalDelay = int.Parse(reservoirSettingsElem.Attribute("maxInternalDelay").Value, CultureInfo.InvariantCulture);
@@ -186,8 +172,6 @@ namespace RCNet.Neural.Network.SM
             if (obj == null) return false;
             ReservoirSettings cmpSettings = obj as ReservoirSettings;
             if (SettingsName != cmpSettings.SettingsName ||
-                InputCoding != cmpSettings.InputCoding ||
-                InputDuration != cmpSettings.InputDuration ||
                 SynapticDelayMethod != cmpSettings.SynapticDelayMethod ||
                 MaxInputDelay != cmpSettings.MaxInputDelay ||
                 MaxInternalDelay != cmpSettings.MaxInternalDelay ||

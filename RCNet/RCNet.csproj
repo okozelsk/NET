@@ -99,24 +99,22 @@
     <Compile Include="Neural\Data\Modulation\IModulator.cs" />
     <Compile Include="Neural\Data\Modulation\RandomModulator.cs" />
     <Compile Include="Neural\Data\Modulation\ConstModulatorSettings.cs" />
-    <Compile Include="Neural\Network\SM\DynamicSynapse.cs" />
-    <Compile Include="Neural\Network\SM\DynamicSynapseSettings.cs" />
-    <Compile Include="Neural\Network\SM\FiringRate.cs" />
-    <Compile Include="Neural\Network\SM\InputAnalogNeuron.cs" />
-    <Compile Include="Neural\Network\SM\InputSpikingNeuron.cs" />
-    <Compile Include="Neural\Network\SM\NeuronStatistics.cs" />
-    <Compile Include="Neural\Network\SM\ReservoirAnalogNeuron.cs" />
-    <Compile Include="Neural\Network\SM\ReservoirSpikingNeuron.cs" />
-    <Compile Include="Neural\Network\SM\SignalConverter.cs" />
+    <Compile Include="Neural\Network\SM\Synapse\DynamicSynapse.cs" />
+    <Compile Include="Neural\Network\SM\Synapse\DynamicSynapseSettings.cs" />
+    <Compile Include="Neural\Network\SM\Neuron\FiringRate.cs" />
+    <Compile Include="Neural\Network\SM\Neuron\InputNeuron.cs" />
+    <Compile Include="Neural\Network\SM\Neuron\NeuronStatistics.cs" />
+    <Compile Include="Neural\Network\SM\Neuron\AnalogNeuron.cs" />
+    <Compile Include="Neural\Network\SM\Neuron\SpikingNeuron.cs" />
     <Compile Include="Neural\Network\SM\Reservoir.cs" />
     <Compile Include="Neural\Network\SM\ReservoirSettings.cs" />
     <Compile Include="Neural\Network\SM\PoolDimensions.cs" />
     <Compile Include="Neural\Network\SM\PoolSettings.cs" />
-    <Compile Include="Neural\Network\SM\INeuron.cs" />
-    <Compile Include="Neural\Network\SM\ISynapse.cs" />
-    <Compile Include="Neural\Network\SM\StaticSynapse.cs" />
-    <Compile Include="Neural\Network\SM\StaticSynapseSettings.cs" />
-    <Compile Include="Neural\Network\SM\Synapse.cs" />
+    <Compile Include="Neural\Network\SM\Neuron\INeuron.cs" />
+    <Compile Include="Neural\Network\SM\Synapse\ISynapse.cs" />
+    <Compile Include="Neural\Network\SM\Synapse\StaticSynapse.cs" />
+    <Compile Include="Neural\Network\SM\Synapse\StaticSynapseSettings.cs" />
+    <Compile Include="Neural\Network\SM\Synapse\Synapse.cs" />
     <Compile Include="Neural\Data\TimeSeriesDataLoader.cs" />
     <Compile Include="Neural\Data\PatternDataLoader.cs" />
     <Compile Include="Extensions\ArrayClassExtensions.cs" />
@@ -163,7 +161,7 @@
     <Compile Include="Neural\Network\SM\ReadoutLayerSettings.cs" />
     <Compile Include="Neural\Network\SM\ReadoutLayer.cs" />
     <Compile Include="Neural\Network\SM\ReadoutUnit.cs" />
-    <Compile Include="Neural\Network\SM\NeuronPlacement.cs" />
+    <Compile Include="Neural\Network\SM\Neuron\NeuronPlacement.cs" />
     <Compile Include="RandomValue\RandomValueSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Queue\SimpleQueue.cs" />
@@ -171,7 +169,7 @@
     <Compile Include="XmlTools\DocValidator.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Neural\Network\SM\StaticSynapseSettings.xsd">
+    <EmbeddedResource Include="Neural\Network\SM\Synapse\StaticSynapseSettings.xsd">
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="RCNetTypes.xsd">
@@ -322,7 +320,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Neural\Network\SM\DynamicSynapseSettings.xsd">
+    <EmbeddedResource Include="Neural\Network\SM\Synapse\DynamicSynapseSettings.xsd">
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>

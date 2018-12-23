@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using RCNet.MathTools;
 
-namespace RCNet.Neural.Network.SM
+namespace RCNet.Neural.Network.SM.Neuron
 {
     /// <summary>
     /// Class converts recent spikes to a number representing weighted firing rate

@@ -9,7 +9,7 @@ using RCNet.Extensions;
 using RCNet.XmlTools;
 using RCNet.RandomValue;
 
-namespace RCNet.Neural.Network.SM
+namespace RCNet.Neural.Network.SM.Synapse
 {
     /// <summary>
     /// Setup parameters of static synapse
@@ -59,7 +59,7 @@ namespace RCNet.Neural.Network.SM
             //Validation
             ElemValidator validator = new ElemValidator();
             Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.SM.StaticSynapseSettings.xsd");
+            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.SM.Synapse.StaticSynapseSettings.xsd");
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
             XElement settingsElem = validator.Validate(elem, "rootElem");
             //Parsing

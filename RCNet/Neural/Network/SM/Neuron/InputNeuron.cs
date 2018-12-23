@@ -7,14 +7,14 @@ using RCNet.Extensions;
 using RCNet.MathTools;
 using RCNet.Neural.Activation;
 
-namespace RCNet.Neural.Network.SM
+namespace RCNet.Neural.Network.SM.Neuron
 {
     /// <summary>
     /// Input neuron is the special type of very simple neuron. Its purpose is only to mediate
     /// external input for a synapse.
     /// </summary>
     [Serializable]
-    public class InputAnalogNeuron : INeuron
+    public class InputNeuron : INeuron
     {
         //Attribute properties
         /// <summary>
@@ -36,7 +36,7 @@ namespace RCNet.Neural.Network.SM
 
         /// <summary>
         /// Type of the output signal (spike or analog)
-        /// This is an analog neuron.
+        /// Input neuron is an analog neuron.
         /// </summary>
         public ActivationFactory.FunctionOutputSignalType OutputType { get { return ActivationFactory.FunctionOutputSignalType.Analog; } }
 
@@ -88,7 +88,7 @@ namespace RCNet.Neural.Network.SM
         /// It is very recommended to have input values normalized and standardized before
         /// they are passed as an input.
         /// </param>
-        public InputAnalogNeuron(int[] inputEntryPoint, int inputFieldIdx, Interval inputRange)
+        public InputNeuron(int[] inputEntryPoint, int inputFieldIdx, Interval inputRange)
         {
             Placement = new NeuronPlacement(inputFieldIdx, - 1, inputFieldIdx, 0, inputEntryPoint[0], inputEntryPoint[1], inputEntryPoint[2]);
             OutputRange = inputRange.DeepClone();
@@ -147,8 +147,8 @@ namespace RCNet.Neural.Network.SM
             }
             return;
         }
- 
 
-    }//InputAnalogNeuron
+
+    }//InputNeuron
 
 }//Namespace

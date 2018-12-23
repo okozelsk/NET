@@ -5,8 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using RCNet.MathTools;
 using RCNet.Queue;
+using RCNet.Neural.Network.SM.Neuron;
 
-namespace RCNet.Neural.Network.SM
+namespace RCNet.Neural.Network.SM.Synapse
 {
     /// <summary>
     /// Abstract class covering the basic behaviour of StateMachine synapses.
@@ -84,49 +85,23 @@ namespace RCNet.Neural.Network.SM
             if (SourceNeuron.Role == CommonEnums.NeuronRole.Input)
             {
                 //Source is input neuron
-                if (SourceNeuron.OutputType == Activation.ActivationFactory.FunctionOutputSignalType.Spike)
+                if (TargetNeuron.OutputType == Activation.ActivationFactory.FunctionOutputSignalType.Spike)
                 {
-                    //Source input neuron is spiking
-                    if (TargetNeuron.OutputType == Activation.ActivationFactory.FunctionOutputSignalType.Spike)
-                    {
-                        //Target is also spiking
-                        //Ensure positive weight
-                        Weight = Math.Abs(weight);
-                        //Convert signal to <0,1>
-                        _add = -SourceNeuron.OutputRange.Min;
-                        _div = SourceNeuron.OutputRange.Span;
-                    }
-                    else
-                    {
-                        //Target is analog
-                        //Weight is unchanged
-                        Weight = weight;
-                        //No signal conversion
-                        _add = 0;
-                        _div = 1;
-                    }
+                    //Target is spiking
+                    //Ensure positive weight
+                    Weight = Math.Abs(weight);
+                    //Convert signal to <0,1>
+                    _add = -SourceNeuron.OutputRange.Min;
+                    _div = SourceNeuron.OutputRange.Span;
                 }
                 else
                 {
-                    //Source input neuron is analog
-                    if (TargetNeuron.OutputType == Activation.ActivationFactory.FunctionOutputSignalType.Spike)
-                    {
-                        //Target is spiking
-                        //Ensure positive weight
-                        Weight = Math.Abs(weight);
-                        //Convert signal to <0,1>
-                        _add = -SourceNeuron.OutputRange.Min;
-                        _div = SourceNeuron.OutputRange.Span;
-                    }
-                    else
-                    {
-                        //Target is also analog
-                        //Weight is unchanged
-                        Weight = weight;
-                        //No signal conversion
-                        _add = 0;
-                        _div = 1;
-                    }
+                    //Target is also analog
+                    //Weight is unchanged
+                    Weight = weight;
+                    //No signal conversion
+                    _add = 0;
+                    _div = 1;
                 }
             }
             else

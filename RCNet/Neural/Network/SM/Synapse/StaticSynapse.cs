@@ -4,8 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using RCNet.Queue;
+using RCNet.Neural.Network.SM.Neuron;
 
-namespace RCNet.Neural.Network.SM
+namespace RCNet.Neural.Network.SM.Synapse
 {
     /// <summary>
     /// Static synapse deliveres constantly weighted signal from source to target neuron.

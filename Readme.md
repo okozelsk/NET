@@ -4,17 +4,16 @@ Two main reservoir computing methods are called Echo State Network (ESN) and Liq
 The implemented solution supports both of these methods. However, since ESN and LSM are based on very similar general principles, RCNet brings the option to combine them at the same time. It means the possibility to design complex "hybrid" recurrent networks with spiking and analog neurons working together. This approach, as I believe, opens up new interesting possibilities. This general implementation is called "**State Machine**" in the context of RCNet.
 <br/>
 <br/>
-Main documentation is located on project's wiki (https://github.com/okozelsk/NET/wiki).
+Main documentation is located on project's wiki (https://github.com/okozelsk/NET/wiki). The WiKi documentation is unfortunately still delayed and does not match the latest version.
 <br/>
 Questions, ideas and suggestions for improvements, usage experiences, bug alerts, constructive comments, etc.... are welcome.
 <br/>
-To contact me use email address oldrich.kozelsky@email.cz
+To contact me use my email address oldrich.kozelsky@email.cz
 
 ## Technical information
  - Source code is written in C# 6.0
  - Necessary components are serializable
  - Backward compatibility with earlier releases is not guaranteed, SW is still under dynamic development
- - The documentation is delayed and does not match the current version
 
 ## Demo application
 Main RCNet functionality is demonstrated in a simple demo application (/Demo/DemoConsoleApp). Application has no startup parameters, all necessary settins are specified in DemoSettings.xml file. DemoSettings.xml has to be in the same folder as the executable DemoConsoleApp.exe. Application performs sequence of demo cases defined in DemoSettings.xml. The input data for each demo case must be stored in the csv file format. You can easily modify DemoSettings.xml and configure your own tasks or modify and tune existing ones.
@@ -93,10 +92,9 @@ See the [wiki pages.](https://en.wikipedia.org/wiki/Biological_neuron_model)
 |--|--|
 |StaticSynapse|Computes constantly weighted signal from source to target neuron. Supports signal delay|
 |DynamicSynapse|Computes dynamically weighted signal from source to target neuron using pre-synaptic and/or post-synaptic "Short-Term-Plasticity". Supports signal delay|
-|InputAnalogNeuron|Input neuron is the special type of very simple neuron. Its purpose is only to mediate input analog value for a synapse|
-|InputSpikingNeuron|Spiking input neuron is the special type of neuron. Its purpose is to preprocess input analog value to be deliverable as the spike train signal into the reservoir neurons through a synapse|
-|ReservoirAnalogNeuron|Reservoir neuron is the main type of the neuron processing input stimuli and emitting output signal. Analog neuron produces analog output. Main features: Retainment (leaky integrator), The second power as augmented readout state|
-|ReservoirSpikingNeuron|Reservoir neuron is the main type of the neuron processing input stimuli and emitting output signal. Spiking neuron produces spikes. Main features: Membrane potential as primary readout state, Firing rate as augmented readout state|
+|InputNeuron|Input neuron is the special type of very simple neuron. Its purpose is only to mediate input analog value for a synapse|
+|AnalogNeuron|Analog neuron produces analog output according to its analog activation function. Main features: Retainment (leaky integrator), The second power as augmented readout state|
+|SpikingNeuron|Spiking neuron produces spikes according to its spiking activation function. Main features: Membrane potential as primary readout state, Firing rate as augmented readout state|
 |Reservoir|Implements recurrent network supporting analog and spiking neurons working directly together. Main features: SpectralRadius, Multiple 3D pools of neurons, Pool to pool connections. It can work as the Echo State Network reservoir, Liquid State Machine reservoir or Mixed reservoir|
 |ReadoutUnit|Contains the trained unit associated with output field and related important error statistics. Trained unit can be the Feed Forward Network or the Parallel Perceptron Network|
 |ReadoutLayer|Class implements the common readout layer concept for the reservoir computing methods. Supports x-fold cross validation method and clustering of the trained readout units.|

@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RCNet.Neural.Network.SM.Neuron;
 using RCNet.MathTools;
 
-namespace RCNet.Neural.Network.SM
+namespace RCNet.Neural.Network.SM.Synapse
 {
     /// <summary>
     /// Synapse is a transporter of the weighted signal from source neuron to target neuron.

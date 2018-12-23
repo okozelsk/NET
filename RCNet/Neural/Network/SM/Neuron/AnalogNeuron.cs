@@ -7,14 +7,13 @@ using RCNet.Extensions;
 using RCNet.MathTools;
 using RCNet.Neural.Activation;
 
-namespace RCNet.Neural.Network.SM
+namespace RCNet.Neural.Network.SM.Neuron
 {
     /// <summary>
-    /// Reservoir neuron is the main type of the neuron processing input stimuli and emitting output signal.
-    /// Analog neuron produces analog output
+    /// Analog neuron has analog activation function and produces analog output
     /// </summary>
     [Serializable]
-    public class ReservoirAnalogNeuron : INeuron
+    public class AnalogNeuron : INeuron
     {
         //Attribute properties
         /// <summary>
@@ -94,7 +93,7 @@ namespace RCNet.Neural.Network.SM
         /// <param name="activation">Instantiated activation function.</param>
         /// <param name="bias">Constant bias.</param>
         /// <param name="retainmentRatio">Retainment ratio.</param>
-        public ReservoirAnalogNeuron(NeuronPlacement placement,
+        public AnalogNeuron(NeuronPlacement placement,
                                      CommonEnums.NeuronRole role,
                                      IActivationFunction activation,
                                      double bias,
