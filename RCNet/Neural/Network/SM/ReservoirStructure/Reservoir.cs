@@ -1081,6 +1081,7 @@ namespace RCNet.Neural.Network.SM.ReservoirStructure
             public bool UseAsPredictor { get; set; }
         }
 
+        [Serializable]
         private class PredictorNeuron
         {
             public INeuron Neuron { get; set; }
