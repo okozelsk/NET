@@ -22,7 +22,6 @@ namespace RCNet.Neural.Activation
     {
         //Constants
         //Typical values
-        public const double TypicalStimuliCoeff = 1;
         public const double TypicalResistance = 15;
         public const double TypicalDecayRate = 0.05;
         public const double TypicalResetV = 5;

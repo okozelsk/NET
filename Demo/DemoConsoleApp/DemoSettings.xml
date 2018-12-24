@@ -1,132 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <demo dataFolder=".\\Data">
-
-  
-  <case name="Classification task Epileptic Seizure Activity:  Mixed spiking and analog reservoir, Feed forward network with hidden layer as a classifier">
-    <!-- Data converted from https://archive.ics.uci.edu/ml/datasets/Epileptic+Seizure+Recognition -->
-    <!-- This dataset is a pre-processed and re-structured/reshaped version of a very commonly used dataset featuring epileptic seizure detection. -->
-    <samples fileName="EpilepticSeizureActivity_middle.csv" singleNormalizer="false" normalizerReserve="0.1"/>
-    <stateMachineCfg taskType="Classification" randomizerSeek="0">
-      <input>
-        <external routeToReadout="false">
-          <field name="EEG"/>
-        </external>
-        <internal>
-          <field name="sin">
-            <sinusoidalGenerator ampl="0.5" freq="1" phase="90"/>
-          </field>
-          <field name="rnd">
-            <randomGenerator min="-0.5" max="0.5"/>
-          </field>
-          <field name="mg">
-            <mackeyGlassGenerator tau="18" b="0.1" c="-0.2"/>
-          </field>
-        </internal>
-      </input>
-      <reservoirCfgContainer>
-        <reservoirCfg name="MainCfg" synapticDelayMethod="Random" maxInputDelay="0" maxInternalDelay="1" spectralRadius="0.999">
-          <inputEntryPoint x="0" y="0" z="0"/>
-          <pools>
-            <pool name="Spiking pool" x="0" y="0" z="0" dimX="6" dimY="6" dimZ="6" readoutNeuronsDensity="1">
-              <neuronGroups>
-                <neuronGroup name="Exc-IzhikewichIF" role="Excitatory" relShare="4" augmentedStates="true">
-                  <activationAutoIzhikevichIF role="Excitatory" stimuliCoeff="100" refractoryPeriods="0" solverMethod="Euler" solverCompSteps="2"/>
-                  <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-                </neuronGroup>
-                <neuronGroup name="Inh-IzhikewichIF" role="Inhibitory" relShare="1" augmentedStates="true">
-                  <activationAutoIzhikevichIF role="Inhibitory" stimuliCoeff="100" refractoryPeriods="0" solverMethod="Euler" solverCompSteps="2"/>
-                  <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-                </neuronGroup>
-              </neuronGroups>
-              <interconnection density="0.1" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
-                <dynamicSynapse>
-                  <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
-                </dynamicSynapse>
-              </interconnection>
-            </pool>
-            <pool name="Logistic pool" x="0" y="0" z="0" dimX="4" dimY="4" dimZ="4" readoutNeuronsDensity="1">
-              <neuronGroups>
-                <neuronGroup name="Exc-Logistic" role="Excitatory" relShare="4" augmentedStates="true">
-                  <activationSigmoid/>
-                  <bias min="-1" max="1" randomSign="false" distribution="Uniform"/>
-                </neuronGroup>
-                <neuronGroup name="Inh-Logistic" role="Inhibitory" relShare="1" augmentedStates="true">
-                  <activationSigmoid/>
-                  <bias min="-1" max="1" randomSign="false" distribution="Uniform"/>
-                </neuronGroup>
-              </neuronGroups>
-              <interconnection density="0.1" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
-                <staticSynapse>
-                  <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
-                </staticSynapse>
-              </interconnection>
-            </pool>
-          </pools>
-          <pool2PoolConns>
-            <pool2PoolConn srcPool="Spiking pool" srcConnDensity="0.5" targetPool="Logistic pool" targetConnDensity="0.05" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" constantNumOfConnections="false">
-              <dynamicSynapse>
-                <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
-              </dynamicSynapse>
-            </pool2PoolConn>
-            <pool2PoolConn srcPool="Logistic pool" srcConnDensity="0.5" targetPool="Spiking pool" targetConnDensity="0.05" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" constantNumOfConnections="false">
-              <dynamicSynapse>
-                <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
-              </dynamicSynapse>
-            </pool2PoolConn>
-          </pool2PoolConns>
-        </reservoirCfg>
-      </reservoirCfgContainer>
-      <reservoirInstanceContainer>
-        <reservoirInstance name="Main" cfg="MainCfg" augmentedStates="false">
-          <inputFieldAssignments>
-            <inputFieldAssignment inputFieldName="EEG" poolName="Spiking pool" density="1">
-              <staticSynapse>
-                <weight min="0" max="0.6" randomSign="false" distribution="Uniform"/>
-              </staticSynapse>
-            </inputFieldAssignment>
-            <inputFieldAssignment inputFieldName="mg" poolName="Spiking pool" density="1">
-              <staticSynapse>
-                <weight min="0.5" max="0.5" randomSign="false" distribution="Uniform"/>
-              </staticSynapse>
-            </inputFieldAssignment>
-            <inputFieldAssignment inputFieldName="EEG" poolName="Logistic pool" density="1">
-              <staticSynapse>
-                <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
-              </staticSynapse>
-            </inputFieldAssignment>
-            <inputFieldAssignment inputFieldName="mg" poolName="Logistic pool" density="1">
-              <staticSynapse>
-                <weight min="0.5" max="0.5" randomSign="false" distribution="Uniform"/>
-              </staticSynapse>
-            </inputFieldAssignment>
-          </inputFieldAssignments>
-        </reservoirInstance>
-      </reservoirInstanceContainer>
-      <readoutLayer testDataRatio="0.1" folds="Auto">
-        <readoutUnit attempts="5" attemptEpochs="3000">
-          <ff regressionMethod="Resilient">
-            <activationTanH/>
-            <hiddenLayers>
-              <layer neurons="20">
-                <activationTanH/>
-              </layer>
-            </hiddenLayers>
-          </ff>
-        </readoutUnit>
-        <outputFields>
-          <field name="EpilepticSeizure"/>
-        </outputFields>
-      </readoutLayer>
-    </stateMachineCfg>
-  </case>
-
-  
-  
   <!--
     This demo case demonstrates the simplest form of ESN reservoir setup. Reservoir consists of one small pool of TanH analog neurons.
     Standard linear regression is used as predicting readout.
     Time series contains real share prices of TTOO title from https://finance.yahoo.com/quote/TTOO/history?p=TTOO.
-    The last known prices are from 2018/03/02 so network is predicting next High and Low prices for the next
+    The last recorded prices are from 2018/03/02 so network is predicting next High and Low prices for the following
     business day 2018/03/05 (where real prices were High=6.58$ and Low=5.99$).
   -->
   <case name="Prediction task High and Low share prices of TTOO (T2 Biosystems, Inc.): Small analog reservoir (ESN), linear regression readout">
@@ -260,11 +138,11 @@
       </readoutLayer>
     </stateMachineCfg>
   </case>
-
   
   <!--
     This demo case demonstrates a richer form of reservoir setup. Reservoir consists of one small pool of SimpleIF spiking neurons
-    and one pool of Sigmoid analog neurons. Pools overlap within the reservoir (share the same 3D space) and are bidirectionally interconnected.
+    and one pool of Sigmoid analog neurons. Pools overlap within the reservoir (share the same 3D space) and pools are bidirectionally
+    interconnected. One additional internal input field "sin" (following sinusoidal signal) is used.
     Standard linear regression is used as a classifier on readout layer.
     The dataset is from https://archive.ics.uci.edu/ml/datasets/Libras+Movement and contains 15 classes of 24 instances each, where
     each class references to a hand movement type in LIBRAS. The hand movement is represented as a bidimensional curve performed
@@ -287,14 +165,8 @@
           <field name="coord_ordinate"/>
         </external>
         <internal>
-          <field name="noise">
-            <randomGenerator min="-0.8" max="0.8" randomSign="false" distribution="Uniform"/>
-          </field>
           <field name="sin">
             <sinusoidalGenerator phase="90" freq="20" ampl="0.1" />
-          </field>
-          <field name="mg">
-            <mackeyGlassGenerator tau="18" b="0.1" c="0.2"/>
           </field>
         </internal>
       </input>
@@ -424,60 +296,117 @@
     </stateMachineCfg>
   </case>
 
-  
-
-  <case name="Classification task Epileptic Seizure Activity:  Single spiking reservoir, 3-gates Parallel Perceptron classifier">
-    <!-- Data converted from https://archive.ics.uci.edu/ml/datasets/Epileptic+Seizure+Recognition -->
-    <!-- This dataset is a pre-processed and re-structured/reshaped version of a very commonly used dataset featuring epileptic seizure detection. -->
+  <!--
+    This demo case demonstrates a richer form of reservoir setup. Reservoir consists of one pool of IzhikewichIF spiking neurons
+    and one pool of Sigmoid analog neurons. Pools overlap within the reservoir (share the same 3D space) and pools are
+    bidirectionally interconnected.  One additional internal input field "mg" (following Mackey-Glass signal) is used.
+    Feed Forward network having one hidden layer of 20 TanH neurons and TanH output neuron is used as a classifier readout unit on readout layer.
+    Used dataset is a pre-processed and re-structured/reshaped version of a very commonly used dataset featuring epileptic seizure detection.
+    The dataset was converted from https://archive.ics.uci.edu/ml/datasets/Epileptic+Seizure+Recognition and contains 11500 EEG recordings
+    each for 1 second. After conversion there are only 2 classes, where each EEG pattern corresponds to an epileptic seizure or normal brain activity.
+    Relevant paper: http://users.fs.cvut.cz/ivo.bukovsky/PROJEKT/Data/Realna/BIO/EEG/reference/PRE61907.pdf
+  -->
+  <case name="Classification task Recognition of the Epileptic Seizure Brain EEG Activity:  Mixed spiking and analog reservoir, Feed forward network with hidden layer as a classifier">
     <samples fileName="EpilepticSeizureActivity.csv" singleNormalizer="false" normalizerReserve="0.1"/>
     <stateMachineCfg taskType="Classification" randomizerSeek="0">
       <input>
         <external routeToReadout="false">
           <field name="EEG"/>
         </external>
+        <internal>
+          <field name="mg">
+            <mackeyGlassGenerator tau="18" b="0.1" c="-0.2"/>
+          </field>
+        </internal>
       </input>
       <reservoirCfgContainer>
-        <reservoirCfg name="All pools" synapticDelayMethod="Random" maxInputDelay="0" maxInternalDelay="1" spectralRadius="0.9">
+        <reservoirCfg name="MainCfg" synapticDelayMethod="Random" maxInputDelay="0" maxInternalDelay="1" spectralRadius="0.999">
           <inputEntryPoint x="0" y="0" z="0"/>
           <pools>
-            <pool name="Analog pool" x="0" y="0" z="0" dimX="8" dimY="8" dimZ="8" readoutNeuronsDensity="1">
+            <pool name="Spiking pool" x="0" y="0" z="0" dimX="6" dimY="6" dimZ="6" readoutNeuronsDensity="1">
               <neuronGroups>
-                <neuronGroup name="Exc-TanH" role="Excitatory" relShare="1" augmentedStates="true">
-                  <activationTanH/>
+                <neuronGroup name="Exc-IzhikewichIF" role="Excitatory" relShare="4" augmentedStates="true">
+                  <activationAutoIzhikevichIF role="Excitatory" stimuliCoeff="100" refractoryPeriods="0" solverMethod="Euler" solverCompSteps="2"/>
                   <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
                 </neuronGroup>
-                <neuronGroup name="Inh-TanH" role="Inhibitory" relShare="1" augmentedStates="true">
-                  <activationTanH/>
+                <neuronGroup name="Inh-IzhikewichIF" role="Inhibitory" relShare="1" augmentedStates="true">
+                  <activationAutoIzhikevichIF role="Inhibitory" stimuliCoeff="100" refractoryPeriods="0" solverMethod="Euler" solverCompSteps="2"/>
                   <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
                 </neuronGroup>
               </neuronGroups>
-              <interconnection density="0.1" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
-                <dynamicSynapse restingEfficacy="0.5" tauFacilitation="500" tauRecovery="5" tauDecay="10">
+              <interconnection density="0.1" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
+                <dynamicSynapse>
                   <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
                 </dynamicSynapse>
               </interconnection>
-              <retainmentNeurons density="1">
-                <rate min="0" max="0.5" randomSign="false" distribution="Uniform"/>
-              </retainmentNeurons>
+            </pool>
+            <pool name="Logistic pool" x="0" y="0" z="0" dimX="4" dimY="4" dimZ="4" readoutNeuronsDensity="1">
+              <neuronGroups>
+                <neuronGroup name="Exc-Logistic" role="Excitatory" relShare="4" augmentedStates="true">
+                  <activationSigmoid/>
+                  <bias min="-1" max="1" randomSign="false" distribution="Uniform"/>
+                </neuronGroup>
+                <neuronGroup name="Inh-Logistic" role="Inhibitory" relShare="1" augmentedStates="true">
+                  <activationSigmoid/>
+                  <bias min="-1" max="1" randomSign="false" distribution="Uniform"/>
+                </neuronGroup>
+              </neuronGroups>
+              <interconnection density="0.1" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
+                <staticSynapse>
+                  <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
+                </staticSynapse>
+              </interconnection>
             </pool>
           </pools>
+          <pool2PoolConns>
+            <pool2PoolConn srcPool="Spiking pool" srcConnDensity="0.5" targetPool="Logistic pool" targetConnDensity="0.05" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" constantNumOfConnections="false">
+              <dynamicSynapse>
+                <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
+              </dynamicSynapse>
+            </pool2PoolConn>
+            <pool2PoolConn srcPool="Logistic pool" srcConnDensity="0.5" targetPool="Spiking pool" targetConnDensity="0.05" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" constantNumOfConnections="false">
+              <dynamicSynapse>
+                <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
+              </dynamicSynapse>
+            </pool2PoolConn>
+          </pool2PoolConns>
         </reservoirCfg>
       </reservoirCfgContainer>
       <reservoirInstanceContainer>
-        <reservoirInstance name="Main" cfg="All pools" augmentedStates="false">
+        <reservoirInstance name="Main" cfg="MainCfg" augmentedStates="false">
           <inputFieldAssignments>
-            <inputFieldAssignment inputFieldName="EEG" poolName="Analog pool" density="1">
+            <inputFieldAssignment inputFieldName="EEG" poolName="Spiking pool" density="1">
               <staticSynapse>
-                <weight min="0" max="0.5" randomSign="false" distribution="Uniform"/>
+                <weight min="0" max="0.6" randomSign="false" distribution="Uniform"/>
+              </staticSynapse>
+            </inputFieldAssignment>
+            <inputFieldAssignment inputFieldName="mg" poolName="Spiking pool" density="1">
+              <staticSynapse>
+                <weight min="0.5" max="0.5" randomSign="false" distribution="Uniform"/>
+              </staticSynapse>
+            </inputFieldAssignment>
+            <inputFieldAssignment inputFieldName="EEG" poolName="Logistic pool" density="1">
+              <staticSynapse>
+                <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
+              </staticSynapse>
+            </inputFieldAssignment>
+            <inputFieldAssignment inputFieldName="mg" poolName="Logistic pool" density="1">
+              <staticSynapse>
+                <weight min="0.5" max="0.5" randomSign="false" distribution="Uniform"/>
               </staticSynapse>
             </inputFieldAssignment>
           </inputFieldAssignments>
         </reservoirInstance>
       </reservoirInstanceContainer>
-      <readoutLayer testDataRatio="0.25" folds="Auto">
-        <readoutUnit attempts="5" attemptEpochs="10000">
+      <readoutLayer testDataRatio="0.1" folds="Auto">
+        <readoutUnit attempts="5" attemptEpochs="3000">
           <ff regressionMethod="Resilient">
             <activationTanH/>
+            <hiddenLayers>
+              <layer neurons="20">
+                <activationTanH/>
+              </layer>
+            </hiddenLayers>
           </ff>
         </readoutUnit>
         <outputFields>
@@ -486,8 +415,5 @@
       </readoutLayer>
     </stateMachineCfg>
   </case>
-
-
-
 
 </demo>

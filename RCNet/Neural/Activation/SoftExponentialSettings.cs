@@ -21,6 +21,9 @@ namespace RCNet.Neural.Activation
     {
         //Constants
         //Typical values
+        /// <summary>
+        /// Typical alpha value
+        /// </summary>
         public const double TypicalAlpha = 1;
 
         //Attribute properties

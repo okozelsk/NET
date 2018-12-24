@@ -21,6 +21,9 @@ namespace RCNet.Neural.Activation
     {
         //Constants
         //Typical values
+        /// <summary>
+        /// Typical negative slope
+        /// </summary>
         public const double TypicalNegSlope = 0.05;
 
         //Attribute properties
