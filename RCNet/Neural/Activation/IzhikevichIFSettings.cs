@@ -22,10 +22,6 @@ namespace RCNet.Neural.Activation
         //Constants
         //Typical values
         /// <summary>
-        /// Typical incoming stimulation coefficient
-        /// </summary>
-        public const double TypicalStimuliCoeff = 10;
-        /// <summary>
         /// Typical value of the parameter "a" in the original Izhikevich model
         /// </summary>
         public const double TypicalRecoveryTimeScale = 0.02;

@@ -22,9 +22,21 @@ namespace RCNet.Neural.Activation
     {
         //Constants
         //Typical values
+        /// <summary>
+        /// Typical value of resistance
+        /// </summary>
         public const double TypicalResistance = 15;
+        /// <summary>
+        /// Typical value of decay rate
+        /// </summary>
         public const double TypicalDecayRate = 0.05;
+        /// <summary>
+        /// Typical value of reset voltage
+        /// </summary>
         public const double TypicalResetV = 5;
+        /// <summary>
+        /// Typical value of firing voltage
+        /// </summary>
         public const double TypicalFiringThresholdV = 20;
 
         //Attribute properties

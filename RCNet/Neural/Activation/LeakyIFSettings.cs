@@ -22,10 +22,25 @@ namespace RCNet.Neural.Activation
     {
         //Constants
         //Typical values
+        /// <summary>
+        /// Typical value of time scale
+        /// </summary>
         public const double TypicalTimeScale = 8;
+        /// <summary>
+        /// Typical value of resistance
+        /// </summary>
         public const double TypicalResistance = 10;
+        /// <summary>
+        /// Typical value of resting voltage
+        /// </summary>
         public const double TypicalRestV = -70;
+        /// <summary>
+        /// Typical value of reset voltage
+        /// </summary>
         public const double TypicalResetV = -65;
+        /// <summary>
+        /// Typical value of firing voltage
+        /// </summary>
         public const double TypicalFiringThresholdV = -50;
 
         //Attribute properties
