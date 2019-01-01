@@ -80,12 +80,6 @@ namespace RCNet.DemoConsoleApp
             /// </summary>
             public string FileName { get; }
             /// <summary>
-            /// How many of starting samples will be used for booting of reservoirs to ensure
-            /// reservoir neurons states be affected by input data only. Boot sequence length of the reservoir should be greater
-            /// or equal to reservoir neurons count. So use the boot sequence length of the largest defined reservoir.
-            /// </summary>
-            public int NumOfBootSamples { get; }
-            /// <summary>
             /// Use true if all input and output State Machine fields are about the same range of values.
             /// </summary>
             public bool SingleNormalizer { get; }
@@ -104,7 +98,6 @@ namespace RCNet.DemoConsoleApp
                 Name = demoCaseElem.Attribute("name").Value;
                 XElement samplesElem = demoCaseElem.Descendants("samples").First();
                 FileName = dir + "\\" + samplesElem.Attribute("fileName").Value;
-                NumOfBootSamples = (samplesElem.Attribute("bootSamples") == null) ? 0 : int.Parse(samplesElem.Attribute("bootSamples").Value);
                 SingleNormalizer = bool.Parse(samplesElem.Attribute("singleNormalizer").Value);
                 NormalizerReserveRatio = double.Parse(samplesElem.Attribute("normalizerReserve").Value, CultureInfo.InvariantCulture);
                 stateMachineCfg = new StateMachineSettings(demoCaseElem.Descendants("stateMachineCfg").First());

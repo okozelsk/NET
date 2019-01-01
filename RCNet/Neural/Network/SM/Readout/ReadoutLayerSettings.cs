@@ -38,13 +38,9 @@ namespace RCNet.Neural.Network.SM.Readout
         /// </summary>
         public int NumOfFolds { get; set; }
         /// <summary>
-        /// Readout unit configuration
+        /// Readout unit configurations
         /// </summary>
-        public ReadoutUnitSettings ReadoutUnitCfg { get; set; }
-        /// <summary>
-        /// The collection of output field names in order of how they will be computed.
-        /// </summary>
-        public List<string> OutputFieldNameCollection { get; set; }
+        public List<ReadoutUnitSettings> ReadoutUnitCfgCollection { get; set; }
 
         //Constructors
         /// <summary>
@@ -55,8 +51,7 @@ namespace RCNet.Neural.Network.SM.Readout
             //Default settings
             TestDataRatio = 0;
             NumOfFolds = 0;
-            ReadoutUnitCfg = new ReadoutUnitSettings();
-            OutputFieldNameCollection = new List<string>();
+            ReadoutUnitCfgCollection = new List<ReadoutUnitSettings>();
             return;
         }
 
@@ -69,8 +64,11 @@ namespace RCNet.Neural.Network.SM.Readout
             //Copy
             TestDataRatio = source.TestDataRatio;
             NumOfFolds = source.NumOfFolds;
-            ReadoutUnitCfg = source.ReadoutUnitCfg.DeepClone();
-            OutputFieldNameCollection = new List<string>(source.OutputFieldNameCollection);
+            ReadoutUnitCfgCollection = new List<ReadoutUnitSettings>();
+            foreach(ReadoutUnitSettings rus in source.ReadoutUnitCfgCollection)
+            {
+                ReadoutUnitCfgCollection.Add(rus.DeepClone());
+            }
             return;
         }
 
@@ -93,15 +91,11 @@ namespace RCNet.Neural.Network.SM.Readout
             //Parsing
             TestDataRatio = double.Parse(readoutLayerSettingsElem.Attribute("testDataRatio").Value, CultureInfo.InvariantCulture);
             NumOfFolds = readoutLayerSettingsElem.Attribute("folds").Value == "Auto" ? 0 : int.Parse(readoutLayerSettingsElem.Attribute("folds").Value);
-            //Readout unit
-            XElement readoutUnitElem = readoutLayerSettingsElem.Descendants("readoutUnit").First();
-            ReadoutUnitCfg = new ReadoutUnitSettings(readoutUnitElem);
-            //Output fields
-            XElement outputFieldsElem = readoutLayerSettingsElem.Descendants("outputFields").First();
-            OutputFieldNameCollection = new List<string>();
-            foreach (XElement outputFieldElem in outputFieldsElem.Descendants("field"))
+            //Readout units
+            ReadoutUnitCfgCollection = new List<ReadoutUnitSettings>();
+            foreach (XElement readoutUnitElem in readoutLayerSettingsElem.Descendants("readoutUnit"))
             {
-                OutputFieldNameCollection.Add(outputFieldElem.Attribute("name").Value);
+                ReadoutUnitCfgCollection.Add(new ReadoutUnitSettings(readoutUnitElem));
             }
             return;
         }
@@ -116,11 +110,17 @@ namespace RCNet.Neural.Network.SM.Readout
             ReadoutLayerSettings cmpSettings = obj as ReadoutLayerSettings;
             if (TestDataRatio != cmpSettings.TestDataRatio ||
                 NumOfFolds != cmpSettings.NumOfFolds ||
-                !ReadoutUnitCfg.Equals(cmpSettings.ReadoutUnitCfg) ||
-                !OutputFieldNameCollection.ToArray().ContainsEqualValues(cmpSettings.OutputFieldNameCollection.ToArray())
+                ReadoutUnitCfgCollection.Count != cmpSettings.ReadoutUnitCfgCollection.Count
                 )
             {
                 return false;
+            }
+            for(int i = 0; i < ReadoutUnitCfgCollection.Count; i++)
+            {
+                if(!ReadoutUnitCfgCollection[i].Equals(cmpSettings.ReadoutUnitCfgCollection[i]))
+                {
+                    return false;
+                }
             }
             return true;
         }
@@ -167,6 +167,14 @@ namespace RCNet.Neural.Network.SM.Readout
 
             //Attributes
             /// <summary>
+            /// Output field name
+            /// </summary>
+            public string Name { get; set; }
+            /// <summary>
+            /// Neural task type
+            /// </summary>
+            public CommonEnums.TaskType TaskType;
+            /// <summary>
             /// Type of readout unit network
             /// </summary>
             public ReadoutUnitNetworkType NetType { get; set; }
@@ -193,6 +201,8 @@ namespace RCNet.Neural.Network.SM.Readout
             /// </summary>
             public ReadoutUnitSettings()
             {
+                Name = "";
+                TaskType = CommonEnums.TaskType.Prediction;
                 NetType = ReadoutUnitNetworkType.FF;
                 NetSettings = null;
                 OutputRange = null;
@@ -207,6 +217,8 @@ namespace RCNet.Neural.Network.SM.Readout
             /// <param name="source">Source instance</param>
             public ReadoutUnitSettings(ReadoutUnitSettings source)
             {
+                Name = source.Name;
+                TaskType = source.TaskType;
                 NetType = source.NetType;
                 NetSettings = null;
                 OutputRange = null;
@@ -235,6 +247,8 @@ namespace RCNet.Neural.Network.SM.Readout
             /// </param>
             public ReadoutUnitSettings(XElement readoutUnitElem)
             {
+                Name = readoutUnitElem.Attribute("name").Value;
+                TaskType = CommonEnums.ParseTaskType(readoutUnitElem.Attribute("task").Value);
                 RegressionAttempts = int.Parse(readoutUnitElem.Attribute("attempts").Value);
                 RegressionAttemptEpochs = int.Parse(readoutUnitElem.Attribute("attemptEpochs").Value);
                 //Net settings
@@ -251,7 +265,7 @@ namespace RCNet.Neural.Network.SM.Readout
                 }
                 XElement netSettingsElem = netSettingsElems[0];
                 //FF?
-                if (netSettingsElem.Name == "ff")
+                if (netSettingsElem.Name.LocalName == "ff")
                 {
                     NetType = ReadoutUnitNetworkType.FF;
                     NetSettings = new FeedForwardNetworkSettings(netSettingsElem);
@@ -275,7 +289,9 @@ namespace RCNet.Neural.Network.SM.Readout
             {
                 if (obj == null) return false;
                 ReadoutUnitSettings cmpSettings = obj as ReadoutUnitSettings;
-                if (NetType != cmpSettings.NetType ||
+                if (Name != cmpSettings.Name ||
+                    TaskType != cmpSettings.TaskType ||
+                    NetType != cmpSettings.NetType ||
                     !Equals(NetSettings, cmpSettings.NetSettings) ||
                     !Equals(OutputRange, cmpSettings.OutputRange) ||
                     RegressionAttempts != cmpSettings.RegressionAttempts ||

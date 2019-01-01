@@ -36,10 +36,6 @@ namespace RCNet.Neural.Network.SM.Readout
         public const int MinLengthOfTestDataset = 2;
         //Attributes
         /// <summary>
-        /// Type of the task
-        /// </summary>
-        private readonly CommonEnums.TaskType _taskType;
-        /// <summary>
         /// Readout layer configuration
         /// </summary>
         private ReadoutLayerSettings _settings;
@@ -58,23 +54,21 @@ namespace RCNet.Neural.Network.SM.Readout
         /// <summary>
         /// Creates an uninitialized instance
         /// </summary>
-        /// <param name="taskType">Type of the task</param>
         /// <param name="settings">Readout layer configuration</param>
         /// <param name="dataRange">Range of input/output data</param>
-        public ReadoutLayer(CommonEnums.TaskType taskType,
-                            ReadoutLayerSettings settings,
-                            Interval dataRange
-                            )
+        public ReadoutLayer(ReadoutLayerSettings settings, Interval dataRange)
         {
-            _taskType = taskType;
             _settings = settings.DeepClone();
             _dataRange = dataRange.DeepClone();
-            if(!_settings.ReadoutUnitCfg.OutputRange.BelongsTo(_dataRange.Min) || !_settings.ReadoutUnitCfg.OutputRange.BelongsTo(_dataRange.Max))
+            foreach (ReadoutLayerSettings.ReadoutUnitSettings rus in _settings.ReadoutUnitCfgCollection)
             {
-                throw new Exception($"Readout unit does not support data range <{_dataRange.Min}; {_dataRange.Max}>.");
+                if (!rus.OutputRange.BelongsTo(_dataRange.Min) || !rus.OutputRange.BelongsTo(_dataRange.Max))
+                {
+                    throw new Exception($"Readout unit {rus.Name} does not support data range <{_dataRange.Min}; {_dataRange.Max}>.");
+                }
             }
             //Clusters
-            _clusterCollection = new ReadoutUnit[_settings.OutputFieldNameCollection.Count][];
+            _clusterCollection = new ReadoutUnit[_settings.ReadoutUnitCfgCollection.Count][];
             _clusterErrStatisticsCollection = new List<ClusterErrStatistics>();
             return;
         }
@@ -83,8 +77,8 @@ namespace RCNet.Neural.Network.SM.Readout
         /// Builds readout layer.
         /// Prepares prediction clusters containing trained readout units.
         /// </summary>
-        /// <param name="predictorsCollection">Collection of all available predictors</param>
-        /// <param name="idealOutputsCollection">Collection of all available desired outputs related to predictors</param>
+        /// <param name="predictorsCollection">Collection of predictors</param>
+        /// <param name="idealOutputsCollection">Collection of desired outputs related to predictors</param>
         /// <param name="regressionController">Regression controller delegate</param>
         /// <param name="regressionControllerData">An user object</param>
         /// <returns>Returned ValidationBundle is something like a protocol.
@@ -133,12 +127,12 @@ namespace RCNet.Neural.Network.SM.Readout
             shuffledData.Shuffle(rand);
             //Data inspection, preparation of datasets and training of ReadoutUnits
             //Clusters of readout units (one cluster for each output field)
-            for (int clusterIdx = 0; clusterIdx < _settings.OutputFieldNameCollection.Count; clusterIdx++)
+            for (int clusterIdx = 0; clusterIdx < _settings.ReadoutUnitCfgCollection.Count; clusterIdx++)
             {
                 _clusterCollection[clusterIdx] = new ReadoutUnit[numOfFolds];
                 List<double[]> idealValueCollection = new List<double[]>(idealOutputsCollection.Count);
                 BinDistribution refBinDistr = null;
-                if (_taskType == CommonEnums.TaskType.Classification)
+                if (_settings.ReadoutUnitCfgCollection[clusterIdx].TaskType == CommonEnums.TaskType.Classification)
                 {
                     //Reference binary distribution is relevant only for classification task
                     refBinDistr = new BinDistribution(_dataRange.Mid);
@@ -149,7 +143,7 @@ namespace RCNet.Neural.Network.SM.Readout
                     double[] value = new double[1];
                     value[0] = idealVector[clusterIdx];
                     idealValueCollection.Add(value);
-                    if (_taskType == CommonEnums.TaskType.Classification)
+                    if (_settings.ReadoutUnitCfgCollection[clusterIdx].TaskType == CommonEnums.TaskType.Classification)
                     {
                         //Reference binary distribution is relevant only for classification task
                         refBinDistr.Update(value);
@@ -157,7 +151,7 @@ namespace RCNet.Neural.Network.SM.Readout
                 }
                 List<TimeSeriesBundle> subBundleCollection = null;
                 //Datasets preparation is depending on the task type
-                if (_taskType == CommonEnums.TaskType.Classification)
+                if (_settings.ReadoutUnitCfgCollection[clusterIdx].TaskType == CommonEnums.TaskType.Classification)
                 {
                     //Classification task
                     subBundleCollection = DivideSamplesForClassification(shuffledData.InputVectorCollection,
@@ -168,14 +162,14 @@ namespace RCNet.Neural.Network.SM.Readout
                 }
                 else
                 {
-                    //Prediction or Hybrid task
+                    //Prediction task
                     subBundleCollection = DivideSamplesForPredictionOrHybrid(shuffledData.InputVectorCollection,
                                                                              idealValueCollection,
                                                                              testDataSetLength
                                                                              );
                 }
                 //Best predicting unit per each fold in the cluster.
-                ClusterErrStatistics ces = new ClusterErrStatistics(_taskType, numOfFolds, refBinDistr);
+                ClusterErrStatistics ces = new ClusterErrStatistics(_settings.ReadoutUnitCfgCollection[clusterIdx].TaskType, numOfFolds, refBinDistr);
                 int arrayPos = 0;
                 for (int foldIdx = 0; foldIdx < numOfFolds; foldIdx++)
                 {
@@ -192,9 +186,8 @@ namespace RCNet.Neural.Network.SM.Readout
                     }
                     //Call training regression to get the best fold's readout unit.
                     //The best unit becomes to be the predicting cluster member.
-                    _clusterCollection[clusterIdx][foldIdx] = ReadoutUnit.CreateTrained(_taskType,
+                    _clusterCollection[clusterIdx][foldIdx] = ReadoutUnit.CreateTrained(_settings.ReadoutUnitCfgCollection[clusterIdx].TaskType,
                                                                                         clusterIdx,
-                                                                                        _settings.OutputFieldNameCollection[clusterIdx],
                                                                                         foldIdx + 1,
                                                                                         numOfFolds,
                                                                                         refBinDistr,
@@ -203,7 +196,7 @@ namespace RCNet.Neural.Network.SM.Readout
                                                                                         subBundleCollection[foldIdx].InputVectorCollection,
                                                                                         subBundleCollection[foldIdx].OutputVectorCollection,
                                                                                         rand,
-                                                                                        _settings.ReadoutUnitCfg,
+                                                                                        _settings.ReadoutUnitCfgCollection[clusterIdx],
                                                                                         regressionController,
                                                                                         regressionControllerData
                                                                                         );

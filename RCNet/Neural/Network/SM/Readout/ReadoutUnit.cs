@@ -212,7 +212,6 @@ namespace RCNet.Neural.Network.SM.Readout
         /// </summary>
         /// <param name="taskType">Type of the task</param>
         /// <param name="readoutUnitIdx">Index of the readout unit (informative only)</param>
-        /// <param name="outputFieldName">Name of the corresponding output field (informative only)</param>
         /// <param name="foldNum">Current fold number</param>
         /// <param name="numOfFolds">Total number of the folds</param>
         /// <param name="refBinDistr">Reference bin distribution (if task type is Classification)</param>
@@ -227,7 +226,6 @@ namespace RCNet.Neural.Network.SM.Readout
         /// <returns>Prepared readout unit</returns>
         public static ReadoutUnit CreateTrained(CommonEnums.TaskType taskType,
                                                 int readoutUnitIdx,
-                                                string outputFieldName,
                                                 int foldNum,
                                                 int numOfFolds,
                                                 BinDistribution refBinDistr,
@@ -298,7 +296,7 @@ namespace RCNet.Neural.Network.SM.Readout
                         {
                             TaskType = taskType,
                             ReadoutUnitIdx = readoutUnitIdx,
-                            OutputFieldName = outputFieldName,
+                            OutputFieldName = readoutUnitSettings.Name,
                             FoldNum = foldNum,
                             NumOfFolds = numOfFolds,
                             RegrAttemptNumber = regrAttemptNumber,

@@ -62,7 +62,6 @@
     <xs:restriction base="xs:string">
       <xs:enumeration value="Prediction"/>
       <xs:enumeration value="Classification"/>
-      <xs:enumeration value="Hybrid"/>
     </xs:restriction>
   </xs:simpleType>
 
@@ -588,27 +587,16 @@
       <xs:element type="FFNetCfgType" name="ff" minOccurs="1" maxOccurs="1"/>
       <xs:element type="PPNetCfgType" name="pp" minOccurs="1" maxOccurs="1"/>
     </xs:choice>
+    <xs:attribute type="xs:string" name="name" use="required"/>
+    <xs:attribute type="NeuralTaskType" name="task" use="required"/>
     <xs:attribute type="UIntGT0Type" name="attempts" use="required"/>
     <xs:attribute type="UIntGT0Type" name="attemptEpochs" use="required"/>
   </xs:complexType>
 
-  <!-- Readout layer - output fields - configuration -->
-  <xs:complexType name="ROutLayerOutputFieldsCfgType">
-    <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="AloneNameType" name="field" minOccurs="1" maxOccurs="unbounded"/>
-    </xs:sequence>
-  </xs:complexType>
-  
   <!-- Readout layer configuration -->
   <xs:complexType name="ROutLayerCfgType">
-    <xs:sequence minOccurs="1" maxOccurs="1">
+    <xs:sequence minOccurs="1" maxOccurs="unbounded">
       <xs:element type="ROutLayerUnitCfgType" name="readoutUnit" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="ROutLayerOutputFieldsCfgType" name="outputFields" minOccurs="1" maxOccurs="1">
-        <xs:unique name="unique_output_field_name">
-          <xs:selector xpath="./field"/>
-          <xs:field xpath="@name"/>
-        </xs:unique>
-      </xs:element>
     </xs:sequence>
     <xs:attribute name="testDataRatio" use="required">
       <xs:simpleType>
@@ -789,6 +777,16 @@
   </xs:complexType>
 
   <!-- ________________________________________STATE MACHINE TYPES_________________________________________________ -->
+  <!-- StateMachine - continuous input feeding -configuration -->
+  <xs:complexType name="SMInpFeedingContinuousCfgType">
+    <xs:attribute type="UIntGT0AutoOptionType" name="bootCycles" use="optional" default="Auto"/>
+    <xs:attribute type="xs:boolean" name="routeToReadout" use="optional" default="false"/>
+  </xs:complexType>
+
+  <!-- StateMachine - patterned input feeding -configuration -->
+  <xs:complexType name="SMInpFeedingPatternedCfgType">
+  </xs:complexType>
+
   <!-- StateMachine - internal input field -configuration -->
   <xs:complexType name="SMInternalInpFieldCfgType">
     <xs:choice minOccurs="1" maxOccurs="1">
@@ -814,12 +812,15 @@
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="AloneNameType" name="field" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
-    <xs:attribute type="xs:boolean" name="routeToReadout" use="optional" default="false"/>
   </xs:complexType>
 
   <!-- StateMachine - input -configuration -->
   <xs:complexType name="SMInputCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:choice minOccurs="1" maxOccurs="1">
+        <xs:element type="SMInpFeedingContinuousCfgType" name="feedingContinuous" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="SMInpFeedingPatternedCfgType" name="feedingPatterned" minOccurs="1" maxOccurs="1"/>
+      </xs:choice>
       <xs:element type="SMExternalInpFieldsCfgType" name="external" minOccurs="1" maxOccurs="1"/>
       <xs:element type="SMInternalInpFieldsCfgType" name="internal" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
@@ -894,9 +895,13 @@
           <xs:field xpath="@name"/>
         </xs:unique>
       </xs:element>
-      <xs:element type="ROutLayerCfgType" name="readoutLayer" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="ROutLayerCfgType" name="readoutLayer" minOccurs="1" maxOccurs="1">
+        <xs:unique name="unique_output_field_name">
+          <xs:selector xpath="./readoutUnit"/>
+          <xs:field xpath="@name"/>
+        </xs:unique>
+      </xs:element>
     </xs:sequence>
-    <xs:attribute type="NeuralTaskType" name="taskType" use="required"/>
     <xs:attribute type="xs:int" name="randomizerSeek" use="optional" default="0"/>
   </xs:complexType>
 

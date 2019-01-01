@@ -57,6 +57,21 @@ namespace RCNet.Neural
             }
         }
 
+        /// <summary>
+        /// Input feeding variants
+        /// </summary>
+        public enum InputFeedingType
+        {
+            /// <summary>
+            /// Continuous feeding
+            /// </summary>
+            Continuous,
+            /// <summary>
+            /// Patterned feeding
+            /// </summary>
+            Patterned
+        }
+
 
         /// <summary>
         /// Supported task types.
@@ -70,11 +85,7 @@ namespace RCNet.Neural
             /// <summary>
             /// Classification (Categorization, Pattern recognition) task type
             /// </summary>
-            Classification,
-            /// <summary>
-            /// Prediction task type with input pattern
-            /// </summary>
-            Hybrid
+            Classification
         }
 
         /// <summary>
@@ -87,7 +98,6 @@ namespace RCNet.Neural
             {
                 case "PREDICTION": return TaskType.Prediction;
                 case "CLASSIFICATION": return TaskType.Classification;
-                case "HYBRID": return TaskType.Hybrid;
                 default:
                     throw new ArgumentException($"Unsupported task type {code}", "code");
             }

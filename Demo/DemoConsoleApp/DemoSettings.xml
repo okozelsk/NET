@@ -8,10 +8,11 @@
     business day 2018/03/05 (where real prices were High=6.58$ and Low=5.99$).
   -->
   <case name="Prediction task High and Low share prices of TTOO (T2 Biosystems, Inc.): Small analog reservoir (ESN), linear regression readout">
-    <samples fileName="TTOO.csv" bootSamples="150" singleNormalizer="true" normalizerReserve="0.1"/>
-    <stateMachineCfg taskType="Prediction" randomizerSeek="0">
+    <samples fileName="TTOO.csv" singleNormalizer="true" normalizerReserve="0.1"/>
+    <stateMachineCfg randomizerSeek="0">
       <input>
-        <external routeToReadout="true">
+        <feedingContinuous bootCycles="Auto" routeToReadout="true"/>
+        <external>
           <field name="High"/>
           <field name="Low"/>
           <field name="Adj Close"/>
@@ -52,15 +53,16 @@
         </reservoirInstance>
       </reservoirInstanceContainer>
       <readoutLayer testDataRatio="0.1" folds="Auto">
-        <readoutUnit attempts="1" attemptEpochs="100">
+        <readoutUnit name="High" task="Prediction" attempts="1" attemptEpochs="100">
           <ff regressionMethod="Linear">
             <activationIdentity/>
           </ff>
         </readoutUnit>
-        <outputFields>
-          <field name="High"/>
-          <field name="Low"/>
-        </outputFields>
+        <readoutUnit name="Low" task="Prediction" attempts="1" attemptEpochs="100">
+          <ff regressionMethod="Linear">
+            <activationIdentity/>
+          </ff>
+        </readoutUnit>
       </readoutLayer>
     </stateMachineCfg>
   </case>
@@ -72,10 +74,11 @@
     Dataset contains generated Mackey Glass chaotic time series.
   -->
   <case name="Prediction task Mackey Glass chaotic time series: Two analog reservoirs (ESN), Linear regression output">
-    <samples fileName="MackeyGlass.csv" bootSamples="400" singleNormalizer="false" normalizerReserve="0.1"/>
-    <stateMachineCfg taskType="Prediction" randomizerSeek="0">
+    <samples fileName="MackeyGlass.csv" singleNormalizer="false" normalizerReserve="0.1"/>
+    <stateMachineCfg randomizerSeek="0">
       <input>
-        <external routeToReadout="false">
+        <feedingContinuous bootCycles="400" routeToReadout="false"/>
+        <external>
           <field name="Value"/>
         </external>
       </input>
@@ -127,14 +130,11 @@
         </reservoirInstance>
       </reservoirInstanceContainer>
       <readoutLayer testDataRatio="0.1" folds="1">
-        <readoutUnit attempts="1" attemptEpochs="1">
+        <readoutUnit name="Value" task="Prediction" attempts="1" attemptEpochs="1">
           <ff regressionMethod="Linear">
             <activationIdentity/>
           </ff>
         </readoutUnit>
-        <outputFields>
-          <field name="Value"/>
-        </outputFields>
       </readoutLayer>
     </stateMachineCfg>
   </case>
@@ -158,9 +158,10 @@
   -->
   <case name="Classification task Libras Movement: Mixed spiking and analog reservoir, Linear regression classifier">
     <samples fileName="LibrasMovement.csv" singleNormalizer="false" normalizerReserve="0.1"/>
-    <stateMachineCfg taskType="Classification" randomizerSeek="0">
+    <stateMachineCfg randomizerSeek="0">
       <input>
-        <external routeToReadout="false">
+        <feedingPatterned/>
+        <external>
           <field name="coord_abcissa"/>
           <field name="coord_ordinate"/>
         </external>
@@ -270,28 +271,81 @@
         </reservoirInstance>
       </reservoirInstanceContainer>
       <readoutLayer testDataRatio="0.0825" folds="Auto">
-        <readoutUnit attempts="10" attemptEpochs="100">
+        <readoutUnit name="curved swing" task="Classification" attempts="10" attemptEpochs="100">
           <ff regressionMethod="Linear">
             <activationIdentity/>
           </ff>
         </readoutUnit>
-        <outputFields>
-          <field name="curved swing"/>
-          <field name="horizontal swing"/>
-          <field name="vertical swing"/>
-          <field name="anti-clockwise arc"/>
-          <field name="clockwise arc"/>
-          <field name="circle"/>
-          <field name="horizontal straight-line"/>
-          <field name="vertical straight-line"/>
-          <field name="horizontal zigzag"/>
-          <field name="vertical zigzag"/>
-          <field name="horizontal wavy"/>
-          <field name="vertical wavy"/>
-          <field name="face-up curve"/>
-          <field name="face-down curve"/>
-          <field name="tremble"/>
-        </outputFields>
+        <readoutUnit name="horizontal swing" task="Classification" attempts="10" attemptEpochs="100">
+          <ff regressionMethod="Linear">
+            <activationIdentity/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="vertical swing" task="Classification" attempts="10" attemptEpochs="100">
+          <ff regressionMethod="Linear">
+            <activationIdentity/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="anti-clockwise arc" task="Classification" attempts="10" attemptEpochs="100">
+          <ff regressionMethod="Linear">
+            <activationIdentity/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="clockwise arc" task="Classification" attempts="10" attemptEpochs="100">
+          <ff regressionMethod="Linear">
+            <activationIdentity/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="circle" task="Classification" attempts="10" attemptEpochs="100">
+          <ff regressionMethod="Linear">
+            <activationIdentity/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="horizontal straight-line" task="Classification" attempts="10" attemptEpochs="100">
+          <ff regressionMethod="Linear">
+            <activationIdentity/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="vertical straight-line" task="Classification" attempts="10" attemptEpochs="100">
+          <ff regressionMethod="Linear">
+            <activationIdentity/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="horizontal zigzag" task="Classification" attempts="10" attemptEpochs="100">
+          <ff regressionMethod="Linear">
+            <activationIdentity/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="vertical zigzag" task="Classification" attempts="10" attemptEpochs="100">
+          <ff regressionMethod="Linear">
+            <activationIdentity/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="horizontal wavy" task="Classification" attempts="10" attemptEpochs="100">
+          <ff regressionMethod="Linear">
+            <activationIdentity/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="vertical wavy" task="Classification" attempts="10" attemptEpochs="100">
+          <ff regressionMethod="Linear">
+            <activationIdentity/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="face-up curve" task="Classification" attempts="10" attemptEpochs="100">
+          <ff regressionMethod="Linear">
+            <activationIdentity/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="face-down curve" task="Classification" attempts="10" attemptEpochs="100">
+          <ff regressionMethod="Linear">
+            <activationIdentity/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="tremble" task="Classification" attempts="10" attemptEpochs="100">
+          <ff regressionMethod="Linear">
+            <activationIdentity/>
+          </ff>
+        </readoutUnit>
       </readoutLayer>
     </stateMachineCfg>
   </case>
@@ -308,9 +362,10 @@
   -->
   <case name="Classification task Recognition of the Epileptic Seizure Brain EEG Activity:  Mixed spiking and analog reservoir, Feed forward network with hidden layer as a classifier">
     <samples fileName="EpilepticSeizureActivity.csv" singleNormalizer="false" normalizerReserve="0.1"/>
-    <stateMachineCfg taskType="Classification" randomizerSeek="0">
+    <stateMachineCfg randomizerSeek="0">
       <input>
-        <external routeToReadout="false">
+        <feedingPatterned/>
+        <external>
           <field name="EEG"/>
         </external>
         <internal>
@@ -399,7 +454,7 @@
         </reservoirInstance>
       </reservoirInstanceContainer>
       <readoutLayer testDataRatio="0.1" folds="Auto">
-        <readoutUnit attempts="5" attemptEpochs="3000">
+        <readoutUnit name="EpilepticSeizure" task="Classification" attempts="5" attemptEpochs="3000">
           <ff regressionMethod="Resilient">
             <activationTanH/>
             <hiddenLayers>
@@ -409,9 +464,6 @@
             </hiddenLayers>
           </ff>
         </readoutUnit>
-        <outputFields>
-          <field name="EpilepticSeizure"/>
-        </outputFields>
       </readoutLayer>
     </stateMachineCfg>
   </case>

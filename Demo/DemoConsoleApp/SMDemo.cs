@@ -11,6 +11,7 @@ using RCNet.Neural.Network.SM.ReservoirStructure;
 using RCNet.Neural.Network.SM.Readout;
 using RCNet.DemoConsoleApp.Log;
 using System.Text;
+using System.Linq;
 
 namespace RCNet.DemoConsoleApp
 {
@@ -249,13 +250,16 @@ namespace RCNet.DemoConsoleApp
             //Prepare regression stage input object
             log.Write(" ", false);
             StateMachine.RegressionStageInput rsi = null;
-            if (demoCaseParams.stateMachineCfg.TaskType == CommonEnums.TaskType.Prediction)
+            List<string> outputFieldNameCollection = (from rus in demoCaseParams.stateMachineCfg.ReadoutLayerConfig.ReadoutUnitCfgCollection select rus.Name).ToList();
+            List<CommonEnums.TaskType> outputFieldTaskCollection = (from rus in demoCaseParams.stateMachineCfg.ReadoutLayerConfig.ReadoutUnitCfgCollection select rus.TaskType).ToList();
+            if (demoCaseParams.stateMachineCfg.InputConfig.FeedingType == CommonEnums.InputFeedingType.Continuous)
             {
-                //Time series prediction task
+                //Time series input
                 //Load data bundle from csv file
                 TimeSeriesBundle data = TimeSeriesDataLoader.Load(demoCaseParams.FileName,
                                                                   demoCaseParams.stateMachineCfg.InputConfig.ExternalFieldNameCollection(),
-                                                                  demoCaseParams.stateMachineCfg.ReadoutLayerConfig.OutputFieldNameCollection,
+                                                                  outputFieldNameCollection,
+                                                                  outputFieldTaskCollection,
                                                                   normalizationRange,
                                                                   demoCaseParams.NormalizerReserveRatio,
                                                                   true,
@@ -263,16 +267,16 @@ namespace RCNet.DemoConsoleApp
                                                                   out bundleNormalizer,
                                                                   out predictionInputVector
                                                                   );
-                rsi = stateMachine.PrepareRegressionStageInput(data, demoCaseParams.NumOfBootSamples, PredictorsCollectionCallback, log);
+                rsi = stateMachine.PrepareRegressionStageInput(data, PredictorsCollectionCallback, log);
             }
             else
             {
-                //Classification or hybrid task
+                //Patterned input
                 //Load data bundle from csv file
-                PatternBundle data = PatternDataLoader.Load(demoCaseParams.stateMachineCfg.TaskType == CommonEnums.TaskType.Classification,
-                                                            demoCaseParams.FileName,
+                PatternBundle data = PatternDataLoader.Load(demoCaseParams.FileName,
                                                             demoCaseParams.stateMachineCfg.InputConfig.ExternalFieldNameCollection(),
-                                                            demoCaseParams.stateMachineCfg.ReadoutLayerConfig.OutputFieldNameCollection,
+                                                            outputFieldNameCollection,
+                                                            outputFieldTaskCollection,
                                                             normalizationRange,
                                                             demoCaseParams.NormalizerReserveRatio,
                                                             true,
@@ -288,9 +292,9 @@ namespace RCNet.DemoConsoleApp
             //Training - State Machine regression stage
             ValidationBundle vb = stateMachine.RegressionStage(rsi, RegressionControl, log);
 
-            //Perform prediction if the task type is Prediction
+            //Perform prediction if the input is continuous
             double[] predictionOutputVector = null;
-            if(demoCaseParams.stateMachineCfg.TaskType == CommonEnums.TaskType.Prediction)
+            if (demoCaseParams.stateMachineCfg.InputConfig.FeedingType == CommonEnums.InputFeedingType.Continuous)
             {
                 predictionOutputVector = stateMachine.Compute(predictionInputVector);
                 //Values are normalized so they have to be denormalized
@@ -301,14 +305,14 @@ namespace RCNet.DemoConsoleApp
             //Report training (regression) results and prediction
             log.Write("    Results", false);
             List<ReadoutLayer.ClusterErrStatistics> clusterErrStatisticsCollection = stateMachine.ClusterErrStatisticsCollection;
-            //Classification results
-            for (int outputIdx = 0; outputIdx < demoCaseParams.stateMachineCfg.ReadoutLayerConfig.OutputFieldNameCollection.Count; outputIdx++)
+            //Results
+            for (int outputIdx = 0; outputIdx < demoCaseParams.stateMachineCfg.ReadoutLayerConfig.ReadoutUnitCfgCollection.Count; outputIdx++)
             {
                 ReadoutLayer.ClusterErrStatistics ces = clusterErrStatisticsCollection[outputIdx];
-                if (demoCaseParams.stateMachineCfg.TaskType == CommonEnums.TaskType.Classification)
+                if (demoCaseParams.stateMachineCfg.ReadoutLayerConfig.ReadoutUnitCfgCollection[outputIdx].TaskType == CommonEnums.TaskType.Classification)
                 {
                     //Classification task report
-                    log.Write("            OutputField: " + demoCaseParams.stateMachineCfg.ReadoutLayerConfig.OutputFieldNameCollection[outputIdx], false);
+                    log.Write("            OutputField: " + demoCaseParams.stateMachineCfg.ReadoutLayerConfig.ReadoutUnitCfgCollection[outputIdx].Name, false);
                     log.Write("   Num of bin 0 samples: " + ces.BinaryErrStat.BinValErrStat[0].NumOfSamples.ToString(), false);
                     log.Write("     Bad bin 0 classif.: " + ces.BinaryErrStat.BinValErrStat[0].Sum.ToString(CultureInfo.InvariantCulture), false);
                     log.Write("       Bin 0 error rate: " + ces.BinaryErrStat.BinValErrStat[0].ArithAvg.ToString(CultureInfo.InvariantCulture), false);
@@ -325,7 +329,7 @@ namespace RCNet.DemoConsoleApp
                 else
                 {
                     //Prediction task report
-                    log.Write("            OutputField: " + demoCaseParams.stateMachineCfg.ReadoutLayerConfig.OutputFieldNameCollection[outputIdx], false);
+                    log.Write("            OutputField: " + demoCaseParams.stateMachineCfg.ReadoutLayerConfig.ReadoutUnitCfgCollection[outputIdx].Name, false);
                     log.Write("   Predicted next value: " + predictionOutputVector[outputIdx].ToString(CultureInfo.InvariantCulture), false);
                     log.Write("   Total num of samples: " + ces.PrecissionErrStat.NumOfSamples.ToString(), false);
                     log.Write("     Total Max Real Err: " + (bundleNormalizer.OutputFieldNormalizerRefCollection[outputIdx].ComputeNaturalSpan(ces.PrecissionErrStat.Max)).ToString(CultureInfo.InvariantCulture), false);

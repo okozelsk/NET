@@ -11,7 +11,7 @@ using RCNet.CsvTools;
 namespace RCNet.Neural.Data
 {
     /// <summary>
-    /// The class allows to upload sample data for a Classification or Hybrid task from a csv file.
+    /// The class allows to upload patterned sample data from a csv file.
     /// </summary>
     public static class PatternDataLoader
     {
@@ -25,9 +25,6 @@ namespace RCNet.Neural.Data
         /// The data row must begin with at least one set of values for defined repetitive attributes.
         /// The data row must end with a value for each defined output.
         /// </summary>
-        /// <param name="classification">
-        /// In case of classification the standardization and reserve ratio are not applied on output fields.
-        /// </param>
         /// <param name="fileName">
         /// Data file name
         /// </param>
@@ -37,6 +34,9 @@ namespace RCNet.Neural.Data
         /// <param name="outputFieldNameCollection">
         /// Output fields
         /// </param>
+        /// <param name="outputFieldTaskCollection">
+        /// Output field tasks
+        /// </param>
         /// <param name="normRange">
         /// Range of normalized values
         /// </param>
@@ -44,16 +44,15 @@ namespace RCNet.Neural.Data
         /// Reserve held by a normalizer to cover cases where future data exceeds a known range of sample data.
         /// </param>
         /// <param name="dataStandardization">
-        /// Specifies whether to apply data standardization to input data.
-        /// Output data is never standardized.
+        /// Specifies whether to apply data standardization.
         /// </param>
         /// <param name="bundleNormalizer">
         /// Returned initialized instance of BundleNormalizer.
         /// </param>
-        public static PatternBundle Load(bool classification,
-                                         string fileName,
+        public static PatternBundle Load(string fileName,
                                          List<string> inputFieldNameCollection,
                                          List<string> outputFieldNameCollection,
+                                         List<CommonEnums.TaskType> outputFieldTaskCollection,
                                          Interval normRange,
                                          double normReserveRatio,
                                          bool dataStandardization,
@@ -123,16 +122,20 @@ namespace RCNet.Neural.Data
                         throw new FormatException($"Output field name {outputFieldName} was not found among the outputs specified in the file.");
                     }
                 }
-                //Bundle handler setup
-                foreach (string attrName in repetitiveGroupOfAttributes.StringValueCollection)
+                //Bundle normalizer setup
+                foreach (string fieldName in inputFieldNameCollection)
                 {
-                    bundleNormalizer.DefineField(attrName, attrName, normReserveRatio, dataStandardization);
-                    bundleNormalizer.DefineInputField(attrName);
+                    bundleNormalizer.DefineField(fieldName, fieldName, normReserveRatio, dataStandardization);
+                    bundleNormalizer.DefineInputField(fieldName);
                 }
-                foreach (string outputName in outputNames.StringValueCollection)
+                for(int i = 0; i < outputFieldNameCollection.Count; i++)
                 {
-                    bundleNormalizer.DefineField(outputName, outputName, classification ? 0 : normReserveRatio, classification ? false : dataStandardization);
-                    bundleNormalizer.DefineOutputField(outputName);
+                    bundleNormalizer.DefineField(outputFieldNameCollection[i],
+                                                 outputFieldNameCollection[i],
+                                                 outputFieldTaskCollection[i] == CommonEnums.TaskType.Classification ? 0 : normReserveRatio,
+                                                 outputFieldTaskCollection[i] == CommonEnums.TaskType.Classification ? false : dataStandardization
+                                                 );
+                    bundleNormalizer.DefineOutputField(outputFieldNameCollection[i]);
                 }
                 bundleNormalizer.FinalizeStructure();
                 //Load data

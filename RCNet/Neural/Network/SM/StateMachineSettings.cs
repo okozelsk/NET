@@ -25,10 +25,6 @@ namespace RCNet.Neural.Network.SM
     {
         //Attribute properties
         /// <summary>
-        /// Type of the task for which is Machine designed
-        /// </summary>
-        public CommonEnums.TaskType TaskType { get; set; }
-        /// <summary>
         /// A value greater than or equal to 0 will always ensure the same initialization of the internal
         /// random number generator and therefore the same network structure, which is good for tuning
         /// other network parameters.
@@ -56,7 +52,6 @@ namespace RCNet.Neural.Network.SM
         public StateMachineSettings()
         {
             //Default settings
-            TaskType = CommonEnums.TaskType.Prediction;
             RandomizerSeek = 0;
             InputConfig = new InputSettings();
             ReservoirInstanceDefinitionCollection = new List<ReservoirInstanceDefinition>();
@@ -71,7 +66,6 @@ namespace RCNet.Neural.Network.SM
         public StateMachineSettings(StateMachineSettings source)
         {
             //Copy
-            TaskType = source.TaskType;
             RandomizerSeek = source.RandomizerSeek;
             InputConfig = source.InputConfig.DeepClone();
             ReservoirInstanceDefinitionCollection = new List<ReservoirInstanceDefinition>(source.ReservoirInstanceDefinitionCollection.Count);
@@ -100,16 +94,10 @@ namespace RCNet.Neural.Network.SM
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
             XElement stateMachineSettingsElem = validator.Validate(elem, "rootElem");
             //Parsing
-            //Task type
-            TaskType = CommonEnums.ParseTaskType(stateMachineSettingsElem.Attribute("taskType").Value);
             //Randomizer seek
             RandomizerSeek = int.Parse(stateMachineSettingsElem.Attribute("randomizerSeek").Value);
             //Input
             InputConfig = new InputSettings(stateMachineSettingsElem.Descendants("input").First());
-            if(TaskType != CommonEnums.TaskType.Prediction && InputConfig.RouteExternalInputToReadout)
-            {
-                throw new Exception("Routing input to readout is allowed for prediction task only.");
-            }
             //Collect available reservoir settings
             List<ReservoirSettings> availableResSettings = new List<ReservoirSettings>();
             XElement reservoirSettingsContainerElem = stateMachineSettingsElem.Descendants("reservoirCfgContainer").First();
@@ -123,6 +111,7 @@ namespace RCNet.Neural.Network.SM
             //Mapping of input fields to reservoir settings (future reservoir instance)
             ReservoirInstanceDefinitionCollection = new List<ReservoirInstanceDefinition>();
             XElement reservoirInstancesContainerElem = stateMachineSettingsElem.Descendants("reservoirInstanceContainer").First();
+            int numOfNeuronsInLargestReservoir = 0;
             foreach (XElement reservoirInstanceElem in reservoirInstancesContainerElem.Descendants("reservoirInstance"))
             {
                 ReservoirInstanceDefinition reservoirInstanceDefinition = new ReservoirInstanceDefinition
@@ -137,6 +126,16 @@ namespace RCNet.Neural.Network.SM
                 if (reservoirInstanceDefinition.Settings == null)
                 {
                     throw new Exception($"Reservoir settings '{reservoirInstanceElem.Attribute("cfg").Value}' was not found among available settings.");
+                }
+                //Update number of neurons in the largest reservoir
+                int numOfReservoirNeurons = 0;
+                foreach(PoolSettings ps in reservoirInstanceDefinition.Settings.PoolSettingsCollection)
+                {
+                    numOfReservoirNeurons += ps.Dim.Size;
+                }
+                if(numOfNeuronsInLargestReservoir < numOfReservoirNeurons)
+                {
+                    numOfNeuronsInLargestReservoir = numOfReservoirNeurons;
                 }
 
                 //Distinct input field names and corresponding indexes using by the reservoir instance
@@ -201,6 +200,11 @@ namespace RCNet.Neural.Network.SM
                 }
                 ReservoirInstanceDefinitionCollection.Add(reservoirInstanceDefinition);
             }
+            //Finalize boot cycles if necessary
+            if(InputConfig.BootCycles == -1 && InputConfig.FeedingType == CommonEnums.InputFeedingType.Continuous)
+            {
+                InputConfig.BootCycles = numOfNeuronsInLargestReservoir;
+            }
 
             return;
         }
@@ -213,8 +217,7 @@ namespace RCNet.Neural.Network.SM
         {
             if (obj == null) return false;
             StateMachineSettings cmpSettings = obj as StateMachineSettings;
-            if (TaskType != cmpSettings.TaskType ||
-                RandomizerSeek != cmpSettings.RandomizerSeek ||
+            if (RandomizerSeek != cmpSettings.RandomizerSeek ||
                 !Equals(InputConfig, cmpSettings.InputConfig) ||
                 ReservoirInstanceDefinitionCollection.Count != cmpSettings.ReservoirInstanceDefinitionCollection.Count ||
                 !Equals(ReadoutLayerConfig, cmpSettings.ReadoutLayerConfig)
@@ -258,6 +261,16 @@ namespace RCNet.Neural.Network.SM
         {
             //Attribute properties
             /// <summary>
+            /// Type of input feeding
+            /// </summary>
+            public CommonEnums.InputFeedingType FeedingType { get; set; }
+
+            /// <summary>
+            /// Number of booting cycles (-1 means Auto)
+            /// </summary>
+            public int BootCycles { get; set; }
+
+            /// <summary>
             /// The parameter specifies whether the external input values will be forwarded to the regression
             /// along with the predictors from the reservoirs.
             /// </summary>
@@ -279,6 +292,8 @@ namespace RCNet.Neural.Network.SM
             /// </summary>
             public InputSettings()
             {
+                FeedingType = CommonEnums.InputFeedingType.Continuous;
+                BootCycles = -1;
                 RouteExternalInputToReadout = false;
                 ExternalFieldCollection = new List<Field>();
                 InternalFieldCollection = new List<InternalField>();
@@ -292,6 +307,8 @@ namespace RCNet.Neural.Network.SM
             public InputSettings(InputSettings source)
                 :this()
             {
+                FeedingType = source.FeedingType;
+                BootCycles = source.BootCycles;
                 RouteExternalInputToReadout = source.RouteExternalInputToReadout;
                 foreach (Field field in source.ExternalFieldCollection)
                 {
@@ -311,9 +328,33 @@ namespace RCNet.Neural.Network.SM
             public InputSettings(XElement settingsElem)
                 :this()
             {
+                //Feeding type
+                XElement feedingElem = settingsElem.Descendants().First();
+                if(feedingElem.Name.LocalName == "feedingContinuous")
+                {
+                    FeedingType = CommonEnums.InputFeedingType.Continuous;
+                    //Number of booting cycles
+                    string bootCyclesAttrValue = feedingElem.Attribute("bootCycles").Value;
+                    if (bootCyclesAttrValue == "Auto")
+                    {
+                        //Automatic - will be set later
+                        BootCycles = -1;
+                    }
+                    else
+                    {
+                        BootCycles = int.Parse(bootCyclesAttrValue, CultureInfo.InvariantCulture);
+                    }
+                    //Routing of external input to readout layer
+                    RouteExternalInputToReadout = bool.Parse(feedingElem.Attribute("routeToReadout").Value);
+                }
+                else
+                {
+                    FeedingType = CommonEnums.InputFeedingType.Patterned;
+                    BootCycles = 0;
+                }
+                //Fields
                 Dictionary<string, string> uniquenessChecker = new Dictionary<string, string>();
                 //External fields
-                RouteExternalInputToReadout = bool.Parse(settingsElem.Descendants("external").First().Attribute("routeToReadout").Value);
                 foreach (XElement extFieldElem in settingsElem.Descendants("external").First().Descendants())
                 {
                     string fieldName = extFieldElem.Attribute("name").Value;
@@ -398,7 +439,9 @@ namespace RCNet.Neural.Network.SM
             {
                 if (obj == null) return false;
                 InputSettings cmpSettings = obj as InputSettings;
-                if (RouteExternalInputToReadout != cmpSettings.RouteExternalInputToReadout ||
+                if (FeedingType != cmpSettings.FeedingType ||
+                    BootCycles != cmpSettings.BootCycles ||
+                    RouteExternalInputToReadout != cmpSettings.RouteExternalInputToReadout ||
                     ExternalFieldCollection.Count != cmpSettings.ExternalFieldCollection.Count ||
                     InternalFieldCollection.Count != cmpSettings.InternalFieldCollection.Count)
                 {

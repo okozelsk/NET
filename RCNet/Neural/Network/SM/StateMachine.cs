@@ -226,9 +226,9 @@ namespace RCNet.Neural.Network.SM
         /// <returns>Computed output values</returns>
         public double[] Compute(List<double[]> inputPattern)
         {
-            if(_settings.TaskType == CommonEnums.TaskType.Prediction)
+            if(_settings.InputConfig.FeedingType == CommonEnums.InputFeedingType.Continuous)
             {
-                throw new Exception("This version of Compute function is useable only for the classification or hybrid task type.");
+                throw new Exception("This version of Compute function is not useable for continuous input feeding.");
             }
             double[] predictors = PushInput(inputPattern);
             //Compute output
@@ -243,9 +243,9 @@ namespace RCNet.Neural.Network.SM
         /// <returns>Computed output values</returns>
         public double[] Compute(double[] inputVector)
         {
-            if (_settings.TaskType != CommonEnums.TaskType.Prediction)
+            if (_settings.InputConfig.FeedingType == CommonEnums.InputFeedingType.Patterned)
             {
-                throw new Exception("This version of Compute function is useable only for the prediction task type.");
+                throw new Exception("This version of Compute function is not useable for patterned input feeding.");
             }
             //Push input into the network
             double[] predictors = PushInput(inputVector, true);
@@ -287,9 +287,9 @@ namespace RCNet.Neural.Network.SM
                                                                 Object userObject = null
                                                                 )
         {
-            if (_settings.TaskType == CommonEnums.TaskType.Prediction)
+            if (_settings.InputConfig.FeedingType == CommonEnums.InputFeedingType.Continuous)
             {
-                throw new Exception("This version of PrepareRegressionStageInput function is useable only for the classification or hybrid task type.");
+                throw new Exception("This version of PrepareRegressionStageInput function is not useable for continuous input feeding.");
             }
             //RegressionStageInput allocation
             RegressionStageInput rsi = new RegressionStageInput
@@ -322,13 +322,6 @@ namespace RCNet.Neural.Network.SM
         /// <param name="dataSet">
         /// The bundle containing known sample input and desired output vectors (in time order)
         /// </param>
-        /// <param name="numOfBootSamples">
-        /// Number of boot samples from the beginning of all samples.
-        /// The purpose of the boot samples is to ensure that the states of the neurons in the reservoir
-        /// depend only on the time series data and not on the initial state of the neurons in the reservoir.
-        /// The number of boot samples depends on the size and configuration of the reservoirs.
-        /// It is usually sufficient to set the number of boot samples equal to the number of neurons in the largest reservoir.
-        /// </param>
         /// <param name="informativeCallback">
         /// Function to be called after each processed input.
         /// </param>
@@ -336,28 +329,27 @@ namespace RCNet.Neural.Network.SM
         /// The user object to be passed to informativeCallback.
         /// </param>
         public RegressionStageInput PrepareRegressionStageInput(TimeSeriesBundle dataSet,
-                                                                int numOfBootSamples,
                                                                 PredictorsCollectionCallbackDelegate informativeCallback = null,
                                                                 Object userObject = null
                                                                 )
         {
-            if (_settings.TaskType != CommonEnums.TaskType.Prediction)
+            if (_settings.InputConfig.FeedingType == CommonEnums.InputFeedingType.Patterned)
             {
-                throw new Exception("This version of PrepareRegressionStageInput function is useable only for the prediction task type.");
+                throw new Exception("This version of PrepareRegressionStageInput function is not useable for patterned input feeding.");
             }
             int dataSetLength = dataSet.InputVectorCollection.Count;
             //RegressionStageInput allocation
             RegressionStageInput rsi = new RegressionStageInput
             {
-                PredictorsCollection = new List<double[]>(dataSetLength - numOfBootSamples),
-                IdealOutputsCollection = new List<double[]>(dataSetLength - numOfBootSamples)
+                PredictorsCollection = new List<double[]>(dataSetLength - _settings.InputConfig.BootCycles),
+                IdealOutputsCollection = new List<double[]>(dataSetLength - _settings.InputConfig.BootCycles)
             };
             //Reset the internal states and statistics
             Reset(true);
             //Collection
             for (int dataSetIdx = 0; dataSetIdx < dataSetLength; dataSetIdx++)
             {
-                bool afterBoot = (dataSetIdx >= numOfBootSamples);
+                bool afterBoot = (dataSetIdx >= _settings.InputConfig.BootCycles);
                 //Push input data into the network
                 double[] predictors = PushInput(dataSet.InputVectorCollection[dataSetIdx], afterBoot);
                 //Is boot sequence passed? Collect predictors?
@@ -395,7 +387,7 @@ namespace RCNet.Neural.Network.SM
                                                 )
         {
             //Readout layer instance
-            _readoutLayer = new ReadoutLayer(_settings.TaskType, _settings.ReadoutLayerConfig, _dataRange);
+            _readoutLayer = new ReadoutLayer(_settings.ReadoutLayerConfig, _dataRange);
             //Training
             return _readoutLayer.Build(rsi.PredictorsCollection,
                                        rsi.IdealOutputsCollection,

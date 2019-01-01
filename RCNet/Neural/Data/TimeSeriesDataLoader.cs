@@ -29,6 +29,9 @@ namespace RCNet.Neural.Data
         /// <param name="outputFieldNameCollection">
         /// Output fields
         /// </param>
+        /// <param name="outputFieldTaskCollection">
+        /// Output field tasks
+        /// </param>
         /// <param name="normRange">
         /// Range of normalized values
         /// </param>
@@ -50,6 +53,7 @@ namespace RCNet.Neural.Data
         public static TimeSeriesBundle Load(string fileName,
                                              List<string> inputFieldNameCollection,
                                              List<string> outputFieldNameCollection,
+                                             List<CommonEnums.TaskType> outputFieldTaskCollection,
                                              Interval normRange,
                                              double normReserveRatio,
                                              bool dataStandardization,
@@ -86,14 +90,18 @@ namespace RCNet.Neural.Data
                     }
                     bundleNormalizer.DefineInputField(name);
                 }
-                foreach (string name in outputFieldNameCollection)
+                for(int i = 0; i < outputFieldNameCollection.Count; i++)
                 {
-                    if (!bundleNormalizer.IsFieldDefined(name))
+                    if (!bundleNormalizer.IsFieldDefined(outputFieldNameCollection[i]))
                     {
-                        bundleNormalizer.DefineField(name, singleNormalizer ? "COMMON" : name, normReserveRatio, dataStandardization);
-                        fieldIndexes.Add(columnNames.IndexOf(name));
+                        bundleNormalizer.DefineField(outputFieldNameCollection[i],
+                                                     singleNormalizer ? "COMMON" : outputFieldNameCollection[i],
+                                                     outputFieldTaskCollection[i] == CommonEnums.TaskType.Classification ? 0 : normReserveRatio,
+                                                     outputFieldTaskCollection[i] == CommonEnums.TaskType.Classification ? false : dataStandardization
+                                                     );
+                        fieldIndexes.Add(columnNames.IndexOf(outputFieldNameCollection[i]));
                     }
-                    bundleNormalizer.DefineOutputField(name);
+                    bundleNormalizer.DefineOutputField(outputFieldNameCollection[i]);
                 }
                 //Finalize structure
                 bundleNormalizer.FinalizeStructure();
