@@ -5,11 +5,18 @@ using RCNet.Extensions;
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// ISRU (Inverse Square Root Unit) activation function
+    /// Implements ISRU (Inverse Square Root Unit) activation function
     /// </summary>
     [Serializable]
     public class ISRU : AnalogActivationFunction
     {
+        //Constants
+        //Typical values
+        /// <summary>
+        /// Typical alpha value
+        /// </summary>
+        public const double TypicalAlpha = 1;
+
         //Attributes
         private readonly Interval _outputRange;
         
@@ -21,14 +28,13 @@ namespace RCNet.Neural.Activation
 
         //Constructor
         /// <summary>
-        /// Instantiates an Inverse Square Root Unit activation function
+        /// Creates an initialized instance
         /// </summary>
-        /// <param name="settings">Encapsulated arguments</param>
-        /// <param name="rand">Random object to be used for randomly generated parameters</param>
-        public ISRU(ISRUSettings settings, Random rand)
+        /// <param name="alpha">The Alpha</param>
+        public ISRU(double alpha)
             : base()
         {
-            Alpha = rand.NextDouble(settings.Alpha).Bound();
+            Alpha = alpha.Bound();
             if (Alpha <= 0)
             {
                 throw new ArgumentOutOfRangeException("alpha", "Alpha must be GT 0");

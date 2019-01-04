@@ -16,6 +16,37 @@ namespace RCNet.Neural.Activation
     [Serializable]
     public class ExpIF : ODESpikingMembrane
     {
+        //Constants
+        //Typical values
+        /// <summary>
+        /// Typical value of time scale
+        /// </summary>
+        public const double TypicalTimeScale = 12;
+        /// <summary>
+        /// Typical value of resistance
+        /// </summary>
+        public const double TypicalResistance = 20;
+        /// <summary>
+        /// Typical value of resting voltage
+        /// </summary>
+        public const double TypicalRestV = -65;
+        /// <summary>
+        /// Typical value of reset voltage
+        /// </summary>
+        public const double TypicalResetV = -60;
+        /// <summary>
+        /// Typical value of rheobase
+        /// </summary>
+        public const double TypicalRheobaseV = -55;
+        /// <summary>
+        /// Typical value of firing voltage
+        /// </summary>
+        public const double TypicalFiringThresholdV = -30;
+        /// <summary>
+        /// Typical value of sharpness delta
+        /// </summary>
+        public const double TypicalSharpnessDeltaT = 2;
+
         //Attributes
         //Parameters
         private readonly double _timeScale;
@@ -25,27 +56,46 @@ namespace RCNet.Neural.Activation
 
         //Constructor
         /// <summary>
-        /// Constructs an initialized instance
+        /// Creates an initialized instance
         /// </summary>
-        /// <param name="settings">Encapsulated arguments</param>
-        /// <param name="rand">Random object to be used for randomly generated parameters</param>
-        public ExpIF(ExpIFSettings settings, Random rand)
-            : base(rand,
-                   rand.NextDouble(settings.RestV),
-                   rand.NextDouble(settings.ResetV),
-                   rand.NextDouble(settings.FiringThresholdV),
-                   settings.RefractoryPeriods,
-                   settings.StimuliCoeff,
-                   settings.SolverMethod,
+        /// <param name="stimuliCoeff">Input stimuli coefficient (pA)</param>
+        /// <param name="timeScale">Membrane time scale (ms)</param>
+        /// <param name="resistance">Membrane resistance (Mohm)</param>
+        /// <param name="restV">Membrane rest potential (mV)</param>
+        /// <param name="resetV">Membrane reset potential (mV)</param>
+        /// <param name="rheobaseV">Membrane rheobase threshold (mV)</param>
+        /// <param name="firingThresholdV">Membrane firing threshold (mV)</param>
+        /// <param name="sharpnessDeltaT">Sharpness of membrane potential change (mV)</param>
+        /// <param name="refractoryPeriods">Number of after spike computation cycles while an input stimuli is ignored (ms)</param>
+        /// <param name="solverMethod">ODE numerical solver method</param>
+        /// <param name="solverCompSteps">ODE numerical solver computation steps of the time step</param>
+        public ExpIF(double stimuliCoeff,
+                     double timeScale,
+                     double resistance,
+                     double restV,
+                     double resetV,
+                     double rheobaseV,
+                     double firingThresholdV,
+                     double sharpnessDeltaT,
+                     int refractoryPeriods,
+                     ODENumSolver.Method solverMethod,
+                     int solverCompSteps
+                     )
+            : base(restV,
+                   resetV,
+                   firingThresholdV,
+                   refractoryPeriods,
+                   stimuliCoeff,
+                   solverMethod,
                    1,
-                   settings.SolverCompSteps,
+                   solverCompSteps,
                    1
                    )
         {
-            _timeScale = rand.NextDouble(settings.TimeScale);
-            _resistance = rand.NextDouble(settings.Resistance);
-            _rheobaseV = rand.NextDouble(settings.RheobaseV);
-            _sharpnessDeltaT = rand.NextDouble(settings.SharpnessDeltaT);
+            _timeScale = timeScale;
+            _resistance = resistance;
+            _rheobaseV = rheobaseV;
+            _sharpnessDeltaT = sharpnessDeltaT;
             return;
         }
 

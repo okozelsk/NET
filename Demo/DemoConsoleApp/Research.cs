@@ -75,7 +75,7 @@ namespace RCNet.DemoConsoleApp
                                                              new RandomValueSettings(20, 20),
                                                              0
                                                              );
-            IActivationFunction af = new SimpleIF(settings, new Random(0));
+            IActivationFunction af = ActivationFactory.Create(settings, new Random(0));
             //*/
             TestActivation(af, 800, 0.15, 10, 600);
             return;

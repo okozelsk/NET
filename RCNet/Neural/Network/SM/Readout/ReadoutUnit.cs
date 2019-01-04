@@ -166,7 +166,7 @@ namespace RCNet.Neural.Network.SM.Readout
                     }
                     return false;
                 default:
-                    //Prediction or hybrid task type
+                    //Prediction task type
                     return (current.CombinedPrecisionError < best.CombinedPrecisionError);
             }
         }

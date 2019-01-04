@@ -5,7 +5,7 @@ using RCNet.MathTools;
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Sinusoid activation function
+    /// Implements Sinusoid activation function
     /// </summary>
     [Serializable]
     public class Sinusoid : AnalogActivationFunction
@@ -15,10 +15,9 @@ namespace RCNet.Neural.Activation
 
         //Constructor
         /// <summary>
-        /// Instantiates Sinusoid activation function
+        /// Creates an initialized instance
         /// </summary>
-        /// <param name="settings">Encapsulated arguments</param>
-        public Sinusoid(SinusoidSettings settings)
+        public Sinusoid()
             : base()
         {
             return;

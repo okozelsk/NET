@@ -23,11 +23,11 @@ Main RCNet functionality is demonstrated in a simple demo application (/Demo/Dem
 ### Data handling
 |Component|Description|
 |--|--|
-|Normalizer|Data normalization/denormalization. Supports Gaussian data standardization|
-|PatternBundle|Bundle of pattern and desired output vector|
-|PatternDataLoader|The class allows to upload sample data for a Classification or Hybrid task from a csv file|
+|Normalizer|Supports data normalization/naturalization and Gaussian standardization|
+|PatternBundle|Bundle of pattern of vectors and desired output vector|
+|PatternDataLoader|Class allows to upload sample data from a csv file to a PatternBundle|
 |TimeSeriesBundle|Bundle of input vector and desired output vector|
-|TimeSeriesDataLoader|The class allows to upload sample data for a Prediction task from a csv file|
+|TimeSeriesDataLoader|Class allows to upload sample data from a csv file to a TimeSeriesBundle|
 |ValidationBundle|Bundle of computed vector and desired output vector|
 |BundleNormalizer|Helper class for easy standardization and normalization/naturalization of sample data bundle|
 
@@ -56,7 +56,7 @@ Main RCNet functionality is demonstrated in a simple demo application (/Demo/Dem
 |SVD|Singular values decomposition of a matrix|
 |QRD|QR decomposition of a matrix|
 |PhysUnit|Encaptualates SI physical unit|
-|"RandomValue"|Supported: Uniform and Gaussian distributions|
+|"RandomValue"|Supports Uniform and Gaussian distributions|
 |Others|BinErrStat, BinDistribution, Bitwise, Combinatorics, Factorial, WeightedAvg, HurstExpEstim, Normalizer, ...|
 
 ### Analog neuron activation functions
@@ -104,7 +104,7 @@ See the [wiki pages.](https://en.wikipedia.org/wiki/Biological_neuron_model)
 |AnalogNeuron|Analog neuron produces analog output according to its analog activation function. Main features: Retainment (leaky integrator), The second power as augmented readout state|
 |SpikingNeuron|Spiking neuron produces spikes according to its spiking activation function. Main features: Membrane potential as primary readout state, Firing rate as augmented readout state|
 |Reservoir|Implements recurrent network supporting analog and spiking neurons working directly together. Main features: SpectralRadius, Multiple 3D pools of neurons, Pool to pool connections. It can work as the Echo State Network reservoir, Liquid State Machine reservoir or Mixed reservoir|
-|ReadoutUnit|Contains the trained unit associated with output field and related important error statistics. Trained unit can be the Feed Forward Network or the Parallel Perceptron Network|
-|ReadoutLayer|Class implements the common readout layer concept for the reservoir computing methods. Supports x-fold cross validation method and clustering of the trained readout units.|
-|StateMachine|Encaptulates the State Machine Network. Supports multiple internal recurrent reservoirs having multiple interconnected/cooperating analog and spiking neuron pools. Supports virtual input data associated with signal generators. Solves task types: Prediction, Classification, Hybrid|
+|ReadoutUnit|Readout unit does the Prediction or Classification. Contains trained output unit and related important error statistics. Trained unit can be the Feed Forward Network or the Parallel Perceptron Network|
+|ReadoutLayer|Class implements common readout layer concept for the reservoir computing methods. Supports x-fold cross validation method and clustering of the trained readout units.|
+|StateMachine|Encaptulates the State Machine Network. Supports multiple internal reservoirs having multiple interconnected/cooperating analog and spiking neuron pools. Supports virtual input data associated with predefined signal generators. Supports two input feeding regimes: Continuous and Patterned|
 

@@ -87,15 +87,10 @@ namespace RCNet.Neural.Activation
         /// Adjusted (modified) input stimuli
         /// </summary>
         protected double _stimuli;
-        /// <summary>
-        /// Membrane initial voltage
-        /// </summary>
-        protected double _initialPotential;
 
         /// <summary>
         /// Constructs an initialized instance
         /// </summary>
-        /// <param name="rand">Random object to be used for the initalization of a starting membrane potential</param>
         /// <param name="restV">Membrane rest voltage</param>
         /// <param name="resetV">Membrane reset voltage</param>
         /// <param name="firingThresholdV">Firing threshold</param>
@@ -105,8 +100,7 @@ namespace RCNet.Neural.Activation
         /// <param name="stepTimeScale">Computation step time scale</param>
         /// <param name="subSteps">Computation sub-steps</param>
         /// <param name="numOfEvolvingVars">Number of evolving variables</param>
-        protected ODESpikingMembrane(Random rand,
-                                     double restV,
+        protected ODESpikingMembrane(double restV,
                                      double resetV,
                                      double firingThresholdV,
                                      int refractoryPeriods,
@@ -127,9 +121,7 @@ namespace RCNet.Neural.Activation
             _solvingMethod = solvingMethod;
             _stepTimeScale = stepTimeScale;
             _subSteps = subSteps;
-            //_initialPotential = rand.NextBoundedUniformDouble(_resetV, _firingThresholdV);
-            _initialPotential = _resetV;
-            _evolVars[VarMembraneVIdx] = _initialPotential;
+            _evolVars[VarMembraneVIdx] = _resetV;
             _inRefractory = false;
             _refractoryPeriod = 0;
             return;
@@ -172,7 +164,7 @@ namespace RCNet.Neural.Activation
         /// </summary>
         public virtual void Reset()
         {
-            _evolVars[VarMembraneVIdx] = _initialPotential;
+            _evolVars[VarMembraneVIdx] = _resetV;
             _inRefractory = false;
             _refractoryPeriod = 0;
             return;

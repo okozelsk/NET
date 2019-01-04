@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using RCNet.Extensions;
 using RCNet.RandomValue;
 using RCNet.MathTools.VectorMath;
+using RCNet.MathTools.Differential;
 
 namespace RCNet.Neural.Activation
 {
@@ -17,6 +18,32 @@ namespace RCNet.Neural.Activation
     public class IzhikevichIF : ODESpikingMembrane
     {
         //Constants
+        //Typical values
+        /// <summary>
+        /// Typical value of the parameter "a" in the original Izhikevich model
+        /// </summary>
+        public const double TypicalRecoveryTimeScale = 0.02;
+        /// <summary>
+        /// Typical value of the parameter "b" in the original Izhikevich model
+        /// </summary>
+        public const double TypicalRecoverySensitivity = 0.2;
+        /// <summary>
+        /// Typical value of the parameter "d" in the original Izhikevich model
+        /// </summary>
+        public const double TypicalRecoveryReset = 2;
+        /// <summary>
+        /// Typical value of the membrane resting potential
+        /// </summary>
+        public const double TypicalRestV = -70;
+        /// <summary>
+        /// Typical value of the parameter "c" in the original Izhikevich model
+        /// </summary>
+        public const double TypicalResetV = -65;
+        /// <summary>
+        /// Typical value of the membrane firing treshold
+        /// </summary>
+        public const double TypicalFiringThresholdV = 30;
+
         /// <summary>
         /// Index of recovery evolving variable
         /// </summary>
@@ -27,77 +54,51 @@ namespace RCNet.Neural.Activation
         private readonly double _recoverySensitivity;
         private readonly double _recoveryReset;
 
+
+        //Constructor
         /// <summary>
-        /// Constructs an initialized instance
+        /// Creates an initialized instance
         /// </summary>
-        /// <param name="settings">Encapsulated arguments</param>
-        /// <param name="rand">Random object to be used for randomly generated parameters</param>
-        public IzhikevichIF(IzhikevichIFSettings settings, Random rand)
-            : base(rand,
-                   rand.NextDouble(settings.RestV),
-                   rand.NextDouble(settings.ResetV),
-                   rand.NextDouble(settings.FiringThresholdV),
-                   settings.RefractoryPeriods,
-                   settings.StimuliCoeff,
-                   settings.SolverMethod,
+        /// <param name="stimuliCoeff">Input stimuli coefficient (pA)</param>
+        /// <param name="recoveryTimeScale">Time scale of the recovery variable</param>
+        /// <param name="recoverySensitivity">Sensitivity of the recovery variable to the subthreshold fluctuations of the membrane potential</param>
+        /// <param name="recoveryReset">After-spike reset of the recovery variable</param>
+        /// <param name="restV">Membrane rest potential (mV)</param>
+        /// <param name="resetV">Membrane reset potential (mV)</param>
+        /// <param name="firingThresholdV">Membrane firing threshold (mV)</param>
+        /// <param name="refractoryPeriods">Number of after spike computation cycles while an input stimuli is ignored (ms)</param>
+        /// <param name="solverMethod">ODE numerical solver method</param>
+        /// <param name="solverCompSteps">ODE numerical solver computation steps of the time step</param>
+        public IzhikevichIF(double stimuliCoeff,
+                            double recoveryTimeScale,
+                            double recoverySensitivity,
+                            double recoveryReset,
+                            double restV,
+                            double resetV,
+                            double firingThresholdV,
+                            int refractoryPeriods,
+                            ODENumSolver.Method solverMethod,
+                            int solverCompSteps
+                            )
+            : base(restV,
+                   resetV,
+                   firingThresholdV,
+                   refractoryPeriods,
+                   stimuliCoeff,
+                   solverMethod,
                    1,
-                   settings.SolverCompSteps,
+                   solverCompSteps,
                    2
                   )
         {
-            _recoveryTimeScale = rand.NextDouble(settings.RecoveryTimeScale);
-            _recoverySensitivity = rand.NextDouble(settings.RecoverySensitivity);
-            _recoveryReset = rand.NextDouble(settings.RecoveryReset);
+            _recoveryTimeScale = recoveryTimeScale;
+            _recoverySensitivity = recoverySensitivity;
+            _recoveryReset = recoveryReset;
             _evolVars[VarRecovery] = (_recoverySensitivity * _evolVars[VarMembraneVIdx]);
             return;
         }
 
         //Methods
-        /// <summary>
-        /// Creates instance having randomly selected parameters within borders according to the neuron role.
-        /// </summary>
-        /// <param name="settings">Encapsulated arguments</param>
-        /// <param name="rand">Random object to be used for randomly generated parameters</param>
-        /// <returns></returns>
-        public static IzhikevichIF AutoCreate(AutoIzhikevichIFSettings settings, Random rand)
-        {
-            double randomValue = rand.NextBoundedUniformDouble(0, 1);
-            IzhikevichIFSettings targetSettings = null;
-            switch(settings.Role)
-            {
-                case CommonEnums.NeuronRole.Excitatory:
-                    targetSettings = new IzhikevichIFSettings(settings.StimuliCoeff,
-                                                              new RandomValueSettings(0.02, 0.02),
-                                                              new RandomValueSettings(0.2, 0.2),
-                                                              new RandomValueSettings(8 + (-6 * randomValue.Power(2)), 8 + (-6 * randomValue.Power(2))),
-                                                              new RandomValueSettings(-70, -70),
-                                                              new RandomValueSettings(-65 + (15 * randomValue.Power(2)), -65 + (15 * randomValue.Power(2))),
-                                                              new RandomValueSettings(30, 30),
-                                                              settings.RefractoryPeriods,
-                                                              settings.SolverMethod,
-                                                              settings.SolverCompSteps
-                                                              );
-                    break;
-                case CommonEnums.NeuronRole.Inhibitory:
-                    targetSettings = new IzhikevichIFSettings(settings.StimuliCoeff,
-                                                              new RandomValueSettings(0.02 + 0.08 * randomValue, 0.02 + 0.08 * randomValue),
-                                                              new RandomValueSettings(0.25 - 0.05 * randomValue, 0.25 - 0.05 * randomValue),
-                                                              new RandomValueSettings(2, 2),
-                                                              new RandomValueSettings(-70, -70),
-                                                              new RandomValueSettings(-65, -65),
-                                                              new RandomValueSettings(30, 30),
-                                                              settings.RefractoryPeriods,
-                                                              settings.SolverMethod,
-                                                              settings.SolverCompSteps
-                                                              );
-                    break;
-                default:
-                    break;
-            }
-
-            return new IzhikevichIF(targetSettings, rand);
-        }
-
         /// <summary>
         /// Resets function to its initial state
         /// </summary>

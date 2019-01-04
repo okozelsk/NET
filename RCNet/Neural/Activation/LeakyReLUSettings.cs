@@ -14,18 +14,12 @@ using RCNet.RandomValue;
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Class encaptulates arguments of the LeakyReLU activation function
+    /// Class encaptulates arguments of the LeakyReLU activation function.
+    /// Arguments are in RandomValue form to allow their dynamic random initialization within the specified ranges.
     /// </summary>
     [Serializable]
     public class LeakyReLUSettings
     {
-        //Constants
-        //Typical values
-        /// <summary>
-        /// Typical negative slope
-        /// </summary>
-        public const double TypicalNegSlope = 0.05;
-
         //Attribute properties
         /// <summary>
         /// The negative slope

@@ -219,7 +219,7 @@ namespace RCNet.Neural.Network.SM
         }
 
         /// <summary>
-        /// Compute function for classification or hybrid tasks.
+        /// Compute function for a patterned input feeding.
         /// Processes given input pattern and computes the output.
         /// </summary>
         /// <param name="inputPattern">Input pattern</param>
@@ -236,7 +236,7 @@ namespace RCNet.Neural.Network.SM
         }
 
         /// <summary>
-        /// Compute fuction for time series prediction tasks.
+        /// Compute fuction for a continuous input feeding.
         /// Processes given input values and computes (predicts) the output.
         /// </summary>
         /// <param name="inputVector">Input values</param>
@@ -270,7 +270,7 @@ namespace RCNet.Neural.Network.SM
         }
 
         /// <summary>
-        /// Prepares input for regression stage of State Machine training for the classification or hybrid task type.
+        /// Prepares input for regression stage of State Machine training.
         /// All input patterns are processed by internal reservoirs and the corresponding network predictors are recorded.
         /// </summary>
         /// <param name="dataSet">
@@ -316,7 +316,7 @@ namespace RCNet.Neural.Network.SM
         }
 
         /// <summary>
-        /// Prepares input for regression stage of State Machine training for the time series prediction task.
+        /// Prepares input for regression stage of State Machine training.
         /// All input vectors are processed by internal reservoirs and the corresponding network predictors are recorded.
         /// </summary>
         /// <param name="dataSet">

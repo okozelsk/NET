@@ -15,12 +15,37 @@ namespace RCNet.Neural.Activation
     public class SimpleIF : IActivationFunction
     {
         //Constants
+        //Typical values
+        /// <summary>
+        /// Typical value of resistance
+        /// </summary>
+        public const double TypicalResistance = 15;
+        /// <summary>
+        /// Typical value of decay rate
+        /// </summary>
+        public const double TypicalDecayRate = 0.05;
+        /// <summary>
+        /// Typical value of reset voltage
+        /// </summary>
+        public const double TypicalResetV = 5;
+        /// <summary>
+        /// Typical value of firing voltage
+        /// </summary>
+        public const double TypicalFiringThresholdV = 20;
+
+        /// <summary>
+        /// Spike value
+        /// </summary>
         private const double Spike = 1d;
+
+        //Attribute properties
+        /// <summary>
+        /// Normal range of the internal state
+        /// </summary>
+        public Interval InternalStateRange { get; }
 
         //Attributes
         private static readonly Interval _outputRange = new Interval(0, 1);
-        private readonly Interval _stateRange;
-        private readonly double _initialPotential;
         private readonly double _resistance;
         private readonly double _decayRate;
         private readonly double _restV;
@@ -34,21 +59,30 @@ namespace RCNet.Neural.Activation
 
         //Constructor
         /// <summary>
-        /// Constructs an initialized instance
+        /// Creates an initialized instance
         /// </summary>
-        /// <param name="settings">Encapsulated arguments settings</param>
-        /// <param name="rand">Random object to be used for randomly generated parameters</param>
-        public SimpleIF(SimpleIFSettings settings, Random rand)
+        /// <param name="stimuliCoeff">Input stimuli coefficient (pA)</param>
+        /// <param name="resistance">Membrane resistance (Mohm)</param>
+        /// <param name="decayRate">Membrane potential decay rate</param>
+        /// <param name="resetV">Membrane reset potential (mV)</param>
+        /// <param name="firingThresholdV">Membrane firing threshold (mV)</param>
+        /// <param name="refractoryPeriods">Number of after spike computation cycles while an input stimuli is ignored (ms)</param>
+        public SimpleIF(double stimuliCoeff,
+                        double resistance,
+                        double decayRate,
+                        double resetV,
+                        double firingThresholdV,
+                        int refractoryPeriods
+                        )
         {
-            _resistance = rand.NextDouble(settings.Resistance);
-            _decayRate = rand.NextDouble(settings.DecayRate);
+            _resistance = resistance;
+            _decayRate = decayRate;
             _restV = 0;
-            _resetV = Math.Abs(rand.NextDouble(settings.ResetV));
-            _firingThresholdV = Math.Abs(rand.NextDouble(settings.FiringThresholdV));
-            _refractoryPeriods = settings.RefractoryPeriods;
-            _stimuliCoeff = settings.StimuliCoeff;
-            _stateRange = new Interval(_restV, _firingThresholdV);
-            _initialPotential = rand.NextBoundedUniformDouble(_resetV, _firingThresholdV);
+            _resetV = Math.Abs(resetV);
+            _firingThresholdV = Math.Abs(firingThresholdV);
+            _refractoryPeriods = refractoryPeriods;
+            _stimuliCoeff = stimuliCoeff;
+            InternalStateRange = new Interval(_restV, _firingThresholdV);
             Reset();
             return;
         }
@@ -75,11 +109,6 @@ namespace RCNet.Neural.Activation
         public bool Stateless { get { return false; } }
 
         /// <summary>
-        /// Normal range of the internal state
-        /// </summary>
-        public Interval InternalStateRange { get { return _stateRange; } }
-
-        /// <summary>
         /// Internal state
         /// </summary>
         public double InternalState { get { return _membraneV; } }
@@ -90,7 +119,7 @@ namespace RCNet.Neural.Activation
         /// </summary>
         public void Reset()
         {
-            _membraneV = _initialPotential;
+            _membraneV = _restV;
             _inRefractory = false;
             _refractoryPeriod = 0;
             return;

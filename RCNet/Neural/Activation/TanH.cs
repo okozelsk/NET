@@ -5,7 +5,7 @@ using RCNet.MathTools;
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// TanH activation function
+    /// Implements TanH activation function
     /// </summary>
     [Serializable]
     public class TanH : AnalogActivationFunction
@@ -15,10 +15,9 @@ namespace RCNet.Neural.Activation
 
         //Constructor
         /// <summary>
-        /// Instantiates TanH activation function
+        /// Creates an initialized instance
         /// </summary>
-        /// <param name="settings">Encapsulated arguments</param>
-        public TanH(TanHSettings settings)
+        public TanH()
             : base()
         {
             return;

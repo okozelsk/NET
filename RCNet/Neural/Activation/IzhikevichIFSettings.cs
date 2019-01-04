@@ -14,38 +14,12 @@ using RCNet.MathTools.Differential;
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Class encaptulates arguments of the IzhikevichIF activation function
+    /// Class encaptulates arguments of the IzhikevichIF activation function.
+    /// Arguments are in RandomValue form to allow their dynamic random initialization within the specified ranges.
     /// </summary>
     [Serializable]
     public class IzhikevichIFSettings
     {
-        //Constants
-        //Typical values
-        /// <summary>
-        /// Typical value of the parameter "a" in the original Izhikevich model
-        /// </summary>
-        public const double TypicalRecoveryTimeScale = 0.02;
-        /// <summary>
-        /// Typical value of the parameter "b" in the original Izhikevich model
-        /// </summary>
-        public const double TypicalRecoverySensitivity = 0.2;
-        /// <summary>
-        /// Typical value of the parameter "d" in the original Izhikevich model
-        /// </summary>
-        public const double TypicalRecoveryReset = 2;
-        /// <summary>
-        /// Typical value of the membrane resting potential
-        /// </summary>
-        public const double TypicalRestV = -70;
-        /// <summary>
-        /// Typical value of the parameter "c" in the original Izhikevich model
-        /// </summary>
-        public const double TypicalResetV = -65;
-        /// <summary>
-        /// Typical value of the membrane firing treshold
-        /// </summary>
-        public const double TypicalFiringThresholdV = 30;
-
         //Attribute properties
         /// <summary>
         /// Input stimuli coefficient (pA)

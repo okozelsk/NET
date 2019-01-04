@@ -5,7 +5,7 @@ using RCNet.MathTools;
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Sigmoid activation function
+    /// Implements Sigmoid activation function
     /// </summary>
     [Serializable]
     public class Sigmoid : AnalogActivationFunction
@@ -15,10 +15,9 @@ namespace RCNet.Neural.Activation
 
         //Constructor
         /// <summary>
-        /// Instantiates Sigmoid activation function
+        /// Creates an initialized instance
         /// </summary>
-        /// <param name="settings">Encapsulated arguments</param>
-        public Sigmoid(SigmoidSettings settings)
+        public Sigmoid()
             : base()
         {
             return;

@@ -3,6 +3,7 @@ using System.Linq;
 using System.Reflection;
 using System.Globalization;
 using System.Xml.Linq;
+using RCNet.Extensions;
 
 namespace RCNet.Neural.Activation
 {
@@ -86,77 +87,168 @@ namespace RCNet.Neural.Activation
         public static IActivationFunction Create(Object settings, Random rand)
         {
             Type settingsType = settings.GetType();
-            if(settingsType == typeof(AdExpIFSettings))
+            if (settingsType == typeof(AdExpIFSettings))
             {
-                return new AdExpIF((AdExpIFSettings)settings, rand);
+                AdExpIFSettings afs = (AdExpIFSettings)settings;
+                return new AdExpIF(afs.StimuliCoeff,
+                                   rand.NextDouble(afs.TimeScale),
+                                   rand.NextDouble(afs.Resistance),
+                                   rand.NextDouble(afs.RestV),
+                                   rand.NextDouble(afs.ResetV),
+                                   rand.NextDouble(afs.RheobaseV),
+                                   rand.NextDouble(afs.FiringThresholdV),
+                                   rand.NextDouble(afs.SharpnessDeltaT),
+                                   rand.NextDouble(afs.AdaptationVoltageCoupling),
+                                   rand.NextDouble(afs.AdaptationTimeConstant),
+                                   rand.NextDouble(afs.AdaptationSpikeTriggeredIncrement),
+                                   afs.SolverMethod,
+                                   afs.SolverCompSteps
+                                  );
             }
             else if (settingsType == typeof(BentIdentitySettings))
             {
-                return new BentIdentity((BentIdentitySettings)settings);
+                return new BentIdentity();
             }
             else if (settingsType == typeof(ElliotSettings))
             {
-                return new Elliot((ElliotSettings)settings, rand);
+                ElliotSettings afs = (ElliotSettings)settings;
+                return new Elliot(rand.NextDouble(afs.Slope));
             }
             else if (settingsType == typeof(ExpIFSettings))
             {
-                return new ExpIF((ExpIFSettings)settings, rand);
+                //return new ExpIF((ExpIFSettings)settings, rand);
+                ExpIFSettings afs = (ExpIFSettings)settings;
+                return new ExpIF(afs.StimuliCoeff,
+                                 rand.NextDouble(afs.TimeScale),
+                                 rand.NextDouble(afs.Resistance),
+                                 rand.NextDouble(afs.RestV),
+                                 rand.NextDouble(afs.ResetV),
+                                 rand.NextDouble(afs.RheobaseV),
+                                 rand.NextDouble(afs.FiringThresholdV),
+                                 rand.NextDouble(afs.SharpnessDeltaT),
+                                 afs.RefractoryPeriods,
+                                 afs.SolverMethod,
+                                 afs.SolverCompSteps
+                                 );
             }
             else if (settingsType == typeof(GaussianSettings))
             {
-                return new Gaussian((GaussianSettings)settings);
+                return new Gaussian();
             }
             else if (settingsType == typeof(IdentitySettings))
             {
-                return new Identity((IdentitySettings)settings);
+                return new Identity();
             }
             else if (settingsType == typeof(ISRUSettings))
             {
-                return new ISRU((ISRUSettings)settings, rand);
+                ISRUSettings afs = (ISRUSettings)settings;
+                return new ISRU(rand.NextDouble(afs.Alpha));
             }
             else if (settingsType == typeof(IzhikevichIFSettings))
             {
-                return new IzhikevichIF((IzhikevichIFSettings)settings, rand);
+                IzhikevichIFSettings afs = (IzhikevichIFSettings)settings;
+                return new IzhikevichIF(afs.StimuliCoeff,
+                                        rand.NextDouble(afs.RecoveryTimeScale),
+                                        rand.NextDouble(afs.RecoverySensitivity),
+                                        rand.NextDouble(afs.RecoveryReset),
+                                        rand.NextDouble(afs.RestV),
+                                        rand.NextDouble(afs.ResetV),
+                                        rand.NextDouble(afs.FiringThresholdV),
+                                        afs.RefractoryPeriods,
+                                        afs.SolverMethod,
+                                        afs.SolverCompSteps
+                                        );
+
             }
             else if (settingsType == typeof(AutoIzhikevichIFSettings))
             {
-                return IzhikevichIF.AutoCreate((AutoIzhikevichIFSettings)settings, rand);
+                double randomValue = rand.NextBoundedUniformDouble(0, 1);
+                AutoIzhikevichIFSettings afs = (AutoIzhikevichIFSettings)settings;
+                if (afs.Role == CommonEnums.NeuronRole.Excitatory)
+                {
+                    //Excitatory ranges
+                    return new IzhikevichIF(afs.StimuliCoeff,
+                                            0.02,
+                                            0.2,
+                                            8 + (-6 * randomValue.Power(2)),
+                                            -70,
+                                            -65 + (15 * randomValue.Power(2)),
+                                            30,
+                                            afs.RefractoryPeriods,
+                                            afs.SolverMethod,
+                                            afs.SolverCompSteps
+                                            );
+                }
+                else
+                {
+                    //Inhibitory ranges
+                    return new IzhikevichIF(afs.StimuliCoeff,
+                                            0.02 + 0.08 * randomValue,
+                                            0.25 - 0.05 * randomValue,
+                                            2,
+                                            -70,
+                                            -65,
+                                            30,
+                                            afs.RefractoryPeriods,
+                                            afs.SolverMethod,
+                                            afs.SolverCompSteps
+                                            );
+                }
             }
             else if (settingsType == typeof(LeakyIFSettings))
             {
-                return new LeakyIF((LeakyIFSettings)settings, rand);
+                LeakyIFSettings afs = (LeakyIFSettings)settings;
+                return new LeakyIF(afs.StimuliCoeff,
+                                   rand.NextDouble(afs.TimeScale),
+                                   rand.NextDouble(afs.Resistance),
+                                   rand.NextDouble(afs.RestV),
+                                   rand.NextDouble(afs.ResetV),
+                                   rand.NextDouble(afs.FiringThresholdV),
+                                   afs.RefractoryPeriods,
+                                   afs.SolverMethod,
+                                   afs.SolverCompSteps
+                                   );
             }
             else if (settingsType == typeof(LeakyReLUSettings))
             {
-                return new LeakyReLU((LeakyReLUSettings)settings, rand);
+                LeakyReLUSettings afs = (LeakyReLUSettings)settings;
+                return new LeakyReLU(rand.NextDouble(afs.NegSlope));
             }
             else if (settingsType == typeof(SigmoidSettings))
             {
-                return new Sigmoid((SigmoidSettings)settings);
+                return new Sigmoid();
             }
             else if (settingsType == typeof(SimpleIFSettings))
             {
-                return new SimpleIF((SimpleIFSettings)settings, rand);
+                SimpleIFSettings afs = (SimpleIFSettings)settings;
+                return new SimpleIF(afs.StimuliCoeff,
+                                    rand.NextDouble(afs.Resistance),
+                                    rand.NextDouble(afs.DecayRate),
+                                    rand.NextDouble(afs.ResetV),
+                                    rand.NextDouble(afs.FiringThresholdV),
+                                    afs.RefractoryPeriods
+                                    );
             }
             else if (settingsType == typeof(SincSettings))
             {
-                return new Sinc((SincSettings)settings);
+                return new Sinc();
             }
             else if (settingsType == typeof(SinusoidSettings))
             {
-                return new Sinusoid((SinusoidSettings)settings);
+                return new Sinusoid();
             }
             else if (settingsType == typeof(SoftExponentialSettings))
             {
-                return new SoftExponential((SoftExponentialSettings)settings, rand);
+                SoftExponentialSettings afs = (SoftExponentialSettings)settings;
+                return new SoftExponential(rand.NextDouble(afs.Alpha));
             }
             else if (settingsType == typeof(SoftPlusSettings))
             {
-                return new SoftPlus((SoftPlusSettings)settings);
+                return new SoftPlus();
             }
             else if (settingsType == typeof(TanHSettings))
             {
-                return new TanH((TanHSettings)settings);
+                return new TanH();
             }
             else
             {

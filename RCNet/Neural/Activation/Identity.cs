@@ -5,7 +5,7 @@ using RCNet.Extensions;
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Identity activation function (aka Linear)
+    /// Implements Identity activation function (aka Linear)
     /// </summary>
     [Serializable]
     public class Identity : AnalogActivationFunction
@@ -15,10 +15,9 @@ namespace RCNet.Neural.Activation
 
         //Constructor
         /// <summary>
-        /// Instantiates Identity activation function
+        /// Creates an initialized instance
         /// </summary>
-        /// <param name="settings">Encapsulated arguments</param>
-        public Identity(IdentitySettings settings)
+        public Identity()
             : base()
         {
             return;

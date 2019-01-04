@@ -14,18 +14,12 @@ using RCNet.MathTools.Differential;
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Class encaptulates arguments of the ISRU activation function
+    /// Class encaptulates arguments of the ISRU activation function.
+    /// Arguments are in RandomValue form to allow their dynamic random initialization within the specified ranges.
     /// </summary>
     [Serializable]
     public class ISRUSettings
     {
-        //Constants
-        //Typical values
-        /// <summary>
-        /// Typical alpha value
-        /// </summary>
-        public const double TypicalAlpha = 1;
-
         //Attribute properties
         /// <summary>
         /// The Alpha

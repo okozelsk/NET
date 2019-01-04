@@ -250,7 +250,7 @@ namespace RCNet.Neural.Network.SM.Readout
                     weight += _clusterCollection[clusterIdx][readoutUnitIdx].TestingErrorStat.NumOfSamples;
                 }
                 wAvg.AddSampleValue(outputValue[0], weight);
-                // Or Flat weights
+                // Or flat weight
                 //wAvg.AddSampleValue(outputValue[0], 1);
             }
             return wAvg.Avg;

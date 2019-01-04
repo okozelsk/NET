@@ -14,21 +14,15 @@ using RCNet.MathTools.Differential;
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Class encaptulates arguments of the Elliot activation function
+    /// Class encaptulates arguments of the Elliot activation function.
+    /// Arguments are in RandomValue form to allow their dynamic random initialization within the specified ranges.
     /// </summary>
     [Serializable]
     public class ElliotSettings
     {
-        //Constants
-        //Typical values
-        /// <summary>
-        /// Curve slope
-        /// </summary>
-        public const double TypicalSlope = 1;
-
         //Attribute properties
         /// <summary>
-        /// The curve slope
+        /// Slope of the curve
         /// </summary>
         public RandomValueSettings Slope { get; }
 
@@ -36,7 +30,7 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
-        /// <param name="slope">The curve slope</param>
+        /// <param name="slope">Slope of the curve</param>
         public ElliotSettings(RandomValueSettings slope)
         {
             Slope = slope.DeepClone();

@@ -5,7 +5,7 @@ using RCNet.MathTools;
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// SoftPlus activation function
+    /// Implements SoftPlus activation function
     /// </summary>
     [Serializable]
     public class SoftPlus : AnalogActivationFunction
@@ -15,10 +15,9 @@ namespace RCNet.Neural.Activation
 
         //Constructor
         /// <summary>
-        /// Instantiates SoftPlus activation function
+        /// Creates an initialized instance
         /// </summary>
-        /// <param name="settings">Encapsulated arguments</param>
-        public SoftPlus(SoftPlusSettings settings)
+        public SoftPlus()
             : base()
         {
             return;

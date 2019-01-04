@@ -5,7 +5,7 @@ using RCNet.MathTools;
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Sinc activation function
+    /// Implements Sinc activation function
     /// </summary>
     [Serializable]
     public class Sinc : AnalogActivationFunction
@@ -15,10 +15,9 @@ namespace RCNet.Neural.Activation
 
         //Constructor
         /// <summary>
-        /// Instantiates Sinc activation function
+        /// Creates an initialized instance
         /// </summary>
-        /// <param name="settings">Encapsulated arguments</param>
-        public Sinc(SincSettings settings)
+        public Sinc()
             : base()
         {
             return;

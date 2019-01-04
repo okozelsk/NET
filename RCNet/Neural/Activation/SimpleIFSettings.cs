@@ -15,30 +15,12 @@ using RCNet.RandomValue;
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Class encaptulates arguments of the SimpleIF activation function
+    /// Class encaptulates arguments of the SimpleIF activation function.
+    /// Arguments are in RandomValue form to allow their dynamic random initialization within the specified ranges.
     /// </summary>
     [Serializable]
     public class SimpleIFSettings
     {
-        //Constants
-        //Typical values
-        /// <summary>
-        /// Typical value of resistance
-        /// </summary>
-        public const double TypicalResistance = 15;
-        /// <summary>
-        /// Typical value of decay rate
-        /// </summary>
-        public const double TypicalDecayRate = 0.05;
-        /// <summary>
-        /// Typical value of reset voltage
-        /// </summary>
-        public const double TypicalResetV = 5;
-        /// <summary>
-        /// Typical value of firing voltage
-        /// </summary>
-        public const double TypicalFiringThresholdV = 20;
-
         //Attribute properties
         /// <summary>
         /// Initial input stimuli coefficient (pA)

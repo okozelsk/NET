@@ -5,11 +5,18 @@ using RCNet.Extensions;
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// SoftExponential activation function
+    /// Implements SoftExponential activation function
     /// </summary>
     [Serializable]
     public class SoftExponential : AnalogActivationFunction
     {
+        //Constants
+        //Typical values
+        /// <summary>
+        /// Typical alpha value
+        /// </summary>
+        public const double TypicalAlpha = 1;
+
         //Attributes
         //Static working ranges
         private static readonly Interval _outputRange = new Interval(double.NegativeInfinity.Bound(), double.PositiveInfinity.Bound());
@@ -21,14 +28,13 @@ namespace RCNet.Neural.Activation
 
         //Constructor
         /// <summary>
-        /// Instantiates SoftExponential activation function
+        /// Creates an initialized instance
         /// </summary>
-        /// <param name="settings">Encapsulated arguments</param>
-        /// <param name="rand">Random object to be used for randomly generated parameters</param>
-        public SoftExponential(SoftExponentialSettings settings, Random rand)
+        /// <param name="alpha">alpha</param>
+        public SoftExponential(double alpha)
             : base()
         {
-            Alpha = rand.NextDouble(settings.Alpha).Bound();
+            Alpha = alpha.Bound();
             return;
         }
 

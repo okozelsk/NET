@@ -5,11 +5,18 @@ using RCNet.Extensions;
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Elliot activation function (aka Softsign).
+    /// Implements Elliot (aka Softsign) activation function
     /// </summary>
     [Serializable]
     public class Elliot : AnalogActivationFunction
     {
+        //Constants
+        //Typical values
+        /// <summary>
+        /// Curve slope
+        /// </summary>
+        public const double TypicalSlope = 1;
+
         //Attributes
         private static readonly Interval _outputRange = new Interval(-1, 1);
 
@@ -21,14 +28,13 @@ namespace RCNet.Neural.Activation
 
         //Constructor
         /// <summary>
-        /// Instantiates Elliot activation function
+        /// Creates an initialized instance
         /// </summary>
-        /// <param name="settings">Encapsulated arguments</param>
-        /// <param name="rand">Random object to be used for randomly generated parameters</param>
-        public Elliot(ElliotSettings settings, Random rand)
+        /// <param name="slope">Slope of the curve</param>
+        public Elliot(double slope)
             : base()
         {
-            Slope = rand.NextDouble(settings.Slope).Bound();
+            Slope = slope.Bound();
             if (Slope <= 0)
             {
                 throw new ArgumentOutOfRangeException("slope", "Slope must be GT 0");

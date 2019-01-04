@@ -5,7 +5,7 @@ using RCNet.MathTools;
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Gaussian activation function
+    /// Implements Gaussian activation function
     /// </summary>
     [Serializable]
     public class Gaussian : AnalogActivationFunction
@@ -15,10 +15,9 @@ namespace RCNet.Neural.Activation
 
         //Constructor
         /// <summary>
-        /// Instantiates Gaussian activation function
+        /// Creates an initialized instance
         /// </summary>
-        /// <param name="settings">Encapsulated arguments</param>
-        public Gaussian(GaussianSettings settings)
+        public Gaussian()
             : base()
         {
             return;

@@ -16,6 +16,29 @@ namespace RCNet.Neural.Activation
     [Serializable]
     public class LeakyIF : ODESpikingMembrane
     {
+        //Constants
+        //Typical values
+        /// <summary>
+        /// Typical value of time scale
+        /// </summary>
+        public const double TypicalTimeScale = 8;
+        /// <summary>
+        /// Typical value of resistance
+        /// </summary>
+        public const double TypicalResistance = 10;
+        /// <summary>
+        /// Typical value of resting voltage
+        /// </summary>
+        public const double TypicalRestV = -70;
+        /// <summary>
+        /// Typical value of reset voltage
+        /// </summary>
+        public const double TypicalResetV = -65;
+        /// <summary>
+        /// Typical value of firing voltage
+        /// </summary>
+        public const double TypicalFiringThresholdV = -50;
+
         //Attributes
         //Parameters
         private readonly double _timeScale;
@@ -23,27 +46,43 @@ namespace RCNet.Neural.Activation
 
         //Constructor
         /// <summary>
-        /// Constructs an initialized instance
+        /// Creates an initialized instance
         /// </summary>
-        /// <param name="settings">Encapsulated arguments</param>
-        /// <param name="rand">Random object to be used for randomly generated parameters</param>
-        public LeakyIF(LeakyIFSettings settings, Random rand)
-            : base(rand,
-                   rand.NextDouble(settings.RestV),
-                   rand.NextDouble(settings.ResetV),
-                   rand.NextDouble(settings.FiringThresholdV),
-                   settings.RefractoryPeriods,
-                   settings.StimuliCoeff,
-                   settings.SolverMethod,
+        /// <param name="stimuliCoeff">Input stimuli coefficient (pA)</param>
+        /// <param name="timeScale">Membrane time scale (ms)</param>
+        /// <param name="resistance">Membrane resistance (Mohm)</param>
+        /// <param name="restV">Membrane rest potential (mV)</param>
+        /// <param name="resetV">Membrane reset potential (mV)</param>
+        /// <param name="firingThresholdV">Membrane firing threshold (mV)</param>
+        /// <param name="refractoryPeriods">Number of after spike computation cycles while an input stimuli is ignored (ms)</param>
+        /// <param name="solverMethod">ODE numerical solver method</param>
+        /// <param name="solverCompSteps">ODE numerical solver computation steps of the time step</param>
+        public LeakyIF(double stimuliCoeff,
+                       double timeScale,
+                       double resistance,
+                       double restV,
+                       double resetV,
+                       double firingThresholdV,
+                       int refractoryPeriods,
+                       ODENumSolver.Method solverMethod,
+                       int solverCompSteps
+                       )
+            : base(restV,
+                   resetV,
+                   firingThresholdV,
+                   refractoryPeriods,
+                   stimuliCoeff,
+                   solverMethod,
                    1,
-                   settings.SolverCompSteps,
+                   solverCompSteps,
                    1
                    )
         {
-            _timeScale = rand.NextDouble(settings.TimeScale);
-            _resistance = rand.NextDouble(settings.Resistance);
+            _timeScale = timeScale;
+            _resistance = resistance;
             return;
         }
+
 
         //Methods
         /// <summary>

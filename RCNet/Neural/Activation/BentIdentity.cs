@@ -5,7 +5,7 @@ using RCNet.MathTools;
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// BentIdentity activation function
+    /// Implements Bent Identity activation function
     /// </summary>
     [Serializable]
     public class BentIdentity : AnalogActivationFunction
@@ -16,10 +16,9 @@ namespace RCNet.Neural.Activation
 
         //Constructor
         /// <summary>
-        /// Instantiates Bent Identity activation function
+        /// Creates an initialized instance
         /// </summary>
-        /// <param name="settings">Encapsulated arguments</param>
-        public BentIdentity(BentIdentitySettings settings)
+        public BentIdentity()
             : base()
         {
             return;

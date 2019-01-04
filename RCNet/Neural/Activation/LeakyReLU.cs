@@ -5,30 +5,36 @@ using RCNet.Extensions;
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// LeakyReLU activation function
+    /// Implements LeakyReLU (Leaky Rectified Linear Unit) activation function
     /// </summary>
     [Serializable]
     public class LeakyReLU : AnalogActivationFunction
     {
+        //Constants
+        //Typical values
+        /// <summary>
+        /// Typical negative slope
+        /// </summary>
+        public const double TypicalNegSlope = 0.05;
+
         //Attributes
         private readonly Interval _outputRange;
 
         //Attribute properties
         /// <summary>
-        /// The curve slope
+        /// A slope of the negative part of the curve
         /// </summary>
         public double NegSlope { get; }
 
         //Constructor
         /// <summary>
-        /// Instantiates a LeakyReLU activation function
+        /// Creates an initialized instance
         /// </summary>
-        /// <param name="settings">Encapsulated arguments</param>
-        /// <param name="rand">Random object to be used for randomly generated parameters</param>
-        public LeakyReLU(LeakyReLUSettings settings, Random rand)
+        /// <param name="negSlope">A slope of the negative part of the curve</param>
+        public LeakyReLU(double negSlope)
             : base()
         {
-            NegSlope = rand.NextDouble(settings.NegSlope).Bound();
+            NegSlope = negSlope.Bound();
             if (NegSlope < 0)
             {
                 throw new ArgumentOutOfRangeException("negSlope", "negSlope must be GE 0");
