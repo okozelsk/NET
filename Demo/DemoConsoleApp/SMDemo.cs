@@ -16,15 +16,13 @@ using System.Linq;
 namespace RCNet.DemoConsoleApp
 {
     /// <summary>
-    /// Demonstrates the State Machine usage.
-    /// It performs demo cases defined in xml file.
-    /// Input data has to be stored in a file (csv format).
+    /// Demonstrates the State Machine usage, performing demo cases defined in xml file.
     /// </summary>
     public static class SMDemo
     {
-
+        //Methods
         /// <summary>
-        /// Informative callback function used to display predictors collection progress.
+        /// Informative callback function called by StateMachine to inform about predictors collection progress.
         /// </summary>
         /// <param name="totalNumOfInputs">Total number of inputs to be processed</param>
         /// <param name="numOfProcessedInputs">Number of processed inputs</param>
@@ -34,6 +32,7 @@ namespace RCNet.DemoConsoleApp
                                                          Object userObject
                                                          )
         {
+            //SMDemo displays/updates information through IOutputLog passed as the userObject
             if (numOfProcessedInputs % 10 == 0 || numOfProcessedInputs == totalNumOfInputs || totalNumOfInputs == 1)
             {
                 ((IOutputLog)userObject).Write($"    Collecting State Machine predictors {totalNumOfInputs.ToString()}/{numOfProcessedInputs.ToString()}", true);
@@ -42,9 +41,9 @@ namespace RCNet.DemoConsoleApp
         }
 
         /// <summary>
-        /// Function displays reservoirs statistics.
+        /// Function simply displays important statistics of the State Machine's reservoirs.
         /// </summary>
-        /// <param name="statisticsCollection">Collection of reservoir statistics</param>
+        /// <param name="statisticsCollection">Collection of reservoir's statistics</param>
         /// <param name="log">Output log object</param>
         private static void ReportReservoirsStatistics(List<ReservoirStat> statisticsCollection, IOutputLog log)
         {
@@ -153,19 +152,21 @@ namespace RCNet.DemoConsoleApp
         }
 
         /// <summary>
-        /// This is the control function of the regression process and is called
+        /// This is the callback control function of the regression process and is called by State Machine
         /// after the completion of each regression training epoch.
-        /// The goal of the regression process is for each output field to train a readout network
-        /// that will give good results both on the training data and the test data.
-        /// Regression.RegressionControlInArgs object passed to the function contains the best error statistics so far
-        /// and the latest statistics. The primary purpose of the function is to decide whether the latest statistics
-        /// are better than the best statistics so far.
-        /// Here is used simply the default implementation of the decision, but
-        /// the the implemented logic can be much more complicated in real-world situations.
+        /// 
+        /// The goal of the regression process is for each output field to train a readout network(s)
+        /// that will give good results both on the training data and the test data. An instance of the
+        /// Regression.RegressionControlInArgs class passed to this function contains the best error statistics so far
+        /// and the latest statistics. The primary purpose of this function is to decide whether the latest statistics
+        /// are better than the best statistics so far. Here is used simply the default implementation of the decision, but
+        /// the logic can be much more complicated in real-world situations.
         /// The function can also tell the regression process that it does not make any sense to continue the regression.
         /// It can terminate the current regression attempt or whole readout unit regression process.
+        /// 
+        /// The secondary purpose of this function is to inform about the regression process progress.
         /// </summary>
-        /// <param name="inArgs">Contains all the necessary information to control the progress of the regression.</param>
+        /// <param name="inArgs">Contains all the necessary information to control the regression.</param>
         /// <returns>Instructions for the regression process.</returns>
         public static ReadoutUnit.RegressionControlOutArgs RegressionControl(ReadoutUnit.RegressionControlInArgs inArgs)
         {
@@ -229,7 +230,7 @@ namespace RCNet.DemoConsoleApp
         }
 
         /// <summary>
-        /// Performs specified demo case.
+        /// Performs one demo case.
         /// Loads and prepares sample data, trains State Machine and displayes results
         /// </summary>
         /// <param name="log">Into this interface are written output messages</param>
@@ -237,30 +238,26 @@ namespace RCNet.DemoConsoleApp
         public static void PerformDemoCase(IOutputLog log, DemoSettings.CaseSettings demoCaseParams)
         {
             log.Write("  Performing demo case " + demoCaseParams.Name, false);
-            //Input/Output data for the State Machine has to be always normalized within the range -1 and 1
-            Interval normalizationRange = CommonEnums.GetDataNormalizationRange(CommonEnums.DataNormalizationRange.Inclusive_Neg1_Pos1);
             //Bundle normalizer object
             BundleNormalizer bundleNormalizer = null;
-            //Prediction input vector (relevant only for time series prediction task)
+            //Prediction input vector (relevant only for input continuous feeding)
             double[] predictionInputVector = null;
-            
-            //Instantiate an State Machine
+            //Instantiate the State Machine
             StateMachine stateMachine = new StateMachine(demoCaseParams.stateMachineCfg);
-
-            //Prepare regression stage input object
+            //Prepare input object for regression stage
             log.Write(" ", false);
             StateMachine.RegressionStageInput rsi = null;
             List<string> outputFieldNameCollection = (from rus in demoCaseParams.stateMachineCfg.ReadoutLayerConfig.ReadoutUnitCfgCollection select rus.Name).ToList();
             List<CommonEnums.TaskType> outputFieldTaskCollection = (from rus in demoCaseParams.stateMachineCfg.ReadoutLayerConfig.ReadoutUnitCfgCollection select rus.TaskType).ToList();
             if (demoCaseParams.stateMachineCfg.InputConfig.FeedingType == CommonEnums.InputFeedingType.Continuous)
             {
-                //Time series input
+                //Continuous input feeding
                 //Load data bundle from csv file
                 TimeSeriesBundle data = TimeSeriesDataLoader.Load(demoCaseParams.FileName,
                                                                   demoCaseParams.stateMachineCfg.InputConfig.ExternalFieldNameCollection(),
                                                                   outputFieldNameCollection,
                                                                   outputFieldTaskCollection,
-                                                                  normalizationRange,
+                                                                  StateMachine.DataRange,
                                                                   demoCaseParams.NormalizerReserveRatio,
                                                                   true,
                                                                   demoCaseParams.SingleNormalizer,
@@ -271,28 +268,28 @@ namespace RCNet.DemoConsoleApp
             }
             else
             {
-                //Patterned input
+                //Patterned input feeding
                 //Load data bundle from csv file
                 PatternBundle data = PatternDataLoader.Load(demoCaseParams.FileName,
                                                             demoCaseParams.stateMachineCfg.InputConfig.ExternalFieldNameCollection(),
                                                             outputFieldNameCollection,
                                                             outputFieldTaskCollection,
-                                                            normalizationRange,
+                                                            StateMachine.DataRange,
                                                             demoCaseParams.NormalizerReserveRatio,
                                                             true,
                                                             out bundleNormalizer
                                                             );
                 rsi = stateMachine.PrepareRegressionStageInput(data, PredictorsCollectionCallback, log);
             }
-            //Report reservoirs statistics
+            //Report statistics of the State Machine's reservoirs
             ReportReservoirsStatistics(rsi.ReservoirStatCollection, log);
 
             //Regression stage
             log.Write("    Regression stage", false);
-            //Training - State Machine regression stage
+            //Perform the regression
             ValidationBundle vb = stateMachine.RegressionStage(rsi, RegressionControl, log);
 
-            //Perform prediction if the input is continuous
+            //Perform prediction if the input feeding is continuous (we know the input but we don't know the ideal output)
             double[] predictionOutputVector = null;
             if (demoCaseParams.stateMachineCfg.InputConfig.FeedingType == CommonEnums.InputFeedingType.Continuous)
             {
@@ -328,7 +325,7 @@ namespace RCNet.DemoConsoleApp
                 }
                 else
                 {
-                    //Prediction task report
+                    //Forecast task report
                     log.Write("            OutputField: " + demoCaseParams.stateMachineCfg.ReadoutLayerConfig.ReadoutUnitCfgCollection[outputIdx].Name, false);
                     log.Write("   Predicted next value: " + predictionOutputVector[outputIdx].ToString(CultureInfo.InvariantCulture), false);
                     log.Write("   Total num of samples: " + ces.PrecissionErrStat.NumOfSamples.ToString(), false);

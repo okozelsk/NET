@@ -12,11 +12,18 @@ using RCNet.Neural.Network.SM.Readout;
 namespace RCNet.Neural.Network.SM
 {
     /// <summary>
-    /// Implements the State Machine Network.
+    /// Implements the State Machine.
     /// </summary>
     [Serializable]
     public class StateMachine
     {
+        //Static attributes
+        /// <summary>
+        /// Data range. Data range has to be always between -1 and 1.
+        /// Input and desired data has to be normalized into this range.
+        /// </summary>
+        public static readonly Interval DataRange = new Interval(-1, 1);
+
         //Delegates
         /// <summary>
         /// Informative callback function to inform about predictors collection progress.
@@ -33,10 +40,6 @@ namespace RCNet.Neural.Network.SM
         /// Settings used for instance creation.
         /// </summary>
         private StateMachineSettings _settings;
-        /// <summary>
-        /// Data range. Data range has to be always between -1 and 1
-        /// </summary>
-        private readonly Interval _dataRange;
         /// <summary>
         /// Collection of the internal input generators associated with the internal input fields
         /// </summary>
@@ -62,8 +65,6 @@ namespace RCNet.Neural.Network.SM
         public StateMachine(StateMachineSettings settings)
         {
             _settings = settings.DeepClone();
-            //Data range has to be always <-1,1>
-            _dataRange = CommonEnums.GetDataNormalizationRange(CommonEnums.DataNormalizationRange.Inclusive_Neg1_Pos1);
             //Internal input generators
             _internalInputGeneratorCollection = new List<IGenerator>();
             foreach(StateMachineSettings.InputSettings.InternalField field in _settings.InputConfig.InternalFieldCollection)
@@ -96,7 +97,7 @@ namespace RCNet.Neural.Network.SM
             _reservoirCollection = new List<Reservoir>(_settings.ReservoirInstanceDefinitionCollection.Count);
             foreach(StateMachineSettings.ReservoirInstanceDefinition instanceDefinition in _settings.ReservoirInstanceDefinitionCollection)
             {
-                Reservoir reservoir = new Reservoir(instanceDefinition, _dataRange, rand);
+                Reservoir reservoir = new Reservoir(instanceDefinition, DataRange, rand);
                 _reservoirCollection.Add(reservoir);
                 _numOfPredictors += reservoir.NumOfOutputPredictors;
             }
@@ -387,7 +388,7 @@ namespace RCNet.Neural.Network.SM
                                                 )
         {
             //Readout layer instance
-            _readoutLayer = new ReadoutLayer(_settings.ReadoutLayerConfig, _dataRange);
+            _readoutLayer = new ReadoutLayer(_settings.ReadoutLayerConfig, DataRange);
             //Training
             return _readoutLayer.Build(rsi.PredictorsCollection,
                                        rsi.IdealOutputsCollection,

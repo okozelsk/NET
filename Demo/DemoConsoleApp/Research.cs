@@ -16,6 +16,9 @@ using RCNet.Neural.Data.Generators;
 
 namespace RCNet.DemoConsoleApp
 {
+    /// <summary>
+    /// This class is a free "playground", the place where it is possible to test new concepts or somewhat else
+    /// </summary>
     class Research
     {
         //Attributes
@@ -44,28 +47,6 @@ namespace RCNet.DemoConsoleApp
                 Console.WriteLine(generator.Next());
             }
             Console.ReadLine();
-
-
-
-
-
-            //TestDEq();
-            //IzhikevichIFSettings settings = new IzhikevichIFSettings(10, 0.1, 0.25, 2, -70, -65, 30, 0, ODENumSolver.Method.Euler, 2);
-            //IActivationFunction af = new IzhikevichIF(settings);
-
-            /*
-            LeakyIFSettings settings = new LeakyIFSettings(5.5,
-                                                           new RandomValueSettings(8, 8),
-                                                           new RandomValueSettings(10, 10),
-                                                           new RandomValueSettings(-70, -70),
-                                                           new RandomValueSettings(-65, -65),
-                                                           new RandomValueSettings(-50, -50),
-                                                           0,
-                                                           ODENumSolver.Method.Euler,
-                                                           2
-                                                           );
-            IActivationFunction af = new LeakyIF(settings, new Random(0));
-            */
 
             ///*
             SimpleIFSettings settings = new SimpleIFSettings(1,
@@ -101,31 +82,6 @@ namespace RCNet.DemoConsoleApp
             Console.ReadLine();
 
             return;
-        }
-
-        private void TestDEq()
-        {
-            Vector v = new Vector(1);
-            v[0] = 5;
-            double time = 0;
-            double timeStep = 0.001d;
-            for (int i = 0; i < 100; i++)
-            {
-                foreach(ODENumSolver.Estimation subResult in ODENumSolver.Solve(DEq, time, v, timeStep, 10, ODENumSolver.Method.Euler))
-                {
-                    v = subResult.V;
-                }
-                time += timeStep;
-                Console.WriteLine($"{time}, v = {v[0]}");
-            }
-            Console.ReadLine();
-            return;
-        }
-
-
-        private Vector DEq(double t, Vector v)
-        {
-            return v;
         }
 
 

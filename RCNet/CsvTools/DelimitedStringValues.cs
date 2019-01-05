@@ -24,9 +24,15 @@ namespace RCNet.CsvTools
         /// </summary>
         public const char DefaultDelimiter = SemicolonDelimiter;
 
-        //Attributes
-        private char _delimiter;
-        private List<string> _stringValueCollection;
+        //Attribute properties
+        /// <summary>
+        /// Current delimiter of the string values
+        /// </summary>
+        public char Delimiter { get; private set; }
+        /// <summary>
+        /// Collection of string values
+        /// </summary>
+        public List<string> StringValueCollection { get; }
 
         //Constructor
         /// <summary>
@@ -35,24 +41,16 @@ namespace RCNet.CsvTools
         /// <param name="delimiter">The delimiter of the string values</param>
         public DelimitedStringValues(char delimiter = DefaultDelimiter)
         {
-            _delimiter = delimiter;
-            _stringValueCollection = new List<string>();
+            Delimiter = delimiter;
+            StringValueCollection = new List<string>();
             return;
         }
 
         //Properties
         /// <summary>
-        /// Current delimiter of the string values
-        /// </summary>
-        public char Delimiter { get { return _delimiter; } }
-        /// <summary>
         /// Number of string values
         /// </summary>
-        public int NumOfStringValues { get { return _stringValueCollection.Count; } }
-        /// <summary>
-        /// Collection of string values
-        /// </summary>
-        public List<string> StringValueCollection { get { return _stringValueCollection; } }
+        public int NumOfStringValues { get { return StringValueCollection.Count; } }
 
         //Methods
         //Static methods
@@ -120,7 +118,7 @@ namespace RCNet.CsvTools
         /// </summary>
         public void Reset()
         {
-            _stringValueCollection.Clear();
+            StringValueCollection.Clear();
             return;
         }
 
@@ -130,7 +128,7 @@ namespace RCNet.CsvTools
         /// <param name="delimiter">New delimiter</param>
         public void ChangeDelimiter(char delimiter)
         {
-            _delimiter = delimiter;
+            Delimiter = delimiter;
             return;
         }
 
@@ -141,8 +139,8 @@ namespace RCNet.CsvTools
         /// <returns>Number of string values in the internal collection after the operation</returns>
         public int AddValue(string value)
         {
-            _stringValueCollection.Add(value);
-            return _stringValueCollection.Count;
+            StringValueCollection.Add(value);
+            return StringValueCollection.Count;
         }
 
         /// <summary>
@@ -152,8 +150,8 @@ namespace RCNet.CsvTools
         /// <returns>Number of string values in the internal collection after the operation</returns>
         public int RemoveAt(int index)
         {
-            _stringValueCollection.RemoveAt(index);
-            return _stringValueCollection.Count;
+            StringValueCollection.RemoveAt(index);
+            return StringValueCollection.Count;
         }
 
         /// <summary>
@@ -162,11 +160,11 @@ namespace RCNet.CsvTools
         /// <returns>Number of string values in the internal collection after the operation</returns>
         public int RemoveTrailingWhites()
         {
-            while(_stringValueCollection.Count > 0 && _stringValueCollection[_stringValueCollection.Count - 1].Trim() == string.Empty)
+            while(StringValueCollection.Count > 0 && StringValueCollection[StringValueCollection.Count - 1].Trim() == string.Empty)
             {
-                _stringValueCollection.RemoveAt(_stringValueCollection.Count - 1);
+                StringValueCollection.RemoveAt(StringValueCollection.Count - 1);
             }
-            return _stringValueCollection.Count;
+            return StringValueCollection.Count;
         }
 
         /// <summary>
@@ -182,10 +180,10 @@ namespace RCNet.CsvTools
             {
                 Reset();
             }
-            _stringValueCollection.AddRange(DelimitedToValues(delimValues,
-                                            recognizeDelimiter ? RecognizeDelimiter(delimValues) : _delimiter
+            StringValueCollection.AddRange(DelimitedToValues(delimValues,
+                                            recognizeDelimiter ? RecognizeDelimiter(delimValues) : Delimiter
                                             ));
-            return _stringValueCollection.Count;
+            return StringValueCollection.Count;
         }
 
         /// <summary>
@@ -195,7 +193,7 @@ namespace RCNet.CsvTools
         /// <returns>String value from the internal collection</returns>
         public string GetValue(int idx)
         {
-            return _stringValueCollection[idx];
+            return StringValueCollection[idx];
         }
 
         /// <summary>
@@ -203,7 +201,7 @@ namespace RCNet.CsvTools
         /// </summary>
         public int IndexOf(string value)
         {
-            return _stringValueCollection.IndexOf(value);
+            return StringValueCollection.IndexOf(value);
         }
 
         /// <summary>
@@ -212,7 +210,7 @@ namespace RCNet.CsvTools
         /// <returns>Single string containing delimited values</returns>
         public override string ToString()
         {
-            return ValuesToDelimited(_stringValueCollection, _delimiter);
+            return ValuesToDelimited(StringValueCollection, Delimiter);
         }
   
     }//DelimitedStringValues

@@ -13,7 +13,7 @@ using RCNet.MathTools;
 namespace RCNet.DemoConsoleApp
 {
     /// <summary>
-    /// The class implements State Machine demo configuration parameters.
+    /// Encapsulates demo cases configurations.
     /// One and only way to create an instance is to use the xml constructor.
     /// </summary>
     public class DemoSettings
@@ -21,7 +21,7 @@ namespace RCNet.DemoConsoleApp
         //Constants
         //Attribute properties
         /// <summary>
-        /// File system directory where the sample data files are stored.
+        /// Location where the csv sample data files are stored.
         /// </summary>
         public string DataFolder { get; }
         /// <summary>
@@ -31,10 +31,10 @@ namespace RCNet.DemoConsoleApp
 
         //Constructor
         /// <summary>
-        /// Creates instance and initialize it from given xml file.
-        /// This is the only way to instantiate State Machine demo settings.
+        /// Creates initialized instance based on given xml file.
+        /// This is the only way to instantiate demo settings.
         /// </summary>
-        /// <param name="fileName">Xml file containing definitions of demo cases to be prformed</param>
+        /// <param name="fileName">Xml file consisting of demo cases definitions</param>
         public DemoSettings(string fileName)
         {
             //Validate xml file and load the document 
@@ -50,22 +50,22 @@ namespace RCNet.DemoConsoleApp
                 validator.AddSchema(schemaStream);
             }
             XDocument xmlDoc = validator.LoadXDocFromFile(fileName);
-            //Parse DataDir
+            //Parsing
+            //Data folder
             XElement root = xmlDoc.Descendants("demo").First();
             DataFolder = root.Attribute("dataFolder").Value;
-            //Parse demo cases definitions
+            //Demo cases definitions
             CaseCfgCollection = new List<CaseSettings>();
             foreach (XElement demoCaseParamsElem in root.Descendants("case"))
             {
                 CaseCfgCollection.Add(new CaseSettings(demoCaseParamsElem, DataFolder));
             }
-
             return;
         }
 
         //Inner classes
         /// <summary>
-        /// Holds the configuration of the single State Machine demo case.
+        /// Holds the configuration of the single demo case.
         /// </summary>
         public class CaseSettings
         {
@@ -80,7 +80,7 @@ namespace RCNet.DemoConsoleApp
             /// </summary>
             public string FileName { get; }
             /// <summary>
-            /// Use true if all input and output State Machine fields are about the same range of values.
+            /// True if all input and output State Machine fields represent the same value (ie. stock price).
             /// </summary>
             public bool SingleNormalizer { get; }
             /// <summary>
@@ -95,11 +95,18 @@ namespace RCNet.DemoConsoleApp
             //Constructor
             public CaseSettings(XElement demoCaseElem, string dir)
             {
+                //Parsing
+                //Demo case name
                 Name = demoCaseElem.Attribute("name").Value;
+                //Samples
                 XElement samplesElem = demoCaseElem.Descendants("samples").First();
+                //Full path to csv file
                 FileName = dir + "\\" + samplesElem.Attribute("fileName").Value;
+                //Single data normalizer usage
                 SingleNormalizer = bool.Parse(samplesElem.Attribute("singleNormalizer").Value);
+                //Normalizer reserve
                 NormalizerReserveRatio = double.Parse(samplesElem.Attribute("normalizerReserve").Value, CultureInfo.InvariantCulture);
+                //State Machine configuration
                 stateMachineCfg = new StateMachineSettings(demoCaseElem.Descendants("stateMachineCfg").First());
                 return;
             }

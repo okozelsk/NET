@@ -9,13 +9,6 @@
   <!-- ________________________________________LOW LEVEL TYPES_________________________________________________ -->
   <!-- SIMPLE TYPES -->
   <!-- ENUMERATION TYPES -->
-  <!-- Enumeration of data normalization range -->
-  <xs:simpleType name="DataNormalizationRangeType">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="Inclusive_0_Pos1"/>
-      <xs:enumeration value="Inclusive_Neg1_Pos1"/>
-    </xs:restriction>
-  </xs:simpleType>
 
   <!-- Enumeration of random distribution -->
   <xs:simpleType name="RandomDistributionType">
@@ -60,7 +53,7 @@
   <!-- Enumeration of neural task type -->
   <xs:simpleType name="NeuralTaskType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="Prediction"/>
+      <xs:enumeration value="Forecast"/>
       <xs:enumeration value="Classification"/>
     </xs:restriction>
   </xs:simpleType>

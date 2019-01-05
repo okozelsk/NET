@@ -4,7 +4,7 @@ using System.Globalization;
 namespace RCNet.Extensions
 {
     /// <summary>
-    /// Useful String class Extensions
+    /// Useful String class extensions
     /// </summary>
     public static class StringClassExtensions
     {

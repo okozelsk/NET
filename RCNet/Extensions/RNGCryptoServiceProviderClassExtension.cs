@@ -8,7 +8,7 @@ using System.Security.Cryptography;
 namespace RCNet.Extensions
 {
     /// <summary>
-    /// Useful extensions of RNGCryptoServiceProvider class.
+    /// Useful extensions of RNGCryptoServiceProvider class
     /// </summary>
     public static class RNGCryptoServiceProviderClassExtension
     {

@@ -154,19 +154,19 @@ namespace RCNet.Neural.Network.SM.Readout
                 if (_settings.ReadoutUnitCfgCollection[clusterIdx].TaskType == CommonEnums.TaskType.Classification)
                 {
                     //Classification task
-                    subBundleCollection = DivideSamplesForClassification(shuffledData.InputVectorCollection,
-                                                                         idealValueCollection,
-                                                                         refBinDistr,
-                                                                         testDataSetLength
-                                                                         );
+                    subBundleCollection = DivideSamplesForClassificationTask(shuffledData.InputVectorCollection,
+                                                                             idealValueCollection,
+                                                                             refBinDistr,
+                                                                             testDataSetLength
+                                                                             );
                 }
                 else
                 {
-                    //Prediction task
-                    subBundleCollection = DivideSamplesForPredictionOrHybrid(shuffledData.InputVectorCollection,
-                                                                             idealValueCollection,
-                                                                             testDataSetLength
-                                                                             );
+                    //Forecast task
+                    subBundleCollection = DivideSamplesForForecastTask(shuffledData.InputVectorCollection,
+                                                                       idealValueCollection,
+                                                                       testDataSetLength
+                                                                       );
                 }
                 //Best predicting unit per each fold in the cluster.
                 ClusterErrStatistics ces = new ClusterErrStatistics(_settings.ReadoutUnitCfgCollection[clusterIdx].TaskType, numOfFolds, refBinDistr);
@@ -270,7 +270,7 @@ namespace RCNet.Neural.Network.SM.Readout
             return outputVector;
         }
         
-        private List<TimeSeriesBundle> DivideSamplesForClassification(List<double[]> predictorsCollection,
+        private List<TimeSeriesBundle> DivideSamplesForClassificationTask(List<double[]> predictorsCollection,
                                                                       List<double[]> idealValueCollection,
                                                                       BinDistribution refBinDistr,
                                                                       int bundleSize
@@ -343,7 +343,7 @@ namespace RCNet.Neural.Network.SM.Readout
             return bundleCollection;
         }
 
-        private List<TimeSeriesBundle> DivideSamplesForPredictionOrHybrid(List<double[]> predictorsCollection,
+        private List<TimeSeriesBundle> DivideSamplesForForecastTask(List<double[]> predictorsCollection,
                                                                           List<double[]> idealValueCollection,
                                                                           int bundleSize
                                                                           )

@@ -4,7 +4,7 @@ using System.Text;
 namespace RCNet.DemoConsoleApp.Log
 {
     /// <summary>
-    /// Simple class implementing the IOutputLog interface.
+    /// Implements a simple output journal (IOutputLog interface).
     /// Messages are written to the system console.
     /// </summary>
     public class ConsoleLog : IOutputLog

@@ -202,7 +202,7 @@ namespace RCNet.Neural.Network.SM.Readout
             public ReadoutUnitSettings()
             {
                 Name = "";
-                TaskType = CommonEnums.TaskType.Prediction;
+                TaskType = CommonEnums.TaskType.Forecast;
                 NetType = ReadoutUnitNetworkType.FF;
                 NetSettings = null;
                 OutputRange = null;

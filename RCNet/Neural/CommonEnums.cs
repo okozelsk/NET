@@ -13,51 +13,6 @@ namespace RCNet.Neural
     public static class CommonEnums
     {
         /// <summary>
-        /// Supported data normalization ranges
-        /// </summary>
-        public enum DataNormalizationRange
-        {
-            /// <summary>
-            /// Range 0;1
-            /// </summary>
-            Inclusive_0_Pos1,
-            /// <summary>
-            /// Range -1;1
-            /// </summary>
-            Inclusive_Neg1_Pos1
-        }
-
-        /// <summary>
-        /// Parses the normalization range from a string code
-        /// </summary>
-        /// <param name="code">Normalization range code</param>
-        public static DataNormalizationRange ParseDataNormalizationRange(string code)
-        {
-            switch (code.ToUpper())
-            {
-                case "INCLUSIVE_0_POS1": return DataNormalizationRange.Inclusive_0_Pos1;
-                case "INCLUSIVE_NEG1_POS1": return DataNormalizationRange.Inclusive_Neg1_Pos1;
-                default:
-                    throw new ArgumentException($"Unsupported normalization range {code}", "code");
-            }
-        }
-
-        /// <summary>
-        /// Returns interval according to the specified normalization range
-        /// </summary>
-        /// <param name="range">Normalization range</param>
-        public static Interval GetDataNormalizationRange(DataNormalizationRange range)
-        {
-            switch (range)
-            {
-                case DataNormalizationRange.Inclusive_0_Pos1: return new Interval(0, 1);
-                case DataNormalizationRange.Inclusive_Neg1_Pos1: return new Interval(-1, 1);
-                default:
-                    throw new ArgumentException($"Unsupported normalization range {range}", "range");
-            }
-        }
-
-        /// <summary>
         /// Input feeding variants
         /// </summary>
         public enum InputFeedingType
@@ -79,9 +34,9 @@ namespace RCNet.Neural
         public enum TaskType
         {
             /// <summary>
-            /// Prediction task type
+            /// Forecasting of the next value
             /// </summary>
-            Prediction,
+            Forecast,
             /// <summary>
             /// Classification (Categorization, Pattern recognition) task type
             /// </summary>
@@ -96,7 +51,7 @@ namespace RCNet.Neural
         {
             switch (code.ToUpper())
             {
-                case "PREDICTION": return TaskType.Prediction;
+                case "FORECAST": return TaskType.Forecast;
                 case "CLASSIFICATION": return TaskType.Classification;
                 default:
                     throw new ArgumentException($"Unsupported task type {code}", "code");

@@ -5,7 +5,7 @@ using RCNet.RandomValue;
 namespace RCNet.Extensions
 {
     /// <summary>
-    /// Useful extensions of Random class.
+    /// Useful extensions of Random class
     /// </summary>
     public static class RandomClassExtensions
     {

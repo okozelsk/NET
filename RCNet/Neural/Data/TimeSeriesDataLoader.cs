@@ -11,12 +11,12 @@ using RCNet.CsvTools;
 namespace RCNet.Neural.Data
 {
     /// <summary>
-    /// The class allows to upload sample data for a Prediction task from a csv file.
+    /// The class allows to upload sample data of a continuous time series from a csv file.
     /// </summary>
     public static class TimeSeriesDataLoader
     {
         /// <summary>
-        /// Loads the data and prepares PredictionBundle.
+        /// Loads the data and prepares TimeSeriesBundle.
         /// The first line of the csv file must be field names. These field names must
         /// match the names of the input and output fields.
         /// </summary>

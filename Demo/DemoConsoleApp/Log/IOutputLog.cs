@@ -3,7 +3,7 @@
 namespace RCNet.DemoConsoleApp.Log
 {
     /// <summary>
-    /// A simple output log interface
+    /// Interface for a simple output journal
     /// </summary>
     public interface IOutputLog
     {

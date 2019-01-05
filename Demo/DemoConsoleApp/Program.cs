@@ -8,18 +8,14 @@ namespace RCNet.DemoConsoleApp
     {
         static void Main(string[] args)
         {
-            //Research
-            //Research r = new Research();
-            //r.Run();
+            ////Research - this is not a part of the demo - it is a free playground
+            //(new Research()).Run();
 
             //Demo standard execution
             try
             {
-                //Logging the output to a console
-                IOutputLog demoOutputLog = new ConsoleLog();
-                //Demo
-                string demoSettingsFile = @"DemoSettings.xml";
-                SMDemo.RunDemo(demoOutputLog, demoSettingsFile);
+                //Run the demo
+                SMDemo.RunDemo(new ConsoleLog(), @"DemoSettings.xml");
             }
             catch(Exception e)
             {
@@ -33,8 +29,7 @@ namespace RCNet.DemoConsoleApp
             Console.WriteLine("Press Enter.");
             Console.ReadLine();
             return;
-        }
-
+        }//Main
 
     }//Program
 

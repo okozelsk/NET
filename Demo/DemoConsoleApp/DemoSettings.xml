@@ -218,7 +218,7 @@
     The last recorded prices are from 2018/03/02 so network is predicting next High and Low prices for the following
     business day 2018/03/05 (where real prices were High=6.58$ and Low=5.99$).
   -->
-  <case name="Prediction task High and Low share prices of TTOO (T2 Biosystems, Inc.): Small analog reservoir (ESN), linear regression readout">
+  <case name="Forecast task High and Low share prices of TTOO (T2 Biosystems, Inc.): Small analog reservoir (ESN), linear regression readout">
     <samples fileName="TTOO.csv" singleNormalizer="true" normalizerReserve="0.1"/>
     <stateMachineCfg randomizerSeek="0">
       <input>
@@ -264,12 +264,12 @@
         </reservoirInstance>
       </reservoirInstanceContainer>
       <readoutLayer testDataRatio="0.1" folds="Auto">
-        <readoutUnit name="High" task="Prediction" attempts="1" attemptEpochs="100">
+        <readoutUnit name="High" task="Forecast" attempts="1" attemptEpochs="100">
           <ff regressionMethod="Linear">
             <activationIdentity/>
           </ff>
         </readoutUnit>
-        <readoutUnit name="Low" task="Prediction" attempts="1" attemptEpochs="100">
+        <readoutUnit name="Low" task="Forecast" attempts="1" attemptEpochs="100">
           <ff regressionMethod="Linear">
             <activationIdentity/>
           </ff>
@@ -284,7 +284,7 @@
     Standard linear regression is used as predicting readout.
     Dataset contains generated Mackey Glass chaotic time series.
   -->
-  <case name="Prediction task Mackey Glass chaotic time series: Two analog reservoirs (ESN), Linear regression output">
+  <case name="Forecast task Mackey Glass chaotic time series: Two analog reservoirs (ESN), Linear regression output">
     <samples fileName="MackeyGlass.csv" singleNormalizer="false" normalizerReserve="0.1"/>
     <stateMachineCfg randomizerSeek="0">
       <input>
@@ -341,7 +341,7 @@
         </reservoirInstance>
       </reservoirInstanceContainer>
       <readoutLayer testDataRatio="0.1" folds="1">
-        <readoutUnit name="Value" task="Prediction" attempts="1" attemptEpochs="1">
+        <readoutUnit name="Value" task="Forecast" attempts="1" attemptEpochs="1">
           <ff regressionMethod="Linear">
             <activationIdentity/>
           </ff>

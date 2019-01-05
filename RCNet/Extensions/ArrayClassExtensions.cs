@@ -42,7 +42,8 @@ namespace RCNet.Extensions
         }
 
         /// <summary>
-        /// Compares the values of this array with the values in the given array.
+        /// Compares the values in this array with the values in the given array.
+        /// Uses Equals method co compare items.
         /// </summary>
         /// <param name="cmpArray">Array to compare with</param>
         /// <param name="array"></param>
@@ -65,7 +66,7 @@ namespace RCNet.Extensions
         }
 
         /// <summary>
-        /// Fills the array with specified value
+        /// Fills the array with a specified value
         /// </summary>
         /// <param name="value">Value to be used</param>
         /// <param name="start">Starting index</param>
@@ -84,7 +85,7 @@ namespace RCNet.Extensions
         }
 
         /// <summary>
-        /// Fills the array with specified value
+        /// Fills the 2D array with a specified value
         /// </summary>
         /// <param name="value">Value to be used</param>
         /// <param name="array"></param>
@@ -104,7 +105,7 @@ namespace RCNet.Extensions
         }
 
         /// <summary>
-        /// Fills the array of arrays with specified value
+        /// Fills the array of arrays with a specified value
         /// </summary>
         /// <param name="value">Value to be used</param>
         /// <param name="array"></param>

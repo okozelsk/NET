@@ -166,7 +166,7 @@ namespace RCNet.Neural.Network.SM.Readout
                     }
                     return false;
                 default:
-                    //Prediction task type
+                    //Forecast task type
                     return (current.CombinedPrecisionError < best.CombinedPrecisionError);
             }
         }
@@ -360,7 +360,7 @@ namespace RCNet.Neural.Network.SM.Readout
             /// <summary>
             /// Type of the neural task
             /// </summary>
-            public CommonEnums.TaskType TaskType { get; set; } = CommonEnums.TaskType.Prediction;
+            public CommonEnums.TaskType TaskType { get; set; } = CommonEnums.TaskType.Forecast;
             /// <summary>
             /// Readout unit index for which the regression is performing (corresponds with output field index)
             /// </summary>

@@ -100,7 +100,7 @@ namespace RCNet.DemoConsoleApp
         /// (Random, Sinusoid and Mackey Glass)
         /// </summary>
         /// <param name="dir">The output directory</param>
-        /// <param name="cultureInfo">The culture info to be used</param>
+        /// <param name="cultureInfo">The culture info object to be used</param>
         /// <param name="timeSeriesLength">The required length of the generated time series</param>
         public static void PrepareDemoTimeSeriesCsvFiles(string dir, CultureInfo cultureInfo, int timeSeriesLength = 10000)
         {

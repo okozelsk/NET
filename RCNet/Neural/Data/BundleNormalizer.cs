@@ -441,7 +441,7 @@ namespace RCNet.Neural.Data
         }
 
         /// <summary>
-        /// Creates PredictionBundle from the vector collection
+        /// Creates TimeSeriesBundle from the vector collection
         /// </summary>
         /// <param name="vectorCollection">Collection of vectors</param>
         /// <param name="normalize">Specifies whether to normalize data in the created bundle</param>
