@@ -165,7 +165,7 @@ namespace RCNet.Neural.Data
                 //Remove the #Outputs keyword from the collection
                 outputNames.RemoveAt(0);
                 //Check if the there is at least one output name
-                if (outputNames.NumOfStringValues < 2)
+                if (outputNames.NumOfStringValues < 1)
                 {
                     throw new FormatException("Missing output name(es).");
                 }
