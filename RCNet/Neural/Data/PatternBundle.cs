@@ -91,8 +91,8 @@ namespace RCNet.Neural.Data
         /// The data row must end with values of defined output fields.
         /// </summary>
         /// <param name="fileName"> Data file name </param>
-        /// <param name="inputFieldNameCollection"> Input fields </param>
-        /// <param name="outputFieldNameCollection"> Output fields </param>
+        /// <param name="inputFieldNameCollection"> Input field names </param>
+        /// <param name="outputFieldNameCollection"> Output field names </param>
         /// <param name="outputFieldTaskCollection">
         /// Neural task related to output field.
         /// Classification task means the output field contains binary value so data
@@ -118,6 +118,8 @@ namespace RCNet.Neural.Data
             bundleNormalizer = new BundleNormalizer(normRange);
             using (StreamReader streamReader = new StreamReader(new FileStream(fileName, FileMode.Open)))
             {
+                List<int> inputFieldGrpIndexes = new List<int>();
+                List<int> outputFieldIndexes = new List<int>();
                 //The first row contains the "#RepetitiveGroupOfAttributes" keyword followed by name(s) of attribute(s)
                 string delimitedRepetitiveGroupOfAttributes = streamReader.ReadLine();
                 if (!delimitedRepetitiveGroupOfAttributes.StartsWith("#RepetitiveGroupOfAttributes"))
@@ -138,16 +140,18 @@ namespace RCNet.Neural.Data
                 //Remove the #RepetitiveGroupOfAttributes keyword from the collection
                 repetitiveGroupOfAttributes.RemoveAt(0);
                 //Check if attribute names match with the input fields collection
-                if (repetitiveGroupOfAttributes.NumOfStringValues != inputFieldNameCollection.Count)
+                if (repetitiveGroupOfAttributes.NumOfStringValues < inputFieldNameCollection.Count)
                 {
-                    throw new FormatException("Different number of attributes in the file and number of specified input fields.");
+                    throw new FormatException("Inconsistent number of attributes in the file and number of specified input fields.");
                 }
                 foreach (string inputFieldName in inputFieldNameCollection)
                 {
-                    if (repetitiveGroupOfAttributes.IndexOf(inputFieldName) < 0)
+                    int index = repetitiveGroupOfAttributes.IndexOf(inputFieldName);
+                    if (index < 0)
                     {
                         throw new FormatException($"Input field name {inputFieldName} was not found among the repetitive attributes specified in the file.");
                     }
+                    inputFieldGrpIndexes.Add(index);
                 }
                 //The second row contains the "#Outputs" keyword followed by name(s) of output class(es) or values(s)
                 string delimitedOutputNames = streamReader.ReadLine();
@@ -158,24 +162,26 @@ namespace RCNet.Neural.Data
                 DelimitedStringValues outputNames = new DelimitedStringValues(csvDelimiter);
                 outputNames.LoadFromString(delimitedOutputNames);
                 outputNames.RemoveTrailingWhites();
+                //Remove the #Outputs keyword from the collection
+                outputNames.RemoveAt(0);
                 //Check if the there is at least one output name
                 if (outputNames.NumOfStringValues < 2)
                 {
                     throw new FormatException("Missing output name(es).");
                 }
-                //Remove the #Outputs keyword from the collection
-                outputNames.RemoveAt(0);
                 //Check if output names match with the output fields collection
-                if (outputNames.NumOfStringValues != outputFieldNameCollection.Count)
+                if (outputNames.NumOfStringValues < outputFieldNameCollection.Count)
                 {
-                    throw new FormatException("Different number of outputs in the file and number of specified output fields.");
+                    throw new FormatException("Inconsistent number of outputs in the file and number of specified output fields.");
                 }
                 foreach (string outputFieldName in outputFieldNameCollection)
                 {
-                    if (outputNames.IndexOf(outputFieldName) < 0)
+                    int index = outputNames.IndexOf(outputFieldName);
+                    if (index < 0)
                     {
                         throw new FormatException($"Output field name {outputFieldName} was not found among the outputs specified in the file.");
                     }
+                    outputFieldIndexes.Add(index);
                 }
                 //Bundle normalizer setup
                 foreach (string fieldName in inputFieldNameCollection)
@@ -209,19 +215,20 @@ namespace RCNet.Neural.Data
                     List<double[]> patternData = new List<double[]>();
                     for (int grpIdx = 0; grpIdx < (dataRow.NumOfStringValues - outputNames.NumOfStringValues) / repetitiveGroupOfAttributes.NumOfStringValues; grpIdx++)
                     {
-                        double[] inputVector = new double[repetitiveGroupOfAttributes.NumOfStringValues];
-                        for (int attrIdx = 0; attrIdx < repetitiveGroupOfAttributes.NumOfStringValues; attrIdx++)
+                        double[] inputVector = new double[inputFieldGrpIndexes.Count];
+                        for(int i = 0; i < inputFieldGrpIndexes.Count; i++)
                         {
-                            inputVector[attrIdx] = dataRow.GetValue(grpIdx * repetitiveGroupOfAttributes.NumOfStringValues + attrIdx).ParseDouble(true, "Can't parse double data value.");
-                        }//attrIdx
+                            inputVector[i] = dataRow.GetValue(grpIdx * repetitiveGroupOfAttributes.NumOfStringValues + inputFieldGrpIndexes[i]).ParseDouble(true, $"Can't parse double data value {dataRow.GetValue(grpIdx * repetitiveGroupOfAttributes.NumOfStringValues + inputFieldGrpIndexes[i])}.");
+                        }
                         patternData.Add(inputVector);
                     }//grpIdx
                     //Output data
-                    double[] outputVector = new double[outputNames.NumOfStringValues];
-                    for (int outputIdx = (dataRow.NumOfStringValues - outputNames.NumOfStringValues), i = 0; outputIdx < dataRow.NumOfStringValues; outputIdx++, i++)
+                    double[] outputVector = new double[outputFieldIndexes.Count];
+                    int dataRowStartIdx = dataRow.NumOfStringValues - outputNames.NumOfStringValues;
+                    for (int i = 0; i < outputFieldIndexes.Count; i++)
                     {
-                        outputVector[i] = dataRow.GetValue(outputIdx).ParseDouble(true, $"Can't parse double value {dataRow.GetValue(outputIdx)}.");
-                    }//outputIdx
+                        outputVector[i] = dataRow.GetValue(dataRowStartIdx + outputFieldIndexes[i]).ParseDouble(true, $"Can't parse double value {dataRow.GetValue(dataRowStartIdx + outputFieldIndexes[i])}.");
+                    }
                     bundle.AddPair(patternData, outputVector);
                 }//while !EOF
             }//using streamReader

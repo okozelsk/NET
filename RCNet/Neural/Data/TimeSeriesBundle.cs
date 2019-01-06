@@ -98,35 +98,21 @@ namespace RCNet.Neural.Data
         /// The first line of the csv file must be field names. These field names must
         /// match the names of the input and output fields.
         /// </summary>
-        /// <param name="fileName">
-        /// Data file name
-        /// </param>
-        /// <param name="inputFieldNameCollection">
-        /// Input fields
-        /// </param>
-        /// <param name="outputFieldNameCollection">
-        /// Output fields
-        /// </param>
+        /// <param name="fileName"> Data file name </param>
+        /// <param name="inputFieldNameCollection"> Input field names </param>
+        /// <param name="outputFieldNameCollection"> Output field names </param>
         /// <param name="outputFieldTaskCollection">
         /// Neural task related to output field.
         /// Classification task means the output field contains binary value so data
         /// standardization and normalizer reserve are suppressed.
         /// </param>
-        /// <param name="normRange">
-        /// Range of normalized values
-        /// </param>
+        /// <param name="normRange"> Range of normalized values </param>
         /// <param name="normReserveRatio">
         /// Reserve held by a normalizer to cover cases where future data exceeds a known range of sample data.
         /// </param>
-        /// <param name="dataStandardization">
-        /// Specifies whether to apply data standardization
-        /// </param>
-        /// <param name="bundleNormalizer">
-        /// Returned initialized instance of BundleNormalizer.
-        /// </param>
-        /// <param name="remainingInputVector">
-        /// Returned the last input vector unused in the bundle.
-        /// </param>
+        /// <param name="dataStandardization"> Specifies whether to apply data standardization </param>
+        /// <param name="bundleNormalizer"> Returned initialized instance of BundleNormalizer </param>
+        /// <param name="remainingInputVector"> Returned the last input vector unused in the bundle </param>
         public static TimeSeriesBundle LoadFromCsv(string fileName,
                                                    List<string> inputFieldNameCollection,
                                                    List<string> outputFieldNameCollection,
@@ -139,11 +125,12 @@ namespace RCNet.Neural.Data
                                                    )
         {
             TimeSeriesBundle bundle = null;
+            remainingInputVector = null;
             bundleNormalizer = new BundleNormalizer(normRange);
             using (StreamReader streamReader = new StreamReader(new FileStream(fileName, FileMode.Open)))
             {
-                List<int> fieldIndexes = new List<int>();
-                List<double[]> allData = new List<double[]>();
+                List<int> inputFieldIndexes = new List<int>();
+                List<int> outputFieldIndexes = new List<int>();
                 //First row contains column names (data fields)
                 string delimitedColumnNames = streamReader.ReadLine();
                 //What data delimiter is used?
@@ -162,7 +149,7 @@ namespace RCNet.Neural.Data
                     if (!bundleNormalizer.IsFieldDefined(name))
                     {
                         bundleNormalizer.DefineField(name, name, normReserveRatio, dataStandardization);
-                        fieldIndexes.Add(columnNames.IndexOf(name));
+                        inputFieldIndexes.Add(columnNames.IndexOf(name));
                     }
                     bundleNormalizer.DefineInputField(name);
                 }
@@ -175,26 +162,57 @@ namespace RCNet.Neural.Data
                                                      outputFieldTaskCollection[i] == CommonEnums.TaskType.Classification ? 0 : normReserveRatio,
                                                      outputFieldTaskCollection[i] == CommonEnums.TaskType.Classification ? false : dataStandardization
                                                      );
-                        fieldIndexes.Add(columnNames.IndexOf(outputFieldNameCollection[i]));
                     }
+                    outputFieldIndexes.Add(columnNames.IndexOf(outputFieldNameCollection[i]));
                     bundleNormalizer.DefineOutputField(outputFieldNameCollection[i]);
                 }
                 //Finalize structure
                 bundleNormalizer.FinalizeStructure();
-                //Load all relevant data
-                DelimitedStringValues dataRow = new DelimitedStringValues(csvDelimiter);
+                //Load full data in string form
+                List<DelimitedStringValues> fullData = new List<DelimitedStringValues>();
                 while (!streamReader.EndOfStream)
                 {
-                    dataRow.LoadFromString(streamReader.ReadLine());
-                    double[] vector = new double[fieldIndexes.Count];
-                    for (int i = 0; i < fieldIndexes.Count; i++)
-                    {
-                        vector[i] = dataRow.GetValue(fieldIndexes[i]).ParseDouble(true, $"Can't parse double value {dataRow.GetValue(fieldIndexes[i])}.");
-                    }
-                    allData.Add(vector);
+                    DelimitedStringValues row = new DelimitedStringValues(csvDelimiter);
+                    row.LoadFromString(streamReader.ReadLine());
+                    fullData.Add(row);
                 }
-                //Create data bundle
-                remainingInputVector = bundleNormalizer.CreateBundleFromVectorCollection(allData, true, out bundle);
+                //Prepare input and output vectors
+                List<double[]> inputVectorCollection = new List<double[]>(fullData.Count);
+                List<double[]> outputVectorCollection = new List<double[]>(fullData.Count);
+                for (int i = 0; i < fullData.Count; i++)
+                {
+                    //Input vector
+                    double[] inputVector = new double[inputFieldIndexes.Count];
+                    for(int j = 0; j < inputFieldIndexes.Count; j++)
+                    {
+                        inputVector[j] = fullData[i].GetValue(inputFieldIndexes[j]).ParseDouble(true, $"Can't parse double value {fullData[i].GetValue(inputFieldIndexes[j])}.");
+                    }
+                    if (i < fullData.Count - 1)
+                    {
+                        //Within the bundle
+                        inputVectorCollection.Add(inputVector);
+                    }
+                    else
+                    {
+                        //remaining input vector out of the bundle
+                        remainingInputVector = inputVector;
+                    }
+                    if (i > 0)
+                    {
+                        //Output vector
+                        double[] outputVector = new double[outputFieldIndexes.Count];
+                        for (int j = 0; j < outputFieldIndexes.Count; j++)
+                        {
+                            outputVector[j] = fullData[i].GetValue(outputFieldIndexes[j]).ParseDouble(true, $"Can't parse double value {fullData[i].GetValue(outputFieldIndexes[j])}.");
+                        }
+                        outputVectorCollection.Add(outputVector);
+                    }
+                }
+                //Create bundle
+                bundle = new TimeSeriesBundle(inputVectorCollection, outputVectorCollection);
+                //Normalize bundle and remaining input vector
+                bundleNormalizer.Normalize(bundle);
+                bundleNormalizer.NormalizeInputVector(remainingInputVector);
             }
             return bundle;
         }//LoadFromCsv

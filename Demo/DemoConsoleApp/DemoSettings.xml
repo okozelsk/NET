@@ -1,73 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <demo dataFolder=".\\Data">
   <!--
-    This demo case demonstrates the simplest form of ESN reservoir setup. Reservoir consists of one small pool of TanH analog neurons.
-    Standard linear regression is used as predicting readout.
-    Time series contains real share prices of TTOO title from https://finance.yahoo.com/quote/TTOO/history?p=TTOO.
-    The last recorded prices are from 2018/03/02 so network is predicting next High and Low prices for the following
-    business day 2018/03/05 (where real prices were High=6.58$ and Low=5.99$).
-  -->
-  <case name="Forecast task High and Low share prices of TTOO (T2 Biosystems, Inc.): Small analog reservoir (ESN), linear regression readout">
-    <samples fileName="TTOO.csv" normalizerReserve="0.1"/>
-    <stateMachineCfg randomizerSeek="0">
-      <input>
-        <feedingContinuous bootCycles="Auto" routeToReadout="true"/>
-        <external>
-          <field name="High"/>
-          <field name="Low"/>
-          <field name="Adj Close"/>
-        </external>
-      </input>
-      <reservoirCfgContainer>
-        <reservoirCfg name="MainCfg" synapticDelayMethod="Random" maxInputDelay="0" maxInternalDelay="2" spectralRadius="0.999">
-          <pools>
-            <pool name="Logistic pool" dimX="4" dimY="4" dimZ="4">
-              <neuronGroups>
-                <neuronGroup name="Exc-Logistic" role="Excitatory" relShare="4">
-                  <activationTanH />
-                  <bias min="0" max="0"/>
-                </neuronGroup>
-                <neuronGroup name="Inh-Logistic" role="Inhibitory" relShare="1">
-                  <activationTanH />
-                  <bias min="0" max="0"/>
-                </neuronGroup>
-              </neuronGroups>
-              <interconnection density="0.1">
-                <staticSynapse>
-                  <weight min="0" max="1"/>
-                </staticSynapse>
-              </interconnection>
-            </pool>
-          </pools>
-        </reservoirCfg>
-      </reservoirCfgContainer>
-      <reservoirInstanceContainer>
-        <reservoirInstance name="Main" cfg="MainCfg" augmentedStates="false">
-          <inputFieldAssignments>
-            <inputFieldAssignment inputFieldName="Adj Close" poolName="Logistic pool" density="1">
-              <staticSynapse>
-                <weight min="0" max="2" randomSign="false" distribution="Uniform"/>
-              </staticSynapse>
-            </inputFieldAssignment>
-          </inputFieldAssignments>
-        </reservoirInstance>
-      </reservoirInstanceContainer>
-      <readoutLayer testDataRatio="0.1" folds="Auto">
-        <readoutUnit name="High" task="Forecast" attempts="1" attemptEpochs="100">
-          <ff regressionMethod="Linear">
-            <activationIdentity/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="Low" task="Forecast" attempts="1" attemptEpochs="100">
-          <ff regressionMethod="Linear">
-            <activationIdentity/>
-          </ff>
-        </readoutUnit>
-      </readoutLayer>
-    </stateMachineCfg>
-  </case>
-
-  <!--
     This demo case demonstrates a richer form of reservoir setup. Reservoir consists of one small pool of SimpleIF spiking neurons
     and one pool of Sigmoid analog neurons. Pools overlap within the reservoir (share the same 3D space) and pools are bidirectionally
     interconnected. One additional internal input field "aug_input" (following random signal) is used.
@@ -270,6 +203,73 @@
           </ff>
         </readoutUnit>
         <readoutUnit name="tremble" task="Classification" attempts="10" attemptEpochs="100">
+          <ff regressionMethod="Linear">
+            <activationIdentity/>
+          </ff>
+        </readoutUnit>
+      </readoutLayer>
+    </stateMachineCfg>
+  </case>
+
+  <!--
+    This demo case demonstrates the simplest form of ESN reservoir setup. Reservoir consists of one small pool of TanH analog neurons.
+    Standard linear regression is used as predicting readout.
+    Time series contains real share prices of TTOO title from https://finance.yahoo.com/quote/TTOO/history?p=TTOO.
+    The last recorded prices are from 2018/03/02 so network is predicting next High and Low prices for the following
+    business day 2018/03/05 (where real prices were High=6.58$ and Low=5.99$).
+  -->
+  <case name="Forecast task High and Low share prices of TTOO (T2 Biosystems, Inc.): Small analog reservoir (ESN), linear regression readout">
+    <samples fileName="TTOO.csv" normalizerReserve="0.1"/>
+    <stateMachineCfg randomizerSeek="0">
+      <input>
+        <feedingContinuous bootCycles="Auto" routeToReadout="true"/>
+        <external>
+          <field name="High"/>
+          <field name="Low"/>
+          <field name="Adj Close"/>
+        </external>
+      </input>
+      <reservoirCfgContainer>
+        <reservoirCfg name="MainCfg" synapticDelayMethod="Random" maxInputDelay="0" maxInternalDelay="2" spectralRadius="0.999">
+          <pools>
+            <pool name="Logistic pool" dimX="4" dimY="4" dimZ="4">
+              <neuronGroups>
+                <neuronGroup name="Exc-Logistic" role="Excitatory" relShare="4">
+                  <activationTanH />
+                  <bias min="0" max="0"/>
+                </neuronGroup>
+                <neuronGroup name="Inh-Logistic" role="Inhibitory" relShare="1">
+                  <activationTanH />
+                  <bias min="0" max="0"/>
+                </neuronGroup>
+              </neuronGroups>
+              <interconnection density="0.1">
+                <staticSynapse>
+                  <weight min="0" max="1"/>
+                </staticSynapse>
+              </interconnection>
+            </pool>
+          </pools>
+        </reservoirCfg>
+      </reservoirCfgContainer>
+      <reservoirInstanceContainer>
+        <reservoirInstance name="Main" cfg="MainCfg" augmentedStates="false">
+          <inputFieldAssignments>
+            <inputFieldAssignment inputFieldName="Adj Close" poolName="Logistic pool" density="1">
+              <staticSynapse>
+                <weight min="0" max="2" randomSign="false" distribution="Uniform"/>
+              </staticSynapse>
+            </inputFieldAssignment>
+          </inputFieldAssignments>
+        </reservoirInstance>
+      </reservoirInstanceContainer>
+      <readoutLayer testDataRatio="0.1" folds="Auto">
+        <readoutUnit name="High" task="Forecast" attempts="1" attemptEpochs="100">
+          <ff regressionMethod="Linear">
+            <activationIdentity/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="Low" task="Forecast" attempts="1" attemptEpochs="100">
           <ff regressionMethod="Linear">
             <activationIdentity/>
           </ff>
