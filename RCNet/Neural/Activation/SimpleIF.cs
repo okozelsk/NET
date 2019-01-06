@@ -91,7 +91,7 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Type of the output
         /// </summary>
-        public ActivationFactory.FunctionOutputSignalType OutputSignalType { get { return ActivationFactory.FunctionOutputSignalType.Spike; } }
+        public CommonEnums.NeuronSignalType OutputSignalType { get { return CommonEnums.NeuronSignalType.Spike; } }
 
         /// <summary>
         /// Output signal range

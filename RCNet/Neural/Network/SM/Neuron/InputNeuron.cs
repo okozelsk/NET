@@ -38,7 +38,7 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// Type of the output signal (spike or analog)
         /// Input neuron is an analog neuron.
         /// </summary>
-        public ActivationFactory.FunctionOutputSignalType OutputType { get { return ActivationFactory.FunctionOutputSignalType.Analog; } }
+        public CommonEnums.NeuronSignalType OutputType { get { return CommonEnums.NeuronSignalType.Analog; } }
 
         /// <summary>
         /// Output signal range

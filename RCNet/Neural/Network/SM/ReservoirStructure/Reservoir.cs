@@ -97,7 +97,7 @@ namespace RCNet.Neural.Network.SM.ReservoirStructure
                             RetainmentRate = 0,
                             UseAsPredictor = false
                         };
-                        if(neuronParams.Activation.OutputSignalType == ActivationFactory.FunctionOutputSignalType.Analog)
+                        if(neuronParams.Activation.OutputSignalType == CommonEnums.NeuronSignalType.Analog)
                         {
                             analogActivationIdxs.Add(idx);
                         }
@@ -139,7 +139,7 @@ namespace RCNet.Neural.Network.SM.ReservoirStructure
                         {
                             NeuronPlacement placement = new NeuronPlacement(neuronGlobalFlatIdx, poolID, neuronPoolFlatIdx, neuronParamsCollection[neuronPoolFlatIdx].GroupID, poolSettings.Dim.X + x, poolSettings.Dim.Y + y, poolSettings.Dim.Z + z);
                             //Neuron instance
-                            if (neuronParamsCollection[neuronPoolFlatIdx].Activation.OutputSignalType == ActivationFactory.FunctionOutputSignalType.Spike)
+                            if (neuronParamsCollection[neuronPoolFlatIdx].Activation.OutputSignalType == CommonEnums.NeuronSignalType.Spike)
                             {
                                 //Spiking neuron
                                 poolNeurons[neuronPoolFlatIdx] = new SpikingNeuron(placement,

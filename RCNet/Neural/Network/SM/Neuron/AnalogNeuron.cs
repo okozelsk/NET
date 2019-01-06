@@ -35,7 +35,7 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// Type of the output signal (spike or analog)
         /// This neuron is analog
         /// </summary>
-        public ActivationFactory.FunctionOutputSignalType OutputType { get { return _activation.OutputSignalType; } }
+        public CommonEnums.NeuronSignalType OutputType { get { return _activation.OutputSignalType; } }
 
         /// <summary>
         /// Output signal range
@@ -104,7 +104,7 @@ namespace RCNet.Neural.Network.SM.Neuron
             Role = role;
             Bias = bias;
             //Check whether function is analog
-            if (activation.OutputSignalType != ActivationFactory.FunctionOutputSignalType.Analog)
+            if (activation.OutputSignalType != CommonEnums.NeuronSignalType.Analog)
             {
                 throw new ArgumentException("Activation function is not analog.", "activation");
             }

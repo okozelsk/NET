@@ -19,7 +19,7 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Type of the output signal
         /// </summary>
-        public ActivationFactory.FunctionOutputSignalType OutputSignalType { get { return ActivationFactory.FunctionOutputSignalType.Analog; } }
+        public CommonEnums.NeuronSignalType OutputSignalType { get { return CommonEnums.NeuronSignalType.Analog; } }
 
         /// <summary>
         /// Output signal range

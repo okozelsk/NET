@@ -49,11 +49,11 @@ namespace RCNet.Neural.Network.SM.Synapse
             _tauFacilitation = tauFacilitation;
             _tauRecovery = tauRecovery;
             _restingEfficacy = restingEfficacy;
-            _applyPreSynaptic = (SourceNeuron.OutputType == Activation.ActivationFactory.FunctionOutputSignalType.Spike);
+            _applyPreSynaptic = (SourceNeuron.OutputType == CommonEnums.NeuronSignalType.Spike);
             _efficacyUtilization = _restingEfficacy;
             _efficacyAvailableFraction = 1;
             _tauDecay = tauDecay;
-            _applyPostSynaptic = (TargetNeuron.OutputType == Activation.ActivationFactory.FunctionOutputSignalType.Spike);
+            _applyPostSynaptic = (TargetNeuron.OutputType == CommonEnums.NeuronSignalType.Spike);
             return;
         }
 

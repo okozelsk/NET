@@ -32,7 +32,7 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// <summary>
         /// Type of the output signal (spike or analog)
         /// </summary>
-        ActivationFactory.FunctionOutputSignalType OutputType { get; }
+        CommonEnums.NeuronSignalType OutputType { get; }
 
         /// <summary>
         /// Output signal range

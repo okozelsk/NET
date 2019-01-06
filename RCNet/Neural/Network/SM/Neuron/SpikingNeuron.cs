@@ -41,7 +41,7 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// Type of the output signal (spike or analog)
         /// This neuron is spiking.
         /// </summary>
-        public ActivationFactory.FunctionOutputSignalType OutputType { get { return _activation.OutputSignalType; } }
+        public CommonEnums.NeuronSignalType OutputType { get { return _activation.OutputSignalType; } }
 
         /// <summary>
         /// Output signal range
@@ -110,7 +110,7 @@ namespace RCNet.Neural.Network.SM.Neuron
             Role = role;
             Bias = bias;
             //Check whether function is spiking
-            if (activation.OutputSignalType != ActivationFactory.FunctionOutputSignalType.Spike)
+            if (activation.OutputSignalType != CommonEnums.NeuronSignalType.Spike)
             {
                 throw new ArgumentException("Activation function is not spiking.", "activation");
             }

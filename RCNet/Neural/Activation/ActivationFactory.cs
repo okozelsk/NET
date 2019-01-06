@@ -12,22 +12,6 @@ namespace RCNet.Neural.Activation
     /// </summary>
     public static class ActivationFactory
     {
-        //Constants
-        /// <summary>
-        /// Activation function output signal
-        /// </summary>
-        public enum FunctionOutputSignalType
-        {
-            /// <summary>
-            /// Function fires spikes when firing condition is met
-            /// </summary>
-            Spike,
-            /// <summary>
-            /// Function has continuous analog output
-            /// </summary>
-            Analog
-        };
-
         /// <summary>
         /// Returns the instance of the activation function settings
         /// </summary>

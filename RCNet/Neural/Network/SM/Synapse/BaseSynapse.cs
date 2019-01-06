@@ -85,7 +85,7 @@ namespace RCNet.Neural.Network.SM.Synapse
             if (SourceNeuron.Role == CommonEnums.NeuronRole.Input)
             {
                 //Source is input neuron
-                if (TargetNeuron.OutputType == Activation.ActivationFactory.FunctionOutputSignalType.Spike)
+                if (TargetNeuron.OutputType == CommonEnums.NeuronSignalType.Spike)
                 {
                     //Target is spiking
                     //Ensure positive weight
@@ -107,10 +107,10 @@ namespace RCNet.Neural.Network.SM.Synapse
             else
             {
                 //Source is reservoir neuron
-                if (SourceNeuron.OutputType == Activation.ActivationFactory.FunctionOutputSignalType.Spike)
+                if (SourceNeuron.OutputType == CommonEnums.NeuronSignalType.Spike)
                 {
                     //Source reservoir neuron is spiking
-                    if (TargetNeuron.OutputType == Activation.ActivationFactory.FunctionOutputSignalType.Spike)
+                    if (TargetNeuron.OutputType == CommonEnums.NeuronSignalType.Spike)
                     {
                         //Target is also spiking
                         //Weight dependent on source neuron role
@@ -132,7 +132,7 @@ namespace RCNet.Neural.Network.SM.Synapse
                 else
                 {
                     //Source reservoir neuron is analog
-                    if (TargetNeuron.OutputType == Activation.ActivationFactory.FunctionOutputSignalType.Spike)
+                    if (TargetNeuron.OutputType == CommonEnums.NeuronSignalType.Spike)
                     {
                         //Target is spiking
                         //Weight dependent on source neuron role

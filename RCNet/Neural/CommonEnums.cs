@@ -27,6 +27,21 @@ namespace RCNet.Neural
             Patterned
         }
 
+        /// <summary>
+        /// Types of the neuron's output signal
+        /// </summary>
+        public enum NeuronSignalType
+        {
+            /// <summary>
+            /// Neuron fires spike when firing condition is met
+            /// </summary>
+            Spike,
+            /// <summary>
+            /// Neuron has continuous analog output signal
+            /// </summary>
+            Analog
+        };
+
 
         /// <summary>
         /// Supported task types.
