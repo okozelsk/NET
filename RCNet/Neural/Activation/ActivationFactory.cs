@@ -80,7 +80,7 @@ namespace RCNet.Neural.Activation
         }
 
         /// <summary>
-        /// Returns the new instance of the activation function
+        /// Creates an instance of the activation function according to given settings.
         /// </summary>
         /// <param name="settings">Specific activation function settings </param>
         /// <param name="rand">Random object to be used for randomly generated parameters</param>

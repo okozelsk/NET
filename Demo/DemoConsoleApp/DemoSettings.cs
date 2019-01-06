@@ -80,17 +80,13 @@ namespace RCNet.DemoConsoleApp
             /// </summary>
             public string FileName { get; }
             /// <summary>
-            /// True if all input and output State Machine fields represent the same value (ie. stock price).
-            /// </summary>
-            public bool SingleNormalizer { get; }
-            /// <summary>
             /// Reserve held by a normalizer to cover cases where future data exceeds a known range of sample data.
             /// </summary>
             public double NormalizerReserveRatio { get; }
             /// <summary>
             /// State machine configuration
             /// </summary>
-            public StateMachineSettings stateMachineCfg { get; }
+            public StateMachineSettings StateMachineCfg { get; }
 
             //Constructor
             public CaseSettings(XElement demoCaseElem, string dir)
@@ -102,12 +98,10 @@ namespace RCNet.DemoConsoleApp
                 XElement samplesElem = demoCaseElem.Descendants("samples").First();
                 //Full path to csv file
                 FileName = dir + "\\" + samplesElem.Attribute("fileName").Value;
-                //Single data normalizer usage
-                SingleNormalizer = bool.Parse(samplesElem.Attribute("singleNormalizer").Value);
                 //Normalizer reserve
                 NormalizerReserveRatio = double.Parse(samplesElem.Attribute("normalizerReserve").Value, CultureInfo.InvariantCulture);
                 //State Machine configuration
-                stateMachineCfg = new StateMachineSettings(demoCaseElem.Descendants("stateMachineCfg").First());
+                StateMachineCfg = new StateMachineSettings(demoCaseElem.Descendants("stateMachineCfg").First());
                 return;
             }
 

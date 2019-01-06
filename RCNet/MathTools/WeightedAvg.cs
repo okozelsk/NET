@@ -8,12 +8,24 @@ namespace RCNet.MathTools
     [Serializable]
     public class WeightedAvg
     {
-        //Attributes
-        private double _sumOfWeightedValues;
-        private double _sumOfWeights;
-        private double _avg;
-        private int _numOfSamples;
-        
+        //Attribute properties
+        /// <summary>
+        /// Number of considered samples
+        /// </summary>
+        public int NumOfSamples { get; private set; }
+        /// <summary>
+        /// The weighted average
+        /// </summary>
+        public double Avg { get; private set; }
+        /// <summary>
+        /// The sum of values
+        /// </summary>
+        public double SumOfValues { get; private set; }
+        /// <summary>
+        /// The sum of weights
+        /// </summary>
+        public double SumOfWeights { get; private set; }
+
         //Constructors
         /// <summary>
         /// Constructs an unitialized instance
@@ -38,23 +50,7 @@ namespace RCNet.MathTools
         /// <summary>
         /// Indicates the readyness
         /// </summary>
-        public bool Initialized { get { return (_numOfSamples > 0); } }
-        /// <summary>
-        /// Number of considered samples
-        /// </summary>
-        public int NumOfSamples { get { return _numOfSamples; } }
-        /// <summary>
-        /// The weighted average
-        /// </summary>
-        public double Avg { get { return _avg; } }
-        /// <summary>
-        /// The sum of values
-        /// </summary>
-        public double SumOfValues { get { return _sumOfWeightedValues; } }
-        /// <summary>
-        /// The sum of weights
-        /// </summary>
-        public double SumOfWeights { get { return _sumOfWeights; } }
+        public bool Initialized { get { return (NumOfSamples > 0); } }
 
         //Methods
         /// <summary>
@@ -62,15 +58,15 @@ namespace RCNet.MathTools
         /// </summary>
         private double Compute()
         {
-            if (_sumOfWeights != 0 && _numOfSamples > 0)
+            if (SumOfWeights != 0 && NumOfSamples > 0)
             {
-                _avg = _sumOfWeightedValues / _sumOfWeights;
+                Avg = SumOfValues / SumOfWeights;
             }
             else
             {
-                _avg = 0;
+                Avg = 0;
             }
-            return _avg;
+            return Avg;
         }
 
         /// <summary>
@@ -86,10 +82,10 @@ namespace RCNet.MathTools
         /// </summary>
         public void Reset()
         {
-            _sumOfWeightedValues = 0;
-            _sumOfWeights = 0;
-            _avg = 0;
-            _numOfSamples = 0;
+            SumOfValues = 0;
+            SumOfWeights = 0;
+            Avg = 0;
+            NumOfSamples = 0;
             return;
         }
 
@@ -99,10 +95,10 @@ namespace RCNet.MathTools
         /// <param name="source">Source instance</param>
         public void Adopt(WeightedAvg source)
         {
-            _sumOfWeightedValues = source._sumOfWeightedValues;
-            _sumOfWeights = source._sumOfWeights;
-            _avg = source._avg;
-            _numOfSamples = source._numOfSamples;
+            SumOfValues = source.SumOfValues;
+            SumOfWeights = source.SumOfWeights;
+            Avg = source.Avg;
+            NumOfSamples = source.NumOfSamples;
             return;
         }
 
@@ -114,9 +110,9 @@ namespace RCNet.MathTools
         /// <returns>Weighted average</returns>
         public double AddSampleValue(double value, double weight = 1)
         {
-            _sumOfWeightedValues += value * weight;
-            _sumOfWeights += weight;
-            ++_numOfSamples;
+            SumOfValues += value * weight;
+            SumOfWeights += weight;
+            ++NumOfSamples;
             return Compute();
         }
 
@@ -128,15 +124,15 @@ namespace RCNet.MathTools
         /// <returns>Weighted average</returns>
         public double RemoveSampleValue(double value, double weight = 1)
         {
-            if (_numOfSamples > 0)
+            if (NumOfSamples > 0)
             {
-                _sumOfWeightedValues -= value * weight;
-                _sumOfWeights -= weight;
-                --_numOfSamples;
-                if(_numOfSamples == 0)
+                SumOfValues -= value * weight;
+                SumOfWeights -= weight;
+                --NumOfSamples;
+                if(NumOfSamples == 0)
                 {
-                    _sumOfWeightedValues = 0;
-                    _sumOfWeights = 0;
+                    SumOfValues = 0;
+                    SumOfWeights = 0;
                 }
             }
             else
@@ -155,7 +151,7 @@ namespace RCNet.MathTools
         /// <returns>Weighted average</returns>
         public double SimulateNext(double simValue, double simWeight = 1)
         {
-            return (_sumOfWeightedValues + (simValue * simWeight)) / (_sumOfWeights + simWeight);
+            return (SumOfValues + (simValue * simWeight)) / (SumOfWeights + simWeight);
         }
 
 

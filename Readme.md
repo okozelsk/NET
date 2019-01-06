@@ -20,17 +20,6 @@ Main RCNet functionality is demonstrated in a simple demo application (/Demo/Dem
 
 
 ## Overview of the main implemented components
-### Data handling
-|Component|Description|
-|--|--|
-|Normalizer|Supports data normalization/naturalization and Gaussian standardization|
-|PatternBundle|Bundle of pattern of vectors and desired output vector|
-|PatternDataLoader|Class allows to upload sample data from a csv file to a PatternBundle|
-|TimeSeriesBundle|Bundle of input vector and desired output vector|
-|TimeSeriesDataLoader|Class allows to upload sample data from a csv file to a TimeSeriesBundle|
-|ValidationBundle|Bundle of computed vector and desired output vector|
-|BundleNormalizer|Helper class for easy standardization and normalization/naturalization of sample data bundle|
-
 ### Signal generators
 |Component|Description|
 |--|--|
@@ -48,6 +37,7 @@ Main RCNet functionality is demonstrated in a simple demo application (/Demo/Dem
 ### Math
 |Component|Description|
 |--|--|
+|Normalizer|Supports data normalization/naturalization and Gaussian standardization|
 |BasicStat|Implements the simple and thread safe statistics|
 |ODENumSolver|Ordinary Differential Equations (ODE) Numerical Solver (Euler and RK4 methods)|
 |Vector|Class represents the mathematical vector of double values supporting basic operations|
@@ -57,7 +47,15 @@ Main RCNet functionality is demonstrated in a simple demo application (/Demo/Dem
 |QRD|QR decomposition of a matrix|
 |PhysUnit|Encaptualates SI physical unit|
 |"RandomValue"|Supports Uniform and Gaussian distributions|
-|Others|BinErrStat, BinDistribution, Bitwise, Combinatorics, Factorial, WeightedAvg, HurstExpEstim, Normalizer, ...|
+|Others|Interval, BinErrStat, BinDistribution, Bitwise, Combinatorics, Factorial, WeightedAvg, HurstExpEstim, ...|
+
+### Data handling
+|Component|Description|
+|--|--|
+|PatternBundle|Bundle of pattern of vectors and desired output vector. Supports upload from csv file|
+|TimeSeriesBundle|Bundle of input vector and desired output vector. Supports upload from csv file|
+|ValidationBundle|Bundle of computed vector and desired output vector|
+|BundleNormalizer|Helper class for easy standardization and normalization/naturalization of sample data bundle|
 
 ### Analog neuron activation functions
 |Component|Description|

@@ -34,14 +34,6 @@ namespace RCNet.MathTools.Differential
         }
 
         /// <summary>
-        /// Delegate of unknown ordinary differential equation (or couple of equations)
-        /// </summary>
-        /// <param name="t">Time</param>
-        /// <param name="v">Vector of evolving values</param>
-        /// <returns>dv/dt</returns>
-        public delegate Vector Eqs(double t, Vector v);
-
-        /// <summary>
         /// Parses given string code of the computation method.
         /// </summary>
         /// <param name="code">A code of the computation method.</param>
@@ -56,6 +48,14 @@ namespace RCNet.MathTools.Differential
             }
         }
 
+
+        /// <summary>
+        /// Delegate of unknown ordinary differential equation (or couple of equations)
+        /// </summary>
+        /// <param name="t">Time</param>
+        /// <param name="v">Vector of evolving values</param>
+        /// <returns>dv/dt</returns>
+        public delegate Vector Eqs(double t, Vector v);
 
         /// <summary>
         /// ODE solver function

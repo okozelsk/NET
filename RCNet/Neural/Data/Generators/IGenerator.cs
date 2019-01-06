@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace RCNet.Neural.Data.Generators
 {
     /// <summary>
-    /// Common interface for generators of the internal input signal
+    /// Common interface for signal generators
     /// </summary>
     public interface IGenerator
     {

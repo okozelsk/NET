@@ -551,7 +551,7 @@ namespace RCNet.MathTools.MatrixMath
                 }
             }
 
-            // Accumulate transformations (Algol's ortran).
+            // Accumulate transformations (Algol's fortran).
 
             Parallel.For(0, _dimension, i =>
             {

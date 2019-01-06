@@ -243,42 +243,41 @@ namespace RCNet.DemoConsoleApp
             //Prediction input vector (relevant only for input continuous feeding)
             double[] predictionInputVector = null;
             //Instantiate the State Machine
-            StateMachine stateMachine = new StateMachine(demoCaseParams.stateMachineCfg);
+            StateMachine stateMachine = new StateMachine(demoCaseParams.StateMachineCfg);
             //Prepare input object for regression stage
             log.Write(" ", false);
             StateMachine.RegressionStageInput rsi = null;
-            List<string> outputFieldNameCollection = (from rus in demoCaseParams.stateMachineCfg.ReadoutLayerConfig.ReadoutUnitCfgCollection select rus.Name).ToList();
-            List<CommonEnums.TaskType> outputFieldTaskCollection = (from rus in demoCaseParams.stateMachineCfg.ReadoutLayerConfig.ReadoutUnitCfgCollection select rus.TaskType).ToList();
-            if (demoCaseParams.stateMachineCfg.InputConfig.FeedingType == CommonEnums.InputFeedingType.Continuous)
+            List<string> outputFieldNameCollection = (from rus in demoCaseParams.StateMachineCfg.ReadoutLayerConfig.ReadoutUnitCfgCollection select rus.Name).ToList();
+            List<CommonEnums.TaskType> outputFieldTaskCollection = (from rus in demoCaseParams.StateMachineCfg.ReadoutLayerConfig.ReadoutUnitCfgCollection select rus.TaskType).ToList();
+            if (demoCaseParams.StateMachineCfg.InputConfig.FeedingType == CommonEnums.InputFeedingType.Continuous)
             {
                 //Continuous input feeding
                 //Load data bundle from csv file
-                TimeSeriesBundle data = TimeSeriesDataLoader.Load(demoCaseParams.FileName,
-                                                                  demoCaseParams.stateMachineCfg.InputConfig.ExternalFieldNameCollection(),
-                                                                  outputFieldNameCollection,
-                                                                  outputFieldTaskCollection,
-                                                                  StateMachine.DataRange,
-                                                                  demoCaseParams.NormalizerReserveRatio,
-                                                                  true,
-                                                                  demoCaseParams.SingleNormalizer,
-                                                                  out bundleNormalizer,
-                                                                  out predictionInputVector
-                                                                  );
+                TimeSeriesBundle data = TimeSeriesBundle.LoadFromCsv(demoCaseParams.FileName,
+                                                                     demoCaseParams.StateMachineCfg.InputConfig.ExternalFieldNameCollection(),
+                                                                     outputFieldNameCollection,
+                                                                     outputFieldTaskCollection,
+                                                                     StateMachine.DataRange,
+                                                                     demoCaseParams.NormalizerReserveRatio,
+                                                                     true,
+                                                                     out bundleNormalizer,
+                                                                     out predictionInputVector
+                                                                     );
                 rsi = stateMachine.PrepareRegressionStageInput(data, PredictorsCollectionCallback, log);
             }
             else
             {
                 //Patterned input feeding
                 //Load data bundle from csv file
-                PatternBundle data = PatternDataLoader.Load(demoCaseParams.FileName,
-                                                            demoCaseParams.stateMachineCfg.InputConfig.ExternalFieldNameCollection(),
-                                                            outputFieldNameCollection,
-                                                            outputFieldTaskCollection,
-                                                            StateMachine.DataRange,
-                                                            demoCaseParams.NormalizerReserveRatio,
-                                                            true,
-                                                            out bundleNormalizer
-                                                            );
+                PatternBundle data = PatternBundle.LoadFromCsv(demoCaseParams.FileName,
+                                                               demoCaseParams.StateMachineCfg.InputConfig.ExternalFieldNameCollection(),
+                                                               outputFieldNameCollection,
+                                                               outputFieldTaskCollection,
+                                                               StateMachine.DataRange,
+                                                               demoCaseParams.NormalizerReserveRatio,
+                                                               true,
+                                                               out bundleNormalizer
+                                                               );
                 rsi = stateMachine.PrepareRegressionStageInput(data, PredictorsCollectionCallback, log);
             }
             //Report statistics of the State Machine's reservoirs
@@ -291,7 +290,7 @@ namespace RCNet.DemoConsoleApp
 
             //Perform prediction if the input feeding is continuous (we know the input but we don't know the ideal output)
             double[] predictionOutputVector = null;
-            if (demoCaseParams.stateMachineCfg.InputConfig.FeedingType == CommonEnums.InputFeedingType.Continuous)
+            if (demoCaseParams.StateMachineCfg.InputConfig.FeedingType == CommonEnums.InputFeedingType.Continuous)
             {
                 predictionOutputVector = stateMachine.Compute(predictionInputVector);
                 //Values are normalized so they have to be denormalized
@@ -303,13 +302,13 @@ namespace RCNet.DemoConsoleApp
             log.Write("    Results", false);
             List<ReadoutLayer.ClusterErrStatistics> clusterErrStatisticsCollection = stateMachine.ClusterErrStatisticsCollection;
             //Results
-            for (int outputIdx = 0; outputIdx < demoCaseParams.stateMachineCfg.ReadoutLayerConfig.ReadoutUnitCfgCollection.Count; outputIdx++)
+            for (int outputIdx = 0; outputIdx < demoCaseParams.StateMachineCfg.ReadoutLayerConfig.ReadoutUnitCfgCollection.Count; outputIdx++)
             {
                 ReadoutLayer.ClusterErrStatistics ces = clusterErrStatisticsCollection[outputIdx];
-                if (demoCaseParams.stateMachineCfg.ReadoutLayerConfig.ReadoutUnitCfgCollection[outputIdx].TaskType == CommonEnums.TaskType.Classification)
+                if (demoCaseParams.StateMachineCfg.ReadoutLayerConfig.ReadoutUnitCfgCollection[outputIdx].TaskType == CommonEnums.TaskType.Classification)
                 {
                     //Classification task report
-                    log.Write("            OutputField: " + demoCaseParams.stateMachineCfg.ReadoutLayerConfig.ReadoutUnitCfgCollection[outputIdx].Name, false);
+                    log.Write("            OutputField: " + demoCaseParams.StateMachineCfg.ReadoutLayerConfig.ReadoutUnitCfgCollection[outputIdx].Name, false);
                     log.Write("   Num of bin 0 samples: " + ces.BinaryErrStat.BinValErrStat[0].NumOfSamples.ToString(), false);
                     log.Write("     Bad bin 0 classif.: " + ces.BinaryErrStat.BinValErrStat[0].Sum.ToString(CultureInfo.InvariantCulture), false);
                     log.Write("       Bin 0 error rate: " + ces.BinaryErrStat.BinValErrStat[0].ArithAvg.ToString(CultureInfo.InvariantCulture), false);
@@ -326,7 +325,7 @@ namespace RCNet.DemoConsoleApp
                 else
                 {
                     //Forecast task report
-                    log.Write("            OutputField: " + demoCaseParams.stateMachineCfg.ReadoutLayerConfig.ReadoutUnitCfgCollection[outputIdx].Name, false);
+                    log.Write("            OutputField: " + demoCaseParams.StateMachineCfg.ReadoutLayerConfig.ReadoutUnitCfgCollection[outputIdx].Name, false);
                     log.Write("   Predicted next value: " + predictionOutputVector[outputIdx].ToString(CultureInfo.InvariantCulture), false);
                     log.Write("   Total num of samples: " + ces.PrecissionErrStat.NumOfSamples.ToString(), false);
                     log.Write("     Total Max Real Err: " + (bundleNormalizer.OutputFieldNormalizerRefCollection[outputIdx].ComputeNaturalSpan(ces.PrecissionErrStat.Max)).ToString(CultureInfo.InvariantCulture), false);

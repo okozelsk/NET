@@ -8,7 +8,7 @@ using RCNet.Extensions;
 namespace RCNet.MathTools
 {
     /// <summary>
-    /// Methods for computation of the Euclidean distance
+    /// Implements computation of the Euclidean distance
     /// </summary>
     public static class EuclideanDistance
     {

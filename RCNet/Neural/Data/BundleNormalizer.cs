@@ -232,20 +232,12 @@ namespace RCNet.Neural.Data
         /// Adjusts internal normalizers
         /// </summary>
         /// <param name="bundle">Sample data bundle</param>
-        /// <param name="predictionPattern">Optional prediction pattern</param>
-        public void AdjustNormalizers(PatternBundle bundle, List<double[]> predictionPattern = null)
+        public void AdjustNormalizers(PatternBundle bundle)
         {
             ResetNormalizers();
             foreach (List<double[]> pattern in bundle.InputPatternCollection)
             {
                 foreach(double[] inputVector in pattern)
-                {
-                    AdjustInputNormalizers(inputVector);
-                }
-            }
-            if(predictionPattern != null)
-            {
-                foreach (double[] inputVector in predictionPattern)
                 {
                     AdjustInputNormalizers(inputVector);
                 }
@@ -410,17 +402,12 @@ namespace RCNet.Neural.Data
         /// Normalizes all values in the sample data bundle
         /// </summary>
         /// <param name="bundle">Sample data bundle</param>
-        /// <param name="predictionPattern">Optional prediction pattern</param>
-        public void Normalize(PatternBundle bundle, List<double[]> predictionPattern = null)
+        public void Normalize(PatternBundle bundle)
         {
-            AdjustNormalizers(bundle, predictionPattern);
+            AdjustNormalizers(bundle);
             foreach (List<double[]> pattern in bundle.InputPatternCollection)
             {
                 NormalizeInputVectorCollection(pattern);
-            }
-            if(predictionPattern != null)
-            {
-                NormalizeInputVectorCollection(predictionPattern);
             }
             NormalizeOutputVectorCollection(bundle.OutputVectorCollection);
             return;

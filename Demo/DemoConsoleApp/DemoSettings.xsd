@@ -12,8 +12,7 @@
   <!-- SM demo - sample data - configuration -->
   <xs:complexType name="SampleDataCfgType">
     <xs:attribute type="xs:string" name="fileName" use="required"/>
-    <xs:attribute type="xs:boolean" name="singleNormalizer" use="required"/>
-    <xs:attribute type="rcn:UDoubleType" name="normalizerReserve" use="required"/>
+    <xs:attribute type="rcn:UDoubleType" name="normalizerReserve" use="optional" default="0.1"/>
   </xs:complexType>
 
   <!-- SM demo - case -configuration -->
