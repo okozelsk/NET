@@ -43,13 +43,13 @@
       </reservoirCfgContainer>
       <reservoirInstanceContainer>
         <reservoirInstance name="Main" cfg="MainCfg" augmentedStates="false">
-          <inputFieldAssignments>
-            <inputFieldAssignment inputFieldName="Adj Close" poolName="Logistic pool" density="1">
+          <inputConnections>
+            <inputConnection fieldName="Adj Close" poolName="Logistic pool" density="1">
               <staticSynapse>
                 <weight min="0" max="2" randomSign="false" distribution="Uniform"/>
               </staticSynapse>
-            </inputFieldAssignment>
-          </inputFieldAssignments>
+            </inputConnection>
+          </inputConnections>
         </reservoirInstance>
       </reservoirInstanceContainer>
       <readoutLayer testDataRatio="0.1" folds="Auto">
@@ -111,22 +111,22 @@
       </reservoirCfgContainer>
       <reservoirInstanceContainer>
         <reservoirInstance name="ESN reservoir #1" cfg="ESNCfg" augmentedStates="false">
-          <inputFieldAssignments>
-            <inputFieldAssignment inputFieldName="Value" poolName="Logistic pool" density="1">
+          <inputConnections>
+            <inputConnection fieldName="Value" poolName="Logistic pool" density="1">
               <staticSynapse>
                 <weight min="0" max="0.2" randomSign="false" distribution="Uniform"/>
               </staticSynapse>
-            </inputFieldAssignment>
-          </inputFieldAssignments>
+            </inputConnection>
+          </inputConnections>
         </reservoirInstance>
         <reservoirInstance name="ESN reservoir #2" cfg="ESNCfg" augmentedStates="false">
-          <inputFieldAssignments>
-            <inputFieldAssignment inputFieldName="Value" poolName="Logistic pool" density="1">
+          <inputConnections>
+            <inputConnection fieldName="Value" poolName="Logistic pool" density="1">
               <staticSynapse>
                 <weight min="0" max="0.2" randomSign="false" distribution="Uniform"/>
               </staticSynapse>
-            </inputFieldAssignment>
-          </inputFieldAssignments>
+            </inputConnection>
+          </inputConnections>
         </reservoirInstance>
       </reservoirInstanceContainer>
       <readoutLayer testDataRatio="0.1" folds="1">
@@ -236,38 +236,38 @@
       </reservoirCfgContainer>
       <reservoirInstanceContainer>
         <reservoirInstance name="Main" cfg="MainCfg" augmentedStates="false">
-          <inputFieldAssignments>
-            <inputFieldAssignment inputFieldName="coord_abcissa" poolName="Spiking pool" density="1">
+          <inputConnections>
+            <inputConnection fieldName="coord_abcissa" poolName="Spiking pool" density="1">
               <staticSynapse>
                 <weight min="0" max="0.3" randomSign="false" distribution="Uniform"/>
               </staticSynapse>
-            </inputFieldAssignment>
-            <inputFieldAssignment inputFieldName="coord_ordinate" poolName="Spiking pool" density="1">
+            </inputConnection>
+            <inputConnection fieldName="coord_ordinate" poolName="Spiking pool" density="1">
               <staticSynapse>
                 <weight min="0" max="0.3" randomSign="false" distribution="Uniform"/>
               </staticSynapse>
-            </inputFieldAssignment>
-            <inputFieldAssignment inputFieldName="aug_input" poolName="Spiking pool" density="1">
+            </inputConnection>
+            <inputConnection fieldName="aug_input" poolName="Spiking pool" density="1">
               <staticSynapse>
                 <weight min="0.25" max="0.25" randomSign="false" distribution="Uniform"/>
               </staticSynapse>
-            </inputFieldAssignment>
-            <inputFieldAssignment inputFieldName="coord_abcissa" poolName="Logistic pool" density="1">
+            </inputConnection>
+            <inputConnection fieldName="coord_abcissa" poolName="Logistic pool" density="1">
               <staticSynapse>
                 <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
               </staticSynapse>
-            </inputFieldAssignment>
-            <inputFieldAssignment inputFieldName="coord_ordinate" poolName="Logistic pool" density="1">
+            </inputConnection>
+            <inputConnection fieldName="coord_ordinate" poolName="Logistic pool" density="1">
               <staticSynapse>
                 <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
               </staticSynapse>
-            </inputFieldAssignment>
-            <inputFieldAssignment inputFieldName="aug_input" poolName="Logistic pool" density="1">
+            </inputConnection>
+            <inputConnection fieldName="aug_input" poolName="Logistic pool" density="1">
               <staticSynapse>
                 <weight min="0.25" max="0.25" randomSign="false" distribution="Uniform"/>
               </staticSynapse>
-            </inputFieldAssignment>
-          </inputFieldAssignments>
+            </inputConnection>
+          </inputConnections>
         </reservoirInstance>
       </reservoirInstanceContainer>
       <readoutLayer testDataRatio="0.0825" folds="Auto">
@@ -429,28 +429,28 @@
       </reservoirCfgContainer>
       <reservoirInstanceContainer>
         <reservoirInstance name="Main" cfg="MainCfg" augmentedStates="false">
-          <inputFieldAssignments>
-            <inputFieldAssignment inputFieldName="EEG" poolName="Spiking pool" density="1">
+          <inputConnections>
+            <inputConnection fieldName="EEG" poolName="Spiking pool" density="1">
               <staticSynapse>
                 <weight min="0" max="0.6" randomSign="false" distribution="Uniform"/>
               </staticSynapse>
-            </inputFieldAssignment>
-            <inputFieldAssignment inputFieldName="mg" poolName="Spiking pool" density="1">
+            </inputConnection>
+            <inputConnection fieldName="mg" poolName="Spiking pool" density="1">
               <staticSynapse>
                 <weight min="0.5" max="0.5" randomSign="false" distribution="Uniform"/>
               </staticSynapse>
-            </inputFieldAssignment>
-            <inputFieldAssignment inputFieldName="EEG" poolName="Logistic pool" density="1">
+            </inputConnection>
+            <inputConnection fieldName="EEG" poolName="Logistic pool" density="1">
               <staticSynapse>
                 <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
               </staticSynapse>
-            </inputFieldAssignment>
-            <inputFieldAssignment inputFieldName="mg" poolName="Logistic pool" density="1">
+            </inputConnection>
+            <inputConnection fieldName="mg" poolName="Logistic pool" density="1">
               <staticSynapse>
                 <weight min="0.5" max="0.5" randomSign="false" distribution="Uniform"/>
               </staticSynapse>
-            </inputFieldAssignment>
-          </inputFieldAssignments>
+            </inputConnection>
+          </inputConnections>
         </reservoirInstance>
       </reservoirInstanceContainer>
       <readoutLayer testDataRatio="0.1" folds="Auto">

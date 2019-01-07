@@ -826,28 +826,28 @@
     </xs:sequence>
   </xs:complexType>
 
-  <!-- StateMachine - reservoir instance - input field assignment configuration -->
-  <xs:complexType name="SMResInstanceInputFieldAssignmentCfg">
+  <!-- StateMachine - reservoir instance - input field connection configuration -->
+  <xs:complexType name="SMResInstanceInputConnectionCfgType">
     <xs:choice minOccurs="1" maxOccurs="1">
       <xs:element type="StaticSynapseCfgType" name="staticSynapse" minOccurs="1" maxOccurs="1"/>
       <xs:element type="DynamicSynapseCfgType" name="dynamicSynapse" minOccurs="1" maxOccurs="1"/>
     </xs:choice>
-    <xs:attribute type="xs:string" name="inputFieldName" use="required"/>
+    <xs:attribute type="xs:string" name="fieldName" use="required"/>
     <xs:attribute type="xs:string" name="poolName" use="required"/>
     <xs:attribute type="UDoubleGT0Type" name="density" use="required"/>
   </xs:complexType>
 
-  <!-- StateMachine - reservoir instance - input field(s) assignment(s) - configuration -->
-  <xs:complexType name="SMResInstanceInputFieldAssignmentsCfgType">
+  <!-- StateMachine - reservoir instance - input field connection - configuration collection -->
+  <xs:complexType name="SMResInstanceInputConnectionsCfgType">
     <xs:sequence minOccurs="1" maxOccurs="unbounded">
-      <xs:element type="SMResInstanceInputFieldAssignmentCfg" name="inputFieldAssignment" minOccurs="1" maxOccurs="unbounded"/>
+      <xs:element type="SMResInstanceInputConnectionCfgType" name="inputConnection" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
   <!-- StateMachine - reservoir instance - configuration -->
   <xs:complexType name="SMResInstanceCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="SMResInstanceInputFieldAssignmentsCfgType" name="inputFieldAssignments" minOccurs="1" maxOccurs="1">
+      <xs:element type="SMResInstanceInputConnectionsCfgType" name="inputConnections" minOccurs="1" maxOccurs="1">
         <xs:unique name="unique_input_field_assignment">
           <xs:selector xpath="./inputFieldAssignment"/>
           <xs:field xpath="@inputFieldName"/>

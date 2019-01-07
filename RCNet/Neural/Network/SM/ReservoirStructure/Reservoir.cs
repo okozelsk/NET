@@ -196,7 +196,7 @@ namespace RCNet.Neural.Network.SM.ReservoirStructure
             for (int poolID = 0; poolID < _poolNeuronsCollection.Count; poolID++)
             {
                 //Input connection
-                SetPoolInputConnections(rand, poolID, instanceDefinition.InputFieldAssignmentCollection);
+                SetPoolInputConnections(rand, poolID, instanceDefinition.InputConnectionCollection);
                 SetPoolInterconnections(rand, poolID);
             }
 
@@ -362,9 +362,9 @@ namespace RCNet.Neural.Network.SM.ReservoirStructure
             return true;
         }
 
-        private void SetPoolInputConnections(Random rand, int poolID, List<StateMachineSettings.ReservoirInstanceDefinition.InputFieldAssignment> inputFieldAssignmentCollection)
+        private void SetPoolInputConnections(Random rand, int poolID, List<StateMachineSettings.ReservoirInstanceDefinition.InputConnection> inputFieldAssignmentCollection)
         {
-            foreach(StateMachineSettings.ReservoirInstanceDefinition.InputFieldAssignment assignment in inputFieldAssignmentCollection)
+            foreach(StateMachineSettings.ReservoirInstanceDefinition.InputConnection assignment in inputFieldAssignmentCollection)
             {
                 if(assignment.PoolID == poolID)
                 {
