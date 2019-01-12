@@ -1,8 +1,79 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <demo dataFolder=".\\Data">
   <!--
-    This demo case demonstrates the simplest form of ESN reservoir setup. Reservoir consists of one small pool of TanH analog neurons.
+    This demo case demonstrates how to instantiate two independent reservoirs. Configuration definies ESN reservoir
+    structure having one pool of 512 TanH analog neurons and two instances of the reservoir (hence in total 2x512=1024 analog neurons).
     Standard linear regression is used as predicting readout.
+    Dataset contains Mackey Glass chaotic time series (tau=17) and network forecasts the next value.
+  -->
+  <case name="Forecast task Mackey Glass chaotic time series: Two analog reservoirs (ESN), Linear regression output">
+    <samples fileName="MackeyGlass.csv" normalizerReserve="0.1"/>
+    <stateMachineCfg randomizerSeek="0">
+      <input>
+        <feedingContinuous bootCycles="Auto" routeToReadout="false"/>
+        <external>
+          <field name="Value"/>
+        </external>
+      </input>
+      <reservoirCfgContainer>
+        <reservoirCfg name="ESNCfg" synapticDelayMethod="Random" maxInputDelay="0" maxInternalDelay="1" spectralRadius="0.65">
+          <pools>
+            <pool name="Logistic pool" dimX="8" dimY="8" dimZ="8" readoutNeuronsDensity="1">
+              <neuronGroups>
+                <neuronGroup name="Exc-Logistic" role="Excitatory" relShare="1" augmentedStates="true">
+                  <activationTanH/>
+                  <bias min="-0.75" max="0.75" randomSign="false" distribution="Uniform"/>
+                </neuronGroup>
+                <neuronGroup name="Inh-Logistic" role="Inhibitory" relShare="1" augmentedStates="true">
+                  <activationTanH/>
+                  <bias min="-0.75" max="0.75" randomSign="false" distribution="Uniform"/>
+                </neuronGroup>
+              </neuronGroups>
+              <interconnection density="0.1" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
+                <staticSynapse>
+                  <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
+                </staticSynapse>
+              </interconnection>
+              <retainmentNeurons density="1">
+                <rate min="0.25" max="0.5" randomSign="false" distribution="Uniform"/>
+              </retainmentNeurons>
+            </pool>
+          </pools>
+        </reservoirCfg>
+      </reservoirCfgContainer>
+      <reservoirInstanceContainer>
+        <reservoirInstance name="ESN reservoir #1" cfg="ESNCfg" augmentedStates="false">
+          <inputConnections>
+            <inputConnection fieldName="Value" poolName="Logistic pool" density="0.5">
+              <staticSynapse>
+                <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
+              </staticSynapse>
+            </inputConnection>
+          </inputConnections>
+        </reservoirInstance>
+        <reservoirInstance name="ESN reservoir #2" cfg="ESNCfg" augmentedStates="false">
+          <inputConnections>
+            <inputConnection fieldName="Value" poolName="Logistic pool" density="0.5">
+              <staticSynapse>
+                <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
+              </staticSynapse>
+            </inputConnection>
+          </inputConnections>
+        </reservoirInstance>
+      </reservoirInstanceContainer>
+      <readoutLayer testDataRatio="0.1" folds="1">
+        <readoutUnit name="Value" task="Forecast" attempts="1" attemptEpochs="1">
+          <ff regressionMethod="Linear">
+            <activationIdentity/>
+          </ff>
+        </readoutUnit>
+      </readoutLayer>
+    </stateMachineCfg>
+  </case>
+
+  <!--
+    This demo case demonstrates the simple form of ESN reservoir setup. Reservoir consists of one pool of 7x7x7=343 TanH analog neurons.
+    Standard linear regression is used as forecasting readout.
     Time series contains real share prices of TTOO title from https://finance.yahoo.com/quote/TTOO/history?p=TTOO.
     The last recorded prices are from 2018/03/02 so network is predicting next High and Low prices for the following
     business day 2018/03/05 (where real prices were High=6.58$ and Low=5.99$).
@@ -19,17 +90,17 @@
         </external>
       </input>
       <reservoirCfgContainer>
-        <reservoirCfg name="MainCfg" synapticDelayMethod="Random" maxInputDelay="0" maxInternalDelay="2" spectralRadius="0.999">
+        <reservoirCfg name="MainCfg" synapticDelayMethod="Distance" maxInputDelay="0" maxInternalDelay="3" spectralRadius="0.999">
           <pools>
-            <pool name="Logistic pool" dimX="4" dimY="4" dimZ="4">
+            <pool name="Logistic pool" dimX="7" dimY="7" dimZ="7">
               <neuronGroups>
                 <neuronGroup name="Exc-Logistic" role="Excitatory" relShare="4">
                   <activationTanH />
-                  <bias min="0" max="0"/>
+                  <bias min="-0.25" max="0.25" distribution="Gaussian"/>
                 </neuronGroup>
                 <neuronGroup name="Inh-Logistic" role="Inhibitory" relShare="1">
                   <activationTanH />
-                  <bias min="0" max="0"/>
+                  <bias min="-0.25" max="0.25" distribution="Gaussian"/>
                 </neuronGroup>
               </neuronGroups>
               <interconnection density="0.1">
@@ -37,6 +108,9 @@
                   <weight min="0" max="1"/>
                 </staticSynapse>
               </interconnection>
+              <retainmentNeurons density="1">
+                <rate min="0.2" max="0.6" />
+              </retainmentNeurons>
             </pool>
           </pools>
         </reservoirCfg>
@@ -44,21 +118,21 @@
       <reservoirInstanceContainer>
         <reservoirInstance name="Main" cfg="MainCfg" augmentedStates="false">
           <inputConnections>
-            <inputConnection fieldName="Adj Close" poolName="Logistic pool" density="1">
+            <inputConnection fieldName="Adj Close" poolName="Logistic pool" density="0.5">
               <staticSynapse>
-                <weight min="0" max="2" randomSign="false" distribution="Uniform"/>
+                <weight min="-2" max="2" randomSign="false" distribution="Uniform"/>
               </staticSynapse>
             </inputConnection>
           </inputConnections>
         </reservoirInstance>
       </reservoirInstanceContainer>
       <readoutLayer testDataRatio="0.1" folds="Auto">
-        <readoutUnit name="High" task="Forecast" attempts="1" attemptEpochs="100">
+        <readoutUnit name="High" task="Forecast" attempts="1" attemptEpochs="200">
           <ff regressionMethod="Linear">
             <activationIdentity/>
           </ff>
         </readoutUnit>
-        <readoutUnit name="Low" task="Forecast" attempts="1" attemptEpochs="100">
+        <readoutUnit name="Low" task="Forecast" attempts="1" attemptEpochs="200">
           <ff regressionMethod="Linear">
             <activationIdentity/>
           </ff>

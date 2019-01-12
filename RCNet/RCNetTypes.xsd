@@ -151,8 +151,16 @@
     </xs:choice>
     <xs:attribute type="xs:double" name="min" use="required"/>
     <xs:attribute type="xs:double" name="max" use="required"/>
-    <xs:attribute type="xs:boolean" name="randomSign" use="optional" default="false"/>
-    <xs:attribute type="RandomDistributionType" name="distribution" use="optional" default="Uniform"/>
+    <xs:attribute type="xs:boolean" name="randomSign" use="optional" default="false">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is false</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="RandomDistributionType" name="distribution" use="optional" default="Uniform">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is Uniform</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- ________________________________________SIGNAL GENERATORS TYPES_____________________________________________ -->
@@ -163,16 +171,40 @@
 
   <!-- Sinusoidal generator configuration element -->
   <xs:complexType name="SinusoidalGeneratorCfgType">
-    <xs:attribute type="xs:double" name="phase" use="optional" default="0"/>
-    <xs:attribute type="xs:double" name="freq" use="optional" default="1"/>
-    <xs:attribute type="xs:double" name="ampl" use="optional" default="1"/>
+    <xs:attribute type="xs:double" name="phase" use="optional" default="0">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:double" name="freq" use="optional" default="1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:double" name="ampl" use="optional" default="1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- Mackey Glass generator configuration element -->
   <xs:complexType name="MackeyGlassGeneratorCfgType">
-    <xs:attribute type="xs:unsignedInt" name="tau" use="optional" default="18"/>
-    <xs:attribute type="xs:double" name="b" use="optional" default="0.1"/>
-    <xs:attribute type="xs:double" name="c" use="optional" default="0.2"/>
+    <xs:attribute type="xs:unsignedInt" name="tau" use="optional" default="18">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 18</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:double" name="b" use="optional" default="0.1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.1</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:double" name="c" use="optional" default="0.2">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.2</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
 
@@ -201,8 +233,16 @@
         </xs:annotation>
       </xs:element>
     </xs:sequence>
-    <xs:attribute type="UDoubleType" name="stimuliCoeff" use="optional" default="1"/>
-    <xs:attribute type="xs:unsignedInt" name="refractoryPeriods" use="optional" default="1"/>
+    <xs:attribute type="UDoubleType" name="stimuliCoeff" use="optional" default="1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:unsignedInt" name="refractoryPeriods" use="optional" default="1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- Activation LeakyIF configuration element -->
@@ -234,10 +274,26 @@
         </xs:annotation>
       </xs:element>
     </xs:sequence>
-    <xs:attribute type="UDoubleType" name="stimuliCoeff" use="optional" default="5.5"/>
-    <xs:attribute type="xs:unsignedInt" name="refractoryPeriods" use="optional" default="1"/>
-    <xs:attribute type="ODENumSolverMethodType" name="solverMethod" use="optional" default="Euler"/>
-    <xs:attribute type="UIntGT0Type" name="solverCompSteps" use="optional" default="2"/>
+    <xs:attribute type="UDoubleType" name="stimuliCoeff" use="optional" default="5.5">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 5.5</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:unsignedInt" name="refractoryPeriods" use="optional" default="1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="ODENumSolverMethodType" name="solverMethod" use="optional" default="Euler">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is Euler</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UIntGT0Type" name="solverCompSteps" use="optional" default="2">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 2</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- Activation ExpIF configuration element -->
@@ -279,10 +335,26 @@
         </xs:annotation>
       </xs:element>
     </xs:sequence>
-    <xs:attribute type="UDoubleType" name="stimuliCoeff" use="optional" default="5.5"/>
-    <xs:attribute type="xs:unsignedInt" name="refractoryPeriods" use="optional" default="1"/>
-    <xs:attribute type="ODENumSolverMethodType" name="solverMethod" use="optional" default="Euler"/>
-    <xs:attribute type="UIntGT0Type" name="solverCompSteps" use="optional" default="2"/>
+    <xs:attribute type="UDoubleType" name="stimuliCoeff" use="optional" default="5.5">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 5.5</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:unsignedInt" name="refractoryPeriods" use="optional" default="1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="ODENumSolverMethodType" name="solverMethod" use="optional" default="Euler">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is Euler</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UIntGT0Type" name="solverCompSteps" use="optional" default="2">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 2</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- Activation AdExpIF configuration element -->
@@ -339,9 +411,21 @@
         </xs:annotation>
       </xs:element>
     </xs:sequence>
-    <xs:attribute type="UDoubleType" name="stimuliCoeff" use="optional" default="150"/>
-    <xs:attribute type="ODENumSolverMethodType" name="solverMethod" use="optional" default="Euler"/>
-    <xs:attribute type="UIntGT0Type" name="solverCompSteps" use="optional" default="2"/>
+    <xs:attribute type="UDoubleType" name="stimuliCoeff" use="optional" default="150">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 150</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="ODENumSolverMethodType" name="solverMethod" use="optional" default="Euler">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is Euler</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UIntGT0Type" name="solverCompSteps" use="optional" default="2">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 2</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- Activation IzhikevichIF configuration element -->
@@ -378,19 +462,51 @@
         </xs:annotation>
       </xs:element>
     </xs:sequence>
-    <xs:attribute type="UDoubleType" name="stimuliCoeff" use="optional" default="10"/>
-    <xs:attribute type="xs:unsignedInt" name="refractoryPeriods" use="optional" default="1"/>
-    <xs:attribute type="ODENumSolverMethodType" name="solverMethod" use="optional" default="Euler"/>
-    <xs:attribute type="UIntGT0Type" name="solverCompSteps" use="optional" default="2"/>
+    <xs:attribute type="UDoubleType" name="stimuliCoeff" use="optional" default="35">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 35</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:unsignedInt" name="refractoryPeriods" use="optional" default="1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="ODENumSolverMethodType" name="solverMethod" use="optional" default="Euler">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is Euler</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UIntGT0Type" name="solverCompSteps" use="optional" default="2">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 2</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- Activation AutoIzhikevichIF configuration element -->
   <xs:complexType name="ActivationAutoIzhikevichIFCfgType">
-    <xs:attribute type="UDoubleType" name="stimuliCoeff" use="optional" default="35"/>
+    <xs:attribute type="UDoubleType" name="stimuliCoeff" use="optional" default="35">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 35</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
     <xs:attribute type="NeuronRoleType" name="role" use="required"/>
-    <xs:attribute type="xs:unsignedInt" name="refractoryPeriods" use="optional" default="1"/>
-    <xs:attribute type="ODENumSolverMethodType" name="solverMethod" use="optional" default="Euler"/>
-    <xs:attribute type="UIntGT0Type" name="solverCompSteps" use="optional" default="2"/>
+    <xs:attribute type="xs:unsignedInt" name="refractoryPeriods" use="optional" default="1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="ODENumSolverMethodType" name="solverMethod" use="optional" default="Euler">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is Euler</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UIntGT0Type" name="solverCompSteps" use="optional" default="2">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 2</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- ________________________________________ANALOG ACTIVATION TYPES_____________________________________________ -->
@@ -508,19 +624,55 @@
 
   <!-- FF network - linear regression trainer - configuration -->
   <xs:complexType name="FFNetLinRegrTrainerCfgType">
-    <xs:attribute type="UDoubleLT1Type" name="hiNoiseIntensity" use="optional" default="0.05"/>
-    <xs:attribute type="UDoubleGT1Type" name="maxStretch" use="optional" default="8"/>
-    <xs:attribute type="UDoubleLT1Type" name="zeroMargin" use="optional" default="0.75"/>
+    <xs:attribute type="UDoubleLT1Type" name="hiNoiseIntensity" use="optional" default="0.05">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.05</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleGT1Type" name="maxStretch" use="optional" default="8">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 8</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleLT1Type" name="zeroMargin" use="optional" default="0.75">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.75</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- FF network - resilient propagation trainer - configuration -->
   <xs:complexType name="FFNetRPropTrainerCfgType">
-    <xs:attribute type="UDoubleLT1Type" name="zeroTolerance" use="optional" default="1E-17"/>
-    <xs:attribute type="UDoubleGT1Type" name="positiveEta" use="optional" default="1.2"/>
-    <xs:attribute type="UDoubleLT1Type" name="negativeEta" use="optional" default="0.5"/>
-    <xs:attribute type="UDoubleType" name="iniDelta" use="optional" default="0.1"/>
-    <xs:attribute type="UDoubleType" name="minDelta" use="optional" default="1E-6"/>
-    <xs:attribute type="UDoubleType" name="maxDelta" use="optional" default="50"/>
+    <xs:attribute type="UDoubleLT1Type" name="zeroTolerance" use="optional" default="1E-17">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 1E-17</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleGT1Type" name="positiveEta" use="optional" default="1.2">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 1.2</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleLT1Type" name="negativeEta" use="optional" default="0.5">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.5</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name="iniDelta" use="optional" default="0.1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.1</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name="minDelta" use="optional" default="1E-6">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 1E-6</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name="maxDelta" use="optional" default="50">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 50</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- FF network configuration -->
@@ -556,11 +708,31 @@
 
   <!-- FF network - p-delta rule trainer - configuration -->
   <xs:complexType name="PPNetPDeltaRuleTrainerCfgType">
-    <xs:attribute type="UDoubleLT1Type" name="iniLR" use="optional" default="0.01"/>
-    <xs:attribute type="UDoubleGT1Type" name="incLR" use="optional" default="1.1"/>
-    <xs:attribute type="UDoubleLT1Type" name="decLR" use="optional" default="0.5"/>
-    <xs:attribute type="UDoubleLT1Type" name="minLR" use="optional" default="1e-4"/>
-    <xs:attribute type="UDoubleLT1Type" name="maxLR" use="optional" default="0.1"/>
+    <xs:attribute type="UDoubleLT1Type" name="iniLR" use="optional" default="0.01">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.01</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleGT1Type" name="incLR" use="optional" default="1.1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 1.1</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleLT1Type" name="decLR" use="optional" default="0.5">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.5</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleLT1Type" name="minLR" use="optional" default="1E-4">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 1E-4</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleLT1Type" name="maxLR" use="optional" default="0.1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.1</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
 
@@ -599,7 +771,11 @@
         </xs:restriction>
       </xs:simpleType>
     </xs:attribute>
-    <xs:attribute type="UIntGT0AutoOptionType" name="folds" use="optional" default="Auto"/>
+    <xs:attribute type="UIntGT0AutoOptionType" name="folds" use="optional" default="Auto">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is Auto</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- ________________________________________SYNAPSE TYPES_________________________________________________ -->
@@ -616,10 +792,26 @@
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="RandomValueType" name="weight" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
-    <xs:attribute type="UDoubleType" name="tauFacilitation" use="optional" default="500"/>
-    <xs:attribute type="UDoubleType" name="tauRecovery" use="optional" default="5"/>
-    <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="optional" default="0.5"/>
-    <xs:attribute type="UDoubleType" name="tauDecay" use="optional" default="10"/>
+    <xs:attribute type="UDoubleType" name="tauFacilitation" use="optional" default="500">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 500</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name="tauRecovery" use="optional" default="5">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 5</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="optional" default="0.5">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.5</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name="tauDecay" use="optional" default="10">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 10</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
 
@@ -632,13 +824,41 @@
       <xs:element type="DynamicSynapseCfgType" name="dynamicSynapse" minOccurs="1" maxOccurs="1"/>
     </xs:choice>
     <xs:attribute type="UDoubleLE1Type" name="density" use="required"/>
-    <xs:attribute type="UDoubleType" name="relShareEE" use="optional" default="0.3"/>
-    <xs:attribute type="UDoubleType" name="relShareEI" use="optional" default="0.2"/>
-    <xs:attribute type="UDoubleType" name="relShareIE" use="optional" default="0.4"/>
-    <xs:attribute type="UDoubleType" name="relShareII" use="optional" default="0.1"/>
-    <xs:attribute type="UDoubleGT0NAOptionType" name="avgDistance" use="optional" default="NA"/>
-    <xs:attribute type="xs:boolean" name="allowSelfConnection" use="optional" default="true"/>
-    <xs:attribute type="xs:boolean" name="constantNumOfConnections" use="optional" default="false"/>
+    <xs:attribute type="UDoubleType" name="relShareEE" use="optional" default="0.3">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.3</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name="relShareEI" use="optional" default="0.2">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.2</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name="relShareIE" use="optional" default="0.4">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.4</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name="relShareII" use="optional" default="0.1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.1</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleGT0NAOptionType" name="avgDistance" use="optional" default="NA">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is NA</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="allowSelfConnection" use="optional" default="true">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is true</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="constantNumOfConnections" use="optional" default="false">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is false</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- Pool - neuron group - configuration -->
@@ -664,7 +884,11 @@
     <xs:attribute type="xs:string" name="name" use="required" />
     <xs:attribute type="NeuronRoleType" name="role" use="required"/>
     <xs:attribute type="UDoubleType" name="relShare" use="required"/>
-    <xs:attribute type="xs:boolean" name="augmentedStates" use="optional" default="true" />
+    <xs:attribute type="xs:boolean" name="augmentedStates" use="optional" default="true">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is true</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- Pool - neuron groups - configuration -->
@@ -695,13 +919,29 @@
       <xs:element type="PoolRetNeuronsCfgType" name="retainmentNeurons" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:string" name="name" use="required" />
-    <xs:attribute type="xs:int" name="x" use="optional" default="0" />
-    <xs:attribute type="xs:int" name="y" use="optional" default="0" />
-    <xs:attribute type="xs:int" name="z" use="optional" default="0" />
+    <xs:attribute type="xs:int" name="x" use="optional" default="0">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:int" name="y" use="optional" default="0">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:int" name="z" use="optional" default="0">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
     <xs:attribute type="xs:unsignedInt" name="dimX" use="required" />
     <xs:attribute type="xs:unsignedInt" name="dimY" use="required" />
     <xs:attribute type="xs:unsignedInt" name="dimZ" use="required" />
-    <xs:attribute type="UDoubleType" name="readoutNeuronsDensity" use="optional" default="1"/>
+    <xs:attribute type="UDoubleType" name="readoutNeuronsDensity" use="optional" default="1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- ________________________________________RESERVOIR TYPES_________________________________________________ -->
@@ -730,11 +970,31 @@
     <xs:attribute type="UDoubleLE1Type" name="srcConnDensity" use="required"/>
     <xs:attribute type="xs:string" name="targetPool" use="required"/>
     <xs:attribute type="UDoubleLE1Type" name="targetConnDensity" use="required"/>
-    <xs:attribute type="UDoubleType" name="relShareEE" use="optional" default="0.3"/>
-    <xs:attribute type="UDoubleType" name="relShareEI" use="optional" default="0.2"/>
-    <xs:attribute type="UDoubleType" name="relShareIE" use="optional" default="0.4"/>
-    <xs:attribute type="UDoubleType" name="relShareII" use="optional" default="0.1"/>
-    <xs:attribute type="xs:boolean" name="constantNumOfConnections" use="optional" default="false"/>
+    <xs:attribute type="UDoubleType" name="relShareEE" use="optional" default="0.3">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.3</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name="relShareEI" use="optional" default="0.2">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.2</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name="relShareIE" use="optional" default="0.4">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.4</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name="relShareII" use="optional" default="0.1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.1</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="constantNumOfConnections" use="optional" default="false">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is false</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- Reservoir - pools interconnection container - configuration -->
@@ -772,8 +1032,16 @@
   <!-- ________________________________________STATE MACHINE TYPES_________________________________________________ -->
   <!-- StateMachine - continuous input feeding -configuration -->
   <xs:complexType name="SMInpFeedingContinuousCfgType">
-    <xs:attribute type="UIntGT0AutoOptionType" name="bootCycles" use="optional" default="Auto"/>
-    <xs:attribute type="xs:boolean" name="routeToReadout" use="optional" default="false"/>
+    <xs:attribute type="UIntGT0AutoOptionType" name="bootCycles" use="optional" default="Auto">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is Auto</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="routeToReadout" use="optional" default="false">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is false</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- StateMachine - patterned input feeding -configuration -->
@@ -857,7 +1125,11 @@
     </xs:sequence>
     <xs:attribute type="xs:string" name="name" use="required" />
     <xs:attribute type="xs:string" name="cfg" use="required" />
-    <xs:attribute type="xs:boolean" name="augmentedStates" use="optional" default="false"/>
+    <xs:attribute type="xs:boolean" name="augmentedStates" use="optional" default="false">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is false</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- StateMachine - reservoir instances - container -->
@@ -895,7 +1167,11 @@
         </xs:unique>
       </xs:element>
     </xs:sequence>
-    <xs:attribute type="xs:int" name="randomizerSeek" use="optional" default="0"/>
+    <xs:attribute type="xs:int" name="randomizerSeek" use="optional" default="0">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
 </xs:schema>
