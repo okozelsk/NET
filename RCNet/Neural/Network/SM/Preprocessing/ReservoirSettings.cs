@@ -11,7 +11,7 @@ using RCNet.RandomValue;
 using RCNet.Neural.Activation;
 using RCNet.Neural.Network.SM.Synapse;
 
-namespace RCNet.Neural.Network.SM.ReservoirStructure
+namespace RCNet.Neural.Network.SM.Preprocessing
 {
     /// <summary>
     /// The class contains reservoir configuration parameters and also contains

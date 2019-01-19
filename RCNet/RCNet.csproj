@@ -106,10 +106,10 @@
     <Compile Include="Neural\Network\SM\Neuron\NeuronStatistics.cs" />
     <Compile Include="Neural\Network\SM\Neuron\AnalogNeuron.cs" />
     <Compile Include="Neural\Network\SM\Neuron\SpikingNeuron.cs" />
-    <Compile Include="Neural\Network\SM\ReservoirStructure\Reservoir.cs" />
-    <Compile Include="Neural\Network\SM\ReservoirStructure\ReservoirSettings.cs" />
-    <Compile Include="Neural\Network\SM\ReservoirStructure\PoolDimensions.cs" />
-    <Compile Include="Neural\Network\SM\ReservoirStructure\PoolSettings.cs" />
+    <Compile Include="Neural\Network\SM\Preprocessing\Reservoir.cs" />
+    <Compile Include="Neural\Network\SM\Preprocessing\ReservoirSettings.cs" />
+    <Compile Include="Neural\Network\SM\Preprocessing\PoolDimensions.cs" />
+    <Compile Include="Neural\Network\SM\Preprocessing\PoolSettings.cs" />
     <Compile Include="Neural\Network\SM\Neuron\INeuron.cs" />
     <Compile Include="Neural\Network\SM\Synapse\ISynapse.cs" />
     <Compile Include="Neural\Network\SM\Synapse\StaticSynapse.cs" />
@@ -199,10 +199,10 @@
     <EmbeddedResource Include="Neural\Network\FF\RPropTrainerSettings.xsd" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Neural\Network\SM\ReservoirStructure\PoolSettings.xsd" />
+    <EmbeddedResource Include="Neural\Network\SM\Preprocessing\PoolSettings.xsd" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Neural\Network\SM\ReservoirStructure\ReservoirSettings.xsd" />
+    <EmbeddedResource Include="Neural\Network\SM\Preprocessing\ReservoirSettings.xsd" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Docs\Imgs\ConnectionPool1ToPool2.jpg" />
@@ -303,7 +303,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Neural\Network\SM\ReservoirStructure\PoolNeuronGroupSettings.xsd">
+    <EmbeddedResource Include="Neural\Network\SM\Preprocessing\PoolNeuronGroupSettings.xsd">
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
@@ -313,7 +313,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Neural\Network\SM\ReservoirStructure\PoolInterconnectionSettings.xsd">
+    <EmbeddedResource Include="Neural\Network\SM\Preprocessing\PoolInterconnectionSettings.xsd">
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>

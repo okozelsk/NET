@@ -5,7 +5,7 @@ using RCNet.MathTools;
 using RCNet.Neural.Data;
 using RCNet.Neural.Data.Generators;
 using RCNet.RandomValue;
-using RCNet.Neural.Network.SM.ReservoirStructure;
+using RCNet.Neural.Network.SM.Preprocessing;
 using RCNet.Neural.Network.SM.Readout;
 
 
