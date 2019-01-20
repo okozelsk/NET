@@ -246,39 +246,39 @@ namespace RCNet.DemoConsoleApp
             StateMachine stateMachine = new StateMachine(demoCaseParams.StateMachineCfg);
             //Prepare input object for regression stage
             log.Write(" ", false);
-            StateMachine.RegressionStageInput rsi = null;
+            StateMachine.RegressionInput rsi = null;
             List<string> outputFieldNameCollection = (from rus in demoCaseParams.StateMachineCfg.ReadoutLayerConfig.ReadoutUnitCfgCollection select rus.Name).ToList();
             List<CommonEnums.TaskType> outputFieldTaskCollection = (from rus in demoCaseParams.StateMachineCfg.ReadoutLayerConfig.ReadoutUnitCfgCollection select rus.TaskType).ToList();
-            if (demoCaseParams.StateMachineCfg.InputConfig.FeedingType == CommonEnums.InputFeedingType.Continuous)
+            if (demoCaseParams.StateMachineCfg.NeuralPreprocessorConfig.InputConfig.FeedingType == CommonEnums.InputFeedingType.Continuous)
             {
                 //Continuous input feeding
                 //Load data bundle from csv file
-                TimeSeriesBundle data = TimeSeriesBundle.LoadFromCsv(demoCaseParams.FileName,
-                                                                     demoCaseParams.StateMachineCfg.InputConfig.ExternalFieldNameCollection(),
+                VectorBundle data = VectorBundle.LoadFromCsv(demoCaseParams.FileName,
+                                                                     demoCaseParams.StateMachineCfg.NeuralPreprocessorConfig.InputConfig.ExternalFieldNameCollection(),
                                                                      outputFieldNameCollection,
                                                                      outputFieldTaskCollection,
-                                                                     StateMachine.DataRange,
+                                                                     NeuralPreprocessor.DataRange,
                                                                      demoCaseParams.NormalizerReserveRatio,
                                                                      true,
                                                                      out bundleNormalizer,
                                                                      out predictionInputVector
                                                                      );
-                rsi = stateMachine.PrepareRegressionStageInput(data, PredictorsCollectionCallback, log);
+                rsi = stateMachine.PrepareRegressionData(data, PredictorsCollectionCallback, log);
             }
             else
             {
                 //Patterned input feeding
                 //Load data bundle from csv file
                 PatternBundle data = PatternBundle.LoadFromCsv(demoCaseParams.FileName,
-                                                               demoCaseParams.StateMachineCfg.InputConfig.ExternalFieldNameCollection(),
+                                                               demoCaseParams.StateMachineCfg.NeuralPreprocessorConfig.InputConfig.ExternalFieldNameCollection(),
                                                                outputFieldNameCollection,
                                                                outputFieldTaskCollection,
-                                                               StateMachine.DataRange,
+                                                               NeuralPreprocessor.DataRange,
                                                                demoCaseParams.NormalizerReserveRatio,
                                                                true,
                                                                out bundleNormalizer
                                                                );
-                rsi = stateMachine.PrepareRegressionStageInput(data, PredictorsCollectionCallback, log);
+                rsi = stateMachine.PrepareRegressionData(data, PredictorsCollectionCallback, log);
             }
             //Report statistics of the State Machine's reservoirs
             ReportReservoirsStatistics(rsi.ReservoirStatCollection, log);
@@ -286,11 +286,11 @@ namespace RCNet.DemoConsoleApp
             //Regression stage
             log.Write("    Regression stage", false);
             //Perform the regression
-            ValidationBundle vb = stateMachine.RegressionStage(rsi, RegressionControl, log);
+            ResultComparativeBundle vb = stateMachine.BuildReadoutLayer(rsi, RegressionControl, log);
 
             //Perform prediction if the input feeding is continuous (we know the input but we don't know the ideal output)
             double[] predictionOutputVector = null;
-            if (demoCaseParams.StateMachineCfg.InputConfig.FeedingType == CommonEnums.InputFeedingType.Continuous)
+            if (demoCaseParams.StateMachineCfg.NeuralPreprocessorConfig.InputConfig.FeedingType == CommonEnums.InputFeedingType.Continuous)
             {
                 predictionOutputVector = stateMachine.Compute(predictionInputVector);
                 //Values are normalized so they have to be denormalized
@@ -300,7 +300,7 @@ namespace RCNet.DemoConsoleApp
             //Display results
             //Report training (regression) results and prediction
             log.Write("    Results", false);
-            List<ReadoutLayer.ClusterErrStatistics> clusterErrStatisticsCollection = stateMachine.ClusterErrStatisticsCollection;
+            List<ReadoutLayer.ClusterErrStatistics> clusterErrStatisticsCollection = stateMachine.RL.ClusterErrStatisticsCollection;
             //Results
             for (int outputIdx = 0; outputIdx < demoCaseParams.StateMachineCfg.ReadoutLayerConfig.ReadoutUnitCfgCollection.Count; outputIdx++)
             {

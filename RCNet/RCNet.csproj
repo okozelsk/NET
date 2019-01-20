@@ -99,6 +99,8 @@
     <Compile Include="Neural\Data\Generators\IGenerator.cs" />
     <Compile Include="Neural\Data\Generators\RandomGenerator.cs" />
     <Compile Include="Neural\Data\Generators\ConstGeneratorSettings.cs" />
+    <Compile Include="Neural\Network\SM\Preprocessing\NeuralPreprocessor.cs" />
+    <Compile Include="Neural\Network\SM\Preprocessing\NeuralPreprocessorSettings.cs" />
     <Compile Include="Neural\Network\SM\Synapse\DynamicSynapse.cs" />
     <Compile Include="Neural\Network\SM\Synapse\DynamicSynapseSettings.cs" />
     <Compile Include="Neural\Network\SM\Neuron\FiringRate.cs" />
@@ -140,8 +142,8 @@
     <Compile Include="Neural\CommonEnums.cs" />
     <Compile Include="Neural\Data\BundleNormalizer.cs" />
     <Compile Include="Neural\Data\PatternBundle.cs" />
-    <Compile Include="Neural\Data\ValidationBundle.cs" />
-    <Compile Include="Neural\Data\TimeSeriesBundle.cs" />
+    <Compile Include="Neural\Data\ResultComparativeBundle.cs" />
+    <Compile Include="Neural\Data\VectorBundle.cs" />
     <Compile Include="Neural\Network\PP\PDeltaRuleTrainerSettings.cs" />
     <Compile Include="Neural\Network\FF\RPropTrainerSettings.cs" />
     <Compile Include="Neural\Network\FF\LinRegrTrainerSettings.cs" />
@@ -334,6 +336,11 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Neural\Data\Generators\MackeyGlassGeneratorSettings.xsd">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Neural\Network\SM\Preprocessing\NeuralPreprocessorSettings.xsd">
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>

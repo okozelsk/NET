@@ -123,7 +123,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             //Validation
             ElemValidator validator = new ElemValidator();
             Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.SM.ReservoirStructure.ReservoirSettings.xsd");
+            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.SM.Preprocessing.ReservoirSettings.xsd");
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
             XElement reservoirSettingsElem = validator.Validate(elem, "rootElem");
             //Parsing

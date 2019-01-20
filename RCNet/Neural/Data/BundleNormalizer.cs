@@ -253,7 +253,7 @@ namespace RCNet.Neural.Data
         /// Adjusts internal normalizers
         /// </summary>
         /// <param name="bundle">Sample data bundle</param>
-        public void AdjustNormalizers(TimeSeriesBundle bundle)
+        public void AdjustNormalizers(VectorBundle bundle)
         {
             ResetNormalizers();
             foreach (double[] inputVector in bundle.InputVectorCollection)
@@ -379,7 +379,7 @@ namespace RCNet.Neural.Data
         /// Normalizes all values in the sample data bundle
         /// </summary>
         /// <param name="bundle">Sample data bundle</param>
-        public void Normalize(TimeSeriesBundle bundle)
+        public void Normalize(VectorBundle bundle)
         {
             AdjustNormalizers(bundle);
             NormalizeInputVectorCollection(bundle.InputVectorCollection);
@@ -391,7 +391,7 @@ namespace RCNet.Neural.Data
         /// Naturalizes all values in the sample data bundle
         /// </summary>
         /// <param name="bundle">Sample data bundle</param>
-        public void Naturalize(TimeSeriesBundle bundle)
+        public void Naturalize(VectorBundle bundle)
         {
             NaturalizeInputVectorCollection(bundle.InputVectorCollection);
             NaturalizeOutputVectorCollection(bundle.OutputVectorCollection);

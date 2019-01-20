@@ -1029,9 +1029,9 @@
     <xs:attribute type="UDoubleGT0NAOptionType" name="spectralRadius" use="required" />
   </xs:complexType>
 
-  <!-- ________________________________________STATE MACHINE TYPES_________________________________________________ -->
-  <!-- StateMachine - continuous input feeding -configuration -->
-  <xs:complexType name="SMInpFeedingContinuousCfgType">
+  <!-- ________________________________________NEURAL PREPROCESSOR TYPES_________________________________________________ -->
+  <!-- NeuralPreprocessor - continuous input feeding -configuration -->
+  <xs:complexType name="NPInpFeedingContinuousCfgType">
     <xs:attribute type="UIntGT0AutoOptionType" name="bootCycles" use="optional" default="Auto">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is Auto</xs:documentation>
@@ -1044,12 +1044,12 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- StateMachine - patterned input feeding -configuration -->
-  <xs:complexType name="SMInpFeedingPatternedCfgType">
+  <!-- NeuralPreprocessor - patterned input feeding -configuration -->
+  <xs:complexType name="NPInpFeedingPatternedCfgType">
   </xs:complexType>
 
-  <!-- StateMachine - internal input field -configuration -->
-  <xs:complexType name="SMInternalInpFieldCfgType">
+  <!-- NeuralPreprocessor - internal input field -configuration -->
+  <xs:complexType name="NPInternalInpFieldCfgType">
     <xs:choice minOccurs="1" maxOccurs="1">
       <xs:element type="ConstGeneratorCfgType" name="constGenerator" minOccurs="1" maxOccurs="1"/>
       <xs:element type="RandomValueType" name="randomGenerator" minOccurs="1" maxOccurs="1"/>
@@ -1060,42 +1060,42 @@
   </xs:complexType>
 
 
-  <!-- StateMachine - internal input fields -configuration -->
-  <xs:complexType name="SMInternalInpFieldsCfgType">
+  <!-- NeuralPreprocessor - internal input fields -configuration -->
+  <xs:complexType name="NPInternalInpFieldsCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="SMInternalInpFieldCfgType" name="field" minOccurs="1" maxOccurs="unbounded"/>
+      <xs:element type="NPInternalInpFieldCfgType" name="field" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
-  
-  
-  <!-- StateMachine - external input fields -configuration -->
-  <xs:complexType name="SMExternalInpFieldsCfgType">
+
+
+  <!-- NeuralPreprocessor - external input fields -configuration -->
+  <xs:complexType name="NPExternalInpFieldsCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="AloneNameType" name="field" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
-  <!-- StateMachine - input -configuration -->
-  <xs:complexType name="SMInputCfgType">
+  <!-- NeuralPreprocessor - input -configuration -->
+  <xs:complexType name="NPInputCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:choice minOccurs="1" maxOccurs="1">
-        <xs:element type="SMInpFeedingContinuousCfgType" name="feedingContinuous" minOccurs="1" maxOccurs="1"/>
-        <xs:element type="SMInpFeedingPatternedCfgType" name="feedingPatterned" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="NPInpFeedingContinuousCfgType" name="feedingContinuous" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="NPInpFeedingPatternedCfgType" name="feedingPatterned" minOccurs="1" maxOccurs="1"/>
       </xs:choice>
-      <xs:element type="SMExternalInpFieldsCfgType" name="external" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="SMInternalInpFieldsCfgType" name="internal" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="NPExternalInpFieldsCfgType" name="external" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="NPInternalInpFieldsCfgType" name="internal" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
   </xs:complexType>
 
-  <!-- StateMachine - reservoirs configuration - container -->
-  <xs:complexType name="SMResCfgContainerType">
+  <!-- NeuralPreprocessor - reservoirs configuration - container -->
+  <xs:complexType name="NPResCfgContainerType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="ReservoirCfgType" name="reservoirCfg" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
-  <!-- StateMachine - reservoir instance - input field connection configuration -->
-  <xs:complexType name="SMResInstanceInputConnectionCfgType">
+  <!-- NeuralPreprocessor - reservoir instance - input field connection configuration -->
+  <xs:complexType name="NPResInstanceInputConnectionCfgType">
     <xs:choice minOccurs="1" maxOccurs="1">
       <xs:element type="StaticSynapseCfgType" name="staticSynapse" minOccurs="1" maxOccurs="1"/>
       <xs:element type="DynamicSynapseCfgType" name="dynamicSynapse" minOccurs="1" maxOccurs="1"/>
@@ -1105,17 +1105,17 @@
     <xs:attribute type="UDoubleGT0Type" name="density" use="required"/>
   </xs:complexType>
 
-  <!-- StateMachine - reservoir instance - input field connection - configuration collection -->
-  <xs:complexType name="SMResInstanceInputConnectionsCfgType">
+  <!-- NeuralPreprocessor - reservoir instance - input field connection - configuration collection -->
+  <xs:complexType name="NPResInstanceInputConnectionsCfgType">
     <xs:sequence minOccurs="1" maxOccurs="unbounded">
-      <xs:element type="SMResInstanceInputConnectionCfgType" name="inputConnection" minOccurs="1" maxOccurs="unbounded"/>
+      <xs:element type="NPResInstanceInputConnectionCfgType" name="inputConnection" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
-  <!-- StateMachine - reservoir instance - configuration -->
-  <xs:complexType name="SMResInstanceCfgType">
+  <!-- NeuralPreprocessor - reservoir instance - configuration -->
+  <xs:complexType name="NPResInstanceCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="SMResInstanceInputConnectionsCfgType" name="inputConnections" minOccurs="1" maxOccurs="1">
+      <xs:element type="NPResInstanceInputConnectionsCfgType" name="inputConnections" minOccurs="1" maxOccurs="1">
         <xs:unique name="unique_input_field_assignment">
           <xs:selector xpath="./inputFieldAssignment"/>
           <xs:field xpath="@inputFieldName"/>
@@ -1132,34 +1132,43 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- StateMachine - reservoir instances - container -->
-  <xs:complexType name="SMResInstanceContainerType">
+  <!-- NeuralPreprocessor - reservoir instances - container -->
+  <xs:complexType name="NPResInstanceContainerType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="SMResInstanceCfgType" name="reservoirInstance" minOccurs="1" maxOccurs="unbounded"/>
+      <xs:element type="NPResInstanceCfgType" name="reservoirInstance" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
-  <!-- StateMachine configuration -->
-  <xs:complexType name="SMCfgType">
+  <!-- NeuralPreprocessor configuration -->
+  <xs:complexType name="NPCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="SMInputCfgType" name="input" minOccurs="1" maxOccurs="1">
+      <xs:element type="NPInputCfgType" name="input" minOccurs="1" maxOccurs="1">
         <xs:unique name="unique_input_field_name">
           <xs:selector xpath=".//field"/>
           <xs:field xpath="@name"/>
         </xs:unique>
       </xs:element>
-      <xs:element type="SMResCfgContainerType" name="reservoirCfgContainer" minOccurs="1" maxOccurs="1">
+      <xs:element type="NPResCfgContainerType" name="reservoirCfgContainer" minOccurs="1" maxOccurs="1">
         <xs:unique name="unique_reservoir_configuration_name">
           <xs:selector xpath="./reservoirCfg"/>
           <xs:field xpath="@name"/>
         </xs:unique>
       </xs:element>
-      <xs:element type="SMResInstanceContainerType" name="reservoirInstanceContainer" minOccurs="1" maxOccurs="1">
+      <xs:element type="NPResInstanceContainerType" name="reservoirInstanceContainer" minOccurs="1" maxOccurs="1">
         <xs:unique name="unique_reservoir_instance_name">
           <xs:selector xpath="./reservoirInstance"/>
           <xs:field xpath="@name"/>
         </xs:unique>
       </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!-- ________________________________________STATE MACHINE TYPES_________________________________________________ -->
+  <!-- StateMachine configuration -->
+  <xs:complexType name="SMCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="NPCfgType" name="neuralPreprocessor" minOccurs="1" maxOccurs="1"/>
       <xs:element type="ROutLayerCfgType" name="readoutLayer" minOccurs="1" maxOccurs="1">
         <xs:unique name="unique_output_field_name">
           <xs:selector xpath="./readoutUnit"/>

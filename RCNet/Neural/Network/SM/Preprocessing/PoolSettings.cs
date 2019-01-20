@@ -122,7 +122,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             //Validation
             ElemValidator validator = new ElemValidator();
             Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.SM.ReservoirStructure.PoolSettings.xsd");
+            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.SM.Preprocessing.PoolSettings.xsd");
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
             XElement poolSettingsElem = validator.Validate(elem, "rootElem");
             //Parsing
@@ -330,7 +330,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 //Validation
                 ElemValidator validator = new ElemValidator();
                 Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-                validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.SM.ReservoirStructure.PoolNeuronGroupSettings.xsd");
+                validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.SM.Preprocessing.PoolNeuronGroupSettings.xsd");
                 validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
                 XElement settingsElem = validator.Validate(elem, "rootElem");
                 //Parsing
@@ -519,7 +519,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 //Validation
                 ElemValidator validator = new ElemValidator();
                 Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-                validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.SM.ReservoirStructure.PoolInterconnectionSettings.xsd");
+                validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.SM.Preprocessing.PoolInterconnectionSettings.xsd");
                 validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
                 XElement settingsElem = validator.Validate(elem, "rootElem");
                 //Parsing

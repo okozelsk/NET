@@ -8,10 +8,10 @@ using RCNet.CsvTools;
 namespace RCNet.Neural.Data
 {
     /// <summary>
-    /// Bundle of input vector and desired output vector
+    /// Bundle of input vector and desired output vector pairs
     /// </summary>
     [Serializable]
-    public class TimeSeriesBundle
+    public class VectorBundle
     {
         //Attributes
         /// <summary>
@@ -28,7 +28,7 @@ namespace RCNet.Neural.Data
         /// <summary>
         /// Instantiates data bundle
         /// </summary>
-        public TimeSeriesBundle()
+        public VectorBundle()
         {
             InputVectorCollection = new List<double[]>();
             OutputVectorCollection = new List<double[]>();
@@ -37,12 +37,11 @@ namespace RCNet.Neural.Data
 
         //Constructors
         /// <summary>
-        /// Instantiates data bundle.
         /// Creates shallow copy of given lists
         /// </summary>
         /// <param name="inputVectorCollection">Collection of input vectors</param>
         /// <param name="outputVectorCollection">Collection of output vectors</param>
-        public TimeSeriesBundle(List<double[]> inputVectorCollection, List<double[]> outputVectorCollection)
+        public VectorBundle(List<double[]> inputVectorCollection, List<double[]> outputVectorCollection)
         {
             InputVectorCollection = new List<double[]>(inputVectorCollection);
             OutputVectorCollection = new List<double[]>(outputVectorCollection);
@@ -50,10 +49,10 @@ namespace RCNet.Neural.Data
         }
 
         /// <summary>
-        /// Instantiates data bundle
+        /// Instantiates an empty bundle
         /// </summary>
         /// <param name="expectedNumOfPairs">Expected number of sample pairs</param>
-        public TimeSeriesBundle(int expectedNumOfPairs)
+        public VectorBundle(int expectedNumOfPairs)
         {
             InputVectorCollection = new List<double[]>(expectedNumOfPairs);
             OutputVectorCollection = new List<double[]>(expectedNumOfPairs);
@@ -113,7 +112,7 @@ namespace RCNet.Neural.Data
         /// <param name="dataStandardization"> Specifies whether to apply data standardization </param>
         /// <param name="bundleNormalizer"> Returned initialized instance of BundleNormalizer </param>
         /// <param name="remainingInputVector"> Returned the last input vector unused in the bundle </param>
-        public static TimeSeriesBundle LoadFromCsv(string fileName,
+        public static VectorBundle LoadFromCsv(string fileName,
                                                    List<string> inputFieldNameCollection,
                                                    List<string> outputFieldNameCollection,
                                                    List<CommonEnums.TaskType> outputFieldTaskCollection,
@@ -124,7 +123,7 @@ namespace RCNet.Neural.Data
                                                    out double[] remainingInputVector
                                                    )
         {
-            TimeSeriesBundle bundle = null;
+            VectorBundle bundle = null;
             remainingInputVector = null;
             bundleNormalizer = new BundleNormalizer(normRange);
             using (StreamReader streamReader = new StreamReader(new FileStream(fileName, FileMode.Open)))
@@ -209,7 +208,7 @@ namespace RCNet.Neural.Data
                     }
                 }
                 //Create bundle
-                bundle = new TimeSeriesBundle(inputVectorCollection, outputVectorCollection);
+                bundle = new VectorBundle(inputVectorCollection, outputVectorCollection);
                 //Normalize bundle and remaining input vector
                 bundleNormalizer.Normalize(bundle);
                 bundleNormalizer.NormalizeInputVector(remainingInputVector);
@@ -217,6 +216,6 @@ namespace RCNet.Neural.Data
             return bundle;
         }//LoadFromCsv
 
-    }//TimeSeriesBundle
+    }//VectorBundle
 
 }//Namespace

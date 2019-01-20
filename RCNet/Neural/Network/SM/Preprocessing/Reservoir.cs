@@ -45,6 +45,17 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// </summary>
         private List<ISynapse>[] _neuronNeuronConnectionsCollection;
 
+        //Attribute properties
+        /// <summary>
+        /// Reservoir's instance definition
+        /// </summary>
+        public NeuralPreprocessorSettings.ReservoirInstanceDefinition InstanceDefinition { get; }
+
+        /// <summary>
+        /// Number of reservoir's output predictors
+        /// </summary>
+        public int NumOfOutputPredictors { get; }
+
         //Constructor
         /// <summary>
         /// Instantiates the reservoir
@@ -52,9 +63,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// <param name="instanceDefinition">Reservoir instance definition</param>
         /// <param name="inputRange">Range of input values</param>
         /// <param name="rand">Random object to be used for random part initialization </param>
-        public Reservoir(StateMachineSettings.ReservoirInstanceDefinition instanceDefinition, Interval inputRange, Random rand)
+        public Reservoir(NeuralPreprocessorSettings.ReservoirInstanceDefinition instanceDefinition, Interval inputRange, Random rand)
         {
-            int numOfInputNodes = instanceDefinition.SMInputFieldIdxCollection.Count;
+            int numOfInputNodes = instanceDefinition.NPInputFieldIdxCollection.Count;
             //Copy settings
             InstanceDefinition = instanceDefinition.DeepClone();
             
@@ -282,19 +293,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing
 
         //Properties
         /// <summary>
-        /// Reservoir's instance definition
-        /// </summary>
-        public StateMachineSettings.ReservoirInstanceDefinition InstanceDefinition { get; }
-
-        /// <summary>
         /// Reservoir size. (Number of neurons in the reservoir)
         /// </summary>
         public int Size { get { return _reservoirNeuronCollection.Length; } }
-
-        /// <summary>
-        /// Number of reservoir's output predictors
-        /// </summary>
-        public int NumOfOutputPredictors { get; }
 
         //Methods
         /// <summary>
@@ -362,9 +363,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             return true;
         }
 
-        private void SetPoolInputConnections(Random rand, int poolID, List<StateMachineSettings.ReservoirInstanceDefinition.InputConnection> inputFieldAssignmentCollection)
+        private void SetPoolInputConnections(Random rand, int poolID, List<NeuralPreprocessorSettings.ReservoirInstanceDefinition.InputConnection> inputFieldAssignmentCollection)
         {
-            foreach(StateMachineSettings.ReservoirInstanceDefinition.InputConnection assignment in inputFieldAssignmentCollection)
+            foreach(NeuralPreprocessorSettings.ReservoirInstanceDefinition.InputConnection assignment in inputFieldAssignmentCollection)
             {
                 if(assignment.PoolID == poolID)
                 {

@@ -85,7 +85,7 @@ namespace RCNet.Neural.Network.SM.Readout
         /// There is recorded fold by fold (unit by unit) predicted and corresponding ideal values.
         /// This is the pesimistic approach. Real results on unseen data could be better due to the clustering synergy.
         /// </returns>
-        public ValidationBundle Build(List<double[]> predictorsCollection,
+        public ResultComparativeBundle Build(List<double[]> predictorsCollection,
                                       List<double[]> idealOutputsCollection,
                                       ReadoutUnit.RegressionCallbackDelegate regressionController,
                                       Object regressionControllerData
@@ -123,7 +123,7 @@ namespace RCNet.Neural.Network.SM.Readout
                 }
             }
             //Create shuffled copy of the data
-            TimeSeriesBundle shuffledData = new TimeSeriesBundle(predictorsCollection, idealOutputsCollection);
+            VectorBundle shuffledData = new VectorBundle(predictorsCollection, idealOutputsCollection);
             shuffledData.Shuffle(rand);
             //Data inspection, preparation of datasets and training of ReadoutUnits
             //Clusters of readout units (one cluster for each output field)
@@ -149,7 +149,7 @@ namespace RCNet.Neural.Network.SM.Readout
                         refBinDistr.Update(value);
                     }
                 }
-                List<TimeSeriesBundle> subBundleCollection = null;
+                List<VectorBundle> subBundleCollection = null;
                 //Datasets preparation is depending on the task type
                 if (_settings.ReadoutUnitCfgCollection[clusterIdx].TaskType == CommonEnums.TaskType.Classification)
                 {
@@ -216,7 +216,7 @@ namespace RCNet.Neural.Network.SM.Readout
 
             }//clusterIdx
             //Validation bundle is returned. 
-            return new ValidationBundle(validationComputedVectorCollection, validationIdealVectorCollection);
+            return new ResultComparativeBundle(validationComputedVectorCollection, validationIdealVectorCollection);
         }
 
         //Properties
@@ -270,14 +270,14 @@ namespace RCNet.Neural.Network.SM.Readout
             return outputVector;
         }
         
-        private List<TimeSeriesBundle> DivideSamplesForClassificationTask(List<double[]> predictorsCollection,
+        private List<VectorBundle> DivideSamplesForClassificationTask(List<double[]> predictorsCollection,
                                                                       List<double[]> idealValueCollection,
                                                                       BinDistribution refBinDistr,
                                                                       int bundleSize
                                                                       )
         {
             int numOfBundles = idealValueCollection.Count / bundleSize;
-            List<TimeSeriesBundle> bundleCollection = new List<TimeSeriesBundle>(numOfBundles);
+            List<VectorBundle> bundleCollection = new List<VectorBundle>(numOfBundles);
             //Scan
             int[] bin0SampleIdxs = new int[refBinDistr.NumOf[0]];
             int bin0SamplesPos = 0;
@@ -310,7 +310,7 @@ namespace RCNet.Neural.Network.SM.Readout
             bin1SamplesPos = 0;
             for(int bundleNum = 0; bundleNum < numOfBundles; bundleNum++)
             {
-                TimeSeriesBundle bundle = new TimeSeriesBundle();
+                VectorBundle bundle = new VectorBundle();
                 //Bin 0
                 for (int i = 0; i < bundleBin0Count; i++)
                 {
@@ -343,18 +343,18 @@ namespace RCNet.Neural.Network.SM.Readout
             return bundleCollection;
         }
 
-        private List<TimeSeriesBundle> DivideSamplesForForecastTask(List<double[]> predictorsCollection,
+        private List<VectorBundle> DivideSamplesForForecastTask(List<double[]> predictorsCollection,
                                                                           List<double[]> idealValueCollection,
                                                                           int bundleSize
                                                                           )
         {
             int numOfBundles = idealValueCollection.Count / bundleSize;
-            List<TimeSeriesBundle> bundleCollection = new List<TimeSeriesBundle>(numOfBundles);
+            List<VectorBundle> bundleCollection = new List<VectorBundle>(numOfBundles);
             //Bundles creation
             int samplesPos = 0;
             for (int bundleNum = 0; bundleNum < numOfBundles; bundleNum++)
             {
-                TimeSeriesBundle bundle = new TimeSeriesBundle();
+                VectorBundle bundle = new VectorBundle();
                 for (int i = 0; i < bundleSize && samplesPos < idealValueCollection.Count; i++)
                 {
                     bundle.InputVectorCollection.Add(predictorsCollection[samplesPos]);

@@ -4,10 +4,10 @@ using System.Collections.Generic;
 namespace RCNet.Neural.Data
 {
     /// <summary>
-    /// Bundle of computed vector and desired ideal vector
+    /// Bundle of computed vector and desired ideal vector pairs
     /// </summary>
     [Serializable]
-    public class ValidationBundle
+    public class ResultComparativeBundle
     {
         //Attributes
         /// <summary>
@@ -27,7 +27,7 @@ namespace RCNet.Neural.Data
         /// </summary>
         /// <param name="computedVectorCollection">Collection of computed vectors</param>
         /// <param name="idealVectorCollection">Collection of ideal vectors</param>
-        public ValidationBundle(List<double[]> computedVectorCollection, List<double[]> idealVectorCollection)
+        public ResultComparativeBundle(List<double[]> computedVectorCollection, List<double[]> idealVectorCollection)
         {
             ComputedVectorCollection = new List<double[]>(computedVectorCollection);
             IdealVectorCollection = new List<double[]>(idealVectorCollection);
@@ -37,7 +37,7 @@ namespace RCNet.Neural.Data
         /// <summary>
         /// Instantiates data bundle
         /// </summary>
-        public ValidationBundle()
+        public ResultComparativeBundle()
         {
             ComputedVectorCollection = new List<double[]>();
             IdealVectorCollection = new List<double[]>();
@@ -48,7 +48,7 @@ namespace RCNet.Neural.Data
         /// Instantiates data bundle
         /// </summary>
         /// <param name="expectedNumOfPairs">Expected number of vector pairs</param>
-        public ValidationBundle(int expectedNumOfPairs)
+        public ResultComparativeBundle(int expectedNumOfPairs)
         {
             ComputedVectorCollection = new List<double[]>(expectedNumOfPairs);
             IdealVectorCollection = new List<double[]>(expectedNumOfPairs);
@@ -68,6 +68,6 @@ namespace RCNet.Neural.Data
         }
 
 
-    }//ValidationBundle
+    }//ResultComparativeBundle
 
 }//Namespace

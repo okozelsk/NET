@@ -8,7 +8,7 @@ using RCNet.CsvTools;
 namespace RCNet.Neural.Data
 {
     /// <summary>
-    /// Bundle of pattern and desired output vector
+    /// Bundle of pattern and desired output vector pairs
     /// </summary>
     [Serializable]
     public class PatternBundle
