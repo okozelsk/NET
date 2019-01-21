@@ -156,7 +156,7 @@ namespace RCNet.Neural.Network.SM.Synapse
             Delay = 0;
             _qSig = new SimpleQueue<Signal>(Delay + 1);
             //Efficacy statistics
-            EfficacyStat = new BasicStat();
+            EfficacyStat = new BasicStat(false);
             return;
         }
 

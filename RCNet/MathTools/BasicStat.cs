@@ -12,7 +12,7 @@ namespace RCNet.MathTools
     {
         //Attributes
         //Locker to ensure thread safe behaviour
-        private Object _lock = new Object();
+        private Object _lock;
         private readonly bool _threadSafe;
         //Base values
         private double _sum;
@@ -38,6 +38,14 @@ namespace RCNet.MathTools
         public BasicStat(bool threadSafe = false)
         {
             _threadSafe = threadSafe;
+            if(_threadSafe)
+            {
+                _lock = new Object();
+            }
+            else
+            {
+                _lock = null;
+            }
             Reset();
             return;
         }

@@ -13,6 +13,7 @@ using RCNet.MathTools.Differential;
 using RCNet.MathTools.VectorMath;
 using RCNet.RandomValue;
 using RCNet.Neural.Data.Generators;
+using System.Globalization;
 
 namespace RCNet.DemoConsoleApp
 {
@@ -32,6 +33,10 @@ namespace RCNet.DemoConsoleApp
         //Methods
         public void Run()
         {
+
+            //TimeSeriesGenerator.SaveTimeSeriesToCsvFile("MackeyGlass_big.csv", "Value", TimeSeriesGenerator.GenMackeyGlassTimeSeries(16000), CultureInfo.InvariantCulture);
+
+
             MackeyGlassGeneratorSettings modSettings = new MackeyGlassGeneratorSettings(18, 0.1, 0.2);
             IGenerator generator = new MackeyGlassGenerator(modSettings);
 
