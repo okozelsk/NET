@@ -134,7 +134,7 @@ namespace RCNet.Extensions
                 do
                 {
                     result = rand.NextGaussianDouble(mean, stdDev);
-                } while (result < min || result > max || result == mean);
+                } while (result < min || result > max);
                 return result;
             }
         }

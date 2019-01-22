@@ -306,11 +306,15 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             //Create weights matrix
             Matrix wMatrix = new Matrix(_reservoirNeuronCollection.Length, _reservoirNeuronCollection.Length);
             //Interconnections
-            Parallel.For(0, _neuronNeuronConnectionsCollection.Length, row =>
+            var rangePartitioner = Partitioner.Create(0, _neuronNeuronConnectionsCollection.Length);
+            Parallel.ForEach(rangePartitioner, (range, loopState) =>
             {
-                foreach(ISynapse synapse in _neuronNeuronConnectionsCollection[row].Values)
+                for(int row = range.Item1; row < range.Item2; row++)
                 {
-                    wMatrix.Data[row][synapse.SourceNeuron.Placement.ReservoirFlatIdx] = synapse.Weight;
+                    foreach (ISynapse synapse in _neuronNeuronConnectionsCollection[row].Values)
+                    {
+                        wMatrix.Data[row][synapse.SourceNeuron.Placement.ReservoirFlatIdx] = synapse.Weight;
+                    }
                 }
             });
             double maxEV = wMatrix.EstimateLargestEigenValue(out double[] eigenVector);
@@ -318,45 +322,37 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         }
 
         /// <summary>
-        /// This general function checks the existency of the interconnection between the source and target neurons
-        /// </summary>
-        /// <param name="connectionsCollection">Bank of synapses</param>
-        /// <param name="sourceNeuron">Source neuron</param>
-        /// <param name="targetNeuronIdx">An index of the target neuron</param>
-        private bool ExistsInterconnection(Dictionary<int, ISynapse>[] connectionsCollection, INeuron sourceNeuron, int targetNeuronIdx)
-        {
-            return connectionsCollection[targetNeuronIdx].ContainsKey(sourceNeuron.Placement.ReservoirFlatIdx);
-        }
-
-        /// <summary>
         /// This general function adds new synapse into the connections bank.
         /// </summary>
         /// <param name="connectionsCollection">Bank of connections</param>
         /// <param name="synapse">A synapse to be added into the bank</param>
-        /// <param name="duplicityCheck">Indicates whether to check the interconnection existency before its creation</param>
         /// <returns>Success/Unsuccess</returns>
-        private bool AddInterconnection(Dictionary<int, ISynapse>[] connectionsCollection, ISynapse synapse, bool duplicityCheck)
+        private bool AddInterconnection(Dictionary<int, ISynapse>[] connectionsCollection, ISynapse synapse)
         {
-            if (duplicityCheck)
+            //Add new connection
+            lock (connectionsCollection[synapse.TargetNeuron.Placement.ReservoirFlatIdx])
             {
-                if(ExistsInterconnection(connectionsCollection, synapse.SourceNeuron, synapse.TargetNeuron.Placement.ReservoirFlatIdx))
+                try
+                {
+                    connectionsCollection[synapse.TargetNeuron.Placement.ReservoirFlatIdx].Add(synapse.SourceNeuron.Placement.ReservoirFlatIdx, synapse);
+                    return true;
+                }
+                catch
                 {
                     //Connection already exists
                     return false;
                 }
             }
-            //Add new connection
-            connectionsCollection[synapse.TargetNeuron.Placement.ReservoirFlatIdx].Add(synapse.SourceNeuron.Placement.ReservoirFlatIdx, synapse);
-            return true;
         }
 
         private void SetPoolInputConnections(Random rand, int poolID, List<NeuralPreprocessorSettings.ReservoirInstanceDefinition.InputConnection> inputFieldAssignmentCollection)
         {
-            foreach(NeuralPreprocessorSettings.ReservoirInstanceDefinition.InputConnection assignment in inputFieldAssignmentCollection)
+            Parallel.ForEach(inputFieldAssignmentCollection, inputConnection =>
+            //foreach(NeuralPreprocessorSettings.ReservoirInstanceDefinition.InputConnection inputConnection in inputFieldAssignmentCollection)
             {
-                if(assignment.PoolID == poolID)
+                if (inputConnection.PoolID == poolID)
                 {
-                    int connectionsPerInput = (int)Math.Round(InstanceDefinition.Settings.PoolSettingsCollection[poolID].Dim.Size * assignment.Density, 0);
+                    int connectionsPerInput = (int)Math.Round(InstanceDefinition.Settings.PoolSettingsCollection[poolID].Dim.Size * inputConnection.Density, 0);
                     if (connectionsPerInput > 0)
                     {
                         int[] indices = new int[InstanceDefinition.Settings.PoolSettingsCollection[poolID].Dim.Size];
@@ -366,18 +362,18 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                         {
                             int targetNeuronIdx = indices[i];
                             ISynapse synapse = null;
-                            if(assignment.SynapseCfg.GetType() == typeof(StaticSynapseSettings))
+                            if (inputConnection.SynapseCfg.GetType() == typeof(StaticSynapseSettings))
                             {
-                                StaticSynapseSettings sss = (StaticSynapseSettings)assignment.SynapseCfg;
-                                synapse = new StaticSynapse(sourceNeuron: _inputNeuronCollection[assignment.FieldIdx],
+                                StaticSynapseSettings sss = (StaticSynapseSettings)inputConnection.SynapseCfg;
+                                synapse = new StaticSynapse(sourceNeuron: _inputNeuronCollection[inputConnection.FieldIdx],
                                                             targetNeuron: _poolNeuronsCollection[poolID][targetNeuronIdx],
                                                             weight: rand.NextDouble(sss.WeightCfg)
                                                             );
                             }
                             else
                             {
-                                DynamicSynapseSettings dss = (DynamicSynapseSettings)assignment.SynapseCfg;
-                                synapse = new DynamicSynapse(sourceNeuron: _inputNeuronCollection[assignment.FieldIdx],
+                                DynamicSynapseSettings dss = (DynamicSynapseSettings)inputConnection.SynapseCfg;
+                                synapse = new DynamicSynapse(sourceNeuron: _inputNeuronCollection[inputConnection.FieldIdx],
                                                              targetNeuron: _poolNeuronsCollection[poolID][targetNeuronIdx],
                                                              weight: rand.NextDouble(dss.WeightCfg),
                                                              tauFacilitation: dss.TauFacilitation,
@@ -386,11 +382,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                                                              tauDecay: dss.TauDecay
                                                              );
                             }
-                            AddInterconnection(_neuronInputConnectionsCollection, synapse, false);
+                            AddInterconnection(_neuronInputConnectionsCollection, synapse);
                         }
                     }
                 }
-            }
+            });
             return;
         }
 
@@ -488,22 +484,25 @@ namespace RCNet.Neural.Network.SM.Preprocessing
 
             //////////////////////////////////////////////////////////////////////////////////////
             //Create physical connections
+            bool byDistance = (sourcePoolID == targetPoolID && sourcePoolSettings.InterconnectionCfg.AvgDistance > 0);
             int numOfCreatedConnections = 0;
-            foreach (NeuronConnCount nccSource in (from item in sourceNeuronCollection where item.ConnCount > 0 select item))
+            Parallel.ForEach((from item in sourceNeuronCollection where item.ConnCount > 0 select item), nccSource =>
+            //foreach (NeuronConnCount nccSource in (from item in sourceNeuronCollection where item.ConnCount > 0 select item))
             {
-                //Copy all possible target neurons
-                List<INeuron> tmpRelTargetNeuronCollection = new List<INeuron>(targetNeuronCollection);
-                if (excludeSourceNeuronFromTarget)
-                {
-                    //Exclude source neuron from targets
-                    tmpRelTargetNeuronCollection.Remove(nccSource.Neuron);
-                }
+                //Copy all possible target neurons and compute distances if necessary
+                List<RelatedNeuron> tmpRelTargetNeuronCollection = new List<RelatedNeuron>(from neuron in targetNeuronCollection
+                                                                                           where (!excludeSourceNeuronFromTarget || (excludeSourceNeuronFromTarget && neuron != nccSource.Neuron))
+                                                                                           select new RelatedNeuron
+                                                                                           {
+                                                                                               Neuron = neuron,
+                                                                                               Distance = byDistance ? EuclideanDistance.Compute(nccSource.Neuron.Placement.Coordinates, neuron.Placement.Coordinates) : 0
+                                                                                           });
                 //Make connections of source neurons
                 for (int connNum = 0; connNum < nccSource.ConnCount; connNum++)
                 {
                     int targetNeuronIndex = -1;
                     //Select target neuron to be connected
-                    if (sourcePoolID == targetPoolID && sourcePoolSettings.InterconnectionCfg.AvgDistance > 0)
+                    if (byDistance)
                     {
                         //Selection based on average distance
                         double gaussianDistance = rand.NextGaussianDouble(sourcePoolSettings.InterconnectionCfg.AvgDistance);
@@ -511,7 +510,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                         double minDiff = double.MaxValue;
                         for (int i = 0; i < tmpRelTargetNeuronCollection.Count; i++)
                         {
-                            double err = Math.Abs(EuclideanDistance.Compute(nccSource.Neuron.Placement.Coordinates, tmpRelTargetNeuronCollection[i].Placement.Coordinates) - gaussianDistance);
+                            double err = Math.Abs(tmpRelTargetNeuronCollection[i].Distance - gaussianDistance);
                             if (err < minDiff)
                             {
                                 targetNeuronIndex = i;
@@ -530,7 +529,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                     {
                         StaticSynapseSettings sss = (StaticSynapseSettings)synapseCfg;
                         synapse = new StaticSynapse(sourceNeuron: nccSource.Neuron,
-                                                    targetNeuron: tmpRelTargetNeuronCollection[targetNeuronIndex],
+                                                    targetNeuron: tmpRelTargetNeuronCollection[targetNeuronIndex].Neuron,
                                                     weight: rand.NextDouble(sss.WeightCfg)
                                                     );
                     }
@@ -538,7 +537,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                     {
                         DynamicSynapseSettings dss = (DynamicSynapseSettings)synapseCfg;
                         synapse = new DynamicSynapse(sourceNeuron: nccSource.Neuron,
-                                                     targetNeuron: tmpRelTargetNeuronCollection[targetNeuronIndex],
+                                                     targetNeuron: tmpRelTargetNeuronCollection[targetNeuronIndex].Neuron,
                                                      weight: rand.NextDouble(dss.WeightCfg),
                                                      tauFacilitation: dss.TauFacilitation,
                                                      tauRecovery: dss.TauRecovery,
@@ -546,14 +545,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                                                      tauDecay: dss.TauDecay
                                                      );
                     }
-                    if(AddInterconnection(_neuronNeuronConnectionsCollection, synapse, true))
+                    if (AddInterconnection(_neuronNeuronConnectionsCollection, synapse))
                     {
                         ++numOfCreatedConnections;
                     }
                     //Remove targetNeuron from tmp collection
                     tmpRelTargetNeuronCollection.RemoveAt(targetNeuronIndex);
                 }//connNum
-            }//nccSource
+            });//nccSource
             return numOfCreatedConnections;
         }
 
@@ -889,8 +888,35 @@ namespace RCNet.Neural.Network.SM.Preprocessing
 
         private class RelatedNeuron
         {
+            //Attribute properties
             public INeuron Neuron { get; set; }
             public double Distance { get; set; }
+
+            //Methods
+            public static int CompareByDistanceAsc(RelatedNeuron item1, RelatedNeuron item2)
+            {
+                if(item1.Distance < item2.Distance)
+                {
+                    return -1;
+                }
+                else if(item1.Distance > item2.Distance)
+                {
+                    return 1;
+                }
+                else
+                {
+                    return 0;
+                }
+            }
+
+            //Inner classes
+            public class DistanceAscComparer : IComparer<RelatedNeuron>
+            {
+                public int Compare(RelatedNeuron item1, RelatedNeuron item2)
+                {
+                    return CompareByDistanceAsc(item1, item2);
+                }
+            }
         }
 
         private class NeuronConnCount
