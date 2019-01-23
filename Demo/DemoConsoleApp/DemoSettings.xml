@@ -74,8 +74,8 @@
   </case>
 
   <!--
-    This demo case demonstrates how to instantiate two independent reservoirs. Configuration definies ESN reservoir
-    structure having one pool of 8000 TanH analog neurons.
+    This demo case demonstrates performance on big reservoir. Configuration definies ESN reservoir
+    structure having one pool of 3162 TanH analog neurons having 1 million synapses.
     Standard linear regression is used as predicting readout.
     Dataset contains Mackey Glass chaotic time series (tau=17) and network forecasts the next value.
   -->
@@ -92,7 +92,7 @@
         <reservoirCfgContainer>
           <reservoirCfg name="ESNCfg" synapticDelayMethod="Random" maxInputDelay="0" maxInternalDelay="1" spectralRadius="0.999">
             <pools>
-              <pool name="Logistic pool" dimX="1000" dimY="1" dimZ="1" readoutNeuronsDensity="1">
+              <pool name="Logistic pool" dimX="3162" dimY="1" dimZ="1" readoutNeuronsDensity="1">
                 <neuronGroups>
                   <neuronGroup name="Exc-Logistic" role="Excitatory" relShare="1" augmentedStates="true">
                     <activationTanH/>

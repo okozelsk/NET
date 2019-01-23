@@ -62,7 +62,12 @@ namespace RCNet.Neural.Network.SM.Synapse
         /// <summary>
         /// Moving signal queue
         /// </summary>
-        protected SimpleQueue<Signal> _qSig;
+        protected SimpleQueue<Signal> _signalQueue;
+
+        /// <summary>
+        /// Reusable signal object to avoid reallocations
+        /// </summary>
+        private Signal _reusableSignalObj;
 
         //Constructor
         /// <summary>
@@ -154,7 +159,10 @@ namespace RCNet.Neural.Network.SM.Synapse
             }
             //Set Delay to 0 as default. It can be changed later by SetDelay method.
             Delay = 0;
-            _qSig = new SimpleQueue<Signal>(Delay + 1);
+            //Instantiate queue
+            _signalQueue = new SimpleQueue<Signal>(Delay + 1);
+            //Reset reusable signal object
+            _reusableSignalObj = null;
             //Efficacy statistics
             EfficacyStat = new BasicStat(false);
             return;
@@ -167,7 +175,7 @@ namespace RCNet.Neural.Network.SM.Synapse
         /// <param name="statistics">Specifies whether to reset also internal statistics</param>
         public virtual void Reset(bool statistics)
         {
-            _qSig.Reset();
+            _signalQueue.Reset();
             if (statistics)
             {
                 EfficacyStat.Reset();
@@ -193,7 +201,8 @@ namespace RCNet.Neural.Network.SM.Synapse
         {
             //Set synapse signal delay
             Delay = delay;
-            _qSig.Resize(Delay + 1);
+            _signalQueue.Resize(Delay + 1);
+            _reusableSignalObj = null;
             return;
         }
 
@@ -210,31 +219,49 @@ namespace RCNet.Neural.Network.SM.Synapse
 
         /// <summary>
         /// Returns signal to be delivered to target neuron.
-        /// Note that this function has to be invoked only once per cycle !!!
+        /// Note that this function has to be invoked only once per reservoir cycle !!!
         /// </summary>
         /// <param name="collectStatistics">Specifies whether to update internal statistics</param>
         public double GetSignal(bool collectStatistics)
         {
             //We are getting source neuron signal
             double sourceSignal = SourceNeuron.OutputSignal;
-            if(sourceSignal == 0)
+            if (sourceSignal == 0)
             {
                 //No need to adjust anything
-                _qSig.Enqueue(new Signal { _weightedSignal = 0d, _preSynapticEfficacy = 1d });
+                if(_reusableSignalObj != null)
+                {
+                    _reusableSignalObj._weightedSignal = 0d;
+                    _reusableSignalObj._preSynapticEfficacy = 1d;
+                    _signalQueue.Enqueue(_reusableSignalObj);
+                }
+                else
+                {
+                    _signalQueue.Enqueue(new Signal { _weightedSignal = 0d, _preSynapticEfficacy = 1d });
+                }
             }
             else
             {
                 //Compute pre-synaptic efficacy
                 double preSynapticEfficacy = GetPreSynapticEfficacy();
                 //Compute constantly weighted signal and pre-synaptic part of efficacy and put them into the queue simulating the signal traveling
-                _qSig.Enqueue(new Signal { _weightedSignal = ((SourceNeuron.OutputSignal + _add) / _div) * Weight, _preSynapticEfficacy = preSynapticEfficacy });
+                if (_reusableSignalObj != null)
+                {
+                    _reusableSignalObj._weightedSignal = ((SourceNeuron.OutputSignal + _add) / _div) * Weight;
+                    _reusableSignalObj._preSynapticEfficacy = preSynapticEfficacy;
+                    _signalQueue.Enqueue(_reusableSignalObj);
+                }
+                else
+                {
+                    _signalQueue.Enqueue(new Signal { _weightedSignal = ((SourceNeuron.OutputSignal + _add) / _div) * Weight, _preSynapticEfficacy = preSynapticEfficacy });
+                }
             }
             //Is there any signal to be delivered?
-            if (_qSig.Full)
+            if (_signalQueue.Full)
             {
                 //Queue is full, so synapse is ready to deliver
-                Signal signal = _qSig.Dequeue();
-                if (signal._weightedSignal == 0)
+                _reusableSignalObj = _signalQueue.Dequeue();
+                if (_reusableSignalObj._weightedSignal == 0)
                 {
                     //No need to adjust anything
                     return 0;
@@ -243,13 +270,13 @@ namespace RCNet.Neural.Network.SM.Synapse
                 {
                     //Compute current post-synaptic efficacy
                     double postSynapticEfficacy = GetPostSynapticEfficacy();
-                    double efficacy = signal._preSynapticEfficacy * postSynapticEfficacy;
+                    double efficacy = _reusableSignalObj._preSynapticEfficacy * postSynapticEfficacy;
                     if (collectStatistics)
                     {
                         EfficacyStat.AddSampleValue(efficacy);
                     }
                     //Deliver the resulting signal
-                    return signal._weightedSignal * efficacy;
+                    return _reusableSignalObj._weightedSignal * efficacy;
                 }
             }
             else

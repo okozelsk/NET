@@ -791,7 +791,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             //Perform reservoir's computation cycle
             //Collect new stimulation for each reservoir neuron
             var rangePartitioner = Partitioner.Create(0, _reservoirNeuronCollection.Length);
-            ;
             Parallel.ForEach(rangePartitioner, (range, loopState) =>
             {
                 for (int neuronIdx = range.Item1; neuronIdx < range.Item2; neuronIdx++)
@@ -812,26 +811,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                     _reservoirNeuronCollection[neuronIdx].NewStimuli(iStimuli, rStimuli);
                 }
             });
-            /*
-            Parallel.For(0, _reservoirNeuronCollection.Length, neuronIdx =>
-            {
-                //Stimulation from input neurons
-                double iStimuli = 0;
-                foreach (ISynapse synapse in _neuronInputConnectionsCollection[neuronIdx].Values)
-                {
-                    iStimuli += synapse.GetSignal(updateStatistics);
-                }
-                //Stimulation from connected reservoir neurons
-                double rStimuli = 0;
-                foreach (ISynapse synapse in _neuronNeuronConnectionsCollection[neuronIdx].Values)
-                {
-                    rStimuli += synapse.GetSignal(updateStatistics);
-                }
-                //Store new neuron's stimulation
-                _reservoirNeuronCollection[neuronIdx].NewStimuli(iStimuli, rStimuli);
-            });
-            */
-            ;
             //Recompute state of all reservoir neurons
             Parallel.ForEach(rangePartitioner, (range, loopState) =>
             {
@@ -840,12 +819,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                     _reservoirNeuronCollection[neuronIdx].NewState(updateStatistics);
                 }
             });
-            /*
-            Parallel.For(0, _reservoirNeuronCollection.Length, neuronIdx =>
-            {
-                _reservoirNeuronCollection[neuronIdx].NewState(updateStatistics);
-            });
-            */
             return;
         }
 
