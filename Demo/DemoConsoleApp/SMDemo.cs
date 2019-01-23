@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Globalization;
+using System.Diagnostics;
+using System.Threading;
 using RCNet.Extensions;
 using RCNet.MathTools;
 using RCNet.Neural;
@@ -333,7 +335,6 @@ namespace RCNet.DemoConsoleApp
                 }
                 log.Write(" ", false);
             }
-            log.Write(" ", false);
             return;
         }
 
@@ -345,16 +346,24 @@ namespace RCNet.DemoConsoleApp
         /// <param name="demoSettingsXmlFile">Xml file containing definitions of demo cases to be prformed</param>
         public static void RunDemo(IOutputLog log, string demoSettingsXmlFile)
         {
-            log.Write("State Machine demo started", false);
+            log.Write("State Machine demo started");
             //Instantiate demo settings from the xml file
             DemoSettings demoSettings = new DemoSettings(demoSettingsXmlFile);
             //Loop through all demo cases
-            foreach(DemoSettings.CaseSettings demoCaseParams in demoSettings.CaseCfgCollection)
+            Stopwatch sw = new Stopwatch();
+            foreach (DemoSettings.CaseSettings demoCaseParams in demoSettings.CaseCfgCollection)
             {
+                sw.Reset();
+                sw.Start();
                 //Execute the demo case
                 PerformDemoCase(log, demoCaseParams);
+                sw.Stop();
+                TimeSpan ts = sw.Elapsed;
+                log.Write("Run time of demo case: " + String.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10));
+                log.Write(string.Empty);
+                log.Write(string.Empty);
             }
-            log.Write("State Machine demo finished", false);
+            log.Write("State Machine demo finished");
             log.Write(string.Empty);
             return;
         }
