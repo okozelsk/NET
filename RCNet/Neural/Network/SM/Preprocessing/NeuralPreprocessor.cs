@@ -48,7 +48,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// </summary>
         public List<Reservoir> ReservoirCollection { get; }
         /// <summary>
-        /// Number of Neural Preprocessor predictors
+        /// All predictor neurons.
+        /// </summary>
+        public List<Reservoir.PredictorNeuron> PredictorNeuronCollection { get; }
+        /// <summary>
+        /// Number of predictors
         /// </summary>
         public int NumOfPredictors { get; }
 
@@ -93,12 +97,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             //Reservoir instance(s)
             //Random generator used for reservoir structure initialization
             Random rand = (randomizerSeek < 0 ? new Random() : new Random(randomizerSeek));
+            PredictorNeuronCollection = new List<Reservoir.PredictorNeuron>();
             NumOfPredictors = 0;
             ReservoirCollection = new List<Reservoir>(_settings.ReservoirInstanceDefinitionCollection.Count);
             foreach(NeuralPreprocessorSettings.ReservoirInstanceDefinition instanceDefinition in _settings.ReservoirInstanceDefinitionCollection)
             {
                 Reservoir reservoir = new Reservoir(instanceDefinition, DataRange, rand);
                 ReservoirCollection.Add(reservoir);
+                PredictorNeuronCollection.AddRange(reservoir.PredictorNeuronCollection);
                 NumOfPredictors += reservoir.NumOfOutputPredictors;
             }
             if(_settings.InputConfig.RouteExternalInputToReadout)

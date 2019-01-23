@@ -80,7 +80,7 @@ namespace RCNet.Neural.Network.SM.Synapse
             SourceNeuron = sourceNeuron;
             TargetNeuron = targetNeuron;
             //Euclidean distance
-            Distance = EuclideanDistance.Compute(SourceNeuron.Placement.Coordinates, TargetNeuron.Placement.Coordinates);
+            Distance = EuclideanDistance.Compute(SourceNeuron.Placement.ReservoirCoordinates, TargetNeuron.Placement.ReservoirCoordinates);
             //Weight sign and signal range conversion rules
             if (SourceNeuron.Role == CommonEnums.NeuronRole.Input)
             {

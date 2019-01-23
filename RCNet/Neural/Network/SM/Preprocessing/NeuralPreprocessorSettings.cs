@@ -89,11 +89,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             //Mapping of input fields to reservoir settings (future reservoir instance)
             ReservoirInstanceDefinitionCollection = new List<ReservoirInstanceDefinition>();
             XElement reservoirInstancesContainerElem = neuralPreprocessorSettingsElem.Descendants("reservoirInstanceContainer").First();
+            int reservoirInstanceID = 0;
             int numOfNeuronsInLargestReservoir = 0;
             foreach (XElement reservoirInstanceElem in reservoirInstancesContainerElem.Descendants("reservoirInstance"))
             {
                 ReservoirInstanceDefinition reservoirInstanceDefinition = new ReservoirInstanceDefinition
                 {
+                    InstanceID = reservoirInstanceID,
                     InstanceName = reservoirInstanceElem.Attribute("name").Value,
                     AugmentedStates = bool.Parse(reservoirInstanceElem.Attribute("augmentedStates").Value),
                     //Select reservoir settings
@@ -177,6 +179,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                     reservoirInstanceDefinition.InputConnectionCollection.Add(new ReservoirInstanceDefinition.InputConnection(resInputFieldIdx, targetPoolID, density, synapseCfg));
                 }
                 ReservoirInstanceDefinitionCollection.Add(reservoirInstanceDefinition);
+                ++reservoirInstanceID;
             }
             //Finalize boot cycles if necessary
             if(InputConfig.BootCycles == -1 && InputConfig.FeedingType == CommonEnums.InputFeedingType.Continuous)
@@ -636,6 +639,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         {
             //Attribute properties
             /// <summary>
+            /// Index of the reservoir instance within the Neural Preprocessor
+            /// </summary>
+            public int InstanceID { get; set; }
+            /// <summary>
             /// Name of the reservoir instance. It is useful for logging and visualization
             /// purposes so instance name should be unique within the Neural Preprocessor.
             /// </summary>
@@ -666,6 +673,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             /// </summary>
             public ReservoirInstanceDefinition()
             {
+                InstanceID = 0;
                 InstanceName = string.Empty;
                 Settings = null;
                 AugmentedStates = false;
@@ -680,6 +688,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             /// <param name="source">Source instance</param>
             public ReservoirInstanceDefinition(ReservoirInstanceDefinition source)
             {
+                InstanceID = source.InstanceID;
                 InstanceName = source.InstanceName;
                 Settings = source.Settings.DeepClone();
                 AugmentedStates = source.AugmentedStates;
@@ -709,7 +718,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             {
                 if (obj == null) return false;
                 ReservoirInstanceDefinition cmpSettings = obj as ReservoirInstanceDefinition;
-                if (InstanceName != cmpSettings.InstanceName ||
+                if (InstanceID != cmpSettings.InstanceID ||
+                    InstanceName != cmpSettings.InstanceName ||
                     !Equals(Settings, cmpSettings.Settings) ||
                     AugmentedStates != cmpSettings.AugmentedStates ||
                     NPInputFieldIdxCollection.Count != cmpSettings.NPInputFieldIdxCollection.Count ||

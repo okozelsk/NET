@@ -90,7 +90,7 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// </param>
         public InputNeuron(int[] inputEntryPoint, int inputFieldIdx, Interval inputRange)
         {
-            Placement = new NeuronPlacement(inputFieldIdx, - 1, inputFieldIdx, 0, inputEntryPoint[0], inputEntryPoint[1], inputEntryPoint[2]);
+            Placement = new NeuronPlacement(-1, inputFieldIdx, - 1, inputFieldIdx, 0, inputEntryPoint[0], inputEntryPoint[1], inputEntryPoint[2]);
             OutputRange = inputRange.DeepClone();
             Statistics = new NeuronStatistics(OutputRange);
             Reset(false);

@@ -14,6 +14,10 @@ namespace RCNet.Neural.Network.SM.Neuron
     public class NeuronPlacement
     {
         /// <summary>
+        /// Neuron's home reservoir ID
+        /// </summary>
+        public int ReservoirID { get; }
+        /// <summary>
         /// Neuron's index in a reservoir flat stucture
         /// </summary>
         public int ReservoirFlatIdx { get; }
@@ -28,40 +32,43 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// <summary>
         /// Neuron's group index within the pool
         /// </summary>
-        public int GroupID { get; }
+        public int PoolGroupID { get; }
         /// <summary>
         /// Coordinates (x,y,z) within the reservoir
         /// </summary>
-        public int[] Coordinates { get; }
+        public int[] ReservoirCoordinates { get; }
 
         //Constructor
         /// <summary>
         /// Instantiates an initialized instance
         /// </summary>
+        /// <param name="reservoirID">Home reservoir index.</param>
         /// <param name="reservoirFlatIdx">Index of the neuron in a reservoir flat structure.</param>
         /// <param name="poolID">Home pool index.</param>
         /// <param name="poolFlatIdx">Index of the neuron in a pool flat structure.</param>
-        /// <param name="groupID">Index of the neuron's group in a pool.</param>
+        /// <param name="poolGroupID">Index of the neuron's group in a pool.</param>
         /// <param name="x">X coordinate in the reservoir</param>
         /// <param name="y">Y coordinate in the reservoir</param>
         /// <param name="z">Z coordinate in the reservoir</param>
-        public NeuronPlacement(int reservoirFlatIdx,
+        public NeuronPlacement(int reservoirID,
+                               int reservoirFlatIdx,
                                int poolID,
                                int poolFlatIdx,
-                               int groupID,
+                               int poolGroupID,
                                int x,
                                int y,
                                int z
                                )
         {
+            ReservoirID = reservoirID;
             ReservoirFlatIdx = reservoirFlatIdx;
             PoolID = poolID;
             PoolFlatIdx = poolFlatIdx;
-            GroupID = groupID;
-            Coordinates = new int[3];
-            Coordinates[0] = x;
-            Coordinates[1] = y;
-            Coordinates[2] = z;
+            PoolGroupID = poolGroupID;
+            ReservoirCoordinates = new int[3];
+            ReservoirCoordinates[0] = x;
+            ReservoirCoordinates[1] = y;
+            ReservoirCoordinates[2] = z;
             return;
         }
     }//NeuronPlacement
