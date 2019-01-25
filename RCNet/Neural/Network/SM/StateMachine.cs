@@ -133,11 +133,51 @@ namespace RCNet.Neural.Network.SM
         {
             //Readout layer instance
             RL = new ReadoutLayer(_settings.ReadoutLayerConfig, NeuralPreprocessor.DataRange);
+            //Optional mapper of predictors to readout units
+            ReadoutLayer.PredictorsMapper mapper = null;
+            if(_settings.MapperConfig != null)
+            {
+                //Create empty instance of the mapper
+                mapper = new ReadoutLayer.PredictorsMapper(NP.NumOfPredictors);
+                //Expand list of predicting neurons to array of predictor origin
+                StateMachineSettings.MapperSettings.PoolRef[] neuronPoolRefCollection = new StateMachineSettings.MapperSettings.PoolRef[NP.NumOfPredictors];
+                int idx = 0;
+                foreach(Reservoir.PredictorNeuron pn in NP.PredictorNeuronCollection)
+                {
+                    neuronPoolRefCollection[idx] = new StateMachineSettings.MapperSettings.PoolRef { _reservoirInstanceIdx = pn.Neuron.Placement.ReservoirID, _poolIdx = pn.Neuron.Placement.PoolID };
+                    ++idx;
+                    if(pn.UseSecondaryPredictor)
+                    {
+                        neuronPoolRefCollection[idx] = neuronPoolRefCollection[idx - 1];
+                        ++idx;
+                    }
+                }
+                //Iterate readout units having specific predictors mapping
+                foreach (string readoutUnitName in _settings.MapperConfig.Map.Keys)
+                {
+                    bool[] switches = new bool[NP.NumOfPredictors];
+                    switches.Populate(false);
+                    foreach(StateMachineSettings.MapperSettings.PoolRef allowedPool in _settings.MapperConfig.Map[readoutUnitName])
+                    {
+                        //Enable specific predictors from allowed pool (origin)
+                        for(int i = 0; i < neuronPoolRefCollection.Length; i++)
+                        {
+                            if(neuronPoolRefCollection[i]._reservoirInstanceIdx == allowedPool._reservoirInstanceIdx && neuronPoolRefCollection[i]._poolIdx == allowedPool._poolIdx)
+                            {
+                                switches[i] = true;
+                            }
+                        }
+                    }
+                    //Add mapping to mapper
+                    mapper.Add(readoutUnitName, switches);
+                }
+            }
             //Training
             return RL.Build(regressionInput.PreprocessedData.InputVectorCollection,
                             regressionInput.PreprocessedData.OutputVectorCollection,
                             regressionController,
-                            regressionControllerData
+                            regressionControllerData,
+                            mapper
                             );
         }
 
@@ -180,7 +220,7 @@ namespace RCNet.Neural.Network.SM
                 throw new Exception("Readout layer is not trained.");
             }
             //Push input into the network
-            double[] predictors = NP.PushInput(inputVector, true);
+            double[] predictors = NP.PushInput(inputVector, false);
             //Compute output
             return RL.Compute(predictors);
         }

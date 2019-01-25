@@ -486,9 +486,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             Random[] randFarm = new Random[sourceNeurons.Count];
             for(int i = 0; i < sourceNeurons.Count; i++)
             {
-                randFarm[i] = new Random(rand.Next());
+                int seed = rand.Next();
+                randFarm[i] = new Random(seed);
             }
             Parallel.For(0, sourceNeurons.Count, sourceNeuronIdx =>
+            //for(int sourceNeuronIdx = 0; sourceNeuronIdx < sourceNeurons.Count; sourceNeuronIdx++)
             {
                 NeuronConnCount nccSource = sourceNeurons[sourceNeuronIdx];
                 Random threadRandObj = randFarm[sourceNeuronIdx];

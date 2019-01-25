@@ -1165,7 +1165,34 @@
 
 
   <!-- ________________________________________STATE MACHINE TYPES_________________________________________________ -->
-  <!-- StateMachine configuration -->
+  <!-- StateMachine - Mapper allowed pool predictors - configuration -->
+  <xs:complexType name="SMAllowedPredictorsPoolCfgType">
+    <xs:attribute type="xs:string" name="reservoirInstanceName" use="required"/>
+    <xs:attribute type="xs:string" name="poolName" use="required"/>
+  </xs:complexType>
+
+  <!-- StateMachine - Mapper allowed pool predictors for specific readout unit - configuration -->
+  <xs:complexType name="SMReadoutUnitAllowedPredictorsCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="SMAllowedPredictorsPoolCfgType" name="allowed" minOccurs="1" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute type="xs:string" name="readoutUnitName" use="required"/>
+  </xs:complexType>
+
+  <!-- StateMachine - Mapper - configuration -->
+  <xs:complexType name="SMPredictorsToReadoutUnitsMapType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="SMReadoutUnitAllowedPredictorsCfgType" name="map" minOccurs="1" maxOccurs="unbounded">
+        <xs:unique name="unique_res_instance_pool_name">
+          <xs:selector xpath="./allowed"/>
+          <xs:field xpath="@reservoirInstanceName"/>
+          <xs:field xpath="@poolName"/>
+        </xs:unique>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- StateMachine complete configuration -->
   <xs:complexType name="SMCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="NPCfgType" name="neuralPreprocessor" minOccurs="1" maxOccurs="1"/>
@@ -1173,6 +1200,12 @@
         <xs:unique name="unique_output_field_name">
           <xs:selector xpath="./readoutUnit"/>
           <xs:field xpath="@name"/>
+        </xs:unique>
+      </xs:element>
+      <xs:element type="SMPredictorsToReadoutUnitsMapType" name="mapper" minOccurs="0" maxOccurs="1">
+        <xs:unique name="unique_readout_unit_name">
+          <xs:selector xpath="./map"/>
+          <xs:field xpath="@readoutUnitName"/>
         </xs:unique>
       </xs:element>
     </xs:sequence>
