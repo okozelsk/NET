@@ -321,7 +321,6 @@ namespace RCNet.Neural.Network.SM.Readout
 
         }//ReadoutUnitSettings
 
-
     }//ReadoutLayerSettings
 
 }//Namespace

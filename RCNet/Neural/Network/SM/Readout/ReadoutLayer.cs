@@ -23,6 +23,10 @@ namespace RCNet.Neural.Network.SM.Readout
         /// </summary>
         private readonly Interval _dataRange;
         /// <summary>
+        /// Mapping of specific predictors to readout units
+        /// </summary>
+        private PredictorsMapper _predictorsMapper;
+        /// <summary>
         /// Maximum number of the folds
         /// </summary>
         public const int MaxNumOfFolds = 100;
@@ -60,6 +64,7 @@ namespace RCNet.Neural.Network.SM.Readout
         {
             _settings = settings.DeepClone();
             _dataRange = dataRange.DeepClone();
+            _predictorsMapper = null;
             foreach (ReadoutLayerSettings.ReadoutUnitSettings rus in _settings.ReadoutUnitCfgCollection)
             {
                 if (!rus.OutputRange.BelongsTo(_dataRange.Min) || !rus.OutputRange.BelongsTo(_dataRange.Max))
@@ -81,19 +86,23 @@ namespace RCNet.Neural.Network.SM.Readout
         /// <param name="idealOutputsCollection">Collection of desired outputs related to predictors</param>
         /// <param name="regressionController">Regression controller delegate</param>
         /// <param name="regressionControllerData">An user object</param>
-        /// <returns>Returned ValidationBundle is something like a protocol.
+        /// <param name="predictorsMapper">Optional specific mapping of predictors to readout units</param>
+        /// <returns>Returned ResultComparativeBundle is something like a protocol.
         /// There is recorded fold by fold (unit by unit) predicted and corresponding ideal values.
         /// This is the pesimistic approach. Real results on unseen data could be better due to the clustering synergy.
         /// </returns>
         public ResultComparativeBundle Build(List<double[]> predictorsCollection,
-                                      List<double[]> idealOutputsCollection,
-                                      ReadoutUnit.RegressionCallbackDelegate regressionController,
-                                      Object regressionControllerData
-                                      )
+                                             List<double[]> idealOutputsCollection,
+                                             ReadoutUnit.RegressionCallbackDelegate regressionController,
+                                             Object regressionControllerData,
+                                             PredictorsMapper predictorsMapper = null
+                                             )
         {
             //Random object
             Random rand = new Random(0);
-            //Allocation of computed and ideal vectors for validation bundle
+            //Predictors mapper (specified or default)
+            _predictorsMapper = predictorsMapper ?? new PredictorsMapper(predictorsCollection[0].Length);
+            //Allocation of computed and ideal vectors for result comparative bundle
             List<double[]> validationComputedVectorCollection = new List<double[]>(idealOutputsCollection.Count);
             List<double[]> validationIdealVectorCollection = new List<double[]>(idealOutputsCollection.Count);
             for (int i = 0; i < idealOutputsCollection.Count; i++)
@@ -150,11 +159,12 @@ namespace RCNet.Neural.Network.SM.Readout
                     }
                 }
                 List<VectorBundle> subBundleCollection = null;
+                List<double[]> readoutUnitInputVectorCollection = _predictorsMapper.CreateVectorCollection(_settings.ReadoutUnitCfgCollection[clusterIdx].Name, shuffledData.InputVectorCollection);
                 //Datasets preparation is depending on the task type
                 if (_settings.ReadoutUnitCfgCollection[clusterIdx].TaskType == CommonEnums.TaskType.Classification)
                 {
                     //Classification task
-                    subBundleCollection = DivideSamplesForClassificationTask(shuffledData.InputVectorCollection,
+                    subBundleCollection = DivideSamplesForClassificationTask(readoutUnitInputVectorCollection,
                                                                              idealValueCollection,
                                                                              refBinDistr,
                                                                              testDataSetLength
@@ -163,7 +173,7 @@ namespace RCNet.Neural.Network.SM.Readout
                 else
                 {
                     //Forecast task
-                    subBundleCollection = DivideSamplesForForecastTask(shuffledData.InputVectorCollection,
+                    subBundleCollection = DivideSamplesForForecastTask(readoutUnitInputVectorCollection,
                                                                        idealValueCollection,
                                                                        testDataSetLength
                                                                        );
@@ -241,9 +251,10 @@ namespace RCNet.Neural.Network.SM.Readout
         private double Compute(double[] predictors, int clusterIdx)
         {
             WeightedAvg wAvg = new WeightedAvg();
+            string readoutUnitName = _settings.ReadoutUnitCfgCollection[clusterIdx].Name;
             for (int readoutUnitIdx = 0; readoutUnitIdx < _clusterCollection[clusterIdx].Length; readoutUnitIdx++)
             {
-                double[] outputValue = _clusterCollection[clusterIdx][readoutUnitIdx].Network.Compute(predictors);
+                double[] outputValue = _clusterCollection[clusterIdx][readoutUnitIdx].Network.Compute(_predictorsMapper.CreateVector(readoutUnitName, predictors));
                 double weight = _clusterCollection[clusterIdx][readoutUnitIdx].TrainingErrorStat.NumOfSamples;
                 if(_clusterCollection[clusterIdx][readoutUnitIdx].TestingErrorStat != null)
                 {
@@ -344,9 +355,9 @@ namespace RCNet.Neural.Network.SM.Readout
         }
 
         private List<VectorBundle> DivideSamplesForForecastTask(List<double[]> predictorsCollection,
-                                                                          List<double[]> idealValueCollection,
-                                                                          int bundleSize
-                                                                          )
+                                                                List<double[]> idealValueCollection,
+                                                                int bundleSize
+                                                                )
         {
             int numOfBundles = idealValueCollection.Count / bundleSize;
             List<VectorBundle> bundleCollection = new List<VectorBundle>(numOfBundles);
@@ -374,6 +385,162 @@ namespace RCNet.Neural.Network.SM.Readout
         }
 
         //Inner classes
+        /// <summary>
+        /// Maps specific predictors to readout units
+        /// </summary>
+        [Serializable]
+        public class PredictorsMapper
+        {
+            /// <summary>
+            /// Number of all available predictors
+            /// </summary>
+            private readonly int _numOfPredictors;
+            /// <summary>
+            /// Mapping of readout unit to switches determining what predictors are assigned to.
+            /// </summary>
+            private readonly Dictionary<string, ReadoutUnitMap> _mapCollection;
+
+            /// <summary>
+            /// Creates uninitialized instance
+            /// </summary>
+            /// <param name="numOfPredictors">Total number of available predictors</param>
+            public PredictorsMapper(int numOfPredictors)
+            {
+                _numOfPredictors = numOfPredictors;
+                _mapCollection = new Dictionary<string, ReadoutUnitMap>();
+                return;
+            }
+
+            /// <summary>
+            /// Adds new mapping for ReadoutUntit
+            /// </summary>
+            /// <param name="readoutUnitName"></param>
+            /// <param name="map">Boolean switches indicating if to use available prdictor for the ReadoutUnit</param>
+            public void Add(string readoutUnitName, bool[] map)
+            {
+                if(map.Length != _numOfPredictors)
+                {
+                    throw new ArgumentException("Incorrect number of switches in the map", "map");
+                }
+                if (readoutUnitName.Length == 0)
+                {
+                    throw new ArgumentException("ReadoutUnit name can not be empty", "readoutUnitName");
+                }
+                if (_mapCollection.ContainsKey(readoutUnitName))
+                {
+                    throw new ArgumentException($"Mapping already contains mapping for ReadoutUnit {readoutUnitName}", "readoutUnitName");
+                }
+                ReadoutUnitMap rum = new ReadoutUnitMap(map);
+                if(rum.VectorLength == 0)
+                {
+                    throw new ArgumentException("Map does not contain mapped predictors", "map");
+                }
+                _mapCollection.Add(readoutUnitName, rum);
+                return;
+            }
+
+            private double[] CreateVector(double[] predictors, bool[] map, int vectorLength)
+            {
+                if (predictors.Length != map.Length)
+                {
+                    throw new ArgumentException("Incorrect number of predictors", "predictors");
+                }
+                double[] vector = new double[vectorLength];
+                for(int i = 0, vIdx = 0; i < predictors.Length; i++)
+                {
+                    if(map[i])
+                    {
+                        vector[vIdx] = predictors[i];
+                        ++vIdx;
+                    }
+                }
+                return vector;
+            }
+
+            /// <summary>
+            /// Creates input vector containing specific subset of predictors for the ReadoutUnit.
+            /// </summary>
+            /// <param name="readoutUnitName">ReadoutUnit name</param>
+            /// <param name="predictors">Available predictors</param>
+            public double[] CreateVector(string readoutUnitName, double[] predictors)
+            {
+                try
+                {
+                    ReadoutUnitMap rum = _mapCollection[readoutUnitName];
+                    return CreateVector(predictors, rum.Map, rum.VectorLength);
+                }
+                catch
+                {
+                    if (predictors.Length != _numOfPredictors)
+                    {
+                        throw new ArgumentException("Incorrect number of predictors", "predictors");
+                    }
+                    return (double[])predictors.Clone();
+                }
+            }
+
+            /// <summary>
+            /// Creates input vector collection where each vector containing specific subset of predictors for the ReadoutUnit.
+            /// </summary>
+            /// <param name="readoutUnitName">ReadoutUnit name</param>
+            /// <param name="predictorsCollection">Collection of available predictors</param>
+            public List<double[]> CreateVectorCollection(string readoutUnitName, List<double[]> predictorsCollection)
+            {
+                List<double[]> vectorCollection = new List<double[]>(predictorsCollection.Count);
+                ReadoutUnitMap rum = null;
+                if (_mapCollection.ContainsKey(readoutUnitName))
+                {
+                    rum = _mapCollection[readoutUnitName];
+                }
+                foreach(double[] predictors in predictorsCollection)
+                {
+                    if(rum == null)
+                    {
+                        vectorCollection.Add((double[])predictors.Clone());
+                    }
+                    else
+                    {
+                        vectorCollection.Add(CreateVector(predictors, rum.Map, rum.VectorLength));
+                    }
+                }
+                return vectorCollection;
+            }
+
+            //Inner classes
+            /// <summary>
+            /// Maps specific predictors to readout unit
+            /// </summary>
+            [Serializable]
+            private class ReadoutUnitMap
+            {
+                //Attribute properties
+                /// <summary>
+                /// Boolean switches indicating if to use available prdictor for this ReadoutUnit
+                /// </summary>
+                public bool[] Map { get; set; }
+                /// <summary>
+                /// Resulting length of ReadoutUnit's input vector (number of true switches in the Map)
+                /// </summary>
+                public int VectorLength { get; private set; }
+
+                /// <summary>
+                /// Creates initialized instance
+                /// </summary>
+                /// <param name="map">Boolean switches indicating if to use available prdictor for this ReadoutUnit.</param>
+                public ReadoutUnitMap(bool[] map)
+                {
+                    Map = (bool[])map.Clone();
+                    VectorLength = 0;
+                    foreach (bool bSwitch in Map)
+                    {
+                        if (bSwitch) ++VectorLength;
+                    }
+                    return;
+                }
+
+            }//ReadoutUnitMap
+        }
+
         /// <summary>
         /// Overall error statistics of the cluster of readout units
         /// </summary>
