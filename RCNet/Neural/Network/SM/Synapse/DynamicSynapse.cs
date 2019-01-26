@@ -26,7 +26,6 @@ namespace RCNet.Neural.Network.SM.Synapse
         private double _efficacyUtilization;
         private double _efficacyAvailableFraction;
         private SimpleQueue<Signal> _signalQueue;
-        private Signal _reusableSignalObj;
 
         //Constructor
         /// <summary>
@@ -57,10 +56,8 @@ namespace RCNet.Neural.Network.SM.Synapse
             _efficacyAvailableFraction = 1;
             _tauDecay = tauDecay;
             _applyPostSynaptic = (TargetNeuron.OutputType == CommonEnums.NeuronSignalType.Spike);
-            //Instantiate queue
-            _signalQueue = new SimpleQueue<Signal>(Delay + 1);
-            //Reset reusable signal object
-            _reusableSignalObj = null;
+            //Signal queue
+            _signalQueue = null;
             return;
         }
 
@@ -71,7 +68,8 @@ namespace RCNet.Neural.Network.SM.Synapse
         /// <param name="statistics">Specifies whether to reset also internal statistics</param>
         public void Reset(bool statistics)
         {
-            _signalQueue.Reset();
+            //Reset queue if it is instantiated
+            _signalQueue?.Reset();
             _efficacyUtilization = _restingEfficacy;
             _efficacyAvailableFraction = 1;
             if (statistics)
@@ -89,8 +87,16 @@ namespace RCNet.Neural.Network.SM.Synapse
         {
             //Set synapse signal delay
             Delay = delay;
-            _signalQueue.Resize(Delay + 1);
-            _reusableSignalObj = null;
+            if(Delay == 0)
+            {
+                //No queue will be used
+                _signalQueue = null;
+            }
+            else
+            {
+                //Delay queue
+                _signalQueue = new SimpleQueue<Signal>(Delay + 1);
+            }
             return;
         }
 
@@ -100,7 +106,7 @@ namespace RCNet.Neural.Network.SM.Synapse
         /// </summary>
         protected double GetPreSynapticEfficacy()
         {
-            if(_applyPreSynaptic)
+            if (_applyPreSynaptic)
             {
                 double x = Math.Exp(-(SourceNeuron.OutputSignalLeak / _tauFacilitation));
                 _efficacyUtilization = x + _restingEfficacy * (1d - x);
@@ -108,7 +114,10 @@ namespace RCNet.Neural.Network.SM.Synapse
                 _efficacyAvailableFraction = _efficacyAvailableFraction * (1d - _efficacyUtilization) * y + 1d - y;
                 return _efficacyUtilization * _efficacyAvailableFraction;
             }
-            return 1d;
+            else
+            {
+                return 1d;
+            }
         }
 
         /// <summary>
@@ -116,11 +125,14 @@ namespace RCNet.Neural.Network.SM.Synapse
         /// </summary>
         protected double GetPostSynapticEfficacy()
         {
-            if(_applyPostSynaptic)
+            if (_applyPostSynaptic)
             {
                 return Math.Exp(-(TargetNeuron.OutputSignalLeak / _tauDecay));
             }
-            return 1d;
+            else
+            {
+                return 1d;
+            }
         }
 
         /// <summary>
@@ -130,71 +142,100 @@ namespace RCNet.Neural.Network.SM.Synapse
         /// <param name="collectStatistics">Specifies whether to update internal statistics</param>
         public double GetSignal(bool collectStatistics)
         {
-            //We are getting source neuron signal
+            //Source neuron signal
             double sourceSignal = SourceNeuron.OutputSignal;
-            if (sourceSignal == 0)
+            if (_signalQueue == null)
             {
-                //No need to adjust anything
-                if (_reusableSignalObj != null)
+                //No delay of the signal - do not use queue
+                if (sourceSignal == 0)
                 {
-                    _reusableSignalObj._weightedSignal = 0d;
-                    _reusableSignalObj._preSynapticEfficacy = 1d;
-                    _signalQueue.Enqueue(_reusableSignalObj);
-                }
-                else
-                {
-                    _signalQueue.Enqueue(new Signal { _weightedSignal = 0d, _preSynapticEfficacy = 1d });
-                }
-            }
-            else
-            {
-                //Compute pre-synaptic efficacy
-                double preSynapticEfficacy = GetPreSynapticEfficacy();
-                //Compute constantly weighted signal and pre-synaptic part of efficacy and put them into the queue simulating the signal traveling
-                if (_reusableSignalObj != null)
-                {
-                    _reusableSignalObj._weightedSignal = ((SourceNeuron.OutputSignal + _add) / _div) * Weight;
-                    _reusableSignalObj._preSynapticEfficacy = preSynapticEfficacy;
-                    _signalQueue.Enqueue(_reusableSignalObj);
-                }
-                else
-                {
-                    _signalQueue.Enqueue(new Signal { _weightedSignal = ((SourceNeuron.OutputSignal + _add) / _div) * Weight, _preSynapticEfficacy = preSynapticEfficacy });
-                }
-            }
-            //Is there any signal to be delivered?
-            if (_signalQueue.Full)
-            {
-                //Queue is full, so synapse is ready to deliver
-                _reusableSignalObj = _signalQueue.Dequeue();
-                if (_reusableSignalObj._weightedSignal == 0)
-                {
-                    //No need to adjust anything
+                    //No source signal so simply return 0
                     return 0;
                 }
                 else
                 {
-                    //Compute current post-synaptic efficacy
-                    double postSynapticEfficacy = GetPostSynapticEfficacy();
-                    double efficacy = _reusableSignalObj._preSynapticEfficacy * postSynapticEfficacy;
+                    //Compute synapse efficacy
+                    double efficacy = GetPreSynapticEfficacy() * GetPostSynapticEfficacy();
+                    //Update statistics if necessary
                     if (collectStatistics)
                     {
                         EfficacyStat.AddSampleValue(efficacy);
                     }
-                    //Deliver the resulting signal
-                    return _reusableSignalObj._weightedSignal * efficacy;
+                    //Return resulting signal
+                    return sourceSignal * Weight * efficacy;
                 }
             }
             else
             {
-                //No signal to be delivered, the first signal is "still on the road"
-                return 0;
+                //Signal to be delayed so use queue
+                if (sourceSignal == 0)
+                {
+                    //No signal adjustments
+                    Signal sigObj = _signalQueue.GetElementOnEnqueuePosition();
+                    if (sigObj != null)
+                    {
+                        sigObj._weightedSignal = 0d;
+                        sigObj._preSynapticEfficacy = 1d;
+                    }
+                    else
+                    {
+                        sigObj = new Signal { _weightedSignal = 0d, _preSynapticEfficacy = 1d };
+                    }
+                    _signalQueue.Enqueue(sigObj);
+                }
+                else
+                {
+                    //Signal to be delayed
+                    Signal sigObj = _signalQueue.GetElementOnEnqueuePosition();
+                    //Compute pre-synaptic efficacy
+                    double preSynapticEfficacy = GetPreSynapticEfficacy();
+                    //Compute constantly weighted signal and pre-synaptic part of efficacy and put them into the queue simulating the signal traveling
+                    if (sigObj != null)
+                    {
+                        sigObj._weightedSignal = ((SourceNeuron.OutputSignal + _add) / _div) * Weight;
+                        sigObj._preSynapticEfficacy = preSynapticEfficacy;
+                    }
+                    else
+                    {
+                        sigObj = new Signal { _weightedSignal = ((SourceNeuron.OutputSignal + _add) / _div) * Weight, _preSynapticEfficacy = preSynapticEfficacy };
+                    }
+                    _signalQueue.Enqueue(sigObj);
+                }
+                //Is there delayed signal to be delivered?
+                if (_signalQueue.Full)
+                {
+                    //Queue is full, so synapse is ready to deliver delayed signal
+                    //Pick up source signal and pre-synaptic part of efficacy
+                    Signal sigObj = _signalQueue.Dequeue();
+                    if (sigObj._weightedSignal == 0)
+                    {
+                        //No need of signal adjustment
+                        return 0;
+                    }
+                    else
+                    {
+                        //Compute resulting efficacy
+                        double efficacy = sigObj._preSynapticEfficacy * GetPostSynapticEfficacy();
+                        //Update statistics if required
+                        if (collectStatistics)
+                        {
+                            EfficacyStat.AddSampleValue(efficacy);
+                        }
+                        //Deliver the resulting signal
+                        return sigObj._weightedSignal * efficacy;
+                    }
+                }
+                else
+                {
+                    //No signal to be delivered, signal is still "on the road"
+                    return 0;
+                }
             }
         }
 
         //Inner classes
         /// <summary>
-        /// Data to be queued
+        /// Signal data to be queued
         /// </summary>
         [Serializable]
         protected class Signal

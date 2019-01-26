@@ -31,9 +31,8 @@ namespace RCNet.Neural.Network.SM.Synapse
                              )
             :base(sourceNeuron, targetNeuron, weight)
         {
-            //Instantiate queue
-            _signalQueue = new SimpleQueue<double>(Delay + 1);
-            //Initialize efficacy stat to constant 1
+            _signalQueue = null;
+            //Initialize efficacy stat to constant 1 (static synapse has always efficacy 1)
             EfficacyStat.AddSampleValue(1d);
             return;
         }
@@ -44,8 +43,9 @@ namespace RCNet.Neural.Network.SM.Synapse
         /// <param name="statistics">Specifies whether to reset also internal statistics</param>
         public void Reset(bool statistics)
         {
-            //Only queue is affected. Efficacy stat is constant so no need to reset statistics
-            _signalQueue.Reset();
+            //Efficacy stat is constant so no need to reset statistics
+            //Only queue is affected if it is instantiated
+            _signalQueue?.Reset();
             return;
         }
 
@@ -57,7 +57,16 @@ namespace RCNet.Neural.Network.SM.Synapse
         {
             //Set synapse signal delay
             Delay = delay;
-            _signalQueue.Resize(Delay + 1);
+            if (Delay == 0)
+            {
+                //No queue will be used
+                _signalQueue = null;
+            }
+            else
+            {
+                //Delay queue
+                _signalQueue = new SimpleQueue<double>(Delay + 1);
+            }
             return;
         }
 
@@ -69,21 +78,19 @@ namespace RCNet.Neural.Network.SM.Synapse
         /// <param name="collectStatistics">Specifies whether to update internal statistics</param>
         public double GetSignal(bool collectStatistics)
         {
-            //Enqueue weighted source neuron signal
-            _signalQueue.Enqueue(((SourceNeuron.OutputSignal + _add) / _div) * Weight);
-            //Is there any signal to be delivered?
-            if (_signalQueue.Full)
+            double signal = ((SourceNeuron.OutputSignal + _add) / _div) * Weight;
+            if (_signalQueue == null)
             {
-                //Queue is full, so synapse is ready to deliver
-                return _signalQueue.Dequeue();
+                return signal;
             }
             else
             {
-                //No signal to be delivered, the first signal is "still on the road"
-                return 0;
+                //Enqueue weighted source neuron signal
+                _signalQueue.Enqueue(signal);
+                //Return signal from queue if queue is full
+                return _signalQueue.Full ? _signalQueue.Dequeue() : 0;
             }
         }
-
 
     }//StaticSynapse
 

@@ -73,6 +73,15 @@ namespace RCNet.Queue
         }
 
         /// <summary>
+        /// Returns element from queue buffer on the next enqueue position.
+        /// If element exists then can be resused in immediately following Enqueue call.
+        /// </summary>
+        public T GetElementOnEnqueuePosition()
+        {
+            return _queueBuffer[_enqueueOffset];
+        }
+
+        /// <summary>
         /// Adds a new item into the queue
         /// </summary>
         /// <param name="item">Item to be added</param>
