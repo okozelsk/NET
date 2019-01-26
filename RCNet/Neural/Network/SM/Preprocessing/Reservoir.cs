@@ -35,11 +35,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// <summary>
         /// Input connections
         /// </summary>
-        private readonly Dictionary<int, ISynapse>[] _neuronInputConnectionsCollection;
+        private readonly SortedList<int, ISynapse>[] _neuronInputConnectionsCollection;
         /// <summary>
         /// Internal connections
         /// </summary>
-        private Dictionary<int, ISynapse>[] _neuronNeuronConnectionsCollection;
+        private SortedList<int, ISynapse>[] _neuronNeuronConnectionsCollection;
 
         //Attribute properties
         /// <summary>
@@ -193,12 +193,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             //Interconnections
             //-----------------------------------------------------------------------------
             //Connection banks allocations
-            _neuronInputConnectionsCollection = new Dictionary<int, ISynapse>[_reservoirNeuronCollection.Length];
-            _neuronNeuronConnectionsCollection = new Dictionary<int, ISynapse>[_reservoirNeuronCollection.Length];
+            _neuronInputConnectionsCollection = new SortedList<int, ISynapse>[_reservoirNeuronCollection.Length];
+            _neuronNeuronConnectionsCollection = new SortedList<int, ISynapse>[_reservoirNeuronCollection.Length];
             for (int n = 0; n < _reservoirNeuronCollection.Length; n++)
             {
-                _neuronInputConnectionsCollection[n] = new Dictionary<int, ISynapse>();
-                _neuronNeuronConnectionsCollection[n] = new Dictionary<int, ISynapse>();
+                _neuronInputConnectionsCollection[n] = new SortedList<int, ISynapse>();
+                _neuronNeuronConnectionsCollection[n] = new SortedList<int, ISynapse>();
             }
 
             //-----------------------------------------------------------------------------
@@ -221,17 +221,17 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             //Setup of the synaptic delays
             //Build the distances statistics
             BasicStat distanceStat = new BasicStat();
-            foreach(Dictionary<int, ISynapse> synapses in _neuronInputConnectionsCollection)
+            foreach(SortedList<int, ISynapse> synapses in _neuronInputConnectionsCollection)
             {
                 distanceStat.AddSampleValues((from synapse in synapses.Values select synapse.Distance));
             }
-            foreach (Dictionary<int, ISynapse> synapses in _neuronNeuronConnectionsCollection)
+            foreach (SortedList<int, ISynapse> synapses in _neuronNeuronConnectionsCollection)
             {
                 distanceStat.AddSampleValues((from synapse in synapses.Values select synapse.Distance));
             }
             //Delays setup
             //Input synapses
-            foreach (Dictionary<int, ISynapse> synapses in _neuronInputConnectionsCollection)
+            foreach (SortedList<int, ISynapse> synapses in _neuronInputConnectionsCollection)
             {
                 foreach(ISynapse synapse in synapses.Values)
                 {
@@ -249,7 +249,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 }
             }
             //Internal synapses
-            foreach (Dictionary<int, ISynapse> synapses in _neuronNeuronConnectionsCollection)
+            foreach (SortedList<int, ISynapse> synapses in _neuronNeuronConnectionsCollection)
             {
                 foreach (ISynapse synapse in synapses.Values)
                 {
@@ -278,7 +278,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 }
                 double scale = InstanceDefinition.Settings.SpectralRadius / maxEigenValue;
                 //Scale internal weights
-                foreach(Dictionary<int, ISynapse> connCollection in _neuronNeuronConnectionsCollection)
+                foreach(SortedList<int, ISynapse> connCollection in _neuronNeuronConnectionsCollection)
                 {
                     foreach(ISynapse conn in connCollection.Values)
                     {
@@ -326,7 +326,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// <param name="connectionsCollection">Bank of connections</param>
         /// <param name="synapse">A synapse to be added into the bank</param>
         /// <returns>Success/Unsuccess</returns>
-        private bool AddInterconnection(Dictionary<int, ISynapse>[] connectionsCollection, ISynapse synapse)
+        private bool AddInterconnection(SortedList<int, ISynapse>[] connectionsCollection, ISynapse synapse)
         {
             //Add new connection
             lock (connectionsCollection[synapse.TargetNeuron.Placement.ReservoirFlatIdx])
@@ -715,7 +715,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 }
                 //Weights statistics
                 //Input weights
-                foreach (Dictionary<int, ISynapse> synapses in _neuronInputConnectionsCollection)
+                foreach (SortedList<int, ISynapse> synapses in _neuronInputConnectionsCollection)
                 {
                     foreach (ISynapse synapse in synapses.Values)
                     {
@@ -726,7 +726,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                     }
                 }
                 //Internal weights
-                foreach (Dictionary<int, ISynapse> synapses in _neuronNeuronConnectionsCollection)
+                foreach (SortedList<int, ISynapse> synapses in _neuronNeuronConnectionsCollection)
                 {
                     foreach (ISynapse synapse in synapses.Values)
                     {

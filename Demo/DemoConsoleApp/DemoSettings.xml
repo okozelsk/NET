@@ -1,6 +1,70 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <demo dataFolder=".\\Data">
   <!--
+    This demo case demonstrates performance on big reservoir. Configuration definies ESN reservoir
+    structure having one pool of 3162 TanH analog neurons having 1 million synapses.
+    Standard linear regression is used as predicting readout.
+    Dataset contains Mackey Glass chaotic time series (tau=17) and network forecasts the next value.
+  -->
+  <case name="Forecast task Mackey Glass chaotic time series: Big analog reservoir (ESN), Linear regression output">
+    <samples fileName="MackeyGlass_big.csv" normalizerReserve="0.1"/>
+    <stateMachineCfg randomizerSeek="0">
+      <neuralPreprocessor>
+        <input>
+          <feedingContinuous bootCycles="Auto" routeToReadout="false"/>
+          <external>
+            <field name="Value"/>
+          </external>
+        </input>
+        <reservoirCfgContainer>
+          <reservoirCfg name="ESNCfg" synapticDelayMethod="Random" maxInputDelay="0" maxInternalDelay="1" spectralRadius="0.999">
+            <pools>
+              <pool name="Logistic pool" dimX="3162" dimY="1" dimZ="1" readoutNeuronsDensity="1">
+                <neuronGroups>
+                  <neuronGroup name="Exc-Logistic" role="Excitatory" relShare="1" augmentedStates="true">
+                    <activationTanH/>
+                    <bias min="-0.75" max="0.75" randomSign="false" distribution="Uniform"/>
+                  </neuronGroup>
+                  <neuronGroup name="Inh-Logistic" role="Inhibitory" relShare="1" augmentedStates="true">
+                    <activationTanH/>
+                    <bias min="-0.75" max="0.75" randomSign="false" distribution="Uniform"/>
+                  </neuronGroup>
+                </neuronGroups>
+                <interconnection density="0.1" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
+                  <staticSynapse>
+                    <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
+                  </staticSynapse>
+                </interconnection>
+                <retainmentNeurons density="1">
+                  <rate min="0.25" max="0.5" randomSign="false" distribution="Uniform"/>
+                </retainmentNeurons>
+              </pool>
+            </pools>
+          </reservoirCfg>
+        </reservoirCfgContainer>
+        <reservoirInstanceContainer>
+          <reservoirInstance name="ESN reservoir" cfg="ESNCfg" augmentedStates="false">
+            <inputConnections>
+              <inputConnection fieldName="Value" poolName="Logistic pool" density="0.5">
+                <staticSynapse>
+                  <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
+                </staticSynapse>
+              </inputConnection>
+            </inputConnections>
+          </reservoirInstance>
+        </reservoirInstanceContainer>
+      </neuralPreprocessor>
+      <readoutLayer testDataRatio="0.1" folds="1">
+        <readoutUnit name="Value" task="Forecast" attempts="1" attemptEpochs="1">
+          <ff regressionMethod="Linear">
+            <activationIdentity/>
+          </ff>
+        </readoutUnit>
+      </readoutLayer>
+    </stateMachineCfg>
+  </case>
+
+  <!--
     This demo case demonstrates a richer form of reservoir setup. Reservoir consists of one small pool of SimpleIF spiking neurons
     and one pool of Sigmoid analog neurons. Pools overlap within the reservoir (share the same 3D space) and pools are bidirectionally
     interconnected. One additional internal input field "aug_input" (following random signal) is used.
