@@ -13,8 +13,11 @@ namespace RCNet.Neural.Network.SM.Synapse
     /// Signal delivery can be delayed depending on Euclidean distance between source and target neuron.
     /// </summary>
     [Serializable]
-    public class StaticSynapse : BaseSynapse
+    public class StaticSynapse : BaseSynapse, ISynapse
     {
+        //Attributes
+        private SimpleQueue<double> _signalQueue;
+
         //Constructor
         /// <summary>
         /// Creates initialized instance
@@ -28,27 +31,59 @@ namespace RCNet.Neural.Network.SM.Synapse
                              )
             :base(sourceNeuron, targetNeuron, weight)
         {
+            //Instantiate queue
+            _signalQueue = new SimpleQueue<double>(Delay + 1);
+            //Initialize efficacy stat to constant 1
+            EfficacyStat.AddSampleValue(1d);
+            return;
+        }
+
+        /// <summary>
+        /// Resets synapse.
+        /// </summary>
+        /// <param name="statistics">Specifies whether to reset also internal statistics</param>
+        public void Reset(bool statistics)
+        {
+            //Only queue is affected. Efficacy stat is constant so no need to reset statistics
+            _signalQueue.Reset();
+            return;
+        }
+
+        /// <summary>
+        /// Sets the synapse signal delay
+        /// </summary>
+        /// <param name="delay">Signal delay (reservoir cycles)</param>
+        public void SetDelay(int delay)
+        {
+            //Set synapse signal delay
+            Delay = delay;
+            _signalQueue.Resize(Delay + 1);
             return;
         }
 
         //Methods
         /// <summary>
-        /// Computes synapse efficacy based on the pre-synaptic activity.
-        /// In case of static synapse, the efficacy is always full (1)
+        /// Returns signal to be delivered to target neuron.
+        /// Note that this function has to be invoked only once per reservoir cycle !!!
         /// </summary>
-        protected override double GetPreSynapticEfficacy()
+        /// <param name="collectStatistics">Specifies whether to update internal statistics</param>
+        public double GetSignal(bool collectStatistics)
         {
-            return 1d;
+            //Enqueue weighted source neuron signal
+            _signalQueue.Enqueue(((SourceNeuron.OutputSignal + _add) / _div) * Weight);
+            //Is there any signal to be delivered?
+            if (_signalQueue.Full)
+            {
+                //Queue is full, so synapse is ready to deliver
+                return _signalQueue.Dequeue();
+            }
+            else
+            {
+                //No signal to be delivered, the first signal is "still on the road"
+                return 0;
+            }
         }
 
-        /// <summary>
-        /// Computes synapse efficacy based on the post-synaptic activity
-        /// In case of static synapse, the efficacy is always full (1)
-        /// </summary>
-        protected override double GetPostSynapticEfficacy()
-        {
-            return 1d;
-        }
 
     }//StaticSynapse
 

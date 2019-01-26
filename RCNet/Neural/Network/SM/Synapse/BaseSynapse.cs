@@ -4,17 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using RCNet.MathTools;
-using RCNet.Queue;
 using RCNet.Neural.Network.SM.Neuron;
 
 namespace RCNet.Neural.Network.SM.Synapse
 {
     /// <summary>
     /// Abstract class covering the basic behaviour of StateMachine synapses.
-    /// (TODO - Consider removal of the ISynapse interface)
     /// </summary>
     [Serializable]
-    public abstract class BaseSynapse : ISynapse
+    public abstract class BaseSynapse
     {
         //Attribute properties
         /// <summary>
@@ -35,16 +33,15 @@ namespace RCNet.Neural.Network.SM.Synapse
         /// <summary>
         /// Weight of the synapse (the maximum weight synapse can achieve)
         /// </summary>
-        public double Weight { get; private set; }
+        public double Weight { get; protected set; }
 
         /// <summary>
         /// Signal delay
         /// </summary>
-        public int Delay { get; private set; }
+        public int Delay { get; protected set; }
 
         /// <summary>
-        /// Resulting efficacy statistics of the synapse.
-        /// (product of Pre-synaptic and Post-synaptic)
+        /// Efficacy statistics of the synapse.
         /// </summary>
         public BasicStat EfficacyStat { get; }
 
@@ -58,16 +55,6 @@ namespace RCNet.Neural.Network.SM.Synapse
         /// "Divide by" part of the signal conversion operation
         /// </summary>
         protected readonly double _div;
-
-        /// <summary>
-        /// Moving signal queue
-        /// </summary>
-        protected SimpleQueue<Signal> _signalQueue;
-
-        /// <summary>
-        /// Reusable signal object to avoid reallocations
-        /// </summary>
-        private Signal _reusableSignalObj;
 
         //Constructor
         /// <summary>
@@ -159,30 +146,12 @@ namespace RCNet.Neural.Network.SM.Synapse
             }
             //Set Delay to 0 as default. It can be changed later by SetDelay method.
             Delay = 0;
-            //Instantiate queue
-            _signalQueue = new SimpleQueue<Signal>(Delay + 1);
-            //Reset reusable signal object
-            _reusableSignalObj = null;
             //Efficacy statistics
             EfficacyStat = new BasicStat(false);
             return;
         }
 
         //Methods
-        /// <summary>
-        /// Resets synapse.
-        /// </summary>
-        /// <param name="statistics">Specifies whether to reset also internal statistics</param>
-        public virtual void Reset(bool statistics)
-        {
-            _signalQueue.Reset();
-            if (statistics)
-            {
-                EfficacyStat.Reset();
-            }
-            return;
-        }
-
         /// <summary>
         /// Rescales the synapse weight.
         /// </summary>
@@ -192,118 +161,6 @@ namespace RCNet.Neural.Network.SM.Synapse
             Weight *= scale;
             return;
         }
-
-        /// <summary>
-        /// Sets the synapse signal delay
-        /// </summary>
-        /// <param name="delay">Signal delay (reservoir cycles)</param>
-        public void SetDelay(int delay)
-        {
-            //Set synapse signal delay
-            Delay = delay;
-            _signalQueue.Resize(Delay + 1);
-            _reusableSignalObj = null;
-            return;
-        }
-
-        /// <summary>
-        /// Computes synapse efficacy based on the pre-synaptic activity
-        /// </summary>
-        protected abstract double GetPreSynapticEfficacy();
-
-
-        /// <summary>
-        /// Computes synapse efficacy based on the post-synaptic activity
-        /// </summary>
-        protected abstract double GetPostSynapticEfficacy();
-
-        /// <summary>
-        /// Returns signal to be delivered to target neuron.
-        /// Note that this function has to be invoked only once per reservoir cycle !!!
-        /// </summary>
-        /// <param name="collectStatistics">Specifies whether to update internal statistics</param>
-        public double GetSignal(bool collectStatistics)
-        {
-            //We are getting source neuron signal
-            double sourceSignal = SourceNeuron.OutputSignal;
-            if (sourceSignal == 0)
-            {
-                //No need to adjust anything
-                if(_reusableSignalObj != null)
-                {
-                    _reusableSignalObj._weightedSignal = 0d;
-                    _reusableSignalObj._preSynapticEfficacy = 1d;
-                    _signalQueue.Enqueue(_reusableSignalObj);
-                }
-                else
-                {
-                    _signalQueue.Enqueue(new Signal { _weightedSignal = 0d, _preSynapticEfficacy = 1d });
-                }
-            }
-            else
-            {
-                //Compute pre-synaptic efficacy
-                double preSynapticEfficacy = GetPreSynapticEfficacy();
-                //Compute constantly weighted signal and pre-synaptic part of efficacy and put them into the queue simulating the signal traveling
-                if (_reusableSignalObj != null)
-                {
-                    _reusableSignalObj._weightedSignal = ((SourceNeuron.OutputSignal + _add) / _div) * Weight;
-                    _reusableSignalObj._preSynapticEfficacy = preSynapticEfficacy;
-                    _signalQueue.Enqueue(_reusableSignalObj);
-                }
-                else
-                {
-                    _signalQueue.Enqueue(new Signal { _weightedSignal = ((SourceNeuron.OutputSignal + _add) / _div) * Weight, _preSynapticEfficacy = preSynapticEfficacy });
-                }
-            }
-            //Is there any signal to be delivered?
-            if (_signalQueue.Full)
-            {
-                //Queue is full, so synapse is ready to deliver
-                _reusableSignalObj = _signalQueue.Dequeue();
-                if (_reusableSignalObj._weightedSignal == 0)
-                {
-                    //No need to adjust anything
-                    return 0;
-                }
-                else
-                {
-                    //Compute current post-synaptic efficacy
-                    double postSynapticEfficacy = GetPostSynapticEfficacy();
-                    double efficacy = _reusableSignalObj._preSynapticEfficacy * postSynapticEfficacy;
-                    if (collectStatistics)
-                    {
-                        EfficacyStat.AddSampleValue(efficacy);
-                    }
-                    //Deliver the resulting signal
-                    return _reusableSignalObj._weightedSignal * efficacy;
-                }
-            }
-            else
-            {
-                //No signal to be delivered, the first signal is "still on the road"
-                return 0;
-            }
-        }
-
-        //Inner classes
-        /// <summary>
-        /// Data to be queued
-        /// </summary>
-        [Serializable]
-        protected class Signal
-        {
-            /// <summary>
-            /// Weighted signal with no adjustments
-            /// </summary>
-            public double _weightedSignal;
-
-            /// <summary>
-            /// Computed synapse efficacy based on pre-synaptic activity
-            /// </summary>
-            public double _preSynapticEfficacy;
-
-        }//Signal
 
     }//Synapse
 
