@@ -29,9 +29,10 @@ namespace RCNet.MathTools.VectorMath
         /// Creates an initialized instance
         /// </summary>
         /// <param name="data">Source data</param>
-        public Vector(double[] data)
+        /// <param name="copy">Specifies if to create copy of the data or adopt given instance</param>
+        public Vector(double[] data, bool copy = true)
         {
-            _data = (double[])data.Clone();
+            _data = copy ? (double[])data.Clone() : data;
             return;
         }
 

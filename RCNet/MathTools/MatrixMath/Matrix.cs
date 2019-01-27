@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using RCNet.Extensions;
+using RCNet.MathTools.VectorMath;
 
 namespace RCNet.MathTools.MatrixMath
 {
@@ -53,9 +54,11 @@ namespace RCNet.MathTools.MatrixMath
         /// <summary>
         /// Instantiates matrix based on dimensions of given array of arrays and copies the data into the new matrix.
         /// </summary>
-        public Matrix(double[][] data)
+        /// <param name="data">Matrix data</param>
+        /// <param name="copy">Specifies if to create copy of the data or adopt given instance</param>
+        public Matrix(double[][] data, bool copy = true)
         {
-            _data = data.Clone2D();
+            _data = copy ? data.Clone2D() : data;
             return;
         }
 
@@ -528,6 +531,442 @@ namespace RCNet.MathTools.MatrixMath
                 x[i] = (1 / lu[i, i]) * (y[i] - sum);
             }
             return x;
+        }
+
+        /// <summary>
+        /// Computes A + B
+        /// </summary>
+        /// <param name="A">Matrix A</param>
+        /// <param name="B">Matrix B</param>
+        /// <returns>Resulting matrix</returns>
+        public static Matrix Add(Matrix A, Matrix B)
+        {
+            int rowsA = A.NumOfRows;
+            int colsA = A.NumOfCols;
+            int rowsB = B.NumOfRows;
+            int colsB = B.NumOfCols;
+            if (colsA != colsB || rowsA != rowsB)
+            {
+                throw new Exception("Dimensions of A must equal to dimensions of B");
+            }
+            double[][] dataR = new double[rowsA][];
+            Parallel.For(0, rowsA, i =>
+            {
+                dataR[i] = new double[colsA];
+                for (int j = 0; j < colsA; j++)
+                {
+                    dataR[i][j] = A._data[i][j] + B._data[i][j];
+                }
+            });
+            return new Matrix(dataR, false);
+        }
+
+        /// <summary>
+        /// Computes A + B
+        /// </summary>
+        /// <param name="A">Matrix A</param>
+        /// <param name="B">Matrix B</param>
+        /// <returns>Resulting matrix</returns>
+        public static Matrix operator +(Matrix A, Matrix B)
+        {
+            return Add(A, B);
+        }
+
+        /// <summary>
+        /// Adds matrix B
+        /// </summary>
+        /// <param name="B">Matrix B</param>
+        public void Add(Matrix B)
+        {
+            int rowsB = B.NumOfRows;
+            int colsB = B.NumOfCols;
+            if (NumOfCols != colsB || NumOfRows != rowsB)
+            {
+                throw new Exception("Dimensions of B must equal to dimensions of this matrix");
+            }
+            Parallel.For(0, rowsB, i =>
+            {
+                for (int j = 0; j < colsB; j++)
+                {
+                    _data[i][j] += B._data[i][j];
+                }
+            });
+            return;
+        }
+
+        /// <summary>
+        /// Computes A[n][n] + s
+        /// </summary>
+        /// <param name="A">Matrix A</param>
+        /// <param name="s">Scalar value</param>
+        /// <returns>Resulting matrix</returns>
+        public static Matrix AddScalarToDiagonal(Matrix A, double s)
+        {
+            int rowsA = A.NumOfRows;
+            int colsA = A.NumOfCols;
+            double[][] dataR = new double[rowsA][];
+            Parallel.For(0, rowsA, i =>
+            {
+                dataR[i] = (double[])A._data[i].Clone();
+                dataR[i][i] += s;
+            });
+            return new Matrix(dataR, false);
+        }
+
+        /// <summary>
+        /// Adds scalar value to main diagonel
+        /// </summary>
+        /// <param name="s">Scalar value</param>
+        public void AddScalarToDiagonal(double s)
+        {
+            Parallel.For(0, NumOfRows, i =>
+            {
+                _data[i][i] += s;
+            });
+            return;
+        }
+
+        /// <summary>
+        /// Computes A - B
+        /// </summary>
+        /// <param name="A">Matrix A</param>
+        /// <param name="B">Matrix B</param>
+        /// <returns>Resulting matrix</returns>
+        public static Matrix Substract(Matrix A, Matrix B)
+        {
+            int rowsA = A.NumOfRows;
+            int colsA = A.NumOfCols;
+            int rowsB = B.NumOfRows;
+            int colsB = B.NumOfCols;
+            if (colsA != colsB || rowsA != rowsB)
+            {
+                throw new Exception("Dimensions of A must equal to dimensions of B");
+            }
+            double[][] dataR = new double[rowsA][];
+            Parallel.For(0, rowsA, i =>
+            {
+                dataR[i] = new double[colsA];
+                for (int j = 0; j < colsA; j++)
+                {
+                    dataR[i][j] = A._data[i][j] - B._data[i][j];
+                }
+            });
+            return new Matrix(dataR, false);
+        }
+
+        /// <summary>
+        /// Computes A - B
+        /// </summary>
+        /// <param name="A">Matrix A</param>
+        /// <param name="B">Matrix B</param>
+        /// <returns>Resulting matrix</returns>
+        public static Matrix operator -(Matrix A, Matrix B)
+        {
+            return Substract(A, B);
+        }
+
+        /// <summary>
+        /// Substract matrix B
+        /// </summary>
+        /// <param name="B">Matrix B</param>
+        public void Substract(Matrix B)
+        {
+            int rowsB = B.NumOfRows;
+            int colsB = B.NumOfCols;
+            if (NumOfCols != colsB || NumOfRows != rowsB)
+            {
+                throw new Exception("Dimensions of B must equal to dimensions of this matrix");
+            }
+            Parallel.For(0, rowsB, i =>
+            {
+                for (int j = 0; j < colsB; j++)
+                {
+                    _data[i][j] -= B._data[i][j];
+                }
+            });
+            return;
+        }
+
+        /// <summary>
+        /// Multiplies matrix A and matrix B
+        /// </summary>
+        /// <param name="A">Matrix A</param>
+        /// <param name="B">Matrix B</param>
+        /// <returns>Resulting matrix</returns>
+        public static Matrix Multiply(Matrix A, Matrix B)
+        {
+            int rowsA = A.NumOfRows;
+            int colsA = A.NumOfCols;
+            int rowsB = B.NumOfRows;
+            int colsB = B.NumOfCols;
+            if (colsA != rowsB)
+            {
+                throw new Exception("Number of columns of A must be equal to number of rows of B");
+            }
+            Matrix R = new Matrix(rowsA, colsB);
+            Parallel.For(0, rowsA, i =>
+            {
+                for (int j = 0; j < colsB; j++)
+                {
+                    for (int k = 0; k < rowsB; k++)
+                    {
+                        R._data[i][j] += A._data[i][k] * B._data[k][j];
+                    }
+                }
+            });
+            return R;
+        }
+
+        /// <summary>
+        /// Multiplies matrix A and matrix B
+        /// </summary>
+        /// <param name="A">Matrix A</param>
+        /// <param name="B">Matrix B</param>
+        /// <returns>Resulting matrix</returns>
+        public static Matrix operator *(Matrix A, Matrix B)
+        {
+            return Multiply(A, B);
+        }
+
+        /// <summary>
+        /// Multiplies matrix A and vector V
+        /// </summary>
+        /// <param name="A">Matrix A</param>
+        /// <param name="v">Vector</param>
+        /// <returns>Resulting vector</returns>
+        public static Vector Multiply(Matrix A, Vector v)
+        {
+            int rowsA = A.NumOfRows;
+            int colsA = A.NumOfCols;
+            if (colsA != v.Length)
+            {
+                throw new Exception("Number of columns of A must be equal to length of vector V");
+            }
+            double[] dataV = new double[rowsA];
+            dataV.Populate(0);
+            Parallel.For(0, rowsA, i =>
+            {
+                for (int j = 0; j < v.Length; j++)
+                {
+                    dataV[i] += A._data[i][j] * v.Data[j];
+                }
+            });
+            return new Vector(dataV, false);
+        }
+
+        /// <summary>
+        /// Multiplies matrix A and vector V
+        /// </summary>
+        /// <param name="A">Matrix A</param>
+        /// <param name="v">Vector</param>
+        /// <returns>Resulting vector</returns>
+        public static Vector operator *(Matrix A, Vector v)
+        {
+            return Multiply(A, v);
+        }
+
+        /// <summary>
+        /// Multiplies matrix by vector v
+        /// </summary>
+        /// <param name="v">Vector v</param>
+        /// <returns>Resulting vector</returns>
+        public Vector Multiply(Vector v)
+        {
+            if (NumOfCols != v.Length)
+            {
+                throw new Exception("Number of columns of the matrix must be equal to length of vector V");
+            }
+            double[] dataV = new double[NumOfRows];
+            dataV.Populate(0);
+            Parallel.For(0, NumOfRows, i =>
+            {
+                for (int j = 0; j < v.Length; j++)
+                {
+                    dataV[i] += _data[i][j] * v.Data[j];
+                }
+            });
+            return new Vector(dataV, false);
+        }
+
+        /// <summary>
+        /// Multiplies matrix A and scalar s
+        /// </summary>
+        /// <param name="A">Matrix A</param>
+        /// <param name="s">Scalar value</param>
+        /// <returns>Resulting matrix</returns>
+        public static Matrix Multiply(Matrix A, double s)
+        {
+            int rowsA = A.NumOfRows;
+            int colsA = A.NumOfCols;
+            double[][] dataR = new double[rowsA][];
+            Parallel.For(0, rowsA, i =>
+            {
+                dataR[i] = new double[colsA];
+                for (int j = 0; j < colsA; j++)
+                {
+                    dataR[i][j] = A._data[i][j] * s;
+                }
+            });
+            return new Matrix(dataR, false);
+        }
+
+        /// <summary>
+        /// Multiplies matrix A and scalar s
+        /// </summary>
+        /// <param name="A">Matrix A</param>
+        /// <param name="s">Scalar value</param>
+        /// <returns>Resulting matrix</returns>
+        public static Matrix operator *(Matrix A, double s)
+        {
+            return Multiply(A, s);
+        }
+
+        /// <summary>
+        /// Multiplies elements in this matrix by scalar value
+        /// </summary>
+        /// <param name="s">Scalar value</param>
+        public void Multiply(double s)
+        {
+            Parallel.For(0, NumOfRows, i =>
+            {
+                for (int j = 0; j < NumOfCols; j++)
+                {
+                    _data[i][j] *= s;
+                }
+            });
+            return;
+        }
+
+        /// <summary>
+        /// Transposes matrix A
+        /// </summary>
+        /// <param name="A">Matrix A</param>
+        public static Matrix Transpose(Matrix A)
+        {
+            int rowsA = A.NumOfRows;
+            int colsA = A.NumOfCols;
+            int rowsR = colsA;
+            int colsR = rowsA;
+            double[][] dataR = new double[rowsR][];
+            Parallel.For(0, rowsR, i =>
+            {
+                dataR[i] = new double[colsR];
+                for(int j = 0; j < rowsA; j++)
+                {
+                    dataR[i][j] = A._data[j][i];
+                }
+            });
+            return new Matrix(dataR, false);
+        }
+
+        /// <summary>
+        /// Retuns transposed this matrix
+        /// </summary>
+        public Matrix Transpose()
+        {
+            int rowsR = NumOfCols;
+            int colsR = NumOfRows;
+            double[][] dataR = new double[rowsR][];
+            Parallel.For(0, rowsR, i =>
+            {
+                dataR[i] = new double[colsR];
+                for (int j = 0; j < colsR; j++)
+                {
+                    dataR[i][j] = _data[j][i];
+                }
+            });
+            return new Matrix(dataR, false);
+        }
+
+        /// <summary>
+        /// Inverses this matrix and returns determinant.
+        /// </summary>
+        public double Inverse()
+        {
+            if (!IsSquared)
+            {
+                throw new Exception("Matrix must be squared.");
+            }
+            double determinant = 1.0;
+            int size = NumOfRows;
+            for (int p = 0; p < size; p++)
+            {
+                double pivot = _data[p][p];
+                determinant *= pivot;
+                if (Math.Abs(pivot) < 1e-20)
+                {
+                    //Failed
+                    throw new Exception($"Pivot is too small. Pivot = {pivot}.");
+                }
+                for (int i = 0; i < size; i++)
+                {
+                    _data[i][p] = -_data[i][p] / pivot;
+                }
+                for (int i = 0; i < size; i++)
+                {
+                    if (i != p)
+                    {
+                        for (int j = 0; j < size; j++)
+                        {
+                            if (j != p)
+                            {
+                                _data[i][j] += _data[p][j] * _data[i][p];
+                            }
+                        }
+                    }
+                }
+                for (int j = 0; j < size; j++)
+                {
+                    _data[p][j] /= pivot;
+                }
+                _data[p][p] = 1 / pivot;
+            }
+            return determinant;
+        }
+
+        /// <summary>
+        /// Computes inverse matrix to matrix A
+        /// </summary>
+        /// <param name="A">Matrix A</param>
+        /// <returns>Resulting matrix</returns>
+        public static Matrix Inverse(Matrix A)
+        {
+            Matrix R = new Matrix(A);
+            R.Inverse();
+            return R;
+        }
+
+        /// <summary>
+        /// Creates matrix designed for Ridge Regression weights computation
+        /// </summary>
+        /// <param name="lambda">Hyperparameter lambda</param>
+        /// <returns>Matrix designed for weights computation</returns>
+        public Matrix DesignRidgeRegression(double lambda)
+        {
+            Matrix tX = Transpose();
+            Matrix iM = tX * this;
+            iM.AddScalarToDiagonal(lambda);
+            iM.Inverse();
+            Matrix designRRM = iM * tX;
+            return designRRM;
+        }
+
+        /// <summary>
+        /// Computes ridge regression weights
+        /// </summary>
+        /// <param name="X">Data matrix</param>
+        /// <param name="desired">Desired values</param>
+        /// <param name="lambda">Hyperparameter lambda</param>
+        /// <returns>Weights</returns>
+        public static Vector RidgeRegression(Matrix X, Vector desired, double lambda)
+        {
+            if(X.NumOfRows != desired.Length)
+            {
+                throw new Exception("Number of matrix rows must be equal to desired vector length.");
+            }
+            Matrix designRRM = X.DesignRidgeRegression(lambda);
+            Vector weights = designRRM * desired;
+            return weights;
         }
 
     }//Matrix

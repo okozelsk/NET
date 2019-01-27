@@ -8,7 +8,7 @@ namespace RCNet.DemoConsoleApp
     {
         static void Main(string[] args)
         {
-            ////Research - this is not a part of the demo - it is a free playground
+            //Research - this is not a part of the demo - it is a free playground
             //(new Research()).Run();
 
             //Demo standard execution

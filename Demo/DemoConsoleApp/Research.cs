@@ -34,9 +34,92 @@ namespace RCNet.DemoConsoleApp
         public void Run()
         {
 
+            //Linear algebra test
+            int numOfweights = 4;
+            int xIdx, dIdx = 0;
+            double[][] data = new double[5][];
+            data[dIdx] = new double[numOfweights];
+            xIdx = -1;
+            data[dIdx][++xIdx] = 1; //Bias
+            data[dIdx][++xIdx] = 2;
+            data[dIdx][++xIdx] = 1;
+            data[dIdx][++xIdx] = 3;
+            ++dIdx;
+            data[dIdx] = new double[numOfweights];
+            xIdx = -1;
+            data[dIdx][++xIdx] = 1; //Bias
+            data[dIdx][++xIdx] = 1;
+            data[dIdx][++xIdx] = 3;
+            data[dIdx][++xIdx] = -3;
+            ++dIdx;
+            data[dIdx] = new double[numOfweights];
+            xIdx = -1;
+            data[dIdx][++xIdx] = 1; //Bias
+            data[dIdx][++xIdx] = -2;
+            data[dIdx][++xIdx] = 4;
+            data[dIdx][++xIdx] = 4;
+            ++dIdx;
+            data[dIdx] = new double[numOfweights];
+            xIdx = -1;
+            data[dIdx][++xIdx] = 1; //Bias
+            data[dIdx][++xIdx] = -5;
+            data[dIdx][++xIdx] = 7;
+            data[dIdx][++xIdx] = 6;
+            ++dIdx;
+            data[dIdx] = new double[numOfweights];
+            xIdx = -1;
+            data[dIdx][++xIdx] = 1; //Bias
+            data[dIdx][++xIdx] = 1;
+            data[dIdx][++xIdx] = 12;
+            data[dIdx][++xIdx] = 5;
+
+            Matrix M = new Matrix(data, true);
+            Vector desired = new Vector(5);
+            dIdx = -1;
+            desired.Data[++dIdx] = 8;
+            desired.Data[++dIdx] = 13;
+            desired.Data[++dIdx] = 5;
+            desired.Data[++dIdx] = 7;
+            desired.Data[++dIdx] = 10;
+
+            Vector weights = Matrix.RidgeRegression(M, desired, 0);
+
+            //Display results
+            for(int i = 0; i < data.Length; i++)
+            {
+                double result = 0;
+                for(int j = 0; j < weights.Length; j++)
+                {
+                    result += data[i][j] * weights[j];
+                }
+                Console.WriteLine($"Computed {result}, Desired {desired.Data[i]}");
+            }
+            Console.WriteLine();
+
+            //QRD
+            QRD decomposition = new QRD(M);
+            Matrix B = new Matrix(desired.Length, 1, desired.Data);
+            Matrix W = decomposition.Solve(B);
+            //Display results
+            for (int i = 0; i < data.Length; i++)
+            {
+                double result = 0;
+                for (int j = 0; j < W.Data.Length; j++)
+                {
+                    result += data[i][j] * W.Data[j][0];
+                }
+                Console.WriteLine($"Computed {result}, Desired {desired.Data[i]}");
+
+            }
+
+
+
+            ;
+
+
+
+
             //TimeSeriesGenerator.SaveTimeSeriesToCsvFile("MackeyGlass_big.csv", "Value", TimeSeriesGenerator.GenMackeyGlassTimeSeries(16000), CultureInfo.InvariantCulture);
-
-
             MackeyGlassGeneratorSettings modSettings = new MackeyGlassGeneratorSettings(18, 0.1, 0.2);
             IGenerator generator = new MackeyGlassGenerator(modSettings);
 
