@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using RCNet.Extensions;
 using RCNet.MathTools.VectorMath;
@@ -879,9 +880,67 @@ namespace RCNet.MathTools.MatrixMath
         }
 
         /// <summary>
-        /// Inverses this matrix and returns determinant.
+        /// Inverses this matrix and returns its determinant.
+        /// Ennhanced algorithm originally proposed by Ahmad FAROOQ and Khan HAMID
         /// </summary>
         public double Inverse()
+        {
+            if (!IsSquared)
+            {
+                throw new Exception("Matrix must be squared.");
+            }
+            double determinant = 1.0;
+            int size = NumOfRows;
+            var rangePartitioner = Partitioner.Create(0, size);
+            for (int p = 0; p < size; p++)
+            {
+                double pivot = _data[p][p];
+                determinant *= pivot;
+                if (Math.Abs(pivot) < 1e-20)
+                {
+                    //Failed
+                    throw new Exception($"Pivot is too small. Pivot = {pivot}.");
+                }
+                Parallel.ForEach(rangePartitioner, (range, loopState) =>
+                {
+                    for (int i = range.Item1; i < range.Item2; i++)
+                    {
+                        _data[i][p] /= -pivot;
+                    }
+                });
+                for (int i = 0; i < size; i++)
+                {
+                    if (i != p)
+                    {
+                        Parallel.ForEach(rangePartitioner, (range, loopState) =>
+                        {
+                            for (int j = range.Item1; j < range.Item2; j++)
+                            {
+                                if (j != p)
+                                {
+                                    _data[i][j] += _data[p][j] * _data[i][p];
+                                }
+                            }
+                        });
+                    }
+                }
+                Parallel.ForEach(rangePartitioner, (range, loopState) =>
+                {
+                    for (int j = range.Item1; j < range.Item2; j++)
+                    {
+                        _data[p][j] /= pivot;
+                    }
+                });
+                _data[p][p] = 1d / pivot;
+            }
+            return determinant;
+        }
+
+        /// <summary>
+        /// Inverses this matrix and returns its determinant.
+        /// Algorithm originally proposed by Ahmad FAROOQ and Khan HAMID
+        /// </summary>
+        public double SingleThreadInverse()
         {
             if (!IsSquared)
             {
