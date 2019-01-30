@@ -119,6 +119,7 @@
     <Compile Include="Neural\Data\Generators\IGenerator.cs" />
     <Compile Include="Neural\Data\Generators\RandomGenerator.cs" />
     <Compile Include="Neural\Data\Generators\ConstGeneratorSettings.cs" />
+    <Compile Include="Neural\Network\FF\LinRegrTrainerOrg.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\NeuralPreprocessor.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\NeuralPreprocessorSettings.cs" />
     <Compile Include="Neural\Network\SM\Synapse\DynamicSynapse.cs" />
@@ -176,7 +177,7 @@
     <Compile Include="Neural\Network\SM\StateMachineSettings.cs" />
     <Compile Include="Neural\Network\FF\FeedForwardNetwork.cs" />
     <Compile Include="Neural\INonRecurrentNetworkTrainer.cs" />
-    <Compile Include="Neural\Network\FF\LinRegrTrainer.cs" />
+    <Compile Include="Neural\Network\FF\LinRegrTrainerNew.cs" />
     <Compile Include="Neural\Network\FF\RPropTrainer.cs" />
     <Compile Include="Neural\Network\SM\Readout\ReadoutLayerSettings.cs" />
     <Compile Include="Neural\Network\SM\Readout\ReadoutLayer.cs" />

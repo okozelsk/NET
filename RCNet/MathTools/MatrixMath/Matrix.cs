@@ -550,16 +550,24 @@ namespace RCNet.MathTools.MatrixMath
             {
                 throw new Exception("Dimensions of A must equal to dimensions of B");
             }
-            double[][] dataR = new double[rowsA][];
-            Parallel.For(0, rowsA, i =>
+            double[][] resultData = new double[rowsA][];
+            var rangePartitioner = Partitioner.Create(0, rowsA);
+            Parallel.ForEach(rangePartitioner, range =>
             {
-                dataR[i] = new double[colsA];
-                for (int j = 0; j < colsA; j++)
+                double[] rowDataResult, rowDataA, rowDataB;
+                for (int i = range.Item1; i < range.Item2; i++)
                 {
-                    dataR[i][j] = A._data[i][j] + B._data[i][j];
+                    rowDataResult = new double[colsA];
+                    rowDataA = A._data[i];
+                    rowDataB = B._data[i];
+                    for (int j = 0; j < colsA; j++)
+                    {
+                        rowDataResult[j] = rowDataA[j] + rowDataB[j];
+                    }
+                    resultData[i] = rowDataResult;
                 }
             });
-            return new Matrix(dataR, false);
+            return new Matrix(resultData, false);
         }
 
         /// <summary>
@@ -585,18 +593,25 @@ namespace RCNet.MathTools.MatrixMath
             {
                 throw new Exception("Dimensions of B must equal to dimensions of this matrix");
             }
-            Parallel.For(0, rowsB, i =>
+            var rangePartitioner = Partitioner.Create(0, rowsB);
+            Parallel.ForEach(rangePartitioner, range =>
             {
-                for (int j = 0; j < colsB; j++)
+                double[] rowData, rowDataB;
+                for (int i = range.Item1; i < range.Item2; i++)
                 {
-                    _data[i][j] += B._data[i][j];
+                    rowData = _data[i];
+                    rowDataB = B._data[i];
+                    for (int j = 0; j < colsB; j++)
+                    {
+                        rowData[j] += rowDataB[j];
+                    }
                 }
             });
             return;
         }
 
         /// <summary>
-        /// Computes A[n][n] + s
+        /// Adds scalar value s to main diagonal of square matrix A.
         /// </summary>
         /// <param name="A">Matrix A</param>
         /// <param name="s">Scalar value</param>
@@ -605,24 +620,40 @@ namespace RCNet.MathTools.MatrixMath
         {
             int rowsA = A.NumOfRows;
             int colsA = A.NumOfCols;
-            double[][] dataR = new double[rowsA][];
-            Parallel.For(0, rowsA, i =>
+            if(rowsA != colsA)
             {
-                dataR[i] = (double[])A._data[i].Clone();
-                dataR[i][i] += s;
+                throw new Exception("Matrix A must be a square matrix (rows dimension = columns dimension)");
+            }
+            double[][] resultData = new double[rowsA][];
+            var rangePartitioner = Partitioner.Create(0, rowsA);
+            Parallel.ForEach(rangePartitioner, range =>
+            {
+                for (int i = range.Item1; i < range.Item2; i++)
+                {
+                    resultData[i] = (double[])A._data[i].Clone();
+                    resultData[i][i] += s;
+                }
             });
-            return new Matrix(dataR, false);
+            return new Matrix(resultData, false);
         }
 
         /// <summary>
-        /// Adds scalar value to main diagonel
+        /// Adds scalar value to main diagonal of this square matrix.
         /// </summary>
         /// <param name="s">Scalar value</param>
         public void AddScalarToDiagonal(double s)
         {
-            Parallel.For(0, NumOfRows, i =>
+            if (!IsSquared)
             {
-                _data[i][i] += s;
+                throw new Exception("Matrix must be a square matrix (rows dimension = columns dimension)");
+            }
+            var rangePartitioner = Partitioner.Create(0, NumOfRows);
+            Parallel.ForEach(rangePartitioner, range =>
+            {
+                for (int i = range.Item1; i < range.Item2; i++)
+                {
+                    _data[i][i] += s;
+                }
             });
             return;
         }
@@ -643,16 +674,24 @@ namespace RCNet.MathTools.MatrixMath
             {
                 throw new Exception("Dimensions of A must equal to dimensions of B");
             }
-            double[][] dataR = new double[rowsA][];
-            Parallel.For(0, rowsA, i =>
+            double[][] resultData = new double[rowsA][];
+            var rangePartitioner = Partitioner.Create(0, rowsA);
+            Parallel.ForEach(rangePartitioner, range =>
             {
-                dataR[i] = new double[colsA];
-                for (int j = 0; j < colsA; j++)
+                double[] rowDataResult, rowDataA, rowDataB;
+                for (int i = range.Item1; i < range.Item2; i++)
                 {
-                    dataR[i][j] = A._data[i][j] - B._data[i][j];
+                    rowDataResult = new double[colsA];
+                    rowDataA = A._data[i];
+                    rowDataB = B._data[i];
+                    for (int j = 0; j < colsA; j++)
+                    {
+                        rowDataResult[j] = rowDataA[j] - rowDataB[j];
+                    }
+                    resultData[i] = rowDataResult;
                 }
             });
-            return new Matrix(dataR, false);
+            return new Matrix(resultData, false);
         }
 
         /// <summary>
@@ -667,7 +706,7 @@ namespace RCNet.MathTools.MatrixMath
         }
 
         /// <summary>
-        /// Substract matrix B
+        /// Substracts matrix B from this matrix
         /// </summary>
         /// <param name="B">Matrix B</param>
         public void Substract(Matrix B)
@@ -678,14 +717,52 @@ namespace RCNet.MathTools.MatrixMath
             {
                 throw new Exception("Dimensions of B must equal to dimensions of this matrix");
             }
-            Parallel.For(0, rowsB, i =>
+            var rangePartitioner = Partitioner.Create(0, rowsB);
+            Parallel.ForEach(rangePartitioner, range =>
             {
-                for (int j = 0; j < colsB; j++)
+                double[] rowData, rowDataB;
+                for (int i = range.Item1; i < range.Item2; i++)
                 {
-                    _data[i][j] -= B._data[i][j];
+                    rowData = _data[i];
+                    rowDataB = B._data[i];
+                    for (int j = 0; j < colsB; j++)
+                    {
+                        rowData[j] -= rowDataB[j];
+                    }
                 }
             });
             return;
+        }
+
+        /// <summary>
+        /// Multiplies matrix A and matrix B.
+        /// Function is single-threaded.
+        /// </summary>
+        /// <param name="A">Matrix A</param>
+        /// <param name="B">Matrix B</param>
+        /// <returns>Resulting matrix</returns>
+        public static Matrix ST_Multiply(Matrix A, Matrix B)
+        {
+            int rowsA = A.NumOfRows;
+            int colsA = A.NumOfCols;
+            int rowsB = B.NumOfRows;
+            int colsB = B.NumOfCols;
+            if (colsA != rowsB)
+            {
+                throw new Exception("Number of columns of A must be equal to number of rows of B");
+            }
+            Matrix R = new Matrix(rowsA, colsB);
+            for (int i = 0; i < rowsA; i++)
+            {
+                for (int j = 0; j < colsB; j++)
+                {
+                    for (int k = 0; k < rowsB; k++)
+                    {
+                        R._data[i][j] += A._data[i][k] * B._data[k][j];
+                    }
+                }
+            }
+            return R;
         }
 
         /// <summary>
@@ -704,18 +781,28 @@ namespace RCNet.MathTools.MatrixMath
             {
                 throw new Exception("Number of columns of A must be equal to number of rows of B");
             }
-            Matrix R = new Matrix(rowsA, colsB);
-            Parallel.For(0, rowsA, i =>
+            var rangePartitioner = Partitioner.Create(0, rowsA);
+            double[][] resultData = new double[rowsA][];
+            Parallel.ForEach(rangePartitioner, range =>
             {
-                for (int j = 0; j < colsB; j++)
+                double[] rowDataA, rowDataB, rowDataResult;
+                for (int i = range.Item1; i < range.Item2; i++)
                 {
-                    for (int k = 0; k < rowsB; k++)
+                    rowDataA = A._data[i];
+                    rowDataResult = new double[colsB];
+                    for (int j = 0; j < rowsB; j++)
                     {
-                        R._data[i][j] += A._data[i][k] * B._data[k][j];
+                        rowDataB = B._data[j];
+                        double valA = rowDataA[j];
+                        for (int k = 0; k < colsB; k++)
+                        {
+                            rowDataResult[k] += valA * rowDataB[k];
+                        }
                     }
-                }
+                    resultData[i] = rowDataResult;
+                };
             });
-            return R;
+            return new Matrix(resultData, false);
         }
 
         /// <summary>
@@ -730,7 +817,7 @@ namespace RCNet.MathTools.MatrixMath
         }
 
         /// <summary>
-        /// Multiplies matrix A and vector V
+        /// Multiplies matrix A and vector v.
         /// </summary>
         /// <param name="A">Matrix A</param>
         /// <param name="v">Vector</param>
@@ -741,18 +828,52 @@ namespace RCNet.MathTools.MatrixMath
             int colsA = A.NumOfCols;
             if (colsA != v.Length)
             {
-                throw new Exception("Number of columns of A must be equal to length of vector V");
+                throw new Exception("Number of columns of A must be equal to length of vector v");
             }
-            double[] dataV = new double[rowsA];
-            dataV.Populate(0);
-            Parallel.For(0, rowsA, i =>
+            double[] resultData = new double[rowsA];
+            double[] vData = v.Data;
+            int vDataLength = vData.Length;
+            var rangePartitioner = Partitioner.Create(0, rowsA);
+            Parallel.ForEach(rangePartitioner, range =>
+            {
+                for(int i = range.Item1; i < range.Item2; i++)
+                {
+                    double[] dataRowA = A._data[i];
+                    double sum = 0;
+                    for (int j = 0; j < vDataLength; j++)
+                    {
+                        sum += dataRowA[j] * vData[j];
+                    }
+                    resultData[i] = sum;
+                }
+            });
+            return new Vector(resultData, false);
+        }
+
+        /// <summary>
+        /// Multiplies matrix A and vector v.
+        /// Function is single-threaded.
+        /// </summary>
+        /// <param name="A">Matrix A</param>
+        /// <param name="v">Vector</param>
+        /// <returns>Resulting vector</returns>
+        public static Vector ST_Multiply(Matrix A, Vector v)
+        {
+            int rowsA = A.NumOfRows;
+            int colsA = A.NumOfCols;
+            if (colsA != v.Length)
+            {
+                throw new Exception("Number of columns of A must be equal to length of vector v");
+            }
+            double[] resultData = new double[rowsA];
+            for (int i = 0; i < rowsA; i++)
             {
                 for (int j = 0; j < v.Length; j++)
                 {
-                    dataV[i] += A._data[i][j] * v.Data[j];
+                    resultData[i] += A._data[i][j] * v.Data[j];
                 }
-            });
-            return new Vector(dataV, false);
+            }
+            return new Vector(resultData, false);
         }
 
         /// <summary>
@@ -767,7 +888,7 @@ namespace RCNet.MathTools.MatrixMath
         }
 
         /// <summary>
-        /// Multiplies matrix by vector v
+        /// Multiplies this matrix by vector v
         /// </summary>
         /// <param name="v">Vector v</param>
         /// <returns>Resulting vector</returns>
@@ -777,16 +898,24 @@ namespace RCNet.MathTools.MatrixMath
             {
                 throw new Exception("Number of columns of the matrix must be equal to length of vector V");
             }
-            double[] dataV = new double[NumOfRows];
-            dataV.Populate(0);
-            Parallel.For(0, NumOfRows, i =>
+            int rows = NumOfRows;
+            double[] resultData = new double[rows];
+            double[] vData = v.Data;
+            var rangePartitioner = Partitioner.Create(0, NumOfRows);
+            Parallel.ForEach(rangePartitioner, range =>
             {
-                for (int j = 0; j < v.Length; j++)
+                for (int i = range.Item1; i < range.Item2; i++)
                 {
-                    dataV[i] += _data[i][j] * v.Data[j];
+                    double[] dataRow = _data[i];
+                    double sum = 0;
+                    for (int j = 0; j < rows; j++)
+                    {
+                        sum += dataRow[j] * vData[j];
+                    }
+                    resultData[i] = sum;
                 }
             });
-            return new Vector(dataV, false);
+            return new Vector(resultData, false);
         }
 
         /// <summary>
@@ -800,12 +929,18 @@ namespace RCNet.MathTools.MatrixMath
             int rowsA = A.NumOfRows;
             int colsA = A.NumOfCols;
             double[][] dataR = new double[rowsA][];
-            Parallel.For(0, rowsA, i =>
+            var rangePartitioner = Partitioner.Create(0, rowsA);
+            Parallel.ForEach(rangePartitioner, range =>
             {
-                dataR[i] = new double[colsA];
-                for (int j = 0; j < colsA; j++)
+                for (int i = range.Item1; i < range.Item2; i++)
                 {
-                    dataR[i][j] = A._data[i][j] * s;
+                    double[] rowDataA = A._data[i];
+                    double[] rowDataR = new double[colsA];
+                    for (int j = 0; j < colsA; j++)
+                    {
+                        rowDataR[j] = rowDataA[j] * s;
+                    }
+                    dataR[i] = rowDataR;
                 }
             });
             return new Matrix(dataR, false);
@@ -828,18 +963,24 @@ namespace RCNet.MathTools.MatrixMath
         /// <param name="s">Scalar value</param>
         public void Multiply(double s)
         {
-            Parallel.For(0, NumOfRows, i =>
+            int cols = NumOfCols;
+            var rangePartitioner = Partitioner.Create(0, NumOfRows);
+            Parallel.ForEach(rangePartitioner, range =>
             {
-                for (int j = 0; j < NumOfCols; j++)
+                for (int i = range.Item1; i < range.Item2; i++)
                 {
-                    _data[i][j] *= s;
+                    double[] rowData = _data[i];
+                    for (int j = 0; j < cols; j++)
+                    {
+                        rowData[j] *= s;
+                    }
                 }
             });
             return;
         }
 
         /// <summary>
-        /// Transposes matrix A
+        /// Retuns transposed given matrix.
         /// </summary>
         /// <param name="A">Matrix A</param>
         public static Matrix Transpose(Matrix A)
@@ -849,33 +990,63 @@ namespace RCNet.MathTools.MatrixMath
             int rowsR = colsA;
             int colsR = rowsA;
             double[][] dataR = new double[rowsR][];
-            Parallel.For(0, rowsR, i =>
+            var rangePartitioner = Partitioner.Create(0, rowsR);
+            Parallel.ForEach(rangePartitioner, range =>
             {
-                dataR[i] = new double[colsR];
-                for(int j = 0; j < rowsA; j++)
+                for(int i = range.Item1; i < range.Item2; i++)
                 {
-                    dataR[i][j] = A._data[j][i];
+                    double[] rowData = new double[colsR];
+                    for (int j = 0; j < colsR; j++)
+                    {
+                        rowData[j] = A._data[j][i];
+                    }
+                    dataR[i] = rowData;
                 }
             });
             return new Matrix(dataR, false);
         }
 
         /// <summary>
-        /// Retuns transposed this matrix
+        /// Retuns transposed this matrix.
         /// </summary>
         public Matrix Transpose()
         {
             int rowsR = NumOfCols;
             int colsR = NumOfRows;
             double[][] dataR = new double[rowsR][];
-            Parallel.For(0, rowsR, i =>
+            var rangePartitioner = Partitioner.Create(0, rowsR);
+            Parallel.ForEach(rangePartitioner, range =>
+            {
+                for(int i = range.Item1; i < range.Item2; i++)
+                {
+                    double[] rowData = new double[colsR];
+                    for (int j = 0; j < colsR; j++)
+                    {
+                        rowData[j] = _data[j][i];
+                    }
+                    dataR[i] = rowData;
+                }
+            });
+            return new Matrix(dataR, false);
+        }
+
+        /// <summary>
+        /// Retuns transposed this matrix.
+        /// Function is single-threaded.
+        /// </summary>
+        public Matrix ST_Transpose()
+        {
+            int rowsR = NumOfCols;
+            int colsR = NumOfRows;
+            double[][] dataR = new double[rowsR][];
+            for(int i = 0; i < rowsR; i++)
             {
                 dataR[i] = new double[colsR];
                 for (int j = 0; j < colsR; j++)
                 {
                     dataR[i][j] = _data[j][i];
                 }
-            });
+            }
             return new Matrix(dataR, false);
         }
 
@@ -883,6 +1054,7 @@ namespace RCNet.MathTools.MatrixMath
         /// Inverses this matrix and returns its determinant.
         /// Ennhanced algorithm originally proposed by Ahmad FAROOQ and Khan HAMID
         /// </summary>
+        /// <returns>Determinant</returns>
         public double Inverse()
         {
             if (!IsSquared)
@@ -894,6 +1066,7 @@ namespace RCNet.MathTools.MatrixMath
             var rangePartitioner = Partitioner.Create(0, size);
             for (int p = 0; p < size; p++)
             {
+                double[] pRowData = _data[p];
                 double pivot = _data[p][p];
                 determinant *= pivot;
                 if (Math.Abs(pivot) < 1e-20)
@@ -901,46 +1074,51 @@ namespace RCNet.MathTools.MatrixMath
                     //Failed
                     throw new Exception($"Pivot is too small. Pivot = {pivot}.");
                 }
-                Parallel.ForEach(rangePartitioner, (range, loopState) =>
+                Parallel.ForEach(rangePartitioner, range =>
                 {
                     for (int i = range.Item1; i < range.Item2; i++)
                     {
                         _data[i][p] /= -pivot;
                     }
                 });
-                for (int i = 0; i < size; i++)
+                Parallel.ForEach(rangePartitioner, range =>
                 {
-                    if (i != p)
+                    double[] iRowData;
+                    for (int i = range.Item1; i < range.Item2; i++)
                     {
-                        Parallel.ForEach(rangePartitioner, (range, loopState) =>
+                        if (i != p)
                         {
-                            for (int j = range.Item1; j < range.Item2; j++)
+                            iRowData = _data[i];
+                            double iRowPColVal = iRowData[p];
+                            for (int j = 0; j < size; j++)
                             {
                                 if (j != p)
                                 {
-                                    _data[i][j] += _data[p][j] * _data[i][p];
+                                    iRowData[j] += pRowData[j] * iRowPColVal;
                                 }
                             }
-                        });
-                    }
-                }
-                Parallel.ForEach(rangePartitioner, (range, loopState) =>
-                {
-                    for (int j = range.Item1; j < range.Item2; j++)
-                    {
-                        _data[p][j] /= pivot;
+                        }
                     }
                 });
-                _data[p][p] = 1d / pivot;
+                Parallel.ForEach(rangePartitioner, range =>
+                {
+                    for (int i = range.Item1; i < range.Item2; i++)
+                    {
+                        pRowData[i] /= pivot;
+                    }
+                });
+                pRowData[p] = 1d / pivot;
             }
             return determinant;
         }
 
         /// <summary>
         /// Inverses this matrix and returns its determinant.
-        /// Algorithm originally proposed by Ahmad FAROOQ and Khan HAMID
+        /// Originally proposed algorithm by Ahmad FAROOQ and Khan HAMID
+        /// Function is single-threaded.
         /// </summary>
-        public double SingleThreadInverse()
+        /// <returns>Determinant</returns>
+        public double ST_Inverse()
         {
             if (!IsSquared)
             {
@@ -996,36 +1174,38 @@ namespace RCNet.MathTools.MatrixMath
         }
 
         /// <summary>
-        /// Creates matrix designed for Ridge Regression weights computation
+        /// Creates matrix prepared for weights direct computation depending on desired results (Y).
+        /// M = [Inv(X'*X + lambda*I)*X']
+        /// then
+        /// Weights = M * Y
         /// </summary>
-        /// <param name="lambda">Hyperparameter lambda</param>
-        /// <returns>Matrix designed for weights computation</returns>
-        public Matrix DesignRidgeRegression(double lambda)
+        /// <param name="lambda">Hyperparameter lambda of Ridge Regression method</param>
+        public Matrix GetRidgeRegressionMatrix(double lambda)
         {
-            Matrix tX = Transpose();
-            Matrix iM = tX * this;
-            iM.AddScalarToDiagonal(lambda);
-            iM.Inverse();
-            Matrix designRRM = iM * tX;
-            return designRRM;
+            Matrix Xt = Transpose();
+            Matrix R = Xt * this;
+            if (lambda > 0)
+            {
+                R.AddScalarToDiagonal(lambda);
+            }
+            R.Inverse();
+            return R * Xt;
         }
 
         /// <summary>
         /// Computes ridge regression weights
         /// </summary>
-        /// <param name="X">Data matrix</param>
-        /// <param name="desired">Desired values</param>
-        /// <param name="lambda">Hyperparameter lambda</param>
-        /// <returns>Weights</returns>
-        public static Vector RidgeRegression(Matrix X, Vector desired, double lambda)
+        /// <param name="X">Predictor matrix</param>
+        /// <param name="desired">Desired result vector</param>
+        /// <param name="lambda">Hyperparameter lambda of Ridge Regression method</param>
+        /// <returns>Weight vector</returns>
+        public static Vector RidgeRegression(Matrix X, Vector desired, double lambda = 0)
         {
             if(X.NumOfRows != desired.Length)
             {
                 throw new Exception("Number of matrix rows must be equal to desired vector length.");
             }
-            Matrix designRRM = X.DesignRidgeRegression(lambda);
-            Vector weights = designRRM * desired;
-            return weights;
+            return X.GetRidgeRegressionMatrix(lambda) * desired;
         }
 
     }//Matrix

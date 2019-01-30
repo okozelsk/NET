@@ -174,7 +174,17 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                     //Density
                     double density = double.Parse(inputConnectionElem.Attribute("density").Value, CultureInfo.InvariantCulture);
                     //Static synapse settings
-                    StaticSynapseSettings synapseCfg = new StaticSynapseSettings(inputConnectionElem.Descendants("staticSynapse").First());
+                    //Synapse
+                    XElement synapseCfgElem = inputConnectionElem.Descendants().First();
+                    Object synapseCfg = null;
+                    if (synapseCfgElem.Name == "staticSynapse")
+                    {
+                        synapseCfg = new StaticSynapseSettings(synapseCfgElem);
+                    }
+                    else
+                    {
+                        synapseCfg = new DynamicSynapseSettings(synapseCfgElem);
+                    }
                     //Add new assignment
                     reservoirInstanceDefinition.InputConnectionCollection.Add(new ReservoirInstanceDefinition.InputConnection(resInputFieldIdx, targetPoolID, density, synapseCfg));
                 }

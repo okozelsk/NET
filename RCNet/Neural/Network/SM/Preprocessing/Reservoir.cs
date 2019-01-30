@@ -793,7 +793,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             //Perform reservoir's computation cycle
             //Collect new stimulation for each reservoir neuron
             var rangePartitioner = Partitioner.Create(0, _reservoirNeuronCollection.Length);
-            Parallel.ForEach(rangePartitioner, (range, loopState) =>
+            Parallel.ForEach(rangePartitioner, range =>
             {
                 for (int neuronIdx = range.Item1; neuronIdx < range.Item2; neuronIdx++)
                 {

@@ -35,6 +35,41 @@ namespace RCNet.DemoConsoleApp
         {
 
             //Linear algebra test
+            double[] flatData = {
+                                  0.2, 5, 17.3, 1.01, 54, 7,
+                                  2.2, 5.5, 12.13, 11.57, 5.71, -85,
+                                  -70.1, 15, -18.3, 0.3, 42, -6.25,
+                                  0.042, 1, 7.75, -81.01, -21.29, 5.44,
+                                  0.1, 4, -4.3, 18.01, 7.12, -3.14,
+                                  -80.1, 24.4, 4.3, 12.03, 2.789, -13
+                                 };
+            Matrix testM = new Matrix(6, 6, flatData);
+
+            /*
+            //Inversion test
+            Matrix resultM = new Matrix(testM);
+            resultM.SingleThreadInverse();
+            */
+            /*
+            //Transpose test
+            Matrix resultM = testM.Transpose();
+            */
+
+            /*
+            //Multiply test
+            Matrix resultM = Matrix.Multiply(testM, testM);
+            for (int i = 0; i < resultM.NumOfRows; i++)
+            {
+                Console.WriteLine($"{resultM.Data[i][0]}; {resultM.Data[i][1]}; {resultM.Data[i][2]}; {resultM.Data[i][3]}; {resultM.Data[i][4]}; {resultM.Data[i][5]}");
+            }
+            */
+
+
+
+            ;
+
+
+
             int numOfweights = 4;
             int xIdx, dIdx = 0;
             double[][] data = new double[5][];
@@ -94,7 +129,12 @@ namespace RCNet.DemoConsoleApp
                 }
                 Console.WriteLine($"Computed {result}, Desired {desired.Data[i]}");
             }
+            for (int i = 0; i < weights.Length; i++)
+            {
+                Console.WriteLine($"Weight[{i}] = {weights[i]}");
+            }
             Console.WriteLine();
+
 
             //QRD
             QRD decomposition = new QRD(M);
@@ -109,7 +149,10 @@ namespace RCNet.DemoConsoleApp
                     result += data[i][j] * W.Data[j][0];
                 }
                 Console.WriteLine($"Computed {result}, Desired {desired.Data[i]}");
-
+            }
+            for (int i = 0; i < W.Data.Length; i++)
+            {
+                Console.WriteLine($"Weight[{i}] = {W.Data[i][0]}");
             }
 
 

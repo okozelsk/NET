@@ -464,12 +464,12 @@ namespace RCNet.Neural.Network.SM.Readout
             /// <param name="predictors">Available predictors</param>
             public double[] CreateVector(string readoutUnitName, double[] predictors)
             {
-                try
+                if (_mapCollection.ContainsKey(readoutUnitName))
                 {
                     ReadoutUnitMap rum = _mapCollection[readoutUnitName];
                     return CreateVector(predictors, rum.Map, rum.VectorLength);
                 }
-                catch
+                else
                 {
                     if (predictors.Length != _numOfPredictors)
                     {
