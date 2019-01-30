@@ -8,15 +8,12 @@ using RCNet.MathTools.VectorMath;
 namespace RCNet.Neural.Network.FF
 {
     /// <summary>
-    /// Implements the linear regression trainer.
-    /// Principle is to add each iteration less and less piece of white-noise to predictors
-    /// and then perform the standard linear regression.
-    /// This technique allows to find more stable weight solution than just a linear regression
-    /// of pure predictors.
+    /// !!!!Class is not useable - it is under construction!!!!!
+    /// Implements the ridge regression trainer.
     /// FF network has to have only output layer with the Identity activation.
     /// </summary>
     [Serializable]
-    public class LinRegrTrainer : INonRecurrentNetworkTrainer
+    public class RidgeRegrTrainer : INonRecurrentNetworkTrainer
     {
         //Attributes
         private LinRegrTrainerSettings _settings;
@@ -40,13 +37,13 @@ namespace RCNet.Neural.Network.FF
         /// <param name="maxEpoch">Maximum allowed training epochs</param>
         /// <param name="rand">Random object to be used for adding a white-noise to predictors</param>
         /// <param name="settings">Optional startup parameters of the trainer</param>
-        public LinRegrTrainer(FeedForwardNetwork net,
-                              List<double[]> inputVectorCollection,
-                              List<double[]> outputVectorCollection,
-                              int maxEpoch,
-                              Random rand,
-                              LinRegrTrainerSettings settings = null
-                              )
+        public RidgeRegrTrainer(FeedForwardNetwork net,
+                                List<double[]> inputVectorCollection,
+                                List<double[]> outputVectorCollection,
+                                int maxEpoch,
+                                Random rand,
+                                LinRegrTrainerSettings settings = null
+                                )
         {
             //Check network readyness
             if (!net.Finalized)
@@ -145,7 +142,7 @@ namespace RCNet.Neural.Network.FF
             //Adjusted predictors
             Matrix predictors = PreparePredictors((double)intensity);
             //Ridge regression matrix
-            Matrix regrMatrix = predictors.GetRidgeRegressionMatrix(0);
+            Matrix regrMatrix = predictors.GetRidgeRegressionMatrix(1e-9);
             //New weights
             double[] newWeights = new double[_net.NumOfWeights];
             //Weights for each output neuron

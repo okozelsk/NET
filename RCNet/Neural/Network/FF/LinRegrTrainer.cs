@@ -15,7 +15,7 @@ namespace RCNet.Neural.Network.FF
     /// FF network has to have only output layer with the Identity activation.
     /// </summary>
     [Serializable]
-    public class LinRegrTrainerOrg : INonRecurrentNetworkTrainer
+    public class LinRegrTrainer : INonRecurrentNetworkTrainer
     {
         //Attributes
         private LinRegrTrainerSettings _settings;
@@ -39,7 +39,7 @@ namespace RCNet.Neural.Network.FF
         /// <param name="maxEpoch">Maximum allowed training epochs</param>
         /// <param name="rand">Random object to be used for adding a white-noise to predictors</param>
         /// <param name="settings">Optional startup parameters of the trainer</param>
-        public LinRegrTrainerOrg(FeedForwardNetwork net,
+        public LinRegrTrainer(FeedForwardNetwork net,
                               List<double[]> inputVectorCollection,
                               List<double[]> outputVectorCollection,
                               int maxEpoch,
