@@ -43,121 +43,10 @@ namespace RCNet.DemoConsoleApp
         }
 
         /// <summary>
-        /// Function simply displays important statistics of the State Machine's reservoirs.
-        /// </summary>
-        /// <param name="statisticsCollection">Collection of reservoir's statistics</param>
-        /// <param name="log">Output log object</param>
-        private static void ReportReservoirsStatistics(List<ReservoirStat> statisticsCollection, IOutputLog log)
-        {
-            log.Write("    Reservoir(s) info:", false);
-            foreach (ReservoirStat resStat in statisticsCollection)
-            {
-                log.Write($"      Statistics of reservoir instance: {resStat.ReservoirInstanceName} ({resStat.ReservoirSettingsName})", false);
-                foreach (ReservoirStat.PoolStat poolStat in resStat.PoolStatCollection)
-                {
-                    log.Write($"        Statistics of pool: {poolStat.PoolName}", false);
-                    foreach (ReservoirStat.PoolStat.NeuronGroupStat groupStat in poolStat.NeuronGroupStatCollection)
-                    {
-                        log.Write($"          Statistics of group: {groupStat.GroupName}", false);
-                        log.Write($"            Neurons stimulation (all components)", false);
-                        log.Write("              AVG Avg, Max, Min, SDdev: " + groupStat.AvgTStimuliStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + groupStat.AvgTStimuliStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + groupStat.AvgTStimuliStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + groupStat.AvgTStimuliStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
-                        log.Write("              MAX Avg, Max, Min, SDdev: " + groupStat.MaxTStimuliStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + groupStat.MaxTStimuliStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + groupStat.MaxTStimuliStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + groupStat.MaxTStimuliStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
-                        log.Write("              MIN Avg, Max, Min, SDdev: " + groupStat.MinTStimuliStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + groupStat.MinTStimuliStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + groupStat.MinTStimuliStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + groupStat.MinTStimuliStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
-                        log.Write("             SPAN Avg, Max, Min, SDdev: " + groupStat.TStimuliSpansStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + groupStat.TStimuliSpansStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + groupStat.TStimuliSpansStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + groupStat.TStimuliSpansStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
-                        log.Write($"            Neurons stimulation (component coming from connected reservoir's neurons)", false);
-                        log.Write("              AVG Avg, Max, Min, SDdev: " + groupStat.AvgRStimuliStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + groupStat.AvgRStimuliStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + groupStat.AvgRStimuliStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + groupStat.AvgRStimuliStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
-                        log.Write("              MAX Avg, Max, Min, SDdev: " + groupStat.MaxRStimuliStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + groupStat.MaxRStimuliStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + groupStat.MaxRStimuliStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + groupStat.MaxRStimuliStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
-                        log.Write("              MIN Avg, Max, Min, SDdev: " + groupStat.MinRStimuliStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + groupStat.MinRStimuliStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + groupStat.MinRStimuliStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + groupStat.MinRStimuliStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
-                        log.Write("             SPAN Avg, Max, Min, SDdev: " + groupStat.RStimuliSpansStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + groupStat.RStimuliSpansStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + groupStat.RStimuliSpansStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + groupStat.RStimuliSpansStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
-                        log.Write($"            Synapses efficacy", false);
-                        log.Write("              AVG Avg, Max, Min, SDdev: " + groupStat.AvgSynEfficacyStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + groupStat.AvgSynEfficacyStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + groupStat.AvgSynEfficacyStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + groupStat.AvgSynEfficacyStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
-                        log.Write("              MAX Avg, Max, Min, SDdev: " + groupStat.MaxSynEfficacyStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + groupStat.MaxSynEfficacyStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + groupStat.MaxSynEfficacyStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + groupStat.MaxSynEfficacyStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
-                        log.Write("              MIN Avg, Max, Min, SDdev: " + groupStat.MinSynEfficacyStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + groupStat.MinSynEfficacyStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + groupStat.MinSynEfficacyStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + groupStat.MinSynEfficacyStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
-                        log.Write("             SPAN Avg, Max, Min, SDdev: " + groupStat.SynEfficacySpansStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + groupStat.SynEfficacySpansStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + groupStat.SynEfficacySpansStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + groupStat.SynEfficacySpansStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
-                        log.Write($"            Activations state", false);
-                        log.Write("              AVG Avg, Max, Min, SDdev: " + groupStat.AvgActivationStatesStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + groupStat.AvgActivationStatesStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + groupStat.AvgActivationStatesStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + groupStat.AvgActivationStatesStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
-                        log.Write("              MAX Avg, Max, Min, SDdev: " + groupStat.MaxActivationStatesStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + groupStat.MaxActivationStatesStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + groupStat.MaxActivationStatesStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + groupStat.MaxActivationStatesStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
-                        log.Write("             SPAN Avg, Max, Min, SDdev: " + groupStat.ActivationStateSpansStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + groupStat.ActivationStateSpansStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + groupStat.ActivationStateSpansStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + groupStat.ActivationStateSpansStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
-                        log.Write($"            Neurons output signal", false);
-                        log.Write("              AVG Avg, Max, Min, SDdev: " + groupStat.AvgOutputSignalStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + groupStat.AvgOutputSignalStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + groupStat.AvgOutputSignalStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + groupStat.AvgOutputSignalStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
-                        log.Write("              MAX Avg, Max, Min, SDdev: " + groupStat.MaxOutputSignalStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + groupStat.MaxOutputSignalStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + groupStat.MaxOutputSignalStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + groupStat.MaxOutputSignalStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
-                        log.Write("              MIN Avg, Max, Min, SDdev: " + groupStat.MinOutputSignalStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + groupStat.MinOutputSignalStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + groupStat.MinOutputSignalStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                             + groupStat.MinOutputSignalStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
-                    }
-                    log.Write($"          Weights statistics", false);
-                    log.Write("            Input Avg, Max, Min, SDdev: " + poolStat.InputWeightsStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                         + poolStat.InputWeightsStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                         + poolStat.InputWeightsStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                         + poolStat.InputWeightsStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
-                    log.Write("         Internal Avg, Max, Min, SDdev: " + poolStat.InternalWeightsStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                         + poolStat.InternalWeightsStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                         + poolStat.InternalWeightsStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                         + poolStat.InternalWeightsStat.StdDev.ToString("N4", CultureInfo.InvariantCulture), false);
-                }
-            }
-            log.Write(" ", false);
-            //Console.ReadLine();
-            return;
-        }
-
-        /// <summary>
         /// This is the callback control function of the regression process and is called by State Machine
-        /// after the completion of each regression training epoch.
+        /// after the completion of each training epoch.
         /// 
-        /// The goal of the regression process is for each output field to train a readout network(s)
+        /// The goal of the regression process is to train for each output field the readout network(s)
         /// that will give good results both on the training data and the test data. An instance of the
         /// Regression.RegressionControlInArgs class passed to this function contains the best error statistics so far
         /// and the latest statistics. The primary purpose of this function is to decide whether the latest statistics
@@ -172,61 +61,26 @@ namespace RCNet.DemoConsoleApp
         /// <returns>Instructions for the regression process.</returns>
         public static ReadoutUnit.RegressionControlOutArgs RegressionControl(ReadoutUnit.RegressionControlInArgs inArgs)
         {
-            //Instantiate output object.
+            const int reportEpochsInterval = 10;
+            //Instantiate output object to set instructions for the regression process.
             ReadoutUnit.RegressionControlOutArgs outArgs = new ReadoutUnit.RegressionControlOutArgs
             {
                 //Call the default implementation of the judgement.
                 CurrentIsBetter = ReadoutUnit.IsBetter(inArgs.TaskType, inArgs.CurrReadoutUnit, inArgs.BestReadoutUnit)
             };
-            //Report the progress
-            if (outArgs.CurrentIsBetter || (inArgs.Epoch % 10) == 0 || inArgs.Epoch == inArgs.MaxEpochs || (inArgs.Epoch == 1 && inArgs.RegrAttemptNumber == 1))
+            //Progress info
+            if (outArgs.CurrentIsBetter ||
+                (inArgs.Epoch % reportEpochsInterval) == 0 ||
+                inArgs.Epoch == inArgs.MaxEpochs ||
+                (inArgs.Epoch == 1 && inArgs.RegrAttemptNumber == 1)
+                )
             {
-                //Mark the currently best readout unit
-                ReadoutUnit bestReadoutUnit = outArgs.CurrentIsBetter ? inArgs.CurrReadoutUnit : inArgs.BestReadoutUnit;
-                //Build progress text message
-                StringBuilder progressText = new StringBuilder();
-                progressText.Append("      OutputField: ");
-                progressText.Append(inArgs.OutputFieldName);
-                progressText.Append(", Fold/Attempt/Epoch: ");
-                progressText.Append(inArgs.FoldNum.ToString().PadLeft(inArgs.NumOfFolds.ToString().Length, '0') + "/");
-                progressText.Append(inArgs.RegrAttemptNumber.ToString().PadLeft(inArgs.RegrMaxAttempts.ToString().Length, '0') + "/");
-                progressText.Append(inArgs.Epoch.ToString().PadLeft(inArgs.MaxEpochs.ToString().Length, '0'));
-                progressText.Append(", DSet-Sizes: (");
-                progressText.Append(inArgs.CurrReadoutUnit.TrainingErrorStat.NumOfSamples.ToString() + ", ");
-                progressText.Append(inArgs.CurrReadoutUnit.TestingErrorStat.NumOfSamples.ToString() + ")");
-                progressText.Append(", Best-Train: ");
-                progressText.Append(bestReadoutUnit.TrainingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture));
-                if (inArgs.TaskType == CommonEnums.TaskType.Classification)
-                {
-                    //Append binary errors
-                    progressText.Append("/" + bestReadoutUnit.TrainingBinErrorStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture));
-                    progressText.Append("/" + bestReadoutUnit.TrainingBinErrorStat.BinValErrStat[1].Sum.ToString(CultureInfo.InvariantCulture));
-                }
-                progressText.Append(", Best-Test: ");
-                progressText.Append(bestReadoutUnit.TestingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture));
-                if (inArgs.TaskType == CommonEnums.TaskType.Classification)
-                {
-                    //Append binary errors
-                    progressText.Append("/" + bestReadoutUnit.TestingBinErrorStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture));
-                    progressText.Append("/" + bestReadoutUnit.TestingBinErrorStat.BinValErrStat[1].Sum.ToString(CultureInfo.InvariantCulture));
-                }
-                progressText.Append(", Curr-Train: ");
-                progressText.Append(inArgs.CurrReadoutUnit.TrainingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture));
-                if (inArgs.TaskType == CommonEnums.TaskType.Classification)
-                {
-                    //Append binary errors
-                    progressText.Append("/" + inArgs.CurrReadoutUnit.TrainingBinErrorStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture));
-                    progressText.Append("/" + inArgs.CurrReadoutUnit.TrainingBinErrorStat.BinValErrStat[1].Sum.ToString(CultureInfo.InvariantCulture));
-                }
-                progressText.Append(", Curr-Test: ");
-                progressText.Append(inArgs.CurrReadoutUnit.TestingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture));
-                if (inArgs.TaskType == CommonEnums.TaskType.Classification)
-                {
-                    //Append binary errors
-                    progressText.Append("/" + inArgs.CurrReadoutUnit.TestingBinErrorStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture));
-                    progressText.Append("/" + inArgs.CurrReadoutUnit.TestingBinErrorStat.BinValErrStat[1].Sum.ToString(CultureInfo.InvariantCulture));
-                }
-                ((IOutputLog)inArgs.UserObject).Write(progressText.ToString(), !(inArgs.Epoch == 1 && inArgs.RegrAttemptNumber == 1));
+                //Build progress report message
+                string progressText = ReadoutLayer.GetProgressReport(inArgs,
+                                                                     outArgs.CurrentIsBetter ? inArgs.CurrReadoutUnit : inArgs.BestReadoutUnit,
+                                                                     6);
+                //Report the progress
+                ((IOutputLog)inArgs.UserObject).Write(progressText, !(inArgs.Epoch == 1 && inArgs.RegrAttemptNumber == 1));
             }
             return outArgs;
         }
@@ -240,31 +94,22 @@ namespace RCNet.DemoConsoleApp
         public static void PerformDemoCase(IOutputLog log, DemoSettings.CaseSettings demoCaseParams)
         {
             log.Write("  Performing demo case " + demoCaseParams.Name, false);
-            //Bundle normalizer object
-            BundleNormalizer bundleNormalizer = null;
-            //Prediction input vector (relevant only for input continuous feeding)
-            double[] predictionInputVector = null;
+            log.Write(" ", false);
             //Instantiate the State Machine
             StateMachine stateMachine = new StateMachine(demoCaseParams.StateMachineCfg);
             //Prepare input object for regression stage
-            log.Write(" ", false);
             StateMachine.RegressionInput rsi = null;
-            List<string> outputFieldNameCollection = (from rus in demoCaseParams.StateMachineCfg.ReadoutLayerConfig.ReadoutUnitCfgCollection select rus.Name).ToList();
-            List<CommonEnums.TaskType> outputFieldTaskCollection = (from rus in demoCaseParams.StateMachineCfg.ReadoutLayerConfig.ReadoutUnitCfgCollection select rus.TaskType).ToList();
+            //Prediction input vector (relevant only for input continuous feeding)
+            double[] predictionInputVector = null;
             if (demoCaseParams.StateMachineCfg.NeuralPreprocessorConfig.InputConfig.FeedingType == CommonEnums.InputFeedingType.Continuous)
             {
                 //Continuous input feeding
                 //Load data bundle from csv file
                 VectorBundle data = VectorBundle.LoadFromCsv(demoCaseParams.FileName,
-                                                                     demoCaseParams.StateMachineCfg.NeuralPreprocessorConfig.InputConfig.ExternalFieldNameCollection(),
-                                                                     outputFieldNameCollection,
-                                                                     outputFieldTaskCollection,
-                                                                     NeuralPreprocessor.DataRange,
-                                                                     demoCaseParams.NormalizerReserveRatio,
-                                                                     true,
-                                                                     out bundleNormalizer,
-                                                                     out predictionInputVector
-                                                                     );
+                                                             demoCaseParams.StateMachineCfg.NeuralPreprocessorConfig.InputConfig.ExternalFieldNameCollection(),
+                                                             demoCaseParams.StateMachineCfg.ReadoutLayerConfig.OutputFieldNameCollection,
+                                                             out predictionInputVector
+                                                             );
                 rsi = stateMachine.PrepareRegressionData(data, PredictorsCollectionCallback, log);
             }
             else
@@ -273,67 +118,35 @@ namespace RCNet.DemoConsoleApp
                 //Load data bundle from csv file
                 PatternBundle data = PatternBundle.LoadFromCsv(demoCaseParams.FileName,
                                                                demoCaseParams.StateMachineCfg.NeuralPreprocessorConfig.InputConfig.ExternalFieldNameCollection(),
-                                                               outputFieldNameCollection,
-                                                               outputFieldTaskCollection,
-                                                               NeuralPreprocessor.DataRange,
-                                                               demoCaseParams.NormalizerReserveRatio,
-                                                               true,
-                                                               out bundleNormalizer
+                                                               demoCaseParams.StateMachineCfg.ReadoutLayerConfig.OutputFieldNameCollection
                                                                );
                 rsi = stateMachine.PrepareRegressionData(data, PredictorsCollectionCallback, log);
             }
-            //Report statistics of the State Machine's reservoirs
-            ReportReservoirsStatistics(rsi.ReservoirStatCollection, log);
+            //Report key statistics of the State Machine's reservoirs
+            string statisticsReport = rsi.CreateReport(4);
+            log.Write(statisticsReport);
+            log.Write(string.Empty);
 
-            //Regression stage
-            log.Write("    Regression stage", false);
+            //Regression stage - building of trained readout layer
+            log.Write("    Regression stage (training of readout layer)", false);
             //Perform the regression
-            ResultComparativeBundle vb = stateMachine.BuildReadoutLayer(rsi, RegressionControl, log);
+            ResultComparativeBundle rcb = stateMachine.BuildReadoutLayer(rsi, RegressionControl, log);
+            log.Write(string.Empty);
+
+            //Report training (regression) results
+            log.Write("    Training results", false);
+            string trainingReport = stateMachine.RL.GetTrainingResultsReport(6);
+            log.Write(trainingReport);
+            log.Write(string.Empty);
 
             //Perform prediction if the input feeding is continuous (we know the input but we don't know the ideal output)
-            double[] predictionOutputVector = null;
             if (demoCaseParams.StateMachineCfg.NeuralPreprocessorConfig.InputConfig.FeedingType == CommonEnums.InputFeedingType.Continuous)
             {
-                predictionOutputVector = stateMachine.Compute(predictionInputVector);
-                //Values are normalized so they have to be denormalized
-                bundleNormalizer.NaturalizeOutputVector(predictionOutputVector);
-            }
-
-            //Display results
-            //Report training (regression) results and prediction
-            log.Write("    Results", false);
-            List<ReadoutLayer.ClusterErrStatistics> clusterErrStatisticsCollection = stateMachine.RL.ClusterErrStatisticsCollection;
-            //Results
-            for (int outputIdx = 0; outputIdx < demoCaseParams.StateMachineCfg.ReadoutLayerConfig.ReadoutUnitCfgCollection.Count; outputIdx++)
-            {
-                ReadoutLayer.ClusterErrStatistics ces = clusterErrStatisticsCollection[outputIdx];
-                if (demoCaseParams.StateMachineCfg.ReadoutLayerConfig.ReadoutUnitCfgCollection[outputIdx].TaskType == CommonEnums.TaskType.Classification)
-                {
-                    //Classification task report
-                    log.Write("            OutputField: " + demoCaseParams.StateMachineCfg.ReadoutLayerConfig.ReadoutUnitCfgCollection[outputIdx].Name, false);
-                    log.Write("   Num of bin 0 samples: " + ces.BinaryErrStat.BinValErrStat[0].NumOfSamples.ToString(), false);
-                    log.Write("     Bad bin 0 classif.: " + ces.BinaryErrStat.BinValErrStat[0].Sum.ToString(CultureInfo.InvariantCulture), false);
-                    log.Write("       Bin 0 error rate: " + ces.BinaryErrStat.BinValErrStat[0].ArithAvg.ToString(CultureInfo.InvariantCulture), false);
-                    log.Write("         Bin 0 accuracy: " + (1 - ces.BinaryErrStat.BinValErrStat[0].ArithAvg).ToString(CultureInfo.InvariantCulture), false);
-                    log.Write("   Num of bin 1 samples: " + ces.BinaryErrStat.BinValErrStat[1].NumOfSamples.ToString(), false);
-                    log.Write("     Bad bin 1 classif.: " + ces.BinaryErrStat.BinValErrStat[1].Sum.ToString(CultureInfo.InvariantCulture), false);
-                    log.Write("       Bin 1 error rate: " + ces.BinaryErrStat.BinValErrStat[1].ArithAvg.ToString(CultureInfo.InvariantCulture), false);
-                    log.Write("         Bin 1 accuracy: " + (1 - ces.BinaryErrStat.BinValErrStat[1].ArithAvg).ToString(CultureInfo.InvariantCulture), false);
-                    log.Write("   Total num of samples: " + ces.BinaryErrStat.TotalErrStat.NumOfSamples.ToString(), false);
-                    log.Write("     Total bad classif.: " + ces.BinaryErrStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture), false);
-                    log.Write("       Total error rate: " + ces.BinaryErrStat.TotalErrStat.ArithAvg.ToString(CultureInfo.InvariantCulture), false);
-                    log.Write("         Total accuracy: " + (1 - ces.BinaryErrStat.TotalErrStat.ArithAvg).ToString(CultureInfo.InvariantCulture), false);
-                }
-                else
-                {
-                    //Forecast task report
-                    log.Write("            OutputField: " + demoCaseParams.StateMachineCfg.ReadoutLayerConfig.ReadoutUnitCfgCollection[outputIdx].Name, false);
-                    log.Write("   Predicted next value: " + predictionOutputVector[outputIdx].ToString(CultureInfo.InvariantCulture), false);
-                    log.Write("   Total num of samples: " + ces.PrecissionErrStat.NumOfSamples.ToString(), false);
-                    log.Write("     Total Max Real Err: " + (bundleNormalizer.OutputFieldNormalizerRefCollection[outputIdx].ComputeNaturalSpan(ces.PrecissionErrStat.Max)).ToString(CultureInfo.InvariantCulture), false);
-                    log.Write("     Total Avg Real Err: " + (bundleNormalizer.OutputFieldNormalizerRefCollection[outputIdx].ComputeNaturalSpan(ces.PrecissionErrStat.ArithAvg)).ToString(CultureInfo.InvariantCulture), false);
-                }
-                log.Write(" ", false);
+                double[] predictionOutputVector = stateMachine.Compute(predictionInputVector);
+                string predictionReport = stateMachine.RL.GetForecastReport(predictionOutputVector, 6);
+                log.Write("    Forecasts", false);
+                log.Write(predictionReport);
+                log.Write(string.Empty);
             }
             return;
         }

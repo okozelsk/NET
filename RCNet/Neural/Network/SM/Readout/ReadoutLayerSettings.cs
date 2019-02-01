@@ -22,7 +22,7 @@ namespace RCNet.Neural.Network.SM.Readout
     {
         //Constants
 
-        //Attributes
+        //Attribute properties
         /// <summary>
         /// Parameter specifies how big part of available samples will be used for testing.
         /// </summary>
@@ -99,6 +99,12 @@ namespace RCNet.Neural.Network.SM.Readout
             }
             return;
         }
+
+        //Properties
+        /// <summary>
+        /// Collection of names of output fields
+        /// </summary>
+        public List<string> OutputFieldNameCollection { get { return (from rus in ReadoutUnitCfgCollection select rus.Name).ToList(); } }
 
         //Methods
         /// <summary>

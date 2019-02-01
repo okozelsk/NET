@@ -94,38 +94,21 @@ namespace RCNet.Neural.Data
         //Static methods
         /// <summary>
         /// Loads the data and prepares TimeSeriesBundle.
-        /// The first line of the csv file must be field names. These field names must
+        /// The first line of the csv file must contain field names. These field names must
         /// match the names of the input and output fields.
         /// </summary>
         /// <param name="fileName"> Data file name </param>
-        /// <param name="inputFieldNameCollection"> Input field names </param>
-        /// <param name="outputFieldNameCollection"> Output field names </param>
-        /// <param name="outputFieldTaskCollection">
-        /// Neural task related to output field.
-        /// Classification task means the output field contains binary value so data
-        /// standardization and normalizer reserve are suppressed.
-        /// </param>
-        /// <param name="normRange"> Range of normalized values </param>
-        /// <param name="normReserveRatio">
-        /// Reserve held by a normalizer to cover cases where future data exceeds a known range of sample data.
-        /// </param>
-        /// <param name="dataStandardization"> Specifies whether to apply data standardization </param>
-        /// <param name="bundleNormalizer"> Returned initialized instance of BundleNormalizer </param>
+        /// <param name="inputFieldNameCollection"> Input fields to be extracted from a file</param>
+        /// <param name="outputFieldNameCollection"> Output fields to be extracted from a file</param>
         /// <param name="remainingInputVector"> Returned the last input vector unused in the bundle </param>
         public static VectorBundle LoadFromCsv(string fileName,
-                                                   List<string> inputFieldNameCollection,
-                                                   List<string> outputFieldNameCollection,
-                                                   List<CommonEnums.TaskType> outputFieldTaskCollection,
-                                                   Interval normRange,
-                                                   double normReserveRatio,
-                                                   bool dataStandardization,
-                                                   out BundleNormalizer bundleNormalizer,
-                                                   out double[] remainingInputVector
-                                                   )
+                                               List<string> inputFieldNameCollection,
+                                               List<string> outputFieldNameCollection,
+                                               out double[] remainingInputVector
+                                               )
         {
             VectorBundle bundle = null;
             remainingInputVector = null;
-            bundleNormalizer = new BundleNormalizer(normRange);
             using (StreamReader streamReader = new StreamReader(new FileStream(fileName, FileMode.Open)))
             {
                 List<int> inputFieldIndexes = new List<int>();
@@ -142,31 +125,15 @@ namespace RCNet.Neural.Data
                 {
                     throw new FormatException("1st row of the file doesn't contain delimited column names or the value delimiter was not properly recognized.");
                 }
-                //Define fields
+                //Collect indexes of allowed fields
                 foreach (string name in inputFieldNameCollection)
                 {
-                    if (!bundleNormalizer.IsFieldDefined(name))
-                    {
-                        bundleNormalizer.DefineField(name, name, normReserveRatio, dataStandardization);
-                        inputFieldIndexes.Add(columnNames.IndexOf(name));
-                    }
-                    bundleNormalizer.DefineInputField(name);
+                    inputFieldIndexes.Add(columnNames.IndexOf(name));
                 }
                 for (int i = 0; i < outputFieldNameCollection.Count; i++)
                 {
-                    if (!bundleNormalizer.IsFieldDefined(outputFieldNameCollection[i]))
-                    {
-                        bundleNormalizer.DefineField(outputFieldNameCollection[i],
-                                                     outputFieldNameCollection[i],
-                                                     outputFieldTaskCollection[i] == CommonEnums.TaskType.Classification ? 0 : normReserveRatio,
-                                                     outputFieldTaskCollection[i] == CommonEnums.TaskType.Classification ? false : dataStandardization
-                                                     );
-                    }
                     outputFieldIndexes.Add(columnNames.IndexOf(outputFieldNameCollection[i]));
-                    bundleNormalizer.DefineOutputField(outputFieldNameCollection[i]);
                 }
-                //Finalize structure
-                bundleNormalizer.FinalizeStructure();
                 //Load full data in string form
                 List<DelimitedStringValues> fullData = new List<DelimitedStringValues>();
                 while (!streamReader.EndOfStream)
@@ -209,9 +176,6 @@ namespace RCNet.Neural.Data
                 }
                 //Create bundle
                 bundle = new VectorBundle(inputVectorCollection, outputVectorCollection);
-                //Normalize bundle and remaining input vector
-                bundleNormalizer.Normalize(bundle);
-                bundleNormalizer.NormalizeInputVector(remainingInputVector);
             }
             return bundle;
         }//LoadFromCsv

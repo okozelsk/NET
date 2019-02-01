@@ -1,1000 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <demo dataFolder=".\\Data">
   <!--
-    This demo case demonstrates how to instantiate two independent reservoirs. Configuration definies ESN reservoir
-    structure having one pool of 512 TanH analog neurons and two instances of the reservoir (hence in total 2x512=1024 analog neurons).
-    Standard linear regression is used as predicting readout.
-    Dataset contains Mackey Glass chaotic time series (tau=17) and network forecasts the next value.
-  -->
-  <case name="Forecast task Mackey Glass chaotic time series: Two analog reservoirs (ESN), Linear regression output">
-    <samples fileName="MackeyGlass.csv" normalizerReserve="0.1"/>
-    <stateMachineCfg randomizerSeek="0">
-      <neuralPreprocessor>
-        <input>
-          <feedingContinuous bootCycles="Auto" routeToReadout="false"/>
-          <external>
-            <field name="Value"/>
-          </external>
-        </input>
-        <reservoirCfgContainer>
-          <reservoirCfg name="ESNCfg" synapticDelayMethod="Random" maxInputDelay="0" maxInternalDelay="1" spectralRadius="0.65">
-            <pools>
-              <pool name="Logistic pool" dimX="8" dimY="8" dimZ="8" readoutNeuronsDensity="1">
-                <neuronGroups>
-                  <neuronGroup name="Exc-Logistic" role="Excitatory" relShare="1" augmentedStates="true">
-                    <activationTanH/>
-                    <bias min="-0.75" max="0.75" randomSign="false" distribution="Uniform"/>
-                  </neuronGroup>
-                  <neuronGroup name="Inh-Logistic" role="Inhibitory" relShare="1" augmentedStates="true">
-                    <activationTanH/>
-                    <bias min="-0.75" max="0.75" randomSign="false" distribution="Uniform"/>
-                  </neuronGroup>
-                </neuronGroups>
-                <interconnection density="0.1" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
-                  <staticSynapse>
-                    <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
-                  </staticSynapse>
-                </interconnection>
-                <retainmentNeurons density="1">
-                  <rate min="0.25" max="0.5" randomSign="false" distribution="Uniform"/>
-                </retainmentNeurons>
-              </pool>
-            </pools>
-          </reservoirCfg>
-        </reservoirCfgContainer>
-        <reservoirInstanceContainer>
-          <reservoirInstance name="ESN reservoir #1" cfg="ESNCfg" augmentedStates="false">
-            <inputConnections>
-              <inputConnection fieldName="Value" poolName="Logistic pool" density="0.5">
-                <staticSynapse>
-                  <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
-                </staticSynapse>
-              </inputConnection>
-            </inputConnections>
-          </reservoirInstance>
-          <reservoirInstance name="ESN reservoir #2" cfg="ESNCfg" augmentedStates="false">
-            <inputConnections>
-              <inputConnection fieldName="Value" poolName="Logistic pool" density="0.5">
-                <staticSynapse>
-                  <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
-                </staticSynapse>
-              </inputConnection>
-            </inputConnections>
-          </reservoirInstance>
-        </reservoirInstanceContainer>
-      </neuralPreprocessor>
-      <readoutLayer testDataRatio="0.1" folds="1">
-        <readoutUnit name="Value" task="Forecast" attempts="1" attemptEpochs="1">
-          <ff regressionMethod="Linear">
-            <activationIdentity/>
-          </ff>
-        </readoutUnit>
-      </readoutLayer>
-    </stateMachineCfg>
-  </case>
-
-
-  <!--
-    This demo case demonstrates a richer form of reservoir setup. Reservoir consists of one small pool of SimpleIF spiking neurons
-    and one pool of Sigmoid analog neurons. Pools overlap within the reservoir (share the same 3D space) and pools are bidirectionally
-    interconnected. One additional internal input field "aug_input" (following random signal) is used.
-    Standard linear regression is used as a classifier on readout layer.
-    The dataset is from https://archive.ics.uci.edu/ml/datasets/Libras+Movement and contains 15 classes of 24 instances each, where
-    each class references to a hand movement type in LIBRAS. The hand movement is represented as a bidimensional curve performed
-    by the hand in a period of time. The curves were obtained from videos of hand movements, with the Libras performance from 4 
-    different people, during 2 sessions. Each video corresponds to only one hand movement and has about 7 seconds.    
-    Each video corresponds to a function F in a functions space which is the continual version of the input dataset.
-    In the video pre-processing, a time normalization is carried out selecting 45 frames from each video, in according 
-    to an uniform distribution. In each frame, the centroid pixels of the segmented objects (the hand) are found, which 
-    compose the discrete version of the curve F with 45 points. All curves are normalized in the unitary space.
-    Each curve F is mapped in a representation with 90 features, with representing the coordinates of movement.
-    Each instance represents 45 points on a bi-dimensional space, which can be plotted in an ordered way (from 1 through
-    45 as the X co-ordinate) in order to draw the path of the movement.
-  -->
-  <case name="Classification task Libras Movement: Mixed spiking and analog reservoir, Linear regression classifier">
-    <samples fileName="LibrasMovement.csv" normalizerReserve="0.1"/>
-    <stateMachineCfg randomizerSeek="0">
-      <neuralPreprocessor>
-        <input>
-          <feedingPatterned/>
-          <external>
-            <field name="coord_abcissa"/>
-            <field name="coord_ordinate"/>
-          </external>
-          <internal>
-            <field name="aug_input">
-              <randomGenerator min="0" max="1"/>
-            </field>
-          </internal>
-        </input>
-        <reservoirCfgContainer>
-          <reservoirCfg name="MainCfg" synapticDelayMethod="Random" maxInputDelay="0" maxInternalDelay="1" spectralRadius="0.999">
-            <inputEntryPoint x="0" y="0" z="0"/>
-            <pools>
-              <pool name="Spiking pool" x="0" y="0" z="0" dimX="4" dimY="4" dimZ="4" readoutNeuronsDensity="1">
-                <neuronGroups>
-                  <neuronGroup name="Exc-SimpleIF" role="Excitatory" relShare="4" augmentedStates="true">
-                    <activationSimpleIF stimuliCoeff="0.5" refractoryPeriods="0">
-                      <resistance min="15" max="15"/>
-                      <decayRate min="0.05" max="0.05"/>
-                      <resetV min="5" max="5"/>
-                      <firingThresholdV min="20" max="20"/>
-                    </activationSimpleIF>
-                    <bias min="0.2" max="0.3" randomSign="false" distribution="Uniform"/>
-                  </neuronGroup>
-                  <neuronGroup name="Inh-SimpleIF" role="Inhibitory" relShare="1" augmentedStates="true">
-                    <activationSimpleIF stimuliCoeff="0.5" refractoryPeriods="1">
-                      <resistance min="15" max="15"/>
-                      <decayRate min="0.05" max="0.05"/>
-                      <resetV min="5" max="5"/>
-                      <firingThresholdV min="20" max="20"/>
-                    </activationSimpleIF>
-                    <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-                  </neuronGroup>
-                </neuronGroups>
-                <interconnection density="0.2" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
-                  <dynamicSynapse restingEfficacy="0.5" tauFacilitation="500" tauRecovery="5" tauDecay="10">
-                    <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
-                  </dynamicSynapse>
-                </interconnection>
-              </pool>
-              <pool name="Logistic pool" x="0" y="0" z="0" dimX="5" dimY="5" dimZ="6" readoutNeuronsDensity="1">
-                <neuronGroups>
-                  <neuronGroup name="Exc-Logistic" role="Excitatory" relShare="4" augmentedStates="true">
-                    <activationSigmoid/>
-                    <bias min="-1" max="1" randomSign="false" distribution="Uniform"/>
-                  </neuronGroup>
-                  <neuronGroup name="Inh-Logistic" role="Inhibitory" relShare="1" augmentedStates="true">
-                    <activationSigmoid/>
-                    <bias min="-1" max="1" randomSign="false" distribution="Uniform"/>
-                  </neuronGroup>
-                </neuronGroups>
-                <interconnection density="0.1" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
-                  <dynamicSynapse restingEfficacy="0.5" tauFacilitation="500" tauRecovery="5" tauDecay="10">
-                    <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
-                  </dynamicSynapse>
-                </interconnection>
-              </pool>
-            </pools>
-            <pool2PoolConns>
-              <pool2PoolConn srcPool="Spiking pool" srcConnDensity="0.5" targetPool="Logistic pool" targetConnDensity="0.05" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" constantNumOfConnections="false">
-                <dynamicSynapse restingEfficacy="0.5" tauFacilitation="500" tauRecovery="5" tauDecay="10">
-                  <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
-                </dynamicSynapse>
-              </pool2PoolConn>
-              <pool2PoolConn srcPool="Logistic pool" srcConnDensity="0.5" targetPool="Spiking pool" targetConnDensity="0.05" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" constantNumOfConnections="false">
-                <dynamicSynapse restingEfficacy="0.5" tauFacilitation="500" tauRecovery="5" tauDecay="10">
-                  <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
-                </dynamicSynapse>
-              </pool2PoolConn>
-            </pool2PoolConns>
-          </reservoirCfg>
-        </reservoirCfgContainer>
-        <reservoirInstanceContainer>
-          <reservoirInstance name="Main" cfg="MainCfg" augmentedStates="false">
-            <inputConnections>
-              <inputConnection fieldName="coord_abcissa" poolName="Spiking pool" density="1">
-                <staticSynapse>
-                  <weight min="0" max="0.3" randomSign="false" distribution="Uniform"/>
-                </staticSynapse>
-              </inputConnection>
-              <inputConnection fieldName="coord_ordinate" poolName="Spiking pool" density="1">
-                <staticSynapse>
-                  <weight min="0" max="0.3" randomSign="false" distribution="Uniform"/>
-                </staticSynapse>
-              </inputConnection>
-              <inputConnection fieldName="aug_input" poolName="Spiking pool" density="1">
-                <staticSynapse>
-                  <weight min="0.25" max="0.25" randomSign="false" distribution="Uniform"/>
-                </staticSynapse>
-              </inputConnection>
-              <inputConnection fieldName="coord_abcissa" poolName="Logistic pool" density="1">
-                <staticSynapse>
-                  <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
-                </staticSynapse>
-              </inputConnection>
-              <inputConnection fieldName="coord_ordinate" poolName="Logistic pool" density="1">
-                <staticSynapse>
-                  <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
-                </staticSynapse>
-              </inputConnection>
-              <inputConnection fieldName="aug_input" poolName="Logistic pool" density="1">
-                <staticSynapse>
-                  <weight min="0.25" max="0.25" randomSign="false" distribution="Uniform"/>
-                </staticSynapse>
-              </inputConnection>
-            </inputConnections>
-          </reservoirInstance>
-        </reservoirInstanceContainer>
-      </neuralPreprocessor>
-      <readoutLayer testDataRatio="0.0825" folds="Auto">
-        <readoutUnit name="curved swing" task="Classification" attempts="10" attemptEpochs="100">
-          <ff regressionMethod="Linear">
-            <activationIdentity/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="horizontal swing" task="Classification" attempts="10" attemptEpochs="100">
-          <ff regressionMethod="Linear">
-            <activationIdentity/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="vertical swing" task="Classification" attempts="10" attemptEpochs="100">
-          <ff regressionMethod="Linear">
-            <activationIdentity/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="anti-clockwise arc" task="Classification" attempts="10" attemptEpochs="100">
-          <ff regressionMethod="Linear">
-            <activationIdentity/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="clockwise arc" task="Classification" attempts="10" attemptEpochs="100">
-          <ff regressionMethod="Linear">
-            <activationIdentity/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="circle" task="Classification" attempts="10" attemptEpochs="100">
-          <ff regressionMethod="Linear">
-            <activationIdentity/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="horizontal straight-line" task="Classification" attempts="10" attemptEpochs="100">
-          <ff regressionMethod="Linear">
-            <activationIdentity/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="vertical straight-line" task="Classification" attempts="10" attemptEpochs="100">
-          <ff regressionMethod="Linear">
-            <activationIdentity/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="horizontal zigzag" task="Classification" attempts="10" attemptEpochs="100">
-          <ff regressionMethod="Linear">
-            <activationIdentity/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="vertical zigzag" task="Classification" attempts="10" attemptEpochs="100">
-          <ff regressionMethod="Linear">
-            <activationIdentity/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="horizontal wavy" task="Classification" attempts="10" attemptEpochs="100">
-          <ff regressionMethod="Linear">
-            <activationIdentity/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="vertical wavy" task="Classification" attempts="10" attemptEpochs="100">
-          <ff regressionMethod="Linear">
-            <activationIdentity/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="face-up curve" task="Classification" attempts="10" attemptEpochs="100">
-          <ff regressionMethod="Linear">
-            <activationIdentity/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="face-down curve" task="Classification" attempts="10" attemptEpochs="100">
-          <ff regressionMethod="Linear">
-            <activationIdentity/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="tremble" task="Classification" attempts="10" attemptEpochs="100">
-          <ff regressionMethod="Linear">
-            <activationIdentity/>
-          </ff>
-        </readoutUnit>
-      </readoutLayer>
-    </stateMachineCfg>
-  </case>
-
-
-
-  <!--
-    This demo case demonstrates performance on big reservoir. Configuration definies ESN reservoir
-    structure having one pool of 3162 TanH analog neurons having 1 million synapses.
-    Standard linear regression is used as predicting readout.
-    Dataset contains Mackey Glass chaotic time series (tau=17) and network forecasts the next value.
-  -->
-  <case name="Forecast task Mackey Glass chaotic time series: Big analog reservoir (ESN), Linear regression output">
-    <samples fileName="MackeyGlass_big.csv" normalizerReserve="0.1"/>
-    <stateMachineCfg randomizerSeek="0">
-      <neuralPreprocessor>
-        <input>
-          <feedingContinuous bootCycles="Auto" routeToReadout="false"/>
-          <external>
-            <field name="Value"/>
-          </external>
-        </input>
-        <reservoirCfgContainer>
-          <reservoirCfg name="ESNCfg" synapticDelayMethod="Random" maxInputDelay="0" maxInternalDelay="0" spectralRadius="0.999">
-            <pools>
-              <pool name="Logistic pool" dimX="3162" dimY="1" dimZ="1" readoutNeuronsDensity="1">
-                <neuronGroups>
-                  <neuronGroup name="Exc-Logistic" role="Excitatory" relShare="1" augmentedStates="true">
-                    <activationTanH/>
-                    <bias min="-0.75" max="0.75" randomSign="false" distribution="Uniform"/>
-                  </neuronGroup>
-                  <neuronGroup name="Inh-Logistic" role="Inhibitory" relShare="1" augmentedStates="true">
-                    <activationTanH/>
-                    <bias min="-0.75" max="0.75" randomSign="false" distribution="Uniform"/>
-                  </neuronGroup>
-                </neuronGroups>
-                <interconnection density="0.1" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
-                  <staticSynapse>
-                    <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
-                  </staticSynapse>
-                </interconnection>
-                <retainmentNeurons density="1">
-                  <rate min="0.25" max="0.5" randomSign="false" distribution="Uniform"/>
-                </retainmentNeurons>
-              </pool>
-            </pools>
-          </reservoirCfg>
-        </reservoirCfgContainer>
-        <reservoirInstanceContainer>
-          <reservoirInstance name="ESN reservoir" cfg="ESNCfg" augmentedStates="false">
-            <inputConnections>
-              <inputConnection fieldName="Value" poolName="Logistic pool" density="0.5">
-                <staticSynapse>
-                  <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
-                </staticSynapse>
-              </inputConnection>
-            </inputConnections>
-          </reservoirInstance>
-        </reservoirInstanceContainer>
-      </neuralPreprocessor>
-      <readoutLayer testDataRatio="0.1" folds="1">
-        <readoutUnit name="Value" task="Forecast" attempts="1" attemptEpochs="1">
-          <ff regressionMethod="Linear">
-            <activationIdentity/>
-          </ff>
-        </readoutUnit>
-      </readoutLayer>
-    </stateMachineCfg>
-  </case>
-
-  <!--
-    This demo case demonstrates a richer form of reservoir setup. Reservoir consists of one small pool of SimpleIF spiking neurons
-    and one pool of Sigmoid analog neurons. Pools overlap within the reservoir (share the same 3D space) and pools are bidirectionally
-    interconnected. One additional internal input field "aug_input" (following random signal) is used.
-    Standard linear regression is used as a classifier on readout layer.
-    The dataset is from https://archive.ics.uci.edu/ml/datasets/Libras+Movement and contains 15 classes of 24 instances each, where
-    each class references to a hand movement type in LIBRAS. The hand movement is represented as a bidimensional curve performed
-    by the hand in a period of time. The curves were obtained from videos of hand movements, with the Libras performance from 4 
-    different people, during 2 sessions. Each video corresponds to only one hand movement and has about 7 seconds.    
-    Each video corresponds to a function F in a functions space which is the continual version of the input dataset.
-    In the video pre-processing, a time normalization is carried out selecting 45 frames from each video, in according 
-    to an uniform distribution. In each frame, the centroid pixels of the segmented objects (the hand) are found, which 
-    compose the discrete version of the curve F with 45 points. All curves are normalized in the unitary space.
-    Each curve F is mapped in a representation with 90 features, with representing the coordinates of movement.
-    Each instance represents 45 points on a bi-dimensional space, which can be plotted in an ordered way (from 1 through
-    45 as the X co-ordinate) in order to draw the path of the movement.
-  -->
-  <case name="Classification task Libras Movement: Mixed spiking and analog reservoir, Linear regression classifier">
-    <samples fileName="LibrasMovement.csv" normalizerReserve="0.1"/>
-    <stateMachineCfg randomizerSeek="0">
-      <neuralPreprocessor>
-        <input>
-          <feedingPatterned/>
-          <external>
-            <field name="coord_abcissa"/>
-            <field name="coord_ordinate"/>
-          </external>
-          <internal>
-            <field name="aug_input">
-              <randomGenerator min="0" max="1"/>
-            </field>
-          </internal>
-        </input>
-        <reservoirCfgContainer>
-          <reservoirCfg name="MainCfg" synapticDelayMethod="Random" maxInputDelay="0" maxInternalDelay="1" spectralRadius="0.999">
-            <inputEntryPoint x="0" y="0" z="0"/>
-            <pools>
-              <pool name="Spiking pool" x="0" y="0" z="0" dimX="4" dimY="4" dimZ="4" readoutNeuronsDensity="1">
-                <neuronGroups>
-                  <neuronGroup name="Exc-SimpleIF" role="Excitatory" relShare="4" augmentedStates="true">
-                    <activationSimpleIF stimuliCoeff="0.5" refractoryPeriods="0">
-                      <resistance min="15" max="15"/>
-                      <decayRate min="0.05" max="0.05"/>
-                      <resetV min="5" max="5"/>
-                      <firingThresholdV min="20" max="20"/>
-                    </activationSimpleIF>
-                    <bias min="0.2" max="0.3" randomSign="false" distribution="Uniform"/>
-                  </neuronGroup>
-                  <neuronGroup name="Inh-SimpleIF" role="Inhibitory" relShare="1" augmentedStates="true">
-                    <activationSimpleIF stimuliCoeff="0.5" refractoryPeriods="1">
-                      <resistance min="15" max="15"/>
-                      <decayRate min="0.05" max="0.05"/>
-                      <resetV min="5" max="5"/>
-                      <firingThresholdV min="20" max="20"/>
-                    </activationSimpleIF>
-                    <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-                  </neuronGroup>
-                </neuronGroups>
-                <interconnection density="0.2" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
-                  <dynamicSynapse restingEfficacy="0.5" tauFacilitation="500" tauRecovery="5" tauDecay="10">
-                    <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
-                  </dynamicSynapse>
-                </interconnection>
-              </pool>
-              <pool name="Logistic pool" x="0" y="0" z="0" dimX="5" dimY="5" dimZ="6" readoutNeuronsDensity="1">
-                <neuronGroups>
-                  <neuronGroup name="Exc-Logistic" role="Excitatory" relShare="4" augmentedStates="true">
-                    <activationSigmoid/>
-                    <bias min="-1" max="1" randomSign="false" distribution="Uniform"/>
-                  </neuronGroup>
-                  <neuronGroup name="Inh-Logistic" role="Inhibitory" relShare="1" augmentedStates="true">
-                    <activationSigmoid/>
-                    <bias min="-1" max="1" randomSign="false" distribution="Uniform"/>
-                  </neuronGroup>
-                </neuronGroups>
-                <interconnection density="0.1" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
-                  <dynamicSynapse restingEfficacy="0.5" tauFacilitation="500" tauRecovery="5" tauDecay="10">
-                    <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
-                  </dynamicSynapse>
-                </interconnection>
-              </pool>
-            </pools>
-            <pool2PoolConns>
-              <pool2PoolConn srcPool="Spiking pool" srcConnDensity="0.5" targetPool="Logistic pool" targetConnDensity="0.05" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" constantNumOfConnections="false">
-                <dynamicSynapse restingEfficacy="0.5" tauFacilitation="500" tauRecovery="5" tauDecay="10">
-                  <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
-                </dynamicSynapse>
-              </pool2PoolConn>
-              <pool2PoolConn srcPool="Logistic pool" srcConnDensity="0.5" targetPool="Spiking pool" targetConnDensity="0.05" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" constantNumOfConnections="false">
-                <dynamicSynapse restingEfficacy="0.5" tauFacilitation="500" tauRecovery="5" tauDecay="10">
-                  <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
-                </dynamicSynapse>
-              </pool2PoolConn>
-            </pool2PoolConns>
-          </reservoirCfg>
-        </reservoirCfgContainer>
-        <reservoirInstanceContainer>
-          <reservoirInstance name="Main" cfg="MainCfg" augmentedStates="false">
-            <inputConnections>
-              <inputConnection fieldName="coord_abcissa" poolName="Spiking pool" density="1">
-                <staticSynapse>
-                  <weight min="0" max="0.3" randomSign="false" distribution="Uniform"/>
-                </staticSynapse>
-              </inputConnection>
-              <inputConnection fieldName="coord_ordinate" poolName="Spiking pool" density="1">
-                <staticSynapse>
-                  <weight min="0" max="0.3" randomSign="false" distribution="Uniform"/>
-                </staticSynapse>
-              </inputConnection>
-              <inputConnection fieldName="aug_input" poolName="Spiking pool" density="1">
-                <staticSynapse>
-                  <weight min="0.25" max="0.25" randomSign="false" distribution="Uniform"/>
-                </staticSynapse>
-              </inputConnection>
-              <inputConnection fieldName="coord_abcissa" poolName="Logistic pool" density="1">
-                <staticSynapse>
-                  <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
-                </staticSynapse>
-              </inputConnection>
-              <inputConnection fieldName="coord_ordinate" poolName="Logistic pool" density="1">
-                <staticSynapse>
-                  <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
-                </staticSynapse>
-              </inputConnection>
-              <inputConnection fieldName="aug_input" poolName="Logistic pool" density="1">
-                <staticSynapse>
-                  <weight min="0.25" max="0.25" randomSign="false" distribution="Uniform"/>
-                </staticSynapse>
-              </inputConnection>
-            </inputConnections>
-          </reservoirInstance>
-        </reservoirInstanceContainer>
-      </neuralPreprocessor>
-      <readoutLayer testDataRatio="0.0825" folds="Auto">
-        <readoutUnit name="curved swing" task="Classification" attempts="10" attemptEpochs="100">
-          <ff regressionMethod="Linear">
-            <activationIdentity/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="horizontal swing" task="Classification" attempts="10" attemptEpochs="100">
-          <ff regressionMethod="Linear">
-            <activationIdentity/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="vertical swing" task="Classification" attempts="10" attemptEpochs="100">
-          <ff regressionMethod="Linear">
-            <activationIdentity/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="anti-clockwise arc" task="Classification" attempts="10" attemptEpochs="100">
-          <ff regressionMethod="Linear">
-            <activationIdentity/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="clockwise arc" task="Classification" attempts="10" attemptEpochs="100">
-          <ff regressionMethod="Linear">
-            <activationIdentity/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="circle" task="Classification" attempts="10" attemptEpochs="100">
-          <ff regressionMethod="Linear">
-            <activationIdentity/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="horizontal straight-line" task="Classification" attempts="10" attemptEpochs="100">
-          <ff regressionMethod="Linear">
-            <activationIdentity/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="vertical straight-line" task="Classification" attempts="10" attemptEpochs="100">
-          <ff regressionMethod="Linear">
-            <activationIdentity/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="horizontal zigzag" task="Classification" attempts="10" attemptEpochs="100">
-          <ff regressionMethod="Linear">
-            <activationIdentity/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="vertical zigzag" task="Classification" attempts="10" attemptEpochs="100">
-          <ff regressionMethod="Linear">
-            <activationIdentity/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="horizontal wavy" task="Classification" attempts="10" attemptEpochs="100">
-          <ff regressionMethod="Linear">
-            <activationIdentity/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="vertical wavy" task="Classification" attempts="10" attemptEpochs="100">
-          <ff regressionMethod="Linear">
-            <activationIdentity/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="face-up curve" task="Classification" attempts="10" attemptEpochs="100">
-          <ff regressionMethod="Linear">
-            <activationIdentity/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="face-down curve" task="Classification" attempts="10" attemptEpochs="100">
-          <ff regressionMethod="Linear">
-            <activationIdentity/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="tremble" task="Classification" attempts="10" attemptEpochs="100">
-          <ff regressionMethod="Linear">
-            <activationIdentity/>
-          </ff>
-        </readoutUnit>
-      </readoutLayer>
-    </stateMachineCfg>
-  </case>
-
-  <!--
-    This demo case demonstrates performance on big reservoir. Configuration definies ESN reservoir
-    structure having one pool of 3162 TanH analog neurons having 1 million synapses.
-    Standard linear regression is used as predicting readout.
-    Dataset contains Mackey Glass chaotic time series (tau=17) and network forecasts the next value.
-  -->
-  <case name="Forecast task Mackey Glass chaotic time series: Big analog reservoir (ESN), Linear regression output">
-    <samples fileName="MackeyGlass_big.csv" normalizerReserve="0.1"/>
-    <stateMachineCfg randomizerSeek="0">
-      <neuralPreprocessor>
-        <input>
-          <feedingContinuous bootCycles="Auto" routeToReadout="false"/>
-          <external>
-            <field name="Value"/>
-          </external>
-        </input>
-        <reservoirCfgContainer>
-          <reservoirCfg name="ESNCfg" synapticDelayMethod="Random" maxInputDelay="0" maxInternalDelay="0" spectralRadius="0.999">
-            <pools>
-              <pool name="Logistic pool" dimX="3162" dimY="1" dimZ="1" readoutNeuronsDensity="1">
-                <neuronGroups>
-                  <neuronGroup name="Exc-Logistic" role="Excitatory" relShare="1" augmentedStates="true">
-                    <activationTanH/>
-                    <bias min="-0.75" max="0.75" randomSign="false" distribution="Uniform"/>
-                  </neuronGroup>
-                  <neuronGroup name="Inh-Logistic" role="Inhibitory" relShare="1" augmentedStates="true">
-                    <activationTanH/>
-                    <bias min="-0.75" max="0.75" randomSign="false" distribution="Uniform"/>
-                  </neuronGroup>
-                </neuronGroups>
-                <interconnection density="0.1" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
-                  <staticSynapse>
-                    <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
-                  </staticSynapse>
-                </interconnection>
-                <retainmentNeurons density="1">
-                  <rate min="0.25" max="0.5" randomSign="false" distribution="Uniform"/>
-                </retainmentNeurons>
-              </pool>
-            </pools>
-          </reservoirCfg>
-        </reservoirCfgContainer>
-        <reservoirInstanceContainer>
-          <reservoirInstance name="ESN reservoir" cfg="ESNCfg" augmentedStates="false">
-            <inputConnections>
-              <inputConnection fieldName="Value" poolName="Logistic pool" density="0.5">
-                <staticSynapse>
-                  <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
-                </staticSynapse>
-              </inputConnection>
-            </inputConnections>
-          </reservoirInstance>
-        </reservoirInstanceContainer>
-      </neuralPreprocessor>
-      <readoutLayer testDataRatio="0.1" folds="1">
-        <readoutUnit name="Value" task="Forecast" attempts="1" attemptEpochs="1">
-          <ff regressionMethod="Linear">
-            <activationIdentity/>
-          </ff>
-        </readoutUnit>
-      </readoutLayer>
-    </stateMachineCfg>
-  </case>
-
-  <!--
-    This demo case demonstrates a richer form of reservoir setup. Reservoir consists of one small pool of SimpleIF spiking neurons
-    and one pool of Sigmoid analog neurons. Pools overlap within the reservoir (share the same 3D space) and pools are bidirectionally
-    interconnected. One additional internal input field "aug_input" (following random signal) is used.
-    Standard linear regression is used as a classifier on readout layer.
-    The dataset is from https://archive.ics.uci.edu/ml/datasets/Libras+Movement and contains 15 classes of 24 instances each, where
-    each class references to a hand movement type in LIBRAS. The hand movement is represented as a bidimensional curve performed
-    by the hand in a period of time. The curves were obtained from videos of hand movements, with the Libras performance from 4 
-    different people, during 2 sessions. Each video corresponds to only one hand movement and has about 7 seconds.    
-    Each video corresponds to a function F in a functions space which is the continual version of the input dataset.
-    In the video pre-processing, a time normalization is carried out selecting 45 frames from each video, in according 
-    to an uniform distribution. In each frame, the centroid pixels of the segmented objects (the hand) are found, which 
-    compose the discrete version of the curve F with 45 points. All curves are normalized in the unitary space.
-    Each curve F is mapped in a representation with 90 features, with representing the coordinates of movement.
-    Each instance represents 45 points on a bi-dimensional space, which can be plotted in an ordered way (from 1 through
-    45 as the X co-ordinate) in order to draw the path of the movement.
-  -->
-  <case name="Classification task Libras Movement: Mixed spiking and analog reservoir, Linear regression classifier">
-    <samples fileName="LibrasMovement.csv" normalizerReserve="0.1"/>
-    <stateMachineCfg randomizerSeek="0">
-      <neuralPreprocessor>
-        <input>
-          <feedingPatterned/>
-          <external>
-            <field name="coord_abcissa"/>
-            <field name="coord_ordinate"/>
-          </external>
-          <internal>
-            <field name="aug_input">
-              <randomGenerator min="0" max="1"/>
-            </field>
-          </internal>
-        </input>
-        <reservoirCfgContainer>
-          <reservoirCfg name="MainCfg" synapticDelayMethod="Random" maxInputDelay="0" maxInternalDelay="1" spectralRadius="0.999">
-            <inputEntryPoint x="0" y="0" z="0"/>
-            <pools>
-              <pool name="Spiking pool" x="0" y="0" z="0" dimX="4" dimY="4" dimZ="4" readoutNeuronsDensity="1">
-                <neuronGroups>
-                  <neuronGroup name="Exc-SimpleIF" role="Excitatory" relShare="4" augmentedStates="true">
-                    <activationSimpleIF stimuliCoeff="0.5" refractoryPeriods="0">
-                      <resistance min="15" max="15"/>
-                      <decayRate min="0.05" max="0.05"/>
-                      <resetV min="5" max="5"/>
-                      <firingThresholdV min="20" max="20"/>
-                    </activationSimpleIF>
-                    <bias min="0.2" max="0.3" randomSign="false" distribution="Uniform"/>
-                  </neuronGroup>
-                  <neuronGroup name="Inh-SimpleIF" role="Inhibitory" relShare="1" augmentedStates="true">
-                    <activationSimpleIF stimuliCoeff="0.5" refractoryPeriods="1">
-                      <resistance min="15" max="15"/>
-                      <decayRate min="0.05" max="0.05"/>
-                      <resetV min="5" max="5"/>
-                      <firingThresholdV min="20" max="20"/>
-                    </activationSimpleIF>
-                    <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-                  </neuronGroup>
-                </neuronGroups>
-                <interconnection density="0.2" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
-                  <dynamicSynapse restingEfficacy="0.5" tauFacilitation="500" tauRecovery="5" tauDecay="10">
-                    <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
-                  </dynamicSynapse>
-                </interconnection>
-              </pool>
-              <pool name="Logistic pool" x="0" y="0" z="0" dimX="5" dimY="5" dimZ="6" readoutNeuronsDensity="1">
-                <neuronGroups>
-                  <neuronGroup name="Exc-Logistic" role="Excitatory" relShare="4" augmentedStates="true">
-                    <activationSigmoid/>
-                    <bias min="-1" max="1" randomSign="false" distribution="Uniform"/>
-                  </neuronGroup>
-                  <neuronGroup name="Inh-Logistic" role="Inhibitory" relShare="1" augmentedStates="true">
-                    <activationSigmoid/>
-                    <bias min="-1" max="1" randomSign="false" distribution="Uniform"/>
-                  </neuronGroup>
-                </neuronGroups>
-                <interconnection density="0.1" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
-                  <dynamicSynapse restingEfficacy="0.5" tauFacilitation="500" tauRecovery="5" tauDecay="10">
-                    <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
-                  </dynamicSynapse>
-                </interconnection>
-              </pool>
-            </pools>
-            <pool2PoolConns>
-              <pool2PoolConn srcPool="Spiking pool" srcConnDensity="0.5" targetPool="Logistic pool" targetConnDensity="0.05" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" constantNumOfConnections="false">
-                <dynamicSynapse restingEfficacy="0.5" tauFacilitation="500" tauRecovery="5" tauDecay="10">
-                  <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
-                </dynamicSynapse>
-              </pool2PoolConn>
-              <pool2PoolConn srcPool="Logistic pool" srcConnDensity="0.5" targetPool="Spiking pool" targetConnDensity="0.05" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" constantNumOfConnections="false">
-                <dynamicSynapse restingEfficacy="0.5" tauFacilitation="500" tauRecovery="5" tauDecay="10">
-                  <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
-                </dynamicSynapse>
-              </pool2PoolConn>
-            </pool2PoolConns>
-          </reservoirCfg>
-        </reservoirCfgContainer>
-        <reservoirInstanceContainer>
-          <reservoirInstance name="Main" cfg="MainCfg" augmentedStates="false">
-            <inputConnections>
-              <inputConnection fieldName="coord_abcissa" poolName="Spiking pool" density="1">
-                <staticSynapse>
-                  <weight min="0" max="0.3" randomSign="false" distribution="Uniform"/>
-                </staticSynapse>
-              </inputConnection>
-              <inputConnection fieldName="coord_ordinate" poolName="Spiking pool" density="1">
-                <staticSynapse>
-                  <weight min="0" max="0.3" randomSign="false" distribution="Uniform"/>
-                </staticSynapse>
-              </inputConnection>
-              <inputConnection fieldName="aug_input" poolName="Spiking pool" density="1">
-                <staticSynapse>
-                  <weight min="0.25" max="0.25" randomSign="false" distribution="Uniform"/>
-                </staticSynapse>
-              </inputConnection>
-              <inputConnection fieldName="coord_abcissa" poolName="Logistic pool" density="1">
-                <staticSynapse>
-                  <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
-                </staticSynapse>
-              </inputConnection>
-              <inputConnection fieldName="coord_ordinate" poolName="Logistic pool" density="1">
-                <staticSynapse>
-                  <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
-                </staticSynapse>
-              </inputConnection>
-              <inputConnection fieldName="aug_input" poolName="Logistic pool" density="1">
-                <staticSynapse>
-                  <weight min="0.25" max="0.25" randomSign="false" distribution="Uniform"/>
-                </staticSynapse>
-              </inputConnection>
-            </inputConnections>
-          </reservoirInstance>
-        </reservoirInstanceContainer>
-      </neuralPreprocessor>
-      <readoutLayer testDataRatio="0.0825" folds="Auto">
-        <readoutUnit name="curved swing" task="Classification" attempts="10" attemptEpochs="100">
-          <ff regressionMethod="Linear">
-            <activationIdentity/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="horizontal swing" task="Classification" attempts="10" attemptEpochs="100">
-          <ff regressionMethod="Linear">
-            <activationIdentity/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="vertical swing" task="Classification" attempts="10" attemptEpochs="100">
-          <ff regressionMethod="Linear">
-            <activationIdentity/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="anti-clockwise arc" task="Classification" attempts="10" attemptEpochs="100">
-          <ff regressionMethod="Linear">
-            <activationIdentity/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="clockwise arc" task="Classification" attempts="10" attemptEpochs="100">
-          <ff regressionMethod="Linear">
-            <activationIdentity/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="circle" task="Classification" attempts="10" attemptEpochs="100">
-          <ff regressionMethod="Linear">
-            <activationIdentity/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="horizontal straight-line" task="Classification" attempts="10" attemptEpochs="100">
-          <ff regressionMethod="Linear">
-            <activationIdentity/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="vertical straight-line" task="Classification" attempts="10" attemptEpochs="100">
-          <ff regressionMethod="Linear">
-            <activationIdentity/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="horizontal zigzag" task="Classification" attempts="10" attemptEpochs="100">
-          <ff regressionMethod="Linear">
-            <activationIdentity/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="vertical zigzag" task="Classification" attempts="10" attemptEpochs="100">
-          <ff regressionMethod="Linear">
-            <activationIdentity/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="horizontal wavy" task="Classification" attempts="10" attemptEpochs="100">
-          <ff regressionMethod="Linear">
-            <activationIdentity/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="vertical wavy" task="Classification" attempts="10" attemptEpochs="100">
-          <ff regressionMethod="Linear">
-            <activationIdentity/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="face-up curve" task="Classification" attempts="10" attemptEpochs="100">
-          <ff regressionMethod="Linear">
-            <activationIdentity/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="face-down curve" task="Classification" attempts="10" attemptEpochs="100">
-          <ff regressionMethod="Linear">
-            <activationIdentity/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="tremble" task="Classification" attempts="10" attemptEpochs="100">
-          <ff regressionMethod="Linear">
-            <activationIdentity/>
-          </ff>
-        </readoutUnit>
-      </readoutLayer>
-      <mapper>
-        <map readoutUnitName="curved swing">
-          <allowed reservoirInstanceName="Main" poolName="Logistic pool"/>
-        </map>
-        <map readoutUnitName="horizontal swing">
-          <allowed reservoirInstanceName="Main" poolName="Spiking pool"/>
-        </map>
-        <map readoutUnitName="tremble">
-          <allowed reservoirInstanceName="Main" poolName="Logistic pool"/>
-          <allowed reservoirInstanceName="Main" poolName="Spiking pool"/>
-        </map>
-      </mapper>
-    </stateMachineCfg>
-  </case>
-
-
-
-  <!--
-    This demo case demonstrates how to instantiate two independent reservoirs. Configuration definies ESN reservoir
-    structure having one pool of 512 TanH analog neurons and two instances of the reservoir (hence in total 2x512=1024 analog neurons).
-    Standard linear regression is used as predicting readout.
-    Dataset contains Mackey Glass chaotic time series (tau=17) and network forecasts the next value.
-  -->
-  <case name="Forecast task Mackey Glass chaotic time series: Two analog reservoirs (ESN), Linear regression output">
-    <samples fileName="MackeyGlass.csv" normalizerReserve="0.1"/>
-    <stateMachineCfg randomizerSeek="0">
-      <neuralPreprocessor>
-        <input>
-          <feedingContinuous bootCycles="Auto" routeToReadout="false"/>
-          <external>
-            <field name="Value"/>
-          </external>
-        </input>
-        <reservoirCfgContainer>
-          <reservoirCfg name="ESNCfg" synapticDelayMethod="Random" maxInputDelay="0" maxInternalDelay="1" spectralRadius="0.65">
-            <pools>
-              <pool name="Logistic pool" dimX="8" dimY="8" dimZ="8" readoutNeuronsDensity="1">
-                <neuronGroups>
-                  <neuronGroup name="Exc-Logistic" role="Excitatory" relShare="1" augmentedStates="true">
-                    <activationTanH/>
-                    <bias min="-0.75" max="0.75" randomSign="false" distribution="Uniform"/>
-                  </neuronGroup>
-                  <neuronGroup name="Inh-Logistic" role="Inhibitory" relShare="1" augmentedStates="true">
-                    <activationTanH/>
-                    <bias min="-0.75" max="0.75" randomSign="false" distribution="Uniform"/>
-                  </neuronGroup>
-                </neuronGroups>
-                <interconnection density="0.1" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
-                  <staticSynapse>
-                    <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
-                  </staticSynapse>
-                </interconnection>
-                <retainmentNeurons density="1">
-                  <rate min="0.25" max="0.5" randomSign="false" distribution="Uniform"/>
-                </retainmentNeurons>
-              </pool>
-            </pools>
-          </reservoirCfg>
-        </reservoirCfgContainer>
-        <reservoirInstanceContainer>
-          <reservoirInstance name="ESN reservoir #1" cfg="ESNCfg" augmentedStates="false">
-            <inputConnections>
-              <inputConnection fieldName="Value" poolName="Logistic pool" density="0.5">
-                <staticSynapse>
-                  <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
-                </staticSynapse>
-              </inputConnection>
-            </inputConnections>
-          </reservoirInstance>
-          <reservoirInstance name="ESN reservoir #2" cfg="ESNCfg" augmentedStates="false">
-            <inputConnections>
-              <inputConnection fieldName="Value" poolName="Logistic pool" density="0.5">
-                <staticSynapse>
-                  <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
-                </staticSynapse>
-              </inputConnection>
-            </inputConnections>
-          </reservoirInstance>
-        </reservoirInstanceContainer>
-      </neuralPreprocessor>
-      <readoutLayer testDataRatio="0.1" folds="1">
-        <readoutUnit name="Value" task="Forecast" attempts="1" attemptEpochs="1">
-          <ff regressionMethod="Linear">
-            <activationIdentity/>
-          </ff>
-        </readoutUnit>
-      </readoutLayer>
-    </stateMachineCfg>
-  </case>
-
-  <!--
-    This demo case demonstrates performance on big reservoir. Configuration definies ESN reservoir
-    structure having one pool of 3162 TanH analog neurons having 1 million synapses.
-    Standard linear regression is used as predicting readout.
-    Dataset contains Mackey Glass chaotic time series (tau=17) and network forecasts the next value.
-  -->
-  <case name="Forecast task Mackey Glass chaotic time series: Big analog reservoir (ESN), Linear regression output">
-    <samples fileName="MackeyGlass_big.csv" normalizerReserve="0.1"/>
-    <stateMachineCfg randomizerSeek="0">
-      <neuralPreprocessor>
-        <input>
-          <feedingContinuous bootCycles="Auto" routeToReadout="false"/>
-          <external>
-            <field name="Value"/>
-          </external>
-        </input>
-        <reservoirCfgContainer>
-          <reservoirCfg name="ESNCfg" synapticDelayMethod="Random" maxInputDelay="0" maxInternalDelay="1" spectralRadius="0.999">
-            <pools>
-              <pool name="Logistic pool" dimX="3162" dimY="1" dimZ="1" readoutNeuronsDensity="1">
-                <neuronGroups>
-                  <neuronGroup name="Exc-Logistic" role="Excitatory" relShare="1" augmentedStates="true">
-                    <activationTanH/>
-                    <bias min="-0.75" max="0.75" randomSign="false" distribution="Uniform"/>
-                  </neuronGroup>
-                  <neuronGroup name="Inh-Logistic" role="Inhibitory" relShare="1" augmentedStates="true">
-                    <activationTanH/>
-                    <bias min="-0.75" max="0.75" randomSign="false" distribution="Uniform"/>
-                  </neuronGroup>
-                </neuronGroups>
-                <interconnection density="0.1" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
-                  <staticSynapse>
-                    <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
-                  </staticSynapse>
-                </interconnection>
-                <retainmentNeurons density="1">
-                  <rate min="0.25" max="0.5" randomSign="false" distribution="Uniform"/>
-                </retainmentNeurons>
-              </pool>
-            </pools>
-          </reservoirCfg>
-        </reservoirCfgContainer>
-        <reservoirInstanceContainer>
-          <reservoirInstance name="ESN reservoir" cfg="ESNCfg" augmentedStates="false">
-            <inputConnections>
-              <inputConnection fieldName="Value" poolName="Logistic pool" density="0.5">
-                <staticSynapse>
-                  <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
-                </staticSynapse>
-              </inputConnection>
-            </inputConnections>
-          </reservoirInstance>
-        </reservoirInstanceContainer>
-      </neuralPreprocessor>
-      <readoutLayer testDataRatio="0.1" folds="1">
-        <readoutUnit name="Value" task="Forecast" attempts="1" attemptEpochs="1">
-          <ff regressionMethod="Linear">
-            <activationIdentity/>
-          </ff>
-        </readoutUnit>
-      </readoutLayer>
-    </stateMachineCfg>
-  </case>
-
-  <!--
     This demo case demonstrates the simple form of ESN reservoir setup. Reservoir consists of one pool of 7x7x7=343 TanH analog neurons.
     Standard linear regression is used as forecasting readout.
     Time series contains real share prices of TTOO title from https://finance.yahoo.com/quote/TTOO/history?p=TTOO.
@@ -1058,6 +64,359 @@
           </ff>
         </readoutUnit>
         <readoutUnit name="Low" task="Forecast" attempts="1" attemptEpochs="200">
+          <ff regressionMethod="Linear">
+            <activationIdentity/>
+          </ff>
+        </readoutUnit>
+      </readoutLayer>
+    </stateMachineCfg>
+  </case>
+
+  <!--
+    This demo case demonstrates how to instantiate two independent reservoirs. Configuration definies ESN reservoir
+    structure having one pool of 512 TanH analog neurons and two instances of the reservoir (hence in total 2x512=1024 analog neurons).
+    Standard linear regression is used as predicting readout.
+    Dataset contains Mackey Glass chaotic time series (tau=17) and network forecasts the next value.
+  -->
+  <case name="Forecast task Mackey Glass chaotic time series: Two analog reservoirs (ESN), Linear regression output">
+    <samples fileName="MackeyGlass.csv" normalizerReserve="0.1"/>
+    <stateMachineCfg randomizerSeek="0">
+      <neuralPreprocessor>
+        <input>
+          <feedingContinuous bootCycles="Auto" routeToReadout="false"/>
+          <external>
+            <field name="Value"/>
+          </external>
+        </input>
+        <reservoirCfgContainer>
+          <reservoirCfg name="ESNCfg" synapticDelayMethod="Random" maxInputDelay="0" maxInternalDelay="1" spectralRadius="0.65">
+            <pools>
+              <pool name="Logistic pool" dimX="8" dimY="8" dimZ="8" readoutNeuronsDensity="1">
+                <neuronGroups>
+                  <neuronGroup name="Exc-Logistic" role="Excitatory" relShare="1" augmentedStates="true">
+                    <activationTanH/>
+                    <bias min="-0.75" max="0.75" randomSign="false" distribution="Uniform"/>
+                  </neuronGroup>
+                  <neuronGroup name="Inh-Logistic" role="Inhibitory" relShare="1" augmentedStates="true">
+                    <activationTanH/>
+                    <bias min="-0.75" max="0.75" randomSign="false" distribution="Uniform"/>
+                  </neuronGroup>
+                </neuronGroups>
+                <interconnection density="0.1" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
+                  <staticSynapse>
+                    <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
+                  </staticSynapse>
+                </interconnection>
+                <retainmentNeurons density="1">
+                  <rate min="0.25" max="0.5" randomSign="false" distribution="Uniform"/>
+                </retainmentNeurons>
+              </pool>
+            </pools>
+          </reservoirCfg>
+        </reservoirCfgContainer>
+        <reservoirInstanceContainer>
+          <reservoirInstance name="ESN reservoir #1" cfg="ESNCfg" augmentedStates="false">
+            <inputConnections>
+              <inputConnection fieldName="Value" poolName="Logistic pool" density="0.5">
+                <staticSynapse>
+                  <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
+                </staticSynapse>
+              </inputConnection>
+            </inputConnections>
+          </reservoirInstance>
+          <reservoirInstance name="ESN reservoir #2" cfg="ESNCfg" augmentedStates="false">
+            <inputConnections>
+              <inputConnection fieldName="Value" poolName="Logistic pool" density="0.5">
+                <staticSynapse>
+                  <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
+                </staticSynapse>
+              </inputConnection>
+            </inputConnections>
+          </reservoirInstance>
+        </reservoirInstanceContainer>
+      </neuralPreprocessor>
+      <readoutLayer testDataRatio="0.1" folds="1">
+        <readoutUnit name="Value" task="Forecast" attempts="1" attemptEpochs="1">
+          <ff regressionMethod="Linear">
+            <activationIdentity/>
+          </ff>
+        </readoutUnit>
+      </readoutLayer>
+    </stateMachineCfg>
+  </case>
+
+
+  <!--
+    This demo case demonstrates a richer form of reservoir setup. Reservoir consists of one small pool of SimpleIF spiking neurons
+    and one pool of Sigmoid analog neurons. Pools overlap within the reservoir (share the same 3D space) and pools are bidirectionally
+    interconnected. One additional internal input field "aug_input" (following random signal) is used.
+    Standard linear regression is used as a classifier on readout layer.
+    The dataset is from https://archive.ics.uci.edu/ml/datasets/Libras+Movement and contains 15 classes of 24 instances each, where
+    each class references to a hand movement type in LIBRAS. The hand movement is represented as a bidimensional curve performed
+    by the hand in a period of time. The curves were obtained from videos of hand movements, with the Libras performance from 4 
+    different people, during 2 sessions. Each video corresponds to only one hand movement and has about 7 seconds.    
+    Each video corresponds to a function F in a functions space which is the continual version of the input dataset.
+    In the video pre-processing, a time normalization is carried out selecting 45 frames from each video, in according 
+    to an uniform distribution. In each frame, the centroid pixels of the segmented objects (the hand) are found, which 
+    compose the discrete version of the curve F with 45 points. All curves are normalized in the unitary space.
+    Each curve F is mapped in a representation with 90 features, with representing the coordinates of movement.
+    Each instance represents 45 points on a bi-dimensional space, which can be plotted in an ordered way (from 1 through
+    45 as the X co-ordinate) in order to draw the path of the movement.
+  -->
+  <case name="Classification task Libras Movement: Mixed spiking and analog reservoir, Linear regression classifier">
+    <samples fileName="LibrasMovement.csv" normalizerReserve="0.1"/>
+    <stateMachineCfg randomizerSeek="0">
+      <neuralPreprocessor>
+        <input>
+          <feedingPatterned/>
+          <external>
+            <field name="coord_abcissa"/>
+            <field name="coord_ordinate"/>
+          </external>
+          <internal>
+            <field name="aug_input">
+              <randomGenerator min="0" max="1"/>
+            </field>
+          </internal>
+        </input>
+        <reservoirCfgContainer>
+          <reservoirCfg name="MainCfg" synapticDelayMethod="Random" maxInputDelay="0" maxInternalDelay="1" spectralRadius="0.999">
+            <inputEntryPoint x="0" y="0" z="0"/>
+            <pools>
+              <pool name="Spiking pool" x="0" y="0" z="0" dimX="4" dimY="4" dimZ="4" readoutNeuronsDensity="1">
+                <neuronGroups>
+                  <neuronGroup name="Exc-SimpleIF" role="Excitatory" relShare="4" augmentedStates="true">
+                    <activationSimpleIF stimuliCoeff="0.5" refractoryPeriods="0">
+                      <resistance min="15" max="15"/>
+                      <decayRate min="0.05" max="0.05"/>
+                      <resetV min="5" max="5"/>
+                      <firingThresholdV min="20" max="20"/>
+                    </activationSimpleIF>
+                    <bias min="0.2" max="0.3" randomSign="false" distribution="Uniform"/>
+                  </neuronGroup>
+                  <neuronGroup name="Inh-SimpleIF" role="Inhibitory" relShare="1" augmentedStates="true">
+                    <activationSimpleIF stimuliCoeff="0.5" refractoryPeriods="1">
+                      <resistance min="15" max="15"/>
+                      <decayRate min="0.05" max="0.05"/>
+                      <resetV min="5" max="5"/>
+                      <firingThresholdV min="20" max="20"/>
+                    </activationSimpleIF>
+                    <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
+                  </neuronGroup>
+                </neuronGroups>
+                <interconnection density="0.2" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
+                  <dynamicSynapse restingEfficacy="0.5" tauFacilitation="500" tauRecovery="5" tauDecay="10">
+                    <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
+                  </dynamicSynapse>
+                </interconnection>
+              </pool>
+              <pool name="Logistic pool" x="0" y="0" z="0" dimX="5" dimY="5" dimZ="6" readoutNeuronsDensity="1">
+                <neuronGroups>
+                  <neuronGroup name="Exc-Logistic" role="Excitatory" relShare="4" augmentedStates="true">
+                    <activationSigmoid/>
+                    <bias min="-1" max="1" randomSign="false" distribution="Uniform"/>
+                  </neuronGroup>
+                  <neuronGroup name="Inh-Logistic" role="Inhibitory" relShare="1" augmentedStates="true">
+                    <activationSigmoid/>
+                    <bias min="-1" max="1" randomSign="false" distribution="Uniform"/>
+                  </neuronGroup>
+                </neuronGroups>
+                <interconnection density="0.1" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
+                  <dynamicSynapse restingEfficacy="0.5" tauFacilitation="500" tauRecovery="5" tauDecay="10">
+                    <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
+                  </dynamicSynapse>
+                </interconnection>
+              </pool>
+            </pools>
+            <pool2PoolConns>
+              <pool2PoolConn srcPool="Spiking pool" srcConnDensity="0.5" targetPool="Logistic pool" targetConnDensity="0.05" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" constantNumOfConnections="false">
+                <dynamicSynapse restingEfficacy="0.5" tauFacilitation="500" tauRecovery="5" tauDecay="10">
+                  <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
+                </dynamicSynapse>
+              </pool2PoolConn>
+              <pool2PoolConn srcPool="Logistic pool" srcConnDensity="0.5" targetPool="Spiking pool" targetConnDensity="0.05" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" constantNumOfConnections="false">
+                <dynamicSynapse restingEfficacy="0.5" tauFacilitation="500" tauRecovery="5" tauDecay="10">
+                  <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
+                </dynamicSynapse>
+              </pool2PoolConn>
+            </pool2PoolConns>
+          </reservoirCfg>
+        </reservoirCfgContainer>
+        <reservoirInstanceContainer>
+          <reservoirInstance name="Main" cfg="MainCfg" augmentedStates="false">
+            <inputConnections>
+              <inputConnection fieldName="coord_abcissa" poolName="Spiking pool" density="1">
+                <staticSynapse>
+                  <weight min="0" max="0.3" randomSign="false" distribution="Uniform"/>
+                </staticSynapse>
+              </inputConnection>
+              <inputConnection fieldName="coord_ordinate" poolName="Spiking pool" density="1">
+                <staticSynapse>
+                  <weight min="0" max="0.3" randomSign="false" distribution="Uniform"/>
+                </staticSynapse>
+              </inputConnection>
+              <inputConnection fieldName="aug_input" poolName="Spiking pool" density="1">
+                <staticSynapse>
+                  <weight min="0.25" max="0.25" randomSign="false" distribution="Uniform"/>
+                </staticSynapse>
+              </inputConnection>
+              <inputConnection fieldName="coord_abcissa" poolName="Logistic pool" density="1">
+                <staticSynapse>
+                  <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
+                </staticSynapse>
+              </inputConnection>
+              <inputConnection fieldName="coord_ordinate" poolName="Logistic pool" density="1">
+                <staticSynapse>
+                  <weight min="0" max="1" randomSign="false" distribution="Uniform"/>
+                </staticSynapse>
+              </inputConnection>
+              <inputConnection fieldName="aug_input" poolName="Logistic pool" density="1">
+                <staticSynapse>
+                  <weight min="0.25" max="0.25" randomSign="false" distribution="Uniform"/>
+                </staticSynapse>
+              </inputConnection>
+            </inputConnections>
+          </reservoirInstance>
+        </reservoirInstanceContainer>
+      </neuralPreprocessor>
+      <readoutLayer testDataRatio="0.0825" folds="Auto">
+        <readoutUnit name="curved swing" task="Classification" attempts="10" attemptEpochs="100">
+          <ff regressionMethod="Linear">
+            <activationIdentity/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="horizontal swing" task="Classification" attempts="10" attemptEpochs="100">
+          <ff regressionMethod="Linear">
+            <activationIdentity/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="vertical swing" task="Classification" attempts="10" attemptEpochs="100">
+          <ff regressionMethod="Linear">
+            <activationIdentity/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="anti-clockwise arc" task="Classification" attempts="10" attemptEpochs="100">
+          <ff regressionMethod="Linear">
+            <activationIdentity/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="clockwise arc" task="Classification" attempts="10" attemptEpochs="100">
+          <ff regressionMethod="Linear">
+            <activationIdentity/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="circle" task="Classification" attempts="10" attemptEpochs="100">
+          <ff regressionMethod="Linear">
+            <activationIdentity/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="horizontal straight-line" task="Classification" attempts="10" attemptEpochs="100">
+          <ff regressionMethod="Linear">
+            <activationIdentity/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="vertical straight-line" task="Classification" attempts="10" attemptEpochs="100">
+          <ff regressionMethod="Linear">
+            <activationIdentity/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="horizontal zigzag" task="Classification" attempts="10" attemptEpochs="100">
+          <ff regressionMethod="Linear">
+            <activationIdentity/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="vertical zigzag" task="Classification" attempts="10" attemptEpochs="100">
+          <ff regressionMethod="Linear">
+            <activationIdentity/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="horizontal wavy" task="Classification" attempts="10" attemptEpochs="100">
+          <ff regressionMethod="Linear">
+            <activationIdentity/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="vertical wavy" task="Classification" attempts="10" attemptEpochs="100">
+          <ff regressionMethod="Linear">
+            <activationIdentity/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="face-up curve" task="Classification" attempts="10" attemptEpochs="100">
+          <ff regressionMethod="Linear">
+            <activationIdentity/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="face-down curve" task="Classification" attempts="10" attemptEpochs="100">
+          <ff regressionMethod="Linear">
+            <activationIdentity/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="tremble" task="Classification" attempts="10" attemptEpochs="100">
+          <ff regressionMethod="Linear">
+            <activationIdentity/>
+          </ff>
+        </readoutUnit>
+      </readoutLayer>
+    </stateMachineCfg>
+  </case>
+
+
+
+  <!--
+    This demo case demonstrates performance on big reservoir. Configuration definies ESN reservoir
+    structure having one pool of 3162 TanH analog neurons having 1 million synapses.
+    Standard linear regression is used as predicting readout.
+    Dataset contains Mackey Glass chaotic time series (tau=17) and network forecasts the next value.
+  -->
+  <case name="Forecast task Mackey Glass chaotic time series: Big analog reservoir (ESN), Linear regression output">
+    <samples fileName="MackeyGlass_big.csv" normalizerReserve="0.1"/>
+    <stateMachineCfg randomizerSeek="0">
+      <neuralPreprocessor>
+        <input>
+          <feedingContinuous bootCycles="Auto" routeToReadout="false"/>
+          <external>
+            <field name="Value"/>
+          </external>
+        </input>
+        <reservoirCfgContainer>
+          <reservoirCfg name="ESNCfg" synapticDelayMethod="Random" maxInputDelay="0" maxInternalDelay="0" spectralRadius="0.999">
+            <pools>
+              <pool name="Logistic pool" dimX="3162" dimY="1" dimZ="1" readoutNeuronsDensity="1">
+                <neuronGroups>
+                  <neuronGroup name="Exc-Logistic" role="Excitatory" relShare="1" augmentedStates="true">
+                    <activationTanH/>
+                    <bias min="-0.75" max="0.75" randomSign="false" distribution="Uniform"/>
+                  </neuronGroup>
+                  <neuronGroup name="Inh-Logistic" role="Inhibitory" relShare="1" augmentedStates="true">
+                    <activationTanH/>
+                    <bias min="-0.75" max="0.75" randomSign="false" distribution="Uniform"/>
+                  </neuronGroup>
+                </neuronGroups>
+                <interconnection density="0.1" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
+                  <staticSynapse>
+                    <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
+                  </staticSynapse>
+                </interconnection>
+                <retainmentNeurons density="1">
+                  <rate min="0.25" max="0.5" randomSign="false" distribution="Uniform"/>
+                </retainmentNeurons>
+              </pool>
+            </pools>
+          </reservoirCfg>
+        </reservoirCfgContainer>
+        <reservoirInstanceContainer>
+          <reservoirInstance name="ESN reservoir" cfg="ESNCfg" augmentedStates="false">
+            <inputConnections>
+              <inputConnection fieldName="Value" poolName="Logistic pool" density="0.5">
+                <staticSynapse>
+                  <weight min="-1" max="1" randomSign="false" distribution="Uniform"/>
+                </staticSynapse>
+              </inputConnection>
+            </inputConnections>
+          </reservoirInstance>
+        </reservoirInstanceContainer>
+      </neuralPreprocessor>
+      <readoutLayer testDataRatio="0.1" folds="1">
+        <readoutUnit name="Value" task="Forecast" attempts="1" attemptEpochs="1">
           <ff regressionMethod="Linear">
             <activationIdentity/>
           </ff>

@@ -15,11 +15,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing
     [Serializable]
     public class NeuralPreprocessor
     {
+        //Constants
+        private const double NormalizerDefaultReserve = 0.1d;
+
         //Static attributes
         /// <summary>
-        /// Data range. Input data range has to be always between -1 and 1.
+        /// Input data will be normalized to this range before the usage
         /// </summary>
-        public static readonly Interval DataRange = new Interval(-1, 1);
+        private static readonly Interval _dataRange = new Interval(-1, 1);
 
         //Delegates
         /// <summary>
@@ -41,6 +44,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// Collection of the internal input generators associated with the internal input fields
         /// </summary>
         private readonly List<IGenerator> _internalInputGeneratorCollection;
+        /// <summary>
+        /// Collection of input fields normalizers
+        /// </summary>
+        private Normalizer[] _inputNormalizerCollection;
 
         //Attribute properties
         /// <summary>
@@ -69,6 +76,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         public NeuralPreprocessor(NeuralPreprocessorSettings settings, int randomizerSeek)
         {
             _settings = settings.DeepClone();
+            _inputNormalizerCollection = null;
             //Internal input generators
             _internalInputGeneratorCollection = new List<IGenerator>();
             foreach(NeuralPreprocessorSettings.InputSettings.InternalField field in _settings.InputConfig.InternalFieldCollection)
@@ -102,7 +110,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             ReservoirCollection = new List<Reservoir>(_settings.ReservoirInstanceDefinitionCollection.Count);
             foreach(NeuralPreprocessorSettings.ReservoirInstanceDefinition instanceDefinition in _settings.ReservoirInstanceDefinitionCollection)
             {
-                Reservoir reservoir = new Reservoir(instanceDefinition, DataRange, rand);
+                Reservoir reservoir = new Reservoir(instanceDefinition, _dataRange, rand);
                 ReservoirCollection.Add(reservoir);
                 PredictorNeuronCollection.AddRange(reservoir.PredictorNeuronCollection);
                 NumOfPredictors += reservoir.NumOfOutputPredictors;
@@ -123,10 +131,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// <param name="resetStatistics">Specifies whether to reset internal statistics</param>
         public void Reset(bool resetStatistics)
         {
+            //Reset generators
             foreach(IGenerator generator in _internalInputGeneratorCollection)
             {
                 generator.Reset();
             }
+            //Reset reservoirs
             foreach(Reservoir reservoir in ReservoirCollection)
             {
                 reservoir.Reset(resetStatistics);
@@ -139,43 +149,190 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// </summary>
         /// <param name="externalInputVector">External input values</param>
         /// <returns></returns>
-        private double[] AddInternalInputVector(double[] externalInputVector)
+        private double[] AddInputsFromInternalGenerators(double[] externalInputVector)
         {
-            double[] smInput = new double[_settings.InputConfig.NumOfFields];
-            externalInputVector.CopyTo(smInput, 0);
-            for(int i = 0; i < _internalInputGeneratorCollection.Count; i++)
+            if (_settings.InputConfig.InternalFieldCollection.Count > 0)
             {
-                smInput[_settings.InputConfig.ExternalFieldCollection.Count + i] = _internalInputGeneratorCollection[i].Next();
+                //There are defined internal fields
+                double[] inputVector = new double[_settings.InputConfig.NumOfFields];
+                externalInputVector.CopyTo(inputVector, 0);
+                for (int i = 0; i < _internalInputGeneratorCollection.Count; i++)
+                {
+                    inputVector[_settings.InputConfig.ExternalFieldCollection.Count + i] = _internalInputGeneratorCollection[i].Next();
+                }
+                return inputVector;
             }
-            return smInput;
+            else
+            {
+                //Defined no internal fields
+                return externalInputVector;
+            }
+        }
+
+        /// <summary>
+        /// Initiates collection of preprocessor's normalizers
+        /// </summary>
+        /// <param name="inputVectorCollection">Collection of input vectors</param>
+        private void InitializeInputNormalizers(List<double[]> inputVectorCollection)
+        {
+            //Instantiate normalizers
+            _inputNormalizerCollection = new Normalizer[_settings.InputConfig.ExternalFieldCollection.Count];
+            for (int i = 0; i < _inputNormalizerCollection.Length; i++)
+            {
+                _inputNormalizerCollection[i] = new Normalizer(_dataRange, NormalizerDefaultReserve, true, false);
+            }
+            //Adjust normalizers
+            foreach (double[] vector in inputVectorCollection)
+            {
+                if (vector.Length != _inputNormalizerCollection.Length)
+                {
+                    throw new Exception("Incosistent length of input vectors.");
+                }
+                for (int i = 0; i < vector.Length; i++)
+                {
+                    _inputNormalizerCollection[i].Adjust(vector[i]);
+                }
+            }
+            return;
+        }
+
+        /// <summary>
+        /// Normalizes given input vector
+        /// </summary>
+        /// <param name="vector">Input vector</param>
+        /// <returns>Normalized input vector</returns>
+        private double[] NormalizeInputVector(double[] vector)
+        {
+            //Normalize data
+            double[] nrmVector = new double[vector.Length];
+            for (int i = 0; i < vector.Length; i++)
+            {
+                nrmVector[i] = _inputNormalizerCollection[i].Normalize(vector[i]);
+            }
+            return nrmVector;
+        }
+
+        /// <summary>
+        /// Initiates collection of preprocessor's normalizers and normalizes given collection of input vectors
+        /// </summary>
+        /// <param name="inputVectorCollection">Collection of input vectors</param>
+        /// <returns>Normalized collection of input vectors</returns>
+        private List<double[]> NormalizeInputVectorCollection(List<double[]> inputVectorCollection)
+        {
+            //Instantiate normalizers
+            InitializeInputNormalizers(inputVectorCollection);
+            //Normalize data
+            List<double[]> nrmInputVectorCollection = new List<double[]>(inputVectorCollection.Count);
+            foreach (double[] vector in inputVectorCollection)
+            {
+                nrmInputVectorCollection.Add(NormalizeInputVector(vector));
+            }
+            return nrmInputVectorCollection;
+        }
+
+        /// <summary>
+        /// Initiates collection of preprocessor's normalizers
+        /// </summary>
+        /// <param name="inputPatternCollection">Collection of input patterns</param>
+        private void InitializeInputNormalizers(List<List<double[]>> inputPatternCollection)
+        {
+            //Instantiate normalizers
+            _inputNormalizerCollection = new Normalizer[_settings.InputConfig.ExternalFieldCollection.Count];
+            for (int i = 0; i < _inputNormalizerCollection.Length; i++)
+            {
+                _inputNormalizerCollection[i] = new Normalizer(NormalizerDefaultReserve, true, false);
+            }
+            //Adjust normalizers
+            foreach (List<double[]> pattern in inputPatternCollection)
+            {
+                foreach (double[] vector in pattern)
+                {
+                    if (vector.Length % _inputNormalizerCollection.Length != 0)
+                    {
+                        throw new Exception("Incosistent length of input vectors.");
+                    }
+                    int numOfSets = vector.Length / _inputNormalizerCollection.Length;
+                    for (int set = 0; set < numOfSets; set++)
+                    {
+                        for (int i = 0; i < _inputNormalizerCollection.Length; i++)
+                        {
+                            _inputNormalizerCollection[i].Adjust(vector[set * _inputNormalizerCollection.Length + i]);
+                        }
+                    }
+                }
+            }
+            return;
+        }
+
+        /// <summary>
+        /// Normalizes given input pattern
+        /// </summary>
+        /// <param name="pattern">Input pattern</param>
+        /// <returns>Normalized input pattern</returns>
+        private List<double[]> NormalizeInputPattern(List<double[]> pattern)
+        {
+            //Normalize data
+            List<double[]> nrmPattern = new List<double[]>(pattern.Count);
+            foreach (double[] vector in pattern)
+            {
+                double[] nrmVector = new double[vector.Length];
+                int numOfSets = vector.Length / _inputNormalizerCollection.Length;
+                for (int set = 0; set < numOfSets; set++)
+                {
+                    for (int i = 0; i < _inputNormalizerCollection.Length; i++)
+                    {
+                        nrmVector[set * _inputNormalizerCollection.Length + i] = _inputNormalizerCollection[i].Normalize(vector[set * _inputNormalizerCollection.Length + i]);
+                    }
+                }
+                nrmPattern.Add(nrmVector);
+            }
+            return nrmPattern;
+        }
+
+        /// <summary>
+        /// Initiates collection of preprocessor's normalizers and normalizes given collection of input patterns
+        /// </summary>
+        /// <param name="inputPatternCollection">Collection of input patterns</param>
+        /// <returns>Normalized collection of input patterns</returns>
+        private List<List<double[]>> NormalizeInputPatternCollection(List<List<double[]>> inputPatternCollection)
+        {
+            //Instantiate normalizers
+            InitializeInputNormalizers(inputPatternCollection);
+            //Normalize data
+            List<List<double[]>> nrmInputPatternCollection = new List<List<double[]>>(inputPatternCollection.Count);
+            foreach (List<double[]> pattern in inputPatternCollection)
+            {
+                nrmInputPatternCollection.Add(NormalizeInputPattern(pattern));
+            }
+            return nrmInputPatternCollection;
         }
 
         /// <summary>
         /// Pushes input vector into the reservoirs and returns the predictors
         /// </summary>
         /// <param name="externalInputVector">Input values</param>
-        /// <param name="collectStatesStatistics">
+        /// <param name="collectStatistics">
         /// The parameter indicates whether to update internal statistics
         /// </param>
-        public double[] PushInput(double[] externalInputVector, bool collectStatesStatistics)
+        private double[] PushInput(double[] externalInputVector, bool collectStatistics)
         {
-            double[] completedInputVector = AddInternalInputVector(externalInputVector);
+            double[] completedInputVector = AddInputsFromInternalGenerators(externalInputVector);
             double[] predictors = new double[NumOfPredictors];
             int predictorsIdx = 0;
             //Compute reservoir(s)
             foreach (Reservoir reservoir in ReservoirCollection)
             {
                 double[] reservoirInput = new double[reservoir.InstanceDefinition.NPInputFieldIdxCollection.Count];
-                for(int i = 0; i < reservoir.InstanceDefinition.NPInputFieldIdxCollection.Count; i++)
+                for (int i = 0; i < reservoir.InstanceDefinition.NPInputFieldIdxCollection.Count; i++)
                 {
                     reservoirInput[i] = completedInputVector[reservoir.InstanceDefinition.NPInputFieldIdxCollection[i]];
                 }
                 //Compute reservoir
-                reservoir.Compute(reservoirInput, collectStatesStatistics);
+                reservoir.Compute(reservoirInput, collectStatistics);
                 reservoir.CopyPredictorsTo(predictors, predictorsIdx);
                 predictorsIdx += reservoir.NumOfOutputPredictors;
             }
-            if(_settings.InputConfig.RouteExternalInputToReadout)
+            if (_settings.InputConfig.RouteExternalInputToReadout)
             {
                 completedInputVector.CopyTo(predictors, predictorsIdx);
             }
@@ -186,7 +343,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// Pushes input pattern into the reservoirs and returns the predictors
         /// </summary>
         /// <param name="externalInputPattern">Input pattern</param>
-        public double[] PushInput(List<double[]> externalInputPattern)
+        /// <param name="collectStatistics">
+        /// The parameter indicates whether to update internal statistics
+        /// </param>
+        private double[] PushInput(List<double[]> externalInputPattern, bool collectStatistics)
         {
             double[] predictors = new double[NumOfPredictors];
             int predictorsIdx = 0;
@@ -194,9 +354,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             Reset(false);
             //Add internal input
             List<double[]> completedInputPattern = new List<double[]>(externalInputPattern.Count);
-            foreach(double[] externalInputVector in externalInputPattern)
+            foreach (double[] externalInputVector in externalInputPattern)
             {
-                completedInputPattern.Add(AddInternalInputVector(externalInputVector));
+                completedInputPattern.Add(AddInputsFromInternalGenerators(externalInputVector));
             }
             //Compute reservoir(s)
             foreach (Reservoir reservoir in ReservoirCollection)
@@ -209,7 +369,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                         reservoirInput[i] = inputVector[reservoir.InstanceDefinition.NPInputFieldIdxCollection[i]];
                     }
                     //Compute the reservoir
-                    reservoir.Compute(reservoirInput, true);
+                    reservoir.Compute(reservoirInput, collectStatistics);
                 }
                 reservoir.CopyPredictorsTo(predictors, predictorsIdx);
                 predictorsIdx += reservoir.NumOfOutputPredictors;
@@ -218,43 +378,43 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         }
 
         /// <summary>
-        /// Prepares input for Readout Layer training.
-        /// All input patterns are processed by internal reservoirs and the corresponding network predictors are recorded.
+        /// Pushes input vector into the reservoirs and returns the predictors
         /// </summary>
-        /// <param name="patternBundle">
-        /// The bundle containing known sample input patterns and desired output vectors
-        /// </param>
-        /// <param name="informativeCallback">
-        /// Function to be called after each processed input.
-        /// </param>
-        /// <param name="userObject">
-        /// The user object to be passed to informativeCallback.
-        /// </param>
-        public VectorBundle PreprocessBundle(PatternBundle patternBundle,
-                                             PredictorsCollectionCallbackDelegate informativeCallback = null,
-                                             Object userObject = null
-                                             )
+        /// <param name="input">Input values in natural form</param>
+        public double[] Preprocess(double[] input)
         {
+            //Check readyness
+            if (_inputNormalizerCollection == null)
+            {
+                throw new Exception("Preprocessor was not initialized by the sample data bundle (normalizers are not instantiated yet).");
+            }
+            //Check calling consistency
+            if (_settings.InputConfig.FeedingType == CommonEnums.InputFeedingType.Patterned)
+            {
+                throw new Exception("Called incorrect version of Preprocess function for patterned input feeding.");
+            }
+            //Normalize vector, push it into the preprocessor and return result
+            return PushInput(NormalizeInputVector(input), false);
+        }
+
+        /// <summary>
+        /// Pushes input pattern into the reservoirs and returns the predictors
+        /// </summary>
+        /// <param name="inputPattern">Patterned input values in natural form</param>
+        public double[] Preprocess(List<double[]> inputPattern)
+        {
+            //Check readyness
+            if (_inputNormalizerCollection == null)
+            {
+                throw new Exception("Preprocessor was not initialized by the sample data bundle (normalizers are not instantiated yet).");
+            }
+            //Check calling consistency
             if (_settings.InputConfig.FeedingType == CommonEnums.InputFeedingType.Continuous)
             {
-                throw new Exception("This version of PreprocessBundle function is not useable for continuous input feeding.");
+                throw new Exception("Called incorrect version of Preprocess function for continuous input feeding.");
             }
-            //Allocations
-            VectorBundle outputBundle = new VectorBundle(patternBundle.InputPatternCollection.Count);
-            //Reset the internal states and statistics
-            Reset(true);
-            //Collection
-            for (int dataSetIdx = 0; dataSetIdx < patternBundle.InputPatternCollection.Count; dataSetIdx++)
-            {
-                //Push input data into the network
-                double[] predictors = PushInput(patternBundle.InputPatternCollection[dataSetIdx]);
-                outputBundle.InputVectorCollection.Add(predictors);
-                //Add desired outputs
-                outputBundle.OutputVectorCollection.Add(patternBundle.OutputVectorCollection[dataSetIdx]);
-                //Informative callback
-                informativeCallback?.Invoke(patternBundle.InputPatternCollection.Count, dataSetIdx + 1, userObject);
-            }
-            return outputBundle;
+            //Normalize pattern, push it into the preprocessor and return result
+            return PushInput(NormalizeInputPattern(inputPattern), false);
         }
 
         /// <summary>
@@ -270,26 +430,28 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// <param name="userObject">
         /// The user object to be passed to informativeCallback.
         /// </param>
-        public VectorBundle PreprocessBundle(VectorBundle vectorBundle,
-                                             PredictorsCollectionCallbackDelegate informativeCallback = null,
-                                             Object userObject = null
-                                             )
+        public VectorBundle InitializeAndPreprocessBundle(VectorBundle vectorBundle,
+                                                          PredictorsCollectionCallbackDelegate informativeCallback = null,
+                                                          Object userObject = null
+                                                          )
         {
+            //Check correctness
             if (_settings.InputConfig.FeedingType == CommonEnums.InputFeedingType.Patterned)
             {
-                throw new Exception("This version of PreprocessBundle function is not useable for patterned input feeding.");
+                throw new Exception("Called incorrect version of InitializeAndPreprocessBundle function for patterned input feeding.");
             }
-            int dataSetLength = vectorBundle.InputVectorCollection.Count;
-            //Allocations
-            VectorBundle outputBundle = new VectorBundle(dataSetLength - _settings.InputConfig.BootCycles);
-            //Reset the internal states and statistics
+            //Reset the internal states and also statistics
             Reset(true);
-            //Collection
-            for (int dataSetIdx = 0; dataSetIdx < dataSetLength; dataSetIdx++)
+            //Initialize normalizers and normalize input data
+            List<double[]> nrmInputVectorCollection = NormalizeInputVectorCollection(vectorBundle.InputVectorCollection);
+            //Allocate output bundle
+            VectorBundle outputBundle = new VectorBundle(vectorBundle.InputVectorCollection.Count - _settings.InputConfig.BootCycles);
+            //Collect predictors
+            for (int dataSetIdx = 0; dataSetIdx < vectorBundle.InputVectorCollection.Count; dataSetIdx++)
             {
                 bool afterBoot = (dataSetIdx >= _settings.InputConfig.BootCycles);
                 //Push input data into the network
-                double[] predictors = PushInput(vectorBundle.InputVectorCollection[dataSetIdx], afterBoot);
+                double[] predictors = PushInput(nrmInputVectorCollection[dataSetIdx], afterBoot);
                 //Is boot sequence passed? Collect predictors?
                 if (afterBoot)
                 {
@@ -300,7 +462,50 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                     outputBundle.OutputVectorCollection.Add(vectorBundle.OutputVectorCollection[dataSetIdx]);
                 }
                 //An informative callback
-                informativeCallback?.Invoke(dataSetLength, dataSetIdx + 1, userObject);
+                informativeCallback?.Invoke(vectorBundle.InputVectorCollection.Count, dataSetIdx + 1, userObject);
+            }
+            return outputBundle;
+        }
+
+        /// <summary>
+        /// Prepares input for Readout Layer training.
+        /// All input patterns are processed by internal reservoirs and the corresponding network predictors are recorded.
+        /// </summary>
+        /// <param name="patternBundle">
+        /// The bundle containing known sample input patterns and desired output vectors
+        /// </param>
+        /// <param name="informativeCallback">
+        /// Function to be called after each processed input.
+        /// </param>
+        /// <param name="userObject">
+        /// The user object to be passed to informativeCallback.
+        /// </param>
+        public VectorBundle InitializeAndPreprocessBundle(PatternBundle patternBundle,
+                                                          PredictorsCollectionCallbackDelegate informativeCallback = null,
+                                                          Object userObject = null
+                                                          )
+        {
+            //Check correctness
+            if (_settings.InputConfig.FeedingType == CommonEnums.InputFeedingType.Continuous)
+            {
+                throw new Exception("Called incorrect version of InitializeAndPreprocessBundle function for continuous input feeding.");
+            }
+            //Reset the internal states and also statistics
+            Reset(true);
+            //Initialize normalizers and normalize input data
+            List<List<double[]>> nrmInputPatternCollection = NormalizeInputPatternCollection(patternBundle.InputPatternCollection);
+            //Allocate output bundle
+            VectorBundle outputBundle = new VectorBundle(patternBundle.InputPatternCollection.Count);
+            //Collection
+            for (int dataSetIdx = 0; dataSetIdx < nrmInputPatternCollection.Count; dataSetIdx++)
+            {
+                //Push input data into the network
+                double[] predictors = PushInput(nrmInputPatternCollection[dataSetIdx], true);
+                outputBundle.InputVectorCollection.Add(predictors);
+                //Add desired outputs
+                outputBundle.OutputVectorCollection.Add(patternBundle.OutputVectorCollection[dataSetIdx]);
+                //Informative callback
+                informativeCallback?.Invoke(patternBundle.InputPatternCollection.Count, dataSetIdx + 1, userObject);
             }
             return outputBundle;
         }

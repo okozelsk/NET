@@ -18,10 +18,23 @@ namespace RCNet.Neural.Network.SM.Readout
     public class ReadoutLayer
     {
         //Constants
+        private const double NormalizerDefaultReserve = 0.1d;
+
+        //Static attributes
         /// <summary>
-        /// Data range
+        /// Input and output data will be normalized to this range before the usage
         /// </summary>
-        private readonly Interval _dataRange;
+        private static readonly Interval _dataRange = new Interval(-1, 1);
+        
+        //Attributes
+        /// <summary>
+        /// Collection of normalizers of input predictors
+        /// </summary>
+        private Normalizer[] _predictorNormalizerCollection;
+        /// <summary>
+        /// Collection of normalizers of output values
+        /// </summary>
+        private Normalizer[] _outputNormalizerCollection;
         /// <summary>
         /// Mapping of specific predictors to readout units
         /// </summary>
@@ -44,7 +57,7 @@ namespace RCNet.Neural.Network.SM.Readout
         /// </summary>
         private ReadoutLayerSettings _settings;
         /// <summary>
-        /// Collection of clusters of trained ReadoutUnits. One cluster per output field.
+        /// Collection of clusters of trained readout units. One cluster of units per output field.
         /// </summary>
         private ReadoutUnit[][] _clusterCollection;
         /// <summary>
@@ -59,11 +72,11 @@ namespace RCNet.Neural.Network.SM.Readout
         /// Creates an uninitialized instance
         /// </summary>
         /// <param name="settings">Readout layer configuration</param>
-        /// <param name="dataRange">Range of input/output data</param>
-        public ReadoutLayer(ReadoutLayerSettings settings, Interval dataRange)
+        public ReadoutLayer(ReadoutLayerSettings settings)
         {
             _settings = settings.DeepClone();
-            _dataRange = dataRange.DeepClone();
+            _predictorNormalizerCollection = null;
+            _outputNormalizerCollection = null;
             _predictorsMapper = null;
             foreach (ReadoutLayerSettings.ReadoutUnitSettings rus in _settings.ReadoutUnitCfgCollection)
             {
@@ -82,8 +95,7 @@ namespace RCNet.Neural.Network.SM.Readout
         /// Builds readout layer.
         /// Prepares prediction clusters containing trained readout units.
         /// </summary>
-        /// <param name="predictorsCollection">Collection of predictors</param>
-        /// <param name="idealOutputsCollection">Collection of desired outputs related to predictors</param>
+        /// <param name="dataBundle">Collection of input predictors and associated desired output values</param>
         /// <param name="regressionController">Regression controller delegate</param>
         /// <param name="regressionControllerData">An user object</param>
         /// <param name="predictorsMapper">Optional specific mapping of predictors to readout units</param>
@@ -91,24 +103,98 @@ namespace RCNet.Neural.Network.SM.Readout
         /// There is recorded fold by fold (unit by unit) predicted and corresponding ideal values.
         /// This is the pesimistic approach. Real results on unseen data could be better due to the clustering synergy.
         /// </returns>
-        public ResultComparativeBundle Build(List<double[]> predictorsCollection,
-                                             List<double[]> idealOutputsCollection,
+        public ResultComparativeBundle Build(VectorBundle dataBundle,
                                              ReadoutUnit.RegressionCallbackDelegate regressionController,
                                              Object regressionControllerData,
                                              PredictorsMapper predictorsMapper = null
                                              )
         {
-            //Random object
+            //Basic checks
+            int numOfPredictors = dataBundle.InputVectorCollection[0].Length;
+            int numOfOutputs = dataBundle.OutputVectorCollection[0].Length;
+            if (numOfPredictors == 0)
+            {
+                throw new Exception("Number of predictors must be greater tham 0.");
+            }
+            if (numOfOutputs != _settings.ReadoutUnitCfgCollection.Count)
+            {
+                throw new Exception("Incorrect number of ideal output values in the vector.");
+            }
+
+            //Normalization of predictors and output data collections
+            //Allocation of normalizers
+            _predictorNormalizerCollection = new Normalizer[numOfPredictors];
+            for(int i = 0; i < numOfPredictors; i++)
+            {
+                _predictorNormalizerCollection[i] = new Normalizer(_dataRange, NormalizerDefaultReserve, true, false);
+            }
+            _outputNormalizerCollection = new Normalizer[numOfOutputs];
+            for (int i = 0; i < numOfOutputs; i++)
+            {
+                bool classificationTask = (_settings.ReadoutUnitCfgCollection[i].TaskType == CommonEnums.TaskType.Classification);
+                _outputNormalizerCollection[i] = new Normalizer(_dataRange,
+                                                                classificationTask ? 0 : NormalizerDefaultReserve,
+                                                                classificationTask ? false : true,
+                                                                false
+                                                                );
+            }
+            //Normalizers adjustment
+            for(int pairIdx = 0; pairIdx < dataBundle.InputVectorCollection.Count; pairIdx++)
+            {
+                //Checks
+                if(dataBundle.InputVectorCollection[pairIdx].Length != numOfPredictors)
+                {
+                    throw new Exception("Inconsistent number of predictors in the predictors collection.");
+                }
+                if(dataBundle.OutputVectorCollection[pairIdx].Length != numOfOutputs)
+                {
+                    throw new Exception("Inconsistent number of values in the ideal values collection.");
+                }
+                //Adjust predictors normalizers
+                for (int i = 0; i < numOfPredictors; i++)
+                {
+                    _predictorNormalizerCollection[i].Adjust(dataBundle.InputVectorCollection[pairIdx][i]);
+                }
+                //Adjust outputs normalizers
+                for (int i = 0; i < numOfOutputs; i++)
+                {
+                    _outputNormalizerCollection[i].Adjust(dataBundle.OutputVectorCollection[pairIdx][i]);
+                }
+            }
+            //Data normalization
+            //Allocation
+            List<double[]> predictorsCollection = new List<double[]>(dataBundle.InputVectorCollection.Count);
+            List<double[]> idealOutputsCollection = new List<double[]>(dataBundle.OutputVectorCollection.Count);
+            //Normalization
+            for (int pairIdx = 0; pairIdx < dataBundle.InputVectorCollection.Count; pairIdx++)
+            {
+                //Predictors
+                double[] predictors = new double[numOfPredictors];
+                for (int i = 0; i < numOfPredictors; i++)
+                {
+                    predictors[i] = _predictorNormalizerCollection[i].Normalize(dataBundle.InputVectorCollection[pairIdx][i]);
+                }
+                predictorsCollection.Add(predictors);
+                //Outputs
+                double[] outputs = new double[numOfOutputs];
+                for (int i = 0; i < numOfOutputs; i++)
+                {
+                    outputs[i] = _outputNormalizerCollection[i].Normalize(dataBundle.OutputVectorCollection[pairIdx][i]);
+                }
+                idealOutputsCollection.Add(outputs);
+            }
+            //Data processing
+            //Random object initialization
             Random rand = new Random(0);
             //Predictors mapper (specified or default)
-            _predictorsMapper = predictorsMapper ?? new PredictorsMapper(predictorsCollection[0].Length);
+            _predictorsMapper = predictorsMapper ?? new PredictorsMapper(numOfPredictors);
             //Allocation of computed and ideal vectors for result comparative bundle
             List<double[]> validationComputedVectorCollection = new List<double[]>(idealOutputsCollection.Count);
             List<double[]> validationIdealVectorCollection = new List<double[]>(idealOutputsCollection.Count);
             for (int i = 0; i < idealOutputsCollection.Count; i++)
             {
-                validationComputedVectorCollection.Add(new double[idealOutputsCollection[0].Length]);
-                validationIdealVectorCollection.Add(new double[idealOutputsCollection[0].Length]);
+                validationComputedVectorCollection.Add(new double[numOfOutputs]);
+                validationIdealVectorCollection.Add(new double[numOfOutputs]);
             }
             //Test dataset size
             if (_settings.TestDataRatio > MaxRatioOfTestData)
@@ -214,10 +300,12 @@ namespace RCNet.Neural.Network.SM.Readout
                     for (int sampleIdx = 0; sampleIdx < subBundleCollection[foldIdx].OutputVectorCollection.Count; sampleIdx++)
                     {
                         
-                        double value = _clusterCollection[clusterIdx][foldIdx].Network.Compute(subBundleCollection[foldIdx].InputVectorCollection[sampleIdx])[0];
-                        ces.Update(value, subBundleCollection[foldIdx].OutputVectorCollection[sampleIdx][0]);
-                        validationIdealVectorCollection[arrayPos][clusterIdx] = subBundleCollection[foldIdx].OutputVectorCollection[sampleIdx][0];
-                        validationComputedVectorCollection[arrayPos][clusterIdx] = value;
+                        double nrmComputedValue = _clusterCollection[clusterIdx][foldIdx].Network.Compute(subBundleCollection[foldIdx].InputVectorCollection[sampleIdx])[0];
+                        double natComputedValue = _outputNormalizerCollection[clusterIdx].Naturalize(nrmComputedValue);
+                        double natIdealValue = _outputNormalizerCollection[clusterIdx].Naturalize(subBundleCollection[foldIdx].OutputVectorCollection[sampleIdx][0]);
+                        ces.Update(natComputedValue, natIdealValue);
+                        validationIdealVectorCollection[arrayPos][clusterIdx] = natIdealValue;
+                        validationComputedVectorCollection[arrayPos][clusterIdx] = natComputedValue;
                         ++arrayPos;
                     }
 
@@ -247,7 +335,131 @@ namespace RCNet.Neural.Network.SM.Readout
             }
         }
 
+        //Static methods
+        /// <summary>
+        /// Builds report string containing information about the regression progress.
+        /// It is usually called from the RegressionControl user implementation.
+        /// </summary>
+        /// <param name="inArgs">>Contains all the necessary information to control the regression.</param>
+        /// <param name="bestReadoutUnit">Currently the best readout unit.</param>
+        /// <param name="margin">Specifies how many spaces to be at the begining of the row.</param>
+        /// <returns>Built text report</returns>
+        public static string GetProgressReport(ReadoutUnit.RegressionControlInArgs inArgs,
+                                               ReadoutUnit bestReadoutUnit,
+                                               int margin = 0
+                                               )
+        {
+            //Build progress text message
+            StringBuilder progressText = new StringBuilder();
+            progressText.Append(new string(' ', margin));
+            progressText.Append("OutputField: ");
+            progressText.Append(inArgs.OutputFieldName);
+            progressText.Append(", Fold/Attempt/Epoch: ");
+            progressText.Append(inArgs.FoldNum.ToString().PadLeft(inArgs.NumOfFolds.ToString().Length, '0') + "/");
+            progressText.Append(inArgs.RegrAttemptNumber.ToString().PadLeft(inArgs.RegrMaxAttempts.ToString().Length, '0') + "/");
+            progressText.Append(inArgs.Epoch.ToString().PadLeft(inArgs.MaxEpochs.ToString().Length, '0'));
+            progressText.Append(", DSet-Sizes: (");
+            progressText.Append(inArgs.CurrReadoutUnit.TrainingErrorStat.NumOfSamples.ToString() + ", ");
+            progressText.Append(inArgs.CurrReadoutUnit.TestingErrorStat.NumOfSamples.ToString() + ")");
+            progressText.Append(", Best-Train: ");
+            progressText.Append(bestReadoutUnit.TrainingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture));
+            if (inArgs.TaskType == CommonEnums.TaskType.Classification)
+            {
+                //Append binary errors
+                progressText.Append("/" + bestReadoutUnit.TrainingBinErrorStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture));
+                progressText.Append("/" + bestReadoutUnit.TrainingBinErrorStat.BinValErrStat[1].Sum.ToString(CultureInfo.InvariantCulture));
+            }
+            progressText.Append(", Best-Test: ");
+            progressText.Append(bestReadoutUnit.TestingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture));
+            if (inArgs.TaskType == CommonEnums.TaskType.Classification)
+            {
+                //Append binary errors
+                progressText.Append("/" + bestReadoutUnit.TestingBinErrorStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture));
+                progressText.Append("/" + bestReadoutUnit.TestingBinErrorStat.BinValErrStat[1].Sum.ToString(CultureInfo.InvariantCulture));
+            }
+            progressText.Append(", Curr-Train: ");
+            progressText.Append(inArgs.CurrReadoutUnit.TrainingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture));
+            if (inArgs.TaskType == CommonEnums.TaskType.Classification)
+            {
+                //Append binary errors
+                progressText.Append("/" + inArgs.CurrReadoutUnit.TrainingBinErrorStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture));
+                progressText.Append("/" + inArgs.CurrReadoutUnit.TrainingBinErrorStat.BinValErrStat[1].Sum.ToString(CultureInfo.InvariantCulture));
+            }
+            progressText.Append(", Curr-Test: ");
+            progressText.Append(inArgs.CurrReadoutUnit.TestingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture));
+            if (inArgs.TaskType == CommonEnums.TaskType.Classification)
+            {
+                //Append binary errors
+                progressText.Append("/" + inArgs.CurrReadoutUnit.TestingBinErrorStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture));
+                progressText.Append("/" + inArgs.CurrReadoutUnit.TestingBinErrorStat.BinValErrStat[1].Sum.ToString(CultureInfo.InvariantCulture));
+            }
+            return progressText.ToString();
+        }
+
         //Methods
+        /// <summary>
+        /// Returns results of the readout units training
+        /// </summary>
+        /// <param name="margin">Specifies how many spaces should be at the begining of each row.</param>
+        /// <returns>Built text report</returns>
+        public string GetTrainingResultsReport(int margin)
+        {
+            string leftMargin = margin == 0 ? string.Empty : new string(' ', margin);
+            StringBuilder sb = new StringBuilder();
+            //Training results
+            for (int outputIdx = 0; outputIdx < _settings.ReadoutUnitCfgCollection.Count; outputIdx++)
+            {
+                ReadoutLayer.ClusterErrStatistics ces = _clusterErrStatisticsCollection[outputIdx];
+                sb.Append(leftMargin + $"Output field [{_settings.ReadoutUnitCfgCollection[outputIdx].Name}]" + Environment.NewLine);
+                if (_settings.ReadoutUnitCfgCollection[outputIdx].TaskType == CommonEnums.TaskType.Classification)
+                {
+                    //Classification task report
+                    sb.Append(leftMargin + $"  Classification of negative samples" + Environment.NewLine);
+                    sb.Append(leftMargin + $"    Number of samples: {ces.BinaryErrStat.BinValErrStat[0].NumOfSamples}" + Environment.NewLine);
+                    sb.Append(leftMargin + $"     Number of errors: {ces.BinaryErrStat.BinValErrStat[0].Sum.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                    sb.Append(leftMargin + $"           Error rate: {ces.BinaryErrStat.BinValErrStat[0].ArithAvg.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                    sb.Append(leftMargin + $"             Accuracy: {(1 - ces.BinaryErrStat.BinValErrStat[0].ArithAvg).ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                    sb.Append(leftMargin + $"  Classification of positive samples" + Environment.NewLine);
+                    sb.Append(leftMargin + $"    Number of samples: {ces.BinaryErrStat.BinValErrStat[1].NumOfSamples}" + Environment.NewLine);
+                    sb.Append(leftMargin + $"     Number of errors: {ces.BinaryErrStat.BinValErrStat[1].Sum.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                    sb.Append(leftMargin + $"           Error rate: {ces.BinaryErrStat.BinValErrStat[1].ArithAvg.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                    sb.Append(leftMargin + $"             Accuracy: {(1 - ces.BinaryErrStat.BinValErrStat[1].ArithAvg).ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                    sb.Append(leftMargin + $"  Overall classification results" + Environment.NewLine);
+                    sb.Append(leftMargin + $"    Number of samples: {ces.BinaryErrStat.TotalErrStat.NumOfSamples}" + Environment.NewLine);
+                    sb.Append(leftMargin + $"     Number of errors: {ces.BinaryErrStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                    sb.Append(leftMargin + $"           Error rate: {ces.BinaryErrStat.TotalErrStat.ArithAvg.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                    sb.Append(leftMargin + $"             Accuracy: {(1 - ces.BinaryErrStat.TotalErrStat.ArithAvg).ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                }
+                else
+                {
+                    //Forecast task report
+                    sb.Append(leftMargin + $"  Number of samples: {ces.PrecissionErrStat.NumOfSamples}" + Environment.NewLine);
+                    sb.Append(leftMargin + $"      Biggest error: {ces.PrecissionErrStat.Max.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                    sb.Append(leftMargin + $"      Average error: {ces.PrecissionErrStat.ArithAvg.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                }
+            }
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// Returns results of the readout units training
+        /// </summary>
+        /// <param name="predictedValues">Vector of computed values.</param>
+        /// <param name="margin">Specifies how many spaces should be at the begining of each row.</param>
+        /// <returns>Built text report</returns>
+        public string GetForecastReport(double[] predictedValues, int margin)
+        {
+            string leftMargin = margin == 0 ? string.Empty : new string(' ', margin);
+            StringBuilder sb = new StringBuilder();
+            //Results
+            for (int outputIdx = 0; outputIdx < _settings.ReadoutUnitCfgCollection.Count; outputIdx++)
+            {
+                sb.Append(leftMargin + $"Output field [{_settings.ReadoutUnitCfgCollection[outputIdx].Name}]: {predictedValues[outputIdx].ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+            }
+            return sb.ToString();
+        }
+
+
         private double Compute(double[] predictors, int clusterIdx)
         {
             WeightedAvg wAvg = new WeightedAvg();
@@ -268,17 +480,57 @@ namespace RCNet.Neural.Network.SM.Readout
         }
 
         /// <summary>
+        /// Normalizes predictors vector
+        /// </summary>
+        /// <param name="predictors">Predictors vector</param>
+        private double[] NormalizePredictors(double[] predictors)
+        {
+            //Check
+            if (predictors.Length != _predictorNormalizerCollection.Length)
+            {
+                throw new Exception("Incorrect length of predictors vector.");
+            }
+            double[] nrmPredictors = new double[predictors.Length];
+            for (int i = 0; i < predictors.Length; i++)
+            {
+                nrmPredictors[i] = _predictorNormalizerCollection[i].Normalize(predictors[i]);
+            }
+            return nrmPredictors;
+        }
+
+        /// <summary>
+        /// Naturalizes output values vector
+        /// </summary>
+        /// <param name="outputs">Output values vector</param>
+        private double[] NaturalizeOutputs(double[] outputs)
+        {
+            double[] natOutputs = new double[outputs.Length];
+            for (int i = 0; i < outputs.Length; i++)
+            {
+                natOutputs[i] = _outputNormalizerCollection[i].Naturalize(outputs[i]);
+            }
+            return natOutputs;
+        }
+
+        /// <summary>
         /// Computes output fields
         /// </summary>
         /// <param name="predictors">The predictors</param>
         public double[] Compute(double[] predictors)
         {
+            //Check readyness
+            if(_predictorNormalizerCollection == null || _outputNormalizerCollection == null)
+            {
+                throw new Exception("Readout layer is not trained. Build function has to be called before Compute function can be used.");
+            }
+            double[] nrmPredictors = NormalizePredictors(predictors);
             double[] outputVector = new double[_clusterCollection.Length];
             for(int clusterIdx = 0; clusterIdx < _clusterCollection.Length; clusterIdx++)
             {
-                outputVector[clusterIdx] = Compute(predictors, clusterIdx);
+                outputVector[clusterIdx] = Compute(nrmPredictors, clusterIdx);
             }
-            return outputVector;
+            double[] natOuputVector = NaturalizeOutputs(outputVector);
+            return natOuputVector;
         }
         
         private List<VectorBundle> DivideSamplesForClassificationTask(List<double[]> predictorsCollection,

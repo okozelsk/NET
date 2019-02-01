@@ -91,31 +91,14 @@ namespace RCNet.Neural.Data
         /// The data row must end with values of defined output fields.
         /// </summary>
         /// <param name="fileName"> Data file name </param>
-        /// <param name="inputFieldNameCollection"> Input field names </param>
-        /// <param name="outputFieldNameCollection"> Output field names </param>
-        /// <param name="outputFieldTaskCollection">
-        /// Neural task related to output field.
-        /// Classification task means the output field contains binary value so data
-        /// standardization and normalizer reserve are suppressed.
-        /// </param>
-        /// <param name="normRange"> Range of normalized values </param>
-        /// <param name="normReserveRatio">
-        /// Reserve held by a normalizer to cover cases where future data exceeds a known range of sample data.
-        /// </param>
-        /// <param name="dataStandardization"> Specifies whether to apply data standardization. </param>
-        /// <param name="bundleNormalizer"> Returned initialized instance of BundleNormalizer. </param>
+        /// <param name="inputFieldNameCollection"> Input fields to be extracted from a file</param>
+        /// <param name="outputFieldNameCollection"> Output fields to be extracted from a file</param>
         public static PatternBundle LoadFromCsv(string fileName,
                                                 List<string> inputFieldNameCollection,
-                                                List<string> outputFieldNameCollection,
-                                                List<CommonEnums.TaskType> outputFieldTaskCollection,
-                                                Interval normRange,
-                                                double normReserveRatio,
-                                                bool dataStandardization,
-                                                out BundleNormalizer bundleNormalizer
+                                                List<string> outputFieldNameCollection
                                                 )
         {
             PatternBundle bundle = new PatternBundle();
-            bundleNormalizer = new BundleNormalizer(normRange);
             using (StreamReader streamReader = new StreamReader(new FileStream(fileName, FileMode.Open)))
             {
                 List<int> inputFieldGrpIndexes = new List<int>();
@@ -183,22 +166,6 @@ namespace RCNet.Neural.Data
                     }
                     outputFieldIndexes.Add(index);
                 }
-                //Bundle normalizer setup
-                foreach (string fieldName in inputFieldNameCollection)
-                {
-                    bundleNormalizer.DefineField(fieldName, fieldName, normReserveRatio, dataStandardization);
-                    bundleNormalizer.DefineInputField(fieldName);
-                }
-                for (int i = 0; i < outputFieldNameCollection.Count; i++)
-                {
-                    bundleNormalizer.DefineField(outputFieldNameCollection[i],
-                                                 outputFieldNameCollection[i],
-                                                 outputFieldTaskCollection[i] == CommonEnums.TaskType.Classification ? 0 : normReserveRatio,
-                                                 outputFieldTaskCollection[i] == CommonEnums.TaskType.Classification ? false : dataStandardization
-                                                 );
-                    bundleNormalizer.DefineOutputField(outputFieldNameCollection[i]);
-                }
-                bundleNormalizer.FinalizeStructure();
                 //Load data
                 DelimitedStringValues dataRow = new DelimitedStringValues(csvDelimiter);
                 while (!streamReader.EndOfStream)
@@ -232,8 +199,6 @@ namespace RCNet.Neural.Data
                     bundle.AddPair(patternData, outputVector);
                 }//while !EOF
             }//using streamReader
-            //Data normalization
-            bundleNormalizer.Normalize(bundle);
             return bundle;
         }//LoadFromCsv
 

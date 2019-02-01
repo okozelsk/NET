@@ -641,6 +641,25 @@
     </xs:attribute>
   </xs:complexType>
 
+  <!-- FF network - ridge regression trainer - configuration -->
+  <xs:complexType name="FFNetRidgeRegrTrainerCfgType">
+    <xs:attribute type="UDoubleLT1Type" name="hiNoiseIntensity" use="optional" default="0.05">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.05</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleGT1Type" name="maxStretch" use="optional" default="8">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 8</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleLT1Type" name="zeroMargin" use="optional" default="0.75">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.75</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
   <!-- FF network - resilient propagation trainer - configuration -->
   <xs:complexType name="FFNetRPropTrainerCfgType">
     <xs:attribute type="UDoubleLT1Type" name="zeroTolerance" use="optional" default="1E-17">

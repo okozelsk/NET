@@ -135,36 +135,39 @@ namespace RCNet.Neural.Network.FF
         /// </summary>
         public void Iteration()
         {
-            //Next epoch
-            ++_epoch;
-            //Noise intensity
-            double intensity = _alphas[Math.Min(_maxEpoch, _epoch) - 1];
-            //Adjusted predictors
-            Matrix predictors = PreparePredictors((double)intensity);
-            //Ridge regression matrix
-            Matrix regrMatrix = predictors.GetRidgeRegressionMatrix(1e-9);
-            //New weights
-            double[] newWeights = new double[_net.NumOfWeights];
-            //Weights for each output neuron
-            for (int outputIdx = 0; outputIdx < _net.NumOfOutputValues; outputIdx++)
+            if (_epoch < _maxEpoch)
             {
-                //Regression
-                Vector weights = regrMatrix * _outputSingleColVectorCollection[outputIdx];
-                //Store weights
-                for (int i = 0; i < weights.Length - 1; i++)
+                //Next epoch
+                ++_epoch;
+                //Noise intensity
+                double intensity = _alphas[Math.Min(_maxEpoch, _epoch) - 1];
+                //Adjusted predictors
+                Matrix predictors = PreparePredictors((double)intensity);
+                //Ridge regression matrix
+                Matrix regrMatrix = predictors.GetRidgeRegressionMatrix(1e-9);
+                //New weights
+                double[] newWeights = new double[_net.NumOfWeights];
+                //Weights for each output neuron
+                for (int outputIdx = 0; outputIdx < _net.NumOfOutputValues; outputIdx++)
                 {
-                    newWeights[outputIdx * _net.NumOfInputValues + i] = weights.Data[i];
+                    //Regression
+                    Vector weights = regrMatrix * _outputSingleColVectorCollection[outputIdx];
+                    //Store weights
+                    for (int i = 0; i < weights.Length - 1; i++)
+                    {
+                        newWeights[outputIdx * _net.NumOfInputValues + i] = weights.Data[i];
+                    }
+                    //Bias weight
+                    newWeights[_net.NumOfOutputValues * _net.NumOfInputValues + outputIdx] = weights.Data[weights.Length - 1];
                 }
-                //Bias weight
-                newWeights[_net.NumOfOutputValues * _net.NumOfInputValues + outputIdx] = weights.Data[weights.Length - 1];
+                //Set new weights and compute error
+                _net.SetWeights(newWeights);
+                _mse = _net.ComputeBatchErrorStat(_inputVectorCollection, _outputVectorCollection).MeanSquare;
             }
-            //Set new weights and compute error
-            _net.SetWeights(newWeights);
-            _mse = _net.ComputeBatchErrorStat(_inputVectorCollection, _outputVectorCollection).MeanSquare;
             return;
         }
 
-    }//LinRegrTrainer
+    }//RidgeRegrTrainer
 
 }//Namespace
 

@@ -1115,6 +1115,7 @@ namespace RCNet.MathTools.MatrixMath
         /// <summary>
         /// Inverses this matrix and returns its determinant.
         /// Originally proposed algorithm by Ahmad FAROOQ and Khan HAMID
+        /// https://www.researchgate.net/profile/Farooq_Ahmad16/publication/220337322_An_Efficient_and_Simple_Algorithm_for_Matrix_Inversion/links/58d77e9daca2727e5ef29dc8/An-Efficient-and-Simple-Algorithm-for-Matrix-Inversion
         /// Function is single-threaded.
         /// </summary>
         /// <returns>Determinant</returns>
@@ -1162,7 +1163,7 @@ namespace RCNet.MathTools.MatrixMath
         }
 
         /// <summary>
-        /// Computes inverse matrix to matrix A
+        /// Computes matrix inverse
         /// </summary>
         /// <param name="A">Matrix A</param>
         /// <returns>Resulting matrix</returns>
@@ -1174,10 +1175,10 @@ namespace RCNet.MathTools.MatrixMath
         }
 
         /// <summary>
-        /// Creates matrix prepared for weights direct computation depending on desired results (Y).
-        /// M = [Inv(X'*X + lambda*I)*X']
+        /// Creates matrix prepared for weights computation.
+        /// R = [Inv(X'*X + lambda*I)*X']
         /// then
-        /// Weights = M * Y
+        /// Weights = R * Y, where Y is the vector of desired results
         /// </summary>
         /// <param name="lambda">Hyperparameter lambda of Ridge Regression method</param>
         public Matrix GetRidgeRegressionMatrix(double lambda)
