@@ -264,7 +264,7 @@ namespace RCNet.Neural.Network.SM.Readout
                                                                        testDataSetLength
                                                                        );
                 }
-                //Best predicting unit per each fold in the cluster.
+                //Find best unit per each fold in the cluster.
                 ClusterErrStatistics ces = new ClusterErrStatistics(_settings.ReadoutUnitCfgCollection[clusterIdx].TaskType, numOfFolds, refBinDistr);
                 int arrayPos = 0;
                 for (int foldIdx = 0; foldIdx < numOfFolds; foldIdx++)
@@ -303,7 +303,10 @@ namespace RCNet.Neural.Network.SM.Readout
                         double nrmComputedValue = _clusterCollection[clusterIdx][foldIdx].Network.Compute(subBundleCollection[foldIdx].InputVectorCollection[sampleIdx])[0];
                         double natComputedValue = _outputNormalizerCollection[clusterIdx].Naturalize(nrmComputedValue);
                         double natIdealValue = _outputNormalizerCollection[clusterIdx].Naturalize(subBundleCollection[foldIdx].OutputVectorCollection[sampleIdx][0]);
-                        ces.Update(natComputedValue, natIdealValue);
+                        ces.Update(nrmComputedValue,
+                                   subBundleCollection[foldIdx].OutputVectorCollection[sampleIdx][0],
+                                   natComputedValue,
+                                   natIdealValue);
                         validationIdealVectorCollection[arrayPos][clusterIdx] = natIdealValue;
                         validationComputedVectorCollection[arrayPos][clusterIdx] = natComputedValue;
                         ++arrayPos;
@@ -326,12 +329,12 @@ namespace RCNet.Neural.Network.SM.Readout
             get
             {
                 //Create and return the deep clone
-                List<ClusterErrStatistics> clone = new List<ClusterErrStatistics>(_clusterErrStatisticsCollection.Count);
+                List<ClusterErrStatistics> clonedStatisticsCollection = new List<ClusterErrStatistics>(_clusterErrStatisticsCollection.Count);
                 foreach(ClusterErrStatistics ces in _clusterErrStatisticsCollection)
                 {
-                    clone.Add(ces.DeepClone());
+                    clonedStatisticsCollection.Add(ces.DeepClone());
                 }
-                return clone;
+                return clonedStatisticsCollection;
             }
         }
 
@@ -857,14 +860,16 @@ namespace RCNet.Neural.Network.SM.Readout
             /// <summary>
             /// Updates cluster statistics
             /// </summary>
-            /// <param name="computedValue">Value computed by the cluster</param>
-            /// <param name="idealValue">Ideal value</param>
-            public void Update(double computedValue, double idealValue)
+            /// <param name="nrmComputedValue">Normalized value computed by the cluster</param>
+            /// <param name="nrmIdealValue">Normalized ideal value</param>
+            /// <param name="natComputedValue">Naturalized value computed by the cluster</param>
+            /// <param name="natIdealValue">Naturalized ideal value</param>
+            public void Update(double nrmComputedValue, double nrmIdealValue, double natComputedValue, double natIdealValue)
             {
-                PrecissionErrStat.AddSampleValue(Math.Abs(computedValue - idealValue));
+                PrecissionErrStat.AddSampleValue(Math.Abs(natComputedValue - natIdealValue));
                 if (TaskType == CommonEnums.TaskType.Classification)
                 {
-                    BinaryErrStat.Update(computedValue, idealValue);
+                    BinaryErrStat.Update(nrmComputedValue, nrmIdealValue);
                 }
                 return;
             }
