@@ -1,5 +1,84 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <demo dataFolder=".\\Data">
+
+  <!--
+    This demo case demonstrates the simple form of ESN reservoir setup. Reservoir consists of one pool of 7x7x7=343 TanH analog neurons.
+    Ridge regression is used as forecasting readout.
+    Time series contains real share prices of TTOO title from https://finance.yahoo.com/quote/TTOO/history?p=TTOO.
+    The last recorded prices are from 2018/03/02 so network is predicting next High and Low prices for the following
+    business day 2018/03/05 (where real prices were High=6.58$ and Low=5.99$).
+  -->
+  <case name="Forecast task High and Low share prices of TTOO (T2 Biosystems, Inc.): Small analog reservoir (ESN), ridge regression readout">
+    <samples fileName="TTOO.csv" normalizerReserve="0.1"/>
+    <stateMachineCfg randomizerSeek="0">
+      <neuralPreprocessor>
+        <input>
+          <feedingContinuous bootCycles="Auto" routeToReadout="true"/>
+          <external>
+            <field name="High"/>
+            <field name="Low"/>
+            <field name="Adj Close"/>
+          </external>
+        </input>
+        <reservoirCfgContainer>
+          <reservoirCfg name="MainCfg" synapticDelayMethod="Distance" maxInputDelay="0" maxInternalDelay="3" spectralRadius="0.999">
+            <pools>
+              <pool name="Logistic pool" dimX="7" dimY="7" dimZ="7">
+                <neuronGroups>
+                  <neuronGroup name="Exc-Logistic" role="Excitatory" relShare="4">
+                    <activationTanH />
+                    <bias min="-0.25" max="0.25" distribution="Gaussian"/>
+                  </neuronGroup>
+                  <neuronGroup name="Inh-Logistic" role="Inhibitory" relShare="1">
+                    <activationTanH />
+                    <bias min="-0.25" max="0.25" distribution="Gaussian"/>
+                  </neuronGroup>
+                </neuronGroups>
+                <interconnection density="0.1">
+                  <staticSynapse>
+                    <weight min="0" max="1"/>
+                  </staticSynapse>
+                </interconnection>
+                <retainmentNeurons density="1">
+                  <rate min="0.2" max="0.6" />
+                </retainmentNeurons>
+              </pool>
+            </pools>
+          </reservoirCfg>
+        </reservoirCfgContainer>
+        <reservoirInstanceContainer>
+          <reservoirInstance name="Main" cfg="MainCfg" augmentedStates="false">
+            <inputConnections>
+              <inputConnection fieldName="Adj Close" poolName="Logistic pool" density="0.5">
+                <staticSynapse>
+                  <weight min="-2" max="2" randomSign="false" distribution="Uniform"/>
+                </staticSynapse>
+              </inputConnection>
+            </inputConnections>
+          </reservoirInstance>
+        </reservoirInstanceContainer>
+      </neuralPreprocessor>
+      <readoutLayer testDataRatio="0.1" folds="Auto">
+        <readoutUnit name="High" task="Forecast">
+          <ff>
+            <activationIdentity/>
+            <ridgeRegrTrainer attemptEpochs="200">
+              <lambda min="0" max="1" steps="5"/>
+            </ridgeRegrTrainer>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="Low" task="Forecast">
+          <ff>
+            <activationIdentity/>
+            <ridgeRegrTrainer attemptEpochs="200">
+              <lambda min="0" max="1" steps="5"/>
+            </ridgeRegrTrainer>
+          </ff>
+        </readoutUnit>
+      </readoutLayer>
+    </stateMachineCfg>
+  </case>
+
   <!--
     This demo case demonstrates the simple form of ESN reservoir setup. Reservoir consists of one pool of 7x7x7=343 TanH analog neurons.
     QRD regression is used as forecasting readout.
@@ -730,84 +809,6 @@
             <activationIdentity/>
             <ridgeRegrTrainer attemptEpochs="1">
               <lambda min="8e-8" max="8e-8" steps="5"/>
-            </ridgeRegrTrainer>
-          </ff>
-        </readoutUnit>
-      </readoutLayer>
-    </stateMachineCfg>
-  </case>
-
-  <!--
-    This demo case demonstrates the simple form of ESN reservoir setup. Reservoir consists of one pool of 7x7x7=343 TanH analog neurons.
-    Ridge regression is used as forecasting readout.
-    Time series contains real share prices of TTOO title from https://finance.yahoo.com/quote/TTOO/history?p=TTOO.
-    The last recorded prices are from 2018/03/02 so network is predicting next High and Low prices for the following
-    business day 2018/03/05 (where real prices were High=6.58$ and Low=5.99$).
-  -->
-  <case name="Forecast task High and Low share prices of TTOO (T2 Biosystems, Inc.): Small analog reservoir (ESN), ridge regression readout">
-    <samples fileName="TTOO.csv" normalizerReserve="0.1"/>
-    <stateMachineCfg randomizerSeek="0">
-      <neuralPreprocessor>
-        <input>
-          <feedingContinuous bootCycles="Auto" routeToReadout="true"/>
-          <external>
-            <field name="High"/>
-            <field name="Low"/>
-            <field name="Adj Close"/>
-          </external>
-        </input>
-        <reservoirCfgContainer>
-          <reservoirCfg name="MainCfg" synapticDelayMethod="Distance" maxInputDelay="0" maxInternalDelay="3" spectralRadius="0.999">
-            <pools>
-              <pool name="Logistic pool" dimX="7" dimY="7" dimZ="7">
-                <neuronGroups>
-                  <neuronGroup name="Exc-Logistic" role="Excitatory" relShare="4">
-                    <activationTanH />
-                    <bias min="-0.25" max="0.25" distribution="Gaussian"/>
-                  </neuronGroup>
-                  <neuronGroup name="Inh-Logistic" role="Inhibitory" relShare="1">
-                    <activationTanH />
-                    <bias min="-0.25" max="0.25" distribution="Gaussian"/>
-                  </neuronGroup>
-                </neuronGroups>
-                <interconnection density="0.1">
-                  <staticSynapse>
-                    <weight min="0" max="1"/>
-                  </staticSynapse>
-                </interconnection>
-                <retainmentNeurons density="1">
-                  <rate min="0.2" max="0.6" />
-                </retainmentNeurons>
-              </pool>
-            </pools>
-          </reservoirCfg>
-        </reservoirCfgContainer>
-        <reservoirInstanceContainer>
-          <reservoirInstance name="Main" cfg="MainCfg" augmentedStates="false">
-            <inputConnections>
-              <inputConnection fieldName="Adj Close" poolName="Logistic pool" density="0.5">
-                <staticSynapse>
-                  <weight min="-2" max="2" randomSign="false" distribution="Uniform"/>
-                </staticSynapse>
-              </inputConnection>
-            </inputConnections>
-          </reservoirInstance>
-        </reservoirInstanceContainer>
-      </neuralPreprocessor>
-      <readoutLayer testDataRatio="0.1" folds="Auto">
-        <readoutUnit name="High" task="Forecast">
-          <ff>
-            <activationIdentity/>
-            <ridgeRegrTrainer attemptEpochs="200">
-              <lambda min="0" max="1" steps="5"/>
-            </ridgeRegrTrainer>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="Low" task="Forecast">
-          <ff>
-            <activationIdentity/>
-            <ridgeRegrTrainer attemptEpochs="200">
-              <lambda min="0" max="1" steps="5"/>
             </ridgeRegrTrainer>
           </ff>
         </readoutUnit>

@@ -16,6 +16,8 @@ namespace RCNet.Neural.Network.FF
     [Serializable]
     public class RidgeRegrTrainer : INonRecurrentNetworkTrainer
     {
+        //Constants
+        private const double StopLambdaDifference = 1e-10;
         //Attribute properties
         /// <summary>
         /// Epoch error (MSE).
@@ -52,7 +54,7 @@ namespace RCNet.Neural.Network.FF
         private readonly Matrix _transposedPredictorsMatrix;
         private List<Vector> _outputSingleColVectorCollection;
         private ParamSeeker _lambdaSeeker;
-        private readonly int _maxEpoch;
+        private double _currLambda;
 
         //Constructor
         /// <summary>
@@ -109,6 +111,7 @@ namespace RCNet.Neural.Network.FF
             }
             //Lambda seeker
             _lambdaSeeker = new ParamSeeker(_settings.LambdaSeekerCfg);
+            _currLambda = 1e6;
             //Matrix setup
             Matrix predictorsMatrix = new Matrix(inputVectorCollection.Count, _net.NumOfInputValues + 1);
             for (int row = 0; row < inputVectorCollection.Count; row++)
@@ -147,44 +150,51 @@ namespace RCNet.Neural.Network.FF
         /// </summary>
         public bool Iteration()
         {
-            if (AttemptEpoch < MaxAttemptEpoch)
+            //Primary stop condition
+            if (AttemptEpoch == MaxAttemptEpoch)
             {
-                //Next epoch
-                ++AttemptEpoch;
-                //Lambda to be tested
-                double lambda = _lambdaSeeker.Next;
-                InfoMessage = $"lambda={lambda.ToString(CultureInfo.InvariantCulture)}";
-                //Copy of base squared matrix
-                Matrix tmpMatrix = new Matrix(_baseSquareMatrix);
-                //Apply lambda
-                tmpMatrix.AddScalarToDiagonal(lambda);
-                //Inverse
-                tmpMatrix.Inverse();
-                //Ridge regression matrix
-                Matrix regrMatrix = tmpMatrix * _transposedPredictorsMatrix;
-                //New weights
-                double[] newWeights = new double[_net.NumOfWeights];
-                //Weights for each output neuron
-                for (int outputIdx = 0; outputIdx < _net.NumOfOutputValues; outputIdx++)
-                {
-                    //Regression
-                    Vector weights = regrMatrix * _outputSingleColVectorCollection[outputIdx];
-                    //Store weights
-                    for (int i = 0; i < weights.Length - 1; i++)
-                    {
-                        newWeights[outputIdx * _net.NumOfInputValues + i] = weights.Data[i];
-                    }
-                    //Bias weight
-                    newWeights[_net.NumOfOutputValues * _net.NumOfInputValues + outputIdx] = weights.Data[weights.Length - 1];
-                }
-                //Set new weights and compute error
-                _net.SetWeights(newWeights);
-                MSE = _net.ComputeBatchErrorStat(_inputVectorCollection, _outputVectorCollection).MeanSquare;
-                //Update lambda seeker
-                _lambdaSeeker.ProcessError(MSE);
-                return true;
+                return false;
             }
-            return false;
+            //New lambda to be tested
+            double newLambda = _lambdaSeeker.Next;
+            //Secondary stop condition
+            if (Math.Abs(_currLambda - newLambda) < StopLambdaDifference)
+            {
+                return false;
+            }
+            //Next epoch allowed
+            _currLambda = newLambda;
+            ++AttemptEpoch;
+            InfoMessage = $"lambda={_currLambda.ToString(CultureInfo.InvariantCulture)}";
+            //Copy of base squared matrix
+            Matrix tmpMatrix = new Matrix(_baseSquareMatrix);
+            //Apply lambda
+            tmpMatrix.AddScalarToDiagonal(_currLambda);
+            //Inverse
+            tmpMatrix.Inverse();
+            //Ridge regression matrix
+            Matrix regrMatrix = tmpMatrix * _transposedPredictorsMatrix;
+            //New weights
+            double[] newWeights = new double[_net.NumOfWeights];
+            //Weights for each output neuron
+            for (int outputIdx = 0; outputIdx < _net.NumOfOutputValues; outputIdx++)
+            {
+                //Regression
+                Vector weights = regrMatrix * _outputSingleColVectorCollection[outputIdx];
+                //Store weights
+                for (int i = 0; i < weights.Length - 1; i++)
+                {
+                    newWeights[outputIdx * _net.NumOfInputValues + i] = weights.Data[i];
+                }
+                //Bias weight
+                newWeights[_net.NumOfOutputValues * _net.NumOfInputValues + outputIdx] = weights.Data[weights.Length - 1];
+            }
+            //Set new weights and compute error
+            _net.SetWeights(newWeights);
+            MSE = _net.ComputeBatchErrorStat(_inputVectorCollection, _outputVectorCollection).MeanSquare;
+            //Update lambda seeker
+            _lambdaSeeker.ProcessError(MSE);
+            return true;
         }
 
     }//RidgeRegrTrainer

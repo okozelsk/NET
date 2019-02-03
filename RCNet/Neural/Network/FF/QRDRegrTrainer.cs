@@ -19,6 +19,8 @@ namespace RCNet.Neural.Network.FF
     [Serializable]
     public class QRDRegrTrainer : INonRecurrentNetworkTrainer
     {
+        //Constants
+        private const double StopNoiseDifference = 1e-8;
         //Attribute properties
         /// <summary>
         /// Epoch error (MSE).
@@ -52,6 +54,7 @@ namespace RCNet.Neural.Network.FF
         private List<double[]> _outputVectorCollection;
         private List<Matrix> _outputSingleColMatrixCollection;
         private Random _rand;
+        private double _currMaxNoise;
         private ParamSeeker _maxNoiseSeeker;
 
         //Constructor
@@ -146,6 +149,7 @@ namespace RCNet.Neural.Network.FF
                 ++Attempt;
                 //Reset
                 _maxNoiseSeeker = new ParamSeeker(_settings.MaxNoiseSeekerCfg);
+                _currMaxNoise = 1e6;
                 MSE = 0;
                 AttemptEpoch = 0;
                 return true;
@@ -162,22 +166,28 @@ namespace RCNet.Neural.Network.FF
         /// </summary>
         public bool Iteration()
         {
-            if (AttemptEpoch == MaxAttemptEpoch)
+            //Fetch next noise intensity
+            double newMaxNoise = _maxNoiseSeeker.Next;
+            //Check continue conditions
+            if (AttemptEpoch == MaxAttemptEpoch || Math.Abs(_currMaxNoise - newMaxNoise) < StopNoiseDifference)
             {
-                //Max epoch reached, try new attempt
+                //Try new attempt
                 if (!NextAttempt())
                 {
                     //Next attempt is not available
                     return false;
                 }
+                else
+                {
+                    newMaxNoise = _maxNoiseSeeker.Next;
+                }
             }
             //Next epoch
             ++AttemptEpoch;
-            //Noise intensity
-            double maxNoise = _maxNoiseSeeker.Next;
-            InfoMessage = $"maxNoise={maxNoise.ToString(CultureInfo.InvariantCulture)}";
+            _currMaxNoise = newMaxNoise;
+            InfoMessage = $"maxNoise={_currMaxNoise.ToString(CultureInfo.InvariantCulture)}";
             //Adjusted predictors
-            Matrix predictors = PreparePredictors((double)maxNoise);
+            Matrix predictors = PreparePredictors(_currMaxNoise);
             //Decomposition
             QRD decomposition = null;
             bool useableQRD = true;
