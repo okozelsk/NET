@@ -1,150 +1,167 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using RCNet.Extensions;
 using RCNet.Neural.Activation;
 using RCNet.MathTools.MatrixMath;
 using RCNet.MathTools.VectorMath;
+using RCNet.MathTools.PS;
 
 namespace RCNet.Neural.Network.FF
 {
     /// <summary>
-    /// !!!!Class is not useable - it is under construction!!!!!
     /// Implements the ridge regression trainer.
     /// FF network has to have only output layer with the Identity activation.
     /// </summary>
     [Serializable]
     public class RidgeRegrTrainer : INonRecurrentNetworkTrainer
     {
+        //Attribute properties
+        /// <summary>
+        /// Epoch error (MSE).
+        /// </summary>
+        public double MSE { get; private set; }
+        /// <summary>
+        /// Max attempt
+        /// </summary>
+        public int MaxAttempt { get; private set; }
+        /// <summary>
+        /// Current attempt
+        /// </summary>
+        public int Attempt { get; private set; }
+        /// <summary>
+        /// Max epoch
+        /// </summary>
+        public int MaxAttemptEpoch { get; private set; }
+        /// <summary>
+        /// Current epoch (incremented each call of Iteration)
+        /// </summary>
+        public int AttemptEpoch { get; private set; }
+        /// <summary>
+        /// Informative message from the trainer
+        /// </summary>
+        public string InfoMessage { get; private set; }
+
         //Attributes
-        private LinRegrTrainerSettings _settings;
+        private RidgeRegrTrainerSettings _settings;
         private FeedForwardNetwork _net;
-        private List<double[]> _inputVectorCollection;
-        private List<double[]> _outputVectorCollection;
+        private readonly List<double[]> _inputVectorCollection;
+        private readonly List<double[]> _outputVectorCollection;
+        private readonly Random _rand;
+        private readonly Matrix _baseSquareMatrix;
+        private readonly Matrix _transposedPredictorsMatrix;
         private List<Vector> _outputSingleColVectorCollection;
-        private Random _rand;
-        private readonly double[] _alphas;
-        private double _mse;
+        private ParamSeeker _lambdaSeeker;
         private readonly int _maxEpoch;
-        private int _epoch;
 
         //Constructor
         /// <summary>
-        /// Constructs new instance of linear regression trainer
+        /// Constructs an initialized instance
         /// </summary>
         /// <param name="net">FF network to be trained</param>
         /// <param name="inputVectorCollection">Predictors (input)</param>
         /// <param name="outputVectorCollection">Ideal outputs (the same number of rows as number of inputs)</param>
-        /// <param name="maxEpoch">Maximum allowed training epochs</param>
-        /// <param name="rand">Random object to be used for adding a white-noise to predictors</param>
         /// <param name="settings">Optional startup parameters of the trainer</param>
+        /// <param name="rand">Random object to be used</param>
         public RidgeRegrTrainer(FeedForwardNetwork net,
                                 List<double[]> inputVectorCollection,
                                 List<double[]> outputVectorCollection,
-                                int maxEpoch,
-                                Random rand,
-                                LinRegrTrainerSettings settings = null
+                                RidgeRegrTrainerSettings settings,
+                                Random rand
                                 )
         {
             //Check network readyness
             if (!net.Finalized)
             {
-                throw new Exception("Can´t create LinRegr trainer. Network structure was not finalized.");
+                throw new Exception("Can´t create trainer. Network structure was not finalized.");
             }
             //Check network conditions
             if (net.LayerCollection.Count != 1 || !(net.LayerCollection[0].Activation is Identity))
             {
-                throw new Exception("Can´t create LinRegr trainer. Network structure is not complient (single layer having Identity activation).");
+                throw new Exception("Can´t create trainer. Network structure is not complient (single layer having Identity activation).");
             }
             //Check samples conditions
-            if(inputVectorCollection.Count < inputVectorCollection[0].Length + 1)
+            if(inputVectorCollection.Count == 0)
             {
-                throw new Exception("Can´t create LinRegr trainer. Insufficient number of training samples. Minimum is " + (inputVectorCollection[0].Length + 1).ToString() + ".");
+                throw new Exception("Can´t create trainer. Missing training samples.");
             }
+            //Collections
+            _inputVectorCollection = new List<double[]>(inputVectorCollection);
+            _outputVectorCollection = new List<double[]>(outputVectorCollection);
             //Parameters
             _settings = settings;
-            if (_settings == null)
-            {
-                //Default parameters
-                _settings = new LinRegrTrainerSettings();
-            }
+            MaxAttempt = _settings.NumOfAttempts;
+            MaxAttemptEpoch = _settings.NumOfAttemptEpochs;
+            Attempt = 1;
+            AttemptEpoch = 0;
             _net = net;
-            _inputVectorCollection = inputVectorCollection;
-            _outputVectorCollection = outputVectorCollection;
+            _rand = rand;
             _outputSingleColVectorCollection = new List<Vector>(_net.NumOfOutputValues);
             for (int outputIdx = 0; outputIdx < _net.NumOfOutputValues; outputIdx++)
             {
-                Vector outputSingleColVector = new Vector(_outputVectorCollection.Count);
-                for (int row = 0; row < _outputVectorCollection.Count; row++)
+                Vector outputSingleColVector = new Vector(outputVectorCollection.Count);
+                for (int row = 0; row < outputVectorCollection.Count; row++)
                 {
                     //Output
-                    outputSingleColVector.Data[row] = _outputVectorCollection[row][outputIdx];
+                    outputSingleColVector.Data[row] = outputVectorCollection[row][outputIdx];
                 }
                 _outputSingleColVectorCollection.Add(outputSingleColVector);
             }
-            _rand = rand;
-            _maxEpoch = maxEpoch;
-            _epoch = 0;
-            _alphas = new double[_maxEpoch];
-            //Plan the iterations alphas
-            double coeff = (maxEpoch > 1) ? _settings.MaxStretch / (maxEpoch - 1) : 0;
-            for (int i = 0; i < _maxEpoch; i++)
+            //Lambda seeker
+            _lambdaSeeker = new ParamSeeker(_settings.LambdaSeekerCfg);
+            //Matrix setup
+            Matrix predictorsMatrix = new Matrix(inputVectorCollection.Count, _net.NumOfInputValues + 1);
+            for (int row = 0; row < inputVectorCollection.Count; row++)
             {
-                _alphas[i] = _settings.HiNoiseIntensity - _settings.HiNoiseIntensity * Math.Tanh(i* coeff);
-                _alphas[i] = Math.Max(0, _alphas[i]);
+                //Predictors
+                for (int col = 0; col < _net.NumOfInputValues; col++)
+                {
+                    predictorsMatrix.Data[row][col] = inputVectorCollection[row][col];
+                }
+                //Add constant bias to predictors
+                predictorsMatrix.Data[row][_net.NumOfInputValues] = 1;
             }
-            //Ensure the last alpha is zero
-            _alphas[_maxEpoch - 1] = 0;
+            _transposedPredictorsMatrix = predictorsMatrix.Transpose();
+            _baseSquareMatrix = _transposedPredictorsMatrix * predictorsMatrix;
             return;
         }
 
         //Properties
-        /// <summary>
-        /// Epoch error (MSE).
-        /// </summary>
-        public double MSE { get { return _mse; } }
-        /// <summary>
-        /// Current epoch (incremented each call of Iteration)
-        /// </summary>
-        public int Epoch { get { return _epoch; } }
         /// <summary>
         /// FF network beeing trained
         /// </summary>
         public INonRecurrentNetwork Net { get { return _net; } }
 
         //Methods
-        private Matrix PreparePredictors(double noiseIntensity)
+        /// <summary>
+        /// Starts next training attempt
+        /// </summary>
+        public bool NextAttempt()
         {
-            Matrix predictors = new Matrix(_inputVectorCollection.Count, _net.NumOfInputValues + 1);
-            for (int row = 0; row < _inputVectorCollection.Count; row++)
-            {
-                //Predictors
-                for(int col = 0; col < _net.NumOfInputValues; col++)
-                {
-                    double predictor = _inputVectorCollection[row][col];
-                    predictors.Data[row][col] = predictor * (1d + _rand.NextDouble(noiseIntensity * _settings.ZeroMargin, noiseIntensity, true, RandomClassExtensions.DistributionType.Uniform));
-                }
-                //Add constant bias to predictors
-                predictors.Data[row][_net.NumOfInputValues] = 1;
-            }
-            return predictors;
+            //Only one attempt makes the sense -> do nothhing and return false
+            return false;
         }
-
 
         /// <summary>
         /// Performs training iteration.
         /// </summary>
-        public void Iteration()
+        public bool Iteration()
         {
-            if (_epoch < _maxEpoch)
+            if (AttemptEpoch < MaxAttemptEpoch)
             {
                 //Next epoch
-                ++_epoch;
-                //Noise intensity
-                double intensity = _alphas[Math.Min(_maxEpoch, _epoch) - 1];
-                //Adjusted predictors
-                Matrix predictors = PreparePredictors((double)intensity);
+                ++AttemptEpoch;
+                //Lambda to be tested
+                double lambda = _lambdaSeeker.Next;
+                InfoMessage = $"lambda={lambda.ToString(CultureInfo.InvariantCulture)}";
+                //Copy of base squared matrix
+                Matrix tmpMatrix = new Matrix(_baseSquareMatrix);
+                //Apply lambda
+                tmpMatrix.AddScalarToDiagonal(lambda);
+                //Inverse
+                tmpMatrix.Inverse();
                 //Ridge regression matrix
-                Matrix regrMatrix = predictors.GetRidgeRegressionMatrix(1e-9);
+                Matrix regrMatrix = tmpMatrix * _transposedPredictorsMatrix;
                 //New weights
                 double[] newWeights = new double[_net.NumOfWeights];
                 //Weights for each output neuron
@@ -162,9 +179,12 @@ namespace RCNet.Neural.Network.FF
                 }
                 //Set new weights and compute error
                 _net.SetWeights(newWeights);
-                _mse = _net.ComputeBatchErrorStat(_inputVectorCollection, _outputVectorCollection).MeanSquare;
+                MSE = _net.ComputeBatchErrorStat(_inputVectorCollection, _outputVectorCollection).MeanSquare;
+                //Update lambda seeker
+                _lambdaSeeker.ProcessError(MSE);
+                return true;
             }
-            return;
+            return false;
         }
 
     }//RidgeRegrTrainer

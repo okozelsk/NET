@@ -13,22 +13,47 @@ namespace RCNet.Neural.Network.PP
     [Serializable]
     public class PDeltaRuleTrainer : INonRecurrentNetworkTrainer
     {
+        //Attribute properties
+        /// <summary>
+        /// MSE after an epoch.
+        /// </summary>
+        public double MSE { get; private set; }
+        /// <summary>
+        /// Max attempt
+        /// </summary>
+        public int MaxAttempt { get; private set; }
+        /// <summary>
+        /// Current attempt
+        /// </summary>
+        public int Attempt { get; private set; }
+        /// <summary>
+        /// Max epoch
+        /// </summary>
+        public int MaxAttemptEpoch { get; private set; }
+        /// <summary>
+        /// Current epoch (incremented each call of Iteration)
+        /// </summary>
+        public int AttemptEpoch { get; private set; }
+        /// <summary>
+        /// Informative message from the trainer
+        /// </summary>
+        public string InfoMessage { get; private set; }
+
         //Attributes
         private PDeltaRuleTrainerSettings _settings;
         private ParallelPerceptron _net;
         private List<double[]> _inputVectorCollection;
-        private List<double[]> _outputVectorCollection;
-        private double _acceptableError;
-        private double _resSquashCoeff;
-        private double _marginSignificance;
+        private readonly List<double[]> _outputVectorCollection;
+        private readonly Random _rand;
+        private readonly double _acceptableError;
+        private readonly double _resSquashCoeff;
+        private readonly double _marginSignificance;
         private double _clearMargin;
-        private double _minM;
-        private double _maxM;
+        private readonly double _minM;
+        private readonly double _maxM;
         private double _learningRate;
         private double[] _prevWeights;
         private double _prevMSE;
-        private double _currMSE;
-        private int _epoch;
         private List<WorkerRange> _workerRangeCollection;
 
         //Constructor
@@ -38,21 +63,21 @@ namespace RCNet.Neural.Network.PP
         /// <param name="net">PP to be trained</param>
         /// <param name="inputVectorCollection">Predictors (input)</param>
         /// <param name="outputVectorCollection">Ideal outputs (the same number of rows as predictors rows)</param>
-        /// <param name="settings">Optional startup parameters of the trainer</param>
+        /// <param name="settings">Configuration of the trainer</param>
+        /// <param name="rand">Random object to be used</param>
         public PDeltaRuleTrainer(ParallelPerceptron net,
                                  List<double[]> inputVectorCollection,
                                  List<double[]> outputVectorCollection,
-                                 PDeltaRuleTrainerSettings settings = null
+                                 PDeltaRuleTrainerSettings settings,
+                                 Random rand
                                  )
         {
             //Parameters
-            _settings = settings;
-            if (_settings == null)
-            {
-                //Default parameters
-                _settings = new PDeltaRuleTrainerSettings();
-            }
+            _settings = (PDeltaRuleTrainerSettings)settings.DeepClone();
+            MaxAttempt = _settings.NumOfAttempts;
+            MaxAttemptEpoch = _settings.NumOfAttemptEpochs;
             _net = net;
+            _rand = rand;
             _inputVectorCollection = inputVectorCollection;
             _outputVectorCollection = outputVectorCollection;
             _resSquashCoeff = _net.ResSquashCoeff;
@@ -61,11 +86,6 @@ namespace RCNet.Neural.Network.PP
             _clearMargin = 0.05;
             _minM = _acceptableError * _resSquashCoeff;
             _maxM = 4d * _minM;
-            _learningRate = _settings.IniLR;
-            _prevWeights = _net.GetWeights();
-            _prevMSE = 0;
-            _currMSE = 0;
-            _epoch = 0;
             //Parallel workers / batch ranges preparation
             _workerRangeCollection = new List<WorkerRange>();
             int numOfWorkers = Math.Min(Environment.ProcessorCount, _inputVectorCollection.Count);
@@ -85,18 +105,14 @@ namespace RCNet.Neural.Network.PP
                 WorkerRange workerRange = new WorkerRange(fromRow, toRow, _net.NumOfWeights);
                 _workerRangeCollection.Add(workerRange);
             }
+            InfoMessage = string.Empty;
+            //Start training attempt
+            Attempt = 0;
+            NextAttempt();
             return;
         }
 
         //Properties
-        /// <summary>
-        /// MSE after an epoch.
-        /// </summary>
-        public double MSE { get { return _currMSE; } }
-        /// <summary>
-        /// Current epoch (incremented each call of Iteration)
-        /// </summary>
-        public int Epoch { get { return _epoch; } }
         /// <summary>
         /// PP network beeing trained
         /// </summary>
@@ -107,15 +123,15 @@ namespace RCNet.Neural.Network.PP
         {
             bool applyWeights = true;
             double clearMarginLR = _learningRate;
-            if (_epoch >= 2)
+            if (AttemptEpoch >= 2)
             {
-                if (_prevMSE > _currMSE)
+                if (_prevMSE > MSE)
                 {
                     //Increase learning rate
                     _learningRate *= _settings.IncLR;
                     _learningRate = Math.Min(_settings.MaxLR, _learningRate);
                 }
-                else if (_prevMSE < _currMSE)
+                else if (_prevMSE < MSE)
                 {
                     if(_learningRate > _settings.MinLR)
                     {
@@ -129,7 +145,7 @@ namespace RCNet.Neural.Network.PP
             if(applyWeights)
             {
                 //Store MSE
-                _prevMSE = _currMSE;
+                _prevMSE = MSE;
                 //Adjust clear margin
                 for (int i = 0; i < _net.NumOfGates; i++)
                 {
@@ -139,21 +155,55 @@ namespace RCNet.Neural.Network.PP
             else
             {
                 //Do not apply iteration updates
-                _currMSE = _prevMSE;
+                MSE = _prevMSE;
                 _net.SetWeights(_prevWeights);
             }
             return;
         }
 
         /// <summary>
+        /// Starts next training attempt
+        /// </summary>
+        public bool NextAttempt()
+        {
+            if (Attempt < MaxAttempt)
+            {
+                //Next attempt is allowed
+                ++Attempt;
+                //Reset
+                _net.RandomizeWeights(_rand);
+                _learningRate = _settings.IniLR;
+                _prevWeights = _net.GetWeights();
+                _prevMSE = 0;
+                MSE = 0;
+                AttemptEpoch = 0;
+                return true;
+            }
+            else
+            {
+                //Max attempt reached -> do nothhing and return false
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Performs training iteration.
         /// </summary>
-        public void Iteration()
+        public bool Iteration()
         {
+            if(AttemptEpoch == MaxAttemptEpoch)
+            {
+                //Max epoch reached, try new attempt
+                if(!NextAttempt())
+                {
+                    //Next attempt is not available
+                    return false;
+                }
+            }
+            //Epoch increment
+            ++AttemptEpoch;
             //Store network weights
             _prevWeights = _net.GetWeights();
-            //Epoch increment
-            ++_epoch;
             //Weights update
             double[] adjustedNetworkWeights = _net.GetWeights();
             Parallel.ForEach(_workerRangeCollection, worker =>
@@ -212,10 +262,10 @@ namespace RCNet.Neural.Network.PP
             //How it looks after weight changes?
             _net.SetWeights(adjustedNetworkWeights);
             _net.NormalizeWeights();
-            _currMSE = _net.ComputeBatchErrorStat(_inputVectorCollection, _outputVectorCollection).MeanSquare;
+            MSE = _net.ComputeBatchErrorStat(_inputVectorCollection, _outputVectorCollection).MeanSquare;
             //Adjust learning parameters and weights according to results
             AdjustLearning(glM / (double)_inputVectorCollection.Count);
-            return;
+            return true;
         }
 
         //Inner classes

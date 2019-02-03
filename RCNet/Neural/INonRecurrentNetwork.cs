@@ -8,7 +8,7 @@ using RCNet.MathTools;
 namespace RCNet.Neural
 {
     /// <summary>
-    /// Mandatory interface of the non-recurrent type of network
+    /// Common interface of non-recurrent networks
     /// </summary>
     public interface INonRecurrentNetwork
     {

@@ -14,7 +14,7 @@ namespace RCNet.Neural.Network.FF
     /// Setup parameters for the resilient propagation trainer
     /// </summary>
     [Serializable]
-    public class RPropTrainerSettings
+    public class RPropTrainerSettings : INonRecurrentNetworkTrainerSettings
     {
         //Constants
         /// <summary>
@@ -44,41 +44,53 @@ namespace RCNet.Neural.Network.FF
 
         //Attribute properties
         /// <summary>
+        /// Number of attempts
+        /// </summary>
+        public int NumOfAttempts { get; set; }
+        /// <summary>
+        /// Number of attempt epochs
+        /// </summary>
+        public int NumOfAttemptEpochs { get; set; }
+        /// <summary>
         /// An absolute value that is still considered as zero
         /// </summary>
-        public double ZeroTolerance { get; set; } = DefaultZeroTolerance;
+        public double ZeroTolerance { get; set; }
         /// <summary>
         /// Positive Eta
         /// </summary>
-        public double PositiveEta { get; set; } = DefaultPositiveEta;
+        public double PositiveEta { get; set; }
         /// <summary>
         /// Negative Eta
         /// </summary>
-        public double NegativeEta { get; set; } = DefaultNegativeEta;
+        public double NegativeEta { get; set; }
         /// <summary>
         /// Delta initial value
         /// </summary>
-        public double IniDelta { get; set; } = DefaultIniDelta;
+        public double IniDelta { get; set; }
         /// <summary>
         /// Delta minimum value
         /// </summary>
-        public double MinDelta { get; set; } = DefaultMinDelta;
+        public double MinDelta { get; set; }
         /// <summary>
         /// Delta maximum value
         /// </summary>
-        public double MaxDelta { get; set; } = DefaultMaxDelta;
+        public double MaxDelta { get; set; }
 
         //Constructors
         /// <summary>
         /// Constructs an initialized instance
         /// </summary>
+        /// <param name="numOfAttempts">Number of attempts</param>
+        /// <param name="numOfAttemptEpochs">Number of attempt epochs</param>
         /// <param name="zeroTolerance">An absolute value that is still considered as zero</param>
         /// <param name="positiveEta">Positive Eta</param>
         /// <param name="negativeEta">Negative Eta</param>
         /// <param name="iniDelta">Delta initial value</param>
         /// <param name="minDelta">Delta minimum value</param>
         /// <param name="maxDelta">Delta maximum value</param>
-        public RPropTrainerSettings(double zeroTolerance = DefaultZeroTolerance,
+        public RPropTrainerSettings(int numOfAttempts,
+                                    int numOfAttemptEpochs,
+                                    double zeroTolerance = DefaultZeroTolerance,
                                     double positiveEta = DefaultPositiveEta,
                                     double negativeEta = DefaultNegativeEta,
                                     double iniDelta = DefaultIniDelta,
@@ -86,6 +98,8 @@ namespace RCNet.Neural.Network.FF
                                     double maxDelta = DefaultMaxDelta
                                     )
         {
+            NumOfAttempts = numOfAttempts;
+            NumOfAttemptEpochs = numOfAttemptEpochs;
             ZeroTolerance = zeroTolerance;
             PositiveEta = positiveEta;
             NegativeEta = negativeEta;
@@ -101,6 +115,8 @@ namespace RCNet.Neural.Network.FF
         /// <param name="source">Source instance</param>
         public RPropTrainerSettings(RPropTrainerSettings source)
         {
+            NumOfAttempts = source.NumOfAttempts;
+            NumOfAttemptEpochs = source.NumOfAttemptEpochs;
             ZeroTolerance = source.ZeroTolerance;
             PositiveEta = source.PositiveEta;
             NegativeEta = source.NegativeEta;
@@ -122,14 +138,16 @@ namespace RCNet.Neural.Network.FF
             Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.FF.RPropTrainerSettings.xsd");
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
-            XElement rPropTrainerSettingsElem = validator.Validate(elem, "rootElem");
+            XElement settingsElem = validator.Validate(elem, "rootElem");
             //Parsing
-            ZeroTolerance = double.Parse(rPropTrainerSettingsElem.Attribute("zeroTolerance").Value, CultureInfo.InvariantCulture);
-            PositiveEta = double.Parse(rPropTrainerSettingsElem.Attribute("positiveEta").Value, CultureInfo.InvariantCulture);
-            NegativeEta = double.Parse(rPropTrainerSettingsElem.Attribute("negativeEta").Value, CultureInfo.InvariantCulture);
-            IniDelta = double.Parse(rPropTrainerSettingsElem.Attribute("iniDelta").Value, CultureInfo.InvariantCulture);
-            MinDelta = double.Parse(rPropTrainerSettingsElem.Attribute("minDelta").Value, CultureInfo.InvariantCulture);
-            MaxDelta = double.Parse(rPropTrainerSettingsElem.Attribute("maxDelta").Value, CultureInfo.InvariantCulture);
+            NumOfAttempts = int.Parse(settingsElem.Attribute("attempts").Value, CultureInfo.InvariantCulture);
+            NumOfAttemptEpochs = int.Parse(settingsElem.Attribute("attemptEpochs").Value, CultureInfo.InvariantCulture);
+            ZeroTolerance = double.Parse(settingsElem.Attribute("zeroTolerance").Value, CultureInfo.InvariantCulture);
+            PositiveEta = double.Parse(settingsElem.Attribute("positiveEta").Value, CultureInfo.InvariantCulture);
+            NegativeEta = double.Parse(settingsElem.Attribute("negativeEta").Value, CultureInfo.InvariantCulture);
+            IniDelta = double.Parse(settingsElem.Attribute("iniDelta").Value, CultureInfo.InvariantCulture);
+            MinDelta = double.Parse(settingsElem.Attribute("minDelta").Value, CultureInfo.InvariantCulture);
+            MaxDelta = double.Parse(settingsElem.Attribute("maxDelta").Value, CultureInfo.InvariantCulture);
             return;
         }
 
@@ -141,7 +159,9 @@ namespace RCNet.Neural.Network.FF
         {
             if (obj == null) return false;
             RPropTrainerSettings cmpSettings = obj as RPropTrainerSettings;
-            if (ZeroTolerance != cmpSettings.ZeroTolerance ||
+            if (NumOfAttempts != cmpSettings.NumOfAttempts ||
+                NumOfAttemptEpochs != cmpSettings.NumOfAttemptEpochs ||
+                ZeroTolerance != cmpSettings.ZeroTolerance ||
                 PositiveEta != cmpSettings.PositiveEta ||
                 NegativeEta != cmpSettings.NegativeEta ||
                 IniDelta != cmpSettings.IniDelta ||
@@ -165,10 +185,9 @@ namespace RCNet.Neural.Network.FF
         /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>
-        public RPropTrainerSettings DeepClone()
+        public INonRecurrentNetworkTrainerSettings DeepClone()
         {
-            RPropTrainerSettings clone = new RPropTrainerSettings(this);
-            return clone;
+            return new RPropTrainerSettings(this);
         }
 
     }//RPropTrainerSettings

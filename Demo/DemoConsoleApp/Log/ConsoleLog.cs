@@ -10,7 +10,7 @@ namespace RCNet.DemoConsoleApp.Log
     public class ConsoleLog : IOutputLog
     {
         //Constants
-        public const int ConsoleBufferMinWidth = 320;
+        public const int ConsoleBufferMinWidth = 500;
         public const int ConsoleBufferMinHeight = 1000;
 
         //Attributes

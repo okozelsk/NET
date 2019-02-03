@@ -7,28 +7,33 @@ using System.Xml.Linq;
 using System.Globalization;
 using System.Reflection;
 using RCNet.XmlTools;
+using RCNet.MathTools.PS;
 
 namespace RCNet.Neural.Network.FF
 {
     /// <summary>
-    /// Startup parameters for the linear regression trainer
+    /// Startup parameters for the QRD regression trainer
     /// </summary>
     [Serializable]
-    public class LinRegrTrainerSettings : INonRecurrentNetworkTrainerSettings
+    public class QRDRegrTrainerSettings : INonRecurrentNetworkTrainerSettings
     {
         //Constants
         /// <summary>
-        /// Default maximum stretch value of TanH function
-        /// </summary>
-        public const double DefaultMaxStretch = 8;
-        /// <summary>
-        /// Default value of the highest noise intensity
-        /// </summary>
-        public const double DefaultHiNoiseIntensity = 0.05;
-        /// <summary>
         /// Default margin of noise values from zero
         /// </summary>
-        public const double DefaultZeroMargin = 0.75;
+        public const double DefaultNoiseZeroMargin = 0.75;
+        /// <summary>
+        /// Seeker's default min noise intensity
+        /// </summary>
+        public const double DefaultMinNoise = 0;
+        /// <summary>
+        /// Seeker's default max noise intensity
+        /// </summary>
+        public const double DefaultMaxNoise = 0.05;
+        /// <summary>
+        /// Seeker's default number of steps within the interval
+        /// </summary>
+        public const int DefaultSteps = 10;
 
         //Attribute properties
         /// <summary>
@@ -40,17 +45,13 @@ namespace RCNet.Neural.Network.FF
         /// </summary>
         public int NumOfAttemptEpochs { get; set; }
         /// <summary>
-        /// Value of the highest noise intensity
-        /// </summary>
-        public double HiNoiseIntensity { get; set; }
-        /// <summary>
-        /// Maximum stretch value of TanH function
-        /// </summary>
-        public double MaxStretch { get; set; }
-        /// <summary>
         /// Margin of noise values from zero
         /// </summary>
-        public double ZeroMargin { get; set; }
+        public double NoiseZeroMargin { get; set; }
+        /// <summary>
+        /// Configuration of seeker of MaxNoise hyperparameter value
+        /// </summary>
+        public ParamSeekerSettings MaxNoiseSeekerCfg { get; set; }
 
         //Constructors
         /// <summary>
@@ -58,21 +59,25 @@ namespace RCNet.Neural.Network.FF
         /// </summary>
         /// <param name="numOfAttempts">Number of attempts</param>
         /// <param name="numOfAttemptEpochs">Number of attempt epochs</param>
-        /// <param name="hiNoiseIntensity">The highest white noise intensity. Between 0 and 1</param>
-        /// <param name="maxStretch">Maximum stretch value of TanH function. GT 1</param>
-        /// <param name="zeroMargin">Margin of noise values from zero. Between 0 and 1.</param>
-        public LinRegrTrainerSettings(int numOfAttempts,
+        /// <param name="noiseZeroMargin">Margin of noise values from zero</param>
+        /// <param name="maxNoiseSeekerCfg">Configuration of seeker of MaxNoise hyperparameter value</param>
+        public QRDRegrTrainerSettings(int numOfAttempts,
                                       int numOfAttemptEpochs,
-                                      double hiNoiseIntensity = DefaultHiNoiseIntensity,
-                                      double maxStretch = DefaultMaxStretch,
-                                      double zeroMargin = DefaultZeroMargin
+                                      double noiseZeroMargin = DefaultNoiseZeroMargin,
+                                      ParamSeekerSettings maxNoiseSeekerCfg = null
                                       )
         {
             NumOfAttempts = numOfAttempts;
             NumOfAttemptEpochs = numOfAttemptEpochs;
-            HiNoiseIntensity = hiNoiseIntensity;
-            MaxStretch = maxStretch;
-            ZeroMargin = zeroMargin;
+            NoiseZeroMargin = noiseZeroMargin;
+            if (maxNoiseSeekerCfg == null)
+            {
+                MaxNoiseSeekerCfg = new ParamSeekerSettings(DefaultMinNoise, DefaultMaxNoise, DefaultSteps);
+            }
+            else
+            {
+                MaxNoiseSeekerCfg = maxNoiseSeekerCfg.DeepClone();
+            }
             return;
         }
 
@@ -80,13 +85,12 @@ namespace RCNet.Neural.Network.FF
         /// Deep copy constructor
         /// </summary>
         /// <param name="source">Source instance</param>
-        public LinRegrTrainerSettings(LinRegrTrainerSettings source)
+        public QRDRegrTrainerSettings(QRDRegrTrainerSettings source)
         {
             NumOfAttempts = source.NumOfAttempts;
             NumOfAttemptEpochs = source.NumOfAttemptEpochs;
-            HiNoiseIntensity = source.HiNoiseIntensity;
-            MaxStretch = source.MaxStretch;
-            ZeroMargin = source.ZeroMargin;
+            NoiseZeroMargin = source.NoiseZeroMargin;
+            MaxNoiseSeekerCfg = source.MaxNoiseSeekerCfg.DeepClone();
             return;
         }
 
@@ -94,21 +98,20 @@ namespace RCNet.Neural.Network.FF
         /// Creates the instance and initializes it from given xml element.
         /// Content of xml element is always validated against the xml schema.
         /// </summary>
-        /// <param name="elem">Xml data containing linear regression trainer settings</param>
-        public LinRegrTrainerSettings(XElement elem)
+        /// <param name="elem">Xml data containing trainer settings</param>
+        public QRDRegrTrainerSettings(XElement elem)
         {
             //Validation
             ElemValidator validator = new ElemValidator();
             Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.FF.LinRegrTrainerSettings.xsd");
+            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.FF.QRDRegrTrainerSettings.xsd");
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
             XElement settingsElem = validator.Validate(elem, "rootElem");
             //Parsing
             NumOfAttempts = int.Parse(settingsElem.Attribute("attempts").Value, CultureInfo.InvariantCulture);
             NumOfAttemptEpochs = int.Parse(settingsElem.Attribute("attemptEpochs").Value, CultureInfo.InvariantCulture);
-            HiNoiseIntensity = double.Parse(settingsElem.Attribute("hiNoiseIntensity").Value, CultureInfo.InvariantCulture);
-            MaxStretch = double.Parse(settingsElem.Attribute("maxStretch").Value, CultureInfo.InvariantCulture);
-            ZeroMargin = double.Parse(settingsElem.Attribute("zeroMargin").Value, CultureInfo.InvariantCulture);
+            NoiseZeroMargin = double.Parse(settingsElem.Attribute("noiseZeroMargin").Value, CultureInfo.InvariantCulture);
+            MaxNoiseSeekerCfg = new ParamSeekerSettings(settingsElem.Descendants("maxNoise").First());
             return;
         }
 
@@ -119,12 +122,11 @@ namespace RCNet.Neural.Network.FF
         public override bool Equals(object obj)
         {
             if (obj == null) return false;
-            LinRegrTrainerSettings cmpSettings = obj as LinRegrTrainerSettings;
+            QRDRegrTrainerSettings cmpSettings = obj as QRDRegrTrainerSettings;
             if (NumOfAttempts != cmpSettings.NumOfAttempts ||
                 NumOfAttemptEpochs != cmpSettings.NumOfAttemptEpochs ||
-                HiNoiseIntensity != cmpSettings.HiNoiseIntensity ||
-                MaxStretch != cmpSettings.MaxStretch ||
-                ZeroMargin != cmpSettings.ZeroMargin
+                NoiseZeroMargin != cmpSettings.NoiseZeroMargin ||
+                !Equals(MaxNoiseSeekerCfg, cmpSettings.MaxNoiseSeekerCfg)
                 )
             {
                 return false;
@@ -145,9 +147,9 @@ namespace RCNet.Neural.Network.FF
         /// </summary>
         public INonRecurrentNetworkTrainerSettings DeepClone()
         {
-            return new LinRegrTrainerSettings(this);
+            return new QRDRegrTrainerSettings(this);
         }
 
-    }//LinRegrTrainerSettings
+    }//QRDRegrTrainerSettings
 
 }//Namespace

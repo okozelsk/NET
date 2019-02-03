@@ -192,14 +192,6 @@ namespace RCNet.Neural.Network.SM.Readout
             /// Unit's output values range.
             /// </summary>
             public Interval OutputRange { get; }
-            /// <summary>
-            /// Number of regression attempts.
-            /// </summary>
-            public int RegressionAttempts { get; set; }
-            /// <summary>
-            /// Number of iterations (epochs) during regression attempt.
-            /// </summary>
-            public int RegressionAttemptEpochs { get; set; }
 
             //Constructors
             /// <summary>
@@ -212,8 +204,6 @@ namespace RCNet.Neural.Network.SM.Readout
                 NetType = ReadoutUnitNetworkType.FF;
                 NetSettings = null;
                 OutputRange = null;
-                RegressionAttempts = 0;
-                RegressionAttemptEpochs = 0;
                 return;
             }
 
@@ -240,8 +230,6 @@ namespace RCNet.Neural.Network.SM.Readout
                     }
                     OutputRange = source.OutputRange.DeepClone();
                 }
-                RegressionAttempts = source.RegressionAttempts;
-                RegressionAttemptEpochs = source.RegressionAttemptEpochs;
                 return;
             }
 
@@ -255,8 +243,6 @@ namespace RCNet.Neural.Network.SM.Readout
             {
                 Name = readoutUnitElem.Attribute("name").Value;
                 TaskType = CommonEnums.ParseTaskType(readoutUnitElem.Attribute("task").Value);
-                RegressionAttempts = int.Parse(readoutUnitElem.Attribute("attempts").Value);
-                RegressionAttemptEpochs = int.Parse(readoutUnitElem.Attribute("attemptEpochs").Value);
                 //Net settings
                 List<XElement> netSettingsElems = new List<XElement>();
                 netSettingsElems.AddRange(readoutUnitElem.Descendants("ff"));
@@ -299,9 +285,7 @@ namespace RCNet.Neural.Network.SM.Readout
                     TaskType != cmpSettings.TaskType ||
                     NetType != cmpSettings.NetType ||
                     !Equals(NetSettings, cmpSettings.NetSettings) ||
-                    !Equals(OutputRange, cmpSettings.OutputRange) ||
-                    RegressionAttempts != cmpSettings.RegressionAttempts ||
-                    RegressionAttemptEpochs != cmpSettings.RegressionAttemptEpochs
+                    !Equals(OutputRange, cmpSettings.OutputRange)
                     )
                 {
                     return false;

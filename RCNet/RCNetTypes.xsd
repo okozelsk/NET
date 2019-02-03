@@ -80,6 +80,27 @@
     </xs:restriction>
   </xs:simpleType>
 
+  <!-- Unsigned integer greater than 1-->
+  <xs:simpleType name="UIntGT1Type">
+    <xs:restriction base="xs:unsignedInt">
+      <xs:minInclusive value="2" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Unsigned integer greater than 2-->
+  <xs:simpleType name="UIntGT2Type">
+    <xs:restriction base="xs:unsignedInt">
+      <xs:minInclusive value="3" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Unsigned integer greater than 3-->
+  <xs:simpleType name="UIntGT3Type">
+    <xs:restriction base="xs:unsignedInt">
+      <xs:minInclusive value="4" />
+    </xs:restriction>
+  </xs:simpleType>
+
   <!-- UIntGT0Type with Auto option-->
   <xs:simpleType name="UIntGT0AutoOptionType">
     <xs:union memberTypes="UIntGT0Type AutoOptionType"/>
@@ -161,6 +182,13 @@
         <xs:documentation xml:lang="en">Default value is Uniform</xs:documentation>
       </xs:annotation>
     </xs:attribute>
+  </xs:complexType>
+
+  <!-- Parameter value seeker - configuration -->
+  <xs:complexType name="ParamSeekerCfgType">
+    <xs:attribute type="xs:double" name="min" use="required"/>
+    <xs:attribute type="xs:double" name="max" use="required"/>
+    <xs:attribute type="UIntGT1Type" name="steps" use="required"/>
   </xs:complexType>
 
   <!-- ________________________________________SIGNAL GENERATORS TYPES_____________________________________________ -->
@@ -588,14 +616,6 @@
 
 
   <!-- ________________________________________FF NETWORK TYPES_________________________________________________ -->
-  <!-- FF network - regression (training) methods - enumeration -->
-  <xs:simpleType name="FFNetRegressionMethodType">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="Linear"/>
-      <xs:enumeration value="Resilient"/>
-    </xs:restriction>
-  </xs:simpleType>
-
   <!-- FF network - hidden layer - configuration -->
   <xs:complexType name="FFNetHiddenLayerCfgType">
     <xs:choice minOccurs="1" maxOccurs="1">
@@ -624,6 +644,8 @@
 
   <!-- FF network - linear regression trainer - configuration -->
   <xs:complexType name="FFNetLinRegrTrainerCfgType">
+    <xs:attribute type="UIntGT0Type" name="attempts" use="required"/>
+    <xs:attribute type="UIntGT0Type" name="attemptEpochs" use="required"/>
     <xs:attribute type="UDoubleLT1Type" name="hiNoiseIntensity" use="optional" default="0.05">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is 0.05</xs:documentation>
@@ -635,6 +657,24 @@
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UDoubleLT1Type" name="zeroMargin" use="optional" default="0.75">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.75</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <!-- FF network - QRD regression trainer - configuration -->
+  <xs:complexType name="FFNetQRDRegrTrainerCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="ParamSeekerCfgType" name="maxNoise" minOccurs="1" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The usual values are: min=0, max=0.1, steps=10</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute type="UIntGT0Type" name="attempts" use="required"/>
+    <xs:attribute type="UIntGT0Type" name="attemptEpochs" use="required"/>
+    <xs:attribute type="UDoubleLT1Type" name="noiseZeroMargin" use="optional" default="0.75">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is 0.75</xs:documentation>
       </xs:annotation>
@@ -643,25 +683,20 @@
 
   <!-- FF network - ridge regression trainer - configuration -->
   <xs:complexType name="FFNetRidgeRegrTrainerCfgType">
-    <xs:attribute type="UDoubleLT1Type" name="hiNoiseIntensity" use="optional" default="0.05">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.05</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="UDoubleGT1Type" name="maxStretch" use="optional" default="8">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 8</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="UDoubleLT1Type" name="zeroMargin" use="optional" default="0.75">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.75</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="ParamSeekerCfgType" name="lambda" minOccurs="1" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The usual values are: min=0, max=2, steps=10</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute type="UIntGT0Type" name="attemptEpochs" use="required"/>
   </xs:complexType>
 
   <!-- FF network - resilient propagation trainer - configuration -->
   <xs:complexType name="FFNetRPropTrainerCfgType">
+    <xs:attribute type="UIntGT0Type" name="attempts" use="required"/>
+    <xs:attribute type="UIntGT0Type" name="attemptEpochs" use="required"/>
     <xs:attribute type="UDoubleLT1Type" name="zeroTolerance" use="optional" default="1E-17">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is 1E-17</xs:documentation>
@@ -714,19 +749,22 @@
         </xs:choice>
         <xs:element type="FFNetHiddenLayersCfgType" name="hiddenLayers" minOccurs="0" maxOccurs="1"/>
       </xs:sequence>
-      <xs:choice minOccurs="0" maxOccurs="1">
+      <xs:choice minOccurs="1" maxOccurs="1">
         <xs:element type="FFNetLinRegrTrainerCfgType" name="linRegrTrainer" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="FFNetQRDRegrTrainerCfgType" name="qrdRegrTrainer" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="FFNetRidgeRegrTrainerCfgType" name="ridgeRegrTrainer" minOccurs="1" maxOccurs="1"/>
         <xs:element type="FFNetRPropTrainerCfgType" name="resPropTrainer" minOccurs="1" maxOccurs="1"/>
       </xs:choice>
     </xs:sequence>
-    <xs:attribute type="FFNetRegressionMethodType" name="regressionMethod" use="required"/>
   </xs:complexType>
 
   <!-- ________________________________________PP NETWORK TYPES_________________________________________________ -->
   <!-- Parallel Perceptron network configuration -->
 
-  <!-- FF network - p-delta rule trainer - configuration -->
+  <!-- Parallel Perceptron - p-delta rule trainer - configuration -->
   <xs:complexType name="PPNetPDeltaRuleTrainerCfgType">
+    <xs:attribute type="UIntGT0Type" name="attempts" use="required"/>
+    <xs:attribute type="UIntGT0Type" name="attemptEpochs" use="required"/>
     <xs:attribute type="UDoubleLT1Type" name="iniLR" use="optional" default="0.01">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is 0.01</xs:documentation>
@@ -773,8 +811,6 @@
     </xs:choice>
     <xs:attribute type="xs:string" name="name" use="required"/>
     <xs:attribute type="NeuralTaskType" name="task" use="required"/>
-    <xs:attribute type="UIntGT0Type" name="attempts" use="required"/>
-    <xs:attribute type="UIntGT0Type" name="attemptEpochs" use="required"/>
   </xs:complexType>
 
   <!-- Readout layer configuration -->

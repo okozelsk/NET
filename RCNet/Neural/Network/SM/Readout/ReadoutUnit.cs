@@ -39,6 +39,10 @@ namespace RCNet.Neural.Network.SM.Readout
         /// </summary>
         public INonRecurrentNetwork Network { get; set; }
         /// <summary>
+        /// Informative message from trainer
+        /// </summary>
+        public string TrainerInfoMessage { get; set; }
+        /// <summary>
         /// Training error statistics
         /// </summary>
         public BasicStat TrainingErrorStat { get; set; }
@@ -95,6 +99,7 @@ namespace RCNet.Neural.Network.SM.Readout
             {
                 Network = source.Network.DeepClone();
             }
+            TrainerInfoMessage = source.TrainerInfoMessage;
             TrainingErrorStat = null;
             if (source.TrainingErrorStat != null)
             {
@@ -184,16 +189,25 @@ namespace RCNet.Neural.Network.SM.Readout
                 FeedForwardNetworkSettings netCfg = (FeedForwardNetworkSettings)settings.NetSettings;
                 FeedForwardNetwork ffn = new FeedForwardNetwork(trainingPredictorsCollection[0].Length, 1, netCfg);
                 net = ffn;
-                switch (netCfg.RegressionMethod)
+                if(netCfg.TrainerCfg.GetType() == typeof(LinRegrTrainerSettings))
                 {
-                    case FeedForwardNetworkSettings.TrainingMethodType.Linear:
-                        trainer = new LinRegrTrainer(ffn, trainingPredictorsCollection, trainingIdealOutputsCollection, settings.RegressionAttemptEpochs, rand, netCfg.LinRegrTrainerCfg);
-                        break;
-                    case FeedForwardNetworkSettings.TrainingMethodType.Resilient:
-                        trainer = new RPropTrainer(ffn, trainingPredictorsCollection, trainingIdealOutputsCollection, netCfg.RPropTrainerCfg);
-                        break;
-                    default:
-                        throw new ArgumentException($"Not supported regression method {netCfg.RegressionMethod}");
+                    trainer = new LinRegrTrainer(ffn, trainingPredictorsCollection, trainingIdealOutputsCollection, (LinRegrTrainerSettings)netCfg.TrainerCfg, rand);
+                }
+                else if(netCfg.TrainerCfg.GetType() == typeof(QRDRegrTrainerSettings))
+                {
+                    trainer = new QRDRegrTrainer(ffn, trainingPredictorsCollection, trainingIdealOutputsCollection, (QRDRegrTrainerSettings)netCfg.TrainerCfg, rand);
+                }
+                else if (netCfg.TrainerCfg.GetType() == typeof(RidgeRegrTrainerSettings))
+                {
+                    trainer = new RidgeRegrTrainer(ffn, trainingPredictorsCollection, trainingIdealOutputsCollection, (RidgeRegrTrainerSettings)netCfg.TrainerCfg, rand);
+                }
+                else if (netCfg.TrainerCfg.GetType() == typeof(RPropTrainerSettings))
+                {
+                    trainer = new RPropTrainer(ffn, trainingPredictorsCollection, trainingIdealOutputsCollection, (RPropTrainerSettings)netCfg.TrainerCfg, rand);
+                }
+                else
+                {
+                    throw new ArgumentException($"Unknown trainer {netCfg.TrainerCfg}");
                 }
             }
             else
@@ -201,7 +215,7 @@ namespace RCNet.Neural.Network.SM.Readout
                 ParallelPerceptronSettings netCfg = (ParallelPerceptronSettings)settings.NetSettings;
                 ParallelPerceptron ppn = new ParallelPerceptron(trainingPredictorsCollection[0].Length, netCfg);
                 net = ppn;
-                trainer = new PDeltaRuleTrainer(ppn, trainingPredictorsCollection, trainingIdealOutputsCollection, netCfg.PDeltaRuleTrainerCfg);
+                trainer = new PDeltaRuleTrainer(ppn, trainingPredictorsCollection, trainingIdealOutputsCollection, netCfg.PDeltaRuleTrainerCfg, rand);
             }
             net.RandomizeWeights(rand);
             return;
@@ -242,107 +256,103 @@ namespace RCNet.Neural.Network.SM.Readout
             ReadoutUnit bestReadoutUnit = null;
             //Regression attempts
             bool stopRegression = false;
-            for (int regrAttemptNumber = 1; regrAttemptNumber <= readoutUnitSettings.RegressionAttempts; regrAttemptNumber++)
+            //Create network and trainer
+            CreateNetAndTreainer(readoutUnitSettings,
+                                 trainingPredictorsCollection,
+                                 trainingIdealOutputsCollection,
+                                 rand,
+                                 out INonRecurrentNetwork net,
+                                 out INonRecurrentNetworkTrainer trainer
+                                 );
+            //Iterate training cycles
+            while (trainer.Iteration())
             {
-                //Create network and trainer
-                CreateNetAndTreainer(readoutUnitSettings,
-                                     trainingPredictorsCollection,
-                                     trainingIdealOutputsCollection,
-                                     rand,
-                                     out INonRecurrentNetwork net,
-                                     out INonRecurrentNetworkTrainer trainer
-                                     );
-                //Reference binary distribution
-                //Iterate training cycles
-                for (int epoch = 1; epoch <= readoutUnitSettings.RegressionAttemptEpochs; epoch++)
+                List<double[]> testingComputedOutputsCollection = null;
+                //Compute current error statistics after training iteration
+                ReadoutUnit currReadoutUnit = new ReadoutUnit();
+                currReadoutUnit.Network = net;
+                currReadoutUnit.TrainerInfoMessage = trainer.InfoMessage;
+                currReadoutUnit.TrainingErrorStat = net.ComputeBatchErrorStat(trainingPredictorsCollection, trainingIdealOutputsCollection, out List<double[]> trainingComputedOutputsCollection);
+                if (taskType == CommonEnums.TaskType.Classification)
                 {
-                    trainer.Iteration();
-                    List<double[]> testingComputedOutputsCollection = null;
-                    //Compute current error statistics after training iteration
-                    ReadoutUnit currReadoutUnit = new ReadoutUnit();
-                    currReadoutUnit.Network = net;
-                    currReadoutUnit.TrainingErrorStat = net.ComputeBatchErrorStat(trainingPredictorsCollection, trainingIdealOutputsCollection, out List<double[]> trainingComputedOutputsCollection);
+                    currReadoutUnit.TrainingBinErrorStat = new BinErrStat(refBinDistr, trainingComputedOutputsCollection, trainingIdealOutputsCollection);
+                    currReadoutUnit.CombinedBinaryError = currReadoutUnit.TrainingBinErrorStat.TotalErrStat.Sum;
+                }
+                currReadoutUnit.CombinedPrecisionError = currReadoutUnit.TrainingErrorStat.ArithAvg;
+                if (testingPredictorsCollection != null && testingPredictorsCollection.Count > 0)
+                {
+                    currReadoutUnit.TestingErrorStat = net.ComputeBatchErrorStat(testingPredictorsCollection, testingIdealOutputsCollection, out testingComputedOutputsCollection);
+                    currReadoutUnit.CombinedPrecisionError = Math.Max(currReadoutUnit.CombinedPrecisionError, currReadoutUnit.TestingErrorStat.ArithAvg);
                     if (taskType == CommonEnums.TaskType.Classification)
                     {
-                        currReadoutUnit.TrainingBinErrorStat = new BinErrStat(refBinDistr, trainingComputedOutputsCollection, trainingIdealOutputsCollection);
-                        currReadoutUnit.CombinedBinaryError = currReadoutUnit.TrainingBinErrorStat.TotalErrStat.Sum;
-                        //currReadoutUnit.CombinedBinaryError = currReadoutUnit.TrainingBinErrorStat.ProportionalErr;
+                        currReadoutUnit.TestingBinErrorStat = new BinErrStat(refBinDistr, testingComputedOutputsCollection, testingIdealOutputsCollection);
+                        currReadoutUnit.CombinedBinaryError = Math.Max(currReadoutUnit.CombinedBinaryError, currReadoutUnit.TestingBinErrorStat.TotalErrStat.Sum);
                     }
-                    currReadoutUnit.CombinedPrecisionError = currReadoutUnit.TrainingErrorStat.ArithAvg;
-                    if (testingPredictorsCollection != null && testingPredictorsCollection.Count > 0)
+                }
+                //Current results processing
+                bool better = false, stopAttempt = false;
+                //Result first initialization
+                if (bestReadoutUnit == null)
+                {
+                    //Adopt current regression results
+                    bestReadoutUnit = currReadoutUnit.DeepClone();
+                }
+                //Perform call back if it is defined
+                if (controller != null)
+                {
+                    //Evaluation of the improvement is driven externally
+                    RegressionControlInArgs cbIn = new RegressionControlInArgs
                     {
-                        currReadoutUnit.TestingErrorStat = net.ComputeBatchErrorStat(testingPredictorsCollection, testingIdealOutputsCollection, out testingComputedOutputsCollection);
-                        currReadoutUnit.CombinedPrecisionError = Math.Max(currReadoutUnit.CombinedPrecisionError, currReadoutUnit.TestingErrorStat.ArithAvg);
-                        if (taskType == CommonEnums.TaskType.Classification)
-                        {
-                            currReadoutUnit.TestingBinErrorStat = new BinErrStat(refBinDistr, testingComputedOutputsCollection, testingIdealOutputsCollection);
-                            currReadoutUnit.CombinedBinaryError = Math.Max(currReadoutUnit.CombinedBinaryError, currReadoutUnit.TestingBinErrorStat.TotalErrStat.Sum);
-                            //currReadoutUnit.CombinedBinaryError = Math.Max(currReadoutUnit.CombinedBinaryError, currReadoutUnit.TestingBinErrorStat.ProportionalErr);
-                        }
-                    }
-                    //Current results processing
-                    bool better = false, stopTrainingCycle = false;
-                    //Result first initialization
-                    if (bestReadoutUnit == null)
-                    {
-                        //Adopt current regression results
-                        bestReadoutUnit = currReadoutUnit.DeepClone();
-                    }
-                    //Perform call back if it is defined
-                    if (controller != null)
-                    {
-                        //Evaluation of the improvement is driven externally
-                        RegressionControlInArgs cbIn = new RegressionControlInArgs
-                        {
-                            TaskType = taskType,
-                            ReadoutUnitIdx = readoutUnitIdx,
-                            OutputFieldName = readoutUnitSettings.Name,
-                            FoldNum = foldNum,
-                            NumOfFolds = numOfFolds,
-                            RegrAttemptNumber = regrAttemptNumber,
-                            RegrMaxAttempts = readoutUnitSettings.RegressionAttempts,
-                            Epoch = epoch,
-                            MaxEpochs = readoutUnitSettings.RegressionAttemptEpochs,
-                            TrainingPredictorsCollection = trainingPredictorsCollection,
-                            TrainingIdealOutputsCollection = trainingIdealOutputsCollection,
-                            TrainingComputedOutputsCollection = trainingComputedOutputsCollection,
-                            TestingPredictorsCollection = testingPredictorsCollection,
-                            TestingIdealOutputsCollection = testingIdealOutputsCollection,
-                            TestingComputedOutputsCollection = testingComputedOutputsCollection,
-                            CurrReadoutUnit = currReadoutUnit,
-                            BestReadoutUnit = bestReadoutUnit,
-                            UserObject = controllerUserObject
-                        };
-                        //Call external controller
-                        RegressionControlOutArgs cbOut = controller(cbIn);
-                        //Pick up results
-                        better = cbOut.CurrentIsBetter;
-                        stopTrainingCycle = cbOut.StopCurrentAttempt;
-                        stopRegression = cbOut.StopRegression;
-                    }
-                    else
-                    {
-                        //Default implementation
-                        better = IsBetter(taskType, currReadoutUnit, bestReadoutUnit);
-                    }
-                    //Best?
-                    if (better)
-                    {
-                        //Adopt current regression results
-                        bestReadoutUnit = currReadoutUnit.DeepClone();
-                    }
-                    //Training stop conditions
-                    if (stopTrainingCycle || stopRegression)
-                    {
-                        break;
-                    }
-                }//epoch
-                //Regression stop conditions
+                        TaskType = taskType,
+                        ReadoutUnitIdx = readoutUnitIdx,
+                        OutputFieldName = readoutUnitSettings.Name,
+                        FoldNum = foldNum,
+                        NumOfFolds = numOfFolds,
+                        RegrAttemptNumber = trainer.Attempt,
+                        RegrMaxAttempts = trainer.MaxAttempt,
+                        Epoch = trainer.AttemptEpoch,
+                        MaxEpochs = trainer.MaxAttemptEpoch,
+                        TrainingPredictorsCollection = trainingPredictorsCollection,
+                        TrainingIdealOutputsCollection = trainingIdealOutputsCollection,
+                        TrainingComputedOutputsCollection = trainingComputedOutputsCollection,
+                        TestingPredictorsCollection = testingPredictorsCollection,
+                        TestingIdealOutputsCollection = testingIdealOutputsCollection,
+                        TestingComputedOutputsCollection = testingComputedOutputsCollection,
+                        CurrReadoutUnit = currReadoutUnit,
+                        BestReadoutUnit = bestReadoutUnit,
+                        UserObject = controllerUserObject
+                    };
+                    //Call external controller
+                    RegressionControlOutArgs cbOut = controller(cbIn);
+                    //Pick up results
+                    better = cbOut.CurrentIsBetter;
+                    stopAttempt = cbOut.StopCurrentAttempt;
+                    stopRegression = cbOut.StopRegression;
+                }
+                else
+                {
+                    //Default implementation
+                    better = IsBetter(taskType, currReadoutUnit, bestReadoutUnit);
+                }
+                //Best?
+                if (better)
+                {
+                    //Adopt current regression results
+                    bestReadoutUnit = currReadoutUnit.DeepClone();
+                }
+                //Process instructions
                 if (stopRegression)
                 {
                     break;
                 }
-            }//regrAttemptNumber
+                else if(stopAttempt)
+                {
+                    if(!trainer.NextAttempt())
+                    {
+                        break;
+                    }
+                }
+            }//while (iteration)
             //Create statistics of the best network weights
             bestReadoutUnit.OutputWeightsStat = bestReadoutUnit.Network.ComputeWeightsStat();
             return bestReadoutUnit;

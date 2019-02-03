@@ -44,7 +44,7 @@ namespace RCNet.Neural.Network.PP
             NumOfGates = 0;
             Resolution = 0;
             OutputRange = new Interval(-1, 1);
-            PDeltaRuleTrainerCfg = new PDeltaRuleTrainerSettings();
+            PDeltaRuleTrainerCfg = null;
             return;
         }
 
@@ -60,17 +60,17 @@ namespace RCNet.Neural.Network.PP
             PDeltaRuleTrainerCfg = null;
             if (source.PDeltaRuleTrainerCfg != null)
             {
-                PDeltaRuleTrainerCfg = source.PDeltaRuleTrainerCfg.DeepClone();
+                PDeltaRuleTrainerCfg = (PDeltaRuleTrainerSettings)source.PDeltaRuleTrainerCfg.DeepClone();
             }
             return;
         }
 
         /// <summary>
         /// Creates the instance and initialize it from given xml element.
-        /// This is the preferred way to instantiate reservoir settings.
+        /// This is the preferred way to instantiate settings.
         /// </summary>
         /// <param name="elem">
-        /// Xml data containing parallel perceptron settings.
+        /// Xml data containing settings.
         /// Content of xml element is always validated against the xml schema.
         /// </param>
         public ParallelPerceptronSettings(XElement elem)
@@ -80,20 +80,13 @@ namespace RCNet.Neural.Network.PP
             Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.PP.ParallelPerceptronSettings.xsd");
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
-            XElement parallelPerceptronSettingsElem = validator.Validate(elem, "rootElem");
+            XElement settingsElem = validator.Validate(elem, "rootElem");
             //Parsing
-            NumOfGates = int.Parse(parallelPerceptronSettingsElem.Attribute("gates").Value, CultureInfo.InvariantCulture);
-            Resolution = int.Parse(parallelPerceptronSettingsElem.Attribute("resolution").Value, CultureInfo.InvariantCulture);
+            NumOfGates = int.Parse(settingsElem.Attribute("gates").Value, CultureInfo.InvariantCulture);
+            Resolution = int.Parse(settingsElem.Attribute("resolution").Value, CultureInfo.InvariantCulture);
             OutputRange = new Interval(-1, 1);
-            XElement pDeltaRuleTrainerElem = parallelPerceptronSettingsElem.Descendants("pDeltaRuleTrainer").FirstOrDefault();
-            if(pDeltaRuleTrainerElem != null)
-            {
-                PDeltaRuleTrainerCfg = new PDeltaRuleTrainerSettings(pDeltaRuleTrainerElem);
-            }
-            else
-            {
-                PDeltaRuleTrainerCfg = new PDeltaRuleTrainerSettings();
-            }
+            XElement pDeltaRuleTrainerElem = settingsElem.Descendants("pDeltaRuleTrainer").First();
+            PDeltaRuleTrainerCfg = new PDeltaRuleTrainerSettings(pDeltaRuleTrainerElem);
             return;
         }
 
@@ -131,8 +124,7 @@ namespace RCNet.Neural.Network.PP
         /// </summary>
         public ParallelPerceptronSettings DeepClone()
         {
-            ParallelPerceptronSettings clone = new ParallelPerceptronSettings(this);
-            return clone;
+            return new ParallelPerceptronSettings(this);
         }
 
     }//ParallelPerceptronSettings

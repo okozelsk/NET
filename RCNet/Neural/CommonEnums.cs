@@ -138,5 +138,35 @@ namespace RCNet.Neural
             }
         }
 
+        /// <summary>
+        /// Method to find good lambda parameter of ridge regression
+        /// </summary>
+        public enum RidgeRegressionLambdaMethod
+        {
+            /// <summary>
+            /// Searching for lambda will use halfway interval method
+            /// </summary>
+            HalfwayInterval,
+            /// <summary>
+            /// Searching for lambda will use constant intervals
+            /// </summary>
+            ConstInterval
+        }
+
+        /// <summary>
+        /// Parses method to decide ridge regression lambda from a string code
+        /// </summary>
+        /// <param name="code">Method to decide ridge regression lambda</param>
+        public static RidgeRegressionLambdaMethod ParseRidgeRegressionLambdaMethod(string code)
+        {
+            switch (code.ToUpper())
+            {
+                case "HALFWAYINTERVAL": return RidgeRegressionLambdaMethod.HalfwayInterval;
+                case "CONSTINTERVAL": return RidgeRegressionLambdaMethod.ConstInterval;
+                default:
+                    throw new ArgumentException($"Unsupported method to decide ridge regression lambda: {code}", "code");
+            }
+        }
+
     }//CommonTypes
 }//Namespace

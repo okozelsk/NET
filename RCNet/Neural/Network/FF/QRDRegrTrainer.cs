@@ -1,24 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using RCNet.Extensions;
 using RCNet.Neural.Activation;
 using RCNet.MathTools.MatrixMath;
-using System.Globalization;
+using RCNet.MathTools.PS;
 
 namespace RCNet.Neural.Network.FF
 {
     /// <summary>
-    /// Implements the linear regression trainer.
+    /// Implements the QRD regression trainer.
     /// Principle is to add each iteration less and less piece of white-noise to predictors
-    /// and then perform the standard linear regression.
-    /// This technique allows to find more stable weight solution than just a linear regression
+    /// and then perform the standard QR decomposition (regression).
+    /// This technique allows to find more stable weight solution than just a QR decomposition
     /// of pure predictors.
     /// FF network has to have only output layer with the Identity activation.
     /// </summary>
     [Serializable]
-    public class LinRegrTrainer : INonRecurrentNetworkTrainer
+    public class QRDRegrTrainer : INonRecurrentNetworkTrainer
     {
-        //Attribute Properties
+        //Attribute properties
         /// <summary>
         /// Epoch error (MSE).
         /// </summary>
@@ -45,44 +46,44 @@ namespace RCNet.Neural.Network.FF
         public string InfoMessage { get; private set; }
 
         //Attributes
-        private LinRegrTrainerSettings _settings;
+        private QRDRegrTrainerSettings _settings;
         private FeedForwardNetwork _net;
         private List<double[]> _inputVectorCollection;
         private List<double[]> _outputVectorCollection;
         private List<Matrix> _outputSingleColMatrixCollection;
         private Random _rand;
-        private readonly double[] _alphas;
+        private ParamSeeker _maxNoiseSeeker;
 
         //Constructor
         /// <summary>
-        /// Constructs new instance of linear regression trainer
+        /// Constructs an initialized instance
         /// </summary>
         /// <param name="net">FF network to be trained</param>
         /// <param name="inputVectorCollection">Predictors (input)</param>
         /// <param name="outputVectorCollection">Ideal outputs (the same number of rows as number of inputs)</param>
-        /// <param name="settings">Startup parameters of the trainer</param>
         /// <param name="rand">Random object to be used for adding a white-noise to predictors</param>
-        public LinRegrTrainer(FeedForwardNetwork net,
+        /// <param name="settings">Startup parameters of the trainer</param>
+        public QRDRegrTrainer(FeedForwardNetwork net,
                               List<double[]> inputVectorCollection,
                               List<double[]> outputVectorCollection,
-                              LinRegrTrainerSettings settings,
+                              QRDRegrTrainerSettings settings,
                               Random rand
                               )
         {
             //Check network readyness
             if (!net.Finalized)
             {
-                throw new Exception("Can´t create LinRegr trainer. Network structure was not finalized.");
+                throw new Exception("Can´t create trainer. Network structure was not finalized.");
             }
             //Check network conditions
             if (net.LayerCollection.Count != 1 || !(net.LayerCollection[0].Activation is Identity))
             {
-                throw new Exception("Can´t create LinRegr trainer. Network structure is not complient (single layer having Identity activation).");
+                throw new Exception("Can´t create trainer. Network structure is not complient (single layer having Identity activation).");
             }
             //Check samples conditions
             if(inputVectorCollection.Count < inputVectorCollection[0].Length + 1)
             {
-                throw new Exception("Can´t create LinRegr trainer. Insufficient number of training samples. Minimum is " + (inputVectorCollection[0].Length + 1).ToString() + ".");
+                throw new Exception("Can´t create trainer. Insufficient number of training samples. Minimum is " + (inputVectorCollection[0].Length + 1).ToString() + ".");
             }
             //Parameters
             _settings = settings;
@@ -103,16 +104,6 @@ namespace RCNet.Neural.Network.FF
                 }
                 _outputSingleColMatrixCollection.Add(outputSingleColMatrix);
             }
-            _alphas = new double[MaxAttemptEpoch];
-            //Plan the iterations alphas
-            double coeff = (MaxAttemptEpoch > 1) ? _settings.MaxStretch / (MaxAttemptEpoch - 1) : 0;
-            for (int i = 0; i < MaxAttemptEpoch; i++)
-            {
-                _alphas[i] = _settings.HiNoiseIntensity - _settings.HiNoiseIntensity * Math.Tanh(i* coeff);
-                _alphas[i] = Math.Max(0, _alphas[i]);
-            }
-            //Ensure the last alpha is zero
-            _alphas[MaxAttemptEpoch - 1] = 0;
             //Start training attempt
             Attempt = 0;
             NextAttempt();
@@ -126,7 +117,7 @@ namespace RCNet.Neural.Network.FF
         public INonRecurrentNetwork Net { get { return _net; } }
 
         //Methods
-        private Matrix PreparePredictors(double noiseIntensity)
+        private Matrix PreparePredictors(double maxNoise)
         {
             Matrix predictors = new Matrix(_inputVectorCollection.Count, _net.NumOfInputValues + 1);
             for (int row = 0; row < _inputVectorCollection.Count; row++)
@@ -135,13 +126,14 @@ namespace RCNet.Neural.Network.FF
                 for(int col = 0; col < _net.NumOfInputValues; col++)
                 {
                     double predictor = _inputVectorCollection[row][col];
-                    predictors.Data[row][col] = predictor * (1d + _rand.NextDouble(noiseIntensity * _settings.ZeroMargin, noiseIntensity, true, RandomClassExtensions.DistributionType.Uniform));
+                    predictors.Data[row][col] = predictor * (1d + _rand.NextDouble(maxNoise * _settings.NoiseZeroMargin, maxNoise, true, RandomClassExtensions.DistributionType.Uniform));
                 }
                 //Add constant bias to predictors
                 predictors.Data[row][_net.NumOfInputValues] = 1;
             }
             return predictors;
         }
+
 
         /// <summary>
         /// Starts next training attempt
@@ -153,6 +145,7 @@ namespace RCNet.Neural.Network.FF
                 //Next attempt is allowed
                 ++Attempt;
                 //Reset
+                _maxNoiseSeeker = new ParamSeeker(_settings.MaxNoiseSeekerCfg);
                 MSE = 0;
                 AttemptEpoch = 0;
                 return true;
@@ -181,10 +174,10 @@ namespace RCNet.Neural.Network.FF
             //Next epoch
             ++AttemptEpoch;
             //Noise intensity
-            double intensity = _alphas[Math.Min(MaxAttemptEpoch, AttemptEpoch) - 1];
-            InfoMessage = $"noiseIntensity={intensity.ToString(CultureInfo.InvariantCulture)}";
+            double maxNoise = _maxNoiseSeeker.Next;
+            InfoMessage = $"maxNoise={maxNoise.ToString(CultureInfo.InvariantCulture)}";
             //Adjusted predictors
-            Matrix predictors = PreparePredictors((double)intensity);
+            Matrix predictors = PreparePredictors((double)maxNoise);
             //Decomposition
             QRD decomposition = null;
             bool useableQRD = true;
@@ -226,10 +219,11 @@ namespace RCNet.Neural.Network.FF
                 _net.SetWeights(newWeights);
                 MSE = _net.ComputeBatchErrorStat(_inputVectorCollection, _outputVectorCollection).MeanSquare;
             }
+            _maxNoiseSeeker.ProcessError(MSE);
             return true;
         }
 
-    }//LinRegrTrainer
+    }//QRDRegrTrainer
 
 }//Namespace
 

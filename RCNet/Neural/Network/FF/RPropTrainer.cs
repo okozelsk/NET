@@ -12,49 +12,59 @@ namespace RCNet.Neural.Network.FF
     [Serializable]
     public class RPropTrainer : INonRecurrentNetworkTrainer
     {
-        //Attributes
-        private RPropTrainerSettings _settings;
-        private FeedForwardNetwork _net;
-        private List<double[]> _inputVectorCollection;
-        private readonly List<double[]> _outputVectorCollection;
-        private double[] _weigthsGradsAcc;
-        private double[] _weigthsPrevGradsAcc;
-        private double[] _weigthsPrevDeltas;
-        private double[] _weigthsPrevChanges;
-        private double _prevMSE;
-        private GradientWorkerData[] _gradientWorkerDataCollection;
-
         //Attribute properties
         /// <summary>
         /// Epoch-1 error (MSE).
         /// </summary>
         public double MSE { get; private set; }
-
         /// <summary>
-        /// Current epoch (incemented by call of Iteration)
+        /// Max attempt
         /// </summary>
-        public int Epoch { get; private set; }
+        public int MaxAttempt { get; private set; }
+        /// <summary>
+        /// Current attempt
+        /// </summary>
+        public int Attempt { get; private set; }
+        /// <summary>
+        /// Max epoch
+        /// </summary>
+        public int MaxAttemptEpoch { get; private set; }
+        /// <summary>
+        /// Current epoch (incremented each call of Iteration)
+        /// </summary>
+        public int AttemptEpoch { get; private set; }
+        /// <summary>
+        /// Informative message from the trainer
+        /// </summary>
+        public string InfoMessage { get; private set; }
+
+        //Attributes
+        private RPropTrainerSettings _settings;
+        private FeedForwardNetwork _net;
+        private List<double[]> _inputVectorCollection;
+        private readonly List<double[]> _outputVectorCollection;
+        private readonly Random _rand;
+        private double[] _weigthsGradsAcc;
+        private double[] _weigthsPrevGradsAcc;
+        private double[] _weigthsPrevDeltas;
+        private double[] _weigthsPrevChanges;
+        private double _prevMSE;
+        private readonly GradientWorkerData[] _gradientWorkerDataCollection;
 
         //Constructor
         /// <summary>
         /// Instantiates the RPropTrainer
         /// </summary>
-        /// <param name="net">
-        /// The feed forward network to be trained
-        /// </param>
-        /// <param name="inputVectorCollection">
-        /// Collection of the training input vectors
-        /// </param>
-        /// <param name="outputVectorCollection">
-        /// Collection of the desired outputs
-        /// </param>
-        /// Trainer parameters
-        /// <param name="settings">
-        /// </param>
+        /// <param name="net"> The feed forward network to be trained </param>
+        /// <param name="inputVectorCollection"> Collection of the training input vectors </param>
+        /// <param name="outputVectorCollection"> Collection of the desired outputs </param>
+        /// <param name="settings"> Trainer parameters </param>
+        /// <param name="rand">Random object to be used</param>
         public RPropTrainer(FeedForwardNetwork net,
                             List<double[]> inputVectorCollection,
                             List<double[]> outputVectorCollection,
-                            RPropTrainerSettings settings = null
+                            RPropTrainerSettings settings,
+                            Random rand
                             )
         {
             if (!net.Finalized)
@@ -62,25 +72,16 @@ namespace RCNet.Neural.Network.FF
                 throw new Exception("Can´t create trainer. Network structure was not finalized.");
             }
             _settings = settings;
-            if (_settings == null)
-            {
-                //Default parameters
-                _settings = new RPropTrainerSettings();
-            }
+            MaxAttempt = _settings.NumOfAttempts;
+            MaxAttemptEpoch = _settings.NumOfAttemptEpochs;
             _net = net;
+            _rand = rand;
             _inputVectorCollection = inputVectorCollection;
             _outputVectorCollection = outputVectorCollection;
             _weigthsGradsAcc = new double[_net.NumOfWeights];
-            _weigthsGradsAcc.Populate(0);
             _weigthsPrevGradsAcc = new double[_net.NumOfWeights];
-            _weigthsPrevGradsAcc.Populate(0);
             _weigthsPrevDeltas = new double[_net.NumOfWeights];
-            _weigthsPrevDeltas.Populate(_settings.IniDelta);
             _weigthsPrevChanges = new double[_net.NumOfWeights];
-            _weigthsPrevChanges.Populate(0);
-            _prevMSE = 0;
-            MSE = 0;
-            Epoch = 0;
             //Parallel gradient workers (batch ranges) preparation
             int numOfWorkers = Math.Max(1, Math.Min(Environment.ProcessorCount - 1, _inputVectorCollection.Count));
             _gradientWorkerDataCollection = new GradientWorkerData[numOfWorkers];
@@ -95,6 +96,10 @@ namespace RCNet.Neural.Network.FF
                 );
                 _gradientWorkerDataCollection[workerIdx] = gwd;
             }
+            InfoMessage = string.Empty;
+            //Start training attempt
+            Attempt = 0;
+            NextAttempt();
             return;
         }
 
@@ -105,7 +110,6 @@ namespace RCNet.Neural.Network.FF
         public INonRecurrentNetwork Net { get { return _net; } }
 
         //Methods
-
         /// <summary>
         /// Decreases the zero recognition precision.
         /// </summary>
@@ -172,12 +176,48 @@ namespace RCNet.Neural.Network.FF
         }
 
         /// <summary>
+        /// Starts next training attempt
+        /// </summary>
+        public bool NextAttempt()
+        {
+            if (Attempt < MaxAttempt)
+            {
+                //Next attempt is allowed
+                ++Attempt;
+                //Reset
+                _net.RandomizeWeights(_rand);
+                _weigthsGradsAcc.Populate(0);
+                _weigthsPrevGradsAcc.Populate(0);
+                _weigthsPrevDeltas.Populate(_settings.IniDelta);
+                _weigthsPrevChanges.Populate(0);
+                _prevMSE = 0;
+                MSE = 0;
+                AttemptEpoch = 0;
+                return true;
+            }
+            else
+            {
+                //Max attempt reached -> do nothhing and return false
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Performs training iteration.
         /// </summary>
-        public void Iteration()
+        public bool Iteration()
         {
+            if (AttemptEpoch == MaxAttemptEpoch)
+            {
+                //Max epoch reached, try new attempt
+                if (!NextAttempt())
+                {
+                    //Next attempt is not available
+                    return false;
+                }
+            }
             //Next epoch
-            ++Epoch;
+            ++AttemptEpoch;
             //Store previous iteration error
             _prevMSE = MSE;
             //Store previously accumulated weight gradients
@@ -274,7 +314,7 @@ namespace RCNet.Neural.Network.FF
             });
             //Set adjusted weights back into the network under training
             _net.SetWeights(networkFlatWeights);
-            return;
+            return true;
         }
 
         //Inner classes

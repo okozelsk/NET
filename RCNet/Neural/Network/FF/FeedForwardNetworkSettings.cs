@@ -18,24 +18,11 @@ namespace RCNet.Neural.Network.FF
     [Serializable]
     public class FeedForwardNetworkSettings
     {
-        //Constants
-        /// <summary>
-        /// Supported training methods
-        /// </summary>
-        public enum TrainingMethodType
-        {
-            /// <summary>
-            /// Linear regression
-            /// </summary>
-            Linear,
-            /// <summary>
-            /// Resilient backpropagation
-            /// </summary>
-            Resilient
-        }//TrainingMethodType
-
-
         //Attribute properties
+        /// <summary>
+        /// Collection of hidden layer definitions. Hidden layers are optional.
+        /// </summary>
+        public List<HiddenLayerSettings> HiddenLayerCollection { get; set; }
         /// <summary>
         /// Activation function settings of the output layer.
         /// </summary>
@@ -45,21 +32,9 @@ namespace RCNet.Neural.Network.FF
         /// </summary>
         public Interval OutputRange { get; set; }
         /// <summary>
-        /// The parameter specifies what method will be used for training
+        /// Startup parameters for the trainer
         /// </summary>
-        public TrainingMethodType RegressionMethod { get; set; }
-        /// <summary>
-        /// Collection of hidden layer definitions. Hidden layers are optional.
-        /// </summary>
-        public List<HiddenLayerSettings> HiddenLayerCollection { get; set; }
-        /// <summary>
-        /// Startup parameters for the linear regression trainer
-        /// </summary>
-        public LinRegrTrainerSettings LinRegrTrainerCfg { get; set; }
-        /// <summary>
-        /// Setup parameters for the resilient propagation trainer
-        /// </summary>
-        public RPropTrainerSettings RPropTrainerCfg { get; set; }
+        public INonRecurrentNetworkTrainerSettings TrainerCfg { get; set; }
 
         //Constructors
         /// <summary>
@@ -69,10 +44,8 @@ namespace RCNet.Neural.Network.FF
         {
             OutputLayerActivation = null;
             OutputRange = null;
-            RegressionMethod = TrainingMethodType.Resilient;
             HiddenLayerCollection = new List<HiddenLayerSettings>();
-            LinRegrTrainerCfg = null;
-            RPropTrainerCfg = new RPropTrainerSettings();
+            TrainerCfg = null;
             return;
         }
 
@@ -89,31 +62,25 @@ namespace RCNet.Neural.Network.FF
                 OutputLayerActivation = ActivationFactory.DeepCloneActivationSettings(source.OutputLayerActivation);
                 OutputRange = source.OutputRange.DeepClone();
             }
-            RegressionMethod = source.RegressionMethod;
             HiddenLayerCollection = new List<HiddenLayerSettings>(source.HiddenLayerCollection.Count);
             foreach(HiddenLayerSettings shls in source.HiddenLayerCollection)
             {
                 HiddenLayerCollection.Add(shls.DeepClone());
             }
-            LinRegrTrainerCfg = null;
-            RPropTrainerCfg = null;
-            if (source.LinRegrTrainerCfg != null)
+            TrainerCfg = null;
+            if (source.TrainerCfg != null)
             {
-                LinRegrTrainerCfg = source.LinRegrTrainerCfg.DeepClone();
-            }
-            if (source.RPropTrainerCfg != null)
-            {
-                RPropTrainerCfg = source.RPropTrainerCfg.DeepClone();
+                TrainerCfg = source.TrainerCfg.DeepClone();
             }
             return;
         }
 
         /// <summary>
         /// Creates the instance and initialize it from given xml element.
-        /// This is the preferred way to instantiate reservoir settings.
+        /// This is the preferred way to instantiate settings.
         /// </summary>
         /// <param name="elem">
-        /// Xml data containing feed forward network settings.
+        /// Xml data containing settings.
         /// Content of xml element is always validated against the xml schema.
         /// </param>
         public FeedForwardNetworkSettings(XElement elem)
@@ -123,18 +90,17 @@ namespace RCNet.Neural.Network.FF
             Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.FF.FeedForwardNetworkSettings.xsd");
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
-            XElement feedForwardNetworkSettingsElem = validator.Validate(elem, "rootElem");
+            XElement settingsElem = validator.Validate(elem, "rootElem");
             //Parsing
-            OutputLayerActivation = ActivationFactory.LoadSettings(feedForwardNetworkSettingsElem.Descendants().First());
+            OutputLayerActivation = ActivationFactory.LoadSettings(settingsElem.Descendants().First());
             if (!IsAllowedActivation(OutputLayerActivation, out Interval outputRange))
             {
                 throw new ApplicationException($"Activation can't be used in FF network. Activation function has to be stateless and has to support derivative calculation.");
             }
             OutputRange = outputRange;
-            RegressionMethod = ParseTrainingMethodType(feedForwardNetworkSettingsElem.Attribute("regressionMethod").Value);
             //Hidden layers
             HiddenLayerCollection = new List<HiddenLayerSettings>();
-            XElement hiddenLayersElem = feedForwardNetworkSettingsElem.Descendants("hiddenLayers").FirstOrDefault();
+            XElement hiddenLayersElem = settingsElem.Descendants("hiddenLayers").FirstOrDefault();
             if (hiddenLayersElem != null)
             {
                 foreach (XElement layerElem in hiddenLayersElem.Descendants("layer"))
@@ -142,33 +108,34 @@ namespace RCNet.Neural.Network.FF
                     HiddenLayerCollection.Add(new HiddenLayerSettings(layerElem));
                 }
             }
-            //Trainers
-            LinRegrTrainerCfg = null;
-            RPropTrainerCfg = null;
-            switch (RegressionMethod)
+            //Trainer configuration
+            TrainerCfg = null;
+            foreach(XElement candidate in settingsElem.Descendants())
             {
-                case TrainingMethodType.Linear:
-                    XElement linRegrTrainerElem = feedForwardNetworkSettingsElem.Descendants("linRegrTrainer").FirstOrDefault();
-                    if(linRegrTrainerElem != null)
-                    {
-                        LinRegrTrainerCfg = new LinRegrTrainerSettings(linRegrTrainerElem);
-                    }
-                    else
-                    {
-                        LinRegrTrainerCfg = new LinRegrTrainerSettings();
-                    }
+                if(candidate.Name.LocalName == "linRegrTrainer")
+                {
+                    TrainerCfg = new LinRegrTrainerSettings(candidate);
+                }
+                else if(candidate.Name.LocalName == "qrdRegrTrainer")
+                {
+                    TrainerCfg = new QRDRegrTrainerSettings(candidate);
+                }
+                else if (candidate.Name.LocalName == "ridgeRegrTrainer")
+                {
+                    TrainerCfg = new RidgeRegrTrainerSettings(candidate);
+                }
+                else if (candidate.Name.LocalName == "resPropTrainer")
+                {
+                    TrainerCfg = new RPropTrainerSettings(candidate);
+                }
+                if (TrainerCfg != null)
+                {
                     break;
-                case TrainingMethodType.Resilient:
-                    XElement resPropTrainerElem = feedForwardNetworkSettingsElem.Descendants("resPropTrainer").FirstOrDefault();
-                    if (resPropTrainerElem != null)
-                    {
-                        RPropTrainerCfg = new RPropTrainerSettings(resPropTrainerElem);
-                    }
-                    else
-                    {
-                        RPropTrainerCfg = new RPropTrainerSettings();
-                    }
-                    break;
+                }
+            }
+            if(TrainerCfg == null)
+            {
+                throw new Exception("Trainer settings not found.");
             }
             return;
         }
@@ -180,7 +147,6 @@ namespace RCNet.Neural.Network.FF
         /// </summary>
         /// <param name="activationSettings">Activation settings</param>
         /// <param name="outputRange">Returned range of the activation function</param>
-        /// <returns></returns>
         public static bool IsAllowedActivation(Object activationSettings, out Interval outputRange)
         {
             IActivationFunction af = ActivationFactory.Create(activationSettings, new Random());
@@ -190,20 +156,6 @@ namespace RCNet.Neural.Network.FF
                 return false;
             }
             return true;
-        }
-        /// <summary>
-        /// Parses training method type from string code
-        /// </summary>
-        /// <param name="code">Code of the training method type</param>
-        public static TrainingMethodType ParseTrainingMethodType(string code)
-        {
-            switch (code.ToUpper())
-            {
-                case "LINEAR": return TrainingMethodType.Linear;
-                case "RESILIENT": return TrainingMethodType.Resilient;
-                default:
-                    throw new ArgumentException($"Unknown training method code {code}");
-            }
         }
 
         //Instance methods
@@ -216,10 +168,8 @@ namespace RCNet.Neural.Network.FF
             FeedForwardNetworkSettings cmpSettings = obj as FeedForwardNetworkSettings;
             if (!Equals(OutputLayerActivation, cmpSettings.OutputLayerActivation) ||
                 !Equals(OutputRange, cmpSettings.OutputRange) ||
-                RegressionMethod != cmpSettings.RegressionMethod ||
                 HiddenLayerCollection.Count != cmpSettings.HiddenLayerCollection.Count ||
-                !Equals(LinRegrTrainerCfg, cmpSettings.LinRegrTrainerCfg) ||
-                !Equals(RPropTrainerCfg, cmpSettings.RPropTrainerCfg)
+                !Equals(TrainerCfg, cmpSettings.TrainerCfg)
                 )
             {
                 return false;
@@ -247,10 +197,8 @@ namespace RCNet.Neural.Network.FF
         /// </summary>
         public FeedForwardNetworkSettings DeepClone()
         {
-            FeedForwardNetworkSettings clone = new FeedForwardNetworkSettings(this);
-            return clone;
+            return new FeedForwardNetworkSettings(this);
         }
-
 
         //Inner classes
         /// <summary>

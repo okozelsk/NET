@@ -18,13 +18,16 @@ namespace RCNet.Neural.Network.SM.Readout
     public class ReadoutLayer
     {
         //Constants
-        private const double NormalizerDefaultReserve = 0.1d;
+        /// <summary>
+        /// Default reserve of normalizer range kept for ability to operate future unseen data
+        /// </summary>
+        public const double NormalizerDefaultReserve = 0.1d;
 
         //Static attributes
         /// <summary>
         /// Input and output data will be normalized to this range before the usage
         /// </summary>
-        private static readonly Interval _dataRange = new Interval(-1, 1);
+        public static readonly Interval DataRange = new Interval(-1, 1);
         
         //Attributes
         /// <summary>
@@ -80,9 +83,9 @@ namespace RCNet.Neural.Network.SM.Readout
             _predictorsMapper = null;
             foreach (ReadoutLayerSettings.ReadoutUnitSettings rus in _settings.ReadoutUnitCfgCollection)
             {
-                if (!rus.OutputRange.BelongsTo(_dataRange.Min) || !rus.OutputRange.BelongsTo(_dataRange.Max))
+                if (!rus.OutputRange.BelongsTo(DataRange.Min) || !rus.OutputRange.BelongsTo(DataRange.Max))
                 {
-                    throw new Exception($"Readout unit {rus.Name} does not support data range <{_dataRange.Min}; {_dataRange.Max}>.");
+                    throw new Exception($"Readout unit {rus.Name} does not support data range <{DataRange.Min}; {DataRange.Max}>.");
                 }
             }
             //Clusters
@@ -126,13 +129,13 @@ namespace RCNet.Neural.Network.SM.Readout
             _predictorNormalizerCollection = new Normalizer[numOfPredictors];
             for(int i = 0; i < numOfPredictors; i++)
             {
-                _predictorNormalizerCollection[i] = new Normalizer(_dataRange, NormalizerDefaultReserve, true, false);
+                _predictorNormalizerCollection[i] = new Normalizer(DataRange, NormalizerDefaultReserve, true, false);
             }
             _outputNormalizerCollection = new Normalizer[numOfOutputs];
             for (int i = 0; i < numOfOutputs; i++)
             {
                 bool classificationTask = (_settings.ReadoutUnitCfgCollection[i].TaskType == CommonEnums.TaskType.Classification);
-                _outputNormalizerCollection[i] = new Normalizer(_dataRange,
+                _outputNormalizerCollection[i] = new Normalizer(DataRange,
                                                                 classificationTask ? 0 : NormalizerDefaultReserve,
                                                                 classificationTask ? false : true,
                                                                 false
@@ -230,7 +233,7 @@ namespace RCNet.Neural.Network.SM.Readout
                 if (_settings.ReadoutUnitCfgCollection[clusterIdx].TaskType == CommonEnums.TaskType.Classification)
                 {
                     //Reference binary distribution is relevant only for classification task
-                    refBinDistr = new BinDistribution(_dataRange.Mid);
+                    refBinDistr = new BinDistribution(DataRange.Mid);
                 }
                 //Transformation to a single value vectors and data analysis
                 foreach (double[] idealVector in shuffledData.OutputVectorCollection)
@@ -396,6 +399,7 @@ namespace RCNet.Neural.Network.SM.Readout
                 progressText.Append("/" + inArgs.CurrReadoutUnit.TestingBinErrorStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture));
                 progressText.Append("/" + inArgs.CurrReadoutUnit.TestingBinErrorStat.BinValErrStat[1].Sum.ToString(CultureInfo.InvariantCulture));
             }
+            progressText.Append($" [{bestReadoutUnit.TrainerInfoMessage}]");
             return progressText.ToString();
         }
 
@@ -436,9 +440,10 @@ namespace RCNet.Neural.Network.SM.Readout
                 else
                 {
                     //Forecast task report
-                    sb.Append(leftMargin + $"  Number of samples: {ces.PrecissionErrStat.NumOfSamples}" + Environment.NewLine);
-                    sb.Append(leftMargin + $"      Biggest error: {ces.PrecissionErrStat.Max.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
-                    sb.Append(leftMargin + $"      Average error: {ces.PrecissionErrStat.ArithAvg.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                    sb.Append(leftMargin + $"  Number of samples: {ces.NatPrecissionErrStat.NumOfSamples}" + Environment.NewLine);
+                    sb.Append(leftMargin + $"      Biggest error: {ces.NatPrecissionErrStat.Max.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                    sb.Append(leftMargin + $"     Smallest error: {ces.NatPrecissionErrStat.Min.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                    sb.Append(leftMargin + $"      Average error: {ces.NatPrecissionErrStat.ArithAvg.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
                 }
             }
             return sb.ToString();
@@ -812,9 +817,13 @@ namespace RCNet.Neural.Network.SM.Readout
             /// </summary>
             public int NumOfReadoutUnits { get; }
             /// <summary>
-            /// Error statistics of the distance between computed and ideal value
+            /// Error statistics of the distance between computed and ideal valus in natural form
             /// </summary>
-            public BasicStat PrecissionErrStat { get; }
+            public BasicStat NatPrecissionErrStat { get; }
+            /// <summary>
+            /// Error statistics of the distance between computed and ideal valus in normalized form
+            /// </summary>
+            public BasicStat NrmPrecissionErrStat { get; }
             /// <summary>
             /// Statistics of the binary errors.
             /// Relevant only for the classification task type.
@@ -831,7 +840,8 @@ namespace RCNet.Neural.Network.SM.Readout
             {
                 TaskType = taskType;
                 NumOfReadoutUnits = numOfReadoutUnits;
-                PrecissionErrStat = new BasicStat();
+                NatPrecissionErrStat = new BasicStat();
+                NrmPrecissionErrStat = new BasicStat();
                 BinaryErrStat = null;
                 if (TaskType == CommonEnums.TaskType.Classification)
                 {
@@ -848,7 +858,8 @@ namespace RCNet.Neural.Network.SM.Readout
             {
                 TaskType = source.TaskType;
                 NumOfReadoutUnits = source.NumOfReadoutUnits;
-                PrecissionErrStat = new BasicStat(source.PrecissionErrStat);
+                NatPrecissionErrStat = new BasicStat(source.NatPrecissionErrStat);
+                NrmPrecissionErrStat = new BasicStat(source.NrmPrecissionErrStat);
                 BinaryErrStat = null;
                 if (TaskType == CommonEnums.TaskType.Classification)
                 {
@@ -866,7 +877,8 @@ namespace RCNet.Neural.Network.SM.Readout
             /// <param name="natIdealValue">Naturalized ideal value</param>
             public void Update(double nrmComputedValue, double nrmIdealValue, double natComputedValue, double natIdealValue)
             {
-                PrecissionErrStat.AddSampleValue(Math.Abs(natComputedValue - natIdealValue));
+                NatPrecissionErrStat.AddSampleValue(Math.Abs(natComputedValue - natIdealValue));
+                NrmPrecissionErrStat.AddSampleValue(Math.Abs(nrmComputedValue - nrmIdealValue));
                 if (TaskType == CommonEnums.TaskType.Classification)
                 {
                     BinaryErrStat.Update(nrmComputedValue, nrmIdealValue);
