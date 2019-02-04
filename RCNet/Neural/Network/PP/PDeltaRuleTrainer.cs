@@ -172,6 +172,7 @@ namespace RCNet.Neural.Network.PP
                 ++Attempt;
                 //Reset
                 _net.RandomizeWeights(_rand);
+                _clearMargin = 0.05;
                 _learningRate = _settings.IniLR;
                 _prevWeights = _net.GetWeights();
                 _prevMSE = 0;
