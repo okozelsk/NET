@@ -167,20 +167,19 @@ namespace RCNet.Neural.Network.FF
             ++AttemptEpoch;
             InfoMessage = $"lambda={_currLambda.ToString(CultureInfo.InvariantCulture)}";
             //Copy of base squared matrix
-            Matrix tmpMatrix = new Matrix(_baseSquareMatrix);
+            Matrix lambdaInvMatrix = new Matrix(_baseSquareMatrix);
             //Apply lambda
-            tmpMatrix.AddScalarToDiagonal(_currLambda);
+            lambdaInvMatrix.AddScalarToDiagonal(_currLambda);
             //Inverse
-            tmpMatrix.Inverse();
-            //Ridge regression matrix
-            Matrix regrMatrix = tmpMatrix * _transposedPredictorsMatrix;
+            lambdaInvMatrix.Inverse();
             //New weights
             double[] newWeights = new double[_net.NumOfWeights];
             //Weights for each output neuron
             for (int outputIdx = 0; outputIdx < _net.NumOfOutputValues; outputIdx++)
             {
+                Vector tPredictorsOutputsProduct = _transposedPredictorsMatrix * _outputSingleColVectorCollection[outputIdx];
                 //Regression
-                Vector weights = regrMatrix * _outputSingleColVectorCollection[outputIdx];
+                Vector weights = lambdaInvMatrix * tPredictorsOutputsProduct;
                 //Store weights
                 for (int i = 0; i < weights.Length - 1; i++)
                 {
