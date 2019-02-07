@@ -54,6 +54,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// Number of reservoir's output predictors
         /// </summary>
         public int NumOfOutputPredictors { get; }
+        /// <summary>
+        /// Number of internal synapses
+        /// </summary>
+        public int NumOfInternalSynapses { get; private set; }
 
         //Constructor
         /// <summary>
@@ -192,6 +196,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             //-----------------------------------------------------------------------------
             //Interconnections
             //-----------------------------------------------------------------------------
+            NumOfInternalSynapses = 0;
             //Connection banks allocations
             _neuronInputConnectionsCollection = new SortedList<int, ISynapse>[_reservoirNeuronCollection.Length];
             _neuronNeuronConnectionsCollection = new SortedList<int, ISynapse>[_reservoirNeuronCollection.Length];
@@ -489,6 +494,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 int seed = rand.Next();
                 randFarm[i] = new Random(seed);
             }
+            int[] synapsesCounter = new int[sourceNeurons.Count];
+            synapsesCounter.Populate(0);
             Parallel.For(0, sourceNeurons.Count, sourceNeuronIdx =>
             //for(int sourceNeuronIdx = 0; sourceNeuronIdx < sourceNeurons.Count; sourceNeuronIdx++)
             {
@@ -550,11 +557,19 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                                                      tauDecay: dss.TauDecay
                                                      );
                     }
-                    AddInterconnection(_neuronNeuronConnectionsCollection, synapse);
+                    if(AddInterconnection(_neuronNeuronConnectionsCollection, synapse))
+                    {
+                        ++synapsesCounter[sourceNeuronIdx];
+                    }
                     //Remove targetNeuron from tmp collection
                     tmpRelTargetNeuronCollection.RemoveAt(targetNeuronIndex);
                 }//connNum
             });
+            //Increment total number of internal synapses
+            foreach (int count in synapsesCounter)
+            {
+                NumOfInternalSynapses += count;
+            }
             return;
         }
 
@@ -682,11 +697,16 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// </summary>
         public ReservoirStat CollectStatistics()
         {
-            ReservoirStat stats = new ReservoirStat(InstanceDefinition.InstanceName, InstanceDefinition.Settings.SettingsName);
+            ReservoirStat stats = new ReservoirStat(InstanceDefinition.InstanceName,
+                                                    InstanceDefinition.Settings.SettingsName,
+                                                    Size,
+                                                    NumOfOutputPredictors,
+                                                    NumOfInternalSynapses
+                                                    );
             int poolID = 0;
             foreach (PoolSettings poolSettings in InstanceDefinition.Settings.PoolSettingsCollection)
             {
-                ReservoirStat.PoolStat poolStat = new ReservoirStat.PoolStat(poolSettings);
+                ReservoirStat.PoolStat poolStat = new ReservoirStat.PoolStat(poolSettings, _poolNeuronsCollection[poolID].Length);
                 //Neurons statistics
                 foreach (INeuron neuron in _poolNeuronsCollection[poolID])
                 {
@@ -927,6 +947,18 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// </summary>
         public string ReservoirSettingsName { get; }
         /// <summary>
+        /// Total number of neurons within the reservoir
+        /// </summary>
+        public int TotalNumOfNeurons { get; }
+        /// <summary>
+        /// Total number of predictors
+        /// </summary>
+        public int TotalNumOfPredictors { get; }
+        /// <summary>
+        /// Total number of internal synapses
+        /// </summary>
+        public int TotalNumOfInternalSynapses { get; }
+        /// <summary>
         /// Collection of resrvoir pools stats
         /// </summary>
         public List<PoolStat> PoolStatCollection { get; }
@@ -937,10 +969,21 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// </summary>
         /// <param name="reservoirInstanceName">Name of the reservoir instance</param>
         /// <param name="reservoirSettingsName">Name of the reservoir configuration settings</param>
-        public ReservoirStat(string reservoirInstanceName, string reservoirSettingsName)
+        /// <param name="numOfNeurons">Total number of neurons</param>
+        /// <param name="numOfPredictors">Total number of predictors</param>
+        /// <param name="numOfInternalSynapses">Total number of synapses</param>
+        public ReservoirStat(string reservoirInstanceName,
+                             string reservoirSettingsName,
+                             int numOfNeurons,
+                             int numOfPredictors,
+                             int numOfInternalSynapses
+                             )
         {
             ReservoirInstanceName = reservoirInstanceName;
             ReservoirSettingsName = reservoirSettingsName;
+            TotalNumOfNeurons = numOfNeurons;
+            TotalNumOfPredictors = numOfPredictors;
+            TotalNumOfInternalSynapses = numOfInternalSynapses;
             PoolStatCollection = new List<PoolStat>();
             return;
         }
@@ -957,6 +1000,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             /// </summary>
             public string PoolName { get; }
 
+            /// <summary>
+            /// Number of neurons within the pool
+            /// </summary>
+            public int NumOfNeurons { get; }
+            
             /// <summary>
             /// Collection of the neuron group statistics
             /// </summary>
@@ -977,9 +1025,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             /// Creates an unitialized instance
             /// </summary>
             /// <param name="poolSettings">Settings of the neuron pool</param>
-            public PoolStat(PoolSettings poolSettings)
+            /// <param name="numOfNeurons">Number of neurons within the pool</param>
+            public PoolStat(PoolSettings poolSettings,
+                            int numOfNeurons
+                            )
             {
                 PoolName = poolSettings.Name;
+                NumOfNeurons = numOfNeurons;
                 NeuronGroupStatCollection = new NeuronGroupStat[poolSettings.NeuronGroups.Count];
                 for(int i = 0; i < poolSettings.NeuronGroups.Count; i++)
                 {

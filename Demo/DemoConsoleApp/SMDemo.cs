@@ -66,7 +66,11 @@ namespace RCNet.DemoConsoleApp
             ReadoutUnit.RegressionControlOutArgs outArgs = new ReadoutUnit.RegressionControlOutArgs
             {
                 //Call the default implementation of the judgement.
-                CurrentIsBetter = ReadoutUnit.IsBetter(inArgs.TaskType, inArgs.CurrReadoutUnit, inArgs.BestReadoutUnit)
+                CurrentIsBetter = ReadoutUnit.IsBetter(inArgs.TaskType, inArgs.CurrReadoutUnit, inArgs.BestReadoutUnit),
+                StopRegression = (inArgs.TaskType == CommonEnums.TaskType.Classification &&
+                                  inArgs.CurrReadoutUnit.TrainingBinErrorStat.TotalErrStat.Sum == 0 &&
+                                  inArgs.CurrReadoutUnit.TestingBinErrorStat.TotalErrStat.Sum == 0
+                                 )
             };
             //Progress info
             if (outArgs.CurrentIsBetter ||

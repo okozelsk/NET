@@ -12,7 +12,7 @@ namespace RCNet.Neural.Network.FF
     /// Implements the QRD regression trainer.
     /// Principle is to add each iteration less and less piece of white-noise to predictors
     /// and then perform the standard QR decomposition (regression).
-    /// This technique allows to find more stable weight solution than just a QR decomposition
+    /// This technique allows to find more stable (generalized) weight solution than just a QR decomposition
     /// of pure predictors.
     /// FF network has to have only output layer with the Identity activation.
     /// </summary>
@@ -86,7 +86,7 @@ namespace RCNet.Neural.Network.FF
             //Check samples conditions
             if(inputVectorCollection.Count < inputVectorCollection[0].Length + 1)
             {
-                throw new Exception("Can´t create trainer. Insufficient number of training samples. Minimum is " + (inputVectorCollection[0].Length + 1).ToString() + ".");
+                throw new Exception($"Can´t create trainer. Insufficient number of training samples {inputVectorCollection.Count}. Minimum is {(inputVectorCollection[0].Length + 1)}.");
             }
             //Parameters
             _settings = settings;

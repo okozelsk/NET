@@ -472,19 +472,24 @@ namespace RCNet.MathTools.MatrixMath
         }
 
         /// <summary>
-        /// Method uses LU decomposition to solve system of the linear equations.
+        /// Method uses LU decomposition to solve system of linear equations.
         /// Matrix must be squared.
         /// </summary>
-        /// <param name="rightPart">Desired results (right part of linear equations)</param>
-        /// <returns>Linear coefficients</returns>
-        public double[] SolveUsingLU(double[] rightPart)
+        /// <param name="desired">Vector of desired results (right part of linear equations)</param>
+        /// <returns>Vector of computed linear coefficients</returns>
+        public Vector SolveUsingLU(Vector desired)
         {
-            //Firstly check squared matrix
+            //Checks squared matrix
             if (!IsSquared)
             {
                 throw new Exception("Matrix must be squared.");
             }
+            if (NumOfRows != desired.Length)
+            {
+                throw new Exception("Number of matrix rows must be equal to length of desired results vector.");
+            }
             int n = NumOfRows;
+            double[] desiredData = desired.Data;
             double[,] lu = new double[n, n];
             double sum = 0;
             //LU decomposition
@@ -518,7 +523,7 @@ namespace RCNet.MathTools.MatrixMath
                 {
                     sum += lu[i, k] * y[k];
                 }
-                y[i] = rightPart[i] - sum;
+                y[i] = desiredData[i] - sum;
             }
             // find solution of Ux = y
             double[] x = new double[n];
@@ -531,7 +536,7 @@ namespace RCNet.MathTools.MatrixMath
                 }
                 x[i] = (1 / lu[i, i]) * (y[i] - sum);
             }
-            return x;
+            return new Vector(x, false);
         }
 
         /// <summary>
@@ -1175,14 +1180,19 @@ namespace RCNet.MathTools.MatrixMath
         }
 
         /// <summary>
-        /// Creates matrix prepared for weights computation.
-        /// R = [Inv(X'*X + lambda*I)*X']
-        /// then
-        /// Weights = R * Y, where Y is the vector of desired results
+        /// Computes ridge regression weights
         /// </summary>
+        /// <param name="desired">Desired results vector</param>
         /// <param name="lambda">Hyperparameter lambda of Ridge Regression method</param>
-        public Matrix GetRidgeRegressionMatrix(double lambda)
+        /// <returns>Vector of computed weights</returns>
+        public Vector RidgeRegression(Vector desired, double lambda = 0)
         {
+            //Checks
+            if (NumOfRows != desired.Length)
+            {
+                throw new Exception("Number of matrix rows must be equal to length of desired results vector.");
+            }
+            //Computation
             Matrix Xt = Transpose();
             Matrix R = Xt * this;
             if (lambda > 0)
@@ -1190,24 +1200,24 @@ namespace RCNet.MathTools.MatrixMath
                 R.AddScalarToDiagonal(lambda);
             }
             R.Inverse();
-            return R * Xt;
+            //For better performance must be ensured that (Xt * desired) is computed first and after then is
+            //computed R * (resulting vector).
+            return R * (Xt * desired);
         }
 
         /// <summary>
         /// Computes ridge regression weights
         /// </summary>
         /// <param name="X">Predictor matrix</param>
-        /// <param name="desired">Desired result vector</param>
+        /// <param name="desired">Desired results vector</param>
         /// <param name="lambda">Hyperparameter lambda of Ridge Regression method</param>
-        /// <returns>Weight vector</returns>
+        /// <returns>Vector of computed weights</returns>
         public static Vector RidgeRegression(Matrix X, Vector desired, double lambda = 0)
         {
-            if(X.NumOfRows != desired.Length)
-            {
-                throw new Exception("Number of matrix rows must be equal to desired vector length.");
-            }
-            return X.GetRidgeRegressionMatrix(lambda) * desired;
+            return X.RidgeRegression(desired, lambda);
         }
+
+
 
     }//Matrix
 

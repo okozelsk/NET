@@ -445,6 +445,7 @@ namespace RCNet.Neural.Network.SM.Readout
                     sb.Append(leftMargin + $"     Smallest error: {ces.NatPrecissionErrStat.Min.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
                     sb.Append(leftMargin + $"      Average error: {ces.NatPrecissionErrStat.ArithAvg.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
                 }
+                sb.Append(Environment.NewLine);
             }
             return sb.ToString();
         }

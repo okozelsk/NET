@@ -170,15 +170,15 @@ namespace RCNet.Neural.Network.FF
             Matrix lambdaInvMatrix = new Matrix(_baseSquareMatrix);
             //Apply lambda
             lambdaInvMatrix.AddScalarToDiagonal(_currLambda);
-            //Inverse
+            //Apply inverse
             lambdaInvMatrix.Inverse();
-            //New weights
+            //New weights buffer
             double[] newWeights = new double[_net.NumOfWeights];
             //Weights for each output neuron
             for (int outputIdx = 0; outputIdx < _net.NumOfOutputValues; outputIdx++)
             {
                 Vector tPredictorsOutputsProduct = _transposedPredictorsMatrix * _outputSingleColVectorCollection[outputIdx];
-                //Regression
+                //Weights solution
                 Vector weights = lambdaInvMatrix * tPredictorsOutputsProduct;
                 //Store weights
                 for (int i = 0; i < weights.Length - 1; i++)

@@ -81,12 +81,11 @@ namespace RCNet.Neural.Network.SM
                                                      Object userObject = null
                                                      )
         {
-            RegressionInput regrInput = new RegressionInput
-            {
-                PreprocessedData = NP.InitializeAndPreprocessBundle(patternBundle, informativeCallback, userObject),
-                ReservoirStatCollection = NP.CollectStatatistics()
-            };
-            return regrInput;
+            return new RegressionInput(NP.InitializeAndPreprocessBundle(patternBundle, informativeCallback, userObject),
+                                       NP.CollectStatatistics(),
+                                       NP.NumOfNeurons,
+                                       NP.NumOfInternalSynapses
+                                       );
         }
 
         /// <summary>
@@ -107,12 +106,11 @@ namespace RCNet.Neural.Network.SM
                                                      Object userObject = null
                                                      )
         {
-            RegressionInput regrInput = new RegressionInput
-            {
-                PreprocessedData = NP.InitializeAndPreprocessBundle(vectorBundle, informativeCallback, userObject),
-                ReservoirStatCollection = NP.CollectStatatistics()
-            };
-            return regrInput;
+            return new RegressionInput(NP.InitializeAndPreprocessBundle(vectorBundle, informativeCallback, userObject),
+                                       NP.CollectStatatistics(),
+                                       NP.NumOfNeurons,
+                                       NP.NumOfInternalSynapses
+                                       );
         }
 
 
@@ -225,22 +223,61 @@ namespace RCNet.Neural.Network.SM
 
         //Inner classes
         /// <summary>
-        /// Contains prepared data for regression stage and statistics of the reservoir(s)
+        /// Contains prepared data for the regression stage and important statistics of the reservoir(s)
         /// </summary>
         [Serializable]
         public class RegressionInput
         {
             //Attribute properties
             /// <summary>
-            /// Collection of the predictors and ideal outputs
+            /// Bundle of the NeuralPreprocessor's predictors and desired ideal outputs
             /// </summary>
-            public VectorBundle PreprocessedData { get; set; } = null;
+            public VectorBundle PreprocessedData { get; }
             /// <summary>
-            /// Collection of statistics of the State Machine's reservoir(s)
+            /// Collection of statistics of NeuralPreprocessor's internal reservoirs
             /// </summary>
-            public List<ReservoirStat> ReservoirStatCollection { get; set; } = null;
+            public List<ReservoirStat> ReservoirStatCollection { get; }
+            /// <summary>
+            /// Total number of NeuralPreprocessor's neurons
+            /// </summary>
+            public int TotalNumOfNeurons { get; }
+            /// <summary>
+            /// Total number of NeuralPreprocessor's internal synapses
+            /// </summary>
+            public int TotalNumOfInternalSynapses { get; }
+
+            //Constructor
+            /// <summary>
+            /// Creates an initialized instance
+            /// </summary>
+            /// <param name="preprocessedData">Bundle of the NeuralPreprocessor's predictors and desired ideal outputs</param>
+            /// <param name="reservoirStatCollection">Collection of statistics of NeuralPreprocessor's internal reservoirs</param>
+            /// <param name="totalNumOfNeurons">Total number of NeuralPreprocessor's neurons</param>
+            /// <param name="totalNumOfInternalSynapses">Total number of NeuralPreprocessor's internal synapses</param>
+            public RegressionInput(VectorBundle preprocessedData,
+                                   List<ReservoirStat> reservoirStatCollection,
+                                   int totalNumOfNeurons,
+                                   int totalNumOfInternalSynapses
+                                   )
+            {
+                PreprocessedData = preprocessedData;
+                ReservoirStatCollection = reservoirStatCollection;
+                TotalNumOfNeurons = totalNumOfNeurons;
+                TotalNumOfInternalSynapses = totalNumOfInternalSynapses;
+                return;
+            }
 
             //Methods
+            private string FNum(double num)
+            {
+                return num.ToString("N4", CultureInfo.InvariantCulture).PadLeft(7);
+            }
+
+            private string StatLine(BasicStat stat)
+            {
+                return $"Avg:{FNum(stat.ArithAvg)},  Max:{FNum(stat.Max)},  Min:{FNum(stat.Min)},  SDdev:{FNum(stat.StdDev)}";
+            }
+
             /// <summary>
             /// Builds report of key statistics collected from NeuralPreprocessor's reservoir(s)
             /// </summary>
@@ -249,108 +286,40 @@ namespace RCNet.Neural.Network.SM
             public string CreateReport(int margin = 0)
             {
                 string leftMargin = margin == 0 ? string.Empty : new string(' ', margin);
+                string resWording = ReservoirStatCollection.Count == 1 ? "reservoir" : "reservoirs";
                 StringBuilder sb = new StringBuilder();
-                sb.Append(leftMargin + "Reservoir(s) info:" + Environment.NewLine);
+                sb.Append(leftMargin + $"Neural preprocessor ({ReservoirStatCollection.Count} {resWording}, {TotalNumOfNeurons} neurons, {TotalNumOfInternalSynapses} internal synapses)" + Environment.NewLine);
                 foreach (ReservoirStat resStat in ReservoirStatCollection)
                 {
-                    sb.Append(leftMargin + $"  Reservoir instance: {resStat.ReservoirInstanceName} ({resStat.ReservoirSettingsName})" + Environment.NewLine);
+                    sb.Append(leftMargin + $"  Reservoir instance: {resStat.ReservoirInstanceName} (configuration {resStat.ReservoirSettingsName}, {resStat.TotalNumOfNeurons} neurons, {resStat.TotalNumOfInternalSynapses} internal synapses)" + Environment.NewLine);
                     foreach (ReservoirStat.PoolStat poolStat in resStat.PoolStatCollection)
                     {
-                        sb.Append(leftMargin + $"    Pool: {poolStat.PoolName}" + Environment.NewLine);
+                        sb.Append(leftMargin + $"    Pool: {poolStat.PoolName} ({poolStat.NumOfNeurons} neurons)" + Environment.NewLine);
                         foreach (ReservoirStat.PoolStat.NeuronGroupStat groupStat in poolStat.NeuronGroupStatCollection)
                         {
-                            sb.Append(leftMargin + $"      Group of neurons: {groupStat.GroupName}" + Environment.NewLine);
-                            sb.Append(leftMargin + "        Stimulation (Input + Reservoir synapses)" + Environment.NewLine);
-                            sb.Append(leftMargin + "          AVG Avg, Max, Min, SDdev: " + groupStat.AvgTStimuliStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                          + groupStat.AvgTStimuliStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                          + groupStat.AvgTStimuliStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                          + groupStat.AvgTStimuliStat.StdDev.ToString("N4", CultureInfo.InvariantCulture) + Environment.NewLine);
-                            sb.Append(leftMargin + "          MAX Avg, Max, Min, SDdev: " + groupStat.MaxTStimuliStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                          + groupStat.MaxTStimuliStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                          + groupStat.MaxTStimuliStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                          + groupStat.MaxTStimuliStat.StdDev.ToString("N4", CultureInfo.InvariantCulture) + Environment.NewLine);
-                            sb.Append(leftMargin + "          MIN Avg, Max, Min, SDdev: " + groupStat.MinTStimuliStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                          + groupStat.MinTStimuliStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                          + groupStat.MinTStimuliStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                          + groupStat.MinTStimuliStat.StdDev.ToString("N4", CultureInfo.InvariantCulture) + Environment.NewLine);
-                            sb.Append(leftMargin + "         SPAN Avg, Max, Min, SDdev: " + groupStat.TStimuliSpansStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                          + groupStat.TStimuliSpansStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                          + groupStat.TStimuliSpansStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                          + groupStat.TStimuliSpansStat.StdDev.ToString("N4", CultureInfo.InvariantCulture) + Environment.NewLine);
-                            /*
-                            sb.Append(leftMargin + "        Stimulation (Reservoir synapses only)" + Environment.NewLine);
-                            sb.Append(leftMargin + "          AVG Avg, Max, Min, SDdev: " + groupStat.AvgRStimuliStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                          + groupStat.AvgRStimuliStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                          + groupStat.AvgRStimuliStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                          + groupStat.AvgRStimuliStat.StdDev.ToString("N4", CultureInfo.InvariantCulture) + Environment.NewLine);
-                            sb.Append(leftMargin + "          MAX Avg, Max, Min, SDdev: " + groupStat.MaxRStimuliStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                          + groupStat.MaxRStimuliStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                          + groupStat.MaxRStimuliStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                          + groupStat.MaxRStimuliStat.StdDev.ToString("N4", CultureInfo.InvariantCulture) + Environment.NewLine);
-                            sb.Append(leftMargin + "          MIN Avg, Max, Min, SDdev: " + groupStat.MinRStimuliStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                          + groupStat.MinRStimuliStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                          + groupStat.MinRStimuliStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                          + groupStat.MinRStimuliStat.StdDev.ToString("N4", CultureInfo.InvariantCulture) + Environment.NewLine);
-                            sb.Append(leftMargin + "         SPAN Avg, Max, Min, SDdev: " + groupStat.RStimuliSpansStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                          + groupStat.RStimuliSpansStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                          + groupStat.RStimuliSpansStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                          + groupStat.RStimuliSpansStat.StdDev.ToString("N4", CultureInfo.InvariantCulture) + Environment.NewLine);
-                            */
-                            sb.Append(leftMargin + "        Reservoir synapses efficacy" + Environment.NewLine);
-                            sb.Append(leftMargin + "          AVG Avg, Max, Min, SDdev: " + groupStat.AvgSynEfficacyStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                          + groupStat.AvgSynEfficacyStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                          + groupStat.AvgSynEfficacyStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                          + groupStat.AvgSynEfficacyStat.StdDev.ToString("N4", CultureInfo.InvariantCulture) + Environment.NewLine);
-                            sb.Append(leftMargin + "          MAX Avg, Max, Min, SDdev: " + groupStat.MaxSynEfficacyStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                          + groupStat.MaxSynEfficacyStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                          + groupStat.MaxSynEfficacyStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                          + groupStat.MaxSynEfficacyStat.StdDev.ToString("N4", CultureInfo.InvariantCulture) + Environment.NewLine);
-                            sb.Append(leftMargin + "          MIN Avg, Max, Min, SDdev: " + groupStat.MinSynEfficacyStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                          + groupStat.MinSynEfficacyStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                          + groupStat.MinSynEfficacyStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                          + groupStat.MinSynEfficacyStat.StdDev.ToString("N4", CultureInfo.InvariantCulture) + Environment.NewLine);
-                            sb.Append(leftMargin + "         SPAN Avg, Max, Min, SDdev: " + groupStat.SynEfficacySpansStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                          + groupStat.SynEfficacySpansStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                          + groupStat.SynEfficacySpansStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                          + groupStat.SynEfficacySpansStat.StdDev.ToString("N4", CultureInfo.InvariantCulture) + Environment.NewLine);
-                            sb.Append(leftMargin + "        Activation" + Environment.NewLine);
-                            sb.Append(leftMargin + "          AVG Avg, Max, Min, SDdev: " + groupStat.AvgActivationStatesStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                          + groupStat.AvgActivationStatesStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                          + groupStat.AvgActivationStatesStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                          + groupStat.AvgActivationStatesStat.StdDev.ToString("N4", CultureInfo.InvariantCulture) + Environment.NewLine);
-                            sb.Append(leftMargin + "          MAX Avg, Max, Min, SDdev: " + groupStat.MaxActivationStatesStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                          + groupStat.MaxActivationStatesStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                          + groupStat.MaxActivationStatesStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                          + groupStat.MaxActivationStatesStat.StdDev.ToString("N4", CultureInfo.InvariantCulture) + Environment.NewLine);
-                            sb.Append(leftMargin + "         SPAN Avg, Max, Min, SDdev: " + groupStat.ActivationStateSpansStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                          + groupStat.ActivationStateSpansStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                          + groupStat.ActivationStateSpansStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                          + groupStat.ActivationStateSpansStat.StdDev.ToString("N4", CultureInfo.InvariantCulture) + Environment.NewLine);
-                            sb.Append(leftMargin + "        Signal" + Environment.NewLine);
-                            sb.Append(leftMargin + "          AVG Avg, Max, Min, SDdev: " + groupStat.AvgOutputSignalStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                          + groupStat.AvgOutputSignalStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                          + groupStat.AvgOutputSignalStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                          + groupStat.AvgOutputSignalStat.StdDev.ToString("N4", CultureInfo.InvariantCulture) + Environment.NewLine);
-                            sb.Append(leftMargin + "          MAX Avg, Max, Min, SDdev: " + groupStat.MaxOutputSignalStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                          + groupStat.MaxOutputSignalStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                          + groupStat.MaxOutputSignalStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                          + groupStat.MaxOutputSignalStat.StdDev.ToString("N4", CultureInfo.InvariantCulture) + Environment.NewLine);
-                            sb.Append(leftMargin + "          MIN Avg, Max, Min, SDdev: " + groupStat.MinOutputSignalStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                          + groupStat.MinOutputSignalStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                          + groupStat.MinOutputSignalStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                          + groupStat.MinOutputSignalStat.StdDev.ToString("N4", CultureInfo.InvariantCulture) + Environment.NewLine);
+                            sb.Append(leftMargin + $"      Group of neurons: {groupStat.GroupName} ({groupStat.AvgOutputSignalStat.NumOfSamples} neurons)" + Environment.NewLine);
+                            sb.Append(leftMargin + $"        Stimulation" + Environment.NewLine);
+                            sb.Append(leftMargin + $"          AVG>  {StatLine(groupStat.AvgTStimuliStat)}" + Environment.NewLine);
+                            sb.Append(leftMargin + $"          MAX>  {StatLine(groupStat.MaxTStimuliStat)}" + Environment.NewLine);
+                            sb.Append(leftMargin + $"          MIN>  {StatLine(groupStat.MinTStimuliStat)}" + Environment.NewLine);
+                            sb.Append(leftMargin + $"         SPAN>  {StatLine(groupStat.TStimuliSpansStat)}" + Environment.NewLine);
+                            sb.Append(leftMargin + $"        Efficacy of synapses" + Environment.NewLine);
+                            sb.Append(leftMargin + $"          AVG>  {StatLine(groupStat.AvgSynEfficacyStat)}" + Environment.NewLine);
+                            sb.Append(leftMargin + $"          MAX>  {StatLine(groupStat.MaxSynEfficacyStat)}" + Environment.NewLine);
+                            sb.Append(leftMargin + $"          MIN>  {StatLine(groupStat.MinSynEfficacyStat)}" + Environment.NewLine);
+                            sb.Append(leftMargin + $"         SPAN>  {StatLine(groupStat.SynEfficacySpansStat)}" + Environment.NewLine);
+                            sb.Append(leftMargin + $"        Activation" + Environment.NewLine);
+                            sb.Append(leftMargin + $"          AVG>  {StatLine(groupStat.AvgActivationStatesStat)}" + Environment.NewLine);
+                            sb.Append(leftMargin + $"          MAX>  {StatLine(groupStat.MaxActivationStatesStat)}" + Environment.NewLine);
+                            sb.Append(leftMargin + $"         SPAN>  {StatLine(groupStat.ActivationStateSpansStat)}" + Environment.NewLine);
+                            sb.Append(leftMargin + $"        Output signal" + Environment.NewLine);
+                            sb.Append(leftMargin + $"          AVG>  {StatLine(groupStat.AvgOutputSignalStat)}" + Environment.NewLine);
+                            sb.Append(leftMargin + $"          MAX>  {StatLine(groupStat.MaxOutputSignalStat)}" + Environment.NewLine);
+                            sb.Append(leftMargin + $"          MIN>  {StatLine(groupStat.MinOutputSignalStat)}" + Environment.NewLine);
                         }
-                        /*
-                        sb.Append(leftMargin + "      Weights" + Environment.NewLine);
-                        sb.Append(leftMargin + "        Input Avg, Max, Min, SDdev: " + poolStat.InputWeightsStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                      + poolStat.InputWeightsStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                      + poolStat.InputWeightsStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                      + poolStat.InputWeightsStat.StdDev.ToString("N4", CultureInfo.InvariantCulture) + Environment.NewLine);
-                        sb.Append(leftMargin + "     Internal Avg, Max, Min, SDdev: " + poolStat.InternalWeightsStat.ArithAvg.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                      + poolStat.InternalWeightsStat.Max.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                      + poolStat.InternalWeightsStat.Min.ToString("N4", CultureInfo.InvariantCulture) + ", "
-                                                                                      + poolStat.InternalWeightsStat.StdDev.ToString("N4", CultureInfo.InvariantCulture) + Environment.NewLine);
-                        */
+                        sb.Append(leftMargin + $"      Weights of synapses" + Environment.NewLine);
+                        sb.Append(leftMargin + $"        Inp.>  {StatLine(poolStat.InputWeightsStat)}" + Environment.NewLine);
+                        sb.Append(leftMargin + $"        Int.>  {StatLine(poolStat.InternalWeightsStat)}" + Environment.NewLine);
                     }
                 }
                 return sb.ToString();

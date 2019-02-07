@@ -642,27 +642,6 @@
     </xs:sequence>
   </xs:complexType>
 
-  <!-- FF network - linear regression trainer - configuration -->
-  <xs:complexType name="FFNetLinRegrTrainerCfgType">
-    <xs:attribute type="UIntGT0Type" name="attempts" use="required"/>
-    <xs:attribute type="UIntGT0Type" name="attemptEpochs" use="required"/>
-    <xs:attribute type="UDoubleLT1Type" name="hiNoiseIntensity" use="optional" default="0.05">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.05</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="UDoubleGT1Type" name="maxStretch" use="optional" default="8">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 8</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="UDoubleLT1Type" name="zeroMargin" use="optional" default="0.75">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.75</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-  </xs:complexType>
-
   <!-- FF network - QRD regression trainer - configuration -->
   <xs:complexType name="FFNetQRDRegrTrainerCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
@@ -750,7 +729,6 @@
         <xs:element type="FFNetHiddenLayersCfgType" name="hiddenLayers" minOccurs="0" maxOccurs="1"/>
       </xs:sequence>
       <xs:choice minOccurs="1" maxOccurs="1">
-        <xs:element type="FFNetLinRegrTrainerCfgType" name="linRegrTrainer" minOccurs="1" maxOccurs="1"/>
         <xs:element type="FFNetQRDRegrTrainerCfgType" name="qrdRegrTrainer" minOccurs="1" maxOccurs="1"/>
         <xs:element type="FFNetRidgeRegrTrainerCfgType" name="ridgeRegrTrainer" minOccurs="1" maxOccurs="1"/>
         <xs:element type="FFNetRPropTrainerCfgType" name="resPropTrainer" minOccurs="1" maxOccurs="1"/>
