@@ -971,7 +971,7 @@
   </case>
 
   <!--
-    Joshua Letterman's task
+    Joshua Letterman's task. Uses Parallel Perceptron is used as the classifier.
   -->
   <case name="Color ERP in Brain EEG Activity">
     <samples fileName="S250Trials.rcnet.csv" normalizerReserve="0.1"/>
