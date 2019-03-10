@@ -8,7 +8,7 @@ Main documentation is located on project's wiki (https://github.com/okozelsk/NET
 <br/>
 Questions, ideas and suggestions for improvements, usage experiences, bug alerts, constructive comments, etc.... are welcome.
 <br/>
-To contact me use my email address oldrich.kozelsky@email.cz
+To contact me, please use my email address oldrich.kozelsky@email.cz
 
 ## Technical information
  - Source code is written in C# 6.0
@@ -16,7 +16,7 @@ To contact me use my email address oldrich.kozelsky@email.cz
  - Backward compatibility with earlier releases is not guaranteed, SW is still under dynamic development
 
 ## Demo application
-Main RCNet functionality is demonstrated in a simple demo application (/Demo/DemoConsoleApp). Application has no startup parameters, all necessary settins are specified in DemoSettings.xml file. DemoSettings.xml has to be in the same folder as the executable DemoConsoleApp.exe. Application performs sequence of demo cases defined in DemoSettings.xml. The input data for each demo case must be stored in the csv file format. You can easily modify DemoSettings.xml and configure your own tasks or modify and tune existing ones.
+Main RCNet functionality is demonstrated in a simple demo application (/Demo/DemoConsoleApp). Application has no startup parameters, all necessary settins are specified in DemoSettings.xml file. DemoSettings.xml has to be in the same folder as the executable DemoConsoleApp.exe. Application performs sequence of demo cases defined in DemoSettings.xml. The input data for each demo case must be stored in the csv file format. You can easily modify DemoSettings.xml and configure your own tasks or modify and tune already defined ones.
 
 
 ## Overview of the main implemented components
@@ -31,7 +31,7 @@ Main RCNet functionality is demonstrated in a simple demo application (/Demo/Dem
 ### XML
 |Component|Description|
 |--|--|
-|ElemValidator|Implements ugly and unefficient method to validate element against specified xsd type. It complements the apparently missing .net method and is necessary to comply with the overall RCNet xml concept.|
+|ElemValidator|Implements unefficient method to validate element against specified xsd type. It complements the apparently missing .net method and is necessary to comply with the overall RCNet xml concept.|
 |DocValidator|Provides the xml loading/validation functionalities|
 
 ### Math
@@ -41,7 +41,7 @@ Main RCNet functionality is demonstrated in a simple demo application (/Demo/Dem
 |BasicStat|Implements the simple and thread safe statistics|
 |ODENumSolver|Ordinary Differential Equations (ODE) Numerical Solver (Euler and RK4 methods)|
 |Vector|Class represents the mathematical vector of double values supporting basic operations|
-|Matrix|Class represents the mathematical matrix of double values supporting basic operations, LU and the Power Iteration method for the largest EV estimation|
+|Matrix|Class represents the mathematical matrix of double values supporting basic operations, LU, Ridge regression and the Power Iteration method for the largest EV estimation|
 |EVD|Full eigen values and vectors decomposition of a matrix|
 |SVD|Singular values decomposition of a matrix|
 |QRD|QR decomposition of a matrix|
@@ -106,5 +106,5 @@ See the [wiki pages.](https://en.wikipedia.org/wiki/Biological_neuron_model)
 |NeuralPreprocessor|Implements data preprocessing to predictors. Supports multiple internal reservoirs having multiple interconnected/cooperating analog and spiking neuron pools. Supports virtual input data associated with predefined signal generators. Supports two input feeding regimes: Continuous and Patterned|
 |ReadoutUnit|Readout unit does the Forecast or Classification. Contains trained output unit and related important error statistics. Trained unit can be the Feed Forward Network or the Parallel Perceptron Network|
 |ReadoutLayer|Class implements common readout layer concept for the reservoir computing methods. Supports x-fold cross validation method and clustering of the trained readout units.|
-|StateMachine|The main component. Encaptulates NeuralPreprocessor and ReadoutLayer fuctionalities into single logical unit.|
+|StateMachine|The main component. Encaptulates independent NeuralPreprocessor and ReadoutLayer fuctionalities into the single logical unit.|
 
