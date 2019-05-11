@@ -15,16 +15,22 @@ namespace RCNet.MathTools
         public static ulong ComputeNumOfCombinations(uint n, uint k)
         {
             //Basic checks
-            if (n < k || k > Factorial.FactorialMaxInputValue)
+            if (n < k)
             {
                 return 0;
             }
-            if(k == 0 || k == n)
+            if (k == 0 || k == n)
             {
                 return 1;
             }
+            double result = 1d;
+            for(uint i = k, j = 0; i >= 1; i--, j++)
+            {
+                result *= (double)(n - j) / (double)(i);
+
+            }
             //Result
-            return Factorial.PartialReversal(n, k) / Factorial.Get(k);
+            return (ulong)Math.Round(result, 0);
         }
 
     }//Combinatorics
