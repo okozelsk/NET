@@ -129,7 +129,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             }
             if(_settings.InputConfig.RouteExternalInputToReadout)
             {
-                NumOfPredictors += _settings.InputConfig.ExternalFieldCollection.Count;
+                foreach(NeuralPreprocessorSettings.InputSettings.Field field in _settings.InputConfig.ExternalFieldCollection)
+                {
+                    if (field.AllowRoutingToReadout) ++NumOfPredictors;
+                }
             }
             return;
         }
@@ -346,7 +349,16 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             }
             if (_settings.InputConfig.RouteExternalInputToReadout)
             {
-                completedInputVector.CopyTo(predictors, predictorsIdx);
+                int fieldIdx = 0;
+                foreach (NeuralPreprocessorSettings.InputSettings.Field field in _settings.InputConfig.ExternalFieldCollection)
+                {
+                    if (field.AllowRoutingToReadout)
+                    {
+                        predictors[predictorsIdx] = completedInputVector[fieldIdx];
+                        ++predictorsIdx;
+                    }
+                    ++fieldIdx;
+                }
             }
             return predictors;
         }

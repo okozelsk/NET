@@ -1081,6 +1081,16 @@
   <xs:complexType name="NPInpFeedingPatternedCfgType">
   </xs:complexType>
 
+  <!-- NeuralPreprocessor - external input field -configuration -->
+  <xs:complexType name="NPExternalInpFieldCfgType">
+    <xs:attribute type="xs:string" name="name" use="required"/>
+    <xs:attribute type="xs:boolean" name="AllowRoutingToReadout" use="optional" default="true">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is true</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
   <!-- NeuralPreprocessor - internal input field -configuration -->
   <xs:complexType name="NPInternalInpFieldCfgType">
     <xs:choice minOccurs="1" maxOccurs="1">
@@ -1104,7 +1114,7 @@
   <!-- NeuralPreprocessor - external input fields -configuration -->
   <xs:complexType name="NPExternalInpFieldsCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="AloneNameType" name="field" minOccurs="1" maxOccurs="unbounded"/>
+      <xs:element type="NPExternalInpFieldCfgType" name="field" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 

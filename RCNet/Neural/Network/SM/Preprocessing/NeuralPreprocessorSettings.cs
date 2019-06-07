@@ -347,12 +347,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 foreach (XElement extFieldElem in settingsElem.Descendants("external").First().Descendants())
                 {
                     string fieldName = extFieldElem.Attribute("name").Value;
-                    if(uniquenessChecker.ContainsKey(fieldName))
+                    bool allowRoutingToReadout = bool.Parse(extFieldElem.Attribute("AllowRoutingToReadout").Value);
+                    if (uniquenessChecker.ContainsKey(fieldName))
                     {
                         throw new Exception($"Duplicit input field name {fieldName}");
                     }
                     uniquenessChecker.Add(fieldName, fieldName);
-                    ExternalFieldCollection.Add(new Field(fieldName));
+                    ExternalFieldCollection.Add(new Field(fieldName, allowRoutingToReadout));
                 }
                 //Internal fields
                 XElement intFieldsElem = settingsElem.Descendants("internal").FirstOrDefault();
@@ -475,14 +476,22 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 /// </summary>
                 public string Name { get; set; }
 
+                /// <summary>
+                /// The parameter specifies whether the field can be included among predictors
+                /// together with the predictors from the reservoirs.
+                /// </summary>
+                public bool AllowRoutingToReadout { get; set; }
+
                 //Constructors
                 /// <summary>
                 /// Creates an initialized instance
                 /// </summary>
                 /// <param name="name">Field name</param>
-                public Field(string name)
+                /// <param name="allowRoutingToReadout">Specifies whether the field can be included among predictors</param>
+                public Field(string name, bool allowRoutingToReadout)
                 {
                     Name = name;
+                    AllowRoutingToReadout = allowRoutingToReadout;
                     return;
                 }
 
@@ -493,6 +502,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 public Field(Field source)
                 {
                     Name = source.Name;
+                    AllowRoutingToReadout = source.AllowRoutingToReadout;
                     return;
                 }
 
@@ -513,7 +523,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 {
                     if (obj == null) return false;
                     Field cmpSettings = obj as Field;
-                    if (Name != cmpSettings.Name)
+                    if (Name != cmpSettings.Name || AllowRoutingToReadout != cmpSettings.AllowRoutingToReadout)
                     {
                         return false;
                     }
@@ -549,7 +559,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 /// <param name="name">Field name</param>
                 /// <param name="settingsElem">Xml element containing associated signal generator settings</param>
                 public InternalField(string name, XElement settingsElem)
-                    :base(name)
+                    :base(name, false)
                 {
                     switch(settingsElem.Name.LocalName)
                     {
