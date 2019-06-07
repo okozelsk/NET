@@ -1,16 +1,16 @@
 # Reservoir Computing for .NET (RCNet)
 ![Reservoir Computing conceptual view](https://github.com/okozelsk/NET/blob/master/RCNet/Docs/Imgs/ReservoirComputing.jpg)
 <br>
-The aim of this project is to make the [reservoir computing](https://en.wikipedia.org/wiki/Reservoir_computing) methods  easy to use and available for .net platform without dependency on external heterogeneous libraries.
+The aim of this project is to make the [reservoir computing](https://en.wikipedia.org/wiki/Reservoir_computing) methods  easy to use and available for .net platform without any other dependencies.
 Two main reservoir computing methods are called Echo State Network (ESN) and Liquid State Machine (LSM).
 The implemented solution supports both of these methods. However, since ESN and LSM are based on very similar general principles, RCNet brings the option to combine them at the same time. It means the possibility to design complex "hybrid" recurrent networks with spiking and analog neurons working together. This approach, as I believe, opens up new interesting possibilities. This general implementation is called "**State Machine**" in the context of RCNet.
 <br/>
 <br/>
-Main documentation is located on project's wiki (https://github.com/okozelsk/NET/wiki). The WiKi documentation is unfortunately still delayed and does not match the latest version.
+Main documentation is located on project's wiki (https://github.com/okozelsk/NET/wiki). The WiKi documentation is unfortunately still under construction and does not match the latest version.
 <br/>
 Questions, ideas and suggestions for improvements, usage experiences, bug alerts, constructive comments, etc.... are welcome.
 <br/>
-To contact me, please use my email address oldrich.kozelsky@email.cz
+Please use my email address oldrich.kozelsky@email.cz to contact me.
 
 ## Technical information
  - Source code is written in C# 6.0
