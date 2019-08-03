@@ -22,7 +22,10 @@ Main RCNet functionality is demonstrated in a simple demo application (/Demo/Dem
 
 
 ## Overview of the main implemented components
-(listed from elementary to composite)
+
+![Reservoir Computing conceptual view](https://github.com/okozelsk/NET/blob/master/RCNet/Docs/Imgs/StateMachine_EntityRelationship.png)
+<br/>
+(listing from elementary to composite)
 
 ### Signal generators
 |Component|Description|
