@@ -1,5 +1,5 @@
 # Reservoir Computing for .NET (RCNet)
-![Reservoir Computing conceptual view](https://github.com/okozelsk/NET/blob/master/RCNet/Docs/Imgs/ReservoirComputing.jpg)
+![Reservoir Computing conceptual view](https://github.com/okozelsk/NET/blob/master/RCNet/Docs/Imgs/ReservoirComputing_BasicSchema.png)
 <br>
 The aim of this project is to make the [reservoir computing](https://en.wikipedia.org/wiki/Reservoir_computing) methods  easy to use and available for .net platform without any other dependencies.
 Two main reservoir computing methods are called Echo State Network (ESN) and Liquid State Machine (LSM).
