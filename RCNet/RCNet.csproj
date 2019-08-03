@@ -242,6 +242,7 @@
     <Content Include="Docs\Imgs\PoolInputConnection.jpg" />
     <Content Include="Docs\Imgs\PoolInterconnection.jpg" />
     <Content Include="Docs\Imgs\ReservoirComputing.jpg" />
+    <Content Include="Docs\Imgs\ReservoirComputing_BasicSchema.png" />
     <Content Include="Docs\Imgs\SelfConnection.jpg" />
     <Content Include="Docs\Imgs\StateMachineComponents.jpg" />
     <Content Include="Docs\Imgs\StateMachine_EntityRelationship.png" />
