@@ -22,7 +22,7 @@ Main RCNet functionality is demonstrated in a simple demo application (/Demo/Dem
 
 
 ## Overview of the main implemented components
-Components are listed in order from elementar to complex.
+(listed from elementary to composite)
 
 ### Signal generators
 |Component|Description|
