@@ -672,6 +672,21 @@
     <xs:attribute type="UIntGT0Type" name="attemptEpochs" use="required"/>
   </xs:complexType>
 
+  <!-- FF network - elastic linear regression trainer - configuration -->
+  <xs:complexType name="FFNetElasticLinRegrTrainerCfgType">
+    <xs:attribute type="UIntGT0Type" name="attemptEpochs" use="required"/>
+    <xs:attribute type="UDoubleLE1Type" name="l1" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Values between 0 and 1 inclusive</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleLE1Type" name="l2" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Values between 0 and 1 inclusive</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
   <!-- FF network - resilient propagation trainer - configuration -->
   <xs:complexType name="FFNetRPropTrainerCfgType">
     <xs:attribute type="UIntGT0Type" name="attempts" use="required"/>
@@ -729,6 +744,7 @@
         <xs:element type="FFNetHiddenLayersCfgType" name="hiddenLayers" minOccurs="0" maxOccurs="1"/>
       </xs:sequence>
       <xs:choice minOccurs="1" maxOccurs="1">
+        <xs:element type="FFNetElasticLinRegrTrainerCfgType" name="elasticLinRegrTrainer" minOccurs="1" maxOccurs="1"/>
         <xs:element type="FFNetQRDRegrTrainerCfgType" name="qrdRegrTrainer" minOccurs="1" maxOccurs="1"/>
         <xs:element type="FFNetRidgeRegrTrainerCfgType" name="ridgeRegrTrainer" minOccurs="1" maxOccurs="1"/>
         <xs:element type="FFNetRPropTrainerCfgType" name="resPropTrainer" minOccurs="1" maxOccurs="1"/>

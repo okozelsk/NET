@@ -201,6 +201,10 @@ namespace RCNet.Neural.Network.SM.Readout
                 {
                     trainer = new RidgeRegrTrainer(ffn, trainingPredictorsCollection, trainingIdealOutputsCollection, (RidgeRegrTrainerSettings)netCfg.TrainerCfg, rand);
                 }
+                else if(netCfg.TrainerCfg.GetType() == typeof(ElasticLinRegrTrainerSettings))
+                {
+                    trainer = new ElasticLinRegrTrainer(ffn, trainingPredictorsCollection, trainingIdealOutputsCollection, (ElasticLinRegrTrainerSettings)netCfg.TrainerCfg);
+                }
                 else if (netCfg.TrainerCfg.GetType() == typeof(RPropTrainerSettings))
                 {
                     trainer = new RPropTrainer(ffn, trainingPredictorsCollection, trainingIdealOutputsCollection, (RPropTrainerSettings)netCfg.TrainerCfg, rand);

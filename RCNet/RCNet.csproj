@@ -125,6 +125,8 @@
     <Compile Include="Neural\Network\FF\QRDRegrTrainerSettings.cs" />
     <Compile Include="MathTools\PS\ParamSeekerSettings.cs" />
     <Compile Include="MathTools\PS\ParamSeeker.cs" />
+    <Compile Include="Neural\Network\FF\ElasticLinRegrTrainer.cs" />
+    <Compile Include="Neural\Network\FF\ElasticLinRegrTrainerSettings.cs" />
     <Compile Include="Neural\Network\FF\RidgeRegrTrainerSettings.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\NeuralPreprocessor.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\NeuralPreprocessorSettings.cs" />
@@ -385,6 +387,11 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Neural\Network\FF\QRDRegrTrainerSettings.xsd">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Neural\Network\FF\ElasticLinRegrTrainerSettings.xsd">
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
