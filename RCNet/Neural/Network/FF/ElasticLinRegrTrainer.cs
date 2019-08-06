@@ -7,6 +7,7 @@ using RCNet.MathTools.MatrixMath;
 using RCNet.MathTools.VectorMath;
 using RCNet.MathTools.PS;
 using System.Threading.Tasks;
+using System.Collections.Concurrent;
 
 namespace RCNet.Neural.Network.FF
 {
@@ -57,6 +58,7 @@ namespace RCNet.Neural.Network.FF
         private readonly double[] _inputDataWeights;
         private readonly double _inputDataWeightsSum;
         private readonly double _gamma;
+        private readonly List<Tuple<int, int>> _parallelRanges;
 
         //Constructor
         /// <summary>
@@ -92,6 +94,8 @@ namespace RCNet.Neural.Network.FF
             //Collections
             _inputVectorCollection = new List<double[]>(inputVectorCollection);
             _outputVectorCollection = new List<double[]>(outputVectorCollection);
+            var rangePartitioner = Partitioner.Create(0, _inputVectorCollection.Count);
+            _parallelRanges = new List<Tuple<int, int>>(rangePartitioner.GetDynamicPartitions());
             //Weights of input samples
             if (inputDataWeights != null)
             {
@@ -178,6 +182,7 @@ namespace RCNet.Neural.Network.FF
             double[] newWeights = _net.GetWeightsCopy();
             if(AttemptEpoch == 1)
             {
+                //In case of first epoch zeroize all weights
                 newWeights.Populate(0);
             }
             //Optimization of the weights for each output separeatelly
@@ -189,51 +194,74 @@ namespace RCNet.Neural.Network.FF
                 //Bias first
                 weights[0] = newWeights[_net.NumOfOutputValues * _net.NumOfInputValues + outputIdx];
                 //Inputs next
-                for (int i = 0; i < _net.NumOfInputValues; i++)
+                Parallel.For(0, _net.NumOfInputValues, i =>
                 {
                     weights[i + 1] = newWeights[outputIdx * _net.NumOfInputValues + i];
-                }
+                });
+                //Elastic iteration
                 if(_inputDataWeightsSum != 0)
                 {
-                    //Compute and store current output values
-                    double[] computedOutputs = new double[_outputVectorCollection.Count];
-                    Parallel.For(0, _outputVectorCollection.Count, i =>
-                    {
-                        computedOutputs[i] = ComputeLinOutput(i, weights);
-                    });
+                    //Compute and store current output values and new bias
                     double oldBias = weights[0];
                     double newBias = 0;
-                    Parallel.For(0, _inputVectorCollection.Count, i =>
+                    double[] parallelSubResults1 = new double[_parallelRanges.Count];
+                    double[] parallelSubResults2 = new double[_parallelRanges.Count];
+                    double[] computedOutputs = new double[_outputVectorCollection.Count];
+                    parallelSubResults1.Populate(0);
+                    Parallel.For(0, _parallelRanges.Count, rangeIdx =>
                     {
-                        newBias += _inputDataWeights[i] * (_outputVectorCollection[i][outputIdx] - computedOutputs[i] + oldBias);
+                        for (int i = _parallelRanges[rangeIdx].Item1; i < _parallelRanges[rangeIdx].Item2; i++)
+                        {
+                            computedOutputs[i] = ComputeLinOutput(i, weights);
+                            parallelSubResults1[rangeIdx] += _inputDataWeights[i] * (_outputVectorCollection[i][outputIdx] - computedOutputs[i] + oldBias);
+                        }
                     });
+                    //New bias finalization
+                    for(int i = 0; i < _parallelRanges.Count; i++)
+                    {
+                        newBias += parallelSubResults1[i];
+                    }
                     newBias /= _inputDataWeightsSum;
                     weights[0] = newBias;
-                    //Update computed outputs
+                    //Update computed outputs if bias has changed
                     double biasDifference = newBias - oldBias;
                     if(biasDifference != 0)
                     {
-                        Parallel.For(0, _outputVectorCollection.Count, i =>
+                        Parallel.For(0, _parallelRanges.Count, rangeIdx =>
                         {
-                            computedOutputs[i] += biasDifference;
+                            for (int i = _parallelRanges[rangeIdx].Item1; i < _parallelRanges[rangeIdx].Item2; i++)
+                            {
+                                computedOutputs[i] += biasDifference;
+                            }
                         });
                     }
                     //Optimization
-                    //TODO: better parallelization
                     for(int inputValueIdx = 0; inputValueIdx < _net.NumOfInputValues; inputValueIdx++)
                     {
+                        //Fit and denominator computation
                         double oldWeight = weights[1 + inputValueIdx];
                         double fit = 0, denominator = 0;
-                        for(int i = 0; i < _outputVectorCollection.Count; i++)
+                        parallelSubResults1.Populate(0);
+                        parallelSubResults2.Populate(0);
+                        Parallel.For(0, _parallelRanges.Count, rangeIdx =>
                         {
-                            double x = _inputVectorCollection[i][inputValueIdx];
-                            if (x != 0)
+                            for (int i = _parallelRanges[rangeIdx].Item1; i < _parallelRanges[rangeIdx].Item2; i++)
                             {
-                                double partialResidual = _outputVectorCollection[i][outputIdx] - computedOutputs[i] + x * oldWeight;
-                                double idwValue = _inputDataWeights[i] * x;
-                                fit += idwValue * partialResidual;
-                                denominator += idwValue * x;
+                                double x = _inputVectorCollection[i][inputValueIdx];
+                                if (x != 0)
+                                {
+                                    double partialResidual = _outputVectorCollection[i][outputIdx] - computedOutputs[i] + x * oldWeight;
+                                    double idwValue = _inputDataWeights[i] * x;
+                                    parallelSubResults1[rangeIdx] += idwValue * partialResidual;
+                                    parallelSubResults2[rangeIdx] += idwValue * x;
+                                }
                             }
+                        });
+                        //Fit and denominator finalization
+                        for (int i = 0; i < _parallelRanges.Count; i++)
+                        {
+                            fit += parallelSubResults1[i];
+                            denominator += parallelSubResults2[i];
                         }
                         fit /= _inputDataWeightsSum;
                         denominator /= _inputDataWeightsSum;
@@ -249,11 +277,15 @@ namespace RCNet.Neural.Network.FF
                         double weightsDiff = newWeight - oldWeight;
                         if(weightsDiff != 0)
                         {
-                            Parallel.For(0, _outputVectorCollection.Count, i =>
+                            Parallel.For(0, _parallelRanges.Count, rangeIdx =>
                             {
-                                if (_inputVectorCollection[i][inputValueIdx] != 0)
+                                for (int i = _parallelRanges[rangeIdx].Item1; i < _parallelRanges[rangeIdx].Item2; i++)
                                 {
-                                    computedOutputs[i] = ComputeLinOutput(i, weights);
+                                    double x = _inputVectorCollection[i][inputValueIdx];
+                                    if (x != 0)
+                                    {
+                                        computedOutputs[i] += weightsDiff * x;
+                                    }
                                 }
                             });
                         }
