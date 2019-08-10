@@ -50,8 +50,9 @@ namespace RCNet.Neural.Network.FF
         private readonly List<double[]> _inputVectorCollection;
         private readonly List<double[]> _outputVectorCollection;
         private readonly Random _rand;
-        private readonly Matrix _baseSquareMatrix;
-        private readonly Matrix _transposedPredictorsMatrix;
+        private readonly Matrix _XT;
+        private readonly Matrix _XTdotX;
+        private readonly Vector[] _XTdotY;
         private List<Vector> _outputSingleColVectorCollection;
         private ParamSeeker _lambdaSeeker;
         private double _currLambda;
@@ -111,21 +112,23 @@ namespace RCNet.Neural.Network.FF
             }
             //Lambda seeker
             _lambdaSeeker = new ParamSeeker(_settings.LambdaSeekerCfg);
-            _currLambda = 1e6;
+            _currLambda = 0;
             //Matrix setup
-            Matrix predictorsMatrix = new Matrix(inputVectorCollection.Count, _net.NumOfInputValues + 1);
+            Matrix X = new Matrix(inputVectorCollection.Count, _net.NumOfInputValues + 1);
             for (int row = 0; row < inputVectorCollection.Count; row++)
             {
-                //Predictors
-                for (int col = 0; col < _net.NumOfInputValues; col++)
-                {
-                    predictorsMatrix.Data[row][col] = inputVectorCollection[row][col];
-                }
-                //Add constant bias to predictors
-                predictorsMatrix.Data[row][_net.NumOfInputValues] = 1;
+                //Add constant bias
+                X.Data[row][0] = 1d;
+                //Add predictors
+                inputVectorCollection[row].CopyTo(X.Data[row], 1);
             }
-            _transposedPredictorsMatrix = predictorsMatrix.Transpose();
-            _baseSquareMatrix = _transposedPredictorsMatrix * predictorsMatrix;
+            _XT = X.Transpose();
+            _XTdotX = _XT * X;
+            _XTdotY = new Vector[_net.NumOfOutputValues];
+            for (int outputIdx = 0; outputIdx < _net.NumOfOutputValues; outputIdx++)
+            {
+                _XTdotY[outputIdx] = _XT * _outputSingleColVectorCollection[outputIdx];
+            }
             return;
         }
 
@@ -158,7 +161,7 @@ namespace RCNet.Neural.Network.FF
             //New lambda to be tested
             double newLambda = _lambdaSeeker.Next;
             //Secondary stop condition
-            if (Math.Abs(_currLambda - newLambda) < StopLambdaDifference)
+            if (AttemptEpoch > 0 && Math.Abs(_currLambda - newLambda) < StopLambdaDifference)
             {
                 return false;
             }
@@ -166,27 +169,37 @@ namespace RCNet.Neural.Network.FF
             _currLambda = newLambda;
             ++AttemptEpoch;
             InfoMessage = $"lambda={_currLambda.ToString(CultureInfo.InvariantCulture)}";
-            //Copy of base squared matrix
-            Matrix lambdaInvMatrix = new Matrix(_baseSquareMatrix);
-            //Apply lambda
-            lambdaInvMatrix.AddScalarToDiagonal(_currLambda);
-            //Apply inverse
-            lambdaInvMatrix.Inverse();
+            //Inverse _XTdotX matrix
+            Matrix I = null;
+            if (_currLambda > 0)
+            {
+                Matrix B = new Matrix(_XTdotX);
+                double tmp = B.Data[0][0];
+                B.AddScalarToDiagonal(_currLambda * _currLambda);
+                B.Data[0][0] = tmp;
+                I = B.Inverse(true);
+            }
+            else
+            {
+                I = _XTdotX.Inverse(true);
+            }
+
+
             //New weights buffer
             double[] newWeights = new double[_net.NumOfWeights];
             //Weights for each output neuron
             for (int outputIdx = 0; outputIdx < _net.NumOfOutputValues; outputIdx++)
             {
-                Vector tPredictorsOutputsProduct = _transposedPredictorsMatrix * _outputSingleColVectorCollection[outputIdx];
                 //Weights solution
-                Vector weights = lambdaInvMatrix * tPredictorsOutputsProduct;
+                Vector weights = I * _XTdotY[outputIdx];
                 //Store weights
-                for (int i = 0; i < weights.Length - 1; i++)
+                //Bias
+                newWeights[_net.NumOfOutputValues * _net.NumOfInputValues + outputIdx] = weights.Data[0];
+                //Predictors
+                for (int i = 0; i < _net.NumOfInputValues; i++)
                 {
-                    newWeights[outputIdx * _net.NumOfInputValues + i] = weights.Data[i];
+                    newWeights[outputIdx * _net.NumOfInputValues + i] = weights.Data[i + 1];
                 }
-                //Bias weight
-                newWeights[_net.NumOfOutputValues * _net.NumOfInputValues + outputIdx] = weights.Data[weights.Length - 1];
             }
             //Set new weights and compute error
             _net.SetWeights(newWeights);

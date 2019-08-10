@@ -69,6 +69,7 @@
     <Compile Include="CsvTools\DelimitedStringValues.cs" />
     <Compile Include="MathTools\Differential\ODENumSolver.cs" />
     <Compile Include="MathTools\EuclideanDistance.cs" />
+    <Compile Include="MathTools\MatrixMath\LUD.cs" />
     <Compile Include="MathTools\MatrixMath\SVD.cs" />
     <Compile Include="MathTools\PhysUnit.cs" />
     <Compile Include="MathTools\VectorMath\Vector.cs" />

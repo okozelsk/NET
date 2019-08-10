@@ -70,94 +70,42 @@ namespace RCNet.DemoConsoleApp
 
 
 
-            int numOfweights = 4;
+            int numOfweights = 3;
             int xIdx, dIdx = 0;
-            double[][] data = new double[5][];
+            double[][] data = new double[3][];
             data[dIdx] = new double[numOfweights];
             xIdx = -1;
-            data[dIdx][++xIdx] = 1; //Bias
             data[dIdx][++xIdx] = 2;
             data[dIdx][++xIdx] = 1;
             data[dIdx][++xIdx] = 3;
             ++dIdx;
             data[dIdx] = new double[numOfweights];
             xIdx = -1;
-            data[dIdx][++xIdx] = 1; //Bias
             data[dIdx][++xIdx] = 1;
             data[dIdx][++xIdx] = 3;
             data[dIdx][++xIdx] = -3;
             ++dIdx;
             data[dIdx] = new double[numOfweights];
             xIdx = -1;
-            data[dIdx][++xIdx] = 1; //Bias
             data[dIdx][++xIdx] = -2;
             data[dIdx][++xIdx] = 4;
             data[dIdx][++xIdx] = 4;
-            ++dIdx;
-            data[dIdx] = new double[numOfweights];
-            xIdx = -1;
-            data[dIdx][++xIdx] = 1; //Bias
-            data[dIdx][++xIdx] = -5;
-            data[dIdx][++xIdx] = 7;
-            data[dIdx][++xIdx] = 6;
-            ++dIdx;
-            data[dIdx] = new double[numOfweights];
-            xIdx = -1;
-            data[dIdx][++xIdx] = 1; //Bias
-            data[dIdx][++xIdx] = 1;
-            data[dIdx][++xIdx] = 12;
-            data[dIdx][++xIdx] = 5;
 
-            Matrix M = new Matrix(data, true);
-            Vector desired = new Vector(5);
-            dIdx = -1;
-            desired.Data[++dIdx] = 8;
-            desired.Data[++dIdx] = 13;
-            desired.Data[++dIdx] = 5;
-            desired.Data[++dIdx] = 7;
-            desired.Data[++dIdx] = 10;
-
-            Vector weights = Matrix.RidgeRegression(M, desired, 0);
-
-            //Display results
-            for(int i = 0; i < data.Length; i++)
-            {
-                double result = 0;
-                for(int j = 0; j < weights.Length; j++)
-                {
-                    result += data[i][j] * weights[j];
-                }
-                Console.WriteLine($"Computed {result}, Desired {desired.Data[i]}");
-            }
-            for (int i = 0; i < weights.Length; i++)
-            {
-                Console.WriteLine($"Weight[{i}] = {weights[i]}");
-            }
-            Console.WriteLine();
+            //Matrix M = new Matrix(data, true);
+            //Matrix I = M.Inverse(false);
+            //Matrix identity = M * I; //Must lead to identity matrix
 
 
-            //QRD
-            QRD decomposition = new QRD(M);
-            Matrix B = new Matrix(desired.Length, 1, desired.Data);
-            Matrix W = decomposition.Solve(B);
-            //Display results
-            for (int i = 0; i < data.Length; i++)
-            {
-                double result = 0;
-                for (int j = 0; j < W.Data.Length; j++)
-                {
-                    result += data[i][j] * W.Data[j][0];
-                }
-                Console.WriteLine($"Computed {result}, Desired {desired.Data[i]}");
-            }
-            for (int i = 0; i < W.Data.Length; i++)
-            {
-                Console.WriteLine($"Weight[{i}] = {W.Data[i][0]}");
-            }
+            Matrix I = new Matrix(3, 3);
+            I.AddScalarToDiagonal(1);
+            Matrix X = new Matrix(I);
+            X.Multiply(0.1);
+
+            Matrix XT = X.Transpose();
+            Matrix R = XT * X;
 
 
-
-            ;
+            Console.ReadLine();
 
 
 

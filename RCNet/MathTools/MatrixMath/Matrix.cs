@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using RCNet.Extensions;
 using RCNet.MathTools.VectorMath;
@@ -401,145 +402,6 @@ namespace RCNet.MathTools.MatrixMath
         }
 
         /// <summary>
-        /// Method uses power iteration method to estimate largest eigen value (in magnitude) and corresponding eigen vector.
-        /// Matrix must be squared.
-        /// </summary>
-        /// <param name="resultEigenVector">Returned corresponding eigen vector</param>
-        /// <param name="maxNumOfIterations">Maximum number of method's iterations</param>
-        /// <param name="stopDelta">Stopping corvengence delta between previous iteration and current iteration</param>
-        /// <returns>Estimated largest eigen value (in magnitude)</returns>
-        public double EstimateLargestEigenValue(out double[] resultEigenVector, int maxNumOfIterations = 1000, double stopDelta = 1e-6)
-        {
-            //Firstly check squared matrix
-            if (!IsSquared)
-            {
-                throw new Exception("Matrix must be squared.");
-            }
-            //Local variables
-            //Iteration initialization
-            int iteration = 0;
-            double iterationDelta = 0;
-            int n = NumOfRows;
-            double[] tmpVector = new double[n];
-            double eigenValue = 0;
-            double[] eigenVector = new double[n];
-            eigenVector.Populate(1);
-            //Results
-            double minDelta = double.MaxValue;
-            double resultEigenValue = 0;
-            resultEigenVector = new double[n];
-            //Convergence loop
-            do
-            {
-                Parallel.For(0, n, i =>
-                {
-                    tmpVector[i] = 0;
-                    for (int j = 0; j < n; j++)
-                    {
-                        tmpVector[i] += _data[i][j] * eigenVector[j];
-                    }
-                });
-
-                //Find element having max magnitude (= new eigen value)
-                double prevEigenValue = eigenValue;
-                eigenValue = tmpVector[0];
-                for (int i = 1; i < n; i++)
-                {
-                    if (Math.Abs(tmpVector[i]) > Math.Abs(eigenValue))
-                    {
-                        eigenValue = tmpVector[i];
-                    }
-                }
-
-                //Prepare new normalized eigenVector
-                for (int i = 0; i < n; i++)
-                {
-                    eigenVector[i] = tmpVector[i] / eigenValue;
-                }
-
-                //Iteration results
-                ++iteration;
-                iterationDelta = Math.Abs(eigenValue - prevEigenValue);
-                if(minDelta > iterationDelta)
-                {
-                    minDelta = iterationDelta;
-                    resultEigenValue = eigenValue;
-                    eigenVector.CopyTo(resultEigenVector, 0);
-                }
-
-            } while(iteration < maxNumOfIterations && iterationDelta > stopDelta);
-            return resultEigenValue;
-        }
-
-        /// <summary>
-        /// Method uses LU decomposition to solve system of linear equations.
-        /// Matrix must be squared.
-        /// </summary>
-        /// <param name="desired">Vector of desired results (right part of linear equations)</param>
-        /// <returns>Vector of computed linear coefficients</returns>
-        public Vector SolveUsingLU(Vector desired)
-        {
-            //Checks squared matrix
-            if (!IsSquared)
-            {
-                throw new Exception("Matrix must be squared.");
-            }
-            if (NumOfRows != desired.Length)
-            {
-                throw new Exception("Number of matrix rows must be equal to length of desired results vector.");
-            }
-            int n = NumOfRows;
-            double[] desiredData = desired.Data;
-            double[,] lu = new double[n, n];
-            double sum = 0;
-            //LU decomposition
-            for (int i = 0; i < n; i++)
-            {
-                for (int j = i; j < n; j++)
-                {
-                    sum = 0;
-                    for (int k = 0; k < i; k++)
-                    {
-                        sum += lu[i, k] * lu[k, j];
-                    }
-                    lu[i, j] = _data[i][j] - sum;
-                }
-                for (int j = i + 1; j < n; j++)
-                {
-                    sum = 0;
-                    for (int k = 0; k < i; k++)
-                    {
-                        sum += lu[j, k] * lu[k, i];
-                    }
-                    lu[j, i] = (1 / lu[i, i]) * (_data[j][i] - sum);
-                }
-            }
-            //Find solution of Ly = b
-            double[] y = new double[n];
-            for (int i = 0; i < n; i++)
-            {
-                sum = 0;
-                for (int k = 0; k < i; k++)
-                {
-                    sum += lu[i, k] * y[k];
-                }
-                y[i] = desiredData[i] - sum;
-            }
-            // find solution of Ux = y
-            double[] x = new double[n];
-            for (int i = n - 1; i >= 0; i--)
-            {
-                sum = 0;
-                for (int k = i + 1; k < n; k++)
-                {
-                    sum += lu[i, k] * x[k];
-                }
-                x[i] = (1 / lu[i, i]) * (y[i] - sum);
-            }
-            return new Vector(x, false);
-        }
-
-        /// <summary>
         /// Computes A + B
         /// </summary>
         /// <param name="A">Matrix A</param>
@@ -795,6 +657,7 @@ namespace RCNet.MathTools.MatrixMath
                 {
                     rowDataA = A._data[i];
                     rowDataResult = new double[colsB];
+                    rowDataResult.Populate(0);
                     for (int j = 0; j < rowsB; j++)
                     {
                         rowDataB = B._data[j];
@@ -871,6 +734,7 @@ namespace RCNet.MathTools.MatrixMath
                 throw new Exception("Number of columns of A must be equal to length of vector v");
             }
             double[] resultData = new double[rowsA];
+            resultData.Populate(0);
             for (int i = 0; i < rowsA; i++)
             {
                 for (int j = 0; j < v.Length; j++)
@@ -1056,165 +920,246 @@ namespace RCNet.MathTools.MatrixMath
         }
 
         /// <summary>
-        /// Inverses this matrix and returns its determinant.
-        /// Ennhanced algorithm originally proposed by Ahmad FAROOQ and Khan HAMID
+        /// Computes inverse matrix of this matrix.
+        /// Function implements enhanced algorithm originally proposed by Ahmad FAROOQ and Khan HAMID in the publication:
+        /// "An Efficient and Generic Algorithm for Matrix Inversion"
+        /// https://www.researchgate.net/publication/220337321_An_Efficient_and_Generic_Algorithm_for_Matrix_Inversion?enrichId=rgreq-abb517cc9e7aa81f0a1bfbb3633efc17-XXX&enrichSource=Y292ZXJQYWdlOzIyMDMzNzMyMTtBUzoxMzA3NzYxNTg5Njk4NTZAMTQwODE5MDg3NDYzMw%3D%3D&el=1_x_2&_esc=publicationCoverPdf
+        /// (parallel processing was introduced to improve performance) 
+        /// 
+        /// Additionaly was implemented flexible off-diagonal pivot selection using dictionary
+        /// approach to build final inverted matrix proposed by Hafsa Athar Jafree, Muhammad Imtiaz, Syed Inayatullah,
+        /// Fozia Hanif Khan and Tajuddin Nizami in the publication:
+        /// "A space efficient flexible pivot selection approach to evaluate determinant and inverse of a matrix"
+        /// https://arxiv.org/ftp/arxiv/papers/1304/1304.6893.pdf
         /// </summary>
-        /// <returns>Determinant</returns>
-        public double Inverse()
+        /// <param name="preferAccuracy">If true, function favorites accuracy (selects pivots having max abs values) over the execution speed (selects diagonal pivots).</param>
+        /// <returns>Inverse matrix of this matrix</returns>
+        public Matrix Inverse(bool preferAccuracy = true)
         {
             if (!IsSquared)
             {
                 throw new Exception("Matrix must be squared.");
             }
-            double determinant = 1.0;
+            //Dimension to be used within the function
             int size = NumOfRows;
+            //Prepare ranges for parallel processing
             var rangePartitioner = Partitioner.Create(0, size);
-            for (int p = 0; p < size; p++)
+            //Dictionary
+            //Computational dictionary matrix - a copy of this matrix in the beginning
+            Matrix dictMatrix = new Matrix(this);
+            //Rows
+            int[] dictRows = new int[size];
+            dictRows.Indices();
+            //Available pivot rows
+            List<int> availableDictPivotRows = new List<int>(dictRows);
+            //Cols
+            int[] dictCols = new int[size];
+            dictCols.Indices();
+            //Available pivot columns
+            List<int> availableDictPivotCols = new List<int>(dictCols);
+            double minPivotValue = 1e-10;
+            //Indicates that some changes were made in dictionary
+            bool dictChanged = false;
+
+            //Main loop
+            for (int n = 0; n < size; n++)
             {
-                double[] pRowData = _data[p];
-                double pivot = _data[p][p];
-                determinant *= pivot;
-                if (Math.Abs(pivot) < 1e-20)
+                //Pivot
+                int pivotRow = -1;
+                int pivotCol = -1;
+                //Select pivot element
+                if (!preferAccuracy)
                 {
-                    //Failed
-                    throw new Exception($"Pivot is too small. Pivot = {pivot}.");
+                    //Simply use diagonal element
+                    pivotRow = n;
+                    pivotCol = n;
+                    //Validate pivot value
+                    if (Math.Abs(dictMatrix._data[pivotRow][pivotCol]) < minPivotValue)
+                    {
+                        //Failed
+                        throw new Exception($"Absolute value of the diagonal Pivot at row {pivotRow} is too small. Pivot = {dictMatrix._data[pivotRow][pivotCol]}.");
+                    }
                 }
+                else
+                {
+                    //Find new Pivot element having highest absolute value
+                    double selectedPivotValue = 0;
+                    int selectedPivotRowListIdx = -1, selectedPivotColListIdx = -1;
+                    for (int pivotRowListIdx = 0; pivotRowListIdx < availableDictPivotRows.Count; pivotRowListIdx++)
+                    {
+                        int row = availableDictPivotRows[pivotRowListIdx];
+                        for (int pivotColListIdx = 0; pivotColListIdx < availableDictPivotCols.Count; pivotColListIdx++)
+                        {
+                            int col = availableDictPivotCols[pivotColListIdx];
+                            double elemAbsValue = Math.Abs(dictMatrix._data[row][col]);
+                            if (elemAbsValue >= minPivotValue && (pivotColListIdx == 0 || elemAbsValue > Math.Abs(selectedPivotValue)))
+                            {
+                                selectedPivotValue = dictMatrix._data[row][col];
+                                selectedPivotRowListIdx = pivotRowListIdx;
+                                pivotRow = row;
+                                selectedPivotColListIdx = pivotColListIdx;
+                                pivotCol = col;
+                            }
+                        }
+                    }
+                    //Test success of pivot selection
+                    if (selectedPivotValue == 0)
+                    {
+                        //Pivot was not selected
+                        throw new Exception($"Can't select Pivot in step {n + 1}. No matrix element has enaugh absolute value >= {minPivotValue}.");
+                    }
+                    //Remove row from available pivot rows
+                    availableDictPivotRows.RemoveAt(selectedPivotRowListIdx);
+                    //Remove col from available pivot cols
+                    availableDictPivotCols.RemoveAt(selectedPivotColListIdx);
+                }
+                //Pick up Pivot value
+                double pivot = dictMatrix._data[pivotRow][pivotCol];
+                //Update dictionary
+                if (pivotRow != n || pivotCol != n)
+                {
+                    dictRows[pivotRow] = pivotCol;
+                    dictCols[pivotCol] = pivotRow;
+                    dictChanged = true;
+                }
+                //Pivot processing
+                //Pivot column elements
                 Parallel.ForEach(rangePartitioner, range =>
                 {
                     for (int i = range.Item1; i < range.Item2; i++)
                     {
-                        _data[i][p] /= -pivot;
+                        if (i != pivotRow)
+                        {
+                            dictMatrix._data[i][pivotCol] /= -pivot;
+                        }
                     }
                 });
+                //Whole matrix except pivot row and column elements
                 Parallel.ForEach(rangePartitioner, range =>
                 {
-                    double[] iRowData;
                     for (int i = range.Item1; i < range.Item2; i++)
                     {
-                        if (i != p)
+                        if (i != pivotRow)
                         {
-                            iRowData = _data[i];
-                            double iRowPColVal = iRowData[p];
                             for (int j = 0; j < size; j++)
                             {
-                                if (j != p)
+                                if (j != pivotCol)
                                 {
-                                    iRowData[j] += pRowData[j] * iRowPColVal;
+                                    dictMatrix._data[i][j] += dictMatrix._data[pivotRow][j] * dictMatrix._data[i][pivotCol];
                                 }
                             }
                         }
                     }
                 });
+                ;
+                //Pivot row elements
                 Parallel.ForEach(rangePartitioner, range =>
                 {
                     for (int i = range.Item1; i < range.Item2; i++)
                     {
-                        pRowData[i] /= pivot;
+                        if (i != pivotCol)
+                        {
+                            dictMatrix._data[pivotRow][i] /= pivot;
+                        }
                     }
                 });
-                pRowData[p] = 1d / pivot;
+                ;
+                //Pivot element
+                dictMatrix._data[pivotRow][pivotCol] = 1d / pivot;
             }
-            return determinant;
+            //Result finalization
+            if(!dictChanged)
+            {
+                //No transpositionings so use directly IM as the result
+                return dictMatrix;
+            }
+            else
+            {
+                //Use dictionary and build resulting matrix
+                Matrix resultingMatrix = new Matrix(size, size);
+                Parallel.ForEach(rangePartitioner, range =>
+                {
+                    for (int i = range.Item1; i < range.Item2; i++)
+                    {
+                        for (int j = 0; j < size; j++)
+                        {
+                            resultingMatrix._data[i][j] = dictMatrix._data[dictCols[j]][dictRows[i]];
+                        }
+                    }
+                });
+                return resultingMatrix;
+            }
         }
 
         /// <summary>
-        /// Inverses this matrix and returns its determinant.
-        /// Originally proposed algorithm by Ahmad FAROOQ and Khan HAMID
-        /// https://www.researchgate.net/profile/Farooq_Ahmad16/publication/220337322_An_Efficient_and_Simple_Algorithm_for_Matrix_Inversion/links/58d77e9daca2727e5ef29dc8/An-Efficient-and-Simple-Algorithm-for-Matrix-Inversion
-        /// Function is single-threaded.
+        /// Method uses power iteration method to estimate largest eigen value (in magnitude) and corresponding eigen vector.
+        /// Matrix must be squared.
         /// </summary>
-        /// <returns>Determinant</returns>
-        public double ST_Inverse()
+        /// <param name="resultEigenVector">Returned corresponding eigen vector</param>
+        /// <param name="maxNumOfIterations">Maximum number of method's iterations</param>
+        /// <param name="stopDelta">Stopping corvengence delta between previous iteration and current iteration</param>
+        /// <returns>Estimated largest eigen value (in magnitude)</returns>
+        public double EstimateLargestEigenValue(out double[] resultEigenVector, int maxNumOfIterations = 1000, double stopDelta = 1e-6)
         {
+            //Firstly check squared matrix
             if (!IsSquared)
             {
                 throw new Exception("Matrix must be squared.");
             }
-            double determinant = 1.0;
-            int size = NumOfRows;
-            for (int p = 0; p < size; p++)
+            //Local variables
+            //Iteration initialization
+            int iteration = 0;
+            double iterationDelta = 0;
+            int n = NumOfRows;
+            double[] tmpVector = new double[n];
+            double eigenValue = 0;
+            double[] eigenVector = new double[n];
+            eigenVector.Populate(1);
+            //Results
+            double minDelta = double.MaxValue;
+            double resultEigenValue = 0;
+            resultEigenVector = new double[n];
+            //Convergence loop
+            do
             {
-                double pivot = _data[p][p];
-                determinant *= pivot;
-                if (Math.Abs(pivot) < 1e-20)
+                Parallel.For(0, n, i =>
                 {
-                    //Failed
-                    throw new Exception($"Pivot is too small. Pivot = {pivot}.");
-                }
-                for (int i = 0; i < size; i++)
-                {
-                    _data[i][p] = -_data[i][p] / pivot;
-                }
-                for (int i = 0; i < size; i++)
-                {
-                    if (i != p)
+                    tmpVector[i] = 0;
+                    for (int j = 0; j < n; j++)
                     {
-                        for (int j = 0; j < size; j++)
-                        {
-                            if (j != p)
-                            {
-                                _data[i][j] += _data[p][j] * _data[i][p];
-                            }
-                        }
+                        tmpVector[i] += _data[i][j] * eigenVector[j];
+                    }
+                });
+
+                //Find element having max magnitude (= new eigen value)
+                double prevEigenValue = eigenValue;
+                eigenValue = tmpVector[0];
+                for (int i = 1; i < n; i++)
+                {
+                    if (Math.Abs(tmpVector[i]) > Math.Abs(eigenValue))
+                    {
+                        eigenValue = tmpVector[i];
                     }
                 }
-                for (int j = 0; j < size; j++)
+
+                //Prepare new normalized eigenVector
+                for (int i = 0; i < n; i++)
                 {
-                    _data[p][j] /= pivot;
+                    eigenVector[i] = tmpVector[i] / eigenValue;
                 }
-                _data[p][p] = 1 / pivot;
-            }
-            return determinant;
-        }
 
-        /// <summary>
-        /// Computes matrix inverse
-        /// </summary>
-        /// <param name="A">Matrix A</param>
-        /// <returns>Resulting matrix</returns>
-        public static Matrix Inverse(Matrix A)
-        {
-            Matrix R = new Matrix(A);
-            R.Inverse();
-            return R;
-        }
+                //Iteration results
+                ++iteration;
+                iterationDelta = Math.Abs(eigenValue - prevEigenValue);
+                if (minDelta > iterationDelta)
+                {
+                    minDelta = iterationDelta;
+                    resultEigenValue = eigenValue;
+                    eigenVector.CopyTo(resultEigenVector, 0);
+                }
 
-        /// <summary>
-        /// Computes ridge regression weights
-        /// </summary>
-        /// <param name="desired">Desired results vector</param>
-        /// <param name="lambda">Hyperparameter lambda of Ridge Regression method</param>
-        /// <returns>Vector of computed weights</returns>
-        public Vector RidgeRegression(Vector desired, double lambda = 0)
-        {
-            //Checks
-            if (NumOfRows != desired.Length)
-            {
-                throw new Exception("Number of matrix rows must be equal to length of desired results vector.");
-            }
-            //Computation
-            Matrix Xt = Transpose();
-            Matrix R = Xt * this;
-            if (lambda > 0)
-            {
-                R.AddScalarToDiagonal(lambda);
-            }
-            R.Inverse();
-            //For better performance must be ensured that (Xt * desired) is computed first and after then is
-            //computed R * (resulting vector).
-            return R * (Xt * desired);
-        }
-
-        /// <summary>
-        /// Computes ridge regression weights
-        /// </summary>
-        /// <param name="X">Predictor matrix</param>
-        /// <param name="desired">Desired results vector</param>
-        /// <param name="lambda">Hyperparameter lambda of Ridge Regression method</param>
-        /// <returns>Vector of computed weights</returns>
-        public static Vector RidgeRegression(Matrix X, Vector desired, double lambda = 0)
-        {
-            return X.RidgeRegression(desired, lambda);
+            } while (iteration < maxNumOfIterations && iterationDelta > stopDelta);
+            return resultEigenValue;
         }
 
 

@@ -38,7 +38,8 @@ namespace RCNet.Neural.Network.FF
         /// Constructs an initialized instance
         /// </summary>
         /// <param name="numOfAttemptEpochs">Number of attempt epochs</param>
-        /// <param name="lambdaSeekerCfg">Configuration of seeker of lambda hyperparameter value</param>
+        /// <param name="l1">L1 (lasso) hyperparameter</param>
+        /// <param name="l2">L2 (ridge) hyperparameter</param>
         public ElasticLinRegrTrainerSettings(int numOfAttemptEpochs, double l1 = 0, double l2 = 0)
         {
             NumOfAttemptEpochs = numOfAttemptEpochs;

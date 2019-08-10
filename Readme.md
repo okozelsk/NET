@@ -16,11 +16,28 @@ I welcome questions, ideas and suggestions for improvements, usage experiences, 
 Main functionality is demonstrated in a simple demo application (/Demo/DemoConsoleApp). Application has no startup parameters, all necessary settins are specified in DemoSettings.xml file. DemoSettings.xml has to be in the same folder as the executable DemoConsoleApp.exe. Application performs sequence of tasks defined in DemoSettings.xml. You can easily insert new task or tune existing one by simple modification of DemoSettings.xml. Each task is defined in the xml element "case" and its input data is expected in csv format.
 
 
-## Overview of the main implemented components
+## Components overview
 
 ![Reservoir Computing conceptual view](https://github.com/okozelsk/NET/blob/master/RCNet/Docs/Imgs/StateMachine_EntityRelationship.png)
 <br/>
-(listing from elementary to composite)
+(listed in logical order from basic to composite and complex)
+
+### Math
+|Component|Description|
+|--|--|
+|Normalizer|Supports data normalization + standardization and then backward naturalization|
+|BasicStat|Provides basic statistics of given data (averages, sum of squares, standard deviation, etc.)|
+|ODENumSolver|Implements ordinary differential equations (ODE) numerical solver supporting Euler and RK4 methods|
+|Vector|Implements vector of double values supporting basic mathematical operations|
+|Matrix|Implements matrix of double values supporting basic mathematical operations. Contains buit-in Power Iteration method for the largest eigen value quick estimation|
+|EVD|Full eigen values and vectors decomposition of a squared matrix|
+|SVD|Singular values decomposition of a matrix|
+|QRD|QR decomposition of a matrix|
+|LUD|LU decomposition of a squared matrix|
+|ParamSeeker|Implements an error driven iterative search for the best value of a given parameter|
+|HurstExpEstim|Implements Hurst exponent estimator. It can be used to evaluate level of data randomness|
+|"RandomValue"|Supports Uniform and Gaussian distributions|
+|Others|Set of small additional helper components like PhysUnit, Interval, Bitwise, Combinatorics, Factorial, WeightedAvg, ...|
 
 ### Signal generators
 |Component|Description|
@@ -30,34 +47,20 @@ Main functionality is demonstrated in a simple demo application (/Demo/DemoConso
 |RandomGenerator|Generates random signal|
 |SinusoidalGenerator|Generates sinusoidal signal|
 
-### XML
+### XML handling
 |Component|Description|
 |--|--|
-|ElemValidator|Implements unefficient method to validate element against specified xsd type. It complements the apparently missing .net method and is necessary to comply with the overall RCNet xml concept.|
+|ElemValidator|Implements validation of alone xml element against specified tzpe defined in xsd. It complements the apparently missing .net method and is necessary to comply with the overall RCNet xml settings concept.|
 |DocValidator|Provides the xml loading/validation functionalities|
-
-### Math
-|Component|Description|
-|--|--|
-|Normalizer|Supports data normalization/naturalization and Gaussian standardization|
-|BasicStat|Implements the simple and thread safe statistics|
-|ODENumSolver|Ordinary Differential Equations (ODE) Numerical Solver (Euler and RK4 methods)|
-|Vector|Class represents the mathematical vector of double values supporting basic operations|
-|Matrix|Class represents the mathematical matrix of double values supporting basic operations, LU, Ridge regression and the Power Iteration method for the largest EV estimation|
-|EVD|Full eigen values and vectors decomposition of a matrix|
-|SVD|Singular values decomposition of a matrix|
-|QRD|QR decomposition of a matrix|
-|PhysUnit|Encaptualates SI physical unit|
-|"RandomValue"|Supports Uniform and Gaussian distributions|
-|Others|Interval, BinErrStat, BinDistribution, Bitwise, Combinatorics, Factorial, WeightedAvg, HurstExpEstim, ...|
 
 ### Data handling
 |Component|Description|
 |--|--|
-|PatternBundle|Bundle of pattern of vectors and desired output vector. Supports upload from csv file|
-|VectorBundle|Bundle of input vector and desired output vector. Supports upload from csv file|
-|ResultComparativeBundle|Bundle of computed vector and desired output vector|
-|BundleNormalizer|Helper class for easy standardization and normalization/naturalization of sample data bundle|
+|DelimitedStringValues|Helper encoder and decoder of data in csv format|
+|PatternBundle|Bundle of patterns of input data vectors and corresponding desired output vectors (n:1). Supports upload from csv file|
+|VectorBundle|Bundle of input data vectors and corresponding desired output vectors (1:1). Supports upload from csv file|
+|ResultComparativeBundle|Bundle of computed output vectors and desired output vectors (1:1)|
+|BundleNormalizer|Helper class for easy standardization + normalization and backward naturalization of data within PatternBundle or VectorBundle|
 
 ### Analog neuron activation functions
 |Component|Description|

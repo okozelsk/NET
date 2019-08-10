@@ -149,7 +149,7 @@ namespace RCNet.Neural.Network.FF
             return output;
         }
 
-        private double SoftTreshold(double x)
+        private double SoftThreshold(double x)
         {
             if(_gamma < Math.Abs(x))
             {
@@ -269,7 +269,7 @@ namespace RCNet.Neural.Network.FF
                         double newWeight = 0;
                         if(denominator != 0)
                         {
-                            newWeight = SoftTreshold(fit) / denominator;
+                            newWeight = SoftThreshold(fit) / denominator;
                         }
                         //Set new weight
                         weights[1 + inputValueIdx] = newWeight;

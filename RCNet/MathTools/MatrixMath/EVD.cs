@@ -70,7 +70,7 @@ namespace RCNet.MathTools.MatrixMath
             _dimension = matrix.NumOfCols;
             if(_dimension != matrix.NumOfRows)
             {
-                throw new ArgumentException("Matrix is not square.", "matrix");
+                throw new ArgumentException("Matrix is not squared.", "matrix");
             }
 
             _eigenvectors = new double[_dimension][];
