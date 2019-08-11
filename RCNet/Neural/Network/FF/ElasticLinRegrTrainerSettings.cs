@@ -25,26 +25,26 @@ namespace RCNet.Neural.Network.FF
         /// </summary>
         public int NumOfAttemptEpochs { get; set; }
         /// <summary>
-        /// L1 hyperparameter
+        /// Ridge lambda hyperparameter
         /// </summary>
-        public double L1 { get; set; }
+        public double Lambda { get; set; }
         /// <summary>
-        /// L2 hyperparameter
+        /// Trade-off ratio between Ridge (0) and Lasso (1) approach
         /// </summary>
-        public double L2 { get; set; }
+        public double Alpha { get; set; }
 
         //Constructors
         /// <summary>
         /// Constructs an initialized instance
         /// </summary>
         /// <param name="numOfAttemptEpochs">Number of attempt epochs</param>
-        /// <param name="l1">L1 (lasso) hyperparameter</param>
-        /// <param name="l2">L2 (ridge) hyperparameter</param>
-        public ElasticLinRegrTrainerSettings(int numOfAttemptEpochs, double l1 = 0, double l2 = 0)
+        /// <param name="lambda">L1 (lasso) hyperparameter</param>
+        /// <param name="alpha">L2 (ridge) hyperparameter</param>
+        public ElasticLinRegrTrainerSettings(int numOfAttemptEpochs, double lambda = 0, double alpha = 0)
         {
             NumOfAttemptEpochs = numOfAttemptEpochs;
-            L1 = l1;
-            L2 = l2;
+            Lambda = lambda;
+            Alpha = alpha;
             return;
         }
 
@@ -55,8 +55,8 @@ namespace RCNet.Neural.Network.FF
         public ElasticLinRegrTrainerSettings(ElasticLinRegrTrainerSettings source)
         {
             NumOfAttemptEpochs = source.NumOfAttemptEpochs;
-            L1 = source.L1;
-            L2 = source.L2;
+            Lambda = source.Lambda;
+            Alpha = source.Alpha;
             return;
         }
 
@@ -75,8 +75,8 @@ namespace RCNet.Neural.Network.FF
             XElement settingsElem = validator.Validate(elem, "rootElem");
             //Parsing
             NumOfAttemptEpochs = int.Parse(settingsElem.Attribute("attemptEpochs").Value, CultureInfo.InvariantCulture);
-            L1 = double.Parse(settingsElem.Attribute("l1").Value, CultureInfo.InvariantCulture);
-            L2 = double.Parse(settingsElem.Attribute("l2").Value, CultureInfo.InvariantCulture);
+            Lambda = double.Parse(settingsElem.Attribute("lambda").Value, CultureInfo.InvariantCulture);
+            Alpha = double.Parse(settingsElem.Attribute("alpha").Value, CultureInfo.InvariantCulture);
             return;
         }
 
@@ -95,8 +95,8 @@ namespace RCNet.Neural.Network.FF
             if (obj == null) return false;
             ElasticLinRegrTrainerSettings cmpSettings = obj as ElasticLinRegrTrainerSettings;
             if (NumOfAttemptEpochs != cmpSettings.NumOfAttemptEpochs ||
-                L1 != cmpSettings.L1 ||
-                L2 != cmpSettings.L2
+                Lambda != cmpSettings.Lambda ||
+                Alpha != cmpSettings.Alpha
                 )
             {
                 return false;

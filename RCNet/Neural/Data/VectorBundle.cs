@@ -41,7 +41,7 @@ namespace RCNet.Neural.Data
         /// </summary>
         /// <param name="inputVectorCollection">Collection of input vectors</param>
         /// <param name="outputVectorCollection">Collection of output vectors</param>
-        public VectorBundle(List<double[]> inputVectorCollection, List<double[]> outputVectorCollection)
+        public VectorBundle(IEnumerable<double[]> inputVectorCollection, IEnumerable<double[]> outputVectorCollection)
         {
             InputVectorCollection = new List<double[]>(inputVectorCollection);
             OutputVectorCollection = new List<double[]>(outputVectorCollection);

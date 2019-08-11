@@ -672,17 +672,17 @@
     <xs:attribute type="UIntGT0Type" name="attemptEpochs" use="required"/>
   </xs:complexType>
 
-  <!-- FF network - elastic linear regression trainer - configuration -->
+  <!-- FF network - elastic net linear regression trainer - configuration -->
   <xs:complexType name="FFNetElasticLinRegrTrainerCfgType">
     <xs:attribute type="UIntGT0Type" name="attemptEpochs" use="required"/>
-    <xs:attribute type="UDoubleLE1Type" name="l1" use="required">
+    <xs:attribute type="UDoubleType" name="lambda" use="required">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Values between 0 and 1 inclusive</xs:documentation>
+        <xs:documentation xml:lang="en">The penalty to be applied.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute type="UDoubleLE1Type" name="l2" use="required">
+    <xs:attribute type="UDoubleLE1Type" name="alpha" use="required">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Values between 0 and 1 inclusive</xs:documentation>
+        <xs:documentation xml:lang="en">Ratio between Ridge and Lasso approach. Values between 0 and 1 inclusive, where 0 leads to full Ridge and 1 leads to full Lasso</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>

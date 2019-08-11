@@ -175,7 +175,7 @@ namespace RCNet.Neural.Network.FF
             {
                 Matrix B = new Matrix(_XTdotX);
                 double tmp = B.Data[0][0];
-                B.AddScalarToDiagonal(_currLambda * _currLambda);
+                B.AddScalarToDiagonal(_currLambda);
                 B.Data[0][0] = tmp;
                 I = B.Inverse(true);
             }

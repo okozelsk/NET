@@ -125,51 +125,40 @@ namespace RCNet.Neural.Network.SM.Readout
             }
 
             //Normalization of predictors and output data collections
-            //Allocation of normalizers
+            //Allocation and preparation of normalizers
+            //Predictors normalizers
             _predictorNormalizerCollection = new Normalizer[numOfPredictors];
-            for(int i = 0; i < numOfPredictors; i++)
+            Parallel.For(0, _predictorNormalizerCollection.Length, nrmIdx =>
             {
-                _predictorNormalizerCollection[i] = new Normalizer(DataRange, NormalizerDefaultReserve, true, false);
-            }
+                _predictorNormalizerCollection[nrmIdx] = new Normalizer(DataRange, NormalizerDefaultReserve, true, false);
+                for (int pairIdx = 0; pairIdx < dataBundle.InputVectorCollection.Count; pairIdx++)
+                {
+                    //Adjust predictor normalizer
+                    _predictorNormalizerCollection[nrmIdx].Adjust(dataBundle.InputVectorCollection[pairIdx][nrmIdx]);
+                }
+            });
+            //Output normalizers
             _outputNormalizerCollection = new Normalizer[numOfOutputs];
-            for (int i = 0; i < numOfOutputs; i++)
+            Parallel.For(0, _outputNormalizerCollection.Length, nrmIdx =>
             {
-                bool classificationTask = (_settings.ReadoutUnitCfgCollection[i].TaskType == CommonEnums.TaskType.Classification);
-                _outputNormalizerCollection[i] = new Normalizer(DataRange,
+                bool classificationTask = (_settings.ReadoutUnitCfgCollection[nrmIdx].TaskType == CommonEnums.TaskType.Classification);
+                _outputNormalizerCollection[nrmIdx] = new Normalizer(DataRange,
                                                                 classificationTask ? 0 : NormalizerDefaultReserve,
                                                                 classificationTask ? false : true,
                                                                 false
                                                                 );
-            }
-            //Normalizers adjustment
-            for(int pairIdx = 0; pairIdx < dataBundle.InputVectorCollection.Count; pairIdx++)
-            {
-                //Checks
-                if(dataBundle.InputVectorCollection[pairIdx].Length != numOfPredictors)
+                for (int pairIdx = 0; pairIdx < dataBundle.OutputVectorCollection.Count; pairIdx++)
                 {
-                    throw new Exception("Inconsistent number of predictors in the predictors collection.");
+                    //Adjust output normalizer
+                    _outputNormalizerCollection[nrmIdx].Adjust(dataBundle.OutputVectorCollection[pairIdx][nrmIdx]);
                 }
-                if(dataBundle.OutputVectorCollection[pairIdx].Length != numOfOutputs)
-                {
-                    throw new Exception("Inconsistent number of values in the ideal values collection.");
-                }
-                //Adjust predictors normalizers
-                for (int i = 0; i < numOfPredictors; i++)
-                {
-                    _predictorNormalizerCollection[i].Adjust(dataBundle.InputVectorCollection[pairIdx][i]);
-                }
-                //Adjust outputs normalizers
-                for (int i = 0; i < numOfOutputs; i++)
-                {
-                    _outputNormalizerCollection[i].Adjust(dataBundle.OutputVectorCollection[pairIdx][i]);
-                }
-            }
+            });
             //Data normalization
             //Allocation
-            List<double[]> predictorsCollection = new List<double[]>(dataBundle.InputVectorCollection.Count);
-            List<double[]> idealOutputsCollection = new List<double[]>(dataBundle.OutputVectorCollection.Count);
+            double[][] predictorsCollection = new double[dataBundle.InputVectorCollection.Count][];
+            double[][] idealOutputsCollection = new double[dataBundle.OutputVectorCollection.Count][];
             //Normalization
-            for (int pairIdx = 0; pairIdx < dataBundle.InputVectorCollection.Count; pairIdx++)
+            Parallel.For(0, dataBundle.InputVectorCollection.Count, pairIdx =>
             {
                 //Predictors
                 double[] predictors = new double[numOfPredictors];
@@ -177,24 +166,25 @@ namespace RCNet.Neural.Network.SM.Readout
                 {
                     predictors[i] = _predictorNormalizerCollection[i].Normalize(dataBundle.InputVectorCollection[pairIdx][i]);
                 }
-                predictorsCollection.Add(predictors);
+                predictorsCollection[pairIdx] = predictors;
                 //Outputs
                 double[] outputs = new double[numOfOutputs];
                 for (int i = 0; i < numOfOutputs; i++)
                 {
                     outputs[i] = _outputNormalizerCollection[i].Normalize(dataBundle.OutputVectorCollection[pairIdx][i]);
                 }
-                idealOutputsCollection.Add(outputs);
-            }
+                idealOutputsCollection[pairIdx] = outputs;
+            });
+
             //Data processing
             //Random object initialization
             Random rand = new Random(0);
             //Predictors mapper (specified or default)
             _predictorsMapper = predictorsMapper ?? new PredictorsMapper(numOfPredictors);
             //Allocation of computed and ideal vectors for result comparative bundle
-            List<double[]> validationComputedVectorCollection = new List<double[]>(idealOutputsCollection.Count);
-            List<double[]> validationIdealVectorCollection = new List<double[]>(idealOutputsCollection.Count);
-            for (int i = 0; i < idealOutputsCollection.Count; i++)
+            List<double[]> validationComputedVectorCollection = new List<double[]>(idealOutputsCollection.Length);
+            List<double[]> validationIdealVectorCollection = new List<double[]>(idealOutputsCollection.Length);
+            for (int i = 0; i < idealOutputsCollection.Length; i++)
             {
                 validationComputedVectorCollection.Add(new double[numOfOutputs]);
                 validationIdealVectorCollection.Add(new double[numOfOutputs]);
@@ -204,7 +194,7 @@ namespace RCNet.Neural.Network.SM.Readout
             {
                 throw new ArgumentException($"Test dataset size is greater than {MaxRatioOfTestData.ToString(CultureInfo.InvariantCulture)}", "TestDataSetSize");
             }
-            int testDataSetLength = (int)Math.Round(idealOutputsCollection.Count * _settings.TestDataRatio, 0);
+            int testDataSetLength = (int)Math.Round(idealOutputsCollection.Length * _settings.TestDataRatio, 0);
             if (testDataSetLength < MinLengthOfTestDataset)
             {
                 throw new ArgumentException($"Num of test samples is less than {MinLengthOfTestDataset.ToString(CultureInfo.InvariantCulture)}", "TestDataSetSize");
@@ -214,7 +204,7 @@ namespace RCNet.Neural.Network.SM.Readout
             if (numOfFolds <= 0)
             {
                 //Auto setup
-                numOfFolds = idealOutputsCollection.Count / testDataSetLength;
+                numOfFolds = idealOutputsCollection.Length / testDataSetLength;
                 if (numOfFolds > MaxNumOfFolds)
                 {
                     numOfFolds = MaxNumOfFolds;
@@ -228,7 +218,7 @@ namespace RCNet.Neural.Network.SM.Readout
             for (int clusterIdx = 0; clusterIdx < _settings.ReadoutUnitCfgCollection.Count; clusterIdx++)
             {
                 _clusterCollection[clusterIdx] = new ReadoutUnit[numOfFolds];
-                List<double[]> idealValueCollection = new List<double[]>(idealOutputsCollection.Count);
+                List<double[]> idealValueCollection = new List<double[]>(idealOutputsCollection.Length);
                 BinDistribution refBinDistr = null;
                 if (_settings.ReadoutUnitCfgCollection[clusterIdx].TaskType == CommonEnums.TaskType.Classification)
                 {

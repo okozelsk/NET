@@ -8,6 +8,7 @@ using RCNet.MathTools.VectorMath;
 using RCNet.MathTools.PS;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
+using RCNet.MathTools;
 
 namespace RCNet.Neural.Network.FF
 {
@@ -55,8 +56,6 @@ namespace RCNet.Neural.Network.FF
         private readonly FeedForwardNetwork _net;
         private readonly List<double[]> _inputVectorCollection;
         private readonly List<double[]> _outputVectorCollection;
-        private readonly double[] _inputDataWeights;
-        private readonly double _inputDataWeightsSum;
         private readonly double _gamma;
         private readonly List<Tuple<int, int>> _parallelRanges;
 
@@ -68,12 +67,10 @@ namespace RCNet.Neural.Network.FF
         /// <param name="inputVectorCollection">Predictors (input)</param>
         /// <param name="outputVectorCollection">Ideal outputs (the same number of rows as number of inputs)</param>
         /// <param name="settings">Startup parameters of the trainer</param>
-        /// <param name="inputDataWeights">Weights of input samples</param>
         public ElasticLinRegrTrainer(FeedForwardNetwork net,
                                      List<double[]> inputVectorCollection,
                                      List<double[]> outputVectorCollection,
-                                     ElasticLinRegrTrainerSettings settings,
-                                     double[] inputDataWeights = null
+                                     ElasticLinRegrTrainerSettings settings
                                      )
         {
             //Check network readyness
@@ -96,22 +93,6 @@ namespace RCNet.Neural.Network.FF
             _outputVectorCollection = new List<double[]>(outputVectorCollection);
             var rangePartitioner = Partitioner.Create(0, _inputVectorCollection.Count);
             _parallelRanges = new List<Tuple<int, int>>(rangePartitioner.GetDynamicPartitions());
-            //Weights of input samples
-            if (inputDataWeights != null)
-            {
-                //Specified
-                _inputDataWeights = (double[])inputDataWeights.Clone();
-                _inputDataWeightsSum = 0;
-                foreach (double w in _inputDataWeights) _inputDataWeightsSum += w;
-            }
-            else
-            {
-                //Unspecified
-                //All samples have the same maximum weight
-                _inputDataWeights = new double[_inputVectorCollection.Count];
-                _inputDataWeights.Populate(1);
-                _inputDataWeightsSum = _inputVectorCollection.Count;
-            }
             //Parameters
             _settings = settings;
             MaxAttempt = _settings.NumOfAttempts;
@@ -119,7 +100,7 @@ namespace RCNet.Neural.Network.FF
             Attempt = 1;
             AttemptEpoch = 0;
             _net = net;
-            _gamma = _settings.L1 * _settings.L2;
+            _gamma = _settings.Lambda * _settings.Alpha;
             return;
         }
 
@@ -177,14 +158,9 @@ namespace RCNet.Neural.Network.FF
             }
             //Next epoch allowed
             ++AttemptEpoch;
-            InfoMessage = $"";
+            InfoMessage = $"Lambda={_settings.Lambda.ToString(CultureInfo.InvariantCulture)} Alpha={_settings.Alpha.ToString(CultureInfo.InvariantCulture)}";
             //Whole network new weights buffer
             double[] newWeights = _net.GetWeightsCopy();
-            if(AttemptEpoch == 1)
-            {
-                //In case of first epoch zeroize all weights
-                newWeights.Populate(0);
-            }
             //Optimization of the weights for each output separeatelly
             for (int outputIdx = 0; outputIdx < _net.NumOfOutputValues; outputIdx++)
             {
@@ -199,50 +175,80 @@ namespace RCNet.Neural.Network.FF
                     weights[i + 1] = newWeights[outputIdx * _net.NumOfInputValues + i];
                 });
                 //Elastic iteration
-                if(_inputDataWeightsSum != 0)
+                //Compute and store current output values and new bias
+                double oldBias = weights[0];
+                double newBias = 0;
+                double[] parallelSubResults1 = new double[_parallelRanges.Count];
+                double[] parallelSubResults2 = new double[_parallelRanges.Count];
+                double[] computedOutputs = new double[_outputVectorCollection.Count];
+                parallelSubResults1.Populate(0);
+                Parallel.For(0, _parallelRanges.Count, rangeIdx =>
                 {
-                    //Compute and store current output values and new bias
-                    double oldBias = weights[0];
-                    double newBias = 0;
-                    double[] parallelSubResults1 = new double[_parallelRanges.Count];
-                    double[] parallelSubResults2 = new double[_parallelRanges.Count];
-                    double[] computedOutputs = new double[_outputVectorCollection.Count];
-                    parallelSubResults1.Populate(0);
+                    for (int i = _parallelRanges[rangeIdx].Item1; i < _parallelRanges[rangeIdx].Item2; i++)
+                    {
+                        computedOutputs[i] = ComputeLinOutput(i, weights);
+                        parallelSubResults1[rangeIdx] += (_outputVectorCollection[i][outputIdx] - computedOutputs[i] + oldBias);
+                    }
+                });
+                //New bias finalization
+                for(int i = 0; i < _parallelRanges.Count; i++)
+                {
+                    newBias += parallelSubResults1[i];
+                }
+                newBias /= _outputVectorCollection.Count;
+                weights[0] = newBias;
+                //Update computed outputs if bias has changed
+                double biasDifference = newBias - oldBias;
+                if(biasDifference != 0)
+                {
                     Parallel.For(0, _parallelRanges.Count, rangeIdx =>
                     {
                         for (int i = _parallelRanges[rangeIdx].Item1; i < _parallelRanges[rangeIdx].Item2; i++)
                         {
-                            computedOutputs[i] = ComputeLinOutput(i, weights);
-                            parallelSubResults1[rangeIdx] += _inputDataWeights[i] * (_outputVectorCollection[i][outputIdx] - computedOutputs[i] + oldBias);
+                            computedOutputs[i] += biasDifference;
                         }
                     });
-                    //New bias finalization
-                    for(int i = 0; i < _parallelRanges.Count; i++)
+                }
+                //Optimization
+                for(int inputValueIdx = 0; inputValueIdx < _net.NumOfInputValues; inputValueIdx++)
+                {
+                    //Fit and denominator computation
+                    double oldWeight = weights[1 + inputValueIdx];
+                    double fit = 0, denominator = 0;
+                    parallelSubResults1.Populate(0);
+                    parallelSubResults2.Populate(0);
+                    Parallel.For(0, _parallelRanges.Count, rangeIdx =>
                     {
-                        newBias += parallelSubResults1[i];
-                    }
-                    newBias /= _inputDataWeightsSum;
-                    weights[0] = newBias;
-                    //Update computed outputs if bias has changed
-                    double biasDifference = newBias - oldBias;
-                    if(biasDifference != 0)
-                    {
-                        Parallel.For(0, _parallelRanges.Count, rangeIdx =>
+                        for (int i = _parallelRanges[rangeIdx].Item1; i < _parallelRanges[rangeIdx].Item2; i++)
                         {
-                            for (int i = _parallelRanges[rangeIdx].Item1; i < _parallelRanges[rangeIdx].Item2; i++)
+                            double x = _inputVectorCollection[i][inputValueIdx];
+                            if (x != 0)
                             {
-                                computedOutputs[i] += biasDifference;
+                                parallelSubResults1[rangeIdx] += x * (_outputVectorCollection[i][outputIdx] - computedOutputs[i] + x * oldWeight);
+                                parallelSubResults2[rangeIdx] += x * x;
                             }
-                        });
-                    }
-                    //Optimization
-                    for(int inputValueIdx = 0; inputValueIdx < _net.NumOfInputValues; inputValueIdx++)
+                        }
+                    });
+                    //Fit and denominator finalization
+                    for (int i = 0; i < _parallelRanges.Count; i++)
                     {
-                        //Fit and denominator computation
-                        double oldWeight = weights[1 + inputValueIdx];
-                        double fit = 0, denominator = 0;
-                        parallelSubResults1.Populate(0);
-                        parallelSubResults2.Populate(0);
+                        fit += parallelSubResults1[i];
+                        denominator += parallelSubResults2[i];
+                    }
+                    fit /= _outputVectorCollection.Count;
+                    denominator /= _outputVectorCollection.Count;
+                    denominator += _settings.Lambda * (1d - _settings.Alpha);
+                    double newWeight = 0;
+                    if(denominator != 0)
+                    {
+                        newWeight = SoftThreshold(fit) / denominator;
+                    }
+                    //Set new weight
+                    weights[1 + inputValueIdx] = newWeight;
+                    //Update computed values
+                    double weightsDiff = newWeight - oldWeight;
+                    if(weightsDiff != 0)
+                    {
                         Parallel.For(0, _parallelRanges.Count, rangeIdx =>
                         {
                             for (int i = _parallelRanges[rangeIdx].Item1; i < _parallelRanges[rangeIdx].Item2; i++)
@@ -250,56 +256,10 @@ namespace RCNet.Neural.Network.FF
                                 double x = _inputVectorCollection[i][inputValueIdx];
                                 if (x != 0)
                                 {
-                                    double partialResidual = _outputVectorCollection[i][outputIdx] - computedOutputs[i] + x * oldWeight;
-                                    double idwValue = _inputDataWeights[i] * x;
-                                    parallelSubResults1[rangeIdx] += idwValue * partialResidual;
-                                    parallelSubResults2[rangeIdx] += idwValue * x;
+                                    computedOutputs[i] += weightsDiff * x;
                                 }
                             }
                         });
-                        //Fit and denominator finalization
-                        for (int i = 0; i < _parallelRanges.Count; i++)
-                        {
-                            fit += parallelSubResults1[i];
-                            denominator += parallelSubResults2[i];
-                        }
-                        fit /= _inputDataWeightsSum;
-                        denominator /= _inputDataWeightsSum;
-                        denominator += _settings.L2 * (1d - _settings.L1);
-                        double newWeight = 0;
-                        if(denominator != 0)
-                        {
-                            newWeight = SoftThreshold(fit) / denominator;
-                        }
-                        //Set new weight
-                        weights[1 + inputValueIdx] = newWeight;
-                        //Update computed values
-                        double weightsDiff = newWeight - oldWeight;
-                        if(weightsDiff != 0)
-                        {
-                            Parallel.For(0, _parallelRanges.Count, rangeIdx =>
-                            {
-                                for (int i = _parallelRanges[rangeIdx].Item1; i < _parallelRanges[rangeIdx].Item2; i++)
-                                {
-                                    double x = _inputVectorCollection[i][inputValueIdx];
-                                    if (x != 0)
-                                    {
-                                        computedOutputs[i] += weightsDiff * x;
-                                    }
-                                }
-                            });
-                        }
-                    }
-
-                }
-                else
-                {
-                    //Sum of input samples weights is 0 (no sample is relevant)
-                    //Do nothing, only if there is L2 specified then zeroize weights
-                    if (_settings.L2 > 0)
-                    {
-                        //Zeroize weights
-                        weights.Populate(0);
                     }
                 }
                 //Put optimized weights back to newWaights buffer

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using RCNet.Extensions;
 using RCNet.MathTools;
 using RCNet.Neural.Data;
@@ -192,22 +193,15 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         {
             //Instantiate normalizers
             _inputNormalizerCollection = new Normalizer[_settings.InputConfig.ExternalFieldCollection.Count];
-            for (int i = 0; i < _inputNormalizerCollection.Length; i++)
+            Parallel.For(0, _inputNormalizerCollection.Length, i =>
             {
                 _inputNormalizerCollection[i] = new Normalizer(_dataRange, NormalizerDefaultReserve, true, false);
-            }
-            //Adjust normalizers
-            foreach (double[] vector in inputVectorCollection)
-            {
-                if (vector.Length != _inputNormalizerCollection.Length)
-                {
-                    throw new Exception("Incosistent length of input vectors.");
-                }
-                for (int i = 0; i < vector.Length; i++)
+                //Adjust normalizer
+                foreach (double[] vector in inputVectorCollection)
                 {
                     _inputNormalizerCollection[i].Adjust(vector[i]);
                 }
-            }
+            });
             return;
         }
 
@@ -232,16 +226,17 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// </summary>
         /// <param name="inputVectorCollection">Collection of input vectors</param>
         /// <returns>Normalized collection of input vectors</returns>
-        private List<double[]> NormalizeInputVectorCollection(List<double[]> inputVectorCollection)
+        private double[][] NormalizeInputVectorCollection(List<double[]> inputVectorCollection)
         {
             //Instantiate normalizers
             InitializeInputNormalizers(inputVectorCollection);
             //Normalize data
-            List<double[]> nrmInputVectorCollection = new List<double[]>(inputVectorCollection.Count);
-            foreach (double[] vector in inputVectorCollection)
+            double[][] nrmInputVectorCollection = new double[inputVectorCollection.Count][];
+            Parallel.For(0, inputVectorCollection.Count, i =>
             {
-                nrmInputVectorCollection.Add(NormalizeInputVector(vector));
-            }
+                nrmInputVectorCollection[i] = NormalizeInputVector(inputVectorCollection[i]);
+
+            });
             return nrmInputVectorCollection;
         }
 
@@ -251,31 +246,19 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// <param name="inputPatternCollection">Collection of input patterns</param>
         private void InitializeInputNormalizers(List<List<double[]>> inputPatternCollection)
         {
-            //Instantiate normalizers
+            //Instantiate and adjust normalizers
             _inputNormalizerCollection = new Normalizer[_settings.InputConfig.ExternalFieldCollection.Count];
-            for (int i = 0; i < _inputNormalizerCollection.Length; i++)
+            Parallel.For(0, _settings.InputConfig.ExternalFieldCollection.Count, i =>
             {
                 _inputNormalizerCollection[i] = new Normalizer(NormalizerDefaultReserve, true, false);
-            }
-            //Adjust normalizers
-            foreach (List<double[]> pattern in inputPatternCollection)
-            {
-                foreach (double[] vector in pattern)
+                foreach (List<double[]> pattern in inputPatternCollection)
                 {
-                    if (vector.Length % _inputNormalizerCollection.Length != 0)
+                    foreach (double[] vector in pattern)
                     {
-                        throw new Exception("Incosistent length of input vectors.");
-                    }
-                    int numOfSets = vector.Length / _inputNormalizerCollection.Length;
-                    for (int set = 0; set < numOfSets; set++)
-                    {
-                        for (int i = 0; i < _inputNormalizerCollection.Length; i++)
-                        {
-                            _inputNormalizerCollection[i].Adjust(vector[set * _inputNormalizerCollection.Length + i]);
-                        }
+                        _inputNormalizerCollection[i].Adjust(vector[i]);
                     }
                 }
-            }
+            });
             return;
         }
 
@@ -309,16 +292,16 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// </summary>
         /// <param name="inputPatternCollection">Collection of input patterns</param>
         /// <returns>Normalized collection of input patterns</returns>
-        private List<List<double[]>> NormalizeInputPatternCollection(List<List<double[]>> inputPatternCollection)
+        private List<double[]>[] NormalizeInputPatternCollection(List<List<double[]>> inputPatternCollection)
         {
             //Instantiate normalizers
             InitializeInputNormalizers(inputPatternCollection);
             //Normalize data
-            List<List<double[]>> nrmInputPatternCollection = new List<List<double[]>>(inputPatternCollection.Count);
-            foreach (List<double[]> pattern in inputPatternCollection)
+            List<double[]>[] nrmInputPatternCollection = new List<double[]>[inputPatternCollection.Count];
+            Parallel.For(0, inputPatternCollection.Count, i =>
             {
-                nrmInputPatternCollection.Add(NormalizeInputPattern(pattern));
-            }
+                nrmInputPatternCollection[i] = NormalizeInputPattern(inputPatternCollection[i]);
+            });
             return nrmInputPatternCollection;
         }
 
@@ -467,7 +450,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             //Reset the internal states and also statistics
             Reset(true);
             //Initialize normalizers and normalize input data
-            List<double[]> nrmInputVectorCollection = NormalizeInputVectorCollection(vectorBundle.InputVectorCollection);
+            double[][] nrmInputVectorCollection = NormalizeInputVectorCollection(vectorBundle.InputVectorCollection);
             //Allocate output bundle
             VectorBundle outputBundle = new VectorBundle(vectorBundle.InputVectorCollection.Count - _settings.InputConfig.BootCycles);
             //Collect predictors
@@ -517,11 +500,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             //Reset the internal states and also statistics
             Reset(true);
             //Initialize normalizers and normalize input data
-            List<List<double[]>> nrmInputPatternCollection = NormalizeInputPatternCollection(patternBundle.InputPatternCollection);
+            List<double[]>[] nrmInputPatternCollection = NormalizeInputPatternCollection(patternBundle.InputPatternCollection);
             //Allocate output bundle
             VectorBundle outputBundle = new VectorBundle(patternBundle.InputPatternCollection.Count);
             //Collection
-            for (int dataSetIdx = 0; dataSetIdx < nrmInputPatternCollection.Count; dataSetIdx++)
+            for (int dataSetIdx = 0; dataSetIdx < nrmInputPatternCollection.Length; dataSetIdx++)
             {
                 //Push input data into the network
                 double[] predictors = PushInput(nrmInputPatternCollection[dataSetIdx], true);

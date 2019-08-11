@@ -30,7 +30,7 @@ namespace RCNet.Neural.Data
         /// </summary>
         /// <param name="inputPatternCollection">Collection of input patterns</param>
         /// <param name="outputVectorCollection">Collection of output vectors</param>
-        public PatternBundle(List<List<double[]>> inputPatternCollection, List<double[]> outputVectorCollection)
+        public PatternBundle(IEnumerable<List<double[]>> inputPatternCollection, IEnumerable<double[]> outputVectorCollection)
         {
             InputPatternCollection = new List<List<double[]>>(inputPatternCollection);
             OutputVectorCollection = new List<double[]>(outputVectorCollection);
