@@ -112,11 +112,7 @@ namespace RCNet.Neural.Network.FF
             TrainerCfg = null;
             foreach(XElement candidate in settingsElem.Descendants())
             {
-                if(candidate.Name.LocalName == "linRegrTrainer")
-                {
-                    TrainerCfg = new LinRegrTrainerSettings(candidate);
-                }
-                else if(candidate.Name.LocalName == "qrdRegrTrainer")
+                if(candidate.Name.LocalName == "qrdRegrTrainer")
                 {
                     TrainerCfg = new QRDRegrTrainerSettings(candidate);
                 }

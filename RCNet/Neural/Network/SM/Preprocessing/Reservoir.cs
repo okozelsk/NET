@@ -59,6 +59,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// </summary>
         public int NumOfInternalSynapses { get; private set; }
 
+        //Attributes
+        private readonly List<Tuple<int, int>> _parallelRanges;
+
+
         //Constructor
         /// <summary>
         /// Instantiates the reservoir
@@ -192,6 +196,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             }//PoolID
             //All neurons flat structure
             _reservoirNeuronCollection = allNeurons.ToArray();
+            //Parallel processing ranges
+            var rangePartitioner = Partitioner.Create(0, _reservoirNeuronCollection.Length);
+            _parallelRanges = new List<Tuple<int, int>>(rangePartitioner.GetDynamicPartitions());
+
 
             //-----------------------------------------------------------------------------
             //Interconnections
@@ -311,7 +319,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             Matrix wMatrix = new Matrix(_reservoirNeuronCollection.Length, _reservoirNeuronCollection.Length);
             //Interconnections
             var rangePartitioner = Partitioner.Create(0, _neuronNeuronConnectionsCollection.Length);
-            Parallel.ForEach(rangePartitioner, (range, loopState) =>
+            Parallel.ForEach(rangePartitioner, range =>
             {
                 for(int row = range.Item1; row < range.Item2; row++)
                 {
@@ -812,8 +820,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             }
             //Perform reservoir's computation cycle
             //Collect new stimulation for each reservoir neuron
-            var rangePartitioner = Partitioner.Create(0, _reservoirNeuronCollection.Length);
-            Parallel.ForEach(rangePartitioner, range =>
+            Parallel.ForEach(_parallelRanges, range =>
             {
                 for (int neuronIdx = range.Item1; neuronIdx < range.Item2; neuronIdx++)
                 {
@@ -834,7 +841,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 }
             });
             //Recompute state of all reservoir neurons
-            Parallel.ForEach(rangePartitioner, (range, loopState) =>
+            Parallel.ForEach(_parallelRanges, range =>
             {
                 for (int neuronIdx = range.Item1; neuronIdx < range.Item2; neuronIdx++)
                 {

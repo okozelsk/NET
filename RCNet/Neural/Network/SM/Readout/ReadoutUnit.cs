@@ -189,11 +189,7 @@ namespace RCNet.Neural.Network.SM.Readout
                 FeedForwardNetworkSettings netCfg = (FeedForwardNetworkSettings)settings.NetSettings;
                 FeedForwardNetwork ffn = new FeedForwardNetwork(trainingPredictorsCollection[0].Length, 1, netCfg);
                 net = ffn;
-                if(netCfg.TrainerCfg.GetType() == typeof(LinRegrTrainerSettings))
-                {
-                    trainer = new LinRegrTrainer(ffn, trainingPredictorsCollection, trainingIdealOutputsCollection, (LinRegrTrainerSettings)netCfg.TrainerCfg, rand);
-                }
-                else if(netCfg.TrainerCfg.GetType() == typeof(QRDRegrTrainerSettings))
+                if(netCfg.TrainerCfg.GetType() == typeof(QRDRegrTrainerSettings))
                 {
                     trainer = new QRDRegrTrainer(ffn, trainingPredictorsCollection, trainingIdealOutputsCollection, (QRDRegrTrainerSettings)netCfg.TrainerCfg, rand);
                 }

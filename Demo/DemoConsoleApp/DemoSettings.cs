@@ -80,10 +80,6 @@ namespace RCNet.DemoConsoleApp
             /// </summary>
             public string FileName { get; }
             /// <summary>
-            /// Reserve held by a normalizer to cover cases where future data exceeds a known range of sample data.
-            /// </summary>
-            public double NormalizerReserveRatio { get; }
-            /// <summary>
             /// State machine configuration
             /// </summary>
             public StateMachineSettings StateMachineCfg { get; }
@@ -98,8 +94,6 @@ namespace RCNet.DemoConsoleApp
                 XElement samplesElem = demoCaseElem.Descendants("samples").First();
                 //Full path to csv file
                 FileName = dir + "\\" + samplesElem.Attribute("fileName").Value;
-                //Normalizer reserve
-                NormalizerReserveRatio = double.Parse(samplesElem.Attribute("normalizerReserve").Value, CultureInfo.InvariantCulture);
                 //State Machine configuration
                 StateMachineCfg = new StateMachineSettings(demoCaseElem.Descendants("stateMachineCfg").First());
                 return;

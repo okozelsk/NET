@@ -122,7 +122,6 @@
     <Compile Include="Neural\Data\Generators\ConstGeneratorSettings.cs" />
     <Compile Include="Neural\INonRecurrentNetworkTrainerSettings.cs" />
     <Compile Include="Neural\Network\FF\QRDRegrTrainer.cs" />
-    <Compile Include="Neural\Network\FF\LinRegrTrainer.cs" />
     <Compile Include="Neural\Network\FF\QRDRegrTrainerSettings.cs" />
     <Compile Include="MathTools\PS\ParamSeekerSettings.cs" />
     <Compile Include="MathTools\PS\ParamSeeker.cs" />
@@ -176,7 +175,6 @@
     <Compile Include="Neural\Data\VectorBundle.cs" />
     <Compile Include="Neural\Network\PP\PDeltaRuleTrainerSettings.cs" />
     <Compile Include="Neural\Network\FF\RPropTrainerSettings.cs" />
-    <Compile Include="Neural\Network\FF\LinRegrTrainerSettings.cs" />
     <Compile Include="Neural\Network\PP\ParallelPerceptronSettings.cs" />
     <Compile Include="Neural\INonRecurrentNetwork.cs" />
     <Compile Include="Neural\Network\PP\ParallelPerceptron.cs" />
@@ -223,9 +221,6 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Neural\Network\PP\PDeltaRuleTrainerSettings.xsd" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Neural\Network\FF\LinRegrTrainerSettings.xsd" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Neural\Network\FF\RPropTrainerSettings.xsd" />
