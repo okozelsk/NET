@@ -22,7 +22,7 @@ namespace RCNet.Neural.Network.FF
     /// 
     /// </summary>
     [Serializable]
-    public class ElasticLinRegrTrainer : INonRecurrentNetworkTrainer
+    public class ElasticRegrTrainer : INonRecurrentNetworkTrainer
     {
         //Constants
         //Attribute properties
@@ -52,7 +52,7 @@ namespace RCNet.Neural.Network.FF
         public string InfoMessage { get; private set; }
 
         //Attributes
-        private readonly ElasticLinRegrTrainerSettings _settings;
+        private readonly ElasticRegrTrainerSettings _settings;
         private readonly FeedForwardNetwork _net;
         private readonly List<double[]> _inputVectorCollection;
         private readonly List<double[]> _outputVectorCollection;
@@ -67,10 +67,10 @@ namespace RCNet.Neural.Network.FF
         /// <param name="inputVectorCollection">Predictors (input)</param>
         /// <param name="outputVectorCollection">Ideal outputs (the same number of rows as number of inputs)</param>
         /// <param name="settings">Startup parameters of the trainer</param>
-        public ElasticLinRegrTrainer(FeedForwardNetwork net,
+        public ElasticRegrTrainer(FeedForwardNetwork net,
                                      List<double[]> inputVectorCollection,
                                      List<double[]> outputVectorCollection,
-                                     ElasticLinRegrTrainerSettings settings
+                                     ElasticRegrTrainerSettings settings
                                      )
         {
             //Check network readyness
@@ -277,7 +277,7 @@ namespace RCNet.Neural.Network.FF
             return true;
         }
 
-    }//ElasticLinRegrTrainer
+    }//ElasticRegrTrainer
 
 }//Namespace
 

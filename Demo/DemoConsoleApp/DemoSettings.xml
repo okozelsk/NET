@@ -64,9 +64,10 @@
       </neuralPreprocessor>
       <readoutLayer testDataRatio="0.0825" folds="Auto">
         <readoutUnit name="curved swing" task="Classification">
-          <pp gates="3" resolution="2">
-            <pDeltaRuleTrainer attempts="10" attemptEpochs="600"/>
-          </pp>
+          <ff>
+            <activationIdentity/>
+            <elasticRegrTrainer attemptEpochs="600" alpha="0.5" lambda="0.5"/>
+          </ff>
         </readoutUnit>
         <readoutUnit name="horizontal swing" task="Classification">
           <ff>
@@ -221,19 +222,19 @@
         <readoutUnit name="High" task="Forecast">
           <ff>
             <activationIdentity/>
-            <elasticLinRegrTrainer attemptEpochs="300" lambda="1e-6" alpha="0.5"/>
+            <elasticRegrTrainer attemptEpochs="300" lambda="1e-6" alpha="0.5"/>
           </ff>
         </readoutUnit>
         <readoutUnit name="Low" task="Forecast">
           <ff>
             <activationIdentity/>
-            <elasticLinRegrTrainer attemptEpochs="300" lambda="1e-6" alpha="0.5"/>
+            <elasticRegrTrainer attemptEpochs="300" lambda="1e-6" alpha="0.5"/>
           </ff>
         </readoutUnit>
         <readoutUnit name="Adj Close" task="Forecast">
           <ff>
             <activationIdentity/>
-            <elasticLinRegrTrainer attemptEpochs="300" lambda="1e-6" alpha="0.5"/>
+            <elasticRegrTrainer attemptEpochs="300" lambda="1e-6" alpha="0.5"/>
           </ff>
         </readoutUnit>
       </readoutLayer>

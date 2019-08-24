@@ -15,7 +15,7 @@ namespace RCNet.Neural.Network.FF
     /// Startup parameters for the elastic linear regression trainer
     /// </summary>
     [Serializable]
-    public class ElasticLinRegrTrainerSettings : INonRecurrentNetworkTrainerSettings
+    public class ElasticRegrTrainerSettings : INonRecurrentNetworkTrainerSettings
     {
         //Constants
 
@@ -40,7 +40,7 @@ namespace RCNet.Neural.Network.FF
         /// <param name="numOfAttemptEpochs">Number of attempt epochs</param>
         /// <param name="lambda">L1 (lasso) hyperparameter</param>
         /// <param name="alpha">L2 (ridge) hyperparameter</param>
-        public ElasticLinRegrTrainerSettings(int numOfAttemptEpochs, double lambda = 0, double alpha = 0)
+        public ElasticRegrTrainerSettings(int numOfAttemptEpochs, double lambda = 0, double alpha = 0)
         {
             NumOfAttemptEpochs = numOfAttemptEpochs;
             Lambda = lambda;
@@ -52,7 +52,7 @@ namespace RCNet.Neural.Network.FF
         /// Deep copy constructor
         /// </summary>
         /// <param name="source">Source instance</param>
-        public ElasticLinRegrTrainerSettings(ElasticLinRegrTrainerSettings source)
+        public ElasticRegrTrainerSettings(ElasticRegrTrainerSettings source)
         {
             NumOfAttemptEpochs = source.NumOfAttemptEpochs;
             Lambda = source.Lambda;
@@ -65,12 +65,12 @@ namespace RCNet.Neural.Network.FF
         /// Content of xml element is always validated against the xml schema.
         /// </summary>
         /// <param name="elem">Xml data containing elastic linear regression trainer settings</param>
-        public ElasticLinRegrTrainerSettings(XElement elem)
+        public ElasticRegrTrainerSettings(XElement elem)
         {
             //Validation
             ElemValidator validator = new ElemValidator();
             Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.FF.ElasticLinRegrTrainerSettings.xsd");
+            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.FF.ElasticRegrTrainerSettings.xsd");
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
             XElement settingsElem = validator.Validate(elem, "rootElem");
             //Parsing
@@ -93,7 +93,7 @@ namespace RCNet.Neural.Network.FF
         public override bool Equals(object obj)
         {
             if (obj == null) return false;
-            ElasticLinRegrTrainerSettings cmpSettings = obj as ElasticLinRegrTrainerSettings;
+            ElasticRegrTrainerSettings cmpSettings = obj as ElasticRegrTrainerSettings;
             if (NumOfAttemptEpochs != cmpSettings.NumOfAttemptEpochs ||
                 Lambda != cmpSettings.Lambda ||
                 Alpha != cmpSettings.Alpha
@@ -117,9 +117,9 @@ namespace RCNet.Neural.Network.FF
         /// </summary>
         public INonRecurrentNetworkTrainerSettings DeepClone()
         {
-            return new ElasticLinRegrTrainerSettings(this);
+            return new ElasticRegrTrainerSettings(this);
         }
 
-    }//ElasticLinRegrTrainerSettings
+    }//ElasticRegrTrainerSettings
 
 }//Namespace

@@ -157,111 +157,54 @@ namespace RCNet.Neural.Network.SM.Synapse
             XElement dynamicsCfgElem;
             //S2SSynapseE2EDynamicsCfg
             dynamicsCfgElem = settingsElem.XPathSelectElement("./dynamicsS2SEE");
-            if(dynamicsCfgElem != null)
-            {
-                S2SSynapseE2EDynamicsCfg = new DynamicsSettings(dynamicsCfgElem);
-            }
-            else
-            {
-                S2SSynapseE2EDynamicsCfg = new DynamicsSettings(0.5, 1100, 50, 3, true, true);
-            }
+            S2SSynapseE2EDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0.5, 1100, 50, 3, true, true) : new DynamicsSettings(dynamicsCfgElem);
             //S2SSynapseE2IDynamicsCfg
             dynamicsCfgElem = settingsElem.XPathSelectElement("./dynamicsS2SEI");
-            if (dynamicsCfgElem != null)
-            {
-                S2SSynapseE2IDynamicsCfg = new DynamicsSettings(dynamicsCfgElem);
-            }
-            else
-            {
-                S2SSynapseE2IDynamicsCfg = new DynamicsSettings(0.05, 125, 1200, 6, true, true);
-            }
+            S2SSynapseE2IDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0.05, 125, 1200, 6, true, true) : new DynamicsSettings(dynamicsCfgElem);
             //S2SSynapseI2EDynamicsCfg
             dynamicsCfgElem = settingsElem.XPathSelectElement("./dynamicsS2SIE");
-            if (dynamicsCfgElem != null)
-            {
-                S2SSynapseI2EDynamicsCfg = new DynamicsSettings(dynamicsCfgElem);
-            }
-            else
-            {
-                S2SSynapseI2EDynamicsCfg = new DynamicsSettings(0.25, 700, 20, 3, true, true);
-            }
+            S2SSynapseI2EDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0.25, 700, 20, 3, true, true) : new DynamicsSettings(dynamicsCfgElem);
             //S2SSynapseI2IDynamicsCfg
             dynamicsCfgElem = settingsElem.XPathSelectElement("./dynamicsS2SII");
-            if (dynamicsCfgElem != null)
-            {
-                S2SSynapseI2IDynamicsCfg = new DynamicsSettings(dynamicsCfgElem);
-            }
-            else
-            {
-                S2SSynapseI2IDynamicsCfg = new DynamicsSettings(0.32, 144, 60, 6, true, true);
-            }
+            S2SSynapseI2IDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0.32, 144, 60, 6, true, true) : new DynamicsSettings(dynamicsCfgElem);
             //A2SSynapseE2EDynamicsCfg
             dynamicsCfgElem = settingsElem.XPathSelectElement("./dynamicsA2SEE");
-            if (dynamicsCfgElem != null)
-            {
-                A2SSynapseE2EDynamicsCfg = new DynamicsSettings(dynamicsCfgElem);
-            }
-            else
-            {
-                A2SSynapseE2EDynamicsCfg = new DynamicsSettings(0.5, 1100, 50, 3, true, false);
-            }
+            A2SSynapseE2EDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0.5, 1100, 50, 3, true, false) : new DynamicsSettings(dynamicsCfgElem);
             //A2SSynapseE2IDynamicsCfg
             dynamicsCfgElem = settingsElem.XPathSelectElement("./dynamicsA2SEI");
-            if (dynamicsCfgElem != null)
-            {
-                A2SSynapseE2IDynamicsCfg = new DynamicsSettings(dynamicsCfgElem);
-            }
-            else
-            {
-                A2SSynapseE2IDynamicsCfg = new DynamicsSettings(0.05, 125, 1200, 6, true, false);
-            }
+            A2SSynapseE2IDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0.05, 125, 1200, 6, true, false) : new DynamicsSettings(dynamicsCfgElem);
             //A2SSynapseI2EDynamicsCfg
             dynamicsCfgElem = settingsElem.XPathSelectElement("./dynamicsA2SIE");
-            if (dynamicsCfgElem != null)
-            {
-                A2SSynapseI2EDynamicsCfg = new DynamicsSettings(dynamicsCfgElem);
-            }
-            else
-            {
-                A2SSynapseI2EDynamicsCfg = new DynamicsSettings(0.25, 700, 20, 3, true, false);
-            }
+            A2SSynapseI2EDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0.25, 700, 20, 3, true, false) : new DynamicsSettings(dynamicsCfgElem);
             //A2SSynapseI2IDynamicsCfg
             dynamicsCfgElem = settingsElem.XPathSelectElement("./dynamicsA2SII");
-            if (dynamicsCfgElem != null)
-            {
-                A2SSynapseI2IDynamicsCfg = new DynamicsSettings(dynamicsCfgElem);
-            }
-            else
-            {
-                A2SSynapseI2IDynamicsCfg = new DynamicsSettings(0.32, 144, 60, 6, true, false);
-            }
+            A2SSynapseI2IDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0.32, 144, 60, 6, true, false) : new DynamicsSettings(dynamicsCfgElem);
 
             //Analog target
-            XElement weightCfgElem;
             //S2ASynapseE2EDynamicsCfg
-            weightCfgElem = settingsElem.XPathSelectElement("./dynamicsS2AEE/weight");
-            S2ASynapseE2EDynamicsCfg = new DynamicsSettings(0, 0, 0, 0, false, false, (weightCfgElem == null ? new RandomValueSettings(0, 1) : new RandomValueSettings(weightCfgElem)));
+            dynamicsCfgElem = settingsElem.XPathSelectElement("./dynamicsS2AEE");
+            S2ASynapseE2EDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0, 0, 0, 0, false, false) : new DynamicsSettings(dynamicsCfgElem);
             //S2ASynapseI2EDynamicsCfg
-            weightCfgElem = settingsElem.XPathSelectElement("./dynamicsS2AIE/weight");
-            S2ASynapseI2EDynamicsCfg = new DynamicsSettings(0, 0, 0, 0, false, false, (weightCfgElem == null ? new RandomValueSettings(0, 1) : new RandomValueSettings(weightCfgElem)));
+            dynamicsCfgElem = settingsElem.XPathSelectElement("./dynamicsS2AIE");
+            S2ASynapseI2EDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0, 0, 0, 0, false, false) : new DynamicsSettings(dynamicsCfgElem);
             //S2ASynapseE2IDynamicsCfg
-            weightCfgElem = settingsElem.XPathSelectElement("./dynamicsS2AEI/weight");
-            S2ASynapseE2IDynamicsCfg = new DynamicsSettings(0, 0, 0, 0, false, false, (weightCfgElem == null ? new RandomValueSettings(0, 1) : new RandomValueSettings(weightCfgElem)));
+            dynamicsCfgElem = settingsElem.XPathSelectElement("./dynamicsS2AEI");
+            S2ASynapseE2IDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0, 0, 0, 0, false, false) : new DynamicsSettings(dynamicsCfgElem);
             //S2ASynapseI2IDynamicsCfg
-            weightCfgElem = settingsElem.XPathSelectElement("./dynamicsS2AII/weight");
-            S2ASynapseI2IDynamicsCfg = new DynamicsSettings(0, 0, 0, 0, false, false, (weightCfgElem == null ? new RandomValueSettings(0, 1) : new RandomValueSettings(weightCfgElem)));
+            dynamicsCfgElem = settingsElem.XPathSelectElement("./dynamicsS2AII");
+            S2ASynapseI2IDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0, 0, 0, 0, false, false) : new DynamicsSettings(dynamicsCfgElem);
             //A2ASynapseE2EDynamicsCfg
-            weightCfgElem = settingsElem.XPathSelectElement("./dynamicsA2AEE/weight");
-            A2ASynapseE2EDynamicsCfg = new DynamicsSettings(0, 0, 0, 0, false, false, (weightCfgElem == null ? new RandomValueSettings(0, 1) : new RandomValueSettings(weightCfgElem)));
+            dynamicsCfgElem = settingsElem.XPathSelectElement("./dynamicsA2AEE");
+            A2ASynapseE2EDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0, 0, 0, 0, false, false) : new DynamicsSettings(dynamicsCfgElem);
             //A2ASynapseI2EDynamicsCfg
-            weightCfgElem = settingsElem.XPathSelectElement("./dynamicsA2AIE/weight");
-            A2ASynapseI2EDynamicsCfg = new DynamicsSettings(0, 0, 0, 0, false, false, (weightCfgElem == null ? new RandomValueSettings(0, 1) : new RandomValueSettings(weightCfgElem)));
+            dynamicsCfgElem = settingsElem.XPathSelectElement("./dynamicsA2AIE");
+            A2ASynapseI2EDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0, 0, 0, 0, false, false) : new DynamicsSettings(dynamicsCfgElem);
             //A2ASynapseE2IDynamicsCfg
-            weightCfgElem = settingsElem.XPathSelectElement("./dynamicsA2AEI/weight");
-            A2ASynapseE2IDynamicsCfg = new DynamicsSettings(0, 0, 0, 0, false, false, (weightCfgElem == null ? new RandomValueSettings(0, 1) : new RandomValueSettings(weightCfgElem)));
+            dynamicsCfgElem = settingsElem.XPathSelectElement("./dynamicsA2AEI");
+            A2ASynapseE2IDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0, 0, 0, 0, false, false) : new DynamicsSettings(dynamicsCfgElem);
             //A2ASynapseI2IDynamicsCfg
-            weightCfgElem = settingsElem.XPathSelectElement("./dynamicsA2AII/weight");
-            A2ASynapseI2IDynamicsCfg = new DynamicsSettings(0, 0, 0, 0, false, false, (weightCfgElem == null ? new RandomValueSettings(0, 1) : new RandomValueSettings(weightCfgElem)));
+            dynamicsCfgElem = settingsElem.XPathSelectElement("./dynamicsA2AII");
+            A2ASynapseI2IDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0, 0, 0, 0, false, false) : new DynamicsSettings(dynamicsCfgElem);
             return;
         }
 

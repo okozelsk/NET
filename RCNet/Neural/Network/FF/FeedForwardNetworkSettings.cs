@@ -120,9 +120,9 @@ namespace RCNet.Neural.Network.FF
                 {
                     TrainerCfg = new RidgeRegrTrainerSettings(candidate);
                 }
-                else if (candidate.Name.LocalName == "elasticLinRegrTrainer")
+                else if (candidate.Name.LocalName == "elasticRegrTrainer")
                 {
-                    TrainerCfg = new ElasticLinRegrTrainerSettings(candidate);
+                    TrainerCfg = new ElasticRegrTrainerSettings(candidate);
                 }
                 else if (candidate.Name.LocalName == "resPropTrainer")
                 {

@@ -63,11 +63,11 @@ namespace RCNet.Neural.Network.SM.Synapse
             _facilitation = _restingEfficacy;
             _depression = 1;
             _applyShortTermPlasticity = applyShortTermPlasticity && (SourceNeuron.OutputType == CommonEnums.NeuronSignalType.Spike);
-            //Post-sznaptic current
+            //Post-synaptic current
             _tauPostSynapticCurrentDecay = tauPostSynapticCurrentDecay;
             _t = 0;
             _stopPostSynapticCurrent = false;
-            _applyPostSynapticCurrent = applyPostSynapticCurrent && (TargetNeuron.OutputType == CommonEnums.NeuronSignalType.Spike);
+            _applyPostSynapticCurrent = applyPostSynapticCurrent;
             return;
         }
 
