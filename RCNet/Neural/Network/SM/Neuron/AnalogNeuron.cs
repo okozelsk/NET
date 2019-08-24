@@ -58,6 +58,11 @@ namespace RCNet.Neural.Network.SM.Neuron
         public int OutputSignalLeak { get; private set; }
 
         /// <summary>
+        /// Specifies, if neuron has already emitted output signal before current signal
+        /// </summary>
+        public bool AfterFirstOutputSignal { get; private set; }
+
+        /// <summary>
         /// Value to be passed to readout layer as a primary predictor.
         /// </summary>
         public double PrimaryPredictor { get { return OutputSignal; } }
@@ -71,7 +76,7 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// <summary>
         /// Neuron's activation function (the heart of the neuron)
         /// </summary>
-        private IActivationFunction _activation;
+        private readonly IActivationFunction _activation;
 
         /// <summary>
         /// If specified, neuron is the leaky intgrator
@@ -79,10 +84,11 @@ namespace RCNet.Neural.Network.SM.Neuron
         private readonly double _retainmentRatio;
 
         /// <summary>
-        /// Input stimulation
+        /// Stimulation
         /// </summary>
-        private double _tStimuli;
+        private double _iStimuli;
         private double _rStimuli;
+        private double _tStimuli;
 
         //Constructor
         /// <summary>
@@ -94,11 +100,11 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// <param name="bias">Constant bias.</param>
         /// <param name="retainmentRatio">Retainment ratio.</param>
         public AnalogNeuron(NeuronPlacement placement,
-                                     CommonEnums.NeuronRole role,
-                                     IActivationFunction activation,
-                                     double bias,
-                                     double retainmentRatio
-                                     )
+                            CommonEnums.NeuronRole role,
+                            IActivationFunction activation,
+                            double bias,
+                            double retainmentRatio
+                            )
         {
             Placement = placement;
             Role = role;
@@ -124,10 +130,12 @@ namespace RCNet.Neural.Network.SM.Neuron
         public void Reset(bool statistics)
         {
             _activation.Reset();
-            _tStimuli = 0;
+            _iStimuli = 0;
             _rStimuli = 0;
+            _tStimuli = 0;
             OutputSignal = _activation.Compute(_tStimuli);
             OutputSignalLeak = 0;
+            AfterFirstOutputSignal = false;
             if (statistics)
             {
                 Statistics.Reset();
@@ -142,8 +150,9 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// <param name="rStimuli">Stimulation comming from reservoir neurons</param>
         public void NewStimuli(double iStimuli, double rStimuli)
         {
-            _tStimuli = (iStimuli + rStimuli + Bias).Bound();
+            _iStimuli = iStimuli;
             _rStimuli = rStimuli;
+            _tStimuli = (iStimuli + rStimuli + Bias);
             return;
         }
 
@@ -156,6 +165,7 @@ namespace RCNet.Neural.Network.SM.Neuron
             //Output signal leak handling
             if (OutputSignal != _activation.OutputRange.Mid)
             {
+                AfterFirstOutputSignal = true;
                 OutputSignalLeak = 0;
             }
             ++OutputSignalLeak;
@@ -164,12 +174,12 @@ namespace RCNet.Neural.Network.SM.Neuron
             OutputSignal = (_retainmentRatio * OutputSignal) + (1d - _retainmentRatio) * state;
             if (collectStatistics)
             {
-                Statistics.Update(_tStimuli, _rStimuli, state, OutputSignal);
+                Statistics.Update(_iStimuli, _rStimuli, _tStimuli, state, OutputSignal);
             }
             return;
         }
 
 
-    }//ReservoirAnalogNeuron
+    }//AnalogNeuron
 
 }//Namespace

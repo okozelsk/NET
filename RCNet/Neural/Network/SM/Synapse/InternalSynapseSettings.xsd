@@ -6,8 +6,8 @@
            >
   <xs:import namespace="RCNetTypes" />
 
-  <!-- Static synapse configuration element -->
-  <xs:element name="rootElem" type="rcn:StaticSynapseCfgType"/>
+  <!-- Internal synapse configuration element -->
+  <xs:element name="rootElem" type="rcn:InternalSynapseCfgType"/>
 
 </xs:schema>
 

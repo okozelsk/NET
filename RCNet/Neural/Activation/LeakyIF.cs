@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using RCNet.Extensions;
+using RCNet.MathTools;
 using RCNet.MathTools.Differential;
 using RCNet.MathTools.VectorMath;
 
@@ -17,27 +18,10 @@ namespace RCNet.Neural.Activation
     public class LeakyIF : ODESpikingMembrane
     {
         //Constants
-        //Typical values
-        /// <summary>
-        /// Typical value of time scale
-        /// </summary>
-        public const double TypicalTimeScale = 8;
-        /// <summary>
-        /// Typical value of resistance
-        /// </summary>
-        public const double TypicalResistance = 10;
-        /// <summary>
-        /// Typical value of resting voltage
-        /// </summary>
-        public const double TypicalRestV = -70;
-        /// <summary>
-        /// Typical value of reset voltage
-        /// </summary>
-        public const double TypicalResetV = -65;
-        /// <summary>
-        /// Typical value of firing voltage
-        /// </summary>
-        public const double TypicalFiringThresholdV = -50;
+
+        //Static members
+        //protected static Interval _stimuliRange = new Interval(-3.629, 12.887);
+        protected static Interval _stimuliRange = new Interval(-3.629/5, 12.887/5);
 
         //Attributes
         //Parameters
@@ -48,7 +32,6 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
-        /// <param name="stimuliCoeff">Input stimuli coefficient (pA)</param>
         /// <param name="timeScale">Membrane time scale (ms)</param>
         /// <param name="resistance">Membrane resistance (Mohm)</param>
         /// <param name="restV">Membrane rest potential (mV)</param>
@@ -57,8 +40,7 @@ namespace RCNet.Neural.Activation
         /// <param name="refractoryPeriods">Number of after spike computation cycles while an input stimuli is ignored (ms)</param>
         /// <param name="solverMethod">ODE numerical solver method</param>
         /// <param name="solverCompSteps">ODE numerical solver computation steps of the time step</param>
-        public LeakyIF(double stimuliCoeff,
-                       double timeScale,
+        public LeakyIF(double timeScale,
                        double resistance,
                        double restV,
                        double resetV,
@@ -71,10 +53,11 @@ namespace RCNet.Neural.Activation
                    resetV,
                    firingThresholdV,
                    refractoryPeriods,
-                   stimuliCoeff,
                    solverMethod,
                    1,
                    solverCompSteps,
+                   1,
+                   100,
                    1
                    )
         {
@@ -83,6 +66,17 @@ namespace RCNet.Neural.Activation
             return;
         }
 
+
+        //Properties
+        /// <summary>
+        /// Optimal strength of the stimulation
+        /// </summary>
+        public override double OptimalStimulationStrength { get { return 2.725; } }
+
+        /// <summary>
+        /// Range of reasonable incoming current
+        /// </summary>
+        public override Interval StimuliRange { get { return _stimuliRange; } }
 
         //Methods
         /// <summary>

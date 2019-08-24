@@ -20,6 +20,13 @@ namespace RCNet.Neural.Activation
     [Serializable]
     public class LeakyReLUSettings
     {
+        //Constants
+        //Typical values
+        /// <summary>
+        /// Typical negative slope
+        /// </summary>
+        public const double TypicalNegSlope = 0.05;
+
         //Attribute properties
         /// <summary>
         /// The negative slope
@@ -31,9 +38,9 @@ namespace RCNet.Neural.Activation
         /// Creates an initialized instance
         /// </summary>
         /// <param name="negSlope">The negative slope</param>
-        public LeakyReLUSettings(RandomValueSettings negSlope)
+        public LeakyReLUSettings(RandomValueSettings negSlope = null)
         {
-            NegSlope = negSlope.DeepClone();
+            NegSlope = RandomValueSettings.CloneOrDefault(negSlope, TypicalNegSlope);
             return;
         }
 
@@ -63,7 +70,7 @@ namespace RCNet.Neural.Activation
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
             XElement activationSettingsElem = validator.Validate(elem, "rootElem");
             //Parsing
-            NegSlope = new RandomValueSettings(activationSettingsElem.Descendants("negSlope").FirstOrDefault());
+            NegSlope = RandomValueSettings.LoadOrDefault(activationSettingsElem, "negSlope", TypicalNegSlope);
             return;
         }
 

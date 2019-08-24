@@ -19,7 +19,7 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// <summary>
         /// Range of the rescalled state value. Allways (0,1)
         /// </summary>
-        private static readonly Interval _rescalledStateRange = new Interval(-1, 1);
+        private static readonly Interval _rescalledStateRange = new Interval(0, 1);
         
         //Attribute properties
         /// <summary>
@@ -64,10 +64,23 @@ namespace RCNet.Neural.Network.SM.Neuron
         public int OutputSignalLeak { get; private set; }
 
         /// <summary>
-        /// Value to be passed to readout layer as a primary predictor
-        /// (rescalled internal state of the neuron - membrane potential)
+        /// Specifies, if neuron has already emitted output signal before current signal
         /// </summary>
-        public double PrimaryPredictor { get { return _rescalledStateRange.Rescale(_activation.InternalState, _activation.InternalStateRange); } }
+        public bool AfterFirstOutputSignal { get; private set; }
+
+        /// <summary>
+        /// Value to be passed to readout layer as a primary predictor
+        /// (number of recent spikes + rescalled current membrane potential as a fraction)
+        /// </summary>
+        public double PrimaryPredictor
+        {
+            get
+            {
+                double rescalledState = _rescalledStateRange.Rescale(_activation.InternalState, _activation.InternalStateRange);
+                double fraction = 1d / (1d + Math.Exp(-_activation.InternalState));
+                return (_firingRate.NumOfRecentSpikes) + fraction;
+            }
+        }
 
         /// <summary>
         /// Value to be passed to readout layer as an augmented predictor
@@ -79,18 +92,19 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// <summary>
         /// Neuron's activation function (the heart of the neuron)
         /// </summary>
-        private IActivationFunction _activation;
+        private readonly IActivationFunction _activation;
 
         /// <summary>
         /// Firing rate computer
         /// </summary>
-        private FiringRate _firingRate;
+        private readonly FiringRate _firingRate;
 
         /// <summary>
-        /// Input stimulation
+        /// Stimulation
         /// </summary>
-        private double _tStimuli;
+        private double _iStimuli;
         private double _rStimuli;
+        private double _tStimuli;
 
         //Constructor
         /// <summary>
@@ -101,10 +115,10 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// <param name="activation">Instantiated activation function.</param>
         /// <param name="bias">Constant bias.</param>
         public SpikingNeuron(NeuronPlacement placement,
-                                      CommonEnums.NeuronRole role,
-                                      IActivationFunction activation,
-                                      double bias
-                                      )
+                             CommonEnums.NeuronRole role,
+                             IActivationFunction activation,
+                             double bias
+                             )
         {
             Placement = placement;
             Role = role;
@@ -130,10 +144,12 @@ namespace RCNet.Neural.Network.SM.Neuron
         {
             _activation.Reset();
             _firingRate.Reset();
-            _tStimuli = 0;
+            _iStimuli = 0;
             _rStimuli = 0;
+            _tStimuli = 0;
             OutputSignal = 0;
             OutputSignalLeak = 0;
+            AfterFirstOutputSignal = false;
             if (statistics)
             {
                 Statistics.Reset();
@@ -148,8 +164,9 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// <param name="rStimuli">Stimulation comming from reservoir neurons</param>
         public void NewStimuli(double iStimuli, double rStimuli)
         {
-            _tStimuli = (iStimuli + rStimuli + Bias).Bound();
+            _iStimuli = iStimuli;
             _rStimuli = rStimuli;
+            _tStimuli = (iStimuli + rStimuli + Bias).Bound();
             return;
         }
 
@@ -163,6 +180,7 @@ namespace RCNet.Neural.Network.SM.Neuron
             if (OutputSignal > 0)
             {
                 //Spike during previous cycle, so reset the counter
+                AfterFirstOutputSignal = true;
                 OutputSignalLeak = 0;
             }
             ++OutputSignalLeak;
@@ -171,12 +189,11 @@ namespace RCNet.Neural.Network.SM.Neuron
             _firingRate.Update(OutputSignal > 0);
             if (collectStatistics)
             {
-                Statistics.Update(_tStimuli, _rStimuli, _activation.InternalState, OutputSignal);
+                Statistics.Update(_iStimuli, _rStimuli, _tStimuli, _activation.InternalState, OutputSignal);
             }
             return;
         }
 
-
-    }//ReservoirSpikingNeuron
+    }//SpikingNeuron
 
 }//Namespace

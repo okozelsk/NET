@@ -11,11 +11,9 @@ namespace RCNet.Neural.Activation
     public class ISRU : AnalogActivationFunction
     {
         //Constants
-        //Typical values
-        /// <summary>
-        /// Typical alpha value
-        /// </summary>
-        public const double TypicalAlpha = 1;
+
+        //Static members
+        private static Interval _stimuliRange = new Interval(-3, 3);
 
         //Attributes
         private readonly Interval _outputRange;
@@ -45,6 +43,16 @@ namespace RCNet.Neural.Activation
 
         //Properties
         /// <summary>
+        /// Optimal strength of the stimulation
+        /// </summary>
+        public override double OptimalStimulationStrength { get { return 0; } }
+
+        /// <summary>
+        /// Range of reasonable incoming current
+        /// </summary>
+        public override Interval StimuliRange { get { return _stimuliRange; } }
+
+        /// <summary>
         /// Output signal range
         /// </summary>
         public override Interval OutputRange { get { return _outputRange; } }
@@ -57,7 +65,7 @@ namespace RCNet.Neural.Activation
         public override double Compute(double x)
         {
             x = x.Bound();
-            return (x / (1d + Alpha * x.Power(2))).Bound();
+            return (x / Math.Sqrt(1d + Alpha * x.Power(2))).Bound();
         }
 
         /// <summary>

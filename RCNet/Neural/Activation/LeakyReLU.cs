@@ -11,12 +11,6 @@ namespace RCNet.Neural.Activation
     public class LeakyReLU : AnalogActivationFunction
     {
         //Constants
-        //Typical values
-        /// <summary>
-        /// Typical negative slope
-        /// </summary>
-        public const double TypicalNegSlope = 0.05;
-
         //Attributes
         private readonly Interval _outputRange;
 
@@ -51,6 +45,16 @@ namespace RCNet.Neural.Activation
         }
 
         //Properties
+        /// <summary>
+        /// Optimal strength of the stimulation is not relevant
+        /// </summary>
+        public override double OptimalStimulationStrength { get { throw new NotImplementedException("Optimal strength of the stimulation is not relevant."); } }
+
+        /// <summary>
+        /// Range of reasonable incoming current
+        /// </summary>
+        public override Interval StimuliRange { get { throw new NotImplementedException("Stimulation range is not relevant."); } }
+
         /// <summary>
         /// Output signal range
         /// </summary>

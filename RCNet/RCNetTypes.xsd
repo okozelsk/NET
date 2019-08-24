@@ -162,7 +162,7 @@
   <!-- Gaussian distribution configuration element -->
   <xs:complexType name="GaussianDistrCfgType">
     <xs:attribute type="xs:double" name="mean" use="required"/>
-    <xs:attribute type="xs:double" name="stdDev" use="required"/>
+    <xs:attribute type="UDoubleGT0Type" name="stdDev" use="required"/>
   </xs:complexType>
 
   <!-- Random value element -->
@@ -177,6 +177,26 @@
         <xs:documentation xml:lang="en">Default value is false</xs:documentation>
       </xs:annotation>
     </xs:attribute>
+    <xs:attribute type="RandomDistributionType" name="distribution" use="optional" default="Uniform">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is Uniform</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <!-- Unsigned gaussian distribution configuration element -->
+  <xs:complexType name="UGaussianDistrCfgType">
+    <xs:attribute type="UDoubleGT0Type" name="mean" use="required"/>
+    <xs:attribute type="UDoubleGT0Type" name="stdDev" use="required"/>
+  </xs:complexType>
+
+  <!-- Unsigned random value element -->
+  <xs:complexType name="URandomValueType">
+    <xs:choice minOccurs="0" maxOccurs="1">
+      <xs:element type="UGaussianDistrCfgType" name="gaussianDistr" minOccurs="1" maxOccurs="1"/>
+    </xs:choice>
+    <xs:attribute type="UDoubleType" name="min" use="required"/>
+    <xs:attribute type="UDoubleGT0Type" name="max" use="required"/>
     <xs:attribute type="RandomDistributionType" name="distribution" use="optional" default="Uniform">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is Uniform</xs:documentation>
@@ -239,33 +259,28 @@
   <!-- ________________________________________SPIKING ACTIVATION TYPES_____________________________________________ -->
   <!-- Activation SimpleIF configuration element -->
   <xs:complexType name="ActivationSimpleIFCfgType">
-    <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="RandomValueType" name="resistance" minOccurs="1" maxOccurs="1">
+    <xs:sequence minOccurs="0" maxOccurs="1">
+      <xs:element type="URandomValueType" name="resistance" minOccurs="0" maxOccurs="1">
         <xs:annotation>
           <xs:documentation xml:lang="en">Typical value is 15</xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element type="RandomValueType" name="decayRate" minOccurs="1" maxOccurs="1">
+      <xs:element type="URandomValueType" name="decayRate" minOccurs="0" maxOccurs="1">
         <xs:annotation>
           <xs:documentation xml:lang="en">Typical value is 0.05</xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element type="RandomValueType" name="resetV" minOccurs="1" maxOccurs="1">
+      <xs:element type="URandomValueType" name="resetV" minOccurs="0" maxOccurs="1">
         <xs:annotation>
           <xs:documentation xml:lang="en">Typical value is 5</xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element type="RandomValueType" name="firingThresholdV" minOccurs="1" maxOccurs="1">
+      <xs:element type="URandomValueType" name="firingThresholdV" minOccurs="0" maxOccurs="1">
         <xs:annotation>
           <xs:documentation xml:lang="en">Typical value is 20</xs:documentation>
         </xs:annotation>
       </xs:element>
     </xs:sequence>
-    <xs:attribute type="UDoubleType" name="stimuliCoeff" use="optional" default="1">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
     <xs:attribute type="xs:unsignedInt" name="refractoryPeriods" use="optional" default="1">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
@@ -275,38 +290,33 @@
 
   <!-- Activation LeakyIF configuration element -->
   <xs:complexType name="ActivationLeakyIFCfgType">
-    <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="RandomValueType" name="timeScale" minOccurs="1" maxOccurs="1">
+    <xs:sequence minOccurs="0" maxOccurs="1">
+      <xs:element type="URandomValueType" name="timeScale" minOccurs="0" maxOccurs="1">
         <xs:annotation>
           <xs:documentation xml:lang="en">Typical value is 8</xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element type="RandomValueType" name="resistance" minOccurs="1" maxOccurs="1">
+      <xs:element type="URandomValueType" name="resistance" minOccurs="0" maxOccurs="1">
         <xs:annotation>
           <xs:documentation xml:lang="en">Typical value is 10</xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element type="RandomValueType" name="restV" minOccurs="1" maxOccurs="1">
+      <xs:element type="RandomValueType" name="restV" minOccurs="0" maxOccurs="1">
         <xs:annotation>
           <xs:documentation xml:lang="en">Typical value is -70</xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element type="RandomValueType" name="resetV" minOccurs="1" maxOccurs="1">
+      <xs:element type="RandomValueType" name="resetV" minOccurs="0" maxOccurs="1">
         <xs:annotation>
           <xs:documentation xml:lang="en">Typical value is -65</xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element type="RandomValueType" name="firingThresholdV" minOccurs="1" maxOccurs="1">
+      <xs:element type="RandomValueType" name="firingThresholdV" minOccurs="0" maxOccurs="1">
         <xs:annotation>
           <xs:documentation xml:lang="en">Typical value is -50</xs:documentation>
         </xs:annotation>
       </xs:element>
     </xs:sequence>
-    <xs:attribute type="UDoubleType" name="stimuliCoeff" use="optional" default="5.5">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 5.5</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
     <xs:attribute type="xs:unsignedInt" name="refractoryPeriods" use="optional" default="1">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
@@ -326,48 +336,43 @@
 
   <!-- Activation ExpIF configuration element -->
   <xs:complexType name="ActivationExpIFCfgType">
-    <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="RandomValueType" name="timeScale" minOccurs="1" maxOccurs="1">
+    <xs:sequence minOccurs="0" maxOccurs="1">
+      <xs:element type="URandomValueType" name="timeScale" minOccurs="0" maxOccurs="1">
         <xs:annotation>
           <xs:documentation xml:lang="en">Typical value is 12</xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element type="RandomValueType" name="resistance" minOccurs="1" maxOccurs="1">
+      <xs:element type="URandomValueType" name="resistance" minOccurs="0" maxOccurs="1">
         <xs:annotation>
           <xs:documentation xml:lang="en">Typical value is 20</xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element type="RandomValueType" name="restV" minOccurs="1" maxOccurs="1">
+      <xs:element type="RandomValueType" name="restV" minOccurs="0" maxOccurs="1">
         <xs:annotation>
           <xs:documentation xml:lang="en">Typical value is -65</xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element type="RandomValueType" name="resetV" minOccurs="1" maxOccurs="1">
+      <xs:element type="RandomValueType" name="resetV" minOccurs="0" maxOccurs="1">
         <xs:annotation>
           <xs:documentation xml:lang="en">Typical value is -60</xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element type="RandomValueType" name="rheobaseV" minOccurs="1" maxOccurs="1">
+      <xs:element type="RandomValueType" name="rheobaseV" minOccurs="0" maxOccurs="1">
         <xs:annotation>
           <xs:documentation xml:lang="en">Typical value is -55</xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element type="RandomValueType" name="firingThresholdV" minOccurs="1" maxOccurs="1">
+      <xs:element type="RandomValueType" name="firingThresholdV" minOccurs="0" maxOccurs="1">
         <xs:annotation>
           <xs:documentation xml:lang="en">Typical value is -30</xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element type="RandomValueType" name="sharpnessDeltaT" minOccurs="1" maxOccurs="1">
+      <xs:element type="URandomValueType" name="sharpnessDeltaT" minOccurs="0" maxOccurs="1">
         <xs:annotation>
           <xs:documentation xml:lang="en">Typical value is 2</xs:documentation>
         </xs:annotation>
       </xs:element>
     </xs:sequence>
-    <xs:attribute type="UDoubleType" name="stimuliCoeff" use="optional" default="5.5">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 5.5</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
     <xs:attribute type="xs:unsignedInt" name="refractoryPeriods" use="optional" default="1">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
@@ -387,63 +392,58 @@
 
   <!-- Activation AdExpIF configuration element -->
   <xs:complexType name="ActivationAdExpIFCfgType">
-    <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="RandomValueType" name="timeScale" minOccurs="1" maxOccurs="1">
+    <xs:sequence minOccurs="0" maxOccurs="1">
+      <xs:element type="URandomValueType" name="timeScale" minOccurs="0" maxOccurs="1">
         <xs:annotation>
           <xs:documentation xml:lang="en">Typical value is 5</xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element type="RandomValueType" name="resistance" minOccurs="1" maxOccurs="1">
+      <xs:element type="URandomValueType" name="resistance" minOccurs="0" maxOccurs="1">
         <xs:annotation>
           <xs:documentation xml:lang="en">Typical value is 500</xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element type="RandomValueType" name="restV" minOccurs="1" maxOccurs="1">
+      <xs:element type="RandomValueType" name="restV" minOccurs="0" maxOccurs="1">
         <xs:annotation>
           <xs:documentation xml:lang="en">Typical value is -70</xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element type="RandomValueType" name="resetV" minOccurs="1" maxOccurs="1">
+      <xs:element type="RandomValueType" name="resetV" minOccurs="0" maxOccurs="1">
         <xs:annotation>
           <xs:documentation xml:lang="en">Typical value is -51</xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element type="RandomValueType" name="rheobaseV" minOccurs="1" maxOccurs="1">
+      <xs:element type="RandomValueType" name="rheobaseV" minOccurs="0" maxOccurs="1">
         <xs:annotation>
           <xs:documentation xml:lang="en">Typical value is -50</xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element type="RandomValueType" name="firingThresholdV" minOccurs="1" maxOccurs="1">
+      <xs:element type="RandomValueType" name="firingThresholdV" minOccurs="0" maxOccurs="1">
         <xs:annotation>
           <xs:documentation xml:lang="en">Typical value is -30</xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element type="RandomValueType" name="sharpnessDeltaT" minOccurs="1" maxOccurs="1">
+      <xs:element type="URandomValueType" name="sharpnessDeltaT" minOccurs="0" maxOccurs="1">
         <xs:annotation>
           <xs:documentation xml:lang="en">Typical value is 2</xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element type="RandomValueType" name="adaptationVoltageCoupling" minOccurs="1" maxOccurs="1">
+      <xs:element type="URandomValueType" name="adaptationVoltageCoupling" minOccurs="0" maxOccurs="1">
         <xs:annotation>
           <xs:documentation xml:lang="en">Typical value is 0.5</xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element type="RandomValueType" name="adaptationTimeConstant" minOccurs="1" maxOccurs="1">
+      <xs:element type="URandomValueType" name="adaptationTimeConstant" minOccurs="0" maxOccurs="1">
         <xs:annotation>
           <xs:documentation xml:lang="en">Typical value is 100</xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element type="RandomValueType" name="adaptationSpikeTriggeredIncrement" minOccurs="1" maxOccurs="1">
+      <xs:element type="URandomValueType" name="adaptationSpikeTriggeredIncrement" minOccurs="0" maxOccurs="1">
         <xs:annotation>
           <xs:documentation xml:lang="en">Typical value is 7</xs:documentation>
         </xs:annotation>
       </xs:element>
     </xs:sequence>
-    <xs:attribute type="UDoubleType" name="stimuliCoeff" use="optional" default="150">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 150</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
     <xs:attribute type="ODENumSolverMethodType" name="solverMethod" use="optional" default="Euler">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is Euler</xs:documentation>
@@ -458,43 +458,38 @@
 
   <!-- Activation IzhikevichIF configuration element -->
   <xs:complexType name="ActivationIzhikevichIFCfgType">
-    <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="RandomValueType" name="recoveryTimeScale" minOccurs="1" maxOccurs="1">
+    <xs:sequence minOccurs="0" maxOccurs="1">
+      <xs:element type="URandomValueType" name="recoveryTimeScale" minOccurs="0" maxOccurs="1">
         <xs:annotation>
           <xs:documentation xml:lang="en">Typical value is 0.02</xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element type="RandomValueType" name="recoverySensitivity" minOccurs="1" maxOccurs="1">
+      <xs:element type="URandomValueType" name="recoverySensitivity" minOccurs="0" maxOccurs="1">
         <xs:annotation>
           <xs:documentation xml:lang="en">Typical value is 0.2</xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element type="RandomValueType" name="recoveryReset" minOccurs="1" maxOccurs="1">
+      <xs:element type="URandomValueType" name="recoveryReset" minOccurs="0" maxOccurs="1">
         <xs:annotation>
           <xs:documentation xml:lang="en">Typical value is 2</xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element type="RandomValueType" name="restV" minOccurs="1" maxOccurs="1">
+      <xs:element type="RandomValueType" name="restV" minOccurs="0" maxOccurs="1">
         <xs:annotation>
           <xs:documentation xml:lang="en">Typical value is -70</xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element type="RandomValueType" name="resetV" minOccurs="1" maxOccurs="1">
+      <xs:element type="RandomValueType" name="resetV" minOccurs="0" maxOccurs="1">
         <xs:annotation>
           <xs:documentation xml:lang="en">Typical value is -65</xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element type="RandomValueType" name="firingThresholdV" minOccurs="1" maxOccurs="1">
+      <xs:element type="RandomValueType" name="firingThresholdV" minOccurs="0" maxOccurs="1">
         <xs:annotation>
           <xs:documentation xml:lang="en">Typical value is 30</xs:documentation>
         </xs:annotation>
       </xs:element>
     </xs:sequence>
-    <xs:attribute type="UDoubleType" name="stimuliCoeff" use="optional" default="35">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 35</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
     <xs:attribute type="xs:unsignedInt" name="refractoryPeriods" use="optional" default="1">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
@@ -514,11 +509,6 @@
 
   <!-- Activation AutoIzhikevichIF configuration element -->
   <xs:complexType name="ActivationAutoIzhikevichIFCfgType">
-    <xs:attribute type="UDoubleType" name="stimuliCoeff" use="optional" default="35">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 35</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
     <xs:attribute type="NeuronRoleType" name="role" use="required"/>
     <xs:attribute type="xs:unsignedInt" name="refractoryPeriods" use="optional" default="1">
       <xs:annotation>
@@ -544,8 +534,8 @@
 
   <!-- Activation Elliot configuration element -->
   <xs:complexType name="ActivationElliotCfgType">
-    <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="RandomValueType" name="slope" minOccurs="1" maxOccurs="1">
+    <xs:sequence minOccurs="0" maxOccurs="1">
+      <xs:element type="URandomValueType" name="slope" minOccurs="0" maxOccurs="1">
         <xs:annotation>
           <xs:documentation xml:lang="en">Typical value is 1</xs:documentation>
         </xs:annotation>
@@ -563,8 +553,8 @@
 
   <!-- Activation ISRU configuration element -->
   <xs:complexType name="ActivationISRUCfgType">
-    <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="RandomValueType" name="alpha" minOccurs="1" maxOccurs="1">
+    <xs:sequence minOccurs="0" maxOccurs="1">
+      <xs:element type="URandomValueType" name="alpha" minOccurs="0" maxOccurs="1">
         <xs:annotation>
           <xs:documentation xml:lang="en">Typical value is 1</xs:documentation>
         </xs:annotation>
@@ -574,8 +564,8 @@
 
   <!-- Activation LeakyReLU configuration element -->
   <xs:complexType name="ActivationLeakyReLUCfgType">
-    <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="RandomValueType" name="negSlope" minOccurs="1" maxOccurs="1">
+    <xs:sequence minOccurs="0" maxOccurs="1">
+      <xs:element type="URandomValueType" name="negSlope" minOccurs="0" maxOccurs="1">
         <xs:annotation>
           <xs:documentation xml:lang="en">Typical value is 0.05</xs:documentation>
         </xs:annotation>
@@ -597,8 +587,8 @@
 
   <!-- Activation SoftExponential configuration element -->
   <xs:complexType name="ActivationSoftExponentialCfgType">
-    <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="RandomValueType" name="alpha" minOccurs="1" maxOccurs="1">
+    <xs:sequence minOccurs="0" maxOccurs="1">
+      <xs:element type="URandomValueType" name="alpha" minOccurs="0" maxOccurs="1">
         <xs:annotation>
           <xs:documentation xml:lang="en">Typical value is 1</xs:documentation>
         </xs:annotation>
@@ -675,14 +665,14 @@
   <!-- FF network - elastic net linear regression trainer - configuration -->
   <xs:complexType name="FFNetElasticLinRegrTrainerCfgType">
     <xs:attribute type="UIntGT0Type" name="attemptEpochs" use="required"/>
-    <xs:attribute type="UDoubleType" name="lambda" use="required">
+    <xs:attribute type="UDoubleType" name="lambda" use="optional" default="1e-6">
       <xs:annotation>
-        <xs:documentation xml:lang="en">The penalty to be applied.</xs:documentation>
+        <xs:documentation xml:lang="en">The penalty to be applied. Default value is 1e-6</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute type="UDoubleLE1Type" name="alpha" use="required">
+    <xs:attribute type="UDoubleLE1Type" name="alpha" use="optional" default="0.5">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Ratio between Ridge and Lasso approach. Values between 0 and 1 inclusive, where 0 leads to full Ridge and 1 leads to full Lasso</xs:documentation>
+        <xs:documentation xml:lang="en">Ratio between Ridge and Lasso approach. Values between 0 and 1 inclusive, where 0 leads to full Ridge and 1 leads to full Lasso. Default value is 0.5</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -829,38 +819,387 @@
 
   <!-- ________________________________________SYNAPSE TYPES_________________________________________________ -->
 
-  <!-- Static synapse - configuration -->
-  <xs:complexType name="StaticSynapseCfgType">
+  <!-- Input synapse types-->
+  <xs:complexType name="InputSynapseSpikingTargetCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="RandomValueType" name="weight" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="URandomValueType" name="weight" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
   </xs:complexType>
-  
-  <!-- Dynamic synapse - configuration -->
-  <xs:complexType name="DynamicSynapseCfgType">
+
+  <xs:complexType name="InputSynapseAnalogTargetCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="RandomValueType" name="weight" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="URandomValueType" name="weight" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
-    <xs:attribute type="UDoubleType" name="tauFacilitation" use="optional" default="500">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 500</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="UDoubleType" name="tauRecovery" use="optional" default="5">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 5</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
+  </xs:complexType>
+
+  <!-- Input synapse - configuration -->
+  <xs:complexType name="InputSynapseCfgType">
+    <xs:sequence minOccurs="0" maxOccurs="1">
+      <xs:element type="InputSynapseSpikingTargetCfgType" name="spikingTarget" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="InputSynapseAnalogTargetCfgType" name="analogTarget" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Internal synapse types-->
+  <!-- Internal synapse - Spiking target configurations -->
+  <xs:complexType name="S2SSynapseE2EDynamicsCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="URandomValueType" name="weight" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
     <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="optional" default="0.5">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.5</xs:documentation>
+        <xs:documentation xml:lang="en">Default value is 0.5 (expreses average probability of neurotransmitter release)</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute type="UDoubleType" name="tauDecay" use="optional" default="10">
+    <xs:attribute type="UDoubleType" name="tauDepression" use="optional" default="1100">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 10</xs:documentation>
+        <xs:documentation xml:lang="en">Default value is 1100 ms</xs:documentation>
       </xs:annotation>
     </xs:attribute>
+    <xs:attribute type="UDoubleType" name="tauFacilitation" use="optional" default="50">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 50 ms</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name="tauPostSynapticCurrentDecay" use="optional" default="3">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 3 ms</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="applyShortTermPlasticity" use="optional" default="true">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is true</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="applyPostSynapticCurrent" use="optional" default="true">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is true</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <xs:complexType name="S2SSynapseE2IDynamicsCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="URandomValueType" name="weight" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+    <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="optional" default="0.05">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.05 (expreses average probability of neurotransmitter release)</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name="tauDepression" use="optional" default="125">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 125 ms</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name="tauFacilitation" use="optional" default="1200">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 1200 ms</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name="tauPostSynapticCurrentDecay" use="optional" default="6">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 6 ms</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="applyShortTermPlasticity" use="optional" default="true">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is true</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="applyPostSynapticCurrent" use="optional" default="true">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is true</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <xs:complexType name="S2SSynapseI2EDynamicsCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="URandomValueType" name="weight" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+    <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="optional" default="0.25">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.25 (expreses average probability of neurotransmitter release)</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name="tauDepression" use="optional" default="700">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 700 ms</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name="tauFacilitation" use="optional" default="20">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 20 ms</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name="tauPostSynapticCurrentDecay" use="optional" default="3">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 3 ms</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="applyShortTermPlasticity" use="optional" default="true">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is true</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="applyPostSynapticCurrent" use="optional" default="true">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is true</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <xs:complexType name="S2SSynapseI2IDynamicsCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="URandomValueType" name="weight" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+    <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="optional" default="0.32">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.32 (expreses average probability of neurotransmitter release)</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name="tauDepression" use="optional" default="144">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 144 ms</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name="tauFacilitation" use="optional" default="60">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 60 ms</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name="tauPostSynapticCurrentDecay" use="optional" default="6">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 6 ms</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="applyShortTermPlasticity" use="optional" default="true">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is true</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="applyPostSynapticCurrent" use="optional" default="true">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is true</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <xs:complexType name="A2SSynapseE2EDynamicsCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="URandomValueType" name="weight" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+    <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="optional" default="0.5">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.5 (expreses average probability of neurotransmitter release)</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name="tauDepression" use="optional" default="1100">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 1100 ms</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name="tauFacilitation" use="optional" default="50">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 50 ms</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name="tauPostSynapticCurrentDecay" use="optional" default="3">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 3 ms</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="applyShortTermPlasticity" use="optional" default="true">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is true</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="applyPostSynapticCurrent" use="optional" default="false">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is false</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <xs:complexType name="A2SSynapseE2IDynamicsCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="URandomValueType" name="weight" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+    <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="optional" default="0.05">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.05 (expreses average probability of neurotransmitter release)</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name="tauDepression" use="optional" default="125">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 125 ms</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name="tauFacilitation" use="optional" default="1200">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 1200 ms</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name="tauPostSynapticCurrentDecay" use="optional" default="6">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 6 ms</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="applyShortTermPlasticity" use="optional" default="true">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is true</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="applyPostSynapticCurrent" use="optional" default="false">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is false</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <xs:complexType name="A2SSynapseI2EDynamicsCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="URandomValueType" name="weight" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+    <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="optional" default="0.25">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.25 (expreses average probability of neurotransmitter release)</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name="tauDepression" use="optional" default="700">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 700 ms</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name="tauFacilitation" use="optional" default="20">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 20 ms</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name="tauPostSynapticCurrentDecay" use="optional" default="3">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 3 ms</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="applyShortTermPlasticity" use="optional" default="true">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is true</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="applyPostSynapticCurrent" use="optional" default="false">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is false</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <xs:complexType name="A2SSynapseI2IDynamicsCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="URandomValueType" name="weight" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+    <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="optional" default="0.32">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.32 (expreses average probability of neurotransmitter release)</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name="tauDepression" use="optional" default="144">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 144 ms</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name="tauFacilitation" use="optional" default="60">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 60 ms</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name="tauPostSynapticCurrentDecay" use="optional" default="6">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 6 ms</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="applyShortTermPlasticity" use="optional" default="true">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is true</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="applyPostSynapticCurrent" use="optional" default="false">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is false</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <!-- Internal synapse - Analog target configurations -->
+  <xs:complexType name="S2ASynapseE2EDynamicsCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="URandomValueType" name="weight" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="S2ASynapseI2EDynamicsCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="URandomValueType" name="weight" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="S2ASynapseE2IDynamicsCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="URandomValueType" name="weight" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="S2ASynapseI2IDynamicsCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="URandomValueType" name="weight" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="A2ASynapseE2EDynamicsCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="URandomValueType" name="weight" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="A2ASynapseI2EDynamicsCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="URandomValueType" name="weight" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="A2ASynapseE2IDynamicsCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="URandomValueType" name="weight" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="A2ASynapseI2IDynamicsCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="URandomValueType" name="weight" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!-- Internal synapse - configuration -->
+  <xs:complexType name="InternalSynapseCfgType">
+    <xs:sequence minOccurs="0" maxOccurs="1">
+      <xs:element type="S2SSynapseE2EDynamicsCfgType" name="dynamicsS2SEE" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="S2SSynapseI2EDynamicsCfgType" name="dynamicsS2SIE" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="S2SSynapseE2IDynamicsCfgType" name="dynamicsS2SEI" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="S2SSynapseI2IDynamicsCfgType" name="dynamicsS2SII" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="A2SSynapseE2EDynamicsCfgType" name="dynamicsA2SEE" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="A2SSynapseI2EDynamicsCfgType" name="dynamicsA2SIE" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="A2SSynapseE2IDynamicsCfgType" name="dynamicsA2SEI" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="A2SSynapseI2IDynamicsCfgType" name="dynamicsA2SII" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="S2ASynapseE2EDynamicsCfgType" name="dynamicsS2AEE" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="S2ASynapseI2EDynamicsCfgType" name="dynamicsS2AIE" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="S2ASynapseE2IDynamicsCfgType" name="dynamicsS2AEI" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="S2ASynapseI2IDynamicsCfgType" name="dynamicsS2AII" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="A2ASynapseE2EDynamicsCfgType" name="dynamicsA2AEE" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="A2ASynapseI2EDynamicsCfgType" name="dynamicsA2AIE" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="A2ASynapseE2IDynamicsCfgType" name="dynamicsA2AEI" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="A2ASynapseI2IDynamicsCfgType" name="dynamicsA2AII" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
   </xs:complexType>
 
 
@@ -868,10 +1207,9 @@
 
   <!-- Pool - interconnection - configuration -->
   <xs:complexType name="PoolInterconnectionCfgType">
-    <xs:choice minOccurs="1" maxOccurs="1">
-      <xs:element type="StaticSynapseCfgType" name="staticSynapse" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="DynamicSynapseCfgType" name="dynamicSynapse" minOccurs="1" maxOccurs="1"/>
-    </xs:choice>
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="InternalSynapseCfgType" name="synapse" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
     <xs:attribute type="UDoubleLE1Type" name="density" use="required"/>
     <xs:attribute type="UDoubleType" name="relShareEE" use="optional" default="0.3">
       <xs:annotation>
@@ -950,7 +1288,7 @@
   <!-- Pool - retainment neurons -configuration -->
   <xs:complexType name="PoolRetNeuronsCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="RandomValueType" name="rate" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="URandomValueType" name="rate" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="UDoubleLE1Type" name="density" use="required"/>
   </xs:complexType>
@@ -1011,10 +1349,9 @@
 
   <!-- Reservoir - pool to pool connection - configuration -->
   <xs:complexType name="ReservoirPool2PoolConnCfgType">
-    <xs:choice minOccurs="1" maxOccurs="1">
-      <xs:element type="StaticSynapseCfgType" name="staticSynapse" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="DynamicSynapseCfgType" name="dynamicSynapse" minOccurs="1" maxOccurs="1"/>
-    </xs:choice>
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="InternalSynapseCfgType" name="synapse" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
     <xs:attribute type="xs:string" name="srcPool" use="required"/>
     <xs:attribute type="UDoubleLE1Type" name="srcConnDensity" use="required"/>
     <xs:attribute type="xs:string" name="targetPool" use="required"/>
@@ -1074,8 +1411,11 @@
     <xs:attribute type="xs:string" name="name" use="required" />
     <xs:attribute type="SynapticDelayMethodType" name="synapticDelayMethod" use="required"/>
     <xs:attribute type="xs:unsignedInt" name="maxInputDelay" use="required"/>
-    <xs:attribute type="xs:unsignedInt" name="maxInternalDelay" use="required"/>
-    <xs:attribute type="UDoubleGT0NAOptionType" name="spectralRadius" use="required" />
+    <xs:attribute type="UDoubleGT0Type" name="spectralRadius" use="optional" default="0.9999">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.9999</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- ________________________________________NEURAL PREPROCESSOR TYPES_________________________________________________ -->
@@ -1155,10 +1495,9 @@
 
   <!-- NeuralPreprocessor - reservoir instance - input field connection configuration -->
   <xs:complexType name="NPResInstanceInputConnectionCfgType">
-    <xs:choice minOccurs="1" maxOccurs="1">
-      <xs:element type="StaticSynapseCfgType" name="staticSynapse" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="DynamicSynapseCfgType" name="dynamicSynapse" minOccurs="1" maxOccurs="1"/>
-    </xs:choice>
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="InputSynapseCfgType" name="synapse" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
     <xs:attribute type="xs:string" name="fieldName" use="required"/>
     <xs:attribute type="xs:string" name="poolName" use="required"/>
     <xs:attribute type="UDoubleGT0Type" name="density" use="required"/>
@@ -1254,7 +1593,16 @@
   <!-- StateMachine complete configuration -->
   <xs:complexType name="SMCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="NPCfgType" name="neuralPreprocessor" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="NPCfgType" name="neuralPreprocessor" minOccurs="1" maxOccurs="1">
+        <xs:key name="input_field_name">
+          <xs:selector xpath="./input/*/field"/>
+          <xs:field xpath="@name"/>
+        </xs:key>
+        <xs:keyref name="existing_input_field" refer="input_field_name">
+          <xs:selector xpath=".//inputConnection" />
+          <xs:field xpath="@fieldName" />
+        </xs:keyref>
+      </xs:element>
       <xs:element type="ROutLayerCfgType" name="readoutLayer" minOccurs="1" maxOccurs="1">
         <xs:unique name="unique_output_field_name">
           <xs:selector xpath="./readoutUnit"/>

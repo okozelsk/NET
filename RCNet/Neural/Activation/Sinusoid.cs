@@ -10,7 +10,9 @@ namespace RCNet.Neural.Activation
     [Serializable]
     public class Sinusoid : AnalogActivationFunction
     {
-        //Attributes
+
+        //Static members
+        private static Interval _stimuliRange = new Interval(-0.75, 0.75);
         private static readonly Interval _outputRange = new Interval(-1, 1);
 
         //Constructor
@@ -24,6 +26,16 @@ namespace RCNet.Neural.Activation
         }
 
         //Properties
+        /// <summary>
+        /// Optimal strength of the stimulation
+        /// </summary>
+        public override double OptimalStimulationStrength { get { return 0.85; } }
+
+        /// <summary>
+        /// Range of reasonable incoming current
+        /// </summary>
+        public override Interval StimuliRange { get { return _stimuliRange; } }
+
         /// <summary>
         /// Output range
         /// </summary>

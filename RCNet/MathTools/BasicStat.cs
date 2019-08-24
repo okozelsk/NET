@@ -12,10 +12,12 @@ namespace RCNet.MathTools
     {
         //Attributes
         //Locker to ensure thread safe behaviour
-        private Object _lock;
+        private readonly Object _lock;
         private readonly bool _threadSafe;
         //Base values
         private double _sum;
+        private double _negSum;
+        private double _posSum;
         private double _sumOfSquares;
         private double _min;
         private double _max;
@@ -194,6 +196,48 @@ namespace RCNet.MathTools
                 else
                 {
                     return _sum;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Sum of the negative sample values
+        /// </summary>
+        public double NegSum
+        {
+            get
+            {
+                if (_threadSafe)
+                {
+                    lock (_lock)
+                    {
+                        return _negSum;
+                    }
+                }
+                else
+                {
+                    return _negSum;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Sum of the positive sample values
+        /// </summary>
+        public double PosSum
+        {
+            get
+            {
+                if (_threadSafe)
+                {
+                    lock (_lock)
+                    {
+                        return _posSum;
+                    }
+                }
+                else
+                {
+                    return _posSum;
                 }
             }
         }
@@ -464,6 +508,8 @@ namespace RCNet.MathTools
         private void ResetInternal()
         {
             _sum = 0;
+            _negSum = 0;
+            _posSum = 0;
             _sumOfSquares = 0;
             _min = 0;
             _max = 0;
@@ -497,6 +543,8 @@ namespace RCNet.MathTools
         private void CopyFromInternal(BasicStat source)
         {
             _sum = source._sum;
+            _posSum = source._posSum;
+            _negSum = source._negSum;
             _sumOfSquares = source._sumOfSquares;
             _min = source._min;
             _max = source._max;
@@ -597,6 +645,14 @@ namespace RCNet.MathTools
         private void AddSampleValueInternal(double value)
         {
             _sum += value;
+            if(value < 0)
+            {
+                _negSum += value;
+            }
+            else
+            {
+                _posSum += value;
+            }
             _sumOfSquares += value.Power(2);
             if (_numOfSamples == 0)
             {

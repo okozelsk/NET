@@ -290,7 +290,7 @@ namespace RCNet.Neural.Data
             CheckStructure();
             for (int i = 0; i < InputFieldNormalizerRefCollection.Count; i++)
             {
-                inputVector[i] = InputFieldNormalizerRefCollection[i].Naturalize(inputVector[i]);
+                inputVector[i] = InputFieldNormalizerRefCollection[i].Denormalize(inputVector[i]);
             }
             return;
         }
@@ -318,7 +318,7 @@ namespace RCNet.Neural.Data
             CheckStructure();
             for (int i = 0; i < OutputFieldNormalizerRefCollection.Count; i++)
             {
-                outputVector[i] = OutputFieldNormalizerRefCollection[i].Naturalize(outputVector[i]);
+                outputVector[i] = OutputFieldNormalizerRefCollection[i].Denormalize(outputVector[i]);
             }
             return;
         }

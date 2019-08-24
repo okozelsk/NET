@@ -62,6 +62,11 @@ namespace RCNet.Neural.Network.SM.Neuron
         public int OutputSignalLeak { get; private set; }
 
         /// <summary>
+        /// Specifies, if neuron has already emitted output signal before current signal
+        /// </summary>
+        public bool AfterFirstOutputSignal { get; private set; }
+
+        /// <summary>
         /// Value to be passed to readout layer as a primary predictor.
         /// Predictor value does not make sense in case of Input neuron.
         /// </summary>
@@ -74,8 +79,9 @@ namespace RCNet.Neural.Network.SM.Neuron
         public double SecondaryPredictor { get { return double.NaN; } }
 
         //Attributes
-        private double _tStimuli;
+        private double _iStimuli;
         private double _rStimuli;
+        private double _tStimuli;
 
         //Constructor
         /// <summary>
@@ -104,10 +110,12 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// <param name="statistics">Specifies whether to reset internal statistics</param>
         public void Reset(bool statistics)
         {
-            _tStimuli = 0;
+            _iStimuli = 0;
             _rStimuli = 0;
+            _tStimuli = 0;
             OutputSignal = 0;
             OutputSignalLeak = 0;
+            AfterFirstOutputSignal = false;
             if (statistics)
             {
                 Statistics.Reset();
@@ -122,8 +130,9 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// <param name="rStimuli">Stimulation comming from reservoir neurons. Should be always 0.</param>
         public void NewStimuli(double iStimuli, double rStimuli)
         {
-            _tStimuli = (iStimuli + rStimuli).Bound();
+            _iStimuli = iStimuli;
             _rStimuli = rStimuli;
+            _tStimuli = (iStimuli + rStimuli).Bound();
             return;
         }
 
@@ -136,6 +145,7 @@ namespace RCNet.Neural.Network.SM.Neuron
             //Output signal leak handling
             if (OutputSignal != OutputRange.Mid)
             {
+                AfterFirstOutputSignal = true;
                 OutputSignalLeak = 0;
             }
             ++OutputSignalLeak;
@@ -143,7 +153,7 @@ namespace RCNet.Neural.Network.SM.Neuron
             OutputSignal = _tStimuli;
             if (collectStatistics)
             {
-                Statistics.Update(_tStimuli, _rStimuli, _tStimuli, _tStimuli);
+                Statistics.Update(_iStimuli, _rStimuli, _tStimuli, OutputSignal, OutputSignal);
             }
             return;
         }

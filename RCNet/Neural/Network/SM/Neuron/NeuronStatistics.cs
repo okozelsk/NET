@@ -22,14 +22,19 @@ namespace RCNet.Neural.Network.SM.Neuron
 
         //Attribute properties
         /// <summary>
-        /// Statistics of neuron's stimulation (all components together)
+        /// Statistics of neuron's input stimulation passed to activation function
         /// </summary>
-        public BasicStat TStimuliStat { get; }
+        public BasicStat InputStimuliStat { get; }
 
         /// <summary>
-        /// Statistics of neuron's stimulation (stimulation component related to part coming from connected reservoir's neurons)
+        /// Statistics of neuron's stimulation incoming from the reservoir
         /// </summary>
-        public BasicStat RStimuliStat { get; }
+        public BasicStat ReservoirStimuliStat { get; }
+
+        /// <summary>
+        /// Statistics of neuron's total stimulation (all components together: Bias + Input + Reservoir)
+        /// </summary>
+        public BasicStat TotalStimuliStat { get; }
 
         /// <summary>
         /// Neuron's normal states min max interval
@@ -53,8 +58,9 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// </summary>
         public NeuronStatistics(Interval neuronStateRange)
         {
-            TStimuliStat = new BasicStat();
-            RStimuliStat = new BasicStat();
+            InputStimuliStat = new BasicStat();
+            ReservoirStimuliStat = new BasicStat();
+            TotalStimuliStat = new BasicStat();
             ActivationStateRange = neuronStateRange.DeepClone();
             NormalizedActivationStateStat = new BasicStat();
             OutputSignalStat = new BasicStat();
@@ -67,8 +73,9 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// </summary>
         public void Reset()
         {
-            TStimuliStat.Reset();
-            RStimuliStat.Reset();
+            InputStimuliStat.Reset();
+            ReservoirStimuliStat.Reset();
+            TotalStimuliStat.Reset();
             NormalizedActivationStateStat.Reset();
             OutputSignalStat.Reset();
             return;
@@ -77,14 +84,16 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// <summary>
         /// Updates statistics
         /// </summary>
+        /// <param name="iStimuli">Incoming stimulation related to part coming from connected Input neurons</param>
+        /// <param name="rStimuli">Incoming stimulation related to part coming from connected reservoir's neurons</param>
         /// <param name="tStimuli">Incoming stimulation (all components together)</param>
-        /// <param name="rStimuli">Incoming stimulation component related to part coming from connected reservoir's neurons</param>
         /// <param name="activationState">Neuron's activation function state</param>
         /// <param name="outputSignal">Neuron's output signal</param>
-        public void Update(double tStimuli, double rStimuli, double activationState, double outputSignal)
+        public void Update(double iStimuli, double rStimuli, double tStimuli, double activationState, double outputSignal)
         {
-            TStimuliStat.AddSampleValue(tStimuli);
-            RStimuliStat.AddSampleValue(rStimuli);
+            InputStimuliStat.AddSampleValue(iStimuli);
+            ReservoirStimuliStat.AddSampleValue(rStimuli);
+            TotalStimuliStat.AddSampleValue(tStimuli);
             NormalizedActivationStateStat.AddSampleValue(NormalizedStateRange.Rescale(activationState, ActivationStateRange));
             OutputSignalStat.AddSampleValue(outputSignal);
             return;

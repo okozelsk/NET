@@ -4,7 +4,7 @@ namespace RCNet.MathTools
 {
     /// <summary>
     /// Implements thread safe (if required) normalizer and denormalizer. Scales the input to desired normalized range and vice versa.
-    /// Normalizer supports gausse data standardization
+    /// Normalizer supports data standardization.
     /// </summary>
     [Serializable]
     public class Normalizer
@@ -55,12 +55,8 @@ namespace RCNet.MathTools
         /// <summary>
         /// Instantiates a normalizer
         /// </summary>
-        /// <param name="reserveRatio">
-        /// Reserve held by a normalizer to cover cases where future data exceeds a known range of sample data.
-        /// </param>
-        /// <param name="standardize">
-        /// Specifies whether to apply data standardization
-        /// </param>
+        /// <param name="reserveRatio">Reserve held by a normalizer to cover cases where future data exceeds a known range of sample data.</param>
+        /// <param name="standardize">Specifies whether to apply data standardization before normalization. </param>
         /// <param name="threadSafe">Specifies if to create thread safe instance</param>
         public Normalizer(double reserveRatio, bool standardize = true, bool threadSafe = false)
         {
@@ -77,12 +73,8 @@ namespace RCNet.MathTools
         /// <param name="normRange">
         /// Range of normalized values
         /// </param>
-        /// <param name="reserveRatio">
-        /// Reserve held by a normalizer to cover cases where future data exceeds a known range of sample data.
-        /// </param>
-        /// <param name="standardize">
-        /// Specifies whether to apply data standardization
-        /// </param>
+        /// <param name="reserveRatio">Reserve held by a normalizer to cover cases where future data exceeds a known range of sample data.</param>
+        /// <param name="standardize">Specifies whether to apply data standardization before normalization. </param>
         /// <param name="threadSafe">Specifies if to create thread safe instance</param>
         public Normalizer(Interval normRange, double reserveRatio, bool standardize = true, bool threadSafe = false)
         {
@@ -98,10 +90,20 @@ namespace RCNet.MathTools
         /// Indicates whether the normalizer is properly initialized
         /// </summary>
         public bool Initialized { get { return (SamplesStat.NumOfSamples > 0 && SamplesStat.Min != SamplesStat.Max); } }
-        private double VMin { get { return SamplesStat.Min - ((SamplesStat.Span * ReserveRatio) / 2); } }
-        private double VMax { get { return SamplesStat.Max + ((SamplesStat.Span * ReserveRatio) / 2); } }
 
         //Methods
+        /// <summary>
+        /// Checks normalizer readyness
+        /// </summary>
+        private void CheckReadiness()
+        {
+            if (!Initialized)
+            {
+                throw new Exception("Not properly initialized");
+            }
+            return;
+        }
+
         /// <summary>
         /// Resets normalizer to initial state
         /// </summary>
@@ -134,50 +136,27 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// The standard normalization
+        /// Standardizes the given natural (sample) value
         /// </summary>
-        /// <param name="min">Samples min</param>
-        /// <param name="max">Samples max</param>
-        /// <param name="v">Natural (sample) value to be normalized</param>
-        /// <returns>Normalized v</returns>
-        private double Normalize(double min, double max, double v)
+        /// <param name="naturalValue">Natural value to be standardized</param>
+        /// <returns>Standardized value (z-skore)</returns>
+        public double Standardize(double naturalValue)
         {
-            return NormRange.Min + NormRange.Span * ((v - min) / (max - min));
+            //Check readiness
+            CheckReadiness();
+            return (naturalValue - SamplesStat.ArithAvg) / SamplesStat.StdDev;
         }
 
         /// <summary>
-        /// The standard denormalization
+        /// Naturalizes the given standardized value
         /// </summary>
-        /// <param name="min">Samples min</param>
-        /// <param name="max">Samples max</param>
-        /// <param name="n">Normalized value</param>
-        /// <returns>Natural value</returns>
-        private double Naturalize(double min, double max, double n)
+        /// <param name="normValue">Standardized value (z-score) to be naturalized</param>
+        /// <returns>Destandardized (natural) value</returns>
+        public double Destandardize(double standardizedValue)
         {
-            return min + (max - min) * ((n - NormRange.Min) / NormRange.Span);
-        }
-
-        /// <summary>
-        /// Checks normalizer readyness
-        /// </summary>
-        private void CheckInitiated()
-        {
-            if (!Initialized)
-            {
-                throw new Exception("Not properly initialized");
-            }
-            return;
-        }
-
-        /// <summary>
-        /// Computes the half of a gausse interval
-        /// </summary>
-        /// <returns>The half of a gausse interval</returns>
-        private double ComputeGausseHalfInterval()
-        {
-            double gausseLo = Math.Abs((VMin - SamplesStat.ArithAvg) / SamplesStat.StdDev);
-            double gausseHi = Math.Abs((VMax - SamplesStat.ArithAvg) / SamplesStat.StdDev);
-            return Math.Max(gausseLo, gausseHi);
+            //Check readiness
+            CheckReadiness();
+            return SamplesStat.ArithAvg + standardizedValue * SamplesStat.StdDev;
         }
 
         /// <summary>
@@ -188,57 +167,55 @@ namespace RCNet.MathTools
         public double Normalize(double naturalValue)
         {
             //Check readiness
-            CheckInitiated();
-            //Value preprocessing
-            if (Standardization)
+            CheckReadiness();
+            //Preprocessing
+            double min, max, val;
+            if(Standardization)
             {
-                //Gausse standardization
-                double gausseHalfInt = ComputeGausseHalfInterval();
-                double gausseValue = (naturalValue - SamplesStat.ArithAvg) / SamplesStat.StdDev;
-                //Normalization
-                return Normalize(-gausseHalfInt, gausseHalfInt, gausseValue);
+
+                double hi = Math.Max(Math.Abs((SamplesStat.Min - SamplesStat.ArithAvg) / SamplesStat.StdDev), Math.Abs((SamplesStat.Max - SamplesStat.ArithAvg) / SamplesStat.StdDev));
+                min = -hi;
+                max = hi;
+                val = (naturalValue - SamplesStat.ArithAvg) / SamplesStat.StdDev;
             }
             else
             {
-                //Normalization
-                return Normalize(VMin, VMax, naturalValue);
+                min = SamplesStat.Min;
+                max = SamplesStat.Max;
+                val = naturalValue;
             }
+            val *= (1 - ReserveRatio);
+            return NormRange.Min + NormRange.Span * ((val - min) / (max - min));
         }
 
         /// <summary>
-        /// Denormalizes the given normalized value
+        /// Naturalizes the given normalized value
         /// </summary>
         /// <param name="normValue">Normalized value to be denormalized</param>
-        /// <returns>Natural (denormalized) value</returns>
-        public double Naturalize(double normValue)
+        /// <returns>Denormalized (natural) value</returns>
+        public double Denormalize(double normValue)
         {
             //Check readiness
-            CheckInitiated();
-            //Value preprocessing
+            CheckReadiness();
+            //Preprocessing
+            double min, max, val;
             if (Standardization)
             {
-                //Denormalization
-                double gausseHalfInt = ComputeGausseHalfInterval();
-                double standardizedGausse = Naturalize(-gausseHalfInt, gausseHalfInt, normValue);
-                //Destandardization -> natural value
-                return (standardizedGausse * SamplesStat.StdDev) + SamplesStat.ArithAvg;
+                double hi = Math.Max(Math.Abs((SamplesStat.Min - SamplesStat.ArithAvg) / SamplesStat.StdDev), Math.Abs((SamplesStat.Max - SamplesStat.ArithAvg) / SamplesStat.StdDev));
+                min = -hi;
+                max = hi;
             }
             else
             {
-                //Denormalization -> natural value
-                return Naturalize(VMin, VMax, normValue);
+                min = SamplesStat.Min;
+                max = SamplesStat.Max;
             }
-        }
-
-        /// <summary>
-        /// Computes what part of the natural values range is affected by the piece of the normalized range
-        /// </summary>
-        /// <param name="normSpan">Piece of normalized range</param>
-        /// <returns>Piece of natural range</returns>
-        public double ComputeNaturalSpan(double normSpan)
-        {
-            CheckInitiated();
-            return ((VMax - VMin) * Math.Abs(normSpan)) * (1 - ReserveRatio);
+            val = (min + (max - min) * ((normValue - NormRange.Min) / NormRange.Span)) / (1d - ReserveRatio);
+            if (Standardization)
+            {
+                val = SamplesStat.ArithAvg + val * SamplesStat.StdDev;
+            }
+            return val;
         }
 
     }//Normalizer

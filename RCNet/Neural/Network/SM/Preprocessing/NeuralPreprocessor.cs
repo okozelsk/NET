@@ -21,7 +21,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
 
         //Static attributes
         /// <summary>
-        /// Input data will be normalized to this range before the usage
+        /// Input data will be normalized to this range before the usage in the reservoirs
         /// </summary>
         private static readonly Interval _dataRange = new Interval(-1, 1);
 
@@ -40,7 +40,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// <summary>
         /// Settings used for instance creation.
         /// </summary>
-        private NeuralPreprocessorSettings _settings;
+        private readonly NeuralPreprocessorSettings _settings;
         /// <summary>
         /// Collection of the internal input generators associated with the internal input fields
         /// </summary>
@@ -520,7 +520,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// <summary>
         /// Collects the key statistics of each reservoir instance.
         /// It is very important to follow these statistics and adjust parameters of the reservoirs so that the neurons
-        /// are not oversaturated or inactive.
+        /// exhibit proper dynamics.
         /// </summary>
         /// <returns>Collection of key statistics for each reservoir instance</returns>
         public List<ReservoirStat> CollectStatatistics()

@@ -15,23 +15,8 @@ namespace RCNet.Neural.Activation
     public class SimpleIF : IActivationFunction
     {
         //Constants
-        //Typical values
-        /// <summary>
-        /// Typical value of resistance
-        /// </summary>
-        public const double TypicalResistance = 15;
-        /// <summary>
-        /// Typical value of decay rate
-        /// </summary>
-        public const double TypicalDecayRate = 0.05;
-        /// <summary>
-        /// Typical value of reset voltage
-        /// </summary>
-        public const double TypicalResetV = 5;
-        /// <summary>
-        /// Typical value of firing voltage
-        /// </summary>
-        public const double TypicalFiringThresholdV = 20;
+        //Static members
+        protected static Interval _stimuliRange = new Interval(-0.01, 1.333333);
 
         /// <summary>
         /// Spike value
@@ -52,7 +37,6 @@ namespace RCNet.Neural.Activation
         private readonly double _resetV;
         private readonly double _firingThresholdV;
         private readonly int _refractoryPeriods;
-        private readonly double _stimuliCoeff;
         private double _membraneV;
         private bool _inRefractory;
         private int _refractoryPeriod;
@@ -61,14 +45,12 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
-        /// <param name="stimuliCoeff">Input stimuli coefficient (pA)</param>
         /// <param name="resistance">Membrane resistance (Mohm)</param>
         /// <param name="decayRate">Membrane potential decay rate</param>
         /// <param name="resetV">Membrane reset potential (mV)</param>
         /// <param name="firingThresholdV">Membrane firing threshold (mV)</param>
         /// <param name="refractoryPeriods">Number of after spike computation cycles while an input stimuli is ignored (ms)</param>
-        public SimpleIF(double stimuliCoeff,
-                        double resistance,
+        public SimpleIF(double resistance,
                         double decayRate,
                         double resetV,
                         double firingThresholdV,
@@ -81,13 +63,22 @@ namespace RCNet.Neural.Activation
             _resetV = Math.Abs(resetV);
             _firingThresholdV = Math.Abs(firingThresholdV);
             _refractoryPeriods = refractoryPeriods;
-            _stimuliCoeff = stimuliCoeff;
             InternalStateRange = new Interval(_restV, _firingThresholdV);
             Reset();
             return;
         }
 
         //Properties
+        /// <summary>
+        /// Optimal strength of the stimulation
+        /// </summary>
+        public double OptimalStimulationStrength { get { return 0.165; } }
+
+        /// <summary>
+        /// Range of reasonable incoming current
+        /// </summary>
+        public Interval StimuliRange { get { return _stimuliRange; } }
+
         /// <summary>
         /// Type of the output
         /// </summary>
@@ -132,7 +123,7 @@ namespace RCNet.Neural.Activation
         /// <param name="x">Input stimuli (interpreted as an electric current)</param>
         public double Compute(double x)
         {
-            x = (x * _stimuliCoeff).Bound();
+            x = (x).Bound();
             double spike = 0;
             if (_membraneV >= _firingThresholdV)
             {
@@ -151,10 +142,11 @@ namespace RCNet.Neural.Activation
                 }
                 else
                 {
-                    //Ignore input stimuli
+                    //Ignore stimulation
                     x = 0;
                 }
             }
+
             //Compute membrane new potential
             //Apply decay
             _membraneV = _restV + (_membraneV - _restV) * (1d - _decayRate);

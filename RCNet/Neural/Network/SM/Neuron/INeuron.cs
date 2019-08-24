@@ -55,6 +55,11 @@ namespace RCNet.Neural.Network.SM.Neuron
         int OutputSignalLeak { get; }
 
         /// <summary>
+        /// Specifies, if neuron has already emitted output signal before current signal
+        /// </summary>
+        bool AfterFirstOutputSignal { get; }
+
+        /// <summary>
         /// Value to be passed to readout layer as a primary predictor.
         /// </summary>
         double PrimaryPredictor { get; }

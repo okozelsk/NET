@@ -11,11 +11,6 @@ namespace RCNet.Neural.Activation
     public class SoftExponential : AnalogActivationFunction
     {
         //Constants
-        //Typical values
-        /// <summary>
-        /// Typical alpha value
-        /// </summary>
-        public const double TypicalAlpha = 1;
 
         //Attributes
         //Static working ranges
@@ -39,6 +34,16 @@ namespace RCNet.Neural.Activation
         }
 
         //Properties
+        /// <summary>
+        /// Optimal strength of the stimulation is not relevant
+        /// </summary>
+        public override double OptimalStimulationStrength { get { throw new NotImplementedException("Optimal strength of the stimulation is not relevant."); } }
+
+        /// <summary>
+        /// Range of reasonable incoming current
+        /// </summary>
+        public override Interval StimuliRange { get { throw new NotImplementedException("Stimulation range is not relevant."); } }
+
         /// <summary>
         /// Output range
         /// </summary>

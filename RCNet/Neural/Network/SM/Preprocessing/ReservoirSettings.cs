@@ -36,10 +36,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// </summary>
         public int MaxInputDelay { get; set; }
         /// <summary>
-        /// Maximum delay of the internal synapses
-        /// </summary>
-        public int MaxInternalDelay { get; set; }
-        /// <summary>
         /// Spectral radius.
         /// </summary>
         public double SpectralRadius { get; set; }
@@ -65,7 +61,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             SettingsName = string.Empty;
             SynapticDelayMethod = CommonEnums.SynapticDelayMethod.Random;
             MaxInputDelay = 0;
-            MaxInternalDelay = 0;
             SpectralRadius = -1;
             InputEntryPoint = null;
             PoolSettingsCollection = null;
@@ -82,7 +77,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             SettingsName = source.SettingsName;
             SynapticDelayMethod = source.SynapticDelayMethod;
             MaxInputDelay = source.MaxInputDelay;
-            MaxInternalDelay = source.MaxInternalDelay;
             SpectralRadius = source.SpectralRadius;
             InputEntryPoint = null;
             if(source.InputEntryPoint != null)
@@ -130,8 +124,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             SettingsName = reservoirSettingsElem.Attribute("name").Value;
             SynapticDelayMethod = CommonEnums.ParseSynapticDelayMethod(reservoirSettingsElem.Attribute("synapticDelayMethod").Value);
             MaxInputDelay = int.Parse(reservoirSettingsElem.Attribute("maxInputDelay").Value, CultureInfo.InvariantCulture);
-            MaxInternalDelay = int.Parse(reservoirSettingsElem.Attribute("maxInternalDelay").Value, CultureInfo.InvariantCulture);
-            SpectralRadius = reservoirSettingsElem.Attribute("spectralRadius").Value == "NA" ? -1d : double.Parse(reservoirSettingsElem.Attribute("spectralRadius").Value, CultureInfo.InvariantCulture);
+            SpectralRadius = double.Parse(reservoirSettingsElem.Attribute("spectralRadius").Value, CultureInfo.InvariantCulture);
             //Input entry point
             InputEntryPoint = new int[3];
             if (reservoirSettingsElem.Descendants("inputEntryPoint").Count() > 0)
@@ -174,7 +167,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             if (SettingsName != cmpSettings.SettingsName ||
                 SynapticDelayMethod != cmpSettings.SynapticDelayMethod ||
                 MaxInputDelay != cmpSettings.MaxInputDelay ||
-                MaxInternalDelay != cmpSettings.MaxInternalDelay ||
                 SpectralRadius != cmpSettings.SpectralRadius ||
                 (PoolSettingsCollection == null && cmpSettings.PoolSettingsCollection != null) ||
                 (PoolSettingsCollection != null && cmpSettings.PoolSettingsCollection == null) ||
@@ -287,7 +279,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             /// <summary>
             /// Neurons are interconnected through synapses.
             /// </summary>
-            public Object SynapseCfg { get; set; }
+            public InternalSynapseSettings SynapseCfg { get; set; }
 
             //Constructors
             /// <summary>
@@ -325,20 +317,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 RatioIE = source.RatioIE;
                 RatioII = source.RatioII;
                 ConstantNumOfConnections = source.ConstantNumOfConnections;
-                SynapseCfg = null;
-                if (source.SynapseCfg != null)
-                {
-                    if (source.SynapseCfg.GetType() == typeof(StaticSynapseSettings))
-                    {
-                        //Static synapse settings
-                        SynapseCfg = ((StaticSynapseSettings)source.SynapseCfg).DeepClone();
-                    }
-                    else
-                    {
-                        //Dynamic synapse settings
-                        SynapseCfg = ((DynamicSynapseSettings)source.SynapseCfg).DeepClone();
-                    }
-                }
+                SynapseCfg = source.SynapseCfg.DeepClone();
                 return;
             }
 
@@ -395,18 +374,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 RatioEI = relShareEI / sum;
                 RatioIE = relShareIE / sum;
                 RatioII = relShareII / sum;
-                //Synapse
-                XElement synapseCfgElem = elem.Descendants().First();
-                if (synapseCfgElem.Name == "staticSynapse")
-                {
-                    SynapseCfg = new StaticSynapseSettings(synapseCfgElem);
-                }
-                else
-                {
-                    SynapseCfg = new DynamicSynapseSettings(synapseCfgElem);
-                }
                 //Constant number of neuron's connections
                 ConstantNumOfConnections = bool.Parse(elem.Attribute("constantNumOfConnections").Value);
+                //Synapse
+                SynapseCfg = new InternalSynapseSettings(elem.Descendants("synapse").First());
                 return;
             }
 

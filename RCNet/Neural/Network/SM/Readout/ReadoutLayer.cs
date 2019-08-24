@@ -58,15 +58,15 @@ namespace RCNet.Neural.Network.SM.Readout
         /// <summary>
         /// Readout layer configuration
         /// </summary>
-        private ReadoutLayerSettings _settings;
+        private readonly ReadoutLayerSettings _settings;
         /// <summary>
         /// Collection of clusters of trained readout units. One cluster of units per output field.
         /// </summary>
-        private ReadoutUnit[][] _clusterCollection;
+        private readonly ReadoutUnit[][] _clusterCollection;
         /// <summary>
         /// Cluster overall error statistics collection
         /// </summary>
-        private List<ClusterErrStatistics> _clusterErrStatisticsCollection;
+        private readonly List<ClusterErrStatistics> _clusterErrStatisticsCollection;
 
 
 
@@ -128,6 +128,7 @@ namespace RCNet.Neural.Network.SM.Readout
             //Allocation and preparation of normalizers
             //Predictors normalizers
             _predictorNormalizerCollection = new Normalizer[numOfPredictors];
+            BasicStat inpTestStat = new BasicStat(true);
             Parallel.For(0, _predictorNormalizerCollection.Length, nrmIdx =>
             {
                 _predictorNormalizerCollection[nrmIdx] = new Normalizer(DataRange, NormalizerDefaultReserve, true, false);
@@ -135,6 +136,10 @@ namespace RCNet.Neural.Network.SM.Readout
                 {
                     //Adjust predictor normalizer
                     _predictorNormalizerCollection[nrmIdx].Adjust(dataBundle.InputVectorCollection[pairIdx][nrmIdx]);
+                    if(nrmIdx == 51)
+                    {
+                        inpTestStat.AddSampleValue(dataBundle.InputVectorCollection[pairIdx][nrmIdx]);
+                    }
                 }
             });
             //Output normalizers
@@ -143,10 +148,10 @@ namespace RCNet.Neural.Network.SM.Readout
             {
                 bool classificationTask = (_settings.ReadoutUnitCfgCollection[nrmIdx].TaskType == CommonEnums.TaskType.Classification);
                 _outputNormalizerCollection[nrmIdx] = new Normalizer(DataRange,
-                                                                classificationTask ? 0 : NormalizerDefaultReserve,
-                                                                classificationTask ? false : true,
-                                                                false
-                                                                );
+                                                                     classificationTask ? 0 : NormalizerDefaultReserve,
+                                                                     classificationTask ? false : true,
+                                                                     false
+                                                                     );
                 for (int pairIdx = 0; pairIdx < dataBundle.OutputVectorCollection.Count; pairIdx++)
                 {
                     //Adjust output normalizer
@@ -165,6 +170,10 @@ namespace RCNet.Neural.Network.SM.Readout
                 for (int i = 0; i < numOfPredictors; i++)
                 {
                     predictors[i] = _predictorNormalizerCollection[i].Normalize(dataBundle.InputVectorCollection[pairIdx][i]);
+                    if(!predictors[i].IsValid())
+                    {
+                        ;
+                    }
                 }
                 predictorsCollection[pairIdx] = predictors;
                 //Outputs
@@ -175,6 +184,13 @@ namespace RCNet.Neural.Network.SM.Readout
                 }
                 idealOutputsCollection[pairIdx] = outputs;
             });
+
+            BasicStat nrmTestStat = new BasicStat(false);
+            for(int i = 0; i < predictorsCollection.Length; i++)
+            {
+                nrmTestStat.AddSampleValue(predictorsCollection[i][0]);
+            }
+
 
             //Data processing
             //Random object initialization
@@ -294,8 +310,8 @@ namespace RCNet.Neural.Network.SM.Readout
                     {
                         
                         double nrmComputedValue = _clusterCollection[clusterIdx][foldIdx].Network.Compute(subBundleCollection[foldIdx].InputVectorCollection[sampleIdx])[0];
-                        double natComputedValue = _outputNormalizerCollection[clusterIdx].Naturalize(nrmComputedValue);
-                        double natIdealValue = _outputNormalizerCollection[clusterIdx].Naturalize(subBundleCollection[foldIdx].OutputVectorCollection[sampleIdx][0]);
+                        double natComputedValue = _outputNormalizerCollection[clusterIdx].Denormalize(nrmComputedValue);
+                        double natIdealValue = _outputNormalizerCollection[clusterIdx].Denormalize(subBundleCollection[foldIdx].OutputVectorCollection[sampleIdx][0]);
                         ces.Update(nrmComputedValue,
                                    subBundleCollection[foldIdx].OutputVectorCollection[sampleIdx][0],
                                    natComputedValue,
@@ -506,7 +522,7 @@ namespace RCNet.Neural.Network.SM.Readout
             double[] natOutputs = new double[outputs.Length];
             for (int i = 0; i < outputs.Length; i++)
             {
-                natOutputs[i] = _outputNormalizerCollection[i].Naturalize(outputs[i]);
+                natOutputs[i] = _outputNormalizerCollection[i].Denormalize(outputs[i]);
             }
             return natOutputs;
         }

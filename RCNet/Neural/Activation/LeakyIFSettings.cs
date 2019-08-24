@@ -21,11 +21,30 @@ namespace RCNet.Neural.Activation
     [Serializable]
     public class LeakyIFSettings
     {
-        //Attribute properties
+        //Constants
+        //Typical values
         /// <summary>
-        /// Input stimuli coefficient (pA)
+        /// Typical value of time scale
         /// </summary>
-        public double StimuliCoeff { get; }
+        public const double TypicalTimeScale = 8;
+        /// <summary>
+        /// Typical value of resistance
+        /// </summary>
+        public const double TypicalResistance = 10;
+        /// <summary>
+        /// Typical value of resting voltage
+        /// </summary>
+        public const double TypicalRestV = -70;
+        /// <summary>
+        /// Typical value of reset voltage
+        /// </summary>
+        public const double TypicalResetV = -65;
+        /// <summary>
+        /// Typical value of firing voltage
+        /// </summary>
+        public const double TypicalFiringThresholdV = -50;
+
+        //Attribute properties
         /// <summary>
         /// Membrane time scale (ms)
         /// </summary>
@@ -64,7 +83,6 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
-        /// <param name="stimuliCoeff">Input stimuli coefficient (pA)</param>
         /// <param name="timeScale">Membrane time scale (ms)</param>
         /// <param name="resistance">Membrane resistance (Mohm)</param>
         /// <param name="restV">Membrane rest potential (mV)</param>
@@ -73,23 +91,21 @@ namespace RCNet.Neural.Activation
         /// <param name="refractoryPeriods">Number of after spike computation cycles while an input stimuli is ignored (ms)</param>
         /// <param name="solverMethod">ODE numerical solver method</param>
         /// <param name="solverCompSteps">ODE numerical solver computation steps of the time step</param>
-        public LeakyIFSettings(double stimuliCoeff,
-                               RandomValueSettings timeScale,
-                               RandomValueSettings resistance,
-                               RandomValueSettings restV,
-                               RandomValueSettings resetV,
-                               RandomValueSettings firingThresholdV,
-                               int refractoryPeriods,
-                               ODENumSolver.Method solverMethod,
-                               int solverCompSteps
+        public LeakyIFSettings(RandomValueSettings timeScale = null,
+                               RandomValueSettings resistance = null,
+                               RandomValueSettings restV = null,
+                               RandomValueSettings resetV = null,
+                               RandomValueSettings firingThresholdV = null,
+                               int refractoryPeriods = 1,
+                               ODENumSolver.Method solverMethod = ODENumSolver.Method.Euler,
+                               int solverCompSteps = 2
                                )
         {
-            StimuliCoeff = stimuliCoeff;
-            TimeScale = timeScale.DeepClone();
-            Resistance = resistance.DeepClone();
-            RestV = restV.DeepClone();
-            ResetV = resetV.DeepClone();
-            FiringThresholdV = firingThresholdV.DeepClone();
+            TimeScale = RandomValueSettings.CloneOrDefault(timeScale, TypicalTimeScale);
+            Resistance = RandomValueSettings.CloneOrDefault(resistance, TypicalResistance);
+            RestV = RandomValueSettings.CloneOrDefault(restV, TypicalRestV);
+            ResetV = RandomValueSettings.CloneOrDefault(resetV, TypicalResetV);
+            FiringThresholdV = RandomValueSettings.CloneOrDefault(firingThresholdV, TypicalFiringThresholdV);
             RefractoryPeriods = refractoryPeriods;
             SolverMethod = solverMethod;
             SolverCompSteps = solverCompSteps;
@@ -102,7 +118,6 @@ namespace RCNet.Neural.Activation
         /// <param name="source">Source instance</param>
         public LeakyIFSettings(LeakyIFSettings source)
         {
-            StimuliCoeff = source.StimuliCoeff;
             TimeScale = source.TimeScale.DeepClone();
             Resistance = source.Resistance.DeepClone();
             RestV = source.RestV.DeepClone();
@@ -130,12 +145,11 @@ namespace RCNet.Neural.Activation
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
             XElement activationSettingsElem = validator.Validate(elem, "rootElem");
             //Parsing
-            StimuliCoeff = double.Parse(activationSettingsElem.Attribute("stimuliCoeff").Value, CultureInfo.InvariantCulture);
-            TimeScale = new RandomValueSettings(activationSettingsElem.Descendants("timeScale").FirstOrDefault());
-            Resistance = new RandomValueSettings(activationSettingsElem.Descendants("resistance").FirstOrDefault());
-            RestV = new RandomValueSettings(activationSettingsElem.Descendants("restV").FirstOrDefault());
-            ResetV = new RandomValueSettings(activationSettingsElem.Descendants("resetV").FirstOrDefault());
-            FiringThresholdV = new RandomValueSettings(activationSettingsElem.Descendants("firingThresholdV").FirstOrDefault());
+            TimeScale = RandomValueSettings.LoadOrDefault(activationSettingsElem, "timeScale", TypicalTimeScale);
+            Resistance = RandomValueSettings.LoadOrDefault(activationSettingsElem, "resistance", TypicalResistance);
+            RestV = RandomValueSettings.LoadOrDefault(activationSettingsElem, "restV", TypicalRestV);
+            ResetV = RandomValueSettings.LoadOrDefault(activationSettingsElem, "resetV", TypicalResetV);
+            FiringThresholdV = RandomValueSettings.LoadOrDefault(activationSettingsElem, "firingThresholdV", TypicalFiringThresholdV);
             RefractoryPeriods = int.Parse(activationSettingsElem.Attribute("refractoryPeriods").Value, CultureInfo.InvariantCulture);
             SolverMethod = ODENumSolver.ParseComputationMethodType(activationSettingsElem.Attribute("solverMethod").Value);
             SolverCompSteps = int.Parse(activationSettingsElem.Attribute("solverCompSteps").Value, CultureInfo.InvariantCulture);
@@ -150,8 +164,7 @@ namespace RCNet.Neural.Activation
         {
             if (obj == null) return false;
             LeakyIFSettings cmpSettings = obj as LeakyIFSettings;
-            if (StimuliCoeff != cmpSettings.StimuliCoeff ||
-                !Equals(TimeScale, cmpSettings.TimeScale) ||
+            if (!Equals(TimeScale, cmpSettings.TimeScale) ||
                 !Equals(Resistance, cmpSettings.Resistance) ||
                 !Equals(RestV, cmpSettings.RestV) ||
                 !Equals(ResetV, cmpSettings.ResetV) ||

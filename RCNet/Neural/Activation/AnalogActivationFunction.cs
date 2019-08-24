@@ -13,9 +13,22 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Instantiates analog activation function
         /// </summary>
-        protected AnalogActivationFunction(){ return; }
+        protected AnalogActivationFunction()
+        {
+            return;
+        }
 
         //Properties
+        /// <summary>
+        /// Optimal strength of the stimulation
+        /// </summary>
+        public abstract double OptimalStimulationStrength { get; }
+
+        /// <summary>
+        /// Range of reasonable incoming current
+        /// </summary>
+        public abstract Interval StimuliRange { get; }
+
         /// <summary>
         /// Type of the output signal
         /// </summary>

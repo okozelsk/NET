@@ -189,9 +189,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             {
                 RetainmentNeuronsDensity = double.Parse(retainmentElem.Attribute("density").Value, CultureInfo.InvariantCulture);
                 RetainmentRate = new RandomValueSettings(retainmentElem.Descendants("rate").First());
-                RetainmentNeuronsFeature = (RetainmentNeuronsDensity > 0 &&
-                                            RetainmentRate.Max > 0
-                                            );
+                RetainmentNeuronsFeature = (RetainmentNeuronsDensity > 0 && RetainmentRate.Max > 0);
             }
             else
             {
@@ -456,7 +454,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             /// <summary>
             /// Neurons in the pool are interconnected through synapses.
             /// </summary>
-            public Object SynapseCfg { get; set; }
+            public InternalSynapseSettings SynapseCfg { get; set; }
 
             //Constructors
             /// <summary>
@@ -490,20 +488,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 AvgDistance = source.AvgDistance;
                 AllowSelfConnection = source.AllowSelfConnection;
                 ConstantNumOfConnections = source.ConstantNumOfConnections;
-                SynapseCfg = null;
-                if(source.SynapseCfg != null)
-                {
-                    if(source.SynapseCfg.GetType() == typeof(StaticSynapseSettings))
-                    {
-                        //Static synapse settings
-                        SynapseCfg = ((StaticSynapseSettings)source.SynapseCfg).DeepClone();
-                    }
-                    else
-                    {
-                        //Dynamic synapse settings
-                        SynapseCfg = ((DynamicSynapseSettings)source.SynapseCfg).DeepClone();
-                    }
-                }
+                SynapseCfg = source.SynapseCfg.DeepClone();
                 return;
             }
 
@@ -542,15 +527,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 //Will have each neuron the same number of connections?
                 ConstantNumOfConnections = bool.Parse(settingsElem.Attribute("constantNumOfConnections").Value);
                 //Synapse
-                XElement synapseCfgElem = settingsElem.Descendants().First();
-                if(synapseCfgElem.Name == "staticSynapse")
-                {
-                    SynapseCfg = new StaticSynapseSettings(synapseCfgElem);
-                }
-                else
-                {
-                    SynapseCfg = new DynamicSynapseSettings(synapseCfgElem);
-                }
+                SynapseCfg = new InternalSynapseSettings(settingsElem.Descendants("synapse").First());
                 return;
             }
 
@@ -596,8 +573,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             }
 
         }//InterconnectionSettings
-
-
 
 
     }//PoolSettings

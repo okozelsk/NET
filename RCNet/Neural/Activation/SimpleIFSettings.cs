@@ -21,11 +21,26 @@ namespace RCNet.Neural.Activation
     [Serializable]
     public class SimpleIFSettings
     {
-        //Attribute properties
+        //Constants
+        //Typical values
         /// <summary>
-        /// Initial input stimuli coefficient (pA)
+        /// Typical value of resistance
         /// </summary>
-        public double StimuliCoeff { get; }
+        public const double TypicalResistance = 15;
+        /// <summary>
+        /// Typical value of decay rate
+        /// </summary>
+        public const double TypicalDecayRate = 0.05;
+        /// <summary>
+        /// Typical value of reset voltage
+        /// </summary>
+        public const double TypicalResetV = 5;
+        /// <summary>
+        /// Typical value of firing voltage
+        /// </summary>
+        public const double TypicalFiringThresholdV = 20;
+
+        //Attribute properties
         /// <summary>
         /// Membrane resistance (Mohm)
         /// </summary>
@@ -51,25 +66,22 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
-        /// <param name="stimuliCoeff">Initial input stimuli coefficient (pA)</param>
         /// <param name="resistance">Membrane resistance (Mohm)</param>
         /// <param name="decayRate">Membrane potential decay rate</param>
         /// <param name="resetV">Membrane reset potential (mV)</param>
         /// <param name="firingThresholdV">Membrane firing threshold (mV)</param>
         /// <param name="refractoryPeriods">Number of after spike computation cycles while an input stimuli is ignored (ms)</param>
-        public SimpleIFSettings(double stimuliCoeff,
-                                RandomValueSettings resistance,
-                                RandomValueSettings decayRate,
-                                RandomValueSettings resetV,
-                                RandomValueSettings firingThresholdV,
-                                int refractoryPeriods
+        public SimpleIFSettings(RandomValueSettings resistance = null,
+                                RandomValueSettings decayRate = null,
+                                RandomValueSettings resetV = null,
+                                RandomValueSettings firingThresholdV = null,
+                                int refractoryPeriods = 1
                                 )
         {
-            StimuliCoeff = stimuliCoeff;
-            Resistance = resistance.DeepClone();
-            DecayRate = decayRate.DeepClone();
-            ResetV = resetV.DeepClone();
-            FiringThresholdV = firingThresholdV.DeepClone();
+            Resistance = RandomValueSettings.CloneOrDefault(resistance, TypicalResistance);
+            DecayRate = RandomValueSettings.CloneOrDefault(decayRate, TypicalDecayRate);
+            ResetV = RandomValueSettings.CloneOrDefault(resetV, TypicalResetV);
+            FiringThresholdV = RandomValueSettings.CloneOrDefault(firingThresholdV, TypicalFiringThresholdV);
             RefractoryPeriods = refractoryPeriods;
             return;
         }
@@ -80,7 +92,6 @@ namespace RCNet.Neural.Activation
         /// <param name="source">Source instance</param>
         public SimpleIFSettings(SimpleIFSettings source)
         {
-            StimuliCoeff = source.StimuliCoeff;
             Resistance = source.Resistance.DeepClone();
             DecayRate = source.DecayRate.DeepClone();
             ResetV = source.ResetV.DeepClone();
@@ -105,11 +116,10 @@ namespace RCNet.Neural.Activation
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
             XElement activationSettingsElem = validator.Validate(elem, "rootElem");
             //Parsing
-            StimuliCoeff = double.Parse(activationSettingsElem.Attribute("stimuliCoeff").Value, CultureInfo.InvariantCulture);
-            Resistance = new RandomValueSettings(activationSettingsElem.Descendants("resistance").FirstOrDefault());
-            DecayRate = new RandomValueSettings(activationSettingsElem.Descendants("decayRate").FirstOrDefault());
-            ResetV = new RandomValueSettings(activationSettingsElem.Descendants("resetV").FirstOrDefault());
-            FiringThresholdV = new RandomValueSettings(activationSettingsElem.Descendants("firingThresholdV").FirstOrDefault());
+            Resistance = RandomValueSettings.LoadOrDefault(activationSettingsElem, "resistance", TypicalResistance);
+            DecayRate = RandomValueSettings.LoadOrDefault(activationSettingsElem, "decayRate", TypicalDecayRate);
+            ResetV = RandomValueSettings.LoadOrDefault(activationSettingsElem, "resetV", TypicalResetV);
+            FiringThresholdV = RandomValueSettings.LoadOrDefault(activationSettingsElem, "firingThresholdV", TypicalFiringThresholdV);
             RefractoryPeriods = int.Parse(activationSettingsElem.Attribute("refractoryPeriods").Value, CultureInfo.InvariantCulture);
             return;
         }
@@ -122,8 +132,7 @@ namespace RCNet.Neural.Activation
         {
             if (obj == null) return false;
             SimpleIFSettings cmpSettings = obj as SimpleIFSettings;
-            if (StimuliCoeff != cmpSettings.StimuliCoeff ||
-                !Equals(Resistance, cmpSettings.Resistance) ||
+            if (!Equals(Resistance, cmpSettings.Resistance) ||
                 !Equals(DecayRate, cmpSettings.DecayRate) ||
                 !Equals(ResetV, cmpSettings.ResetV) ||
                 !Equals(FiringThresholdV, cmpSettings.FiringThresholdV) ||

@@ -17,54 +17,13 @@ namespace RCNet.Neural.Activation
     public class AdExpIF : ODESpikingMembrane
     {
         //Constants
-        //Constants
-        //Typical values
-        /// <summary>
-        /// Typical value of time scale
-        /// </summary>
-        public const double TypicalTimeScale = 5;
-        /// <summary>
-        /// Typical value of resistance
-        /// </summary>
-        public const double TypicalResistance = 500;
-        /// <summary>
-        /// Typical value of resting voltage
-        /// </summary>
-        public const double TypicalRestV = -70;
-        /// <summary>
-        /// Typical value of reset voltage
-        /// </summary>
-        public const double TypicalResetV = -51;
-        /// <summary>
-        /// Typical value of rheobase
-        /// </summary>
-        public const double TypicalRheobaseV = -50;
-        /// <summary>
-        /// Typical value of firing voltage
-        /// </summary>
-        public const double TypicalFiringThresholdV = -30;
-        /// <summary>
-        /// Typical value of sharpness delta
-        /// </summary>
-        public const double TypicalSharpnessDeltaT = 2;
-        /// <summary>
-        /// Typical value of adaptation voltage coupling
-        /// </summary>
-        public const double TypicalAdaptationVoltageCoupling = 0.5;
-        /// <summary>
-        /// Typical value of adaptation time constant
-        /// </summary>
-        public const double TypicalAdaptationTimeConstant = 100;
-        /// <summary>
-        /// Typical value of spike triggered increment
-        /// </summary>
-        public const double TypicalAdaptationSpikeTriggeredIncrement = 7;
-
-
         /// <summary>
         /// Index of AdaptationOmega evolving variable
         /// </summary>
         private const int VarAdaptationOmegaIdx = 1;
+
+        //Static members
+        protected static Interval _stimuliRange = new Interval(-1.63133, 1.928314);
 
         //Attributes
         //Parameters
@@ -79,7 +38,6 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Constructs an initialized instance
         /// </summary>
-        /// <param name="stimuliCoeff">Input stimuli coefficient (pA)</param>
         /// <param name="timeScale">Membrane time scale (ms)</param>
         /// <param name="resistance">Membrane resistance (Mohm)</param>
         /// <param name="restV">Membrane rest potential (mV)</param>
@@ -92,8 +50,7 @@ namespace RCNet.Neural.Activation
         /// <param name="adaptationSpikeTriggeredIncrement">Spike triggered adaptation increment (pA)</param>
         /// <param name="solverMethod">ODE numerical solver method</param>
         /// <param name="solverCompSteps">ODE numerical solver computation steps of the time step</param>
-        public AdExpIF(double stimuliCoeff,
-                       double timeScale,
+        public AdExpIF(double timeScale,
                        double resistance,
                        double restV,
                        double resetV,
@@ -110,11 +67,12 @@ namespace RCNet.Neural.Activation
                    PhysUnit.ToBase(resetV, PhysUnit.MetricPrefix.Milli),
                    PhysUnit.ToBase(firingThresholdV, PhysUnit.MetricPrefix.Milli),
                    0,
-                   PhysUnit.ToBase(stimuliCoeff, PhysUnit.MetricPrefix.Piko),
                    solverMethod,
                    PhysUnit.ToBase(1, PhysUnit.MetricPrefix.Milli),
                    solverCompSteps,
-                   2
+                   2,
+                   PhysUnit.FromBase(1d, PhysUnit.MetricPrefix.Giga),
+                   PhysUnit.FromBase(1d, PhysUnit.MetricPrefix.Milli)
                   )
         {
             _timeScale = PhysUnit.ToBase(timeScale, PhysUnit.MetricPrefix.Milli);
@@ -127,6 +85,17 @@ namespace RCNet.Neural.Activation
             _evolVars[VarAdaptationOmegaIdx] = 0;
             return;
         }
+
+        //Properties
+        /// <summary>
+        /// Optimal strength of the stimulation
+        /// </summary>
+        public override double OptimalStimulationStrength { get { return 1; } }
+
+        /// <summary>
+        /// Range of reasonable incoming current
+        /// </summary>
+        public override Interval StimuliRange { get { return _stimuliRange; } }
 
         //Methods
         /// <summary>

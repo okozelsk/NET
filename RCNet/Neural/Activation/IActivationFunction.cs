@@ -14,6 +14,16 @@ namespace RCNet.Neural.Activation
     {
         //Properties
         /// <summary>
+        /// Optimal strength of the stimulation
+        /// </summary>
+        double OptimalStimulationStrength { get; }
+
+        /// <summary>
+        /// Range of reasonable incoming current
+        /// </summary>
+        Interval StimuliRange { get; }
+
+        /// <summary>
         /// Type of the output signal
         /// </summary>
         CommonEnums.NeuronSignalType OutputSignalType { get; }

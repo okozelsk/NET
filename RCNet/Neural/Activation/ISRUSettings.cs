@@ -20,6 +20,13 @@ namespace RCNet.Neural.Activation
     [Serializable]
     public class ISRUSettings
     {
+        //Constants
+        //Typical values
+        /// <summary>
+        /// Typical alpha value
+        /// </summary>
+        public const double TypicalAlpha = 1;
+
         //Attribute properties
         /// <summary>
         /// The Alpha
@@ -31,9 +38,9 @@ namespace RCNet.Neural.Activation
         /// Creates an initialized instance
         /// </summary>
         /// <param name="alpha">The Alpha</param>
-        public ISRUSettings(RandomValueSettings alpha)
+        public ISRUSettings(RandomValueSettings alpha = null)
         {
-            Alpha = alpha.DeepClone();
+            Alpha = RandomValueSettings.CloneOrDefault(alpha, TypicalAlpha);
             return;
         }
 
@@ -63,7 +70,7 @@ namespace RCNet.Neural.Activation
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
             XElement activationSettingsElem = validator.Validate(elem, "rootElem");
             //Parsing
-            Alpha = new RandomValueSettings(activationSettingsElem.Descendants("alpha").FirstOrDefault());
+            Alpha = RandomValueSettings.LoadOrDefault(activationSettingsElem, "alpha", TypicalAlpha);
             return;
         }
 

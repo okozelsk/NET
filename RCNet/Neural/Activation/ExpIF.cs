@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using RCNet.Extensions;
+using RCNet.MathTools;
 using RCNet.MathTools.Differential;
 using RCNet.MathTools.VectorMath;
 
@@ -17,35 +18,8 @@ namespace RCNet.Neural.Activation
     public class ExpIF : ODESpikingMembrane
     {
         //Constants
-        //Typical values
-        /// <summary>
-        /// Typical value of time scale
-        /// </summary>
-        public const double TypicalTimeScale = 12;
-        /// <summary>
-        /// Typical value of resistance
-        /// </summary>
-        public const double TypicalResistance = 20;
-        /// <summary>
-        /// Typical value of resting voltage
-        /// </summary>
-        public const double TypicalRestV = -65;
-        /// <summary>
-        /// Typical value of reset voltage
-        /// </summary>
-        public const double TypicalResetV = -60;
-        /// <summary>
-        /// Typical value of rheobase
-        /// </summary>
-        public const double TypicalRheobaseV = -55;
-        /// <summary>
-        /// Typical value of firing voltage
-        /// </summary>
-        public const double TypicalFiringThresholdV = -30;
-        /// <summary>
-        /// Typical value of sharpness delta
-        /// </summary>
-        public const double TypicalSharpnessDeltaT = 2;
+        //Static members
+        protected static Interval _stimuliRange = new Interval(-2.819, 15.8414118);
 
         //Attributes
         //Parameters
@@ -58,7 +32,6 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
-        /// <param name="stimuliCoeff">Input stimuli coefficient (pA)</param>
         /// <param name="timeScale">Membrane time scale (ms)</param>
         /// <param name="resistance">Membrane resistance (Mohm)</param>
         /// <param name="restV">Membrane rest potential (mV)</param>
@@ -69,8 +42,7 @@ namespace RCNet.Neural.Activation
         /// <param name="refractoryPeriods">Number of after spike computation cycles while an input stimuli is ignored (ms)</param>
         /// <param name="solverMethod">ODE numerical solver method</param>
         /// <param name="solverCompSteps">ODE numerical solver computation steps of the time step</param>
-        public ExpIF(double stimuliCoeff,
-                     double timeScale,
+        public ExpIF(double timeScale,
                      double resistance,
                      double restV,
                      double resetV,
@@ -85,10 +57,11 @@ namespace RCNet.Neural.Activation
                    resetV,
                    firingThresholdV,
                    refractoryPeriods,
-                   stimuliCoeff,
                    solverMethod,
                    1,
                    solverCompSteps,
+                   1,
+                   100,
                    1
                    )
         {
@@ -98,6 +71,17 @@ namespace RCNet.Neural.Activation
             _sharpnessDeltaT = sharpnessDeltaT;
             return;
         }
+
+        //Properties
+        /// <summary>
+        /// Optimal strength of the stimulation
+        /// </summary>
+        public override double OptimalStimulationStrength { get { return 1.125; } }
+
+        /// <summary>
+        /// Range of reasonable incoming current
+        /// </summary>
+        public override Interval StimuliRange { get { return _stimuliRange; } }
 
         //Methods
         /// <summary>

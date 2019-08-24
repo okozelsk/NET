@@ -11,11 +11,9 @@ namespace RCNet.Neural.Activation
     public class Elliot : AnalogActivationFunction
     {
         //Constants
-        //Typical values
-        /// <summary>
-        /// Curve slope
-        /// </summary>
-        public const double TypicalSlope = 1;
+
+        //Static members
+        private static Interval _stimuliRange = new Interval(-19, 19);
 
         //Attributes
         private static readonly Interval _outputRange = new Interval(-1, 1);
@@ -43,6 +41,16 @@ namespace RCNet.Neural.Activation
         }
 
         //Properties
+        /// <summary>
+        /// Optimal strength of the stimulation
+        /// </summary>
+        public override double OptimalStimulationStrength { get { return 0; } }
+
+        /// <summary>
+        /// Range of reasonable incoming current
+        /// </summary>
+        public override Interval StimuliRange { get { return _stimuliRange; } }
+
         /// <summary>
         /// Output range
         /// </summary>

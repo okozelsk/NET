@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RCNet.Extensions;
 using RCNet.MathTools;
 using RCNet.Neural.Network.SM.Neuron;
 
 namespace RCNet.Neural.Network.SM.Synapse
 {
     /// <summary>
-    /// Abstract class covering the basic behaviour of StateMachine synapses.
+    /// Abstract class covering the basic behaviour of implemented synapses.
     /// </summary>
     [Serializable]
     public abstract class BaseSynapse
@@ -62,11 +63,11 @@ namespace RCNet.Neural.Network.SM.Synapse
         /// </summary>
         /// <param name="sourceNeuron">Source neuron</param>
         /// <param name="targetNeuron">Target neuron</param>
-        /// <param name="weight">Synapse weight</param>
+        /// <param name="weight">Synapse initial weight</param>
         public BaseSynapse(INeuron sourceNeuron,
-                       INeuron targetNeuron,
-                       double weight
-                       )
+                           INeuron targetNeuron,
+                           double weight
+                           )
         {
             //Neurons to be connected
             SourceNeuron = sourceNeuron;
@@ -76,73 +77,32 @@ namespace RCNet.Neural.Network.SM.Synapse
             //Weight sign and signal range conversion rules
             if (SourceNeuron.Role == CommonEnums.NeuronRole.Input)
             {
-                //Source is input neuron
-                if (TargetNeuron.OutputType == CommonEnums.NeuronSignalType.Spike)
+                if (TargetNeuron.OutputType == CommonEnums.NeuronSignalType.Analog)
                 {
-                    //Target is spiking
-                    //Ensure positive weight
-                    Weight = Math.Abs(weight);
-                    //Convert signal to <0,1>
-                    _add = -SourceNeuron.OutputRange.Min;
-                    _div = SourceNeuron.OutputRange.Span;
-                }
-                else
-                {
-                    //Target is also analog
-                    //Weight is unchanged
-                    Weight = weight;
+                    //Target is analog neuron
                     //No signal conversion
                     _add = 0;
                     _div = 1;
+                    //No change of the weight sign
+                    Weight = weight;
+                }
+                else
+                {
+                    //Target is spiking neuron
+                    //Convert signal to <0,1>
+                    _add = -SourceNeuron.OutputRange.Min;
+                    _div = SourceNeuron.OutputRange.Span;
+                    //Weight is always positive
+                    Weight = Math.Abs(weight);
                 }
             }
             else
             {
-                //Source is reservoir neuron
-                if (SourceNeuron.OutputType == CommonEnums.NeuronSignalType.Spike)
-                {
-                    //Source reservoir neuron is spiking
-                    if (TargetNeuron.OutputType == CommonEnums.NeuronSignalType.Spike)
-                    {
-                        //Target is also spiking
-                        //Weight dependent on source neuron role
-                        Weight = Math.Abs(weight) * ((SourceNeuron.Role == CommonEnums.NeuronRole.Excitatory) ? 1 : -1);
-                        //No signal conversion
-                        _add = 0;
-                        _div = 1;
-                    }
-                    else
-                    {
-                        //Target is analog
-                        //Weight is unchanged
-                        Weight = weight;
-                        //Convert signal to target neuron range
-                        _add = (TargetNeuron.OutputRange.Min - SourceNeuron.OutputRange.Min);
-                        _div = (SourceNeuron.OutputRange.Span / TargetNeuron.OutputRange.Span);
-                    }
-                }
-                else
-                {
-                    //Source reservoir neuron is analog
-                    if (TargetNeuron.OutputType == CommonEnums.NeuronSignalType.Spike)
-                    {
-                        //Target is spiking
-                        //Weight dependent on source neuron role
-                        Weight = Math.Abs(weight) * ((SourceNeuron.Role == CommonEnums.NeuronRole.Excitatory) ? 1 : -1);
-                        //Convert signal to <0,1>
-                        _add = -SourceNeuron.OutputRange.Min;
-                        _div = SourceNeuron.OutputRange.Span;
-                    }
-                    else
-                    {
-                        //Target is also analog
-                        //Weight is unchanged
-                        Weight = weight;
-                        //No signal conversion
-                        _add = 0;
-                        _div = 1;
-                    }
-                }
+                //Convert signal to <0,1>
+                _add = -SourceNeuron.OutputRange.Min;
+                _div = SourceNeuron.OutputRange.Span;
+                //Weight sign is dependent on source neuron role
+                Weight = Math.Abs(weight) * (SourceNeuron.Role == CommonEnums.NeuronRole.Excitatory ? 1d : -1d);
             }
             //Set Delay to 0 as default. It can be changed later by SetDelay method.
             Delay = 0;
@@ -151,17 +111,18 @@ namespace RCNet.Neural.Network.SM.Synapse
             return;
         }
 
+
         //Methods
         /// <summary>
         /// Rescales the synapse weight.
         /// </summary>
-        /// <param name="scale">Scale factor</param>
-        public void Rescale(double scale)
+        /// <param name="factor">Scale factor</param>
+        public void Rescale(double factor)
         {
-            Weight *= scale;
+            Weight *= factor;
             return;
         }
 
-    }//Synapse
+    }//BaseSynapse
 
 }//Namespace

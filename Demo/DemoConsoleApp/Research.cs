@@ -33,6 +33,30 @@ namespace RCNet.DemoConsoleApp
         //Methods
         public void Run()
         {
+            //Activation tests
+
+            IActivationFunction testAF = ActivationFactory.Create(new SimpleIFSettings(refractoryPeriods:0), new Random(0));
+            TestActivation(testAF, 100, 3.5, 10, 70);
+
+            SimpleIFSettings setup = new SimpleIFSettings();
+            FindAFInputBorders(ActivationFactory.Create(setup, new Random(0)),
+                                    -0.1,
+                                    20
+                                    );
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
             //Linear algebra test
             double[] flatData = {
@@ -128,8 +152,7 @@ namespace RCNet.DemoConsoleApp
             Console.ReadLine();
 
             ///*
-            SimpleIFSettings settings = new SimpleIFSettings(1,
-                                                             new RandomValueSettings(15, 15),
+            SimpleIFSettings settings = new SimpleIFSettings(new RandomValueSettings(15, 15),
                                                              new RandomValueSettings(0.05, 0.05),
                                                              new RandomValueSettings(5, 5),
                                                              new RandomValueSettings(20, 20),
@@ -156,10 +179,50 @@ namespace RCNet.DemoConsoleApp
                 {
                     signal = af.Compute(0);
                 }
-                Console.WriteLine($"{i}, State {af.InternalState} signal {signal}");
+                Console.WriteLine($"{i}, State {(af.OutputSignalType == Neural.CommonEnums.NeuronSignalType.Spike ? af.InternalState : signal)} signal {signal}");
             }
             Console.ReadLine();
 
+            return;
+        }
+
+        private double FindCurrent(IActivationFunction af, double targetResponse, double tolerance)
+        {
+            double lo = -100, hi = 100;
+            while (true)
+            {
+                af.Reset();
+                double current = (lo + (hi - lo) / 2);
+                double response = af.Compute(current);
+                if (af.OutputSignalType == Neural.CommonEnums.NeuronSignalType.Spike)
+                {
+                    response = af.InternalState;
+                }
+                Console.CursorLeft = 0;
+                Console.Write($"lo {lo}, hi {hi}, current {current}, response {response}".PadRight(150, ' '));
+                if (Math.Abs(response - targetResponse) <= tolerance)
+                {
+                    Console.WriteLine();
+                    return current;
+                }
+                if (response > targetResponse)
+                {
+                    hi = current;
+                }
+                else if (response < targetResponse)
+                {
+                    lo = current;
+                }
+            }
+        }
+
+        private void FindAFInputBorders(IActivationFunction af, double minResponse, double maxResponse)
+        {
+            const double tolerance = 1e-6;
+            Console.WriteLine($"AF: {af.ToString()} minResponse {minResponse} maxResponse {maxResponse}");
+            Console.WriteLine($"Found min current: {FindCurrent(af, minResponse, tolerance)}");
+            Console.WriteLine($"Found max current: {FindCurrent(af, maxResponse, tolerance)}");
+            Console.ReadLine();
             return;
         }
 

@@ -10,7 +10,9 @@ namespace RCNet.Neural.Activation
     [Serializable]
     public class TanH : AnalogActivationFunction
     {
-        //Attributes
+
+        //Static members
+        private static Interval _stimuliRange = new Interval(-3, 3);
         private static readonly Interval _outputRange = new Interval(-1, 1);
 
         //Constructor
@@ -24,6 +26,16 @@ namespace RCNet.Neural.Activation
         }
 
         //Properties
+        /// <summary>
+        /// Optimal strength of the stimulation
+        /// </summary>
+        public override double OptimalStimulationStrength { get { return 0; } }
+
+        /// <summary>
+        /// Range of reasonable incoming current
+        /// </summary>
+        public override Interval StimuliRange { get { return _stimuliRange; } }
+
         /// <summary>
         /// Output range
         /// </summary>

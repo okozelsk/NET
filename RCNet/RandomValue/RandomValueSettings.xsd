@@ -6,7 +6,7 @@
            >
   <xs:import namespace="RCNetTypes" />
 
-  <!-- Random weight settings element -->
+  <!-- Random value settings element -->
   <xs:element name="rootElem" type="rcn:RandomValueType"/>
 
 </xs:schema>

@@ -270,7 +270,7 @@ namespace RCNet.Neural.Network.SM
             //Methods
             private string FNum(double num)
             {
-                return num.ToString("N4", CultureInfo.InvariantCulture).PadLeft(7);
+                return num.ToString("N8", CultureInfo.InvariantCulture).PadLeft(12);
             }
 
             private string StatLine(BasicStat stat)
@@ -279,7 +279,7 @@ namespace RCNet.Neural.Network.SM
             }
 
             /// <summary>
-            /// Builds report of key statistics collected from NeuralPreprocessor's reservoir(s)
+            /// Builds report of key statistics collected from all the NeuralPreprocessor's reservoirs
             /// </summary>
             /// <param name="margin">Specifies how many spaces should be at the begining of each row.</param>
             /// <returns>Built text report</returns>
@@ -291,14 +291,33 @@ namespace RCNet.Neural.Network.SM
                 sb.Append(leftMargin + $"Neural preprocessor ({ReservoirStatCollection.Count} {resWording}, {TotalNumOfNeurons} neurons, {TotalNumOfInternalSynapses} internal synapses)" + Environment.NewLine);
                 foreach (ReservoirStat resStat in ReservoirStatCollection)
                 {
-                    sb.Append(leftMargin + $"  Reservoir instance: {resStat.ReservoirInstanceName} (configuration {resStat.ReservoirSettingsName}, {resStat.TotalNumOfNeurons} neurons, {resStat.TotalNumOfInternalSynapses} internal synapses)" + Environment.NewLine);
+                    sb.Append(leftMargin + $"  Reservoir instance: {resStat.ReservoirInstanceName} (configuration {resStat.ReservoirSettingsName}, {resStat.TotalNumOfNeurons} neurons, {Math.Round(resStat.ExcitatoryNeuronsRatio * 100, 1).ToString(CultureInfo.InvariantCulture)}% excitatory neurons, {resStat.TotalNumOfInternalSynapses} internal synapses)" + Environment.NewLine);
+                    sb.Append(leftMargin + $"    Zero incoming res. stimuli : {resStat.NumOfNoRStimuliNeurons} neurons" + Environment.NewLine);
+                    sb.Append(leftMargin + $"    Zero emitted output signal : {resStat.NumOfNoOutputSignalNeurons} neurons" + Environment.NewLine);
+                    sb.Append(leftMargin + $"    Const emitted output signal: {resStat.NumOfConstOutputSignalNeurons} neurons" + Environment.NewLine);
                     foreach (ReservoirStat.PoolStat poolStat in resStat.PoolStatCollection)
                     {
-                        sb.Append(leftMargin + $"    Pool: {poolStat.PoolName} ({poolStat.NumOfNeurons} neurons)" + Environment.NewLine);
+                        sb.Append(leftMargin + $"    Pool: {poolStat.PoolName} ({poolStat.NumOfNeurons} neurons, {Math.Round(poolStat.ExcitatoryNeuronsRatio * 100, 1).ToString(CultureInfo.InvariantCulture)}% excitatory neurons, {poolStat.InternalWeightsStat.NumOfSamples} internal synapses)" + Environment.NewLine);
+                        sb.Append(leftMargin + $"      Zero incoming res. stimuli : {poolStat.NumOfNoRStimuliNeurons} neurons" + Environment.NewLine);
+                        sb.Append(leftMargin + $"      Zero emitted output signal : {poolStat.NumOfNoOutputSignalNeurons} neurons" + Environment.NewLine);
+                        sb.Append(leftMargin + $"      Const emitted output signal: {poolStat.NumOfConstOutputSignalNeurons} neurons" + Environment.NewLine);
                         foreach (ReservoirStat.PoolStat.NeuronGroupStat groupStat in poolStat.NeuronGroupStatCollection)
                         {
                             sb.Append(leftMargin + $"      Group of neurons: {groupStat.GroupName} ({groupStat.AvgOutputSignalStat.NumOfSamples} neurons)" + Environment.NewLine);
-                            sb.Append(leftMargin + $"        Stimulation" + Environment.NewLine);
+                            sb.Append(leftMargin + $"        Zero incoming res. stimuli : {groupStat.NumOfNoRStimuliNeurons} neurons" + Environment.NewLine);
+                            sb.Append(leftMargin + $"        Zero emitted output signal : {groupStat.NumOfNoOutputSignalNeurons} neurons" + Environment.NewLine);
+                            sb.Append(leftMargin + $"        Const emitted output signal: {groupStat.NumOfConstOutputSignalNeurons} neurons" + Environment.NewLine);
+                            sb.Append(leftMargin + $"        Stimulation from Input neurons " + Environment.NewLine);
+                            sb.Append(leftMargin + $"          AVG>  {StatLine(groupStat.AvgIStimuliStat)}" + Environment.NewLine);
+                            sb.Append(leftMargin + $"          MAX>  {StatLine(groupStat.MaxIStimuliStat)}" + Environment.NewLine);
+                            sb.Append(leftMargin + $"          MIN>  {StatLine(groupStat.MinIStimuliStat)}" + Environment.NewLine);
+                            sb.Append(leftMargin + $"         SPAN>  {StatLine(groupStat.IStimuliSpansStat)}" + Environment.NewLine);
+                            sb.Append(leftMargin + $"        Stimulation from Reservoir neurons" + Environment.NewLine);
+                            sb.Append(leftMargin + $"          AVG>  {StatLine(groupStat.AvgRStimuliStat)}" + Environment.NewLine);
+                            sb.Append(leftMargin + $"          MAX>  {StatLine(groupStat.MaxRStimuliStat)}" + Environment.NewLine);
+                            sb.Append(leftMargin + $"          MIN>  {StatLine(groupStat.MinRStimuliStat)}" + Environment.NewLine);
+                            sb.Append(leftMargin + $"         SPAN>  {StatLine(groupStat.RStimuliSpansStat)}" + Environment.NewLine);
+                            sb.Append(leftMargin + $"        Total stimulation (including Bias)" + Environment.NewLine);
                             sb.Append(leftMargin + $"          AVG>  {StatLine(groupStat.AvgTStimuliStat)}" + Environment.NewLine);
                             sb.Append(leftMargin + $"          MAX>  {StatLine(groupStat.MaxTStimuliStat)}" + Environment.NewLine);
                             sb.Append(leftMargin + $"          MIN>  {StatLine(groupStat.MinTStimuliStat)}" + Environment.NewLine);
@@ -311,13 +330,14 @@ namespace RCNet.Neural.Network.SM
                             sb.Append(leftMargin + $"        Activation" + Environment.NewLine);
                             sb.Append(leftMargin + $"          AVG>  {StatLine(groupStat.AvgActivationStatesStat)}" + Environment.NewLine);
                             sb.Append(leftMargin + $"          MAX>  {StatLine(groupStat.MaxActivationStatesStat)}" + Environment.NewLine);
+                            sb.Append(leftMargin + $"          MIN>  {StatLine(groupStat.MinActivationStatesStat)}" + Environment.NewLine);
                             sb.Append(leftMargin + $"         SPAN>  {StatLine(groupStat.ActivationStateSpansStat)}" + Environment.NewLine);
                             sb.Append(leftMargin + $"        Output signal" + Environment.NewLine);
                             sb.Append(leftMargin + $"          AVG>  {StatLine(groupStat.AvgOutputSignalStat)}" + Environment.NewLine);
                             sb.Append(leftMargin + $"          MAX>  {StatLine(groupStat.MaxOutputSignalStat)}" + Environment.NewLine);
                             sb.Append(leftMargin + $"          MIN>  {StatLine(groupStat.MinOutputSignalStat)}" + Environment.NewLine);
                         }
-                        sb.Append(leftMargin + $"      Weights of synapses" + Environment.NewLine);
+                        sb.Append(leftMargin + $"      Initial weights of synapses" + Environment.NewLine);
                         sb.Append(leftMargin + $"        Inp.>  {StatLine(poolStat.InputWeightsStat)}" + Environment.NewLine);
                         sb.Append(leftMargin + $"        Int.>  {StatLine(poolStat.InternalWeightsStat)}" + Environment.NewLine);
                     }

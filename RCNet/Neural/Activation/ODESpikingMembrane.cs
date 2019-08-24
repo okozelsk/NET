@@ -54,10 +54,6 @@ namespace RCNet.Neural.Activation
         /// </summary>
         protected int _refractoryPeriods;
         /// <summary>
-        /// Input strength modifier
-        /// </summary>
-        protected double _stimuliCoeff;
-        /// <summary>
         /// ODE numerical solver method
         /// </summary>
         protected ODENumSolver.Method _solvingMethod;
@@ -84,6 +80,14 @@ namespace RCNet.Neural.Activation
         /// </summary>
         protected int _refractoryPeriod;
         /// <summary>
+        /// Coefficient for conversion of incoming stimuli current to expected physical unit 
+        /// </summary>
+        protected double _currentCoeff;
+        /// <summary>
+        /// Coefficient for conversion of membrane potential to expected physical unit 
+        /// </summary>
+        protected double _potentialCoeff;
+        /// <summary>
         /// Adjusted (modified) input stimuli
         /// </summary>
         protected double _stimuli;
@@ -95,7 +99,6 @@ namespace RCNet.Neural.Activation
         /// <param name="resetV">Membrane reset voltage</param>
         /// <param name="firingThresholdV">Firing threshold</param>
         /// <param name="refractoryPeriods">Refractory periods</param>
-        /// <param name="stimuliCoeff">Input stimuli coefficient</param>
         /// <param name="solvingMethod">ODE numerical solver method</param>
         /// <param name="stepTimeScale">Computation step time scale</param>
         /// <param name="subSteps">Computation sub-steps</param>
@@ -104,18 +107,18 @@ namespace RCNet.Neural.Activation
                                      double resetV,
                                      double firingThresholdV,
                                      int refractoryPeriods,
-                                     double stimuliCoeff,
                                      ODENumSolver.Method solvingMethod,
                                      double stepTimeScale,
                                      int subSteps,
-                                     int numOfEvolvingVars
+                                     int numOfEvolvingVars,
+                                     double currentCoeff = 1d,
+                                     double potentialCoeff = 1d
                                      )
         {
             _restV = restV;
             _resetV = resetV;
             _firingThresholdV = firingThresholdV;
             _refractoryPeriods = refractoryPeriods;
-            _stimuliCoeff = stimuliCoeff;
             _stateRange = new Interval(Math.Min(_resetV, _restV), _firingThresholdV);
             _evolVars = new Vector(numOfEvolvingVars);
             _solvingMethod = solvingMethod;
@@ -124,10 +127,27 @@ namespace RCNet.Neural.Activation
             _evolVars[VarMembraneVIdx] = _resetV;
             _inRefractory = false;
             _refractoryPeriod = 0;
+            _currentCoeff = currentCoeff;
+            _potentialCoeff = potentialCoeff;
             return;
         }
 
         //Properties
+        /// <summary>
+        /// Optimal strength of the stimulation
+        /// </summary>
+        public abstract double OptimalStimulationStrength { get; }
+
+        /// <summary>
+        /// Range of reasonable incoming current
+        /// </summary>
+        public abstract Interval StimuliRange { get; }
+
+        /// <summary>
+        /// Range of reasonable incoming current
+        /// </summary>
+        //public abstract Interval StimuliRange { get; }
+
         /// <summary>
         /// Type of the output
         /// </summary>
@@ -156,7 +176,7 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Internal state
         /// </summary>
-        public double InternalState { get { return _evolVars[VarMembraneVIdx]; } }
+        public double InternalState { get { return _potentialCoeff * _evolVars[VarMembraneVIdx]; } }
 
         //Methods
         /// <summary>
@@ -177,7 +197,7 @@ namespace RCNet.Neural.Activation
         /// <param name="x">Input stimuli (interpreted as an electric current)</param>
         public virtual double Compute(double x)
         {
-            _stimuli = (x * _stimuliCoeff).Bound();
+            _stimuli = (x * _currentCoeff).Bound();
             double output = 0;
             if (_evolVars[VarMembraneVIdx] >= _firingThresholdV)
             {
@@ -195,10 +215,11 @@ namespace RCNet.Neural.Activation
                 }
                 else
                 {
-                    //Ignore input stimuli
+                    //Ignore stimulation
                     _stimuli = 0;
                 }
             }
+            
             //Compute membrane new potential
             foreach (ODENumSolver.Estimation subResult in ODENumSolver.Solve(MembraneDiffEq, 0, _evolVars, _stepTimeScale, _subSteps, _solvingMethod))
             {

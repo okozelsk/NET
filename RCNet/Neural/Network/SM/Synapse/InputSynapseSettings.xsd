@@ -6,8 +6,8 @@
            >
   <xs:import namespace="RCNetTypes" />
 
-  <!-- Dynamic synapse configuration element -->
-  <xs:element name="rootElem" type="rcn:DynamicSynapseCfgType"/>
+  <!-- Input synapse configuration element -->
+  <xs:element name="rootElem" type="rcn:InputSynapseCfgType"/>
 
 </xs:schema>
 

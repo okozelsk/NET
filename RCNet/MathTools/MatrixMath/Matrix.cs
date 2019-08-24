@@ -957,7 +957,7 @@ namespace RCNet.MathTools.MatrixMath
             dictCols.Indices();
             //Available pivot columns
             List<int> availableDictPivotCols = new List<int>(dictCols);
-            double minPivotValue = 1e-10;
+            double minPivotValue = 1e-20;
             //Indicates that some changes were made in dictionary
             bool dictChanged = false;
 

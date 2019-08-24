@@ -21,22 +21,22 @@ namespace RCNet.RandomValue
         /// <summary>
         /// Min random value
         /// </summary>
-        public double Min { get; set; }
+        public double Min { get; }
 
         /// <summary>
         /// Max random value
         /// </summary>
-        public double Max { get; set; }
+        public double Max { get; }
         
         /// <summary>
         /// Specifies whether to randomize value sign
         /// </summary>
-        public bool RandomSign { get; set; }
+        public bool RandomSign { get; }
         
         /// <summary>
         /// Specifies what distribution to use
         /// </summary>
-        public RandomClassExtensions.DistributionType DistrType { get; set; }
+        public RandomClassExtensions.DistributionType DistrType { get; }
 
         /// <summary>
         /// Gaussian distribution parameters
@@ -64,6 +64,7 @@ namespace RCNet.RandomValue
             RandomSign = randomSign;
             DistrType = distrType;
             GaussianDistrCfg = gaussianDistrCfg;
+            Check();
             return;
         }
 
@@ -112,10 +113,71 @@ namespace RCNet.RandomValue
             {
                 GaussianDistrCfg = new GaussianDistrSettings(gaussianParamsElem);
             }
+            Check();
             return;
         }
 
         //Methods
+        //Static methods
+        /// <summary>
+        /// If exists descendant element within the root element then function creates instance of the RandomValueSettings using
+        /// descendant's xml settings. If not, function creates instance of the RandomValueSettings using specified default parameters.
+        /// </summary>
+        public static RandomValueSettings LoadOrDefault(XElement rootElem, string descendant, double defaultMin, double defaultMax, bool randomSign = false)
+        {
+            XElement descendantElement = rootElem.Descendants(descendant).FirstOrDefault();
+            if (descendantElement != null)
+            {
+                return new RandomValueSettings(descendantElement);
+            }
+            else
+            {
+                return new RandomValueSettings(defaultMin, defaultMax, randomSign);
+            }
+        }
+
+        /// <summary>
+        /// If exists descendant element within the root element then function creates instance of the RandomValueSettings using
+        /// descendant's xml settings. If not, function creates instance of the RandomValueSettings using specified default parameters.
+        /// </summary>
+        public static RandomValueSettings LoadOrDefault(XElement rootElem, string descendant, double defaultConst, bool randomSign = false)
+        {
+            return LoadOrDefault(rootElem, descendant, defaultConst, defaultConst, randomSign);
+        }
+
+        /// <summary>
+        /// If source is not null then function creates it's clone. If not, function creates instance of the RandomValueSettings using specified default parameters.
+        /// </summary>
+        public static RandomValueSettings CloneOrDefault(RandomValueSettings source, double defaultMin, double defaultMax, bool randomSign = false)
+        {
+            if(source == null)
+            {
+                return new RandomValueSettings(defaultMin, defaultMax, randomSign);
+            }
+            else
+            {
+                return source.DeepClone();
+            }
+        }
+
+        /// <summary>
+        /// If source is not null then function creates it's clone. If not, function creates instance of the RandomValueSettings using specified default parameters.
+        /// </summary>
+        public static RandomValueSettings CloneOrDefault(RandomValueSettings source, double defaultConst, bool randomSign = false)
+        {
+            return CloneOrDefault(source, defaultConst, defaultConst, randomSign);
+        }
+
+        //Instance methods
+        private void Check()
+        {
+            if(Max < Min)
+            {
+                throw new Exception($"Incorrect min ({Min.ToString(CultureInfo.InvariantCulture)}) and max ({Max.ToString(CultureInfo.InvariantCulture)}) values. Max must be GE to min.");
+            }
+            return;
+        }
+        
         /// <summary>
         /// See the base.
         /// </summary>
@@ -162,12 +224,12 @@ namespace RCNet.RandomValue
             /// <summary>
             /// Mean
             /// </summary>
-            public double Mean { get; set; }
+            public double Mean { get; }
             
             /// <summary>
             /// Standard deviation
             /// </summary>
-            public double StdDev { get; set; }
+            public double StdDev { get; }
 
             //Constructors
             /// <summary>
@@ -179,6 +241,7 @@ namespace RCNet.RandomValue
             {
                 Mean = mean;
                 StdDev = stdDev;
+                Check();
                 return;
             }
 
@@ -202,10 +265,20 @@ namespace RCNet.RandomValue
                 //Parsing
                 Mean = double.Parse(elem.Attribute("mean").Value, CultureInfo.InvariantCulture);
                 StdDev = double.Parse(elem.Attribute("stdDev").Value, CultureInfo.InvariantCulture);
+                Check();
                 return;
             }
 
             //Methods
+            private void Check()
+            {
+                if (StdDev <= 0)
+                {
+                    throw new Exception($"Incorrect StdDev ({StdDev.ToString(CultureInfo.InvariantCulture)}) value. StdDev must be GT 0.");
+                }
+                return;
+            }
+
             /// <summary>
             /// See the base.
             /// </summary>

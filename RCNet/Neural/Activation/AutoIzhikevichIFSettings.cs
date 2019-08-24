@@ -21,10 +21,6 @@ namespace RCNet.Neural.Activation
     {
         //Attribute properties
         /// <summary>
-        /// Input stimuli coefficient (pA)
-        /// </summary>
-        public double StimuliCoeff { get; }
-        /// <summary>
         /// Role of the neuron (excitatory or inhibitory)
         /// </summary>
         public CommonEnums.NeuronRole Role { get; }
@@ -46,19 +42,16 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
-        /// <param name="stimuliCoeff">Input stimuli coefficient (pA)</param>
         /// <param name="role">Role of the neuron (excitatory or inhibitory)</param>
         /// <param name="refractoryPeriods">Number of after spike computation cycles while an input stimuli is ignored (ms)</param>
         /// <param name="solverMethod">ODE numerical solver method</param>
         /// <param name="solverCompSteps">ODE numerical solver computation steps of the time step</param>
-        public AutoIzhikevichIFSettings(double stimuliCoeff,
-                                        CommonEnums.NeuronRole role,
+        public AutoIzhikevichIFSettings(CommonEnums.NeuronRole role,
                                         int refractoryPeriods,
                                         ODENumSolver.Method solverMethod,
                                         int solverCompSteps
                                         )
         {
-            StimuliCoeff = stimuliCoeff;
             Role = role;
             RefractoryPeriods = refractoryPeriods;
             SolverMethod = solverMethod;
@@ -72,7 +65,6 @@ namespace RCNet.Neural.Activation
         /// <param name="source">Source instance</param>
         public AutoIzhikevichIFSettings(AutoIzhikevichIFSettings source)
         {
-            StimuliCoeff = source.StimuliCoeff;
             Role = source.Role;
             RefractoryPeriods = source.RefractoryPeriods;
             SolverMethod = source.SolverMethod;
@@ -96,7 +88,6 @@ namespace RCNet.Neural.Activation
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
             XElement activationSettingsElem = validator.Validate(elem, "rootElem");
             //Parsing
-            StimuliCoeff = double.Parse(activationSettingsElem.Attribute("stimuliCoeff").Value, CultureInfo.InvariantCulture);
             Role = CommonEnums.ParseNeuronRole(activationSettingsElem.Attribute("role").Value);
             RefractoryPeriods = int.Parse(activationSettingsElem.Attribute("refractoryPeriods").Value, CultureInfo.InvariantCulture);
             SolverMethod = ODENumSolver.ParseComputationMethodType(activationSettingsElem.Attribute("solverMethod").Value);
@@ -112,8 +103,7 @@ namespace RCNet.Neural.Activation
         {
             if (obj == null) return false;
             AutoIzhikevichIFSettings cmpSettings = obj as AutoIzhikevichIFSettings;
-            if (StimuliCoeff != cmpSettings.StimuliCoeff ||
-                Role != cmpSettings.Role ||
+            if (Role != cmpSettings.Role ||
                 RefractoryPeriods != cmpSettings.RefractoryPeriods ||
                 SolverMethod != cmpSettings.SolverMethod ||
                 SolverCompSteps != cmpSettings.SolverCompSteps

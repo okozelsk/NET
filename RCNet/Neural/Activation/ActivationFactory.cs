@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Globalization;
 using System.Xml.Linq;
 using RCNet.Extensions;
+using RCNet.RandomValue;
 
 namespace RCNet.Neural.Activation
 {
@@ -12,6 +13,7 @@ namespace RCNet.Neural.Activation
     /// </summary>
     public static class ActivationFactory
     {
+        //Methods
         /// <summary>
         /// Returns the instance of the activation function settings
         /// </summary>
@@ -74,8 +76,7 @@ namespace RCNet.Neural.Activation
             if (settingsType == typeof(AdExpIFSettings))
             {
                 AdExpIFSettings afs = (AdExpIFSettings)settings;
-                return new AdExpIF(afs.StimuliCoeff,
-                                   rand.NextDouble(afs.TimeScale),
+                return new AdExpIF(rand.NextDouble(afs.TimeScale),
                                    rand.NextDouble(afs.Resistance),
                                    rand.NextDouble(afs.RestV),
                                    rand.NextDouble(afs.ResetV),
@@ -100,10 +101,8 @@ namespace RCNet.Neural.Activation
             }
             else if (settingsType == typeof(ExpIFSettings))
             {
-                //return new ExpIF((ExpIFSettings)settings, rand);
                 ExpIFSettings afs = (ExpIFSettings)settings;
-                return new ExpIF(afs.StimuliCoeff,
-                                 rand.NextDouble(afs.TimeScale),
+                return new ExpIF(rand.NextDouble(afs.TimeScale),
                                  rand.NextDouble(afs.Resistance),
                                  rand.NextDouble(afs.RestV),
                                  rand.NextDouble(afs.ResetV),
@@ -131,8 +130,7 @@ namespace RCNet.Neural.Activation
             else if (settingsType == typeof(IzhikevichIFSettings))
             {
                 IzhikevichIFSettings afs = (IzhikevichIFSettings)settings;
-                return new IzhikevichIF(afs.StimuliCoeff,
-                                        rand.NextDouble(afs.RecoveryTimeScale),
+                return new IzhikevichIF(rand.NextDouble(afs.RecoveryTimeScale),
                                         rand.NextDouble(afs.RecoverySensitivity),
                                         rand.NextDouble(afs.RecoveryReset),
                                         rand.NextDouble(afs.RestV),
@@ -151,8 +149,7 @@ namespace RCNet.Neural.Activation
                 if (afs.Role == CommonEnums.NeuronRole.Excitatory)
                 {
                     //Excitatory ranges
-                    return new IzhikevichIF(afs.StimuliCoeff,
-                                            0.02,
+                    return new IzhikevichIF(0.02,
                                             0.2,
                                             8 + (-6 * randomValue.Power(2)),
                                             -70,
@@ -166,8 +163,7 @@ namespace RCNet.Neural.Activation
                 else
                 {
                     //Inhibitory ranges
-                    return new IzhikevichIF(afs.StimuliCoeff,
-                                            0.02 + 0.08 * randomValue,
+                    return new IzhikevichIF(0.02 + 0.08 * randomValue,
                                             0.25 - 0.05 * randomValue,
                                             2,
                                             -70,
@@ -182,8 +178,7 @@ namespace RCNet.Neural.Activation
             else if (settingsType == typeof(LeakyIFSettings))
             {
                 LeakyIFSettings afs = (LeakyIFSettings)settings;
-                return new LeakyIF(afs.StimuliCoeff,
-                                   rand.NextDouble(afs.TimeScale),
+                return new LeakyIF(rand.NextDouble(afs.TimeScale),
                                    rand.NextDouble(afs.Resistance),
                                    rand.NextDouble(afs.RestV),
                                    rand.NextDouble(afs.ResetV),
@@ -205,8 +200,7 @@ namespace RCNet.Neural.Activation
             else if (settingsType == typeof(SimpleIFSettings))
             {
                 SimpleIFSettings afs = (SimpleIFSettings)settings;
-                return new SimpleIF(afs.StimuliCoeff,
-                                    rand.NextDouble(afs.Resistance),
+                return new SimpleIF(rand.NextDouble(afs.Resistance),
                                     rand.NextDouble(afs.DecayRate),
                                     rand.NextDouble(afs.ResetV),
                                     rand.NextDouble(afs.FiringThresholdV),

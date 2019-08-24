@@ -20,6 +20,13 @@ namespace RCNet.Neural.Activation
     [Serializable]
     public class ElliotSettings
     {
+        //Constants
+        //Typical values
+        /// <summary>
+        /// Curve slope
+        /// </summary>
+        public const double TypicalSlope = 1;
+
         //Attribute properties
         /// <summary>
         /// Slope of the curve
@@ -31,9 +38,9 @@ namespace RCNet.Neural.Activation
         /// Creates an initialized instance
         /// </summary>
         /// <param name="slope">Slope of the curve</param>
-        public ElliotSettings(RandomValueSettings slope)
+        public ElliotSettings(RandomValueSettings slope = null)
         {
-            Slope = slope.DeepClone();
+            Slope = RandomValueSettings.CloneOrDefault(slope, TypicalSlope);
             return;
         }
 
@@ -63,7 +70,7 @@ namespace RCNet.Neural.Activation
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
             XElement activationSettingsElem = validator.Validate(elem, "rootElem");
             //Parsing
-            Slope = new RandomValueSettings(activationSettingsElem.Descendants("slope").FirstOrDefault());
+            Slope = RandomValueSettings.LoadOrDefault(activationSettingsElem, "slope", TypicalSlope);
             return;
         }
 

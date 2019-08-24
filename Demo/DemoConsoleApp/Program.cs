@@ -10,8 +10,8 @@ namespace RCNet.DemoConsoleApp
         {
             //Research - this is not a part of the demo - it is a free playground
             //(new Research()).Run();
-
-            //Demo standard execution
+            SMDemo.RunDemo(new ConsoleLog(), @"DemoSettings.xml");
+            //Standard execution of the Demo
             try
             {
                 //Run the demo

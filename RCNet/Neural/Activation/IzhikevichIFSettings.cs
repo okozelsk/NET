@@ -20,11 +20,34 @@ namespace RCNet.Neural.Activation
     [Serializable]
     public class IzhikevichIFSettings
     {
-        //Attribute properties
+        //Constants
+        //Typical values
         /// <summary>
-        /// Input stimuli coefficient (pA)
+        /// Typical value of the parameter "a" in the original Izhikevich model
         /// </summary>
-        public double StimuliCoeff { get; }
+        public const double TypicalRecoveryTimeScale = 0.02;
+        /// <summary>
+        /// Typical value of the parameter "b" in the original Izhikevich model
+        /// </summary>
+        public const double TypicalRecoverySensitivity = 0.2;
+        /// <summary>
+        /// Typical value of the parameter "d" in the original Izhikevich model
+        /// </summary>
+        public const double TypicalRecoveryReset = 2;
+        /// <summary>
+        /// Typical value of the membrane resting potential
+        /// </summary>
+        public const double TypicalRestV = -70;
+        /// <summary>
+        /// Typical value of the parameter "c" in the original Izhikevich model
+        /// </summary>
+        public const double TypicalResetV = -65;
+        /// <summary>
+        /// Typical value of the membrane firing treshold
+        /// </summary>
+        public const double TypicalFiringThresholdV = 30;
+
+        //Attribute properties
         /// <summary>
         /// Dimensionless. Describes the time scale of the recovery variable. Smaller values result in slower recovery.
         /// (parameter a in original model)
@@ -71,7 +94,6 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
-        /// <param name="stimuliCoeff">Input stimuli coefficient (pA)</param>
         /// <param name="recoveryTimeScale">Time scale of the recovery variable</param>
         /// <param name="recoverySensitivity">Sensitivity of the recovery variable to the subthreshold fluctuations of the membrane potential</param>
         /// <param name="recoveryReset">After-spike reset of the recovery variable</param>
@@ -81,25 +103,23 @@ namespace RCNet.Neural.Activation
         /// <param name="refractoryPeriods">Number of after spike computation cycles while an input stimuli is ignored (ms)</param>
         /// <param name="solverMethod">ODE numerical solver method</param>
         /// <param name="solverCompSteps">ODE numerical solver computation steps of the time step</param>
-        public IzhikevichIFSettings(double stimuliCoeff,
-                                    RandomValueSettings recoveryTimeScale,
-                                    RandomValueSettings recoverySensitivity,
-                                    RandomValueSettings recoveryReset,
-                                    RandomValueSettings restV,
-                                    RandomValueSettings resetV,
-                                    RandomValueSettings firingThresholdV,
-                                    int refractoryPeriods,
-                                    ODENumSolver.Method solverMethod,
-                                    int solverCompSteps
+        public IzhikevichIFSettings(RandomValueSettings recoveryTimeScale = null,
+                                    RandomValueSettings recoverySensitivity = null,
+                                    RandomValueSettings recoveryReset = null,
+                                    RandomValueSettings restV = null,
+                                    RandomValueSettings resetV = null,
+                                    RandomValueSettings firingThresholdV = null,
+                                    int refractoryPeriods = 1,
+                                    ODENumSolver.Method solverMethod = ODENumSolver.Method.Euler,
+                                    int solverCompSteps = 2
                                     )
         {
-            StimuliCoeff = stimuliCoeff;
-            RecoveryTimeScale = recoveryTimeScale.DeepClone();
-            RecoverySensitivity = recoverySensitivity.DeepClone();
-            RecoveryReset = recoveryReset.DeepClone();
-            RestV = restV.DeepClone();
-            ResetV = resetV.DeepClone();
-            FiringThresholdV = firingThresholdV.DeepClone();
+            RecoveryTimeScale = RandomValueSettings.CloneOrDefault(recoveryTimeScale, TypicalRecoveryTimeScale);
+            RecoverySensitivity = RandomValueSettings.CloneOrDefault(recoverySensitivity, TypicalRecoverySensitivity);
+            RecoveryReset = RandomValueSettings.CloneOrDefault(recoveryReset, TypicalRecoveryReset);
+            RestV = RandomValueSettings.CloneOrDefault(restV, TypicalRestV);
+            ResetV = RandomValueSettings.CloneOrDefault(resetV, TypicalResetV);
+            FiringThresholdV = RandomValueSettings.CloneOrDefault(firingThresholdV, TypicalFiringThresholdV);
             RefractoryPeriods = refractoryPeriods;
             SolverMethod = solverMethod;
             SolverCompSteps = solverCompSteps;
@@ -112,7 +132,6 @@ namespace RCNet.Neural.Activation
         /// <param name="source">Source instance</param>
         public IzhikevichIFSettings(IzhikevichIFSettings source)
         {
-            StimuliCoeff = source.StimuliCoeff;
             RecoveryTimeScale = source.RecoveryTimeScale.DeepClone();
             RecoverySensitivity = source.RecoverySensitivity.DeepClone();
             RecoveryReset = source.RecoveryReset.DeepClone();
@@ -141,13 +160,12 @@ namespace RCNet.Neural.Activation
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
             XElement activationSettingsElem = validator.Validate(elem, "rootElem");
             //Parsing
-            StimuliCoeff = double.Parse(activationSettingsElem.Attribute("stimuliCoeff").Value, CultureInfo.InvariantCulture);
-            RecoveryTimeScale = new RandomValueSettings(activationSettingsElem.Descendants("recoveryTimeScale").FirstOrDefault());
-            RecoverySensitivity = new RandomValueSettings(activationSettingsElem.Descendants("recoverySensitivity").FirstOrDefault());
-            RecoveryReset = new RandomValueSettings(activationSettingsElem.Descendants("recoveryReset").FirstOrDefault());
-            RestV = new RandomValueSettings(activationSettingsElem.Descendants("restV").FirstOrDefault());
-            ResetV = new RandomValueSettings(activationSettingsElem.Descendants("resetV").FirstOrDefault());
-            FiringThresholdV = new RandomValueSettings(activationSettingsElem.Descendants("firingThresholdV").FirstOrDefault());
+            RecoveryTimeScale = RandomValueSettings.LoadOrDefault(activationSettingsElem, "recoveryTimeScale", TypicalRecoveryTimeScale);
+            RecoverySensitivity = RandomValueSettings.LoadOrDefault(activationSettingsElem, "recoverySensitivity", TypicalRecoverySensitivity);
+            RecoveryReset = RandomValueSettings.LoadOrDefault(activationSettingsElem, "recoveryReset", TypicalRecoveryReset);
+            RestV = RandomValueSettings.LoadOrDefault(activationSettingsElem, "restV", TypicalRestV);
+            ResetV = RandomValueSettings.LoadOrDefault(activationSettingsElem, "resetV", TypicalResetV);
+            FiringThresholdV = RandomValueSettings.LoadOrDefault(activationSettingsElem, "firingThresholdV", TypicalFiringThresholdV);
             RefractoryPeriods = int.Parse(activationSettingsElem.Attribute("refractoryPeriods").Value, CultureInfo.InvariantCulture);
             SolverMethod = ODENumSolver.ParseComputationMethodType(activationSettingsElem.Attribute("solverMethod").Value);
             SolverCompSteps = int.Parse(activationSettingsElem.Attribute("solverCompSteps").Value, CultureInfo.InvariantCulture);
@@ -162,8 +180,7 @@ namespace RCNet.Neural.Activation
         {
             if (obj == null) return false;
             IzhikevichIFSettings cmpSettings = obj as IzhikevichIFSettings;
-            if (StimuliCoeff != cmpSettings.StimuliCoeff ||
-                !Equals(RecoveryTimeScale, cmpSettings.RecoveryTimeScale) ||
+            if (!Equals(RecoveryTimeScale, cmpSettings.RecoveryTimeScale) ||
                 !Equals(RecoverySensitivity, cmpSettings.RecoverySensitivity) ||
                 !Equals(RecoveryReset, cmpSettings.RecoveryReset) ||
                 !Equals(RestV, cmpSettings.RestV) ||
