@@ -20,16 +20,6 @@ namespace RCNet.Neural.Activation
 
         //Properties
         /// <summary>
-        /// Optimal strength of the stimulation
-        /// </summary>
-        public abstract double OptimalStimulationStrength { get; }
-
-        /// <summary>
-        /// Range of reasonable incoming current
-        /// </summary>
-        public abstract Interval StimuliRange { get; }
-
-        /// <summary>
         /// Type of the output signal
         /// </summary>
         public CommonEnums.NeuronSignalType OutputSignalType { get { return CommonEnums.NeuronSignalType.Analog; } }
@@ -65,6 +55,11 @@ namespace RCNet.Neural.Activation
         /// Does nothing in case of analog activation function.
         /// </summary>
         public void Reset(){ return; }
+
+        /// <summary>
+        /// Sets initial state of the activation function (applicable for !stateless only)
+        /// </summary>
+        public void SetInitialInternalState(double state) { throw new NotImplementedException("Analog activation function is stateless."); }
 
         /// <summary>
         /// Computes output of the activation function.

@@ -78,7 +78,13 @@ namespace RCNet.Neural.Network.SM.Neuron
             {
                 double rescalledState = _rescalledStateRange.Rescale(_activation.InternalState, _activation.InternalStateRange);
                 double fraction = 1d / (1d + Math.Exp(-_activation.InternalState));
-                return (_firingRate.NumOfRecentSpikes) + fraction;
+                //return (_firingRate.NumOfRecentSpikes) + fraction;
+                Interval normInt = new Interval(0, 1);
+                fraction = normInt.Rescale(_activation.InternalState, new Interval(-200, 200));
+                //return (double)_firingRate.GetLastSpikes(8) + fraction;
+
+                return Math.Pow(_firingRate.GetRecentExpWRate() + 2, (fraction + 2));
+                //return _activation.InternalState;
             }
         }
 
@@ -86,7 +92,13 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// Value to be passed to readout layer as an augmented predictor
         /// (exponentially weighted firing rate)
         /// </summary>
-        public double SecondaryPredictor { get { return _firingRate.GetRate(); } }
+        public double SecondaryPredictor
+        {
+            get
+            {
+                return _firingRate.GetRecentExpWRate();
+            }
+        }
 
         //Attributes
         /// <summary>

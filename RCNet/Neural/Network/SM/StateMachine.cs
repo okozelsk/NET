@@ -29,6 +29,14 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         public NeuralPreprocessor NP { get; private set; }
         /// <summary>
+        /// Number of predictors exhibits useable values (produces meaningfully different values)
+        /// </summary>
+        public int NumOfValidPredictors { get; private set; }
+        /// <summary>
+        /// Collection of switches enabling/disabling predictorsNumber of NP's predictors
+        /// </summary>
+        public bool[] PredictorGeneralSwitchCollection { get; private set; }
+        /// <summary>
         /// Readout layer.
         /// </summary>
         public ReadoutLayer RL { get; private set; }
@@ -43,12 +51,18 @@ namespace RCNet.Neural.Network.SM
             _settings = settings.DeepClone();
             //Neural preprocessor instance
             NP = new NeuralPreprocessor(settings.NeuralPreprocessorConfig, settings.RandomizerSeek);
+            NumOfValidPredictors = 0;
+            PredictorGeneralSwitchCollection = null;
             //Readout layer
             RL = null;
             return;
         }
 
         //Properties
+        /// <summary>
+        /// Number of invalid predictors (exhibits no meaningfully different values)
+        /// </summary>
+        public int NumOfUnusedPredictors { get { return NP.NumOfPredictors - NumOfValidPredictors; } }
 
         //Methods
         /// <summary>
@@ -60,6 +74,32 @@ namespace RCNet.Neural.Network.SM
             NP.Reset(true);
             //Get rid the ReadoutLayer instance
             RL = null;
+            return;
+        }
+
+        /// <summary>
+        /// Function checks given predictors and set general enabling/disabling switches of predictors
+        /// </summary>
+        /// <param name="predictorsCollection">Collection of regression predictors</param>
+        private void InitPredictorsGeneralSwitches(List<double[]> predictorsCollection)
+        {
+            PredictorGeneralSwitchCollection = new bool[NP.NumOfPredictors];
+            PredictorGeneralSwitchCollection.Populate(false);
+            //Test predictors
+            NumOfValidPredictors = 0;
+            for (int row = 1; row < predictorsCollection.Count; row++)
+            {
+                for (int i = 0; i < PredictorGeneralSwitchCollection.Length; i++)
+                {
+                    if (Math.Abs(predictorsCollection[row][i] - predictorsCollection[row - 1][i]) > 1e-20)
+                    {
+                        //Update number of valid predictors
+                        NumOfValidPredictors += PredictorGeneralSwitchCollection[i] ? 0 : 1;
+                        //Predictor exhibits different values => enable it
+                        PredictorGeneralSwitchCollection[i] = true;
+                    }
+                }
+            }
             return;
         }
 
@@ -81,10 +121,13 @@ namespace RCNet.Neural.Network.SM
                                                      Object userObject = null
                                                      )
         {
-            return new RegressionInput(NP.InitializeAndPreprocessBundle(patternBundle, informativeCallback, userObject),
+            VectorBundle preprocessedData = NP.InitializeAndPreprocessBundle(patternBundle, informativeCallback, userObject);
+            InitPredictorsGeneralSwitches(preprocessedData.InputVectorCollection);
+            return new RegressionInput(preprocessedData,
                                        NP.CollectStatatistics(),
                                        NP.NumOfNeurons,
-                                       NP.NumOfInternalSynapses
+                                       NP.NumOfInternalSynapses,
+                                       NumOfUnusedPredictors
                                        );
         }
 
@@ -106,16 +149,21 @@ namespace RCNet.Neural.Network.SM
                                                      Object userObject = null
                                                      )
         {
-            return new RegressionInput(NP.InitializeAndPreprocessBundle(vectorBundle, informativeCallback, userObject),
+            VectorBundle preprocessedData = NP.InitializeAndPreprocessBundle(vectorBundle, informativeCallback, userObject);
+            InitPredictorsGeneralSwitches(preprocessedData.InputVectorCollection);
+            return new RegressionInput(preprocessedData,
                                        NP.CollectStatatistics(),
                                        NP.NumOfNeurons,
-                                       NP.NumOfInternalSynapses
+                                       NP.NumOfInternalSynapses,
+                                       NumOfUnusedPredictors
                                        );
         }
 
 
         /// <summary>
         /// Creates and trains the State Machine readout layer.
+        /// Function uses specific mapping of predictors to readout units, if available.
+        /// Function also rejects unusable predictors having no reasonable fluctuation of values.
         /// </summary>
         /// <param name="regressionInput">
         /// RegressionInput object prepared by PrepareRegressionData function
@@ -133,12 +181,10 @@ namespace RCNet.Neural.Network.SM
         {
             //Readout layer instance
             RL = new ReadoutLayer(_settings.ReadoutLayerConfig);
-            //Optional mapper of predictors to readout units
-            ReadoutLayer.PredictorsMapper mapper = null;
-            if(_settings.MapperConfig != null)
+            //Create empty instance of the mapper
+            ReadoutLayer.PredictorsMapper mapper = new ReadoutLayer.PredictorsMapper(NP.NumOfPredictors);
+            if (_settings.MapperConfig != null)
             {
-                //Create empty instance of the mapper
-                mapper = new ReadoutLayer.PredictorsMapper(NP.NumOfPredictors);
                 //Expand list of predicting neurons to array of predictor origin
                 StateMachineSettings.MapperSettings.PoolRef[] neuronPoolRefCollection = new StateMachineSettings.MapperSettings.PoolRef[NP.NumOfPredictors];
                 int idx = 0;
@@ -152,21 +198,31 @@ namespace RCNet.Neural.Network.SM
                         ++idx;
                     }
                 }
-                //Iterate readout units having specific predictors mapping
-                foreach (string readoutUnitName in _settings.MapperConfig.Map.Keys)
+                //Iterate all readout units
+                foreach (string readoutUnitName in _settings.ReadoutLayerConfig.OutputFieldNameCollection)
                 {
                     bool[] switches = new bool[NP.NumOfPredictors];
-                    switches.Populate(false);
-                    foreach(StateMachineSettings.MapperSettings.PoolRef allowedPool in _settings.MapperConfig.Map[readoutUnitName])
+                    //Exists specific mapping?
+                    if(_settings.MapperConfig != null && _settings.MapperConfig.Map.ContainsKey(readoutUnitName))
                     {
-                        //Enable specific predictors from allowed pool (origin)
-                        for(int i = 0; i < neuronPoolRefCollection.Length; i++)
+                        switches.Populate(false);
+                        foreach (StateMachineSettings.MapperSettings.PoolRef allowedPool in _settings.MapperConfig.Map[readoutUnitName])
                         {
-                            if(neuronPoolRefCollection[i]._reservoirInstanceIdx == allowedPool._reservoirInstanceIdx && neuronPoolRefCollection[i]._poolIdx == allowedPool._poolIdx)
+                            //Enable specific predictors from allowed pool (origin)
+                            for (int i = 0; i < neuronPoolRefCollection.Length; i++)
                             {
-                                switches[i] = true;
+                                if (neuronPoolRefCollection[i]._reservoirInstanceIdx == allowedPool._reservoirInstanceIdx && neuronPoolRefCollection[i]._poolIdx == allowedPool._poolIdx)
+                                {
+                                    //Enable predictor if it is valid
+                                    switches[i] = PredictorGeneralSwitchCollection[i];
+                                }
                             }
                         }
+                    }
+                    else
+                    {
+                        //Initially allow all valid predictors
+                        PredictorGeneralSwitchCollection.CopyTo(switches, 0);
                     }
                     //Add mapping to mapper
                     mapper.Add(readoutUnitName, switches);
@@ -242,6 +298,10 @@ namespace RCNet.Neural.Network.SM
             /// </summary>
             public int TotalNumOfNeurons { get; }
             /// <summary>
+            /// Number of invalid predictors (exhibits no meaningfully different values)
+            /// </summary>
+            public int NumOfUnusedPredictors { get; }
+            /// <summary>
             /// Total number of NeuralPreprocessor's internal synapses
             /// </summary>
             public int TotalNumOfInternalSynapses { get; }
@@ -254,16 +314,19 @@ namespace RCNet.Neural.Network.SM
             /// <param name="reservoirStatCollection">Collection of statistics of NeuralPreprocessor's internal reservoirs</param>
             /// <param name="totalNumOfNeurons">Total number of NeuralPreprocessor's neurons</param>
             /// <param name="totalNumOfInternalSynapses">Total number of NeuralPreprocessor's internal synapses</param>
+            /// <param name="numOfUnusedPredictors">Number of NeuralPreprocessor's invalid predictors</param>
             public RegressionInput(VectorBundle preprocessedData,
                                    List<ReservoirStat> reservoirStatCollection,
                                    int totalNumOfNeurons,
-                                   int totalNumOfInternalSynapses
+                                   int totalNumOfInternalSynapses,
+                                   int numOfUnusedPredictors
                                    )
             {
                 PreprocessedData = preprocessedData;
                 ReservoirStatCollection = reservoirStatCollection;
                 TotalNumOfNeurons = totalNumOfNeurons;
                 TotalNumOfInternalSynapses = totalNumOfInternalSynapses;
+                NumOfUnusedPredictors = numOfUnusedPredictors;
                 return;
             }
 
@@ -342,6 +405,7 @@ namespace RCNet.Neural.Network.SM
                         sb.Append(leftMargin + $"        Int.>  {StatLine(poolStat.InternalWeightsStat)}" + Environment.NewLine);
                     }
                 }
+                sb.Append(leftMargin + $"Number of unused (invalid) predictors: {NumOfUnusedPredictors}" + Environment.NewLine);
                 return sb.ToString();
             }
 

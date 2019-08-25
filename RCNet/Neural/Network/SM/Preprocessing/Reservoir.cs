@@ -284,88 +284,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 }
             });
 
-            /*
-            //-----------------------------------------------------------------------------
-            //Check spiking neurons' internal weights and ensure folowing elementary rules
-            const double MaxInhExcWRatio = 0.99d;
-            Parallel.ForEach((from neuron in _reservoirNeuronCollection where neuron.OutputType == CommonEnums.NeuronSignalType.Spike select neuron), neuron =>
-            {
-                BasicStat anaWeights = new BasicStat();
-                BasicStat spiWeights = new BasicStat();
-                double anaInhScaleCoeff = 1d;
-                double spiInhScaleCoeff = 1d;
-                //Load current weights' balances
-                foreach (ISynapse synapse in _neuronNeuronConnectionsCollection[neuron.Placement.ReservoirFlatIdx].Values)
-                {
-                    if(synapse.SourceNeuron.OutputType == CommonEnums.NeuronSignalType.Analog)
-                    {
-                        anaWeights.AddSampleValue(synapse.Weight);
-                    }
-                    else
-                    {
-                        spiWeights.AddSampleValue(synapse.Weight);
-                    }
-                }
-                //Check analog weights
-                if (anaWeights.NegSum != 0)
-                {
-                    if (anaWeights.PosSum == 0)
-                    {
-                        throw new Exception($"Incorrect synapses balance from analog neurons to spiking neuron. Missing excitatory synapses.");
-                    }
-                    double inhExcRatio = Math.Abs(anaWeights.NegSum) / anaWeights.PosSum;
-                    if(inhExcRatio > MaxInhExcWRatio)
-                    {
-                        //Scale down inhibitory weights
-                        anaInhScaleCoeff = MaxInhExcWRatio / inhExcRatio;
-                    }
-                }
-                //Check spiking weights
-                if (spiWeights.NegSum != 0)
-                {
-                    if (spiWeights.PosSum == 0)
-                    {
-                        throw new Exception($"Incorrect synapses balance from spiking neurons to spiking neuron. Missing excitatory synapses.");
-                    }
-                    if(Math.Abs(spiWeights.NegSum) > spiWeights.PosSum)
-                    {
-                        ;
-                    }
-                    double inhExcRatio = Math.Abs(spiWeights.NegSum) / spiWeights.PosSum;
-                    if (inhExcRatio > MaxInhExcWRatio)
-                    {
-                        //Scale down inhibitory weights
-                        spiInhScaleCoeff = MaxInhExcWRatio / inhExcRatio;
-                    }
-                }
-                if (anaInhScaleCoeff != 1d || spiInhScaleCoeff != 1d)
-                {
-                    //Scale down inhibitory weights
-                    foreach (ISynapse synapse in _neuronNeuronConnectionsCollection[neuron.Placement.ReservoirFlatIdx].Values)
-                    {
-                        if (synapse.Weight < 0)
-                        {
-                            if (synapse.SourceNeuron.OutputType == CommonEnums.NeuronSignalType.Analog && anaInhScaleCoeff != 1d)
-                            {
-                                //Rescale analog inhibitory weight
-                                synapse.Rescale(anaInhScaleCoeff);
-                            }
-                            else if(synapse.SourceNeuron.OutputType == CommonEnums.NeuronSignalType.Spike && spiInhScaleCoeff != 1d)
-                            {
-                                //Rescale spiking inhibitory weight
-                                synapse.Rescale(spiInhScaleCoeff);
-                            }
-                        }
-                    }
-                }
-            });
-            */
             //-----------------------------------------------------------------------------
             //Spectral radius
             //Apply only for the analog part of the reservoir
             if (_numOfAnalogNeurons > 0)
             {
-                ApplySpectralRadius();
+                ApplySpectralRadius(true);
             }
 
             //Finished
@@ -380,52 +304,30 @@ namespace RCNet.Neural.Network.SM.Preprocessing
 
         //Methods
         /// <summary>
-        /// Estimates the largest eigen value
+        /// Scales weights of synapses to achieve requiered spectral radius on specified subset of weights
         /// </summary>
-        private double EstimateLargestEigenValue()
+        /// <param name="scaleAnalogOnly">Specifies whether to scale weights of synapses targeting analog neurons only (true) or weights of all synapses (false)</param>
+        private void ApplySpectralRadius(bool scaleAnalogOnly)
         {
-            //Create weights matrix
+            //Create reservoir's weight matrix
             Matrix wMatrix = new Matrix(_reservoirNeuronCollection.Length, _reservoirNeuronCollection.Length);
-            //Interconnections
-            var rangePartitioner = Partitioner.Create(0, _neuronNeuronConnectionsCollection.Length);
-            Parallel.ForEach(rangePartitioner, range =>
+            Parallel.ForEach(from neuron in _reservoirNeuronCollection where !scaleAnalogOnly || neuron.OutputType == CommonEnums.NeuronSignalType.Analog select neuron, neuron =>
             {
-                for(int row = range.Item1; row < range.Item2; row++)
+                foreach (ISynapse synapse in _neuronNeuronConnectionsCollection[neuron.Placement.ReservoirFlatIdx].Values)
                 {
-                    foreach (ISynapse synapse in _neuronNeuronConnectionsCollection[row].Values)
-                    {
-                        wMatrix.Data[row][synapse.SourceNeuron.Placement.ReservoirFlatIdx] = synapse.Weight;
-                    }
+                    wMatrix.Data[neuron.Placement.ReservoirFlatIdx][synapse.SourceNeuron.Placement.ReservoirFlatIdx] = synapse.Weight;
                 }
             });
-            double maxEV = wMatrix.EstimateLargestEigenValue(out double[] eigenVector);
-            return Math.Abs(maxEV);
-        }
-
-        /// <summary>
-        /// Scales weights of synapses (only where target neuron is analog) to achieve requiered spectral radius
-        /// </summary>
-        private void ApplySpectralRadius()
-        {
-            //Create analog neurons' weights matrix
-            Matrix wMatrix = new Matrix(_reservoirNeuronCollection.Length, _reservoirNeuronCollection.Length);
-            Parallel.ForEach((from neuron in _reservoirNeuronCollection where neuron.OutputType == CommonEnums.NeuronSignalType.Analog select neuron.Placement.ReservoirFlatIdx), row =>
+            double largestEigenValue = Math.Abs(wMatrix.EstimateLargestEigenValue(out double[] eigenVector));
+            if (largestEigenValue == 0)
             {
-                foreach (ISynapse synapse in _neuronNeuronConnectionsCollection[row].Values)
-                {
-                    wMatrix.Data[row][synapse.SourceNeuron.Placement.ReservoirFlatIdx] = synapse.Weight;
-                }
-            });
-            double maxEigenValue = wMatrix.EstimateLargestEigenValue(out double[] eigenVector);
-            if (maxEigenValue == 0)
-            {
-                throw new Exception("Invalid reservoir weights. Max eigenvalue is 0.");
+                throw new Exception("Invalid reservoir weights or specified subset of weights. Largest eigenvalue is 0.");
             }
-            double scale = InstanceDefinition.Settings.SpectralRadius / maxEigenValue;
-            //Scale weights
-            Parallel.ForEach((from neuron in _reservoirNeuronCollection where neuron.OutputType == CommonEnums.NeuronSignalType.Analog select neuron.Placement.ReservoirFlatIdx), row =>
+            double scale = InstanceDefinition.Settings.SpectralRadius / largestEigenValue;
+            //Scale weights of synapses targeting analog neurons
+            Parallel.ForEach(from neuron in _reservoirNeuronCollection where !scaleAnalogOnly || neuron.OutputType == CommonEnums.NeuronSignalType.Analog select neuron, neuron =>
             {
-                foreach (ISynapse synapse in _neuronNeuronConnectionsCollection[row].Values)
+                foreach (ISynapse synapse in _neuronNeuronConnectionsCollection[neuron.Placement.ReservoirFlatIdx].Values)
                 {
                     synapse.Rescale(scale);
                 }

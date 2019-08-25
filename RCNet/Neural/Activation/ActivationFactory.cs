@@ -72,11 +72,12 @@ namespace RCNet.Neural.Activation
         /// <param name="rand">Random object to be used for randomly generated parameters</param>
         public static IActivationFunction Create(Object settings, Random rand)
         {
+            IActivationFunction af = null;
             Type settingsType = settings.GetType();
             if (settingsType == typeof(AdExpIFSettings))
             {
                 AdExpIFSettings afs = (AdExpIFSettings)settings;
-                return new AdExpIF(rand.NextDouble(afs.TimeScale),
+                af = new AdExpIF(rand.NextDouble(afs.TimeScale),
                                    rand.NextDouble(afs.Resistance),
                                    rand.NextDouble(afs.RestV),
                                    rand.NextDouble(afs.ResetV),
@@ -92,17 +93,17 @@ namespace RCNet.Neural.Activation
             }
             else if (settingsType == typeof(BentIdentitySettings))
             {
-                return new BentIdentity();
+                af = new BentIdentity();
             }
             else if (settingsType == typeof(ElliotSettings))
             {
                 ElliotSettings afs = (ElliotSettings)settings;
-                return new Elliot(rand.NextDouble(afs.Slope));
+                af = new Elliot(rand.NextDouble(afs.Slope));
             }
             else if (settingsType == typeof(ExpIFSettings))
             {
                 ExpIFSettings afs = (ExpIFSettings)settings;
-                return new ExpIF(rand.NextDouble(afs.TimeScale),
+                af = new ExpIF(rand.NextDouble(afs.TimeScale),
                                  rand.NextDouble(afs.Resistance),
                                  rand.NextDouble(afs.RestV),
                                  rand.NextDouble(afs.ResetV),
@@ -116,21 +117,21 @@ namespace RCNet.Neural.Activation
             }
             else if (settingsType == typeof(GaussianSettings))
             {
-                return new Gaussian();
+                af = new Gaussian();
             }
             else if (settingsType == typeof(IdentitySettings))
             {
-                return new Identity();
+                af = new Identity();
             }
             else if (settingsType == typeof(ISRUSettings))
             {
                 ISRUSettings afs = (ISRUSettings)settings;
-                return new ISRU(rand.NextDouble(afs.Alpha));
+                af = new ISRU(rand.NextDouble(afs.Alpha));
             }
             else if (settingsType == typeof(IzhikevichIFSettings))
             {
                 IzhikevichIFSettings afs = (IzhikevichIFSettings)settings;
-                return new IzhikevichIF(rand.NextDouble(afs.RecoveryTimeScale),
+                af = new IzhikevichIF(rand.NextDouble(afs.RecoveryTimeScale),
                                         rand.NextDouble(afs.RecoverySensitivity),
                                         rand.NextDouble(afs.RecoveryReset),
                                         rand.NextDouble(afs.RestV),
@@ -149,7 +150,7 @@ namespace RCNet.Neural.Activation
                 if (afs.Role == CommonEnums.NeuronRole.Excitatory)
                 {
                     //Excitatory ranges
-                    return new IzhikevichIF(0.02,
+                    af = new IzhikevichIF(0.02,
                                             0.2,
                                             8 + (-6 * randomValue.Power(2)),
                                             -70,
@@ -163,7 +164,7 @@ namespace RCNet.Neural.Activation
                 else
                 {
                     //Inhibitory ranges
-                    return new IzhikevichIF(0.02 + 0.08 * randomValue,
+                    af = new IzhikevichIF(0.02 + 0.08 * randomValue,
                                             0.25 - 0.05 * randomValue,
                                             2,
                                             -70,
@@ -178,7 +179,7 @@ namespace RCNet.Neural.Activation
             else if (settingsType == typeof(LeakyIFSettings))
             {
                 LeakyIFSettings afs = (LeakyIFSettings)settings;
-                return new LeakyIF(rand.NextDouble(afs.TimeScale),
+                af = new LeakyIF(rand.NextDouble(afs.TimeScale),
                                    rand.NextDouble(afs.Resistance),
                                    rand.NextDouble(afs.RestV),
                                    rand.NextDouble(afs.ResetV),
@@ -191,16 +192,16 @@ namespace RCNet.Neural.Activation
             else if (settingsType == typeof(LeakyReLUSettings))
             {
                 LeakyReLUSettings afs = (LeakyReLUSettings)settings;
-                return new LeakyReLU(rand.NextDouble(afs.NegSlope));
+                af = new LeakyReLU(rand.NextDouble(afs.NegSlope));
             }
             else if (settingsType == typeof(SigmoidSettings))
             {
-                return new Sigmoid();
+                af = new Sigmoid();
             }
             else if (settingsType == typeof(SimpleIFSettings))
             {
                 SimpleIFSettings afs = (SimpleIFSettings)settings;
-                return new SimpleIF(rand.NextDouble(afs.Resistance),
+                af = new SimpleIF(rand.NextDouble(afs.Resistance),
                                     rand.NextDouble(afs.DecayRate),
                                     rand.NextDouble(afs.ResetV),
                                     rand.NextDouble(afs.FiringThresholdV),
@@ -209,29 +210,35 @@ namespace RCNet.Neural.Activation
             }
             else if (settingsType == typeof(SincSettings))
             {
-                return new Sinc();
+                af = new Sinc();
             }
             else if (settingsType == typeof(SinusoidSettings))
             {
-                return new Sinusoid();
+                af = new Sinusoid();
             }
             else if (settingsType == typeof(SoftExponentialSettings))
             {
                 SoftExponentialSettings afs = (SoftExponentialSettings)settings;
-                return new SoftExponential(rand.NextDouble(afs.Alpha));
+                af = new SoftExponential(rand.NextDouble(afs.Alpha));
             }
             else if (settingsType == typeof(SoftPlusSettings))
             {
-                return new SoftPlus();
+                af = new SoftPlus();
             }
             else if (settingsType == typeof(TanHSettings))
             {
-                return new TanH();
+                af = new TanH();
             }
             else
             {
                 throw new ArgumentException($"Unsupported activation function settings: {settingsType.Name}");
             }
+            //Set random initial membrane potential for spiking activation
+            if(!af.Stateless && af.OutputSignalType == CommonEnums.NeuronSignalType.Spike)
+            {
+                af.SetInitialInternalState(rand.NextDouble(0.25, 1, false, RandomClassExtensions.DistributionType.Uniform));
+            }
+            return af;
         }
 
         /// <summary>

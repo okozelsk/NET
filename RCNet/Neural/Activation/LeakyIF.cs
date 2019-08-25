@@ -18,11 +18,6 @@ namespace RCNet.Neural.Activation
     public class LeakyIF : ODESpikingMembrane
     {
         //Constants
-
-        //Static members
-        //protected static Interval _stimuliRange = new Interval(-3.629, 12.887);
-        protected static Interval _stimuliRange = new Interval(-3.629/5, 12.887/5);
-
         //Attributes
         //Parameters
         private readonly double _timeScale;
@@ -68,16 +63,6 @@ namespace RCNet.Neural.Activation
 
 
         //Properties
-        /// <summary>
-        /// Optimal strength of the stimulation
-        /// </summary>
-        public override double OptimalStimulationStrength { get { return 2.725; } }
-
-        /// <summary>
-        /// Range of reasonable incoming current
-        /// </summary>
-        public override Interval StimuliRange { get { return _stimuliRange; } }
-
         //Methods
         /// <summary>
         /// Triggered when membrane is firing a spike

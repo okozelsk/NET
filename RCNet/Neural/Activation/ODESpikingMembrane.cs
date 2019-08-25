@@ -65,6 +65,14 @@ namespace RCNet.Neural.Activation
         /// Time sub-steps within the computation step
         /// </summary>
         protected int _subSteps;
+        /// <summary>
+        /// Coefficient for conversion of incoming stimuli current to expected physical unit 
+        /// </summary>
+        protected double _currentCoeff;
+        /// <summary>
+        /// Coefficient for conversion of membrane potential to expected physical unit 
+        /// </summary>
+        protected double _potentialCoeff;
 
         //Operation attributes
         /// <summary>
@@ -80,17 +88,13 @@ namespace RCNet.Neural.Activation
         /// </summary>
         protected int _refractoryPeriod;
         /// <summary>
-        /// Coefficient for conversion of incoming stimuli current to expected physical unit 
-        /// </summary>
-        protected double _currentCoeff;
-        /// <summary>
-        /// Coefficient for conversion of membrane potential to expected physical unit 
-        /// </summary>
-        protected double _potentialCoeff;
-        /// <summary>
         /// Adjusted (modified) input stimuli
         /// </summary>
         protected double _stimuli;
+        /// <summary>
+        /// Initial membrane potential
+        /// </summary>
+        protected double _initialMembranePotential;
 
         /// <summary>
         /// Constructs an initialized instance
@@ -124,7 +128,8 @@ namespace RCNet.Neural.Activation
             _solvingMethod = solvingMethod;
             _stepTimeScale = stepTimeScale;
             _subSteps = subSteps;
-            _evolVars[VarMembraneVIdx] = _resetV;
+            _initialMembranePotential = _resetV;
+            _evolVars[VarMembraneVIdx] = _initialMembranePotential;
             _inRefractory = false;
             _refractoryPeriod = 0;
             _currentCoeff = currentCoeff;
@@ -133,21 +138,6 @@ namespace RCNet.Neural.Activation
         }
 
         //Properties
-        /// <summary>
-        /// Optimal strength of the stimulation
-        /// </summary>
-        public abstract double OptimalStimulationStrength { get; }
-
-        /// <summary>
-        /// Range of reasonable incoming current
-        /// </summary>
-        public abstract Interval StimuliRange { get; }
-
-        /// <summary>
-        /// Range of reasonable incoming current
-        /// </summary>
-        //public abstract Interval StimuliRange { get; }
-
         /// <summary>
         /// Type of the output
         /// </summary>
@@ -184,9 +174,21 @@ namespace RCNet.Neural.Activation
         /// </summary>
         public virtual void Reset()
         {
-            _evolVars[VarMembraneVIdx] = _resetV;
+            _evolVars[VarMembraneVIdx] = _initialMembranePotential;
             _inRefractory = false;
             _refractoryPeriod = 0;
+            return;
+        }
+
+
+        /// <summary>
+        /// Sets initial state of the membrane potential
+        /// </summary>
+        /// <param name="state">0 >= state < 1, where 0 means Min(reset, rest) potential and 1 means firing threshold</param>
+        public void SetInitialInternalState(double state)
+        {
+            _initialMembranePotential = _stateRange.Min + state * _stateRange.Span;
+            Reset();
             return;
         }
 
@@ -253,7 +255,7 @@ namespace RCNet.Neural.Activation
 
         /// <summary>
         /// Unsupported functionality!!!
-        /// Computes derivative of the activation input (does not change internal state)
+        /// Computes derivative of the activation input
         /// </summary>
         /// <param name="c">The result of the activation (Compute method)</param>
         /// <param name="x">Activation input (x argument of the Compute method)</param>

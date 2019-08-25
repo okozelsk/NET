@@ -91,10 +91,10 @@ namespace RCNet.Neural.Network.SM.Neuron
         }
 
         /// <summary>
-        /// Returns current firing rate
+        /// Returns recent exponentially weighted firing rate
         /// </summary>
         /// <returns>Average exponentially weighted firing rate between 0 and 1</returns>
-        public double GetRate()
+        public double GetRecentExpWRate()
         {
             if(_numOfBufferedData == 0)
             {
@@ -114,6 +114,46 @@ namespace RCNet.Neural.Network.SM.Neuron
             return (double)(rate / _sumOfSpikeValues[_numOfBufferedData - 1]);
         }
 
+        /// <summary>
+        /// Returns recent firing frequency
+        /// </summary>
+        /// <returns>Firing frequency between 0 and 1</returns>
+        public double GetRecentFrequency()
+        {
+            if (_numOfBufferedData == 0)
+            {
+                return 0;
+            }
+            return (double)NumOfRecentSpikes / _numOfBufferedData;
+        }
+
+        /// <summary>
+        /// Returns last spikes as an integer number where bits are in order that the higher bit represents the more recent spike
+        /// </summary>
+        /// <returns>Last spikes history as an integer</returns>
+        public ulong GetLastSpikes(int histLength)
+        {
+            if (_numOfBufferedData == 0 || histLength < 1)
+            {
+                return 0;
+            }
+            if(histLength > _numOfBufferedData)
+            {
+                histLength = _numOfBufferedData;
+            }
+            ulong localCopy = _spikes;
+            ulong result = 0;
+            for (int i = 0; i < histLength; i++)
+            {
+                result <<= 1;
+                if ((localCopy & 1) > 0)
+                {
+                    result += 1;
+                }
+                localCopy >>= 1;
+            }
+            return result;
+        }
 
     }//FiringRate
 

@@ -22,9 +22,6 @@ namespace RCNet.Neural.Activation
         /// </summary>
         private const int VarAdaptationOmegaIdx = 1;
 
-        //Static members
-        protected static Interval _stimuliRange = new Interval(-1.63133, 1.928314);
-
         //Attributes
         //Parameters
         private readonly double _timeScale;
@@ -87,16 +84,6 @@ namespace RCNet.Neural.Activation
         }
 
         //Properties
-        /// <summary>
-        /// Optimal strength of the stimulation
-        /// </summary>
-        public override double OptimalStimulationStrength { get { return 1; } }
-
-        /// <summary>
-        /// Range of reasonable incoming current
-        /// </summary>
-        public override Interval StimuliRange { get { return _stimuliRange; } }
-
         //Methods
         /// <summary>
         /// Resets function to initial state

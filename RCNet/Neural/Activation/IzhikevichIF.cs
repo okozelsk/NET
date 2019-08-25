@@ -24,9 +24,6 @@ namespace RCNet.Neural.Activation
         /// </summary>
         protected const int VarRecovery = 1;
 
-        //Static members
-        protected static Interval _stimuliRange = new Interval(-2.417636, 75.4);
-
         //Attributes
         //Parameters
         private readonly double _recoveryTimeScale;
@@ -75,16 +72,6 @@ namespace RCNet.Neural.Activation
         }
 
         //Properties
-        /// <summary>
-        /// Optimal strength of the stimulation
-        /// </summary>
-        public override double OptimalStimulationStrength { get { return 8.75; } }
-
-        /// <summary>
-        /// Range of reasonable incoming current
-        /// </summary>
-        public override Interval StimuliRange { get { return _stimuliRange; } }
-
         //Methods
         /// <summary>
         /// Resets function to its initial state

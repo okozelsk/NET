@@ -168,7 +168,7 @@ namespace RCNet.Neural.Network.SM.Synapse
                     EfficacyStat.AddSampleValue(efficacy);
                 }
                 //Return resulting signal
-                return sourceSignal * Weight * efficacy + ComputePostSynapticCurrent();
+                return sourceSignal * Weight * efficacy + ComputePostSynapticCurrent() * Math.Sign(Weight);
             }
         }
 

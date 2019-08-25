@@ -14,16 +14,6 @@ namespace RCNet.Neural.Activation
     {
         //Properties
         /// <summary>
-        /// Optimal strength of the stimulation
-        /// </summary>
-        double OptimalStimulationStrength { get; }
-
-        /// <summary>
-        /// Range of reasonable incoming current
-        /// </summary>
-        Interval StimuliRange { get; }
-
-        /// <summary>
         /// Type of the output signal
         /// </summary>
         CommonEnums.NeuronSignalType OutputSignalType { get; }
@@ -53,12 +43,16 @@ namespace RCNet.Neural.Activation
         /// </summary>
         double InternalState { get; }
 
-
         //Methods
         /// <summary>
         /// Resets function to its initial state
         /// </summary>
         void Reset();
+
+        /// <summary>
+        /// Sets initial state of the activation function (applicable for !stateless only)
+        /// </summary>
+        void SetInitialInternalState(double state);
 
         /// <summary>
         /// Computes output of the activation function (changes internal state)

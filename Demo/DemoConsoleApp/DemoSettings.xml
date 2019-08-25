@@ -35,11 +35,11 @@
                 <neuronGroups>
                   <neuronGroup name="Exc-grp" role="Excitatory" relShare="4" augmentedStates="true">
                     <activationLeakyIF refractoryPeriods="0"/>
-                    <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
+                    <bias min="0.15" max="0.15" randomSign="false" distribution="Uniform"/>
                   </neuronGroup>
                   <neuronGroup name="Inh-grp" role="Inhibitory" relShare="1" augmentedStates="true">
                     <activationLeakyIF refractoryPeriods="0"/>
-                    <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
+                    <bias min="0.15" max="0.15" randomSign="false" distribution="Uniform"/>
                   </neuronGroup>
                 </neuronGroups>
                 <interconnection density="0.1" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
@@ -64,10 +64,9 @@
       </neuralPreprocessor>
       <readoutLayer testDataRatio="0.0825" folds="Auto">
         <readoutUnit name="curved swing" task="Classification">
-          <ff>
-            <activationIdentity/>
-            <elasticRegrTrainer attemptEpochs="600" alpha="0.5" lambda="0.5"/>
-          </ff>
+          <pp gates="3" resolution="2">
+            <pDeltaRuleTrainer attempts="10" attemptEpochs="1000"/>
+          </pp>
         </readoutUnit>
         <readoutUnit name="horizontal swing" task="Classification">
           <ff>
@@ -78,9 +77,10 @@
           </ff>
         </readoutUnit>
         <readoutUnit name="vertical swing" task="Classification">
-          <pp gates="3" resolution="2">
-            <pDeltaRuleTrainer attempts="10" attemptEpochs="600"/>
-          </pp>
+          <ff>
+            <activationIdentity/>
+            <elasticRegrTrainer attemptEpochs="600" alpha="0.5" lambda="1e-6"/>
+          </ff>
         </readoutUnit>
         <readoutUnit name="anti-clockwise arc" task="Classification">
           <pp gates="3" resolution="2">

@@ -18,9 +18,6 @@ namespace RCNet.Neural.Activation
     public class ExpIF : ODESpikingMembrane
     {
         //Constants
-        //Static members
-        protected static Interval _stimuliRange = new Interval(-2.819, 15.8414118);
-
         //Attributes
         //Parameters
         private readonly double _timeScale;
@@ -73,16 +70,6 @@ namespace RCNet.Neural.Activation
         }
 
         //Properties
-        /// <summary>
-        /// Optimal strength of the stimulation
-        /// </summary>
-        public override double OptimalStimulationStrength { get { return 1.125; } }
-
-        /// <summary>
-        /// Range of reasonable incoming current
-        /// </summary>
-        public override Interval StimuliRange { get { return _stimuliRange; } }
-
         //Methods
         /// <summary>
         /// Triggered when membrane is firing a spike

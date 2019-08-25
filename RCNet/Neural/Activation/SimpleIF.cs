@@ -15,9 +15,6 @@ namespace RCNet.Neural.Activation
     public class SimpleIF : IActivationFunction
     {
         //Constants
-        //Static members
-        protected static Interval _stimuliRange = new Interval(-0.01, 1.333333);
-
         /// <summary>
         /// Spike value
         /// </summary>
@@ -40,6 +37,7 @@ namespace RCNet.Neural.Activation
         private double _membraneV;
         private bool _inRefractory;
         private int _refractoryPeriod;
+        private double _initialMembranePotential;
 
         //Constructor
         /// <summary>
@@ -63,22 +61,13 @@ namespace RCNet.Neural.Activation
             _resetV = Math.Abs(resetV);
             _firingThresholdV = Math.Abs(firingThresholdV);
             _refractoryPeriods = refractoryPeriods;
+            _initialMembranePotential = _restV;
             InternalStateRange = new Interval(_restV, _firingThresholdV);
             Reset();
             return;
         }
 
         //Properties
-        /// <summary>
-        /// Optimal strength of the stimulation
-        /// </summary>
-        public double OptimalStimulationStrength { get { return 0.165; } }
-
-        /// <summary>
-        /// Range of reasonable incoming current
-        /// </summary>
-        public Interval StimuliRange { get { return _stimuliRange; } }
-
         /// <summary>
         /// Type of the output
         /// </summary>
@@ -110,9 +99,20 @@ namespace RCNet.Neural.Activation
         /// </summary>
         public void Reset()
         {
-            _membraneV = _restV;
+            _membraneV = _initialMembranePotential;
             _inRefractory = false;
             _refractoryPeriod = 0;
+            return;
+        }
+
+        /// <summary>
+        /// Sets initial state of the membrane potential
+        /// </summary>
+        /// <param name="state">0 >= state < 1, where 0 means rest potential and 1 means firing threshold</param>
+        public void SetInitialInternalState(double state)
+        {
+            _initialMembranePotential = InternalStateRange.Min + state * InternalStateRange.Span;
+            Reset();
             return;
         }
 
