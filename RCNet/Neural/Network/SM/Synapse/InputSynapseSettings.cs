@@ -20,10 +20,18 @@ namespace RCNet.Neural.Network.SM.Synapse
     {
         //Attribute properties
         /// <summary>
+        /// Synapse's scope when targeting spiking neurons
+        /// </summary>
+        public CommonEnums.InputSynapseScope SpikingTargetScope { get; set; }
+        /// <summary>
         /// Synapse's random weight settings for Input->Spiking connection
         /// </summary>
         public RandomValueSettings SpikingTargetWeightCfg { get; set; }
 
+        /// <summary>
+        /// Synapse's scope when targeting analog neurons
+        /// </summary>
+        public CommonEnums.InputSynapseScope AnalogTargetScope { get; set; }
         /// <summary>
         /// Synapse's random weight settings for Input->Analog connection
         /// </summary>
@@ -35,7 +43,9 @@ namespace RCNet.Neural.Network.SM.Synapse
         /// </summary>
         public InputSynapseSettings()
         {
+            SpikingTargetScope = CommonEnums.InputSynapseScope.Excitatory;
             SpikingTargetWeightCfg = null;
+            AnalogTargetScope = CommonEnums.InputSynapseScope.All;
             AnalogTargetWeightCfg = null;
             return;
         }
@@ -46,11 +56,13 @@ namespace RCNet.Neural.Network.SM.Synapse
         /// <param name="source">Source instance</param>
         public InputSynapseSettings(InputSynapseSettings source)
         {
+            SpikingTargetScope = source.SpikingTargetScope;
             SpikingTargetWeightCfg = null;
             if (source.SpikingTargetWeightCfg != null)
             {
                 SpikingTargetWeightCfg = source.SpikingTargetWeightCfg.DeepClone();
             }
+            AnalogTargetScope = source.AnalogTargetScope;
             AnalogTargetWeightCfg = null;
             if (source.AnalogTargetWeightCfg != null)
             {
@@ -75,8 +87,20 @@ namespace RCNet.Neural.Network.SM.Synapse
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
             XElement settingsElem = validator.Validate(elem, "rootElem");
             //Parsing
+            XElement cfgElem;
+            //Spiking target
+            //Scope
+            cfgElem = settingsElem.XPathSelectElement("./spikingTarget");
+            if(cfgElem != null)
+            {
+                SpikingTargetScope = CommonEnums.ParseInputSynapseScope(cfgElem.Attribute("scope").Value);
+            }
+            else
+            {
+                SpikingTargetScope = CommonEnums.InputSynapseScope.Excitatory;
+            }
             //Spiking target Weight
-            XElement cfgElem = settingsElem.XPathSelectElement("./spikingTarget/weight");
+            cfgElem = settingsElem.XPathSelectElement("./spikingTarget/weight");
             if(cfgElem != null)
             {
                 SpikingTargetWeightCfg = new RandomValueSettings(cfgElem);
@@ -84,6 +108,17 @@ namespace RCNet.Neural.Network.SM.Synapse
             else
             {
                 SpikingTargetWeightCfg = new RandomValueSettings(0, 1);
+            }
+            //Analog target
+            //Scope
+            cfgElem = settingsElem.XPathSelectElement("./analogTarget");
+            if (cfgElem != null)
+            {
+                AnalogTargetScope = CommonEnums.ParseInputSynapseScope(cfgElem.Attribute("scope").Value);
+            }
+            else
+            {
+                AnalogTargetScope = CommonEnums.InputSynapseScope.All;
             }
             //Analog target Weight
             cfgElem = settingsElem.XPathSelectElement("./analogTarget/weight");
@@ -106,7 +141,9 @@ namespace RCNet.Neural.Network.SM.Synapse
         {
             if (obj == null) return false;
             InputSynapseSettings cmpSettings = obj as InputSynapseSettings;
-            if (!Equals(SpikingTargetWeightCfg, cmpSettings.SpikingTargetWeightCfg) ||
+            if (SpikingTargetScope != cmpSettings.SpikingTargetScope ||
+                !Equals(SpikingTargetWeightCfg, cmpSettings.SpikingTargetWeightCfg) ||
+                AnalogTargetScope != cmpSettings.AnalogTargetScope ||
                 !Equals(AnalogTargetWeightCfg, cmpSettings.AnalogTargetWeightCfg)
                 )
             {

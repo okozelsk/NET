@@ -79,7 +79,7 @@ namespace RCNet.Neural
         public enum NeuronRole
         {
             /// <summary>
-            /// Outgoing synapse signal will have sign driven by input data value and target neuron range.
+            /// Outgoing synapse signal will have sign driven by input data value.
             /// </summary>
             Input,
             /// <summary>
@@ -139,34 +139,40 @@ namespace RCNet.Neural
         }
 
         /// <summary>
-        /// Method to find good lambda parameter of ridge regression
+        /// Scope of the input synapse
         /// </summary>
-        public enum RidgeRegressionLambdaMethod
+        public enum InputSynapseScope
         {
             /// <summary>
-            /// Searching for lambda will use halfway interval method
+            /// Both Excitatory and Inhibitory neurons
             /// </summary>
-            HalfwayInterval,
+            All,
             /// <summary>
-            /// Searching for lambda will use constant intervals
+            /// Excitatory neurons only
             /// </summary>
-            ConstInterval
+            Excitatory,
+            /// <summary>
+            /// Inhibitory neurons only
+            /// </summary>
+            Inhibitory
         }
 
         /// <summary>
-        /// Parses method to decide ridge regression lambda from a string code
+        /// Parses scope of the input synapse from a string code
         /// </summary>
-        /// <param name="code">Method to decide ridge regression lambda</param>
-        public static RidgeRegressionLambdaMethod ParseRidgeRegressionLambdaMethod(string code)
+        /// <param name="code">Scope code</param>
+        public static InputSynapseScope ParseInputSynapseScope(string code)
         {
             switch (code.ToUpper())
             {
-                case "HALFWAYINTERVAL": return RidgeRegressionLambdaMethod.HalfwayInterval;
-                case "CONSTINTERVAL": return RidgeRegressionLambdaMethod.ConstInterval;
+                case "ALL": return InputSynapseScope.All;
+                case "EXCITATORY": return InputSynapseScope.Excitatory;
+                case "INHIBITORY": return InputSynapseScope.Inhibitory;
                 default:
-                    throw new ArgumentException($"Unsupported method to decide ridge regression lambda: {code}", "code");
+                    throw new ArgumentException($"Unsupported scope of the input synapse {code}", "code");
             }
         }
+
 
     }//CommonTypes
 }//Namespace

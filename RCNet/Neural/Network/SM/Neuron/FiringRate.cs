@@ -45,7 +45,9 @@ namespace RCNet.Neural.Network.SM.Neuron
                 _spikeValueCache[i] = val;
                 _sumOfSpikeValues[i] = (i > 0 ? _sumOfSpikeValues[i - 1] : 0) + val;
             }
-            _highestBitMask = 2 ^ (SpikeBuffLength - 1);
+
+            _highestBitMask = 1;
+            _highestBitMask <<= (SpikeBuffLength - 1);
             return;
         }
 
@@ -76,17 +78,17 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// <param name="spike"></param>
         public void Update(bool spike)
         {
-            NumOfRecentSpikes -= ((_spikes & _highestBitMask) > 0 ? 1 : 0);
+            NumOfRecentSpikes -= (_spikes & _highestBitMask) > 0 ? 1 : 0;
             _spikes <<= 1;
             if (spike)
             {
                 _spikes |= 1;
+                ++NumOfRecentSpikes;
             }
             if (_numOfBufferedData < SpikeBuffLength)
             {
                 ++_numOfBufferedData;
             }
-            NumOfRecentSpikes += (spike ? 1 : 0);
             return;
         }
 
@@ -146,10 +148,7 @@ namespace RCNet.Neural.Network.SM.Neuron
             for (int i = 0; i < histLength; i++)
             {
                 result <<= 1;
-                if ((localCopy & 1) > 0)
-                {
-                    result += 1;
-                }
+                result += localCopy & 1;
                 localCopy >>= 1;
             }
             return result;

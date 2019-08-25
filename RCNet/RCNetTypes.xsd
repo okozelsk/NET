@@ -34,6 +34,15 @@
     </xs:restriction>
   </xs:simpleType>
 
+  <!-- Enumeration of input synapse scope -->
+  <xs:simpleType name="InputSynapseScopeType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="All"/>
+      <xs:enumeration value="Excitatory"/>
+      <xs:enumeration value="Inhibitory"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <!-- Enumeration of input coding type -->
   <xs:simpleType name="InputCodingType">
     <xs:restriction base="xs:string">
@@ -821,15 +830,25 @@
 
   <!-- Input synapse types-->
   <xs:complexType name="InputSynapseSpikingTargetCfgType">
-    <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="URandomValueType" name="weight" minOccurs="1" maxOccurs="1"/>
+    <xs:sequence minOccurs="0" maxOccurs="1">
+      <xs:element type="URandomValueType" name="weight" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
+    <xs:attribute type="InputSynapseScopeType" name="scope" use="optional" default="Excitatory">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is Excitatory (connect only excitatory neurons)</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <xs:complexType name="InputSynapseAnalogTargetCfgType">
-    <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="URandomValueType" name="weight" minOccurs="1" maxOccurs="1"/>
+    <xs:sequence minOccurs="0" maxOccurs="1">
+      <xs:element type="URandomValueType" name="weight" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
+    <xs:attribute type="InputSynapseScopeType" name="scope" use="optional" default="All">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is All (Inhibitory and Excitatory neurons)</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- Input synapse - configuration -->

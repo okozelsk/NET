@@ -361,17 +361,17 @@ namespace RCNet.Neural.Network.SM.Preprocessing
 
         private void SetPoolInputConnections(Random rand, int poolID, List<NeuralPreprocessorSettings.ReservoirInstanceDefinition.InputConnection> inputConnectionCollection)
         {
-            //Select available targets (spiking inhibitory neurons are forbidden)
-            List<INeuron> targetNeurons = new List<INeuron>(from neuron in _poolNeuronsCollection[poolID]
-                                                            where neuron.OutputType == CommonEnums.NeuronSignalType.Analog ||
-                                                                  (neuron.OutputType == CommonEnums.NeuronSignalType.Spike && neuron.Role == CommonEnums.NeuronRole.Excitatory)
-                                                            select neuron
-                                                            );
             //Create connections
             foreach (NeuralPreprocessorSettings.ReservoirInstanceDefinition.InputConnection inputConnection in inputConnectionCollection)
             {
                 if (inputConnection.PoolID == poolID)
                 {
+                    //Select available targets according to synapse's allowed scope
+                    List<INeuron> targetNeurons = new List<INeuron>(from neuron in _poolNeuronsCollection[poolID]
+                                                                    where  (neuron.OutputType == CommonEnums.NeuronSignalType.Analog && (inputConnection.SynapseCfg.AnalogTargetScope == CommonEnums.InputSynapseScope.All || (neuron.Role == CommonEnums.NeuronRole.Excitatory && inputConnection.SynapseCfg.AnalogTargetScope == CommonEnums.InputSynapseScope.Excitatory) || (neuron.Role == CommonEnums.NeuronRole.Inhibitory && inputConnection.SynapseCfg.AnalogTargetScope == CommonEnums.InputSynapseScope.Inhibitory))) ||
+                                                                           (neuron.OutputType == CommonEnums.NeuronSignalType.Spike && (inputConnection.SynapseCfg.SpikingTargetScope == CommonEnums.InputSynapseScope.All || (neuron.Role == CommonEnums.NeuronRole.Excitatory && inputConnection.SynapseCfg.SpikingTargetScope == CommonEnums.InputSynapseScope.Excitatory) || (neuron.Role == CommonEnums.NeuronRole.Inhibitory && inputConnection.SynapseCfg.SpikingTargetScope == CommonEnums.InputSynapseScope.Inhibitory)))
+                                                                    select neuron
+                                                                    );
                     int connectionsPerInput = (int)Math.Round(InstanceDefinition.Settings.PoolSettingsCollection[poolID].Dim.Size * inputConnection.Density, 0);
                     if(connectionsPerInput > targetNeurons.Count)
                     {
@@ -758,7 +758,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                         ++poolStat.NumOfNoOutputSignalNeurons;
                         ++stats.NumOfNoOutputSignalNeurons;
                     }
-                    if (neuron.Statistics.OutputSignalStat.Span == 0)
+                    if (neuron.Statistics.OutputSignalStat.Span == 0 && neuron.Statistics.OutputSignalStat.Max != 0)
                     {
                         ++poolStat.NeuronGroupStatCollection[neuron.Placement.PoolGroupID].NumOfConstOutputSignalNeurons;
                         ++poolStat.NumOfConstOutputSignalNeurons;

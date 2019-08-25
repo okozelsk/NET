@@ -35,11 +35,11 @@
                 <neuronGroups>
                   <neuronGroup name="Exc-grp" role="Excitatory" relShare="4" augmentedStates="true">
                     <activationLeakyIF refractoryPeriods="0"/>
-                    <bias min="0.15" max="0.15" randomSign="false" distribution="Uniform"/>
+                    <bias min="0.1" max="0.1" randomSign="false" distribution="Uniform"/>
                   </neuronGroup>
                   <neuronGroup name="Inh-grp" role="Inhibitory" relShare="1" augmentedStates="true">
                     <activationLeakyIF refractoryPeriods="0"/>
-                    <bias min="0.15" max="0.15" randomSign="false" distribution="Uniform"/>
+                    <bias min="0.1" max="0.1" randomSign="false" distribution="Uniform"/>
                   </neuronGroup>
                 </neuronGroups>
                 <interconnection density="0.1" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
@@ -50,13 +50,15 @@
           </reservoirCfg>
         </reservoirCfgContainer>
         <reservoirInstanceContainer>
-          <reservoirInstance name="Main" cfg="MainCfg" augmentedStates="false">
+          <reservoirInstance name="Main" cfg="MainCfg" augmentedStates="true">
             <inputConnections>
-              <inputConnection fieldName="coord_abcissa" poolName="LSM pool" density="0.25">
-                <synapse/>
+              <inputConnection fieldName="coord_abcissa" poolName="LSM pool" density="0.5">
+                <synapse>
+                </synapse>
               </inputConnection>
-              <inputConnection fieldName="coord_ordinate" poolName="LSM pool" density="0.25">
-                <synapse/>
+              <inputConnection fieldName="coord_ordinate" poolName="LSM pool" density="0.5">
+                <synapse>
+                </synapse>
               </inputConnection>
             </inputConnections>
           </reservoirInstance>

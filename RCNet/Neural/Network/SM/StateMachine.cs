@@ -17,12 +17,8 @@ namespace RCNet.Neural.Network.SM
     [Serializable]
     public class StateMachine
     {
-        //Attributes
-        /// <summary>
-        /// Settings used for instance creation.
-        /// </summary>
-        private StateMachineSettings _settings;
-
+        //Constants
+        private const double MinPredictorValueDifference = 1e-6;
         //Attribute properties
         /// <summary>
         /// Neural preprocessor.
@@ -40,6 +36,12 @@ namespace RCNet.Neural.Network.SM
         /// Readout layer.
         /// </summary>
         public ReadoutLayer RL { get; private set; }
+
+        //Attributes
+        /// <summary>
+        /// Settings used for instance creation.
+        /// </summary>
+        private StateMachineSettings _settings;
 
         //Constructor
         /// <summary>
@@ -91,7 +93,7 @@ namespace RCNet.Neural.Network.SM
             {
                 for (int i = 0; i < PredictorGeneralSwitchCollection.Length; i++)
                 {
-                    if (Math.Abs(predictorsCollection[row][i] - predictorsCollection[row - 1][i]) > 1e-20)
+                    if (Math.Abs(predictorsCollection[row][i] - predictorsCollection[row - 1][i]) > MinPredictorValueDifference)
                     {
                         //Update number of valid predictors
                         NumOfValidPredictors += PredictorGeneralSwitchCollection[i] ? 0 : 1;
@@ -99,6 +101,7 @@ namespace RCNet.Neural.Network.SM
                         PredictorGeneralSwitchCollection[i] = true;
                     }
                 }
+                if (NumOfValidPredictors == PredictorGeneralSwitchCollection.Length) break;
             }
             return;
         }

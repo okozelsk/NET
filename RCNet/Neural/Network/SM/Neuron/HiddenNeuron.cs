@@ -10,10 +10,10 @@ using RCNet.Neural.Activation;
 namespace RCNet.Neural.Network.SM.Neuron
 {
     /// <summary>
-    /// Spiking neuron has spiking activation function and produces spikes
+    /// Reservoir's hidden neuron
     /// </summary>
     [Serializable]
-    public class SpikingNeuron : INeuron
+    public class HiddenNeuron //: INeuron
     {
         //Static attributes
         /// <summary>
@@ -70,13 +70,21 @@ namespace RCNet.Neural.Network.SM.Neuron
 
         /// <summary>
         /// Value to be passed to readout layer as a primary predictor
-        /// (current membrane potential)
+        /// (number of recent spikes + rescalled current membrane potential as a fraction)
         /// </summary>
         public double PrimaryPredictor
         {
             get
             {
-                return _activation.InternalState;
+                double rescalledState = _rescalledStateRange.Rescale(_activation.InternalState, _activation.InternalStateRange);
+                double fraction = 1d / (1d + Math.Exp(-_activation.InternalState));
+                //return (_firingRate.NumOfRecentSpikes) + fraction;
+                Interval normInt = new Interval(0, 1);
+                fraction = normInt.Rescale(_activation.InternalState, new Interval(-200, 200));
+                //return (double)_firingRate.GetLastSpikes(8) + fraction;
+
+                return Math.Pow(_firingRate.GetRecentExpWRate() + 2, (fraction + 2));
+                //return _activation.InternalState;
             }
         }
 
@@ -118,7 +126,7 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// <param name="role">Neuron's signal role (Excitatory/Inhibitory).</param>
         /// <param name="activation">Instantiated activation function.</param>
         /// <param name="bias">Constant bias.</param>
-        public SpikingNeuron(NeuronPlacement placement,
+        public HiddenNeuron(NeuronPlacement placement,
                              CommonEnums.NeuronRole role,
                              IActivationFunction activation,
                              double bias
@@ -198,6 +206,6 @@ namespace RCNet.Neural.Network.SM.Neuron
             return;
         }
 
-    }//SpikingNeuron
+    }//HiddenNeuron
 
 }//Namespace
