@@ -104,7 +104,7 @@ namespace RCNet.Neural.Network.SM.Readout
         /// <param name="predictorsMapper">Optional specific mapping of predictors to readout units</param>
         /// <returns>Returned ResultComparativeBundle is something like a protocol.
         /// There is recorded fold by fold (unit by unit) predicted and corresponding ideal values.
-        /// This is the pesimistic approach. Real results on unseen data could be better due to the clustering synergy.
+        /// This is the pesimistic approach. Real results on unseen data could be better due to the clustering.
         /// </returns>
         public ResultComparativeBundle Build(VectorBundle dataBundle,
                                              ReadoutUnit.RegressionCallbackDelegate regressionController,
@@ -123,12 +123,12 @@ namespace RCNet.Neural.Network.SM.Readout
             {
                 throw new Exception("Incorrect number of ideal output values in the vector.");
             }
-
+            //Predictors mapper (specified or default)
+            _predictorsMapper = predictorsMapper ?? new PredictorsMapper(numOfPredictors);
             //Normalization of predictors and output data collections
             //Allocation and preparation of normalizers
             //Predictors normalizers
             _predictorNormalizerCollection = new Normalizer[numOfPredictors];
-            BasicStat inpTestStat = new BasicStat(true);
             Parallel.For(0, _predictorNormalizerCollection.Length, nrmIdx =>
             {
                 _predictorNormalizerCollection[nrmIdx] = new Normalizer(DataRange, NormalizerDefaultReserve, true, false);
@@ -136,10 +136,6 @@ namespace RCNet.Neural.Network.SM.Readout
                 {
                     //Adjust predictor normalizer
                     _predictorNormalizerCollection[nrmIdx].Adjust(dataBundle.InputVectorCollection[pairIdx][nrmIdx]);
-                    if(nrmIdx == 51)
-                    {
-                        inpTestStat.AddSampleValue(dataBundle.InputVectorCollection[pairIdx][nrmIdx]);
-                    }
                 }
             });
             //Output normalizers
@@ -169,10 +165,13 @@ namespace RCNet.Neural.Network.SM.Readout
                 double[] predictors = new double[numOfPredictors];
                 for (int i = 0; i < numOfPredictors; i++)
                 {
-                    predictors[i] = _predictorNormalizerCollection[i].Normalize(dataBundle.InputVectorCollection[pairIdx][i]);
-                    if(!predictors[i].IsValid())
+                    if (_predictorsMapper.PredictorGeneralSwitchCollection[i])
                     {
-                        ;
+                        predictors[i] = _predictorNormalizerCollection[i].Normalize(dataBundle.InputVectorCollection[pairIdx][i]);
+                    }
+                    else
+                    {
+                        predictors[i] = double.NaN;
                     }
                 }
                 predictorsCollection[pairIdx] = predictors;
@@ -185,18 +184,9 @@ namespace RCNet.Neural.Network.SM.Readout
                 idealOutputsCollection[pairIdx] = outputs;
             });
 
-            BasicStat nrmTestStat = new BasicStat(false);
-            for(int i = 0; i < predictorsCollection.Length; i++)
-            {
-                nrmTestStat.AddSampleValue(predictorsCollection[i][0]);
-            }
-
-
             //Data processing
             //Random object initialization
             Random rand = new Random(0);
-            //Predictors mapper (specified or default)
-            _predictorsMapper = predictorsMapper ?? new PredictorsMapper(numOfPredictors);
             //Allocation of computed and ideal vectors for result comparative bundle
             List<double[]> validationComputedVectorCollection = new List<double[]>(idealOutputsCollection.Length);
             List<double[]> validationIdealVectorCollection = new List<double[]>(idealOutputsCollection.Length);
@@ -230,7 +220,7 @@ namespace RCNet.Neural.Network.SM.Readout
             VectorBundle shuffledData = new VectorBundle(predictorsCollection, idealOutputsCollection);
             shuffledData.Shuffle(rand);
             //Data inspection, preparation of datasets and training of ReadoutUnits
-            //Clusters of readout units (one cluster for each output field)
+            //Clusters of readout units (one cluster per each output field)
             for (int clusterIdx = 0; clusterIdx < _settings.ReadoutUnitCfgCollection.Count; clusterIdx++)
             {
                 _clusterCollection[clusterIdx] = new ReadoutUnit[numOfFolds];
@@ -658,22 +648,46 @@ namespace RCNet.Neural.Network.SM.Readout
         [Serializable]
         public class PredictorsMapper
         {
+            //Attribute properties
             /// <summary>
-            /// Number of all available predictors
+            /// Collection of switches generally enabling/disabling predictors
             /// </summary>
-            private readonly int _numOfPredictors;
+            public bool[] PredictorGeneralSwitchCollection { get; private set; }
+            //Attributes
             /// <summary>
             /// Mapping of readout unit to switches determining what predictors are assigned to.
             /// </summary>
             private readonly Dictionary<string, ReadoutUnitMap> _mapCollection;
-
+            private readonly int _numOfAllowedPredictors;
             /// <summary>
-            /// Creates uninitialized instance
+            /// Creates initialized instance
             /// </summary>
             /// <param name="numOfPredictors">Total number of available predictors</param>
             public PredictorsMapper(int numOfPredictors)
             {
-                _numOfPredictors = numOfPredictors;
+                PredictorGeneralSwitchCollection = new bool[numOfPredictors];
+                PredictorGeneralSwitchCollection.Populate(true);
+                _numOfAllowedPredictors = numOfPredictors;
+                _mapCollection = new Dictionary<string, ReadoutUnitMap>();
+                return;
+            }
+
+            /// <summary>
+            /// Creates initialized instance
+            /// </summary>
+            /// <param name="predictorGeneralSwitchCollection">Collection of switches generally enabling/disabling predictors</param>
+            public PredictorsMapper(bool[] predictorGeneralSwitchCollection)
+            {
+                PredictorGeneralSwitchCollection = (bool[])predictorGeneralSwitchCollection.Clone();
+                _numOfAllowedPredictors = 0;
+                for(int i = 0; i < predictorGeneralSwitchCollection.Length; i++)
+                {
+                    if (predictorGeneralSwitchCollection[i]) ++_numOfAllowedPredictors;
+                }
+                if (_numOfAllowedPredictors == 0 || predictorGeneralSwitchCollection.Length == 0)
+                {
+                    throw new ArgumentException("There is no available predictor", "predictorGeneralSwitchCollection");
+                }
                 _mapCollection = new Dictionary<string, ReadoutUnitMap>();
                 return;
             }
@@ -685,7 +699,7 @@ namespace RCNet.Neural.Network.SM.Readout
             /// <param name="map">Boolean switches indicating if to use available prdictor for the ReadoutUnit</param>
             public void Add(string readoutUnitName, bool[] map)
             {
-                if(map.Length != _numOfPredictors)
+                if(map.Length != PredictorGeneralSwitchCollection.Length)
                 {
                     throw new ArgumentException("Incorrect number of switches in the map", "map");
                 }
@@ -697,12 +711,28 @@ namespace RCNet.Neural.Network.SM.Readout
                 {
                     throw new ArgumentException($"Mapping already contains mapping for ReadoutUnit {readoutUnitName}", "readoutUnitName");
                 }
-                ReadoutUnitMap rum = new ReadoutUnitMap(map);
-                if(rum.VectorLength == 0)
+                //Apply general switches
+                bool[] localMap = (bool[])map.Clone();
+                int numOfReadoutUnitAllowedPredictors = 0;
+                for(int i = 0; i < localMap.Length; i++)
                 {
-                    throw new ArgumentException("Map does not contain mapped predictors", "map");
+                    if(localMap[i])
+                    {
+                        if (!PredictorGeneralSwitchCollection[i])
+                        {
+                            localMap[i] = false;
+                        }
+                        else
+                        {
+                            ++numOfReadoutUnitAllowedPredictors;
+                        }
+                    }
                 }
-                _mapCollection.Add(readoutUnitName, rum);
+                if(numOfReadoutUnitAllowedPredictors < 1)
+                {
+                    throw new ArgumentException("Map contains no allowed predictors", "map");
+                }
+                _mapCollection.Add(readoutUnitName, new ReadoutUnitMap(localMap));
                 return;
             }
 
@@ -731,6 +761,10 @@ namespace RCNet.Neural.Network.SM.Readout
             /// <param name="predictors">Available predictors</param>
             public double[] CreateVector(string readoutUnitName, double[] predictors)
             {
+                if (predictors.Length != PredictorGeneralSwitchCollection.Length)
+                {
+                    throw new ArgumentException("Incorrect number of predictors", "predictors");
+                }
                 if (_mapCollection.ContainsKey(readoutUnitName))
                 {
                     ReadoutUnitMap rum = _mapCollection[readoutUnitName];
@@ -738,11 +772,7 @@ namespace RCNet.Neural.Network.SM.Readout
                 }
                 else
                 {
-                    if (predictors.Length != _numOfPredictors)
-                    {
-                        throw new ArgumentException("Incorrect number of predictors", "predictors");
-                    }
-                    return (double[])predictors.Clone();
+                    return CreateVector(predictors, PredictorGeneralSwitchCollection, _numOfAllowedPredictors);
                 }
             }
 
@@ -763,7 +793,7 @@ namespace RCNet.Neural.Network.SM.Readout
                 {
                     if(rum == null)
                     {
-                        vectorCollection.Add((double[])predictors.Clone());
+                        vectorCollection.Add(CreateVector(predictors, PredictorGeneralSwitchCollection, _numOfAllowedPredictors));
                     }
                     else
                     {
@@ -796,7 +826,7 @@ namespace RCNet.Neural.Network.SM.Readout
                 /// <param name="map">Boolean switches indicating if to use available prdictor for this ReadoutUnit.</param>
                 public ReadoutUnitMap(bool[] map)
                 {
-                    Map = (bool[])map.Clone();
+                    Map = map;
                     VectorLength = 0;
                     foreach (bool bSwitch in Map)
                     {

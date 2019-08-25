@@ -127,7 +127,6 @@ namespace RCNet.Neural.Network.SM.Synapse
         /// </summary>
         protected double ComputePostSynapticCurrent()
         {
-            ++_t;
             if (_applyPostSynapticCurrent && !_stopPostSynapticCurrent)
             {
                 double current = Math.Exp(-(_t / _tauPostSynapticCurrentDecay));
@@ -150,6 +149,7 @@ namespace RCNet.Neural.Network.SM.Synapse
         /// <param name="collectStatistics">Specifies whether to update internal statistics</param>
         public double GetSignal(bool collectStatistics)
         {
+            ++_t;
             //Source neuron signal
             double sourceSignal = SourceNeuron.OutputSignal;
             //No delay of the signal - do not use queue

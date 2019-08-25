@@ -29,7 +29,7 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         public int NumOfValidPredictors { get; private set; }
         /// <summary>
-        /// Collection of switches enabling/disabling predictorsNumber of NP's predictors
+        /// Collection of switches generally enabling/disabling predictors
         /// </summary>
         public bool[] PredictorGeneralSwitchCollection { get; private set; }
         /// <summary>
@@ -185,7 +185,7 @@ namespace RCNet.Neural.Network.SM
             //Readout layer instance
             RL = new ReadoutLayer(_settings.ReadoutLayerConfig);
             //Create empty instance of the mapper
-            ReadoutLayer.PredictorsMapper mapper = new ReadoutLayer.PredictorsMapper(NP.NumOfPredictors);
+            ReadoutLayer.PredictorsMapper mapper = new ReadoutLayer.PredictorsMapper(PredictorGeneralSwitchCollection);
             if (_settings.MapperConfig != null)
             {
                 //Expand list of predicting neurons to array of predictor origin

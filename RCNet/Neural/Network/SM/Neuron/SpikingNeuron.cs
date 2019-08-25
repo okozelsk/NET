@@ -70,12 +70,17 @@ namespace RCNet.Neural.Network.SM.Neuron
 
         /// <summary>
         /// Value to be passed to readout layer as a primary predictor
-        /// (current membrane potential)
+        /// (number of recent spikes + rescalled current membrane potential as a fraction)
         /// </summary>
         public double PrimaryPredictor
         {
             get
             {
+                //double fraction = 1d / (1d + Math.Exp(-_activation.InternalState / 1e5d));
+                //double fraction = (_activation.InternalState + 1000) / 1e5d;
+                //double predictor = (double)(OutputSignalLeak);// + fraction;
+                //double predictor = ((double)(_firingRate.GetLastSpikes(16) * 1000) + (double)_firingRate.NumOfRecentSpikes) + fraction;
+                //double predictor = ((double)(_firingRate.GetLastSpikes(1) * 1000) + (double)_firingRate.NumOfRecentSpikes) + fraction;
                 return _activation.InternalState;
             }
         }
