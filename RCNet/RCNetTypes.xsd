@@ -26,16 +26,8 @@
     </xs:restriction>
   </xs:simpleType>
 
-  <!-- Enumeration of neuron role -->
-  <xs:simpleType name="NeuronRoleType">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="Excitatory"/>
-      <xs:enumeration value="Inhibitory"/>
-    </xs:restriction>
-  </xs:simpleType>
-
-  <!-- Enumeration of input synapse scope -->
-  <xs:simpleType name="InputSynapseScopeType">
+  <!-- Enumeration of synaptic target scope -->
+  <xs:simpleType name="SynapticTargetScopeType">
     <xs:restriction base="xs:string">
       <xs:enumeration value="All"/>
       <xs:enumeration value="Excitatory"/>
@@ -43,11 +35,20 @@
     </xs:restriction>
   </xs:simpleType>
 
-  <!-- Enumeration of input coding type -->
-  <xs:simpleType name="InputCodingType">
+  <!-- Enumeration of neuron's role -->
+  <xs:simpleType name="NeuronRoleType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="Analog"/>
-      <xs:enumeration value="SpikeTrain"/>
+      <xs:enumeration value="Excitatory"/>
+      <xs:enumeration value="Inhibitory"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Enumeration of neuron's output signaling restriction -->
+  <xs:simpleType name="NeuronSignalingRestrictionType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="NoRestriction"/>
+      <xs:enumeration value="AnalogOnly"/>
+      <xs:enumeration value="SpikingOnly"/>
     </xs:restriction>
   </xs:simpleType>
 
@@ -221,6 +222,7 @@
   </xs:complexType>
 
   <!-- ________________________________________SIGNAL GENERATORS TYPES_____________________________________________ -->
+
   <!-- Const generator configuration element -->
   <xs:complexType name="ConstGeneratorCfgType">
     <xs:attribute type="xs:double" name="constSignal" use="required"/>
@@ -266,6 +268,7 @@
 
 
   <!-- ________________________________________SPIKING ACTIVATION TYPES_____________________________________________ -->
+
   <!-- Activation SimpleIF configuration element -->
   <xs:complexType name="ActivationSimpleIFCfgType">
     <xs:sequence minOccurs="0" maxOccurs="1">
@@ -537,6 +540,7 @@
   </xs:complexType>
 
   <!-- ________________________________________ANALOG ACTIVATION TYPES_____________________________________________ -->
+
   <!-- Activation BentIdentity configuration element -->
   <xs:complexType name="ActivationBentIdentityCfgType">
   </xs:complexType>
@@ -615,6 +619,7 @@
 
 
   <!-- ________________________________________FF NETWORK TYPES_________________________________________________ -->
+
   <!-- FF network - hidden layer - configuration -->
   <xs:complexType name="FFNetHiddenLayerCfgType">
     <xs:choice minOccurs="1" maxOccurs="1">
@@ -752,7 +757,6 @@
   </xs:complexType>
 
   <!-- ________________________________________PP NETWORK TYPES_________________________________________________ -->
-  <!-- Parallel Perceptron network configuration -->
 
   <!-- Parallel Perceptron - p-delta rule trainer - configuration -->
   <xs:complexType name="PPNetPDeltaRuleTrainerCfgType">
@@ -784,7 +788,6 @@
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
-
 
   <xs:complexType name="PPNetCfgType">
     <xs:sequence minOccurs="0" maxOccurs="1">
@@ -833,7 +836,7 @@
     <xs:sequence minOccurs="0" maxOccurs="1">
       <xs:element type="URandomValueType" name="weight" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
-    <xs:attribute type="InputSynapseScopeType" name="scope" use="optional" default="Excitatory">
+    <xs:attribute type="SynapticTargetScopeType" name="scope" use="optional" default="Excitatory">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is Excitatory (connect only excitatory neurons)</xs:documentation>
       </xs:annotation>
@@ -844,7 +847,7 @@
     <xs:sequence minOccurs="0" maxOccurs="1">
       <xs:element type="URandomValueType" name="weight" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
-    <xs:attribute type="InputSynapseScopeType" name="scope" use="optional" default="All">
+    <xs:attribute type="SynapticTargetScopeType" name="scope" use="optional" default="All">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is All (Inhibitory and Excitatory neurons)</xs:documentation>
       </xs:annotation>
@@ -857,6 +860,16 @@
       <xs:element type="InputSynapseSpikingTargetCfgType" name="spikingTarget" minOccurs="0" maxOccurs="1"/>
       <xs:element type="InputSynapseAnalogTargetCfgType" name="analogTarget" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
+    <xs:attribute type="SynapticDelayMethodType" name="delayMethod" use="optional" default="Random">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is Random</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:unsignedInt" name="maxDelay" use="optional" default="0">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0. No delay.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- Internal synapse types-->
@@ -1438,7 +1451,6 @@
     </xs:attribute>
   </xs:complexType>
 
-
   <!-- Internal synapse - configuration -->
   <xs:complexType name="InternalSynapseCfgType">
     <xs:sequence minOccurs="0" maxOccurs="1">
@@ -1507,8 +1519,8 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Pool - neuron group - configuration -->
-  <xs:complexType name="PoolNeuronGroupCfgType">
+  <!-- Pool - spiking neuron group - configuration -->
+  <xs:complexType name="PoolSpikingNeuronGroupCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:choice minOccurs="1" maxOccurs="1">
         <xs:element type="ActivationSimpleIFCfgType" name="activationSimpleIF" minOccurs="1" maxOccurs="1"/>
@@ -1517,6 +1529,36 @@
         <xs:element type="ActivationAdExpIFCfgType" name="activationAdExpIF" minOccurs="1" maxOccurs="1"/>
         <xs:element type="ActivationIzhikevichIFCfgType" name="activationIzhikevichIF" minOccurs="1" maxOccurs="1"/>
         <xs:element type="ActivationAutoIzhikevichIFCfgType" name="activationAutoIzhikevichIF" minOccurs="1" maxOccurs="1"/>
+      </xs:choice>
+      <xs:element type="RandomValueType" name="bias" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
+    <xs:attribute type="xs:string" name="name" use="required" />
+    <xs:attribute type="NeuronRoleType" name="role" use="required"/>
+    <xs:attribute type="UDoubleType" name="relShare" use="required"/>
+    <xs:attribute type="UDoubleType" name="readoutDensity" use="optional" default="1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="augmentedStates" use="optional" default="true">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is true</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <!-- Pool - analog neuron group - retainment neurons -configuration -->
+  <xs:complexType name="PoolAnalogNeuronsRetanmentCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="URandomValueType" name="strength" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+    <xs:attribute type="UDoubleLE1Type" name="density" use="required"/>
+  </xs:complexType>
+
+  <!-- Pool - analog neuron group - configuration -->
+  <xs:complexType name="PoolAnalogNeuronGroupCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:choice minOccurs="1" maxOccurs="1">
         <xs:element type="ActivationElliotCfgType" name="activationElliot" minOccurs="1" maxOccurs="1"/>
         <xs:element type="ActivationGaussianCfgType" name="activationGaussian" minOccurs="1" maxOccurs="1"/>
         <xs:element type="ActivationISRUCfgType" name="activationISRU" minOccurs="1" maxOccurs="1"/>
@@ -1525,11 +1567,27 @@
         <xs:element type="ActivationSinusoidCfgType" name="activationSinusoid" minOccurs="1" maxOccurs="1"/>
         <xs:element type="ActivationTanHCfgType" name="activationTanH" minOccurs="1" maxOccurs="1"/>
       </xs:choice>
-      <xs:element type="RandomValueType" name="bias" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="RandomValueType" name="bias" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="URandomValueType" name="spikeThreshold" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Number between 0 and 1. If current state meats this value, it will be interpretted as a spike.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    <xs:element type="PoolAnalogNeuronsRetanmentCfgType" name="retainment" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:string" name="name" use="required" />
     <xs:attribute type="NeuronRoleType" name="role" use="required"/>
     <xs:attribute type="UDoubleType" name="relShare" use="required"/>
+    <xs:attribute type="NeuronSignalingRestrictionType" name="signalingRestriction" use="optional" default="NoRestriction">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is NoRestriction</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name="readoutDensity" use="optional" default="1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
     <xs:attribute type="xs:boolean" name="augmentedStates" use="optional" default="true">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is true</xs:documentation>
@@ -1540,16 +1598,11 @@
   <!-- Pool - neuron groups - configuration -->
   <xs:complexType name="PoolNeuronGroupsCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="PoolNeuronGroupCfgType" name="neuronGroup" minOccurs="1" maxOccurs="unbounded"/>
+      <xs:choice minOccurs="1" maxOccurs="unbounded">
+        <xs:element type="PoolAnalogNeuronGroupCfgType" name="analogGroup" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="PoolSpikingNeuronGroupCfgType" name="spikingGroup" minOccurs="1" maxOccurs="1"/>
+      </xs:choice>
     </xs:sequence>
-  </xs:complexType>
-
-  <!-- Pool - retainment neurons -configuration -->
-  <xs:complexType name="PoolRetNeuronsCfgType">
-    <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="URandomValueType" name="rate" minOccurs="1" maxOccurs="1"/>
-    </xs:sequence>
-    <xs:attribute type="UDoubleLE1Type" name="density" use="required"/>
   </xs:complexType>
 
   <!-- Pool configuration -->
@@ -1557,12 +1610,11 @@
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="PoolNeuronGroupsCfgType" name="neuronGroups" minOccurs="1" maxOccurs="1">
         <xs:unique name="unique_neuron_group_name">
-          <xs:selector xpath="./neuronGroup"/>
+          <xs:selector xpath="./*"/>
           <xs:field xpath="@name"/>
         </xs:unique>
       </xs:element>
       <xs:element type="PoolInterconnectionCfgType" name="interconnection" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="PoolRetNeuronsCfgType" name="retainmentNeurons" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:string" name="name" use="required" />
     <xs:attribute type="xs:int" name="x" use="optional" default="0">
@@ -1583,11 +1635,6 @@
     <xs:attribute type="xs:unsignedInt" name="dimX" use="required" />
     <xs:attribute type="xs:unsignedInt" name="dimY" use="required" />
     <xs:attribute type="xs:unsignedInt" name="dimZ" use="required" />
-    <xs:attribute type="UDoubleType" name="readoutNeuronsDensity" use="optional" default="1">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
   </xs:complexType>
 
   <!-- ________________________________________RESERVOIR TYPES_________________________________________________ -->
@@ -1649,6 +1696,23 @@
     </xs:sequence>
   </xs:complexType>
 
+  <!-- Reservoir - spectral radius - value - configuration -->
+  <xs:complexType name="ReservoirSpectralRadiusValueCfgType">
+    <xs:attribute type="UDoubleGT0NAOptionType" name="value" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Use NA to disable spectral radius application.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  
+  <!-- Reservoir - spectral radius - configuration -->
+  <xs:complexType name="ReservoirSpectralRadiusCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="ReservoirSpectralRadiusValueCfgType" name="analogScope" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="ReservoirSpectralRadiusValueCfgType" name="spikingScope" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+
   <!-- Reservoir configuration -->
   <xs:complexType name="ReservoirCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
@@ -1666,15 +1730,9 @@
           <xs:field xpath="@targetPool"/>
         </xs:unique>
       </xs:element>
+      <xs:element type="ReservoirSpectralRadiusCfgType" name="spectralRadius" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:string" name="name" use="required" />
-    <xs:attribute type="SynapticDelayMethodType" name="synapticDelayMethod" use="required"/>
-    <xs:attribute type="xs:unsignedInt" name="maxInputDelay" use="required"/>
-    <xs:attribute type="UDoubleGT0Type" name="spectralRadius" use="optional" default="0.9999">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.9999</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
   </xs:complexType>
 
   <!-- ________________________________________NEURAL PREPROCESSOR TYPES_________________________________________________ -->

@@ -37,26 +37,11 @@ namespace RCNet.Neural.Network.SM.Synapse
         public double Weight { get; protected set; }
 
         /// <summary>
-        /// Signal delay
-        /// </summary>
-        public int Delay { get; protected set; }
-
-        /// <summary>
         /// Efficacy statistics of the synapse.
         /// </summary>
         public BasicStat EfficacyStat { get; }
 
-        //Attributes
-        /// <summary>
-        /// "Add" part of the signal conversion operation
-        /// </summary>
-        protected readonly double _add;
-
-        /// <summary>
-        /// "Divide by" part of the signal conversion operation
-        /// </summary>
-        protected readonly double _div;
-
+ 
         //Constructor
         /// <summary>
         /// Creates initialized instance
@@ -74,43 +59,30 @@ namespace RCNet.Neural.Network.SM.Synapse
             TargetNeuron = targetNeuron;
             //Euclidean distance
             Distance = EuclideanDistance.Compute(SourceNeuron.Placement.ReservoirCoordinates, TargetNeuron.Placement.ReservoirCoordinates);
-            //Weight sign and signal range conversion rules
+            //Weight sign rules
             if (SourceNeuron.Role == CommonEnums.NeuronRole.Input)
             {
-                if (TargetNeuron.OutputType == CommonEnums.NeuronSignalType.Analog)
+                if (TargetNeuron.ActivationType == CommonEnums.ActivationType.Analog)
                 {
-                    //Target is analog neuron
-                    //No signal conversion
-                    _add = 0;
-                    _div = 1;
                     //No change of the weight sign
                     Weight = weight;
                 }
                 else
                 {
                     //Target is spiking neuron
-                    //Convert signal to <0,1>
-                    _add = -SourceNeuron.OutputRange.Min;
-                    _div = SourceNeuron.OutputRange.Span;
-                    //Weight is always positive
+                    //Weight must be always positive
                     Weight = Math.Abs(weight);
                 }
             }
             else
             {
-                //Convert signal to <0,1>
-                _add = -SourceNeuron.OutputRange.Min;
-                _div = SourceNeuron.OutputRange.Span;
                 //Weight sign is dependent on source neuron role
                 Weight = Math.Abs(weight) * (SourceNeuron.Role == CommonEnums.NeuronRole.Excitatory ? 1d : -1d);
             }
-            //Set Delay to 0 as default. It can be changed later by SetDelay method.
-            Delay = 0;
             //Efficacy statistics
             EfficacyStat = new BasicStat(false);
             return;
         }
-
 
         //Methods
         /// <summary>

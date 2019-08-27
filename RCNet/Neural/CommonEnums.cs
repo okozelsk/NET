@@ -28,16 +28,16 @@ namespace RCNet.Neural
         }
 
         /// <summary>
-        /// Types of the neuron's output signal
+        /// Types of the neuron's activation function
         /// </summary>
-        public enum NeuronSignalType
+        public enum ActivationType
         {
             /// <summary>
-            /// Neuron fires spike when firing condition is met
+            /// Fires spike only when firing condition is met
             /// </summary>
-            Spike,
+            Spiking,
             /// <summary>
-            /// Neuron has continuous analog output signal
+            /// Produces continuous analog output signal
             /// </summary>
             Analog
         };
@@ -109,6 +109,41 @@ namespace RCNet.Neural
         }
 
         /// <summary>
+        /// Output signaling restriction of the neuron
+        /// </summary>
+        public enum NeuronSignalingRestrictionType
+        {
+            /// <summary>
+            /// Neuron can emitt both analog signal and spikes.
+            /// </summary>
+            NoRestriction,
+            /// <summary>
+            /// Neuron can emitt only analog signal.
+            /// </summary>
+            AnalogOnly,
+            /// <summary>
+            /// Neuron can emitt only spiking signal.
+            /// </summary>
+            SpikingOnly
+        }
+
+        /// <summary>
+        /// Parses neuron's output signaling restriction
+        /// </summary>
+        /// <param name="code">Restriction code</param>
+        public static NeuronSignalingRestrictionType ParseNeuronSignalingRestriction(string code)
+        {
+            switch (code.ToUpper())
+            {
+                case "NORESTRICTION": return NeuronSignalingRestrictionType.NoRestriction;
+                case "ANALOGONLY": return NeuronSignalingRestrictionType.AnalogOnly;
+                case "SPIKINGONLY": return NeuronSignalingRestrictionType.SpikingOnly;
+                default:
+                    throw new ArgumentException($"Unsupported neuron output signaling restriction {code}", "code");
+            }
+        }
+
+        /// <summary>
         /// Method to decide synapse delay
         /// </summary>
         public enum SynapticDelayMethod
@@ -139,9 +174,9 @@ namespace RCNet.Neural
         }
 
         /// <summary>
-        /// Scope of the input synapse
+        /// Target scope of the synapse
         /// </summary>
-        public enum InputSynapseScope
+        public enum SynapticTargetScope
         {
             /// <summary>
             /// Both Excitatory and Inhibitory neurons
@@ -158,21 +193,21 @@ namespace RCNet.Neural
         }
 
         /// <summary>
-        /// Parses scope of the input synapse from a string code
+        /// Parses target scope of the synapse from a string code
         /// </summary>
         /// <param name="code">Scope code</param>
-        public static InputSynapseScope ParseInputSynapseScope(string code)
+        public static SynapticTargetScope ParseSynapticTargetScope(string code)
         {
             switch (code.ToUpper())
             {
-                case "ALL": return InputSynapseScope.All;
-                case "EXCITATORY": return InputSynapseScope.Excitatory;
-                case "INHIBITORY": return InputSynapseScope.Inhibitory;
+                case "ALL": return SynapticTargetScope.All;
+                case "EXCITATORY": return SynapticTargetScope.Excitatory;
+                case "INHIBITORY": return SynapticTargetScope.Inhibitory;
                 default:
-                    throw new ArgumentException($"Unsupported scope of the input synapse {code}", "code");
+                    throw new ArgumentException($"Unsupported synaptic target scope {code}", "code");
             }
         }
 
 
-    }//CommonTypes
+    }//CommonEnums
 }//Namespace

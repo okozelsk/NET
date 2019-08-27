@@ -216,135 +216,135 @@ namespace RCNet.Neural.Network.SM.Synapse
         /// <param name="sourceNeuronRole">Role of the source neuron</param>
         /// <param name="targetNeuronType">Type of the target neuron</param>
         /// <param name="targetNeuronRole">Role of the target neuron</param>
-        public DynamicsSettings GetDynamicsSettings(CommonEnums.NeuronSignalType sourceNeuronType,
+        public DynamicsSettings GetDynamicsSettings(CommonEnums.ActivationType sourceNeuronType,
                                                     CommonEnums.NeuronRole sourceNeuronRole,
-                                                    CommonEnums.NeuronSignalType targetNeuronType,
+                                                    CommonEnums.ActivationType targetNeuronType,
                                                     CommonEnums.NeuronRole targetNeuronRole
                                                     )
         {
 
-            if(sourceNeuronType == CommonEnums.NeuronSignalType.Spike &&
-               targetNeuronType == CommonEnums.NeuronSignalType.Spike &&
+            if(sourceNeuronType == CommonEnums.ActivationType.Spiking &&
+               targetNeuronType == CommonEnums.ActivationType.Spiking &&
                sourceNeuronRole == CommonEnums.NeuronRole.Excitatory &&
                targetNeuronRole == CommonEnums.NeuronRole.Excitatory
                )
             {
                 return S2SSynapseE2EDynamicsCfg;
             }
-            else if (sourceNeuronType == CommonEnums.NeuronSignalType.Spike &&
-               targetNeuronType == CommonEnums.NeuronSignalType.Spike &&
+            else if (sourceNeuronType == CommonEnums.ActivationType.Spiking &&
+               targetNeuronType == CommonEnums.ActivationType.Spiking &&
                sourceNeuronRole == CommonEnums.NeuronRole.Excitatory &&
                targetNeuronRole == CommonEnums.NeuronRole.Inhibitory
                )
             {
                 return S2SSynapseE2IDynamicsCfg;
             }
-            else if (sourceNeuronType == CommonEnums.NeuronSignalType.Spike &&
-               targetNeuronType == CommonEnums.NeuronSignalType.Spike &&
+            else if (sourceNeuronType == CommonEnums.ActivationType.Spiking &&
+               targetNeuronType == CommonEnums.ActivationType.Spiking &&
                sourceNeuronRole == CommonEnums.NeuronRole.Inhibitory &&
                targetNeuronRole == CommonEnums.NeuronRole.Excitatory
                )
             {
                 return S2SSynapseI2EDynamicsCfg;
             }
-            else if (sourceNeuronType == CommonEnums.NeuronSignalType.Spike &&
-               targetNeuronType == CommonEnums.NeuronSignalType.Spike &&
+            else if (sourceNeuronType == CommonEnums.ActivationType.Spiking &&
+               targetNeuronType == CommonEnums.ActivationType.Spiking &&
                sourceNeuronRole == CommonEnums.NeuronRole.Inhibitory &&
                targetNeuronRole == CommonEnums.NeuronRole.Inhibitory
                )
             {
                 return S2SSynapseI2IDynamicsCfg;
             }
-            else if (sourceNeuronType == CommonEnums.NeuronSignalType.Analog &&
-               targetNeuronType == CommonEnums.NeuronSignalType.Spike &&
+            else if (sourceNeuronType == CommonEnums.ActivationType.Analog &&
+               targetNeuronType == CommonEnums.ActivationType.Spiking &&
                sourceNeuronRole == CommonEnums.NeuronRole.Excitatory &&
                targetNeuronRole == CommonEnums.NeuronRole.Excitatory
                )
             {
                 return A2SSynapseE2EDynamicsCfg;
             }
-            else if (sourceNeuronType == CommonEnums.NeuronSignalType.Analog &&
-               targetNeuronType == CommonEnums.NeuronSignalType.Spike &&
+            else if (sourceNeuronType == CommonEnums.ActivationType.Analog &&
+               targetNeuronType == CommonEnums.ActivationType.Spiking &&
                sourceNeuronRole == CommonEnums.NeuronRole.Excitatory &&
                targetNeuronRole == CommonEnums.NeuronRole.Inhibitory
                )
             {
                 return A2SSynapseE2IDynamicsCfg;
             }
-            else if (sourceNeuronType == CommonEnums.NeuronSignalType.Analog &&
-               targetNeuronType == CommonEnums.NeuronSignalType.Spike &&
+            else if (sourceNeuronType == CommonEnums.ActivationType.Analog &&
+               targetNeuronType == CommonEnums.ActivationType.Spiking &&
                sourceNeuronRole == CommonEnums.NeuronRole.Inhibitory &&
                targetNeuronRole == CommonEnums.NeuronRole.Excitatory
                )
             {
                 return A2SSynapseI2EDynamicsCfg;
             }
-            else if (sourceNeuronType == CommonEnums.NeuronSignalType.Analog &&
-               targetNeuronType == CommonEnums.NeuronSignalType.Spike &&
+            else if (sourceNeuronType == CommonEnums.ActivationType.Analog &&
+               targetNeuronType == CommonEnums.ActivationType.Spiking &&
                sourceNeuronRole == CommonEnums.NeuronRole.Inhibitory &&
                targetNeuronRole == CommonEnums.NeuronRole.Inhibitory
                )
             {
                 return A2SSynapseI2IDynamicsCfg;
             }
-            else if (sourceNeuronType == CommonEnums.NeuronSignalType.Spike &&
-               targetNeuronType == CommonEnums.NeuronSignalType.Analog &&
+            else if (sourceNeuronType == CommonEnums.ActivationType.Spiking &&
+               targetNeuronType == CommonEnums.ActivationType.Analog &&
                sourceNeuronRole == CommonEnums.NeuronRole.Excitatory &&
                targetNeuronRole == CommonEnums.NeuronRole.Excitatory
                )
             {
                 return S2ASynapseE2EDynamicsCfg;
             }
-            else if (sourceNeuronType == CommonEnums.NeuronSignalType.Spike &&
-               targetNeuronType == CommonEnums.NeuronSignalType.Analog &&
+            else if (sourceNeuronType == CommonEnums.ActivationType.Spiking &&
+               targetNeuronType == CommonEnums.ActivationType.Analog &&
                sourceNeuronRole == CommonEnums.NeuronRole.Excitatory &&
                targetNeuronRole == CommonEnums.NeuronRole.Inhibitory
                )
             {
                 return S2ASynapseE2IDynamicsCfg;
             }
-            else if (sourceNeuronType == CommonEnums.NeuronSignalType.Spike &&
-               targetNeuronType == CommonEnums.NeuronSignalType.Analog &&
+            else if (sourceNeuronType == CommonEnums.ActivationType.Spiking &&
+               targetNeuronType == CommonEnums.ActivationType.Analog &&
                sourceNeuronRole == CommonEnums.NeuronRole.Inhibitory &&
                targetNeuronRole == CommonEnums.NeuronRole.Excitatory
                )
             {
                 return S2ASynapseI2EDynamicsCfg;
             }
-            else if (sourceNeuronType == CommonEnums.NeuronSignalType.Spike &&
-               targetNeuronType == CommonEnums.NeuronSignalType.Analog &&
+            else if (sourceNeuronType == CommonEnums.ActivationType.Spiking &&
+               targetNeuronType == CommonEnums.ActivationType.Analog &&
                sourceNeuronRole == CommonEnums.NeuronRole.Inhibitory &&
                targetNeuronRole == CommonEnums.NeuronRole.Inhibitory
                )
             {
                 return S2ASynapseI2IDynamicsCfg;
             }
-            else if (sourceNeuronType == CommonEnums.NeuronSignalType.Analog &&
-               targetNeuronType == CommonEnums.NeuronSignalType.Analog &&
+            else if (sourceNeuronType == CommonEnums.ActivationType.Analog &&
+               targetNeuronType == CommonEnums.ActivationType.Analog &&
                sourceNeuronRole == CommonEnums.NeuronRole.Excitatory &&
                targetNeuronRole == CommonEnums.NeuronRole.Excitatory
                )
             {
                 return A2ASynapseE2EDynamicsCfg;
             }
-            else if (sourceNeuronType == CommonEnums.NeuronSignalType.Analog &&
-               targetNeuronType == CommonEnums.NeuronSignalType.Analog &&
+            else if (sourceNeuronType == CommonEnums.ActivationType.Analog &&
+               targetNeuronType == CommonEnums.ActivationType.Analog &&
                sourceNeuronRole == CommonEnums.NeuronRole.Excitatory &&
                targetNeuronRole == CommonEnums.NeuronRole.Inhibitory
                )
             {
                 return A2ASynapseE2IDynamicsCfg;
             }
-            else if (sourceNeuronType == CommonEnums.NeuronSignalType.Analog &&
-               targetNeuronType == CommonEnums.NeuronSignalType.Analog &&
+            else if (sourceNeuronType == CommonEnums.ActivationType.Analog &&
+               targetNeuronType == CommonEnums.ActivationType.Analog &&
                sourceNeuronRole == CommonEnums.NeuronRole.Inhibitory &&
                targetNeuronRole == CommonEnums.NeuronRole.Excitatory
                )
             {
                 return A2ASynapseI2EDynamicsCfg;
             }
-            else if (sourceNeuronType == CommonEnums.NeuronSignalType.Analog &&
-               targetNeuronType == CommonEnums.NeuronSignalType.Analog &&
+            else if (sourceNeuronType == CommonEnums.ActivationType.Analog &&
+               targetNeuronType == CommonEnums.ActivationType.Analog &&
                sourceNeuronRole == CommonEnums.NeuronRole.Inhibitory &&
                targetNeuronRole == CommonEnums.NeuronRole.Inhibitory
                )

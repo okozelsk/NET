@@ -2,6 +2,273 @@
 <demo dataFolder=".\\Data">
 
   <!--
+    ANALOG SPIKING
+  -->
+  <case name="Classification task Libras Movement: Analog LSM reservoir, Elastic regression classifier">
+    <samples fileName="LibrasMovement.csv"/>
+    <stateMachineCfg randomizerSeek="0">
+      <neuralPreprocessor>
+        <input>
+          <feedingPatterned/>
+          <external>
+            <field name="coord_abcissa"/>
+            <field name="coord_ordinate"/>
+          </external>
+        </input>
+        <reservoirCfgContainer>
+          <reservoirCfg name="MainCfg">
+            <pools>
+              <pool name="LSM pool abcissa" dimX="5" dimY="5" dimZ="5">
+                <neuronGroups>
+                  <analogGroup name="Exc-grp" role="Excitatory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction" augmentedStates="true">
+                    <activationTanH/>
+                    <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
+                    <spikeThreshold min="0.975" max="0.975"/>
+                  </analogGroup>
+                  <analogGroup name="Inh-grp" role="Inhibitory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction" augmentedStates="true">
+                    <activationTanH/>
+                    <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
+                    <spikeThreshold min="0.975" max="0.975"/>
+                  </analogGroup>
+                </neuronGroups>
+                <interconnection density="0.1" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
+                  <synapse/>
+                </interconnection>
+              </pool>
+              <pool name="LSM pool ordinate" dimX="5" dimY="5" dimZ="5">
+                <neuronGroups>
+                  <analogGroup name="Exc-grp" role="Excitatory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction" augmentedStates="true">
+                    <activationTanH/>
+                    <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
+                    <spikeThreshold min="0.975" max="0.975"/>
+                  </analogGroup>
+                  <analogGroup name="Inh-grp" role="Inhibitory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction" augmentedStates="true">
+                    <activationTanH/>
+                    <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
+                    <spikeThreshold min="0.975" max="0.975"/>
+                  </analogGroup>
+                </neuronGroups>
+                <interconnection density="0.1" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
+                  <synapse/>
+                </interconnection>
+              </pool>
+            </pools>
+            <spectralRadius>
+              <analogScope value="0.9999"/>
+              <spikingScope value="0.9999"/>
+            </spectralRadius>
+          </reservoirCfg>
+        </reservoirCfgContainer>
+        <reservoirInstanceContainer>
+          <reservoirInstance name="Main" cfg="MainCfg" augmentedStates="false">
+            <inputConnections>
+              <inputConnection fieldName="coord_abcissa" poolName="LSM pool abcissa" density="1">
+                <synapse delayMethod="Random" maxDelay="0">
+                  <analogTarget scope="All">
+                    <weight min="0" max="1"/>
+                  </analogTarget>
+                </synapse>
+              </inputConnection>
+              <inputConnection fieldName="coord_ordinate" poolName="LSM pool ordinate" density="1">
+                <synapse delayMethod="Random" maxDelay="0">
+                  <analogTarget scope="All">
+                    <weight min="0" max="1"/>
+                  </analogTarget>
+                </synapse>
+              </inputConnection>
+            </inputConnections>
+          </reservoirInstance>
+        </reservoirInstanceContainer>
+      </neuralPreprocessor>
+      <readoutLayer testDataRatio="0.0825" folds="Auto">
+        <readoutUnit name="curved swing" task="Classification">
+          <pp gates="3" resolution="2">
+            <pDeltaRuleTrainer attempts="10" attemptEpochs="1000"/>
+          </pp>
+        </readoutUnit>
+        <readoutUnit name="horizontal swing" task="Classification">
+          <ff>
+            <activationIdentity/>
+            <qrdRegrTrainer attempts="3" attemptEpochs="1000" noiseZeroMargin="0">
+              <maxNoise min="0" max="0.5" steps="100"/>
+            </qrdRegrTrainer>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="vertical swing" task="Classification">
+          <ff>
+            <activationIdentity/>
+            <elasticRegrTrainer attemptEpochs="600" alpha="0.5" lambda="1e-6"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="anti-clockwise arc" task="Classification">
+          <pp gates="3" resolution="2">
+            <pDeltaRuleTrainer attempts="10" attemptEpochs="600"/>
+          </pp>
+        </readoutUnit>
+        <readoutUnit name="clockwise arc" task="Classification">
+          <pp gates="3" resolution="2">
+            <pDeltaRuleTrainer attempts="10" attemptEpochs="600"/>
+          </pp>
+        </readoutUnit>
+        <readoutUnit name="circle" task="Classification">
+          <pp gates="3" resolution="2">
+            <pDeltaRuleTrainer attempts="10" attemptEpochs="600"/>
+          </pp>
+        </readoutUnit>
+        <readoutUnit name="horizontal straight-line" task="Classification">
+          <pp gates="3" resolution="2">
+            <pDeltaRuleTrainer attempts="10" attemptEpochs="600"/>
+          </pp>
+        </readoutUnit>
+        <readoutUnit name="vertical straight-line" task="Classification">
+          <pp gates="3" resolution="2">
+            <pDeltaRuleTrainer attempts="10" attemptEpochs="600"/>
+          </pp>
+        </readoutUnit>
+        <readoutUnit name="horizontal zigzag" task="Classification">
+          <pp gates="3" resolution="2">
+            <pDeltaRuleTrainer attempts="10" attemptEpochs="600"/>
+          </pp>
+        </readoutUnit>
+        <readoutUnit name="vertical zigzag" task="Classification">
+          <pp gates="3" resolution="2">
+            <pDeltaRuleTrainer attempts="10" attemptEpochs="600"/>
+          </pp>
+        </readoutUnit>
+        <readoutUnit name="horizontal wavy" task="Classification">
+          <pp gates="3" resolution="2">
+            <pDeltaRuleTrainer attempts="10" attemptEpochs="600"/>
+          </pp>
+        </readoutUnit>
+        <readoutUnit name="vertical wavy" task="Classification">
+          <pp gates="3" resolution="2">
+            <pDeltaRuleTrainer attempts="10" attemptEpochs="600"/>
+          </pp>
+        </readoutUnit>
+        <readoutUnit name="face-up curve" task="Classification">
+          <pp gates="3" resolution="2">
+            <pDeltaRuleTrainer attempts="10" attemptEpochs="600"/>
+          </pp>
+        </readoutUnit>
+        <readoutUnit name="face-down curve" task="Classification">
+          <pp gates="3" resolution="2">
+            <pDeltaRuleTrainer attempts="10" attemptEpochs="600"/>
+          </pp>
+        </readoutUnit>
+        <readoutUnit name="tremble" task="Classification">
+          <pp gates="3" resolution="2">
+            <pDeltaRuleTrainer attempts="10" attemptEpochs="600"/>
+          </pp>
+        </readoutUnit>
+      </readoutLayer>
+    </stateMachineCfg>
+  </case>
+
+  
+  <!--
+    This demo case demonstrates the simple form of ESN reservoir setup. Reservoir consists of one pool of 7x7x7=343 TanH analog neurons.
+    QRD regression is used as forecasting readout.
+    Time series contains real share prices of TTOO title from https://finance.yahoo.com/quote/TTOO/history?p=TTOO.
+    The last recorded prices are from 2018/03/02 so network is predicting next High and Low prices for the following
+    business day 2018/03/05 (where real prices were High=6.58$ and Low=5.99$).
+  -->
+  <case name="Forecast task High and Low share prices of TTOO (T2 Biosystems, Inc.): Small analog reservoir (ESN), QRD regression readout">
+    <samples fileName="TTOO.csv"/>
+    <stateMachineCfg randomizerSeek="0">
+      <neuralPreprocessor>
+        <input>
+          <feedingContinuous bootCycles="Auto" routeToReadout="true"/>
+          <external>
+            <field name="High" AllowRoutingToReadout="true"/>
+            <field name="Low" AllowRoutingToReadout="true"/>
+            <field name="Adj Close" AllowRoutingToReadout="true"/>
+          </external>
+        </input>
+        <reservoirCfgContainer>
+          <reservoirCfg name="MainCfg">
+            <pools>
+              <pool name="Logistic pool" dimX="6" dimY="6" dimZ="6">
+                <neuronGroups>
+                  <analogGroup name="Exc-Logistic" role="Excitatory" relShare="1" signalingRestriction="AnalogOnly" readoutDensity="1" augmentedStates="true">
+                    <activationTanH/>
+                    <retainment density="1">
+                      <strength min="0" max="0.75" distribution="Uniform"/>
+                    </retainment>
+                  </analogGroup>
+                  <analogGroup name="Inh-Logistic" role="Inhibitory" relShare="1" signalingRestriction="AnalogOnly" readoutDensity="1" augmentedStates="true">
+                    <activationTanH/>
+                    <retainment density="1">
+                      <strength min="0" max="0.75" distribution="Uniform"/>
+                    </retainment>
+                  </analogGroup>
+                </neuronGroups>
+                <interconnection density="0.1" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
+                  <synapse/>
+                </interconnection>
+              </pool>
+            </pools>
+            <spectralRadius>
+              <analogScope value="0.9999"/>
+              <spikingScope value="NA"/>
+            </spectralRadius>
+          </reservoirCfg>
+        </reservoirCfgContainer>
+        <reservoirInstanceContainer>
+          <reservoirInstance name="Main" cfg="MainCfg" augmentedStates="false">
+            <inputConnections>
+              <inputConnection fieldName="High" poolName="Logistic pool" density="1">
+                <synapse>
+                  <analogTarget>
+                    <weight min="0" max="0.05" distribution="Uniform"/>
+                  </analogTarget>
+                </synapse>
+              </inputConnection>
+              <inputConnection fieldName="Low" poolName="Logistic pool" density="1">
+                <synapse>
+                  <analogTarget>
+                    <weight min="0" max="0.05" distribution="Uniform"/>
+                  </analogTarget>
+                </synapse>
+              </inputConnection>
+              <inputConnection fieldName="Adj Close" poolName="Logistic pool" density="1">
+                <synapse>
+                  <analogTarget>
+                    <weight min="0" max="0.05" distribution="Uniform"/>
+                  </analogTarget>
+                </synapse>
+              </inputConnection>
+            </inputConnections>
+          </reservoirInstance>
+        </reservoirInstanceContainer>
+      </neuralPreprocessor>
+      <readoutLayer testDataRatio="0.1" folds="Auto">
+        <readoutUnit name="High" task="Forecast">
+          <ff>
+            <activationIdentity/>
+            <elasticRegrTrainer attemptEpochs="300" lambda="1e-6" alpha="0.5"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="Low" task="Forecast">
+          <ff>
+            <activationIdentity/>
+            <elasticRegrTrainer attemptEpochs="300" lambda="1e-6" alpha="0.5"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="Adj Close" task="Forecast">
+          <ff>
+            <activationIdentity/>
+            <elasticRegrTrainer attemptEpochs="300" lambda="1e-6" alpha="0.5"/>
+          </ff>
+        </readoutUnit>
+      </readoutLayer>
+    </stateMachineCfg>
+  </case>
+
+  
+  
+  
+  
+  <!--
     This demo case demonstrates classical setup of LSM (spiking) reservoir.
     One additional internal input field "aug_input" (following random signal) is used.
     QRD linear regression is used as a classifier on readout layer.
@@ -29,39 +296,41 @@
           </external>
         </input>
         <reservoirCfgContainer>
-          <reservoirCfg name="MainCfg" synapticDelayMethod="Random" maxInputDelay="0" spectralRadius="0.999">
+          <reservoirCfg name="MainCfg">
             <pools>
-              <pool name="LSM pool abcissa" dimX="5" dimY="5" dimZ="5" readoutNeuronsDensity="1">
+              <pool name="LSM pool abcissa" dimX="5" dimY="5" dimZ="5">
                 <neuronGroups>
-                  <neuronGroup name="Exc-grp" role="Excitatory" relShare="4" augmentedStates="true">
+                  <spikingGroup name="Exc-grp" role="Excitatory" relShare="4" readoutDensity="1" augmentedStates="true">
                     <activationLeakyIF refractoryPeriods="0"/>
                     <bias min="0.1" max="0.1" randomSign="false" distribution="Uniform"/>
-                  </neuronGroup>
-                  <neuronGroup name="Inh-grp" role="Inhibitory" relShare="1" augmentedStates="true">
+                  </spikingGroup>
+                  <spikingGroup name="Inh-grp" role="Inhibitory" relShare="1" readoutDensity="1" augmentedStates="true">
                     <activationLeakyIF refractoryPeriods="0"/>
-                    <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-                  </neuronGroup>
+                  </spikingGroup>
                 </neuronGroups>
                 <interconnection density="0.05" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
                   <synapse/>
                 </interconnection>
               </pool>
-              <pool name="LSM pool ordinate" dimX="5" dimY="5" dimZ="5" readoutNeuronsDensity="1">
+              <pool name="LSM pool ordinate" dimX="5" dimY="5" dimZ="5">
                 <neuronGroups>
-                  <neuronGroup name="Exc-grp" role="Excitatory" relShare="4" augmentedStates="true">
+                  <spikingGroup name="Exc-grp" role="Excitatory" relShare="4"  readoutDensity="1" augmentedStates="true">
                     <activationLeakyIF refractoryPeriods="0"/>
                     <bias min="0.1" max="0.1" randomSign="false" distribution="Uniform"/>
-                  </neuronGroup>
-                  <neuronGroup name="Inh-grp" role="Inhibitory" relShare="1" augmentedStates="true">
+                  </spikingGroup>
+                  <spikingGroup name="Inh-grp" role="Inhibitory" relShare="1" readoutDensity="1" augmentedStates="true">
                     <activationLeakyIF refractoryPeriods="0"/>
-                    <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-                  </neuronGroup>
+                  </spikingGroup>
                 </neuronGroups>
                 <interconnection density="0.05" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
                   <synapse/>
                 </interconnection>
               </pool>
             </pools>
+            <spectralRadius>
+              <analogScope value="NA"/>
+              <spikingScope value="NA"/>
+            </spectralRadius>
           </reservoirCfg>
         </reservoirCfgContainer>
         <reservoirInstanceContainer>
@@ -184,27 +453,32 @@
           </external>
         </input>
         <reservoirCfgContainer>
-          <reservoirCfg name="MainCfg" synapticDelayMethod="Random" maxInputDelay="0" spectralRadius="0.999">
+          <reservoirCfg name="MainCfg">
             <pools>
-              <pool name="Logistic pool" dimX="6" dimY="6" dimZ="6" readoutNeuronsDensity="1">
+              <pool name="Logistic pool" dimX="6" dimY="6" dimZ="6">
                 <neuronGroups>
-                  <neuronGroup name="Exc-Logistic" role="Excitatory" relShare="1" augmentedStates="true">
+                  <analogGroup name="Exc-Logistic" role="Excitatory" relShare="1" signalingRestriction="AnalogOnly" readoutDensity="1" augmentedStates="true">
                     <activationTanH/>
-                    <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-                  </neuronGroup>
-                  <neuronGroup name="Inh-Logistic" role="Inhibitory" relShare="1" augmentedStates="true">
+                    <retainment density="1">
+                      <strength min="0" max="0.75" distribution="Uniform"/>
+                    </retainment>
+                  </analogGroup>
+                  <analogGroup name="Inh-Logistic" role="Inhibitory" relShare="1" signalingRestriction="AnalogOnly" readoutDensity="1" augmentedStates="true">
                     <activationTanH/>
-                    <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-                  </neuronGroup>
+                    <retainment density="1">
+                      <strength min="0" max="0.75" distribution="Uniform"/>
+                    </retainment>
+                  </analogGroup>
                 </neuronGroups>
                 <interconnection density="0.1" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
                   <synapse/>
                 </interconnection>
-                <retainmentNeurons density="1">
-                  <rate min="0" max="0.75" distribution="Uniform"/>
-                </retainmentNeurons>
               </pool>
             </pools>
+            <spectralRadius>
+              <analogScope value="0.9999"/>
+              <spikingScope value="NA"/>
+            </spectralRadius>
           </reservoirCfg>
         </reservoirCfgContainer>
         <reservoirInstanceContainer>
@@ -278,27 +552,34 @@
           </external>
         </input>
         <reservoirCfgContainer>
-          <reservoirCfg name="ESNCfg" synapticDelayMethod="Random" maxInputDelay="0" spectralRadius="0.65">
+          <reservoirCfg name="ESNCfg">
             <pools>
-              <pool name="Logistic pool" dimX="8" dimY="8" dimZ="8" readoutNeuronsDensity="1">
+              <pool name="Logistic pool" dimX="8" dimY="8" dimZ="8">
                 <neuronGroups>
-                  <neuronGroup name="Exc-Logistic" role="Excitatory" relShare="1" augmentedStates="true">
+                  <analogGroup name="Exc-Logistic" role="Excitatory" relShare="1" augmentedStates="true">
                     <activationTanH/>
                     <bias min="-0.75" max="0.75" randomSign="false" distribution="Uniform"/>
-                  </neuronGroup>
-                  <neuronGroup name="Inh-Logistic" role="Inhibitory" relShare="1" augmentedStates="true">
+                    <retainment density="1">
+                      <strength min="0.25" max="0.5" distribution="Uniform"/>
+                    </retainment>
+                  </analogGroup>
+                  <analogGroup name="Inh-Logistic" role="Inhibitory" relShare="1" augmentedStates="true">
                     <activationTanH/>
                     <bias min="-0.75" max="0.75" randomSign="false" distribution="Uniform"/>
-                  </neuronGroup>
+                    <retainment density="1">
+                      <strength min="0.25" max="0.5" distribution="Uniform"/>
+                    </retainment>
+                  </analogGroup>
                 </neuronGroups>
                 <interconnection density="0.1" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
                   <synapse/>
                 </interconnection>
-                <retainmentNeurons density="1">
-                  <rate min="0.25" max="0.5" distribution="Uniform"/>
-                </retainmentNeurons>
               </pool>
             </pools>
+            <spectralRadius>
+              <analogScope value="0.65"/>
+              <spikingScope value="NA"/>
+            </spectralRadius>
           </reservoirCfg>
         </reservoirCfgContainer>
         <reservoirInstanceContainer>
@@ -331,70 +612,6 @@
     </stateMachineCfg>
   </case>
 
-  <!--
-    This demo case demonstrates performance on big reservoir. Configuration definies ESN reservoir
-    structure having one pool of 3162 TanH analog neurons having 1 million synapses.
-    QRD regression is used as predicting readout.
-    Dataset contains Mackey Glass chaotic time series (tau=17) and network forecasts the next value.
-  -->
-  <case name="Forecast task Mackey Glass chaotic time series: Big analog reservoir (ESN), QRD regression output">
-    <samples fileName="MackeyGlass_big.csv"/>
-    <stateMachineCfg randomizerSeek="0">
-      <neuralPreprocessor>
-        <input>
-          <feedingContinuous bootCycles="Auto" routeToReadout="false"/>
-          <external>
-            <field name="Value" AllowRoutingToReadout="true"/>
-          </external>
-        </input>
-        <reservoirCfgContainer>
-          <reservoirCfg name="ESNCfg" synapticDelayMethod="Random" maxInputDelay="0" spectralRadius="0.999">
-            <pools>
-              <pool name="Logistic pool" dimX="3162" dimY="1" dimZ="1" readoutNeuronsDensity="1">
-                <neuronGroups>
-                  <neuronGroup name="Exc-Logistic" role="Excitatory" relShare="1" augmentedStates="true">
-                    <activationTanH/>
-                    <bias min="-0.75" max="0.75" randomSign="false" distribution="Uniform"/>
-                  </neuronGroup>
-                  <neuronGroup name="Inh-Logistic" role="Inhibitory" relShare="1" augmentedStates="true">
-                    <activationTanH/>
-                    <bias min="-0.75" max="0.75" randomSign="false" distribution="Uniform"/>
-                  </neuronGroup>
-                </neuronGroups>
-                <interconnection density="0.1" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
-                  <synapse/>
-                </interconnection>
-                <retainmentNeurons density="1">
-                  <rate min="0.25" max="0.5" distribution="Uniform"/>
-                </retainmentNeurons>
-              </pool>
-            </pools>
-          </reservoirCfg>
-        </reservoirCfgContainer>
-        <reservoirInstanceContainer>
-          <reservoirInstance name="ESN reservoir" cfg="ESNCfg" augmentedStates="false">
-            <inputConnections>
-              <inputConnection fieldName="Value" poolName="Logistic pool" density="0.5">
-                <synapse/>
-              </inputConnection>
-            </inputConnections>
-          </reservoirInstance>
-        </reservoirInstanceContainer>
-      </neuralPreprocessor>
-      <readoutLayer testDataRatio="0.1" folds="1">
-        <readoutUnit name="Value" task="Forecast">
-          <ff>
-            <activationIdentity/>
-            <ridgeRegrTrainer attemptEpochs="1">
-              <lambda min="0" max="0" steps="10"/>
-            </ridgeRegrTrainer>
-          </ff>
-        </readoutUnit>
-      </readoutLayer>
-    </stateMachineCfg>
-  </case>
-
-
 
   <!--
     This demo case demonstrates a richer form of reservoir setup. Reservoir consists of one pool of IzhikewichIF spiking neurons
@@ -422,34 +639,33 @@
           </internal>
         </input>
         <reservoirCfgContainer>
-          <reservoirCfg name="MainCfg" synapticDelayMethod="Random" maxInputDelay="0" spectralRadius="0.999">
+          <reservoirCfg name="MainCfg">
             <inputEntryPoint x="0" y="0" z="0"/>
             <pools>
-              <pool name="Spiking pool" x="0" y="0" z="0" dimX="6" dimY="6" dimZ="6" readoutNeuronsDensity="1">
+              <pool name="Spiking pool" x="0" y="0" z="0" dimX="6" dimY="6" dimZ="6">
                 <neuronGroups>
-                  <neuronGroup name="Exc-IzhikewichIF" role="Excitatory" relShare="4" augmentedStates="true">
+                  <spikingGroup name="Exc-IzhikewichIF" role="Excitatory" relShare="4" augmentedStates="true">
                     <activationAutoIzhikevichIF role="Excitatory" refractoryPeriods="0" solverMethod="Euler" solverCompSteps="2"/>
-                    <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-                  </neuronGroup>
-                  <neuronGroup name="Inh-IzhikewichIF" role="Inhibitory" relShare="1" augmentedStates="true">
+                  </spikingGroup>
+                  <spikingGroup name="Inh-IzhikewichIF" role="Inhibitory" relShare="1" augmentedStates="true">
                     <activationAutoIzhikevichIF role="Inhibitory" refractoryPeriods="0" solverMethod="Euler" solverCompSteps="2"/>
                     <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-                  </neuronGroup>
+                  </spikingGroup>
                 </neuronGroups>
                 <interconnection density="0.1" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
                   <synapse/>
                 </interconnection>
               </pool>
-              <pool name="Logistic pool" x="0" y="0" z="0" dimX="4" dimY="4" dimZ="4" readoutNeuronsDensity="1">
+              <pool name="Logistic pool" x="0" y="0" z="0" dimX="4" dimY="4" dimZ="4">
                 <neuronGroups>
-                  <neuronGroup name="Exc-Logistic" role="Excitatory" relShare="4" augmentedStates="true">
+                  <analogGroup name="Exc-Logistic" role="Excitatory" relShare="4" augmentedStates="true">
                     <activationSigmoid/>
                     <bias min="-1" max="1" randomSign="false" distribution="Uniform"/>
-                  </neuronGroup>
-                  <neuronGroup name="Inh-Logistic" role="Inhibitory" relShare="1" augmentedStates="true">
+                  </analogGroup>
+                  <analogGroup name="Inh-Logistic" role="Inhibitory" relShare="1" augmentedStates="true">
                     <activationSigmoid/>
                     <bias min="-1" max="1" randomSign="false" distribution="Uniform"/>
-                  </neuronGroup>
+                  </analogGroup>
                 </neuronGroups>
                 <interconnection density="0.1" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
                   <synapse/>
@@ -464,6 +680,10 @@
                 <synapse/>
               </pool2PoolConn>
             </pool2PoolConns>
+            <spectralRadius>
+              <analogScope value="0.9999"/>
+              <spikingScope value="NA"/>
+            </spectralRadius>
           </reservoirCfg>
         </reservoirCfgContainer>
         <reservoirInstanceContainer>

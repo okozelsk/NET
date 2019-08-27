@@ -8,20 +8,15 @@ using RCNet.MathTools;
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Each neuron activation function has to implement this interface
+    /// Common interface of all activation functions
     /// </summary>
     public interface IActivationFunction
     {
         //Properties
         /// <summary>
-        /// Type of the output signal
+        /// Type of the activation function
         /// </summary>
-        CommonEnums.NeuronSignalType OutputSignalType { get; }
-
-        /// <summary>
-        /// Output range
-        /// </summary>
-        Interval OutputRange { get; }
+        CommonEnums.ActivationType ActivationType { get; }
 
         /// <summary>
         /// Specifies whether the activation function supports derivative calculation
@@ -39,9 +34,14 @@ namespace RCNet.Neural.Activation
         Interval InternalStateRange { get; }
 
         /// <summary>
-        /// Internal state
+        /// Current internal state
         /// </summary>
         double InternalState { get; }
+
+        /// <summary>
+        /// Output range of the Compute method
+        /// </summary>
+        Interval OutputRange { get; }
 
         //Methods
         /// <summary>
@@ -55,13 +55,13 @@ namespace RCNet.Neural.Activation
         void SetInitialInternalState(double state);
 
         /// <summary>
-        /// Computes output of the activation function (changes internal state)
+        /// Computes output of the activation function
         /// </summary>
         /// <param name="x">Activation input</param>
         double Compute(double x);
 
         /// <summary>
-        /// Computes derivative of the activation input (does not change internal state)
+        /// Computes derivative (with respect to x)
         /// </summary>
         /// <param name="c">The result of the activation (Compute method)</param>
         /// <param name="x">Activation input (x argument of the Compute method)</param>

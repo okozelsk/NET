@@ -14,10 +14,7 @@ using RCNet.Neural.Network.SM.Synapse;
 namespace RCNet.Neural.Network.SM.Preprocessing
 {
     /// <summary>
-    /// The class contains neural pool configuration parameters and also contains
-    /// internal logic so it is not just a container of parameters. To create the proper instance by hand is not
-    /// a trivial task.
-    /// The easiest and safest way to create a proper instance is to use the xml constructor.
+    /// Configuration of neural pool.
     /// </summary>
     [Serializable]
     public class PoolSettings
@@ -32,10 +29,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// </summary>
         public PoolDimensions Dim { get; set; }
         /// <summary>
-        /// Determines what ratio of the pool's neurons to use as the readout predictors
-        /// </summary>
-        public double ReadoutNeuronsDensity { get; set; }
-        /// <summary>
         /// Settings of the neuron groups in the pool.
         /// </summary>
         public List<NeuronGroupSettings> NeuronGroups { get; set; }
@@ -43,40 +36,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// Configuration of the pool's neurons interconnection
         /// </summary>
         public InterconnectionSettings InterconnectionCfg { get; set; }
-        /// <summary>
-        /// Indicates whether the retainment (leaky integrators) neurons feature is used.
-        /// Relevant for neurons having time independent activation (analog)
-        /// </summary>
-        public bool RetainmentNeuronsFeature { get; set; }
-        /// <summary>
-        /// The parameter says how much of the pool neurons will have the Retainment property set.
-        /// Specific analog neurons will be selected randomly.
-        /// Count = NumberOfAnalogNeurons * Density
-        /// </summary>
-        public double RetainmentNeuronsDensity { get; set; }
-        /// <summary>
-        /// If the pool neuron is selected to have the Retainment property then its retainment rate will be randomly selected
-        /// following specified settings
-        /// </summary>
-        public RandomValueSettings RetainmentRate { get; set; }
 
         //Constructors
-        /// <summary>
-        /// Creates an uninitialized instance
-        /// </summary>
-        public PoolSettings()
-        {
-            Name = string.Empty;
-            Dim = null;
-            ReadoutNeuronsDensity = 1;
-            NeuronGroups = null;
-            InterconnectionCfg = null;
-            RetainmentNeuronsFeature = false;
-            RetainmentNeuronsDensity = 0;
-            RetainmentRate = null;
-            return;
-        }
-
         /// <summary>
         /// The deep copy constructor
         /// </summary>
@@ -89,29 +50,17 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             {
                 Dim = new PoolDimensions(source.Dim.X, source.Dim.Y, source.Dim.Z, source.Dim.DimX, source.Dim.DimY, source.Dim.DimZ);
             }
-            ReadoutNeuronsDensity = source.ReadoutNeuronsDensity;
             NeuronGroups = new List<NeuronGroupSettings>(source.NeuronGroups.Count);
             foreach(NeuronGroupSettings item in source.NeuronGroups)
             {
                 NeuronGroups.Add(item.DeepClone());
             }
             InterconnectionCfg = source.InterconnectionCfg.DeepClone();
-            RetainmentNeuronsFeature = source.RetainmentNeuronsFeature;
-            RetainmentNeuronsDensity = source.RetainmentNeuronsDensity;
-            if (RetainmentNeuronsFeature)
-            {
-                RetainmentRate = source.RetainmentRate.DeepClone();
-            }
-            else
-            {
-                RetainmentRate = null;
-            }
             return;
         }
 
         /// <summary>
         /// Creates the instance and initialize it from given xml element.
-        /// This is the preferred way to instantiate pool settings.
         /// </summary>
         /// <param name="elem">
         /// Xml data containing pool settings.
@@ -136,15 +85,24 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                                      int.Parse(poolSettingsElem.Attribute("dimY").Value, CultureInfo.InvariantCulture),
                                      int.Parse(poolSettingsElem.Attribute("dimZ").Value, CultureInfo.InvariantCulture)
                                      );
-            //Readout neurons density
-            ReadoutNeuronsDensity = double.Parse(poolSettingsElem.Attribute("readoutNeuronsDensity").Value, CultureInfo.InvariantCulture);
             //NeuronGroups
             XElement neuronGroupsElem = poolSettingsElem.Descendants("neuronGroups").First();
             double totalRelShare = 0;
             NeuronGroups = new List<NeuronGroupSettings>();
-            foreach(XElement neuronGroupElem in neuronGroupsElem.Descendants("neuronGroup"))
+            //Analog neuron groups
+            foreach(XElement neuronGroupElem in neuronGroupsElem.Descendants("analogGroup"))
             {
-                NeuronGroupSettings ngs = new NeuronGroupSettings(neuronGroupElem);
+                NeuronGroupSettings ngs = new NeuronGroupSettings(neuronGroupElem, CommonEnums.ActivationType.Analog);
+                if (ngs.RelativeShare > 0)
+                {
+                    NeuronGroups.Add(ngs);
+                    totalRelShare += ngs.RelativeShare;
+                }
+            }
+            //Spiking neuron groups
+            foreach (XElement neuronGroupElem in neuronGroupsElem.Descendants("spikingGroup"))
+            {
+                NeuronGroupSettings ngs = new NeuronGroupSettings(neuronGroupElem, CommonEnums.ActivationType.Spiking);
                 if (ngs.RelativeShare > 0)
                 {
                     NeuronGroups.Add(ngs);
@@ -175,26 +133,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 totalCount += sign;
                 if (NeuronGroups[0].Count < 0)
                 {
-                    throw new Exception("Can't set proper neuron absolute counts for the neuron groups.");
+                    throw new Exception("Can't set proper neuron counts for the neuron groups.");
                 }
             }
             
             //Interconnection
             XElement interconnectionElem = poolSettingsElem.Descendants("interconnection").First();
             InterconnectionCfg = new InterconnectionSettings(interconnectionElem);
-            //Retainment neurons
-            XElement retainmentElem = poolSettingsElem.Descendants("retainmentNeurons").FirstOrDefault();
-            RetainmentNeuronsFeature = (retainmentElem != null);
-            if (RetainmentNeuronsFeature)
-            {
-                RetainmentNeuronsDensity = double.Parse(retainmentElem.Attribute("density").Value, CultureInfo.InvariantCulture);
-                RetainmentRate = new RandomValueSettings(retainmentElem.Descendants("rate").First());
-                RetainmentNeuronsFeature = (RetainmentNeuronsDensity > 0 && RetainmentRate.Max > 0);
-            }
-            else
-            {
-                RetainmentNeuronsDensity = 0;
-            }
             return;
         }
 
@@ -207,13 +152,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             if (obj == null) return false;
             PoolSettings cmpSettings = obj as PoolSettings;
             if (Name != cmpSettings.Name ||
+                NeuronGroups.Count != NeuronGroups.Count ||
                 !Equals(Dim, cmpSettings.Dim) ||
-                ReadoutNeuronsDensity != cmpSettings.ReadoutNeuronsDensity ||
-                !Equals(NeuronGroups.Count, cmpSettings.NeuronGroups.Count) ||
-                !Equals(InterconnectionCfg, cmpSettings.InterconnectionCfg) ||
-                RetainmentNeuronsFeature != cmpSettings.RetainmentNeuronsFeature ||
-                RetainmentNeuronsDensity != cmpSettings.RetainmentNeuronsDensity ||
-                !Equals(RetainmentRate, cmpSettings.RetainmentRate)
+                !Equals(InterconnectionCfg, cmpSettings.InterconnectionCfg)
                 )
             {
                 return false;
@@ -253,6 +194,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         public class NeuronGroupSettings
         {
             //Constants
+            public const double DefaultAnalogSpikeThreshold = 0.975d;
             //Attribute properties
             /// <summary>
             /// Name of the neuron group
@@ -267,6 +209,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             /// </summary>
             public double RelativeShare { get; set; }
             /// <summary>
+            /// Determines what ratio of the neurons to use as the readout predictors
+            /// </summary>
+            public double ReadoutNeuronsDensity { get; set; }
+            /// <summary>
             /// Specifies, whether neurons within the group generate secondary predictors
             /// </summary>
             public bool AugmentedStates { get; set; }
@@ -275,31 +221,39 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             /// </summary>
             public int Count { get; set; }
             /// <summary>
-            /// Activation settings of the groupped neurons
+            /// Type of the activation function
+            /// </summary>
+            public CommonEnums.ActivationType ActivationType;
+            /// <summary>
+            /// Common activation settings of the groupped neurons
             /// </summary>
             public Object ActivationCfg { get; set; }
             /// <summary>
-            /// Each pool's neuron has its own constant input bias. Bias is always added to input signal of the neuron.
+            /// Restriction of neuron's output signaling
+            /// </summary>
+            public CommonEnums.NeuronSignalingRestrictionType SignalingRestriction;
+            /// <summary>
+            /// Each pool's neuron can have its own constant input bias. Bias is always added to input signal of the neuron.
             /// A constant bias value of the neuron will be selected randomly according to the settings.
             /// </summary>
             public RandomValueSettings BiasCfg { get; set; }
+            /// <summary>
+            /// Spike threshold configuration for neurons having stateless analog activation function.
+            /// A constant threshold value of the neuron will be selected randomly according to the settings.
+            /// </summary>
+            public RandomValueSettings AnalogSpikeThresholdCfg { get; set; }
+            /// <summary>
+            /// The parameter says how much of the neurons will have the Retainment property (leaky integrator neuron).
+            /// Count = NumberOfAnalogNeurons * Density
+            /// </summary>
+            public double RetainmentNeuronsDensity { get; set; }
+            /// <summary>
+            /// If the neuron is selected to have the Retainment property then its retainment strength will be randomly selected
+            /// following this settings
+            /// </summary>
+            public RandomValueSettings RetainmentStrengthCfg { get; set; }
 
             //Constructors
-            /// <summary>
-            /// Creates an uninitialized instance
-            /// </summary>
-            public NeuronGroupSettings()
-            {
-                Name = string.Empty;
-                Role = CommonEnums.NeuronRole.Excitatory;
-                RelativeShare = 0;
-                AugmentedStates = false;
-                Count = 0;
-                ActivationCfg = null;
-                BiasCfg = null;
-                return;
-            }
-
             /// <summary>
             /// The deep copy constructor
             /// </summary>
@@ -309,10 +263,16 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 Name = source.Name;
                 Role = source.Role;
                 RelativeShare = source.RelativeShare;
+                ReadoutNeuronsDensity = source.ReadoutNeuronsDensity;
                 AugmentedStates = source.AugmentedStates;
                 Count = source.Count;
+                ActivationType = source.ActivationType;
                 ActivationCfg = ActivationFactory.DeepCloneActivationSettings(source.ActivationCfg);
-                BiasCfg = source.BiasCfg.DeepClone();
+                SignalingRestriction = source.SignalingRestriction;
+                BiasCfg = source.BiasCfg?.DeepClone();
+                AnalogSpikeThresholdCfg = source.AnalogSpikeThresholdCfg?.DeepClone();
+                RetainmentNeuronsDensity = source.RetainmentNeuronsDensity;
+                RetainmentStrengthCfg = source.RetainmentStrengthCfg?.DeepClone();
                 return;
             }
 
@@ -321,16 +281,25 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             /// </summary>
             /// <param name="elem">
             /// Xml data containing settings.
-            /// Content of xml element is always validated against the xml schema.
+            /// Content of xml element is always validated against the appropriate xml schema.
             /// </param>
-            public NeuronGroupSettings(XElement elem)
+            /// <param name="activationType">Specifies sub-type of the neuron group</param>
+            public NeuronGroupSettings(XElement elem, CommonEnums.ActivationType activationType)
             {
                 //Validation
                 ElemValidator validator = new ElemValidator();
                 Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-                validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.SM.Preprocessing.PoolNeuronGroupSettings.xsd");
+                if (activationType == CommonEnums.ActivationType.Analog)
+                {
+                    validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.SM.Preprocessing.PoolAnalogNeuronGroupSettings.xsd");
+                }
+                else
+                {
+                    validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.SM.Preprocessing.PoolSpikingNeuronGroupSettings.xsd");
+                }
                 validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
                 XElement settingsElem = validator.Validate(elem, "rootElem");
+                ActivationType = activationType;
                 //Parsing
                 //Name
                 Name = settingsElem.Attribute("name").Value;
@@ -338,12 +307,46 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 Role = CommonEnums.ParseNeuronRole(settingsElem.Attribute("role").Value);
                 //Relative share
                 RelativeShare = double.Parse(settingsElem.Attribute("relShare").Value, CultureInfo.InvariantCulture);
-                //Augmented states
-                AugmentedStates = bool.Parse(settingsElem.Attribute("augmentedStates").Value);
+                //Readout neurons density
+                ReadoutNeuronsDensity = double.Parse(settingsElem.Attribute("readoutDensity").Value, CultureInfo.InvariantCulture);
                 //Activation settings
                 ActivationCfg = ActivationFactory.LoadSettings(settingsElem.Descendants().First());
                 //Bias
-                BiasCfg = new RandomValueSettings(settingsElem.Descendants("bias").First());
+                XElement cfgElem = settingsElem.Descendants("bias").FirstOrDefault();
+                BiasCfg = cfgElem == null ? null : new RandomValueSettings(cfgElem);
+                //Spiking sub-type
+                if (activationType == CommonEnums.ActivationType.Spiking)
+                {
+                    SignalingRestriction = CommonEnums.NeuronSignalingRestrictionType.SpikingOnly;
+                    AnalogSpikeThresholdCfg = null;
+                    RetainmentNeuronsDensity = 0;
+                    RetainmentStrengthCfg = null;
+                }
+                else
+                {
+                    //Analog sub-type
+                    //Output signaling restriction
+                    SignalingRestriction = CommonEnums.ParseNeuronSignalingRestriction(settingsElem.Attribute("signalingRestriction").Value);
+                    //Analog spike threshold
+                    cfgElem = settingsElem.Descendants("spikeThreshold").FirstOrDefault();
+                    AnalogSpikeThresholdCfg = cfgElem == null ? new RandomValueSettings(DefaultAnalogSpikeThreshold, DefaultAnalogSpikeThreshold, false, RandomClassExtensions.DistributionType.Uniform) : new RandomValueSettings(cfgElem);
+                    //Retainment
+                    cfgElem = settingsElem.Descendants("retainment").FirstOrDefault();
+                    RetainmentNeuronsDensity = 0;
+                    RetainmentStrengthCfg = null;
+                    if (cfgElem != null)
+                    {
+                        RetainmentNeuronsDensity = double.Parse(cfgElem.Attribute("density").Value, CultureInfo.InvariantCulture);
+                        RetainmentStrengthCfg = new RandomValueSettings(cfgElem.Descendants("strength").First());
+                        if(RetainmentNeuronsDensity == 0 || (RetainmentStrengthCfg.Min == 0 && RetainmentStrengthCfg.Max == 0))
+                        {
+                            RetainmentNeuronsDensity = 0;
+                            RetainmentStrengthCfg = null;
+                        }
+                    }
+                }
+                //Augmented states
+                AugmentedStates = bool.Parse(settingsElem.Attribute("augmentedStates").Value);
                 return;
             }
 
@@ -378,10 +381,16 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 if (Name != cmpSettings.Name ||
                     Role != cmpSettings.Role ||
                     RelativeShare != cmpSettings.RelativeShare ||
+                    ReadoutNeuronsDensity != cmpSettings.ReadoutNeuronsDensity ||
                     AugmentedStates != cmpSettings.AugmentedStates ||
                     Count != cmpSettings.Count ||
+                    ActivationType != cmpSettings.ActivationType ||
                     !Equals(ActivationCfg, cmpSettings.ActivationCfg) ||
-                    !Equals(BiasCfg, cmpSettings.BiasCfg)
+                    SignalingRestriction != cmpSettings.SignalingRestriction ||
+                    !Equals(BiasCfg, cmpSettings.BiasCfg) ||
+                    !Equals(AnalogSpikeThresholdCfg, cmpSettings.AnalogSpikeThresholdCfg) ||
+                    RetainmentNeuronsDensity != cmpSettings.RetainmentNeuronsDensity ||
+                    !Equals(RetainmentStrengthCfg, cmpSettings.RetainmentStrengthCfg)
                     )
                 {
                     return false;

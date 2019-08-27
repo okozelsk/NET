@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using RCNet.Extensions;
 using RCNet.MathTools;
 using RCNet.Neural.Activation;
+using RCNet.Neural.Network.SM.Preprocessing;
 
 namespace RCNet.Neural.Network.SM.Neuron
 {
@@ -13,17 +14,14 @@ namespace RCNet.Neural.Network.SM.Neuron
     /// Reservoir's hidden neuron
     /// </summary>
     [Serializable]
-    public class HiddenNeuron //: INeuron
+    public class HiddenNeuron : INeuron
     {
         //Static attributes
-        /// <summary>
-        /// Range of the rescalled state value. Allways (0,1)
-        /// </summary>
-        private static readonly Interval _rescalledStateRange = new Interval(0, 1);
-        
+        private static readonly Interval _outputRange = new Interval(0, 1);
+
         //Attribute properties
         /// <summary>
-        /// Home pool identificator and neuron placement within the reservoir
+        /// Home pool identifier and neuron placement within the reservoir
         /// </summary>
         public NeuronPlacement Placement { get; }
 
@@ -38,15 +36,9 @@ namespace RCNet.Neural.Network.SM.Neuron
         public CommonEnums.NeuronRole Role { get; }
 
         /// <summary>
-        /// Type of the output signal (spike or analog)
-        /// This neuron is spiking.
+        /// Output signaling restriction
         /// </summary>
-        public CommonEnums.NeuronSignalType OutputType { get { return _activation.OutputSignalType; } }
-
-        /// <summary>
-        /// Output signal range
-        /// </summary>
-        public Interval OutputRange { get { return _activation.OutputRange; } }
+        public CommonEnums.NeuronSignalingRestrictionType SignalingRestriction { get; }
 
         /// <summary>
         /// Constant bias
@@ -54,51 +46,14 @@ namespace RCNet.Neural.Network.SM.Neuron
         public double Bias { get; }
 
         /// <summary>
-        /// Output signal
+        /// Computation cycles gone from the last emitted spike or start (if no spike emitted before current computation cycle)
         /// </summary>
-        public double OutputSignal { get; private set; }
+        public int SpikeLeak { get; private set; }
 
         /// <summary>
-        /// Computation cycles gone from the last emitted signal
+        /// Specifies, if neuron has already emitted spike before current computation cycle
         /// </summary>
-        public int OutputSignalLeak { get; private set; }
-
-        /// <summary>
-        /// Specifies, if neuron has already emitted output signal before current signal
-        /// </summary>
-        public bool AfterFirstOutputSignal { get; private set; }
-
-        /// <summary>
-        /// Value to be passed to readout layer as a primary predictor
-        /// (number of recent spikes + rescalled current membrane potential as a fraction)
-        /// </summary>
-        public double PrimaryPredictor
-        {
-            get
-            {
-                double rescalledState = _rescalledStateRange.Rescale(_activation.InternalState, _activation.InternalStateRange);
-                double fraction = 1d / (1d + Math.Exp(-_activation.InternalState));
-                //return (_firingRate.NumOfRecentSpikes) + fraction;
-                Interval normInt = new Interval(0, 1);
-                fraction = normInt.Rescale(_activation.InternalState, new Interval(-200, 200));
-                //return (double)_firingRate.GetLastSpikes(8) + fraction;
-
-                return Math.Pow(_firingRate.GetRecentExpWRate() + 2, (fraction + 2));
-                //return _activation.InternalState;
-            }
-        }
-
-        /// <summary>
-        /// Value to be passed to readout layer as an augmented predictor
-        /// (exponentially weighted firing rate)
-        /// </summary>
-        public double SecondaryPredictor
-        {
-            get
-            {
-                return _firingRate.GetRecentExpWRate();
-            }
-        }
+        public bool AfterFirstSpike { get; private set; }
 
         //Attributes
         /// <summary>
@@ -107,8 +62,9 @@ namespace RCNet.Neural.Network.SM.Neuron
         private readonly IActivationFunction _activation;
 
         /// <summary>
-        /// Firing rate computer
+        /// Firing
         /// </summary>
+        private readonly double _analogFiringThreshold;
         private readonly FiringRate _firingRate;
 
         /// <summary>
@@ -118,33 +74,105 @@ namespace RCNet.Neural.Network.SM.Neuron
         private double _rStimuli;
         private double _tStimuli;
 
+        /// <summary>
+        /// Retainment
+        /// </summary>
+        private readonly double _retainmentStrength;
+
+        /// <summary>
+        /// Activation state
+        /// </summary>
+        private double _activationState;
+
+        /// <summary>
+        /// Signals
+        /// </summary>
+        private double _analogSignal;
+        private double _spikingSignal;
+
+
         //Constructor
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
         /// <param name="placement">Home pool identificator and neuron placement within the pool.</param>
-        /// <param name="role">Neuron's signal role (Excitatory/Inhibitory).</param>
+        /// <param name="role">Neuron's role (Excitatory/Inhibitory).</param>
         /// <param name="activation">Instantiated activation function.</param>
-        /// <param name="bias">Constant bias.</param>
+        /// <param name="signalingRestriction">Output signaling restriction. Spiking activation has output signal always restricted to SpikingOnly.</param>
+        /// <param name="bias">Constant bias to be applied.</param>
+        /// <param name="analogFiringThreshold">Firing threshold to be applied in case of analog activation. Ignored in case of spiking activation.</param>
+        /// <param name="retainmentStrength">Strength of the neuron's retainment property. Affected only in case of analog activation.</param>
         public HiddenNeuron(NeuronPlacement placement,
-                             CommonEnums.NeuronRole role,
-                             IActivationFunction activation,
-                             double bias
-                             )
+                            CommonEnums.NeuronRole role,
+                            IActivationFunction activation,
+                            CommonEnums.NeuronSignalingRestrictionType signalingRestriction,
+                            double bias = 0,
+                            double analogFiringThreshold = PoolSettings.NeuronGroupSettings.DefaultAnalogSpikeThreshold,
+                            double retainmentStrength = 0
+                            )
         {
             Placement = placement;
+            Statistics = new NeuronStatistics();
+            if(role == CommonEnums.NeuronRole.Input)
+            {
+                throw new ArgumentException("Role of the hidden neuron can not be Input.", "role");
+            }
             Role = role;
             Bias = bias;
-            //Check whether function is spiking
-            if (activation.OutputSignalType != CommonEnums.NeuronSignalType.Spike)
-            {
-                throw new ArgumentException("Activation function is not spiking.", "activation");
-            }
+            //Activation specific
             _activation = activation;
+            if (activation.ActivationType == CommonEnums.ActivationType.Spiking)
+            {
+                //Spiking
+                SignalingRestriction = CommonEnums.NeuronSignalingRestrictionType.SpikingOnly;
+                _analogFiringThreshold = 0;
+                _retainmentStrength = 0;
+            }
+            else
+            {
+                //Anaolg
+                SignalingRestriction = signalingRestriction;
+                _analogFiringThreshold = analogFiringThreshold;
+                _retainmentStrength = retainmentStrength;
+            }
             _firingRate = new FiringRate();
-            Statistics = new NeuronStatistics(_activation.InternalStateRange);
             Reset(false);
             return;
+        }
+
+        //Properties
+        /// <summary>
+        /// Type of the activation function
+        /// </summary>
+        public CommonEnums.ActivationType ActivationType { get { return _activation.ActivationType; } }
+
+        /// <summary>
+        /// Value to be passed to readout layer as a primary predictor
+        /// </summary>
+        public double PrimaryPredictor
+        {
+            get
+            {
+                return _activationState;
+            }
+        }
+
+        /// <summary>
+        /// Value to be passed to readout layer as a secondary predictor
+        /// </summary>
+        public double SecondaryPredictor
+        {
+            get
+            {
+                if (SignalingRestriction == CommonEnums.NeuronSignalingRestrictionType.SpikingOnly)
+                {
+                    return _firingRate.GetRecentExpWRate();
+                }
+                else
+                {
+                    return _activationState * _activationState;
+                }
+            }
         }
 
         //Methods
@@ -159,9 +187,11 @@ namespace RCNet.Neural.Network.SM.Neuron
             _iStimuli = 0;
             _rStimuli = 0;
             _tStimuli = 0;
-            OutputSignal = 0;
-            OutputSignalLeak = 0;
-            AfterFirstOutputSignal = false;
+            _activationState = 0;
+            _analogSignal = 0;
+            _spikingSignal = 0;
+            SpikeLeak = 0;
+            AfterFirstSpike = false;
             if (statistics)
             {
                 Statistics.Reset();
@@ -174,11 +204,11 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// </summary>
         /// <param name="iStimuli">Stimulation comming from input neurons</param>
         /// <param name="rStimuli">Stimulation comming from reservoir neurons</param>
-        public void NewStimuli(double iStimuli, double rStimuli)
+        public void NewStimulation(double iStimuli, double rStimuli)
         {
             _iStimuli = iStimuli;
             _rStimuli = rStimuli;
-            _tStimuli = (iStimuli + rStimuli + Bias).Bound();
+            _tStimuli = (_iStimuli + _rStimuli + Bias).Bound();
             return;
         }
 
@@ -186,25 +216,62 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// Computes neuron's new output signal and updates statistics
         /// </summary>
         /// <param name="collectStatistics">Specifies whether to update internal statistics</param>
-        public void NewState(bool collectStatistics)
+        public void ComputeSignal(bool collectStatistics)
         {
-            //Output signal leak handling
-            if (OutputSignal > 0)
+            //Spike leak handling
+            if (_spikingSignal > 0)
             {
                 //Spike during previous cycle, so reset the counter
-                AfterFirstOutputSignal = true;
-                OutputSignalLeak = 0;
+                AfterFirstSpike = true;
+                SpikeLeak = 0;
             }
-            ++OutputSignalLeak;
-            //New output signal
-            OutputSignal = _activation.Compute(_tStimuli);
-            _firingRate.Update(OutputSignal > 0);
+            ++SpikeLeak;
+
+            if(_activation.ActivationType == CommonEnums.ActivationType.Spiking)
+            {
+                //Spiking activation
+                _spikingSignal = _activation.Compute(_tStimuli);
+                _activationState = _activation.InternalState;
+                _firingRate.Update(_spikingSignal > 0);
+                _analogSignal = _spikingSignal;
+            }
+            else
+            {
+                //Analog activation
+                double newState = _activation.Compute(_tStimuli);
+                _activationState = (_retainmentStrength * _activationState) + (1d - _retainmentStrength) * newState;
+                _analogSignal = _outputRange.Rescale(_activationState, _activation.OutputRange);
+                _firingRate.Update(_activationState > _analogFiringThreshold);
+                _spikingSignal = _activationState > _analogFiringThreshold ? 1 : 0;
+            }
+            //Update statistics
             if (collectStatistics)
             {
-                Statistics.Update(_iStimuli, _rStimuli, _tStimuli, _activation.InternalState, OutputSignal);
+                Statistics.Update(_iStimuli, _rStimuli, _tStimuli, _activationState, _analogSignal, _spikingSignal);
             }
             return;
         }
+
+        /// <summary>
+        /// Neuron returns previously computed signal of required type (if possible).
+        /// Type of finally returned signal depends on specified targetActivationType and signaling restriction of the neuron.
+        /// Signal is always within the range <0, 1>
+        /// </summary>
+        /// <param name="targetActivationType">Specifies what type of the signal is preferred.</param>
+        public double GetSignal(CommonEnums.ActivationType targetActivationType)
+        {
+            if (SignalingRestriction != CommonEnums.NeuronSignalingRestrictionType.NoRestriction)
+            {
+                //Apply internal restriction
+                return SignalingRestriction == CommonEnums.NeuronSignalingRestrictionType.AnalogOnly ? _analogSignal : _spikingSignal;
+            }
+            else
+            {
+                //Return signal according to targetActivationType
+                return targetActivationType == CommonEnums.ActivationType.Analog ? _analogSignal : _spikingSignal;
+            }
+        }
+
 
     }//HiddenNeuron
 

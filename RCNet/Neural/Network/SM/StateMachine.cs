@@ -41,7 +41,7 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// Settings used for instance creation.
         /// </summary>
-        private StateMachineSettings _settings;
+        private readonly StateMachineSettings _settings;
 
         //Constructor
         /// <summary>

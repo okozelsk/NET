@@ -13,14 +13,16 @@ using RCNet.Neural.Network.SM.Synapse;
 namespace RCNet.Neural.Network.SM.Preprocessing
 {
     /// <summary>
-    /// The class contains Neural Preprocessor configuration parameters and also contains
-    /// internal logic so it is not just a container of parameters. To create a proper instance by hand is not
-    /// a trivial task.
-    /// The easiest and safest way to create an instance is to use the xml constructor.
+    /// Neural Preprocessor configuration parameters
     /// </summary>
     [Serializable]
     public class NeuralPreprocessorSettings
     {
+        //Constants
+        /// <summary>
+        /// Value indicates to decide Neural Preprocessor's boot cycles automatically based on number of neurons within the resrvoirs
+        /// </summary>
+        public const int AutomaticBootCycles = -1;
         //Attribute properties
         /// <summary>
         /// Settings of external and internal inputs
@@ -33,17 +35,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         public List<ReservoirInstanceDefinition> ReservoirInstanceDefinitionCollection { get; set; }
 
         //Constructors
-        /// <summary>
-        /// Creates an uninitialized instance.
-        /// </summary>
-        public NeuralPreprocessorSettings()
-        {
-            //Default settings
-            InputConfig = new InputSettings();
-            ReservoirInstanceDefinitionCollection = new List<ReservoirInstanceDefinition>();
-            return;
-        }
-
         /// <summary>
         /// The deep copy constructor
         /// </summary>
@@ -173,8 +164,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                     }
                     //Density
                     double density = double.Parse(inputConnectionElem.Attribute("density").Value, CultureInfo.InvariantCulture);
-                    //Static synapse settings
-                    //Synapse
+                    //Input synapse settings
                     InputSynapseSettings synapseCfg = new InputSynapseSettings(inputConnectionElem.Descendants("synapse").First());
                     //Add new assignment
                     reservoirInstanceDefinition.InputConnectionCollection.Add(new ReservoirInstanceDefinition.InputConnection(resInputFieldIdx, targetPoolID, density, synapseCfg));
@@ -183,7 +173,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 ++reservoirInstanceID;
             }
             //Finalize boot cycles if necessary
-            if(InputConfig.BootCycles == -1 && InputConfig.FeedingType == CommonEnums.InputFeedingType.Continuous)
+            if(InputConfig.BootCycles == AutomaticBootCycles && InputConfig.FeedingType == CommonEnums.InputFeedingType.Continuous)
             {
                 InputConfig.BootCycles = numOfNeuronsInLargestReservoir;
             }
@@ -270,7 +260,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             /// <summary>
             /// Creates an uninitialized instance.
             /// </summary>
-            public InputSettings()
+            private InputSettings()
             {
                 FeedingType = CommonEnums.InputFeedingType.Continuous;
                 BootCycles = -1;
@@ -317,8 +307,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                     string bootCyclesAttrValue = feedingElem.Attribute("bootCycles").Value;
                     if (bootCyclesAttrValue == "Auto")
                     {
-                        //Automatic - will be set later
-                        BootCycles = -1;
+                        //Boot cycles will be set automatically later
+                        BootCycles = NeuralPreprocessorSettings.AutomaticBootCycles;
                     }
                     else
                     {

@@ -20,14 +20,9 @@ namespace RCNet.Neural.Activation
 
         //Properties
         /// <summary>
-        /// Type of the output signal
+        /// Type of the activation function.
         /// </summary>
-        public CommonEnums.NeuronSignalType OutputSignalType { get { return CommonEnums.NeuronSignalType.Analog; } }
-
-        /// <summary>
-        /// Output signal range
-        /// </summary>
-        public abstract Interval OutputRange { get; }
+        public CommonEnums.ActivationType ActivationType { get { return CommonEnums.ActivationType.Analog; } }
 
         /// <summary>
         /// Specifies whether the activation function supports derivative calculation
@@ -49,6 +44,12 @@ namespace RCNet.Neural.Activation
         /// </summary>
         public double InternalState { get { throw new NotImplementedException("Analog activation function is stateless."); } }
 
+        /// <summary>
+        /// Output range of the Compute method
+        /// </summary>
+        public abstract Interval OutputRange { get; }
+
+
         //Methods
         /// <summary>
         /// Resets function to its initial state.
@@ -68,7 +69,7 @@ namespace RCNet.Neural.Activation
         public abstract double Compute(double x);
 
         /// <summary>
-        /// Computes derivative of the activation input.
+        /// Computes derivative (with respect to x)
         /// </summary>
         /// <param name="c">The result of the activation (Compute method)</param>
         /// <param name="x">Activation input (x argument of the Compute method)</param>

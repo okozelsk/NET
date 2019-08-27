@@ -6,8 +6,8 @@
            >
   <xs:import namespace="RCNetTypes" />
 
-  <!-- Pool neuron group settings element -->
-  <xs:element name="rootElem" type="rcn:PoolNeuronGroupCfgType"/>
+  <!-- Pool spiking neuron group settings element -->
+  <xs:element name="rootElem" type="rcn:PoolSpikingNeuronGroupCfgType"/>
 
 </xs:schema>
 

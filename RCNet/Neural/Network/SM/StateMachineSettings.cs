@@ -15,8 +15,7 @@ using RCNet.Neural.Network.SM.Readout;
 namespace RCNet.Neural.Network.SM
 {
     /// <summary>
-    /// The class contains State Machine configuration.
-    /// The easiest and safest way to create an instance is to use the xml constructor.
+    /// State Machine configuration.
     /// </summary>
     [Serializable]
     public class StateMachineSettings
@@ -43,19 +42,6 @@ namespace RCNet.Neural.Network.SM
         public MapperSettings MapperConfig { get; set; }
 
         //Constructors
-        /// <summary>
-        /// Creates an uninitialized instance.
-        /// </summary>
-        public StateMachineSettings()
-        {
-            //Default settings
-            RandomizerSeek = 0;
-            NeuralPreprocessorConfig = new NeuralPreprocessorSettings();
-            ReadoutLayerConfig = new ReadoutLayerSettings();
-            MapperConfig = null;
-            return;
-        }
-
         /// <summary>
         /// The deep copy constructor
         /// </summary>

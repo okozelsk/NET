@@ -28,7 +28,7 @@ namespace RCNet.Neural.Activation
 
         //Attributes
         /// <summary>
-        /// Output range
+        /// Output range (0 no spike, 1 spike)
         /// </summary>
         protected static readonly Interval _outputRange = new Interval(0, 1);
 
@@ -139,12 +139,12 @@ namespace RCNet.Neural.Activation
 
         //Properties
         /// <summary>
-        /// Type of the output
+        /// Type of the activation
         /// </summary>
-        public CommonEnums.NeuronSignalType OutputSignalType { get { return CommonEnums.NeuronSignalType.Spike; } }
+        public CommonEnums.ActivationType ActivationType { get { return CommonEnums.ActivationType.Spiking; } }
 
         /// <summary>
-        /// Output signal range
+        /// Output range of the Compute method
         /// </summary>
         public Interval OutputRange { get { return _outputRange; } }
 
@@ -254,8 +254,7 @@ namespace RCNet.Neural.Activation
         protected abstract void OnFiring();
 
         /// <summary>
-        /// Unsupported functionality!!!
-        /// Computes derivative of the activation input
+        /// Computes derivative (with respect to x)
         /// </summary>
         /// <param name="c">The result of the activation (Compute method)</param>
         /// <param name="x">Activation input (x argument of the Compute method)</param>

@@ -35,11 +35,6 @@ namespace RCNet.Neural.Network.SM.Synapse
         double Weight { get; }
 
         /// <summary>
-        /// Signal delay
-        /// </summary>
-        int Delay { get; }
-
-        /// <summary>
         /// Efficacy statistics of the synapse
         /// </summary>
         BasicStat EfficacyStat { get; }
@@ -56,12 +51,6 @@ namespace RCNet.Neural.Network.SM.Synapse
         /// </summary>
         /// <param name="scale">Scale factor</param>
         void Rescale(double scale);
-
-        /// <summary>
-        /// Sets the synapse delay
-        /// </summary>
-        /// <param name="delay">Signal delay (reservoir cycles)</param>
-        void SetDelay(int delay);
 
         /// <summary>
         /// Returns signal to be delivered to target neuron.

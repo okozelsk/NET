@@ -16,9 +16,12 @@ namespace RCNet.Neural.Network.SM.Neuron
     [Serializable]
     public class InputNeuron : INeuron
     {
+        //Static attributes
+        private static Interval _spikingTargetRange = new Interval(0, 1);
+
         //Attribute properties
         /// <summary>
-        /// Home pool identificator and neuron placement within the reservoir
+        /// Home pool identifierr and neuron placement within the reservoir
         /// Note that Input neuron home PoolID is always -1, because Input neurons do not belong to a physical pool.
         /// </summary>
         public NeuronPlacement Placement { get; }
@@ -30,41 +33,33 @@ namespace RCNet.Neural.Network.SM.Neuron
 
         /// <summary>
         /// Neuron's role within the reservoir (input, excitatory or inhibitory)
-        /// Note that Input neuron is always input.
         /// </summary>
         public CommonEnums.NeuronRole Role { get { return CommonEnums.NeuronRole.Input; } }
 
         /// <summary>
-        /// Type of the output signal (spike or analog)
-        /// Input neuron is an analog neuron.
+        /// Type of the activation function
         /// </summary>
-        public CommonEnums.NeuronSignalType OutputType { get { return CommonEnums.NeuronSignalType.Analog; } }
+        public CommonEnums.ActivationType ActivationType { get { return CommonEnums.ActivationType.Analog; } }
 
         /// <summary>
-        /// Output signal range
+        /// Output signaling restriction
         /// </summary>
-        public Interval OutputRange { get; }
+        public CommonEnums.NeuronSignalingRestrictionType SignalingRestriction { get { return CommonEnums.NeuronSignalingRestrictionType.AnalogOnly; } }
 
         /// <summary>
         /// Constant bias.
-        /// Note that Input neuron has bias always 0.
         /// </summary>
         public double Bias { get { return 0; } }
 
         /// <summary>
-        /// Output signal
+        /// Computation cycles gone from the last emitted spike
         /// </summary>
-        public double OutputSignal { get; private set; }
-
-        /// <summary>
-        /// Computation cycles gone from the last emitted signal
-        /// </summary>
-        public int OutputSignalLeak { get; private set; }
+        public int SpikeLeak { get { throw new NotImplementedException("SpikeLeak is unsupported for InputNeuron"); } }
 
         /// <summary>
         /// Specifies, if neuron has already emitted output signal before current signal
         /// </summary>
-        public bool AfterFirstOutputSignal { get; private set; }
+        public bool AfterFirstSpike { get { return false; } }
 
         /// <summary>
         /// Value to be passed to readout layer as a primary predictor.
@@ -79,9 +74,12 @@ namespace RCNet.Neural.Network.SM.Neuron
         public double SecondaryPredictor { get { return double.NaN; } }
 
         //Attributes
+        private readonly Interval _inputRange;
         private double _iStimuli;
         private double _rStimuli;
         private double _tStimuli;
+        private double _analogTargetSignal;
+        private double _spikingTargetSignal;
 
         //Constructor
         /// <summary>
@@ -97,8 +95,8 @@ namespace RCNet.Neural.Network.SM.Neuron
         public InputNeuron(int[] inputEntryPoint, int inputFieldIdx, Interval inputRange)
         {
             Placement = new NeuronPlacement(-1, inputFieldIdx, - 1, inputFieldIdx, 0, inputEntryPoint[0], inputEntryPoint[1], inputEntryPoint[2]);
-            OutputRange = inputRange.DeepClone();
-            Statistics = new NeuronStatistics(OutputRange);
+            _inputRange = inputRange.DeepClone();
+            Statistics = new NeuronStatistics();
             Reset(false);
             return;
         }
@@ -113,9 +111,8 @@ namespace RCNet.Neural.Network.SM.Neuron
             _iStimuli = 0;
             _rStimuli = 0;
             _tStimuli = 0;
-            OutputSignal = 0;
-            OutputSignalLeak = 0;
-            AfterFirstOutputSignal = false;
+            _analogTargetSignal = 0;
+            _spikingTargetSignal = 0;
             if (statistics)
             {
                 Statistics.Reset();
@@ -127,35 +124,44 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// Stores new incoming stimulation.
         /// </summary>
         /// <param name="iStimuli">External input analog signal</param>
-        /// <param name="rStimuli">Stimulation comming from reservoir neurons. Should be always 0.</param>
-        public void NewStimuli(double iStimuli, double rStimuli)
+        /// <param name="rStimuli">Parameter is ignored. Stimulation comming from reservoir neurons is irrelevant. </param>
+        public void NewStimulation(double iStimuli, double rStimuli)
         {
             _iStimuli = iStimuli;
-            _rStimuli = rStimuli;
-            _tStimuli = (iStimuli + rStimuli).Bound();
+            _rStimuli = 0;
+            _tStimuli = (_iStimuli + _rStimuli + Bias).Bound();
             return;
         }
 
         /// <summary>
-        /// Computes neuron's new output signal and updates statistics
+        /// Prepares new output signal (input for hidden neurons).
         /// </summary>
         /// <param name="collectStatistics">Specifies whether to update internal statistics</param>
-        public void NewState(bool collectStatistics)
+        public void ComputeSignal(bool collectStatistics)
         {
-            //Output signal leak handling
-            if (OutputSignal != OutputRange.Mid)
-            {
-                AfterFirstOutputSignal = true;
-                OutputSignalLeak = 0;
-            }
-            ++OutputSignalLeak;
-            //New output signal
-            OutputSignal = _tStimuli;
+            _analogTargetSignal = _tStimuli;
+            _spikingTargetSignal = _spikingTargetRange.Rescale(_tStimuli, _inputRange);
             if (collectStatistics)
             {
-                Statistics.Update(_iStimuli, _rStimuli, _tStimuli, OutputSignal, OutputSignal);
+                Statistics.Update(_iStimuli, _rStimuli, _tStimuli, _tStimuli, _analogTargetSignal, _spikingTargetSignal);
             }
             return;
+        }
+
+        /// <summary>
+        /// Neuron returns input for neuron having activation of specified type.
+        /// </summary>
+        /// <param name="targetActivationType">Specifies what type of the signal is required.</param>
+        public double GetSignal(CommonEnums.ActivationType targetActivationType)
+        {
+            if (targetActivationType == CommonEnums.ActivationType.Spiking)
+            {
+                return _spikingTargetSignal;
+            }
+            else
+            {
+                return _analogTargetSignal;
+            }
         }
 
 

@@ -15,7 +15,7 @@ namespace RCNet.Neural.Network.SM.Neuron
     {
         //Attribute properties
         /// <summary>
-        /// Home pool identificator and neuron placement within the pool
+        /// Home pool identifier and neuron placement within the pool
         /// </summary>
         NeuronPlacement Placement { get; }
 
@@ -30,34 +30,29 @@ namespace RCNet.Neural.Network.SM.Neuron
         CommonEnums.NeuronRole Role { get; }
 
         /// <summary>
-        /// Type of the output signal (spike or analog)
+        /// Type of the activation function
         /// </summary>
-        CommonEnums.NeuronSignalType OutputType { get; }
+        CommonEnums.ActivationType ActivationType { get; }
 
         /// <summary>
-        /// Output signal range
+        /// Output signaling restriction
         /// </summary>
-        Interval OutputRange { get; }
-
+        CommonEnums.NeuronSignalingRestrictionType SignalingRestriction { get; }
+        
         /// <summary>
         /// Constant bias
         /// </summary>
         double Bias { get; }
 
         /// <summary>
-        /// Output signal
+        /// Computation cycles gone from the last emitted spike or start (if no spike emitted before current computation cycle)
         /// </summary>
-        double OutputSignal { get; }
+        int SpikeLeak { get; }
 
         /// <summary>
-        /// Computation cycles gone from the last emitted signal
+        /// Specifies, if neuron has already emitted spike before current computation cycle
         /// </summary>
-        int OutputSignalLeak { get; }
-
-        /// <summary>
-        /// Specifies, if neuron has already emitted output signal before current signal
-        /// </summary>
-        bool AfterFirstOutputSignal { get; }
+        bool AfterFirstSpike { get; }
 
         /// <summary>
         /// Value to be passed to readout layer as a primary predictor.
@@ -81,13 +76,21 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// </summary>
         /// <param name="iStimuli">Stimulation comming from input neurons</param>
         /// <param name="rStimuli">Stimulation comming from reservoir neurons</param>
-        void NewStimuli(double iStimuli, double rStimuli);
+        void NewStimulation(double iStimuli, double rStimuli);
 
         /// <summary>
-        /// Computes neuron's new output signal and updates statistics
+        /// Computes neuron's new output signal, updates SpikeLeak, AfterFirstSpike and Statistics.
+        /// Must be called only once per reservoir computation cycle.
         /// </summary>
         /// <param name="collectStatistics">Specifies whether to update internal statistics</param>
-        void NewState(bool collectStatistics);
+        void ComputeSignal(bool collectStatistics);
+
+        /// <summary>
+        /// Neuron's output signal.
+        /// </summary>
+        /// <param name="targetActivationType">Specifies what type of the signal is required if possible</param>
+        double GetSignal(CommonEnums.ActivationType targetActivationType);
+
 
     }//INeuron
 

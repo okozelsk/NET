@@ -17,7 +17,19 @@ namespace RCNet.Neural.Network.SM.Synapse
     [Serializable]
     public class InputSynapse : BaseSynapse, ISynapse
     {
+        //Attribute properties
+        /// <summary>
+        /// Signal delaying (in computation cycles)
+        /// </summary>
+        public int Delay { get; protected set; }
+
+        /// <summary>
+        /// Method to decide signal delaying
+        /// </summary>
+        public CommonEnums.SynapticDelayMethod DelayMethod { get; protected set; }
+
         //Attributes
+        private readonly int _maxDelay;
         private SimpleQueue<Signal> _signalQueue;
 
         //Constructor
@@ -27,13 +39,20 @@ namespace RCNet.Neural.Network.SM.Synapse
         /// <param name="sourceNeuron">Source neuron</param>
         /// <param name="targetNeuron">Target neuron</param>
         /// <param name="weight">Synapse weight (unsigned)</param>
+        /// <param name="delayMethod">Synaptic delay method to be used</param>
+        /// <param name="maxDelay">Maximum synaptic delay</param>
         public InputSynapse(INeuron sourceNeuron,
                             INeuron targetNeuron,
-                            double weight
+                            double weight,
+                            CommonEnums.SynapticDelayMethod delayMethod,
+                            int maxDelay
                             )
             :base(sourceNeuron, targetNeuron, weight)
         {
-            //Signal queue
+            //Signal delaying can be set later by SetDelay method
+            _maxDelay = maxDelay;
+            Delay = 0;
+            DelayMethod = delayMethod;
             _signalQueue = null;
             return;
         }
@@ -50,27 +69,35 @@ namespace RCNet.Neural.Network.SM.Synapse
             if (statistics)
             {
                 EfficacyStat.Reset();
+                EfficacyStat.AddSampleValue(1d);
             }
             return;
         }
 
-        /// <summary>
-        /// Sets the synapse signal delay
-        /// </summary>
-        /// <param name="delay">Signal delay (reservoir cycles)</param>
-        public void SetDelay(int delay)
+        public void SetDelay(BasicStat distanceStat, Random rand)
         {
-            //Set synapse signal delay
-            Delay = delay;
-            if(Delay == 0)
+            if (_maxDelay > 0)
             {
-                //No queue will be used
-                _signalQueue = null;
-            }
-            else
-            {
-                //Delay queue
-                _signalQueue = new SimpleQueue<Signal>(Delay + 1);
+                //Set synapse signal delay
+                if (DelayMethod == CommonEnums.SynapticDelayMethod.Distance)
+                {
+                    double relDistance = (Distance - distanceStat.Min) / distanceStat.Span;
+                    Delay = (int)Math.Round(_maxDelay * relDistance);
+                }
+                else
+                {
+                    Delay = rand.Next(_maxDelay + 1);
+                }
+                if (Delay == 0)
+                {
+                    //No queue will be used
+                    _signalQueue = null;
+                }
+                else
+                {
+                    //Delay queue
+                    _signalQueue = new SimpleQueue<Signal>(Delay + 1);
+                }
             }
             return;
         }
@@ -81,80 +108,32 @@ namespace RCNet.Neural.Network.SM.Synapse
         /// <param name="collectStatistics">Specifies whether to update internal statistics</param>
         public double GetSignal(bool collectStatistics)
         {
-            //Source neuron signal
-            double sourceSignal = SourceNeuron.OutputSignal;
+            //Weighted source neuron signal
+            double weightedSignal = SourceNeuron.GetSignal(TargetNeuron.ActivationType) * Weight; ;
             if (_signalQueue == null)
             {
-                //No delay of the signal - do not use queue
-                if (sourceSignal == 0)
-                {
-                    //No source signal so simply return 0
-                    return 0;
-                }
-                else
-                {
-                    //Update statistics if necessary
-                    if (collectStatistics)
-                    {
-                        EfficacyStat.AddSampleValue(1d);
-                    }
-                    //Return resulting signal
-                    return sourceSignal * Weight;
-                }
+                return weightedSignal;
             }
             else
             {
                 //Signal to be delayed so use queue
-                if (sourceSignal == 0)
+                //Enqueue
+                Signal sigObj = _signalQueue.GetElementOnEnqueuePosition();
+                if (sigObj != null)
                 {
-                    //No signal adjustments
-                    Signal sigObj = _signalQueue.GetElementOnEnqueuePosition();
-                    if (sigObj != null)
-                    {
-                        sigObj._weightedSignal = 0d;
-                    }
-                    else
-                    {
-                        sigObj = new Signal { _weightedSignal = 0d };
-                    }
-                    _signalQueue.Enqueue(sigObj);
+                    sigObj._weightedSignal = weightedSignal;
                 }
                 else
                 {
-                    //Signal to be delayed
-                    Signal sigObj = _signalQueue.GetElementOnEnqueuePosition();
-                    //Compute constantly weighted signal and put it into the queue simulating the signal traveling delay
-                    if (sigObj != null)
-                    {
-                        sigObj._weightedSignal = ((SourceNeuron.OutputSignal + _add) / _div) * Weight;
-                    }
-                    else
-                    {
-                        sigObj = new Signal { _weightedSignal = ((SourceNeuron.OutputSignal + _add) / _div) * Weight };
-                    }
-                    _signalQueue.Enqueue(sigObj);
+                    sigObj = new Signal { _weightedSignal = weightedSignal };
                 }
+                _signalQueue.Enqueue(sigObj);
                 //Is there delayed signal to be delivered?
                 if (_signalQueue.Full)
                 {
                     //Queue is full, so synapse is ready to deliver delayed signal
-                    //Pick up source signal and pre-synaptic part of efficacy
-                    Signal sigObj = _signalQueue.Dequeue();
-                    if (sigObj._weightedSignal == 0)
-                    {
-                        //No need of signal adjustment
-                        return 0;
-                    }
-                    else
-                    {
-                        //Update statistics if required
-                        if (collectStatistics)
-                        {
-                            EfficacyStat.AddSampleValue(1d);
-                        }
-                        //Deliver the resulting signal
-                        return sigObj._weightedSignal;
-                    }
+                    sigObj = _signalQueue.Dequeue();
+                    return sigObj._weightedSignal;
                 }
                 else
                 {

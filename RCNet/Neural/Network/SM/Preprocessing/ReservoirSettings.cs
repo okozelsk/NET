@@ -10,35 +10,27 @@ using RCNet.XmlTools;
 using RCNet.RandomValue;
 using RCNet.Neural.Activation;
 using RCNet.Neural.Network.SM.Synapse;
+using System.Xml.XPath;
 
 namespace RCNet.Neural.Network.SM.Preprocessing
 {
     /// <summary>
-    /// The class contains reservoir configuration parameters and also contains
-    /// internal logic so it is not just a container of parameters. To create the proper instance by hand is not
-    /// a trivial task.
-    /// The easiest and safest way to create an instance is to use the xml constructor.
+    /// Contains reservoir configuration parameters.
     /// </summary>
     [Serializable]
     public class ReservoirSettings
     {
+        //Constants
+        /// <summary>
+        /// Value indicates no application of the spectral radius
+        /// </summary>
+        public const double NASpectralRadius = -1d;
+
         //Attribute properties
         /// <summary>
         /// Name of this configuration
         /// </summary>
         public string SettingsName { get; set; }
-        /// <summary>
-        /// Specifies how will be decided synaptic delay
-        /// </summary>
-        public CommonEnums.SynapticDelayMethod SynapticDelayMethod { get; set; }
-        /// <summary>
-        /// Maximum delay of the input synapses
-        /// </summary>
-        public int MaxInputDelay { get; set; }
-        /// <summary>
-        /// Spectral radius.
-        /// </summary>
-        public double SpectralRadius { get; set; }
         /// <summary>
         /// Input entry point coordinates
         /// </summary>
@@ -51,23 +43,16 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// Collection of pools interconnection settings
         /// </summary>
         public List<PoolsInterconnection> PoolsInterconnectionCollection { get; set; }
+        /// <summary>
+        /// Spectral radius value for analog activations scope.
+        /// </summary>
+        public double AnalogScopeSpectralRadius { get; set; }
+        /// <summary>
+        /// Spectral radius value for spiking activations scope.
+        /// </summary>
+        public double SpikingScopeSpectralRadius { get; set; }
 
         //Constructors
-        /// <summary>
-        /// Creates an uninitialized instance
-        /// </summary>
-        public ReservoirSettings()
-        {
-            SettingsName = string.Empty;
-            SynapticDelayMethod = CommonEnums.SynapticDelayMethod.Random;
-            MaxInputDelay = 0;
-            SpectralRadius = -1;
-            InputEntryPoint = null;
-            PoolSettingsCollection = null;
-            PoolsInterconnectionCollection = null;
-            return;
-        }
-
         /// <summary>
         /// The deep copy constructor
         /// </summary>
@@ -75,9 +60,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         public ReservoirSettings(ReservoirSettings source)
         {
             SettingsName = source.SettingsName;
-            SynapticDelayMethod = source.SynapticDelayMethod;
-            MaxInputDelay = source.MaxInputDelay;
-            SpectralRadius = source.SpectralRadius;
             InputEntryPoint = null;
             if(source.InputEntryPoint != null)
             {
@@ -101,12 +83,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                     PoolsInterconnectionCollection.Add(poolsInterConn.DeepClone());
                 }
             }
+            AnalogScopeSpectralRadius = source.AnalogScopeSpectralRadius;
+            SpikingScopeSpectralRadius = source.SpikingScopeSpectralRadius;
             return;
         }
 
         /// <summary>
         /// Creates the instance and initialize it from given xml element.
-        /// This is the preferred way to instantiate reservoir settings.
         /// </summary>
         /// <param name="elem">
         /// Xml data containing reservoir settings.
@@ -122,9 +105,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             XElement reservoirSettingsElem = validator.Validate(elem, "rootElem");
             //Parsing
             SettingsName = reservoirSettingsElem.Attribute("name").Value;
-            SynapticDelayMethod = CommonEnums.ParseSynapticDelayMethod(reservoirSettingsElem.Attribute("synapticDelayMethod").Value);
-            MaxInputDelay = int.Parse(reservoirSettingsElem.Attribute("maxInputDelay").Value, CultureInfo.InvariantCulture);
-            SpectralRadius = double.Parse(reservoirSettingsElem.Attribute("spectralRadius").Value, CultureInfo.InvariantCulture);
             //Input entry point
             InputEntryPoint = new int[3];
             if (reservoirSettingsElem.Descendants("inputEntryPoint").Count() > 0)
@@ -153,6 +133,24 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                     PoolsInterconnectionCollection.Add(new PoolsInterconnection(poolsInterConnElem, PoolSettingsCollection));
                 }
             }
+            //Spectral radius
+            AnalogScopeSpectralRadius = NASpectralRadius;
+            SpikingScopeSpectralRadius = NASpectralRadius;
+            XElement cfgElem;
+            //Analog scope
+            cfgElem = reservoirSettingsElem.XPathSelectElement("./spectralRadius/analogScope");
+            if (cfgElem != null)
+            {
+                string scopeSRValue = cfgElem.Attribute("value").Value;
+                AnalogScopeSpectralRadius = scopeSRValue == "NA" ? NASpectralRadius : double.Parse(scopeSRValue, CultureInfo.InvariantCulture);
+            }
+            //Spiking scope
+            cfgElem = reservoirSettingsElem.XPathSelectElement("./spectralRadius/spikingScope");
+            if (cfgElem != null)
+            {
+                string scopeSRValue = cfgElem.Attribute("value").Value;
+                SpikingScopeSpectralRadius = scopeSRValue == "NA" ? NASpectralRadius : double.Parse(scopeSRValue, CultureInfo.InvariantCulture);
+            }
             return;
         }
 
@@ -165,15 +163,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             if (obj == null) return false;
             ReservoirSettings cmpSettings = obj as ReservoirSettings;
             if (SettingsName != cmpSettings.SettingsName ||
-                SynapticDelayMethod != cmpSettings.SynapticDelayMethod ||
-                MaxInputDelay != cmpSettings.MaxInputDelay ||
-                SpectralRadius != cmpSettings.SpectralRadius ||
                 (PoolSettingsCollection == null && cmpSettings.PoolSettingsCollection != null) ||
                 (PoolSettingsCollection != null && cmpSettings.PoolSettingsCollection == null) ||
                 (PoolSettingsCollection != null && PoolSettingsCollection.Count != cmpSettings.PoolSettingsCollection.Count) ||
                 (PoolsInterconnectionCollection == null && cmpSettings.PoolsInterconnectionCollection != null) ||
                 (PoolsInterconnectionCollection != null && cmpSettings.PoolsInterconnectionCollection == null) ||
-                (PoolsInterconnectionCollection != null && PoolsInterconnectionCollection.Count != cmpSettings.PoolsInterconnectionCollection.Count)
+                (PoolsInterconnectionCollection != null && PoolsInterconnectionCollection.Count != cmpSettings.PoolsInterconnectionCollection.Count) ||
+                AnalogScopeSpectralRadius != cmpSettings.AnalogScopeSpectralRadius ||
+                SpikingScopeSpectralRadius != cmpSettings.SpikingScopeSpectralRadius
                 )
             {
                 return false;
@@ -282,24 +279,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             public InternalSynapseSettings SynapseCfg { get; set; }
 
             //Constructors
-            /// <summary>
-            /// Creates an unitialized instance
-            /// </summary>
-            public PoolsInterconnection()
-            {
-                SourcePoolName = string.Empty;
-                SourceConnectionDensity = 0;
-                TargetPoolName = string.Empty;
-                TargetConnectionDensity = 0;
-                RatioEE = 0.3;
-                RatioEI = 0.2;
-                RatioIE = 0.4;
-                RatioII = 0.1;
-                ConstantNumOfConnections = true;
-                SynapseCfg = null;
-                return;
-            }
-
             /// <summary>
             /// Copy constructor
             /// </summary>

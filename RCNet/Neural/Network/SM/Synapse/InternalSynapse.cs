@@ -62,7 +62,7 @@ namespace RCNet.Neural.Network.SM.Synapse
             _restingEfficacy = restingEfficacy;
             _facilitation = _restingEfficacy;
             _depression = 1;
-            _applyShortTermPlasticity = applyShortTermPlasticity && (SourceNeuron.OutputType == CommonEnums.NeuronSignalType.Spike);
+            _applyShortTermPlasticity = applyShortTermPlasticity;
             //Post-synaptic current
             _tauPostSynapticCurrentDecay = tauPostSynapticCurrentDecay;
             _t = 0;
@@ -90,28 +90,19 @@ namespace RCNet.Neural.Network.SM.Synapse
         }
 
         /// <summary>
-        /// Sets the synapse signal delay
-        /// </summary>
-        /// <param name="delay">Signal delay (reservoir cycles)</param>
-        public void SetDelay(int delay)
-        {
-            throw new NotImplementedException("Setting delay is not possible in case of reservoirs internal synapse.");
-        }
-
-        /// <summary>
         /// Computes synapse efficacy based on the short-term-plasticity model.
         /// </summary>
         protected double ComputeEfficacy()
         {
             if (_applyShortTermPlasticity)
             {
-                if (SourceNeuron.AfterFirstOutputSignal)
+                if (SourceNeuron.AfterFirstSpike)
                 {
                     //Facilitation model
-                    double tmp = _facilitation * Math.Exp(-(SourceNeuron.OutputSignalLeak / _tauFacilitation));
+                    double tmp = _facilitation * Math.Exp(-(SourceNeuron.SpikeLeak / _tauFacilitation));
                     _facilitation = tmp + _restingEfficacy * (1d - tmp);
                     //Depression model
-                    tmp = Math.Exp(-(SourceNeuron.OutputSignalLeak / _tauDepression));
+                    tmp = Math.Exp(-(SourceNeuron.SpikeLeak / _tauDepression));
                     _depression = _depression * (1d - _facilitation) * tmp + 1d - tmp;
                 }
                 return _facilitation * _depression;
@@ -151,8 +142,7 @@ namespace RCNet.Neural.Network.SM.Synapse
         {
             ++_t;
             //Source neuron signal
-            double sourceSignal = SourceNeuron.OutputSignal;
-            //No delay of the signal - do not use queue
+            double sourceSignal = SourceNeuron.GetSignal(TargetNeuron.ActivationType);
             if (sourceSignal == 0)
             {
                 //No source signal so simply return 0

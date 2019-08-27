@@ -13,7 +13,7 @@ using System.Xml.XPath;
 namespace RCNet.Neural.Network.SM.Synapse
 {
     /// <summary>
-    /// Setup parameters of input synapse
+    /// Configuration parameters of an input synapse
     /// </summary>
     [Serializable]
     public class InputSynapseSettings
@@ -22,7 +22,7 @@ namespace RCNet.Neural.Network.SM.Synapse
         /// <summary>
         /// Synapse's scope when targeting spiking neurons
         /// </summary>
-        public CommonEnums.InputSynapseScope SpikingTargetScope { get; set; }
+        public CommonEnums.SynapticTargetScope SpikingTargetScope { get; set; }
         /// <summary>
         /// Synapse's random weight settings for Input->Spiking connection
         /// </summary>
@@ -31,25 +31,23 @@ namespace RCNet.Neural.Network.SM.Synapse
         /// <summary>
         /// Synapse's scope when targeting analog neurons
         /// </summary>
-        public CommonEnums.InputSynapseScope AnalogTargetScope { get; set; }
+        public CommonEnums.SynapticTargetScope AnalogTargetScope { get; set; }
         /// <summary>
         /// Synapse's random weight settings for Input->Analog connection
         /// </summary>
         public RandomValueSettings AnalogTargetWeightCfg { get; set; }
 
-        //Constructors
         /// <summary>
-        /// Creates an uninitialized instance
+        /// Specifies how will be decided synaptic delay
         /// </summary>
-        public InputSynapseSettings()
-        {
-            SpikingTargetScope = CommonEnums.InputSynapseScope.Excitatory;
-            SpikingTargetWeightCfg = null;
-            AnalogTargetScope = CommonEnums.InputSynapseScope.All;
-            AnalogTargetWeightCfg = null;
-            return;
-        }
+        public CommonEnums.SynapticDelayMethod DelayMethod { get; set; }
+        /// <summary>
+        /// Maximum delay of the input signal
+        /// </summary>
+        public int MaxDelay { get; set; }
 
+
+        //Constructors
         /// <summary>
         /// The deep copy constructor
         /// </summary>
@@ -68,6 +66,8 @@ namespace RCNet.Neural.Network.SM.Synapse
             {
                 AnalogTargetWeightCfg = source.AnalogTargetWeightCfg.DeepClone();
             }
+            DelayMethod = source.DelayMethod;
+            MaxDelay = source.MaxDelay;
             return;
         }
 
@@ -93,11 +93,11 @@ namespace RCNet.Neural.Network.SM.Synapse
             cfgElem = settingsElem.XPathSelectElement("./spikingTarget");
             if(cfgElem != null)
             {
-                SpikingTargetScope = CommonEnums.ParseInputSynapseScope(cfgElem.Attribute("scope").Value);
+                SpikingTargetScope = CommonEnums.ParseSynapticTargetScope(cfgElem.Attribute("scope").Value);
             }
             else
             {
-                SpikingTargetScope = CommonEnums.InputSynapseScope.Excitatory;
+                SpikingTargetScope = CommonEnums.SynapticTargetScope.Excitatory;
             }
             //Spiking target Weight
             cfgElem = settingsElem.XPathSelectElement("./spikingTarget/weight");
@@ -114,11 +114,11 @@ namespace RCNet.Neural.Network.SM.Synapse
             cfgElem = settingsElem.XPathSelectElement("./analogTarget");
             if (cfgElem != null)
             {
-                AnalogTargetScope = CommonEnums.ParseInputSynapseScope(cfgElem.Attribute("scope").Value);
+                AnalogTargetScope = CommonEnums.ParseSynapticTargetScope(cfgElem.Attribute("scope").Value);
             }
             else
             {
-                AnalogTargetScope = CommonEnums.InputSynapseScope.All;
+                AnalogTargetScope = CommonEnums.SynapticTargetScope.All;
             }
             //Analog target Weight
             cfgElem = settingsElem.XPathSelectElement("./analogTarget/weight");
@@ -130,6 +130,9 @@ namespace RCNet.Neural.Network.SM.Synapse
             {
                 AnalogTargetWeightCfg = new RandomValueSettings(0, 1);
             }
+            //Delay
+            DelayMethod = CommonEnums.ParseSynapticDelayMethod(settingsElem.Attribute("delayMethod").Value);
+            MaxDelay = int.Parse(settingsElem.Attribute("maxDelay").Value, CultureInfo.InvariantCulture);
             return;
         }
 
@@ -144,7 +147,9 @@ namespace RCNet.Neural.Network.SM.Synapse
             if (SpikingTargetScope != cmpSettings.SpikingTargetScope ||
                 !Equals(SpikingTargetWeightCfg, cmpSettings.SpikingTargetWeightCfg) ||
                 AnalogTargetScope != cmpSettings.AnalogTargetScope ||
-                !Equals(AnalogTargetWeightCfg, cmpSettings.AnalogTargetWeightCfg)
+                !Equals(AnalogTargetWeightCfg, cmpSettings.AnalogTargetWeightCfg) ||
+                DelayMethod != cmpSettings.DelayMethod ||
+                MaxDelay != cmpSettings.MaxDelay
                 )
             {
                 return false;

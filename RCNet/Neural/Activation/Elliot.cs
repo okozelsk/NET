@@ -39,7 +39,7 @@ namespace RCNet.Neural.Activation
 
         //Properties
         /// <summary>
-        /// Output range
+        /// Output range of the Compute method
         /// </summary>
         public override Interval OutputRange { get { return _outputRange; } }
 
@@ -55,7 +55,7 @@ namespace RCNet.Neural.Activation
         }
 
         /// <summary>
-        /// Computes derivative of the activation input
+        /// Computes derivative (with respect to x)
         /// </summary>
         /// <param name="c">The result of the activation (Compute method)</param>
         /// <param name="x">Activation input (x argument of the Compute method)</param>
