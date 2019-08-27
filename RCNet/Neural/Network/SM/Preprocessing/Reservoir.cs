@@ -23,11 +23,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// <summary>
         /// Reservoir's input neurons.
         /// </summary>
-        private readonly INeuron[] _inputNeuronCollection;
+        private readonly InputNeuron[] _inputNeuronCollection;
         /// <summary>
         /// Neurons within the pools.
         /// </summary>
-        private readonly List<INeuron[]> _poolNeuronsCollection;
+        private readonly List<HiddenNeuron[]> _poolNeuronsCollection;
         /// <summary>
         /// Ratio of the excitatory neurons within the pool
         /// </summary>
@@ -35,7 +35,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// <summary>
         /// Reservoir's all internal neurons (flat structure).
         /// </summary>
-        private readonly INeuron[] _reservoirNeuronCollection;
+        private readonly HiddenNeuron[] _reservoirNeuronCollection;
         /// <summary>
         /// Ratio of the excitatory neurons within the reservoir
         /// </summary>
@@ -90,7 +90,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             //Initialization of neurons
             //-----------------------------------------------------------------------------
             //Input neurons
-            _inputNeuronCollection = new INeuron[numOfInputNodes];
+            _inputNeuronCollection = new InputNeuron[numOfInputNodes];
             for (int i = 0; i < numOfInputNodes; i++)
             {
                 _inputNeuronCollection[i] = new InputNeuron(InstanceDefinition.Settings.InputEntryPoint, i, inputRange);
@@ -106,8 +106,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             int neuronReservoirFlatIdx = 0;
             _numOfAnalogNeurons = 0;
             _numOfSpikingNeurons = 0;
-            List<INeuron> allNeurons = new List<INeuron>();
-            _poolNeuronsCollection = new List<INeuron[]>(InstanceDefinition.Settings.PoolSettingsCollection.Count);
+            List<HiddenNeuron> allNeurons = new List<HiddenNeuron>();
+            _poolNeuronsCollection = new List<HiddenNeuron[]>(InstanceDefinition.Settings.PoolSettingsCollection.Count);
             _poolExcitatoryNeuronsRatioCollection = new double[InstanceDefinition.Settings.PoolSettingsCollection.Count];
             _reservoirExcitatoryNeuronsRatio = 0d;
             PredictorNeuronCollection = new List<PredictorNeuron>();
@@ -179,7 +179,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 //Randomize order before sequential instantiation
                 rand.Shuffle(neuronParamsCollection);
                 //Instantiate neurons
-                INeuron[] poolNeurons = new INeuron[poolSettings.Dim.Size];
+                HiddenNeuron[] poolNeurons = new HiddenNeuron[poolSettings.Dim.Size];
                 int neuronPoolFlatIdx = 0;
                 for (int x = 0; x < poolSettings.Dim.DimX; x++)
                 {
@@ -313,12 +313,18 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 //Do nothing
                 return;
             }
-            //Create reservoir's weight matrix
+            //Select target neurons
+            List<HiddenNeuron> scopeNeurons = new List<HiddenNeuron>(from neuron in _reservoirNeuronCollection
+                                                                     where (analogScope && neuron.ActivationType == CommonEnums.ActivationType.Analog) ||
+                                                                           (spikingScope && neuron.ActivationType == CommonEnums.ActivationType.Spiking)
+                                                                     select neuron);
+            if(scopeNeurons.Count == 0)
+            {
+                throw new Exception("ApplySpectralRadius: Invalid scope to apply spectral radius. No weight belongs into the spacified scope.");
+            }
+            //Create weight matrix
             Matrix wMatrix = new Matrix(_reservoirNeuronCollection.Length, _reservoirNeuronCollection.Length);
-            Parallel.ForEach(from neuron in _reservoirNeuronCollection
-                             where (analogScope && neuron.ActivationType == CommonEnums.ActivationType.Analog) ||
-                                   (spikingScope && neuron.ActivationType == CommonEnums.ActivationType.Spiking)
-                             select neuron, neuron =>
+            Parallel.ForEach(scopeNeurons, neuron =>
             {
                 foreach (ISynapse synapse in _neuronNeuronConnectionsCollection[neuron.Placement.ReservoirFlatIdx].Values)
                 {
@@ -328,14 +334,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             double largestEigenValue = Math.Abs(wMatrix.EstimateLargestEigenValue(out double[] eigenVector));
             if (largestEigenValue == 0)
             {
-                throw new Exception("Invalid reservoir weights or specified subset of weights. Largest eigenvalue is 0.");
+                throw new Exception("ApplySpectralRadius: Invalid weights or specified subset of weights. Largest eigenvalue is 0.");
             }
             double scale = spectralRadius / largestEigenValue;
             //Scale weights of synapses targeting analog neurons
-            Parallel.ForEach(from neuron in _reservoirNeuronCollection
-                             where (analogScope && neuron.ActivationType == CommonEnums.ActivationType.Analog) ||
-                                   (spikingScope && neuron.ActivationType == CommonEnums.ActivationType.Spiking)
-                             select neuron, neuron =>
+            Parallel.ForEach(scopeNeurons, neuron =>
             {
                 foreach (ISynapse synapse in _neuronNeuronConnectionsCollection[neuron.Placement.ReservoirFlatIdx].Values)
                 {
@@ -377,11 +380,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 if (inputConnection.PoolID == poolID)
                 {
                     //Select available targets according to synapse's allowed scope
-                    List<INeuron> targetNeurons = new List<INeuron>(from neuron in _poolNeuronsCollection[poolID]
-                                                                    where  (neuron.ActivationType == CommonEnums.ActivationType.Analog && (inputConnection.SynapseCfg.AnalogTargetScope == CommonEnums.SynapticTargetScope.All || (neuron.Role == CommonEnums.NeuronRole.Excitatory && inputConnection.SynapseCfg.AnalogTargetScope == CommonEnums.SynapticTargetScope.Excitatory) || (neuron.Role == CommonEnums.NeuronRole.Inhibitory && inputConnection.SynapseCfg.AnalogTargetScope == CommonEnums.SynapticTargetScope.Inhibitory))) ||
-                                                                           (neuron.ActivationType == CommonEnums.ActivationType.Spiking && (inputConnection.SynapseCfg.SpikingTargetScope == CommonEnums.SynapticTargetScope.All || (neuron.Role == CommonEnums.NeuronRole.Excitatory && inputConnection.SynapseCfg.SpikingTargetScope == CommonEnums.SynapticTargetScope.Excitatory) || (neuron.Role == CommonEnums.NeuronRole.Inhibitory && inputConnection.SynapseCfg.SpikingTargetScope == CommonEnums.SynapticTargetScope.Inhibitory)))
-                                                                    select neuron
-                                                                    );
+                    List<HiddenNeuron> targetNeurons = new List<HiddenNeuron>(from neuron in _poolNeuronsCollection[poolID]
+                                                                              where  (neuron.ActivationType == CommonEnums.ActivationType.Analog && (inputConnection.SynapseCfg.AnalogTargetScope == CommonEnums.SynapticTargetScope.All || (neuron.Role == CommonEnums.NeuronRole.Excitatory && inputConnection.SynapseCfg.AnalogTargetScope == CommonEnums.SynapticTargetScope.Excitatory) || (neuron.Role == CommonEnums.NeuronRole.Inhibitory && inputConnection.SynapseCfg.AnalogTargetScope == CommonEnums.SynapticTargetScope.Inhibitory))) ||
+                                                                                     (neuron.ActivationType == CommonEnums.ActivationType.Spiking && (inputConnection.SynapseCfg.SpikingTargetScope == CommonEnums.SynapticTargetScope.All || (neuron.Role == CommonEnums.NeuronRole.Excitatory && inputConnection.SynapseCfg.SpikingTargetScope == CommonEnums.SynapticTargetScope.Excitatory) || (neuron.Role == CommonEnums.NeuronRole.Inhibitory && inputConnection.SynapseCfg.SpikingTargetScope == CommonEnums.SynapticTargetScope.Inhibitory)))
+                                                                              select neuron
+                                                                              );
                     int connectionsPerInput = (int)Math.Round(InstanceDefinition.Settings.PoolSettingsCollection[poolID].Dim.Size * inputConnection.Density, 0);
                     if(connectionsPerInput > targetNeurons.Count)
                     {
@@ -449,10 +452,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             }
             //////////////////////////////////////////////////////////////////////////////////////
             //Collect all possible target neurons
-            List<INeuron> targetNeuronCollection = (from neuron in _poolNeuronsCollection[targetPoolID]
-                                                    where neuron.Role == targetNeuronRole
-                                                    select neuron
-                                                    ).ToList();
+            List<HiddenNeuron> targetNeuronCollection = (from neuron in _poolNeuronsCollection[targetPoolID]
+                                                         where neuron.Role == targetNeuronRole
+                                                         select neuron
+                                                         ).ToList();
             //////////////////////////////////////////////////////////////////////////////////////
             //Plan number of connections per each source neuron
             bool excludeSourceNeuronFromTarget = (sourcePoolID == targetPoolID && sourceNeuronRole == targetNeuronRole && !sourcePoolSettings.InterconnectionCfg.AllowSelfConnection);
@@ -720,7 +723,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             {
                 ReservoirStat.PoolStat poolStat = new ReservoirStat.PoolStat(poolSettings, _poolNeuronsCollection[poolID].Length, _poolExcitatoryNeuronsRatioCollection[poolID]);
                 //Neurons statistics
-                foreach (INeuron neuron in _poolNeuronsCollection[poolID])
+                foreach (HiddenNeuron neuron in _poolNeuronsCollection[poolID])
                 {
                     poolStat.NeuronGroupStatCollection[neuron.Placement.PoolGroupID].AvgActivationStatesStat.AddSampleValue(neuron.Statistics.ActivationStat.ArithAvg);
                     poolStat.NeuronGroupStatCollection[neuron.Placement.PoolGroupID].MaxActivationStatesStat.AddSampleValue(neuron.Statistics.ActivationStat.Max);
@@ -814,7 +817,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         public void Reset(bool resetStatistics)
         {
             //Input neurons
-            foreach(INeuron neuron in _inputNeuronCollection)
+            foreach(InputNeuron neuron in _inputNeuronCollection)
             {
                 neuron.Reset(resetStatistics);
             }
@@ -928,7 +931,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             /// <summary>
             /// Neuron from which is extracted primary predictor
             /// </summary>
-            public INeuron Neuron { get; set; }
+            public HiddenNeuron Neuron { get; set; }
             /// <summary>
             /// Indicates whether to extract also additional secondary predictor from the neuron (neuron will give two predictors)
             /// </summary>
@@ -938,7 +941,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         private class RelatedNeuron
         {
             //Attribute properties
-            public INeuron Neuron { get; set; }
+            public HiddenNeuron Neuron { get; set; }
             public double Distance { get; set; }
 
             //Methods
@@ -970,7 +973,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
 
         private class NeuronConnCount
         {
-            public INeuron Neuron { get; set; }
+            public HiddenNeuron Neuron { get; set; }
             public int ConnCount { get; set; }
 
             public static int CmpSortDesc(NeuronConnCount item1, NeuronConnCount item2)

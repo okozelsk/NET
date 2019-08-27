@@ -11,25 +11,32 @@ using RCNet.XmlTools;
 namespace RCNet.Neural.Data.Generators
 {
     /// <summary>
-    /// Setup parameters for the Const signal generator
+    /// Setup parameters for the Pulse signal generator
     /// </summary>
     [Serializable]
-    public class ConstGeneratorSettings
+    public class PulseGeneratorSettings
     {
         //Attribute properties
         /// <summary>
-        /// Constant signal value
+        /// Signal value
         /// </summary>
-        public double ConstSignal { get; set; }
+        public double Signal { get; set; }
+
+        /// <summary>
+        /// Pulse leak value
+        /// </summary>
+        public int Leak { get; set; }
 
         //Constructors
         /// <summary>
         /// Constructs an initialized instance
         /// </summary>
-        /// <param name="constSignal">Constant signal value</param>
-        public ConstGeneratorSettings(double constSignal)
+        /// <param name="signal">Pulse signal value</param>
+        /// <param name="leak">Constant pulse leak</param>
+        public PulseGeneratorSettings(double signal, int leak)
         {
-            ConstSignal = constSignal;
+            Signal = signal;
+            Leak = Math.Abs(leak);
             return;
         }
 
@@ -37,9 +44,10 @@ namespace RCNet.Neural.Data.Generators
         /// Deep copy constructor
         /// </summary>
         /// <param name="source">Source instance</param>
-        public ConstGeneratorSettings(ConstGeneratorSettings source)
+        public PulseGeneratorSettings(PulseGeneratorSettings source)
         {
-            ConstSignal = source.ConstSignal;
+            Signal = source.Signal;
+            Leak = source.Leak;
             return;
         }
 
@@ -48,16 +56,17 @@ namespace RCNet.Neural.Data.Generators
         /// Content of xml element is always validated against the xml schema.
         /// </summary>
         /// <param name="elem">Xml data containing settings</param>
-        public ConstGeneratorSettings(XElement elem)
+        public PulseGeneratorSettings(XElement elem)
         {
             //Validation
             ElemValidator validator = new ElemValidator();
             Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Data.Generators.ConstGeneratorSettings.xsd");
+            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Data.Generators.PulseGeneratorSettings.xsd");
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
             XElement settingsElem = validator.Validate(elem, "rootElem");
             //Parsing
-            ConstSignal = double.Parse(settingsElem.Attribute("constSignal").Value, CultureInfo.InvariantCulture);
+            Signal = double.Parse(settingsElem.Attribute("signal").Value, CultureInfo.InvariantCulture);
+            Leak = Math.Abs(int.Parse(settingsElem.Attribute("leak").Value, CultureInfo.InvariantCulture));
             return;
         }
 
@@ -68,8 +77,8 @@ namespace RCNet.Neural.Data.Generators
         public override bool Equals(object obj)
         {
             if (obj == null) return false;
-            ConstGeneratorSettings cmpSettings = obj as ConstGeneratorSettings;
-            if (ConstSignal != cmpSettings.ConstSignal)
+            PulseGeneratorSettings cmpSettings = obj as PulseGeneratorSettings;
+            if (Signal != cmpSettings.Signal || Leak != cmpSettings.Leak)
             {
                 return false;
             }
@@ -87,11 +96,11 @@ namespace RCNet.Neural.Data.Generators
         /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>
-        public ConstGeneratorSettings DeepClone()
+        public PulseGeneratorSettings DeepClone()
         {
-            return new ConstGeneratorSettings(this);
+            return new PulseGeneratorSettings(this);
         }
 
-    }//ConstGeneratorSettings
+    }//PulseGeneratorSettings
 
 }//Namespace

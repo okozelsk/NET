@@ -7,22 +7,27 @@ using System.Threading.Tasks;
 namespace RCNet.Neural.Data.Generators
 {
     /// <summary>
-    /// Generates constant signal
+    /// Generates constant pulses
     /// </summary>
     [Serializable]
-    public class ConstGenerator : IGenerator
+    public class PulseGenerator : IGenerator
     {
         //Attributes
         private readonly double _signal;
+        private readonly int _leak;
+        private int _t;
 
         //Constructors
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
-        /// <param name="constSignal">Constant signal value</param>
-        public ConstGenerator(double constSignal)
+        /// <param name="signal">Pulse signal value</param>
+        /// <param name="leak">Constant pulse leak</param>
+        public PulseGenerator(double signal, int leak)
         {
-            _signal = constSignal;
+            _signal = signal;
+            _leak = Math.Abs(leak);
+            Reset();
             return;
         }
 
@@ -30,9 +35,11 @@ namespace RCNet.Neural.Data.Generators
         /// Creates an initialized instance
         /// </summary>
         /// <param name="settings">Configuration</param>
-        public ConstGenerator(ConstGeneratorSettings settings)
+        public PulseGenerator(PulseGeneratorSettings settings)
         {
-            _signal = settings.ConstSignal;
+            _signal = settings.Signal;
+            _leak = settings.Leak;
+            Reset();
             return;
         }
 
@@ -42,7 +49,7 @@ namespace RCNet.Neural.Data.Generators
         /// </summary>
         public void Reset()
         {
-            //Does nothing
+            _t = 0;
             return;
         }
 
@@ -51,8 +58,17 @@ namespace RCNet.Neural.Data.Generators
         /// </summary>
         public double Next()
         {
-            return _signal;
+            if (_t == _leak)
+            {
+                _t = 0;
+                return _signal;
+            }
+            else
+            {
+                ++_t;
+                return 0;
+            }
         }
 
-    }//ConstGenerator
+    }//PulseGenerator
 }//Namespace

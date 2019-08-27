@@ -544,16 +544,16 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 {
                     switch(settingsElem.Name.LocalName)
                     {
-                        case "constGenerator":
-                            GeneratorSettings = new ConstGeneratorSettings(settingsElem);
+                        case "pulse":
+                            GeneratorSettings = new PulseGeneratorSettings(settingsElem);
                             break;
-                        case "randomGenerator":
+                        case "random":
                             GeneratorSettings = new RandomValueSettings(settingsElem);
                             break;
-                        case "sinusoidalGenerator":
+                        case "sinusoidal":
                             GeneratorSettings = new SinusoidalGeneratorSettings(settingsElem);
                             break;
-                        case "mackeyGlassGenerator":
+                        case "mackeyGlass":
                             GeneratorSettings = new MackeyGlassGeneratorSettings(settingsElem);
                             break;
                         default:
@@ -569,9 +569,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 public InternalField(InternalField source)
                     :base(source)
                 {
-                    if(source.GeneratorSettings.GetType() == typeof(ConstGeneratorSettings))
+                    if(source.GeneratorSettings.GetType() == typeof(PulseGeneratorSettings))
                     {
-                        GeneratorSettings = ((ConstGeneratorSettings)source.GeneratorSettings).DeepClone();
+                        GeneratorSettings = ((PulseGeneratorSettings)source.GeneratorSettings).DeepClone();
                     }
                     else if(source.GeneratorSettings.GetType() == typeof(RandomValueSettings))
                     {

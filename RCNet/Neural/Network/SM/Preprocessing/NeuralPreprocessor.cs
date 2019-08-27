@@ -90,9 +90,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             _internalInputGeneratorCollection = new List<IGenerator>();
             foreach(NeuralPreprocessorSettings.InputSettings.InternalField field in _settings.InputConfig.InternalFieldCollection)
             {
-                if(field.GeneratorSettings.GetType() == typeof(ConstGeneratorSettings))
+                if(field.GeneratorSettings.GetType() == typeof(PulseGeneratorSettings))
                 {
-                    _internalInputGeneratorCollection.Add(new ConstGenerator((ConstGeneratorSettings)field.GeneratorSettings));
+                    _internalInputGeneratorCollection.Add(new PulseGenerator((PulseGeneratorSettings)field.GeneratorSettings));
                 }
                 else if (field.GeneratorSettings.GetType() == typeof(RandomValueSettings))
                 {

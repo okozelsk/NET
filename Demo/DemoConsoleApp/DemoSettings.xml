@@ -14,6 +14,14 @@
             <field name="coord_abcissa"/>
             <field name="coord_ordinate"/>
           </external>
+          <internal>
+            <field name="excitatoryPulse">
+              <pulse signal="0.5" leak="1"/>
+            </field>
+            <field name="inhibitoryPulse">
+              <pulse signal="-0.5" leak="1"/>
+            </field>
+          </internal>
         </input>
         <reservoirCfgContainer>
           <reservoirCfg name="MainCfg">
@@ -21,14 +29,20 @@
               <pool name="LSM pool abcissa" dimX="5" dimY="5" dimZ="5">
                 <neuronGroups>
                   <analogGroup name="Exc-grp" role="Excitatory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction" augmentedStates="true">
-                    <activationTanH/>
-                    <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-                    <spikeThreshold min="0.975" max="0.975"/>
+                    <activationSigmoid/>
+                    <bias min="-0.5" max="0.5" randomSign="false" distribution="Uniform"/>
+                    <spikeThreshold min="0.8" max="0.8"/>
+                    <retainment density="1">
+                      <strength min="0.25" max="0.75"/>
+                    </retainment>
                   </analogGroup>
-                  <analogGroup name="Inh-grp" role="Inhibitory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction" augmentedStates="true">
-                    <activationTanH/>
-                    <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-                    <spikeThreshold min="0.975" max="0.975"/>
+                  <analogGroup name="Inh-grp" role="Inhibitory" relShare="1" readoutDensity="1" signalingRestriction="SpikingOnly" augmentedStates="true">
+                    <activationSigmoid/>
+                    <bias min="-0.5" max="0.5" randomSign="false" distribution="Uniform"/>
+                    <spikeThreshold min="0.8" max="0.8"/>
+                    <retainment density="1">
+                      <strength min="0.25" max="0.75"/>
+                    </retainment>
                   </analogGroup>
                 </neuronGroups>
                 <interconnection density="0.1" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
@@ -38,14 +52,20 @@
               <pool name="LSM pool ordinate" dimX="5" dimY="5" dimZ="5">
                 <neuronGroups>
                   <analogGroup name="Exc-grp" role="Excitatory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction" augmentedStates="true">
-                    <activationTanH/>
-                    <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-                    <spikeThreshold min="0.975" max="0.975"/>
+                    <activationSigmoid/>
+                    <bias min="-0.5" max="0.5" randomSign="false" distribution="Uniform"/>
+                    <spikeThreshold min="0.8" max="0.8"/>
+                    <retainment density="1">
+                      <strength min="0.25" max="0.75"/>
+                    </retainment>
                   </analogGroup>
-                  <analogGroup name="Inh-grp" role="Inhibitory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction" augmentedStates="true">
-                    <activationTanH/>
-                    <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
-                    <spikeThreshold min="0.975" max="0.975"/>
+                  <analogGroup name="Inh-grp" role="Inhibitory" relShare="1" readoutDensity="1" signalingRestriction="SpikingOnly" augmentedStates="true">
+                    <activationSigmoid/>
+                    <bias min="-0.5" max="0.5" randomSign="false" distribution="Uniform"/>
+                    <spikeThreshold min="0.8" max="0.8"/>
+                    <retainment density="1">
+                      <strength min="0.25" max="0.75"/>
+                    </retainment>
                   </analogGroup>
                 </neuronGroups>
                 <interconnection density="0.1" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
@@ -634,7 +654,7 @@
           </external>
           <internal>
             <field name="mg">
-              <mackeyGlassGenerator tau="18" b="0.1" c="-0.2"/>
+              <mackeyGlass tau="18" b="0.1" c="-0.2"/>
             </field>
           </internal>
         </input>

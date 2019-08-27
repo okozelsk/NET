@@ -223,9 +223,10 @@
 
   <!-- ________________________________________SIGNAL GENERATORS TYPES_____________________________________________ -->
 
-  <!-- Const generator configuration element -->
-  <xs:complexType name="ConstGeneratorCfgType">
-    <xs:attribute type="xs:double" name="constSignal" use="required"/>
+  <!-- Pulse generator configuration element -->
+  <xs:complexType name="PulseGeneratorCfgType">
+    <xs:attribute type="xs:double" name="signal" use="required"/>
+    <xs:attribute type="xs:unsignedInt" name="leak" use="required"/>
   </xs:complexType>
 
   <!-- Sinusoidal generator configuration element -->
@@ -1767,10 +1768,10 @@
   <!-- NeuralPreprocessor - internal input field -configuration -->
   <xs:complexType name="NPInternalInpFieldCfgType">
     <xs:choice minOccurs="1" maxOccurs="1">
-      <xs:element type="ConstGeneratorCfgType" name="constGenerator" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="RandomValueType" name="randomGenerator" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="SinusoidalGeneratorCfgType" name="sinusoidalGenerator" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="MackeyGlassGeneratorCfgType" name="mackeyGlassGenerator" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="PulseGeneratorCfgType" name="pulse" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="RandomValueType" name="random" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="SinusoidalGeneratorCfgType" name="sinusoidal" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="MackeyGlassGeneratorCfgType" name="mackeyGlass" minOccurs="1" maxOccurs="1"/>
     </xs:choice>
     <xs:attribute type="xs:string" name="name" use="required"/>
   </xs:complexType>

@@ -112,14 +112,14 @@
     <Compile Include="Neural\Activation\TanH.cs" />
     <Compile Include="Neural\Activation\ExpIF.cs" />
     <Compile Include="Neural\Activation\SimpleIF.cs" />
-    <Compile Include="Neural\Data\Generators\ConstGenerator.cs" />
+    <Compile Include="Neural\Data\Generators\PulseGenerator.cs" />
     <Compile Include="Neural\Data\Generators\MackeyGlassGenerator.cs" />
     <Compile Include="Neural\Data\Generators\SinusoidalGenerator.cs" />
     <Compile Include="Neural\Data\Generators\MackeyGlassGeneratorSettings.cs" />
     <Compile Include="Neural\Data\Generators\SinusoidalGeneratorSettings.cs" />
     <Compile Include="Neural\Data\Generators\IGenerator.cs" />
     <Compile Include="Neural\Data\Generators\RandomGenerator.cs" />
-    <Compile Include="Neural\Data\Generators\ConstGeneratorSettings.cs" />
+    <Compile Include="Neural\Data\Generators\PulseGeneratorSettings.cs" />
     <Compile Include="Neural\INonRecurrentNetworkTrainerSettings.cs" />
     <Compile Include="Neural\Network\FF\QRDRegrTrainer.cs" />
     <Compile Include="Neural\Network\FF\QRDRegrTrainerSettings.cs" />
@@ -343,7 +343,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Neural\Data\Generators\ConstGeneratorSettings.xsd">
+    <EmbeddedResource Include="Neural\Data\Generators\PulseGeneratorSettings.xsd">
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>

@@ -6,8 +6,8 @@
            >
   <xs:import namespace="RCNetTypes" />
 
-  <!-- Const generator configuration element -->
-  <xs:element name="rootElem" type="rcn:ConstGeneratorCfgType"/>
+  <!-- Pulse generator configuration element -->
+  <xs:element name="rootElem" type="rcn:PulseGeneratorCfgType"/>
 
 </xs:schema>
 
