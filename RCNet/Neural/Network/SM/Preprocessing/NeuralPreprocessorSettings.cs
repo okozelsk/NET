@@ -88,11 +88,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 {
                     InstanceID = reservoirInstanceID,
                     InstanceName = reservoirInstanceElem.Attribute("name").Value,
-                    AugmentedStates = bool.Parse(reservoirInstanceElem.Attribute("augmentedStates").Value),
                     //Select reservoir settings
                     Settings = (from settings in availableResSettings
                                          where settings.SettingsName == reservoirInstanceElem.Attribute("cfg").Value
-                                         select settings).FirstOrDefault()
+                                         select settings).FirstOrDefault(),
+                    PredictorsCfg = new PredictorsSettings(reservoirInstanceElem.Descendants("predictors").First())
                 };
                 if (reservoirInstanceDefinition.Settings == null)
                 {
@@ -653,13 +653,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             /// </summary>
             public ReservoirSettings Settings { get; set; }
             /// <summary>
-            /// The parameter specifies whether, in addition to the standard neuron states,
-            /// augmented states of reservoir neurons will be added to the reservoir output predictors.
-            /// Augmented states double the number of output predictors of the reservoir.
-            /// The augmented state of the neuron is its squared state.
-            /// </summary>
-            public bool AugmentedStates { get; set; }
-            /// <summary>
             /// Reservoir's input fields indexes in Neural Preprocessor input fields.
             /// </summary>
             public List<int> NPInputFieldIdxCollection { get; set; }
@@ -667,6 +660,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             /// Connections of the Reservoir's input fields to the Reservoir's pools.
             /// </summary>
             public List<InputConnection> InputConnectionCollection { get; set; }
+            /// <summary>
+            /// Configuration of the predictors (enabling/disabling)
+            /// </summary>
+            public PredictorsSettings PredictorsCfg { get; set; }
 
             //Constructors
             /// <summary>
@@ -677,7 +674,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 InstanceID = 0;
                 InstanceName = string.Empty;
                 Settings = null;
-                AugmentedStates = false;
+                PredictorsCfg = null;
                 NPInputFieldIdxCollection = new List<int>();
                 InputConnectionCollection = new List<InputConnection>();
                 return;
@@ -692,13 +689,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 InstanceID = source.InstanceID;
                 InstanceName = source.InstanceName;
                 Settings = source.Settings.DeepClone();
-                AugmentedStates = source.AugmentedStates;
                 NPInputFieldIdxCollection = new List<int>(source.NPInputFieldIdxCollection);
                 InputConnectionCollection = new List<InputConnection>(source.InputConnectionCollection.Count);
                 foreach(InputConnection ifa in source.InputConnectionCollection)
                 {
                     InputConnectionCollection.Add(ifa.DeepClone());
                 }
+                PredictorsCfg = source.PredictorsCfg?.DeepClone();
                 return;
             }
             
@@ -722,10 +719,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 if (InstanceID != cmpSettings.InstanceID ||
                     InstanceName != cmpSettings.InstanceName ||
                     !Equals(Settings, cmpSettings.Settings) ||
-                    AugmentedStates != cmpSettings.AugmentedStates ||
                     NPInputFieldIdxCollection.Count != cmpSettings.NPInputFieldIdxCollection.Count ||
                     !NPInputFieldIdxCollection.ToArray().ContainsEqualValues(cmpSettings.NPInputFieldIdxCollection.ToArray()) ||
-                    InputConnectionCollection.Count != cmpSettings.InputConnectionCollection.Count
+                    InputConnectionCollection.Count != cmpSettings.InputConnectionCollection.Count ||
+                    !Equals(PredictorsCfg, cmpSettings.PredictorsCfg)
                     )
                 {
                     return false;

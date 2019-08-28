@@ -213,10 +213,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             /// </summary>
             public double ReadoutNeuronsDensity { get; set; }
             /// <summary>
-            /// Specifies, whether neurons within the group generate secondary predictors
-            /// </summary>
-            public bool AugmentedStates { get; set; }
-            /// <summary>
             /// Computed attribute. What count of pool's neurons is formed by this group of the neurons
             /// </summary>
             public int Count { get; set; }
@@ -252,6 +248,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             /// following this settings
             /// </summary>
             public RandomValueSettings RetainmentStrengthCfg { get; set; }
+            /// <summary>
+            /// Configuration of the predictors (enabling/disabling)
+            /// </summary>
+            public PredictorsSettings PredictorsCfg { get; set; }
 
             //Constructors
             /// <summary>
@@ -264,7 +264,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 Role = source.Role;
                 RelativeShare = source.RelativeShare;
                 ReadoutNeuronsDensity = source.ReadoutNeuronsDensity;
-                AugmentedStates = source.AugmentedStates;
                 Count = source.Count;
                 ActivationType = source.ActivationType;
                 ActivationCfg = ActivationFactory.DeepCloneActivationSettings(source.ActivationCfg);
@@ -273,6 +272,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 AnalogSpikeThresholdCfg = source.AnalogSpikeThresholdCfg?.DeepClone();
                 RetainmentNeuronsDensity = source.RetainmentNeuronsDensity;
                 RetainmentStrengthCfg = source.RetainmentStrengthCfg?.DeepClone();
+                PredictorsCfg = source.PredictorsCfg?.DeepClone();
                 return;
             }
 
@@ -345,8 +345,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                         }
                     }
                 }
-                //Augmented states
-                AugmentedStates = bool.Parse(settingsElem.Attribute("augmentedStates").Value);
+                //Predictors
+                PredictorsCfg = new PredictorsSettings(settingsElem.Descendants("predictors").First());
                 return;
             }
 
@@ -382,7 +382,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                     Role != cmpSettings.Role ||
                     RelativeShare != cmpSettings.RelativeShare ||
                     ReadoutNeuronsDensity != cmpSettings.ReadoutNeuronsDensity ||
-                    AugmentedStates != cmpSettings.AugmentedStates ||
                     Count != cmpSettings.Count ||
                     ActivationType != cmpSettings.ActivationType ||
                     !Equals(ActivationCfg, cmpSettings.ActivationCfg) ||
@@ -390,7 +389,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                     !Equals(BiasCfg, cmpSettings.BiasCfg) ||
                     !Equals(AnalogSpikeThresholdCfg, cmpSettings.AnalogSpikeThresholdCfg) ||
                     RetainmentNeuronsDensity != cmpSettings.RetainmentNeuronsDensity ||
-                    !Equals(RetainmentStrengthCfg, cmpSettings.RetainmentStrengthCfg)
+                    !Equals(RetainmentStrengthCfg, cmpSettings.RetainmentStrengthCfg) ||
+                    !Equals(PredictorsCfg, cmpSettings.PredictorsCfg)
                     )
                 {
                     return false;

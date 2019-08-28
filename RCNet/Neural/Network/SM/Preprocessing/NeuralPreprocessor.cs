@@ -5,6 +5,7 @@ using RCNet.Extensions;
 using RCNet.MathTools;
 using RCNet.Neural.Data;
 using RCNet.Neural.Data.Generators;
+using RCNet.Neural.Network.SM.Neuron;
 using RCNet.RandomValue;
 
 
@@ -56,9 +57,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// </summary>
         public List<Reservoir> ReservoirCollection { get; }
         /// <summary>
-        /// All predictor neurons.
+        /// All predicting neurons.
         /// </summary>
-        public List<Reservoir.PredictorNeuron> PredictorNeuronCollection { get; }
+        public List<HiddenNeuron> PredictorNeuronCollection { get; }
         /// <summary>
         /// Number of neurons
         /// </summary>
@@ -114,7 +115,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             //Reservoir instance(s)
             //Random generator used for reservoir structure initialization
             Random rand = (randomizerSeek < 0 ? new Random() : new Random(randomizerSeek));
-            PredictorNeuronCollection = new List<Reservoir.PredictorNeuron>();
+            PredictorNeuronCollection = new List<HiddenNeuron>();
             NumOfNeurons = 0;
             NumOfPredictors = 0;
             NumOfInternalSynapses = 0;
@@ -123,9 +124,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             {
                 Reservoir reservoir = new Reservoir(instanceDefinition, _dataRange, rand);
                 ReservoirCollection.Add(reservoir);
-                PredictorNeuronCollection.AddRange(reservoir.PredictorNeuronCollection);
+                PredictorNeuronCollection.AddRange(reservoir.PredictingNeuronCollection);
                 NumOfNeurons += reservoir.Size;
-                NumOfPredictors += reservoir.NumOfOutputPredictors;
+                NumOfPredictors += reservoir.NumOfPredictors;
                 NumOfInternalSynapses += reservoir.NumOfInternalSynapses;
             }
             if(_settings.InputConfig.RouteExternalInputToReadout)
@@ -328,7 +329,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 //Compute reservoir
                 reservoir.Compute(reservoirInput, collectStatistics);
                 reservoir.CopyPredictorsTo(predictors, predictorsIdx);
-                predictorsIdx += reservoir.NumOfOutputPredictors;
+                predictorsIdx += reservoir.NumOfPredictors;
             }
             if (_settings.InputConfig.RouteExternalInputToReadout)
             {
@@ -379,7 +380,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                     reservoir.Compute(reservoirInput, collectStatistics);
                 }
                 reservoir.CopyPredictorsTo(predictors, predictorsIdx);
-                predictorsIdx += reservoir.NumOfOutputPredictors;
+                predictorsIdx += reservoir.NumOfPredictors;
             }
             return predictors;
         }

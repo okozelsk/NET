@@ -5,6 +5,7 @@ using System.Text;
 using RCNet.Extensions;
 using RCNet.MathTools;
 using RCNet.Neural.Data;
+using RCNet.Neural.Network.SM.Neuron;
 using RCNet.Neural.Network.SM.Preprocessing;
 using RCNet.Neural.Network.SM.Readout;
 
@@ -191,13 +192,11 @@ namespace RCNet.Neural.Network.SM
                 //Expand list of predicting neurons to array of predictor origin
                 StateMachineSettings.MapperSettings.PoolRef[] neuronPoolRefCollection = new StateMachineSettings.MapperSettings.PoolRef[NP.NumOfPredictors];
                 int idx = 0;
-                foreach(Reservoir.PredictorNeuron pn in NP.PredictorNeuronCollection)
+                foreach(HiddenNeuron neuron in NP.PredictorNeuronCollection)
                 {
-                    neuronPoolRefCollection[idx] = new StateMachineSettings.MapperSettings.PoolRef { _reservoirInstanceIdx = pn.Neuron.Placement.ReservoirID, _poolIdx = pn.Neuron.Placement.PoolID };
-                    ++idx;
-                    if(pn.UseSecondaryPredictor)
+                    for(int i = 0; i < neuron.PredictorsCfg.NumOfEnabledPredictors; i++)
                     {
-                        neuronPoolRefCollection[idx] = neuronPoolRefCollection[idx - 1];
+                        neuronPoolRefCollection[idx] = new StateMachineSettings.MapperSettings.PoolRef { _reservoirInstanceIdx = neuron.Placement.ReservoirID, _poolIdx = neuron.Placement.PoolID };
                         ++idx;
                     }
                 }

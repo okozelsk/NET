@@ -55,6 +55,13 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// </summary>
         public bool AfterFirstSpike { get; private set; }
 
+        /// <summary>
+        /// Configuration of the predictors (enabling/disabling).
+        /// It can be null.
+        /// </summary>
+        public PredictorsSettings PredictorsCfg { get; private set; }
+
+
         //Attributes
         /// <summary>
         /// Neuron's activation function (the heart of the neuron)
@@ -106,6 +113,7 @@ namespace RCNet.Neural.Network.SM.Neuron
                             CommonEnums.NeuronRole role,
                             IActivationFunction activation,
                             CommonEnums.NeuronSignalingRestrictionType signalingRestriction,
+                            PredictorsSettings predictorsCfg,
                             double bias = 0,
                             double analogFiringThreshold = PoolSettings.NeuronGroupSettings.DefaultAnalogSpikeThreshold,
                             double retainmentStrength = 0
@@ -118,6 +126,7 @@ namespace RCNet.Neural.Network.SM.Neuron
                 throw new ArgumentException("Role of the hidden neuron can not be Input.", "role");
             }
             Role = role;
+            PredictorsCfg = predictorsCfg;
             Bias = bias;
             //Activation specific
             _activation = activation;
@@ -145,35 +154,6 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// Type of the activation function
         /// </summary>
         public CommonEnums.ActivationType ActivationType { get { return _activation.ActivationType; } }
-
-        /// <summary>
-        /// Value to be passed to readout layer as a primary predictor
-        /// </summary>
-        public double PrimaryPredictor
-        {
-            get
-            {
-                return _activationState;
-            }
-        }
-
-        /// <summary>
-        /// Value to be passed to readout layer as a secondary predictor
-        /// </summary>
-        public double SecondaryPredictor
-        {
-            get
-            {
-                if (SignalingRestriction == CommonEnums.NeuronSignalingRestrictionType.SpikingOnly)
-                {
-                    return _firingRate.GetRecentExpWRate();
-                }
-                else
-                {
-                    return _activationState * _activationState;
-                }
-            }
-        }
 
         //Methods
         /// <summary>
@@ -270,6 +250,76 @@ namespace RCNet.Neural.Network.SM.Neuron
                 //Return signal according to targetActivationType
                 return targetActivationType == CommonEnums.ActivationType.Analog ? _analogSignal : _spikingSignal;
             }
+        }
+
+        /// <summary>
+        /// Copies values of enabled predictors to a given buffer starting from specified position (idx)
+        /// </summary>
+        /// <param name="predictors">Buffer where to be copied enabled predictors</param>
+        /// <param name="idx">Starting position index</param>
+        /// <returns></returns>
+        public int CopyPredictorsTo(double[] predictors, int idx)
+        {
+            if (PredictorsCfg == null || PredictorsCfg.NumOfEnabledPredictors == 0)
+            {
+                return 0;
+            }
+            if (PredictorsCfg.Activation)
+            {
+                predictors[idx] = _activationState;
+                ++idx;
+            }
+            if (PredictorsCfg.SquaredActivation)
+            {
+                predictors[idx] = _activationState * _activationState;
+                ++idx;
+            }
+            if (PredictorsCfg.ExpWAvgFiringRate64)
+            {
+                predictors[idx] = _firingRate.GetRecentExpWRate();
+                ++idx;
+            }
+            if (PredictorsCfg.NumOfFirings64)
+            {
+                predictors[idx] = _firingRate.NumOfRecentSpikes;
+                ++idx;
+            }
+            if (PredictorsCfg.LastBin32FiringHist)
+            {
+                predictors[idx] = _firingRate.GetLastSpikes(32);
+                ++idx;
+            }
+            if (PredictorsCfg.LastBin16FiringHist)
+            {
+                predictors[idx] = _firingRate.GetLastSpikes(16);
+                ++idx;
+            }
+            if (PredictorsCfg.LastBin8FiringHist)
+            {
+                predictors[idx] = _firingRate.GetLastSpikes(8);
+                ++idx;
+            }
+            if (PredictorsCfg.LastBin1FiringHist)
+            {
+                predictors[idx] = _firingRate.GetLastSpikes(1);
+                ++idx;
+            }
+            return PredictorsCfg.NumOfEnabledPredictors;
+        }
+
+        /// <summary>
+        /// Returns array containing values of enabled predictors
+        /// </summary>
+        /// <returns></returns>
+        public double[] GetPredictors()
+        {
+            if (PredictorsCfg == null || PredictorsCfg.NumOfEnabledPredictors == 0)
+            {
+                return null;
+            }
+            double[] predictors = new double[PredictorsCfg.NumOfEnabledPredictors];
+            CopyPredictorsTo(predictors, 0);
+            return predictors;
         }
 
 

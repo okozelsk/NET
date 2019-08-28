@@ -131,6 +131,7 @@
     <Compile Include="Neural\Network\SM\Neuron\HiddenNeuron.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\NeuralPreprocessor.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\NeuralPreprocessorSettings.cs" />
+    <Compile Include="Neural\Network\SM\Preprocessing\PredictorsSettings.cs" />
     <Compile Include="Neural\Network\SM\Synapse\InternalSynapseSettings.cs" />
     <Compile Include="Neural\Network\SM\Synapse\InputSynapseSettings.cs" />
     <Compile Include="Neural\Network\SM\Synapse\InternalSynapse.cs" />
@@ -397,6 +398,11 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Neural\Network\SM\Preprocessing\PoolSpikingNeuronGroupSettings.xsd">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Neural\Network\SM\Preprocessing\PredictorsSettings.xsd">
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>

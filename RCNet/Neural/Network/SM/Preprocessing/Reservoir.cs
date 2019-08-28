@@ -55,13 +55,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// </summary>
         public NeuralPreprocessorSettings.ReservoirInstanceDefinition InstanceDefinition { get; }
         /// <summary>
-        /// Reservoir's predictor neurons.
+        /// Reservoir's predicting neurons.
         /// </summary>
-        public List<PredictorNeuron> PredictorNeuronCollection { get; }
+        public List<HiddenNeuron> PredictingNeuronCollection { get; }
         /// <summary>
-        /// Number of reservoir's output predictors
+        /// Number of reservoir's predictors
         /// </summary>
-        public int NumOfOutputPredictors { get; }
+        public int NumOfPredictors { get; }
         /// <summary>
         /// Number of internal synapses
         /// </summary>
@@ -110,7 +110,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             _poolNeuronsCollection = new List<HiddenNeuron[]>(InstanceDefinition.Settings.PoolSettingsCollection.Count);
             _poolExcitatoryNeuronsRatioCollection = new double[InstanceDefinition.Settings.PoolSettingsCollection.Count];
             _reservoirExcitatoryNeuronsRatio = 0d;
-            PredictorNeuronCollection = new List<PredictorNeuron>();
+            PredictingNeuronCollection = new List<HiddenNeuron>();
             for (int poolID = 0; poolID < InstanceDefinition.Settings.PoolSettingsCollection.Count; poolID++)
             {
                 PoolSettings poolSettings = InstanceDefinition.Settings.PoolSettingsCollection[poolID];
@@ -122,6 +122,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 foreach (PoolSettings.NeuronGroupSettings ngs in poolSettings.NeuronGroups)
                 {
                     NeuronCreationParams[] grpNCP = new NeuronCreationParams[ngs.Count];
+                    PredictorsSettings predictorsCfg = new PredictorsSettings(ngs.PredictorsCfg, instanceDefinition.PredictorsCfg);
                     //Group neuron params
                     for (int i = 0; i < ngs.Count; i++)
                     {
@@ -134,7 +135,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                             GroupID = groupID,
                             AnalogFiringThreshold = ngs.AnalogSpikeThresholdCfg == null ? 0 : rand.NextDouble(ngs.AnalogSpikeThresholdCfg),
                             RetainmentStrength = 0,
-                            UseAsPredictor = false
+                            PredictorsCfg = null
                         };
                         if (ngs.Role == CommonEnums.NeuronRole.Excitatory)
                         {
@@ -163,13 +164,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                         }
                     }
                     //Readout
-                    if(ngs.ReadoutNeuronsDensity > 0)
+                    if(ngs.ReadoutNeuronsDensity > 0 && predictorsCfg.NumOfEnabledPredictors > 0)
                     {
                         int numOfReadoutneurons = (int)Math.Round(ngs.ReadoutNeuronsDensity * ngs.Count);
                         rand.Shuffle(grpNCP);
                         for (int i = 0; i < numOfReadoutneurons; i++)
                         {
-                            grpNCP[i].UseAsPredictor = true;
+                            grpNCP[i].PredictorsCfg = predictorsCfg;
                         }
                     }
                     ++groupID;
@@ -193,6 +194,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                                                                               neuronParamsCollection[neuronPoolFlatIdx].Role,
                                                                               neuronParamsCollection[neuronPoolFlatIdx].Activation,
                                                                               neuronParamsCollection[neuronPoolFlatIdx].SignalingRestriction,
+                                                                              neuronParamsCollection[neuronPoolFlatIdx].PredictorsCfg,
                                                                               neuronParamsCollection[neuronPoolFlatIdx].Bias,
                                                                               neuronParamsCollection[neuronPoolFlatIdx].AnalogFiringThreshold,
                                                                               neuronParamsCollection[neuronPoolFlatIdx].RetainmentStrength
@@ -201,15 +203,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                             //Input distance statistics
                             inputDistanceStatCollection[placement.PoolID].AddSampleValue(EuclideanDistance.Compute(InstanceDefinition.Settings.InputEntryPoint, placement.ReservoirCoordinates));
                             //Predictor
-                            if (neuronParamsCollection[neuronPoolFlatIdx].UseAsPredictor)
+                            if (poolNeurons[neuronPoolFlatIdx].PredictorsCfg != null && poolNeurons[neuronPoolFlatIdx].PredictorsCfg.NumOfEnabledPredictors > 0)
                             {
-                                PredictorNeuron pn = new PredictorNeuron
-                                {
-                                    Neuron = poolNeurons[neuronPoolFlatIdx],
-                                    UseSecondaryPredictor = (instanceDefinition.AugmentedStates && poolSettings.NeuronGroups[neuronParamsCollection[neuronPoolFlatIdx].GroupID].AugmentedStates)
-                                };
-                                PredictorNeuronCollection.Add(pn);
-                                NumOfOutputPredictors += pn.UseSecondaryPredictor ? 2 : 1;
+                                PredictingNeuronCollection.Add(poolNeurons[neuronPoolFlatIdx]);
+                                NumOfPredictors += poolNeurons[neuronPoolFlatIdx].PredictorsCfg.NumOfEnabledPredictors;
                             }
                             ++neuronPoolFlatIdx;
                             ++neuronReservoirFlatIdx;
@@ -715,7 +712,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                                                     InstanceDefinition.Settings.SettingsName,
                                                     Size,
                                                     _reservoirExcitatoryNeuronsRatio,
-                                                    NumOfOutputPredictors,
+                                                    NumOfPredictors,
                                                     NumOfInternalSynapses
                                                     );
             int poolID = 0;
@@ -895,16 +892,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// </summary>
         public void CopyPredictorsTo(double[] buffer, int fromOffset)
         {
-            int bufferIdx = fromOffset;
-            foreach(PredictorNeuron pn in PredictorNeuronCollection)
+            foreach(HiddenNeuron neuron in PredictingNeuronCollection)
             {
-                buffer[bufferIdx] = pn.Neuron.PrimaryPredictor;
-                ++bufferIdx;
-                if (pn.UseSecondaryPredictor)
-                {
-                    buffer[bufferIdx] = pn.Neuron.SecondaryPredictor;
-                    ++bufferIdx;
-                }
+                fromOffset += neuron.CopyPredictorsTo(buffer, fromOffset);
             }
             return;
         }
@@ -919,23 +909,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             public int GroupID { get; set; }
             public double AnalogFiringThreshold { get; set; }
             public double RetainmentStrength { get; set; }
-            public bool UseAsPredictor { get; set; }
-        }
-
-        /// <summary>
-        /// Structure contains information about the neuron from which are extracted predictors
-        /// </summary>
-        [Serializable]
-        public class PredictorNeuron
-        {
-            /// <summary>
-            /// Neuron from which is extracted primary predictor
-            /// </summary>
-            public HiddenNeuron Neuron { get; set; }
-            /// <summary>
-            /// Indicates whether to extract also additional secondary predictor from the neuron (neuron will give two predictors)
-            /// </summary>
-            public bool UseSecondaryPredictor { get; set; }
+            public PredictorsSettings PredictorsCfg { get; set; }
         }
 
         private class RelatedNeuron

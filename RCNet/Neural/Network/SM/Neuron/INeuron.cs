@@ -54,16 +54,6 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// </summary>
         bool AfterFirstSpike { get; }
 
-        /// <summary>
-        /// Value to be passed to readout layer as a primary predictor.
-        /// </summary>
-        double PrimaryPredictor { get; }
-
-        /// <summary>
-        /// Value to be passed to readout layer as an augmented predictor.
-        /// </summary>
-        double SecondaryPredictor { get; }
-
         //Methods
         /// <summary>
         /// Resets neuron to its initial state

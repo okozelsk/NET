@@ -61,18 +61,6 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// </summary>
         public bool AfterFirstSpike { get { return false; } }
 
-        /// <summary>
-        /// Value to be passed to readout layer as a primary predictor.
-        /// Predictor value does not make sense in case of Input neuron.
-        /// </summary>
-        public double PrimaryPredictor { get { return double.NaN; } }
-
-        /// <summary>
-        /// Value to be passed to readout layer as an augmented predictor.
-        /// Augmented predictor value does not make sense in case of Input neuron.
-        /// </summary>
-        public double SecondaryPredictor { get { return double.NaN; } }
-
         //Attributes
         private readonly Interval _inputRange;
         private double _iStimuli;

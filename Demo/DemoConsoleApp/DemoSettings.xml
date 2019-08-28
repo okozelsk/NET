@@ -16,10 +16,10 @@
           </external>
           <internal>
             <field name="excitatoryPulse">
-              <pulse signal="0.5" leak="1"/>
+              <pulse signal="0.5" leak="2"/>
             </field>
             <field name="inhibitoryPulse">
-              <pulse signal="-0.5" leak="1"/>
+              <pulse signal="-0.5" leak="3"/>
             </field>
           </internal>
         </input>
@@ -28,21 +28,23 @@
             <pools>
               <pool name="LSM pool abcissa" dimX="5" dimY="5" dimZ="5">
                 <neuronGroups>
-                  <analogGroup name="Exc-grp" role="Excitatory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction" augmentedStates="true">
+                  <analogGroup name="Exc-grp" role="Excitatory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction">
                     <activationSigmoid/>
                     <bias min="-0.5" max="0.5" randomSign="false" distribution="Uniform"/>
                     <spikeThreshold min="0.8" max="0.8"/>
                     <retainment density="1">
                       <strength min="0.25" max="0.75"/>
                     </retainment>
+                    <predictors activation="true" squaredActivation="false" expWAvgFiringRate64="false" numOfFirings64="false" lastBin32FiringHist="false" lastBin16FiringHist="false" lastBin8FiringHist="false" lastBin1FiringHist="false"/>
                   </analogGroup>
-                  <analogGroup name="Inh-grp" role="Inhibitory" relShare="1" readoutDensity="1" signalingRestriction="SpikingOnly" augmentedStates="true">
+                  <analogGroup name="Inh-grp" role="Inhibitory" relShare="1" readoutDensity="1" signalingRestriction="SpikingOnly">
                     <activationSigmoid/>
                     <bias min="-0.5" max="0.5" randomSign="false" distribution="Uniform"/>
                     <spikeThreshold min="0.8" max="0.8"/>
                     <retainment density="1">
                       <strength min="0.25" max="0.75"/>
                     </retainment>
+                    <predictors activation="true" squaredActivation="false" expWAvgFiringRate64="false" numOfFirings64="false" lastBin32FiringHist="false" lastBin16FiringHist="false" lastBin8FiringHist="false" lastBin1FiringHist="false"/>
                   </analogGroup>
                 </neuronGroups>
                 <interconnection density="0.1" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
@@ -51,21 +53,23 @@
               </pool>
               <pool name="LSM pool ordinate" dimX="5" dimY="5" dimZ="5">
                 <neuronGroups>
-                  <analogGroup name="Exc-grp" role="Excitatory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction" augmentedStates="true">
+                  <analogGroup name="Exc-grp" role="Excitatory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction">
                     <activationSigmoid/>
                     <bias min="-0.5" max="0.5" randomSign="false" distribution="Uniform"/>
                     <spikeThreshold min="0.8" max="0.8"/>
                     <retainment density="1">
                       <strength min="0.25" max="0.75"/>
                     </retainment>
+                    <predictors activation="true" squaredActivation="false" expWAvgFiringRate64="false" numOfFirings64="false" lastBin32FiringHist="false" lastBin16FiringHist="false" lastBin8FiringHist="false" lastBin1FiringHist="false"/>
                   </analogGroup>
-                  <analogGroup name="Inh-grp" role="Inhibitory" relShare="1" readoutDensity="1" signalingRestriction="SpikingOnly" augmentedStates="true">
+                  <analogGroup name="Inh-grp" role="Inhibitory" relShare="1" readoutDensity="1" signalingRestriction="SpikingOnly">
                     <activationSigmoid/>
                     <bias min="-0.5" max="0.5" randomSign="false" distribution="Uniform"/>
                     <spikeThreshold min="0.8" max="0.8"/>
                     <retainment density="1">
                       <strength min="0.25" max="0.75"/>
                     </retainment>
+                    <predictors activation="true" squaredActivation="false" expWAvgFiringRate64="false" numOfFirings64="false" lastBin32FiringHist="false" lastBin16FiringHist="false" lastBin8FiringHist="false" lastBin1FiringHist="false"/>
                   </analogGroup>
                 </neuronGroups>
                 <interconnection density="0.1" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
@@ -80,7 +84,7 @@
           </reservoirCfg>
         </reservoirCfgContainer>
         <reservoirInstanceContainer>
-          <reservoirInstance name="Main" cfg="MainCfg" augmentedStates="false">
+          <reservoirInstance name="Main" cfg="MainCfg">
             <inputConnections>
               <inputConnection fieldName="coord_abcissa" poolName="LSM pool abcissa" density="1">
                 <synapse delayMethod="Random" maxDelay="0">
@@ -97,6 +101,7 @@
                 </synapse>
               </inputConnection>
             </inputConnections>
+            <predictors activation="true" squaredActivation="false" expWAvgFiringRate64="false" numOfFirings64="false" lastBin32FiringHist="false" lastBin16FiringHist="false" lastBin8FiringHist="false" lastBin1FiringHist="false"/>
           </reservoirInstance>
         </reservoirInstanceContainer>
       </neuralPreprocessor>
@@ -209,17 +214,19 @@
             <pools>
               <pool name="Logistic pool" dimX="6" dimY="6" dimZ="6">
                 <neuronGroups>
-                  <analogGroup name="Exc-Logistic" role="Excitatory" relShare="1" signalingRestriction="AnalogOnly" readoutDensity="1" augmentedStates="true">
+                  <analogGroup name="Exc-Logistic" role="Excitatory" relShare="1" signalingRestriction="AnalogOnly" readoutDensity="1">
                     <activationTanH/>
                     <retainment density="1">
                       <strength min="0" max="0.75" distribution="Uniform"/>
                     </retainment>
+                    <predictors activation="true" squaredActivation="false" expWAvgFiringRate64="false" numOfFirings64="false" lastBin32FiringHist="false" lastBin16FiringHist="false" lastBin8FiringHist="false" lastBin1FiringHist="false"/>
                   </analogGroup>
-                  <analogGroup name="Inh-Logistic" role="Inhibitory" relShare="1" signalingRestriction="AnalogOnly" readoutDensity="1" augmentedStates="true">
+                  <analogGroup name="Inh-Logistic" role="Inhibitory" relShare="1" signalingRestriction="AnalogOnly" readoutDensity="1">
                     <activationTanH/>
                     <retainment density="1">
                       <strength min="0" max="0.75" distribution="Uniform"/>
                     </retainment>
+                    <predictors activation="true" squaredActivation="false" expWAvgFiringRate64="false" numOfFirings64="false" lastBin32FiringHist="false" lastBin16FiringHist="false" lastBin8FiringHist="false" lastBin1FiringHist="false"/>
                   </analogGroup>
                 </neuronGroups>
                 <interconnection density="0.1" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
@@ -234,7 +241,7 @@
           </reservoirCfg>
         </reservoirCfgContainer>
         <reservoirInstanceContainer>
-          <reservoirInstance name="Main" cfg="MainCfg" augmentedStates="false">
+          <reservoirInstance name="Main" cfg="MainCfg">
             <inputConnections>
               <inputConnection fieldName="High" poolName="Logistic pool" density="1">
                 <synapse>
@@ -258,6 +265,7 @@
                 </synapse>
               </inputConnection>
             </inputConnections>
+            <predictors activation="true" squaredActivation="false" expWAvgFiringRate64="false" numOfFirings64="false" lastBin32FiringHist="false" lastBin16FiringHist="false" lastBin8FiringHist="false" lastBin1FiringHist="false"/>
           </reservoirInstance>
         </reservoirInstanceContainer>
       </neuralPreprocessor>
@@ -320,12 +328,14 @@
             <pools>
               <pool name="LSM pool abcissa" dimX="5" dimY="5" dimZ="5">
                 <neuronGroups>
-                  <spikingGroup name="Exc-grp" role="Excitatory" relShare="4" readoutDensity="1" augmentedStates="true">
+                  <spikingGroup name="Exc-grp" role="Excitatory" relShare="4" readoutDensity="1">
                     <activationLeakyIF refractoryPeriods="0"/>
                     <bias min="0.1" max="0.1" randomSign="false" distribution="Uniform"/>
+                    <predictors activation="true" squaredActivation="false" expWAvgFiringRate64="false" numOfFirings64="false" lastBin32FiringHist="false" lastBin16FiringHist="false" lastBin8FiringHist="false" lastBin1FiringHist="false"/>
                   </spikingGroup>
-                  <spikingGroup name="Inh-grp" role="Inhibitory" relShare="1" readoutDensity="1" augmentedStates="true">
+                  <spikingGroup name="Inh-grp" role="Inhibitory" relShare="1" readoutDensity="1">
                     <activationLeakyIF refractoryPeriods="0"/>
+                    <predictors activation="true" squaredActivation="false" expWAvgFiringRate64="false" numOfFirings64="false" lastBin32FiringHist="false" lastBin16FiringHist="false" lastBin8FiringHist="false" lastBin1FiringHist="false"/>
                   </spikingGroup>
                 </neuronGroups>
                 <interconnection density="0.05" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
@@ -334,12 +344,14 @@
               </pool>
               <pool name="LSM pool ordinate" dimX="5" dimY="5" dimZ="5">
                 <neuronGroups>
-                  <spikingGroup name="Exc-grp" role="Excitatory" relShare="4"  readoutDensity="1" augmentedStates="true">
+                  <spikingGroup name="Exc-grp" role="Excitatory" relShare="4"  readoutDensity="1">
                     <activationLeakyIF refractoryPeriods="0"/>
                     <bias min="0.1" max="0.1" randomSign="false" distribution="Uniform"/>
+                    <predictors activation="true" squaredActivation="false" expWAvgFiringRate64="false" numOfFirings64="false" lastBin32FiringHist="false" lastBin16FiringHist="false" lastBin8FiringHist="false" lastBin1FiringHist="false"/>
                   </spikingGroup>
-                  <spikingGroup name="Inh-grp" role="Inhibitory" relShare="1" readoutDensity="1" augmentedStates="true">
+                  <spikingGroup name="Inh-grp" role="Inhibitory" relShare="1" readoutDensity="1">
                     <activationLeakyIF refractoryPeriods="0"/>
+                    <predictors activation="true" squaredActivation="false" expWAvgFiringRate64="false" numOfFirings64="false" lastBin32FiringHist="false" lastBin16FiringHist="false" lastBin8FiringHist="false" lastBin1FiringHist="false"/>
                   </spikingGroup>
                 </neuronGroups>
                 <interconnection density="0.05" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
@@ -354,7 +366,7 @@
           </reservoirCfg>
         </reservoirCfgContainer>
         <reservoirInstanceContainer>
-          <reservoirInstance name="Main" cfg="MainCfg" augmentedStates="false">
+          <reservoirInstance name="Main" cfg="MainCfg">
             <inputConnections>
               <inputConnection fieldName="coord_abcissa" poolName="LSM pool abcissa" density="0.25">
                 <synapse>
@@ -365,6 +377,7 @@
                 </synapse>
               </inputConnection>
             </inputConnections>
+            <predictors activation="true" squaredActivation="false" expWAvgFiringRate64="false" numOfFirings64="false" lastBin32FiringHist="false" lastBin16FiringHist="false" lastBin8FiringHist="false" lastBin1FiringHist="false"/>
           </reservoirInstance>
         </reservoirInstanceContainer>
       </neuralPreprocessor>
@@ -477,17 +490,19 @@
             <pools>
               <pool name="Logistic pool" dimX="6" dimY="6" dimZ="6">
                 <neuronGroups>
-                  <analogGroup name="Exc-Logistic" role="Excitatory" relShare="1" signalingRestriction="AnalogOnly" readoutDensity="1" augmentedStates="true">
+                  <analogGroup name="Exc-Logistic" role="Excitatory" relShare="1" signalingRestriction="AnalogOnly" readoutDensity="1">
                     <activationTanH/>
                     <retainment density="1">
                       <strength min="0" max="0.75" distribution="Uniform"/>
                     </retainment>
+                    <predictors activation="true" squaredActivation="false" expWAvgFiringRate64="false" numOfFirings64="false" lastBin32FiringHist="false" lastBin16FiringHist="false" lastBin8FiringHist="false" lastBin1FiringHist="false"/>
                   </analogGroup>
-                  <analogGroup name="Inh-Logistic" role="Inhibitory" relShare="1" signalingRestriction="AnalogOnly" readoutDensity="1" augmentedStates="true">
+                  <analogGroup name="Inh-Logistic" role="Inhibitory" relShare="1" signalingRestriction="AnalogOnly" readoutDensity="1">
                     <activationTanH/>
                     <retainment density="1">
                       <strength min="0" max="0.75" distribution="Uniform"/>
                     </retainment>
+                    <predictors activation="true" squaredActivation="false" expWAvgFiringRate64="false" numOfFirings64="false" lastBin32FiringHist="false" lastBin16FiringHist="false" lastBin8FiringHist="false" lastBin1FiringHist="false"/>
                   </analogGroup>
                 </neuronGroups>
                 <interconnection density="0.1" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
@@ -502,7 +517,7 @@
           </reservoirCfg>
         </reservoirCfgContainer>
         <reservoirInstanceContainer>
-          <reservoirInstance name="Main" cfg="MainCfg" augmentedStates="false">
+          <reservoirInstance name="Main" cfg="MainCfg">
             <inputConnections>
               <inputConnection fieldName="High" poolName="Logistic pool" density="1">
                 <synapse>
@@ -526,6 +541,7 @@
                 </synapse>
               </inputConnection>
             </inputConnections>
+            <predictors activation="true" squaredActivation="false" expWAvgFiringRate64="false" numOfFirings64="false" lastBin32FiringHist="false" lastBin16FiringHist="false" lastBin8FiringHist="false" lastBin1FiringHist="false"/>
           </reservoirInstance>
         </reservoirInstanceContainer>
       </neuralPreprocessor>
@@ -576,19 +592,21 @@
             <pools>
               <pool name="Logistic pool" dimX="8" dimY="8" dimZ="8">
                 <neuronGroups>
-                  <analogGroup name="Exc-Logistic" role="Excitatory" relShare="1" augmentedStates="true">
+                  <analogGroup name="Exc-Logistic" role="Excitatory" relShare="1">
                     <activationTanH/>
                     <bias min="-0.75" max="0.75" randomSign="false" distribution="Uniform"/>
                     <retainment density="1">
                       <strength min="0.25" max="0.5" distribution="Uniform"/>
                     </retainment>
+                    <predictors activation="true" squaredActivation="false" expWAvgFiringRate64="false" numOfFirings64="false" lastBin32FiringHist="false" lastBin16FiringHist="false" lastBin8FiringHist="false" lastBin1FiringHist="false"/>
                   </analogGroup>
-                  <analogGroup name="Inh-Logistic" role="Inhibitory" relShare="1" augmentedStates="true">
+                  <analogGroup name="Inh-Logistic" role="Inhibitory" relShare="1">
                     <activationTanH/>
                     <bias min="-0.75" max="0.75" randomSign="false" distribution="Uniform"/>
                     <retainment density="1">
                       <strength min="0.25" max="0.5" distribution="Uniform"/>
                     </retainment>
+                    <predictors activation="true" squaredActivation="false" expWAvgFiringRate64="false" numOfFirings64="false" lastBin32FiringHist="false" lastBin16FiringHist="false" lastBin8FiringHist="false" lastBin1FiringHist="false"/>
                   </analogGroup>
                 </neuronGroups>
                 <interconnection density="0.1" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
@@ -603,19 +621,21 @@
           </reservoirCfg>
         </reservoirCfgContainer>
         <reservoirInstanceContainer>
-          <reservoirInstance name="ESN reservoir #1" cfg="ESNCfg" augmentedStates="false">
+          <reservoirInstance name="ESN reservoir #1" cfg="ESNCfg">
             <inputConnections>
               <inputConnection fieldName="Value" poolName="Logistic pool" density="0.5">
                 <synapse/>
               </inputConnection>
             </inputConnections>
+            <predictors activation="true" squaredActivation="false" expWAvgFiringRate64="false" numOfFirings64="false" lastBin32FiringHist="false" lastBin16FiringHist="false" lastBin8FiringHist="false" lastBin1FiringHist="false"/>
           </reservoirInstance>
-          <reservoirInstance name="ESN reservoir #2" cfg="ESNCfg" augmentedStates="false">
+          <reservoirInstance name="ESN reservoir #2" cfg="ESNCfg">
             <inputConnections>
               <inputConnection fieldName="Value" poolName="Logistic pool" density="0.5">
                 <synapse/>
               </inputConnection>
             </inputConnections>
+            <predictors activation="true" squaredActivation="false" expWAvgFiringRate64="false" numOfFirings64="false" lastBin32FiringHist="false" lastBin16FiringHist="false" lastBin8FiringHist="false" lastBin1FiringHist="false"/>
           </reservoirInstance>
         </reservoirInstanceContainer>
       </neuralPreprocessor>
@@ -664,12 +684,14 @@
             <pools>
               <pool name="Spiking pool" x="0" y="0" z="0" dimX="6" dimY="6" dimZ="6">
                 <neuronGroups>
-                  <spikingGroup name="Exc-IzhikewichIF" role="Excitatory" relShare="4" augmentedStates="true">
+                  <spikingGroup name="Exc-IzhikewichIF" role="Excitatory" relShare="4">
                     <activationAutoIzhikevichIF role="Excitatory" refractoryPeriods="0" solverMethod="Euler" solverCompSteps="2"/>
+                    <predictors activation="true" squaredActivation="false" expWAvgFiringRate64="false" numOfFirings64="false" lastBin32FiringHist="false" lastBin16FiringHist="false" lastBin8FiringHist="false" lastBin1FiringHist="false"/>
                   </spikingGroup>
-                  <spikingGroup name="Inh-IzhikewichIF" role="Inhibitory" relShare="1" augmentedStates="true">
+                  <spikingGroup name="Inh-IzhikewichIF" role="Inhibitory" relShare="1">
                     <activationAutoIzhikevichIF role="Inhibitory" refractoryPeriods="0" solverMethod="Euler" solverCompSteps="2"/>
                     <bias min="0" max="0" randomSign="false" distribution="Uniform"/>
+                    <predictors activation="true" squaredActivation="false" expWAvgFiringRate64="false" numOfFirings64="false" lastBin32FiringHist="false" lastBin16FiringHist="false" lastBin8FiringHist="false" lastBin1FiringHist="false"/>
                   </spikingGroup>
                 </neuronGroups>
                 <interconnection density="0.1" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
@@ -678,13 +700,15 @@
               </pool>
               <pool name="Logistic pool" x="0" y="0" z="0" dimX="4" dimY="4" dimZ="4">
                 <neuronGroups>
-                  <analogGroup name="Exc-Logistic" role="Excitatory" relShare="4" augmentedStates="true">
+                  <analogGroup name="Exc-Logistic" role="Excitatory" relShare="4">
                     <activationSigmoid/>
                     <bias min="-1" max="1" randomSign="false" distribution="Uniform"/>
+                    <predictors activation="true" squaredActivation="false" expWAvgFiringRate64="false" numOfFirings64="false" lastBin32FiringHist="false" lastBin16FiringHist="false" lastBin8FiringHist="false" lastBin1FiringHist="false"/>
                   </analogGroup>
-                  <analogGroup name="Inh-Logistic" role="Inhibitory" relShare="1" augmentedStates="true">
+                  <analogGroup name="Inh-Logistic" role="Inhibitory" relShare="1">
                     <activationSigmoid/>
                     <bias min="-1" max="1" randomSign="false" distribution="Uniform"/>
+                    <predictors activation="true" squaredActivation="false" expWAvgFiringRate64="false" numOfFirings64="false" lastBin32FiringHist="false" lastBin16FiringHist="false" lastBin8FiringHist="false" lastBin1FiringHist="false"/>
                   </analogGroup>
                 </neuronGroups>
                 <interconnection density="0.1" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
@@ -707,7 +731,7 @@
           </reservoirCfg>
         </reservoirCfgContainer>
         <reservoirInstanceContainer>
-          <reservoirInstance name="Main" cfg="MainCfg" augmentedStates="false">
+          <reservoirInstance name="Main" cfg="MainCfg">
             <inputConnections>
               <inputConnection fieldName="EEG" poolName="Spiking pool" density="1">
                 <synapse/>
@@ -726,6 +750,7 @@
                 </synapse>
               </inputConnection>
             </inputConnections>
+            <predictors activation="true" squaredActivation="false" expWAvgFiringRate64="false" numOfFirings64="false" lastBin32FiringHist="false" lastBin16FiringHist="false" lastBin8FiringHist="false" lastBin1FiringHist="false"/>
           </reservoirInstance>
         </reservoirInstanceContainer>
       </neuralPreprocessor>

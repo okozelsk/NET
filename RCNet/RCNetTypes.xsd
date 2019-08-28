@@ -1520,6 +1520,50 @@
     </xs:attribute>
   </xs:complexType>
 
+  <!-- Predictors - configuration -->
+  <xs:complexType name="PredictorsCfgType">
+    <xs:attribute type="xs:boolean" name="activation" use="optional" default="true">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Current activation state. Default value is true</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="squaredActivation" use="optional" default="false">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Squared current activation state. Default value is false</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="expWAvgFiringRate64" use="optional" default="false">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Exponentially weighted average firing rate within the last 64 cycles. Default value is false</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="numOfFirings64" use="optional" default="false">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Number of firings during the last 64 cycles. Default value is false</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="lastBin32FiringHist" use="optional" default="false">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Binary (0/1) firing history of the last 32 cycles as an unsigned integer number. Default value is false</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="lastBin16FiringHist" use="optional" default="false">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Binary (0/1) firing history of the last 16 cycles as an unsigned integer number. Default value is false</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="lastBin8FiringHist" use="optional" default="false">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Binary (0/1) firing history of the last 8 cycles as an unsigned integer number. Default value is false</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="lastBin1FiringHist" use="optional" default="false">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Binary (0/1) indicator of the firing during the last cycle. Default value is false</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
   <!-- Pool - spiking neuron group - configuration -->
   <xs:complexType name="PoolSpikingNeuronGroupCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
@@ -1532,6 +1576,7 @@
         <xs:element type="ActivationAutoIzhikevichIFCfgType" name="activationAutoIzhikevichIF" minOccurs="1" maxOccurs="1"/>
       </xs:choice>
       <xs:element type="RandomValueType" name="bias" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="PredictorsCfgType" name="predictors" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:string" name="name" use="required" />
     <xs:attribute type="NeuronRoleType" name="role" use="required"/>
@@ -1539,11 +1584,6 @@
     <xs:attribute type="UDoubleType" name="readoutDensity" use="optional" default="1">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="xs:boolean" name="augmentedStates" use="optional" default="true">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is true</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -1574,7 +1614,8 @@
           <xs:documentation xml:lang="en">Number between 0 and 1. If current state meats this value, it will be interpretted as a spike.</xs:documentation>
         </xs:annotation>
       </xs:element>
-    <xs:element type="PoolAnalogNeuronsRetanmentCfgType" name="retainment" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="PoolAnalogNeuronsRetanmentCfgType" name="retainment" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="PredictorsCfgType" name="predictors" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:string" name="name" use="required" />
     <xs:attribute type="NeuronRoleType" name="role" use="required"/>
@@ -1587,11 +1628,6 @@
     <xs:attribute type="UDoubleType" name="readoutDensity" use="optional" default="1">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="xs:boolean" name="augmentedStates" use="optional" default="true">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is true</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -1838,14 +1874,10 @@
           <xs:field xpath="@poolName"/>
         </xs:unique>
       </xs:element>
+      <xs:element type="PredictorsCfgType" name="predictors" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:string" name="name" use="required" />
     <xs:attribute type="xs:string" name="cfg" use="required" />
-    <xs:attribute type="xs:boolean" name="augmentedStates" use="optional" default="false">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is false</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
   </xs:complexType>
 
   <!-- NeuralPreprocessor - reservoir instances - container -->
