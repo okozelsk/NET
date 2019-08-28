@@ -35,7 +35,7 @@
                     <retainment density="1">
                       <strength min="0.25" max="0.75"/>
                     </retainment>
-                    <predictors activation="true" squaredActivation="false" expWAvgFiringRate64="false" numOfFirings64="false" lastBin32FiringHist="false" lastBin16FiringHist="false" lastBin8FiringHist="false" lastBin1FiringHist="false"/>
+                    <predictors activation="true" squaredActivation="false" expWAvgFiringRate64="true" numOfFirings64="false" lastBin32FiringHist="false" lastBin16FiringHist="false" lastBin8FiringHist="false" lastBin1FiringHist="false"/>
                   </analogGroup>
                   <analogGroup name="Inh-grp" role="Inhibitory" relShare="1" readoutDensity="1" signalingRestriction="SpikingOnly">
                     <activationSigmoid/>
@@ -44,7 +44,7 @@
                     <retainment density="1">
                       <strength min="0.25" max="0.75"/>
                     </retainment>
-                    <predictors activation="true" squaredActivation="false" expWAvgFiringRate64="false" numOfFirings64="false" lastBin32FiringHist="false" lastBin16FiringHist="false" lastBin8FiringHist="false" lastBin1FiringHist="false"/>
+                    <predictors activation="true" squaredActivation="false" expWAvgFiringRate64="true" numOfFirings64="false" lastBin32FiringHist="false" lastBin16FiringHist="false" lastBin8FiringHist="false" lastBin1FiringHist="false"/>
                   </analogGroup>
                 </neuronGroups>
                 <interconnection density="0.1" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
@@ -60,7 +60,7 @@
                     <retainment density="1">
                       <strength min="0.25" max="0.75"/>
                     </retainment>
-                    <predictors activation="true" squaredActivation="false" expWAvgFiringRate64="false" numOfFirings64="false" lastBin32FiringHist="false" lastBin16FiringHist="false" lastBin8FiringHist="false" lastBin1FiringHist="false"/>
+                    <predictors activation="true" squaredActivation="false" expWAvgFiringRate64="true" numOfFirings64="false" lastBin32FiringHist="false" lastBin16FiringHist="false" lastBin8FiringHist="false" lastBin1FiringHist="false"/>
                   </analogGroup>
                   <analogGroup name="Inh-grp" role="Inhibitory" relShare="1" readoutDensity="1" signalingRestriction="SpikingOnly">
                     <activationSigmoid/>
@@ -69,7 +69,7 @@
                     <retainment density="1">
                       <strength min="0.25" max="0.75"/>
                     </retainment>
-                    <predictors activation="true" squaredActivation="false" expWAvgFiringRate64="false" numOfFirings64="false" lastBin32FiringHist="false" lastBin16FiringHist="false" lastBin8FiringHist="false" lastBin1FiringHist="false"/>
+                    <predictors activation="true" squaredActivation="false" expWAvgFiringRate64="true" numOfFirings64="false" lastBin32FiringHist="false" lastBin16FiringHist="false" lastBin8FiringHist="false" lastBin1FiringHist="false"/>
                   </analogGroup>
                 </neuronGroups>
                 <interconnection density="0.1" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
@@ -101,7 +101,7 @@
                 </synapse>
               </inputConnection>
             </inputConnections>
-            <predictors activation="true" squaredActivation="false" expWAvgFiringRate64="false" numOfFirings64="false" lastBin32FiringHist="false" lastBin16FiringHist="false" lastBin8FiringHist="false" lastBin1FiringHist="false"/>
+            <predictors activation="true" squaredActivation="false" expWAvgFiringRate64="true" numOfFirings64="false" lastBin32FiringHist="false" lastBin16FiringHist="false" lastBin8FiringHist="false" lastBin1FiringHist="false"/>
           </reservoirInstance>
         </reservoirInstanceContainer>
       </neuralPreprocessor>

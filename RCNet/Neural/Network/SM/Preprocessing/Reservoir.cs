@@ -747,9 +747,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                         poolStat.NeuronGroupStatCollection[neuron.Placement.PoolGroupID].MinTStimuliStat.AddSampleValue(neuron.Statistics.TotalStimuliStat.Min);
                         poolStat.NeuronGroupStatCollection[neuron.Placement.PoolGroupID].TStimuliSpansStat.AddSampleValue(neuron.Statistics.TotalStimuliStat.Span);
                     }
-                    poolStat.NeuronGroupStatCollection[neuron.Placement.PoolGroupID].AvgOutputSignalStat.AddSampleValue(neuron.Statistics.AnalogSignalStat.ArithAvg);
-                    poolStat.NeuronGroupStatCollection[neuron.Placement.PoolGroupID].MaxOutputSignalStat.AddSampleValue(neuron.Statistics.AnalogSignalStat.Max);
-                    poolStat.NeuronGroupStatCollection[neuron.Placement.PoolGroupID].MinOutputSignalStat.AddSampleValue(neuron.Statistics.AnalogSignalStat.Min);
+                    poolStat.NeuronGroupStatCollection[neuron.Placement.PoolGroupID].AvgAnalogSignalStat.AddSampleValue(neuron.Statistics.AnalogSignalStat.ArithAvg);
+                    poolStat.NeuronGroupStatCollection[neuron.Placement.PoolGroupID].MaxAnalogSignalStat.AddSampleValue(neuron.Statistics.AnalogSignalStat.Max);
+                    poolStat.NeuronGroupStatCollection[neuron.Placement.PoolGroupID].MinAnalogSignalStat.AddSampleValue(neuron.Statistics.AnalogSignalStat.Min);
+                    poolStat.NeuronGroupStatCollection[neuron.Placement.PoolGroupID].AvgFiringStat.AddSampleValue(neuron.Statistics.FiringStat.ArithAvg);
+                    poolStat.NeuronGroupStatCollection[neuron.Placement.PoolGroupID].MaxFiringStat.AddSampleValue(neuron.Statistics.FiringStat.Max);
+                    poolStat.NeuronGroupStatCollection[neuron.Placement.PoolGroupID].MinFiringStat.AddSampleValue(neuron.Statistics.FiringStat.Min);
                     //Synapses efficacy statistics
                     foreach (ISynapse rSynapse in _neuronNeuronConnectionsCollection[neuron.Placement.ReservoirFlatIdx].Values)
                     {
@@ -766,15 +769,28 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                     }
                     if (neuron.Statistics.AnalogSignalStat.NumOfNonzeroSamples == 0)
                     {
-                        ++poolStat.NeuronGroupStatCollection[neuron.Placement.PoolGroupID].NumOfNoOutputSignalNeurons;
-                        ++poolStat.NumOfNoOutputSignalNeurons;
-                        ++stats.NumOfNoOutputSignalNeurons;
+                        ++poolStat.NeuronGroupStatCollection[neuron.Placement.PoolGroupID].NumOfNoAnalogOutputSignalNeurons;
+                        ++poolStat.NumOfNoAnalogOutputSignalNeurons;
+                        ++stats.NumOfNoAnalogOutputSignalNeurons;
                     }
                     if (neuron.Statistics.AnalogSignalStat.Span == 0 && neuron.Statistics.AnalogSignalStat.Max != 0)
                     {
-                        ++poolStat.NeuronGroupStatCollection[neuron.Placement.PoolGroupID].NumOfConstOutputSignalNeurons;
-                        ++poolStat.NumOfConstOutputSignalNeurons;
-                        ++stats.NumOfConstOutputSignalNeurons;
+                        ++poolStat.NeuronGroupStatCollection[neuron.Placement.PoolGroupID].NumOfConstAnalogOutputSignalNeurons;
+                        ++poolStat.NumOfConstAnalogOutputSignalNeurons;
+                        ++stats.NumOfConstAnalogOutputSignalNeurons;
+                    }
+
+                    if (neuron.Statistics.FiringStat.NumOfNonzeroSamples == 0)
+                    {
+                        ++poolStat.NeuronGroupStatCollection[neuron.Placement.PoolGroupID].NumOfNotFiringNeurons;
+                        ++poolStat.NumOfNotFiringNeurons;
+                        ++stats.NumOfNotFiringNeurons;
+                    }
+                    if (neuron.Statistics.FiringStat.Span == 0 && neuron.Statistics.FiringStat.Max != 0)
+                    {
+                        ++poolStat.NeuronGroupStatCollection[neuron.Placement.PoolGroupID].NumOfConstFiringNeurons;
+                        ++poolStat.NumOfConstFiringNeurons;
+                        ++stats.NumOfConstFiringNeurons;
                     }
                 }
                 //Weights statistics
@@ -796,7 +812,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                     {
                         if (synapse.TargetNeuron.Placement.PoolID == poolID)
                         {
-                            poolStat.InternalWeightsStat.AddSampleValue(synapse.Weight);
+                            if (synapse.TargetNeuron.ActivationType == CommonEnums.ActivationType.Analog)
+                            {
+                                poolStat.InternalAnalogWeightsStat.AddSampleValue(synapse.Weight);
+                            }
+                            else
+                            {
+                                poolStat.InternalSpikingWeightsStat.AddSampleValue(synapse.Weight);
+                            }
                         }
                     }
                 }
@@ -1009,13 +1032,21 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// </summary>
         public int NumOfNoRStimuliNeurons { get; set; }
         /// <summary>
-        /// Number of neurons emitting no output signal
+        /// Number of neurons emitting no output analog signal
         /// </summary>
-        public int NumOfNoOutputSignalNeurons { get; set; }
+        public int NumOfNoAnalogOutputSignalNeurons { get; set; }
         /// <summary>
-        /// Number of neurons emitting constant output signal
+        /// Number of neurons emitting constant output analog signal
         /// </summary>
-        public int NumOfConstOutputSignalNeurons { get; set; }
+        public int NumOfConstAnalogOutputSignalNeurons { get; set; }
+        /// <summary>
+        /// Number of neurons emitting no output spikes
+        /// </summary>
+        public int NumOfNotFiringNeurons { get; set; }
+        /// <summary>
+        /// Number of neurons emitting constant output spikes
+        /// </summary>
+        public int NumOfConstFiringNeurons { get; set; }
 
         //Constructor
         /// <summary>
@@ -1042,8 +1073,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             TotalNumOfInternalSynapses = numOfInternalSynapses;
             PoolStatCollection = new List<PoolStat>();
             NumOfNoRStimuliNeurons = 0;
-            NumOfNoOutputSignalNeurons = 0;
-            NumOfConstOutputSignalNeurons = 0;
+            NumOfNoAnalogOutputSignalNeurons = 0;
+            NumOfConstAnalogOutputSignalNeurons = 0;
+            NumOfNotFiringNeurons = 0;
+            NumOfConstFiringNeurons = 0;
             return;
         }
 
@@ -1080,11 +1113,19 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             /// <summary>
             /// Number of neurons emitting no output signal
             /// </summary>
-            public int NumOfNoOutputSignalNeurons { get; set; }
+            public int NumOfNoAnalogOutputSignalNeurons { get; set; }
             /// <summary>
             /// Number of neurons emitting constant output signal
             /// </summary>
-            public int NumOfConstOutputSignalNeurons { get; set; }
+            public int NumOfConstAnalogOutputSignalNeurons { get; set; }
+            /// <summary>
+            /// Number of neurons emitting no output spikes
+            /// </summary>
+            public int NumOfNotFiringNeurons { get; set; }
+            /// <summary>
+            /// Number of neurons emitting constant output spikes
+            /// </summary>
+            public int NumOfConstFiringNeurons { get; set; }
 
             /// <summary>
             /// Input weights statistics
@@ -1092,9 +1133,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             public BasicStat InputWeightsStat { get; }
 
             /// <summary>
-            /// Internal weights statistics
+            /// Internal analog weights statistics
             /// </summary>
-            public BasicStat InternalWeightsStat { get; }
+            public BasicStat InternalAnalogWeightsStat { get; }
+
+            /// <summary>
+            /// Internal spiking weights statistics
+            /// </summary>
+            public BasicStat InternalSpikingWeightsStat { get; }
 
             //Constructor
             /// <summary>
@@ -1116,10 +1162,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                     NeuronGroupStatCollection[i] = new NeuronGroupStat(poolSettings.NeuronGroups[i].Name);
                 }
                 NumOfNoRStimuliNeurons = 0;
-                NumOfNoOutputSignalNeurons = 0;
-                NumOfConstOutputSignalNeurons = 0;
+                NumOfNoAnalogOutputSignalNeurons = 0;
+                NumOfConstAnalogOutputSignalNeurons = 0;
+                NumOfNotFiringNeurons = 0;
+                NumOfConstFiringNeurons = 0;
                 InputWeightsStat = new BasicStat();
-                InternalWeightsStat = new BasicStat();
+                InternalAnalogWeightsStat = new BasicStat();
+                InternalSpikingWeightsStat = new BasicStat();
                 return;
             }
 
@@ -1199,17 +1248,29 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 /// </summary>
                 public BasicStat TStimuliSpansStat { get; }
                 /// <summary>
-                /// Statistics of neurons' average output signals
+                /// Statistics of neurons' average analog signals
                 /// </summary>
-                public BasicStat AvgOutputSignalStat { get; }
+                public BasicStat AvgAnalogSignalStat { get; }
                 /// <summary>
-                /// Statistics of neurons' max output signals
+                /// Statistics of neurons' max analog signals
                 /// </summary>
-                public BasicStat MaxOutputSignalStat { get; }
+                public BasicStat MaxAnalogSignalStat { get; }
                 /// <summary>
-                /// Statistics of neurons' min output signals
+                /// Statistics of neurons' min analog signals
                 /// </summary>
-                public BasicStat MinOutputSignalStat { get; }
+                public BasicStat MinAnalogSignalStat { get; }
+                /// <summary>
+                /// Statistics of neurons' average firing signals
+                /// </summary>
+                public BasicStat AvgFiringStat { get; }
+                /// <summary>
+                /// Statistics of neurons' max firing signals
+                /// </summary>
+                public BasicStat MaxFiringStat { get; }
+                /// <summary>
+                /// Statistics of neurons' min firing signals
+                /// </summary>
+                public BasicStat MinFiringStat { get; }
                 /// <summary>
                 /// Statistics of the synapses' average efficacy
                 /// </summary>
@@ -1233,11 +1294,19 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 /// <summary>
                 /// Number of neurons emitting no output signal
                 /// </summary>
-                public int NumOfNoOutputSignalNeurons { get; set; }
+                public int NumOfNoAnalogOutputSignalNeurons { get; set; }
                 /// <summary>
                 /// Number of neurons emitting constant output signal
                 /// </summary>
-                public int NumOfConstOutputSignalNeurons { get; set; }
+                public int NumOfConstAnalogOutputSignalNeurons { get; set; }
+                /// <summary>
+                /// Number of neurons emitting no output spikes
+                /// </summary>
+                public int NumOfNotFiringNeurons { get; set; }
+                /// <summary>
+                /// Number of neurons emitting constant output spikes
+                /// </summary>
+                public int NumOfConstFiringNeurons { get; set; }
 
 
                 //Constructor
@@ -1264,16 +1333,21 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                     MaxIStimuliStat = new BasicStat();
                     MinIStimuliStat = new BasicStat();
                     IStimuliSpansStat = new BasicStat();
-                    AvgOutputSignalStat = new BasicStat();
-                    MaxOutputSignalStat = new BasicStat();
-                    MinOutputSignalStat = new BasicStat();
+                    AvgAnalogSignalStat = new BasicStat();
+                    MaxAnalogSignalStat = new BasicStat();
+                    MinAnalogSignalStat = new BasicStat();
+                    AvgFiringStat = new BasicStat();
+                    MaxFiringStat = new BasicStat();
+                    MinFiringStat = new BasicStat();
                     AvgSynEfficacyStat = new BasicStat();
                     MaxSynEfficacyStat = new BasicStat();
                     MinSynEfficacyStat = new BasicStat();
                     SynEfficacySpansStat = new BasicStat();
                     NumOfNoRStimuliNeurons = 0;
-                    NumOfNoOutputSignalNeurons = 0;
-                    NumOfConstOutputSignalNeurons = 0;
+                    NumOfNoAnalogOutputSignalNeurons = 0;
+                    NumOfConstAnalogOutputSignalNeurons = 0;
+                    NumOfNotFiringNeurons = 0;
+                    NumOfConstFiringNeurons = 0;
                     return;
                 }
 

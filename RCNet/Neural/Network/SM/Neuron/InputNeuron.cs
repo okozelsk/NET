@@ -66,8 +66,8 @@ namespace RCNet.Neural.Network.SM.Neuron
         private double _iStimuli;
         private double _rStimuli;
         private double _tStimuli;
-        private double _analogTargetSignal;
-        private double _spikingTargetSignal;
+        private double _analogSignal;
+        private double _spikingSignal;
 
         //Constructor
         /// <summary>
@@ -99,8 +99,8 @@ namespace RCNet.Neural.Network.SM.Neuron
             _iStimuli = 0;
             _rStimuli = 0;
             _tStimuli = 0;
-            _analogTargetSignal = 0;
-            _spikingTargetSignal = 0;
+            _analogSignal = 0;
+            _spikingSignal = 0;
             if (statistics)
             {
                 Statistics.Reset();
@@ -127,11 +127,11 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// <param name="collectStatistics">Specifies whether to update internal statistics</param>
         public void ComputeSignal(bool collectStatistics)
         {
-            _analogTargetSignal = _tStimuli;
-            _spikingTargetSignal = _spikingTargetRange.Rescale(_tStimuli, _inputRange);
+            _analogSignal = _tStimuli;
+            _spikingSignal = _spikingTargetRange.Rescale(_tStimuli, _inputRange);
             if (collectStatistics)
             {
-                Statistics.Update(_iStimuli, _rStimuli, _tStimuli, _tStimuli, _analogTargetSignal, _spikingTargetSignal);
+                Statistics.Update(_iStimuli, _rStimuli, _tStimuli, _tStimuli, _analogSignal, _spikingSignal);
             }
             return;
         }
@@ -144,11 +144,11 @@ namespace RCNet.Neural.Network.SM.Neuron
         {
             if (targetActivationType == CommonEnums.ActivationType.Spiking)
             {
-                return _spikingTargetSignal;
+                return _spikingSignal;
             }
             else
             {
-                return _analogTargetSignal;
+                return _analogSignal;
             }
         }
 

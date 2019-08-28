@@ -358,20 +358,26 @@ namespace RCNet.Neural.Network.SM
                 {
                     sb.Append(leftMargin + $"  Reservoir instance: {resStat.ReservoirInstanceName} (configuration {resStat.ReservoirSettingsName}, {resStat.TotalNumOfNeurons} neurons, {Math.Round(resStat.ExcitatoryNeuronsRatio * 100, 1).ToString(CultureInfo.InvariantCulture)}% excitatory neurons, {resStat.TotalNumOfInternalSynapses} internal synapses)" + Environment.NewLine);
                     sb.Append(leftMargin + $"    Zero incoming res. stimuli : {resStat.NumOfNoRStimuliNeurons} neurons" + Environment.NewLine);
-                    sb.Append(leftMargin + $"    Zero emitted output signal : {resStat.NumOfNoOutputSignalNeurons} neurons" + Environment.NewLine);
-                    sb.Append(leftMargin + $"    Const emitted output signal: {resStat.NumOfConstOutputSignalNeurons} neurons" + Environment.NewLine);
+                    sb.Append(leftMargin + $"    Zero emitted analog signal : {resStat.NumOfNoAnalogOutputSignalNeurons} neurons" + Environment.NewLine);
+                    sb.Append(leftMargin + $"    Const emitted analog signal: {resStat.NumOfConstAnalogOutputSignalNeurons} neurons" + Environment.NewLine);
+                    sb.Append(leftMargin + $"                    Not firing : {resStat.NumOfNotFiringNeurons} neurons" + Environment.NewLine);
+                    sb.Append(leftMargin + $"                   Const firing: {resStat.NumOfConstFiringNeurons} neurons" + Environment.NewLine);
                     foreach (ReservoirStat.PoolStat poolStat in resStat.PoolStatCollection)
                     {
-                        sb.Append(leftMargin + $"    Pool: {poolStat.PoolName} ({poolStat.NumOfNeurons} neurons, {Math.Round(poolStat.ExcitatoryNeuronsRatio * 100, 1).ToString(CultureInfo.InvariantCulture)}% excitatory neurons, {poolStat.InternalWeightsStat.NumOfSamples} internal synapses)" + Environment.NewLine);
+                        sb.Append(leftMargin + $"    Pool: {poolStat.PoolName} ({poolStat.NumOfNeurons} neurons, {Math.Round(poolStat.ExcitatoryNeuronsRatio * 100, 1).ToString(CultureInfo.InvariantCulture)}% excitatory neurons, {poolStat.InternalAnalogWeightsStat.NumOfSamples} internal synapses)" + Environment.NewLine);
                         sb.Append(leftMargin + $"      Zero incoming res. stimuli : {poolStat.NumOfNoRStimuliNeurons} neurons" + Environment.NewLine);
-                        sb.Append(leftMargin + $"      Zero emitted output signal : {poolStat.NumOfNoOutputSignalNeurons} neurons" + Environment.NewLine);
-                        sb.Append(leftMargin + $"      Const emitted output signal: {poolStat.NumOfConstOutputSignalNeurons} neurons" + Environment.NewLine);
+                        sb.Append(leftMargin + $"      Zero emitted analog signal : {poolStat.NumOfNoAnalogOutputSignalNeurons} neurons" + Environment.NewLine);
+                        sb.Append(leftMargin + $"      Const emitted analog signal: {poolStat.NumOfConstAnalogOutputSignalNeurons} neurons" + Environment.NewLine);
+                        sb.Append(leftMargin + $"                      Not firing : {poolStat.NumOfNotFiringNeurons} neurons" + Environment.NewLine);
+                        sb.Append(leftMargin + $"                     Const firing: {poolStat.NumOfConstFiringNeurons} neurons" + Environment.NewLine);
                         foreach (ReservoirStat.PoolStat.NeuronGroupStat groupStat in poolStat.NeuronGroupStatCollection)
                         {
-                            sb.Append(leftMargin + $"      Group of neurons: {groupStat.GroupName} ({groupStat.AvgOutputSignalStat.NumOfSamples} neurons)" + Environment.NewLine);
+                            sb.Append(leftMargin + $"      Group of neurons: {groupStat.GroupName} ({groupStat.AvgAnalogSignalStat.NumOfSamples} neurons)" + Environment.NewLine);
                             sb.Append(leftMargin + $"        Zero incoming res. stimuli : {groupStat.NumOfNoRStimuliNeurons} neurons" + Environment.NewLine);
-                            sb.Append(leftMargin + $"        Zero emitted output signal : {groupStat.NumOfNoOutputSignalNeurons} neurons" + Environment.NewLine);
-                            sb.Append(leftMargin + $"        Const emitted output signal: {groupStat.NumOfConstOutputSignalNeurons} neurons" + Environment.NewLine);
+                            sb.Append(leftMargin + $"        Zero emitted analog signal : {groupStat.NumOfNoAnalogOutputSignalNeurons} neurons" + Environment.NewLine);
+                            sb.Append(leftMargin + $"        Const emitted analog signal: {groupStat.NumOfConstAnalogOutputSignalNeurons} neurons" + Environment.NewLine);
+                            sb.Append(leftMargin + $"                        Not firing : {groupStat.NumOfNotFiringNeurons} neurons" + Environment.NewLine);
+                            sb.Append(leftMargin + $"                       Const firing: {groupStat.NumOfConstFiringNeurons} neurons" + Environment.NewLine);
                             sb.Append(leftMargin + $"        Stimulation from Input neurons " + Environment.NewLine);
                             sb.Append(leftMargin + $"          AVG>  {StatLine(groupStat.AvgIStimuliStat)}" + Environment.NewLine);
                             sb.Append(leftMargin + $"          MAX>  {StatLine(groupStat.MaxIStimuliStat)}" + Environment.NewLine);
@@ -397,14 +403,19 @@ namespace RCNet.Neural.Network.SM
                             sb.Append(leftMargin + $"          MAX>  {StatLine(groupStat.MaxActivationStatesStat)}" + Environment.NewLine);
                             sb.Append(leftMargin + $"          MIN>  {StatLine(groupStat.MinActivationStatesStat)}" + Environment.NewLine);
                             sb.Append(leftMargin + $"         SPAN>  {StatLine(groupStat.ActivationStateSpansStat)}" + Environment.NewLine);
-                            sb.Append(leftMargin + $"        Output signal" + Environment.NewLine);
-                            sb.Append(leftMargin + $"          AVG>  {StatLine(groupStat.AvgOutputSignalStat)}" + Environment.NewLine);
-                            sb.Append(leftMargin + $"          MAX>  {StatLine(groupStat.MaxOutputSignalStat)}" + Environment.NewLine);
-                            sb.Append(leftMargin + $"          MIN>  {StatLine(groupStat.MinOutputSignalStat)}" + Environment.NewLine);
+                            sb.Append(leftMargin + $"        Analog signal" + Environment.NewLine);
+                            sb.Append(leftMargin + $"          AVG>  {StatLine(groupStat.AvgAnalogSignalStat)}" + Environment.NewLine);
+                            sb.Append(leftMargin + $"          MAX>  {StatLine(groupStat.MaxAnalogSignalStat)}" + Environment.NewLine);
+                            sb.Append(leftMargin + $"          MIN>  {StatLine(groupStat.MinAnalogSignalStat)}" + Environment.NewLine);
+                            sb.Append(leftMargin + $"        Spiking signal" + Environment.NewLine);
+                            sb.Append(leftMargin + $"          AVG>  {StatLine(groupStat.AvgFiringStat)}" + Environment.NewLine);
+                            sb.Append(leftMargin + $"          MAX>  {StatLine(groupStat.MaxFiringStat)}" + Environment.NewLine);
+                            sb.Append(leftMargin + $"          MIN>  {StatLine(groupStat.MinFiringStat)}" + Environment.NewLine);
                         }
-                        sb.Append(leftMargin + $"      Initial weights of synapses" + Environment.NewLine);
-                        sb.Append(leftMargin + $"        Inp.>  {StatLine(poolStat.InputWeightsStat)}" + Environment.NewLine);
-                        sb.Append(leftMargin + $"        Int.>  {StatLine(poolStat.InternalWeightsStat)}" + Environment.NewLine);
+                        sb.Append(leftMargin + $"      Weights of synapses" + Environment.NewLine);
+                        sb.Append(leftMargin + $"        Input        >  {StatLine(poolStat.InputWeightsStat)}" + Environment.NewLine);
+                        sb.Append(leftMargin + $"        Int. Analog  >  {StatLine(poolStat.InternalAnalogWeightsStat)}" + Environment.NewLine);
+                        sb.Append(leftMargin + $"        Int. Spiking >  {StatLine(poolStat.InternalSpikingWeightsStat)}" + Environment.NewLine);
                     }
                 }
                 sb.Append(leftMargin + $"Number of unused (invalid) predictors: {NumOfUnusedPredictors}" + Environment.NewLine);

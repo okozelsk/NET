@@ -36,14 +36,14 @@ namespace RCNet.Neural.Network.SM.Neuron
         public BasicStat ActivationStat { get; }
 
         /// <summary>
-        /// Statistics of neuron's amitted analog signal
+        /// Statistics of neuron's emitted analog signal (always <0,1>)
         /// </summary>
         public BasicStat AnalogSignalStat { get; }
 
         /// <summary>
-        /// Statistics of neuron's amitted spiking signal
+        /// Statistics of neuron's emitted spikes (always <0,1>)
         /// </summary>
-        public BasicStat SpikingSignalStat { get; }
+        public BasicStat FiringStat { get; }
 
 
         //Constructor
@@ -57,7 +57,7 @@ namespace RCNet.Neural.Network.SM.Neuron
             TotalStimuliStat = new BasicStat();
             ActivationStat = new BasicStat();
             AnalogSignalStat = new BasicStat();
-            SpikingSignalStat = new BasicStat();
+            FiringStat = new BasicStat();
             return;
         }
 
@@ -72,7 +72,7 @@ namespace RCNet.Neural.Network.SM.Neuron
             TotalStimuliStat.Reset();
             ActivationStat.Reset();
             AnalogSignalStat.Reset();
-            SpikingSignalStat.Reset();
+            FiringStat.Reset();
             return;
         }
 
@@ -83,15 +83,16 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// <param name="rStimuli">Incoming stimulation related to part coming from connected reservoir's neurons</param>
         /// <param name="tStimuli">Incoming stimulation (all components together including Bias)</param>
         /// <param name="activationState">Neuron's activation state</param>
-        /// <param name="outputSignal">Neuron's output signal</param>
-        public void Update(double iStimuli, double rStimuli, double tStimuli, double activationState, double analogSignal, double spikingSignal)
+        /// <param name="analogSignal">Neuron's output analog signal</param>
+        /// <param name="spike">Neuron's output spike signal</param>
+        public void Update(double iStimuli, double rStimuli, double tStimuli, double activationState, double analogSignal, double spike)
         {
             InputStimuliStat.AddSampleValue(iStimuli);
             ReservoirStimuliStat.AddSampleValue(rStimuli);
             TotalStimuliStat.AddSampleValue(tStimuli);
             ActivationStat.AddSampleValue(activationState);
             AnalogSignalStat.AddSampleValue(analogSignal);
-            SpikingSignalStat.AddSampleValue(spikingSignal);
+            FiringStat.AddSampleValue(spike);
             return;
         }
 
