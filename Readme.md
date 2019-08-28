@@ -42,7 +42,7 @@ Main functionality is demonstrated in a simple demo application (/Demo/DemoConso
 ### Signal generators
 |Component|Description|
 |--|--|
-|ConstGenerator|Generates constant signal|
+|PulseGenerator|Generates constant pulses at a specified frequency|
 |MackeyGlassGenerator|Generates Mackey-Glass chaotic signal|
 |RandomGenerator|Generates random signal|
 |SinusoidalGenerator|Generates sinusoidal signal|
@@ -50,7 +50,7 @@ Main functionality is demonstrated in a simple demo application (/Demo/DemoConso
 ### XML handling
 |Component|Description|
 |--|--|
-|ElemValidator|Implements validation of alone xml element against specified tzpe defined in xsd. It complements the apparently missing .net method and is necessary to comply with the overall RCNet xml settings concept.|
+|ElemValidator|Implements validation of alone xml element against specified type defined in xsd. It complements the apparently missing .net method and is necessary to comply with the overall RCNet xml settings concept.|
 |DocValidator|Provides the xml loading/validation functionalities|
 
 ### Data handling
@@ -96,20 +96,19 @@ See the [wiki pages.](https://en.wikipedia.org/wiki/Biological_neuron_model)
 |RPropTrainer|Resilient propagation (iRPROP+) trainer of the feed forward network|
 |QRDRegrTrainer|Implements the linear regression (QR decomposition) trainer of the feed forward network. This is the special case trainer for FF network having no hidden layers and Identity output activation function|
 |RidgeRegrTrainer|Implements the ridge linear regression trainer of the feed forward network. This is the special case trainer for FF network having no hidden layers and Identity output activation function|
-|ElasticLinRegrTrainer|Implements the elastic linear regression trainer of the feed forward network. This is the special case trainer for FF network having no hidden layers and Identity output activation function|
+|ElasticRegrTrainer|Implements the elastic net trainer of the feed forward network. This is the special case trainer for FF network having no hidden layers and Identity output activation function|
 |ParallelPerceptron|Implements the parallel perceptron network|
 |PDeltaRuleTrainer|P-Delta rule trainer of the parallel perceptron network|
 
 ### State Machine components
 |Component|Description|
 |--|--|
-|StaticSynapse|Computes constantly weighted signal from source to target neuron. Supports signal delay|
-|DynamicSynapse|Computes dynamically weighted signal from source to target neuron using pre-synaptic and/or post-synaptic "Short-Term-Plasticity". Supports signal delay|
+|InputSynapse|Computes constantly weighted signal from external input and passes it to target neuron. Supports signal delay|
+|InternalSynapse|Computes dynamically weighted signal from source to target neuron using pre-synaptic short-term plasticity and post-synaptic current.|
 |InputNeuron|Input neuron is the special type of very simple neuron. Its purpose is only to mediate input analog value for a synapse|
-|AnalogNeuron|Analog neuron produces analog output according to its analog activation function. Main features: Retainment (leaky integrator), The second power as augmented readout state|
-|SpikingNeuron|Spiking neuron produces spikes according to its spiking activation function. Main features: Membrane potential as primary readout state, Firing rate as augmented readout state|
-|Reservoir|Implements recurrent network supporting analog and spiking neurons working directly together. Main features: SpectralRadius, Multiple 3D pools of neurons, Pool to pool connections. It can work as the Echo State Network reservoir, Liquid State Machine reservoir or Mixed reservoir|
-|NeuralPreprocessor|Implements data preprocessing to predictors. Supports multiple internal reservoirs having multiple interconnected/cooperating analog and spiking neuron pools. Supports virtual input data associated with predefined signal generators. Supports two input feeding regimes: Continuous and Patterned|
+|HiddenNeuron|Supports both analog and spiking activation functions and can produce analog signal and/or spikes. Based on the specified threshold, it is able to produce spikes even when analog activation is used. Supports Retainment property of analog activation (leaky integrator). Supports 8 different predictors.|
+|Reservoir|Provides recurrent network supporting analog and spiking neurons working directly together. Main features: SpectralRadius (for weights of analog, spiking or both neurons), Multiple 3D pools of neurons, Pool to pool connections. It can work as the Echo State Network reservoir, Liquid State Machine reservoir or Mixed reservoir|
+|NeuralPreprocessor|Provides data preprocessing to predictors. Supports multiple internal reservoirs. Supports virtual input data associated with predefined signal generators. Supports two input feeding regimes: Continuous and Patterned|
 |ReadoutUnit|Readout unit does the Forecast or Classification. Contains trained output unit and related important error statistics. Trained unit can be the Feed Forward Network or the Parallel Perceptron Network|
 |ReadoutLayer|Class implements common readout layer concept for the reservoir computing methods. Supports x-fold cross validation method and clustering of the trained readout units.|
 |StateMachine|The main component. Encaptulates independent NeuralPreprocessor and ReadoutLayer fuctionalities into the single logical unit.|
