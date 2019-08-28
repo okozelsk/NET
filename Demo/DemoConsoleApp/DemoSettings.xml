@@ -2,9 +2,9 @@
 <demo dataFolder=".\\Data">
 
   <!--
-    ANALOG SPIKING
+    EXPERIMENTAL ANALOG SPIKING
   -->
-  <case name="Classification task Libras Movement: Analog LSM reservoir, Elastic regression classifier">
+  <case name="Classification task Libras Movement: Analog LSM reservoir, Parallel Perceptron classifier">
     <samples fileName="LibrasMovement.csv"/>
     <stateMachineCfg randomizerSeek="0">
       <neuralPreprocessor>
@@ -16,10 +16,10 @@
           </external>
           <internal>
             <field name="excitatoryPulse">
-              <pulse signal="0.5" leak="2"/>
+              <pulse signal="1" leak="2"/>
             </field>
             <field name="inhibitoryPulse">
-              <pulse signal="-0.5" leak="3"/>
+              <pulse signal="-1" leak="3"/>
             </field>
           </internal>
         </input>
@@ -31,20 +31,20 @@
                   <analogGroup name="Exc-grp" role="Excitatory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction">
                     <activationSigmoid/>
                     <bias min="-0.5" max="0.5" randomSign="false" distribution="Uniform"/>
-                    <spikeThreshold min="0.8" max="0.8"/>
+                    <spikeThreshold min="0.25" max="0.8"/>
                     <retainment density="1">
                       <strength min="0.25" max="0.75"/>
                     </retainment>
-                    <predictors activation="true" squaredActivation="false" expWAvgFiringRate64="true" numOfFirings64="false" lastBin32FiringHist="false" lastBin16FiringHist="false" lastBin8FiringHist="false" lastBin1FiringHist="false"/>
+                    <predictors activation="true" squaredActivation="false" expWAvgFiringRate64="false" numOfFirings64="true" lastBin32FiringHist="false" lastBin16FiringHist="false" lastBin8FiringHist="false" lastBin1FiringHist="false"/>
                   </analogGroup>
                   <analogGroup name="Inh-grp" role="Inhibitory" relShare="1" readoutDensity="1" signalingRestriction="SpikingOnly">
                     <activationSigmoid/>
                     <bias min="-0.5" max="0.5" randomSign="false" distribution="Uniform"/>
-                    <spikeThreshold min="0.8" max="0.8"/>
+                    <spikeThreshold min="0.25" max="0.8"/>
                     <retainment density="1">
                       <strength min="0.25" max="0.75"/>
                     </retainment>
-                    <predictors activation="true" squaredActivation="false" expWAvgFiringRate64="true" numOfFirings64="false" lastBin32FiringHist="false" lastBin16FiringHist="false" lastBin8FiringHist="false" lastBin1FiringHist="false"/>
+                    <predictors activation="true" squaredActivation="false" expWAvgFiringRate64="false" numOfFirings64="true" lastBin32FiringHist="false" lastBin16FiringHist="false" lastBin8FiringHist="false" lastBin1FiringHist="false"/>
                   </analogGroup>
                 </neuronGroups>
                 <interconnection density="0.1" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
@@ -56,20 +56,20 @@
                   <analogGroup name="Exc-grp" role="Excitatory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction">
                     <activationSigmoid/>
                     <bias min="-0.5" max="0.5" randomSign="false" distribution="Uniform"/>
-                    <spikeThreshold min="0.8" max="0.8"/>
+                    <spikeThreshold min="0.25" max="0.8"/>
                     <retainment density="1">
                       <strength min="0.25" max="0.75"/>
                     </retainment>
-                    <predictors activation="true" squaredActivation="false" expWAvgFiringRate64="true" numOfFirings64="false" lastBin32FiringHist="false" lastBin16FiringHist="false" lastBin8FiringHist="false" lastBin1FiringHist="false"/>
+                    <predictors activation="true" squaredActivation="false" expWAvgFiringRate64="false" numOfFirings64="true" lastBin32FiringHist="false" lastBin16FiringHist="false" lastBin8FiringHist="false" lastBin1FiringHist="false"/>
                   </analogGroup>
                   <analogGroup name="Inh-grp" role="Inhibitory" relShare="1" readoutDensity="1" signalingRestriction="SpikingOnly">
                     <activationSigmoid/>
                     <bias min="-0.5" max="0.5" randomSign="false" distribution="Uniform"/>
-                    <spikeThreshold min="0.8" max="0.8"/>
+                    <spikeThreshold min="0.25" max="0.8"/>
                     <retainment density="1">
                       <strength min="0.25" max="0.75"/>
                     </retainment>
-                    <predictors activation="true" squaredActivation="false" expWAvgFiringRate64="true" numOfFirings64="false" lastBin32FiringHist="false" lastBin16FiringHist="false" lastBin8FiringHist="false" lastBin1FiringHist="false"/>
+                    <predictors activation="true" squaredActivation="false" expWAvgFiringRate64="false" numOfFirings64="true" lastBin32FiringHist="false" lastBin16FiringHist="false" lastBin8FiringHist="false" lastBin1FiringHist="false"/>
                   </analogGroup>
                 </neuronGroups>
                 <interconnection density="0.1" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
@@ -79,7 +79,7 @@
             </pools>
             <spectralRadius>
               <analogScope value="0.9999"/>
-              <spikingScope value="0.9999"/>
+              <spikingScope value="NA"/>
             </spectralRadius>
           </reservoirCfg>
         </reservoirCfgContainer>
@@ -87,102 +87,98 @@
           <reservoirInstance name="Main" cfg="MainCfg">
             <inputConnections>
               <inputConnection fieldName="coord_abcissa" poolName="LSM pool abcissa" density="1">
-                <synapse delayMethod="Random" maxDelay="0">
+                <synapse delayMethod="Random" maxDelay="7">
                   <analogTarget scope="All">
                     <weight min="0" max="1"/>
                   </analogTarget>
                 </synapse>
               </inputConnection>
               <inputConnection fieldName="coord_ordinate" poolName="LSM pool ordinate" density="1">
-                <synapse delayMethod="Random" maxDelay="0">
+                <synapse delayMethod="Random" maxDelay="7">
                   <analogTarget scope="All">
                     <weight min="0" max="1"/>
                   </analogTarget>
                 </synapse>
               </inputConnection>
             </inputConnections>
-            <predictors activation="true" squaredActivation="false" expWAvgFiringRate64="true" numOfFirings64="false" lastBin32FiringHist="false" lastBin16FiringHist="false" lastBin8FiringHist="false" lastBin1FiringHist="false"/>
+            <predictors activation="true" squaredActivation="true" expWAvgFiringRate64="true" numOfFirings64="true" lastBin32FiringHist="true" lastBin16FiringHist="true" lastBin8FiringHist="true" lastBin1FiringHist="true"/>
           </reservoirInstance>
         </reservoirInstanceContainer>
       </neuralPreprocessor>
       <readoutLayer testDataRatio="0.0825" folds="Auto">
         <readoutUnit name="curved swing" task="Classification">
           <pp gates="3" resolution="2">
-            <pDeltaRuleTrainer attempts="10" attemptEpochs="1000"/>
+            <pDeltaRuleTrainer attempts="5" attemptEpochs="1500"/>
           </pp>
         </readoutUnit>
         <readoutUnit name="horizontal swing" task="Classification">
-          <ff>
-            <activationIdentity/>
-            <qrdRegrTrainer attempts="3" attemptEpochs="1000" noiseZeroMargin="0">
-              <maxNoise min="0" max="0.5" steps="100"/>
-            </qrdRegrTrainer>
-          </ff>
+          <pp gates="3" resolution="2">
+            <pDeltaRuleTrainer attempts="5" attemptEpochs="1500"/>
+          </pp>
         </readoutUnit>
         <readoutUnit name="vertical swing" task="Classification">
-          <ff>
-            <activationIdentity/>
-            <elasticRegrTrainer attemptEpochs="600" alpha="0.5" lambda="1e-6"/>
-          </ff>
+          <pp gates="3" resolution="2">
+            <pDeltaRuleTrainer attempts="5" attemptEpochs="1500"/>
+          </pp>
         </readoutUnit>
         <readoutUnit name="anti-clockwise arc" task="Classification">
           <pp gates="3" resolution="2">
-            <pDeltaRuleTrainer attempts="10" attemptEpochs="600"/>
+            <pDeltaRuleTrainer attempts="5" attemptEpochs="1500"/>
           </pp>
         </readoutUnit>
         <readoutUnit name="clockwise arc" task="Classification">
           <pp gates="3" resolution="2">
-            <pDeltaRuleTrainer attempts="10" attemptEpochs="600"/>
+            <pDeltaRuleTrainer attempts="5" attemptEpochs="1500"/>
           </pp>
         </readoutUnit>
         <readoutUnit name="circle" task="Classification">
           <pp gates="3" resolution="2">
-            <pDeltaRuleTrainer attempts="10" attemptEpochs="600"/>
+            <pDeltaRuleTrainer attempts="5" attemptEpochs="1500"/>
           </pp>
         </readoutUnit>
         <readoutUnit name="horizontal straight-line" task="Classification">
           <pp gates="3" resolution="2">
-            <pDeltaRuleTrainer attempts="10" attemptEpochs="600"/>
+            <pDeltaRuleTrainer attempts="5" attemptEpochs="1500"/>
           </pp>
         </readoutUnit>
         <readoutUnit name="vertical straight-line" task="Classification">
           <pp gates="3" resolution="2">
-            <pDeltaRuleTrainer attempts="10" attemptEpochs="600"/>
+            <pDeltaRuleTrainer attempts="5" attemptEpochs="1500"/>
           </pp>
         </readoutUnit>
         <readoutUnit name="horizontal zigzag" task="Classification">
           <pp gates="3" resolution="2">
-            <pDeltaRuleTrainer attempts="10" attemptEpochs="600"/>
+            <pDeltaRuleTrainer attempts="5" attemptEpochs="1500"/>
           </pp>
         </readoutUnit>
         <readoutUnit name="vertical zigzag" task="Classification">
           <pp gates="3" resolution="2">
-            <pDeltaRuleTrainer attempts="10" attemptEpochs="600"/>
+            <pDeltaRuleTrainer attempts="5" attemptEpochs="1500"/>
           </pp>
         </readoutUnit>
         <readoutUnit name="horizontal wavy" task="Classification">
           <pp gates="3" resolution="2">
-            <pDeltaRuleTrainer attempts="10" attemptEpochs="600"/>
+            <pDeltaRuleTrainer attempts="5" attemptEpochs="1500"/>
           </pp>
         </readoutUnit>
         <readoutUnit name="vertical wavy" task="Classification">
           <pp gates="3" resolution="2">
-            <pDeltaRuleTrainer attempts="10" attemptEpochs="600"/>
+            <pDeltaRuleTrainer attempts="5" attemptEpochs="1500"/>
           </pp>
         </readoutUnit>
         <readoutUnit name="face-up curve" task="Classification">
           <pp gates="3" resolution="2">
-            <pDeltaRuleTrainer attempts="10" attemptEpochs="600"/>
+            <pDeltaRuleTrainer attempts="5" attemptEpochs="1500"/>
           </pp>
         </readoutUnit>
         <readoutUnit name="face-down curve" task="Classification">
           <pp gates="3" resolution="2">
-            <pDeltaRuleTrainer attempts="10" attemptEpochs="600"/>
+            <pDeltaRuleTrainer attempts="5" attemptEpochs="1500"/>
           </pp>
         </readoutUnit>
         <readoutUnit name="tremble" task="Classification">
           <pp gates="3" resolution="2">
-            <pDeltaRuleTrainer attempts="10" attemptEpochs="600"/>
+            <pDeltaRuleTrainer attempts="5" attemptEpochs="1500"/>
           </pp>
         </readoutUnit>
       </readoutLayer>

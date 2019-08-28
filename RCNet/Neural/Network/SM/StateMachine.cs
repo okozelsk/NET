@@ -194,9 +194,10 @@ namespace RCNet.Neural.Network.SM
                 int idx = 0;
                 foreach(HiddenNeuron neuron in NP.PredictorNeuronCollection)
                 {
-                    for(int i = 0; i < neuron.PredictorsCfg.NumOfEnabledPredictors; i++)
+                    StateMachineSettings.MapperSettings.PoolRef poolRef = new StateMachineSettings.MapperSettings.PoolRef { _reservoirInstanceIdx = neuron.Placement.ReservoirID, _poolIdx = neuron.Placement.PoolID };
+                    for (int i = 0; i < neuron.PredictorsCfg.NumOfEnabledPredictors; i++)
                     {
-                        neuronPoolRefCollection[idx] = new StateMachineSettings.MapperSettings.PoolRef { _reservoirInstanceIdx = neuron.Placement.ReservoirID, _poolIdx = neuron.Placement.PoolID };
+                        neuronPoolRefCollection[idx] = poolRef;
                         ++idx;
                     }
                 }
