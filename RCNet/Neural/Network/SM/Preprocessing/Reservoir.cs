@@ -256,13 +256,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             //-----------------------------------------------------------------------------
             //Setup of the input synaptic delays
             //Delay setup on input synapses
-            Parallel.ForEach(_neuronInputConnectionsCollection, synapses =>
+            //Parallel.ForEach(_neuronInputConnectionsCollection, synapses =>
+            foreach(SortedList<int, ISynapse> synapses in _neuronInputConnectionsCollection)
             {
                 foreach (InputSynapse synapse in synapses.Values)
                 {
                     synapse.SetDelay(inputDistanceStatCollection[synapse.TargetNeuron.Placement.PoolID], rand);
                 }
-            });
+            }//);
 
             //-----------------------------------------------------------------------------
             //Spectral radius

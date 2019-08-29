@@ -214,8 +214,10 @@ namespace RCNet.Neural.Network.FF
         /// </summary>
         public INonRecurrentNetwork DeepClone()
         {
-            FeedForwardNetwork clone = new FeedForwardNetwork(NumOfInputValues, NumOfOutputValues);
-            clone.NumOfNeurons = NumOfNeurons;
+            FeedForwardNetwork clone = new FeedForwardNetwork(NumOfInputValues, NumOfOutputValues)
+            {
+                NumOfNeurons = NumOfNeurons
+            };
             foreach (Layer layer in LayerCollection)
             {
                 clone.LayerCollection.Add(layer.DeepClone());
