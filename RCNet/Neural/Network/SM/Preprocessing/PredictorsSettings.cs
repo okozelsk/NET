@@ -33,6 +33,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// </summary>
         public bool ExpWAvgFiringRate64 { get; private set; }
         /// <summary>
+        /// Fading number of firings
+        /// </summary>
+        public bool FadingNumOfFirings { get; private set; }
+        /// <summary>
         /// Number of firings during the last 64 cycles
         /// </summary>
         public bool NumOfFirings64 { get; private set; }
@@ -68,6 +72,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             Activation = (groupPredictorsSettings.Activation && reservoirPredictorsSettings.Activation);
             SquaredActivation = (groupPredictorsSettings.SquaredActivation && reservoirPredictorsSettings.SquaredActivation);
             ExpWAvgFiringRate64 = (groupPredictorsSettings.ExpWAvgFiringRate64 && reservoirPredictorsSettings.ExpWAvgFiringRate64);
+            FadingNumOfFirings = (groupPredictorsSettings.FadingNumOfFirings && reservoirPredictorsSettings.FadingNumOfFirings);
             NumOfFirings64 = (groupPredictorsSettings.NumOfFirings64 && reservoirPredictorsSettings.NumOfFirings64);
             LastBin32FiringHist = (groupPredictorsSettings.LastBin32FiringHist && reservoirPredictorsSettings.LastBin32FiringHist);
             LastBin16FiringHist = (groupPredictorsSettings.LastBin16FiringHist && reservoirPredictorsSettings.LastBin16FiringHist);
@@ -86,6 +91,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             Activation = source.Activation;
             SquaredActivation = source.SquaredActivation;
             ExpWAvgFiringRate64 = source.ExpWAvgFiringRate64;
+            FadingNumOfFirings = source.FadingNumOfFirings;
             NumOfFirings64 = source.NumOfFirings64;
             LastBin32FiringHist = source.LastBin32FiringHist;
             LastBin16FiringHist = source.LastBin16FiringHist;
@@ -114,6 +120,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             Activation = bool.Parse(PredictorsSettingsElem.Attribute("activation").Value);
             SquaredActivation = bool.Parse(PredictorsSettingsElem.Attribute("squaredActivation").Value);
             ExpWAvgFiringRate64 = bool.Parse(PredictorsSettingsElem.Attribute("expWAvgFiringRate64").Value);
+            FadingNumOfFirings = bool.Parse(PredictorsSettingsElem.Attribute("fadingNumOfFirings").Value);
             NumOfFirings64 = bool.Parse(PredictorsSettingsElem.Attribute("numOfFirings64").Value);
             LastBin32FiringHist = bool.Parse(PredictorsSettingsElem.Attribute("lastBin32FiringHist").Value);
             LastBin16FiringHist = bool.Parse(PredictorsSettingsElem.Attribute("lastBin16FiringHist").Value);
@@ -134,6 +141,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             count += Activation ? 1 : 0;
             count += SquaredActivation ? 1 : 0;
             count += ExpWAvgFiringRate64 ? 1 : 0;
+            count += FadingNumOfFirings ? 1 : 0;
             count += NumOfFirings64 ? 1 : 0;
             count += LastBin32FiringHist ? 1 : 0;
             count += LastBin16FiringHist ? 1 : 0;
@@ -151,6 +159,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             if (Activation != cmpSettings.Activation ||
                 SquaredActivation != cmpSettings.SquaredActivation ||
                 ExpWAvgFiringRate64 != cmpSettings.ExpWAvgFiringRate64 ||
+                FadingNumOfFirings != cmpSettings.FadingNumOfFirings ||
                 NumOfFirings64 != cmpSettings.NumOfFirings64 ||
                 LastBin32FiringHist != cmpSettings.LastBin32FiringHist ||
                 LastBin16FiringHist != cmpSettings.LastBin16FiringHist ||

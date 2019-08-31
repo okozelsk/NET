@@ -133,7 +133,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                             Activation = ActivationFactory.Create(ngs.ActivationCfg, rand),
                             Bias = ngs.BiasCfg == null ? 0 : rand.NextDouble(ngs.BiasCfg),
                             GroupID = groupID,
-                            AnalogFiringThreshold = ngs.AnalogSpikeThresholdCfg == null ? 0 : rand.NextDouble(ngs.AnalogSpikeThresholdCfg),
+                            AnalogFiringThreshold = ngs.AnalogFiringThreshold,
                             RetainmentStrength = 0,
                             PredictorsCfg = null
                         };
@@ -566,9 +566,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                                                            dynamicsSettings.TauFacilitation,
                                                            dynamicsSettings.TauDepression,
                                                            dynamicsSettings.RestingEfficacy,
-                                                           dynamicsSettings.TauPostSynapticCurrentDecay,
-                                                           dynamicsSettings.ApplyShortTermPlasticity,
-                                                           dynamicsSettings.ApplyPostSynapticCurrent
+                                                           dynamicsSettings.ApplyShortTermPlasticity
                                                            );
                     if(AddInterconnection(_neuronNeuronConnectionsCollection, synapse))
                     {

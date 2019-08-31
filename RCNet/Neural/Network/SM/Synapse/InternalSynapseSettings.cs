@@ -157,54 +157,54 @@ namespace RCNet.Neural.Network.SM.Synapse
             XElement dynamicsCfgElem;
             //S2SSynapseE2EDynamicsCfg
             dynamicsCfgElem = settingsElem.XPathSelectElement("./dynamicsS2SEE");
-            S2SSynapseE2EDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0.5, 1100, 50, 3, true, true) : new DynamicsSettings(dynamicsCfgElem);
+            S2SSynapseE2EDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0.5, 1100, 50, true) : new DynamicsSettings(dynamicsCfgElem);
             //S2SSynapseE2IDynamicsCfg
             dynamicsCfgElem = settingsElem.XPathSelectElement("./dynamicsS2SEI");
-            S2SSynapseE2IDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0.05, 125, 1200, 6, true, true) : new DynamicsSettings(dynamicsCfgElem);
+            S2SSynapseE2IDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0.05, 125, 1200, true) : new DynamicsSettings(dynamicsCfgElem);
             //S2SSynapseI2EDynamicsCfg
             dynamicsCfgElem = settingsElem.XPathSelectElement("./dynamicsS2SIE");
-            S2SSynapseI2EDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0.25, 700, 20, 3, true, true) : new DynamicsSettings(dynamicsCfgElem);
+            S2SSynapseI2EDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0.25, 700, 20, true) : new DynamicsSettings(dynamicsCfgElem);
             //S2SSynapseI2IDynamicsCfg
             dynamicsCfgElem = settingsElem.XPathSelectElement("./dynamicsS2SII");
-            S2SSynapseI2IDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0.32, 144, 60, 6, true, true) : new DynamicsSettings(dynamicsCfgElem);
+            S2SSynapseI2IDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0.32, 144, 60, true) : new DynamicsSettings(dynamicsCfgElem);
             //A2SSynapseE2EDynamicsCfg
             dynamicsCfgElem = settingsElem.XPathSelectElement("./dynamicsA2SEE");
-            A2SSynapseE2EDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0.5, 1100, 50, 3, true, false) : new DynamicsSettings(dynamicsCfgElem);
+            A2SSynapseE2EDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0.5, 1100, 50, true) : new DynamicsSettings(dynamicsCfgElem);
             //A2SSynapseE2IDynamicsCfg
             dynamicsCfgElem = settingsElem.XPathSelectElement("./dynamicsA2SEI");
-            A2SSynapseE2IDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0.05, 125, 1200, 6, true, false) : new DynamicsSettings(dynamicsCfgElem);
+            A2SSynapseE2IDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0.05, 125, 1200, true) : new DynamicsSettings(dynamicsCfgElem);
             //A2SSynapseI2EDynamicsCfg
             dynamicsCfgElem = settingsElem.XPathSelectElement("./dynamicsA2SIE");
-            A2SSynapseI2EDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0.25, 700, 20, 3, true, false) : new DynamicsSettings(dynamicsCfgElem);
+            A2SSynapseI2EDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0.25, 700, 20, true) : new DynamicsSettings(dynamicsCfgElem);
             //A2SSynapseI2IDynamicsCfg
             dynamicsCfgElem = settingsElem.XPathSelectElement("./dynamicsA2SII");
-            A2SSynapseI2IDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0.32, 144, 60, 6, true, false) : new DynamicsSettings(dynamicsCfgElem);
+            A2SSynapseI2IDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0.32, 144, 60, true) : new DynamicsSettings(dynamicsCfgElem);
 
             //Analog target
             //S2ASynapseE2EDynamicsCfg
             dynamicsCfgElem = settingsElem.XPathSelectElement("./dynamicsS2AEE");
-            S2ASynapseE2EDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0, 0, 0, 0, false, false) : new DynamicsSettings(dynamicsCfgElem);
+            S2ASynapseE2EDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0, 0, 0, false) : new DynamicsSettings(dynamicsCfgElem);
             //S2ASynapseI2EDynamicsCfg
             dynamicsCfgElem = settingsElem.XPathSelectElement("./dynamicsS2AIE");
-            S2ASynapseI2EDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0, 0, 0, 0, false, false) : new DynamicsSettings(dynamicsCfgElem);
+            S2ASynapseI2EDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0, 0, 0, false) : new DynamicsSettings(dynamicsCfgElem);
             //S2ASynapseE2IDynamicsCfg
             dynamicsCfgElem = settingsElem.XPathSelectElement("./dynamicsS2AEI");
-            S2ASynapseE2IDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0, 0, 0, 0, false, false) : new DynamicsSettings(dynamicsCfgElem);
+            S2ASynapseE2IDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0, 0, 0, false) : new DynamicsSettings(dynamicsCfgElem);
             //S2ASynapseI2IDynamicsCfg
             dynamicsCfgElem = settingsElem.XPathSelectElement("./dynamicsS2AII");
-            S2ASynapseI2IDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0, 0, 0, 0, false, false) : new DynamicsSettings(dynamicsCfgElem);
+            S2ASynapseI2IDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0, 0, 0, false) : new DynamicsSettings(dynamicsCfgElem);
             //A2ASynapseE2EDynamicsCfg
             dynamicsCfgElem = settingsElem.XPathSelectElement("./dynamicsA2AEE");
-            A2ASynapseE2EDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0, 0, 0, 0, false, false) : new DynamicsSettings(dynamicsCfgElem);
+            A2ASynapseE2EDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0, 0, 0, false) : new DynamicsSettings(dynamicsCfgElem);
             //A2ASynapseI2EDynamicsCfg
             dynamicsCfgElem = settingsElem.XPathSelectElement("./dynamicsA2AIE");
-            A2ASynapseI2EDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0, 0, 0, 0, false, false) : new DynamicsSettings(dynamicsCfgElem);
+            A2ASynapseI2EDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0, 0, 0, false) : new DynamicsSettings(dynamicsCfgElem);
             //A2ASynapseE2IDynamicsCfg
             dynamicsCfgElem = settingsElem.XPathSelectElement("./dynamicsA2AEI");
-            A2ASynapseE2IDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0, 0, 0, 0, false, false) : new DynamicsSettings(dynamicsCfgElem);
+            A2ASynapseE2IDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0, 0, 0, false) : new DynamicsSettings(dynamicsCfgElem);
             //A2ASynapseI2IDynamicsCfg
             dynamicsCfgElem = settingsElem.XPathSelectElement("./dynamicsA2AII");
-            A2ASynapseI2IDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0, 0, 0, 0, false, false) : new DynamicsSettings(dynamicsCfgElem);
+            A2ASynapseI2IDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0, 0, 0, false) : new DynamicsSettings(dynamicsCfgElem);
             return;
         }
 
@@ -418,17 +418,9 @@ namespace RCNet.Neural.Network.SM.Synapse
             /// </summary>
             public double TauFacilitation { get; set; }
             /// <summary>
-            /// Synapse's post-synaptic current decay time constant (ms)
-            /// </summary>
-            public double TauPostSynapticCurrentDecay { get; set; }
-            /// <summary>
             /// Specifies whether to apply short-term plasticity
             /// </summary>
             public bool ApplyShortTermPlasticity { get; set; }
-            /// <summary>
-            /// Specifies whether to apply post-synaptic current injections
-            /// </summary>
-            public bool ApplyPostSynapticCurrent { get; set; }
             /// <summary>
             /// Synapse's random weight settings
             /// </summary>
@@ -443,9 +435,7 @@ namespace RCNet.Neural.Network.SM.Synapse
                 RestingEfficacy = 0;
                 TauFacilitation = 0;
                 TauDepression = 0;
-                TauPostSynapticCurrentDecay = 0;
                 ApplyShortTermPlasticity = true;
-                ApplyPostSynapticCurrent = true;
                 WeightCfg = null;
                 return;
             }
@@ -459,9 +449,7 @@ namespace RCNet.Neural.Network.SM.Synapse
                 RestingEfficacy = source.RestingEfficacy;
                 TauFacilitation = source.TauFacilitation;
                 TauDepression = source.TauDepression;
-                TauPostSynapticCurrentDecay = source.TauPostSynapticCurrentDecay;
                 ApplyShortTermPlasticity = source.ApplyShortTermPlasticity;
-                ApplyPostSynapticCurrent = source.ApplyPostSynapticCurrent;
                 WeightCfg = null;
                 if (source.WeightCfg != null)
                 {
@@ -488,12 +476,8 @@ namespace RCNet.Neural.Network.SM.Synapse
                     TauDepression = double.Parse(settingsElem.Attribute("tauDepression").Value, CultureInfo.InvariantCulture);
                     //Efficacy facilitation
                     TauFacilitation = double.Parse(settingsElem.Attribute("tauFacilitation").Value, CultureInfo.InvariantCulture);
-                    //Decay of the post-synaptic current
-                    TauPostSynapticCurrentDecay = double.Parse(settingsElem.Attribute("tauPostSynapticCurrentDecay").Value, CultureInfo.InvariantCulture);
                     //Apply short-term plasticity ?
                     ApplyShortTermPlasticity = bool.Parse(settingsElem.Attribute("applyShortTermPlasticity").Value);
-                    //Apply dynamic decay?
-                    ApplyPostSynapticCurrent = bool.Parse(settingsElem.Attribute("applyPostSynapticCurrent").Value);
                     //Weight
                     XElement weightCfgElem = settingsElem.Descendants("weight").FirstOrDefault();
                     if (weightCfgElem != null)
@@ -514,25 +498,19 @@ namespace RCNet.Neural.Network.SM.Synapse
             /// <param name="restingEfficacy">Synapse's resting efficacy (average probability of neurotransmitter release)</param>
             /// <param name="tauDepression">Synapse's efficacy depression model time constant (ms)</param>
             /// <param name="tauFacilitation">Synapse's efficacy facilitation model time constant (ms)</param>
-            /// <param name="tauPostSynapticCurrentDecay">Synapse's post-synaptic current decay time constant (ms)</param>
             /// <param name="applyShortTermPlasticity">Specifies whether to apply short-term plasticity</param>
-            /// <param name="applyPostSynapticCurrent">Specifies whether to apply post-synaptic current injections</param>
             /// <param name="weightCfg">Synapse's random weight settings</param>
             public DynamicsSettings(double restingEfficacy,
                                     double tauDepression,
                                     double tauFacilitation,
-                                    double tauPostSynapticCurrentDecay,
                                     bool applyShortTermPlasticity,
-                                    bool applyPostSynapticCurrent,
                                     RandomValueSettings weightCfg = null
                                     )
             {
                 RestingEfficacy = restingEfficacy;
                 TauDepression = tauDepression;
                 TauFacilitation = tauFacilitation;
-                TauPostSynapticCurrentDecay = tauPostSynapticCurrentDecay;
                 ApplyShortTermPlasticity = applyShortTermPlasticity;
-                ApplyPostSynapticCurrent = applyPostSynapticCurrent;
                 WeightCfg = (weightCfg == null ? new RandomValueSettings(0, 1) : weightCfg.DeepClone());
                 return;
             }
@@ -548,9 +526,7 @@ namespace RCNet.Neural.Network.SM.Synapse
                 if (RestingEfficacy != cmpSettings.RestingEfficacy ||
                     TauFacilitation != cmpSettings.TauFacilitation ||
                     TauDepression != cmpSettings.TauDepression ||
-                    TauPostSynapticCurrentDecay != cmpSettings.TauPostSynapticCurrentDecay ||
                     ApplyShortTermPlasticity != cmpSettings.ApplyShortTermPlasticity ||
-                    ApplyPostSynapticCurrent != cmpSettings.ApplyPostSynapticCurrent ||
                     !Equals(WeightCfg, cmpSettings.WeightCfg)
                     )
                 {

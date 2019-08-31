@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Globalization;
 using System.Xml.Linq;
+using System.Xml.XPath;
 using System.IO;
 using RCNet.Extensions;
 using RCNet.XmlTools;
@@ -194,7 +195,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         public class NeuronGroupSettings
         {
             //Constants
-            public const double DefaultAnalogSpikeThreshold = 0.975d;
+            public const double DefaultAnalogFiringThreshold = 0.0025d;
             //Attribute properties
             /// <summary>
             /// Name of the neuron group
@@ -234,10 +235,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             /// </summary>
             public RandomValueSettings BiasCfg { get; set; }
             /// <summary>
-            /// Spike threshold configuration for neurons having stateless analog activation function.
-            /// A constant threshold value of the neuron will be selected randomly according to the settings.
+            /// Firing threshold configuration for neurons having stateless analog activation function.
             /// </summary>
-            public RandomValueSettings AnalogSpikeThresholdCfg { get; set; }
+            public double AnalogFiringThreshold { get; set; }
             /// <summary>
             /// The parameter says how much of the neurons will have the Retainment property (leaky integrator neuron).
             /// Count = NumberOfAnalogNeurons * Density
@@ -269,7 +269,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 ActivationCfg = ActivationFactory.DeepCloneActivationSettings(source.ActivationCfg);
                 SignalingRestriction = source.SignalingRestriction;
                 BiasCfg = source.BiasCfg?.DeepClone();
-                AnalogSpikeThresholdCfg = source.AnalogSpikeThresholdCfg?.DeepClone();
+                AnalogFiringThreshold = source.AnalogFiringThreshold;
                 RetainmentNeuronsDensity = source.RetainmentNeuronsDensity;
                 RetainmentStrengthCfg = source.RetainmentStrengthCfg?.DeepClone();
                 PredictorsCfg = source.PredictorsCfg?.DeepClone();
@@ -318,7 +318,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 if (activationType == CommonEnums.ActivationType.Spiking)
                 {
                     SignalingRestriction = CommonEnums.NeuronSignalingRestrictionType.SpikingOnly;
-                    AnalogSpikeThresholdCfg = null;
+                    AnalogFiringThreshold = 0;
                     RetainmentNeuronsDensity = 0;
                     RetainmentStrengthCfg = null;
                 }
@@ -327,9 +327,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                     //Analog sub-type
                     //Output signaling restriction
                     SignalingRestriction = CommonEnums.ParseNeuronSignalingRestriction(settingsElem.Attribute("signalingRestriction").Value);
-                    //Analog spike threshold
-                    cfgElem = settingsElem.Descendants("spikeThreshold").FirstOrDefault();
-                    AnalogSpikeThresholdCfg = cfgElem == null ? new RandomValueSettings(DefaultAnalogSpikeThreshold, DefaultAnalogSpikeThreshold, false, RandomClassExtensions.DistributionType.Uniform) : new RandomValueSettings(cfgElem);
+                    //Analog firing threshold
+                    cfgElem = settingsElem.Descendants("firingThreshold").FirstOrDefault();
+                    AnalogFiringThreshold = cfgElem == null ? DefaultAnalogFiringThreshold : double.Parse(cfgElem.Attribute("value").Value, CultureInfo.InvariantCulture);
                     //Retainment
                     cfgElem = settingsElem.Descendants("retainment").FirstOrDefault();
                     RetainmentNeuronsDensity = 0;
@@ -387,7 +387,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                     !Equals(ActivationCfg, cmpSettings.ActivationCfg) ||
                     SignalingRestriction != cmpSettings.SignalingRestriction ||
                     !Equals(BiasCfg, cmpSettings.BiasCfg) ||
-                    !Equals(AnalogSpikeThresholdCfg, cmpSettings.AnalogSpikeThresholdCfg) ||
+                    AnalogFiringThreshold != cmpSettings.AnalogFiringThreshold ||
                     RetainmentNeuronsDensity != cmpSettings.RetainmentNeuronsDensity ||
                     !Equals(RetainmentStrengthCfg, cmpSettings.RetainmentStrengthCfg) ||
                     !Equals(PredictorsCfg, cmpSettings.PredictorsCfg)

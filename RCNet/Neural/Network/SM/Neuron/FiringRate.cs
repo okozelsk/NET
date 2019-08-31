@@ -15,6 +15,7 @@ namespace RCNet.Neural.Network.SM.Neuron
     {
         //Constants
         private const int SpikeBuffLength = sizeof(ulong) * 8;
+        private const double FadingNumOfFiringsDecay = 0.025;
 
         //Static members
         private static readonly decimal[] _spikeValueCache;
@@ -24,9 +25,15 @@ namespace RCNet.Neural.Network.SM.Neuron
         //Instance members
         //Attribute properties
         /// <summary>
-        /// Returns current number of spikes within the sliding buffer
+        /// Returns current number of the spikes within the sliding buffer
         /// </summary>
-        public int NumOfRecentSpikes { get; private set; }
+        public int NumOfRecentFirings { get; private set; }
+
+        /// <summary>
+        /// Returns fading count of the firings
+        /// </summary>
+        public double FadingNumOfFirings { get; private set; }
+
         //Attributes
         private ulong _spikes;
         private int _numOfBufferedData;
@@ -68,7 +75,7 @@ namespace RCNet.Neural.Network.SM.Neuron
         {
             _spikes = 0;
             _numOfBufferedData = 0;
-            NumOfRecentSpikes = 0;
+            NumOfRecentFirings = 0;
             return;
         }
 
@@ -78,12 +85,14 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// <param name="spike"></param>
         public void Update(bool spike)
         {
-            NumOfRecentSpikes -= (_spikes & _highestBitMask) > 0 ? 1 : 0;
+            NumOfRecentFirings -= (_spikes & _highestBitMask) > 0 ? 1 : 0;
+            FadingNumOfFirings *= (1d - FadingNumOfFiringsDecay);
             _spikes <<= 1;
             if (spike)
             {
                 _spikes |= 1;
-                ++NumOfRecentSpikes;
+                ++NumOfRecentFirings;
+                ++FadingNumOfFirings;
             }
             if (_numOfBufferedData < SpikeBuffLength)
             {
@@ -126,7 +135,7 @@ namespace RCNet.Neural.Network.SM.Neuron
             {
                 return 0;
             }
-            return (double)NumOfRecentSpikes / _numOfBufferedData;
+            return (double)NumOfRecentFirings / _numOfBufferedData;
         }
 
         /// <summary>
