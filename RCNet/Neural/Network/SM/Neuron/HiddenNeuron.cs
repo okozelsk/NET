@@ -56,11 +56,9 @@ namespace RCNet.Neural.Network.SM.Neuron
         public bool AfterFirstSpike { get; private set; }
 
         /// <summary>
-        /// Configuration of the predictors (enabling/disabling).
-        /// It can be null.
+        /// Swithes enabling/disabling neuron's predictors
         /// </summary>
-        public PredictorsSettings PredictorsCfg { get; private set; }
-
+        public HiddenNeuronPredictorsSettings PredictorsCfg { get; }
 
         //Attributes
         /// <summary>
@@ -72,7 +70,6 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// Firing
         /// </summary>
         private readonly double _analogFiringThreshold;
-        private readonly FiringRate _firingRate;
 
         /// <summary>
         /// Stimulation
@@ -97,6 +94,11 @@ namespace RCNet.Neural.Network.SM.Neuron
         private double _analogSignal;
         private double _spikingSignal;
 
+        /// <summary>
+        /// Predictors
+        /// </summary>
+        private readonly HiddenNeuronPredictors _predictors;
+
 
         //Constructor
         /// <summary>
@@ -106,6 +108,7 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// <param name="role">Neuron's role (Excitatory/Inhibitory).</param>
         /// <param name="activation">Instantiated activation function.</param>
         /// <param name="signalingRestriction">Output signaling restriction. Spiking activation causes output signal always restricted to SpikingOnly.</param>
+        /// <param name="predictorsCfg">Enabled/Disabled predictors for the neuron.</param>
         /// <param name="bias">Constant bias to be applied.</param>
         /// <param name="analogFiringThreshold">A number between 0 and 1 (LT1). Every time the new activation value is higher than the previous activation value by at least the threshold, it is evaluated as a firing event. Ignored in case of spiking activation.</param>
         /// <param name="retainmentStrength">Strength of the analog neuron's retainment property. Ignored in case of spiking activation.</param>
@@ -113,7 +116,7 @@ namespace RCNet.Neural.Network.SM.Neuron
                             CommonEnums.NeuronRole role,
                             IActivationFunction activation,
                             CommonEnums.NeuronSignalingRestrictionType signalingRestriction,
-                            PredictorsSettings predictorsCfg,
+                            HiddenNeuronPredictorsSettings predictorsCfg,
                             double bias = 0,
                             double analogFiringThreshold = PoolSettings.NeuronGroupSettings.DefaultAnalogFiringThreshold,
                             double retainmentStrength = 0
@@ -121,13 +124,13 @@ namespace RCNet.Neural.Network.SM.Neuron
         {
             Placement = placement;
             Statistics = new NeuronStatistics();
-            if(role == CommonEnums.NeuronRole.Input)
+            if (role == CommonEnums.NeuronRole.Input)
             {
                 throw new ArgumentException("Role of the hidden neuron can not be Input.", "role");
             }
             Role = role;
-            PredictorsCfg = predictorsCfg;
             Bias = bias;
+            PredictorsCfg = predictorsCfg;
             //Activation specific
             _activation = activation;
             if (activation.ActivationType == CommonEnums.ActivationType.Spiking)
@@ -139,12 +142,12 @@ namespace RCNet.Neural.Network.SM.Neuron
             }
             else
             {
-                //Anaolg
+                //Analog
                 SignalingRestriction = signalingRestriction;
                 _analogFiringThreshold = analogFiringThreshold;
                 _retainmentStrength = retainmentStrength;
             }
-            _firingRate = new FiringRate();
+            _predictors = new HiddenNeuronPredictors(predictorsCfg);
             Reset(false);
             return;
         }
@@ -163,7 +166,7 @@ namespace RCNet.Neural.Network.SM.Neuron
         public void Reset(bool statistics)
         {
             _activation.Reset();
-            _firingRate.Reset();
+            _predictors.Reset();
             _iStimuli = 0;
             _rStimuli = 0;
             _tStimuli = 0;
@@ -212,7 +215,6 @@ namespace RCNet.Neural.Network.SM.Neuron
                 //Spiking activation
                 _spikingSignal = _activation.Compute(_tStimuli);
                 _activationState = _activation.InternalState;
-                _firingRate.Update(_spikingSignal > 0);
                 _analogSignal = _spikingSignal;
             }
             else
@@ -223,9 +225,10 @@ namespace RCNet.Neural.Network.SM.Neuron
                 _activationState = (_retainmentStrength * _activationState) + (1d - _retainmentStrength) * newState;
                 _analogSignal = _outputRange.Rescale(_activationState, _activation.OutputRange);
                 bool firingEvent = (_activationState - prevActivationState) > _analogFiringThreshold;
-                _firingRate.Update(firingEvent);
                 _spikingSignal = firingEvent ? 1d : 0d;
             }
+            //Update predictors
+            _predictors.Update(_activationState, (_spikingSignal > 0));
             //Update statistics
             if (collectStatistics)
             {
@@ -262,56 +265,7 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// <returns></returns>
         public int CopyPredictorsTo(double[] predictors, int idx)
         {
-            if (PredictorsCfg == null || PredictorsCfg.NumOfEnabledPredictors == 0)
-            {
-                return 0;
-            }
-            if (PredictorsCfg.Activation)
-            {
-                predictors[idx] = _activationState;
-                ++idx;
-            }
-            if (PredictorsCfg.SquaredActivation)
-            {
-                predictors[idx] = _activationState * _activationState;
-                ++idx;
-            }
-            if (PredictorsCfg.ExpWAvgFiringRate64)
-            {
-                predictors[idx] = _firingRate.GetRecentExpWRate();
-                ++idx;
-            }
-            if (PredictorsCfg.FadingNumOfFirings)
-            {
-                predictors[idx] = _firingRate.FadingNumOfFirings;
-                ++idx;
-            }
-            if (PredictorsCfg.NumOfFirings64)
-            {
-                predictors[idx] = _firingRate.NumOfRecentFirings;
-                ++idx;
-            }
-            if (PredictorsCfg.LastBin32FiringHist)
-            {
-                predictors[idx] = _firingRate.GetLastSpikes(32);
-                ++idx;
-            }
-            if (PredictorsCfg.LastBin16FiringHist)
-            {
-                predictors[idx] = _firingRate.GetLastSpikes(16);
-                ++idx;
-            }
-            if (PredictorsCfg.LastBin8FiringHist)
-            {
-                predictors[idx] = _firingRate.GetLastSpikes(8);
-                ++idx;
-            }
-            if (PredictorsCfg.LastBin1FiringHist)
-            {
-                predictors[idx] = _firingRate.GetLastSpikes(1);
-                ++idx;
-            }
-            return PredictorsCfg.NumOfEnabledPredictors;
+            return _predictors.CopyPredictorsTo(predictors, idx);
         }
 
         /// <summary>
@@ -320,13 +274,7 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// <returns></returns>
         public double[] GetPredictors()
         {
-            if (PredictorsCfg == null || PredictorsCfg.NumOfEnabledPredictors == 0)
-            {
-                return null;
-            }
-            double[] predictors = new double[PredictorsCfg.NumOfEnabledPredictors];
-            CopyPredictorsTo(predictors, 0);
-            return predictors;
+            return _predictors.GetPredictors();
         }
 
 

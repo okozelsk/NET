@@ -34,6 +34,16 @@ namespace RCNet.DemoConsoleApp
         public void Run()
         {
             //Activation tests
+            double fadingSum = 0;
+            for(int i = 0; i < 1000; i++)
+            {
+                fadingSum *= (1d - 0.1);
+                fadingSum += 1d;
+                Console.WriteLine(fadingSum);
+            }
+
+            Console.ReadLine();
+
 
             IActivationFunction testAF = ActivationFactory.Create(new SimpleIFSettings(refractoryPeriods:0), new Random(0));
             TestActivation(testAF, 100, 3.5, 10, 70);

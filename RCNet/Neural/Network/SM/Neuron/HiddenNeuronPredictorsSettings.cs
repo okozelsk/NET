@@ -11,13 +11,13 @@ using RCNet.RandomValue;
 using RCNet.Neural.Activation;
 using RCNet.Neural.Network.SM.Synapse;
 
-namespace RCNet.Neural.Network.SM.Preprocessing
+namespace RCNet.Neural.Network.SM.Neuron
 {
     /// <summary>
     /// Configuration of the availble predictors
     /// </summary>
     [Serializable]
-    public class PredictorsSettings
+    public class HiddenNeuronPredictorsSettings
     {
         //Attribute properties
         /// <summary>
@@ -67,7 +67,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// </summary>
         /// <param name="groupPredictorsSettings">Neuron group predictors settings</param>
         /// <param name="reservoirPredictorsSettings">Reservoir predictors settings</param>
-        public PredictorsSettings(PredictorsSettings groupPredictorsSettings, PredictorsSettings reservoirPredictorsSettings)
+        public HiddenNeuronPredictorsSettings(HiddenNeuronPredictorsSettings groupPredictorsSettings, HiddenNeuronPredictorsSettings reservoirPredictorsSettings)
         {
             Activation = (groupPredictorsSettings.Activation && reservoirPredictorsSettings.Activation);
             SquaredActivation = (groupPredictorsSettings.SquaredActivation && reservoirPredictorsSettings.SquaredActivation);
@@ -86,7 +86,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// The deep copy constructor
         /// </summary>
         /// <param name="source">Source instance</param>
-        public PredictorsSettings(PredictorsSettings source)
+        public HiddenNeuronPredictorsSettings(HiddenNeuronPredictorsSettings source)
         {
             Activation = source.Activation;
             SquaredActivation = source.SquaredActivation;
@@ -108,12 +108,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// Xml element containing the settings.
         /// Content of xml element is always validated against the xml schema.
         /// </param>
-        public PredictorsSettings(XElement elem)
+        public HiddenNeuronPredictorsSettings(XElement elem)
         {
             //Validation
             ElemValidator validator = new ElemValidator();
             Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.SM.Preprocessing.PredictorsSettings.xsd");
+            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.SM.Neuron.HiddenNeuronPredictorsSettings.xsd");
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
             XElement PredictorsSettingsElem = validator.Validate(elem, "rootElem");
             //Parsing
@@ -155,7 +155,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         public override bool Equals(object obj)
         {
             if (obj == null) return false;
-            PredictorsSettings cmpSettings = obj as PredictorsSettings;
+            HiddenNeuronPredictorsSettings cmpSettings = obj as HiddenNeuronPredictorsSettings;
             if (Activation != cmpSettings.Activation ||
                 SquaredActivation != cmpSettings.SquaredActivation ||
                 ExpWAvgFiringRate64 != cmpSettings.ExpWAvgFiringRate64 ||
@@ -184,13 +184,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>
-        public PredictorsSettings DeepClone()
+        public HiddenNeuronPredictorsSettings DeepClone()
         {
-            PredictorsSettings clone = new PredictorsSettings(this);
+            HiddenNeuronPredictorsSettings clone = new HiddenNeuronPredictorsSettings(this);
             return clone;
         }
 
-    }//PredictorsSettings
+    }//HiddenNeuronPredictorsSettings
 
 }//Namespace
 

@@ -128,15 +128,15 @@
     <Compile Include="Neural\Network\FF\ElasticRegrTrainer.cs" />
     <Compile Include="Neural\Network\FF\ElasticRegrTrainerSettings.cs" />
     <Compile Include="Neural\Network\FF\RidgeRegrTrainerSettings.cs" />
+    <Compile Include="Neural\Network\SM\Neuron\HiddenNeuronPredictors.cs" />
     <Compile Include="Neural\Network\SM\Neuron\HiddenNeuron.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\NeuralPreprocessor.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\NeuralPreprocessorSettings.cs" />
-    <Compile Include="Neural\Network\SM\Preprocessing\PredictorsSettings.cs" />
+    <Compile Include="Neural\Network\SM\Neuron\HiddenNeuronPredictorsSettings.cs" />
     <Compile Include="Neural\Network\SM\Synapse\InternalSynapseSettings.cs" />
     <Compile Include="Neural\Network\SM\Synapse\InputSynapseSettings.cs" />
     <Compile Include="Neural\Network\SM\Synapse\InternalSynapse.cs" />
     <Compile Include="Neural\Network\SM\Synapse\InputSynapse.cs" />
-    <Compile Include="Neural\Network\SM\Neuron\FiringRate.cs" />
     <Compile Include="Neural\Network\SM\Neuron\InputNeuron.cs" />
     <Compile Include="Neural\Network\SM\Neuron\NeuronStatistics.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\Reservoir.cs" />
@@ -402,7 +402,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Neural\Network\SM\Preprocessing\PredictorsSettings.xsd">
+    <EmbeddedResource Include="Neural\Network\SM\Neuron\HiddenNeuronPredictorsSettings.xsd">
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>

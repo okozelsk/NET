@@ -122,7 +122,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 foreach (PoolSettings.NeuronGroupSettings ngs in poolSettings.NeuronGroups)
                 {
                     NeuronCreationParams[] grpNCP = new NeuronCreationParams[ngs.Count];
-                    PredictorsSettings predictorsCfg = new PredictorsSettings(ngs.PredictorsCfg, instanceDefinition.PredictorsCfg);
+                    HiddenNeuronPredictorsSettings predictorsCfg = new HiddenNeuronPredictorsSettings(ngs.PredictorsCfg, instanceDefinition.PredictorsCfg);
                     //Group neuron params
                     for (int i = 0; i < ngs.Count; i++)
                     {
@@ -746,19 +746,28 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                         poolStat.NeuronGroupStatCollection[neuron.Placement.PoolGroupID].MinTStimuliStat.AddSampleValue(neuron.Statistics.TotalStimuliStat.Min);
                         poolStat.NeuronGroupStatCollection[neuron.Placement.PoolGroupID].TStimuliSpansStat.AddSampleValue(neuron.Statistics.TotalStimuliStat.Span);
                     }
-                    poolStat.NeuronGroupStatCollection[neuron.Placement.PoolGroupID].AvgAnalogSignalStat.AddSampleValue(neuron.Statistics.AnalogSignalStat.ArithAvg);
-                    poolStat.NeuronGroupStatCollection[neuron.Placement.PoolGroupID].MaxAnalogSignalStat.AddSampleValue(neuron.Statistics.AnalogSignalStat.Max);
-                    poolStat.NeuronGroupStatCollection[neuron.Placement.PoolGroupID].MinAnalogSignalStat.AddSampleValue(neuron.Statistics.AnalogSignalStat.Min);
-                    poolStat.NeuronGroupStatCollection[neuron.Placement.PoolGroupID].AvgFiringStat.AddSampleValue(neuron.Statistics.FiringStat.ArithAvg);
-                    poolStat.NeuronGroupStatCollection[neuron.Placement.PoolGroupID].MaxFiringStat.AddSampleValue(neuron.Statistics.FiringStat.Max);
-                    poolStat.NeuronGroupStatCollection[neuron.Placement.PoolGroupID].MinFiringStat.AddSampleValue(neuron.Statistics.FiringStat.Min);
+                    if (neuron.Statistics.AnalogSignalStat.NumOfNonzeroSamples > 0)
+                    {
+                        poolStat.NeuronGroupStatCollection[neuron.Placement.PoolGroupID].AvgAnalogSignalStat.AddSampleValue(neuron.Statistics.AnalogSignalStat.ArithAvg);
+                        poolStat.NeuronGroupStatCollection[neuron.Placement.PoolGroupID].MaxAnalogSignalStat.AddSampleValue(neuron.Statistics.AnalogSignalStat.Max);
+                        poolStat.NeuronGroupStatCollection[neuron.Placement.PoolGroupID].MinAnalogSignalStat.AddSampleValue(neuron.Statistics.AnalogSignalStat.Min);
+                    }
+                    if (neuron.Statistics.FiringStat.NumOfNonzeroSamples > 0)
+                    {
+                        poolStat.NeuronGroupStatCollection[neuron.Placement.PoolGroupID].AvgFiringStat.AddSampleValue(neuron.Statistics.FiringStat.ArithAvg);
+                        poolStat.NeuronGroupStatCollection[neuron.Placement.PoolGroupID].MaxFiringStat.AddSampleValue(neuron.Statistics.FiringStat.Max);
+                        poolStat.NeuronGroupStatCollection[neuron.Placement.PoolGroupID].MinFiringStat.AddSampleValue(neuron.Statistics.FiringStat.Min);
+                    }
                     //Synapses efficacy statistics
                     foreach (ISynapse rSynapse in _neuronNeuronConnectionsCollection[neuron.Placement.ReservoirFlatIdx].Values)
                     {
-                        poolStat.NeuronGroupStatCollection[neuron.Placement.PoolGroupID].AvgSynEfficacyStat.AddSampleValue(rSynapse.EfficacyStat.ArithAvg);
-                        poolStat.NeuronGroupStatCollection[neuron.Placement.PoolGroupID].MaxSynEfficacyStat.AddSampleValue(rSynapse.EfficacyStat.Max);
-                        poolStat.NeuronGroupStatCollection[neuron.Placement.PoolGroupID].MinSynEfficacyStat.AddSampleValue(rSynapse.EfficacyStat.Min);
-                        poolStat.NeuronGroupStatCollection[neuron.Placement.PoolGroupID].SynEfficacySpansStat.AddSampleValue(rSynapse.EfficacyStat.Span);
+                        if (rSynapse.EfficacyStat.NumOfSamples > 0)
+                        {
+                            poolStat.NeuronGroupStatCollection[neuron.Placement.PoolGroupID].AvgSynEfficacyStat.AddSampleValue(rSynapse.EfficacyStat.ArithAvg);
+                            poolStat.NeuronGroupStatCollection[neuron.Placement.PoolGroupID].MaxSynEfficacyStat.AddSampleValue(rSynapse.EfficacyStat.Max);
+                            poolStat.NeuronGroupStatCollection[neuron.Placement.PoolGroupID].MinSynEfficacyStat.AddSampleValue(rSynapse.EfficacyStat.Min);
+                            poolStat.NeuronGroupStatCollection[neuron.Placement.PoolGroupID].SynEfficacySpansStat.AddSampleValue(rSynapse.EfficacyStat.Span);
+                        }
                     }
                     if (neuron.Statistics.ReservoirStimuliStat.NumOfNonzeroSamples == 0)
                     {
@@ -931,7 +940,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             public int GroupID { get; set; }
             public double AnalogFiringThreshold { get; set; }
             public double RetainmentStrength { get; set; }
-            public PredictorsSettings PredictorsCfg { get; set; }
+            public HiddenNeuronPredictorsSettings PredictorsCfg { get; set; }
         }
 
         private class RelatedNeuron

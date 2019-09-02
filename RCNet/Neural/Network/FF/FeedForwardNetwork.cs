@@ -389,12 +389,8 @@ namespace RCNet.Neural.Network.FF
                 {
                     throw new ArgumentOutOfRangeException("numOfNeurons", $"Invalid parameter value: {numOfNeurons}");
                 }
-                if (activation == null)
-                {
-                    throw new ArgumentException("activation", "Activation can't be null");
-                }
                 //Setup
-                Activation = activation;
+                Activation = activation ?? throw new ArgumentException("activation", "Activation can't be null");
                 NumOfLayerNeurons = numOfNeurons;
                 NumOfInputNodes = -1;
                 WeightsStartFlatIdx = 0;
@@ -430,11 +426,13 @@ namespace RCNet.Neural.Network.FF
             /// </summary>
             internal Layer DeepClone()
             {
-                Layer clone = new Layer(NumOfLayerNeurons, Activation);
-                clone.NumOfInputNodes = NumOfInputNodes;
-                clone.WeightsStartFlatIdx = WeightsStartFlatIdx;
-                clone.BiasesStartFlatIdx = BiasesStartFlatIdx;
-                clone.NeuronsStartFlatIdx = NeuronsStartFlatIdx;
+                Layer clone = new Layer(NumOfLayerNeurons, Activation)
+                {
+                    NumOfInputNodes = NumOfInputNodes,
+                    WeightsStartFlatIdx = WeightsStartFlatIdx,
+                    BiasesStartFlatIdx = BiasesStartFlatIdx,
+                    NeuronsStartFlatIdx = NeuronsStartFlatIdx
+                };
                 return clone;
             }
 

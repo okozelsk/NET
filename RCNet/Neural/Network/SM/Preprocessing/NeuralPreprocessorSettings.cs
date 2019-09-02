@@ -8,6 +8,7 @@ using RCNet.Extensions;
 using RCNet.XmlTools;
 using RCNet.RandomValue;
 using RCNet.Neural.Data.Generators;
+using RCNet.Neural.Network.SM.Neuron;
 using RCNet.Neural.Network.SM.Synapse;
 
 namespace RCNet.Neural.Network.SM.Preprocessing
@@ -92,7 +93,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                     Settings = (from settings in availableResSettings
                                          where settings.SettingsName == reservoirInstanceElem.Attribute("cfg").Value
                                          select settings).FirstOrDefault(),
-                    PredictorsCfg = new PredictorsSettings(reservoirInstanceElem.Descendants("predictors").First())
+                    PredictorsCfg = new HiddenNeuronPredictorsSettings(reservoirInstanceElem.Descendants("predictors").First())
                 };
                 if (reservoirInstanceDefinition.Settings == null)
                 {
@@ -663,7 +664,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             /// <summary>
             /// Configuration of the predictors (enabling/disabling)
             /// </summary>
-            public PredictorsSettings PredictorsCfg { get; set; }
+            public HiddenNeuronPredictorsSettings PredictorsCfg { get; set; }
 
             //Constructors
             /// <summary>

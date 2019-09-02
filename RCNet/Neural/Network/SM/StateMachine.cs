@@ -365,7 +365,7 @@ namespace RCNet.Neural.Network.SM
                     sb.Append(leftMargin + $"                   Const firing: {resStat.NumOfConstFiringNeurons} neurons" + Environment.NewLine);
                     foreach (ReservoirStat.PoolStat poolStat in resStat.PoolStatCollection)
                     {
-                        sb.Append(leftMargin + $"    Pool: {poolStat.PoolName} ({poolStat.NumOfNeurons} neurons, {Math.Round(poolStat.ExcitatoryNeuronsRatio * 100, 1).ToString(CultureInfo.InvariantCulture)}% excitatory neurons, {poolStat.InternalAnalogWeightsStat.NumOfSamples} internal synapses)" + Environment.NewLine);
+                        sb.Append(leftMargin + $"    Pool: {poolStat.PoolName} ({poolStat.NumOfNeurons} neurons, {Math.Round(poolStat.ExcitatoryNeuronsRatio * 100, 1).ToString(CultureInfo.InvariantCulture)}% excitatory neurons, {poolStat.InternalAnalogWeightsStat.NumOfSamples + poolStat.InternalSpikingWeightsStat.NumOfSamples} internal synapses)" + Environment.NewLine);
                         sb.Append(leftMargin + $"      Zero incoming res. stimuli : {poolStat.NumOfNoRStimuliNeurons} neurons" + Environment.NewLine);
                         sb.Append(leftMargin + $"      Zero emitted analog signal : {poolStat.NumOfNoAnalogOutputSignalNeurons} neurons" + Environment.NewLine);
                         sb.Append(leftMargin + $"      Const emitted analog signal: {poolStat.NumOfConstAnalogOutputSignalNeurons} neurons" + Environment.NewLine);

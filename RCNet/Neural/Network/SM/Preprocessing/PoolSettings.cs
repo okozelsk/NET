@@ -10,6 +10,7 @@ using RCNet.Extensions;
 using RCNet.XmlTools;
 using RCNet.RandomValue;
 using RCNet.Neural.Activation;
+using RCNet.Neural.Network.SM.Neuron;
 using RCNet.Neural.Network.SM.Synapse;
 
 namespace RCNet.Neural.Network.SM.Preprocessing
@@ -251,7 +252,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             /// <summary>
             /// Configuration of the predictors (enabling/disabling)
             /// </summary>
-            public PredictorsSettings PredictorsCfg { get; set; }
+            public HiddenNeuronPredictorsSettings PredictorsCfg { get; set; }
 
             //Constructors
             /// <summary>
@@ -346,7 +347,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                     }
                 }
                 //Predictors
-                PredictorsCfg = new PredictorsSettings(settingsElem.Descendants("predictors").First());
+                PredictorsCfg = new HiddenNeuronPredictorsSettings(settingsElem.Descendants("predictors").First());
                 return;
             }
 

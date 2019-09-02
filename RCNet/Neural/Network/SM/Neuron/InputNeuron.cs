@@ -17,7 +17,7 @@ namespace RCNet.Neural.Network.SM.Neuron
     public class InputNeuron : INeuron
     {
         //Static attributes
-        private static Interval _spikingTargetRange = new Interval(0, 1);
+        private static readonly Interval _spikingTargetRange = new Interval(0, 1);
 
         //Attribute properties
         /// <summary>

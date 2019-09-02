@@ -65,7 +65,7 @@ namespace RCNet.Neural.Network.SM.Synapse
         public void Reset(bool statistics)
         {
             _facilitation = _restingEfficacy;
-            _depression = 1;
+            _depression = 1d;
             if (statistics)
             {
                 EfficacyStat.Reset();
