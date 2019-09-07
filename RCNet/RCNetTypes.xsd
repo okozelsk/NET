@@ -15,6 +15,18 @@
     <xs:restriction base="xs:string">
       <xs:enumeration value="Uniform"/>
       <xs:enumeration value="Gaussian"/>
+      <xs:enumeration value="Exponential"/>
+      <xs:enumeration value="Gamma"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Enumeration of the mode of Pulse generator -->
+  <xs:simpleType name="PulseGeneratorModeType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Constant"/>
+      <xs:enumeration value="Uniform"/>
+      <xs:enumeration value="Gaussian"/>
+      <xs:enumeration value="Poisson"/>
     </xs:restriction>
   </xs:simpleType>
 
@@ -116,11 +128,23 @@
     <xs:union memberTypes="UIntGT0Type AutoOptionType"/>
   </xs:simpleType>
 
+  <!-- Double LT 0 -->
+  <xs:simpleType name="DoubleLT0Type">
+    <xs:restriction base="xs:double">
+      <xs:maxExclusive value="0" />
+    </xs:restriction>
+  </xs:simpleType>
+
   <!-- Unsigned double -->
   <xs:simpleType name="UDoubleType">
     <xs:restriction base="xs:double">
       <xs:minInclusive value="0" />
     </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Double not EQ 0 -->
+  <xs:simpleType name="DoubleNotEq0Type">
+    <xs:union memberTypes="DoubleLT0Type UDoubleGT0Type"/>
   </xs:simpleType>
 
   <!-- Unsigned double GT 0-->
@@ -148,6 +172,13 @@
     </xs:restriction>
   </xs:simpleType>
 
+  <!-- Unsigned double GE 1-->
+  <xs:simpleType name="UDoubleGE1Type">
+    <xs:restriction base="xs:double">
+      <xs:minInclusive value="1" />
+    </xs:restriction>
+  </xs:simpleType>
+
   <!-- Unsigned double greater than 1 -->
   <xs:simpleType name="UDoubleGT1Type">
     <xs:restriction base="xs:double">
@@ -169,27 +200,40 @@
     <xs:attribute type="xs:string" name="name" use="required"/>
   </xs:complexType>
 
+  <!-- Uniform distribution configuration element -->
+  <xs:complexType name="UniformDistrCfgType">
+  </xs:complexType>
+
   <!-- Gaussian distribution configuration element -->
   <xs:complexType name="GaussianDistrCfgType">
     <xs:attribute type="xs:double" name="mean" use="required"/>
     <xs:attribute type="UDoubleGT0Type" name="stdDev" use="required"/>
   </xs:complexType>
 
+  <!-- Exponential distribution configuration element -->
+  <xs:complexType name="ExponentialDistrCfgType">
+    <xs:attribute type="DoubleNotEq0Type" name="mean" use="required"/>
+  </xs:complexType>
+
+  <!-- Gamma distribution configuration element -->
+  <xs:complexType name="GammaDistrCfgType">
+    <xs:attribute type="UDoubleGT0Type" name="alpha" use="required"/>
+    <xs:attribute type="UDoubleGT0Type" name="beta" use="required"/>
+  </xs:complexType>
+
   <!-- Random value element -->
   <xs:complexType name="RandomValueType">
     <xs:choice minOccurs="0" maxOccurs="1">
+      <xs:element type="UniformDistrCfgType" name="uniformDistr" minOccurs="1" maxOccurs="1"/>
       <xs:element type="GaussianDistrCfgType" name="gaussianDistr" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="ExponentialDistrCfgType" name="exponentialDistr" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="GammaDistrCfgType" name="gammaDistr" minOccurs="1" maxOccurs="1"/>
     </xs:choice>
     <xs:attribute type="xs:double" name="min" use="required"/>
     <xs:attribute type="xs:double" name="max" use="required"/>
     <xs:attribute type="xs:boolean" name="randomSign" use="optional" default="false">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is false</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="RandomDistributionType" name="distribution" use="optional" default="Uniform">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is Uniform</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -200,32 +244,21 @@
     <xs:attribute type="UDoubleGT0Type" name="stdDev" use="required"/>
   </xs:complexType>
 
+  <!-- Unsigned Exponential distribution configuration element -->
+  <xs:complexType name="UExponentialDistrCfgType">
+    <xs:attribute type="UDoubleGT0Type" name="mean" use="required"/>
+  </xs:complexType>
+
   <!-- Unsigned random value element -->
   <xs:complexType name="URandomValueType">
     <xs:choice minOccurs="0" maxOccurs="1">
+      <xs:element type="UniformDistrCfgType" name="uniformDistr" minOccurs="1" maxOccurs="1"/>
       <xs:element type="UGaussianDistrCfgType" name="gaussianDistr" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="UExponentialDistrCfgType" name="exponentialDistr" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="GammaDistrCfgType" name="gammaDistr" minOccurs="1" maxOccurs="1"/>
     </xs:choice>
     <xs:attribute type="UDoubleType" name="min" use="required"/>
     <xs:attribute type="UDoubleGT0Type" name="max" use="required"/>
-    <xs:attribute type="RandomDistributionType" name="distribution" use="optional" default="Uniform">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is Uniform</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-  </xs:complexType>
-
-  <!-- Unsigned LT1 random value element -->
-  <xs:complexType name="URandomValueLT1Type">
-    <xs:choice minOccurs="0" maxOccurs="1">
-      <xs:element type="UGaussianDistrCfgType" name="gaussianDistr" minOccurs="1" maxOccurs="1"/>
-    </xs:choice>
-    <xs:attribute type="UDoubleLT1Type" name="min" use="required"/>
-    <xs:attribute type="UDoubleLT1Type" name="max" use="required"/>
-    <xs:attribute type="RandomDistributionType" name="distribution" use="optional" default="Uniform">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is Uniform</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
   </xs:complexType>
 
   <!-- Parameter value seeker - configuration -->
@@ -240,7 +273,8 @@
   <!-- Pulse generator configuration element -->
   <xs:complexType name="PulseGeneratorCfgType">
     <xs:attribute type="xs:double" name="signal" use="required"/>
-    <xs:attribute type="xs:unsignedInt" name="leak" use="required"/>
+    <xs:attribute type="UDoubleGE1Type" name="avgPeriod" use="required"/>
+    <xs:attribute type="PulseGeneratorModeType" name="mode" use="required"/>
   </xs:complexType>
 
   <!-- Sinusoidal generator configuration element -->

@@ -6,7 +6,7 @@ namespace RCNet.Extensions
     /// <summary>
     /// Useful extensions of Double class.
     /// </summary>
-    public static class DoubleClassExtensions
+    public static class DoubleExtensions
     {
         /// <summary>
         /// Checks if this is computable double value.
@@ -64,6 +64,6 @@ namespace RCNet.Extensions
             }
         }
 
-    }//DoubleClassExtensions
+    }//DoubleExtensions
 
 }//Namespace

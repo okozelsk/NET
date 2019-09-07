@@ -48,12 +48,12 @@ namespace RCNet.Neural.Network.FF
         public string InfoMessage { get; private set; }
 
         //Attributes
-        private QRDRegrTrainerSettings _settings;
-        private FeedForwardNetwork _net;
-        private List<double[]> _inputVectorCollection;
-        private List<double[]> _outputVectorCollection;
-        private List<Matrix> _outputSingleColMatrixCollection;
-        private Random _rand;
+        private readonly QRDRegrTrainerSettings _settings;
+        private readonly FeedForwardNetwork _net;
+        private readonly List<double[]> _inputVectorCollection;
+        private readonly List<double[]> _outputVectorCollection;
+        private readonly List<Matrix> _outputSingleColMatrixCollection;
+        private readonly Random _rand;
         private double _currMaxNoise;
         private ParamSeeker _maxNoiseSeeker;
 
@@ -129,7 +129,7 @@ namespace RCNet.Neural.Network.FF
                 for(int col = 0; col < _net.NumOfInputValues; col++)
                 {
                     double predictor = _inputVectorCollection[row][col];
-                    predictors.Data[row][col] = predictor * (1d + _rand.NextDouble(maxNoise * _settings.NoiseZeroMargin, maxNoise, true, RandomClassExtensions.DistributionType.Uniform));
+                    predictors.Data[row][col] = predictor * (1d + _rand.NextRangedUniformDouble(maxNoise * _settings.NoiseZeroMargin, maxNoise) * _rand.NextSign());
                 }
                 //Add constant bias to predictors
                 predictors.Data[row][_net.NumOfInputValues] = 1;

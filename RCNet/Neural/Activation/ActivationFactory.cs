@@ -72,7 +72,7 @@ namespace RCNet.Neural.Activation
         /// <param name="rand">Random object to be used for randomly generated parameters</param>
         public static IActivationFunction Create(Object settings, Random rand)
         {
-            IActivationFunction af = null;
+            IActivationFunction af;
             Type settingsType = settings.GetType();
             if (settingsType == typeof(AdExpIFSettings))
             {
@@ -145,7 +145,7 @@ namespace RCNet.Neural.Activation
             }
             else if (settingsType == typeof(AutoIzhikevichIFSettings))
             {
-                double randomValue = rand.NextBoundedUniformDouble(0, 1);
+                double randomValue = rand.NextRangedUniformDouble(0, 1);
                 AutoIzhikevichIFSettings afs = (AutoIzhikevichIFSettings)settings;
                 if (afs.Role == CommonEnums.NeuronRole.Excitatory)
                 {
@@ -236,7 +236,7 @@ namespace RCNet.Neural.Activation
             //Set random initial membrane potential for spiking activation
             if(!af.Stateless && af.ActivationType == CommonEnums.ActivationType.Spiking)
             {
-                af.SetInitialInternalState(rand.NextDouble(0.25, 1, false, RandomClassExtensions.DistributionType.Uniform));
+                af.SetInitialInternalState(rand.NextRangedUniformDouble(0.25, 1));
             }
             return af;
         }

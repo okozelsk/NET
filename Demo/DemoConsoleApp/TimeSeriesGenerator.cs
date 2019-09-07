@@ -40,7 +40,7 @@ namespace RCNet.DemoConsoleApp
         /// <returns>A collection of random values</returns>
         public static List<double> GenRandomTimeSeries(int length, int seek = -1)
         {
-            RandomValueSettings settings = new RandomValueSettings(0, 1, false, Extensions.RandomClassExtensions.DistributionType.Uniform);
+            RandomValueSettings settings = new RandomValueSettings(0, 1, false);
             RandomGenerator generator = new RandomGenerator(settings, seek);
             return GenTimeSeries(generator, length);
         }

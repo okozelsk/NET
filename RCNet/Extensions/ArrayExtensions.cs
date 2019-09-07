@@ -7,7 +7,7 @@ namespace RCNet.Extensions
     /// <summary>
     /// Useful extensions of Array class
     /// </summary>
-    public static class ArrayClassExtensions
+    public static class ArrayExtensions
     {
         /// <summary>
         /// Shifts all array elements to the right and sets the first element value to newValue
@@ -189,7 +189,7 @@ namespace RCNet.Extensions
             return;
         }
 
-    }//ArrayClassExtensions
+    }//ArrayExtensions
 
 }//Namespace
 

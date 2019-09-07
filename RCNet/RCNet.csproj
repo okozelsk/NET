@@ -146,11 +146,10 @@
     <Compile Include="Neural\Network\SM\Neuron\INeuron.cs" />
     <Compile Include="Neural\Network\SM\Synapse\ISynapse.cs" />
     <Compile Include="Neural\Network\SM\Synapse\BaseSynapse.cs" />
-    <Compile Include="Extensions\ArrayClassExtensions.cs" />
-    <Compile Include="Extensions\DoubleClassExtensions.cs" />
-    <Compile Include="Extensions\RandomClassExtensions.cs" />
-    <Compile Include="Extensions\RNGCryptoServiceProviderClassExtension.cs" />
-    <Compile Include="Extensions\StringClassExtensions.cs" />
+    <Compile Include="Extensions\ArrayExtensions.cs" />
+    <Compile Include="Extensions\DoubleExtensions.cs" />
+    <Compile Include="Extensions\RandomExtensions.cs" />
+    <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="MathTools\BasicStat.cs" />
     <Compile Include="MathTools\BinDistribution.cs" />
     <Compile Include="MathTools\BinErrStat.cs" />
@@ -190,6 +189,7 @@
     <Compile Include="Neural\Network\SM\Readout\ReadoutLayer.cs" />
     <Compile Include="Neural\Network\SM\Readout\ReadoutUnit.cs" />
     <Compile Include="Neural\Network\SM\Neuron\NeuronPlacement.cs" />
+    <Compile Include="RandomValue\IDistrSettings.cs" />
     <Compile Include="RandomValue\RandomValueSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Queue\SimpleQueue.cs" />

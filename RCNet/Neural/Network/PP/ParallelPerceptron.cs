@@ -20,7 +20,7 @@ namespace RCNet.Neural.Network.PP
         /// </summary>
         public const double BiasValue = 1d;
         private readonly int _numOfGateWeights;
-        private double[] _flatWeights;
+        private readonly double[] _flatWeights;
 
         //Constructors
         /// <summary>
@@ -137,10 +137,9 @@ namespace RCNet.Neural.Network.PP
         public double[] Compute(double[] input)
         {
             double sum = 0;
-            double gateSum;
             for (int i = 0; i < NumOfGates; i++)
             {
-                sum += ComputeGate(i, input, out gateSum);
+                sum += ComputeGate(i, input, out _);
             }
             return ComputeResult(sum);
         }
@@ -243,7 +242,7 @@ namespace RCNet.Neural.Network.PP
         public void RandomizeWeights(Random rand)
         {
             //Random values
-            rand.Fill(_flatWeights, -1, 1, false, RandomClassExtensions.DistributionType.Uniform);
+            rand.FillUniform(_flatWeights, -1, 1, false);
             NormalizeWeights();
             return;
         }

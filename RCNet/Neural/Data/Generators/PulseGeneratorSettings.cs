@@ -16,27 +16,58 @@ namespace RCNet.Neural.Data.Generators
     [Serializable]
     public class PulseGeneratorSettings
     {
+        //Enums
+        /// <summary>
+        /// Method of the pulse timing
+        /// </summary>
+        public enum TimingMode
+        {
+            /// <summary>
+            /// Period of the pulses is constant
+            /// </summary>
+            Constant,
+            /// <summary>
+            /// Period of the pulses follows the Uniform distribution
+            /// </summary>
+            Uniform,
+            /// <summary>
+            /// Period of the pulses follows the Gaussian distribution
+            /// </summary>
+            Gaussian,
+            /// <summary>
+            /// Period of the pulses follows the Poisson (Exponential) distribution
+            /// </summary>
+            Poisson
+        }
+
         //Attribute properties
         /// <summary>
-        /// Signal value
+        /// Pulse signal
         /// </summary>
         public double Signal { get; set; }
 
         /// <summary>
-        /// Pulse leak value
+        /// Average period of the pulse
         /// </summary>
-        public int Leak { get; set; }
+        public double AvgPeriod { get; set; }
+
+        /// <summary>
+        /// Pulse timing mode
+        /// </summary>
+        public TimingMode Mode { get; set; }
 
         //Constructors
         /// <summary>
         /// Constructs an initialized instance
         /// </summary>
-        /// <param name="signal">Pulse signal value</param>
-        /// <param name="leak">Constant pulse leak</param>
-        public PulseGeneratorSettings(double signal, int leak)
+        /// <param name="signal">Pulse signal</param>
+        /// <param name="avgPeriod">Pulse average period</param>
+        /// <param name="mode">Pulse timing mode</param>
+        public PulseGeneratorSettings(double signal, double avgPeriod, TimingMode mode)
         {
             Signal = signal;
-            Leak = Math.Abs(leak);
+            AvgPeriod = Math.Abs(avgPeriod);
+            Mode = mode;
             return;
         }
 
@@ -47,7 +78,8 @@ namespace RCNet.Neural.Data.Generators
         public PulseGeneratorSettings(PulseGeneratorSettings source)
         {
             Signal = source.Signal;
-            Leak = source.Leak;
+            AvgPeriod = source.AvgPeriod;
+            Mode = source.Mode;
             return;
         }
 
@@ -66,11 +98,31 @@ namespace RCNet.Neural.Data.Generators
             XElement settingsElem = validator.Validate(elem, "rootElem");
             //Parsing
             Signal = double.Parse(settingsElem.Attribute("signal").Value, CultureInfo.InvariantCulture);
-            Leak = Math.Abs(int.Parse(settingsElem.Attribute("leak").Value, CultureInfo.InvariantCulture));
+            AvgPeriod = Math.Abs(double.Parse(settingsElem.Attribute("avgPeriod").Value, CultureInfo.InvariantCulture));
+            Mode = ParseTimingMode(settingsElem.Attribute("mode").Value);
             return;
         }
 
         //Methods
+        //Static methods
+        /// <summary>
+        /// Parses the timing mode from a string code
+        /// </summary>
+        /// <param name="code">Mode code</param>
+        public static TimingMode ParseTimingMode(string code)
+        {
+            switch (code.ToUpper())
+            {
+                case "CONSTANT": return TimingMode.Constant;
+                case "UNIFORM": return TimingMode.Uniform;
+                case "GAUSSIAN": return TimingMode.Gaussian;
+                case "POISSON": return TimingMode.Poisson;
+                default:
+                    throw new ArgumentException($"Unsupported mode code {code}", "code");
+            }
+        }
+
+        //Instance methods
         /// <summary>
         /// See the base.
         /// </summary>
@@ -78,7 +130,10 @@ namespace RCNet.Neural.Data.Generators
         {
             if (obj == null) return false;
             PulseGeneratorSettings cmpSettings = obj as PulseGeneratorSettings;
-            if (Signal != cmpSettings.Signal || Leak != cmpSettings.Leak)
+            if (Signal != cmpSettings.Signal ||
+                AvgPeriod != cmpSettings.AvgPeriod ||
+                Mode != cmpSettings.Mode
+                )
             {
                 return false;
             }

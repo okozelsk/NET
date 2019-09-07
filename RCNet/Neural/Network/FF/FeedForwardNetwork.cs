@@ -177,9 +177,9 @@ namespace RCNet.Neural.Network.FF
                 {
                     for (int inputNodeIdx = 0; inputNodeIdx < layer.NumOfInputNodes; inputNodeIdx++, weightFlatIndex++)
                     {
-                        _flatWeights[weightFlatIndex] = rand.NextDouble(0, b, false, RandomClassExtensions.DistributionType.Uniform);
+                        _flatWeights[weightFlatIndex] = rand.NextRangedUniformDouble(0, b);
                     }
-                    _flatWeights[biasFlatIndex] = rand.NextDouble(-b, b, false, RandomClassExtensions.DistributionType.Uniform);
+                    _flatWeights[biasFlatIndex] = rand.NextRangedUniformDouble(-b, b);
                 }
             }
             return;
@@ -201,10 +201,7 @@ namespace RCNet.Neural.Network.FF
             }
             else
             {
-                for(int i = 0; i < _flatWeights.Length; i++)
-                {
-                    _flatWeights[i] = rand.NextDouble(WeightDefaultIniMin, WeightDefaultIniMax, true, RandomClassExtensions.DistributionType.Uniform);
-                }
+                rand.FillUniform(_flatWeights, WeightDefaultIniMin, WeightDefaultIniMax, true);
             }
             return;
         }

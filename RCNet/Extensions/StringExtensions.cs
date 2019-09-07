@@ -6,7 +6,7 @@ namespace RCNet.Extensions
     /// <summary>
     /// Useful String class extensions
     /// </summary>
-    public static class StringClassExtensions
+    public static class StringExtensions
     {
         /// <summary>
         /// Parses double value. Function tries parsing with the InvariantCulture and if fails, tries the CurrentCulture.
@@ -15,12 +15,11 @@ namespace RCNet.Extensions
         /// </summary>
         public static double ParseDouble(this string x, bool throwEx, string exText = "")
         {
-            double value;
-            if(!double.TryParse(x, NumberStyles.Float, CultureInfo.InvariantCulture, out value))
+            if (!double.TryParse(x, NumberStyles.Float, CultureInfo.InvariantCulture, out double value))
             {
-                if(!double.TryParse(x, NumberStyles.Float, CultureInfo.CurrentCulture, out value))
+                if (!double.TryParse(x, NumberStyles.Float, CultureInfo.CurrentCulture, out value))
                 {
-                    if(throwEx)
+                    if (throwEx)
                     {
                         throw new Exception(exText);
                     }
@@ -40,8 +39,7 @@ namespace RCNet.Extensions
         /// </summary>
         public static DateTime ParseDateTime(this string x, bool throwEx, string exText = "")
         {
-            DateTime value;
-            if (!DateTime.TryParse(x, CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, out value))
+            if (!DateTime.TryParse(x, CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, out DateTime value))
             {
                 if (!DateTime.TryParse(x, CultureInfo.CurrentCulture, DateTimeStyles.AllowWhiteSpaces, out value))
                 {
@@ -65,8 +63,7 @@ namespace RCNet.Extensions
         /// </summary>
         public static int ParseInt(this string x, bool throwEx, string exText = "")
         {
-            int value;
-            if (!int.TryParse(x, NumberStyles.Integer, CultureInfo.InvariantCulture, out value))
+            if (!int.TryParse(x, NumberStyles.Integer, CultureInfo.InvariantCulture, out int value))
             {
                 if (!int.TryParse(x, NumberStyles.Integer, CultureInfo.CurrentCulture, out value))
                 {
@@ -83,7 +80,7 @@ namespace RCNet.Extensions
             return value;
         }
 
-    }//StringClassExtensions
+    }//StringExtensions
 
 }//Namespace
 

@@ -475,7 +475,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             foreach (NeuronConnCount ncc in sourceNeuronCollection)
             {
                 //Number of connections for current source neuron
-                int connCount = constantNumOfNeuronConnections ? averageConnectionsPerNeuron : (int)Math.Round(rand.NextBoundedGaussianDouble(averageConnectionsPerNeuron - 1d, averageConnectionsPerNeuron + 1d));
+                double gausseMin = averageConnectionsPerNeuron - 1d;
+                double gausseMax = averageConnectionsPerNeuron + 1d;
+                double gausseMean = gausseMin + (gausseMax - gausseMin) / 2d;
+                double gausseSDev = (gausseMax - gausseMin) / 6d;
+                int connCount = constantNumOfNeuronConnections ? averageConnectionsPerNeuron : (int)Math.Round(rand.NextFilterredGaussianDouble(gausseMean, gausseSDev, gausseMin, gausseMax));
                 if (connCount > maxPhysicalConnCountPerNeuron) connCount = maxPhysicalConnCountPerNeuron;
                 if (connCount > connectionsCountDown) connCount = connectionsCountDown;
                 ncc.ConnCount = connCount;

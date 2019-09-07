@@ -36,13 +36,13 @@ Main functionality and possibilities are demonstrated in a simple demo applicati
 |LUD|LU decomposition of a squared matrix|
 |ParamSeeker|Implements an error driven iterative search for the best value of a given parameter|
 |HurstExpEstim|Implements Hurst exponent estimator. It can be used to evaluate level of data randomness|
-|"RandomValue"|Supports Uniform and Gaussian distributions|
+|"RandomValue"|Supports Uniform, Gaussian, Exponential and Gamma distributions|
 |Others|Set of small additional helper components like PhysUnit, Interval, Bitwise, Combinatorics, Factorial, WeightedAvg, ...|
 
 ### Signal generators
 |Component|Description|
 |--|--|
-|PulseGenerator|Generates constant pulses at a specified frequency|
+|PulseGenerator|Generates constant pulses having specified average period. Pulse leaks follow specified random distribution or can be constant|
 |MackeyGlassGenerator|Generates Mackey-Glass chaotic signal|
 |RandomGenerator|Generates random signal|
 |SinusoidalGenerator|Generates sinusoidal signal|

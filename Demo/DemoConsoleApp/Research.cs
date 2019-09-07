@@ -23,16 +23,56 @@ namespace RCNet.DemoConsoleApp
     class Research
     {
         //Attributes
+        private Random _rand;
 
         //Constructor
         public Research()
         {
+            _rand = new Random();
             return;
         }
 
         //Methods
         public void Run()
         {
+            BasicStat sampleStat = new BasicStat();
+
+            //Pulse generator test
+            sampleStat.Reset();
+            PulseGeneratorSettings modSettings = new PulseGeneratorSettings(1, 1.5, PulseGeneratorSettings.TimingMode.Poisson);
+            IGenerator generator = new PulseGenerator(modSettings);
+
+            int steps = 10000;
+            double period = 0;
+            for (int i = 0; i < steps; i++)
+            {
+                ++period;
+                double sample = generator.Next();
+                //Console.WriteLine(sample);
+                if(sample != 0)
+                {
+                    sampleStat.AddSampleValue(period);
+                    period = 0;
+                }
+            }
+            Console.WriteLine($"Mean: {sampleStat.ArithAvg} StdDev: {sampleStat.StdDev} Min: {sampleStat.Min} Max: {sampleStat.Max}");
+            Console.ReadLine();
+
+
+
+            //Random distributions test
+            BasicStat rStat = new BasicStat();
+            for(int i = 0; i < 200; i++)
+            {
+                double r = _rand.NextFilterredGaussianDouble(0.5, 1, -0.5, 1);
+                rStat.AddSampleValue(r);
+                Console.WriteLine(r);
+            }
+            Console.WriteLine($"Mean: {rStat.ArithAvg} StdDev: {rStat.StdDev} Min: {rStat.Min} Max: {rStat.Max}");
+            Console.ReadLine();
+
+
+
             //Activation tests
             double fadingSum = 0;
             for(int i = 0; i < 1000; i++)
@@ -144,22 +184,6 @@ namespace RCNet.DemoConsoleApp
 
 
 
-            //TimeSeriesGenerator.SaveTimeSeriesToCsvFile("MackeyGlass_big.csv", "Value", TimeSeriesGenerator.GenMackeyGlassTimeSeries(16000), CultureInfo.InvariantCulture);
-            MackeyGlassGeneratorSettings modSettings = new MackeyGlassGeneratorSettings(18, 0.1, 0.2);
-            IGenerator generator = new MackeyGlassGenerator(modSettings);
-
-            int steps = 100;
-            for (int i = 0; i < steps; i++)
-            {
-                Console.WriteLine(generator.Next());
-            }
-            Console.ReadLine();
-            generator.Reset();
-            for (int i = 0; i < steps; i++)
-            {
-                Console.WriteLine(generator.Next());
-            }
-            Console.ReadLine();
 
             ///*
             SimpleIFSettings settings = new SimpleIFSettings(new RandomValueSettings(15, 15),
@@ -179,10 +203,10 @@ namespace RCNet.DemoConsoleApp
             Random rand = new Random();
             for (int i = 1; i <= simLength; i++)
             {
-                double signal = 0;
+                double signal;
                 if (i >= from && i < from + count)
                 {
-                    double input = double.IsNaN(constCurrent) ? rand.NextDouble(0, 1, false, RandomClassExtensions.DistributionType.Uniform) : constCurrent;
+                    double input = double.IsNaN(constCurrent) ? rand.NextDouble() : constCurrent;
                     signal = af.Compute(input);
                 }
                 else

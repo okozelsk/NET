@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RCNet.Extensions;
 
 namespace RCNet.Neural.Data.Generators
 {
@@ -14,19 +15,23 @@ namespace RCNet.Neural.Data.Generators
     {
         //Attributes
         private readonly double _signal;
-        private readonly int _leak;
+        private readonly double _avgPeriod;
+        private readonly PulseGeneratorSettings.TimingMode _mode;
+        private Random _rand;
         private int _t;
+        private int _nextPulseTime;
 
         //Constructors
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
         /// <param name="signal">Pulse signal value</param>
-        /// <param name="leak">Constant pulse leak</param>
-        public PulseGenerator(double signal, int leak)
+        /// <param name="avgPeriod">Pulse average leak</param>
+        public PulseGenerator(double signal, double avgPeriod, PulseGeneratorSettings.TimingMode mode)
         {
             _signal = signal;
-            _leak = Math.Abs(leak);
+            _avgPeriod = Math.Abs(avgPeriod);
+            _mode = mode;
             Reset();
             return;
         }
@@ -38,18 +43,56 @@ namespace RCNet.Neural.Data.Generators
         public PulseGenerator(PulseGeneratorSettings settings)
         {
             _signal = settings.Signal;
-            _leak = settings.Leak;
+            _avgPeriod = settings.AvgPeriod;
+            _mode = settings.Mode;
             Reset();
             return;
         }
 
         //Methods
         /// <summary>
+        /// Schedules next pulse time
+        /// </summary>
+        private void ScheduleNextPulse()
+        {
+            double minPeriod = 1d;
+            double maxPeriod = 1d + 2d * (_avgPeriod - 1d);
+            double spanPeriod = maxPeriod - minPeriod;
+            int timeIncrement;
+            switch(_mode)
+            {
+                case PulseGeneratorSettings.TimingMode.Constant:
+                    timeIncrement = (int)Math.Round(_avgPeriod);
+                    break;
+                case PulseGeneratorSettings.TimingMode.Uniform:
+                    timeIncrement = (int)Math.Round(_rand.NextRangedUniformDouble(minPeriod, maxPeriod));
+                    break;
+                case PulseGeneratorSettings.TimingMode.Gaussian:
+                    timeIncrement = (int)Math.Round(_rand.NextFilterredGaussianDouble(_avgPeriod, spanPeriod / 6d, minPeriod, maxPeriod));
+                    break;
+                case PulseGeneratorSettings.TimingMode.Poisson:
+                    timeIncrement = (int)Math.Round(_rand.NextExponentialDouble(_avgPeriod));
+                    break;
+                default:
+                    timeIncrement = 0;
+                    break;
+            }
+            if(timeIncrement <= 0)
+            {
+                timeIncrement = 1;
+            }
+            _nextPulseTime = _t + timeIncrement;
+            return;
+        }
+
+        /// <summary>
         /// Resets generator to its initial state
         /// </summary>
         public void Reset()
         {
+            _rand = new Random(0);
             _t = 0;
+            ScheduleNextPulse();
             return;
         }
 
@@ -58,14 +101,14 @@ namespace RCNet.Neural.Data.Generators
         /// </summary>
         public double Next()
         {
-            if (_t == _leak)
+            ++_t;
+            if(_t == _nextPulseTime)
             {
-                _t = 0;
+                ScheduleNextPulse();
                 return _signal;
             }
             else
             {
-                ++_t;
                 return 0;
             }
         }

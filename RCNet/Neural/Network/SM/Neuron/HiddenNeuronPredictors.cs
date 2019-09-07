@@ -14,12 +14,13 @@ namespace RCNet.Neural.Network.SM.Neuron
     class HiddenNeuronPredictors
     {
         //Constants
-        private const int HistBuffLength = 64;
+        private const int SpikesBuffLength = sizeof(ulong) * 8;
         private const double FadingDecay = 0.005;
 
         //Static members
         private static readonly double[] _spikeExpValueCache;
         private static readonly double _sumOfSpikeExpValues;
+        private static readonly ulong _highestBit;
 
         //Instance members
         //Attribute properties
@@ -29,26 +30,27 @@ namespace RCNet.Neural.Network.SM.Neuron
         public HiddenNeuronPredictorsSettings Settings { get; }
 
         //Attributes
-        private readonly double[] _spikes;
-        private readonly double[] _activations;
-        private int _numOfBufferedData;
-        //Predictors
-        private int _numOfRecentFirings;
-        private double _fadingSumOfFirings;
-        private double _expWAvgOfFirings;
+        private double _lastActivation;
+        private ulong _spikesBuffer;
+        private int _bufferedHistLength;
+        private int _sumOfBufferedSpikes;
+        private double _fadingSumOfSpikes;
+
 
         /// <summary>
         /// Static constructor
         /// </summary>
         static HiddenNeuronPredictors()
         {
-            _spikeExpValueCache = new double[HistBuffLength];
+            _spikeExpValueCache = new double[SpikesBuffLength];
             _sumOfSpikeExpValues = 0;
-            for (int i = 0; i < HistBuffLength; i++)
+            _highestBit = 1ul;
+            for (int i = 0; i < SpikesBuffLength; i++)
             {
                 double val = Math.Exp(-i);
                 _spikeExpValueCache[i] = val;
                 _sumOfSpikeExpValues += val;
+                if (i > 0) _highestBit <<= 1;
             }
             return;
         }
@@ -59,8 +61,6 @@ namespace RCNet.Neural.Network.SM.Neuron
         public HiddenNeuronPredictors(HiddenNeuronPredictorsSettings settings)
         {
             Settings = settings;
-            _spikes = new double[HistBuffLength];
-            _activations = new double[HistBuffLength];
             Reset();
             return;
         }
@@ -71,12 +71,11 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// </summary>
         public void Reset()
         {
-            _spikes.Populate(0);
-            _activations.Populate(0);
-            _numOfBufferedData = 0;
-            _numOfRecentFirings = 0;
-            _fadingSumOfFirings = 0;
-            _expWAvgOfFirings = 0;
+            _lastActivation = 0;
+            _spikesBuffer = 0;
+            _bufferedHistLength = 0;
+            _sumOfBufferedSpikes = 0;
+            _fadingSumOfSpikes = 0;
             return;
         }
 
@@ -87,24 +86,21 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// <param name="spike">Is firing spike?</param>
         public void Update(double activation, bool spike)
         {
-            //Rotate buffers and compute predictors
-            _numOfRecentFirings -= (_spikes[_spikes.Length - 1] > 0 ? 1 : 0);
-            _fadingSumOfFirings *= (1d - FadingDecay);
-            _expWAvgOfFirings = 0;
-            for (int i = HistBuffLength - 1; i >= 0; i--)
+            _lastActivation = activation;
+            //Rotate buffer and update some predictors
+            _sumOfBufferedSpikes -= (_spikesBuffer & _highestBit) > 0ul ? 1 : 0;
+            _fadingSumOfSpikes *= (1d - FadingDecay);
+            _spikesBuffer <<= 1;
+            if(spike)
             {
-                _spikes[i] = (i > 0 ? _spikes[i - 1] : (spike ? 1d : 0d));
-                _expWAvgOfFirings += _spikes[i] * _spikeExpValueCache[i];
-                _activations[i] = (i > 0 ? _activations[i - 1] : activation);
+                _spikesBuffer |= 1ul;
+                ++_sumOfBufferedSpikes;
+                ++_fadingSumOfSpikes;
             }
-            //Finalize predictors
-            _numOfRecentFirings += (_spikes[0] > 0 ? 1 : 0);
-            _fadingSumOfFirings += _spikes[0];
-            _expWAvgOfFirings /= _sumOfSpikeExpValues;
-            //Update buffers usage
-            if (_numOfBufferedData < HistBuffLength)
+            //Update buffer usage
+            if (_bufferedHistLength < SpikesBuffLength)
             {
-                ++_numOfBufferedData;
+                ++_bufferedHistLength;
             }
             return;
         }
@@ -116,22 +112,50 @@ namespace RCNet.Neural.Network.SM.Neuron
         private ulong GetLastSpikes(int histLength)
         {
             //Checks and corrections
-            if (_numOfBufferedData == 0 || histLength < 1)
+            if (_bufferedHistLength == 0 || histLength < 1)
             {
                 return 0;
             }
-            if(histLength > _numOfBufferedData)
+            if(histLength > _bufferedHistLength)
             {
-                histLength = _numOfBufferedData;
+                histLength = _bufferedHistLength;
             }
-            //Pick up requested history
+            //Roll requested history
             ulong result = 0;
+            ulong tmp = _spikesBuffer;
             for (int i = 0; i < histLength; i++)
             {
                 result <<= 1;
-                result += (_spikes[i] > 0 ? (ulong)1 : (ulong)0);
+                result += tmp & 1ul;
+                tmp >>= 1;
             }
             return result;
+        }
+
+        /// <summary>
+        /// Returns exponentially weighted average of spikes in order that the stronger weight represents the more recent spike
+        /// </summary>
+        /// <returns>Exponentially weighted average of spikes</returns>
+        private double GetLastSpikesExpWAvg(int histLength)
+        {
+            //Checks and corrections
+            if (_bufferedHistLength == 0 || histLength < 1)
+            {
+                return 0;
+            }
+            if (histLength > _bufferedHistLength)
+            {
+                histLength = _bufferedHistLength;
+            }
+            //Roll requested history
+            double result = 0;
+            ulong tmp = _spikesBuffer;
+            for (int i = 0; i < histLength; i++)
+            {
+                result += (tmp & 1ul) > 0 ? _spikeExpValueCache[i] : 0d;
+                tmp >>= 1;
+            }
+            return result / _sumOfSpikeExpValues;
         }
 
         /// <summary>
@@ -148,48 +172,39 @@ namespace RCNet.Neural.Network.SM.Neuron
             }
             if (Settings.Activation)
             {
-                predictors[idx] = _activations[0];
-                ++idx;
+                predictors[idx++] = _lastActivation;
             }
             if (Settings.SquaredActivation)
             {
-                predictors[idx] = _activations[0] * _activations[0];
-                ++idx;
+                predictors[idx++] = _lastActivation.Power(2);
             }
             if (Settings.ExpWAvgFiringRate64)
             {
-                predictors[idx] = _expWAvgOfFirings;
-                ++idx;
+                predictors[idx++] = GetLastSpikesExpWAvg(_bufferedHistLength);
             }
             if (Settings.FadingNumOfFirings)
             {
-                predictors[idx] = _fadingSumOfFirings;
-                ++idx;
+                predictors[idx++] = _fadingSumOfSpikes;
             }
             if (Settings.NumOfFirings64)
             {
-                predictors[idx] = _numOfRecentFirings;
-                ++idx;
+                predictors[idx++] = _sumOfBufferedSpikes;
             }
             if (Settings.LastBin32FiringHist)
             {
-                predictors[idx] = GetLastSpikes(32);
-                ++idx;
+                predictors[idx++] = GetLastSpikes(32);
             }
             if (Settings.LastBin16FiringHist)
             {
-                predictors[idx] = GetLastSpikes(16);
-                ++idx;
+                predictors[idx++] = GetLastSpikes(16);
             }
             if (Settings.LastBin8FiringHist)
             {
-                predictors[idx] = GetLastSpikes(8);
-                ++idx;
+                predictors[idx++] = GetLastSpikes(8);
             }
             if (Settings.LastBin1FiringHist)
             {
-                predictors[idx] = GetLastSpikes(1);
-                ++idx;
+                predictors[idx++] = GetLastSpikes(1);
             }
             return Settings.NumOfEnabledPredictors;
         }
