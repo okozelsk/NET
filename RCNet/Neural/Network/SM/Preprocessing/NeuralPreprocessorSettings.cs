@@ -242,10 +242,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             public int BootCycles { get; set; }
 
             /// <summary>
-            /// The parameter specifies whether the external input values will be included among predictors
+            /// The parameter specifies whether the (allowed) input fields will be included among predictors
             /// together with the predictors from the reservoirs.
             /// </summary>
-            public bool RouteExternalInputToReadout { get; set; }
+            public bool RouteInputToReadout { get; set; }
 
             /// <summary>
             /// External input data
@@ -265,7 +265,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             {
                 FeedingType = CommonEnums.InputFeedingType.Continuous;
                 BootCycles = -1;
-                RouteExternalInputToReadout = false;
+                RouteInputToReadout = false;
                 ExternalFieldCollection = new List<Field>();
                 InternalFieldCollection = new List<InternalField>();
                 return;
@@ -280,7 +280,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             {
                 FeedingType = source.FeedingType;
                 BootCycles = source.BootCycles;
-                RouteExternalInputToReadout = source.RouteExternalInputToReadout;
+                RouteInputToReadout = source.RouteInputToReadout;
                 foreach (Field field in source.ExternalFieldCollection)
                 {
                     ExternalFieldCollection.Add(field.DeepClone());
@@ -315,13 +315,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                     {
                         BootCycles = int.Parse(bootCyclesAttrValue, CultureInfo.InvariantCulture);
                     }
-                    //Routing of external input to readout layer
-                    RouteExternalInputToReadout = bool.Parse(feedingElem.Attribute("routeToReadout").Value);
+                    //Routing of input to readout layer
+                    RouteInputToReadout = bool.Parse(feedingElem.Attribute("routeToReadout").Value);
                 }
                 else
                 {
                     FeedingType = CommonEnums.InputFeedingType.Patterned;
                     BootCycles = 0;
+                    RouteInputToReadout = false;
                 }
                 //Fields
                 Dictionary<string, string> uniquenessChecker = new Dictionary<string, string>();
@@ -329,7 +330,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 foreach (XElement extFieldElem in settingsElem.Descendants("external").First().Descendants())
                 {
                     string fieldName = extFieldElem.Attribute("name").Value;
-                    bool allowRoutingToReadout = bool.Parse(extFieldElem.Attribute("AllowRoutingToReadout").Value);
+                    bool allowRoutingToReadout = bool.Parse(extFieldElem.Attribute("allowRoutingToReadout").Value);
                     if (uniquenessChecker.ContainsKey(fieldName))
                     {
                         throw new Exception($"Duplicit input field name {fieldName}");
@@ -344,12 +345,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                     foreach (XElement intFieldElem in intFieldsElem.Descendants("field"))
                     {
                         string fieldName = intFieldElem.Attribute("name").Value;
+                        bool allowRoutingToReadout = bool.Parse(intFieldElem.Attribute("allowRoutingToReadout").Value);
                         if (uniquenessChecker.ContainsKey(fieldName))
                         {
                             throw new Exception($"Duplicit input field name: {fieldName}");
                         }
                         uniquenessChecker.Add(fieldName, fieldName);
-                        InternalFieldCollection.Add(new InternalField(fieldName, intFieldElem.Descendants().First()));
+                        InternalFieldCollection.Add(new InternalField(fieldName, allowRoutingToReadout, intFieldElem.Descendants().First()));
                     }
                 }
                 return;
@@ -413,7 +415,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 InputSettings cmpSettings = obj as InputSettings;
                 if (FeedingType != cmpSettings.FeedingType ||
                     BootCycles != cmpSettings.BootCycles ||
-                    RouteExternalInputToReadout != cmpSettings.RouteExternalInputToReadout ||
+                    RouteInputToReadout != cmpSettings.RouteInputToReadout ||
                     ExternalFieldCollection.Count != cmpSettings.ExternalFieldCollection.Count ||
                     InternalFieldCollection.Count != cmpSettings.InternalFieldCollection.Count)
                 {
@@ -539,9 +541,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 /// Creates an initialized instance
                 /// </summary>
                 /// <param name="name">Field name</param>
+                /// <param name="allowRoutingToReadout">Specifies whether the field can be included among predictors</param>
                 /// <param name="settingsElem">Xml element containing associated signal generator settings</param>
-                public InternalField(string name, XElement settingsElem)
-                    :base(name, false)
+                public InternalField(string name, bool allowRoutingToReadout, XElement settingsElem)
+                    :base(name, allowRoutingToReadout)
                 {
                     switch(settingsElem.Name.LocalName)
                     {

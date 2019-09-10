@@ -129,9 +129,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 NumOfPredictors += reservoir.NumOfPredictors;
                 NumOfInternalSynapses += reservoir.NumOfInternalSynapses;
             }
-            if(_settings.InputConfig.RouteExternalInputToReadout)
+            if(_settings.InputConfig.RouteInputToReadout)
             {
                 foreach(NeuralPreprocessorSettings.InputSettings.Field field in _settings.InputConfig.ExternalFieldCollection)
+                {
+                    if (field.AllowRoutingToReadout) ++NumOfPredictors;
+                }
+                foreach (NeuralPreprocessorSettings.InputSettings.Field field in _settings.InputConfig.InternalFieldCollection)
                 {
                     if (field.AllowRoutingToReadout) ++NumOfPredictors;
                 }
@@ -331,15 +335,22 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 reservoir.CopyPredictorsTo(predictors, predictorsIdx);
                 predictorsIdx += reservoir.NumOfPredictors;
             }
-            if (_settings.InputConfig.RouteExternalInputToReadout)
+            if (_settings.InputConfig.RouteInputToReadout)
             {
                 int fieldIdx = 0;
                 foreach (NeuralPreprocessorSettings.InputSettings.Field field in _settings.InputConfig.ExternalFieldCollection)
                 {
                     if (field.AllowRoutingToReadout)
                     {
-                        predictors[predictorsIdx] = completedInputVector[fieldIdx];
-                        ++predictorsIdx;
+                        predictors[predictorsIdx++] = completedInputVector[fieldIdx];
+                    }
+                    ++fieldIdx;
+                }
+                foreach (NeuralPreprocessorSettings.InputSettings.Field field in _settings.InputConfig.InternalFieldCollection)
+                {
+                    if (field.AllowRoutingToReadout)
+                    {
+                        predictors[predictorsIdx++] = completedInputVector[fieldIdx];
                     }
                     ++fieldIdx;
                 }

@@ -108,7 +108,7 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Sets initial state of the membrane potential
         /// </summary>
-        /// <param name="state">0 >= state < 1, where 0 means rest potential and 1 means firing threshold</param>
+        /// <param name="state">0 LE state LT 1, where 0 means rest potential and 1 means firing threshold</param>
         public void SetInitialInternalState(double state)
         {
             _initialMembranePotential = InternalStateRange.Min + state * InternalStateRange.Span;

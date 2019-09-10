@@ -107,6 +107,8 @@ namespace RCNet.Neural.Activation
         /// <param name="stepTimeScale">Computation step time scale</param>
         /// <param name="subSteps">Computation sub-steps</param>
         /// <param name="numOfEvolvingVars">Number of evolving variables</param>
+        /// <param name="currentCoeff">Coefficient of the current</param>
+        /// <param name="potentialCoeff">Coefficient of the potential</param>
         protected ODESpikingMembrane(double restV,
                                      double resetV,
                                      double firingThresholdV,
@@ -184,7 +186,7 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Sets initial state of the membrane potential
         /// </summary>
-        /// <param name="state">0 >= state < 1, where 0 means Min(reset, rest) potential and 1 means firing threshold</param>
+        /// <param name="state">0 LE state LT 1, where 0 means Min(reset, rest) potential and 1 means firing threshold</param>
         public void SetInitialInternalState(double state)
         {
             _initialMembranePotential = _stateRange.Min + state * _stateRange.Span;

@@ -150,7 +150,7 @@ namespace RCNet.MathTools
         /// <summary>
         /// Naturalizes the given standardized value
         /// </summary>
-        /// <param name="normValue">Standardized value (z-score) to be naturalized</param>
+        /// <param name="standardizedValue">Standardized value (z-score) to be naturalized</param>
         /// <returns>Destandardized (natural) value</returns>
         public double Destandardize(double standardizedValue)
         {

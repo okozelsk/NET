@@ -36,12 +36,12 @@ namespace RCNet.Neural.Network.SM.Neuron
         public BasicStat ActivationStat { get; }
 
         /// <summary>
-        /// Statistics of neuron's emitted analog signal (always <0,1>)
+        /// Statistics of neuron's emitted analog signal (always [0,1])
         /// </summary>
         public BasicStat AnalogSignalStat { get; }
 
         /// <summary>
-        /// Statistics of neuron's emitted spikes (always <0,1>)
+        /// Statistics of neuron's emitted spikes (always [0,1])
         /// </summary>
         public BasicStat FiringStat { get; }
 

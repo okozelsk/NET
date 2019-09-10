@@ -1692,7 +1692,7 @@
   <!-- NeuralPreprocessor - external input field -configuration -->
   <xs:complexType name="NPExternalInpFieldCfgType">
     <xs:attribute type="xs:string" name="name" use="required"/>
-    <xs:attribute type="xs:boolean" name="AllowRoutingToReadout" use="optional" default="true">
+    <xs:attribute type="xs:boolean" name="allowRoutingToReadout" use="optional" default="true">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is true</xs:documentation>
       </xs:annotation>
@@ -1708,6 +1708,11 @@
       <xs:element type="MackeyGlassGeneratorCfgType" name="mackeyGlass" minOccurs="1" maxOccurs="1"/>
     </xs:choice>
     <xs:attribute type="xs:string" name="name" use="required"/>
+    <xs:attribute type="xs:boolean" name="allowRoutingToReadout" use="optional" default="false">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is false</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
 

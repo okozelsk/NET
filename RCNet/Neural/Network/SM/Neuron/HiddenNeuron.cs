@@ -240,7 +240,7 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// <summary>
         /// Neuron returns previously computed signal of required type (if possible).
         /// Type of finally returned signal depends on specified targetActivationType and signaling restriction of the neuron.
-        /// Signal is always within the range <0, 1>
+        /// Signal is always within the range [0,1]
         /// </summary>
         /// <param name="targetActivationType">Specifies what type of the signal is preferred.</param>
         public double GetSignal(CommonEnums.ActivationType targetActivationType)

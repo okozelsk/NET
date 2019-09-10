@@ -195,9 +195,9 @@
         <input>
           <feedingContinuous bootCycles="Auto" routeToReadout="true"/>
           <external>
-            <field name="High" AllowRoutingToReadout="true"/>
-            <field name="Low" AllowRoutingToReadout="true"/>
-            <field name="Adj Close" AllowRoutingToReadout="true"/>
+            <field name="High" allowRoutingToReadout="true"/>
+            <field name="Low" allowRoutingToReadout="true"/>
+            <field name="Adj Close" allowRoutingToReadout="true"/>
           </external>
         </input>
         <reservoirCfgContainer>
@@ -864,7 +864,7 @@
         <input>
           <feedingContinuous bootCycles="Auto" routeToReadout="false"/>
           <external>
-            <field name="Value" AllowRoutingToReadout="true"/>
+            <field name="Value" allowRoutingToReadout="true"/>
           </external>
         </input>
         <reservoirCfgContainer>
@@ -949,9 +949,9 @@
         <input>
           <feedingContinuous bootCycles="Auto" routeToReadout="true"/>
           <external>
-            <field name="High" AllowRoutingToReadout="true"/>
-            <field name="Low" AllowRoutingToReadout="true"/>
-            <field name="Adj Close" AllowRoutingToReadout="true"/>
+            <field name="High" allowRoutingToReadout="true"/>
+            <field name="Low" allowRoutingToReadout="true"/>
+            <field name="Adj Close" allowRoutingToReadout="true"/>
           </external>
         </input>
         <reservoirCfgContainer>

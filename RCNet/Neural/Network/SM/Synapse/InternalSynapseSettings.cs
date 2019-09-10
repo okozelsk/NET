@@ -402,6 +402,10 @@ namespace RCNet.Neural.Network.SM.Synapse
         }
 
         //Inner classes
+        /// <summary>
+        /// COnfiguration of synapse dynamics
+        /// </summary>
+        [Serializable]
         public class DynamicsSettings
         {
             //Attribute properties
@@ -461,7 +465,7 @@ namespace RCNet.Neural.Network.SM.Synapse
             /// <summary>
             /// Creates the instance and initialize it from given xml element.
             /// </summary>
-            /// <param name="elem">
+            /// <param name="settingsElem">
             /// Xml data containing settings.
             /// Content of xml element is not validated against the xml schema.
             /// </param>

@@ -1067,6 +1067,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// <param name="reservoirInstanceName">Name of the reservoir instance</param>
         /// <param name="reservoirSettingsName">Name of the reservoir configuration settings</param>
         /// <param name="numOfNeurons">Total number of neurons</param>
+        /// <param name="excitatoryNeuronsRatio">Total ratio of the excitatory neurons</param>
         /// <param name="numOfPredictors">Total number of predictors</param>
         /// <param name="numOfInternalSynapses">Total number of synapses</param>
         public ReservoirStat(string reservoirInstanceName,
@@ -1160,6 +1161,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             /// </summary>
             /// <param name="poolSettings">Settings of the neuron pool</param>
             /// <param name="numOfNeurons">Number of neurons within the pool</param>
+            /// <param name="excitatoryNeuronsRatio">Ratio of excitatory neurons within the pool</param>
             public PoolStat(PoolSettings poolSettings,
                             int numOfNeurons,
                             double excitatoryNeuronsRatio

@@ -27,6 +27,7 @@ namespace RCNet.Neural.Data.Generators
         /// </summary>
         /// <param name="signal">Pulse signal value</param>
         /// <param name="avgPeriod">Pulse average leak</param>
+        /// <param name="mode">Pulse timing mode</param>
         public PulseGenerator(double signal, double avgPeriod, PulseGeneratorSettings.TimingMode mode)
         {
             _signal = signal;
@@ -62,7 +63,7 @@ namespace RCNet.Neural.Data.Generators
             switch(_mode)
             {
                 case PulseGeneratorSettings.TimingMode.Constant:
-                    timeIncrement = (int)Math.Round(_avgPeriod);
+                    timeIncrement = (_t == 0) ? 1 : (int)Math.Round(_avgPeriod);
                     break;
                 case PulseGeneratorSettings.TimingMode.Uniform:
                     timeIncrement = (int)Math.Round(_rand.NextRangedUniformDouble(minPeriod, maxPeriod));

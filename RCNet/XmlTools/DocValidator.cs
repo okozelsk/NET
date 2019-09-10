@@ -12,7 +12,7 @@ namespace RCNet.XmlTools
     {
         //Constants
         //Attributes
-        private XmlSchemaSet _schemaSet;
+        private readonly XmlSchemaSet _schemaSet;
 
         //Constructor
         /// <summary>

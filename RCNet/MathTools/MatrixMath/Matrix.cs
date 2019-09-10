@@ -922,15 +922,13 @@ namespace RCNet.MathTools.MatrixMath
         /// <summary>
         /// Computes inverse matrix of this matrix.
         /// Function implements enhanced algorithm originally proposed by Ahmad FAROOQ and Khan HAMID in the publication:
-        /// "An Efficient and Generic Algorithm for Matrix Inversion"
-        /// https://www.researchgate.net/publication/220337321_An_Efficient_and_Generic_Algorithm_for_Matrix_Inversion?enrichId=rgreq-abb517cc9e7aa81f0a1bfbb3633efc17-XXX&enrichSource=Y292ZXJQYWdlOzIyMDMzNzMyMTtBUzoxMzA3NzYxNTg5Njk4NTZAMTQwODE5MDg3NDYzMw%3D%3D&el=1_x_2&_esc=publicationCoverPdf
+        /// <see href="https://www.researchgate.net/publication/220337321_An_Efficient_and_Generic_Algorithm_for_Matrix_Inversion">An Efficient and Generic Algorithm for Matrix Inversion</see>
         /// (parallel processing was introduced to improve performance) 
         /// 
         /// Additionaly was implemented flexible off-diagonal pivot selection using dictionary
         /// approach to build final inverted matrix proposed by Hafsa Athar Jafree, Muhammad Imtiaz, Syed Inayatullah,
         /// Fozia Hanif Khan and Tajuddin Nizami in the publication:
-        /// "A space efficient flexible pivot selection approach to evaluate determinant and inverse of a matrix"
-        /// https://arxiv.org/ftp/arxiv/papers/1304/1304.6893.pdf
+        /// <see href="https://arxiv.org/ftp/arxiv/papers/1304/1304.6893.pdf">A space efficient flexible pivot selection approach to evaluate determinant and inverse of a matrix</see>
         /// </summary>
         /// <param name="preferAccuracy">If true, function favorites accuracy (selects pivots having max abs values) over the execution speed (selects diagonal pivots).</param>
         /// <returns>Inverse matrix of this matrix</returns>

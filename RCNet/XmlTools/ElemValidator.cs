@@ -17,7 +17,7 @@ namespace RCNet.XmlTools
     public class ElemValidator
     {
         //Attributes
-        private DocValidator _validator;
+        private readonly DocValidator _validator;
 
         //Constructor
         /// <summary>
@@ -56,7 +56,7 @@ namespace RCNet.XmlTools
         public XElement Validate(XElement source, string xsdRootElemName = "rootElem")
         {
             XDocument doc = XDocument.Parse(source.ToString());
-            XDocument validationSourceDoc = new XDocument(new XElement("rootElem", doc.Root.Attributes(), doc.Root.Nodes()));
+            XDocument validationSourceDoc = new XDocument(new XElement(xsdRootElemName, doc.Root.Attributes(), doc.Root.Nodes()));
             XDocument validaatedDoc = _validator.LoadXDocFromString(validationSourceDoc.ToString());
             return validaatedDoc.Root;
         }

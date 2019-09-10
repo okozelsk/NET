@@ -74,6 +74,11 @@ namespace RCNet.Neural.Network.SM.Synapse
             return;
         }
 
+        /// <summary>
+        /// Setups signal delaying
+        /// </summary>
+        /// <param name="distanceStat">Statistics of the distances</param>
+        /// <param name="rand">Random object to be used when RandomMethod</param>
         public void SetDelay(BasicStat distanceStat, Random rand)
         {
             if (_maxDelay > 0)
