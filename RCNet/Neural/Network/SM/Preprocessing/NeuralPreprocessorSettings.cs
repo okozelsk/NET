@@ -10,6 +10,7 @@ using RCNet.RandomValue;
 using RCNet.Neural.Data.Generators;
 using RCNet.Neural.Network.SM.Neuron;
 using RCNet.Neural.Network.SM.Synapse;
+using RCNet.Neural.Data.Filter;
 
 namespace RCNet.Neural.Network.SM.Preprocessing
 {
@@ -250,7 +251,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             /// <summary>
             /// External input data
             /// </summary>
-            public List<Field> ExternalFieldCollection { get; set; }
+            public List<ExternalField> ExternalFieldCollection { get; set; }
 
             /// <summary>
             /// Internal (augmented) input data
@@ -266,7 +267,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 FeedingType = CommonEnums.InputFeedingType.Continuous;
                 BootCycles = -1;
                 RouteInputToReadout = false;
-                ExternalFieldCollection = new List<Field>();
+                ExternalFieldCollection = new List<ExternalField>();
                 InternalFieldCollection = new List<InternalField>();
                 return;
             }
@@ -281,9 +282,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 FeedingType = source.FeedingType;
                 BootCycles = source.BootCycles;
                 RouteInputToReadout = source.RouteInputToReadout;
-                foreach (Field field in source.ExternalFieldCollection)
+                foreach (ExternalField field in source.ExternalFieldCollection)
                 {
-                    ExternalFieldCollection.Add(field.DeepClone());
+                    ExternalFieldCollection.Add((ExternalField)field.DeepClone());
                 }
                 foreach (InternalField field in source.InternalFieldCollection)
                 {
@@ -327,7 +328,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 //Fields
                 Dictionary<string, string> uniquenessChecker = new Dictionary<string, string>();
                 //External fields
-                foreach (XElement extFieldElem in settingsElem.Descendants("external").First().Descendants())
+                foreach (XElement extFieldElem in settingsElem.Descendants("external").First().Descendants("field"))
                 {
                     string fieldName = extFieldElem.Attribute("name").Value;
                     bool allowRoutingToReadout = bool.Parse(extFieldElem.Attribute("allowRoutingToReadout").Value);
@@ -336,7 +337,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                         throw new Exception($"Duplicit input field name {fieldName}");
                     }
                     uniquenessChecker.Add(fieldName, fieldName);
-                    ExternalFieldCollection.Add(new Field(fieldName, allowRoutingToReadout));
+                    ExternalFieldCollection.Add(new ExternalField(fieldName, allowRoutingToReadout, extFieldElem.Descendants().FirstOrDefault()));
                 }
                 //Internal fields
                 XElement intFieldsElem = settingsElem.Descendants("internal").FirstOrDefault();
@@ -449,7 +450,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
 
             //Inner classes
             /// <summary>
-            /// Represents simple input field
+            /// Base class of fields
             /// </summary>
             [Serializable]
             public class Field
@@ -523,6 +524,80 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 }
 
             }//Field
+
+            /// <summary>
+            /// Represents external input field
+            /// </summary>
+            [Serializable]
+            public class ExternalField : Field
+            {
+                //Attribute properties
+                /// <summary>
+                /// Feature filter configuration
+                /// </summary>
+                public FeatureFilterSettings FeatureFilterCfg { get; set; }
+
+                //Constructors
+                /// <summary>
+                /// Creates an initialized instance
+                /// </summary>
+                /// <param name="name">Field name</param>
+                /// <param name="allowRoutingToReadout">Specifies whether the field can be included among predictors</param>
+                /// <param name="settingsElem">Xml element containing associated feature filter settings</param>
+                public ExternalField(string name, bool allowRoutingToReadout, XElement settingsElem)
+                    : base(name, allowRoutingToReadout)
+                {
+                    FeatureFilterCfg = FeatureFilterFactory.LoadSettings(settingsElem);
+                    return;
+                }
+
+                /// <summary>
+                /// The deep copy constructor.
+                /// </summary>
+                /// <param name="source">Source instance</param>
+                public ExternalField(ExternalField source)
+                    : base(source)
+                {
+                    FeatureFilterCfg = FeatureFilterFactory.DeepClone(source.FeatureFilterCfg);
+                    return;
+                }
+
+                //Methods
+                /// <summary>
+                /// Creates the deep copy instance of this instance
+                /// </summary>
+                /// <returns></returns>
+                public override Field DeepClone()
+                {
+                    return new ExternalField(this);
+                }
+
+                /// <summary>
+                /// See the base.
+                /// </summary>
+                public override bool Equals(object obj)
+                {
+                    if (obj == null) return false;
+                    ExternalField cmpSettings = obj as ExternalField;
+                    if (!base.Equals(obj) ||
+                        !Equals(FeatureFilterCfg, cmpSettings.FeatureFilterCfg)
+                        )
+                    {
+                        return false;
+                    }
+                    return true;
+                }
+
+                /// <summary>
+                /// See the base.
+                /// </summary>
+                public override int GetHashCode()
+                {
+                    return base.GetHashCode();
+                }
+
+            }//ExternalField
+
 
             /// <summary>
             /// Represents input internal field

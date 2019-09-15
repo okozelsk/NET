@@ -10,6 +10,7 @@ using RCNet.Neural.Network.FF;
 using RCNet.Neural.Network.PP;
 using RCNet.XmlTools;
 using RCNet.MathTools;
+using RCNet.Neural.Data.Filter;
 
 namespace RCNet.Neural.Network.SM.Readout
 {
@@ -181,6 +182,10 @@ namespace RCNet.Neural.Network.SM.Readout
             /// </summary>
             public CommonEnums.TaskType TaskType;
             /// <summary>
+            /// Feature filter configuration
+            /// </summary>
+            public FeatureFilterSettings FeatureFilterCfg;
+            /// <summary>
             /// Type of readout unit network
             /// </summary>
             public ReadoutUnitNetworkType NetType { get; set; }
@@ -201,6 +206,7 @@ namespace RCNet.Neural.Network.SM.Readout
             {
                 Name = "";
                 TaskType = CommonEnums.TaskType.Forecast;
+                FeatureFilterCfg = null;
                 NetType = ReadoutUnitNetworkType.FF;
                 NetSettings = null;
                 OutputRange = null;
@@ -215,6 +221,7 @@ namespace RCNet.Neural.Network.SM.Readout
             {
                 Name = source.Name;
                 TaskType = source.TaskType;
+                FeatureFilterCfg = FeatureFilterFactory.DeepClone(source.FeatureFilterCfg);
                 NetType = source.NetType;
                 NetSettings = null;
                 OutputRange = null;
@@ -241,8 +248,19 @@ namespace RCNet.Neural.Network.SM.Readout
             /// </param>
             public ReadoutUnitSettings(XElement readoutUnitElem)
             {
+                //Name
                 Name = readoutUnitElem.Attribute("name").Value;
-                TaskType = CommonEnums.ParseTaskType(readoutUnitElem.Attribute("task").Value);
+                //Task and filter
+                XElement taskElem = readoutUnitElem.Descendants().First();
+                if(taskElem.Name.LocalName == "forecast")
+                {
+                    TaskType = CommonEnums.TaskType.Forecast;
+                }
+                else
+                {
+                    TaskType = CommonEnums.TaskType.Classification;
+                }
+                FeatureFilterCfg = FeatureFilterFactory.LoadSettings(taskElem.Descendants().First());
                 //Net settings
                 List<XElement> netSettingsElems = new List<XElement>();
                 netSettingsElems.AddRange(readoutUnitElem.Descendants("ff"));
@@ -283,6 +301,7 @@ namespace RCNet.Neural.Network.SM.Readout
                 ReadoutUnitSettings cmpSettings = obj as ReadoutUnitSettings;
                 if (Name != cmpSettings.Name ||
                     TaskType != cmpSettings.TaskType ||
+                    !Equals(FeatureFilterCfg, cmpSettings.FeatureFilterCfg) ||
                     NetType != cmpSettings.NetType ||
                     !Equals(NetSettings, cmpSettings.NetSettings) ||
                     !Equals(OutputRange, cmpSettings.OutputRange)

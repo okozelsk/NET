@@ -13,6 +13,7 @@ using RCNet.MathTools.Differential;
 using RCNet.MathTools.VectorMath;
 using RCNet.RandomValue;
 using RCNet.Neural.Data.Generators;
+using RCNet.Neural.Data.Filter;
 using System.Globalization;
 
 namespace RCNet.DemoConsoleApp
@@ -35,9 +36,24 @@ namespace RCNet.DemoConsoleApp
         //Methods
         public void Run()
         {
-            BasicStat sampleStat = new BasicStat();
+
+            //Filter test
+            RealFeatureFilter rff = new RealFeatureFilter(new Interval(-1, 1));
+            for(int i = 1; i <= 1500; i++)
+            {
+                rff.Update(_rand.NextDouble() * _rand.Next(0, 10000));
+            }
+            double featureValue = 0.5;
+            double filterValue = rff.ApplyFilter(featureValue);
+            double reverseValue = rff.ApplyReverse(filterValue);
+            Console.WriteLine($"Feature: {featureValue} Filter: {filterValue} Reverse: {reverseValue}");
+
+
+
+
 
             //Pulse generator test
+            BasicStat sampleStat = new BasicStat();
             sampleStat.Reset();
             PulseGeneratorSettings modSettings = new PulseGeneratorSettings(1, 1.5, PulseGeneratorSettings.TimingMode.Poisson);
             IGenerator generator = new PulseGenerator(modSettings);

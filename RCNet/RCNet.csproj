@@ -112,6 +112,15 @@
     <Compile Include="Neural\Activation\TanH.cs" />
     <Compile Include="Neural\Activation\ExpIF.cs" />
     <Compile Include="Neural\Activation\SimpleIF.cs" />
+    <Compile Include="Neural\Data\Filter\BinFeatureFilterSettings.cs" />
+    <Compile Include="Neural\Data\Filter\FeatureFilterFactory.cs" />
+    <Compile Include="Neural\Data\Filter\RealFeatureFilterSettings.cs" />
+    <Compile Include="Neural\Data\Filter\EnumFeatureFilterSettings.cs" />
+    <Compile Include="Neural\Data\Filter\FeatureFilterSettings.cs" />
+    <Compile Include="Neural\Data\Filter\RealFeatureFilter.cs" />
+    <Compile Include="Neural\Data\Filter\EnumFeatureFilter.cs" />
+    <Compile Include="Neural\Data\Filter\BinFeatureFilter.cs" />
+    <Compile Include="Neural\Data\Filter\FeatureFilter.cs" />
     <Compile Include="Neural\Data\Generators\PulseGenerator.cs" />
     <Compile Include="Neural\Data\Generators\MackeyGlassGenerator.cs" />
     <Compile Include="Neural\Data\Generators\SinusoidalGenerator.cs" />
@@ -165,12 +174,10 @@
     <Compile Include="MathTools\Interval.cs" />
     <Compile Include="MathTools\MatrixMath\Matrix.cs" />
     <Compile Include="MathTools\MatrixMath\QRD.cs" />
-    <Compile Include="MathTools\Normalizer.cs" />
     <Compile Include="MathTools\WeightedAvg.cs" />
     <Compile Include="Neural\CommonEnums.cs" />
-    <Compile Include="Neural\Data\BundleNormalizer.cs" />
     <Compile Include="Neural\Data\PatternBundle.cs" />
-    <Compile Include="Neural\Data\ResultComparativeBundle.cs" />
+    <Compile Include="Neural\Data\ResultBundle.cs" />
     <Compile Include="Neural\Data\VectorBundle.cs" />
     <Compile Include="Neural\Network\PP\PDeltaRuleTrainerSettings.cs" />
     <Compile Include="Neural\Network\FF\RPropTrainerSettings.cs" />
@@ -384,7 +391,9 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Neural\Filter\" />
+    <EmbeddedResource Include="Neural\Data\Filter\BinFeatureFilterSettings.xsd">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Neural\Network\SM\Synapse\InputSynapseSettings.xsd">
@@ -403,6 +412,16 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Neural\Network\SM\Neuron\HiddenNeuronPredictorsSettings.xsd">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Neural\Data\Filter\EnumFeatureFilterSettings.xsd">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Neural\Data\Filter\RealFeatureFilterSettings.xsd">
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>

@@ -178,7 +178,7 @@ namespace RCNet.Neural.Network.SM
         /// <param name="regressionControllerData">
         /// Optional custom object to be passed to regressionController together with other standard information
         /// </param>
-        public ResultComparativeBundle BuildReadoutLayer(RegressionInput regressionInput,
+        public ResultBundle BuildReadoutLayer(RegressionInput regressionInput,
                                                          ReadoutUnit.RegressionCallbackDelegate regressionController = null,
                                                          Object regressionControllerData = null
                                                          )

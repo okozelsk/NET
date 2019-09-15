@@ -846,16 +846,63 @@
     <xs:attribute type="UIntGT0Type" name="resolution" use="required"/>
   </xs:complexType>
 
+  <!-- ________________________________________FEATURE FILTERS TYPES_____________________________________________ -->
+
+  <!-- Binary feature filter configuration element -->
+  <xs:complexType name="BinFeatureFilterCfgType">
+  </xs:complexType>
+
+  <!-- Standard enumeration feature filter configuration element -->
+  <xs:complexType name="EnumFeatureFilterCfgType">
+    <xs:attribute type="UIntGT0Type" name="numOfElements" use="required"/>
+  </xs:complexType>
+
+  <!-- Real number feature filter configuration element -->
+  <xs:complexType name="RealFeatureFilterCfgType">
+    <xs:attribute type="xs:boolean" name="standardize" use="optional" default="true">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is true</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="keepReserve" use="optional" default="true">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is true</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
   <!-- ________________________________________READOUT LAYER TYPES_________________________________________________ -->
+
+
+  <!-- Readout unit forecast task configuration -->
+  <xs:complexType name="ROutLayerUnitForecastTaskCfgType">
+    <xs:choice minOccurs="1" maxOccurs="1">
+      <xs:element type="BinFeatureFilterCfgType" name="binFeature" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="EnumFeatureFilterCfgType" name="enumFeature" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="RealFeatureFilterCfgType" name="realFeature" minOccurs="0" maxOccurs="1"/>
+    </xs:choice>
+  </xs:complexType>
+
+  <!-- Readout unit classification task configuration -->
+  <xs:complexType name="ROutLayerUnitClassificationTaskCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="BinFeatureFilterCfgType" name="binFeature" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
 
   <!-- Readout unit configuration -->
   <xs:complexType name="ROutLayerUnitCfgType">
-    <xs:choice minOccurs="1" maxOccurs="1">
-      <xs:element type="FFNetCfgType" name="ff" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="PPNetCfgType" name="pp" minOccurs="1" maxOccurs="1"/>
-    </xs:choice>
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:choice minOccurs="1" maxOccurs="1">
+        <xs:element type="ROutLayerUnitForecastTaskCfgType" name="forecast" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="ROutLayerUnitClassificationTaskCfgType" name="classification" minOccurs="1" maxOccurs="1"/>
+      </xs:choice>
+      <xs:choice minOccurs="1" maxOccurs="1">
+        <xs:element type="FFNetCfgType" name="ff" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="PPNetCfgType" name="pp" minOccurs="1" maxOccurs="1"/>
+      </xs:choice>
+    </xs:sequence>
     <xs:attribute type="xs:string" name="name" use="required"/>
-    <xs:attribute type="NeuralTaskType" name="task" use="required"/>
   </xs:complexType>
 
   <!-- Readout layer configuration -->
@@ -1691,6 +1738,11 @@
 
   <!-- NeuralPreprocessor - external input field -configuration -->
   <xs:complexType name="NPExternalInpFieldCfgType">
+    <xs:choice minOccurs="1" maxOccurs="1">
+      <xs:element type="BinFeatureFilterCfgType" name="binFeature" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="EnumFeatureFilterCfgType" name="enumFeature" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="RealFeatureFilterCfgType" name="realFeature" minOccurs="0" maxOccurs="1"/>
+    </xs:choice>
     <xs:attribute type="xs:string" name="name" use="required"/>
     <xs:attribute type="xs:boolean" name="allowRoutingToReadout" use="optional" default="true">
       <xs:annotation>

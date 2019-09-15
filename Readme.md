@@ -25,7 +25,6 @@ Main functionality and possibilities are demonstrated in a simple demo applicati
 ### Math
 |Component|Description|
 |--|--|
-|Normalizer|Supports data normalization + standardization and then backward naturalization|
 |BasicStat|Provides basic statistics of given data (averages, sum of squares, standard deviation, etc.)|
 |ODENumSolver|Implements ordinary differential equations (ODE) numerical solver supporting Euler and RK4 methods|
 |Vector|Implements vector of double values supporting basic mathematical operations|
@@ -56,11 +55,13 @@ Main functionality and possibilities are demonstrated in a simple demo applicati
 ### Data handling
 |Component|Description|
 |--|--|
+|BinFeatureFilter|Binary (0/1) feature filter|
+|EnumFeatureFilter|Enumeration (1..N) feature filter|
+|RealFeatureFilter|Real number feature filter supporting standardization and range reserve for handling of unseen data in the future|
 |DelimitedStringValues|Helper encoder and decoder of data in csv format|
-|PatternBundle|Bundle of patterns of input data vectors and corresponding desired output vectors (n:1). Supports upload from csv file|
 |VectorBundle|Bundle of input data vectors and corresponding desired output vectors (1:1). Supports upload from csv file|
-|ResultComparativeBundle|Bundle of computed output vectors and desired output vectors (1:1)|
-|BundleNormalizer|Helper class for easy standardization + normalization and backward naturalization of data within PatternBundle or VectorBundle|
+|PatternBundle|Bundle of patterns of input data vectors and corresponding desired output vectors (n:1). Supports upload from csv file|
+|ResultBundle|Bundle of computed output vectors and desired output vectors (1:1)|
 
 ### Analog neuron activation functions
 |Component|Description|

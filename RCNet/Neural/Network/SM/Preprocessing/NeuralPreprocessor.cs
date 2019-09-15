@@ -5,6 +5,7 @@ using RCNet.Extensions;
 using RCNet.MathTools;
 using RCNet.Neural.Data;
 using RCNet.Neural.Data.Generators;
+using RCNet.Neural.Data.Filter;
 using RCNet.Neural.Network.SM.Neuron;
 using RCNet.RandomValue;
 
@@ -18,11 +19,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing
     public class NeuralPreprocessor
     {
         //Constants
-        private const double NormalizerDefaultReserve = 0.1d;
 
         //Static attributes
         /// <summary>
-        /// Input data will be normalized to this range before the usage in the reservoirs
+        /// Input data will be transformed by feature filters to this range before the usage in the reservoirs
         /// </summary>
         private static readonly Interval _dataRange = new Interval(-1, 1);
 
@@ -47,9 +47,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// </summary>
         private readonly List<IGenerator> _internalInputGeneratorCollection;
         /// <summary>
-        /// Collection of input fields normalizers
+        /// Collection of input feature filters
         /// </summary>
-        private Normalizer[] _inputNormalizerCollection;
+        private FeatureFilter[] _featureFilterCollection;
 
         //Attribute properties
         /// <summary>
@@ -86,7 +86,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         public NeuralPreprocessor(NeuralPreprocessorSettings settings, int randomizerSeek)
         {
             _settings = settings.DeepClone();
-            _inputNormalizerCollection = null;
+            _featureFilterCollection = null;
             //Internal input generators
             _internalInputGeneratorCollection = new List<IGenerator>();
             foreach(NeuralPreprocessorSettings.InputSettings.InternalField field in _settings.InputConfig.InternalFieldCollection)
@@ -191,76 +191,75 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         }
 
         /// <summary>
-        /// Initiates collection of preprocessor's normalizers
+        /// Initiates collection of preprocessor's feature filters
         /// </summary>
         /// <param name="inputVectorCollection">Collection of input vectors</param>
-        private void InitializeInputNormalizers(List<double[]> inputVectorCollection)
+        private void InitializeFeatureFilters(List<double[]> inputVectorCollection)
         {
-            //Instantiate normalizers
-            _inputNormalizerCollection = new Normalizer[_settings.InputConfig.ExternalFieldCollection.Count];
-            Parallel.For(0, _inputNormalizerCollection.Length, i =>
+            //Instantiate filters
+            _featureFilterCollection = new FeatureFilter[_settings.InputConfig.ExternalFieldCollection.Count];
+            Parallel.For(0, _featureFilterCollection.Length, i =>
             {
-                _inputNormalizerCollection[i] = new Normalizer(_dataRange, NormalizerDefaultReserve, true, false);
-                //Adjust normalizer
+                _featureFilterCollection[i] = FeatureFilterFactory.Create(_dataRange, _settings.InputConfig.ExternalFieldCollection[i].FeatureFilterCfg);
+                //Update filter
                 foreach (double[] vector in inputVectorCollection)
                 {
-                    _inputNormalizerCollection[i].Adjust(vector[i]);
+                    _featureFilterCollection[i].Update(vector[i]);
                 }
             });
             return;
         }
 
         /// <summary>
-        /// Normalizes given input vector
+        /// Applies filters on vector of features
         /// </summary>
         /// <param name="vector">Input vector</param>
-        /// <returns>Normalized input vector</returns>
-        private double[] NormalizeInputVector(double[] vector)
+        /// <returns>Filterred input vector</returns>
+        private double[] ApplyFiltersOnInputVector(double[] vector)
         {
-            //Normalize data
-            double[] nrmVector = new double[vector.Length];
+            double[] filterVector = new double[vector.Length];
             for (int i = 0; i < vector.Length; i++)
             {
-                nrmVector[i] = _inputNormalizerCollection[i].Normalize(vector[i]);
+                filterVector[i] = _featureFilterCollection[i].ApplyFilter(vector[i]);
             }
-            return nrmVector;
+            return filterVector;
         }
 
         /// <summary>
-        /// Initiates collection of preprocessor's normalizers and normalizes given collection of input vectors
+        /// Initiates collection of preprocessor's feature filters and applies filters on given collection of input vectors
         /// </summary>
         /// <param name="inputVectorCollection">Collection of input vectors</param>
-        /// <returns>Normalized collection of input vectors</returns>
-        private double[][] NormalizeInputVectorCollection(List<double[]> inputVectorCollection)
+        /// <returns>Filterred collection of input vectors</returns>
+        private double[][] ApplyFiltersOnInputVectorCollection(List<double[]> inputVectorCollection)
         {
-            //Instantiate normalizers
-            InitializeInputNormalizers(inputVectorCollection);
-            //Normalize data
-            double[][] nrmInputVectorCollection = new double[inputVectorCollection.Count][];
+            //Instantiate feature filters
+            InitializeFeatureFilters(inputVectorCollection);
+            //Apply filters
+            double[][] filterInputVectorCollection = new double[inputVectorCollection.Count][];
             Parallel.For(0, inputVectorCollection.Count, i =>
             {
-                nrmInputVectorCollection[i] = NormalizeInputVector(inputVectorCollection[i]);
+                filterInputVectorCollection[i] = ApplyFiltersOnInputVector(inputVectorCollection[i]);
 
             });
-            return nrmInputVectorCollection;
+            return filterInputVectorCollection;
         }
 
         /// <summary>
-        /// Initiates collection of preprocessor's normalizers
+        /// Initiates collection of preprocessor's feature filters
         /// </summary>
         /// <param name="inputPatternCollection">Collection of input patterns</param>
-        private void InitializeInputNormalizers(List<List<double[]>> inputPatternCollection)
+        private void InitializeFeatureFilters(List<List<double[]>> inputPatternCollection)
         {
-            //Instantiate and adjust normalizers
-            _inputNormalizerCollection = new Normalizer[_settings.InputConfig.ExternalFieldCollection.Count];
+            //Instantiate and adjust feature filters
+            _featureFilterCollection = new FeatureFilter[_settings.InputConfig.ExternalFieldCollection.Count];
             Parallel.For(0, _settings.InputConfig.ExternalFieldCollection.Count, i =>
             {
-                _inputNormalizerCollection[i] = new Normalizer(NormalizerDefaultReserve, true, false);
+                _featureFilterCollection[i] = FeatureFilterFactory.Create(_dataRange, _settings.InputConfig.ExternalFieldCollection[i].FeatureFilterCfg);
                 foreach (List<double[]> pattern in inputPatternCollection)
                 {
                     foreach (double[] vector in pattern)
                     {
-                        _inputNormalizerCollection[i].Adjust(vector[i]);
+                        _featureFilterCollection[i].Update(vector[i]);
                     }
                 }
             });
@@ -268,46 +267,46 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         }
 
         /// <summary>
-        /// Normalizes given input pattern
+        /// Applies feature filters on pattern
         /// </summary>
         /// <param name="pattern">Input pattern</param>
-        /// <returns>Normalized input pattern</returns>
-        private List<double[]> NormalizeInputPattern(List<double[]> pattern)
+        /// <returns>Filterred input pattern</returns>
+        private List<double[]> ApplyFiltersOnInputPattern(List<double[]> pattern)
         {
-            //Normalize data
-            List<double[]> nrmPattern = new List<double[]>(pattern.Count);
+            List<double[]> filterPattern = new List<double[]>(pattern.Count);
             foreach (double[] vector in pattern)
             {
-                double[] nrmVector = new double[vector.Length];
-                int numOfSets = vector.Length / _inputNormalizerCollection.Length;
+                double[] filterVector = new double[vector.Length];
+                int numOfSets = vector.Length / _featureFilterCollection.Length;
                 for (int set = 0; set < numOfSets; set++)
                 {
-                    for (int i = 0; i < _inputNormalizerCollection.Length; i++)
+                    for (int i = 0; i < _featureFilterCollection.Length; i++)
                     {
-                        nrmVector[set * _inputNormalizerCollection.Length + i] = _inputNormalizerCollection[i].Normalize(vector[set * _inputNormalizerCollection.Length + i]);
+                        int idx = set * _featureFilterCollection.Length + i;
+                        filterVector[idx] = _featureFilterCollection[i].ApplyFilter(vector[idx]);
                     }
                 }
-                nrmPattern.Add(nrmVector);
+                filterPattern.Add(filterVector);
             }
-            return nrmPattern;
+            return filterPattern;
         }
 
         /// <summary>
-        /// Initiates collection of preprocessor's normalizers and normalizes given collection of input patterns
+        /// Initiates collection of preprocessor's feature filters and applies filters on given collection of input patterns
         /// </summary>
         /// <param name="inputPatternCollection">Collection of input patterns</param>
-        /// <returns>Normalized collection of input patterns</returns>
-        private List<double[]>[] NormalizeInputPatternCollection(List<List<double[]>> inputPatternCollection)
+        /// <returns>Filterred collection of input patterns</returns>
+        private List<double[]>[] ApplyFiltersOnInputPatternCollection(List<List<double[]>> inputPatternCollection)
         {
-            //Instantiate normalizers
-            InitializeInputNormalizers(inputPatternCollection);
-            //Normalize data
-            List<double[]>[] nrmInputPatternCollection = new List<double[]>[inputPatternCollection.Count];
+            //Instantiate feature filters
+            InitializeFeatureFilters(inputPatternCollection);
+            //Filter data
+            List<double[]>[] filterInputPatternCollection = new List<double[]>[inputPatternCollection.Count];
             Parallel.For(0, inputPatternCollection.Count, i =>
             {
-                nrmInputPatternCollection[i] = NormalizeInputPattern(inputPatternCollection[i]);
+                filterInputPatternCollection[i] = ApplyFiltersOnInputPattern(inputPatternCollection[i]);
             });
-            return nrmInputPatternCollection;
+            return filterInputPatternCollection;
         }
 
         /// <summary>
@@ -403,17 +402,17 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         public double[] Preprocess(double[] input)
         {
             //Check readyness
-            if (_inputNormalizerCollection == null)
+            if (_featureFilterCollection == null)
             {
-                throw new Exception("Preprocessor was not initialized by the sample data bundle (normalizers are not instantiated yet).");
+                throw new Exception("Preprocessor was not initialized by the sample data bundle (feature filters are not instantiated yet).");
             }
             //Check calling consistency
             if (_settings.InputConfig.FeedingType == CommonEnums.InputFeedingType.Patterned)
             {
                 throw new Exception("Called incorrect version of Preprocess function for patterned input feeding.");
             }
-            //Normalize vector, push it into the preprocessor and return result
-            return PushInput(NormalizeInputVector(input), false);
+            //Apply filters on vector, push it into the preprocessor and return result
+            return PushInput(ApplyFiltersOnInputVector(input), false);
         }
 
         /// <summary>
@@ -423,17 +422,17 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         public double[] Preprocess(List<double[]> inputPattern)
         {
             //Check readyness
-            if (_inputNormalizerCollection == null)
+            if (_featureFilterCollection == null)
             {
-                throw new Exception("Preprocessor was not initialized by the sample data bundle (normalizers are not instantiated yet).");
+                throw new Exception("Preprocessor was not initialized by the sample data bundle (feature filters are not instantiated yet).");
             }
             //Check calling consistency
             if (_settings.InputConfig.FeedingType == CommonEnums.InputFeedingType.Continuous)
             {
                 throw new Exception("Called incorrect version of Preprocess function for continuous input feeding.");
             }
-            //Normalize pattern, push it into the preprocessor and return result
-            return PushInput(NormalizeInputPattern(inputPattern), false);
+            //Apply filters on pattern, push it into the preprocessor and return result
+            return PushInput(ApplyFiltersOnInputPattern(inputPattern), false);
         }
 
         /// <summary>
@@ -461,8 +460,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             }
             //Reset the internal states and also statistics
             Reset(true);
-            //Initialize normalizers and normalize input data
-            double[][] nrmInputVectorCollection = NormalizeInputVectorCollection(vectorBundle.InputVectorCollection);
+            //Initialize feature filters and apply filters on input data
+            double[][] filterInputVectorCollection = ApplyFiltersOnInputVectorCollection(vectorBundle.InputVectorCollection);
             //Allocate output bundle
             VectorBundle outputBundle = new VectorBundle(vectorBundle.InputVectorCollection.Count - _settings.InputConfig.BootCycles);
             //Collect predictors
@@ -470,7 +469,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             {
                 bool afterBoot = (dataSetIdx >= _settings.InputConfig.BootCycles);
                 //Push input data into the network
-                double[] predictors = PushInput(nrmInputVectorCollection[dataSetIdx], afterBoot);
+                double[] predictors = PushInput(filterInputVectorCollection[dataSetIdx], afterBoot);
                 //Is boot sequence passed? Collect predictors?
                 if (afterBoot)
                 {
@@ -511,15 +510,15 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             }
             //Reset the internal states and also statistics
             Reset(true);
-            //Initialize normalizers and normalize input data
-            List<double[]>[] nrmInputPatternCollection = NormalizeInputPatternCollection(patternBundle.InputPatternCollection);
+            //Initialize feature filters and apply filters on input data
+            List<double[]>[] filterInputPatternCollection = ApplyFiltersOnInputPatternCollection(patternBundle.InputPatternCollection);
             //Allocate output bundle
             VectorBundle outputBundle = new VectorBundle(patternBundle.InputPatternCollection.Count);
             //Collection
-            for (int dataSetIdx = 0; dataSetIdx < nrmInputPatternCollection.Length; dataSetIdx++)
+            for (int dataSetIdx = 0; dataSetIdx < filterInputPatternCollection.Length; dataSetIdx++)
             {
                 //Push input data into the network
-                double[] predictors = PushInput(nrmInputPatternCollection[dataSetIdx], true);
+                double[] predictors = PushInput(filterInputPatternCollection[dataSetIdx], true);
                 outputBundle.InputVectorCollection.Add(predictors);
                 //Add desired outputs
                 outputBundle.OutputVectorCollection.Add(patternBundle.OutputVectorCollection[dataSetIdx]);

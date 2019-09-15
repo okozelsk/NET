@@ -134,7 +134,7 @@ namespace RCNet.DemoConsoleApp
             //Regression stage - building of trained readout layer
             log.Write("    Regression stage (training of readout layer)", false);
             //Perform the regression
-            ResultComparativeBundle rcb = stateMachine.BuildReadoutLayer(rsi, RegressionControl, log);
+            ResultBundle rcb = stateMachine.BuildReadoutLayer(rsi, RegressionControl, log);
             log.Write(string.Empty);
 
             //Report training (regression) results

@@ -8,6 +8,7 @@ using RCNet.MathTools;
 using RCNet.Neural.Activation;
 using RCNet.Neural.Data;
 using RCNet.Extensions;
+using RCNet.Neural.Data.Filter;
 
 namespace RCNet.Neural.Network.SM.Readout
 {
@@ -19,46 +20,41 @@ namespace RCNet.Neural.Network.SM.Readout
     {
         //Constants
         /// <summary>
-        /// Default reserve of normalizer range kept for ability to operate future unseen data
-        /// </summary>
-        public const double NormalizerDefaultReserve = 0.1d;
-
-        //Static attributes
-        /// <summary>
-        /// Input and output data will be normalized to this range before the usage
-        /// </summary>
-        public static readonly Interval DataRange = new Interval(-1, 1);
-        
-        //Attributes
-        /// <summary>
-        /// Collection of normalizers of input predictors
-        /// </summary>
-        private Normalizer[] _predictorNormalizerCollection;
-        /// <summary>
-        /// Collection of normalizers of output values
-        /// </summary>
-        private Normalizer[] _outputNormalizerCollection;
-        /// <summary>
-        /// Mapping of specific predictors to readout units
-        /// </summary>
-        private PredictorsMapper _predictorsMapper;
-        /// <summary>
         /// Maximum number of the folds
         /// </summary>
         public const int MaxNumOfFolds = 100;
         /// <summary>
         /// Maximum part of available samples useable for test purposes
         /// </summary>
-        public const double MaxRatioOfTestData = 1d/3d;
+        public const double MaxRatioOfTestData = 1d / 3d;
         /// <summary>
         /// Minimum length of the test dataset
         /// </summary>
         public const int MinLengthOfTestDataset = 2;
+
+        //Static attributes
+        /// <summary>
+        /// Input and output data will be normalized to this range before the usage
+        /// </summary>
+        public static readonly Interval DataRange = new Interval(-1, 1);
+
         //Attributes
         /// <summary>
         /// Readout layer configuration
         /// </summary>
         private readonly ReadoutLayerSettings _settings;
+        /// <summary>
+        /// Collection of feature filters of input predictors
+        /// </summary>
+        private FeatureFilter[] _predictorFeatureFilterCollection;
+        /// <summary>
+        /// Collection of feature filters of output values
+        /// </summary>
+        private FeatureFilter[] _outputFeatureFilterCollection;
+        /// <summary>
+        /// Mapping of specific predictors to readout units
+        /// </summary>
+        private PredictorsMapper _predictorsMapper;
         /// <summary>
         /// Collection of clusters of trained readout units. One cluster of units per output field.
         /// </summary>
@@ -78,8 +74,8 @@ namespace RCNet.Neural.Network.SM.Readout
         public ReadoutLayer(ReadoutLayerSettings settings)
         {
             _settings = settings.DeepClone();
-            _predictorNormalizerCollection = null;
-            _outputNormalizerCollection = null;
+            _predictorFeatureFilterCollection = null;
+            _outputFeatureFilterCollection = null;
             _predictorsMapper = null;
             foreach (ReadoutLayerSettings.ReadoutUnitSettings rus in _settings.ReadoutUnitCfgCollection)
             {
@@ -106,7 +102,7 @@ namespace RCNet.Neural.Network.SM.Readout
         /// There is recorded fold by fold (unit by unit) predicted and corresponding ideal values.
         /// This is the pesimistic approach. Real results on unseen data could be better due to the clustering.
         /// </returns>
-        public ResultComparativeBundle Build(VectorBundle dataBundle,
+        public ResultBundle Build(VectorBundle dataBundle,
                                              ReadoutUnit.RegressionCallbackDelegate regressionController,
                                              Object regressionControllerData,
                                              PredictorsMapper predictorsMapper = null
@@ -125,33 +121,27 @@ namespace RCNet.Neural.Network.SM.Readout
             }
             //Predictors mapper (specified or default)
             _predictorsMapper = predictorsMapper ?? new PredictorsMapper(numOfPredictors);
-            //Normalization of predictors and output data collections
-            //Allocation and preparation of normalizers
-            //Predictors normalizers
-            _predictorNormalizerCollection = new Normalizer[numOfPredictors];
-            Parallel.For(0, _predictorNormalizerCollection.Length, nrmIdx =>
+            //Allocation and preparation of feature filters
+            //Predictors
+            _predictorFeatureFilterCollection = new FeatureFilter[numOfPredictors];
+            Parallel.For(0, _predictorFeatureFilterCollection.Length, nrmIdx =>
             {
-                _predictorNormalizerCollection[nrmIdx] = new Normalizer(DataRange, NormalizerDefaultReserve, true, false);
+                _predictorFeatureFilterCollection[nrmIdx] = new RealFeatureFilter(DataRange, true, true);
                 for (int pairIdx = 0; pairIdx < dataBundle.InputVectorCollection.Count; pairIdx++)
                 {
-                    //Adjust predictor normalizer
-                    _predictorNormalizerCollection[nrmIdx].Adjust(dataBundle.InputVectorCollection[pairIdx][nrmIdx]);
+                    //Adjust filter
+                    _predictorFeatureFilterCollection[nrmIdx].Update(dataBundle.InputVectorCollection[pairIdx][nrmIdx]);
                 }
             });
-            //Output normalizers
-            _outputNormalizerCollection = new Normalizer[numOfOutputs];
-            Parallel.For(0, _outputNormalizerCollection.Length, nrmIdx =>
+            //Output values
+            _outputFeatureFilterCollection = new FeatureFilter[numOfOutputs];
+            Parallel.For(0, _outputFeatureFilterCollection.Length, nrmIdx =>
             {
-                bool classificationTask = (_settings.ReadoutUnitCfgCollection[nrmIdx].TaskType == CommonEnums.TaskType.Classification);
-                _outputNormalizerCollection[nrmIdx] = new Normalizer(DataRange,
-                                                                     classificationTask ? 0 : NormalizerDefaultReserve,
-                                                                     classificationTask ? false : true,
-                                                                     false
-                                                                     );
+                _outputFeatureFilterCollection[nrmIdx] = FeatureFilterFactory.Create(DataRange, _settings.ReadoutUnitCfgCollection[nrmIdx].FeatureFilterCfg);
                 for (int pairIdx = 0; pairIdx < dataBundle.OutputVectorCollection.Count; pairIdx++)
                 {
                     //Adjust output normalizer
-                    _outputNormalizerCollection[nrmIdx].Adjust(dataBundle.OutputVectorCollection[pairIdx][nrmIdx]);
+                    _outputFeatureFilterCollection[nrmIdx].Update(dataBundle.OutputVectorCollection[pairIdx][nrmIdx]);
                 }
             });
             //Data normalization
@@ -167,7 +157,7 @@ namespace RCNet.Neural.Network.SM.Readout
                 {
                     if (_predictorsMapper.PredictorGeneralSwitchCollection[i])
                     {
-                        predictors[i] = _predictorNormalizerCollection[i].Normalize(dataBundle.InputVectorCollection[pairIdx][i]);
+                        predictors[i] = _predictorFeatureFilterCollection[i].ApplyFilter(dataBundle.InputVectorCollection[pairIdx][i]);
                     }
                     else
                     {
@@ -179,7 +169,7 @@ namespace RCNet.Neural.Network.SM.Readout
                 double[] outputs = new double[numOfOutputs];
                 for (int i = 0; i < numOfOutputs; i++)
                 {
-                    outputs[i] = _outputNormalizerCollection[i].Normalize(dataBundle.OutputVectorCollection[pairIdx][i]);
+                    outputs[i] = _outputFeatureFilterCollection[i].ApplyFilter(dataBundle.OutputVectorCollection[pairIdx][i]);
                 }
                 idealOutputsCollection[pairIdx] = outputs;
             });
@@ -300,8 +290,8 @@ namespace RCNet.Neural.Network.SM.Readout
                     {
                         
                         double nrmComputedValue = _clusterCollection[clusterIdx][foldIdx].Network.Compute(subBundleCollection[foldIdx].InputVectorCollection[sampleIdx])[0];
-                        double natComputedValue = _outputNormalizerCollection[clusterIdx].Denormalize(nrmComputedValue);
-                        double natIdealValue = _outputNormalizerCollection[clusterIdx].Denormalize(subBundleCollection[foldIdx].OutputVectorCollection[sampleIdx][0]);
+                        double natComputedValue = _outputFeatureFilterCollection[clusterIdx].ApplyReverse(nrmComputedValue);
+                        double natIdealValue = _outputFeatureFilterCollection[clusterIdx].ApplyReverse(subBundleCollection[foldIdx].OutputVectorCollection[sampleIdx][0]);
                         ces.Update(nrmComputedValue,
                                    subBundleCollection[foldIdx].OutputVectorCollection[sampleIdx][0],
                                    natComputedValue,
@@ -316,7 +306,7 @@ namespace RCNet.Neural.Network.SM.Readout
 
             }//clusterIdx
             //Validation bundle is returned. 
-            return new ResultComparativeBundle(validationComputedVectorCollection, validationIdealVectorCollection);
+            return new ResultBundle(validationComputedVectorCollection, validationIdealVectorCollection);
         }
 
         //Properties
@@ -491,14 +481,14 @@ namespace RCNet.Neural.Network.SM.Readout
         private double[] NormalizePredictors(double[] predictors)
         {
             //Check
-            if (predictors.Length != _predictorNormalizerCollection.Length)
+            if (predictors.Length != _predictorFeatureFilterCollection.Length)
             {
                 throw new Exception("Incorrect length of predictors vector.");
             }
             double[] nrmPredictors = new double[predictors.Length];
             for (int i = 0; i < predictors.Length; i++)
             {
-                nrmPredictors[i] = _predictorNormalizerCollection[i].Normalize(predictors[i]);
+                nrmPredictors[i] = _predictorFeatureFilterCollection[i].ApplyFilter(predictors[i]);
             }
             return nrmPredictors;
         }
@@ -512,7 +502,7 @@ namespace RCNet.Neural.Network.SM.Readout
             double[] natOutputs = new double[outputs.Length];
             for (int i = 0; i < outputs.Length; i++)
             {
-                natOutputs[i] = _outputNormalizerCollection[i].Denormalize(outputs[i]);
+                natOutputs[i] = _outputFeatureFilterCollection[i].ApplyReverse(outputs[i]);
             }
             return natOutputs;
         }
@@ -524,7 +514,7 @@ namespace RCNet.Neural.Network.SM.Readout
         public double[] Compute(double[] predictors)
         {
             //Check readyness
-            if(_predictorNormalizerCollection == null || _outputNormalizerCollection == null)
+            if(_predictorFeatureFilterCollection == null || _outputFeatureFilterCollection == null)
             {
                 throw new Exception("Readout layer is not trained. Build function has to be called before Compute function can be used.");
             }
