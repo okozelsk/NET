@@ -214,7 +214,7 @@ namespace RCNet.Neural.Network.SM
                             //Enable specific predictors from allowed pool (origin)
                             for (int i = 0; i < neuronPoolRefCollection.Length; i++)
                             {
-                                if (neuronPoolRefCollection[i]._reservoirInstanceIdx == allowedPool._reservoirInstanceIdx && neuronPoolRefCollection[i]._poolIdx == allowedPool._poolIdx)
+                                if (neuronPoolRefCollection[i] != null && neuronPoolRefCollection[i]._reservoirInstanceIdx == allowedPool._reservoirInstanceIdx && neuronPoolRefCollection[i]._poolIdx == allowedPool._poolIdx)
                                 {
                                     //Enable predictor if it is valid
                                     switches[i] = PredictorGeneralSwitchCollection[i];

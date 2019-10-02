@@ -165,7 +165,6 @@
     <Compile Include="MathTools\Bitwise.cs" />
     <Compile Include="MathTools\Combinatorics.cs" />
     <Compile Include="MathTools\Factorial.cs" />
-    <Compile Include="MathTools\Hurst\HurstExpVector.cs" />
     <Compile Include="MathTools\Hurst\HurstExpEstim.cs" />
     <Compile Include="MathTools\Hurst\RescalledRange.cs" />
     <Compile Include="MathTools\MatrixMath\EVD.cs" />

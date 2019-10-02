@@ -32,7 +32,8 @@ namespace RCNet.Neural.Data.Filter
         /// <summary>
         /// Constructs an initialized instance
         /// </summary>
-        /// <param name="numOfElements">Number of feature's enumerated elements</param>
+        /// <param name="standardize">Standardize?</param>
+        /// <param name="keepReserve">Keep range reserve?</param>
         public RealFeatureFilterSettings(bool standardize, bool keepReserve)
             :base(FeatureFilter.FeatureType.Real)
         {

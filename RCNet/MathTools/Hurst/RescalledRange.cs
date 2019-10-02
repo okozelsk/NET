@@ -13,7 +13,7 @@ namespace RCNet.MathTools.Hurst
     public class RescalledRange
     {
         //Attributes
-        private List<double> _valueCollection;
+        private readonly List<double> _valueCollection;
         private double _sum;
 
         /// <summary>
