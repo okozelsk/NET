@@ -175,7 +175,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 ++reservoirInstanceID;
             }
             //Finalize boot cycles if necessary
-            if(InputConfig.BootCycles == AutomaticBootCycles && InputConfig.FeedingType == CommonEnums.InputFeedingType.Continuous)
+            if(InputConfig.BootCycles == AutomaticBootCycles && InputConfig.FeedingType == NeuralPreprocessor.InputFeedingType.Continuous)
             {
                 InputConfig.BootCycles = numOfNeuronsInLargestReservoir;
             }
@@ -235,7 +235,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             /// <summary>
             /// Type of input feeding
             /// </summary>
-            public CommonEnums.InputFeedingType FeedingType { get; set; }
+            public NeuralPreprocessor.InputFeedingType FeedingType { get; set; }
 
             /// <summary>
             /// Number of booting cycles (-1 means Auto)
@@ -264,7 +264,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             /// </summary>
             private InputSettings()
             {
-                FeedingType = CommonEnums.InputFeedingType.Continuous;
+                FeedingType = NeuralPreprocessor.InputFeedingType.Continuous;
                 BootCycles = -1;
                 RouteInputToReadout = false;
                 ExternalFieldCollection = new List<ExternalField>();
@@ -304,7 +304,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 XElement feedingElem = settingsElem.Descendants().First();
                 if(feedingElem.Name.LocalName == "feedingContinuous")
                 {
-                    FeedingType = CommonEnums.InputFeedingType.Continuous;
+                    FeedingType = NeuralPreprocessor.InputFeedingType.Continuous;
                     //Number of booting cycles
                     string bootCyclesAttrValue = feedingElem.Attribute("bootCycles").Value;
                     if (bootCyclesAttrValue == "Auto")
@@ -321,7 +321,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 }
                 else
                 {
-                    FeedingType = CommonEnums.InputFeedingType.Patterned;
+                    FeedingType = NeuralPreprocessor.InputFeedingType.Patterned;
                     BootCycles = 0;
                     RouteInputToReadout = false;
                 }
@@ -535,7 +535,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 /// <summary>
                 /// Feature filter configuration
                 /// </summary>
-                public FeatureFilterSettings FeatureFilterCfg { get; set; }
+                public BaseFeatureFilterSettings FeatureFilterCfg { get; set; }
 
                 //Constructors
                 /// <summary>
@@ -740,7 +740,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             /// </summary>
             public List<InputConnection> InputConnectionCollection { get; set; }
             /// <summary>
-            /// Configuration of the predictors (enabling/disabling)
+            /// Configuration of the predictors
             /// </summary>
             public HiddenNeuronPredictorsSettings PredictorsCfg { get; set; }
 

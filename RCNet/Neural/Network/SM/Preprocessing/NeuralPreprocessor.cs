@@ -18,7 +18,21 @@ namespace RCNet.Neural.Network.SM.Preprocessing
     [Serializable]
     public class NeuralPreprocessor
     {
-        //Constants
+        //Enums
+        /// <summary>
+        /// Input feeding variants
+        /// </summary>
+        public enum InputFeedingType
+        {
+            /// <summary>
+            /// Continuous feeding
+            /// </summary>
+            Continuous,
+            /// <summary>
+            /// Patterned feeding
+            /// </summary>
+            Patterned
+        }
 
         //Static attributes
         /// <summary>
@@ -49,7 +63,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// <summary>
         /// Collection of input feature filters
         /// </summary>
-        private FeatureFilter[] _featureFilterCollection;
+        private BaseFeatureFilter[] _featureFilterCollection;
 
         //Attribute properties
         /// <summary>
@@ -197,7 +211,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         private void InitializeFeatureFilters(List<double[]> inputVectorCollection)
         {
             //Instantiate filters
-            _featureFilterCollection = new FeatureFilter[_settings.InputConfig.ExternalFieldCollection.Count];
+            _featureFilterCollection = new BaseFeatureFilter[_settings.InputConfig.ExternalFieldCollection.Count];
             Parallel.For(0, _featureFilterCollection.Length, i =>
             {
                 _featureFilterCollection[i] = FeatureFilterFactory.Create(_dataRange, _settings.InputConfig.ExternalFieldCollection[i].FeatureFilterCfg);
@@ -251,7 +265,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         private void InitializeFeatureFilters(List<List<double[]>> inputPatternCollection)
         {
             //Instantiate and adjust feature filters
-            _featureFilterCollection = new FeatureFilter[_settings.InputConfig.ExternalFieldCollection.Count];
+            _featureFilterCollection = new BaseFeatureFilter[_settings.InputConfig.ExternalFieldCollection.Count];
             Parallel.For(0, _settings.InputConfig.ExternalFieldCollection.Count, i =>
             {
                 _featureFilterCollection[i] = FeatureFilterFactory.Create(_dataRange, _settings.InputConfig.ExternalFieldCollection[i].FeatureFilterCfg);
@@ -407,7 +421,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 throw new Exception("Preprocessor was not initialized by the sample data bundle (feature filters are not instantiated yet).");
             }
             //Check calling consistency
-            if (_settings.InputConfig.FeedingType == CommonEnums.InputFeedingType.Patterned)
+            if (_settings.InputConfig.FeedingType == InputFeedingType.Patterned)
             {
                 throw new Exception("Called incorrect version of Preprocess function for patterned input feeding.");
             }
@@ -427,7 +441,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 throw new Exception("Preprocessor was not initialized by the sample data bundle (feature filters are not instantiated yet).");
             }
             //Check calling consistency
-            if (_settings.InputConfig.FeedingType == CommonEnums.InputFeedingType.Continuous)
+            if (_settings.InputConfig.FeedingType == InputFeedingType.Continuous)
             {
                 throw new Exception("Called incorrect version of Preprocess function for continuous input feeding.");
             }
@@ -454,7 +468,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                                                           )
         {
             //Check correctness
-            if (_settings.InputConfig.FeedingType == CommonEnums.InputFeedingType.Patterned)
+            if (_settings.InputConfig.FeedingType == InputFeedingType.Patterned)
             {
                 throw new Exception("Called incorrect version of InitializeAndPreprocessBundle function for patterned input feeding.");
             }
@@ -504,7 +518,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                                                           )
         {
             //Check correctness
-            if (_settings.InputConfig.FeedingType == CommonEnums.InputFeedingType.Continuous)
+            if (_settings.InputConfig.FeedingType == InputFeedingType.Continuous)
             {
                 throw new Exception("Called incorrect version of InitializeAndPreprocessBundle function for continuous input feeding.");
             }

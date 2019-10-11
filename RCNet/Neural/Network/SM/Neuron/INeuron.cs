@@ -27,17 +27,17 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// <summary>
         /// Neuron's role within the reservoir (excitatory or inhibitory)
         /// </summary>
-        CommonEnums.NeuronRole Role { get; }
+        NeuronCommon.NeuronRole Role { get; }
 
         /// <summary>
         /// Type of the activation function
         /// </summary>
-        CommonEnums.ActivationType ActivationType { get; }
+        ActivationType TypeOfActivation { get; }
 
         /// <summary>
         /// Output signaling restriction
         /// </summary>
-        CommonEnums.NeuronSignalingRestrictionType SignalingRestriction { get; }
+        NeuronCommon.NeuronSignalingRestrictionType SignalingRestriction { get; }
         
         /// <summary>
         /// Constant bias
@@ -79,7 +79,7 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// Neuron's output signal.
         /// </summary>
         /// <param name="targetActivationType">Specifies what type of the signal is required if possible</param>
-        double GetSignal(CommonEnums.ActivationType targetActivationType);
+        double GetSignal(ActivationType targetActivationType);
 
 
     }//INeuron

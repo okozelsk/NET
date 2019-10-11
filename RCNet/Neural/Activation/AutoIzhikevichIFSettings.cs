@@ -8,6 +8,7 @@ using System.Xml.Linq;
 using System.Reflection;
 using RCNet.Extensions;
 using RCNet.RandomValue;
+using RCNet.Neural.Network.SM.Neuron;
 using RCNet.XmlTools;
 using RCNet.MathTools.Differential;
 
@@ -23,7 +24,7 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Role of the neuron (excitatory or inhibitory)
         /// </summary>
-        public CommonEnums.NeuronRole Role { get; }
+        public NeuronCommon.NeuronRole Role { get; }
         /// <summary>
         /// Number of after spike computation cycles while an input stimuli is ignored (ms)
         /// </summary>
@@ -46,7 +47,7 @@ namespace RCNet.Neural.Activation
         /// <param name="refractoryPeriods">Number of after spike computation cycles while an input stimuli is ignored (ms)</param>
         /// <param name="solverMethod">ODE numerical solver method</param>
         /// <param name="solverCompSteps">ODE numerical solver computation steps of the time step</param>
-        public AutoIzhikevichIFSettings(CommonEnums.NeuronRole role,
+        public AutoIzhikevichIFSettings(NeuronCommon.NeuronRole role,
                                         int refractoryPeriods,
                                         ODENumSolver.Method solverMethod,
                                         int solverCompSteps
@@ -88,7 +89,7 @@ namespace RCNet.Neural.Activation
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
             XElement activationSettingsElem = validator.Validate(elem, "rootElem");
             //Parsing
-            Role = CommonEnums.ParseNeuronRole(activationSettingsElem.Attribute("role").Value);
+            Role = NeuronCommon.ParseNeuronRole(activationSettingsElem.Attribute("role").Value);
             RefractoryPeriods = int.Parse(activationSettingsElem.Attribute("refractoryPeriods").Value, CultureInfo.InvariantCulture);
             SolverMethod = ODENumSolver.ParseComputationMethodType(activationSettingsElem.Attribute("solverMethod").Value);
             SolverCompSteps = int.Parse(activationSettingsElem.Attribute("solverCompSteps").Value, CultureInfo.InvariantCulture);

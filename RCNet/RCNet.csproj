@@ -73,6 +73,7 @@
     <Compile Include="MathTools\MatrixMath\SVD.cs" />
     <Compile Include="MathTools\PhysUnit.cs" />
     <Compile Include="MathTools\VectorMath\Vector.cs" />
+    <Compile Include="Neural\Activation\ActivationCommon.cs" />
     <Compile Include="Neural\Activation\ActivationFactory.cs" />
     <Compile Include="Neural\Activation\AutoIzhikevichIFSettings.cs" />
     <Compile Include="Neural\Activation\IzhikevichIFSettings.cs" />
@@ -116,11 +117,11 @@
     <Compile Include="Neural\Data\Filter\FeatureFilterFactory.cs" />
     <Compile Include="Neural\Data\Filter\RealFeatureFilterSettings.cs" />
     <Compile Include="Neural\Data\Filter\EnumFeatureFilterSettings.cs" />
-    <Compile Include="Neural\Data\Filter\FeatureFilterSettings.cs" />
+    <Compile Include="Neural\Data\Filter\BaseFeatureFilterSettings.cs" />
     <Compile Include="Neural\Data\Filter\RealFeatureFilter.cs" />
     <Compile Include="Neural\Data\Filter\EnumFeatureFilter.cs" />
     <Compile Include="Neural\Data\Filter\BinFeatureFilter.cs" />
-    <Compile Include="Neural\Data\Filter\FeatureFilter.cs" />
+    <Compile Include="Neural\Data\Filter\BaseFeatureFilter.cs" />
     <Compile Include="Neural\Data\Generators\PulseGenerator.cs" />
     <Compile Include="Neural\Data\Generators\MackeyGlassGenerator.cs" />
     <Compile Include="Neural\Data\Generators\SinusoidalGenerator.cs" />
@@ -139,6 +140,7 @@
     <Compile Include="Neural\Network\FF\RidgeRegrTrainerSettings.cs" />
     <Compile Include="Neural\Network\SM\Neuron\HiddenNeuronPredictors.cs" />
     <Compile Include="Neural\Network\SM\Neuron\HiddenNeuron.cs" />
+    <Compile Include="Neural\Network\SM\Neuron\NeuronCommon.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\NeuralPreprocessor.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\NeuralPreprocessorSettings.cs" />
     <Compile Include="Neural\Network\SM\Neuron\HiddenNeuronPredictorsSettings.cs" />
@@ -174,7 +176,6 @@
     <Compile Include="MathTools\MatrixMath\Matrix.cs" />
     <Compile Include="MathTools\MatrixMath\QRD.cs" />
     <Compile Include="MathTools\WeightedAvg.cs" />
-    <Compile Include="Neural\CommonEnums.cs" />
     <Compile Include="Neural\Data\PatternBundle.cs" />
     <Compile Include="Neural\Data\ResultBundle.cs" />
     <Compile Include="Neural\Data\VectorBundle.cs" />

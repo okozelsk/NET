@@ -14,7 +14,7 @@ namespace RCNet.Neural.Data.Filter
     /// Startup parameters for the enumeration feature filter
     /// </summary>
     [Serializable]
-    public class EnumFeatureFilterSettings : FeatureFilterSettings
+    public class EnumFeatureFilterSettings : BaseFeatureFilterSettings
     {
         //Constants
 
@@ -30,7 +30,7 @@ namespace RCNet.Neural.Data.Filter
         /// </summary>
         /// <param name="numOfElements">Number of feature's enumerated elements</param>
         public EnumFeatureFilterSettings(int numOfElements)
-            :base(FeatureFilter.FeatureType.Enum)
+            :base(BaseFeatureFilter.FeatureType.Enum)
         {
             NumOfElements = numOfElements;
             return;
@@ -53,7 +53,7 @@ namespace RCNet.Neural.Data.Filter
         /// </summary>
         /// <param name="elem">Xml data containing settings</param>
         public EnumFeatureFilterSettings(XElement elem)
-            :base(FeatureFilter.FeatureType.Enum)
+            :base(BaseFeatureFilter.FeatureType.Enum)
         {
             //Validation
             ElemValidator validator = new ElemValidator();

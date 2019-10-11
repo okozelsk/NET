@@ -11,7 +11,7 @@ namespace RCNet.Neural.Data.Filter
     /// Implements real number feature filter
     /// </summary>
     [Serializable]
-    public class RealFeatureFilter : FeatureFilter
+    public class RealFeatureFilter : BaseFeatureFilter
     {
         //Constants
         /// <summary>

@@ -26,7 +26,7 @@ namespace RCNet.Neural.Network.SM.Synapse
         /// <summary>
         /// Method to decide signal delaying
         /// </summary>
-        public CommonEnums.SynapticDelayMethod DelayMethod { get; protected set; }
+        public SynapticDelayMethod DelayMethod { get; protected set; }
 
         //Attributes
         private readonly int _maxDelay;
@@ -44,7 +44,7 @@ namespace RCNet.Neural.Network.SM.Synapse
         public InputSynapse(INeuron sourceNeuron,
                             INeuron targetNeuron,
                             double weight,
-                            CommonEnums.SynapticDelayMethod delayMethod,
+                            SynapticDelayMethod delayMethod,
                             int maxDelay
                             )
             :base(sourceNeuron, targetNeuron, weight)
@@ -84,7 +84,7 @@ namespace RCNet.Neural.Network.SM.Synapse
             if (_maxDelay > 0)
             {
                 //Set synapse signal delay
-                if (DelayMethod == CommonEnums.SynapticDelayMethod.Distance)
+                if (DelayMethod == SynapticDelayMethod.Distance)
                 {
                     double relDistance = (Distance - distanceStat.Min) / distanceStat.Span;
                     Delay = (int)Math.Round(_maxDelay * relDistance);
@@ -114,7 +114,7 @@ namespace RCNet.Neural.Network.SM.Synapse
         public double GetSignal(bool collectStatistics)
         {
             //Weighted source neuron signal
-            double weightedSignal = SourceNeuron.GetSignal(TargetNeuron.ActivationType) * Weight; ;
+            double weightedSignal = SourceNeuron.GetSignal(TargetNeuron.TypeOfActivation) * Weight; ;
             if (_signalQueue == null)
             {
                 return weightedSignal;

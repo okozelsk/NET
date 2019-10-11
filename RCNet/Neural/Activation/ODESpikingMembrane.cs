@@ -143,7 +143,7 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Type of the activation
         /// </summary>
-        public CommonEnums.ActivationType ActivationType { get { return CommonEnums.ActivationType.Spiking; } }
+        public ActivationType TypeOfActivation { get { return ActivationType.Spiking; } }
 
         /// <summary>
         /// Output range of the Compute method

@@ -8,14 +8,13 @@ using RCNet.Extensions;
 namespace RCNet.Neural.Network.SM.Neuron
 {
     /// <summary>
-    /// Class converts recent spikes to an exponentially weighted firing rate (0-1)
+    /// Class implements predictors of the hidden neuron
     /// </summary>
     [Serializable]
     class HiddenNeuronPredictors
     {
         //Constants
         private const int SpikesBuffLength = sizeof(ulong) * 8;
-        private const double FadingDecay = 0.005;
 
         //Static members
         private static readonly double[] _spikeExpValueCache;
@@ -25,16 +24,17 @@ namespace RCNet.Neural.Network.SM.Neuron
         //Instance members
         //Attribute properties
         /// <summary>
-        /// Enabling/Disabling switches of predictors
+        /// Predictors configuration.
         /// </summary>
-        public HiddenNeuronPredictorsSettings Settings { get; }
+        public HiddenNeuronPredictorsSettings Cfg { get; }
 
         //Attributes
         private double _lastActivation;
         private ulong _spikesBuffer;
         private int _bufferedHistLength;
-        private int _sumOfBufferedSpikes;
-        private double _fadingSumOfSpikes;
+        private int _firingCount;
+        private readonly ulong _firingCountBit;
+        private double _firingFadingSum;
 
 
         /// <summary>
@@ -56,11 +56,24 @@ namespace RCNet.Neural.Network.SM.Neuron
         }
 
         /// <summary>
-        /// Creates new initialized instance
+        /// Creates new initialized instance.
         /// </summary>
-        public HiddenNeuronPredictors(HiddenNeuronPredictorsSettings settings)
+        /// <param name="cfg">Configuration to be used. Note that Params member must not be null.</param>
+        public HiddenNeuronPredictors(HiddenNeuronPredictorsSettings cfg)
         {
-            Settings = settings;
+            Cfg = cfg;
+            if (Cfg.Params.FiringCountWindow == SpikesBuffLength)
+            {
+                _firingCountBit = _highestBit;
+            }
+            else
+            {
+                _firingCountBit = 1ul;
+                for (int i = 1; i < Cfg.Params.FiringCountWindow; i++)
+                {
+                    _firingCountBit <<= 1;
+                }
+            }
             Reset();
             return;
         }
@@ -74,8 +87,8 @@ namespace RCNet.Neural.Network.SM.Neuron
             _lastActivation = 0;
             _spikesBuffer = 0;
             _bufferedHistLength = 0;
-            _sumOfBufferedSpikes = 0;
-            _fadingSumOfSpikes = 0;
+            _firingCount = 0;
+            _firingFadingSum = 0;
             return;
         }
 
@@ -88,14 +101,14 @@ namespace RCNet.Neural.Network.SM.Neuron
         {
             _lastActivation = activation;
             //Rotate buffer and update some predictors
-            _sumOfBufferedSpikes -= (_spikesBuffer & _highestBit) > 0ul ? 1 : 0;
-            _fadingSumOfSpikes *= (1d - FadingDecay);
+            _firingCount -= (_spikesBuffer & _firingCountBit) > 0ul ? 1 : 0;
+            _firingFadingSum *= (1d - Cfg.Params.FiringFadingSumStrength);
             _spikesBuffer <<= 1;
             if(spike)
             {
                 _spikesBuffer |= 1ul;
-                ++_sumOfBufferedSpikes;
-                ++_fadingSumOfSpikes;
+                ++_firingCount;
+                ++_firingFadingSum;
             }
             //Update buffer usage
             if (_bufferedHistLength < SpikesBuffLength)
@@ -109,7 +122,7 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// Returns last spikes as an integer number where bits are in order that the higher bit represents the more recent spike
         /// </summary>
         /// <returns>Last spikes history as an integer</returns>
-        private ulong GetLastSpikes(int histLength)
+        private ulong GetFiringBinPattern(int histLength)
         {
             //Checks and corrections
             if (_bufferedHistLength == 0 || histLength < 1)
@@ -136,7 +149,7 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// Returns exponentially weighted average of spikes in order that the stronger weight represents the more recent spike
         /// </summary>
         /// <returns>Exponentially weighted average of spikes</returns>
-        private double GetLastSpikesExpWAvg(int histLength)
+        private double GetFiringExpWAvgRate(int histLength)
         {
             //Checks and corrections
             if (_bufferedHistLength == 0 || histLength < 1)
@@ -166,47 +179,35 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// <returns></returns>
         public int CopyPredictorsTo(double[] predictors, int idx)
         {
-            if (Settings == null || Settings.NumOfEnabledPredictors == 0)
+            if (Cfg.NumOfEnabledPredictors == 0)
             {
                 return 0;
             }
-            if (Settings.Activation)
+            if (Cfg.Activation)
             {
                 predictors[idx++] = _lastActivation;
             }
-            if (Settings.SquaredActivation)
+            if (Cfg.SquaredActivation)
             {
                 predictors[idx++] = _lastActivation.Power(2);
             }
-            if (Settings.ExpWAvgFiringRate64)
+            if (Cfg.FiringExpWRate)
             {
-                predictors[idx++] = GetLastSpikesExpWAvg(_bufferedHistLength);
+                predictors[idx++] = GetFiringExpWAvgRate(Math.Min(_bufferedHistLength, Cfg.Params.FiringExpWRateWindow));
             }
-            if (Settings.FadingNumOfFirings)
+            if (Cfg.FiringFadingSum)
             {
-                predictors[idx++] = _fadingSumOfSpikes;
+                predictors[idx++] = _firingFadingSum;
             }
-            if (Settings.NumOfFirings64)
+            if (Cfg.FiringCount)
             {
-                predictors[idx++] = _sumOfBufferedSpikes;
+                predictors[idx++] = _firingCount;
             }
-            if (Settings.LastBin32FiringHist)
+            if (Cfg.FiringBinPattern)
             {
-                predictors[idx++] = GetLastSpikes(32);
+                predictors[idx++] = GetFiringBinPattern(Cfg.Params.FiringBinPatternWindow);
             }
-            if (Settings.LastBin16FiringHist)
-            {
-                predictors[idx++] = GetLastSpikes(16);
-            }
-            if (Settings.LastBin8FiringHist)
-            {
-                predictors[idx++] = GetLastSpikes(8);
-            }
-            if (Settings.LastBin1FiringHist)
-            {
-                predictors[idx++] = GetLastSpikes(1);
-            }
-            return Settings.NumOfEnabledPredictors;
+            return Cfg.NumOfEnabledPredictors;
         }
 
         /// <summary>
@@ -215,11 +216,11 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// <returns></returns>
         public double[] GetPredictors()
         {
-            if (Settings == null || Settings.NumOfEnabledPredictors == 0)
+            if (Cfg.NumOfEnabledPredictors == 0)
             {
                 return null;
             }
-            double[] predictors = new double[Settings.NumOfEnabledPredictors];
+            double[] predictors = new double[Cfg.NumOfEnabledPredictors];
             CopyPredictorsTo(predictors, 0);
             return predictors;
         }

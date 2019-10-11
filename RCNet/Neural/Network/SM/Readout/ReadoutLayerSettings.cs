@@ -180,11 +180,11 @@ namespace RCNet.Neural.Network.SM.Readout
             /// <summary>
             /// Neural task type
             /// </summary>
-            public CommonEnums.TaskType TaskType;
+            public ReadoutUnit.TaskType TaskType;
             /// <summary>
             /// Feature filter configuration
             /// </summary>
-            public FeatureFilterSettings FeatureFilterCfg;
+            public BaseFeatureFilterSettings FeatureFilterCfg;
             /// <summary>
             /// Type of readout unit network
             /// </summary>
@@ -204,8 +204,8 @@ namespace RCNet.Neural.Network.SM.Readout
             /// </summary>
             public ReadoutUnitSettings()
             {
-                Name = "";
-                TaskType = CommonEnums.TaskType.Forecast;
+                Name = string.Empty;
+                TaskType = ReadoutUnit.TaskType.Forecast;
                 FeatureFilterCfg = null;
                 NetType = ReadoutUnitNetworkType.FF;
                 NetSettings = null;
@@ -254,11 +254,11 @@ namespace RCNet.Neural.Network.SM.Readout
                 XElement taskElem = readoutUnitElem.Descendants().First();
                 if(taskElem.Name.LocalName == "forecast")
                 {
-                    TaskType = CommonEnums.TaskType.Forecast;
+                    TaskType = ReadoutUnit.TaskType.Forecast;
                 }
                 else
                 {
-                    TaskType = CommonEnums.TaskType.Classification;
+                    TaskType = ReadoutUnit.TaskType.Classification;
                 }
                 FeatureFilterCfg = FeatureFilterFactory.LoadSettings(taskElem.Descendants().First());
                 //Net settings

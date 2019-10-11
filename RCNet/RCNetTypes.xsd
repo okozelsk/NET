@@ -102,6 +102,30 @@
     </xs:restriction>
   </xs:simpleType>
 
+  <!-- Unsigned integer GE 1 and LE 64-->
+  <xs:simpleType name="UIntGE1LE64Type">
+    <xs:restriction base="xs:unsignedInt">
+      <xs:minInclusive value="1" />
+      <xs:maxInclusive value="64" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Unsigned integer GE 1 and LE 32-->
+  <xs:simpleType name="UIntGE1LE32Type">
+    <xs:restriction base="xs:unsignedInt">
+      <xs:minInclusive value="1" />
+      <xs:maxInclusive value="32" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Unsigned integer GE 2 and LE 64-->
+  <xs:simpleType name="UIntGE2LE64Type">
+    <xs:restriction base="xs:unsignedInt">
+      <xs:minInclusive value="2" />
+      <xs:maxInclusive value="64" />
+    </xs:restriction>
+  </xs:simpleType>
+
   <!-- Unsigned integer greater than 1-->
   <xs:simpleType name="UIntGT1Type">
     <xs:restriction base="xs:unsignedInt">
@@ -151,6 +175,14 @@
   <xs:simpleType name="UDoubleGT0Type">
     <xs:restriction base="xs:double">
       <xs:minExclusive value="0" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Unsigned double GT 0 LT 1-->
+  <xs:simpleType name="UDoubleGT0LT1Type">
+    <xs:restriction base="xs:double">
+      <xs:minExclusive value="0" />
+      <xs:maxExclusive value="1" />
     </xs:restriction>
   </xs:simpleType>
 
@@ -1412,6 +1444,94 @@
 
   <!-- ________________________________________NEURAL POOL TYPES_________________________________________________ -->
 
+  <!-- Predictor FiringExpWRate - configuration -->
+  <xs:complexType name="PredictorFiringExpWRateCfgType">
+    <xs:attribute type="UIntGE2LE64Type" name="window" use="optional" default="64">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Sliding window size (2..64). Default value is 64</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <!-- Predictor FiringFadingSum - configuration -->
+  <xs:complexType name="PredictorFiringFadingSumCfgType">
+    <xs:attribute type="UDoubleGT0LT1Type" name="strength" use="optional" default="0.005">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Fading strength (GT0..LT1). Default value is 0.005</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <!-- Predictor FiringCount - configuration -->
+  <xs:complexType name="PredictorFiringCountCfgType">
+    <xs:attribute type="UIntGE1LE64Type" name="window" use="optional" default="64">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Sliding window size (1..64). Default value is 64</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <!-- Predictor FiringBinPattern - configuration -->
+  <xs:complexType name="PredictorFiringBinPatternCfgType">
+    <xs:attribute type="UIntGE1LE32Type" name="window" use="optional" default="32">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Sliding window size (1..32). Default value is 32</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <!-- Predictors settings - configuration -->
+  <xs:complexType name="PredictorsSettingsCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="PredictorFiringExpWRateCfgType" name="firingExpWRate" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="PredictorFiringFadingSumCfgType" name="firingFadingSum" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="PredictorFiringCountCfgType" name="firingCount" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="PredictorFiringBinPatternCfgType" name="firingBinPattern" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Predictors permit - configuration -->
+  <xs:complexType name="PredictorsPermitCfgType">
+    <xs:attribute type="xs:boolean" name="activation" use="optional" default="true">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Current activation state. Default value is true</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="squaredActivation" use="optional" default="true">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Squared current activation state. Default value is true</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="firingExpWRate" use="optional" default="true">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Exponentially weighted average firing rate within the sliding window. Default value is true</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="firingFadingSum" use="optional" default="true">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Fading sum of firings. Default value is true</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="firingCount" use="optional" default="true">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Number of firings within the sliding window. Default value is true</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="firingBinPattern" use="optional" default="true">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Binary (0/1) firing sequence within the sliding window as an 32 bit unsigned int number. Default value is true</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <!-- Predictors - configuration -->
+  <xs:complexType name="PredictorsCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="PredictorsSettingsCfgType" name="settings" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="PredictorsPermitCfgType" name="permit" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+
   <!-- Pool - interconnection - configuration -->
   <xs:complexType name="PoolInterconnectionCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
@@ -1455,55 +1575,6 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Predictors - configuration -->
-  <xs:complexType name="PredictorsCfgType">
-    <xs:attribute type="xs:boolean" name="activation" use="optional" default="true">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Current activation state. Default value is true</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="xs:boolean" name="squaredActivation" use="optional" default="false">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Squared current activation state. Default value is false</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="xs:boolean" name="expWAvgFiringRate64" use="optional" default="false">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Exponentially weighted average firing rate within the last 64 cycles. Default value is false</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="xs:boolean" name="fadingNumOfFirings" use="optional" default="false">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Fading number of firings. Default value is false</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="xs:boolean" name="numOfFirings64" use="optional" default="false">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Number of firings during the last 64 cycles. Default value is false</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="xs:boolean" name="lastBin32FiringHist" use="optional" default="false">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Binary (0/1) firing history of the last 32 cycles as an unsigned integer number. Default value is false</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="xs:boolean" name="lastBin16FiringHist" use="optional" default="false">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Binary (0/1) firing history of the last 16 cycles as an unsigned integer number. Default value is false</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="xs:boolean" name="lastBin8FiringHist" use="optional" default="false">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Binary (0/1) firing history of the last 8 cycles as an unsigned integer number. Default value is false</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="xs:boolean" name="lastBin1FiringHist" use="optional" default="false">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Binary (0/1) indicator of the firing during the last cycle. Default value is false</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-  </xs:complexType>
-
   <!-- Pool - spiking neuron group - configuration -->
   <xs:complexType name="PoolSpikingNeuronGroupCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
@@ -1516,7 +1587,7 @@
         <xs:element type="ActivationAutoIzhikevichIFCfgType" name="activationAutoIzhikevichIF" minOccurs="1" maxOccurs="1"/>
       </xs:choice>
       <xs:element type="RandomValueType" name="bias" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="PredictorsCfgType" name="predictors" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="PredictorsCfgType" name="predictors" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:string" name="name" use="required" />
     <xs:attribute type="NeuronRoleType" name="role" use="required"/>
@@ -1560,7 +1631,7 @@
       <xs:element type="RandomValueType" name="bias" minOccurs="0" maxOccurs="1"/>
       <xs:element type="PoolAnalogNeuronsFiringThresholdCfgType" name="firingThreshold" minOccurs="0" maxOccurs="1"/>
       <xs:element type="PoolAnalogNeuronsRetanmentCfgType" name="retainment" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="PredictorsCfgType" name="predictors" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="PredictorsCfgType" name="predictors" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:string" name="name" use="required" />
     <xs:attribute type="NeuronRoleType" name="role" use="required"/>
@@ -1596,6 +1667,7 @@
           <xs:field xpath="@name"/>
         </xs:unique>
       </xs:element>
+      <xs:element type="PredictorsCfgType" name="predictors" minOccurs="0" maxOccurs="1"/>
       <xs:element type="PoolInterconnectionCfgType" name="interconnection" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:string" name="name" use="required" />

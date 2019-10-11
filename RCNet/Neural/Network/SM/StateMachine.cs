@@ -179,9 +179,9 @@ namespace RCNet.Neural.Network.SM
         /// Optional custom object to be passed to regressionController together with other standard information
         /// </param>
         public ResultBundle BuildReadoutLayer(RegressionInput regressionInput,
-                                                         ReadoutUnit.RegressionCallbackDelegate regressionController = null,
-                                                         Object regressionControllerData = null
-                                                         )
+                                              ReadoutUnit.RegressionCallbackDelegate regressionController = null,
+                                              Object regressionControllerData = null
+                                              )
         {
             //Readout layer instance
             RL = new ReadoutLayer(_settings.ReadoutLayerConfig);
@@ -255,7 +255,7 @@ namespace RCNet.Neural.Network.SM
         /// <returns>Computed output values</returns>
         public double[] Compute(List<double[]> inputPattern)
         {
-            if (_settings.NeuralPreprocessorConfig.InputConfig.FeedingType == CommonEnums.InputFeedingType.Continuous)
+            if (_settings.NeuralPreprocessorConfig.InputConfig.FeedingType == NeuralPreprocessor.InputFeedingType.Continuous)
             {
                 throw new Exception("This version of Compute function is not useable for continuous input feeding.");
             }
@@ -275,7 +275,7 @@ namespace RCNet.Neural.Network.SM
         /// <returns>Computed output values</returns>
         public double[] Compute(double[] inputVector)
         {
-            if (_settings.NeuralPreprocessorConfig.InputConfig.FeedingType == CommonEnums.InputFeedingType.Patterned)
+            if (_settings.NeuralPreprocessorConfig.InputConfig.FeedingType == NeuralPreprocessor.InputFeedingType.Patterned)
             {
                 throw new Exception("This version of Compute function is not useable for patterned input feeding.");
             }

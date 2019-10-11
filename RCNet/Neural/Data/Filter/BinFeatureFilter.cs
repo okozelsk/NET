@@ -12,7 +12,7 @@ namespace RCNet.Neural.Data.Filter
     /// Implements binary feature filter
     /// </summary>
     [Serializable]
-    public class BinFeatureFilter : FeatureFilter
+    public class BinFeatureFilter : BaseFeatureFilter
     {
         //Static members
         private static readonly Interval _range = new Interval(0d, 1d);

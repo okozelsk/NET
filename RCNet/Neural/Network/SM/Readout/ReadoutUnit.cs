@@ -17,6 +17,22 @@ namespace RCNet.Neural.Network.SM.Readout
     [Serializable]
     public class ReadoutUnit
     {
+        //Enums
+        /// <summary>
+        /// Supported task types.
+        /// </summary>
+        public enum TaskType
+        {
+            /// <summary>
+            /// Forecasting of the next value
+            /// </summary>
+            Forecast,
+            /// <summary>
+            /// Classification (Categorization, Pattern recognition) task type
+            /// </summary>
+            Classification
+        }
+
         //Delegates
         /// <summary>
         /// This is the control function of the regression process and is called
@@ -132,6 +148,21 @@ namespace RCNet.Neural.Network.SM.Readout
 
         //Methods
         /// <summary>
+        /// Parses the task type from a string code
+        /// </summary>
+        /// <param name="code">Task type code</param>
+        public static TaskType ParseTaskType(string code)
+        {
+            switch (code.ToUpper())
+            {
+                case "FORECAST": return TaskType.Forecast;
+                case "CLASSIFICATION": return TaskType.Classification;
+                default:
+                    throw new ArgumentException($"Unsupported task type {code}", "code");
+            }
+        }
+
+        /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>
         public ReadoutUnit DeepClone()
@@ -145,11 +176,11 @@ namespace RCNet.Neural.Network.SM.Readout
         /// <param name="taskType">Type of the task</param>
         /// <param name="current">Current readout unit</param>
         /// <param name="best">For now the best readout unit</param>
-        public static bool IsBetter(CommonEnums.TaskType taskType, ReadoutUnit current, ReadoutUnit best)
+        public static bool IsBetter(TaskType taskType, ReadoutUnit current, ReadoutUnit best)
         {
             switch(taskType)
             {
-                case CommonEnums.TaskType.Classification:
+                case TaskType.Classification:
                     if(current.CombinedBinaryError < best.CombinedBinaryError)
                     {
                         return true;
@@ -238,7 +269,7 @@ namespace RCNet.Neural.Network.SM.Readout
         /// <param name="controller">Regression controller</param>
         /// <param name="controllerUserObject">An user object to be passed to controller</param>
         /// <returns>Prepared readout unit</returns>
-        public static ReadoutUnit CreateTrained(CommonEnums.TaskType taskType,
+        public static ReadoutUnit CreateTrained(TaskType taskType,
                                                 int readoutUnitIdx,
                                                 int foldNum,
                                                 int numOfFolds,
@@ -273,7 +304,7 @@ namespace RCNet.Neural.Network.SM.Readout
                 currReadoutUnit.Network = net;
                 currReadoutUnit.TrainerInfoMessage = trainer.InfoMessage;
                 currReadoutUnit.TrainingErrorStat = net.ComputeBatchErrorStat(trainingPredictorsCollection, trainingIdealOutputsCollection, out List<double[]> trainingComputedOutputsCollection);
-                if (taskType == CommonEnums.TaskType.Classification)
+                if (taskType == TaskType.Classification)
                 {
                     currReadoutUnit.TrainingBinErrorStat = new BinErrStat(refBinDistr, trainingComputedOutputsCollection, trainingIdealOutputsCollection);
                     currReadoutUnit.CombinedBinaryError = currReadoutUnit.TrainingBinErrorStat.TotalErrStat.Sum;
@@ -283,7 +314,7 @@ namespace RCNet.Neural.Network.SM.Readout
                 {
                     currReadoutUnit.TestingErrorStat = net.ComputeBatchErrorStat(testingPredictorsCollection, testingIdealOutputsCollection, out testingComputedOutputsCollection);
                     currReadoutUnit.CombinedPrecisionError = Math.Max(currReadoutUnit.CombinedPrecisionError, currReadoutUnit.TestingErrorStat.ArithAvg);
-                    if (taskType == CommonEnums.TaskType.Classification)
+                    if (taskType == TaskType.Classification)
                     {
                         currReadoutUnit.TestingBinErrorStat = new BinErrStat(refBinDistr, testingComputedOutputsCollection, testingIdealOutputsCollection);
                         currReadoutUnit.CombinedBinaryError = Math.Max(currReadoutUnit.CombinedBinaryError, currReadoutUnit.TestingBinErrorStat.TotalErrStat.Sum);
@@ -370,7 +401,7 @@ namespace RCNet.Neural.Network.SM.Readout
             /// <summary>
             /// Type of the neural task
             /// </summary>
-            public CommonEnums.TaskType TaskType { get; set; } = CommonEnums.TaskType.Forecast;
+            public TaskType TaskType { get; set; } = TaskType.Forecast;
             /// <summary>
             /// Readout unit index for which the regression is performing (corresponds with output field index)
             /// </summary>

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using RCNet.Extensions;
 using RCNet.MathTools;
+using RCNet.Neural.Activation;
 using RCNet.Neural.Network.SM.Neuron;
 
 namespace RCNet.Neural.Network.SM.Synapse
@@ -15,6 +16,41 @@ namespace RCNet.Neural.Network.SM.Synapse
     [Serializable]
     public abstract class BaseSynapse
     {
+        //Enums
+        /// <summary>
+        /// Method to decide synapse delay
+        /// </summary>
+        public enum SynapticDelayMethod
+        {
+            /// <summary>
+            /// Synapse delay is decided randomly
+            /// </summary>
+            Random,
+            /// <summary>
+            /// Synapse delay is decided according to Euclidean distance
+            /// </summary>
+            Distance
+        }
+
+        /// <summary>
+        /// Target scope of the synapse
+        /// </summary>
+        public enum SynapticTargetScope
+        {
+            /// <summary>
+            /// Both Excitatory and Inhibitory neurons
+            /// </summary>
+            All,
+            /// <summary>
+            /// Excitatory neurons only
+            /// </summary>
+            Excitatory,
+            /// <summary>
+            /// Inhibitory neurons only
+            /// </summary>
+            Inhibitory
+        }
+
         //Attribute properties
         /// <summary>
         /// Source neuron - signal emitter
@@ -60,9 +96,9 @@ namespace RCNet.Neural.Network.SM.Synapse
             //Euclidean distance
             Distance = EuclideanDistance.Compute(SourceNeuron.Placement.ReservoirCoordinates, TargetNeuron.Placement.ReservoirCoordinates);
             //Weight sign rules
-            if (SourceNeuron.Role == CommonEnums.NeuronRole.Input)
+            if (SourceNeuron.Role == NeuronCommon.NeuronRole.Input)
             {
-                if (TargetNeuron.ActivationType == CommonEnums.ActivationType.Analog)
+                if (TargetNeuron.TypeOfActivation == ActivationType.Analog)
                 {
                     //No change of the weight sign
                     Weight = weight;
@@ -77,7 +113,7 @@ namespace RCNet.Neural.Network.SM.Synapse
             else
             {
                 //Weight sign is dependent on source neuron role
-                Weight = Math.Abs(weight) * (SourceNeuron.Role == CommonEnums.NeuronRole.Excitatory ? 1d : -1d);
+                Weight = Math.Abs(weight) * (SourceNeuron.Role == NeuronCommon.NeuronRole.Excitatory ? 1d : -1d);
             }
             //Efficacy statistics
             EfficacyStat = new BasicStat(false);
@@ -85,6 +121,37 @@ namespace RCNet.Neural.Network.SM.Synapse
         }
 
         //Methods
+        /// <summary>
+        /// Parses method to decide synapse delay from a string code
+        /// </summary>
+        /// <param name="code">Method to decide synapse delay code</param>
+        public static SynapticDelayMethod ParseSynapticDelayMethod(string code)
+        {
+            switch (code.ToUpper())
+            {
+                case "RANDOM": return SynapticDelayMethod.Random;
+                case "DISTANCE": return SynapticDelayMethod.Distance;
+                default:
+                    throw new ArgumentException($"Unsupported synapse delay decision method: {code}", "code");
+            }
+        }
+
+        /// <summary>
+        /// Parses target scope of the synapse from a string code
+        /// </summary>
+        /// <param name="code">Scope code</param>
+        public static SynapticTargetScope ParseSynapticTargetScope(string code)
+        {
+            switch (code.ToUpper())
+            {
+                case "ALL": return SynapticTargetScope.All;
+                case "EXCITATORY": return SynapticTargetScope.Excitatory;
+                case "INHIBITORY": return SynapticTargetScope.Inhibitory;
+                default:
+                    throw new ArgumentException($"Unsupported synaptic target scope {code}", "code");
+            }
+        }
+
         /// <summary>
         /// Rescales the synapse weight.
         /// </summary>

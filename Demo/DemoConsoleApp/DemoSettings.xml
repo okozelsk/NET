@@ -36,14 +36,12 @@
                     <retainment density="1">
                       <strength min="0" max="0.75" />
                     </retainment>
-                    <predictors activation="true" squaredActivation="true" expWAvgFiringRate64="true" fadingNumOfFirings="true" numOfFirings64="true" lastBin32FiringHist="true" lastBin16FiringHist="true" lastBin8FiringHist="true" lastBin1FiringHist="true"/>
                   </analogGroup>
                   <analogGroup name="Inh-Logistic" role="Inhibitory" relShare="1" signalingRestriction="NoRestriction" readoutDensity="1">
                     <activationTanH/>
                     <retainment density="1">
                       <strength min="0" max="0.75"/>
                     </retainment>
-                    <predictors activation="true" squaredActivation="true" expWAvgFiringRate64="true" fadingNumOfFirings="true" numOfFirings64="true" lastBin32FiringHist="true" lastBin16FiringHist="true" lastBin8FiringHist="true" lastBin1FiringHist="true"/>
                   </analogGroup>
                 </neuronGroups>
                 <interconnection density="0.1" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
@@ -82,16 +80,14 @@
                 </synapse>
               </inputConnection>
             </inputConnections>
-            <predictors activation="true"
-                        squaredActivation="false"
-                        expWAvgFiringRate64="false"
-                        fadingNumOfFirings="false"
-                        numOfFirings64="false"
-                        lastBin32FiringHist="false"
-                        lastBin16FiringHist="false"
-                        lastBin8FiringHist="false"
-                        lastBin1FiringHist="false"
-                        />
+            <predictors>
+              <permit activation="true"
+                      squaredActivation="false"
+                      firingExpWRate="false"
+                      firingFadingSum="false"
+                      firingCount="false"
+                      firingBinPattern="false"/>
+            </predictors>
           </reservoirInstance>
         </reservoirInstanceContainer>
       </neuralPreprocessor>
@@ -166,12 +162,10 @@
                   <analogGroup name="Exc-grp" role="Excitatory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction">
                     <activationTanH/>
                     <firingThreshold value="0.0025"/>
-                    <predictors activation="true" squaredActivation="true" expWAvgFiringRate64="true" fadingNumOfFirings="true" numOfFirings64="true" lastBin32FiringHist="true" lastBin16FiringHist="true" lastBin8FiringHist="true" lastBin1FiringHist="true"/>
                   </analogGroup>
                   <analogGroup name="Inh-grp" role="Inhibitory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction">
                     <activationTanH/>
                     <firingThreshold value="0.0025"/>
-                    <predictors activation="true" squaredActivation="true" expWAvgFiringRate64="true" fadingNumOfFirings="true" numOfFirings64="true" lastBin32FiringHist="true" lastBin16FiringHist="true" lastBin8FiringHist="true" lastBin1FiringHist="true"/>
                   </analogGroup>
                 </neuronGroups>
                 <interconnection density="0.1" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
@@ -203,16 +197,14 @@
                 </synapse>
               </inputConnection>
             </inputConnections>
-            <predictors activation="false"
-                        squaredActivation="false"
-                        expWAvgFiringRate64="false"
-                        fadingNumOfFirings="false"
-                        numOfFirings64="true"
-                        lastBin32FiringHist="true"
-                        lastBin16FiringHist="false"
-                        lastBin8FiringHist="false"
-                        lastBin1FiringHist="false"
-                        />
+            <predictors>
+              <permit activation="false"
+                      squaredActivation="false"
+                      firingExpWRate="false"
+                      firingFadingSum="false"
+                      firingCount="true"
+                      firingBinPattern="false"/>
+            </predictors>
           </reservoirInstance>
         </reservoirInstanceContainer>
       </neuralPreprocessor>
@@ -394,12 +386,10 @@
                   <spikingGroup name="Exc-grp" role="Excitatory" relShare="4" readoutDensity="1">
                     <activationAdExpIF/>
                     <bias min="0" max="0" randomSign="false" />
-                    <predictors activation="true" squaredActivation="true" expWAvgFiringRate64="true" fadingNumOfFirings="true" numOfFirings64="true" lastBin32FiringHist="true" lastBin16FiringHist="true" lastBin8FiringHist="true" lastBin1FiringHist="true"/>
                   </spikingGroup>
                   <spikingGroup name="Inh-grp" role="Inhibitory" relShare="1" readoutDensity="1">
                     <activationAdExpIF/>
                     <bias min="0" max="0" randomSign="false" />
-                    <predictors activation="true" squaredActivation="true" expWAvgFiringRate64="true" fadingNumOfFirings="true" numOfFirings64="true" lastBin32FiringHist="true" lastBin16FiringHist="true" lastBin8FiringHist="true" lastBin1FiringHist="true"/>
                   </spikingGroup>
                 </neuronGroups>
                 <interconnection density="0.1" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
@@ -427,16 +417,14 @@
                 </synapse>
               </inputConnection>
             </inputConnections>
-            <predictors activation="false"
-                        squaredActivation="false"
-                        expWAvgFiringRate64="false"
-                        fadingNumOfFirings="false"
-                        numOfFirings64="true"
-                        lastBin32FiringHist="false"
-                        lastBin16FiringHist="false"
-                        lastBin8FiringHist="false"
-                        lastBin1FiringHist="false"
-                        />
+            <predictors>
+              <permit activation="false"
+                      squaredActivation="false"
+                      firingExpWRate="false"
+                      firingFadingSum="false"
+                      firingCount="true"
+                      firingBinPattern="false"/>
+            </predictors>
           </reservoirInstance>
         </reservoirInstanceContainer>
       </neuralPreprocessor>
@@ -620,12 +608,10 @@
                   <analogGroup name="Exc-grp" role="Excitatory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction">
                     <activationTanH/>
                     <firingThreshold value="0.0025"/>
-                    <predictors activation="true" squaredActivation="true" expWAvgFiringRate64="true" fadingNumOfFirings="true" numOfFirings64="true" lastBin32FiringHist="true" lastBin16FiringHist="true" lastBin8FiringHist="true" lastBin1FiringHist="true"/>
                   </analogGroup>
                   <analogGroup name="Inh-grp" role="Inhibitory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction">
                     <activationTanH/>
                     <firingThreshold value="0.0025"/>
-                    <predictors activation="true" squaredActivation="true" expWAvgFiringRate64="true" fadingNumOfFirings="true" numOfFirings64="true" lastBin32FiringHist="true" lastBin16FiringHist="true" lastBin8FiringHist="true" lastBin1FiringHist="true"/>
                   </analogGroup>
                 </neuronGroups>
                 <interconnection density="0.1" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
@@ -657,16 +643,14 @@
                 </synapse>
               </inputConnection>
             </inputConnections>
-            <predictors activation="false"
-                        squaredActivation="false"
-                        expWAvgFiringRate64="false"
-                        fadingNumOfFirings="false"
-                        numOfFirings64="true"
-                        lastBin32FiringHist="true"
-                        lastBin16FiringHist="false"
-                        lastBin8FiringHist="false"
-                        lastBin1FiringHist="false"
-                        />
+            <predictors>
+              <permit activation="false"
+                      squaredActivation="false"
+                      firingExpWRate="false"
+                      firingFadingSum="false"
+                      firingCount="true"
+                      firingBinPattern="true"/>
+            </predictors>
           </reservoirInstance>
         </reservoirInstanceContainer>
       </neuralPreprocessor>
@@ -848,12 +832,10 @@
                   <spikingGroup name="Exc-grp-spiking" role="Excitatory" relShare="4" readoutDensity="1">
                     <activationAdExpIF/>
                     <bias min="0" max="0" randomSign="false" />
-                    <predictors activation="true" squaredActivation="true" expWAvgFiringRate64="true" fadingNumOfFirings="true" numOfFirings64="true" lastBin32FiringHist="true" lastBin16FiringHist="true" lastBin8FiringHist="true" lastBin1FiringHist="true"/>
                   </spikingGroup>
                   <spikingGroup name="Inh-grp-spiking" role="Inhibitory" relShare="1" readoutDensity="1">
                     <activationAdExpIF/>
                     <bias min="0" max="0" randomSign="false" />
-                    <predictors activation="true" squaredActivation="true" expWAvgFiringRate64="true" fadingNumOfFirings="true" numOfFirings64="true" lastBin32FiringHist="true" lastBin16FiringHist="true" lastBin8FiringHist="true" lastBin1FiringHist="true"/>
                   </spikingGroup>
                 </neuronGroups>
                 <interconnection density="0.1" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
@@ -865,12 +847,10 @@
                   <analogGroup name="Exc-grp-analog" role="Excitatory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction">
                     <activationTanH/>
                     <firingThreshold value="0.0025"/>
-                    <predictors activation="true" squaredActivation="true" expWAvgFiringRate64="true" fadingNumOfFirings="true" numOfFirings64="true" lastBin32FiringHist="true" lastBin16FiringHist="true" lastBin8FiringHist="true" lastBin1FiringHist="true"/>
                   </analogGroup>
                   <analogGroup name="Inh-grp-analog" role="Inhibitory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction">
                     <activationTanH/>
                     <firingThreshold value="0.0025"/>
-                    <predictors activation="true" squaredActivation="true" expWAvgFiringRate64="true" fadingNumOfFirings="true" numOfFirings64="true" lastBin32FiringHist="true" lastBin16FiringHist="true" lastBin8FiringHist="true" lastBin1FiringHist="true"/>
                   </analogGroup>
                 </neuronGroups>
                 <interconnection density="0.1" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
@@ -905,16 +885,14 @@
                 <synapse delayMethod="Random" maxDelay="0"/>
               </inputConnection>
             </inputConnections>
-            <predictors activation="false"
-                        squaredActivation="false"
-                        expWAvgFiringRate64="false"
-                        fadingNumOfFirings="false"
-                        numOfFirings64="true"
-                        lastBin32FiringHist="false"
-                        lastBin16FiringHist="false"
-                        lastBin8FiringHist="false"
-                        lastBin1FiringHist="false"
-                        />
+            <predictors>
+              <permit activation="false"
+                      squaredActivation="false"
+                      firingExpWRate="false"
+                      firingFadingSum="false"
+                      firingCount="true"
+                      firingBinPattern="false"/>
+            </predictors>
           </reservoirInstance>
         </reservoirInstanceContainer>
       </neuralPreprocessor>
@@ -1091,7 +1069,6 @@
                     <retainment density="1">
                       <strength min="0.25" max="0.5" />
                     </retainment>
-                    <predictors activation="true" squaredActivation="false" expWAvgFiringRate64="false" numOfFirings64="false" lastBin32FiringHist="false" lastBin16FiringHist="false" lastBin8FiringHist="false" lastBin1FiringHist="false"/>
                   </analogGroup>
                   <analogGroup name="Inh-Logistic" role="Inhibitory" relShare="1">
                     <activationTanH/>
@@ -1099,7 +1076,6 @@
                     <retainment density="1">
                       <strength min="0.25" max="0.5" />
                     </retainment>
-                    <predictors activation="true" squaredActivation="false" expWAvgFiringRate64="false" numOfFirings64="false" lastBin32FiringHist="false" lastBin16FiringHist="false" lastBin8FiringHist="false" lastBin1FiringHist="false"/>
                   </analogGroup>
                 </neuronGroups>
                 <interconnection density="0.1" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
@@ -1120,7 +1096,14 @@
                 <synapse/>
               </inputConnection>
             </inputConnections>
-            <predictors activation="true" squaredActivation="false" expWAvgFiringRate64="false" numOfFirings64="false" lastBin32FiringHist="false" lastBin16FiringHist="false" lastBin8FiringHist="false" lastBin1FiringHist="false"/>
+            <predictors>
+              <permit activation="true"
+                      squaredActivation="false"
+                      firingExpWRate="false"
+                      firingFadingSum="false"
+                      firingCount="false"
+                      firingBinPattern="false"/>
+            </predictors>
           </reservoirInstance>
           <reservoirInstance name="ESN reservoir #2" cfg="ESNCfg">
             <inputConnections>
@@ -1128,7 +1111,14 @@
                 <synapse/>
               </inputConnection>
             </inputConnections>
-            <predictors activation="true" squaredActivation="false" expWAvgFiringRate64="false" numOfFirings64="false" lastBin32FiringHist="false" lastBin16FiringHist="false" lastBin8FiringHist="false" lastBin1FiringHist="false"/>
+            <predictors>
+              <permit activation="true"
+                      squaredActivation="false"
+                      firingExpWRate="false"
+                      firingFadingSum="false"
+                      firingCount="false"
+                      firingBinPattern="false"/>
+            </predictors>
           </reservoirInstance>
         </reservoirInstanceContainer>
       </neuralPreprocessor>
@@ -1186,14 +1176,12 @@
                     <retainment density="1">
                       <strength min="0" max="0.75" />
                     </retainment>
-                    <predictors activation="true" squaredActivation="false" expWAvgFiringRate64="false" numOfFirings64="false" lastBin32FiringHist="false" lastBin16FiringHist="false" lastBin8FiringHist="false" lastBin1FiringHist="false"/>
                   </analogGroup>
                   <analogGroup name="Inh-Logistic" role="Inhibitory" relShare="1" signalingRestriction="AnalogOnly" readoutDensity="1">
                     <activationTanH/>
                     <retainment density="1">
                       <strength min="0" max="0.75" />
                     </retainment>
-                    <predictors activation="true" squaredActivation="false" expWAvgFiringRate64="false" numOfFirings64="false" lastBin32FiringHist="false" lastBin16FiringHist="false" lastBin8FiringHist="false" lastBin1FiringHist="false"/>
                   </analogGroup>
                 </neuronGroups>
                 <interconnection density="0.1" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
@@ -1232,7 +1220,14 @@
                 </synapse>
               </inputConnection>
             </inputConnections>
-            <predictors activation="true" squaredActivation="false" expWAvgFiringRate64="false" numOfFirings64="false" lastBin32FiringHist="false" lastBin16FiringHist="false" lastBin8FiringHist="false" lastBin1FiringHist="false"/>
+            <predictors>
+              <permit activation="true"
+                      squaredActivation="false"
+                      firingExpWRate="false"
+                      firingFadingSum="false"
+                      firingCount="false"
+                      firingBinPattern="false"/>
+            </predictors>
           </reservoirInstance>
         </reservoirInstanceContainer>
       </neuralPreprocessor>
@@ -1302,7 +1297,6 @@
                     <retainment density="0">
                       <strength min="0.25" max="0.75"/>
                     </retainment>
-                    <predictors activation="true" squaredActivation="true" expWAvgFiringRate64="true" fadingNumOfFirings="true" numOfFirings64="true" lastBin32FiringHist="true" lastBin16FiringHist="true" lastBin8FiringHist="true" lastBin1FiringHist="true"/>
                   </analogGroup>
                   <analogGroup name="Inh-grp" role="Inhibitory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction">
                     <activationTanH/>
@@ -1311,7 +1305,6 @@
                     <retainment density="0">
                       <strength min="0.25" max="0.75"/>
                     </retainment>
-                    <predictors activation="true" squaredActivation="true" expWAvgFiringRate64="true" fadingNumOfFirings="true" numOfFirings64="true" lastBin32FiringHist="true" lastBin16FiringHist="true" lastBin8FiringHist="true" lastBin1FiringHist="true"/>
                   </analogGroup>
                 </neuronGroups>
                 <interconnection density="0.05" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
@@ -1336,16 +1329,14 @@
                 </synapse>
               </inputConnection>
             </inputConnections>
-            <predictors activation="false"
-                        squaredActivation="false"
-                        expWAvgFiringRate64="false"
-                        fadingNumOfFirings="true"
-                        numOfFirings64="false"
-                        lastBin32FiringHist="false"
-                        lastBin16FiringHist="false"
-                        lastBin8FiringHist="false"
-                        lastBin1FiringHist="false"
-                        />
+            <predictors>
+              <permit activation="false"
+                      squaredActivation="false"
+                      firingExpWRate="false"
+                      firingFadingSum="true"
+                      firingCount="false"
+                      firingBinPattern="false"/>
+            </predictors>
           </reservoirInstance>
         </reservoirInstanceContainer>
       </neuralPreprocessor>

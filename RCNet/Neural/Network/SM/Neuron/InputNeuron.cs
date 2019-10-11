@@ -34,17 +34,17 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// <summary>
         /// Neuron's role within the reservoir (input, excitatory or inhibitory)
         /// </summary>
-        public CommonEnums.NeuronRole Role { get { return CommonEnums.NeuronRole.Input; } }
+        public NeuronCommon.NeuronRole Role { get { return NeuronCommon.NeuronRole.Input; } }
 
         /// <summary>
         /// Type of the activation function
         /// </summary>
-        public CommonEnums.ActivationType ActivationType { get { return CommonEnums.ActivationType.Analog; } }
+        public ActivationType TypeOfActivation { get { return ActivationType.Analog; } }
 
         /// <summary>
         /// Output signaling restriction
         /// </summary>
-        public CommonEnums.NeuronSignalingRestrictionType SignalingRestriction { get { return CommonEnums.NeuronSignalingRestrictionType.AnalogOnly; } }
+        public NeuronCommon.NeuronSignalingRestrictionType SignalingRestriction { get { return NeuronCommon.NeuronSignalingRestrictionType.AnalogOnly; } }
 
         /// <summary>
         /// Constant bias.
@@ -140,9 +140,9 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// Neuron returns input for neuron having activation of specified type.
         /// </summary>
         /// <param name="targetActivationType">Specifies what type of the signal is required.</param>
-        public double GetSignal(CommonEnums.ActivationType targetActivationType)
+        public double GetSignal(ActivationType targetActivationType)
         {
-            if (targetActivationType == CommonEnums.ActivationType.Spiking)
+            if (targetActivationType == ActivationType.Spiking)
             {
                 return _spikingSignal;
             }

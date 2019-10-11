@@ -33,12 +33,12 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// <summary>
         /// Neuron's role within the reservoir (excitatory or inhibitory)
         /// </summary>
-        public CommonEnums.NeuronRole Role { get; }
+        public NeuronCommon.NeuronRole Role { get; }
 
         /// <summary>
         /// Output signaling restriction
         /// </summary>
-        public CommonEnums.NeuronSignalingRestrictionType SignalingRestriction { get; }
+        public NeuronCommon.NeuronSignalingRestrictionType SignalingRestriction { get; }
 
         /// <summary>
         /// Constant bias
@@ -113,9 +113,9 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// <param name="analogFiringThreshold">A number between 0 and 1 (LT1). Every time the new activation value is higher than the previous activation value by at least the threshold, it is evaluated as a firing event. Ignored in case of spiking activation.</param>
         /// <param name="retainmentStrength">Strength of the analog neuron's retainment property. Ignored in case of spiking activation.</param>
         public HiddenNeuron(NeuronPlacement placement,
-                            CommonEnums.NeuronRole role,
+                            NeuronCommon.NeuronRole role,
                             IActivationFunction activation,
-                            CommonEnums.NeuronSignalingRestrictionType signalingRestriction,
+                            NeuronCommon.NeuronSignalingRestrictionType signalingRestriction,
                             HiddenNeuronPredictorsSettings predictorsCfg,
                             double bias = 0,
                             double analogFiringThreshold = PoolSettings.NeuronGroupSettings.DefaultAnalogFiringThreshold,
@@ -124,7 +124,7 @@ namespace RCNet.Neural.Network.SM.Neuron
         {
             Placement = placement;
             Statistics = new NeuronStatistics();
-            if (role == CommonEnums.NeuronRole.Input)
+            if (role == NeuronCommon.NeuronRole.Input)
             {
                 throw new ArgumentException("Role of the hidden neuron can not be Input.", "role");
             }
@@ -133,10 +133,10 @@ namespace RCNet.Neural.Network.SM.Neuron
             PredictorsCfg = predictorsCfg;
             //Activation specific
             _activation = activation;
-            if (activation.ActivationType == CommonEnums.ActivationType.Spiking)
+            if (activation.TypeOfActivation == ActivationType.Spiking)
             {
                 //Spiking
-                SignalingRestriction = CommonEnums.NeuronSignalingRestrictionType.SpikingOnly;
+                SignalingRestriction = NeuronCommon.NeuronSignalingRestrictionType.SpikingOnly;
                 _analogFiringThreshold = 0;
                 _retainmentStrength = 0;
             }
@@ -147,7 +147,7 @@ namespace RCNet.Neural.Network.SM.Neuron
                 _analogFiringThreshold = analogFiringThreshold;
                 _retainmentStrength = retainmentStrength;
             }
-            _predictors = new HiddenNeuronPredictors(predictorsCfg);
+            _predictors = predictorsCfg != null ? new HiddenNeuronPredictors(predictorsCfg) : null;
             Reset(false);
             return;
         }
@@ -156,7 +156,7 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// <summary>
         /// Type of the activation function
         /// </summary>
-        public CommonEnums.ActivationType ActivationType { get { return _activation.ActivationType; } }
+        public ActivationType TypeOfActivation { get { return _activation.TypeOfActivation; } }
 
         //Methods
         /// <summary>
@@ -166,7 +166,7 @@ namespace RCNet.Neural.Network.SM.Neuron
         public void Reset(bool statistics)
         {
             _activation.Reset();
-            _predictors.Reset();
+            _predictors?.Reset();
             _iStimuli = 0;
             _rStimuli = 0;
             _tStimuli = 0;
@@ -210,7 +210,7 @@ namespace RCNet.Neural.Network.SM.Neuron
             }
             ++SpikeLeak;
 
-            if(_activation.ActivationType == CommonEnums.ActivationType.Spiking)
+            if(_activation.TypeOfActivation == ActivationType.Spiking)
             {
                 //Spiking activation
                 _spikingSignal = _activation.Compute(_tStimuli);
@@ -228,7 +228,7 @@ namespace RCNet.Neural.Network.SM.Neuron
                 _spikingSignal = firingEvent ? 1d : 0d;
             }
             //Update predictors
-            _predictors.Update(_activationState, (_spikingSignal > 0));
+            _predictors?.Update(_activationState, (_spikingSignal > 0));
             //Update statistics
             if (collectStatistics)
             {
@@ -243,17 +243,17 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// Signal is always within the range [0,1]
         /// </summary>
         /// <param name="targetActivationType">Specifies what type of the signal is preferred.</param>
-        public double GetSignal(CommonEnums.ActivationType targetActivationType)
+        public double GetSignal(ActivationType targetActivationType)
         {
-            if (SignalingRestriction != CommonEnums.NeuronSignalingRestrictionType.NoRestriction)
+            if (SignalingRestriction != NeuronCommon.NeuronSignalingRestrictionType.NoRestriction)
             {
                 //Apply internal restriction
-                return SignalingRestriction == CommonEnums.NeuronSignalingRestrictionType.AnalogOnly ? _analogSignal : _spikingSignal;
+                return SignalingRestriction == NeuronCommon.NeuronSignalingRestrictionType.AnalogOnly ? _analogSignal : _spikingSignal;
             }
             else
             {
                 //Return signal according to targetActivationType
-                return targetActivationType == CommonEnums.ActivationType.Analog ? _analogSignal : _spikingSignal;
+                return targetActivationType == ActivationType.Analog ? _analogSignal : _spikingSignal;
             }
         }
 
@@ -265,7 +265,14 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// <returns></returns>
         public int CopyPredictorsTo(double[] predictors, int idx)
         {
-            return _predictors.CopyPredictorsTo(predictors, idx);
+            if (_predictors == null)
+            {
+                return 0;
+            }
+            else
+            {
+                return _predictors.CopyPredictorsTo(predictors, idx);
+            }
         }
 
         /// <summary>
@@ -274,7 +281,7 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// <returns></returns>
         public double[] GetPredictors()
         {
-            return _predictors.GetPredictors();
+            return _predictors?.GetPredictors();
         }
 
 

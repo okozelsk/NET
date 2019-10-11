@@ -104,7 +104,7 @@ namespace RCNet.Neural.Network.SM.Synapse
         public double GetSignal(bool collectStatistics)
         {
             //Source neuron signal
-            double sourceSignal = SourceNeuron.GetSignal(TargetNeuron.ActivationType);
+            double sourceSignal = SourceNeuron.GetSignal(TargetNeuron.TypeOfActivation);
             if (sourceSignal == 0)
             {
                 return 0;

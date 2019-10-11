@@ -14,7 +14,7 @@ namespace RCNet.Neural.Data.Filter
     /// Startup parameters for the binary feature filter
     /// </summary>
     [Serializable]
-    public class BinFeatureFilterSettings : FeatureFilterSettings
+    public class BinFeatureFilterSettings : BaseFeatureFilterSettings
     {
         //Constants
 
@@ -25,7 +25,7 @@ namespace RCNet.Neural.Data.Filter
         /// Constructs an initialized instance
         /// </summary>
         public BinFeatureFilterSettings()
-            :base(FeatureFilter.FeatureType.Binary)
+            :base(BaseFeatureFilter.FeatureType.Binary)
         {
             return;
         }
@@ -46,7 +46,7 @@ namespace RCNet.Neural.Data.Filter
         /// </summary>
         /// <param name="elem">Xml data containing settings</param>
         public BinFeatureFilterSettings(XElement elem)
-            :base(FeatureFilter.FeatureType.Binary)
+            :base(BaseFeatureFilter.FeatureType.Binary)
         {
             //Validation
             ElemValidator validator = new ElemValidator();

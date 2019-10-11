@@ -18,7 +18,7 @@ namespace RCNet.Neural.Data.Filter
         /// </summary>
         /// <param name="elem">Element containing settings</param>
         /// <returns></returns>
-        public static FeatureFilterSettings LoadSettings(XElement elem)
+        public static BaseFeatureFilterSettings LoadSettings(XElement elem)
         {
             switch(elem.Name.LocalName)
             {
@@ -38,15 +38,15 @@ namespace RCNet.Neural.Data.Filter
         /// </summary>
         /// <param name="outputRange">Output range of feature filter</param>
         /// <param name="settings">Settings of feature filter</param>
-        public static FeatureFilter Create(Interval outputRange, FeatureFilterSettings settings)
+        public static BaseFeatureFilter Create(Interval outputRange, BaseFeatureFilterSettings settings)
         {
             switch(settings.Type)
             {
-                case FeatureFilter.FeatureType.Binary:
+                case BaseFeatureFilter.FeatureType.Binary:
                     return new BinFeatureFilter(outputRange, (BinFeatureFilterSettings)settings);
-                case FeatureFilter.FeatureType.Enum:
+                case BaseFeatureFilter.FeatureType.Enum:
                     return new EnumFeatureFilter(outputRange, (EnumFeatureFilterSettings)settings);
-                case FeatureFilter.FeatureType.Real:
+                case BaseFeatureFilter.FeatureType.Real:
                     return new RealFeatureFilter(outputRange, (RealFeatureFilterSettings)settings);
                 default:
                     throw new ArgumentException($"Unexpected feature type {settings.Type}", "settings");
@@ -57,15 +57,15 @@ namespace RCNet.Neural.Data.Filter
         /// Creates deep copy of given settings
         /// </summary>
         /// <param name="settings">Settings of feature filter</param>
-        public static FeatureFilterSettings DeepClone(FeatureFilterSettings settings)
+        public static BaseFeatureFilterSettings DeepClone(BaseFeatureFilterSettings settings)
         {
             switch (settings.Type)
             {
-                case FeatureFilter.FeatureType.Binary:
+                case BaseFeatureFilter.FeatureType.Binary:
                     return new BinFeatureFilterSettings((BinFeatureFilterSettings)settings);
-                case FeatureFilter.FeatureType.Enum:
+                case BaseFeatureFilter.FeatureType.Enum:
                     return new EnumFeatureFilterSettings((EnumFeatureFilterSettings)settings);
-                case FeatureFilter.FeatureType.Real:
+                case BaseFeatureFilter.FeatureType.Real:
                     return new RealFeatureFilterSettings((RealFeatureFilterSettings)settings);
                 default:
                     throw new ArgumentException($"Unexpected feature type {settings.Type}", "settings");

@@ -20,6 +20,9 @@ namespace RCNet.Neural.Network.SM.Neuron
     public class HiddenNeuronPredictorsSettings
     {
         //Attribute properties
+        //Configuration
+        public Settings Params { get; private set; }
+        //Permits
         /// <summary>
         /// Current activation state
         /// </summary>
@@ -29,33 +32,21 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// </summary>
         public bool SquaredActivation { get; private set; }
         /// <summary>
-        /// Exponentially weighted average firing rate within the last 64 cycles
+        /// Exponentially weighted average firing rate within the last N cycles window
         /// </summary>
-        public bool ExpWAvgFiringRate64 { get; private set; }
+        public bool FiringExpWRate { get; private set; }
         /// <summary>
         /// Fading number of firings
         /// </summary>
-        public bool FadingNumOfFirings { get; private set; }
+        public bool FiringFadingSum { get; private set; }
         /// <summary>
-        /// Number of firings during the last 64 cycles
+        /// Number of firings within the last N cycles window
         /// </summary>
-        public bool NumOfFirings64 { get; private set; }
+        public bool FiringCount { get; private set; }
         /// <summary>
-        /// Binary (0/1) firing history of the last 32 cycles as an unsigned integer number
+        /// Binary (0/1) firings within the last N cycles window as an unsigned integer number
         /// </summary>
-        public bool LastBin32FiringHist { get; private set; }
-        /// <summary>
-        /// Binary (0/1) firing history of the last 16 cycles as an unsigned integer number
-        /// </summary>
-        public bool LastBin16FiringHist { get; private set; }
-        /// <summary>
-        /// Binary (0/1) firing history of the last 8 cycles as an unsigned integer number
-        /// </summary>
-        public bool LastBin8FiringHist { get; private set; }
-        /// <summary>
-        /// Binary (0/1) indicator of the firing during the last cycle
-        /// </summary>
-        public bool LastBin1FiringHist { get; private set; }
+        public bool FiringBinPattern { get; private set; }
         /// <summary>
         /// Number of enabled predictors
         /// </summary>
@@ -63,21 +54,43 @@ namespace RCNet.Neural.Network.SM.Neuron
 
         //Constructors
         /// <summary>
-        /// Creates instance having switches initialized as a result of neuron group and reservoir instance predictors settings
+        /// Creates initialized instance as a result of neuron group, pool and reservoir instance predictors settings
         /// </summary>
         /// <param name="groupPredictorsSettings">Neuron group predictors settings</param>
+        /// <param name="poolPredictorsSettings">Pool predictors settings</param>
         /// <param name="reservoirPredictorsSettings">Reservoir predictors settings</param>
-        public HiddenNeuronPredictorsSettings(HiddenNeuronPredictorsSettings groupPredictorsSettings, HiddenNeuronPredictorsSettings reservoirPredictorsSettings)
+        public HiddenNeuronPredictorsSettings(HiddenNeuronPredictorsSettings groupPredictorsSettings,
+                                              HiddenNeuronPredictorsSettings poolPredictorsSettings,
+                                              HiddenNeuronPredictorsSettings reservoirPredictorsSettings
+                                              )
         {
-            Activation = (groupPredictorsSettings.Activation && reservoirPredictorsSettings.Activation);
-            SquaredActivation = (groupPredictorsSettings.SquaredActivation && reservoirPredictorsSettings.SquaredActivation);
-            ExpWAvgFiringRate64 = (groupPredictorsSettings.ExpWAvgFiringRate64 && reservoirPredictorsSettings.ExpWAvgFiringRate64);
-            FadingNumOfFirings = (groupPredictorsSettings.FadingNumOfFirings && reservoirPredictorsSettings.FadingNumOfFirings);
-            NumOfFirings64 = (groupPredictorsSettings.NumOfFirings64 && reservoirPredictorsSettings.NumOfFirings64);
-            LastBin32FiringHist = (groupPredictorsSettings.LastBin32FiringHist && reservoirPredictorsSettings.LastBin32FiringHist);
-            LastBin16FiringHist = (groupPredictorsSettings.LastBin16FiringHist && reservoirPredictorsSettings.LastBin16FiringHist);
-            LastBin8FiringHist = (groupPredictorsSettings.LastBin8FiringHist && reservoirPredictorsSettings.LastBin8FiringHist);
-            LastBin1FiringHist = (groupPredictorsSettings.LastBin1FiringHist && reservoirPredictorsSettings.LastBin1FiringHist);
+            //Params
+            Params = groupPredictorsSettings?.Params != null ? groupPredictorsSettings.Params.DeepClone() : (poolPredictorsSettings?.Params != null ? poolPredictorsSettings.Params.DeepClone() : (reservoirPredictorsSettings?.Params != null ? reservoirPredictorsSettings.Params.DeepClone() : new Settings()));
+            //Permits
+            Activation = ((groupPredictorsSettings == null ? true : groupPredictorsSettings.Activation) &&
+                          (poolPredictorsSettings == null ? true : poolPredictorsSettings.Activation) &&
+                          (reservoirPredictorsSettings == null ? true : reservoirPredictorsSettings.Activation)
+                          );
+            SquaredActivation = ((groupPredictorsSettings == null ? true : groupPredictorsSettings.SquaredActivation) &&
+                                 (poolPredictorsSettings == null ? true : poolPredictorsSettings.SquaredActivation) &&
+                                 (reservoirPredictorsSettings == null ? true : reservoirPredictorsSettings.SquaredActivation)
+                                 );
+            FiringExpWRate = ((groupPredictorsSettings == null ? true : groupPredictorsSettings.FiringExpWRate) &&
+                              (poolPredictorsSettings == null ? true : poolPredictorsSettings.FiringExpWRate) &&
+                              (reservoirPredictorsSettings == null ? true : reservoirPredictorsSettings.FiringExpWRate)
+                              );
+            FiringFadingSum = ((groupPredictorsSettings == null ? true : groupPredictorsSettings.FiringFadingSum) &&
+                               (poolPredictorsSettings == null ? true : poolPredictorsSettings.FiringFadingSum) &&
+                               (reservoirPredictorsSettings == null ? true : reservoirPredictorsSettings.FiringFadingSum)
+                               );
+            FiringCount = ((groupPredictorsSettings == null ? true : groupPredictorsSettings.FiringCount) &&
+                           (poolPredictorsSettings == null ? true : poolPredictorsSettings.FiringCount) &&
+                           (reservoirPredictorsSettings == null ? true : reservoirPredictorsSettings.FiringCount)
+                           );
+            FiringBinPattern = ((groupPredictorsSettings == null ? true : groupPredictorsSettings.FiringBinPattern) &&
+                                (poolPredictorsSettings == null ? true : poolPredictorsSettings.FiringBinPattern) &&
+                                (reservoirPredictorsSettings == null ? true : reservoirPredictorsSettings.FiringBinPattern)
+                                );
             NumOfEnabledPredictors = GetNumOfEnabledPredictors();
             return;
         }
@@ -88,15 +101,15 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// <param name="source">Source instance</param>
         public HiddenNeuronPredictorsSettings(HiddenNeuronPredictorsSettings source)
         {
+            //Params
+            Params = source.Params?.DeepClone();
+            //Permits
             Activation = source.Activation;
             SquaredActivation = source.SquaredActivation;
-            ExpWAvgFiringRate64 = source.ExpWAvgFiringRate64;
-            FadingNumOfFirings = source.FadingNumOfFirings;
-            NumOfFirings64 = source.NumOfFirings64;
-            LastBin32FiringHist = source.LastBin32FiringHist;
-            LastBin16FiringHist = source.LastBin16FiringHist;
-            LastBin8FiringHist = source.LastBin8FiringHist;
-            LastBin1FiringHist = source.LastBin1FiringHist;
+            FiringExpWRate = source.FiringExpWRate;
+            FiringFadingSum = source.FiringFadingSum;
+            FiringCount = source.FiringCount;
+            FiringBinPattern = source.FiringBinPattern;
             NumOfEnabledPredictors = source.NumOfEnabledPredictors;
             return;
         }
@@ -115,17 +128,22 @@ namespace RCNet.Neural.Network.SM.Neuron
             Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.SM.Neuron.HiddenNeuronPredictorsSettings.xsd");
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
-            XElement PredictorsSettingsElem = validator.Validate(elem, "rootElem");
-            //Parsing
-            Activation = bool.Parse(PredictorsSettingsElem.Attribute("activation").Value);
-            SquaredActivation = bool.Parse(PredictorsSettingsElem.Attribute("squaredActivation").Value);
-            ExpWAvgFiringRate64 = bool.Parse(PredictorsSettingsElem.Attribute("expWAvgFiringRate64").Value);
-            FadingNumOfFirings = bool.Parse(PredictorsSettingsElem.Attribute("fadingNumOfFirings").Value);
-            NumOfFirings64 = bool.Parse(PredictorsSettingsElem.Attribute("numOfFirings64").Value);
-            LastBin32FiringHist = bool.Parse(PredictorsSettingsElem.Attribute("lastBin32FiringHist").Value);
-            LastBin16FiringHist = bool.Parse(PredictorsSettingsElem.Attribute("lastBin16FiringHist").Value);
-            LastBin8FiringHist = bool.Parse(PredictorsSettingsElem.Attribute("lastBin8FiringHist").Value);
-            LastBin1FiringHist = bool.Parse(PredictorsSettingsElem.Attribute("lastBin1FiringHist").Value);
+            XElement predictorsElem = validator.Validate(elem, "rootElem");
+            //Parsing of params
+            Params = null;
+            XElement paramsElem = predictorsElem.Descendants("settings").FirstOrDefault();
+            if(paramsElem != null)
+            {
+                Params = new Settings(paramsElem);
+            }
+            //Parsing of permits
+            XElement permitElem = predictorsElem.Descendants("permit").First();
+            Activation = bool.Parse(permitElem.Attribute("activation").Value);
+            SquaredActivation = bool.Parse(permitElem.Attribute("squaredActivation").Value);
+            FiringExpWRate = bool.Parse(permitElem.Attribute("firingExpWRate").Value);
+            FiringFadingSum = bool.Parse(permitElem.Attribute("firingFadingSum").Value);
+            FiringCount = bool.Parse(permitElem.Attribute("firingCount").Value);
+            FiringBinPattern = bool.Parse(permitElem.Attribute("firingBinPattern").Value);
             NumOfEnabledPredictors = GetNumOfEnabledPredictors();
             return;
         }
@@ -140,15 +158,13 @@ namespace RCNet.Neural.Network.SM.Neuron
             int count = 0;
             count += Activation ? 1 : 0;
             count += SquaredActivation ? 1 : 0;
-            count += ExpWAvgFiringRate64 ? 1 : 0;
-            count += FadingNumOfFirings ? 1 : 0;
-            count += NumOfFirings64 ? 1 : 0;
-            count += LastBin32FiringHist ? 1 : 0;
-            count += LastBin16FiringHist ? 1 : 0;
-            count += LastBin8FiringHist ? 1 : 0;
-            count += LastBin1FiringHist ? 1 : 0;
+            count += FiringExpWRate ? 1 : 0;
+            count += FiringFadingSum ? 1 : 0;
+            count += FiringCount ? 1 : 0;
+            count += FiringBinPattern ? 1 : 0;
             return count;
         }
+
         /// <summary>
         /// See the base.
         /// </summary>
@@ -156,15 +172,13 @@ namespace RCNet.Neural.Network.SM.Neuron
         {
             if (obj == null) return false;
             HiddenNeuronPredictorsSettings cmpSettings = obj as HiddenNeuronPredictorsSettings;
-            if (Activation != cmpSettings.Activation ||
+            if (!Equals(Params, cmpSettings.Params) ||
+                Activation != cmpSettings.Activation ||
                 SquaredActivation != cmpSettings.SquaredActivation ||
-                ExpWAvgFiringRate64 != cmpSettings.ExpWAvgFiringRate64 ||
-                FadingNumOfFirings != cmpSettings.FadingNumOfFirings ||
-                NumOfFirings64 != cmpSettings.NumOfFirings64 ||
-                LastBin32FiringHist != cmpSettings.LastBin32FiringHist ||
-                LastBin16FiringHist != cmpSettings.LastBin16FiringHist ||
-                LastBin8FiringHist != cmpSettings.LastBin8FiringHist ||
-                LastBin1FiringHist != cmpSettings.LastBin1FiringHist ||
+                FiringExpWRate != cmpSettings.FiringExpWRate ||
+                FiringFadingSum != cmpSettings.FiringFadingSum ||
+                FiringCount != cmpSettings.FiringCount ||
+                FiringBinPattern != cmpSettings.FiringBinPattern ||
                 NumOfEnabledPredictors != cmpSettings.NumOfEnabledPredictors
                 )
             {
@@ -189,6 +203,125 @@ namespace RCNet.Neural.Network.SM.Neuron
             HiddenNeuronPredictorsSettings clone = new HiddenNeuronPredictorsSettings(this);
             return clone;
         }
+
+        //Inner classes
+        [Serializable]
+        public class Settings
+        {
+            //Constants
+            /// <summary>
+            /// Default value of window length for FiringExpWRate predictor
+            /// </summary>
+            public const int DefaultFiringExpWRateWindow = 64;
+            /// <summary>
+            /// Default value of strength of fading for FiringFadingSum predictor
+            /// </summary>
+            public const double DefaultFiringFadingSumStrength = 0.005;
+            /// <summary>
+            /// Default value of window length for FiringCount predictor
+            /// </summary>
+            public const int DefaultFiringCountWindow = 64;
+            /// <summary>
+            /// Default value of window length for FiringBinPattern predictor
+            /// </summary>
+            public const int DefaultFiringBinPatternWindow = 32;
+
+            //Attribute properties
+            /// <summary>
+            /// Window length for FiringExpWRate predictor
+            /// </summary>
+            public int FiringExpWRateWindow { get; set; }
+            /// <summary>
+            /// Strength of fading for FiringFadingSum predictor
+            /// </summary>
+            public double FiringFadingSumStrength { get; set; }
+            //Attribute properties
+            /// <summary>
+            /// Window length for FiringCount predictor
+            /// </summary>
+            public int FiringCountWindow { get; set; }
+            /// <summary>
+            /// Window length for FiringBinPattern predictor
+            /// </summary>
+            public int FiringBinPatternWindow { get; set; }
+            
+            //Constructor
+            /// <summary>
+            /// Creates initialized instance using default values
+            /// </summary>
+            public Settings()
+            {
+                FiringExpWRateWindow = DefaultFiringExpWRateWindow;
+                FiringFadingSumStrength = DefaultFiringFadingSumStrength;
+                FiringCountWindow = DefaultFiringCountWindow;
+                FiringBinPatternWindow = DefaultFiringBinPatternWindow;
+                return;
+            }
+
+            /// <summary>
+            /// Copy constructor
+            /// </summary>
+            /// <param name="source">Source instance</param>
+            public Settings(Settings source)
+            {
+                FiringExpWRateWindow = source.FiringExpWRateWindow;
+                FiringFadingSumStrength = source.FiringFadingSumStrength;
+                FiringCountWindow = source.FiringCountWindow;
+                FiringBinPatternWindow = source.FiringBinPatternWindow;
+                return;
+            }
+
+            /// <summary>
+            /// Creates initialized instance using xml element
+            /// </summary>
+            /// <param name="elem">Xml element containing settings</param>
+            public Settings(XElement elem)
+            {
+                //Parsing
+                FiringExpWRateWindow = int.Parse(elem.Descendants("firingExpWRate").First().Attribute("window").Value, CultureInfo.InvariantCulture);
+                FiringFadingSumStrength = double.Parse(elem.Descendants("firingFadingSum").First().Attribute("strength").Value, CultureInfo.InvariantCulture);
+                FiringCountWindow = int.Parse(elem.Descendants("firingCount").First().Attribute("window").Value, CultureInfo.InvariantCulture);
+                FiringBinPatternWindow = int.Parse(elem.Descendants("firingBinPattern").First().Attribute("window").Value, CultureInfo.InvariantCulture);
+                return;
+            }
+
+            //Methods
+            /// <summary>
+            /// See the base.
+            /// </summary>
+            public override bool Equals(object obj)
+            {
+                if (obj == null) return false;
+                Settings cmpSettings = obj as Settings;
+                if (FiringExpWRateWindow != cmpSettings.FiringExpWRateWindow ||
+                    FiringFadingSumStrength != cmpSettings.FiringFadingSumStrength ||
+                    FiringCountWindow != cmpSettings.FiringCountWindow ||
+                    FiringBinPatternWindow != cmpSettings.FiringBinPatternWindow
+                    )
+                {
+                    return false;
+                }
+                return true;
+            }
+
+            /// <summary>
+            /// See the base.
+            /// </summary>
+            public override int GetHashCode()
+            {
+                return base.GetHashCode();
+            }
+
+            /// <summary>
+            /// Creates the deep copy instance of this instance
+            /// </summary>
+            public Settings DeepClone()
+            {
+                Settings clone = new Settings(this);
+                return clone;
+            }
+
+        }//Settings
 
     }//HiddenNeuronPredictorsSettings
 

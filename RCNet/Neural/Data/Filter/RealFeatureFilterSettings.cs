@@ -14,7 +14,7 @@ namespace RCNet.Neural.Data.Filter
     /// Startup parameters for the real number feature filter
     /// </summary>
     [Serializable]
-    public class RealFeatureFilterSettings : FeatureFilterSettings
+    public class RealFeatureFilterSettings : BaseFeatureFilterSettings
     {
         //Constants
 
@@ -35,7 +35,7 @@ namespace RCNet.Neural.Data.Filter
         /// <param name="standardize">Standardize?</param>
         /// <param name="keepReserve">Keep range reserve?</param>
         public RealFeatureFilterSettings(bool standardize, bool keepReserve)
-            :base(FeatureFilter.FeatureType.Real)
+            :base(BaseFeatureFilter.FeatureType.Real)
         {
             Standardize = standardize;
             KeepReserve = keepReserve;
@@ -60,7 +60,7 @@ namespace RCNet.Neural.Data.Filter
         /// </summary>
         /// <param name="elem">Xml data containing settings</param>
         public RealFeatureFilterSettings(XElement elem)
-            :base(FeatureFilter.FeatureType.Real)
+            :base(BaseFeatureFilter.FeatureType.Real)
         {
             //Validation
             ElemValidator validator = new ElemValidator();

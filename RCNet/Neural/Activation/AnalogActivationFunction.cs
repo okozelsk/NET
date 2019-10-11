@@ -22,7 +22,7 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Type of the activation function.
         /// </summary>
-        public CommonEnums.ActivationType ActivationType { get { return CommonEnums.ActivationType.Analog; } }
+        public ActivationType TypeOfActivation { get { return ActivationType.Analog; } }
 
         /// <summary>
         /// Specifies whether the activation function supports derivative calculation

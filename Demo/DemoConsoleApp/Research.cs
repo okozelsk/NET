@@ -229,7 +229,7 @@ namespace RCNet.DemoConsoleApp
                 {
                     signal = af.Compute(0);
                 }
-                Console.WriteLine($"{i}, State {(af.ActivationType == Neural.CommonEnums.ActivationType.Spiking ? af.InternalState : signal)} signal {signal}");
+                Console.WriteLine($"{i}, State {(af.TypeOfActivation == Neural.Activation.ActivationType.Spiking ? af.InternalState : signal)} signal {signal}");
             }
             Console.ReadLine();
 
@@ -244,7 +244,7 @@ namespace RCNet.DemoConsoleApp
                 af.Reset();
                 double current = (lo + (hi - lo) / 2);
                 double response = af.Compute(current);
-                if (af.ActivationType == Neural.CommonEnums.ActivationType.Spiking)
+                if (af.TypeOfActivation == Neural.Activation.ActivationType.Spiking)
                 {
                     response = af.InternalState;
                 }

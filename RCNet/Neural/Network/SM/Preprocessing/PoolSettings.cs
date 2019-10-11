@@ -35,6 +35,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// </summary>
         public List<NeuronGroupSettings> NeuronGroups { get; set; }
         /// <summary>
+        /// Configuration of the predictors
+        /// </summary>
+        public HiddenNeuronPredictorsSettings PredictorsCfg { get; set; }
+        /// <summary>
         /// Configuration of the pool's neurons interconnection
         /// </summary>
         public InterconnectionSettings InterconnectionCfg { get; set; }
@@ -57,6 +61,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             {
                 NeuronGroups.Add(item.DeepClone());
             }
+            PredictorsCfg = source.PredictorsCfg?.DeepClone();
             InterconnectionCfg = source.InterconnectionCfg.DeepClone();
             return;
         }
@@ -94,7 +99,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             //Analog neuron groups
             foreach(XElement neuronGroupElem in neuronGroupsElem.Descendants("analogGroup"))
             {
-                NeuronGroupSettings ngs = new NeuronGroupSettings(neuronGroupElem, CommonEnums.ActivationType.Analog);
+                NeuronGroupSettings ngs = new NeuronGroupSettings(neuronGroupElem, ActivationType.Analog);
                 if (ngs.RelativeShare > 0)
                 {
                     NeuronGroups.Add(ngs);
@@ -104,7 +109,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             //Spiking neuron groups
             foreach (XElement neuronGroupElem in neuronGroupsElem.Descendants("spikingGroup"))
             {
-                NeuronGroupSettings ngs = new NeuronGroupSettings(neuronGroupElem, CommonEnums.ActivationType.Spiking);
+                NeuronGroupSettings ngs = new NeuronGroupSettings(neuronGroupElem, ActivationType.Spiking);
                 if (ngs.RelativeShare > 0)
                 {
                     NeuronGroups.Add(ngs);
@@ -138,7 +143,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                     throw new Exception("Can't set proper neuron counts for the neuron groups.");
                 }
             }
-            
+
+            //Predictors
+            XElement predictorsElem = poolSettingsElem.Descendants("predictors").FirstOrDefault();
+            if (predictorsElem != null)
+            {
+                PredictorsCfg = new HiddenNeuronPredictorsSettings(predictorsElem);
+            }
+
             //Interconnection
             XElement interconnectionElem = poolSettingsElem.Descendants("interconnection").First();
             InterconnectionCfg = new InterconnectionSettings(interconnectionElem);
@@ -156,6 +168,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             if (Name != cmpSettings.Name ||
                 NeuronGroups.Count != NeuronGroups.Count ||
                 !Equals(Dim, cmpSettings.Dim) ||
+                !Equals(PredictorsCfg, cmpSettings.PredictorsCfg) ||
                 !Equals(InterconnectionCfg, cmpSettings.InterconnectionCfg)
                 )
             {
@@ -208,7 +221,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             /// <summary>
             /// Excitatory or Inhibitory role of the neurons
             /// </summary>
-            public CommonEnums.NeuronRole Role { get; set; }
+            public NeuronCommon.NeuronRole Role { get; set; }
             /// <summary>
             /// Used to compute Density attribute (how big relative portion of pool's neurons is formed by this group of the neurons)
             /// </summary>
@@ -224,7 +237,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             /// <summary>
             /// Type of the activation function
             /// </summary>
-            public CommonEnums.ActivationType ActivationType;
+            public ActivationType ActivationType;
             /// <summary>
             /// Common activation settings of the groupped neurons
             /// </summary>
@@ -232,7 +245,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             /// <summary>
             /// Restriction of neuron's output signaling
             /// </summary>
-            public CommonEnums.NeuronSignalingRestrictionType SignalingRestriction;
+            public NeuronCommon.NeuronSignalingRestrictionType SignalingRestriction;
             /// <summary>
             /// Each pool's neuron can have its own constant input bias. Bias is always added to input signal of the neuron.
             /// A constant bias value of the neuron will be selected randomly according to the settings.
@@ -253,7 +266,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             /// </summary>
             public RandomValueSettings RetainmentStrengthCfg { get; set; }
             /// <summary>
-            /// Configuration of the predictors (enabling/disabling)
+            /// Configuration of the predictors
             /// </summary>
             public HiddenNeuronPredictorsSettings PredictorsCfg { get; set; }
 
@@ -288,12 +301,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             /// Content of xml element is always validated against the appropriate xml schema.
             /// </param>
             /// <param name="activationType">Specifies sub-type of the neuron group</param>
-            public NeuronGroupSettings(XElement elem, CommonEnums.ActivationType activationType)
+            public NeuronGroupSettings(XElement elem, ActivationType activationType)
             {
                 //Validation
                 ElemValidator validator = new ElemValidator();
                 Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-                if (activationType == CommonEnums.ActivationType.Analog)
+                if (activationType == ActivationType.Analog)
                 {
                     validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.SM.Preprocessing.PoolAnalogNeuronGroupSettings.xsd");
                 }
@@ -308,7 +321,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 //Name
                 Name = settingsElem.Attribute("name").Value;
                 //Role
-                Role = CommonEnums.ParseNeuronRole(settingsElem.Attribute("role").Value);
+                Role = NeuronCommon.ParseNeuronRole(settingsElem.Attribute("role").Value);
                 //Relative share
                 RelativeShare = double.Parse(settingsElem.Attribute("relShare").Value, CultureInfo.InvariantCulture);
                 //Readout neurons density
@@ -319,9 +332,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 XElement cfgElem = settingsElem.Descendants("bias").FirstOrDefault();
                 BiasCfg = cfgElem == null ? null : new RandomValueSettings(cfgElem);
                 //Spiking sub-type
-                if (activationType == CommonEnums.ActivationType.Spiking)
+                if (activationType == ActivationType.Spiking)
                 {
-                    SignalingRestriction = CommonEnums.NeuronSignalingRestrictionType.SpikingOnly;
+                    SignalingRestriction = NeuronCommon.NeuronSignalingRestrictionType.SpikingOnly;
                     AnalogFiringThreshold = 0;
                     RetainmentNeuronsDensity = 0;
                     RetainmentStrengthCfg = null;
@@ -330,7 +343,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 {
                     //Analog sub-type
                     //Output signaling restriction
-                    SignalingRestriction = CommonEnums.ParseNeuronSignalingRestriction(settingsElem.Attribute("signalingRestriction").Value);
+                    SignalingRestriction = NeuronCommon.ParseNeuronSignalingRestriction(settingsElem.Attribute("signalingRestriction").Value);
                     //Analog firing threshold
                     cfgElem = settingsElem.Descendants("firingThreshold").FirstOrDefault();
                     AnalogFiringThreshold = cfgElem == null ? DefaultAnalogFiringThreshold : double.Parse(cfgElem.Attribute("value").Value, CultureInfo.InvariantCulture);
@@ -350,7 +363,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                     }
                 }
                 //Predictors
-                PredictorsCfg = new HiddenNeuronPredictorsSettings(settingsElem.Descendants("predictors").First());
+                XElement predictorsElem = settingsElem.Descendants("predictors").FirstOrDefault();
+                if (predictorsElem != null)
+                {
+                    PredictorsCfg = new HiddenNeuronPredictorsSettings(predictorsElem);
+                }
                 return;
             }
 

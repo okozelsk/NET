@@ -46,11 +46,11 @@ namespace RCNet.Neural.Network.SM.Readout
         /// <summary>
         /// Collection of feature filters of input predictors
         /// </summary>
-        private FeatureFilter[] _predictorFeatureFilterCollection;
+        private BaseFeatureFilter[] _predictorFeatureFilterCollection;
         /// <summary>
         /// Collection of feature filters of output values
         /// </summary>
-        private FeatureFilter[] _outputFeatureFilterCollection;
+        private BaseFeatureFilter[] _outputFeatureFilterCollection;
         /// <summary>
         /// Mapping of specific predictors to readout units
         /// </summary>
@@ -123,7 +123,7 @@ namespace RCNet.Neural.Network.SM.Readout
             _predictorsMapper = predictorsMapper ?? new PredictorsMapper(numOfPredictors);
             //Allocation and preparation of feature filters
             //Predictors
-            _predictorFeatureFilterCollection = new FeatureFilter[numOfPredictors];
+            _predictorFeatureFilterCollection = new BaseFeatureFilter[numOfPredictors];
             Parallel.For(0, _predictorFeatureFilterCollection.Length, nrmIdx =>
             {
                 _predictorFeatureFilterCollection[nrmIdx] = new RealFeatureFilter(DataRange, true, true);
@@ -134,7 +134,7 @@ namespace RCNet.Neural.Network.SM.Readout
                 }
             });
             //Output values
-            _outputFeatureFilterCollection = new FeatureFilter[numOfOutputs];
+            _outputFeatureFilterCollection = new BaseFeatureFilter[numOfOutputs];
             Parallel.For(0, _outputFeatureFilterCollection.Length, nrmIdx =>
             {
                 _outputFeatureFilterCollection[nrmIdx] = FeatureFilterFactory.Create(DataRange, _settings.ReadoutUnitCfgCollection[nrmIdx].FeatureFilterCfg);
@@ -216,7 +216,7 @@ namespace RCNet.Neural.Network.SM.Readout
                 _clusterCollection[clusterIdx] = new ReadoutUnit[numOfFolds];
                 List<double[]> idealValueCollection = new List<double[]>(idealOutputsCollection.Length);
                 BinDistribution refBinDistr = null;
-                if (_settings.ReadoutUnitCfgCollection[clusterIdx].TaskType == CommonEnums.TaskType.Classification)
+                if (_settings.ReadoutUnitCfgCollection[clusterIdx].TaskType == ReadoutUnit.TaskType.Classification)
                 {
                     //Reference binary distribution is relevant only for classification task
                     refBinDistr = new BinDistribution(DataRange.Mid);
@@ -227,7 +227,7 @@ namespace RCNet.Neural.Network.SM.Readout
                     double[] value = new double[1];
                     value[0] = idealVector[clusterIdx];
                     idealValueCollection.Add(value);
-                    if (_settings.ReadoutUnitCfgCollection[clusterIdx].TaskType == CommonEnums.TaskType.Classification)
+                    if (_settings.ReadoutUnitCfgCollection[clusterIdx].TaskType == ReadoutUnit.TaskType.Classification)
                     {
                         //Reference binary distribution is relevant only for classification task
                         refBinDistr.Update(value);
@@ -236,7 +236,7 @@ namespace RCNet.Neural.Network.SM.Readout
                 List<VectorBundle> subBundleCollection = null;
                 List<double[]> readoutUnitInputVectorCollection = _predictorsMapper.CreateVectorCollection(_settings.ReadoutUnitCfgCollection[clusterIdx].Name, shuffledData.InputVectorCollection);
                 //Datasets preparation is depending on the task type
-                if (_settings.ReadoutUnitCfgCollection[clusterIdx].TaskType == CommonEnums.TaskType.Classification)
+                if (_settings.ReadoutUnitCfgCollection[clusterIdx].TaskType == ReadoutUnit.TaskType.Classification)
                 {
                     //Classification task
                     subBundleCollection = DivideSamplesForClassificationTask(readoutUnitInputVectorCollection,
@@ -355,7 +355,7 @@ namespace RCNet.Neural.Network.SM.Readout
             progressText.Append(inArgs.CurrReadoutUnit.TestingErrorStat.NumOfSamples.ToString() + ")");
             progressText.Append(", Best-Train: ");
             progressText.Append(bestReadoutUnit.TrainingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture));
-            if (inArgs.TaskType == CommonEnums.TaskType.Classification)
+            if (inArgs.TaskType == ReadoutUnit.TaskType.Classification)
             {
                 //Append binary errors
                 progressText.Append("/" + bestReadoutUnit.TrainingBinErrorStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture));
@@ -363,7 +363,7 @@ namespace RCNet.Neural.Network.SM.Readout
             }
             progressText.Append(", Best-Test: ");
             progressText.Append(bestReadoutUnit.TestingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture));
-            if (inArgs.TaskType == CommonEnums.TaskType.Classification)
+            if (inArgs.TaskType == ReadoutUnit.TaskType.Classification)
             {
                 //Append binary errors
                 progressText.Append("/" + bestReadoutUnit.TestingBinErrorStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture));
@@ -371,7 +371,7 @@ namespace RCNet.Neural.Network.SM.Readout
             }
             progressText.Append(", Curr-Train: ");
             progressText.Append(inArgs.CurrReadoutUnit.TrainingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture));
-            if (inArgs.TaskType == CommonEnums.TaskType.Classification)
+            if (inArgs.TaskType == ReadoutUnit.TaskType.Classification)
             {
                 //Append binary errors
                 progressText.Append("/" + inArgs.CurrReadoutUnit.TrainingBinErrorStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture));
@@ -379,7 +379,7 @@ namespace RCNet.Neural.Network.SM.Readout
             }
             progressText.Append(", Curr-Test: ");
             progressText.Append(inArgs.CurrReadoutUnit.TestingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture));
-            if (inArgs.TaskType == CommonEnums.TaskType.Classification)
+            if (inArgs.TaskType == ReadoutUnit.TaskType.Classification)
             {
                 //Append binary errors
                 progressText.Append("/" + inArgs.CurrReadoutUnit.TestingBinErrorStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture));
@@ -404,7 +404,7 @@ namespace RCNet.Neural.Network.SM.Readout
             {
                 ReadoutLayer.ClusterErrStatistics ces = _clusterErrStatisticsCollection[outputIdx];
                 sb.Append(leftMargin + $"Output field [{_settings.ReadoutUnitCfgCollection[outputIdx].Name}]" + Environment.NewLine);
-                if (_settings.ReadoutUnitCfgCollection[outputIdx].TaskType == CommonEnums.TaskType.Classification)
+                if (_settings.ReadoutUnitCfgCollection[outputIdx].TaskType == ReadoutUnit.TaskType.Classification)
                 {
                     //Classification task report
                     sb.Append(leftMargin + $"  Classification of negative samples" + Environment.NewLine);
@@ -838,7 +838,7 @@ namespace RCNet.Neural.Network.SM.Readout
             /// <summary>
             /// Type of the solved neural task
             /// </summary>
-            public CommonEnums.TaskType TaskType { get; }
+            public ReadoutUnit.TaskType TaskType { get; }
             /// <summary>
             /// Number of readout units within the cluster
             /// </summary>
@@ -863,14 +863,14 @@ namespace RCNet.Neural.Network.SM.Readout
             /// <param name="taskType"></param>
             /// <param name="numOfReadoutUnits"></param>
             /// <param name="refBinDistr"></param>
-            public ClusterErrStatistics(CommonEnums.TaskType taskType, int numOfReadoutUnits, BinDistribution refBinDistr)
+            public ClusterErrStatistics(ReadoutUnit.TaskType taskType, int numOfReadoutUnits, BinDistribution refBinDistr)
             {
                 TaskType = taskType;
                 NumOfReadoutUnits = numOfReadoutUnits;
                 NatPrecissionErrStat = new BasicStat();
                 NrmPrecissionErrStat = new BasicStat();
                 BinaryErrStat = null;
-                if (TaskType == CommonEnums.TaskType.Classification)
+                if (TaskType == ReadoutUnit.TaskType.Classification)
                 {
                     BinaryErrStat = new BinErrStat(refBinDistr);
                 }
@@ -888,7 +888,7 @@ namespace RCNet.Neural.Network.SM.Readout
                 NatPrecissionErrStat = new BasicStat(source.NatPrecissionErrStat);
                 NrmPrecissionErrStat = new BasicStat(source.NrmPrecissionErrStat);
                 BinaryErrStat = null;
-                if (TaskType == CommonEnums.TaskType.Classification)
+                if (TaskType == ReadoutUnit.TaskType.Classification)
                 {
                     BinaryErrStat = new BinErrStat(source.BinaryErrStat);
                 }
@@ -906,7 +906,7 @@ namespace RCNet.Neural.Network.SM.Readout
             {
                 NatPrecissionErrStat.AddSampleValue(Math.Abs(natComputedValue - natIdealValue));
                 NrmPrecissionErrStat.AddSampleValue(Math.Abs(nrmComputedValue - nrmIdealValue));
-                if (TaskType == CommonEnums.TaskType.Classification)
+                if (TaskType == ReadoutUnit.TaskType.Classification)
                 {
                     BinaryErrStat.Update(nrmComputedValue, nrmIdealValue);
                 }

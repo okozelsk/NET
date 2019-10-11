@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Xml.Linq;
 using RCNet.Extensions;
 using RCNet.RandomValue;
+using RCNet.Neural.Network.SM.Neuron;
 
 namespace RCNet.Neural.Activation
 {
@@ -147,7 +148,7 @@ namespace RCNet.Neural.Activation
             {
                 double randomValue = rand.NextRangedUniformDouble(0, 1);
                 AutoIzhikevichIFSettings afs = (AutoIzhikevichIFSettings)settings;
-                if (afs.Role == CommonEnums.NeuronRole.Excitatory)
+                if (afs.Role == NeuronCommon.NeuronRole.Excitatory)
                 {
                     //Excitatory ranges
                     af = new IzhikevichIF(0.02,
@@ -234,7 +235,7 @@ namespace RCNet.Neural.Activation
                 throw new ArgumentException($"Unsupported activation function settings: {settingsType.Name}");
             }
             //Set random initial membrane potential for spiking activation
-            if(!af.Stateless && af.ActivationType == CommonEnums.ActivationType.Spiking)
+            if(!af.Stateless && af.TypeOfActivation == ActivationType.Spiking)
             {
                 af.SetInitialInternalState(rand.NextRangedUniformDouble(0.25, 1));
             }

@@ -14,7 +14,7 @@ namespace RCNet.Neural.Data.Filter
     /// Base class of feature filters setup
     /// </summary>
     [Serializable]
-    public abstract class FeatureFilterSettings
+    public abstract class BaseFeatureFilterSettings
     {
         //Constants
 
@@ -22,14 +22,14 @@ namespace RCNet.Neural.Data.Filter
         /// <summary>
         /// Feature type
         /// </summary>
-        public FeatureFilter.FeatureType Type { get; set; }
+        public BaseFeatureFilter.FeatureType Type { get; set; }
 
         //Constructors
         /// <summary>
         /// Constructs an initialized instance
         /// </summary>
         /// <param name="featureType">Feature type</param>
-        public FeatureFilterSettings(FeatureFilter.FeatureType featureType)
+        public BaseFeatureFilterSettings(BaseFeatureFilter.FeatureType featureType)
         {
             Type = featureType;
             return;
@@ -39,7 +39,7 @@ namespace RCNet.Neural.Data.Filter
         /// Deep copy constructor
         /// </summary>
         /// <param name="source">Source instance</param>
-        public FeatureFilterSettings(FeatureFilterSettings source)
+        public BaseFeatureFilterSettings(BaseFeatureFilterSettings source)
         {
             Type = source.Type;
             return;
@@ -52,7 +52,7 @@ namespace RCNet.Neural.Data.Filter
         public override bool Equals(object obj)
         {
             if (obj == null) return false;
-            FeatureFilterSettings cmpSettings = obj as FeatureFilterSettings;
+            BaseFeatureFilterSettings cmpSettings = obj as BaseFeatureFilterSettings;
             if (Type != cmpSettings.Type)
             {
                 return false;
@@ -68,6 +68,6 @@ namespace RCNet.Neural.Data.Filter
             return base.GetHashCode();
         }
 
-    }//FeatureFilterSettings
+    }//BaseFeatureFilterSettings
 
 }//Namespace

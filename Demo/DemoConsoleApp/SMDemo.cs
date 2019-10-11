@@ -67,7 +67,7 @@ namespace RCNet.DemoConsoleApp
             {
                 //Call the default implementation of the judgement.
                 CurrentIsBetter = ReadoutUnit.IsBetter(inArgs.TaskType, inArgs.CurrReadoutUnit, inArgs.BestReadoutUnit),
-                StopRegression = (inArgs.TaskType == CommonEnums.TaskType.Classification &&
+                StopRegression = (inArgs.TaskType == ReadoutUnit.TaskType.Classification &&
                                   inArgs.CurrReadoutUnit.TrainingBinErrorStat.TotalErrStat.Sum == 0 &&
                                   inArgs.CurrReadoutUnit.TestingBinErrorStat.TotalErrStat.Sum == 0
                                  )
@@ -105,7 +105,7 @@ namespace RCNet.DemoConsoleApp
             StateMachine.RegressionInput rsi = null;
             //Prediction input vector (relevant only for input continuous feeding)
             double[] predictionInputVector = null;
-            if (demoCaseParams.StateMachineCfg.NeuralPreprocessorConfig.InputConfig.FeedingType == CommonEnums.InputFeedingType.Continuous)
+            if (demoCaseParams.StateMachineCfg.NeuralPreprocessorConfig.InputConfig.FeedingType == NeuralPreprocessor.InputFeedingType.Continuous)
             {
                 //Continuous input feeding
                 //Load data bundle from csv file
@@ -144,7 +144,7 @@ namespace RCNet.DemoConsoleApp
             log.Write(string.Empty);
 
             //Perform prediction if the input feeding is continuous (we know the input but we don't know the ideal output)
-            if (demoCaseParams.StateMachineCfg.NeuralPreprocessorConfig.InputConfig.FeedingType == CommonEnums.InputFeedingType.Continuous)
+            if (demoCaseParams.StateMachineCfg.NeuralPreprocessorConfig.InputConfig.FeedingType == NeuralPreprocessor.InputFeedingType.Continuous)
             {
                 double[] predictionOutputVector = stateMachine.Compute(predictionInputVector);
                 string predictionReport = stateMachine.RL.GetForecastReport(predictionOutputVector, 6);
