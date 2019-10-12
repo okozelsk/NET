@@ -187,7 +187,7 @@ namespace RCNet.Neural.Network.SM
             RL = new ReadoutLayer(_settings.ReadoutLayerConfig);
             //Create empty instance of the mapper
             ReadoutLayer.PredictorsMapper mapper = new ReadoutLayer.PredictorsMapper(PredictorGeneralSwitchCollection);
-            if (_settings.MapperConfig != null)
+            if (_settings.MapperCfg != null)
             {
                 //Expand list of predicting neurons to array of predictor origin
                 StateMachineSettings.MapperSettings.PoolRef[] neuronPoolRefCollection = new StateMachineSettings.MapperSettings.PoolRef[NP.NumOfPredictors];
@@ -205,34 +205,48 @@ namespace RCNet.Neural.Network.SM
                 foreach (string readoutUnitName in _settings.ReadoutLayerConfig.OutputFieldNameCollection)
                 {
                     bool[] switches = new bool[NP.NumOfPredictors];
+                    //Initially allow all valid predictors
+                    PredictorGeneralSwitchCollection.CopyTo(switches, 0);
                     //Exists specific mapping?
-                    if(_settings.MapperConfig != null && _settings.MapperConfig.Map.ContainsKey(readoutUnitName))
+                    if (_settings.MapperCfg != null && (_settings.MapperCfg.PoolsMap.ContainsKey(readoutUnitName) || _settings.MapperCfg.RoutedInputFieldsMap.ContainsKey(readoutUnitName)))
                     {
-                        //Initially disable all neuron predictors
-                        switches.Populate(false);
-                        //Enable enabled input field predictors
-                        for (int i = neuronPoolRefCollection.Length - 1; i >= NP.PredictorNeuronCollection.Count; i--)
+                        //Routed input fields
+                        if (_settings.MapperCfg.RoutedInputFieldsMap.ContainsKey(readoutUnitName))
                         {
-                            switches[i] = PredictorGeneralSwitchCollection[i];
+                            //Initially disable all routed input fields
+                            for (int i = NP.PredictorNeuronCollection.Count; i < NP.NumOfPredictors; i++)
+                            {
+                                switches[i] = false;
+                            }
+                            //Enable enabled routed input fields
+                            List<int> enabledRoutedFieldsIdxs = _settings.MapperCfg.RoutedInputFieldsMap[readoutUnitName];
+                            for (int i = 0; i < enabledRoutedFieldsIdxs.Count; i++)
+                            {
+                                switches[NP.PredictorNeuronCollection.Count + enabledRoutedFieldsIdxs[i]] = PredictorGeneralSwitchCollection[NP.PredictorNeuronCollection.Count + enabledRoutedFieldsIdxs[i]];
+                            }
                         }
-                        //Enable allowed neuron predictors
-                        foreach (StateMachineSettings.MapperSettings.PoolRef allowedPool in _settings.MapperConfig.Map[readoutUnitName])
+                        //Neuron predictors
+                        if (_settings.MapperCfg.PoolsMap.ContainsKey(readoutUnitName))
                         {
-                            //Enable specific predictors from allowed pool (origin)
+                            //Initially disable all neuron predictors
                             for (int i = 0; i < NP.PredictorNeuronCollection.Count; i++)
                             {
-                                if (neuronPoolRefCollection[i]._reservoirInstanceIdx == allowedPool._reservoirInstanceIdx && neuronPoolRefCollection[i]._poolIdx == allowedPool._poolIdx)
+                                switches[i] = false;
+                            }
+                            //Enable allowed neuron predictors
+                            foreach (StateMachineSettings.MapperSettings.PoolRef allowedPool in _settings.MapperCfg.PoolsMap[readoutUnitName])
+                            {
+                                //Enable specific predictors from allowed pool (origin)
+                                for (int i = 0; i < NP.PredictorNeuronCollection.Count; i++)
                                 {
-                                    //Enable predictor if it is valid
-                                    switches[i] = PredictorGeneralSwitchCollection[i];
+                                    if (neuronPoolRefCollection[i]._reservoirInstanceIdx == allowedPool._reservoirInstanceIdx && neuronPoolRefCollection[i]._poolIdx == allowedPool._poolIdx)
+                                    {
+                                        //Enable predictor if it is valid
+                                        switches[i] = PredictorGeneralSwitchCollection[i];
+                                    }
                                 }
                             }
                         }
-                    }
-                    else
-                    {
-                        //Initially allow all valid predictors
-                        PredictorGeneralSwitchCollection.CopyTo(switches, 0);
                     }
                     //Add mapping to mapper
                     mapper.Add(readoutUnitName, switches);

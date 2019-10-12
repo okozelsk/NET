@@ -39,7 +39,7 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// Configuration of mapper of predictors to readout units
         /// </summary>
-        public MapperSettings MapperConfig { get; set; }
+        public MapperSettings MapperCfg { get; set; }
 
         //Constructors
         /// <summary>
@@ -52,10 +52,10 @@ namespace RCNet.Neural.Network.SM
             RandomizerSeek = source.RandomizerSeek;
             NeuralPreprocessorConfig = source.NeuralPreprocessorConfig.DeepClone();
             ReadoutLayerConfig = new ReadoutLayerSettings(source.ReadoutLayerConfig);
-            MapperConfig = null;
-            if(source.MapperConfig != null)
+            MapperCfg = null;
+            if(source.MapperCfg != null)
             {
-                MapperConfig = source.MapperConfig.DeepClone();
+                MapperCfg = source.MapperCfg.DeepClone();
             }
             return;
         }
@@ -88,7 +88,7 @@ namespace RCNet.Neural.Network.SM
             if(mapperSettingsElem != null)
             {
                 //Create mapper object
-                MapperConfig = new MapperSettings();
+                MapperCfg = new MapperSettings();
                 //Loop through mappings
                 foreach(XElement mapElem in mapperSettingsElem.Descendants("map"))
                 {
@@ -109,43 +109,68 @@ namespace RCNet.Neural.Network.SM
                     }
                     //Allowed pools
                     List<MapperSettings.PoolRef> allowedPools = new List<MapperSettings.PoolRef>();
-                    foreach(XElement allowedPoolElem in mapElem.Descendants("allowed"))
+                    XElement allowedPoolsElem = mapElem.Descendants("allowedPools").FirstOrDefault();
+                    if (allowedPoolsElem != null)
                     {
-                        //Reservoir instance
-                        string reservoirInstanceName = allowedPoolElem.Attribute("reservoirInstanceName").Value;
-                        int reservoirInstanceIdx = -1;
-                        for(int i = 0; i < NeuralPreprocessorConfig.ReservoirInstanceDefinitionCollection.Count; i++)
+                        foreach (XElement allowedPoolElem in allowedPoolsElem.Descendants("pool"))
                         {
-                            if(NeuralPreprocessorConfig.ReservoirInstanceDefinitionCollection[i].InstanceName == reservoirInstanceName)
+                            //Reservoir instance name
+                            string reservoirInstanceName = allowedPoolElem.Attribute("reservoirInstanceName").Value;
+                            int reservoirInstanceIdx = -1;
+                            for (int i = 0; i < NeuralPreprocessorConfig.ReservoirInstanceDefinitionCollection.Count; i++)
                             {
-                                reservoirInstanceIdx = i;
-                                break;
+                                if (NeuralPreprocessorConfig.ReservoirInstanceDefinitionCollection[i].InstanceName == reservoirInstanceName)
+                                {
+                                    reservoirInstanceIdx = i;
+                                    break;
+                                }
+                                else if (i == NeuralPreprocessorConfig.ReservoirInstanceDefinitionCollection.Count - 1)
+                                {
+                                    throw new Exception($"Name {reservoirInstanceName} not found among resevoir instances.");
+                                }
                             }
-                            else if(i == NeuralPreprocessorConfig.ReservoirInstanceDefinitionCollection.Count - 1)
+                            //Pool name
+                            string reservoirCfgName = NeuralPreprocessorConfig.ReservoirInstanceDefinitionCollection[reservoirInstanceIdx].Settings.SettingsName;
+                            ReservoirSettings reservoirSettings = NeuralPreprocessorConfig.ReservoirInstanceDefinitionCollection[reservoirInstanceIdx].Settings;
+                            string poolName = allowedPoolElem.Attribute("poolName").Value;
+                            int poolIdx = -1;
+                            for (int i = 0; i < reservoirSettings.PoolSettingsCollection.Count; i++)
                             {
-                                throw new Exception($"Name {reservoirInstanceName} not found among resevoir instances.");
+                                if (reservoirSettings.PoolSettingsCollection[i].Name == poolName)
+                                {
+                                    poolIdx = i;
+                                    break;
+                                }
+                                else if (i == reservoirSettings.PoolSettingsCollection.Count - 1)
+                                {
+                                    throw new Exception($"Name {poolName} not found among resevoir's pools.");
+                                }
                             }
+                            allowedPools.Add(new MapperSettings.PoolRef { _reservoirInstanceIdx = reservoirInstanceIdx, _poolIdx = poolIdx });
                         }
-                        //Pool
-                        string reservoirCfgName = NeuralPreprocessorConfig.ReservoirInstanceDefinitionCollection[reservoirInstanceIdx].Settings.SettingsName;
-                        ReservoirSettings reservoirSettings = NeuralPreprocessorConfig.ReservoirInstanceDefinitionCollection[reservoirInstanceIdx].Settings;
-                        string poolName = allowedPoolElem.Attribute("poolName").Value;
-                        int poolIdx = -1;
-                        for (int i = 0; i < reservoirSettings.PoolSettingsCollection.Count; i++)
-                        {
-                            if(reservoirSettings.PoolSettingsCollection[i].Name == poolName)
-                            {
-                                poolIdx = i;
-                                break;
-                            }
-                            else if(i == reservoirSettings.PoolSettingsCollection.Count - 1)
-                            {
-                                throw new Exception($"Name {poolName} not found among resevoir's pools.");
-                            }
-                        }
-                        allowedPools.Add(new MapperSettings.PoolRef { _reservoirInstanceIdx = reservoirInstanceIdx, _poolIdx = poolIdx });
+                        MapperCfg.PoolsMap.Add(readoutUnitName, allowedPools);
                     }
-                    MapperConfig.Map.Add(readoutUnitName, allowedPools);
+
+                    //Allowed routed input fields
+                    List<int> allowedRoutedFieldsIdxs = new List<int>();
+                    XElement allowedInputFieldsElem = mapElem.Descendants("allowedInputFields").FirstOrDefault();
+                    List<string> routedInputFieldNames = NeuralPreprocessorConfig.InputConfig.RoutedFieldNameCollection();
+                    if (allowedInputFieldsElem != null)
+                    {
+                        foreach (XElement allowedInputFieldElem in allowedInputFieldsElem.Descendants("field"))
+                        {
+                            //Input field name
+                            string inputFieldName = allowedInputFieldElem.Attribute("name").Value;
+                            int routedFieldIdx = routedInputFieldNames.IndexOf(inputFieldName);
+                            if (routedFieldIdx == -1)
+                            {
+                                throw new Exception($"Name {inputFieldName} not found among input fields allowed to be routed to readout.");
+                            }
+                            allowedRoutedFieldsIdxs.Add(routedFieldIdx);
+                        }
+                        MapperCfg.RoutedInputFieldsMap.Add(readoutUnitName, allowedRoutedFieldsIdxs);
+                    }
+
                 }
             }
             return;
@@ -162,9 +187,9 @@ namespace RCNet.Neural.Network.SM
             if (RandomizerSeek != cmpSettings.RandomizerSeek ||
                 !Equals(NeuralPreprocessorConfig, cmpSettings.NeuralPreprocessorConfig) ||
                 !Equals(ReadoutLayerConfig, cmpSettings.ReadoutLayerConfig) ||
-                (MapperConfig == null && cmpSettings.MapperConfig != null) ||
-                (MapperConfig != null && cmpSettings.MapperConfig == null) ||
-                (MapperConfig != null && !Equals(MapperConfig, cmpSettings.MapperConfig))
+                (MapperCfg == null && cmpSettings.MapperCfg != null) ||
+                (MapperCfg != null && cmpSettings.MapperCfg == null) ||
+                (MapperCfg != null && !Equals(MapperCfg, cmpSettings.MapperCfg))
                 )
             {
                 return false;
@@ -199,14 +224,20 @@ namespace RCNet.Neural.Network.SM
             /// <summary>
             /// Mapping of readout unit and allowed predictors pools
             /// </summary>
-            public Dictionary<string, List<PoolRef>> Map { get; }
+            public Dictionary<string, List<PoolRef>> PoolsMap { get; }
 
             /// <summary>
-            /// Creates an unitialized instance
+            /// Mapping of readout unit and allowed routed input fields indexes
+            /// </summary>
+            public Dictionary<string, List<int>> RoutedInputFieldsMap { get; }
+
+            /// <summary>
+            /// Creates an empty initialized instance
             /// </summary>
             public MapperSettings()
             {
-                Map = new Dictionary<string, List<PoolRef>>();
+                PoolsMap = new Dictionary<string, List<PoolRef>>();
+                RoutedInputFieldsMap = new Dictionary<string, List<int>>();
                 return;
             }
 
@@ -218,17 +249,18 @@ namespace RCNet.Neural.Network.SM
             {
                 if (obj == null) return false;
                 MapperSettings cmpSettings = obj as MapperSettings;
-                if (Map.Count != cmpSettings.Map.Count)
+                //Pools map
+                if (PoolsMap.Count != cmpSettings.PoolsMap.Count)
                 {
                     return false;
                 }
-                foreach(string key in Map.Keys)
+                foreach(string key in PoolsMap.Keys)
                 {
-                    List<PoolRef> myAllowedPools = Map[key];
+                    List<PoolRef> myAllowedPools = PoolsMap[key];
                     List<PoolRef> cmpAllowedPools = null;
                     try
                     {
-                        cmpAllowedPools = cmpSettings.Map[key];
+                        cmpAllowedPools = cmpSettings.PoolsMap[key];
                     }
                     catch
                     {
@@ -238,11 +270,11 @@ namespace RCNet.Neural.Network.SM
                     {
                         return false;
                     }
-                    foreach(PoolRef ap in myAllowedPools)
+                    foreach(PoolRef allowedPool in myAllowedPools)
                     {
                         for(int i = 0; i < cmpAllowedPools.Count; i++)
                         {
-                            if(cmpAllowedPools[i]._reservoirInstanceIdx == ap._reservoirInstanceIdx && cmpAllowedPools[i]._poolIdx == ap._poolIdx)
+                            if(cmpAllowedPools[i]._reservoirInstanceIdx == allowedPool._reservoirInstanceIdx && cmpAllowedPools[i]._poolIdx == allowedPool._poolIdx)
                             {
                                 break;
                             }
@@ -253,6 +285,46 @@ namespace RCNet.Neural.Network.SM
                         }
                     }
                 }
+
+
+                //Input fields map
+                if (RoutedInputFieldsMap.Count != cmpSettings.RoutedInputFieldsMap.Count)
+                {
+                    return false;
+                }
+                foreach (string key in RoutedInputFieldsMap.Keys)
+                {
+                    List<int> myAllowedRoutedInputFieldsIdxs = RoutedInputFieldsMap[key];
+                    List<int> cmpAllowedRoutedInputFieldsIdxs = null;
+                    try
+                    {
+                        cmpAllowedRoutedInputFieldsIdxs = cmpSettings.RoutedInputFieldsMap[key];
+                    }
+                    catch
+                    {
+                        return false;
+                    }
+                    if (myAllowedRoutedInputFieldsIdxs.Count != cmpAllowedRoutedInputFieldsIdxs.Count)
+                    {
+                        return false;
+                    }
+                    foreach (int allowedInputField in myAllowedRoutedInputFieldsIdxs)
+                    {
+                        for (int i = 0; i < cmpAllowedRoutedInputFieldsIdxs.Count; i++)
+                        {
+                            if (cmpAllowedRoutedInputFieldsIdxs[i] == allowedInputField)
+                            {
+                                break;
+                            }
+                            else if (i == cmpAllowedRoutedInputFieldsIdxs.Count - 1)
+                            {
+                                return false;
+                            }
+                        }
+                    }
+                }
+
+
                 return true;
             }
 
@@ -270,15 +342,26 @@ namespace RCNet.Neural.Network.SM
             public MapperSettings DeepClone()
             {
                 MapperSettings clonnedMapper = new MapperSettings();
-                foreach (KeyValuePair<string, List<PoolRef>> keyValuePair in Map)
+                //Allowed pools
+                foreach (KeyValuePair<string, List<PoolRef>> keyValuePair in PoolsMap)
                 {
-                    List<PoolRef> clonnedList = new List<PoolRef>(keyValuePair.Value.Count);
-                    foreach (PoolRef ap in keyValuePair.Value)
+                    List<PoolRef> clonnedAllowedPoolsList = new List<PoolRef>(keyValuePair.Value.Count);
+                    foreach (PoolRef allowedPool in keyValuePair.Value)
                     {
-                        PoolRef clonnedAP = new PoolRef { _reservoirInstanceIdx = ap._reservoirInstanceIdx, _poolIdx = ap._poolIdx };
-                        clonnedList.Add(clonnedAP);
+                        PoolRef clonnedAllowedPool = new PoolRef { _reservoirInstanceIdx = allowedPool._reservoirInstanceIdx, _poolIdx = allowedPool._poolIdx };
+                        clonnedAllowedPoolsList.Add(clonnedAllowedPool);
                     }
-                    clonnedMapper.Map.Add(keyValuePair.Key, clonnedList);
+                    clonnedMapper.PoolsMap.Add(keyValuePair.Key, clonnedAllowedPoolsList);
+                }
+                //Allowed input fields
+                foreach (KeyValuePair<string, List<int>> keyValuePair in RoutedInputFieldsMap)
+                {
+                    List<int> clonnedAllowedRoutedInputFieldsIdxs = new List<int>(keyValuePair.Value.Count);
+                    foreach (int allowedRoutedInputFieldIdx in keyValuePair.Value)
+                    {
+                        clonnedAllowedRoutedInputFieldsIdxs.Add(allowedRoutedInputFieldIdx);
+                    }
+                    clonnedMapper.RoutedInputFieldsMap.Add(keyValuePair.Key, clonnedAllowedRoutedInputFieldsIdxs);
                 }
                 return clonnedMapper;
             }

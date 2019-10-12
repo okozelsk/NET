@@ -399,6 +399,21 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             }
 
             /// <summary>
+            /// Returns collection of input field names to be routed to readout layer
+            /// </summary>
+            /// <returns></returns>
+            public List<string> RoutedFieldNameCollection()
+            {
+                List<string> result = new List<string>();
+                if(RouteInputToReadout)
+                {
+                    result.AddRange(from item in ExternalFieldCollection where item.AllowRoutingToReadout select item.Name);
+                    result.AddRange(from item in InternalFieldCollection where item.AllowRoutingToReadout select item.Name);
+                }
+                return result;
+            }
+
+            /// <summary>
             /// Creates the deep copy instance of this instance
             /// </summary>
             /// <returns></returns>
