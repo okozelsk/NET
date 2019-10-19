@@ -190,11 +190,11 @@ namespace RCNet.Neural.Network.SM
             if (_settings.MapperCfg != null)
             {
                 //Expand list of predicting neurons to array of predictor origin
-                StateMachineSettings.MapperSettings.PoolRef[] neuronPoolRefCollection = new StateMachineSettings.MapperSettings.PoolRef[NP.NumOfPredictors];
+                StateMachineSettings.MapperSettings.AllowedPool[] neuronPoolRefCollection = new StateMachineSettings.MapperSettings.AllowedPool[NP.NumOfPredictors];
                 int idx = 0;
                 foreach(HiddenNeuron neuron in NP.PredictorNeuronCollection)
                 {
-                    StateMachineSettings.MapperSettings.PoolRef poolRef = new StateMachineSettings.MapperSettings.PoolRef { _reservoirInstanceIdx = neuron.Placement.ReservoirID, _poolIdx = neuron.Placement.PoolID };
+                    StateMachineSettings.MapperSettings.AllowedPool poolRef = new StateMachineSettings.MapperSettings.AllowedPool { _reservoirInstanceIdx = neuron.Placement.ReservoirID, _poolIdx = neuron.Placement.PoolID };
                     for (int i = 0; i < neuron.PredictorsCfg.NumOfEnabledPredictors; i++)
                     {
                         neuronPoolRefCollection[idx] = poolRef;
@@ -234,7 +234,7 @@ namespace RCNet.Neural.Network.SM
                                 switches[i] = false;
                             }
                             //Enable allowed neuron predictors
-                            foreach (StateMachineSettings.MapperSettings.PoolRef allowedPool in _settings.MapperCfg.PoolsMap[readoutUnitName])
+                            foreach (StateMachineSettings.MapperSettings.AllowedPool allowedPool in _settings.MapperCfg.PoolsMap[readoutUnitName])
                             {
                                 //Enable specific predictors from allowed pool (origin)
                                 for (int i = 0; i < NP.PredictorNeuronCollection.Count; i++)

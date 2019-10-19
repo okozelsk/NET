@@ -8,7 +8,7 @@ using RCNet.Extensions;
 using RCNet.XmlTools;
 using RCNet.RandomValue;
 using RCNet.Neural.Data.Generators;
-using RCNet.Neural.Network.SM.Synapse;
+using RCNet.Neural.Network.SM.Neuron;
 using RCNet.Neural.Network.SM.Preprocessing;
 using RCNet.Neural.Network.SM.Readout;
 
@@ -108,7 +108,7 @@ namespace RCNet.Neural.Network.SM
                         }
                     }
                     //Allowed pools
-                    List<MapperSettings.PoolRef> allowedPools = new List<MapperSettings.PoolRef>();
+                    List<MapperSettings.AllowedPool> allowedPools = new List<MapperSettings.AllowedPool>();
                     XElement allowedPoolsElem = mapElem.Descendants("allowedPools").FirstOrDefault();
                     if (allowedPoolsElem != null)
                     {
@@ -146,7 +146,7 @@ namespace RCNet.Neural.Network.SM
                                     throw new Exception($"Name {poolName} not found among resevoir's pools.");
                                 }
                             }
-                            allowedPools.Add(new MapperSettings.PoolRef { _reservoirInstanceIdx = reservoirInstanceIdx, _poolIdx = poolIdx });
+                            allowedPools.Add(new MapperSettings.AllowedPool { _reservoirInstanceIdx = reservoirInstanceIdx, _poolIdx = poolIdx });
                         }
                         MapperCfg.PoolsMap.Add(readoutUnitName, allowedPools);
                     }
@@ -224,7 +224,7 @@ namespace RCNet.Neural.Network.SM
             /// <summary>
             /// Mapping of readout unit and allowed predictors pools
             /// </summary>
-            public Dictionary<string, List<PoolRef>> PoolsMap { get; }
+            public Dictionary<string, List<AllowedPool>> PoolsMap { get; }
 
             /// <summary>
             /// Mapping of readout unit and allowed routed input fields indexes
@@ -236,7 +236,7 @@ namespace RCNet.Neural.Network.SM
             /// </summary>
             public MapperSettings()
             {
-                PoolsMap = new Dictionary<string, List<PoolRef>>();
+                PoolsMap = new Dictionary<string, List<AllowedPool>>();
                 RoutedInputFieldsMap = new Dictionary<string, List<int>>();
                 return;
             }
@@ -256,8 +256,8 @@ namespace RCNet.Neural.Network.SM
                 }
                 foreach(string key in PoolsMap.Keys)
                 {
-                    List<PoolRef> myAllowedPools = PoolsMap[key];
-                    List<PoolRef> cmpAllowedPools = null;
+                    List<AllowedPool> myAllowedPools = PoolsMap[key];
+                    List<AllowedPool> cmpAllowedPools = null;
                     try
                     {
                         cmpAllowedPools = cmpSettings.PoolsMap[key];
@@ -270,7 +270,7 @@ namespace RCNet.Neural.Network.SM
                     {
                         return false;
                     }
-                    foreach(PoolRef allowedPool in myAllowedPools)
+                    foreach(AllowedPool allowedPool in myAllowedPools)
                     {
                         for(int i = 0; i < cmpAllowedPools.Count; i++)
                         {
@@ -343,12 +343,12 @@ namespace RCNet.Neural.Network.SM
             {
                 MapperSettings clonnedMapper = new MapperSettings();
                 //Allowed pools
-                foreach (KeyValuePair<string, List<PoolRef>> keyValuePair in PoolsMap)
+                foreach (KeyValuePair<string, List<AllowedPool>> keyValuePair in PoolsMap)
                 {
-                    List<PoolRef> clonnedAllowedPoolsList = new List<PoolRef>(keyValuePair.Value.Count);
-                    foreach (PoolRef allowedPool in keyValuePair.Value)
+                    List<AllowedPool> clonnedAllowedPoolsList = new List<AllowedPool>(keyValuePair.Value.Count);
+                    foreach (AllowedPool allowedPool in keyValuePair.Value)
                     {
-                        PoolRef clonnedAllowedPool = new PoolRef { _reservoirInstanceIdx = allowedPool._reservoirInstanceIdx, _poolIdx = allowedPool._poolIdx };
+                        AllowedPool clonnedAllowedPool = new AllowedPool { _reservoirInstanceIdx = allowedPool._reservoirInstanceIdx, _poolIdx = allowedPool._poolIdx };
                         clonnedAllowedPoolsList.Add(clonnedAllowedPool);
                     }
                     clonnedMapper.PoolsMap.Add(keyValuePair.Key, clonnedAllowedPoolsList);
@@ -371,7 +371,7 @@ namespace RCNet.Neural.Network.SM
             /// Identification of the pool from which are allowed predictors
             /// </summary>
             [Serializable]
-            public class PoolRef
+            public class AllowedPool
             {
                 /// <summary>
                 /// Index of the reservoir instance
@@ -389,7 +389,7 @@ namespace RCNet.Neural.Network.SM
                 public override bool Equals(object obj)
                 {
                     if (obj == null) return false;
-                    PoolRef cmpSettings = obj as PoolRef;
+                    AllowedPool cmpSettings = obj as AllowedPool;
                     if (_reservoirInstanceIdx != cmpSettings._reservoirInstanceIdx ||
                         _poolIdx != cmpSettings._poolIdx
                         )

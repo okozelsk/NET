@@ -1490,8 +1490,8 @@
     </xs:sequence>
   </xs:complexType>
 
-  <!-- Predictors permit - configuration -->
-  <xs:complexType name="PredictorsPermitCfgType">
+  <!-- Predictors permission - configuration -->
+  <xs:complexType name="PredictorsPermissionCfgType">
     <xs:attribute type="xs:boolean" name="activation" use="optional" default="true">
       <xs:annotation>
         <xs:documentation xml:lang="en">Current activation state. Default value is true</xs:documentation>
@@ -1528,7 +1528,7 @@
   <xs:complexType name="PredictorsCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="PredictorsSettingsCfgType" name="settings" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="PredictorsPermitCfgType" name="permit" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="PredictorsPermissionCfgType" name="permission" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
   </xs:complexType>
 
@@ -1945,7 +1945,7 @@
     <xs:attribute type="xs:string" name="reservoirInstanceName" use="required"/>
     <xs:attribute type="xs:string" name="poolName" use="required"/>
   </xs:complexType>
-
+  
   <!-- StateMachine - Mapper - Allowed pools predictors - configuration -->
   <xs:complexType name="SMMapperAllowedPoolsType">
     <xs:sequence minOccurs="1" maxOccurs="1">

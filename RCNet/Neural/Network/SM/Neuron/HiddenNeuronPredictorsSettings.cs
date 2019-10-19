@@ -21,6 +21,9 @@ namespace RCNet.Neural.Network.SM.Neuron
     {
         //Attribute properties
         //Configuration
+        /// <summary>
+        /// Parameters of the predictors
+        /// </summary>
         public Settings Params { get; private set; }
         //Permits
         /// <summary>
@@ -137,7 +140,7 @@ namespace RCNet.Neural.Network.SM.Neuron
                 Params = new Settings(paramsElem);
             }
             //Parsing of permits
-            XElement permitElem = predictorsElem.Descendants("permit").First();
+            XElement permitElem = predictorsElem.Descendants("permission").First();
             Activation = bool.Parse(permitElem.Attribute("activation").Value);
             SquaredActivation = bool.Parse(permitElem.Attribute("squaredActivation").Value);
             FiringExpWRate = bool.Parse(permitElem.Attribute("firingExpWRate").Value);
@@ -205,6 +208,9 @@ namespace RCNet.Neural.Network.SM.Neuron
         }
 
         //Inner classes
+        /// <summary>
+        /// Predictors' parameters
+        /// </summary>
         [Serializable]
         public class Settings
         {
