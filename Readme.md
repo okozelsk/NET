@@ -112,5 +112,5 @@ See the [wiki pages.](https://en.wikipedia.org/wiki/Biological_neuron_model)
 |NeuralPreprocessor|Provides data preprocessing to predictors. Supports multiple internal reservoirs. Supports virtual input data associated with predefined signal generators. Supports two input feeding regimes: Continuous and Patterned|
 |ReadoutUnit|Readout unit does the Forecast or Classification. Contains cluster of trained readout networks and related important error statistics. Trained unit can contain cluster of the Feed Forward Networks or the Parallel Perceptron Networks|
 |ReadoutLayer|Class implements independent readout layer concept useable separatedly or together with reservoir computing preprocessing. Supports x-fold cross validation together with clustering of the trained readout units.|
-|StateMachine|The main component. Encaptulates independent NeuralPreprocessor and ReadoutLayer fuctionalities into the single logical unit.|
+|StateMachine|The main component. Encapsulates independent NeuralPreprocessor and ReadoutLayer components into the single component and adds support for routing specific predictors and input fields to the specific readout units.|
 
