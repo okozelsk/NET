@@ -240,25 +240,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         }
 
         /// <summary>
-        /// Initiates collection of preprocessor's feature filters and applies filters on given collection of input vectors
-        /// </summary>
-        /// <param name="inputVectorCollection">Collection of input vectors</param>
-        /// <returns>Filterred collection of input vectors</returns>
-        private double[][] ApplyFiltersOnInputVectorCollection(List<double[]> inputVectorCollection)
-        {
-            //Instantiate feature filters
-            InitializeFeatureFilters(inputVectorCollection);
-            //Apply filters
-            double[][] filterInputVectorCollection = new double[inputVectorCollection.Count][];
-            Parallel.For(0, inputVectorCollection.Count, i =>
-            {
-                filterInputVectorCollection[i] = ApplyFiltersOnInputVector(inputVectorCollection[i]);
-
-            });
-            return filterInputVectorCollection;
-        }
-
-        /// <summary>
         /// Initiates collection of preprocessor's feature filters
         /// </summary>
         /// <param name="inputPatternCollection">Collection of input patterns</param>
@@ -306,24 +287,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         }
 
         /// <summary>
-        /// Initiates collection of preprocessor's feature filters and applies filters on given collection of input patterns
-        /// </summary>
-        /// <param name="inputPatternCollection">Collection of input patterns</param>
-        /// <returns>Filterred collection of input patterns</returns>
-        private List<double[]>[] ApplyFiltersOnInputPatternCollection(List<List<double[]>> inputPatternCollection)
-        {
-            //Instantiate feature filters
-            InitializeFeatureFilters(inputPatternCollection);
-            //Filter data
-            List<double[]>[] filterInputPatternCollection = new List<double[]>[inputPatternCollection.Count];
-            Parallel.For(0, inputPatternCollection.Count, i =>
-            {
-                filterInputPatternCollection[i] = ApplyFiltersOnInputPattern(inputPatternCollection[i]);
-            });
-            return filterInputPatternCollection;
-        }
-
-        /// <summary>
         /// Pushes input vector into the reservoirs and returns the predictors
         /// </summary>
         /// <param name="externalInputVector">Input values</param>
@@ -332,7 +295,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// </param>
         private double[] PushInput(double[] externalInputVector, bool collectStatistics)
         {
-            double[] completedInputVector = AddInputsFromInternalGenerators(externalInputVector);
+            double[] completedInputVector = AddInputsFromInternalGenerators(ApplyFiltersOnInputVector(externalInputVector));
             double[] predictors = new double[NumOfPredictors];
             int predictorsIdx = 0;
             //Compute reservoir(s)
@@ -355,7 +318,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 {
                     if (field.AllowRoutingToReadout)
                     {
-                        predictors[predictorsIdx++] = completedInputVector[fieldIdx];
+                        //Route original values
+                        predictors[predictorsIdx++] = externalInputVector[fieldIdx];
                     }
                     ++fieldIdx;
                 }
@@ -384,11 +348,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             int predictorsIdx = 0;
             //Reset SM but keep statistics
             Reset(false);
+            //Apply filters
+            List<double[]> normalizedInputPattern = ApplyFiltersOnInputPattern(externalInputPattern);
             //Add internal input
-            List<double[]> completedInputPattern = new List<double[]>(externalInputPattern.Count);
-            foreach (double[] externalInputVector in externalInputPattern)
+            List<double[]> completedInputPattern = new List<double[]>(normalizedInputPattern.Count);
+            foreach (double[] externalInputPatternVector in normalizedInputPattern)
             {
-                completedInputPattern.Add(AddInputsFromInternalGenerators(externalInputVector));
+                completedInputPattern.Add(AddInputsFromInternalGenerators(externalInputPatternVector));
             }
             //Compute reservoir(s)
             foreach (Reservoir reservoir in ReservoirCollection)
@@ -425,8 +391,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             {
                 throw new Exception("Called incorrect version of Preprocess function for patterned input feeding.");
             }
-            //Apply filters on vector, push it into the preprocessor and return result
-            return PushInput(ApplyFiltersOnInputVector(input), false);
+            //Push input vector into the preprocessor and return result
+            return PushInput(input, false);
         }
 
         /// <summary>
@@ -445,8 +411,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             {
                 throw new Exception("Called incorrect version of Preprocess function for continuous input feeding.");
             }
-            //Apply filters on pattern, push it into the preprocessor and return result
-            return PushInput(ApplyFiltersOnInputPattern(inputPattern), false);
+            //Push input pattern into the preprocessor and return result
+            return PushInput(inputPattern, false);
         }
 
         /// <summary>
@@ -474,8 +440,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             }
             //Reset the internal states and also statistics
             Reset(true);
-            //Initialize feature filters and apply filters on input data
-            double[][] filterInputVectorCollection = ApplyFiltersOnInputVectorCollection(vectorBundle.InputVectorCollection);
+            //Initialize feature filters
+            InitializeFeatureFilters(vectorBundle.InputVectorCollection);
             //Allocate output bundle
             VectorBundle outputBundle = new VectorBundle(vectorBundle.InputVectorCollection.Count - _settings.InputConfig.BootCycles);
             //Collect predictors
@@ -483,7 +449,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             {
                 bool afterBoot = (dataSetIdx >= _settings.InputConfig.BootCycles);
                 //Push input data into the network
-                double[] predictors = PushInput(filterInputVectorCollection[dataSetIdx], afterBoot);
+                double[] predictors = PushInput(vectorBundle.InputVectorCollection[dataSetIdx], afterBoot);
                 //Is boot sequence passed? Collect predictors?
                 if (afterBoot)
                 {
@@ -524,15 +490,15 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             }
             //Reset the internal states and also statistics
             Reset(true);
-            //Initialize feature filters and apply filters on input data
-            List<double[]>[] filterInputPatternCollection = ApplyFiltersOnInputPatternCollection(patternBundle.InputPatternCollection);
+            //Initialize feature filters
+            InitializeFeatureFilters(patternBundle.InputPatternCollection);
             //Allocate output bundle
             VectorBundle outputBundle = new VectorBundle(patternBundle.InputPatternCollection.Count);
             //Collection
-            for (int dataSetIdx = 0; dataSetIdx < filterInputPatternCollection.Length; dataSetIdx++)
+            for (int dataSetIdx = 0; dataSetIdx < patternBundle.InputPatternCollection.Count; dataSetIdx++)
             {
                 //Push input data into the network
-                double[] predictors = PushInput(filterInputPatternCollection[dataSetIdx], true);
+                double[] predictors = PushInput(patternBundle.InputPatternCollection[dataSetIdx], true);
                 outputBundle.InputVectorCollection.Add(predictors);
                 //Add desired outputs
                 outputBundle.OutputVectorCollection.Add(patternBundle.OutputVectorCollection[dataSetIdx]);

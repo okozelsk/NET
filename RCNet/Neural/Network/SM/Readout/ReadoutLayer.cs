@@ -103,10 +103,10 @@ namespace RCNet.Neural.Network.SM.Readout
         /// This is the pesimistic approach. Real results on unseen data could be better due to the clustering.
         /// </returns>
         public ResultBundle Build(VectorBundle dataBundle,
-                                             ReadoutUnit.RegressionCallbackDelegate regressionController,
-                                             Object regressionControllerData,
-                                             PredictorsMapper predictorsMapper = null
-                                             )
+                                  ReadoutUnit.RegressionCallbackDelegate regressionController,
+                                  Object regressionControllerData,
+                                  PredictorsMapper predictorsMapper = null
+                                  )
         {
             //Basic checks
             int numOfPredictors = dataBundle.InputVectorCollection[0].Length;
@@ -177,14 +177,6 @@ namespace RCNet.Neural.Network.SM.Readout
             //Data processing
             //Random object initialization
             Random rand = new Random(0);
-            //Allocation of computed and ideal vectors for result comparative bundle
-            List<double[]> validationComputedVectorCollection = new List<double[]>(idealOutputsCollection.Length);
-            List<double[]> validationIdealVectorCollection = new List<double[]>(idealOutputsCollection.Length);
-            for (int i = 0; i < idealOutputsCollection.Length; i++)
-            {
-                validationComputedVectorCollection.Add(new double[numOfOutputs]);
-                validationIdealVectorCollection.Add(new double[numOfOutputs]);
-            }
             //Test dataset size
             if (_settings.TestDataRatio > MaxRatioOfTestData)
             {
@@ -285,7 +277,7 @@ namespace RCNet.Neural.Network.SM.Readout
                                                                                         regressionController,
                                                                                         regressionControllerData
                                                                                         );
-                    //Cluster error statistics & data for validation bundle (pesimistic approach)
+                    //Cluster error statistics (pesimistic approach)
                     for (int sampleIdx = 0; sampleIdx < subBundleCollection[foldIdx].OutputVectorCollection.Count; sampleIdx++)
                     {
                         
@@ -296,8 +288,6 @@ namespace RCNet.Neural.Network.SM.Readout
                                    subBundleCollection[foldIdx].OutputVectorCollection[sampleIdx][0],
                                    natComputedValue,
                                    natIdealValue);
-                        validationIdealVectorCollection[arrayPos][clusterIdx] = natIdealValue;
-                        validationComputedVectorCollection[arrayPos][clusterIdx] = natComputedValue;
                         ++arrayPos;
                     }
 
@@ -305,8 +295,14 @@ namespace RCNet.Neural.Network.SM.Readout
                 _clusterErrStatisticsCollection.Add(ces);
 
             }//clusterIdx
-            //Validation bundle is returned. 
-            return new ResultBundle(validationComputedVectorCollection, validationIdealVectorCollection);
+            //Validation bundle to be returned (perform full recomputation - optimistic approach)
+            ResultBundle resultBundle = new ResultBundle(dataBundle.InputVectorCollection.Count);
+            for(int rowIdx = 0; rowIdx < dataBundle.InputVectorCollection.Count; rowIdx++)
+            {
+                double[] computedVector = Compute(dataBundle.InputVectorCollection[rowIdx]);
+                resultBundle.AddVectors(dataBundle.InputVectorCollection[rowIdx], computedVector, dataBundle.OutputVectorCollection[rowIdx]);
+            }
+            return resultBundle;
         }
 
         //Properties
