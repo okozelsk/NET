@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace RCNet.Neural.Network.SM.Neuron
 {
+    /// <summary>
+    /// Enums and parsings of enum values for a Neuron type
+    /// </summary>
     public static class NeuronCommon
     {
         //Enums

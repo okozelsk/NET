@@ -89,7 +89,8 @@ namespace RCNet.Neural.Activation
                                    rand.NextDouble(afs.AdaptationTimeConstant),
                                    rand.NextDouble(afs.AdaptationSpikeTriggeredIncrement),
                                    afs.SolverMethod,
-                                   afs.SolverCompSteps
+                                   afs.SolverCompSteps,
+                                   afs.SolveGradually
                                   );
             }
             else if (settingsType == typeof(BentIdentitySettings))
@@ -113,7 +114,8 @@ namespace RCNet.Neural.Activation
                                  rand.NextDouble(afs.SharpnessDeltaT),
                                  afs.RefractoryPeriods,
                                  afs.SolverMethod,
-                                 afs.SolverCompSteps
+                                 afs.SolverCompSteps,
+                                 afs.SolveGradually
                                  );
             }
             else if (settingsType == typeof(GaussianSettings))
@@ -133,15 +135,16 @@ namespace RCNet.Neural.Activation
             {
                 IzhikevichIFSettings afs = (IzhikevichIFSettings)settings;
                 af = new IzhikevichIF(rand.NextDouble(afs.RecoveryTimeScale),
-                                        rand.NextDouble(afs.RecoverySensitivity),
-                                        rand.NextDouble(afs.RecoveryReset),
-                                        rand.NextDouble(afs.RestV),
-                                        rand.NextDouble(afs.ResetV),
-                                        rand.NextDouble(afs.FiringThresholdV),
-                                        afs.RefractoryPeriods,
-                                        afs.SolverMethod,
-                                        afs.SolverCompSteps
-                                        );
+                                      rand.NextDouble(afs.RecoverySensitivity),
+                                      rand.NextDouble(afs.RecoveryReset),
+                                      rand.NextDouble(afs.RestV),
+                                      rand.NextDouble(afs.ResetV),
+                                      rand.NextDouble(afs.FiringThresholdV),
+                                      afs.RefractoryPeriods,
+                                      afs.SolverMethod,
+                                      afs.SolverCompSteps,
+                                      afs.SolveGradually
+                                      );
 
             }
             else if (settingsType == typeof(AutoIzhikevichIFSettings))
@@ -152,29 +155,31 @@ namespace RCNet.Neural.Activation
                 {
                     //Excitatory ranges
                     af = new IzhikevichIF(0.02,
-                                            0.2,
-                                            8 + (-6 * randomValue.Power(2)),
-                                            -70,
-                                            -65 + (15 * randomValue.Power(2)),
-                                            30,
-                                            afs.RefractoryPeriods,
-                                            afs.SolverMethod,
-                                            afs.SolverCompSteps
-                                            );
+                                          0.2,
+                                          8 + (-6 * randomValue.Power(2)),
+                                          -70,
+                                          -65 + (15 * randomValue.Power(2)),
+                                          30,
+                                          afs.RefractoryPeriods,
+                                          afs.SolverMethod,
+                                          afs.SolverCompSteps,
+                                          afs.SolveGradually
+                                          );
                 }
                 else
                 {
                     //Inhibitory ranges
                     af = new IzhikevichIF(0.02 + 0.08 * randomValue,
-                                            0.25 - 0.05 * randomValue,
-                                            2,
-                                            -70,
-                                            -65,
-                                            30,
-                                            afs.RefractoryPeriods,
-                                            afs.SolverMethod,
-                                            afs.SolverCompSteps
-                                            );
+                                          0.25 - 0.05 * randomValue,
+                                          2,
+                                          -70,
+                                          -65,
+                                          30,
+                                          afs.RefractoryPeriods,
+                                          afs.SolverMethod,
+                                          afs.SolverCompSteps,
+                                          afs.SolveGradually
+                                          );
                 }
             }
             else if (settingsType == typeof(LeakyIFSettings))
@@ -187,7 +192,8 @@ namespace RCNet.Neural.Activation
                                    rand.NextDouble(afs.FiringThresholdV),
                                    afs.RefractoryPeriods,
                                    afs.SolverMethod,
-                                   afs.SolverCompSteps
+                                   afs.SolverCompSteps,
+                                   afs.SolveGradually
                                    );
             }
             else if (settingsType == typeof(LeakyReLUSettings))

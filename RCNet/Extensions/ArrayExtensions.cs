@@ -66,6 +66,28 @@ namespace RCNet.Extensions
         }
 
         /// <summary>
+        /// Compares the values in this array with the values in the given array starting at specified position in this array.
+        /// Uses Equals method co compare items.
+        /// </summary>
+        /// <param name="startIdx">Start position in this array</param>
+        /// <param name="cmpArray">Array to compare with</param>
+        /// <param name="array"></param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsEqualSequence<T>(this T[] array, int startIdx, T[] cmpArray)
+        {
+            if (array == null || cmpArray == null)
+            {
+                return false;
+            }
+            if ((startIdx + cmpArray.Length) >= array.Length) return false;
+            for (int i = 0; i < cmpArray.Length; i++)
+            {
+                if (!array[startIdx + i].Equals(cmpArray[i])) return false;
+            }
+            return true;
+        }
+
+        /// <summary>
         /// Fills the array with a specified value
         /// </summary>
         /// <param name="value">Value to be used</param>

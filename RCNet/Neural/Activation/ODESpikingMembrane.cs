@@ -66,6 +66,12 @@ namespace RCNet.Neural.Activation
         /// </summary>
         protected int _subSteps;
         /// <summary>
+        /// Determines what variant of ODENumSolver method to use.
+        /// Gradual solving can lead to shorter computation time (computation stops immediately the firing threshold is met) but
+        /// it impacts membrane current potential prediction power.
+        /// </summary>
+        protected bool _solveGradually;
+        /// <summary>
         /// Coefficient for conversion of incoming stimuli current to expected physical unit 
         /// </summary>
         protected double _currentCoeff;
@@ -106,6 +112,7 @@ namespace RCNet.Neural.Activation
         /// <param name="solvingMethod">ODE numerical solver method</param>
         /// <param name="stepTimeScale">Computation step time scale</param>
         /// <param name="subSteps">Computation sub-steps</param>
+        /// <param name="solveGradually">Determines what variant of ODENumSolver method to use. Gradual solving can lead to shorter computation time (computation stops immediately the firing threshold is met) but it impacts membrane current potential prediction power.</param>
         /// <param name="numOfEvolvingVars">Number of evolving variables</param>
         /// <param name="currentCoeff">Coefficient of the current</param>
         /// <param name="potentialCoeff">Coefficient of the potential</param>
@@ -116,6 +123,7 @@ namespace RCNet.Neural.Activation
                                      ODENumSolver.Method solvingMethod,
                                      double stepTimeScale,
                                      int subSteps,
+                                     bool solveGradually,
                                      int numOfEvolvingVars,
                                      double currentCoeff = 1d,
                                      double potentialCoeff = 1d
@@ -130,6 +138,7 @@ namespace RCNet.Neural.Activation
             _solvingMethod = solvingMethod;
             _stepTimeScale = stepTimeScale;
             _subSteps = subSteps;
+            _solveGradually = solveGradually;
             _initialMembranePotential = _resetV;
             _evolVars[VarMembraneVIdx] = _initialMembranePotential;
             _inRefractory = false;
@@ -223,15 +232,22 @@ namespace RCNet.Neural.Activation
                     _stimuli = 0;
                 }
             }
-            
+
             //Compute membrane new potential
-            foreach (ODENumSolver.Estimation subResult in ODENumSolver.Solve(MembraneDiffEq, 0, _evolVars, _stepTimeScale, _subSteps, _solvingMethod))
+            if (_solveGradually)
             {
-                _evolVars = subResult.V;
-                if (_evolVars[VarMembraneVIdx] >= _firingThresholdV)
+                foreach (ODENumSolver.Estimation subResult in ODENumSolver.SolveGradually(MembraneDiffEq, 0, _evolVars, _stepTimeScale, _subSteps, _solvingMethod))
                 {
-                    break;
+                    _evolVars = subResult.V;
+                    if (_evolVars[VarMembraneVIdx] >= _firingThresholdV)
+                    {
+                        break;
+                    }
                 }
+            }
+            else
+            {
+                _evolVars = ODENumSolver.Solve(MembraneDiffEq, 0, _evolVars, _stepTimeScale, _subSteps, _solvingMethod);
             }
             //Output
             if (_evolVars[VarMembraneVIdx] >= _firingThresholdV)

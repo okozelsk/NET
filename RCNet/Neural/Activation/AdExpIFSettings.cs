@@ -113,6 +113,12 @@ namespace RCNet.Neural.Activation
         /// ODE numerical solver computation steps of the time step 
         /// </summary>
         public int SolverCompSteps { get; }
+        /// <summary>
+        /// Determines what variant of ODENumSolver method to use.
+        /// Gradual solving can lead to shorter computation time (computation stops immediately the firing threshold is met) but
+        /// it impacts membrane current potential prediction power.
+        /// </summary>
+        public bool SolveGradually { get; }
 
 
         //Constructors
@@ -131,6 +137,7 @@ namespace RCNet.Neural.Activation
         /// <param name="adaptationSpikeTriggeredIncrement">Spike triggered adaptation increment (pA)</param>
         /// <param name="solverMethod">ODE numerical solver method</param>
         /// <param name="solverCompSteps">ODE numerical solver computation steps of the time step</param>
+        /// <param name="solveGradually">Determines what variant of ODENumSolver method to use. Gradual solving can lead to shorter computation time (computation stops immediately the firing threshold is met) but it impacts membrane current potential prediction power.</param>
         public AdExpIFSettings(RandomValueSettings timeScale = null,
                                RandomValueSettings resistance = null,
                                RandomValueSettings restV = null,
@@ -142,7 +149,8 @@ namespace RCNet.Neural.Activation
                                RandomValueSettings adaptationTimeConstant = null,
                                RandomValueSettings adaptationSpikeTriggeredIncrement = null,
                                ODENumSolver.Method solverMethod = ODENumSolver.Method.Euler,
-                               int solverCompSteps = 2
+                               int solverCompSteps = 2,
+                               bool solveGradually = false
                                )
         {
             TimeScale = RandomValueSettings.CloneOrDefault(timeScale, TypicalTimeScale);
@@ -157,6 +165,7 @@ namespace RCNet.Neural.Activation
             AdaptationSpikeTriggeredIncrement = RandomValueSettings.CloneOrDefault(adaptationSpikeTriggeredIncrement, TypicalAdaptationSpikeTriggeredIncrement);
             SolverMethod = solverMethod;
             SolverCompSteps = solverCompSteps;
+            SolveGradually = solveGradually;
             return;
         }
 
@@ -178,6 +187,7 @@ namespace RCNet.Neural.Activation
             AdaptationSpikeTriggeredIncrement = source.AdaptationSpikeTriggeredIncrement.DeepClone();
             SolverMethod = source.SolverMethod;
             SolverCompSteps = source.SolverCompSteps;
+            SolveGradually = source.SolveGradually;
             return;
         }
 
@@ -209,6 +219,7 @@ namespace RCNet.Neural.Activation
             AdaptationSpikeTriggeredIncrement = RandomValueSettings.LoadOrDefault(activationSettingsElem, "adaptationSpikeTriggeredIncrement", TypicalAdaptationSpikeTriggeredIncrement);
             SolverMethod = ODENumSolver.ParseComputationMethodType(activationSettingsElem.Attribute("solverMethod").Value);
             SolverCompSteps = int.Parse(activationSettingsElem.Attribute("solverCompSteps").Value, CultureInfo.InvariantCulture);
+            SolveGradually = bool.Parse(activationSettingsElem.Attribute("solveGradually").Value);
             return;
         }
 
@@ -231,7 +242,8 @@ namespace RCNet.Neural.Activation
                 !Equals(AdaptationTimeConstant, cmpSettings.AdaptationTimeConstant) ||
                 !Equals(AdaptationSpikeTriggeredIncrement, cmpSettings.AdaptationSpikeTriggeredIncrement) ||
                 SolverMethod != cmpSettings.SolverMethod ||
-                SolverCompSteps != cmpSettings.SolverCompSteps
+                SolverCompSteps != cmpSettings.SolverCompSteps ||
+                SolveGradually != cmpSettings.SolveGradually
                 )
             {
                 return false;

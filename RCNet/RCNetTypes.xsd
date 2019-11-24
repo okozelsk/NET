@@ -425,6 +425,11 @@
         <xs:documentation xml:lang="en">Default value is 2</xs:documentation>
       </xs:annotation>
     </xs:attribute>
+    <xs:attribute type="xs:boolean" name="solveGradually" use="optional" default="false">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is false. Gradual solving can lead to shorter computation time (computation stops immediately the firing threshold is met) but it impacts membrane current potential prediction power.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- Activation ExpIF configuration element -->
@@ -479,6 +484,11 @@
     <xs:attribute type="UIntGT0Type" name="solverCompSteps" use="optional" default="2">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is 2</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="solveGradually" use="optional" default="false">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is false. Gradual solving can lead to shorter computation time (computation stops immediately the firing threshold is met) but it impacts membrane current potential prediction power.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -547,6 +557,11 @@
         <xs:documentation xml:lang="en">Default value is 2</xs:documentation>
       </xs:annotation>
     </xs:attribute>
+    <xs:attribute type="xs:boolean" name="solveGradually" use="optional" default="false">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is false. Gradual solving can lead to shorter computation time (computation stops immediately the firing threshold is met) but it impacts membrane current potential prediction power.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- Activation IzhikevichIF configuration element -->
@@ -598,6 +613,11 @@
         <xs:documentation xml:lang="en">Default value is 2</xs:documentation>
       </xs:annotation>
     </xs:attribute>
+    <xs:attribute type="xs:boolean" name="solveGradually" use="optional" default="false">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is false. Gradual solving can lead to shorter computation time (computation stops immediately the firing threshold is met) but it impacts membrane current potential prediction power.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- Activation AutoIzhikevichIF configuration element -->
@@ -616,6 +636,11 @@
     <xs:attribute type="UIntGT0Type" name="solverCompSteps" use="optional" default="2">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is 2</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="solveGradually" use="optional" default="false">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is false. Gradual solving can lead to shorter computation time (computation stops immediately the firing threshold is met) but it impacts membrane current potential prediction power.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>

@@ -66,8 +66,8 @@ namespace RCNet.MathTools.Differential
         /// <param name="t">Target time</param>
         /// <param name="subSteps">Number of computation time-sub-steps</param>
         /// <param name="method">Solution method to be used</param>
-        /// <returns>Solution estimations at computation time sub-steps</returns>
-        public static IEnumerable<Estimation> Solve(Eqs eqs, double t0, Vector v0, double t, int subSteps = DefaultTimeSubSteps, Method method = Method.Euler)
+        /// <returns>Returns solution estimations gradually at computation time sub-steps</returns>
+        public static IEnumerable<Estimation> SolveGradually(Eqs eqs, double t0, Vector v0, double t, int subSteps = DefaultTimeSubSteps, Method method = Method.Euler)
         {
             double h = (t - t0) / subSteps;
             double currT = t0;
@@ -87,6 +87,37 @@ namespace RCNet.MathTools.Differential
                 yield return new Estimation(currT, new Vector(estimV));
             }
             yield break;
+        }
+
+        /// <summary>
+        /// ODE solver function
+        /// </summary>
+        /// <param name="eqs">Ordinary differential equation or couple of differential equations</param>
+        /// <param name="t0">Known start time</param>
+        /// <param name="v0">Vector of known value(s) at start time</param>
+        /// <param name="t">Target time</param>
+        /// <param name="subSteps">Number of computation time-sub-steps</param>
+        /// <param name="method">Solution method to be used</param>
+        /// <returns>Returns solution estimation at target time t</returns>
+        public static Vector Solve(Eqs eqs, double t0, Vector v0, double t, int subSteps = DefaultTimeSubSteps, Method method = Method.Euler)
+        {
+            double h = (t - t0) / subSteps;
+            double currT = t0;
+            Vector estimV = v0.Clone();
+            for (int step = 0; step < subSteps; step++)
+            {
+                switch (method)
+                {
+                    case Method.Euler:
+                        estimV = EulerSubStep(eqs, currT, estimV, h);
+                        break;
+                    case Method.RK4:
+                        estimV = RK4SubStep(eqs, currT, estimV, h);
+                        break;
+                }
+                currT += h;
+            }
+            return estimV;
         }
 
         //Euler 1st order computation sub-step

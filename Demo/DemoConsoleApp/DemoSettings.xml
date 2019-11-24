@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <demo dataFolder=".\\Data">
 
+
+
   <!--
     This demo case demonstrates the simple form of classical ESN reservoir setup to predict next Low, High and Close share prices.
     Elastic net regression is used as forecasting readout.

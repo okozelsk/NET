@@ -67,6 +67,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CsvTools\DelimitedStringValues.cs" />
+    <Compile Include="Extensions\DoubleArrayExtensions.cs" />
     <Compile Include="MathTools\Differential\ODENumSolver.cs" />
     <Compile Include="MathTools\EuclideanDistance.cs" />
     <Compile Include="MathTools\MatrixMath\LUD.cs" />
