@@ -24,7 +24,7 @@ namespace RCNet.DemoConsoleApp
     class Research
     {
         //Attributes
-        private Random _rand;
+        private readonly Random _rand;
 
         //Constructor
         public Research()
@@ -36,6 +36,17 @@ namespace RCNet.DemoConsoleApp
         //Methods
         public void Run()
         {
+
+
+            IActivationFunction testAF = ActivationFactory.Create(new AutoIzhikevichIFSettings(Neural.Network.SM.Neuron.NeuronCommon.NeuronRole.Excitatory), new Random(0));
+            TestActivation(testAF, 200, 0.47, 10, 170);
+
+            AutoIzhikevichIFSettings setup = new AutoIzhikevichIFSettings(Neural.Network.SM.Neuron.NeuronCommon.NeuronRole.Excitatory);
+            FindAFInputBorders(ActivationFactory.Create(setup, new Random(0)), -0.1, 20);
+
+
+            Console.ReadLine();
+
 
             //Filter test
             RealFeatureFilter rff = new RealFeatureFilter(new Interval(-1, 1));
@@ -101,29 +112,8 @@ namespace RCNet.DemoConsoleApp
             Console.ReadLine();
 
 
-            IActivationFunction testAF = ActivationFactory.Create(new SimpleIFSettings(refractoryPeriods:0), new Random(0));
-            TestActivation(testAF, 100, 3.5, 10, 70);
 
-            SimpleIFSettings setup = new SimpleIFSettings();
-            FindAFInputBorders(ActivationFactory.Create(setup, new Random(0)),
-                                    -0.1,
-                                    20
-                                    );
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            /*
             //Linear algebra test
             double[] flatData = {
                                   0.2, 5, 17.3, 1.01, 54, 7,
@@ -135,7 +125,6 @@ namespace RCNet.DemoConsoleApp
                                  };
             Matrix testM = new Matrix(6, 6, flatData);
 
-            /*
             //Inversion test
             Matrix resultM = new Matrix(testM);
             resultM.SingleThreadInverse();
@@ -239,7 +228,7 @@ namespace RCNet.DemoConsoleApp
         private double FindCurrent(IActivationFunction af, double targetResponse, double tolerance)
         {
             double lo = -100, hi = 100;
-            while (true)
+            while (Math.Abs(lo - hi) > 1e-4)
             {
                 af.Reset();
                 double current = (lo + (hi - lo) / 2);
@@ -264,6 +253,7 @@ namespace RCNet.DemoConsoleApp
                     lo = current;
                 }
             }
+            return double.NaN;
         }
 
         private void FindAFInputBorders(IActivationFunction af, double minResponse, double maxResponse)

@@ -64,7 +64,9 @@ namespace RCNet.Neural.Activation
                    1,
                    solverCompSteps,
                    solveGradually,
-                   2
+                   2,
+                   50,
+                   1
                   )
         {
             _recoveryTimeScale = recoveryTimeScale;
