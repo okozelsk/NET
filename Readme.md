@@ -3,18 +3,21 @@
 <br>
 The aim of this project is to make the [reservoir computing](https://en.wikipedia.org/wiki/Reservoir_computing) methods  easy to use and available for .net platform without any other dependencies.
 Two main reservoir computing methods are called Echo State Network (ESN) and Liquid State Machine (LSM).
-The implemented solution supports both of these methods. However, since ESN and LSM are based on very similar general principles, RCNet brings the option to combine them at the same time. It means the possibility to design complex "hybrid" recurrent networks consisting of spiking and analog neurons working together.
-Mutual cooperation of stateless analog and spiking activation functions is enabled by special implementation of hidden neuron, which can fire spikes even in case of stateless analog activation (in case of analog activation there is defined a firing event depending on current and previous results of the stateless activation). This approach, I believe, opens up new possibilities and the mutual use of the best of both worlds will be the subject of my further research.
-Since now, the Hidden Neuron provides a standardized set of predictors no matter what activation function is used. Now, it seems to be no longer true that the Echo State Network is not capable to generalize and separate input signal enaugh to enable excellent classification results at the readout layer. On the contrary. It now appears that the use of pure analog activations (TanH) and the simple classical ESN reservoir design having echo state property could be an "unexpected" competitor to spiking LSM reservoirs.
-The main component encapsulating whole functionality is called "**State Machine**" and it has to be instantiated using a xml configuration. "**State Machine**" is serializabled so it is easily possible to instantiate and train it and than use it as a real-time loadable component in the solution. Source code is written in C# 6.0.
+RCNet supports both of these methods. Moreover, since ESN and LSM are based on similar general principles, RCNet allows to design complex "hybrid" recurrent reservoirs consisting of spiking and analog neurons synaptically linked together.
+Mutual cooperation of hidden neurons having stateless analog and spiking activation functions is enabled by specific implementation of hidden neuron. Hidden neuron is not stateless and it can fire spikes even in case of stateless analog activation is used. "Anaolog spikes" are based on defined firing event depending on current and previous values of activation.
+Hidden neuron also provides a standardized set of predictors no matter what activation function is used. According to preliminary results, it seems that it is no longer true that ESN is not capable to generalize and separate input signal enaugh to perform excellent classification. On the contrary. It now appears that the use of pure analog activations (like TanH) and the simple classical ESN reservoir design could be an "unexpected" competitor to spiking LSM reservoirs.
+<br/>
+The main component of RCNet is called "**State Machine**" and it has to be instantiated through xml configuration. "**State Machine**" is serializable so it is easily possible to instantiate and train it and than use it as a real-time loadable component in the solution. Source code is written in C# 6.0.
 More detailed documentation will be posted here (https://github.com/okozelsk/NET/wiki) as soon as the current stage of the wild changes is over.
 <br/>
 I welcome questions, ideas and suggestions for improvements, usage experiences, bug alerts, constructive comments, etc... Please use my email address oldrich.kozelsky@email.cz to contact me.
 
 
 ## Demo application
-Main functionality and possibilities are demonstrated in a simple demo application (/Demo/DemoConsoleApp). Application has no startup parameters, all necessary settins are specified in DemoSettings.xml file. DemoSettings.xml has to be in the same folder as the executable DemoConsoleApp.exe. Application performs sequence of tasks defined in DemoSettings.xml. You can easily insert new task or tune existing one by simple modification of DemoSettings.xml. Each task is defined in the xml element "case" and its input data is expected in csv format.
+Main functionality and possibilities are demonstrated in a simple demo application (/Demo/DemoConsoleApp). Application has no startup parameters, all necessary settins are specified in DemoSettings.xml file. DemoSettings.xml has to be in the same folder as the executable DemoConsoleApp.exe. Application performs sequence of tasks defined in DemoSettings.xml. You can easily insert new task or tune existing one by simple modification of DemoSettings.xml. Each task is defined in the xml element "case".
 
+### Data format for the demo application
+Input data is expected in csv format.
 
 ## Components overview
 
@@ -61,7 +64,7 @@ Main functionality and possibilities are demonstrated in a simple demo applicati
 |DelimitedStringValues|Helper encoder and decoder of data in csv format|
 |VectorBundle|Bundle of input data vectors and corresponding desired output vectors (1:1). Supports upload from csv file|
 |PatternBundle|Bundle of patterns of input data vectors and corresponding desired output vectors (n:1). Supports upload from csv file|
-|ResultBundle|Bundle of computed output vectors and desired output vectors (1:1)|
+|ResultBundle|Bundle of input, computed and desired output vectors (1:1:1)|
 
 ### Analog neuron activation functions
 |Component|Description|
