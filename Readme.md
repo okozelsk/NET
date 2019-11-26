@@ -7,8 +7,10 @@ RCNet supports both of these methods. Moreover, since ESN and LSM are based on s
 Mutual cooperation of hidden neurons having stateless analog and spiking activation functions is enabled by specific implementation of hidden neuron. Hidden neuron is not stateless and it can fire spikes even in case of stateless analog activation is used. "Anaolog spikes" are based on defined firing event depending on current and previous values of activation.
 Hidden neuron also provides a standardized set of predictors no matter what activation function is used. According to preliminary results, it seems that it is no longer true that ESN is not capable to generalize and separate input signal enaugh to perform excellent classification. On the contrary. It now appears that the use of pure analog activations (like TanH) and the simple classical ESN reservoir design could be an "unexpected" competitor to spiking LSM reservoirs.
 <br/>
-The main component of RCNet is called "**State Machine**" and it has to be instantiated through xml configuration. "**State Machine**" is serializable so it is easily possible to instantiate and train it and than use it as a real-time loadable component in the solution. Source code is written in C# 6.0.
-More detailed documentation will be posted here (https://github.com/okozelsk/NET/wiki) as soon as the current stage of the wild changes is over.
+The main component of RCNet is called "**State Machine**" and it has to be instantiated through xml configuration. "**State Machine**" is serializable so it is easily possible to instantiate and train it and than use it as a real-time loadable component in the solution.
+<br/>
+Source code is written in C# 7.3 (.NET framework 4.7.2).
+More detailed documentation will be posted [here](https://github.com/okozelsk/NET/wiki) as soon as the current stage of the wild changes is over.
 <br/>
 I welcome questions, ideas and suggestions for improvements, usage experiences, bug alerts, constructive comments, etc... Please use my email address oldrich.kozelsky@email.cz to contact me.
 
@@ -17,7 +19,9 @@ I welcome questions, ideas and suggestions for improvements, usage experiences, 
 Main functionality and possibilities are demonstrated in a simple demo application (/Demo/DemoConsoleApp). Application has no startup parameters, all necessary settins are specified in DemoSettings.xml file. DemoSettings.xml has to be in the same folder as the executable DemoConsoleApp.exe. Application performs sequence of tasks defined in DemoSettings.xml. You can easily insert new task or tune existing one by simple modification of DemoSettings.xml. Each task is defined in the xml element "case".
 
 ### Data format for the demo application
-Input data is expected in csv format.
+Input data is expected in csv format where delimiter can be a semicolon or a comma.
+* **Continuous feeding regime** requires a standard csv format, where the first line contains the names of the data fields and each next line contains the numeric data. [Here](https://github.com/okozelsk/NET/blob/master/Demo/DemoConsoleApp/Data/TTOO.csv) is an example
+* **Patterned feeding regime** requires specific csv format. First line specifies names of repetitive input features of the pattern (first must be keyword "#RepetitiveGroupOfAttributes"). Second line specifies names of output values (first must be keyword "#Outputs"). Each next line then contains Nx values of repetitive pattern features followed by expected output values at the end. [Here](https://github.com/okozelsk/NET/blob/master/Demo/DemoConsoleApp/Data/LibrasMovement.csv) is an example
 
 ## Components overview
 
