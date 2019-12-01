@@ -15,6 +15,7 @@ using RCNet.RandomValue;
 using RCNet.Neural.Data.Generators;
 using RCNet.Neural.Data.Filter;
 using System.Globalization;
+using RCNet.Queue;
 
 namespace RCNet.DemoConsoleApp
 {
@@ -36,6 +37,20 @@ namespace RCNet.DemoConsoleApp
         //Methods
         public void Run()
         {
+            //Queue test
+            int queueCapacity = 10;
+            SimpleQueue<int> queue = new SimpleQueue<int>(queueCapacity);
+            for(int i = 0; i < 35; i++)
+            {
+                queue.Enqueue(i, true);
+            }
+            for(int i = 0; i < queue.Count; i++)
+            {
+                Console.WriteLine($"LatestFirst: {queue.GetElementAt(i, true)} LatestLast: {queue.GetElementAt(i, false)}");
+            }
+            Console.ReadLine();
+
+
 
 
             IActivationFunction testAF = ActivationFactory.Create(new AutoIzhikevichIFSettings(Neural.Network.SM.Neuron.NeuronCommon.NeuronRole.Excitatory), new Random(0));

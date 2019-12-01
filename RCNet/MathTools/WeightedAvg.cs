@@ -154,7 +154,5 @@ namespace RCNet.MathTools
             return (SumOfValues + (simValue * simWeight)) / (SumOfWeights + simWeight);
         }
 
-
-
     }//WeightedAvg
 }//Namespace

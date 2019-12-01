@@ -50,6 +50,25 @@ namespace RCNet.Neural.Network.SM.Neuron
             SpikingOnly
         }
 
+        /// <summary>
+        /// Type of weights used by moving weighted average neuron's predictors
+        /// </summary>
+        public enum NeuronPredictorMWAvgWeightsType
+        {
+            /// <summary>
+            /// Exponential weights.
+            /// </summary>
+            Exponential,
+            /// <summary>
+            /// Linear weigths.
+            /// </summary>
+            Linear,
+            /// <summary>
+            /// Constant weights.
+            /// </summary>
+            Constant
+        }
+
         //Methods
         /// <summary>
         /// Parses neuron role from a string code
@@ -80,6 +99,22 @@ namespace RCNet.Neural.Network.SM.Neuron
                 case "SPIKINGONLY": return NeuronSignalingRestrictionType.SpikingOnly;
                 default:
                     throw new ArgumentException($"Unsupported neuron output signaling restriction {code}", "code");
+            }
+        }
+
+        /// <summary>
+        /// Parses type of weights used by moving weighted average neuron's predictors
+        /// </summary>
+        /// <param name="code">Restriction code</param>
+        public static NeuronPredictorMWAvgWeightsType ParseNeuronPredictorMWAvgWeightsType(string code)
+        {
+            switch (code.ToUpper())
+            {
+                case "EXPONENTIAL": return NeuronPredictorMWAvgWeightsType.Exponential;
+                case "LINEAR": return NeuronPredictorMWAvgWeightsType.Linear;
+                case "CONSTANT": return NeuronPredictorMWAvgWeightsType.Constant;
+                default:
+                    throw new ArgumentException($"Unsupported type of weights used by moving weighted average neuron's predictors {code}", "code");
             }
         }
 

@@ -33,15 +33,23 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// <summary>
         /// Squared current activation state
         /// </summary>
-        public bool SquaredActivation { get; private set; }
+        public bool ActivationSquare { get; private set; }
         /// <summary>
-        /// Exponentially weighted average firing rate within the last N cycles window
+        /// Fading sum of the activation state
         /// </summary>
-        public bool FiringExpWRate { get; private set; }
+        public bool ActivationFadingSum { get; private set; }
+        /// <summary>
+        /// Moving weighted average activation
+        /// </summary>
+        public bool ActivationMWAvg { get; private set; }
         /// <summary>
         /// Fading number of firings
         /// </summary>
         public bool FiringFadingSum { get; private set; }
+        /// <summary>
+        /// Moving weighted average firing
+        /// </summary>
+        public bool FiringMWAvg { get; private set; }
         /// <summary>
         /// Number of firings within the last N cycles window
         /// </summary>
@@ -74,18 +82,26 @@ namespace RCNet.Neural.Network.SM.Neuron
                           (poolPredictorsSettings == null ? true : poolPredictorsSettings.Activation) &&
                           (reservoirPredictorsSettings == null ? true : reservoirPredictorsSettings.Activation)
                           );
-            SquaredActivation = ((groupPredictorsSettings == null ? true : groupPredictorsSettings.SquaredActivation) &&
-                                 (poolPredictorsSettings == null ? true : poolPredictorsSettings.SquaredActivation) &&
-                                 (reservoirPredictorsSettings == null ? true : reservoirPredictorsSettings.SquaredActivation)
+            ActivationSquare = ((groupPredictorsSettings == null ? true : groupPredictorsSettings.ActivationSquare) &&
+                                 (poolPredictorsSettings == null ? true : poolPredictorsSettings.ActivationSquare) &&
+                                 (reservoirPredictorsSettings == null ? true : reservoirPredictorsSettings.ActivationSquare)
                                  );
-            FiringExpWRate = ((groupPredictorsSettings == null ? true : groupPredictorsSettings.FiringExpWRate) &&
-                              (poolPredictorsSettings == null ? true : poolPredictorsSettings.FiringExpWRate) &&
-                              (reservoirPredictorsSettings == null ? true : reservoirPredictorsSettings.FiringExpWRate)
+            ActivationFadingSum = ((groupPredictorsSettings == null ? true : groupPredictorsSettings.ActivationFadingSum) &&
+                                 (poolPredictorsSettings == null ? true : poolPredictorsSettings.ActivationFadingSum) &&
+                                 (reservoirPredictorsSettings == null ? true : reservoirPredictorsSettings.ActivationFadingSum)
+                                 );
+            ActivationMWAvg = ((groupPredictorsSettings == null ? true : groupPredictorsSettings.ActivationMWAvg) &&
+                              (poolPredictorsSettings == null ? true : poolPredictorsSettings.ActivationMWAvg) &&
+                              (reservoirPredictorsSettings == null ? true : reservoirPredictorsSettings.ActivationMWAvg)
                               );
             FiringFadingSum = ((groupPredictorsSettings == null ? true : groupPredictorsSettings.FiringFadingSum) &&
                                (poolPredictorsSettings == null ? true : poolPredictorsSettings.FiringFadingSum) &&
                                (reservoirPredictorsSettings == null ? true : reservoirPredictorsSettings.FiringFadingSum)
                                );
+            FiringMWAvg = ((groupPredictorsSettings == null ? true : groupPredictorsSettings.FiringMWAvg) &&
+                              (poolPredictorsSettings == null ? true : poolPredictorsSettings.FiringMWAvg) &&
+                              (reservoirPredictorsSettings == null ? true : reservoirPredictorsSettings.FiringMWAvg)
+                              );
             FiringCount = ((groupPredictorsSettings == null ? true : groupPredictorsSettings.FiringCount) &&
                            (poolPredictorsSettings == null ? true : poolPredictorsSettings.FiringCount) &&
                            (reservoirPredictorsSettings == null ? true : reservoirPredictorsSettings.FiringCount)
@@ -108,9 +124,11 @@ namespace RCNet.Neural.Network.SM.Neuron
             Params = source.Params?.DeepClone();
             //Permits
             Activation = source.Activation;
-            SquaredActivation = source.SquaredActivation;
-            FiringExpWRate = source.FiringExpWRate;
+            ActivationSquare = source.ActivationSquare;
+            ActivationFadingSum = source.ActivationFadingSum;
+            ActivationMWAvg = source.ActivationMWAvg;
             FiringFadingSum = source.FiringFadingSum;
+            FiringMWAvg = source.FiringMWAvg;
             FiringCount = source.FiringCount;
             FiringBinPattern = source.FiringBinPattern;
             NumOfEnabledPredictors = source.NumOfEnabledPredictors;
@@ -139,12 +157,14 @@ namespace RCNet.Neural.Network.SM.Neuron
             {
                 Params = new Settings(paramsElem);
             }
-            //Parsing of permits
+            //Parsing of permission
             XElement permitElem = predictorsElem.Descendants("permission").First();
             Activation = bool.Parse(permitElem.Attribute("activation").Value);
-            SquaredActivation = bool.Parse(permitElem.Attribute("squaredActivation").Value);
-            FiringExpWRate = bool.Parse(permitElem.Attribute("firingExpWRate").Value);
+            ActivationSquare = bool.Parse(permitElem.Attribute("activationSquare").Value);
+            ActivationFadingSum = bool.Parse(permitElem.Attribute("activationFadingSum").Value);
+            ActivationMWAvg = bool.Parse(permitElem.Attribute("activationMWAvg").Value);
             FiringFadingSum = bool.Parse(permitElem.Attribute("firingFadingSum").Value);
+            FiringMWAvg = bool.Parse(permitElem.Attribute("firingMWAvg").Value);
             FiringCount = bool.Parse(permitElem.Attribute("firingCount").Value);
             FiringBinPattern = bool.Parse(permitElem.Attribute("firingBinPattern").Value);
             NumOfEnabledPredictors = GetNumOfEnabledPredictors();
@@ -160,9 +180,11 @@ namespace RCNet.Neural.Network.SM.Neuron
         {
             int count = 0;
             count += Activation ? 1 : 0;
-            count += SquaredActivation ? 1 : 0;
-            count += FiringExpWRate ? 1 : 0;
+            count += ActivationSquare ? 1 : 0;
+            count += ActivationFadingSum ? 1 : 0;
+            count += ActivationMWAvg ? 1 : 0;
             count += FiringFadingSum ? 1 : 0;
+            count += FiringMWAvg ? 1 : 0;
             count += FiringCount ? 1 : 0;
             count += FiringBinPattern ? 1 : 0;
             return count;
@@ -177,9 +199,11 @@ namespace RCNet.Neural.Network.SM.Neuron
             HiddenNeuronPredictorsSettings cmpSettings = obj as HiddenNeuronPredictorsSettings;
             if (!Equals(Params, cmpSettings.Params) ||
                 Activation != cmpSettings.Activation ||
-                SquaredActivation != cmpSettings.SquaredActivation ||
-                FiringExpWRate != cmpSettings.FiringExpWRate ||
+                ActivationSquare != cmpSettings.ActivationSquare ||
+                ActivationFadingSum != cmpSettings.ActivationFadingSum ||
+                ActivationMWAvg != cmpSettings.ActivationMWAvg ||
                 FiringFadingSum != cmpSettings.FiringFadingSum ||
+                FiringMWAvg != cmpSettings.FiringMWAvg ||
                 FiringCount != cmpSettings.FiringCount ||
                 FiringBinPattern != cmpSettings.FiringBinPattern ||
                 NumOfEnabledPredictors != cmpSettings.NumOfEnabledPredictors
@@ -216,13 +240,37 @@ namespace RCNet.Neural.Network.SM.Neuron
         {
             //Constants
             /// <summary>
-            /// Default value of window length for FiringExpWRate predictor
+            /// Default value of strength of fading for ActivationFadingSum predictor
             /// </summary>
-            public const int DefaultFiringExpWRateWindow = 64;
+            public const double DefaultActivationFadingSumStrength = 0.005;
+            /// <summary>
+            /// Default value of window length for ActivationMWAvg predictor
+            /// </summary>
+            public const int DefaultActivationMWAvgWindow = 64;
+            /// <summary>
+            /// Default value of leakage for ActivationMWAvg predictor
+            /// </summary>
+            public const int DefaultActivationMWAvgLeakage = 0;
+            /// <summary>
+            /// Default weights type for ActivationMWAvg predictor
+            /// </summary>
+            public const NeuronCommon.NeuronPredictorMWAvgWeightsType DefaultActivationMWAvgWeightsType = NeuronCommon.NeuronPredictorMWAvgWeightsType.Exponential;
             /// <summary>
             /// Default value of strength of fading for FiringFadingSum predictor
             /// </summary>
             public const double DefaultFiringFadingSumStrength = 0.005;
+            /// <summary>
+            /// Default value of window length for FiringMWAvg predictor
+            /// </summary>
+            public const int DefaultFiringMWAvgWindow = 64;
+            /// <summary>
+            /// Default value of leakage for FiringMWAvg predictor
+            /// </summary>
+            public const int DefaultFiringMWAvgLeakage = 0;
+            /// <summary>
+            /// Default weights type for FiringMWAvg predictor
+            /// </summary>
+            public const NeuronCommon.NeuronPredictorMWAvgWeightsType DefaultFiringMWAvgWeightsType = NeuronCommon.NeuronPredictorMWAvgWeightsType.Exponential;
             /// <summary>
             /// Default value of window length for FiringCount predictor
             /// </summary>
@@ -234,13 +282,37 @@ namespace RCNet.Neural.Network.SM.Neuron
 
             //Attribute properties
             /// <summary>
-            /// Window length for FiringExpWRate predictor
+            /// Strength of fading for ActivationFadingSum predictor
             /// </summary>
-            public int FiringExpWRateWindow { get; set; }
+            public double ActivationFadingSumStrength { get; set; }
+            /// <summary>
+            /// Window length for ActivationMWAvg predictor
+            /// </summary>
+            public int ActivationMWAvgWindow { get; set; }
+            /// <summary>
+            /// Leakage for ActivationMWAvg predictor
+            /// </summary>
+            public int ActivationMWAvgLeakage { get; set; }
+            /// <summary>
+            /// Leakage for ActivationMWAvg predictor
+            /// </summary>
+            public NeuronCommon.NeuronPredictorMWAvgWeightsType ActivationMWAvgWeightsType { get; set; }
             /// <summary>
             /// Strength of fading for FiringFadingSum predictor
             /// </summary>
             public double FiringFadingSumStrength { get; set; }
+            /// <summary>
+            /// Window length for FiringMWAvg predictor
+            /// </summary>
+            public int FiringMWAvgWindow { get; set; }
+            /// <summary>
+            /// Leakage for FiringMWAvg predictor
+            /// </summary>
+            public int FiringMWAvgLeakage { get; set; }
+            /// <summary>
+            /// Leakage for FiringMWAvg predictor
+            /// </summary>
+            public NeuronCommon.NeuronPredictorMWAvgWeightsType FiringMWAvgWeightsType { get; set; }
             //Attribute properties
             /// <summary>
             /// Window length for FiringCount predictor
@@ -257,8 +329,14 @@ namespace RCNet.Neural.Network.SM.Neuron
             /// </summary>
             public Settings()
             {
-                FiringExpWRateWindow = DefaultFiringExpWRateWindow;
+                ActivationFadingSumStrength = DefaultActivationFadingSumStrength;
+                ActivationMWAvgWindow = DefaultActivationMWAvgWindow;
+                ActivationMWAvgLeakage = DefaultActivationMWAvgLeakage;
+                ActivationMWAvgWeightsType = DefaultActivationMWAvgWeightsType;
                 FiringFadingSumStrength = DefaultFiringFadingSumStrength;
+                FiringMWAvgWindow = DefaultFiringMWAvgWindow;
+                FiringMWAvgLeakage = DefaultFiringMWAvgLeakage;
+                FiringMWAvgWeightsType = DefaultFiringMWAvgWeightsType;
                 FiringCountWindow = DefaultFiringCountWindow;
                 FiringBinPatternWindow = DefaultFiringBinPatternWindow;
                 return;
@@ -270,8 +348,14 @@ namespace RCNet.Neural.Network.SM.Neuron
             /// <param name="source">Source instance</param>
             public Settings(Settings source)
             {
-                FiringExpWRateWindow = source.FiringExpWRateWindow;
+                ActivationFadingSumStrength = source.ActivationFadingSumStrength;
+                ActivationMWAvgWindow = source.ActivationMWAvgWindow;
+                ActivationMWAvgLeakage = source.ActivationMWAvgLeakage;
+                ActivationMWAvgWeightsType = source.ActivationMWAvgWeightsType;
                 FiringFadingSumStrength = source.FiringFadingSumStrength;
+                FiringMWAvgWindow = source.FiringMWAvgWindow;
+                FiringMWAvgLeakage = source.FiringMWAvgLeakage;
+                FiringMWAvgWeightsType = source.FiringMWAvgWeightsType;
                 FiringCountWindow = source.FiringCountWindow;
                 FiringBinPatternWindow = source.FiringBinPatternWindow;
                 return;
@@ -284,8 +368,14 @@ namespace RCNet.Neural.Network.SM.Neuron
             public Settings(XElement elem)
             {
                 //Parsing
-                FiringExpWRateWindow = int.Parse(elem.Descendants("firingExpWRate").First().Attribute("window").Value, CultureInfo.InvariantCulture);
+                ActivationFadingSumStrength = double.Parse(elem.Descendants("activationFadingSum").First().Attribute("strength").Value, CultureInfo.InvariantCulture);
+                ActivationMWAvgWindow = int.Parse(elem.Descendants("activationMWAvg").First().Attribute("window").Value, CultureInfo.InvariantCulture);
+                ActivationMWAvgLeakage = int.Parse(elem.Descendants("activationMWAvg").First().Attribute("leakage").Value, CultureInfo.InvariantCulture);
+                ActivationMWAvgWeightsType = NeuronCommon.ParseNeuronPredictorMWAvgWeightsType(elem.Descendants("activationMWAvg").First().Attribute("weights").Value);
                 FiringFadingSumStrength = double.Parse(elem.Descendants("firingFadingSum").First().Attribute("strength").Value, CultureInfo.InvariantCulture);
+                FiringMWAvgWindow = int.Parse(elem.Descendants("firingMWAvg").First().Attribute("window").Value, CultureInfo.InvariantCulture);
+                FiringMWAvgLeakage = int.Parse(elem.Descendants("firingMWAvg").First().Attribute("leakage").Value, CultureInfo.InvariantCulture);
+                FiringMWAvgWeightsType = NeuronCommon.ParseNeuronPredictorMWAvgWeightsType(elem.Descendants("firingMWAvg").First().Attribute("weights").Value);
                 FiringCountWindow = int.Parse(elem.Descendants("firingCount").First().Attribute("window").Value, CultureInfo.InvariantCulture);
                 FiringBinPatternWindow = int.Parse(elem.Descendants("firingBinPattern").First().Attribute("window").Value, CultureInfo.InvariantCulture);
                 return;
@@ -299,8 +389,14 @@ namespace RCNet.Neural.Network.SM.Neuron
             {
                 if (obj == null) return false;
                 Settings cmpSettings = obj as Settings;
-                if (FiringExpWRateWindow != cmpSettings.FiringExpWRateWindow ||
+                if (ActivationFadingSumStrength != cmpSettings.ActivationFadingSumStrength ||
+                    ActivationMWAvgWindow != cmpSettings.ActivationMWAvgWindow ||
+                    ActivationMWAvgLeakage != cmpSettings.ActivationMWAvgLeakage ||
+                    ActivationMWAvgWeightsType != cmpSettings.ActivationMWAvgWeightsType ||
                     FiringFadingSumStrength != cmpSettings.FiringFadingSumStrength ||
+                    FiringMWAvgWindow != cmpSettings.FiringMWAvgWindow ||
+                    FiringMWAvgLeakage != cmpSettings.FiringMWAvgLeakage ||
+                    FiringMWAvgWeightsType != cmpSettings.FiringMWAvgWeightsType ||
                     FiringCountWindow != cmpSettings.FiringCountWindow ||
                     FiringBinPatternWindow != cmpSettings.FiringBinPatternWindow
                     )

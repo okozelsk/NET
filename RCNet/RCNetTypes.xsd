@@ -64,6 +64,15 @@
     </xs:restriction>
   </xs:simpleType>
 
+  <!-- Enumeration of moving weighted average weights type -->
+  <xs:simpleType name="MWAvgWeightsType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Exponential"/>
+      <xs:enumeration value="Linear"/>
+      <xs:enumeration value="Constant"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <!-- Enumeration of ODE numerical solver methods -->
   <xs:simpleType name="ODENumSolverMethodType">
     <xs:restriction base="xs:string">
@@ -1469,20 +1478,30 @@
 
   <!-- ________________________________________NEURAL POOL TYPES_________________________________________________ -->
 
-  <!-- Predictor FiringExpWRate - configuration -->
-  <xs:complexType name="PredictorFiringExpWRateCfgType">
+  <!-- Predictor FadingSum - configuration -->
+  <xs:complexType name="PredictorFadingSumCfgType">
+    <xs:attribute type="UDoubleGT0LT1Type" name="strength" use="optional" default="0.005">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Fading strength (GT0..LT1). Default value is 0.005</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <!-- Predictor MWAvg - configuration -->
+  <xs:complexType name="PredictorMWAvgCfgType">
     <xs:attribute type="UIntGE2LE64Type" name="window" use="optional" default="64">
       <xs:annotation>
         <xs:documentation xml:lang="en">Sliding window size (2..64). Default value is 64</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-  </xs:complexType>
-
-  <!-- Predictor FiringFadingSum - configuration -->
-  <xs:complexType name="PredictorFiringFadingSumCfgType">
-    <xs:attribute type="UDoubleGT0LT1Type" name="strength" use="optional" default="0.005">
+    <xs:attribute type="xs:unsignedInt" name="leakage" use="optional" default="0">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Fading strength (GT0..LT1). Default value is 0.005</xs:documentation>
+        <xs:documentation xml:lang="en">Samples leakage. Default value is 0</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="MWAvgWeightsType" name="weights" use="optional" default="Exponential">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Sample weights. Default value is Exponential</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -1508,8 +1527,10 @@
   <!-- Predictors settings - configuration -->
   <xs:complexType name="PredictorsSettingsCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="PredictorFiringExpWRateCfgType" name="firingExpWRate" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="PredictorFiringFadingSumCfgType" name="firingFadingSum" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="PredictorFadingSumCfgType" name="activationFadingSum" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="PredictorMWAvgCfgType" name="activationMWAvg" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="PredictorFadingSumCfgType" name="firingFadingSum" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="PredictorMWAvgCfgType" name="firingMWAvg" minOccurs="1" maxOccurs="1"/>
       <xs:element type="PredictorFiringCountCfgType" name="firingCount" minOccurs="1" maxOccurs="1"/>
       <xs:element type="PredictorFiringBinPatternCfgType" name="firingBinPattern" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
@@ -1522,19 +1543,29 @@
         <xs:documentation xml:lang="en">Current activation state. Default value is true</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute type="xs:boolean" name="squaredActivation" use="optional" default="true">
+    <xs:attribute type="xs:boolean" name="activationSquare" use="optional" default="true">
       <xs:annotation>
         <xs:documentation xml:lang="en">Squared current activation state. Default value is true</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute type="xs:boolean" name="firingExpWRate" use="optional" default="true">
+    <xs:attribute type="xs:boolean" name="activationFadingSum" use="optional" default="true">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Exponentially weighted average firing rate within the sliding window. Default value is true</xs:documentation>
+        <xs:documentation xml:lang="en">Fading sum of activation states. Default value is true</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="activationMWAvg" use="optional" default="true">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Weighted moving average of activations. Default value is true</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="xs:boolean" name="firingFadingSum" use="optional" default="true">
       <xs:annotation>
         <xs:documentation xml:lang="en">Fading sum of firings. Default value is true</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="firingMWAvg" use="optional" default="true">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Weighted moving average of firings. Default value is true</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="xs:boolean" name="firingCount" use="optional" default="true">

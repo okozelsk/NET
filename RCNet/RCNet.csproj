@@ -74,6 +74,7 @@
     <Compile Include="MathTools\MatrixMath\SVD.cs" />
     <Compile Include="MathTools\PhysUnit.cs" />
     <Compile Include="MathTools\VectorMath\Vector.cs" />
+    <Compile Include="MathTools\MovingWeightedAvg.cs" />
     <Compile Include="Neural\Activation\ActivationCommon.cs" />
     <Compile Include="Neural\Activation\ActivationFactory.cs" />
     <Compile Include="Neural\Activation\AutoIzhikevichIFSettings.cs" />

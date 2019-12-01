@@ -33,6 +33,8 @@ Input data is expected in csv format where delimiter can be a semicolon or a com
 |Component|Description|
 |--|--|
 |BasicStat|Provides basic statistics of given data (averages, sum of squares, standard deviation, etc.)|
+|WeightedAvg|Computes weighted average of given value/weight data pairs|
+|MovingWeightedAvg|Computes weighted average of recent part of given data|
 |ODENumSolver|Implements ordinary differential equations (ODE) numerical solver supporting Euler and RK4 methods|
 |Vector|Implements vector of double values supporting basic mathematical operations|
 |Matrix|Implements matrix of double values supporting basic mathematical operations. Contains buit-in Power Iteration method for the largest eigen value quick estimation|
@@ -43,25 +45,26 @@ Input data is expected in csv format where delimiter can be a semicolon or a com
 |ParamSeeker|Implements an error driven iterative search for the best value of a given parameter|
 |HurstExpEstim|Implements Hurst exponent estimator. It can be used to evaluate level of data randomness|
 |"RandomValue"|Supports Uniform, Gaussian, Exponential and Gamma distributions|
-|Others|Set of small additional helper components like PhysUnit, Interval, Bitwise, Combinatorics, Factorial, WeightedAvg, ...|
+|Others|Set of small additional helper components like PhysUnit, Interval, Bitwise, Combinatorics, Factorial,...|
 
 ### Signal generators
 |Component|Description|
 |--|--|
 |PulseGenerator|Generates constant pulses having specified average period. Pulse leaks follow specified random distribution or can be constant|
 |MackeyGlassGenerator|Generates Mackey-Glass chaotic signal|
-|RandomGenerator|Generates random signal|
+|RandomGenerator|Generates random signal following specified distribution|
 |SinusoidalGenerator|Generates sinusoidal signal|
 
 ### XML handling
 |Component|Description|
 |--|--|
 |ElemValidator|Implements validation of alone xml element against specified type defined in xsd. It complements the apparently missing .net method and is necessary to comply with the overall RCNet xml settings concept.|
-|DocValidator|Provides the xml loading/validation functionalities|
+|DocValidator|Provides the xml document loading/validation functionalities|
 
 ### Data handling
 |Component|Description|
 |--|--|
+|SimpleQueue|Implements quick and simple FIFO queue (template). Supports access to enqueued elements so it can be also used as the "sliding window"|
 |BinFeatureFilter|Binary (0/1) feature filter|
 |EnumFeatureFilter|Enumeration (1..N) feature filter|
 |RealFeatureFilter|Real number feature filter supporting standardization and range reserve for handling of unseen data in the future|
@@ -70,7 +73,9 @@ Input data is expected in csv format where delimiter can be a semicolon or a com
 |PatternBundle|Bundle of patterns of input data vectors and corresponding desired output vectors (n:1). Supports upload from csv file|
 |ResultBundle|Bundle of input, computed and desired output vectors (1:1:1)|
 
-### Analog neuron activation functions
+### Analog activation functions (stateless)
+See the [wiki pages.](https://en.wikipedia.org/wiki/Activation_function)
+
 |Component|Description|
 |--|--|
 |BentIdentity|Bent identity activation function|
@@ -85,9 +90,10 @@ Input data is expected in csv format where delimiter can be a semicolon or a com
 |SoftExponential|Soft exponential activation function|
 |SoftPlus|Soft Plus activation function|
 |TanH|TanH activation function|
-See the [wiki pages.](https://en.wikipedia.org/wiki/Activation_function)
 
-### Spiking neuron activation functions
+### Spiking activation functions (stateful)
+See the [wiki pages.](https://en.wikipedia.org/wiki/Biological_neuron_model)
+
 |Component|Description|
 |--|--|
 |SimpleIF|Simple Integrate and Fire activation function|
@@ -95,7 +101,6 @@ See the [wiki pages.](https://en.wikipedia.org/wiki/Activation_function)
 |ExpIF|Exponential Integrate and Fire activation function|
 |AdExpIF|Adaptive Exponential Integrate and Fire activation function|
 |IzhikevichIF|Izhikevich Integrate and Fire activation function (model "one fits all")|
-See the [wiki pages.](https://en.wikipedia.org/wiki/Biological_neuron_model)
 
 ### Non-recurrent networks and trainers
 |Component|Description|
@@ -105,6 +110,7 @@ See the [wiki pages.](https://en.wikipedia.org/wiki/Biological_neuron_model)
 |QRDRegrTrainer|Implements the linear regression (QR decomposition) trainer of the feed forward network. This is the special case trainer for FF network having no hidden layers and Identity output activation function|
 |RidgeRegrTrainer|Implements the ridge linear regression trainer of the feed forward network. This is the special case trainer for FF network having no hidden layers and Identity output activation function|
 |ElasticRegrTrainer|Implements the elastic net trainer of the feed forward network. This is the special case trainer for FF network having no hidden layers and Identity output activation function|
+|||
 |ParallelPerceptron|Implements the parallel perceptron network|
 |PDeltaRuleTrainer|P-Delta rule trainer of the parallel perceptron network|
 
