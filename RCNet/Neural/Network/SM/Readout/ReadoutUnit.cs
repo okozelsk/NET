@@ -259,7 +259,9 @@ namespace RCNet.Neural.Network.SM.Readout
         /// <param name="readoutUnitIdx">Index of the readout unit (informative only)</param>
         /// <param name="foldNum">Current fold number</param>
         /// <param name="numOfFolds">Total number of the folds</param>
-        /// <param name="refBinDistr">Reference bin distribution (if task type is Classification)</param>
+        /// <param name="binBorder">Binary 0/1 border. Double value LT this border is considered as 0 and GE as 1.
+        /// (relevant only if task type is Classification)
+        /// </param>
         /// <param name="trainingPredictorsCollection">Collection of the predictors for training</param>
         /// <param name="trainingIdealOutputsCollection">Collection of ideal outputs for training. Note that the double array always has only one member.</param>
         /// <param name="testingPredictorsCollection">Collection of the predictors for testing</param>
@@ -273,7 +275,7 @@ namespace RCNet.Neural.Network.SM.Readout
                                                 int readoutUnitIdx,
                                                 int foldNum,
                                                 int numOfFolds,
-                                                BinDistribution refBinDistr,
+                                                double binBorder,
                                                 List<double[]> trainingPredictorsCollection,
                                                 List<double[]> trainingIdealOutputsCollection,
                                                 List<double[]> testingPredictorsCollection,
@@ -300,13 +302,15 @@ namespace RCNet.Neural.Network.SM.Readout
             {
                 List<double[]> testingComputedOutputsCollection = null;
                 //Compute current error statistics after training iteration
-                ReadoutUnit currReadoutUnit = new ReadoutUnit();
-                currReadoutUnit.Network = net;
-                currReadoutUnit.TrainerInfoMessage = trainer.InfoMessage;
-                currReadoutUnit.TrainingErrorStat = net.ComputeBatchErrorStat(trainingPredictorsCollection, trainingIdealOutputsCollection, out List<double[]> trainingComputedOutputsCollection);
+                ReadoutUnit currReadoutUnit = new ReadoutUnit
+                {
+                    Network = net,
+                    TrainerInfoMessage = trainer.InfoMessage,
+                    TrainingErrorStat = net.ComputeBatchErrorStat(trainingPredictorsCollection, trainingIdealOutputsCollection, out List<double[]> trainingComputedOutputsCollection)
+                };
                 if (taskType == TaskType.Classification)
                 {
-                    currReadoutUnit.TrainingBinErrorStat = new BinErrStat(refBinDistr, trainingComputedOutputsCollection, trainingIdealOutputsCollection);
+                    currReadoutUnit.TrainingBinErrorStat = new BinErrStat(binBorder, trainingComputedOutputsCollection, trainingIdealOutputsCollection);
                     currReadoutUnit.CombinedBinaryError = currReadoutUnit.TrainingBinErrorStat.TotalErrStat.Sum;
                 }
                 currReadoutUnit.CombinedPrecisionError = currReadoutUnit.TrainingErrorStat.ArithAvg;
@@ -316,7 +320,7 @@ namespace RCNet.Neural.Network.SM.Readout
                     currReadoutUnit.CombinedPrecisionError = Math.Max(currReadoutUnit.CombinedPrecisionError, currReadoutUnit.TestingErrorStat.ArithAvg);
                     if (taskType == TaskType.Classification)
                     {
-                        currReadoutUnit.TestingBinErrorStat = new BinErrStat(refBinDistr, testingComputedOutputsCollection, testingIdealOutputsCollection);
+                        currReadoutUnit.TestingBinErrorStat = new BinErrStat(binBorder, testingComputedOutputsCollection, testingIdealOutputsCollection);
                         currReadoutUnit.CombinedBinaryError = Math.Max(currReadoutUnit.CombinedBinaryError, currReadoutUnit.TestingBinErrorStat.TotalErrStat.Sum);
                     }
                 }

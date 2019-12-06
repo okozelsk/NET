@@ -134,7 +134,7 @@ namespace RCNet.DemoConsoleApp
             //Regression stage - building of trained readout layer
             log.Write("    Regression stage (training of readout layer)", false);
             //Perform the regression
-            ResultBundle rcb = stateMachine.BuildReadoutLayer(rsi, RegressionControl, log);
+            StateMachine.RegressionOutput regressionOutput = stateMachine.BuildReadoutLayer(rsi, RegressionControl, log);
             log.Write(string.Empty);
 
             //Report training (regression) results
@@ -143,7 +143,16 @@ namespace RCNet.DemoConsoleApp
             log.Write(trainingReport);
             log.Write(string.Empty);
 
-            //Perform prediction if the input feeding is continuous (we know the input but we don't know the ideal output)
+            if (regressionOutput.VerificationResultBundle.InputVectorCollection.Count > 0)
+            {
+                //Report verification results
+                log.Write("    Verification results", false);
+                string verificationReport = regressionOutput.VerificationSummaryStat.GetReport(6);
+                log.Write(verificationReport);
+                log.Write(string.Empty);
+            }
+
+            //Perform prediction in case the input feeding is continuous (we know the input but we don't know the ideal output)
             if (demoCaseParams.StateMachineCfg.NeuralPreprocessorConfig.InputConfig.FeedingType == NeuralPreprocessor.InputFeedingType.Continuous)
             {
                 double[] predictionOutputVector = stateMachine.Compute(predictionInputVector);

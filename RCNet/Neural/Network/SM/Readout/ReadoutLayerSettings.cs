@@ -42,6 +42,11 @@ namespace RCNet.Neural.Network.SM.Readout
         /// Readout unit configurations
         /// </summary>
         public List<ReadoutUnitSettings> ReadoutUnitCfgCollection { get; set; }
+        /// <summary>
+        /// Dictionary of names of "one winner" groups
+        /// </summary>
+        public Dictionary<string, string> OneWinnerGroupNameCollection { get; set; }
+
 
         //Constructors
         /// <summary>
@@ -53,6 +58,7 @@ namespace RCNet.Neural.Network.SM.Readout
             TestDataRatio = 0;
             NumOfFolds = 0;
             ReadoutUnitCfgCollection = new List<ReadoutUnitSettings>();
+            OneWinnerGroupNameCollection = new Dictionary<string, string>();
             return;
         }
 
@@ -70,6 +76,7 @@ namespace RCNet.Neural.Network.SM.Readout
             {
                 ReadoutUnitCfgCollection.Add(rus.DeepClone());
             }
+            OneWinnerGroupNameCollection = new Dictionary<string, string>(source.OneWinnerGroupNameCollection);
             return;
         }
 
@@ -94,9 +101,20 @@ namespace RCNet.Neural.Network.SM.Readout
             NumOfFolds = readoutLayerSettingsElem.Attribute("folds").Value == "Auto" ? 0 : int.Parse(readoutLayerSettingsElem.Attribute("folds").Value);
             //Readout units
             ReadoutUnitCfgCollection = new List<ReadoutUnitSettings>();
+            OneWinnerGroupNameCollection = new Dictionary<string, string>();
+            int unitIndex = 0;
             foreach (XElement readoutUnitElem in readoutLayerSettingsElem.Descendants("readoutUnit"))
             {
-                ReadoutUnitCfgCollection.Add(new ReadoutUnitSettings(readoutUnitElem));
+                ReadoutUnitSettings rus = new ReadoutUnitSettings(unitIndex, readoutUnitElem);
+                ReadoutUnitCfgCollection.Add(rus);
+                if(rus.OneWinnerGroupName != ReadoutUnitSettings.NoOneWinnerGroupName)
+                {
+                    if(!OneWinnerGroupNameCollection.TryGetValue(rus.OneWinnerGroupName, out string value))
+                    {
+                        OneWinnerGroupNameCollection.Add(rus.OneWinnerGroupName, rus.OneWinnerGroupName);
+                    }
+                }
+                ++unitIndex;
             }
             return;
         }
@@ -109,6 +127,16 @@ namespace RCNet.Neural.Network.SM.Readout
 
         //Methods
         /// <summary>
+        /// Returns settings of readout units belonging into the specified one-winner group.
+        /// </summary>
+        /// <param name="groupName">One-winner group name</param>
+        public List<ReadoutUnitSettings> GetOneWinnerGroupMembers(string groupName)
+        {
+            return (from rus in ReadoutUnitCfgCollection where rus.OneWinnerGroupName == groupName select rus).ToList();
+        }
+
+        
+        /// <summary>
         /// See the base.
         /// </summary>
         public override bool Equals(object obj)
@@ -117,7 +145,8 @@ namespace RCNet.Neural.Network.SM.Readout
             ReadoutLayerSettings cmpSettings = obj as ReadoutLayerSettings;
             if (TestDataRatio != cmpSettings.TestDataRatio ||
                 NumOfFolds != cmpSettings.NumOfFolds ||
-                ReadoutUnitCfgCollection.Count != cmpSettings.ReadoutUnitCfgCollection.Count
+                ReadoutUnitCfgCollection.Count != cmpSettings.ReadoutUnitCfgCollection.Count ||
+                OneWinnerGroupNameCollection.Count != cmpSettings.OneWinnerGroupNameCollection.Count
                 )
             {
                 return false;
@@ -125,6 +154,17 @@ namespace RCNet.Neural.Network.SM.Readout
             for(int i = 0; i < ReadoutUnitCfgCollection.Count; i++)
             {
                 if(!ReadoutUnitCfgCollection[i].Equals(cmpSettings.ReadoutUnitCfgCollection[i]))
+                {
+                    return false;
+                }
+            }
+            foreach(string name in OneWinnerGroupNameCollection.Keys)
+            {
+                if(!cmpSettings.OneWinnerGroupNameCollection.TryGetValue(name, out string value))
+                {
+                    return false;
+                }
+                if(OneWinnerGroupNameCollection[name] != cmpSettings.OneWinnerGroupNameCollection[name])
                 {
                     return false;
                 }
@@ -157,6 +197,7 @@ namespace RCNet.Neural.Network.SM.Readout
         public class ReadoutUnitSettings
         {
             //Constants
+            public const string NoOneWinnerGroupName = "NA";
             /// <summary>
             /// Supported types of readout unit networks
             /// </summary>
@@ -178,9 +219,17 @@ namespace RCNet.Neural.Network.SM.Readout
             /// </summary>
             public string Name { get; set; }
             /// <summary>
+            /// Readout unit zero-based index
+            /// </summary>
+            public int Index { get; set; }
+            /// <summary>
             /// Neural task type
             /// </summary>
             public ReadoutUnit.TaskType TaskType;
+            /// <summary>
+            /// Specifies membership in the group of possible classes where only one can win.
+            /// </summary>
+            public readonly string OneWinnerGroupName;
             /// <summary>
             /// Feature filter configuration
             /// </summary>
@@ -205,7 +254,9 @@ namespace RCNet.Neural.Network.SM.Readout
             public ReadoutUnitSettings()
             {
                 Name = string.Empty;
+                Index = -1;
                 TaskType = ReadoutUnit.TaskType.Forecast;
+                OneWinnerGroupName = NoOneWinnerGroupName;
                 FeatureFilterCfg = null;
                 NetType = ReadoutUnitNetworkType.FF;
                 NetSettings = null;
@@ -220,7 +271,9 @@ namespace RCNet.Neural.Network.SM.Readout
             public ReadoutUnitSettings(ReadoutUnitSettings source)
             {
                 Name = source.Name;
+                Index = source.Index;
                 TaskType = source.TaskType;
+                OneWinnerGroupName = source.OneWinnerGroupName;
                 FeatureFilterCfg = FeatureFilterFactory.DeepClone(source.FeatureFilterCfg);
                 NetType = source.NetType;
                 NetSettings = null;
@@ -243,23 +296,31 @@ namespace RCNet.Neural.Network.SM.Readout
             /// <summary>
             /// Creates the instance and initializes it from given xml element.
             /// </summary>
-            /// <param name="readoutUnitElem">
-            /// Xml data containing the settings.
-            /// </param>
-            public ReadoutUnitSettings(XElement readoutUnitElem)
+            /// <param name="index">Zero-based index of this readout unit</param>
+            /// <param name="readoutUnitElem">Xml data containing the settings.</param>
+            public ReadoutUnitSettings(int index, XElement readoutUnitElem)
             {
                 //Name
                 Name = readoutUnitElem.Attribute("name").Value;
+                Index = index;
                 //Task and filter
                 XElement taskElem = readoutUnitElem.Descendants().First();
                 if(taskElem.Name.LocalName == "forecast")
                 {
                     TaskType = ReadoutUnit.TaskType.Forecast;
+                    OneWinnerGroupName = NoOneWinnerGroupName;
                 }
                 else
                 {
                     TaskType = ReadoutUnit.TaskType.Classification;
+                    //One winner group name
+                    OneWinnerGroupName = taskElem.Attribute("oneWinnerGroupName").Value;
+                    if(OneWinnerGroupName.ToUpper().Trim() == NoOneWinnerGroupName)
+                    {
+                        OneWinnerGroupName = NoOneWinnerGroupName;
+                    }
                 }
+                //Feature filter
                 FeatureFilterCfg = FeatureFilterFactory.LoadSettings(taskElem.Descendants().First());
                 //Net settings
                 List<XElement> netSettingsElems = new List<XElement>();
@@ -267,7 +328,7 @@ namespace RCNet.Neural.Network.SM.Readout
                 netSettingsElems.AddRange(readoutUnitElem.Descendants("pp"));
                 if (netSettingsElems.Count != 1)
                 {
-                    throw new Exception("Only one network configuration can be specified in readout unit settings.");
+                    throw new Exception("Only one network configuration can be specified within readout unit settings.");
                 }
                 if (netSettingsElems.Count == 0)
                 {
@@ -300,7 +361,9 @@ namespace RCNet.Neural.Network.SM.Readout
                 if (obj == null) return false;
                 ReadoutUnitSettings cmpSettings = obj as ReadoutUnitSettings;
                 if (Name != cmpSettings.Name ||
+                    Index != cmpSettings.Index ||
                     TaskType != cmpSettings.TaskType ||
+                    OneWinnerGroupName != cmpSettings.OneWinnerGroupName ||
                     !Equals(FeatureFilterCfg, cmpSettings.FeatureFilterCfg) ||
                     NetType != cmpSettings.NetType ||
                     !Equals(NetSettings, cmpSettings.NetSettings) ||

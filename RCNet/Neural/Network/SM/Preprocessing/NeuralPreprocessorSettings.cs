@@ -238,6 +238,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             public NeuralPreprocessor.InputFeedingType FeedingType { get; set; }
 
             /// <summary>
+            /// Parameter is relevant only for patterned feeding and specifies, if to preprocess time series in both time directions.
+            /// </summary>
+            public bool Bidirectional { get; set; }
+
+            /// <summary>
             /// Number of booting cycles (-1 means Auto)
             /// </summary>
             public int BootCycles { get; set; }
@@ -265,6 +270,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             private InputSettings()
             {
                 FeedingType = NeuralPreprocessor.InputFeedingType.Continuous;
+                Bidirectional = false;
                 BootCycles = -1;
                 RouteInputToReadout = false;
                 ExternalFieldCollection = new List<ExternalField>();
@@ -280,6 +286,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 :this()
             {
                 FeedingType = source.FeedingType;
+                Bidirectional = source.Bidirectional;
                 BootCycles = source.BootCycles;
                 RouteInputToReadout = source.RouteInputToReadout;
                 foreach (ExternalField field in source.ExternalFieldCollection)
@@ -305,6 +312,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 if(feedingElem.Name.LocalName == "feedingContinuous")
                 {
                     FeedingType = NeuralPreprocessor.InputFeedingType.Continuous;
+                    Bidirectional = false;
                     //Number of booting cycles
                     string bootCyclesAttrValue = feedingElem.Attribute("bootCycles").Value;
                     if (bootCyclesAttrValue == "Auto")
@@ -322,6 +330,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 else
                 {
                     FeedingType = NeuralPreprocessor.InputFeedingType.Patterned;
+                    Bidirectional = RouteInputToReadout = bool.Parse(feedingElem.Attribute("bidir").Value);
                     BootCycles = 0;
                     RouteInputToReadout = false;
                 }
@@ -430,6 +439,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 if (obj == null) return false;
                 InputSettings cmpSettings = obj as InputSettings;
                 if (FeedingType != cmpSettings.FeedingType ||
+                    Bidirectional != cmpSettings.Bidirectional ||
                     BootCycles != cmpSettings.BootCycles ||
                     RouteInputToReadout != cmpSettings.RouteInputToReadout ||
                     ExternalFieldCollection.Count != cmpSettings.ExternalFieldCollection.Count ||

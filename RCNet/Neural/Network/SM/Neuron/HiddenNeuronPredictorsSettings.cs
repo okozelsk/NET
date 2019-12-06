@@ -242,7 +242,7 @@ namespace RCNet.Neural.Network.SM.Neuron
             /// <summary>
             /// Default value of strength of fading for ActivationFadingSum predictor
             /// </summary>
-            public const double DefaultActivationFadingSumStrength = 0.005;
+            public const double DefaultActivationFadingSumStrength = 0.1;
             /// <summary>
             /// Default value of window length for ActivationMWAvg predictor
             /// </summary>

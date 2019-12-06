@@ -12,64 +12,28 @@ namespace RCNet.MathTools
     [Serializable]
     public class BinErrStat
     {
-        //Constants
-        private const double MaxErr = 1E9;
-
         //Attribute properties
         /// <summary>
-        /// Reference distribution of 0/1 values
+        /// Binary 0/1 border. Double value LT this border is considered as 0 and GE as 1.
         /// </summary>
-        public BinDistribution RefBinValDistr { get; set; }
-        /// <summary>
-        /// This distribution of 0/1 values (from ideal)
-        /// </summary>
-        public BinDistribution ThisBinValDistr { get; set; }
+        public double BinBorder { get; }
         /// <summary>
         /// Statistics of errors on individual 0/1 values
         /// </summary>
-        public BasicStat[] BinValErrStat { get; set; }
+        public BasicStat[] BinValErrStat { get; }
         /// <summary>
         /// Total error statistics
         /// </summary>
-        public BasicStat TotalErrStat { get; set; }
-
-        //Properties
-        /// <summary>
-        /// Proportional error based on bin values distributions and error rates.
-        /// </summary>
-        public double ProportionalErr
-        {
-            get
-            {
-                double err = 0;
-                for (int binVal = 0; binVal <= 1; binVal++)
-                {
-                    double proportionCoeff = MaxErr;
-                    if (ThisBinValDistr.BinRate[binVal] > 0)
-                    {
-                        proportionCoeff = RefBinValDistr.BinRate[binVal] / ThisBinValDistr.BinRate[binVal];
-                    }
-                    double errRate = 1;
-                    if (ThisBinValDistr.NumOf[binVal] > 0)
-                    {
-                        errRate = BinValErrStat[binVal].Sum / BinValErrStat[binVal].NumOfSamples;
-                    }
-                    err += proportionCoeff * errRate;
-                }
-                return err;
-            }
-        }
-
+        public BasicStat TotalErrStat { get; }
 
         //Constructors
         /// <summary>
         /// Creates an uninitialized instance
         /// </summary>
-        /// <param name="refBinValDistr">Reference distribution of 0/1 values</param>
-        public BinErrStat(BinDistribution refBinValDistr)
+        /// <param name="binBorder">Double value LT this border is considered as 0 and GE as 1</param>
+        public BinErrStat(double binBorder)
         {
-            RefBinValDistr = refBinValDistr.DeepClone();
-            ThisBinValDistr = new BinDistribution(RefBinValDistr.BinBorder);
+            BinBorder = binBorder;
             BinValErrStat = new BasicStat[2];
             BinValErrStat[0] = new BasicStat();
             BinValErrStat[1] = new BasicStat();
@@ -80,12 +44,12 @@ namespace RCNet.MathTools
         /// <summary>
         /// Construct an initialized instance
         /// </summary>
-        /// <param name="refBinValDistr">Reference distribution of 0/1 values</param>
+        /// <param name="binBorder">Double value LT this border is considered as 0 and GE as 1</param>
         /// <param name="computedVectorCollection">Collection of computed vectors</param>
         /// <param name="idealVectorCollection">Collection of ideal vectors</param>
         /// <param name="valueIdx">Index of a binary value within the vector</param>
-        public BinErrStat(BinDistribution refBinValDistr, IEnumerable<double[]> computedVectorCollection, IEnumerable<double[]> idealVectorCollection, int valueIdx = 0)
-            :this(refBinValDistr)
+        public BinErrStat(double binBorder, IEnumerable<double[]> computedVectorCollection, IEnumerable<double[]> idealVectorCollection, int valueIdx = 0)
+            :this(binBorder)
         {
             Update(computedVectorCollection, idealVectorCollection, valueIdx);
             return;
@@ -94,11 +58,11 @@ namespace RCNet.MathTools
         /// <summary>
         /// Construct an initialized instance
         /// </summary>
-        /// <param name="refBinValDistr">Reference distribution of 0/1 values</param>
+        /// <param name="binBorder">Double value LT this border is considered as 0 and GE as 1</param>
         /// <param name="computedValueCollection">Collection of computed vectors</param>
         /// <param name="idealValueCollection">Collection of ideal vectors</param>
-        public BinErrStat(BinDistribution refBinValDistr, IEnumerable<double> computedValueCollection, IEnumerable<double> idealValueCollection)
-            : this(refBinValDistr)
+        public BinErrStat(double binBorder, IEnumerable<double> computedValueCollection, IEnumerable<double> idealValueCollection)
+            : this(binBorder)
         {
             Update(computedValueCollection, idealValueCollection);
             return;
@@ -110,8 +74,7 @@ namespace RCNet.MathTools
         /// <param name="source">Source instance</param>
         public BinErrStat(BinErrStat source)
         {
-            RefBinValDistr = source.RefBinValDistr.DeepClone();
-            ThisBinValDistr = source.ThisBinValDistr.DeepClone();
+            BinBorder = source.BinBorder;
             BinValErrStat = new BasicStat[2];
             BinValErrStat[0] = new BasicStat(source.BinValErrStat[0]);
             BinValErrStat[1] = new BasicStat(source.BinValErrStat[1]);
@@ -121,27 +84,25 @@ namespace RCNet.MathTools
 
         //Methods
         /// <summary>
-        /// Compares if two values represent are the same binary value
+        /// Decides if two values represent the same binary value
         /// </summary>
-        /// <param name="computedValue">Computed binary value</param>
-        /// <param name="idealValue">Ideal binary value</param>
-        /// <returns></returns>
+        /// <param name="computedValue">Computed value</param>
+        /// <param name="idealValue">Ideal value</param>
         private bool BinMatch(double computedValue, double idealValue)
         {
-            if (computedValue >= RefBinValDistr.BinBorder && idealValue >= RefBinValDistr.BinBorder) return true;
-            if (computedValue < RefBinValDistr.BinBorder && idealValue < RefBinValDistr.BinBorder) return true;
+            if (computedValue >= BinBorder && idealValue >= BinBorder) return true;
+            if (computedValue < BinBorder && idealValue < BinBorder) return true;
             return false;
         }
 
         /// <summary>
         /// Updates the statistics
         /// </summary>
-        /// <param name="computedValue">Computed binary value</param>
-        /// <param name="idealValue">Ideal binary value</param>
+        /// <param name="computedValue">Computed value</param>
+        /// <param name="idealValue">Ideal value</param>
         public void Update(double computedValue, double idealValue)
         {
-            ThisBinValDistr.Update(idealValue);
-            int idealBinVal = (idealValue >= ThisBinValDistr.BinBorder) ? 1 : 0;
+            int idealBinVal = (idealValue >= BinBorder) ? 1 : 0;
             int errValue = BinMatch(computedValue, idealValue) ? 0 : 1;
             BinValErrStat[idealBinVal].AddSampleValue(errValue);
             TotalErrStat.AddSampleValue(errValue);

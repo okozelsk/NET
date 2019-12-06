@@ -195,6 +195,22 @@
     </xs:restriction>
   </xs:simpleType>
 
+  <!-- Unsigned double GE 0 LT 1-->
+  <xs:simpleType name="UDoubleGE0LT1Type">
+    <xs:restriction base="xs:double">
+      <xs:minInclusive value="0" />
+      <xs:maxExclusive value="1" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Unsigned double GE 0 LE 1-->
+  <xs:simpleType name="UDoubleGE0LE1Type">
+    <xs:restriction base="xs:double">
+      <xs:minInclusive value="0" />
+      <xs:maxInclusive value="1" />
+    </xs:restriction>
+  </xs:simpleType>
+
   <!-- Double with NA option-->
   <xs:simpleType name="DoubleNAOptionType">
     <xs:union memberTypes="xs:double NAOptionType"/>
@@ -954,6 +970,11 @@
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="BinFeatureFilterCfgType" name="binFeature" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
+    <xs:attribute type="xs:string" name="oneWinnerGroupName" use="optional" default="NA">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Specifies membership in the group of possible classes where only one can win. Default value is NA (not applicable, ie. stand-alone class).</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- Readout unit configuration -->
@@ -1478,11 +1499,20 @@
 
   <!-- ________________________________________NEURAL POOL TYPES_________________________________________________ -->
 
-  <!-- Predictor FadingSum - configuration -->
-  <xs:complexType name="PredictorFadingSumCfgType">
-    <xs:attribute type="UDoubleGT0LT1Type" name="strength" use="optional" default="0.005">
+  <!-- Predictor ActivationFadingSum - configuration -->
+  <xs:complexType name="PredictorActivationFadingSumCfgType">
+    <xs:attribute type="UDoubleGE0LT1Type" name="strength" use="optional" default="0.1">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Fading strength (GT0..LT1). Default value is 0.005</xs:documentation>
+        <xs:documentation xml:lang="en">Fading strength (GE0..LT1). Default value is 0.1</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <!-- Predictor FiringFadingSum - configuration -->
+  <xs:complexType name="PredictorFiringFadingSumCfgType">
+    <xs:attribute type="UDoubleGE0LT1Type" name="strength" use="optional" default="0.005">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Fading strength (GE0..LT1). Default value is 0.005</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -1527,9 +1557,9 @@
   <!-- Predictors settings - configuration -->
   <xs:complexType name="PredictorsSettingsCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="PredictorFadingSumCfgType" name="activationFadingSum" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="PredictorActivationFadingSumCfgType" name="activationFadingSum" minOccurs="1" maxOccurs="1"/>
       <xs:element type="PredictorMWAvgCfgType" name="activationMWAvg" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="PredictorFadingSumCfgType" name="firingFadingSum" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="PredictorFiringFadingSumCfgType" name="firingFadingSum" minOccurs="1" maxOccurs="1"/>
       <xs:element type="PredictorMWAvgCfgType" name="firingMWAvg" minOccurs="1" maxOccurs="1"/>
       <xs:element type="PredictorFiringCountCfgType" name="firingCount" minOccurs="1" maxOccurs="1"/>
       <xs:element type="PredictorFiringBinPatternCfgType" name="firingBinPattern" minOccurs="1" maxOccurs="1"/>
@@ -1862,6 +1892,11 @@
 
   <!-- NeuralPreprocessor - patterned input feeding -configuration -->
   <xs:complexType name="NPInpFeedingPatternedCfgType">
+    <xs:attribute type="xs:boolean" name="bidir" use="optional" default="false">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Specifies, if to preprocess time series pattern in both time directions (doubles predictors). Default value is false</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- NeuralPreprocessor - external input field -configuration -->
@@ -2076,6 +2111,11 @@
     <xs:attribute type="xs:int" name="randomizerSeek" use="optional" default="0">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is 0</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:unsignedInt" name="verificationSamples" use="optional" default="0">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Specifies, how many lasting samples to be used for verification. Default value is 0</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>

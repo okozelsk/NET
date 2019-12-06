@@ -115,10 +115,12 @@ namespace RCNet.MathTools
         /// </summary>
         public BinDistribution DeepClone()
         {
-            BinDistribution clone = new BinDistribution(this.BinBorder);
-            clone.Count = Count;
-            clone.NumOf = (int[])NumOf.Clone();
-            clone.BinRate = (double[])BinRate.Clone();
+            BinDistribution clone = new BinDistribution(this.BinBorder)
+            {
+                Count = Count,
+                NumOf = (int[])NumOf.Clone(),
+                BinRate = (double[])BinRate.Clone()
+            };
             return clone;
         }
 

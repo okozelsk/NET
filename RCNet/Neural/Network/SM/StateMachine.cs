@@ -125,9 +125,36 @@ namespace RCNet.Neural.Network.SM
                                                      Object userObject = null
                                                      )
         {
-            VectorBundle preprocessedData = NP.InitializeAndPreprocessBundle(patternBundle, informativeCallback, userObject);
+            //Learning/Verification samples
+            PatternBundle learningBundle = null;
+            PatternBundle verificationBundle = null;
+            if(_settings.VerificationSamples > 0)
+            {
+                int numOfVerifivationSamples = Math.Min(_settings.VerificationSamples, patternBundle.InputPatternCollection.Count);
+                learningBundle = new PatternBundle();
+                verificationBundle = new PatternBundle();
+                for(int i = 0; i < patternBundle.InputPatternCollection.Count; i++)
+                {
+                    if(i < patternBundle.InputPatternCollection.Count - numOfVerifivationSamples)
+                    {
+                        learningBundle.AddPair(patternBundle.InputPatternCollection[i], patternBundle.OutputVectorCollection[i]);
+                    }
+                    else
+                    {
+                        verificationBundle.AddPair(patternBundle.InputPatternCollection[i], patternBundle.OutputVectorCollection[i]);
+                    }
+                }
+            }
+            else
+            {
+                learningBundle = patternBundle;
+            }
+            //Preprocessing
+            VectorBundle preprocessedData = NP.InitializeAndPreprocessBundle(learningBundle, informativeCallback, userObject);
             InitPredictorsGeneralSwitches(preprocessedData.InputVectorCollection);
             return new RegressionInput(preprocessedData,
+                                       null,
+                                       verificationBundle,
                                        NP.CollectStatatistics(),
                                        NP.NumOfNeurons,
                                        NP.NumOfInternalSynapses,
@@ -153,9 +180,36 @@ namespace RCNet.Neural.Network.SM
                                                      Object userObject = null
                                                      )
         {
-            VectorBundle preprocessedData = NP.InitializeAndPreprocessBundle(vectorBundle, informativeCallback, userObject);
+            //Learning/Verification samples
+            VectorBundle learningBundle = null;
+            VectorBundle verificationBundle = null;
+            if (_settings.VerificationSamples > 0)
+            {
+                int numOfVerifivationSamples = Math.Min(_settings.VerificationSamples, vectorBundle.InputVectorCollection.Count);
+                learningBundle = new VectorBundle();
+                verificationBundle = new VectorBundle();
+                for (int i = 0; i < vectorBundle.InputVectorCollection.Count; i++)
+                {
+                    if (i < vectorBundle.InputVectorCollection.Count - numOfVerifivationSamples)
+                    {
+                        learningBundle.AddPair(vectorBundle.InputVectorCollection[i], vectorBundle.OutputVectorCollection[i]);
+                    }
+                    else
+                    {
+                        verificationBundle.AddPair(vectorBundle.InputVectorCollection[i], vectorBundle.OutputVectorCollection[i]);
+                    }
+                }
+            }
+            else
+            {
+                learningBundle = vectorBundle;
+            }
+            //Preprocessing
+            VectorBundle preprocessedData = NP.InitializeAndPreprocessBundle(learningBundle, informativeCallback, userObject);
             InitPredictorsGeneralSwitches(preprocessedData.InputVectorCollection);
             return new RegressionInput(preprocessedData,
+                                       verificationBundle,
+                                       null,
                                        NP.CollectStatatistics(),
                                        NP.NumOfNeurons,
                                        NP.NumOfInternalSynapses,
@@ -173,15 +227,15 @@ namespace RCNet.Neural.Network.SM
         /// RegressionInput object prepared by PrepareRegressionData function
         /// </param>
         /// <param name="regressionController">
-        /// Optional. see Regression.RegressionCallbackDelegate
+        /// Optional. see ReadoutUnit.RegressionCallbackDelegate
         /// </param>
         /// <param name="regressionControllerData">
         /// Optional custom object to be passed to regressionController together with other standard information
         /// </param>
-        public ResultBundle BuildReadoutLayer(RegressionInput regressionInput,
-                                              ReadoutUnit.RegressionCallbackDelegate regressionController = null,
-                                              Object regressionControllerData = null
-                                              )
+        public RegressionOutput BuildReadoutLayer(RegressionInput regressionInput,
+                                                  ReadoutUnit.RegressionCallbackDelegate regressionController = null,
+                                                  Object regressionControllerData = null
+                                                  )
         {
             //Readout layer instance
             RL = new ReadoutLayer(_settings.ReadoutLayerConfig);
@@ -252,12 +306,40 @@ namespace RCNet.Neural.Network.SM
                     mapper.Add(readoutUnitName, switches);
                 }
             }
+
             //Training
-            return RL.Build(regressionInput.PreprocessedData,
-                            regressionController,
-                            regressionControllerData,
-                            mapper
-                            );
+            ResultBundle trainingResultBundle = RL.Build(regressionInput.PreprocessedData,
+                                                         regressionController,
+                                                         regressionControllerData,
+                                                         mapper
+                                                         );
+            //Verification
+            ResultBundle verificationResultBundle = new ResultBundle();
+            ReadoutLayer.SummaryResultStat verificationSummaryStat = new ReadoutLayer.SummaryResultStat(_settings.ReadoutLayerConfig);
+            if (_settings.VerificationSamples > 0)
+            {
+                if(_settings.NeuralPreprocessorConfig.InputConfig.FeedingType == NeuralPreprocessor.InputFeedingType.Continuous)
+                {
+                    for (int sampleIdx = 0; sampleIdx < regressionInput.VerificationVectorBundle.InputVectorCollection.Count; sampleIdx++)
+                    {
+                        double[] predictors = NP.Preprocess(regressionInput.VerificationVectorBundle.InputVectorCollection[sampleIdx]);
+                        double[] result = RL.Compute(predictors);
+                        verificationResultBundle.AddVectors(predictors, result, regressionInput.VerificationVectorBundle.OutputVectorCollection[sampleIdx]);
+                        verificationSummaryStat.Update(result, regressionInput.VerificationVectorBundle.OutputVectorCollection[sampleIdx], _settings.ReadoutLayerConfig);
+                    }
+                }
+                else
+                {
+                    for (int sampleIdx = 0; sampleIdx < regressionInput.VerificationPatternBundle.InputPatternCollection.Count; sampleIdx++)
+                    {
+                        double[] predictors = NP.Preprocess(regressionInput.VerificationPatternBundle.InputPatternCollection[sampleIdx]);
+                        double[] result = RL.Compute(predictors);
+                        verificationResultBundle.AddVectors(predictors, result, regressionInput.VerificationPatternBundle.OutputVectorCollection[sampleIdx]);
+                        verificationSummaryStat.Update(result, regressionInput.VerificationPatternBundle.OutputVectorCollection[sampleIdx], _settings.ReadoutLayerConfig);
+                    }
+                }
+            }
+            return new RegressionOutput(trainingResultBundle, verificationResultBundle, verificationSummaryStat);
         }
 
 
@@ -314,6 +396,14 @@ namespace RCNet.Neural.Network.SM
             /// </summary>
             public VectorBundle PreprocessedData { get; }
             /// <summary>
+            /// Bundle of input data vectors and desired ideal outputs for verification purposes
+            /// </summary>
+            public VectorBundle VerificationVectorBundle { get; }
+            /// <summary>
+            /// Bundle of input data patterns and desired ideal outputs for verification purposes
+            /// </summary>
+            public PatternBundle VerificationPatternBundle { get; }
+            /// <summary>
             /// Collection of statistics of NeuralPreprocessor's internal reservoirs
             /// </summary>
             public List<ReservoirStat> ReservoirStatCollection { get; }
@@ -335,11 +425,15 @@ namespace RCNet.Neural.Network.SM
             /// Creates an initialized instance
             /// </summary>
             /// <param name="preprocessedData">Bundle of the NeuralPreprocessor's predictors and desired ideal outputs</param>
+            /// <param name="verificationVectorBundle">Bundle of input data vectors and desired ideal outputs for verification purposes</param>
+            /// <param name="verificationPatternBundle">Bundle of input data patterns and desired ideal outputs for verification purposes</param>
             /// <param name="reservoirStatCollection">Collection of statistics of NeuralPreprocessor's internal reservoirs</param>
             /// <param name="totalNumOfNeurons">Total number of NeuralPreprocessor's neurons</param>
             /// <param name="totalNumOfInternalSynapses">Total number of NeuralPreprocessor's internal synapses</param>
             /// <param name="numOfUnusedPredictors">Number of NeuralPreprocessor's invalid predictors</param>
             public RegressionInput(VectorBundle preprocessedData,
+                                   VectorBundle verificationVectorBundle,
+                                   PatternBundle verificationPatternBundle,
                                    List<ReservoirStat> reservoirStatCollection,
                                    int totalNumOfNeurons,
                                    int totalNumOfInternalSynapses,
@@ -347,6 +441,8 @@ namespace RCNet.Neural.Network.SM
                                    )
             {
                 PreprocessedData = preprocessedData;
+                VerificationVectorBundle = verificationVectorBundle;
+                VerificationPatternBundle = verificationPatternBundle;
                 ReservoirStatCollection = reservoirStatCollection;
                 TotalNumOfNeurons = totalNumOfNeurons;
                 TotalNumOfInternalSynapses = totalNumOfInternalSynapses;
@@ -449,6 +545,44 @@ namespace RCNet.Neural.Network.SM
             }
 
         }//RegressionInput
+
+        /// <summary>
+        /// Contains results of the regression process (training and verification results)
+        /// </summary>
+        [Serializable]
+        public class RegressionOutput
+        {
+            /// <summary>
+            /// Training result data bundle
+            /// </summary>
+            public ResultBundle TrainingResultBundle { get; }
+            /// <summary>
+            /// Verification result data bundle
+            /// </summary>
+            public ResultBundle VerificationResultBundle { get; }
+            /// <summary>
+            /// Detailed verification statistics
+            /// </summary>
+            public ReadoutLayer.SummaryResultStat VerificationSummaryStat { get; }
+
+            //Constructor
+            /// <summary>
+            /// Creates an initialized instance
+            /// </summary>
+            /// <param name="trainingResultBundle">Training result data bundle</param>
+            /// <param name="verificationResultBundle">Verification result data bundle</param>
+            /// <param name="verificationSummaryStat">Detailed verification statistics</param>
+            public RegressionOutput(ResultBundle trainingResultBundle,
+                                    ResultBundle verificationResultBundle,
+                                    ReadoutLayer.SummaryResultStat verificationSummaryStat
+                                    )
+            {
+                TrainingResultBundle = trainingResultBundle;
+                VerificationResultBundle = verificationResultBundle;
+                VerificationSummaryStat = verificationSummaryStat;
+                return;
+            }
+        }
 
     }//StateMachine
 }//Namespace
