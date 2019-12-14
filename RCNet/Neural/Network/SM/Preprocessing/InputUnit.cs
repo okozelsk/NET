@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using RCNet.MathTools;
-using RCNet.Extensions;
 using RCNet.Neural.Network.SM.Neuron;
 
 
@@ -23,9 +22,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// </summary>
         public const int SpikeTrainMaxLength = 32;
 
-        //Static members
-        private static readonly uint[] _bitValuesCache;
-
         //Attribute properties
         /// <summary>
         /// Input neuron providing analog signal
@@ -41,22 +37,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         private readonly Interval _inputRange;
         private readonly int _spikeTrainLength;
         private readonly double _precisionPiece;
-        private readonly uint _maxPrecisionBitMask;
+        private readonly ulong _maxPrecisionBitMask;
 
-        //Constructors
-        /// <summary>
-        /// Static constructor
-        /// </summary>
-        static InputUnit()
-        {
-            _bitValuesCache = new uint[SpikeTrainMaxLength];
-            for(int i = 0; i < SpikeTrainMaxLength; i++)
-            {
-                _bitValuesCache[i] = (uint)Math.Round(Math.Pow(2d, i));
-            }
-            return;
-        }
-
+        //Constructor
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
@@ -92,17 +75,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         }
 
         /// <summary>
-        /// Checks if specified spike should be emmited or not.
-        /// (In other words: function checks if bit is set at specified position in the given sequence of bits)
-        /// </summary>
-        /// <param name="spikeTrain">Spike-train (sequence of bits)</param>
-        /// <param name="spikeIdx">Index of the spike (bit) to be checked</param>
-        private double GetSpikeValue(uint spikeTrain, int spikeIdx)
-        {
-            return ((spikeTrain & _bitValuesCache[spikeIdx]) == 0) ? 0d : 1d;
-        }
-
-        /// <summary>
         /// Resets all associated input neurons to initial state
         /// </summary>
         /// <param name="statistics">Specifies whether to reset internal statistics of the associated neurons</param>
@@ -126,7 +98,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             uint bits = GetSpikeTrain(iStimuli);
             for(int i = 0; i < _spikeTrainLength; i++)
             {
-                SpikingInputNeuronCollection[i].NewStimulation(GetSpikeValue(bits, i), 0d);
+                SpikingInputNeuronCollection[i].NewStimulation(Bitwise.GetBit(bits, i), 0d);
             }
             return;
         }
