@@ -4,7 +4,101 @@
   <!--
     This demo case demonstrates successful use of the pure analog ESN reservoir for the fast and accurate classifications enabled by
     the new ability of the analog neurons to fire a spike.
-    Following straightforward configuration of the StateMachine slightly outperforms the best algorithm
+    Following straightforward configuration of the StateMachine exhibits similar accuracy as the best algorithm
+    called BOSS, referenced at the dataset's home site:
+    "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
+    https://timeseriesclassification.com/description.php?Dataset=BeetleFly.
+    MPEG-7 CE Shape-1 Part B is a database of binary images developed for testing MPEG-7 shape descriptors, and is available free online. 
+    It is used for testing contour/image and skeleton-based descriptors. Classes of images vary broadly, and include classes that are
+    similar in shape to one another. There are 20 instances of each class, and 60 classes in total.
+    We have extracted the outlines of these images and mapped them into 1-D series of distances to the centre. 
+    Beetle/Fly is the problem of distinguishing between an outline of a beetle and a fly.
+    Demo note: The first 20 instances in BeetleFly.csv are for network learning and the last 20 instances for verification.
+  -->
+  <case name="Classification task BeetleFly: Simple pure ESN reservoir generating FiringFadingSum predictors, one Identity neuron as a classifier (FF-Resilient trainer)">
+    <samples fileName="BeetleFly.csv"/>
+    <stateMachineCfg randomizerSeek="0" verificationSamples="20">
+      <neuralPreprocessor>
+        <input>
+          <feedingPatterned bidir="false"/>
+          <external>
+            <field name="DistanceFromCenter">
+              <realFeature standardize="true" keepReserve="true"/>
+            </field>
+          </external>
+        </input>
+        <reservoirCfgContainer>
+          <reservoirCfg name="MainCfg">
+            <pools>
+              <pool name="PureESN" dimX="6" dimY="6" dimZ="5">
+                <neuronGroups>
+                  <analogGroup name="Exc-grp" role="Excitatory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction">
+                    <activationTanH/>
+                    <firingThreshold value="0.0015"/>
+                  </analogGroup>
+                  <analogGroup name="Inh-grp" role="Inhibitory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction">
+                    <activationTanH/>
+                    <firingThreshold value="0.0015"/>
+                  </analogGroup>
+                </neuronGroups>
+                <interconnection density="0.2" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
+                  <synapse/>
+                </interconnection>
+              </pool>
+            </pools>
+            <spectralRadius>
+              <analogScope value="0.9999"/>
+              <spikingScope value="NA"/>
+            </spectralRadius>
+          </reservoirCfg>
+        </reservoirCfgContainer>
+        <reservoirInstanceContainer>
+          <reservoirInstance name="Main" cfg="MainCfg">
+            <inputConnections>
+              <inputConnection fieldName="DistanceFromCenter" poolName="PureESN" density="1">
+                <synapse delayMethod="Random" maxDelay="0">
+                  <analogTarget scope="All">
+                    <weight min="0" max="1"/>
+                  </analogTarget>
+                </synapse>
+              </inputConnection>
+            </inputConnections>
+            <predictors>
+              <permission activation="false"
+                          activationSquare="false"
+                          activationFadingSum="false"
+                          activationMWAvg="false"
+                          firingFadingSum="true"
+                          firingMWAvg="false"
+                          firingCount="false"
+                          firingBinPattern="false"/>
+            </predictors>
+          </reservoirInstance>
+        </reservoirInstanceContainer>
+      </neuralPreprocessor>
+      <readoutLayer testDataRatio="0.1" folds="Auto">
+        <readoutUnit name="Beetle1Fly0">
+          <classification>
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationIdentity/>
+            <ridgeRegrTrainer attemptEpochs="1">
+              <lambda min="0.1" max="0.1" steps="2"/>
+            </ridgeRegrTrainer>
+          </ff>
+        </readoutUnit>
+      </readoutLayer>
+    </stateMachineCfg>
+  </case>
+
+
+
+
+  <!--
+    This demo case demonstrates successful use of the pure analog ESN reservoir for the fast and accurate classifications enabled by
+    the new ability of the analog neurons to fire a spike.
+    Following straightforward configuration of the StateMachine exhibits similar accuracy as the best algorithm
     called BOSS, referenced at the dataset's home site:
     "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
     https://timeseriesclassification.com/description.php?Dataset=Worms.
@@ -27,7 +121,7 @@
     four mutant types: goa-1 (44 cases); unc-1 (35 cases); unc-38 (45 cases) and unc-63 (25 cases). The data were extracted from the 
     C. elegans behavioural database {wormWeb}. The formatted classification problems are available from the website associated with this
     paper {tscWeb}.
-    Demo note: The lasting 77 instances in Worms.csv are used as the verification set and it equals to mentioned "test set".
+    Demo note: The first 181 instances in Worms.csv are for network learning and the last 77 instances for verification.
   -->
   <case name="Classification task Worms: Simple pure ESN reservoir generating FiringFadingSum predictors, one Identity neuron as a classifier (FF-Resilient trainer)">
     <samples fileName="Worms.csv"/>
@@ -48,14 +142,14 @@
                 <neuronGroups>
                   <analogGroup name="Exc-grp" role="Excitatory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction">
                     <activationTanH/>
-                    <firingThreshold value="0.0025"/>
+                    <firingThreshold value="0.00125"/>
                     <retainment density="1">
                       <strength min="0" max="0.5"/>
                     </retainment>
                   </analogGroup>
                   <analogGroup name="Inh-grp" role="Inhibitory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction">
                     <activationTanH/>
-                    <firingThreshold value="0.0025"/>
+                    <firingThreshold value="0.00125"/>
                     <retainment density="1">
                       <strength min="0" max="0.5"/>
                     </retainment>
@@ -161,7 +255,8 @@
     Each curve F is mapped in a representation with 90 features, with representing the coordinates of movement.
     Each instance represents 45 points on a bi-dimensional space, which can be plotted in an ordered way (from 1 through
     45 as the X co-ordinate) in order to draw the path of the movement.
-    For this demo purposes was selected 4x15 instances as the verification set (last 60 rows in LibrasMovement.csv)
+    For this demo purposes was selected 4x15 instances as the verification set.
+    Demo note: The first 300 instances in LibrasMovement.csv are for network learning and the last 60 instances for verification.
   -->
   <case name="Classification task Libras Movement: Simple pure ESN reservoir generating FiringCount predictors, one TanH neuron as a classifier (FF-Resilient trainer)">
     <samples fileName="LibrasMovement.csv"/>
@@ -185,11 +280,11 @@
                 <neuronGroups>
                   <analogGroup name="Exc-grp" role="Excitatory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction">
                     <activationTanH/>
-                    <firingThreshold value="0.0025"/>
+                    <firingThreshold value="0.00125"/>
                   </analogGroup>
                   <analogGroup name="Inh-grp" role="Inhibitory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction">
                     <activationTanH/>
-                    <firingThreshold value="0.0025"/>
+                    <firingThreshold value="0.00125"/>
                   </analogGroup>
                 </neuronGroups>
                 <interconnection density="0.2" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
@@ -991,11 +1086,11 @@
                 <neuronGroups>
                   <analogGroup name="Exc-grp" role="Excitatory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction">
                     <activationTanH/>
-                    <firingThreshold value="0.0025"/>
+                    <firingThreshold value="0.00125"/>
                   </analogGroup>
                   <analogGroup name="Inh-grp" role="Inhibitory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction">
                     <activationTanH/>
-                    <firingThreshold value="0.0025"/>
+                    <firingThreshold value="0.00125"/>
                   </analogGroup>
                 </neuronGroups>
                 <interconnection density="0.1" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
@@ -1232,11 +1327,11 @@
                 <neuronGroups>
                   <analogGroup name="Exc-grp-analog" role="Excitatory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction">
                     <activationTanH/>
-                    <firingThreshold value="0.0025"/>
+                    <firingThreshold value="0.00125"/>
                   </analogGroup>
                   <analogGroup name="Inh-grp-analog" role="Inhibitory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction">
                     <activationTanH/>
-                    <firingThreshold value="0.0025"/>
+                    <firingThreshold value="0.00125"/>
                   </analogGroup>
                 </neuronGroups>
                 <interconnection density="0.1" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
@@ -1522,7 +1617,7 @@
           <ff>
             <activationIdentity/>
             <qrdRegrTrainer attempts="1" attemptEpochs="1">
-              <maxNoise min="0" max="0" steps="3"/>
+              <maxNoise min="0" max="0" steps="2"/>
             </qrdRegrTrainer>
           </ff>
         </readoutUnit>
@@ -1687,7 +1782,7 @@
                   <analogGroup name="Exc-grp" role="Excitatory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction">
                     <activationTanH/>
                     <bias min="0" max="0" randomSign="false" />
-                    <firingThreshold value="0.0025"/>
+                    <firingThreshold value="0.00125"/>
                     <retainment density="0">
                       <strength min="0.25" max="0.75"/>
                     </retainment>
@@ -1695,7 +1790,7 @@
                   <analogGroup name="Inh-grp" role="Inhibitory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction">
                     <activationTanH/>
                     <bias min="0" max="0" randomSign="false" />
-                    <firingThreshold value="0.0025"/>
+                    <firingThreshold value="0.00125"/>
                     <retainment density="0">
                       <strength min="0.25" max="0.75"/>
                     </retainment>

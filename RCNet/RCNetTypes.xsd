@@ -672,6 +672,10 @@
 
   <!-- ________________________________________ANALOG ACTIVATION TYPES_____________________________________________ -->
 
+  <!-- Activation SQNL configuration element -->
+  <xs:complexType name="ActivationSQNLCfgType">
+  </xs:complexType>
+
   <!-- Activation BentIdentity configuration element -->
   <xs:complexType name="ActivationBentIdentityCfgType">
   </xs:complexType>
@@ -754,6 +758,7 @@
   <!-- FF network - hidden layer - configuration -->
   <xs:complexType name="FFNetHiddenLayerCfgType">
     <xs:choice minOccurs="1" maxOccurs="1">
+      <xs:element type="ActivationSQNLCfgType" name="activationSQNL" minOccurs="1" maxOccurs="1"/>
       <xs:element type="ActivationBentIdentityCfgType" name="activationBentIdentity" minOccurs="1" maxOccurs="1"/>
       <xs:element type="ActivationElliotCfgType" name="activationElliot" minOccurs="1" maxOccurs="1"/>
       <xs:element type="ActivationGaussianCfgType" name="activationGaussian" minOccurs="1" maxOccurs="1"/>
@@ -863,6 +868,7 @@
     <xs:sequence minOccurs="0" maxOccurs="1">
       <xs:sequence minOccurs="1" maxOccurs="1">
         <xs:choice minOccurs="1" maxOccurs="1">
+          <xs:element type="ActivationSQNLCfgType" name="activationSQNL" minOccurs="1" maxOccurs="1"/>
           <xs:element type="ActivationBentIdentityCfgType" name="activationBentIdentity" minOccurs="1" maxOccurs="1"/>
           <xs:element type="ActivationElliotCfgType" name="activationElliot" minOccurs="1" maxOccurs="1"/>
           <xs:element type="ActivationGaussianCfgType" name="activationGaussian" minOccurs="1" maxOccurs="1"/>
@@ -1001,7 +1007,7 @@
       <xs:simpleType>
         <xs:restriction base="xs:double">
           <xs:minExclusive value="0" />
-          <xs:maxInclusive value="0.3333333333333333" />
+          <xs:maxInclusive value="0.5" />
         </xs:restriction>
       </xs:simpleType>
     </xs:attribute>
@@ -1695,9 +1701,9 @@
 
   <!-- Pool - analog neuron group - firing threshold -configuration -->
   <xs:complexType name="PoolAnalogNeuronsFiringThresholdCfgType">
-    <xs:attribute type="UDoubleLE1Type" name="value" use="optional" default="0.0025">
+    <xs:attribute type="UDoubleLE1Type" name="value" use="optional" default="0.00125">
       <xs:annotation>
-        <xs:documentation xml:lang="en">A number between 0 and 1 (LT1). Every time the new activation value is higher than the previous activation value by at least the threshold, it is evaluated as a firing event. Default value is 0.0025.</xs:documentation>
+        <xs:documentation xml:lang="en">A number between 0 and 1 (LT1). Every time the new normalized activation value is higher than the previous normalized activation value by at least the threshold, it is evaluated as a firing event. Default value is 0.00125.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -1706,6 +1712,7 @@
   <xs:complexType name="PoolAnalogNeuronGroupCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:choice minOccurs="1" maxOccurs="1">
+        <xs:element type="ActivationSQNLCfgType" name="activationSQNL" minOccurs="1" maxOccurs="1"/>
         <xs:element type="ActivationElliotCfgType" name="activationElliot" minOccurs="1" maxOccurs="1"/>
         <xs:element type="ActivationGaussianCfgType" name="activationGaussian" minOccurs="1" maxOccurs="1"/>
         <xs:element type="ActivationISRUCfgType" name="activationISRU" minOccurs="1" maxOccurs="1"/>

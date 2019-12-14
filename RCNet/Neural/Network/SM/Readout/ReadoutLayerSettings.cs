@@ -197,6 +197,9 @@ namespace RCNet.Neural.Network.SM.Readout
         public class ReadoutUnitSettings
         {
             //Constants
+            /// <summary>
+            /// Code indicating no membership in a One-winner group
+            /// </summary>
             public const string NoOneWinnerGroupName = "NA";
             /// <summary>
             /// Supported types of readout unit networks

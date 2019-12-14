@@ -212,7 +212,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             /// <summary>
             /// Default value for analog firing threshold
             /// </summary>
-            public const double DefaultAnalogFiringThreshold = 0.0025d;
+            public const double DefaultAnalogFiringThreshold = 0.00125d;
             //Attribute properties
             /// <summary>
             /// Name of the neuron group

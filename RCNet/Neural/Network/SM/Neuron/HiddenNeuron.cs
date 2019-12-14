@@ -220,11 +220,11 @@ namespace RCNet.Neural.Network.SM.Neuron
             else
             {
                 //Analog activation
-                double prevActivationState = _activationState;
                 double newState = _activation.Compute(_tStimuli);
                 _activationState = (_retainmentStrength * _activationState) + (1d - _retainmentStrength) * newState;
+                double prevAnalogSignal = _analogSignal;
                 _analogSignal = _outputRange.Rescale(_activationState, _activation.OutputRange);
-                bool firingEvent = (_activationState - prevActivationState) > _analogFiringThreshold;
+                bool firingEvent = (_analogSignal - prevAnalogSignal) > _analogFiringThreshold;
                 _spikingSignal = firingEvent ? 1d : 0d;
             }
             //Update predictors

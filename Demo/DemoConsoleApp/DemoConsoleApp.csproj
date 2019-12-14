@@ -132,6 +132,9 @@
     <Content Include="Data\MackeyGlass_big.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <None Include="Data\BeetleFly.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Data\Worms.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

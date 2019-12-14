@@ -78,8 +78,10 @@
     <Compile Include="Neural\Activation\ActivationCommon.cs" />
     <Compile Include="Neural\Activation\ActivationFactory.cs" />
     <Compile Include="Neural\Activation\AutoIzhikevichIFSettings.cs" />
+    <Compile Include="Neural\Activation\SQNLSettings.cs" />
     <Compile Include="Neural\Activation\IzhikevichIFSettings.cs" />
     <Compile Include="Neural\Activation\IzhikevichIF.cs" />
+    <Compile Include="Neural\Activation\SQNL.cs" />
     <Compile Include="Neural\Activation\TanHSettings.cs" />
     <Compile Include="Neural\Activation\SoftPlusSettings.cs" />
     <Compile Include="Neural\Activation\SoftExponentialSettings.cs" />
@@ -424,6 +426,11 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Neural\Data\Filter\RealFeatureFilterSettings.xsd">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Neural\Activation\SQNLSettings.xsd">
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>

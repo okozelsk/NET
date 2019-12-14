@@ -79,6 +79,7 @@ See the [wiki pages.](https://en.wikipedia.org/wiki/Activation_function)
 |Component|Description|
 |--|--|
 |BentIdentity|Bent identity activation function|
+|SQNL|Square nonlinearity activation function|
 |Elliot|Elliot activation function (aka Softsign)|
 |Gaussian|Gaussian activation function|
 |Identity|Identity activation function (aka Linear)|

@@ -27,6 +27,8 @@ namespace RCNet.Neural.Activation
             {
                 case "activationAdExpIF":
                     return new AdExpIFSettings(settingsElem);
+                case "activationSQNL":
+                    return new SQNLSettings(settingsElem);
                 case "activationBentIdentity":
                     return new BentIdentitySettings(settingsElem);
                 case "activationElliot":
@@ -232,6 +234,10 @@ namespace RCNet.Neural.Activation
             {
                 af = new SoftPlus();
             }
+            else if (settingsType == typeof(SQNLSettings))
+            {
+                af = new SQNL();
+            }
             else if (settingsType == typeof(TanHSettings))
             {
                 af = new TanH();
@@ -260,6 +266,10 @@ namespace RCNet.Neural.Activation
             if (settingsType == typeof(AdExpIFSettings))
             {
                 return ((AdExpIFSettings)settings).DeepClone();
+            }
+            else if (settingsType == typeof(SQNLSettings))
+            {
+                return ((SQNLSettings)settings).DeepClone();
             }
             else if (settingsType == typeof(BentIdentitySettings))
             {

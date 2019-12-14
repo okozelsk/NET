@@ -26,7 +26,7 @@ namespace RCNet.Neural.Network.SM.Readout
         /// <summary>
         /// Maximum part of available samples useable for test purposes
         /// </summary>
-        public const double MaxRatioOfTestData = 1d / 3d;
+        public const double MaxRatioOfTestData = 0.5d;
         /// <summary>
         /// Minimum length of the test dataset
         /// </summary>
@@ -450,8 +450,43 @@ namespace RCNet.Neural.Network.SM.Readout
             return sb.ToString();
         }
 
-
         private double Compute(double[] predictors, int clusterIdx)
+        {
+            string readoutUnitName = _settings.ReadoutUnitCfgCollection[clusterIdx].Name;
+            double[] readoutUnitPredictors = _predictorsMapper.CreateVector(readoutUnitName, predictors);
+            WeightedAvg weightedResult = new WeightedAvg();
+            foreach (ReadoutUnit clusterMember in _clusterCollection[clusterIdx])
+            {
+                double computedValue = clusterMember.Network.Compute(readoutUnitPredictors)[0];
+                if (_settings.ReadoutUnitCfgCollection[clusterIdx].TaskType == ReadoutUnit.TaskType.Classification)
+                {
+                    //Classification
+                    //Training accuracy as a sub-result wight
+                    weightedResult.AddSampleValue(computedValue, 1d - clusterMember.TrainingBinErrorStat.TotalErrStat.ArithAvg);
+                    if (clusterMember.TestingBinErrorStat != null && clusterMember.TestingBinErrorStat.TotalErrStat.NumOfSamples > 0)
+                    {
+                        //Testing accuracy as a sub-result wight
+                        weightedResult.AddSampleValue(computedValue, 1d - clusterMember.TestingBinErrorStat.TotalErrStat.ArithAvg);
+                    }
+                }
+                else
+                {
+                    //Forecast
+                    //Training accuracy as a sub-result wight
+                    weightedResult.AddSampleValue(computedValue, 1d - clusterMember.TrainingErrorStat.ArithAvg);
+                    if (clusterMember.TestingErrorStat != null && clusterMember.TestingErrorStat.NumOfSamples > 0)
+                    {
+                        //Testing accuracy as a sub-result wight
+                        weightedResult.AddSampleValue(computedValue, 1d - clusterMember.TestingErrorStat.ArithAvg);
+                    }
+
+                }
+            }
+            return weightedResult.Avg;
+        }
+
+
+        private double Compute_v1(double[] predictors, int clusterIdx)
         {
             string readoutUnitName = _settings.ReadoutUnitCfgCollection[clusterIdx].Name;
             double[] readoutUnitPredictors = _predictorsMapper.CreateVector(readoutUnitName, predictors);

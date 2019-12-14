@@ -64,13 +64,13 @@ namespace RCNet.MathTools
         /// </summary>
         /// <param name="weights">Weights to be used</param>
         /// <param name="latestFirst">Specifies logical order (latest..oldest or oldest..latest)</param>
-        public WeightedAvg GetWeightedAvg(double[] weights, bool latestFirst = false)
+        public WeightedAvg GetWeightedAvg(double[] weights = null, bool latestFirst = false)
         {
             CheckReadyness();
             WeightedAvg wAvg = new WeightedAvg();
             for (int i = 0; i < _dataWindow.Count; i++)
             {
-                wAvg.AddSampleValue(_dataWindow.GetElementAt(i, latestFirst), weights[i]);
+                wAvg.AddSampleValue(_dataWindow.GetElementAt(i, latestFirst), weights == null ? 1d : weights[i]);
             }
             return wAvg;
         }
