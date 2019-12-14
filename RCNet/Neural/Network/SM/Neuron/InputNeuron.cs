@@ -39,12 +39,12 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// <summary>
         /// Type of the activation function
         /// </summary>
-        public ActivationType TypeOfActivation { get { return ActivationType.Analog; } }
+        public ActivationType TypeOfActivation { get { throw new NotImplementedException("TypeOfActivation is unsupported for InputNeuron"); } }
 
         /// <summary>
         /// Output signaling restriction
         /// </summary>
-        public NeuronCommon.NeuronSignalingRestrictionType SignalingRestriction { get { return NeuronCommon.NeuronSignalingRestrictionType.AnalogOnly; } }
+        public NeuronCommon.NeuronSignalingRestrictionType SignalingRestriction { get; }
 
         /// <summary>
         /// Constant bias.
@@ -80,10 +80,16 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// It is very recommended to have input values normalized and standardized before
         /// they are passed as an input.
         /// </param>
-        public InputNeuron(int[] inputEntryPoint, int inputFieldIdx, Interval inputRange)
+        /// <param name="signalingRestriction">Distinguish between analog/spiking provided signal</param>
+        public InputNeuron(int[] inputEntryPoint,
+                           int inputFieldIdx,
+                           Interval inputRange,
+                           NeuronCommon.NeuronSignalingRestrictionType signalingRestriction = NeuronCommon.NeuronSignalingRestrictionType.AnalogOnly
+                           )
         {
             Placement = new NeuronPlacement(-1, inputFieldIdx, - 1, inputFieldIdx, 0, inputEntryPoint[0], inputEntryPoint[1], inputEntryPoint[2]);
             _inputRange = inputRange.DeepClone();
+            SignalingRestriction = signalingRestriction;
             Statistics = new NeuronStatistics();
             Reset(false);
             return;

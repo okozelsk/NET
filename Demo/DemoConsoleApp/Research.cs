@@ -14,6 +14,7 @@ using RCNet.MathTools.VectorMath;
 using RCNet.RandomValue;
 using RCNet.Neural.Data.Generators;
 using RCNet.Neural.Data.Filter;
+using RCNet.Neural.Network.SM.Preprocessing;
 using System.Globalization;
 using RCNet.Queue;
 
@@ -37,6 +38,23 @@ namespace RCNet.DemoConsoleApp
         //Methods
         public void Run()
         {
+            /*
+            //Input unit test
+            int precBits = 32;
+            InputUnit iu = new InputUnit(new Interval(-1, 1), precBits);
+            for (double val = -1d; val <= 1d; val+=0.25d)
+            {
+                Console.WriteLine($"Value: {val}");
+                uint bits = iu.GetBits(val);
+                for(int i = 0; i < precBits; i++)
+                {
+                    Console.WriteLine($"Bit{i}: {iu.GetSpikeValue(bits, i)}");
+                }
+                Console.ReadLine();
+            }
+            Console.ReadLine();
+            */
+
             //Queue test
             int queueCapacity = 10;
             SimpleQueue<int> queue = new SimpleQueue<int>(queueCapacity);

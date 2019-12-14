@@ -145,6 +145,7 @@
     <Compile Include="Neural\Network\SM\Neuron\HiddenNeuronPredictors.cs" />
     <Compile Include="Neural\Network\SM\Neuron\HiddenNeuron.cs" />
     <Compile Include="Neural\Network\SM\Neuron\NeuronCommon.cs" />
+    <Compile Include="Neural\Network\SM\Preprocessing\InputUnit.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\NeuralPreprocessor.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\NeuralPreprocessorSettings.cs" />
     <Compile Include="Neural\Network\SM\Neuron\HiddenNeuronPredictorsSettings.cs" />
