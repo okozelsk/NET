@@ -9,9 +9,9 @@ namespace RCNet.MathTools
     {
         //Constants
         /// <summary>
-        /// Zero based maximum index of the highest bit
+        /// Zero based index of the highest allowed bit
         /// </summary>
-        private const uint BitMaxIndex = sizeof(ulong) - 1;
+        private const int BitMaxIndex = sizeof(ulong) - 1;
 
         //Attributes
         /// <summary>
