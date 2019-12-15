@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <demo dataFolder=".\\Data">
 
+
   <!--
     This demo case demonstrates successful use of the pure analog ESN reservoir for the fast and accurate classifications enabled by
     the new ability of the analog neurons to fire a spike.
@@ -15,7 +16,7 @@
     Bird/Chicken is the problem of distinguishing between an outline of a bird and a chicken.
     Demo note: The first 20 instances in BirdChicken.csv are for network learning and the last 20 instances for verification.
   -->
-  <case name="Classification task BirdChicken: Simple pure ESN reservoir generating FiringFadingSum predictors, one Identity neuron as a classifier (FF-Resilient trainer)">
+  <case name="Classification task BirdChicken: Simple pure ESN reservoir generating FiringFadingSum predictors, one Identity neuron as a classifier (Ridge regression trainer)">
     <samples fileName="BirdChicken.csv"/>
     <stateMachineCfg randomizerSeek="0" verificationSamples="20">
       <neuralPreprocessor>
@@ -105,7 +106,7 @@
     Beetle/Fly is the problem of distinguishing between an outline of a beetle and a fly.
     Demo note: The first 20 instances in BeetleFly.csv are for network learning and the last 20 instances for verification.
   -->
-  <case name="Classification task BeetleFly: Simple pure ESN reservoir generating FiringFadingSum predictors, one Identity neuron as a classifier (FF-Resilient trainer)">
+  <case name="Classification task BeetleFly: Simple pure ESN reservoir generating FiringFadingSum predictors, one Identity neuron as a classifier (Ridge regression trainer)">
     <samples fileName="BeetleFly.csv"/>
     <stateMachineCfg randomizerSeek="0" verificationSamples="20">
       <neuralPreprocessor>
@@ -697,7 +698,7 @@
     Each instance represents 45 points on a bi-dimensional space, which can be plotted in an ordered way (from 1 through
     45 as the X co-ordinate) in order to draw the path of the movement.
   -->
-  <case name="Classification task Libras Movement: Classical LSM reservoir, One neuron FF-Resilient classifier uses firingFadingSum predictor">
+  <case name="Classification task Libras Movement: Classical LSM reservoir generating FiringFadingSum predictors, One TanH neuron as a classifier (FF-Resilient trainer)">
     <samples fileName="LibrasMovement.csv"/>
     <stateMachineCfg randomizerSeek="0" verificationSamples="60">
       <neuralPreprocessor>
@@ -719,11 +720,9 @@
                 <neuronGroups>
                   <spikingGroup name="Exc-grp" role="Excitatory" relShare="4" readoutDensity="1">
                     <activationAutoIzhikevichIF role="Excitatory"/>
-                    <bias min="0" max="0" randomSign="false" />
                   </spikingGroup>
                   <spikingGroup name="Inh-grp" role="Inhibitory" relShare="1" readoutDensity="1">
                     <activationAutoIzhikevichIF role="Inhibitory"/>
-                    <bias min="0" max="0" randomSign="false" />
                   </spikingGroup>
                 </neuronGroups>
                 <interconnection density="0.1" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
@@ -905,17 +904,6 @@
   </case>
 
 
-
-  
-  
-  
-  
-  
-  
-  
-  
-  
-
   <!--
     This demo case demonstrates classical setup of LSM reservoir consisting of the neurons having spiking activation function.
     The dataset is from https://archive.ics.uci.edu/ml/datasets/Libras+Movement and contains 15 classes of 24 instances each, where
@@ -952,11 +940,9 @@
                 <neuronGroups>
                   <spikingGroup name="Exc-grp" role="Excitatory" relShare="4" readoutDensity="1">
                     <activationAdExpIF/>
-                    <bias min="0" max="0" randomSign="false" />
                   </spikingGroup>
                   <spikingGroup name="Inh-grp" role="Inhibitory" relShare="1" readoutDensity="1">
                     <activationAdExpIF/>
-                    <bias min="0" max="0" randomSign="false" />
                   </spikingGroup>
                 </neuronGroups>
                 <interconnection density="0.1" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
@@ -1845,19 +1831,17 @@
 
 
   <!--
-    This demo case demonstrates pure ESN reservoir on long pattern.
-    As a readout classifier is used Feed Forward network having one hidden layer of 20 TanH neurons and TanH output neuron.
     Used dataset is a pre-processed and re-structured/reshaped version of a very commonly used dataset featuring epileptic seizure detection.
     The dataset was converted from https://archive.ics.uci.edu/ml/datasets/Epileptic+Seizure+Recognition and contains 11500 EEG recordings
     each for 1 second. After conversion there are only 2 classes, where each EEG pattern corresponds to an epileptic seizure or not.
     Relevant paper: http://users.fs.cvut.cz/ivo.bukovsky/PROJEKT/Data/Realna/BIO/EEG/reference/PRE61907.pdf
   -->
-  <case name="Classification task Recognition of the Epileptic Seizure Brain Activity (EEG):  Pure ESN reservoir, Feed forward network with hidden layer as a classifier">
-    <samples fileName="EpilepticSeizureActivity_middle.csv"/>
-    <stateMachineCfg randomizerSeek="0">
+  <case name="Classification task Recognition of the Epileptic Seizure Brain Activity (EEG):  Pure ESN reservoir, one Identity neuron as a classifier (Ridge regression trainer)">
+    <samples fileName="EpilepticSeizureActivity.csv"/>
+    <stateMachineCfg randomizerSeek="0" verificationSamples="1000">
       <neuralPreprocessor>
         <input>
-          <feedingPatterned/>
+          <feedingPatterned bidir="true"/>
           <external>
             <field name="EEG">
               <realFeature standardize="true" keepReserve="false"/>
@@ -1867,23 +1851,13 @@
         <reservoirCfgContainer>
           <reservoirCfg name="MainCfg">
             <pools>
-              <pool name="Experimental" dimX="8" dimY="8" dimZ="5">
+              <pool name="PureESN" dimX="6" dimY="6" dimZ="5">
                 <neuronGroups>
                   <analogGroup name="Exc-grp" role="Excitatory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction">
                     <activationTanH/>
-                    <bias min="0" max="0" randomSign="false" />
-                    <firingThreshold value="0.00125"/>
-                    <retainment density="0">
-                      <strength min="0.25" max="0.75"/>
-                    </retainment>
                   </analogGroup>
                   <analogGroup name="Inh-grp" role="Inhibitory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction">
                     <activationTanH/>
-                    <bias min="0" max="0" randomSign="false" />
-                    <firingThreshold value="0.00125"/>
-                    <retainment density="0">
-                      <strength min="0.25" max="0.75"/>
-                    </retainment>
                   </analogGroup>
                 </neuronGroups>
                 <interconnection density="0.05" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
@@ -1900,7 +1874,7 @@
         <reservoirInstanceContainer>
           <reservoirInstance name="Main" cfg="MainCfg">
             <inputConnections>
-              <inputConnection fieldName="EEG" poolName="Experimental" density="0.25">
+              <inputConnection fieldName="EEG" poolName="PureESN" density="0.5">
                 <synapse delayMethod="Random" maxDelay="0">
                   <analogTarget scope="All">
                     <weight min="0" max="1"/>
@@ -1927,13 +1901,10 @@
             <binFeature/>
           </classification>
           <ff>
-            <activationTanH/>
-            <hiddenLayers>
-              <layer neurons="10">
-                <activationTanH/>
-              </layer>
-            </hiddenLayers>
-            <resPropTrainer attempts="5" attemptEpochs="1000"/>
+            <activationIdentity/>
+            <ridgeRegrTrainer attemptEpochs="1">
+              <lambda min="0.1" max="0.1" steps="2"/>
+            </ridgeRegrTrainer>
           </ff>
         </readoutUnit>
       </readoutLayer>
