@@ -29,7 +29,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         public InputNeuron AnalogInputNeuron { get; }
         /// <summary>
         /// Set of Input neurons providing spiking signal.
-        /// Collection of spiking input neurons is a "spike-train" representing analog input value.
+        /// Collection of spiking input neurons expressing a "spike-train" representing analog input value.
         /// </summary>
         public InputNeuron[] SpikingInputNeuronCollection { get; }
 

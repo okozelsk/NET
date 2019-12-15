@@ -1914,12 +1914,19 @@
       <xs:element type="RealFeatureFilterCfgType" name="realFeature" minOccurs="0" maxOccurs="1"/>
     </xs:choice>
     <xs:attribute type="xs:string" name="name" use="required"/>
+    <xs:attribute type="UIntGE1LE32Type" name="spikeTrainLength" use="optional" default="8">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 8</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
     <xs:attribute type="xs:boolean" name="allowRoutingToReadout" use="optional" default="true">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is true</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
+
+  
 
   <!-- NeuralPreprocessor - internal input field -configuration -->
   <xs:complexType name="NPInternalInpFieldCfgType">
@@ -1930,6 +1937,11 @@
       <xs:element type="MackeyGlassGeneratorCfgType" name="mackeyGlass" minOccurs="1" maxOccurs="1"/>
     </xs:choice>
     <xs:attribute type="xs:string" name="name" use="required"/>
+    <xs:attribute type="UIntGE1LE32Type" name="spikeTrainLength" use="optional" default="8">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 8</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
     <xs:attribute type="xs:boolean" name="allowRoutingToReadout" use="optional" default="false">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is false</xs:documentation>

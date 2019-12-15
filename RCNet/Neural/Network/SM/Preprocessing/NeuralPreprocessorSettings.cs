@@ -100,7 +100,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 {
                     throw new Exception($"Reservoir settings '{reservoirInstanceElem.Attribute("cfg").Value}' was not found among available settings.");
                 }
-                //Update number of neurons in the largest reservoir
+                //Number of neurons of the largest reservoir
                 int numOfReservoirNeurons = 0;
                 foreach(PoolSettings ps in reservoirInstanceDefinition.Settings.PoolSettingsCollection)
                 {
@@ -128,7 +128,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                     //Add distinct name to the collection
                     if(resInpFieldNameCollection.IndexOf(inputFieldName) < 0)
                     {
-                        reservoirInstanceDefinition.NPInputFieldIdxCollection.Add(inputFieldIdx);
+                        reservoirInstanceDefinition.InputFieldInfoCollection.Add(new ReservoirInstanceDefinition.InputFieldInfo(inputFieldName, inputFieldIdx, InputConfig.GetField(inputFieldName).SpikeTrainLength));
                         resInpFieldNameCollection.Add(inputFieldName);
                     }
                 }
@@ -340,13 +340,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 foreach (XElement extFieldElem in settingsElem.Descendants("external").First().Descendants("field"))
                 {
                     string fieldName = extFieldElem.Attribute("name").Value;
+                    int spikeTrainLength = int.Parse(extFieldElem.Attribute("spikeTrainLength").Value, CultureInfo.InvariantCulture);
                     bool allowRoutingToReadout = bool.Parse(extFieldElem.Attribute("allowRoutingToReadout").Value);
                     if (uniquenessChecker.ContainsKey(fieldName))
                     {
                         throw new Exception($"Duplicit input field name {fieldName}");
                     }
                     uniquenessChecker.Add(fieldName, fieldName);
-                    ExternalFieldCollection.Add(new ExternalField(fieldName, allowRoutingToReadout, extFieldElem.Descendants().FirstOrDefault()));
+                    ExternalFieldCollection.Add(new ExternalField(fieldName, spikeTrainLength, allowRoutingToReadout, extFieldElem.Descendants().FirstOrDefault()));
                 }
                 //Internal fields
                 XElement intFieldsElem = settingsElem.Descendants("internal").FirstOrDefault();
@@ -355,13 +356,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                     foreach (XElement intFieldElem in intFieldsElem.Descendants("field"))
                     {
                         string fieldName = intFieldElem.Attribute("name").Value;
+                        int spikeTrainLength = int.Parse(intFieldElem.Attribute("spikeTrainLength").Value, CultureInfo.InvariantCulture);
                         bool allowRoutingToReadout = bool.Parse(intFieldElem.Attribute("allowRoutingToReadout").Value);
                         if (uniquenessChecker.ContainsKey(fieldName))
                         {
                             throw new Exception($"Duplicit input field name: {fieldName}");
                         }
                         uniquenessChecker.Add(fieldName, fieldName);
-                        InternalFieldCollection.Add(new InternalField(fieldName, allowRoutingToReadout, intFieldElem.Descendants().First()));
+                        InternalFieldCollection.Add(new InternalField(fieldName, spikeTrainLength, allowRoutingToReadout, intFieldElem.Descendants().First()));
                     }
                 }
                 return;
@@ -396,6 +398,29 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                     }
                 }
                 return -1;
+            }
+
+            /// <summary>
+            /// Function searches for the specified field among all Neural Preprocessor input fields
+            /// </summary>
+            /// <param name="fieldName">Name of the searched field</param>
+            public Field GetField(string fieldName)
+            {
+                for (int i = 0; i < ExternalFieldCollection.Count; i++)
+                {
+                    if (ExternalFieldCollection[i].Name == fieldName)
+                    {
+                        return ExternalFieldCollection[i];
+                    }
+                }
+                for (int i = 0; i < InternalFieldCollection.Count; i++)
+                {
+                    if (InternalFieldCollection[i].Name == fieldName)
+                    {
+                        return InternalFieldCollection[i];
+                    }
+                }
+                return null;
             }
 
             /// <summary>
@@ -480,6 +505,22 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             [Serializable]
             public class Field
             {
+                //Constants
+                /// <summary>
+                /// Default length of the spike-train
+                /// </summary>
+                public const int DefaultSpikeTrainLength = 8;
+                
+                /// <summary>
+                /// Minimum length of the spike-train
+                /// </summary>
+                public const int MinSpikeTrainLength = 1;
+                
+                /// <summary>
+                /// Maximum length of the spike-train
+                /// </summary>
+                public const int MaxSpikeTrainLength = 32;
+                
                 //Attribute properties
                 /// <summary>
                 /// Field name
@@ -487,20 +528,28 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 public string Name { get; set; }
 
                 /// <summary>
+                /// Length of the spike-train
+                /// </summary>
+                public int SpikeTrainLength { get; set; }
+
+                /// <summary>
                 /// The parameter specifies whether the field can be included among predictors
                 /// together with the predictors from the reservoirs.
                 /// </summary>
                 public bool AllowRoutingToReadout { get; set; }
+
 
                 //Constructors
                 /// <summary>
                 /// Creates an initialized instance
                 /// </summary>
                 /// <param name="name">Field name</param>
+                /// <param name="spikeTrainLength">Length of the spike-train</param>
                 /// <param name="allowRoutingToReadout">Specifies whether the field can be included among predictors</param>
-                public Field(string name, bool allowRoutingToReadout)
+                public Field(string name, int spikeTrainLength, bool allowRoutingToReadout)
                 {
                     Name = name;
+                    SpikeTrainLength = spikeTrainLength;
                     AllowRoutingToReadout = allowRoutingToReadout;
                     return;
                 }
@@ -512,6 +561,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 public Field(Field source)
                 {
                     Name = source.Name;
+                    SpikeTrainLength = source.SpikeTrainLength;
                     AllowRoutingToReadout = source.AllowRoutingToReadout;
                     return;
                 }
@@ -533,7 +583,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 {
                     if (obj == null) return false;
                     Field cmpSettings = obj as Field;
-                    if (Name != cmpSettings.Name || AllowRoutingToReadout != cmpSettings.AllowRoutingToReadout)
+                    if (Name != cmpSettings.Name ||
+                        SpikeTrainLength != cmpSettings.SpikeTrainLength ||
+                        AllowRoutingToReadout != cmpSettings.AllowRoutingToReadout
+                        )
                     {
                         return false;
                     }
@@ -567,10 +620,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 /// Creates an initialized instance
                 /// </summary>
                 /// <param name="name">Field name</param>
+                /// <param name="spikeTrainLength">Length of the spike-train</param>
                 /// <param name="allowRoutingToReadout">Specifies whether the field can be included among predictors</param>
                 /// <param name="settingsElem">Xml element containing associated feature filter settings</param>
-                public ExternalField(string name, bool allowRoutingToReadout, XElement settingsElem)
-                    : base(name, allowRoutingToReadout)
+                public ExternalField(string name, int spikeTrainLength, bool allowRoutingToReadout, XElement settingsElem)
+                    : base(name, spikeTrainLength, allowRoutingToReadout)
                 {
                     FeatureFilterCfg = FeatureFilterFactory.LoadSettings(settingsElem);
                     return;
@@ -641,10 +695,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 /// Creates an initialized instance
                 /// </summary>
                 /// <param name="name">Field name</param>
+                /// <param name="spikeTrainLength">Length of the spike-train</param>
                 /// <param name="allowRoutingToReadout">Specifies whether the field can be included among predictors</param>
                 /// <param name="settingsElem">Xml element containing associated signal generator settings</param>
-                public InternalField(string name, bool allowRoutingToReadout, XElement settingsElem)
-                    :base(name, allowRoutingToReadout)
+                public InternalField(string name, int spikeTrainLength, bool allowRoutingToReadout, XElement settingsElem)
+                    :base(name, spikeTrainLength, allowRoutingToReadout)
                 {
                     switch(settingsElem.Name.LocalName)
                     {
@@ -757,9 +812,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             /// </summary>
             public ReservoirSettings Settings { get; set; }
             /// <summary>
-            /// Reservoir's input fields indexes in Neural Preprocessor input fields.
+            /// Necessary attributes of Reservoir's input fields
             /// </summary>
-            public List<int> NPInputFieldIdxCollection { get; set; }
+            public List<InputFieldInfo> InputFieldInfoCollection { get; set; }
             /// <summary>
             /// Connections of the Reservoir's input fields to the Reservoir's pools.
             /// </summary>
@@ -779,7 +834,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 InstanceName = string.Empty;
                 Settings = null;
                 PredictorsCfg = null;
-                NPInputFieldIdxCollection = new List<int>();
+                InputFieldInfoCollection = new List<InputFieldInfo>();
                 InputConnectionCollection = new List<InputConnection>();
                 return;
             }
@@ -793,7 +848,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 InstanceID = source.InstanceID;
                 InstanceName = source.InstanceName;
                 Settings = source.Settings.DeepClone();
-                NPInputFieldIdxCollection = new List<int>(source.NPInputFieldIdxCollection);
+                InputFieldInfoCollection = new List<InputFieldInfo>(source.InputFieldInfoCollection.Count);
+                foreach(InputFieldInfo ifi in source.InputFieldInfoCollection)
+                {
+                    InputFieldInfoCollection.Add(ifi.DeepClone());
+                }
                 InputConnectionCollection = new List<InputConnection>(source.InputConnectionCollection.Count);
                 foreach(InputConnection ifa in source.InputConnectionCollection)
                 {
@@ -823,15 +882,21 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 if (InstanceID != cmpSettings.InstanceID ||
                     InstanceName != cmpSettings.InstanceName ||
                     !Equals(Settings, cmpSettings.Settings) ||
-                    NPInputFieldIdxCollection.Count != cmpSettings.NPInputFieldIdxCollection.Count ||
-                    !NPInputFieldIdxCollection.ToArray().ContainsEqualValues(cmpSettings.NPInputFieldIdxCollection.ToArray()) ||
+                    InputFieldInfoCollection.Count != cmpSettings.InputFieldInfoCollection.Count ||
                     InputConnectionCollection.Count != cmpSettings.InputConnectionCollection.Count ||
                     !Equals(PredictorsCfg, cmpSettings.PredictorsCfg)
                     )
                 {
                     return false;
                 }
-                for(int i = 0; i < InputConnectionCollection.Count; i++)
+                for(int i = 0; i < InputFieldInfoCollection.Count; i++)
+                {
+                    if (!Equals(InputFieldInfoCollection[i], cmpSettings.InputFieldInfoCollection[i]))
+                    {
+                        return false;
+                    }
+                }
+                for (int i = 0; i < InputConnectionCollection.Count; i++)
                 {
                     if(!Equals(InputConnectionCollection[i], cmpSettings.InputConnectionCollection[i]))
                     {
@@ -850,6 +915,91 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             }
 
             //Inner classes
+            /// <summary>
+            /// Necessary attributes of an input field
+            /// </summary>
+            [Serializable]
+            public class InputFieldInfo
+            {
+                /// <summary>
+                /// Name of the input field
+                /// </summary>
+                public string FieldName { get; set; }
+
+                /// <summary>
+                /// Index of the field among NP input fields
+                /// </summary>
+                public int FieldIndex { get; set; }
+
+                /// <summary>
+                /// Length of the spike-train of value representation
+                /// </summary>
+                public int SpikeTrainLength { get; set; }
+
+                //Constructors
+                /// <summary>
+                /// Creates an itialized instance.
+                /// </summary>
+                /// <param name="fieldName">Name of the input field</param>
+                /// <param name="fieldIndex">Index of the field among NP input fields</param>
+                /// <param name="spikeTrainLength">Length of the spike-train of value representation</param>
+                public InputFieldInfo(string fieldName, int fieldIndex, int spikeTrainLength)
+                {
+                    FieldName = fieldName;
+                    FieldIndex = fieldIndex;
+                    SpikeTrainLength = spikeTrainLength;
+                    return;
+                }
+
+                /// <summary>
+                /// The deep copy constructor.
+                /// </summary>
+                /// <param name="source">Source instance</param>
+                public InputFieldInfo(InputFieldInfo source)
+                {
+                    FieldName = source.FieldName;
+                    FieldIndex = source.FieldIndex;
+                    SpikeTrainLength = source.SpikeTrainLength;
+                    return;
+                }
+
+                //Methods
+                /// <summary>
+                /// Creates the deep copy instance of this instance
+                /// </summary>
+                /// <returns></returns>
+                public InputFieldInfo DeepClone()
+                {
+                    return new InputFieldInfo(this);
+                }
+
+                /// <summary>
+                /// See the base.
+                /// </summary>
+                public override bool Equals(object obj)
+                {
+                    if (obj == null) return false;
+                    InputFieldInfo cmpSettings = obj as InputFieldInfo;
+                    if (FieldName != cmpSettings.FieldName ||
+                        FieldIndex != cmpSettings.FieldIndex ||
+                        SpikeTrainLength != cmpSettings.SpikeTrainLength
+                        )
+                    {
+                        return false;
+                    }
+                    return true;
+                }
+
+                /// <summary>
+                /// See the base.
+                /// </summary>
+                public override int GetHashCode()
+                {
+                    return base.GetHashCode();
+                }
+
+            }//InputFieldInfo
+
             /// <summary>
             /// Connection of input field to pool
             /// </summary>

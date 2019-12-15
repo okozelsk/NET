@@ -301,10 +301,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             //Compute reservoir(s)
             foreach (Reservoir reservoir in ReservoirCollection)
             {
-                double[] reservoirInput = new double[reservoir.InstanceDefinition.NPInputFieldIdxCollection.Count];
-                for (int i = 0; i < reservoir.InstanceDefinition.NPInputFieldIdxCollection.Count; i++)
+                double[] reservoirInput = new double[reservoir.InstanceDefinition.InputFieldInfoCollection.Count];
+                for (int i = 0; i < reservoir.InstanceDefinition.InputFieldInfoCollection.Count; i++)
                 {
-                    reservoirInput[i] = completedInputVector[reservoir.InstanceDefinition.NPInputFieldIdxCollection[i]];
+                    reservoirInput[i] = completedInputVector[reservoir.InstanceDefinition.InputFieldInfoCollection[i].FieldIndex];
                 }
                 //Compute reservoir
                 reservoir.Compute(reservoirInput, collectStatistics);
@@ -359,7 +359,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             //Compute reservoir(s)
             foreach (Reservoir reservoir in ReservoirCollection)
             {
-                double[] reservoirInput = new double[reservoir.InstanceDefinition.NPInputFieldIdxCollection.Count];
+                double[] reservoirInput = new double[reservoir.InstanceDefinition.InputFieldInfoCollection.Count];
                 List<List<double[]>> stepInputPatterns = new List<List<double[]>>() { completedInputPattern };
                 if(_settings.InputConfig.Bidirectional)
                 {
@@ -371,9 +371,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 {
                     foreach (double[] inputVector in stepInputPattern)
                     {
-                        for (int i = 0; i < reservoir.InstanceDefinition.NPInputFieldIdxCollection.Count; i++)
+                        for (int i = 0; i < reservoir.InstanceDefinition.InputFieldInfoCollection.Count; i++)
                         {
-                            reservoirInput[i] = inputVector[reservoir.InstanceDefinition.NPInputFieldIdxCollection[i]];
+                            reservoirInput[i] = inputVector[reservoir.InstanceDefinition.InputFieldInfoCollection[i].FieldIndex];
                         }
                         //Compute the reservoir
                         reservoir.Compute(reservoirInput, collectStatistics);

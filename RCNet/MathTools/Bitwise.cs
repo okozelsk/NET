@@ -11,7 +11,7 @@ namespace RCNet.MathTools
         /// <summary>
         /// Zero based index of the highest allowed bit
         /// </summary>
-        private const int BitMaxIndex = sizeof(ulong) - 1;
+        private const int BitMaxIndex = sizeof(ulong) * 8 - 1;
 
         //Attributes
         /// <summary>

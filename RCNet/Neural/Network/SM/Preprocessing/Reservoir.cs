@@ -21,9 +21,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing
     {
         //Attributes
         /// <summary>
-        /// Reservoir's input neurons.
+        /// Reservoir's input units.
         /// </summary>
-        private readonly InputNeuron[] _inputNeuronCollection;
+        private readonly InputUnit[] _inputUnitCollection;
         /// <summary>
         /// Neurons within the pools.
         /// </summary>
@@ -82,18 +82,16 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// <param name="rand">Random object to be used for random part initialization </param>
         public Reservoir(NeuralPreprocessorSettings.ReservoirInstanceDefinition instanceDefinition, Interval inputRange, Random rand)
         {
-            int numOfInputNodes = instanceDefinition.NPInputFieldIdxCollection.Count;
             //Copy settings
             InstanceDefinition = instanceDefinition.DeepClone();
-
             //-----------------------------------------------------------------------------
             //Initialization of neurons
             //-----------------------------------------------------------------------------
             //Input neurons
-            _inputNeuronCollection = new InputNeuron[numOfInputNodes];
-            for (int i = 0; i < numOfInputNodes; i++)
+            _inputUnitCollection = new InputUnit[InstanceDefinition.InputFieldInfoCollection.Count];
+            for (int i = 0; i < InstanceDefinition.InputFieldInfoCollection.Count; i++)
             {
-                _inputNeuronCollection[i] = new InputNeuron(InstanceDefinition.Settings.InputEntryPoint, i, inputRange);
+                _inputUnitCollection[i] = new InputUnit(InstanceDefinition.Settings.InputEntryPoint, i, inputRange, InstanceDefinition.InputFieldInfoCollection[i].SpikeTrainLength);
             }
             BasicStat[] inputDistanceStatCollection = new BasicStat[InstanceDefinition.Settings.PoolSettingsCollection.Count];
             for(int i = 0; i < inputDistanceStatCollection.Length; i++)
@@ -397,7 +395,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                         {
                             int targetNeuronIdx = indices[i];
                             double weight = (targetNeurons[targetNeuronIdx].TypeOfActivation == ActivationType.Spiking ? rand.NextDouble(inputConnection.SynapseCfg.SpikingTargetWeightCfg) : rand.NextDouble(inputConnection.SynapseCfg.AnalogTargetWeightCfg));
-                            ISynapse synapse = new InputSynapse(_inputNeuronCollection[inputConnection.FieldIdx],
+                            ISynapse synapse = new InputSynapse(_inputUnitCollection[inputConnection.FieldIdx].AnalogInputNeuron,
                                                                 targetNeurons[targetNeuronIdx],
                                                                 weight,
                                                                 inputConnection.SynapseCfg.DelayMethod,
@@ -849,9 +847,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         public void Reset(bool resetStatistics)
         {
             //Input neurons
-            foreach(InputNeuron neuron in _inputNeuronCollection)
+            foreach(InputUnit inputUnit in _inputUnitCollection)
             {
-                neuron.Reset(resetStatistics);
+                inputUnit.Reset(resetStatistics);
             }
             //Reservoir neurons and all linked synapses
             Parallel.For(0, _reservoirNeuronCollection.Length, n =>
@@ -886,8 +884,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             //Set input values to input neurons
             for (int i = 0; i < input.Length; i++)
             {
-                _inputNeuronCollection[i].NewStimulation(input[i], 0);
-                _inputNeuronCollection[i].ComputeSignal(updateStatistics);
+                _inputUnitCollection[i].NewStimulation(input[i]);
+                _inputUnitCollection[i].ComputeSignal(updateStatistics);
             }
             //Perform reservoir's computation cycle
             //Collect new stimulation for each reservoir neuron
