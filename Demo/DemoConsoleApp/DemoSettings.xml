@@ -106,7 +106,7 @@
     Beetle/Fly is the problem of distinguishing between an outline of a beetle and a fly.
     Demo note: The first 20 instances in BeetleFly.csv are for network learning and the last 20 instances for verification.
   -->
-  <case name="Classification task BeetleFly: Simple pure ESN reservoir generating FiringFadingSum predictors, one Identity neuron as a classifier (Ridge regression trainer)">
+  <case name="Classification task BeetleFly: Simple pure ESN reservoir generating FiringFadingSum predictors, Parallel Perceptron (one gate) as a classifier">
     <samples fileName="BeetleFly.csv"/>
     <stateMachineCfg randomizerSeek="0" verificationSamples="20">
       <neuralPreprocessor>

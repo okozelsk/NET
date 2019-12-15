@@ -334,7 +334,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 //Spiking sub-type
                 if (activationType == ActivationType.Spiking)
                 {
+                    //Output signaling restriction
                     SignalingRestriction = NeuronCommon.NeuronSignalingRestrictionType.SpikingOnly;
+                    //Irrelevant settings
                     AnalogFiringThreshold = 0;
                     RetainmentNeuronsDensity = 0;
                     RetainmentStrengthCfg = null;
