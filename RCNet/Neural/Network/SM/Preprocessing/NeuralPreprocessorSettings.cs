@@ -166,10 +166,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                     }
                     //Density
                     double density = double.Parse(inputConnectionElem.Attribute("density").Value, CultureInfo.InvariantCulture);
+                    NeuronCommon.NeuronSignalingRestrictionType signalingRestriction = NeuronCommon.ParseNeuronSignalingRestriction(inputConnectionElem.Attribute("signalingRestriction").Value);
                     //Input synapse settings
                     InputSynapseSettings synapseCfg = new InputSynapseSettings(inputConnectionElem.Descendants("synapse").First());
                     //Add new assignment
-                    reservoirInstanceDefinition.InputConnectionCollection.Add(new ReservoirInstanceDefinition.InputConnection(resInputFieldIdx, targetPoolID, density, synapseCfg));
+                    reservoirInstanceDefinition.InputConnectionCollection.Add(new ReservoirInstanceDefinition.InputConnection(resInputFieldIdx, targetPoolID, density, signalingRestriction, synapseCfg));
                 }
                 ReservoirInstanceDefinitionCollection.Add(reservoirInstanceDefinition);
                 ++reservoirInstanceID;
@@ -1022,6 +1023,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 /// </summary>
                 public double Density { get; set; }
                 /// <summary>
+                /// Restriction of signaling of associated synapses
+                /// </summary>
+                public NeuronCommon.NeuronSignalingRestrictionType SignalingRestriction { get; set; }
+                /// <summary>
                 /// Input neuron to pool's neuron synapse settings
                 /// </summary>
                 public InputSynapseSettings SynapseCfg { get; set; }
@@ -1033,12 +1038,19 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 /// <param name="fieldIdx">Index of the reservoir input field</param>
                 /// <param name="poolID">ID of the target pool</param>
                 /// <param name="density">Input field connection density</param>
+                /// <param name="signalingRestriction">Restriction of signaling of associated synapses</param>
                 /// <param name="synapseCfg">Input neuron to pool's neuron synapse settings</param>
-                public InputConnection(int fieldIdx, int poolID, double density, InputSynapseSettings synapseCfg)
+                public InputConnection(int fieldIdx,
+                                       int poolID,
+                                       double density,
+                                       NeuronCommon.NeuronSignalingRestrictionType signalingRestriction,
+                                       InputSynapseSettings synapseCfg
+                                       )
                 {
                     FieldIdx = fieldIdx;
                     PoolID = poolID;
                     Density = density;
+                    SignalingRestriction = signalingRestriction;
                     SynapseCfg = synapseCfg.DeepClone();
                     return;
                 }
@@ -1052,6 +1064,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                     FieldIdx = source.FieldIdx;
                     PoolID = source.PoolID;
                     Density = source.Density;
+                    SignalingRestriction = source.SignalingRestriction;
                     SynapseCfg = source.SynapseCfg.DeepClone();
                     return;
                 }
@@ -1076,6 +1089,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                     if (FieldIdx != cmpSettings.FieldIdx ||
                         PoolID != cmpSettings.PoolID ||
                         Density != cmpSettings.Density ||
+                        SignalingRestriction != cmpSettings.SignalingRestriction ||
                         !Equals(SynapseCfg, cmpSettings.SynapseCfg)
                         )
                     {

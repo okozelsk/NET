@@ -134,7 +134,14 @@ namespace RCNet.Neural.Network.SM.Neuron
         public void ComputeSignal(bool collectStatistics)
         {
             _analogSignal = _tStimuli;
-            _spikingSignal = _spikingTargetRange.Rescale(_tStimuli, _inputRange);
+            if (SignalingRestriction == NeuronCommon.NeuronSignalingRestrictionType.AnalogOnly)
+            {
+                _spikingSignal = _spikingTargetRange.Rescale(_tStimuli, _inputRange);
+            }
+            else
+            {
+                _spikingSignal = _tStimuli;
+            }
             if (collectStatistics)
             {
                 Statistics.Update(_iStimuli, _rStimuli, _tStimuli, _tStimuli, _analogSignal, _spikingSignal);

@@ -391,11 +391,31 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                         int[] indices = new int[targetNeurons.Count];
                         indices.Indices();
                         rand.Shuffle(indices);
+                        int spikingNeuronSubIndex = 0;
                         for (int i = 0; i < connectionsPerInput; i++)
                         {
                             int targetNeuronIdx = indices[i];
-                            double weight = (targetNeurons[targetNeuronIdx].TypeOfActivation == ActivationType.Spiking ? rand.NextDouble(inputConnection.SynapseCfg.SpikingTargetWeightCfg) : rand.NextDouble(inputConnection.SynapseCfg.AnalogTargetWeightCfg));
-                            ISynapse synapse = new InputSynapse(_inputUnitCollection[inputConnection.FieldIdx].AnalogInputNeuron,
+                            double weight = targetNeurons[targetNeuronIdx].TypeOfActivation == ActivationType.Spiking ? rand.NextDouble(inputConnection.SynapseCfg.SpikingTargetWeightCfg) : rand.NextDouble(inputConnection.SynapseCfg.AnalogTargetWeightCfg);
+                            INeuron inputNeuron;
+                            //Input neuron
+                            if(inputConnection.SignalingRestriction == NeuronCommon.NeuronSignalingRestrictionType.AnalogOnly ||
+                               (inputConnection.SignalingRestriction == NeuronCommon.NeuronSignalingRestrictionType.NoRestriction && targetNeurons[targetNeuronIdx].TypeOfActivation == ActivationType.Analog)
+                               )
+                            {
+                                //Connect analog input neuron
+                                inputNeuron = _inputUnitCollection[inputConnection.FieldIdx].AnalogInputNeuron;
+                            }
+                            else
+                            {
+                                //Connect train spiking input neuron
+                                inputNeuron = _inputUnitCollection[inputConnection.FieldIdx].SpikingInputNeuronCollection[spikingNeuronSubIndex];
+                                ++spikingNeuronSubIndex;
+                                if (spikingNeuronSubIndex == _inputUnitCollection[inputConnection.FieldIdx].SpikingInputNeuronCollection.Length)
+                                {
+                                    spikingNeuronSubIndex = 0;
+                                }
+                            }
+                            ISynapse synapse = new InputSynapse(inputNeuron,
                                                                 targetNeurons[targetNeuronIdx],
                                                                 weight,
                                                                 inputConnection.SynapseCfg.DelayMethod,

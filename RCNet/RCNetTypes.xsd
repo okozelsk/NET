@@ -56,7 +56,7 @@
   </xs:simpleType>
 
   <!-- Enumeration of neuron's output signaling restriction -->
-  <xs:simpleType name="NeuronSignalingRestrictionType">
+  <xs:simpleType name="SignalingRestrictionType">
     <xs:restriction base="xs:string">
       <xs:enumeration value="NoRestriction"/>
       <xs:enumeration value="AnalogOnly"/>
@@ -1729,7 +1729,7 @@
     <xs:attribute type="xs:string" name="name" use="required" />
     <xs:attribute type="NeuronRoleType" name="role" use="required"/>
     <xs:attribute type="UDoubleType" name="relShare" use="required"/>
-    <xs:attribute type="NeuronSignalingRestrictionType" name="signalingRestriction" use="optional" default="NoRestriction">
+    <xs:attribute type="SignalingRestrictionType" name="signalingRestriction" use="optional" default="NoRestriction">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is NoRestriction</xs:documentation>
       </xs:annotation>
@@ -1992,6 +1992,11 @@
     <xs:attribute type="xs:string" name="fieldName" use="required"/>
     <xs:attribute type="xs:string" name="poolName" use="required"/>
     <xs:attribute type="UDoubleGT0Type" name="density" use="required"/>
+    <xs:attribute type="SignalingRestrictionType" name="signalingRestriction" use="optional" default="AnalogOnly">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is AnalogOnly</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- NeuralPreprocessor - reservoir instance - input field connection - configuration collection -->

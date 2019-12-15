@@ -114,7 +114,7 @@ namespace RCNet.Neural.Network.SM.Synapse
         public double GetSignal(bool collectStatistics)
         {
             //Weighted source neuron signal
-            double weightedSignal = SourceNeuron.GetSignal(TargetNeuron.TypeOfActivation) * Weight; ;
+            double weightedSignal = SourceNeuron.GetSignal(TargetNeuron.TypeOfActivation) * Weight;
             if (_signalQueue == null)
             {
                 return weightedSignal;
