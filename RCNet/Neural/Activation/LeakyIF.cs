@@ -35,7 +35,6 @@ namespace RCNet.Neural.Activation
         /// <param name="refractoryPeriods">Number of after spike computation cycles while an input stimuli is ignored (ms)</param>
         /// <param name="solverMethod">ODE numerical solver method</param>
         /// <param name="solverCompSteps">ODE numerical solver computation steps of the time step</param>
-        /// <param name="solveGradually">Determines what variant of ODENumSolver method to use. Gradual solving can lead to shorter computation time (computation stops immediately the firing threshold is met) but it impacts membrane current potential prediction power.</param>
         public LeakyIF(double timeScale,
                        double resistance,
                        double restV,
@@ -43,8 +42,7 @@ namespace RCNet.Neural.Activation
                        double firingThresholdV,
                        int refractoryPeriods,
                        ODENumSolver.Method solverMethod,
-                       int solverCompSteps,
-                       bool solveGradually
+                       int solverCompSteps
                        )
             : base(restV,
                    resetV,
@@ -53,7 +51,6 @@ namespace RCNet.Neural.Activation
                    solverMethod,
                    1,
                    solverCompSteps,
-                   solveGradually,
                    1,
                    100,
                    1

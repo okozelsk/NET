@@ -47,7 +47,6 @@ namespace RCNet.Neural.Activation
         /// <param name="adaptationSpikeTriggeredIncrement">Spike triggered adaptation increment (pA)</param>
         /// <param name="solverMethod">ODE numerical solver method</param>
         /// <param name="solverCompSteps">ODE numerical solver computation steps of the time step</param>
-        /// <param name="solveGradually">Determines what variant of ODENumSolver method to use. Gradual solving can lead to shorter computation time (computation stops immediately the firing threshold is met) but it impacts membrane current potential prediction power.</param>
         public AdExpIF(double timeScale,
                        double resistance,
                        double restV,
@@ -59,8 +58,7 @@ namespace RCNet.Neural.Activation
                        double adaptationTimeConstant,
                        double adaptationSpikeTriggeredIncrement,
                        ODENumSolver.Method solverMethod,
-                       int solverCompSteps,
-                       bool solveGradually
+                       int solverCompSteps
                        )
             : base(PhysUnit.ToBase(restV, PhysUnit.MetricPrefix.Milli),
                    PhysUnit.ToBase(resetV, PhysUnit.MetricPrefix.Milli),
@@ -69,7 +67,6 @@ namespace RCNet.Neural.Activation
                    solverMethod,
                    PhysUnit.ToBase(1, PhysUnit.MetricPrefix.Milli),
                    solverCompSteps,
-                   solveGradually,
                    2,
                    PhysUnit.FromBase(1d, PhysUnit.MetricPrefix.Giga),
                    PhysUnit.FromBase(1d, PhysUnit.MetricPrefix.Milli)

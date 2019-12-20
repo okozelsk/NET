@@ -91,8 +91,7 @@ namespace RCNet.Neural.Activation
                                    rand.NextDouble(afs.AdaptationTimeConstant),
                                    rand.NextDouble(afs.AdaptationSpikeTriggeredIncrement),
                                    afs.SolverMethod,
-                                   afs.SolverCompSteps,
-                                   afs.SolveGradually
+                                   afs.SolverCompSteps
                                   );
             }
             else if (settingsType == typeof(BentIdentitySettings))
@@ -116,8 +115,7 @@ namespace RCNet.Neural.Activation
                                  rand.NextDouble(afs.SharpnessDeltaT),
                                  afs.RefractoryPeriods,
                                  afs.SolverMethod,
-                                 afs.SolverCompSteps,
-                                 afs.SolveGradually
+                                 afs.SolverCompSteps
                                  );
             }
             else if (settingsType == typeof(GaussianSettings))
@@ -144,8 +142,7 @@ namespace RCNet.Neural.Activation
                                       rand.NextDouble(afs.FiringThresholdV),
                                       afs.RefractoryPeriods,
                                       afs.SolverMethod,
-                                      afs.SolverCompSteps,
-                                      afs.SolveGradually
+                                      afs.SolverCompSteps
                                       );
 
             }
@@ -164,8 +161,7 @@ namespace RCNet.Neural.Activation
                                           30,
                                           afs.RefractoryPeriods,
                                           afs.SolverMethod,
-                                          afs.SolverCompSteps,
-                                          afs.SolveGradually
+                                          afs.SolverCompSteps
                                           );
                 }
                 else
@@ -179,8 +175,7 @@ namespace RCNet.Neural.Activation
                                           30,
                                           afs.RefractoryPeriods,
                                           afs.SolverMethod,
-                                          afs.SolverCompSteps,
-                                          afs.SolveGradually
+                                          afs.SolverCompSteps
                                           );
                 }
             }
@@ -194,8 +189,7 @@ namespace RCNet.Neural.Activation
                                    rand.NextDouble(afs.FiringThresholdV),
                                    afs.RefractoryPeriods,
                                    afs.SolverMethod,
-                                   afs.SolverCompSteps,
-                                   afs.SolveGradually
+                                   afs.SolverCompSteps
                                    );
             }
             else if (settingsType == typeof(LeakyReLUSettings))

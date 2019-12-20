@@ -124,7 +124,6 @@ namespace RCNet.Neural.Activation
         public double Compute(double x)
         {
             x = (x).Bound();
-            double spike = 0;
             if (_membraneV >= _firingThresholdV)
             {
                 //Membrane potential after spike
@@ -155,9 +154,13 @@ namespace RCNet.Neural.Activation
             //Output
             if (_membraneV >= _firingThresholdV)
             {
-                spike = Spike;
+                _membraneV = _firingThresholdV;
+                return Spike;
             }
-            return spike;
+            else
+            {
+                return 0d;
+            }
         }
 
         /// <summary>

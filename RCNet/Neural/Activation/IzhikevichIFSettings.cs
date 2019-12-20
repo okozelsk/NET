@@ -88,12 +88,6 @@ namespace RCNet.Neural.Activation
         /// ODE numerical solver computation steps of the time step 
         /// </summary>
         public int SolverCompSteps { get; }
-        /// <summary>
-        /// Determines what variant of ODENumSolver method to use.
-        /// Gradual solving can lead to shorter computation time (computation stops immediately the firing threshold is met) but
-        /// it impacts membrane current potential prediction power.
-        /// </summary>
-        public bool SolveGradually { get; }
 
 
         //Constructors
@@ -109,7 +103,6 @@ namespace RCNet.Neural.Activation
         /// <param name="refractoryPeriods">Number of after spike computation cycles while an input stimuli is ignored (ms)</param>
         /// <param name="solverMethod">ODE numerical solver method</param>
         /// <param name="solverCompSteps">ODE numerical solver computation steps of the time step</param>
-        /// <param name="solveGradually">Determines what variant of ODENumSolver method to use. Gradual solving can lead to shorter computation time (computation stops immediately the firing threshold is met) but it impacts membrane current potential prediction power.</param>
         public IzhikevichIFSettings(RandomValueSettings recoveryTimeScale = null,
                                     RandomValueSettings recoverySensitivity = null,
                                     RandomValueSettings recoveryReset = null,
@@ -118,8 +111,7 @@ namespace RCNet.Neural.Activation
                                     RandomValueSettings firingThresholdV = null,
                                     int refractoryPeriods = 1,
                                     ODENumSolver.Method solverMethod = ODENumSolver.Method.Euler,
-                                    int solverCompSteps = 2,
-                                    bool solveGradually = false
+                                    int solverCompSteps = 2
                                     )
         {
             RecoveryTimeScale = RandomValueSettings.CloneOrDefault(recoveryTimeScale, TypicalRecoveryTimeScale);
@@ -131,7 +123,6 @@ namespace RCNet.Neural.Activation
             RefractoryPeriods = refractoryPeriods;
             SolverMethod = solverMethod;
             SolverCompSteps = solverCompSteps;
-            SolveGradually = solveGradually;
             return;
         }
 
@@ -150,7 +141,6 @@ namespace RCNet.Neural.Activation
             RefractoryPeriods = source.RefractoryPeriods;
             SolverMethod = source.SolverMethod;
             SolverCompSteps = source.SolverCompSteps;
-            SolveGradually = source.SolveGradually;
             return;
         }
 
@@ -179,7 +169,6 @@ namespace RCNet.Neural.Activation
             RefractoryPeriods = int.Parse(activationSettingsElem.Attribute("refractoryPeriods").Value, CultureInfo.InvariantCulture);
             SolverMethod = ODENumSolver.ParseComputationMethodType(activationSettingsElem.Attribute("solverMethod").Value);
             SolverCompSteps = int.Parse(activationSettingsElem.Attribute("solverCompSteps").Value, CultureInfo.InvariantCulture);
-            SolveGradually = bool.Parse(activationSettingsElem.Attribute("solveGradually").Value);
             return;
         }
 
@@ -199,8 +188,7 @@ namespace RCNet.Neural.Activation
                 !Equals(FiringThresholdV, cmpSettings.FiringThresholdV) ||
                 RefractoryPeriods != cmpSettings.RefractoryPeriods ||
                 SolverMethod != cmpSettings.SolverMethod ||
-                SolverCompSteps != cmpSettings.SolverCompSteps ||
-                SolveGradually != cmpSettings.SolveGradually
+                SolverCompSteps != cmpSettings.SolverCompSteps
                 )
             {
                 return false;

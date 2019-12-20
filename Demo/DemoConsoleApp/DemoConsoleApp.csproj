@@ -138,6 +138,9 @@
     <None Include="Data\BirdChicken.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="Data\ProximalPhalanxOutlineAgeGroup.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Data\Worms.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
