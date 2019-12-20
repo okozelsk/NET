@@ -17,6 +17,11 @@ I welcome questions, ideas and suggestions for improvements, usage experiences, 
 
 ## Demo application
 Main functionality and possibilities are demonstrated in a simple demo application (/Demo/DemoConsoleApp). Application has no startup parameters, all necessary settins are specified in DemoSettings.xml file. DemoSettings.xml has to be in the same folder as the executable DemoConsoleApp.exe. Application performs sequence of tasks defined in DemoSettings.xml. You can easily insert new task or tune existing one by simple modification of DemoSettings.xml. Each task is defined in the xml element "case".
+<br>
+DemoSettings.xml contains several classification problems from the:
+[Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com](https://timeseriesclassification.com/description.php?Dataset=ProximalPhalanxOutlineAgeGroup)
+site. It is shown, that even without any massive tuning of StateMachine's parameters, it exhibits very similar or better classification accuracy as the best algorithms referenced on the site.
+
 
 ### Data format for the demo application
 Input data is expected in csv format where delimiter can be a semicolon or a comma.
@@ -120,7 +125,8 @@ See the [wiki pages.](https://en.wikipedia.org/wiki/Biological_neuron_model)
 |--|--|
 |InputSynapse|Computes constantly weighted signal from external input and passes it to target neuron. Supports signal delay|
 |InternalSynapse|Computes dynamically weighted signal from source to target neuron. It supports pre-synaptic short-term plasticity.|
-|InputNeuron|Input neuron is the special type of very simple neuron. Its purpose is only to mediate input analog value for a synapse|
+|InputUnit|Provides external input for processing in the reservoir. Supports analog and spike-train codings (used spike-train coding method is from the "Sparse coding" family). Coded data is then further provided through set of InputNeurons.|
+|InputNeuron|Input neuron is the special type of very simple neuron. Its purpose is only to mediate input signal for a synapse|
 |HiddenNeuron|Supports both analog and spiking activation functions and can produce analog signal and/or spikes (neuron is able to fire spikes even when stateless analog activation is used). Supports Retainment property of analog activation (leaky integrator). Supports set of different predictors.|
 |Reservoir|Provides recurrent network supporting analog and spiking neurons working directly together. Main features: SpectralRadius (for weights of analog, spiking or both neurons), Multiple 3D pools of neurons, Pool to pool connections. It can work as the Echo State Network reservoir, Liquid State Machine reservoir or Mixed reservoir|
 |NeuralPreprocessor|Provides data preprocessing to predictors. Supports multiple internal reservoirs. Supports virtual input data associated with predefined signal generators. Supports two input feeding regimes: Continuous and Patterned|
