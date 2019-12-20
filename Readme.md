@@ -19,7 +19,7 @@ I welcome questions, ideas and suggestions for improvements, usage experiences, 
 Main functionality and possibilities are demonstrated in a simple demo application (/Demo/DemoConsoleApp). Application has no startup parameters, all necessary settins are specified in DemoSettings.xml file. DemoSettings.xml has to be in the same folder as the executable DemoConsoleApp.exe. Application performs sequence of tasks defined in DemoSettings.xml. You can easily insert new task or tune existing one by simple modification of DemoSettings.xml. Each task is defined in the xml element "case".
 <br>
 DemoSettings.xml contains several classification problems from the:
-[Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com](https://timeseriesclassification.com/description.php?Dataset=ProximalPhalanxOutlineAgeGroup)
+[Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com](https://timeseriesclassification.com)
 site. It is shown, that even without any massive tuning of StateMachine's parameters, it exhibits very similar or better classification accuracy as the best algorithms referenced on the site.
 
 
