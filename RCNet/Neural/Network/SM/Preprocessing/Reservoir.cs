@@ -91,7 +91,16 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             _inputUnitCollection = new InputUnit[InstanceDefinition.InputFieldInfoCollection.Count];
             for (int i = 0; i < InstanceDefinition.InputFieldInfoCollection.Count; i++)
             {
-                _inputUnitCollection[i] = new InputUnit(InstanceDefinition.Settings.InputEntryPoint, i, inputRange, InstanceDefinition.InputFieldInfoCollection[i].SpikeTrainLength);
+                _inputUnitCollection[i] = new InputUnit(InstanceDefinition.Settings.InputEntryPoint,
+                                                        i,
+                                                        inputRange,
+                                                        InstanceDefinition.InputFieldInfoCollection[i].SpikeTrainLength,
+                                                        InstanceDefinition.InputFieldInfoCollection[i].TransDiffDistance,
+                                                        InstanceDefinition.InputFieldInfoCollection[i].TransNumOfLinearSteps,
+                                                        InstanceDefinition.InputFieldInfoCollection[i].TransPowerExponent,
+                                                        InstanceDefinition.InputFieldInfoCollection[i].TransFoldedPowerExponent,
+                                                        InstanceDefinition.InputFieldInfoCollection[i].TransMovingAverageWindowLength
+                                                        );
             }
             BasicStat[] inputDistanceStatCollection = new BasicStat[InstanceDefinition.Settings.PoolSettingsCollection.Count];
             for(int i = 0; i < inputDistanceStatCollection.Length; i++)
@@ -403,7 +412,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                                )
                             {
                                 //Connect analog input neuron
-                                inputNeuron = _inputUnitCollection[inputConnection.FieldIdx].AnalogInputNeuron;
+                                if (targetNeurons[targetNeuronIdx].TypeOfActivation == ActivationType.Analog)
+                                {
+                                    inputNeuron = _inputUnitCollection[inputConnection.FieldIdx].AnalogInputNeuronCollection[inputConnection.SynapseCfg.AnalogTransRelShares.GetNext()];
+                                }
+                                else
+                                {
+                                    inputNeuron = _inputUnitCollection[inputConnection.FieldIdx].AnalogInputNeuronCollection[(int)InputUnit.AnalogCodingMethod.Original];
+                                }
                             }
                             else
                             {

@@ -38,22 +38,6 @@ namespace RCNet.DemoConsoleApp
         //Methods
         public void Run()
         {
-            //Input unit test
-            int spikeTrainLength = 8;
-            InputUnit iu = new InputUnit(new int[] { 0, 0, 0 }, 0, new Interval(-1, 1), spikeTrainLength);
-            for (double val = -1d; val <= 1d; val+=0.25d)
-            {
-                Console.WriteLine($"Value: {val}");
-                iu.NewStimulation(val);
-                iu.ComputeSignal(false);
-                for(int i = 0; i < spikeTrainLength; i++)
-                {
-                    Console.WriteLine($"Bit{i}: {iu.SpikingInputNeuronCollection[i].GetSignal(ActivationType.Analog)}");
-                }
-                Console.ReadLine();
-            }
-            Console.ReadLine();
-
             //Queue test
             int queueCapacity = 10;
             SimpleQueue<int> queue = new SimpleQueue<int>(queueCapacity);

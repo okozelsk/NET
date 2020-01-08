@@ -52,13 +52,13 @@ namespace RCNet.XmlTools
         /// </summary>
         /// <param name="source"></param>
         /// <param name="xsdRootElemName"></param>
-        /// <returns></returns>
+        /// <returns>Validated and completed root element.</returns>
         public XElement Validate(XElement source, string xsdRootElemName = "rootElem")
         {
             XDocument doc = XDocument.Parse(source.ToString());
             XDocument validationSourceDoc = new XDocument(new XElement(xsdRootElemName, doc.Root.Attributes(), doc.Root.Nodes()));
-            XDocument validaatedDoc = _validator.LoadXDocFromString(validationSourceDoc.ToString());
-            return validaatedDoc.Root;
+            XDocument validatedDoc = _validator.LoadXDocFromString(validationSourceDoc.ToString());
+            return validatedDoc.Root;
         }
 
 

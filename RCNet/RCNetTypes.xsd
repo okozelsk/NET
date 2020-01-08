@@ -127,6 +127,14 @@
     </xs:restriction>
   </xs:simpleType>
 
+  <!-- Unsigned integer GE 1 and LE 1024-->
+  <xs:simpleType name="UIntGE1LE1024Type">
+    <xs:restriction base="xs:unsignedInt">
+      <xs:minInclusive value="1" />
+      <xs:maxInclusive value="1024" />
+    </xs:restriction>
+  </xs:simpleType>
+
   <!-- Unsigned integer GE 2 and LE 64-->
   <xs:simpleType name="UIntGE2LE64Type">
     <xs:restriction base="xs:unsignedInt">
@@ -1016,6 +1024,36 @@
         <xs:documentation xml:lang="en">Default value is All (Inhibitory and Excitatory neurons)</xs:documentation>
       </xs:annotation>
     </xs:attribute>
+    <xs:attribute type="UDoubleType" name="relShareOriginal" use="optional" default="1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name="relShareTransDiff" use="optional" default="0">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name="relShareTransLinearSteps" use="optional" default="0">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name="relShareTransPower" use="optional" default="0">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name="relShareTransFoldedPower" use="optional" default="0">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name="relShareTransMovingAverage" use="optional" default="0">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- Input synapse - configuration -->
@@ -1500,9 +1538,9 @@
 
   <!-- Predictor MWAvg - configuration -->
   <xs:complexType name="PredictorMWAvgCfgType">
-    <xs:attribute type="UIntGE2LE64Type" name="window" use="optional" default="64">
+    <xs:attribute type="UIntGT0Type" name="window" use="optional" default="64">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Sliding window size (2..64). Default value is 64</xs:documentation>
+        <xs:documentation xml:lang="en">Sliding window size (1..64 for Exp weights, 1..10240 for Lin weights and 1..N for Const weights). Default value is 64</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="xs:unsignedInt" name="leakage" use="optional" default="0">
@@ -1879,6 +1917,11 @@
         <xs:documentation xml:lang="en">Specifies, if to preprocess time series pattern in both time directions (doubles predictors). Default value is false</xs:documentation>
       </xs:annotation>
     </xs:attribute>
+    <xs:attribute type="xs:boolean" name="routeToReadout" use="optional" default="false">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is false. If true is specified, all patterns have to have the same length.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- NeuralPreprocessor - external input field -configuration -->
@@ -1889,14 +1932,39 @@
       <xs:element type="RealFeatureFilterCfgType" name="realFeature" minOccurs="0" maxOccurs="1"/>
     </xs:choice>
     <xs:attribute type="xs:string" name="name" use="required"/>
+    <xs:attribute type="xs:boolean" name="allowRoutingToReadout" use="optional" default="true">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is true</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
     <xs:attribute type="UIntGE1LE32Type" name="spikeTrainLength" use="optional" default="8">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is 8</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute type="xs:boolean" name="allowRoutingToReadout" use="optional" default="true">
+    <xs:attribute type="UIntGE1LE1024Type" name="transDiffDistance" use="optional" default="1">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is true</xs:documentation>
+        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UIntGT1Type" name="transNumOfLinearSteps" use="optional" default="16">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 16</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleGT0Type" name="transPowerExponent" use="optional" default="0.5">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.5</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleGT0Type" name="transFoldedPowerExponent" use="optional" default="0.5">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.5</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UIntGE1LE1024Type" name="transMovingAverageWindowLength" use="optional" default="5">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 5</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -1912,14 +1980,39 @@
       <xs:element type="MackeyGlassGeneratorCfgType" name="mackeyGlass" minOccurs="1" maxOccurs="1"/>
     </xs:choice>
     <xs:attribute type="xs:string" name="name" use="required"/>
+    <xs:attribute type="xs:boolean" name="allowRoutingToReadout" use="optional" default="false">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is false</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
     <xs:attribute type="UIntGE1LE32Type" name="spikeTrainLength" use="optional" default="8">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is 8</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute type="xs:boolean" name="allowRoutingToReadout" use="optional" default="false">
+    <xs:attribute type="UIntGE1LE1024Type" name="transDiffDistance" use="optional" default="1">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is false</xs:documentation>
+        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UIntGT1Type" name="transNumOfLinearSteps" use="optional" default="16">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 16</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleGT0Type" name="transPowerExponent" use="optional" default="0.5">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.5</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleGT0Type" name="transFoldedPowerExponent" use="optional" default="0.5">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.5</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UIntGE1LE1024Type" name="transMovingAverageWindowLength" use="optional" default="5">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 5</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -2026,6 +2119,11 @@
         </xs:unique>
       </xs:element>
     </xs:sequence>
+    <xs:attribute type="UDoubleLT1Type" name="predictorsReductionRatio" use="optional" default="0">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Specifies how many predictors having smallest standard deviation to be disabled. Default value is 0.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
 
@@ -2110,11 +2208,6 @@
     <xs:attribute type="xs:int" name="randomizerSeek" use="optional" default="0">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is 0</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="xs:unsignedInt" name="verificationSamples" use="optional" default="0">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Specifies, how many lasting samples to be used for verification. Default value is 0</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>

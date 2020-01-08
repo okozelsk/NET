@@ -10,14 +10,15 @@
 
   <!-- COMPLEX TYPES -->
   <!-- SM demo - sample data - configuration -->
-  <xs:complexType name="SampleDataCfgType">
-    <xs:attribute type="xs:string" name="fileName" use="required"/>
+  <xs:complexType name="SamplesDataCfgType">
+    <xs:attribute type="xs:string" name="trainingData" use="required"/>
+    <xs:attribute type="xs:string" name="verificationData" use="optional" default=""/>
   </xs:complexType>
 
   <!-- SM demo - case -configuration -->
   <xs:complexType name="CaseCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="SampleDataCfgType" name="samples" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="SamplesDataCfgType" name="samples" minOccurs="1" maxOccurs="1"/>
       <xs:element type="rcn:SMCfgType" name="stateMachineCfg" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:string" name="name" use="required"/>

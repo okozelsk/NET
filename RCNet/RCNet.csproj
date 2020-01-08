@@ -68,13 +68,15 @@
   <ItemGroup>
     <Compile Include="CsvTools\DelimitedStringValues.cs" />
     <Compile Include="Extensions\DoubleArrayExtensions.cs" />
+    <Compile Include="MathTools\Differential\MovingDifferentiator.cs" />
     <Compile Include="MathTools\Differential\ODENumSolver.cs" />
     <Compile Include="MathTools\EuclideanDistance.cs" />
     <Compile Include="MathTools\MatrixMath\LUD.cs" />
     <Compile Include="MathTools\MatrixMath\SVD.cs" />
     <Compile Include="MathTools\PhysUnit.cs" />
+    <Compile Include="MathTools\Probability\PMixer.cs" />
     <Compile Include="MathTools\VectorMath\Vector.cs" />
-    <Compile Include="MathTools\MovingWeightedAvg.cs" />
+    <Compile Include="MathTools\MovingDataWindow.cs" />
     <Compile Include="Neural\Activation\ActivationCommon.cs" />
     <Compile Include="Neural\Activation\ActivationFactory.cs" />
     <Compile Include="Neural\Activation\AutoIzhikevichIFSettings.cs" />
@@ -149,6 +151,8 @@
     <Compile Include="Neural\Network\SM\Preprocessing\NeuralPreprocessor.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\NeuralPreprocessorSettings.cs" />
     <Compile Include="Neural\Network\SM\Neuron\HiddenNeuronPredictorsSettings.cs" />
+    <Compile Include="Neural\Network\SM\Readout\ReadoutUnitBuilder.cs" />
+    <Compile Include="Neural\Network\SM\RelShareRealtime.cs" />
     <Compile Include="Neural\Network\SM\Synapse\InternalSynapseSettings.cs" />
     <Compile Include="Neural\Network\SM\Synapse\InputSynapseSettings.cs" />
     <Compile Include="Neural\Network\SM\Synapse\InternalSynapse.cs" />

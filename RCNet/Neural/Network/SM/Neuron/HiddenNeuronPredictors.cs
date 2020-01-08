@@ -15,12 +15,13 @@ namespace RCNet.Neural.Network.SM.Neuron
     class HiddenNeuronPredictors
     {
         //Constants
-        public const int MaxWindowSize = sizeof(ulong) * 8;
+        public const int MaxBinBufferSize = sizeof(ulong) * 8;
+        public const int MaxExpWeightsSize = 64;
+        public const int MaxLinWeightsSize = 10*1024;
 
         //Static members
         private static readonly double[] _expWeightsCache;
         private static readonly double[] _linWeightsCache;
-        private static readonly double[] _constWeightsCache;
         private static readonly ulong _highestBit;
 
         //Instance members
@@ -33,7 +34,7 @@ namespace RCNet.Neural.Network.SM.Neuron
         //Attributes
         private double _lastActivation;
         private double _activationFadingSum;
-        private readonly MovingWeightedAvg _activationMWAvg;
+        private readonly MovingDataWindow _activationMDW;
         private readonly double[] _activationMWAvgWeights;
         private int _activationMWAvgLeakage;
         private ulong _spikesBuffer;
@@ -41,7 +42,7 @@ namespace RCNet.Neural.Network.SM.Neuron
         private int _firingCount;
         private readonly ulong _firingCountBit;
         private double _firingFadingSum;
-        private readonly MovingWeightedAvg _firingMWAvg;
+        private readonly MovingDataWindow _firingMDW;
         private readonly double[] _firingMWAvgWeights;
         private int _firingMWAvgLeakage;
 
@@ -51,16 +52,20 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// </summary>
         static HiddenNeuronPredictors()
         {
-            _expWeightsCache = new double[MaxWindowSize];
-            _linWeightsCache = new double[MaxWindowSize];
-            _constWeightsCache = new double[MaxWindowSize];
             _highestBit = 1ul;
-            for (int i = 0; i < MaxWindowSize; i++)
+            for (int i = 0; i < MaxBinBufferSize; i++)
             {
-                _expWeightsCache[i] = Math.Exp(-((MaxWindowSize - 1) - i));
-                _linWeightsCache[i] = i + 1;
-                _constWeightsCache[i] = 1d;
                 if (i > 0) _highestBit <<= 1;
+            }
+            _expWeightsCache = new double[MaxExpWeightsSize];
+            for (int i = 0; i < MaxExpWeightsSize; i++)
+            {
+                _expWeightsCache[i] = Math.Exp(-((MaxExpWeightsSize - 1) - i));
+            }
+            _linWeightsCache = new double[MaxLinWeightsSize];
+            for (int i = 0; i < MaxLinWeightsSize; i++)
+            {
+                _linWeightsCache[i] = i + 1;
             }
             return;
         }
@@ -72,7 +77,7 @@ namespace RCNet.Neural.Network.SM.Neuron
         public HiddenNeuronPredictors(HiddenNeuronPredictorsSettings cfg)
         {
             Cfg = cfg;
-            if (Cfg.Params.FiringCountWindow == MaxWindowSize)
+            if (Cfg.Params.FiringCountWindow == MaxBinBufferSize)
             {
                 _firingCountBit = _highestBit;
             }
@@ -84,32 +89,36 @@ namespace RCNet.Neural.Network.SM.Neuron
                     _firingCountBit <<= 1;
                 }
             }
-            _activationMWAvg = new MovingWeightedAvg(Cfg.Params.ActivationMWAvgWindow);
             switch(Cfg.Params.ActivationMWAvgWeightsType)
             {
                 case NeuronCommon.NeuronPredictorMWAvgWeightsType.Exponential:
                     _activationMWAvgWeights = _expWeightsCache;
+                    _activationMDW = new MovingDataWindow(Math.Min(Cfg.Params.ActivationMWAvgWindow, _expWeightsCache.Length));
                     break;
                 case NeuronCommon.NeuronPredictorMWAvgWeightsType.Linear:
                     _activationMWAvgWeights = _linWeightsCache;
+                    _activationMDW = new MovingDataWindow(Math.Min(Cfg.Params.ActivationMWAvgWindow, _linWeightsCache.Length));
                     break;
                 case NeuronCommon.NeuronPredictorMWAvgWeightsType.Constant:
-                    _activationMWAvgWeights = _constWeightsCache;
+                    _activationMWAvgWeights = null;
+                    _activationMDW = new MovingDataWindow(Cfg.Params.ActivationMWAvgWindow);
                     break;
                 default:
                     throw new Exception("Unsupported weights type.");
             }
-            _firingMWAvg = new MovingWeightedAvg(Cfg.Params.FiringMWAvgWindow);
             switch (Cfg.Params.FiringMWAvgWeightsType)
             {
                 case NeuronCommon.NeuronPredictorMWAvgWeightsType.Exponential:
                     _firingMWAvgWeights = _expWeightsCache;
+                    _firingMDW = new MovingDataWindow(Math.Min(Cfg.Params.FiringMWAvgWindow, _expWeightsCache.Length));
                     break;
                 case NeuronCommon.NeuronPredictorMWAvgWeightsType.Linear:
                     _firingMWAvgWeights = _linWeightsCache;
+                    _firingMDW = new MovingDataWindow(Math.Min(Cfg.Params.FiringMWAvgWindow, _linWeightsCache.Length));
                     break;
                 case NeuronCommon.NeuronPredictorMWAvgWeightsType.Constant:
-                    _firingMWAvgWeights = _constWeightsCache;
+                    _firingMWAvgWeights = null;
+                    _firingMDW = new MovingDataWindow(Cfg.Params.FiringMWAvgWindow);
                     break;
                 default:
                     throw new Exception("Unsupported weights type.");
@@ -126,13 +135,13 @@ namespace RCNet.Neural.Network.SM.Neuron
         {
             _lastActivation = 0d;
             _activationFadingSum = 0d;
-            _activationMWAvg.Reset();
+            _activationMDW.Reset();
             _activationMWAvgLeakage = 0;
             _spikesBuffer = 0;
             _bufferedHistLength = 0;
             _firingCount = 0;
             _firingFadingSum = 0d;
-            _firingMWAvg.Reset();
+            _firingMDW.Reset();
             _firingMWAvgLeakage = 0;
             return;
         }
@@ -150,7 +159,7 @@ namespace RCNet.Neural.Network.SM.Neuron
             _activationFadingSum += activation;
             if (_activationMWAvgLeakage == Cfg.Params.ActivationMWAvgLeakage)
             {
-                _activationMWAvg.AddSampleValue(activation);
+                _activationMDW.AddSampleValue(activation);
                 _activationMWAvgLeakage = 0;
             }
             else
@@ -161,7 +170,7 @@ namespace RCNet.Neural.Network.SM.Neuron
             _firingFadingSum *= (1d - Cfg.Params.FiringFadingSumStrength);
             if (_firingMWAvgLeakage == Cfg.Params.FiringMWAvgLeakage)
             {
-                _firingMWAvg.AddSampleValue(spike ? 1d : 0d);
+                _firingMDW.AddSampleValue(spike ? 1d : 0d);
                 _firingMWAvgLeakage = 0;
             }
             else
@@ -176,7 +185,7 @@ namespace RCNet.Neural.Network.SM.Neuron
                 ++_firingFadingSum;
             }
             //Update buffer usage
-            if (_bufferedHistLength < MaxWindowSize)
+            if (_bufferedHistLength < MaxBinBufferSize)
             {
                 ++_bufferedHistLength;
             }
@@ -236,7 +245,7 @@ namespace RCNet.Neural.Network.SM.Neuron
             }
             if (Cfg.ActivationMWAvg)
             {
-                predictors[idx++] = _activationMWAvg.NumOfSamples > 0 ? _activationMWAvg.GetWeightedAvg(_activationMWAvgWeights, false).Avg : 0d;
+                predictors[idx++] = _activationMDW.NumOfSamples > 0 ? _activationMDW.GetWeightedAvg(_activationMWAvgWeights, false).Avg : 0d;
             }
             if (Cfg.FiringFadingSum)
             {
@@ -244,7 +253,7 @@ namespace RCNet.Neural.Network.SM.Neuron
             }
             if (Cfg.FiringMWAvg)
             {
-                predictors[idx++] = _firingMWAvg.NumOfSamples > 0 ? _firingMWAvg.GetWeightedAvg(_firingMWAvgWeights, false).Avg : 0d;
+                predictors[idx++] = _firingMDW.NumOfSamples > 0 ? _firingMDW.GetWeightedAvg(_firingMWAvgWeights, false).Avg : 0d;
             }
             if (Cfg.FiringCount)
             {

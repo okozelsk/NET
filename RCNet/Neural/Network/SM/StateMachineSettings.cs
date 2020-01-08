@@ -29,10 +29,6 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         public int RandomizerSeek { get; set; }
         /// <summary>
-        /// Specifies, how many lasting samples to be used for verification.
-        /// </summary>
-        public int VerificationSamples { get; set; }
-        /// <summary>
         /// Settings of Neural Preprocessor
         /// </summary>
         public NeuralPreprocessorSettings NeuralPreprocessorConfig { get; set; }
@@ -54,7 +50,6 @@ namespace RCNet.Neural.Network.SM
         {
             //Copy
             RandomizerSeek = source.RandomizerSeek;
-            VerificationSamples = source.VerificationSamples;
             NeuralPreprocessorConfig = source.NeuralPreprocessorConfig.DeepClone();
             ReadoutLayerConfig = new ReadoutLayerSettings(source.ReadoutLayerConfig);
             MapperCfg = null;
@@ -84,8 +79,6 @@ namespace RCNet.Neural.Network.SM
             //Parsing
             //Randomizer seek
             RandomizerSeek = int.Parse(stateMachineSettingsElem.Attribute("randomizerSeek").Value);
-            //Verification samples
-            VerificationSamples = int.Parse(stateMachineSettingsElem.Attribute("verificationSamples").Value);
             //Neural preprocessor
             NeuralPreprocessorConfig = new NeuralPreprocessorSettings(stateMachineSettingsElem.Descendants("neuralPreprocessor").First());
             //Readout layer
@@ -192,7 +185,6 @@ namespace RCNet.Neural.Network.SM
             if (obj == null) return false;
             StateMachineSettings cmpSettings = obj as StateMachineSettings;
             if (RandomizerSeek != cmpSettings.RandomizerSeek ||
-                VerificationSamples != cmpSettings.VerificationSamples ||
                 !Equals(NeuralPreprocessorConfig, cmpSettings.NeuralPreprocessorConfig) ||
                 !Equals(ReadoutLayerConfig, cmpSettings.ReadoutLayerConfig) ||
                 (MapperCfg == null && cmpSettings.MapperCfg != null) ||

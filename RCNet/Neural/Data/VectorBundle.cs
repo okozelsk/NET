@@ -180,6 +180,122 @@ namespace RCNet.Neural.Data
             return bundle;
         }//LoadFromCsv
 
+        //Methods
+        /// <summary>
+        /// Splits this bundle to a collection of smaller bundles.
+        /// Method expects length of the output vectors = 1.
+        /// </summary>
+        /// <param name="subBundleSize">Sub-bundle size</param>
+        /// <param name="binBorder">If specified, method will keep balanced number of output values GE to binBorder in the each sub-bundle</param>
+        /// <returns>Collection of extracted sub-bundles</returns>
+        public List<VectorBundle> Split(int subBundleSize, double binBorder = double.NaN)
+        {
+            int numOfBundles = OutputVectorCollection.Count / subBundleSize;
+            List<VectorBundle> bundleCollection = new List<VectorBundle>(numOfBundles);
+            if (!double.IsNaN(binBorder))
+            {
+                BinDistribution refBinDistr = new BinDistribution(binBorder);
+                refBinDistr.Update(OutputVectorCollection, 0);
+                //Scan
+                int[] bin0SampleIdxs = new int[refBinDistr.NumOf[0]];
+                int bin0SamplesPos = 0;
+                int[] bin1SampleIdxs = new int[refBinDistr.NumOf[1]];
+                int bin1SamplesPos = 0;
+                for (int i = 0; i < OutputVectorCollection.Count; i++)
+                {
+                    if (OutputVectorCollection[i][0] >= refBinDistr.BinBorder)
+                    {
+                        bin1SampleIdxs[bin1SamplesPos++] = i;
+                    }
+                    else
+                    {
+                        bin0SampleIdxs[bin0SamplesPos++] = i;
+                    }
+                }
+                //Division
+                int bundleBin0Count = Math.Max(1, refBinDistr.NumOf[0] / numOfBundles);
+                int bundleBin1Count = Math.Max(1, refBinDistr.NumOf[1] / numOfBundles);
+                if (bundleBin0Count * numOfBundles > bin0SampleIdxs.Length)
+                {
+                    throw new Exception("Insufficient bin 0 samples");
+                }
+                if (bundleBin1Count * numOfBundles > bin1SampleIdxs.Length)
+                {
+                    throw new Exception("Insufficient bin 1 samples");
+                }
+                //Bundles creation
+                bin0SamplesPos = 0;
+                bin1SamplesPos = 0;
+                for (int bundleNum = 0; bundleNum < numOfBundles; bundleNum++)
+                {
+                    VectorBundle bundle = new VectorBundle();
+                    //Bin 0
+                    for (int i = 0; i < bundleBin0Count; i++)
+                    {
+                        bundle.InputVectorCollection.Add(InputVectorCollection[bin0SampleIdxs[bin0SamplesPos]]);
+                        bundle.OutputVectorCollection.Add(OutputVectorCollection[bin0SampleIdxs[bin0SamplesPos]]);
+                        ++bin0SamplesPos;
+                    }
+                    //Bin 1
+                    for (int i = 0; i < bundleBin1Count; i++)
+                    {
+                        bundle.InputVectorCollection.Add(InputVectorCollection[bin1SampleIdxs[bin1SamplesPos]]);
+                        bundle.OutputVectorCollection.Add(OutputVectorCollection[bin1SampleIdxs[bin1SamplesPos]]);
+                        ++bin1SamplesPos;
+                    }
+                    bundleCollection.Add(bundle);
+                }
+                //Remaining samples
+                for (int i = 0; i < bin0SampleIdxs.Length - bin0SamplesPos; i++)
+                {
+                    int bundleIdx = i % bundleCollection.Count;
+                    bundleCollection[bundleIdx].InputVectorCollection.Add(InputVectorCollection[bin0SampleIdxs[bin0SamplesPos + i]]);
+                    bundleCollection[bundleIdx].OutputVectorCollection.Add(OutputVectorCollection[bin0SampleIdxs[bin0SamplesPos + i]]);
+                }
+                for (int i = 0; i < bin1SampleIdxs.Length - bin1SamplesPos; i++)
+                {
+                    int bundleIdx = i % bundleCollection.Count;
+                    bundleCollection[bundleIdx].InputVectorCollection.Add(InputVectorCollection[bin1SampleIdxs[bin1SamplesPos + i]]);
+                    bundleCollection[bundleIdx].OutputVectorCollection.Add(OutputVectorCollection[bin1SampleIdxs[bin1SamplesPos + i]]);
+                }
+            }
+            else
+            {
+                //Bundles creation
+                int samplesPos = 0;
+                for (int bundleNum = 0; bundleNum < numOfBundles; bundleNum++)
+                {
+                    VectorBundle bundle = new VectorBundle();
+                    for (int i = 0; i < subBundleSize && samplesPos < OutputVectorCollection.Count; i++)
+                    {
+                        bundle.InputVectorCollection.Add(InputVectorCollection[samplesPos]);
+                        bundle.OutputVectorCollection.Add(OutputVectorCollection[samplesPos]);
+                        ++samplesPos;
+                    }
+                    bundleCollection.Add(bundle);
+                }
+                //Remaining samples
+                for (int i = 0; i < OutputVectorCollection.Count - samplesPos; i++)
+                {
+                    int bundleIdx = i % bundleCollection.Count;
+                    bundleCollection[bundleIdx].InputVectorCollection.Add(InputVectorCollection[samplesPos + i]);
+                    bundleCollection[bundleIdx].OutputVectorCollection.Add(OutputVectorCollection[samplesPos + i]);
+                }
+            }
+            return bundleCollection;
+        }
+
+        /// <summary>
+        /// Adds data from given bundle into this bundle
+        /// </summary>
+        /// <param name="data">Data to be added</param>
+        public void Add(VectorBundle data)
+        {
+            InputVectorCollection.AddRange(data.InputVectorCollection);
+            OutputVectorCollection.AddRange(data.OutputVectorCollection);
+            return;
+        }
+
     }//VectorBundle
 
 }//Namespace

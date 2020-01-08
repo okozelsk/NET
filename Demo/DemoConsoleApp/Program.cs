@@ -6,7 +6,7 @@ namespace RCNet.DemoConsoleApp
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
             //Research - this is not a part of the demo - it is a free playground
             //(new Research()).Run();
@@ -15,7 +15,8 @@ namespace RCNet.DemoConsoleApp
             try
             {
                 //Run the demo
-                SMDemo.RunDemo(new ConsoleLog(), @"DemoSettings.xml");
+                SMDemo demoEngine = new SMDemo(new ConsoleLog());
+                demoEngine.RunDemo(@"DemoSettings.xml");
             }
             catch(Exception e)
             {

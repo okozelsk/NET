@@ -144,6 +144,14 @@ namespace RCNet.MathTools
             return;
         }
 
+        /// <summary>
+        /// Creates the deep copy of this instance
+        /// </summary>
+        public BinErrStat DeepClone()
+        {
+            return new BinErrStat(this);
+        }
+
     }//BinErrStat
 
 }//Namespace

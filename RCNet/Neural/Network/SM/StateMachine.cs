@@ -18,21 +18,28 @@ namespace RCNet.Neural.Network.SM
     [Serializable]
     public class StateMachine
     {
-        //Constants
-        private const double MinPredictorValueDifference = 1e-6;
+
+        //Delegates
+        /// <summary>
+        /// Delegate of VerificationProgressChanged event handler.
+        /// </summary>
+        /// <param name="totalNumOfInputs">Total number of inputs to be processed</param>
+        /// <param name="numOfProcessedInputs">Number of processed inputs</param>
+        public delegate void VerificationProgressChangedHandler(int totalNumOfInputs, int numOfProcessedInputs);
+
+        //Events
+        /// <summary>
+        /// This informative event occurs every time the progress of verification has changed
+        /// </summary>
+        [field: NonSerialized]
+        public event VerificationProgressChangedHandler VerificationProgressChanged;
+
         //Attribute properties
         /// <summary>
         /// Neural preprocessor.
         /// </summary>
         public NeuralPreprocessor NP { get; private set; }
-        /// <summary>
-        /// Number of predictors exhibits useable values (produces meaningfully different values)
-        /// </summary>
-        public int NumOfValidPredictors { get; private set; }
-        /// <summary>
-        /// Collection of switches generally enabling/disabling predictors
-        /// </summary>
-        public bool[] PredictorGeneralSwitchCollection { get; private set; }
+
         /// <summary>
         /// Readout layer.
         /// </summary>
@@ -54,199 +61,38 @@ namespace RCNet.Neural.Network.SM
             _settings = settings.DeepClone();
             //Neural preprocessor instance
             NP = new NeuralPreprocessor(settings.NeuralPreprocessorConfig, settings.RandomizerSeek);
-            NumOfValidPredictors = 0;
-            PredictorGeneralSwitchCollection = null;
-            //Readout layer
-            RL = null;
+            //Readout layer instance
+            RL = new ReadoutLayer(_settings.ReadoutLayerConfig);
             return;
         }
 
-        //Properties
-        /// <summary>
-        /// Number of invalid predictors (exhibits no meaningfully different values)
-        /// </summary>
-        public int NumOfUnusedPredictors { get { return NP.NumOfPredictors - NumOfValidPredictors; } }
 
         //Methods
         /// <summary>
-        /// Sets State Machine internal state to its initial state
+        /// Sets StateMachine internal state to its initial state
         /// </summary>
         public void Reset()
         {
             //Neural preprocessor reset
             NP.Reset(true);
-            //Get rid the ReadoutLayer instance
-            RL = null;
+            //ReadoutLayer reset
+            RL.Reset();
             return;
         }
 
         /// <summary>
-        /// Function checks given predictors and set general enabling/disabling switches of predictors
+        /// Build initialized instance of predictors mapper for readout layer
         /// </summary>
-        /// <param name="predictorsCollection">Collection of regression predictors</param>
-        private void InitPredictorsGeneralSwitches(List<double[]> predictorsCollection)
+        private ReadoutLayer.PredictorsMapper BuildPredictorsMapper()
         {
-            PredictorGeneralSwitchCollection = new bool[NP.NumOfPredictors];
-            PredictorGeneralSwitchCollection.Populate(false);
-            //Test predictors
-            NumOfValidPredictors = 0;
-            for (int row = 1; row < predictorsCollection.Count; row++)
-            {
-                for (int i = 0; i < PredictorGeneralSwitchCollection.Length; i++)
-                {
-                    if (Math.Abs(predictorsCollection[row][i] - predictorsCollection[row - 1][i]) > MinPredictorValueDifference)
-                    {
-                        //Update number of valid predictors
-                        NumOfValidPredictors += PredictorGeneralSwitchCollection[i] ? 0 : 1;
-                        //Predictor exhibits different values => enable it
-                        PredictorGeneralSwitchCollection[i] = true;
-                    }
-                }
-                if (NumOfValidPredictors == PredictorGeneralSwitchCollection.Length) break;
-            }
-            return;
-        }
-
-        /// <summary>
-        /// Prepares input for regression stage of State Machine training.
-        /// All input patterns are processed by internal reservoirs and the corresponding network predictors are recorded.
-        /// </summary>
-        /// <param name="patternBundle">
-        /// The bundle containing known sample input patterns and desired output vectors
-        /// </param>
-        /// <param name="informativeCallback">
-        /// Function to be called after each processed input.
-        /// </param>
-        /// <param name="userObject">
-        /// The user object to be passed to informativeCallback.
-        /// </param>
-        public RegressionInput PrepareRegressionData(PatternBundle patternBundle,
-                                                     NeuralPreprocessor.PredictorsCollectionCallbackDelegate informativeCallback = null,
-                                                     Object userObject = null
-                                                     )
-        {
-            //Learning/Verification samples
-            PatternBundle learningBundle = null;
-            PatternBundle verificationBundle = null;
-            if(_settings.VerificationSamples > 0)
-            {
-                int numOfVerifivationSamples = Math.Min(_settings.VerificationSamples, patternBundle.InputPatternCollection.Count);
-                learningBundle = new PatternBundle();
-                verificationBundle = new PatternBundle();
-                for(int i = 0; i < patternBundle.InputPatternCollection.Count; i++)
-                {
-                    if(i < patternBundle.InputPatternCollection.Count - numOfVerifivationSamples)
-                    {
-                        learningBundle.AddPair(patternBundle.InputPatternCollection[i], patternBundle.OutputVectorCollection[i]);
-                    }
-                    else
-                    {
-                        verificationBundle.AddPair(patternBundle.InputPatternCollection[i], patternBundle.OutputVectorCollection[i]);
-                    }
-                }
-            }
-            else
-            {
-                learningBundle = patternBundle;
-            }
-            //Preprocessing
-            VectorBundle preprocessedData = NP.InitializeAndPreprocessBundle(learningBundle, informativeCallback, userObject);
-            InitPredictorsGeneralSwitches(preprocessedData.InputVectorCollection);
-            return new RegressionInput(preprocessedData,
-                                       null,
-                                       verificationBundle,
-                                       NP.CollectStatatistics(),
-                                       NP.NumOfNeurons,
-                                       NP.NumOfInternalSynapses,
-                                       NumOfUnusedPredictors
-                                       );
-        }
-
-        /// <summary>
-        /// Prepares input for regression stage of State Machine training.
-        /// All input vectors are processed by internal reservoirs and the corresponding network predictors are recorded.
-        /// </summary>
-        /// <param name="vectorBundle">
-        /// The bundle containing known sample input and desired output vectors (in time order)
-        /// </param>
-        /// <param name="informativeCallback">
-        /// Function to be called after each processed input.
-        /// </param>
-        /// <param name="userObject">
-        /// The user object to be passed to informativeCallback.
-        /// </param>
-        public RegressionInput PrepareRegressionData(VectorBundle vectorBundle,
-                                                     NeuralPreprocessor.PredictorsCollectionCallbackDelegate informativeCallback = null,
-                                                     Object userObject = null
-                                                     )
-        {
-            //Learning/Verification samples
-            VectorBundle learningBundle = null;
-            VectorBundle verificationBundle = null;
-            if (_settings.VerificationSamples > 0)
-            {
-                int numOfVerifivationSamples = Math.Min(_settings.VerificationSamples, vectorBundle.InputVectorCollection.Count);
-                learningBundle = new VectorBundle();
-                verificationBundle = new VectorBundle();
-                for (int i = 0; i < vectorBundle.InputVectorCollection.Count; i++)
-                {
-                    if (i < vectorBundle.InputVectorCollection.Count - numOfVerifivationSamples)
-                    {
-                        learningBundle.AddPair(vectorBundle.InputVectorCollection[i], vectorBundle.OutputVectorCollection[i]);
-                    }
-                    else
-                    {
-                        verificationBundle.AddPair(vectorBundle.InputVectorCollection[i], vectorBundle.OutputVectorCollection[i]);
-                    }
-                }
-            }
-            else
-            {
-                learningBundle = vectorBundle;
-            }
-            //Preprocessing
-            VectorBundle preprocessedData = NP.InitializeAndPreprocessBundle(learningBundle, informativeCallback, userObject);
-            InitPredictorsGeneralSwitches(preprocessedData.InputVectorCollection);
-            return new RegressionInput(preprocessedData,
-                                       verificationBundle,
-                                       null,
-                                       NP.CollectStatatistics(),
-                                       NP.NumOfNeurons,
-                                       NP.NumOfInternalSynapses,
-                                       NumOfUnusedPredictors
-                                       );
-        }
-
-
-        /// <summary>
-        /// Creates and trains the State Machine readout layer.
-        /// Function uses specific mapping of predictors to readout units, if available.
-        /// Function also rejects unusable predictors having no reasonable fluctuation of values.
-        /// </summary>
-        /// <param name="regressionInput">
-        /// RegressionInput object prepared by PrepareRegressionData function
-        /// </param>
-        /// <param name="regressionController">
-        /// Optional. see ReadoutUnit.RegressionCallbackDelegate
-        /// </param>
-        /// <param name="regressionControllerData">
-        /// Optional custom object to be passed to regressionController together with other standard information
-        /// </param>
-        public RegressionOutput BuildReadoutLayer(RegressionInput regressionInput,
-                                                  ReadoutUnit.RegressionCallbackDelegate regressionController = null,
-                                                  Object regressionControllerData = null
-                                                  )
-        {
-            //Readout layer instance
-            RL = new ReadoutLayer(_settings.ReadoutLayerConfig);
             //Create empty instance of the mapper
-            ReadoutLayer.PredictorsMapper mapper = new ReadoutLayer.PredictorsMapper(PredictorGeneralSwitchCollection);
+            ReadoutLayer.PredictorsMapper mapper = new ReadoutLayer.PredictorsMapper(NP.PredictorGeneralSwitchCollection);
             if (_settings.MapperCfg != null)
             {
                 //Expand list of predicting neurons to array of predictor origin
-                StateMachineSettings.MapperSettings.AllowedPool[] neuronPoolRefCollection = new StateMachineSettings.MapperSettings.AllowedPool[NP.NumOfPredictors];
+                StateMachineSettings.MapperSettings.AllowedPool[] neuronPoolRefCollection = new StateMachineSettings.MapperSettings.AllowedPool[NP.TotalNumOfPredictors];
                 int idx = 0;
-                foreach(HiddenNeuron neuron in NP.PredictorNeuronCollection)
+                foreach (HiddenNeuron neuron in NP.PredictorNeuronCollection)
                 {
                     StateMachineSettings.MapperSettings.AllowedPool poolRef = new StateMachineSettings.MapperSettings.AllowedPool { _reservoirInstanceIdx = neuron.Placement.ReservoirID, _poolIdx = neuron.Placement.PoolID };
                     for (int i = 0; i < neuron.PredictorsCfg.NumOfEnabledPredictors; i++)
@@ -258,9 +104,9 @@ namespace RCNet.Neural.Network.SM
                 //Iterate all readout units
                 foreach (string readoutUnitName in _settings.ReadoutLayerConfig.OutputFieldNameCollection)
                 {
-                    bool[] switches = new bool[NP.NumOfPredictors];
+                    bool[] switches = new bool[NP.TotalNumOfPredictors];
                     //Initially allow all valid predictors
-                    PredictorGeneralSwitchCollection.CopyTo(switches, 0);
+                    NP.PredictorGeneralSwitchCollection.CopyTo(switches, 0);
                     //Exists specific mapping?
                     if (_settings.MapperCfg != null && (_settings.MapperCfg.PoolsMap.ContainsKey(readoutUnitName) || _settings.MapperCfg.RoutedInputFieldsMap.ContainsKey(readoutUnitName)))
                     {
@@ -268,7 +114,7 @@ namespace RCNet.Neural.Network.SM
                         if (_settings.MapperCfg.RoutedInputFieldsMap.ContainsKey(readoutUnitName))
                         {
                             //Initially disable all routed input fields
-                            for (int i = NP.PredictorNeuronCollection.Count; i < NP.NumOfPredictors; i++)
+                            for (int i = NP.PredictorNeuronCollection.Count; i < NP.TotalNumOfPredictors; i++)
                             {
                                 switches[i] = false;
                             }
@@ -276,7 +122,7 @@ namespace RCNet.Neural.Network.SM
                             List<int> enabledRoutedFieldsIdxs = _settings.MapperCfg.RoutedInputFieldsMap[readoutUnitName];
                             for (int i = 0; i < enabledRoutedFieldsIdxs.Count; i++)
                             {
-                                switches[NP.PredictorNeuronCollection.Count + enabledRoutedFieldsIdxs[i]] = PredictorGeneralSwitchCollection[NP.PredictorNeuronCollection.Count + enabledRoutedFieldsIdxs[i]];
+                                switches[NP.PredictorNeuronCollection.Count + enabledRoutedFieldsIdxs[i]] = NP.PredictorGeneralSwitchCollection[NP.PredictorNeuronCollection.Count + enabledRoutedFieldsIdxs[i]];
                             }
                         }
                         //Neuron predictors
@@ -296,7 +142,7 @@ namespace RCNet.Neural.Network.SM
                                     if (neuronPoolRefCollection[i]._reservoirInstanceIdx == allowedPool._reservoirInstanceIdx && neuronPoolRefCollection[i]._poolIdx == allowedPool._poolIdx)
                                     {
                                         //Enable predictor if it is valid
-                                        switches[i] = PredictorGeneralSwitchCollection[i];
+                                        switches[i] = NP.PredictorGeneralSwitchCollection[i];
                                     }
                                 }
                             }
@@ -306,42 +152,8 @@ namespace RCNet.Neural.Network.SM
                     mapper.Add(readoutUnitName, switches);
                 }
             }
-
-            //Training
-            ResultBundle trainingResultBundle = RL.Build(regressionInput.PreprocessedData,
-                                                         regressionController,
-                                                         regressionControllerData,
-                                                         mapper
-                                                         );
-            //Verification
-            ResultBundle verificationResultBundle = new ResultBundle();
-            ReadoutLayer.SummaryResultStat verificationSummaryStat = new ReadoutLayer.SummaryResultStat(_settings.ReadoutLayerConfig);
-            if (_settings.VerificationSamples > 0)
-            {
-                if(_settings.NeuralPreprocessorConfig.InputConfig.FeedingType == NeuralPreprocessor.InputFeedingType.Continuous)
-                {
-                    for (int sampleIdx = 0; sampleIdx < regressionInput.VerificationVectorBundle.InputVectorCollection.Count; sampleIdx++)
-                    {
-                        double[] predictors = NP.Preprocess(regressionInput.VerificationVectorBundle.InputVectorCollection[sampleIdx]);
-                        double[] result = RL.Compute(predictors);
-                        verificationResultBundle.AddVectors(predictors, result, regressionInput.VerificationVectorBundle.OutputVectorCollection[sampleIdx]);
-                        verificationSummaryStat.Update(result, regressionInput.VerificationVectorBundle.OutputVectorCollection[sampleIdx], _settings.ReadoutLayerConfig);
-                    }
-                }
-                else
-                {
-                    for (int sampleIdx = 0; sampleIdx < regressionInput.VerificationPatternBundle.InputPatternCollection.Count; sampleIdx++)
-                    {
-                        double[] predictors = NP.Preprocess(regressionInput.VerificationPatternBundle.InputPatternCollection[sampleIdx]);
-                        double[] result = RL.Compute(predictors);
-                        verificationResultBundle.AddVectors(predictors, result, regressionInput.VerificationPatternBundle.OutputVectorCollection[sampleIdx]);
-                        verificationSummaryStat.Update(result, regressionInput.VerificationPatternBundle.OutputVectorCollection[sampleIdx], _settings.ReadoutLayerConfig);
-                    }
-                }
-            }
-            return new RegressionOutput(trainingResultBundle, verificationResultBundle, verificationSummaryStat);
+            return mapper;
         }
-
 
         /// <summary>
         /// Compute function for a patterned input feeding.
@@ -355,7 +167,7 @@ namespace RCNet.Neural.Network.SM
             {
                 throw new Exception("This version of Compute function is not useable for continuous input feeding.");
             }
-            if (RL == null)
+            if (!RL.Trained)
             {
                 throw new Exception("Readout layer is not trained.");
             }
@@ -375,7 +187,7 @@ namespace RCNet.Neural.Network.SM
             {
                 throw new Exception("This version of Compute function is not useable for patterned input feeding.");
             }
-            if (RL == null)
+            if (!RL.Trained)
             {
                 throw new Exception("Readout layer is not trained.");
             }
@@ -383,206 +195,392 @@ namespace RCNet.Neural.Network.SM
             return RL.Compute(NP.Preprocess(inputVector));
         }
 
+
+        /// <summary>
+        /// Performs training of the StateMachine
+        /// </summary>
+        /// <param name="vectorBundle">Training data bundle (input vectors and desired output vectors)</param>
+        /// <param name="regressionController">Optional regression controller.</param>
+        /// <returns>Output of the regression stage</returns>
+        public TrainingResults Train(VectorBundle vectorBundle, ReadoutUnitBuilder.RegressionControllerDelegate regressionController = null)
+        {
+            //StateMachine reset
+            Reset();
+            //Neural preprocessing
+            VectorBundle preprocessedData = NP.InitializeAndPreprocessBundle(vectorBundle, out NeuralPreprocessor.PreprocessingOverview preprocessingOverview);
+            //Training of the readout layer 
+            ReadoutLayer.RegressionOverview regressionOverview = RL.Build(preprocessedData, BuildPredictorsMapper(), regressionController);
+            //Return compact results
+            return new TrainingResults(preprocessingOverview, regressionOverview);
+        }
+
+
+        /// <summary>
+        /// Performs training of the StateMachine
+        /// </summary>
+        /// <param name="patternBundle">Training data bundle (input patterns and desired output vectors)</param>
+        /// <param name="regressionController">Optional regression controller.</param>
+        /// <returns>Output of the regression stage</returns>
+        public TrainingResults Train(PatternBundle patternBundle, ReadoutUnitBuilder.RegressionControllerDelegate regressionController = null)
+        {
+            //StateMachine reset
+            Reset();
+            //Neural preprocessing
+            VectorBundle preprocessedData = NP.InitializeAndPreprocessBundle(patternBundle, out NeuralPreprocessor.PreprocessingOverview preprocessingOverview);
+            //Training of the readout layer 
+            ReadoutLayer.RegressionOverview regressionOverview = RL.Build(preprocessedData, BuildPredictorsMapper(), regressionController);
+            //Return compact results
+            return new TrainingResults(preprocessingOverview, regressionOverview);
+        }
+
+        /// <summary>
+        /// Performs given data bundle and evaluates computed results against ideal results
+        /// Raises VerificationProgressChanged event.
+        /// </summary>
+        /// <param name="vectorBundle">Data bundle containing known input vectors and desired output vectors (in time order)</param>
+        /// <returns>Verification result</returns>
+        public VerificationResults Verify(VectorBundle vectorBundle)
+        {
+            VerificationResults verificationResults = new VerificationResults(_settings.ReadoutLayerConfig);
+            for (int sampleIdx = 0; sampleIdx < vectorBundle.InputVectorCollection.Count; sampleIdx++)
+            {
+                double[] predictors = NP.Preprocess(vectorBundle.InputVectorCollection[sampleIdx]);
+                ReadoutLayer.ReadoutData readoutData = RL.ComputeReadoutData(predictors);
+                double[] result = RL.Compute(predictors);
+                verificationResults.Update(predictors, readoutData, vectorBundle.OutputVectorCollection[sampleIdx]);
+                VerificationProgressChanged(vectorBundle.InputVectorCollection.Count, sampleIdx + 1);
+            }
+            return verificationResults;
+        }
+
+        /// <summary>
+        /// Performs given data bundle and evaluates computed results against ideal results.
+        /// Raises VerificationProgressChanged event.
+        /// </summary>
+        /// <param name="patternBundle">Data bundle containing known sample input patterns and desired output vectors</param>
+        /// <returns>Verification result</returns>
+        public VerificationResults Verify(PatternBundle patternBundle)
+        {
+            VerificationResults verificationResults = new VerificationResults(_settings.ReadoutLayerConfig);
+            for (int sampleIdx = 0; sampleIdx < patternBundle.InputPatternCollection.Count; sampleIdx++)
+            {
+                double[] predictors = NP.Preprocess(patternBundle.InputPatternCollection[sampleIdx]);
+                ReadoutLayer.ReadoutData readoutData = RL.ComputeReadoutData(predictors);
+                double[] result = RL.Compute(predictors);
+                verificationResults.Update(predictors, readoutData, patternBundle.OutputVectorCollection[sampleIdx]);
+                VerificationProgressChanged(patternBundle.InputPatternCollection.Count, sampleIdx + 1);
+            }
+            return verificationResults;
+        }
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////////////////////
+
         //Inner classes
         /// <summary>
-        /// Contains prepared data for the regression stage and important statistics of the reservoir(s)
+        /// Contains results of the StateMachine training
         /// </summary>
         [Serializable]
-        public class RegressionInput
+        public class TrainingResults
         {
-            //Attribute properties
             /// <summary>
-            /// Bundle of the NeuralPreprocessor's predictors and desired ideal outputs
+            /// Reservoir(s) statistics and other important information as a result of the preprocessing phase of the StateMachine training
             /// </summary>
-            public VectorBundle PreprocessedData { get; }
+            public NeuralPreprocessor.PreprocessingOverview PreprocessingResults { get; }
+
             /// <summary>
-            /// Bundle of input data vectors and desired ideal outputs for verification purposes
+            /// Results of readout layer training (regression) phase of the StateMachine training
             /// </summary>
-            public VectorBundle VerificationVectorBundle { get; }
-            /// <summary>
-            /// Bundle of input data patterns and desired ideal outputs for verification purposes
-            /// </summary>
-            public PatternBundle VerificationPatternBundle { get; }
-            /// <summary>
-            /// Collection of statistics of NeuralPreprocessor's internal reservoirs
-            /// </summary>
-            public List<ReservoirStat> ReservoirStatCollection { get; }
-            /// <summary>
-            /// Total number of NeuralPreprocessor's neurons
-            /// </summary>
-            public int TotalNumOfNeurons { get; }
-            /// <summary>
-            /// Number of invalid predictors (exhibits no meaningfully different values)
-            /// </summary>
-            public int NumOfUnusedPredictors { get; }
-            /// <summary>
-            /// Total number of NeuralPreprocessor's internal synapses
-            /// </summary>
-            public int TotalNumOfInternalSynapses { get; }
+            public ReadoutLayer.RegressionOverview RegressionResults { get; }
 
             //Constructor
             /// <summary>
             /// Creates an initialized instance
             /// </summary>
-            /// <param name="preprocessedData">Bundle of the NeuralPreprocessor's predictors and desired ideal outputs</param>
-            /// <param name="verificationVectorBundle">Bundle of input data vectors and desired ideal outputs for verification purposes</param>
-            /// <param name="verificationPatternBundle">Bundle of input data patterns and desired ideal outputs for verification purposes</param>
-            /// <param name="reservoirStatCollection">Collection of statistics of NeuralPreprocessor's internal reservoirs</param>
-            /// <param name="totalNumOfNeurons">Total number of NeuralPreprocessor's neurons</param>
-            /// <param name="totalNumOfInternalSynapses">Total number of NeuralPreprocessor's internal synapses</param>
-            /// <param name="numOfUnusedPredictors">Number of NeuralPreprocessor's invalid predictors</param>
-            public RegressionInput(VectorBundle preprocessedData,
-                                   VectorBundle verificationVectorBundle,
-                                   PatternBundle verificationPatternBundle,
-                                   List<ReservoirStat> reservoirStatCollection,
-                                   int totalNumOfNeurons,
-                                   int totalNumOfInternalSynapses,
-                                   int numOfUnusedPredictors
+            /// <param name="preprocessingResults">Reservoir(s) statistics and other important information as a result of the preprocessing phase of the StateMachine training.</param>
+            /// <param name="regressionResults">Results of readout layer training (regression) phase of the StateMachine training.</param>
+            public TrainingResults(NeuralPreprocessor.PreprocessingOverview preprocessingResults,
+                                   ReadoutLayer.RegressionOverview regressionResults
                                    )
             {
-                PreprocessedData = preprocessedData;
-                VerificationVectorBundle = verificationVectorBundle;
-                VerificationPatternBundle = verificationPatternBundle;
-                ReservoirStatCollection = reservoirStatCollection;
-                TotalNumOfNeurons = totalNumOfNeurons;
-                TotalNumOfInternalSynapses = totalNumOfInternalSynapses;
-                NumOfUnusedPredictors = numOfUnusedPredictors;
+                PreprocessingResults = preprocessingResults;
+                RegressionResults = regressionResults;
+                return;
+            }
+
+        }//TrainingResults
+
+        /// <summary>
+        /// Summary statistics
+        /// </summary>
+        [Serializable]
+        public class VerificationResults
+        {
+            /// <summary>
+            /// Configuration of the readout layer
+            /// </summary>
+            public ReadoutLayerSettings ReadoutLayerConfig { get; }
+            /// <summary>
+            /// Computation result data bundle
+            /// </summary>
+            public ResultBundle ComputationResultBundle { get; }
+            /// <summary>
+            /// Error statistics of individual readout units
+            /// </summary>
+            public List<ReadoutUnitStat> ReadoutUnitStatCollection { get; }
+            /// <summary>
+            /// Error statistics of one-winner groups of readout units
+            /// </summary>
+            public List<OneWinnerGroupStat> OneWinnerGroupStatCollection { get; }
+
+            //Constructor
+            /// <summary>
+            /// Creates initialized instance
+            /// </summary>
+            /// <param name="readoutLayerConfig">Configuration of the Readout Layer</param>
+            public VerificationResults(ReadoutLayerSettings readoutLayerConfig)
+            {
+                ReadoutLayerConfig = readoutLayerConfig.DeepClone();
+                ComputationResultBundle = new ResultBundle();
+                ReadoutUnitStatCollection = new List<ReadoutUnitStat>(ReadoutLayerConfig.ReadoutUnitCfgCollection.Count);
+                foreach (ReadoutLayerSettings.ReadoutUnitSettings rus in ReadoutLayerConfig.ReadoutUnitCfgCollection)
+                {
+                    ReadoutUnitStatCollection.Add(new ReadoutUnitStat(rus));
+                }
+                OneWinnerGroupStatCollection = new List<OneWinnerGroupStat>();
+                foreach (string groupName in ReadoutLayerConfig.OneWinnerGroupNameCollection.Values)
+                {
+                    OneWinnerGroupStatCollection.Add(new OneWinnerGroupStat(groupName, ReadoutLayerConfig.GetOneWinnerGroupMembers(groupName)));
+                }
                 return;
             }
 
             //Methods
-            private string FNum(double num)
+            /// <summary>
+            /// Updates error statistics
+            /// </summary>
+            /// <param name="inputValues">Input values</param>
+            /// <param name="readoutData">Computed readout data</param>
+            /// <param name="idealValues">Ideal values</param>
+            public void Update(double[] inputValues, ReadoutLayer.ReadoutData readoutData, double[] idealValues)
             {
-                return num.ToString("N8", CultureInfo.InvariantCulture).PadLeft(12);
-            }
-
-            private string StatLine(BasicStat stat)
-            {
-                return $"Avg:{FNum(stat.ArithAvg)},  Max:{FNum(stat.Max)},  Min:{FNum(stat.Min)},  SDdev:{FNum(stat.StdDev)}";
+                //Store input, computed and ideal values
+                ComputationResultBundle.InputVectorCollection.Add(inputValues);
+                ComputationResultBundle.ComputedVectorCollection.Add(readoutData.DataVector);
+                ComputationResultBundle.IdealVectorCollection.Add(idealValues);
+                //Update statistics
+                foreach (ReadoutUnitStat ruStat in ReadoutUnitStatCollection)
+                {
+                    ruStat.Update(readoutData.DataVector, idealValues);
+                }
+                foreach (OneWinnerGroupStat grStat in OneWinnerGroupStatCollection)
+                {
+                    grStat.Update(readoutData, idealValues);
+                }
+                return;
             }
 
             /// <summary>
-            /// Builds report of key statistics collected from all the NeuralPreprocessor's reservoirs
+            /// Returns textual summary statistics
             /// </summary>
             /// <param name="margin">Specifies how many spaces should be at the begining of each row.</param>
             /// <returns>Built text report</returns>
-            public string CreateReport(int margin = 0)
+            public string GetReport(int margin)
             {
                 string leftMargin = margin == 0 ? string.Empty : new string(' ', margin);
-                string resWording = ReservoirStatCollection.Count == 1 ? "reservoir" : "reservoirs";
                 StringBuilder sb = new StringBuilder();
-                sb.Append(leftMargin + $"Neural preprocessor ({ReservoirStatCollection.Count} {resWording}, {TotalNumOfNeurons} neurons, {TotalNumOfInternalSynapses} internal synapses)" + Environment.NewLine);
-                foreach (ReservoirStat resStat in ReservoirStatCollection)
+                //Report
+                //Readout units separatelly
+                foreach (ReadoutUnitStat ruStat in ReadoutUnitStatCollection)
                 {
-                    sb.Append(leftMargin + $"    Reservoir instance: {resStat.ReservoirInstanceName} (configuration {resStat.ReservoirSettingsName}, {resStat.TotalNumOfNeurons} neurons, {Math.Round(resStat.ExcitatoryNeuronsRatio * 100, 1).ToString(CultureInfo.InvariantCulture)}% excitatory neurons, {resStat.TotalNumOfInternalSynapses} internal synapses)" + Environment.NewLine);
-                    sb.Append(leftMargin + $"        Activity" + Environment.NewLine);
-                    sb.Append(leftMargin + $"            {resStat.NumOfNoRStimuliNeurons} neurons receive no stimulation from the reservoir" + Environment.NewLine);
-                    sb.Append(leftMargin + $"            {resStat.NumOfNoAnalogOutputSignalNeurons} neurons produce no analog signal" + Environment.NewLine);
-                    sb.Append(leftMargin + $"            {resStat.NumOfConstAnalogOutputSignalNeurons} neurons produce constant analog signal" + Environment.NewLine);
-                    sb.Append(leftMargin + $"            {resStat.NumOfNotFiringNeurons} neurons don't spike" + Environment.NewLine);
-                    sb.Append(leftMargin + $"            {resStat.NumOfConstFiringNeurons} neurons are constantly firing" + Environment.NewLine);
-                    foreach (ReservoirStat.PoolStat poolStat in resStat.PoolStatCollection)
+                    sb.Append(leftMargin + $"Output field [{ruStat.Name}]" + Environment.NewLine);
+                    if (ruStat.Task == ReadoutUnit.TaskType.Classification)
                     {
-                        sb.Append(leftMargin + $"        Pool: {poolStat.PoolName} ({poolStat.NumOfNeurons} neurons, {Math.Round(poolStat.ExcitatoryNeuronsRatio * 100, 1).ToString(CultureInfo.InvariantCulture)}% excitatory neurons, {poolStat.InternalAnalogWeightsStat.NumOfSamples + poolStat.InternalSpikingWeightsStat.NumOfSamples} internal synapses)" + Environment.NewLine);
-                        sb.Append(leftMargin + $"            Activity" + Environment.NewLine);
-                        sb.Append(leftMargin + $"                {poolStat.NumOfNoRStimuliNeurons} neurons receive no stimulation from the reservoir" + Environment.NewLine);
-                        sb.Append(leftMargin + $"                {poolStat.NumOfNoAnalogOutputSignalNeurons} neurons produce no analog signal" + Environment.NewLine);
-                        sb.Append(leftMargin + $"                {poolStat.NumOfConstAnalogOutputSignalNeurons} neurons produce constant analog signal" + Environment.NewLine);
-                        sb.Append(leftMargin + $"                {poolStat.NumOfNotFiringNeurons} neurons don't spike" + Environment.NewLine);
-                        sb.Append(leftMargin + $"                {poolStat.NumOfConstFiringNeurons} neurons are constantly firing" + Environment.NewLine);
-                        sb.Append(leftMargin + $"            Weights of synapses" + Environment.NewLine);
-                        sb.Append(leftMargin + $"                Input       >  {StatLine(poolStat.InputWeightsStat)}" + Environment.NewLine);
-                        sb.Append(leftMargin + $"                Int. Analog >  {StatLine(poolStat.InternalAnalogWeightsStat)}" + Environment.NewLine);
-                        sb.Append(leftMargin + $"                Int. Spiking>  {StatLine(poolStat.InternalSpikingWeightsStat)}" + Environment.NewLine);
-                        foreach (ReservoirStat.PoolStat.NeuronGroupStat groupStat in poolStat.NeuronGroupStatCollection)
-                        {
-                            sb.Append(leftMargin + $"            Group of neurons: {groupStat.GroupName} ({groupStat.AvgAnalogSignalStat.NumOfSamples} neurons)" + Environment.NewLine);
-                            sb.Append(leftMargin + $"                Activity" + Environment.NewLine);
-                            sb.Append(leftMargin + $"                    {groupStat.NumOfNoRStimuliNeurons} neurons receive no stimulation from the reservoir" + Environment.NewLine);
-                            sb.Append(leftMargin + $"                    {groupStat.NumOfNoAnalogOutputSignalNeurons} neurons produce no analog signal" + Environment.NewLine);
-                            sb.Append(leftMargin + $"                    {groupStat.NumOfConstAnalogOutputSignalNeurons} neurons produce constant analog signal" + Environment.NewLine);
-                            sb.Append(leftMargin + $"                    {groupStat.NumOfNotFiringNeurons} neurons don't spike" + Environment.NewLine);
-                            sb.Append(leftMargin + $"                    {groupStat.NumOfConstFiringNeurons} neurons are constantly firing" + Environment.NewLine);
-                            sb.Append(leftMargin + $"                Stimulation from input neurons" + Environment.NewLine);
-                            sb.Append(leftMargin + $"                    AVG>  {StatLine(groupStat.AvgIStimuliStat)}" + Environment.NewLine);
-                            sb.Append(leftMargin + $"                    MAX>  {StatLine(groupStat.MaxIStimuliStat)}" + Environment.NewLine);
-                            sb.Append(leftMargin + $"                    MIN>  {StatLine(groupStat.MinIStimuliStat)}" + Environment.NewLine);
-                            sb.Append(leftMargin + $"                   SPAN>  {StatLine(groupStat.IStimuliSpansStat)}" + Environment.NewLine);
-                            sb.Append(leftMargin + $"                Stimulation from reservoir neurons" + Environment.NewLine);
-                            sb.Append(leftMargin + $"                    AVG>  {StatLine(groupStat.AvgRStimuliStat)}" + Environment.NewLine);
-                            sb.Append(leftMargin + $"                    MAX>  {StatLine(groupStat.MaxRStimuliStat)}" + Environment.NewLine);
-                            sb.Append(leftMargin + $"                    MIN>  {StatLine(groupStat.MinRStimuliStat)}" + Environment.NewLine);
-                            sb.Append(leftMargin + $"                   SPAN>  {StatLine(groupStat.RStimuliSpansStat)}" + Environment.NewLine);
-                            sb.Append(leftMargin + $"                Total stimulation (including Bias)" + Environment.NewLine);
-                            sb.Append(leftMargin + $"                    AVG>  {StatLine(groupStat.AvgTStimuliStat)}" + Environment.NewLine);
-                            sb.Append(leftMargin + $"                    MAX>  {StatLine(groupStat.MaxTStimuliStat)}" + Environment.NewLine);
-                            sb.Append(leftMargin + $"                    MIN>  {StatLine(groupStat.MinTStimuliStat)}" + Environment.NewLine);
-                            sb.Append(leftMargin + $"                   SPAN>  {StatLine(groupStat.TStimuliSpansStat)}" + Environment.NewLine);
-                            sb.Append(leftMargin + $"                Efficacy of synapses" + Environment.NewLine);
-                            sb.Append(leftMargin + $"                    AVG>  {StatLine(groupStat.AvgSynEfficacyStat)}" + Environment.NewLine);
-                            sb.Append(leftMargin + $"                    MAX>  {StatLine(groupStat.MaxSynEfficacyStat)}" + Environment.NewLine);
-                            sb.Append(leftMargin + $"                    MIN>  {StatLine(groupStat.MinSynEfficacyStat)}" + Environment.NewLine);
-                            sb.Append(leftMargin + $"                   SPAN>  {StatLine(groupStat.SynEfficacySpansStat)}" + Environment.NewLine);
-                            sb.Append(leftMargin + $"                Activation" + Environment.NewLine);
-                            sb.Append(leftMargin + $"                    AVG>  {StatLine(groupStat.AvgActivationStatesStat)}" + Environment.NewLine);
-                            sb.Append(leftMargin + $"                    MAX>  {StatLine(groupStat.MaxActivationStatesStat)}" + Environment.NewLine);
-                            sb.Append(leftMargin + $"                    MIN>  {StatLine(groupStat.MinActivationStatesStat)}" + Environment.NewLine);
-                            sb.Append(leftMargin + $"                   SPAN>  {StatLine(groupStat.ActivationStateSpansStat)}" + Environment.NewLine);
-                            sb.Append(leftMargin + $"                Analog output" + Environment.NewLine);
-                            sb.Append(leftMargin + $"                    AVG>  {StatLine(groupStat.AvgAnalogSignalStat)}" + Environment.NewLine);
-                            sb.Append(leftMargin + $"                    MAX>  {StatLine(groupStat.MaxAnalogSignalStat)}" + Environment.NewLine);
-                            sb.Append(leftMargin + $"                    MIN>  {StatLine(groupStat.MinAnalogSignalStat)}" + Environment.NewLine);
-                            sb.Append(leftMargin + $"                Spiking signal" + Environment.NewLine);
-                            sb.Append(leftMargin + $"                    AVG>  {StatLine(groupStat.AvgFiringStat)}" + Environment.NewLine);
-                            sb.Append(leftMargin + $"                    MAX>  {StatLine(groupStat.MaxFiringStat)}" + Environment.NewLine);
-                            sb.Append(leftMargin + $"                    MIN>  {StatLine(groupStat.MinFiringStat)}" + Environment.NewLine);
-                        }
+                        //Classification task report
+                        sb.Append(leftMargin + $"  Classification of negative samples" + Environment.NewLine);
+                        sb.Append(leftMargin + $"    Number of samples: {ruStat.BinErrorStat.BinValErrStat[0].NumOfSamples}" + Environment.NewLine);
+                        sb.Append(leftMargin + $"     Number of errors: {ruStat.BinErrorStat.BinValErrStat[0].Sum.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                        sb.Append(leftMargin + $"           Error rate: {ruStat.BinErrorStat.BinValErrStat[0].ArithAvg.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                        sb.Append(leftMargin + $"             Accuracy: {(1 - ruStat.BinErrorStat.BinValErrStat[0].ArithAvg).ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                        sb.Append(leftMargin + $"  Classification of positive samples" + Environment.NewLine);
+                        sb.Append(leftMargin + $"    Number of samples: {ruStat.BinErrorStat.BinValErrStat[1].NumOfSamples}" + Environment.NewLine);
+                        sb.Append(leftMargin + $"     Number of errors: {ruStat.BinErrorStat.BinValErrStat[1].Sum.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                        sb.Append(leftMargin + $"           Error rate: {ruStat.BinErrorStat.BinValErrStat[1].ArithAvg.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                        sb.Append(leftMargin + $"             Accuracy: {(1 - ruStat.BinErrorStat.BinValErrStat[1].ArithAvg).ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                        sb.Append(leftMargin + $"  Overall classification results" + Environment.NewLine);
+                        sb.Append(leftMargin + $"    Number of samples: {ruStat.BinErrorStat.TotalErrStat.NumOfSamples}" + Environment.NewLine);
+                        sb.Append(leftMargin + $"     Number of errors: {ruStat.BinErrorStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                        sb.Append(leftMargin + $"           Error rate: {ruStat.BinErrorStat.TotalErrStat.ArithAvg.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                        sb.Append(leftMargin + $"             Accuracy: {(1 - ruStat.BinErrorStat.TotalErrStat.ArithAvg).ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
                     }
+                    else
+                    {
+                        //Forecast task report
+                        sb.Append(leftMargin + $"  Number of samples: {ruStat.ErrorStat.NumOfSamples}" + Environment.NewLine);
+                        sb.Append(leftMargin + $"      Biggest error: {ruStat.ErrorStat.Max.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                        sb.Append(leftMargin + $"     Smallest error: {ruStat.ErrorStat.Min.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                        sb.Append(leftMargin + $"      Average error: {ruStat.ErrorStat.ArithAvg.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                    }
+                    sb.Append(Environment.NewLine);
                 }
-                sb.Append(Environment.NewLine);
-                sb.Append(leftMargin + $"Number of unused (invalid) predictors: {NumOfUnusedPredictors}" + Environment.NewLine);
+                //One-winner groups
+                foreach (OneWinnerGroupStat grStat in OneWinnerGroupStatCollection)
+                {
+                    sb.Append(leftMargin + $"One winner group [{grStat.Name}]" + Environment.NewLine);
+                    foreach (string className in grStat.ClassErrorStatCollection.Keys)
+                    {
+                        BasicStat errorStat = grStat.ClassErrorStatCollection[className];
+                        sb.Append(leftMargin + $"  Class {className}" + Environment.NewLine);
+                        sb.Append(leftMargin + $"    Number of samples: {errorStat.NumOfSamples}" + Environment.NewLine);
+                        sb.Append(leftMargin + $"     Number of errors: {errorStat.Sum.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                        sb.Append(leftMargin + $"           Error rate: {errorStat.ArithAvg.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                        sb.Append(leftMargin + $"             Accuracy: {(1 - errorStat.ArithAvg).ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                    }
+                    sb.Append(leftMargin + $"  Group total" + Environment.NewLine);
+                    sb.Append(leftMargin + $"    Number of samples: {grStat.GroupErrorStat.NumOfSamples}" + Environment.NewLine);
+                    sb.Append(leftMargin + $"     Number of errors: {grStat.GroupErrorStat.Sum.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                    sb.Append(leftMargin + $"           Error rate: {grStat.GroupErrorStat.ArithAvg.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                    sb.Append(leftMargin + $"             Accuracy: {(1 - grStat.GroupErrorStat.ArithAvg).ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+
+                    sb.Append(Environment.NewLine);
+                }
+
                 return sb.ToString();
             }
 
-        }//RegressionInput
 
-        /// <summary>
-        /// Contains results of the regression process (training and verification results)
-        /// </summary>
-        [Serializable]
-        public class RegressionOutput
-        {
-            /// <summary>
-            /// Training result data bundle
-            /// </summary>
-            public ResultBundle TrainingResultBundle { get; }
-            /// <summary>
-            /// Verification result data bundle
-            /// </summary>
-            public ResultBundle VerificationResultBundle { get; }
-            /// <summary>
-            /// Detailed verification statistics
-            /// </summary>
-            public ReadoutLayer.SummaryResultStat VerificationSummaryStat { get; }
 
-            //Constructor
+            //Inner classes
             /// <summary>
-            /// Creates an initialized instance
+            /// Readout unit statistics
             /// </summary>
-            /// <param name="trainingResultBundle">Training result data bundle</param>
-            /// <param name="verificationResultBundle">Verification result data bundle</param>
-            /// <param name="verificationSummaryStat">Detailed verification statistics</param>
-            public RegressionOutput(ResultBundle trainingResultBundle,
-                                    ResultBundle verificationResultBundle,
-                                    ReadoutLayer.SummaryResultStat verificationSummaryStat
-                                    )
+            [Serializable]
+            public class ReadoutUnitStat
             {
-                TrainingResultBundle = trainingResultBundle;
-                VerificationResultBundle = verificationResultBundle;
-                VerificationSummaryStat = verificationSummaryStat;
-                return;
-            }
-        }
+                /// <summary>
+                /// Readout unit name
+                /// </summary>
+                public string Name { get; }
+                /// <summary>
+                /// Readout unit zero-based index
+                /// </summary>
+                public int Index { get; }
+                /// <summary>
+                /// Neural task
+                /// </summary>
+                public ReadoutUnit.TaskType Task { get; }
+                /// <summary>
+                /// Error statistics
+                /// </summary>
+                public BasicStat ErrorStat { get; }
+                /// <summary>
+                /// Binary error statistics. Relevant only for Classification task.
+                /// </summary>
+                public BinErrStat BinErrorStat { get; }
+
+                //Constructor
+                /// <summary>
+                /// Creates an unitialized instance
+                /// </summary>
+                /// <param name="rus">Readout unit settings</param>
+                public ReadoutUnitStat(ReadoutLayerSettings.ReadoutUnitSettings rus)
+                {
+                    Name = rus.Name;
+                    Index = rus.Index;
+                    Task = rus.TaskType;
+                    ErrorStat = new BasicStat();
+                    if (Task == ReadoutUnit.TaskType.Classification)
+                    {
+                        BinErrorStat = new BinErrStat(0.5d);
+                    }
+                    return;
+                }
+
+                //Methods
+                /// <summary>
+                /// Updates statistics
+                /// </summary>
+                /// <param name="computedValues">Computed values</param>
+                /// <param name="idealValues">Ideal values</param>
+                public void Update(double[] computedValues, double[] idealValues)
+                {
+                    ErrorStat.AddSampleValue(Math.Abs(computedValues[Index] - idealValues[Index]));
+                    if (Task == ReadoutUnit.TaskType.Classification)
+                    {
+                        BinErrorStat.Update(computedValues[Index], idealValues[Index]);
+                    }
+                    return;
+                }
+
+            }//ReadoutUnitStat
+
+            /// <summary>
+            /// One-winner group statistics
+            /// </summary>
+            [Serializable]
+            public class OneWinnerGroupStat
+            {
+                /// <summary>
+                /// Group name
+                /// </summary>
+                public string Name { get; }
+                /// <summary>
+                /// Group binary error statistics
+                /// </summary>
+                public BasicStat GroupErrorStat { get; }
+                /// <summary>
+                /// Collection of group sub-class error statistics
+                /// </summary>
+                public Dictionary<string, BasicStat> ClassErrorStatCollection { get; }
+
+                //Constructor
+                /// <summary>
+                /// Creates an unitialized instance
+                /// </summary>
+                /// <param name="groupName">One-winner group name</param>
+                /// <param name="members">One-winner group members</param>
+                public OneWinnerGroupStat(string groupName, List<ReadoutLayerSettings.ReadoutUnitSettings> members)
+                {
+                    Name = groupName;
+                    GroupErrorStat = new BasicStat();
+                    ClassErrorStatCollection = new Dictionary<string, BasicStat>();
+                    foreach (ReadoutLayerSettings.ReadoutUnitSettings rus in members)
+                    {
+                        ClassErrorStatCollection.Add(rus.Name, new BasicStat());
+                    }
+                    return;
+                }
+
+                //Methods
+                /// <summary>
+                /// Updates error statistics
+                /// </summary>
+                /// <param name="readoutData">Computed readout data</param>
+                /// <param name="idealValues">Ideal values</param>
+                public void Update(ReadoutLayer.ReadoutData readoutData, double[] idealValues)
+                {
+                    int winningUnitIndex = readoutData.OneWinnerDataCollection[Name].WinningReadoutUnitIndex;
+                    int maxIdealValueIdx = -1;
+                    string maxIdealValueName = string.Empty;
+                    foreach (ReadoutLayer.ReadoutData.ReadoutUnitData unitData in readoutData.ReadoutUnitDataCollection.Values)
+                    {
+                        if (maxIdealValueIdx == -1 || idealValues[unitData.Index] > idealValues[maxIdealValueIdx])
+                        {
+                            maxIdealValueIdx = unitData.Index;
+                            maxIdealValueName = unitData.Name;
+                        }
+                    }
+                    double err = winningUnitIndex == maxIdealValueIdx ? 0d : 1d;
+                    GroupErrorStat.AddSampleValue(err);
+                    ClassErrorStatCollection[maxIdealValueName].AddSampleValue(err);
+                    return;
+                }
+
+            }//OneWinnerGroupStat
+
+        }//VerificationResult
+
 
     }//StateMachine
 }//Namespace

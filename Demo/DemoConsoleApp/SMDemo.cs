@@ -20,136 +20,173 @@ namespace RCNet.DemoConsoleApp
     /// <summary>
     /// Demonstrates the State Machine usage, performing demo cases defined in xml file.
     /// </summary>
-    public static class SMDemo
+    public class SMDemo
     {
-        //Methods
+        //Attributes
+        private readonly IOutputLog _log;
+
+        //Constructor
+        public SMDemo(IOutputLog log)
+        {
+            _log = log;
+            return;
+        }
+
+        //Event handlers
         /// <summary>
-        /// Informative callback function called by StateMachine to inform about predictors collection progress.
+        /// Displays information about the verification progress.
         /// </summary>
         /// <param name="totalNumOfInputs">Total number of inputs to be processed</param>
         /// <param name="numOfProcessedInputs">Number of processed inputs</param>
-        /// <param name="userObject">An user object (IOutputLog)</param>
-        public static void PredictorsCollectionCallback(int totalNumOfInputs,
-                                                         int numOfProcessedInputs,
-                                                         Object userObject
-                                                         )
+        private void OnVerificationProgressChanged(int totalNumOfInputs, int numOfProcessedInputs)
         {
-            //SMDemo displays/updates information through IOutputLog passed as the userObject
+            //Display progress
             if (numOfProcessedInputs % 10 == 0 || numOfProcessedInputs == totalNumOfInputs || totalNumOfInputs == 1)
             {
-                ((IOutputLog)userObject).Write($"    Collecting State Machine predictors {totalNumOfInputs.ToString()}/{numOfProcessedInputs.ToString()}", true);
+                _log.Write($"    Computing verification data {totalNumOfInputs.ToString()}/{numOfProcessedInputs.ToString()}", true);
+            }
+            return;
+        }
+
+
+        //Methods
+
+        /// <summary>
+        /// Displays information about the preprocessing progress and at the end displays important NeuralPreprocessor's statistics.
+        /// </summary>
+        /// <param name="totalNumOfInputs">Total number of inputs to be processed</param>
+        /// <param name="numOfProcessedInputs">Number of processed inputs</param>
+        /// <param name="finalPreprocessingOverview">Final overview of the preprocessing phase</param>
+        private void OnPreprocessingProgressChanged(int totalNumOfInputs,
+                                                    int numOfProcessedInputs,
+                                                    NeuralPreprocessor.PreprocessingOverview finalPreprocessingOverview
+                                                    )
+        {
+            if (finalPreprocessingOverview == null)
+            {
+                //Display progress
+                if (numOfProcessedInputs % 10 == 0 || numOfProcessedInputs == totalNumOfInputs || totalNumOfInputs == 1)
+                {
+                    _log.Write($"    Neural preprocessing and collection of State Machine predictors {totalNumOfInputs.ToString()}/{numOfProcessedInputs.ToString()}", true);
+                }
+            }
+            else
+            {
+                //Display preprocessing final information
+                _log.Write(string.Empty);
+                _log.Write(finalPreprocessingOverview.CreateReport(4));
+                _log.Write(string.Empty);
             }
             return;
         }
 
         /// <summary>
-        /// This is the callback control function of the regression process and is called by State Machine
-        /// after the completion of each training epoch.
-        /// 
-        /// The goal of the regression process is to train for each output field the readout network(s)
-        /// that will give good results both on the training data and the test data. An instance of the
-        /// Regression.RegressionControlInArgs class passed to this function contains the best error statistics so far
-        /// and the latest statistics. The primary purpose of this function is to decide whether the latest statistics
-        /// are better than the best statistics so far. Here is used simply the default implementation of the decision, but
-        /// the logic can be much more complicated in real-world situations.
-        /// The function can also tell the regression process that it does not make any sense to continue the regression.
-        /// It can terminate the current regression attempt or whole readout unit regression process.
-        /// 
-        /// The secondary purpose of this function is to inform about the regression process progress.
+        /// Displays information about the readout unit regression progress.
         /// </summary>
-        /// <param name="inArgs">Contains all the necessary information to control the regression.</param>
-        /// <returns>Instructions for the regression process.</returns>
-        public static ReadoutUnit.RegressionControlOutArgs RegressionControl(ReadoutUnit.RegressionControlInArgs inArgs)
+        /// <param name="regrState">Current state of the regression process</param>
+        /// <param name="bestUnitChanged">Indicates that the best readout unit was changed as a result of the performed epoch</param>
+        private void OnRegressionEpochDone(ReadoutUnitBuilder.RegrState regrState, bool bestUnitChanged)
         {
-            const int reportEpochsInterval = 10;
-            //Instantiate output object to set instructions for the regression process.
-            ReadoutUnit.RegressionControlOutArgs outArgs = new ReadoutUnit.RegressionControlOutArgs
-            {
-                //Call the default implementation of the judgement.
-                CurrentIsBetter = ReadoutUnit.IsBetter(inArgs.TaskType, inArgs.CurrReadoutUnit, inArgs.BestReadoutUnit),
-                StopRegression = (inArgs.TaskType == ReadoutUnit.TaskType.Classification &&
-                                  inArgs.CurrReadoutUnit.TrainingBinErrorStat.TotalErrStat.Sum == 0 &&
-                                  inArgs.CurrReadoutUnit.TestingBinErrorStat.TotalErrStat.Sum == 0
-                                 )
-            };
+            int reportEpochsInterval = 5;
             //Progress info
-            if (outArgs.CurrentIsBetter ||
-                (inArgs.Epoch % reportEpochsInterval) == 0 ||
-                inArgs.Epoch == inArgs.MaxEpochs ||
-                (inArgs.Epoch == 1 && inArgs.RegrAttemptNumber == 1)
+            if (bestUnitChanged ||
+                (regrState.Epoch % reportEpochsInterval) == 0 ||
+                regrState.Epoch == regrState.MaxEpochs ||
+                (regrState.Epoch == 1 && regrState.RegrAttemptNumber == 1)
                 )
             {
                 //Build progress report message
-                string progressText = ReadoutLayer.GetProgressReport(inArgs,
-                                                                     outArgs.CurrentIsBetter ? inArgs.CurrReadoutUnit : inArgs.BestReadoutUnit,
-                                                                     6);
+                string progressText = regrState.GetProgressInfo(4);
                 //Report the progress
-                ((IOutputLog)inArgs.UserObject).Write(progressText, !(inArgs.Epoch == 1 && inArgs.RegrAttemptNumber == 1));
+                _log.Write(progressText, !(regrState.Epoch == 1 && regrState.RegrAttemptNumber == 1));
             }
-            return outArgs;
+            return;
         }
 
         /// <summary>
         /// Performs one demo case.
-        /// Loads and prepares sample data, trains State Machine and displayes results
         /// </summary>
-        /// <param name="log">Into this interface are written output messages</param>
         /// <param name="demoCaseParams">An instance of DemoSettings.CaseSettings to be performed</param>
-        public static void PerformDemoCase(IOutputLog log, DemoSettings.CaseSettings demoCaseParams)
+        public void PerformDemoCase(DemoSettings.CaseSettings demoCaseParams)
         {
-            log.Write("  Performing demo case " + demoCaseParams.Name, false);
-            log.Write(" ", false);
-            //Instantiate the State Machine
-            StateMachine stateMachine = new StateMachine(demoCaseParams.StateMachineCfg);
-            //Prepare input object for regression stage
-            StateMachine.RegressionInput rsi = null;
             //Prediction input vector (relevant only for input continuous feeding)
             double[] predictionInputVector = null;
+            //Log start
+            _log.Write("  Performing demo case " + demoCaseParams.Name, false);
+            _log.Write(" ", false);
+            //Instantiate the StateMachine
+            StateMachine stateMachine = new StateMachine(demoCaseParams.StateMachineCfg);
+            //////////////////////////////////////////////////////////////////////////////////////
+            //Train StateMachine
+            //Register to PreprocessingProgressChanged event
+            stateMachine.NP.PreprocessingProgressChanged += OnPreprocessingProgressChanged;
+            //Register to RegressionEpochDone event
+            stateMachine.RL.RegressionEpochDone += OnRegressionEpochDone;
+            StateMachine.TrainingResults trainingResults;
             if (demoCaseParams.StateMachineCfg.NeuralPreprocessorConfig.InputConfig.FeedingType == NeuralPreprocessor.InputFeedingType.Continuous)
             {
                 //Continuous input feeding
                 //Load data bundle from csv file
-                VectorBundle data = VectorBundle.LoadFromCsv(demoCaseParams.FileName,
-                                                             demoCaseParams.StateMachineCfg.NeuralPreprocessorConfig.InputConfig.ExternalFieldNameCollection(),
-                                                             demoCaseParams.StateMachineCfg.ReadoutLayerConfig.OutputFieldNameCollection,
-                                                             out predictionInputVector
-                                                             );
-                rsi = stateMachine.PrepareRegressionData(data, PredictorsCollectionCallback, log);
+                VectorBundle trainingData = VectorBundle.LoadFromCsv(demoCaseParams.TrainingDataFileName,
+                                                                     demoCaseParams.StateMachineCfg.NeuralPreprocessorConfig.InputConfig.ExternalFieldNameCollection(),
+                                                                     demoCaseParams.StateMachineCfg.ReadoutLayerConfig.OutputFieldNameCollection,
+                                                                     out predictionInputVector
+                                                                     );
+                trainingResults = stateMachine.Train(trainingData);
             }
             else
             {
                 //Patterned input feeding
                 //Load data bundle from csv file
-                PatternBundle data = PatternBundle.LoadFromCsv(demoCaseParams.FileName,
-                                                               demoCaseParams.StateMachineCfg.NeuralPreprocessorConfig.InputConfig.ExternalFieldNameCollection(),
-                                                               demoCaseParams.StateMachineCfg.ReadoutLayerConfig.OutputFieldNameCollection
-                                                               );
-                rsi = stateMachine.PrepareRegressionData(data, PredictorsCollectionCallback, log);
+                PatternBundle trainingData = PatternBundle.LoadFromCsv(demoCaseParams.TrainingDataFileName,
+                                                                       demoCaseParams.StateMachineCfg.NeuralPreprocessorConfig.InputConfig.ExternalFieldNameCollection(),
+                                                                       demoCaseParams.StateMachineCfg.ReadoutLayerConfig.OutputFieldNameCollection
+                                                                       );
+                trainingResults = stateMachine.Train(trainingData);
             }
-            //Report key statistics of the State Machine's reservoirs
-            string statisticsReport = rsi.CreateReport(4);
-            log.Write(statisticsReport);
-            log.Write(string.Empty);
-
-            //Regression stage - building of trained readout layer
-            log.Write("    Regression stage (training of readout layer)", false);
-            //Perform the regression
-            StateMachine.RegressionOutput regressionOutput = stateMachine.BuildReadoutLayer(rsi, RegressionControl, log);
-            log.Write(string.Empty);
+            _log.Write(string.Empty);
 
             //Report training (regression) results
-            log.Write("    Training results", false);
-            string trainingReport = stateMachine.RL.GetTrainingResultsReport(6);
-            log.Write(trainingReport);
-            log.Write(string.Empty);
+            _log.Write("    Training results", false);
+            string trainingReport = trainingResults.RegressionResults.GetTrainingResultsReport(6);
+            _log.Write(trainingReport);
+            _log.Write(string.Empty);
 
-            if (regressionOutput.VerificationResultBundle.InputVectorCollection.Count > 0)
+            //////////////////////////////////////////////////////////////////////////////////////
+            //Verification of training quality on verification data
+            if (demoCaseParams.VerificationDataFileName.Length > 0)
             {
+                stateMachine.VerificationProgressChanged += OnVerificationProgressChanged;
+                StateMachine.VerificationResults verificationResults;
+                if (demoCaseParams.StateMachineCfg.NeuralPreprocessorConfig.InputConfig.FeedingType == NeuralPreprocessor.InputFeedingType.Continuous)
+                {
+                    //Continuous input feeding
+                    //Last known values from training must be pushed into the reservoirs to keep time series continuity
+                    //(first data in verification.csv is output of the last data in training.csv)
+                    double[] predictionOutputVector = stateMachine.Compute(predictionInputVector);
+                    //Load data bundle from csv file
+                    VectorBundle verificationData = VectorBundle.LoadFromCsv(demoCaseParams.VerificationDataFileName,
+                                                                             demoCaseParams.StateMachineCfg.NeuralPreprocessorConfig.InputConfig.ExternalFieldNameCollection(),
+                                                                             demoCaseParams.StateMachineCfg.ReadoutLayerConfig.OutputFieldNameCollection,
+                                                                             out predictionInputVector
+                                                                             );
+                    verificationResults = stateMachine.Verify(verificationData);
+                }
+                else
+                {
+                    //Patterned input feeding
+                    //Load data bundle from csv file
+                    PatternBundle verificationData = PatternBundle.LoadFromCsv(demoCaseParams.VerificationDataFileName,
+                                                                               demoCaseParams.StateMachineCfg.NeuralPreprocessorConfig.InputConfig.ExternalFieldNameCollection(),
+                                                                               demoCaseParams.StateMachineCfg.ReadoutLayerConfig.OutputFieldNameCollection
+                                                                               );
+                    verificationResults = stateMachine.Verify(verificationData);
+                }
+                _log.Write(string.Empty);
                 //Report verification results
-                log.Write("    Verification results", false);
-                string verificationReport = regressionOutput.VerificationSummaryStat.GetReport(6);
-                log.Write(verificationReport);
-                log.Write(string.Empty);
+                _log.Write("    Verification results", false);
+                _log.Write(verificationResults.GetReport(6));
+                _log.Write(string.Empty);
             }
 
             //Perform prediction in case the input feeding is continuous (we know the input but we don't know the ideal output)
@@ -157,22 +194,21 @@ namespace RCNet.DemoConsoleApp
             {
                 double[] predictionOutputVector = stateMachine.Compute(predictionInputVector);
                 string predictionReport = stateMachine.RL.GetForecastReport(predictionOutputVector, 6);
-                log.Write("    Forecasts", false);
-                log.Write(predictionReport);
-                log.Write(string.Empty);
+                _log.Write("    Forecasts", false);
+                _log.Write(predictionReport);
+                _log.Write(string.Empty);
             }
             return;
         }
 
         /// <summary>
         /// Runs State Machine demo. This is the main function.
-        /// For each demo case defined in xml file function calls PerformDemoCase.
+        /// Executes demo cases defined in xml file.
         /// </summary>
-        /// <param name="log">Into this interface demo writes output to be displayed</param>
-        /// <param name="demoSettingsXmlFile">Xml file containing definitions of demo cases to be prformed</param>
-        public static void RunDemo(IOutputLog log, string demoSettingsXmlFile)
+        /// <param name="demoSettingsXmlFile">Xml file containing definitions of demo cases to be performed</param>
+        public void RunDemo(string demoSettingsXmlFile)
         {
-            log.Write("State Machine demo started");
+            _log.Write("State Machine demo started");
             //Instantiate demo settings from the xml file
             DemoSettings demoSettings = new DemoSettings(demoSettingsXmlFile);
             //Loop through all demo cases
@@ -182,15 +218,15 @@ namespace RCNet.DemoConsoleApp
                 sw.Reset();
                 sw.Start();
                 //Execute the demo case
-                PerformDemoCase(log, demoCaseParams);
+                PerformDemoCase(demoCaseParams);
                 sw.Stop();
                 TimeSpan ts = sw.Elapsed;
-                log.Write("Run time of demo case: " + String.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10));
-                log.Write(string.Empty);
-                log.Write(string.Empty);
+                _log.Write("  Run time of demo case: " + String.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10));
+                _log.Write(string.Empty);
+                _log.Write(string.Empty);
             }
-            log.Write("State Machine demo finished");
-            log.Write(string.Empty);
+            _log.Write("State Machine demo finished");
+            _log.Write(string.Empty);
             return;
         }
     }//SMDemo

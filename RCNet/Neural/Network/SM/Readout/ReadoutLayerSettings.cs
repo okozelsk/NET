@@ -355,6 +355,12 @@ namespace RCNet.Neural.Network.SM.Readout
                 return;
             }
 
+            //Properties
+            /// <summary>
+            /// Binary border (for classification purposes only)
+            /// </summary>
+            public double BinBorder { get { return OutputRange.Mid; } }
+            
             //Methods
             /// <summary>
             /// See the base.

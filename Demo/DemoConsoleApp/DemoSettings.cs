@@ -76,9 +76,13 @@ namespace RCNet.DemoConsoleApp
             /// </summary>
             public string Name { get; }
             /// <summary>
-            /// Demo case data file (appropriate csv format)
+            /// Demo case training data file (appropriate csv format)
             /// </summary>
-            public string FileName { get; }
+            public string TrainingDataFileName { get; }
+            /// <summary>
+            /// Demo case verification data file (appropriate csv format)
+            /// </summary>
+            public string VerificationDataFileName { get; }
             /// <summary>
             /// State machine configuration
             /// </summary>
@@ -92,8 +96,19 @@ namespace RCNet.DemoConsoleApp
                 Name = demoCaseElem.Attribute("name").Value;
                 //Samples
                 XElement samplesElem = demoCaseElem.Descendants("samples").First();
-                //Full path to csv file
-                FileName = dir + "\\" + samplesElem.Attribute("fileName").Value;
+                //Full path to training csv file
+                TrainingDataFileName = dir + "\\" + samplesElem.Attribute("trainingData").Value;
+                //Verification data file
+                if (samplesElem.Attribute("verificationData").Value.Trim().Length > 0)
+                {
+                    //Full path to verification csv file
+                    VerificationDataFileName = dir + "\\" + samplesElem.Attribute("verificationData").Value;
+                }
+                else
+                {
+                    //Empty - no verification data
+                    VerificationDataFileName = string.Empty;
+                }
                 //State Machine configuration
                 StateMachineCfg = new StateMachineSettings(demoCaseElem.Descendants("stateMachineCfg").First());
                 return;

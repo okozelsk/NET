@@ -540,6 +540,24 @@ namespace RCNet.MathTools
             return;
         }
 
+        /// <summary>
+        /// Creates the deep copy of this instance
+        /// </summary>
+        public BasicStat DeepClone()
+        {
+            if (_threadSafe)
+            {
+                lock (_lock)
+                {
+                    return new BasicStat(this, _threadSafe);
+                }
+            }
+            else
+            {
+                return new BasicStat(this, _threadSafe);
+            }
+        }
+
         private void CopyFromInternal(BasicStat source)
         {
             _sum = source._sum;

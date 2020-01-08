@@ -20,10 +20,6 @@ namespace RCNet.Neural.Network.SM.Readout
     {
         //Constants
         /// <summary>
-        /// Maximum number of the folds
-        /// </summary>
-        public const int MaxNumOfFolds = 100;
-        /// <summary>
         /// Maximum part of available samples useable for test purposes
         /// </summary>
         public const double MaxRatioOfTestData = 0.5d;
@@ -37,6 +33,26 @@ namespace RCNet.Neural.Network.SM.Readout
         /// Input and output data will be normalized to this range before the usage
         /// </summary>
         public static readonly Interval DataRange = new Interval(-1, 1);
+
+        //Delegates
+        /// <summary>
+        /// Delegate of RegressionEpochDone event handler.
+        /// </summary>
+        /// <param name="regrState">Current state of the regression process</param>
+        /// <param name="bestUnitChanged">Indicates that the best readout unit was changed as a result of the performed epoch</param>
+        public delegate void RegressionEpochDoneHandler(ReadoutUnitBuilder.RegrState regrState, bool bestUnitChanged);
+
+        //Events
+        /// <summary>
+        /// This informative event occurs every time the regression epoch is done
+        /// </summary>
+        public event RegressionEpochDoneHandler RegressionEpochDone;
+
+        //Attribute properties
+        /// <summary>
+        /// Indicates if the readout layer is trained
+        /// </summary>
+        public bool Trained { get; private set; }
 
         //Attributes
         /// <summary>
@@ -58,11 +74,11 @@ namespace RCNet.Neural.Network.SM.Readout
         /// <summary>
         /// Collection of clusters of trained readout units. One cluster of units per output field.
         /// </summary>
-        private readonly ReadoutUnit[][] _clusterCollection;
+        private ReadoutUnit[][] _clusterCollection;
         /// <summary>
         /// Cluster overall error statistics collection
         /// </summary>
-        private readonly List<ClusterErrStatistics> _clusterErrStatisticsCollection;
+        private List<ClusterErrStatistics> _clusterErrStatisticsCollection;
 
 
 
@@ -74,9 +90,6 @@ namespace RCNet.Neural.Network.SM.Readout
         public ReadoutLayer(ReadoutLayerSettings settings)
         {
             _settings = settings.DeepClone();
-            _predictorFeatureFilterCollection = null;
-            _outputFeatureFilterCollection = null;
-            _predictorsMapper = null;
             foreach (ReadoutLayerSettings.ReadoutUnitSettings rus in _settings.ReadoutUnitCfgCollection)
             {
                 if (!rus.OutputRange.BelongsTo(DataRange.Min) || !rus.OutputRange.BelongsTo(DataRange.Max))
@@ -84,29 +97,85 @@ namespace RCNet.Neural.Network.SM.Readout
                     throw new Exception($"Readout unit {rus.Name} does not support data range <{DataRange.Min}; {DataRange.Max}>.");
                 }
             }
-            //Clusters
+            Reset();
+            return;
+        }
+
+        //Properties
+        /// <summary>
+        /// Cluster overall error statistics collection
+        /// </summary>
+        public List<ClusterErrStatistics> ClusterErrStatisticsCollection
+        {
+            get
+            {
+                //Create and return the deep clone
+                List<ClusterErrStatistics> clonedStatisticsCollection = new List<ClusterErrStatistics>(_clusterErrStatisticsCollection.Count);
+                foreach (ClusterErrStatistics ces in _clusterErrStatisticsCollection)
+                {
+                    clonedStatisticsCollection.Add(ces.DeepClone());
+                }
+                return clonedStatisticsCollection;
+            }
+        }
+
+        //Static methods
+        /// <summary>
+        /// Decides what readout unit within the One Winner group is winning
+        /// </summary>
+        /// <param name="oneWinnerGroupName">Name of One Winner group</param>
+        /// <param name="dataVector">Vector of values corresponding to readout units</param>
+        /// <param name="rls">Readout layer settings</param>
+        /// <param name="ces">Collection of the cluster's error statistics</param>
+        public static int DecideOneWinner(string oneWinnerGroupName, double[] dataVector, ReadoutLayerSettings rls, List<ClusterErrStatistics> ces)
+        {
+            //Obtain group members
+            List<ReadoutLayerSettings.ReadoutUnitSettings> rusCollection = rls.GetOneWinnerGroupMembers(oneWinnerGroupName);
+            //Find the highest probability unit
+            int maxPIdx = -1;
+            for (int i = 0; i < rusCollection.Count; i++)
+            {
+                if (maxPIdx == -1 || dataVector[rusCollection[i].Index] > dataVector[maxPIdx])
+                {
+                    maxPIdx = rusCollection[i].Index;
+                }
+            }
+            return maxPIdx;
+        }
+
+        //Methods
+        /// <summary>
+        /// Resets readout layer to its initial untrained state
+        /// </summary>
+        public void Reset()
+        {
+            _predictorFeatureFilterCollection = null;
+            _outputFeatureFilterCollection = null;
+            _predictorsMapper = null;
             _clusterCollection = new ReadoutUnit[_settings.ReadoutUnitCfgCollection.Count][];
             _clusterErrStatisticsCollection = new List<ClusterErrStatistics>();
+            Trained = false;
+            return;
+        }
+
+        private void OnRegressionEpochDone(ReadoutUnitBuilder.RegrState regrState, bool bestUnitChanged)
+        {
+            //Only raise up
+            RegressionEpochDone(regrState, bestUnitChanged);
             return;
         }
 
         /// <summary>
-        /// Builds readout layer.
-        /// Prepares prediction clusters containing trained readout units.
+        /// Builds trained readout layer.
         /// </summary>
         /// <param name="dataBundle">Collection of input predictors and associated desired output values</param>
-        /// <param name="regressionController">Regression controller delegate</param>
-        /// <param name="regressionControllerData">An user object</param>
         /// <param name="predictorsMapper">Optional specific mapping of predictors to readout units</param>
-        /// <returns>Returned ResultComparativeBundle is something like a protocol.
-        /// There is recorded fold by fold (unit by unit) predicted and corresponding ideal values.
-        /// This is the pesimistic approach. Real results on unseen data could be better due to the clustering.
-        /// </returns>
-        public ResultBundle Build(VectorBundle dataBundle,
-                                  ReadoutUnit.RegressionCallbackDelegate regressionController,
-                                  Object regressionControllerData,
-                                  PredictorsMapper predictorsMapper = null
-                                  )
+        /// <param name="controller">Optional external regression controller</param>
+        /// <returns>Results of the regression</returns>
+        public RegressionOverview Build(VectorBundle dataBundle,
+                                        PredictorsMapper predictorsMapper = null,
+                                        ReadoutUnitBuilder.RegressionControllerDelegate controller = null
+                                        )
         {
             //Basic checks
             int numOfPredictors = dataBundle.InputVectorCollection[0].Length;
@@ -117,7 +186,7 @@ namespace RCNet.Neural.Network.SM.Readout
             }
             if (numOfOutputs != _settings.ReadoutUnitCfgCollection.Count)
             {
-                throw new Exception("Incorrect number of ideal output values in the vector.");
+                throw new Exception("Incorrect length of output vectors.");
             }
             //Predictors mapper (specified or default)
             _predictorsMapper = predictorsMapper ?? new PredictorsMapper(numOfPredictors);
@@ -146,8 +215,8 @@ namespace RCNet.Neural.Network.SM.Readout
             });
             //Data normalization
             //Allocation
-            double[][] predictorsCollection = new double[dataBundle.InputVectorCollection.Count][];
-            double[][] idealOutputsCollection = new double[dataBundle.OutputVectorCollection.Count][];
+            double[][] normalizedPredictorsCollection = new double[dataBundle.InputVectorCollection.Count][];
+            double[][] normalizedIdealOutputsCollection = new double[dataBundle.OutputVectorCollection.Count][];
             //Normalization
             Parallel.For(0, dataBundle.InputVectorCollection.Count, pairIdx =>
             {
@@ -164,14 +233,14 @@ namespace RCNet.Neural.Network.SM.Readout
                         predictors[i] = double.NaN;
                     }
                 }
-                predictorsCollection[pairIdx] = predictors;
+                normalizedPredictorsCollection[pairIdx] = predictors;
                 //Outputs
                 double[] outputs = new double[numOfOutputs];
                 for (int i = 0; i < numOfOutputs; i++)
                 {
                     outputs[i] = _outputFeatureFilterCollection[i].ApplyFilter(dataBundle.OutputVectorCollection[pairIdx][i]);
                 }
-                idealOutputsCollection[pairIdx] = outputs;
+                normalizedIdealOutputsCollection[pairIdx] = outputs;
             });
 
             //Data processing
@@ -180,9 +249,9 @@ namespace RCNet.Neural.Network.SM.Readout
             //Test dataset size
             if (_settings.TestDataRatio > MaxRatioOfTestData)
             {
-                throw new ArgumentException($"Test dataset size is greater than {MaxRatioOfTestData.ToString(CultureInfo.InvariantCulture)}", "TestDataSetSize");
+                throw new ArgumentException($"Test data rato is greater than {MaxRatioOfTestData.ToString(CultureInfo.InvariantCulture)}", "TestDataSetSize");
             }
-            int testDataSetLength = (int)Math.Round(idealOutputsCollection.Length * _settings.TestDataRatio, 0);
+            int testDataSetLength = (int)Math.Round(normalizedIdealOutputsCollection.Length * _settings.TestDataRatio, 0);
             if (testDataSetLength < MinLengthOfTestDataset)
             {
                 throw new ArgumentException($"Num of test samples is less than {MinLengthOfTestDataset.ToString(CultureInfo.InvariantCulture)}", "TestDataSetSize");
@@ -192,248 +261,91 @@ namespace RCNet.Neural.Network.SM.Readout
             if (numOfFolds <= 0)
             {
                 //Auto setup
-                numOfFolds = idealOutputsCollection.Length / testDataSetLength;
-                if (numOfFolds > MaxNumOfFolds)
-                {
-                    numOfFolds = MaxNumOfFolds;
-                }
+                numOfFolds = normalizedIdealOutputsCollection.Length / testDataSetLength;
             }
             //Create shuffled copy of the data
-            VectorBundle shuffledData = new VectorBundle(predictorsCollection, idealOutputsCollection);
+            VectorBundle shuffledData = new VectorBundle(normalizedPredictorsCollection, normalizedIdealOutputsCollection);
             shuffledData.Shuffle(rand);
             //Data inspection, preparation of datasets and training of ReadoutUnits
             //Clusters of readout units (one cluster per each output field)
             for (int clusterIdx = 0; clusterIdx < _settings.ReadoutUnitCfgCollection.Count; clusterIdx++)
             {
                 _clusterCollection[clusterIdx] = new ReadoutUnit[numOfFolds];
-                List<double[]> idealValueCollection = new List<double[]>(idealOutputsCollection.Length);
-                BinDistribution refBinDistr = null;
-                if (_settings.ReadoutUnitCfgCollection[clusterIdx].TaskType == ReadoutUnit.TaskType.Classification)
-                {
-                    //Reference binary distribution is relevant only for classification task
-                    refBinDistr = new BinDistribution(DataRange.Mid);
-                }
-                //Transformation to a single value vectors and data analysis
+                List<double[]> idealValueCollection = new List<double[]>(normalizedIdealOutputsCollection.Length);
+                //Transformation of ideal vectors to a single value vectors
                 foreach (double[] idealVector in shuffledData.OutputVectorCollection)
                 {
                     double[] value = new double[1];
                     value[0] = idealVector[clusterIdx];
                     idealValueCollection.Add(value);
-                    if (_settings.ReadoutUnitCfgCollection[clusterIdx].TaskType == ReadoutUnit.TaskType.Classification)
-                    {
-                        //Reference binary distribution is relevant only for classification task
-                        refBinDistr.Update(value);
-                    }
                 }
-                List<VectorBundle> subBundleCollection = null;
                 List<double[]> readoutUnitInputVectorCollection = _predictorsMapper.CreateVectorCollection(_settings.ReadoutUnitCfgCollection[clusterIdx].Name, shuffledData.InputVectorCollection);
-                //Datasets preparation is depending on the task type
-                if (_settings.ReadoutUnitCfgCollection[clusterIdx].TaskType == ReadoutUnit.TaskType.Classification)
-                {
-                    //Classification task
-                    subBundleCollection = DivideSamplesForClassificationTask(readoutUnitInputVectorCollection,
-                                                                             idealValueCollection,
-                                                                             refBinDistr,
-                                                                             testDataSetLength
-                                                                             );
-                }
-                else
-                {
-                    //Forecast task
-                    subBundleCollection = DivideSamplesForForecastTask(readoutUnitInputVectorCollection,
-                                                                       idealValueCollection,
-                                                                       testDataSetLength
-                                                                       );
-                }
-                //Find best unit per each fold in the cluster.
-                ClusterErrStatistics ces = new ClusterErrStatistics(_settings.ReadoutUnitCfgCollection[clusterIdx].TaskType, numOfFolds, DataRange.Mid);
-                int arrayPos = 0;
+                VectorBundle readoutUnitDataBundle = new VectorBundle(readoutUnitInputVectorCollection, idealValueCollection);
+                //Data split
+                List<VectorBundle> subBundleCollection = readoutUnitDataBundle.Split(testDataSetLength, (_settings.ReadoutUnitCfgCollection[clusterIdx].TaskType == ReadoutUnit.TaskType.Classification) ? DataRange.Mid : double.NaN);
+                //Instantiate cluster error statistics
+                ClusterErrStatistics ces = new ClusterErrStatistics(_settings.ReadoutUnitCfgCollection[clusterIdx].Name,
+                                                                    clusterIdx,
+                                                                    _settings.ReadoutUnitCfgCollection[clusterIdx].TaskType,
+                                                                    numOfFolds,
+                                                                    DataRange.Mid
+                                                                    );
+                //Train unit for each fold in the cluster.
                 for (int foldIdx = 0; foldIdx < numOfFolds; foldIdx++)
                 {
-                    //Build training samples
-                    List<double[]> trainingPredictorsCollection = new List<double[]>();
-                    List<double[]> trainingIdealValueCollection = new List<double[]>();
+                    //Prepare training data bundle
+                    VectorBundle trainingData = new VectorBundle();
                     for (int bundleIdx = 0; bundleIdx < subBundleCollection.Count; bundleIdx++)
                     {
                         if (bundleIdx != foldIdx)
                         {
-                            trainingPredictorsCollection.AddRange(subBundleCollection[bundleIdx].InputVectorCollection);
-                            trainingIdealValueCollection.AddRange(subBundleCollection[bundleIdx].OutputVectorCollection);
+                            trainingData.Add(subBundleCollection[bundleIdx]);
                         }
                     }
-                    //Call training regression to get the best fold's readout unit.
-                    //The best unit becomes to be the predicting cluster member.
-                    _clusterCollection[clusterIdx][foldIdx] = ReadoutUnit.CreateTrained(_settings.ReadoutUnitCfgCollection[clusterIdx].TaskType,
-                                                                                        clusterIdx,
-                                                                                        foldIdx + 1,
-                                                                                        numOfFolds,
-                                                                                        DataRange.Mid,
-                                                                                        trainingPredictorsCollection,
-                                                                                        trainingIdealValueCollection,
-                                                                                        subBundleCollection[foldIdx].InputVectorCollection,
-                                                                                        subBundleCollection[foldIdx].OutputVectorCollection,
-                                                                                        rand,
-                                                                                        _settings.ReadoutUnitCfgCollection[clusterIdx],
-                                                                                        regressionController,
-                                                                                        regressionControllerData
-                                                                                        );
-                    //Cluster error statistics (pesimistic approach)
+                    ReadoutUnitBuilder readoutUnitBuilder = new ReadoutUnitBuilder(_settings.ReadoutUnitCfgCollection[clusterIdx],
+                                                                                   foldIdx + 1,
+                                                                                   numOfFolds,
+                                                                                   trainingData,
+                                                                                   subBundleCollection[foldIdx],
+                                                                                   rand,
+                                                                                   controller
+                                                                                   );
+                    //Register notification
+                    readoutUnitBuilder.RegressionEpochDone += OnRegressionEpochDone;
+                    //Build trained readout unit. Trained unit becomes to be the predicting cluster member
+                    _clusterCollection[clusterIdx][foldIdx] = readoutUnitBuilder.Build();
+                    //Update cluster error statistics (pesimistic approach)
                     for (int sampleIdx = 0; sampleIdx < subBundleCollection[foldIdx].OutputVectorCollection.Count; sampleIdx++)
                     {
-                        
                         double nrmComputedValue = _clusterCollection[clusterIdx][foldIdx].Network.Compute(subBundleCollection[foldIdx].InputVectorCollection[sampleIdx])[0];
                         double natComputedValue = _outputFeatureFilterCollection[clusterIdx].ApplyReverse(nrmComputedValue);
                         double natIdealValue = _outputFeatureFilterCollection[clusterIdx].ApplyReverse(subBundleCollection[foldIdx].OutputVectorCollection[sampleIdx][0]);
                         ces.Update(nrmComputedValue,
                                    subBundleCollection[foldIdx].OutputVectorCollection[sampleIdx][0],
                                    natComputedValue,
-                                   natIdealValue);
-                        ++arrayPos;
+                                   natIdealValue
+                                   );
                     }
 
                 }//foldIdx
                 _clusterErrStatisticsCollection.Add(ces);
 
             }//clusterIdx
-            //Result bundle to be returned (perform full recomputation - optimistic approach)
+            
+            //Result bundle (performs full recomputation of the original data)
             ResultBundle resultBundle = new ResultBundle(dataBundle.InputVectorCollection.Count);
             for(int rowIdx = 0; rowIdx < dataBundle.InputVectorCollection.Count; rowIdx++)
             {
                 double[] computedVector = Compute(dataBundle.InputVectorCollection[rowIdx]);
                 resultBundle.AddVectors(dataBundle.InputVectorCollection[rowIdx], computedVector, dataBundle.OutputVectorCollection[rowIdx]);
             }
-            return resultBundle;
-        }
-
-        //Properties
-        /// <summary>
-        /// Cluster overall error statistics collection
-        /// </summary>
-        public List<ClusterErrStatistics> ClusterErrStatisticsCollection
-        {
-            get
-            {
-                //Create and return the deep clone
-                List<ClusterErrStatistics> clonedStatisticsCollection = new List<ClusterErrStatistics>(_clusterErrStatisticsCollection.Count);
-                foreach(ClusterErrStatistics ces in _clusterErrStatisticsCollection)
-                {
-                    clonedStatisticsCollection.Add(ces.DeepClone());
-                }
-                return clonedStatisticsCollection;
-            }
-        }
-
-        //Static methods
-        /// <summary>
-        /// Builds report string containing information about the regression progress.
-        /// It is usually called from the RegressionControl user implementation.
-        /// </summary>
-        /// <param name="inArgs">>Contains all the necessary information to control the regression.</param>
-        /// <param name="bestReadoutUnit">Currently the best readout unit.</param>
-        /// <param name="margin">Specifies how many spaces to be at the begining of the row.</param>
-        /// <returns>Built text report</returns>
-        public static string GetProgressReport(ReadoutUnit.RegressionControlInArgs inArgs,
-                                               ReadoutUnit bestReadoutUnit,
-                                               int margin = 0
-                                               )
-        {
-            //Build progress text message
-            StringBuilder progressText = new StringBuilder();
-            progressText.Append(new string(' ', margin));
-            progressText.Append("OutputField: ");
-            progressText.Append(inArgs.OutputFieldName);
-            progressText.Append(", Fold/Attempt/Epoch: ");
-            progressText.Append(inArgs.FoldNum.ToString().PadLeft(inArgs.NumOfFolds.ToString().Length, '0') + "/");
-            progressText.Append(inArgs.RegrAttemptNumber.ToString().PadLeft(inArgs.RegrMaxAttempts.ToString().Length, '0') + "/");
-            progressText.Append(inArgs.Epoch.ToString().PadLeft(inArgs.MaxEpochs.ToString().Length, '0'));
-            progressText.Append(", DSet-Sizes: (");
-            progressText.Append(inArgs.CurrReadoutUnit.TrainingErrorStat.NumOfSamples.ToString() + ", ");
-            progressText.Append(inArgs.CurrReadoutUnit.TestingErrorStat.NumOfSamples.ToString() + ")");
-            progressText.Append(", Best-Train: ");
-            progressText.Append(bestReadoutUnit.TrainingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture));
-            if (inArgs.TaskType == ReadoutUnit.TaskType.Classification)
-            {
-                //Append binary errors
-                progressText.Append("/" + bestReadoutUnit.TrainingBinErrorStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture));
-                progressText.Append("/" + bestReadoutUnit.TrainingBinErrorStat.BinValErrStat[1].Sum.ToString(CultureInfo.InvariantCulture));
-            }
-            progressText.Append(", Best-Test: ");
-            progressText.Append(bestReadoutUnit.TestingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture));
-            if (inArgs.TaskType == ReadoutUnit.TaskType.Classification)
-            {
-                //Append binary errors
-                progressText.Append("/" + bestReadoutUnit.TestingBinErrorStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture));
-                progressText.Append("/" + bestReadoutUnit.TestingBinErrorStat.BinValErrStat[1].Sum.ToString(CultureInfo.InvariantCulture));
-            }
-            progressText.Append(", Curr-Train: ");
-            progressText.Append(inArgs.CurrReadoutUnit.TrainingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture));
-            if (inArgs.TaskType == ReadoutUnit.TaskType.Classification)
-            {
-                //Append binary errors
-                progressText.Append("/" + inArgs.CurrReadoutUnit.TrainingBinErrorStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture));
-                progressText.Append("/" + inArgs.CurrReadoutUnit.TrainingBinErrorStat.BinValErrStat[1].Sum.ToString(CultureInfo.InvariantCulture));
-            }
-            progressText.Append(", Curr-Test: ");
-            progressText.Append(inArgs.CurrReadoutUnit.TestingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture));
-            if (inArgs.TaskType == ReadoutUnit.TaskType.Classification)
-            {
-                //Append binary errors
-                progressText.Append("/" + inArgs.CurrReadoutUnit.TestingBinErrorStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture));
-                progressText.Append("/" + inArgs.CurrReadoutUnit.TestingBinErrorStat.BinValErrStat[1].Sum.ToString(CultureInfo.InvariantCulture));
-            }
-            progressText.Append($" [{bestReadoutUnit.TrainerInfoMessage}]");
-            return progressText.ToString();
-        }
-
-        //Methods
-        /// <summary>
-        /// Returns results of the readout units training
-        /// </summary>
-        /// <param name="margin">Specifies how many spaces should be at the begining of each row.</param>
-        /// <returns>Built text report</returns>
-        public string GetTrainingResultsReport(int margin)
-        {
-            string leftMargin = margin == 0 ? string.Empty : new string(' ', margin);
-            StringBuilder sb = new StringBuilder();
-            //Training results
-            for (int outputIdx = 0; outputIdx < _settings.ReadoutUnitCfgCollection.Count; outputIdx++)
-            {
-                ReadoutLayer.ClusterErrStatistics ces = _clusterErrStatisticsCollection[outputIdx];
-                sb.Append(leftMargin + $"Output field [{_settings.ReadoutUnitCfgCollection[outputIdx].Name}]" + Environment.NewLine);
-                if (_settings.ReadoutUnitCfgCollection[outputIdx].TaskType == ReadoutUnit.TaskType.Classification)
-                {
-                    //Classification task report
-                    sb.Append(leftMargin + $"  Classification of negative samples" + Environment.NewLine);
-                    sb.Append(leftMargin + $"    Number of samples: {ces.BinaryErrStat.BinValErrStat[0].NumOfSamples}" + Environment.NewLine);
-                    sb.Append(leftMargin + $"     Number of errors: {ces.BinaryErrStat.BinValErrStat[0].Sum.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
-                    sb.Append(leftMargin + $"           Error rate: {ces.BinaryErrStat.BinValErrStat[0].ArithAvg.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
-                    sb.Append(leftMargin + $"             Accuracy: {(1 - ces.BinaryErrStat.BinValErrStat[0].ArithAvg).ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
-                    sb.Append(leftMargin + $"  Classification of positive samples" + Environment.NewLine);
-                    sb.Append(leftMargin + $"    Number of samples: {ces.BinaryErrStat.BinValErrStat[1].NumOfSamples}" + Environment.NewLine);
-                    sb.Append(leftMargin + $"     Number of errors: {ces.BinaryErrStat.BinValErrStat[1].Sum.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
-                    sb.Append(leftMargin + $"           Error rate: {ces.BinaryErrStat.BinValErrStat[1].ArithAvg.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
-                    sb.Append(leftMargin + $"             Accuracy: {(1 - ces.BinaryErrStat.BinValErrStat[1].ArithAvg).ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
-                    sb.Append(leftMargin + $"  Overall classification results" + Environment.NewLine);
-                    sb.Append(leftMargin + $"    Number of samples: {ces.BinaryErrStat.TotalErrStat.NumOfSamples}" + Environment.NewLine);
-                    sb.Append(leftMargin + $"     Number of errors: {ces.BinaryErrStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
-                    sb.Append(leftMargin + $"           Error rate: {ces.BinaryErrStat.TotalErrStat.ArithAvg.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
-                    sb.Append(leftMargin + $"             Accuracy: {(1 - ces.BinaryErrStat.TotalErrStat.ArithAvg).ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
-                }
-                else
-                {
-                    //Forecast task report
-                    sb.Append(leftMargin + $"  Number of samples: {ces.NatPrecissionErrStat.NumOfSamples}" + Environment.NewLine);
-                    sb.Append(leftMargin + $"      Biggest error: {ces.NatPrecissionErrStat.Max.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
-                    sb.Append(leftMargin + $"     Smallest error: {ces.NatPrecissionErrStat.Min.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
-                    sb.Append(leftMargin + $"      Average error: {ces.NatPrecissionErrStat.ArithAvg.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
-                }
-                sb.Append(Environment.NewLine);
-            }
-            return sb.ToString();
+            //Readout layer is trained and ready
+            Trained = true;
+            return new RegressionOverview(ClusterErrStatisticsCollection, resultBundle);
         }
 
         /// <summary>
-        /// Returns results of the readout units training
+        /// Creates report of predicted values
         /// </summary>
         /// <param name="predictedValues">Vector of computed values.</param>
         /// <param name="margin">Specifies how many spaces should be at the begining of each row.</param>
@@ -455,80 +367,38 @@ namespace RCNet.Neural.Network.SM.Readout
             string readoutUnitName = _settings.ReadoutUnitCfgCollection[clusterIdx].Name;
             double[] readoutUnitPredictors = _predictorsMapper.CreateVector(readoutUnitName, predictors);
             WeightedAvg weightedResult = new WeightedAvg();
+            //Loop cluster members' predictions
             foreach (ReadoutUnit clusterMember in _clusterCollection[clusterIdx])
             {
                 double computedValue = clusterMember.Network.Compute(readoutUnitPredictors)[0];
+                double weight = 0d;
                 if (_settings.ReadoutUnitCfgCollection[clusterIdx].TaskType == ReadoutUnit.TaskType.Classification)
                 {
                     //Classification
-                    //Training accuracy as a sub-result wight
-                    weightedResult.AddSampleValue(computedValue, 1d - clusterMember.TrainingBinErrorStat.TotalErrStat.ArithAvg);
+                    //Training accuracy as a weight base
+                    weight = 1d - clusterMember.TrainingBinErrorStat.TotalErrStat.ArithAvg;
                     if (clusterMember.TestingBinErrorStat != null && clusterMember.TestingBinErrorStat.TotalErrStat.NumOfSamples > 0)
                     {
-                        //Testing accuracy as a sub-result wight
-                        weightedResult.AddSampleValue(computedValue, 1d - clusterMember.TestingBinErrorStat.TotalErrStat.ArithAvg);
+                        //Testing results are available
+                        //Combined accuracy as a resulting wight
+                        weight *= 1d - clusterMember.TestingBinErrorStat.TotalErrStat.ArithAvg;
                     }
                 }
                 else
                 {
                     //Forecast
-                    //Training accuracy as a sub-result wight
-                    weightedResult.AddSampleValue(computedValue, 1d - clusterMember.TrainingErrorStat.ArithAvg);
+                    //Training accuracy as a weight base
+                    weight = 1d - clusterMember.TrainingErrorStat.ArithAvg;
                     if (clusterMember.TestingErrorStat != null && clusterMember.TestingErrorStat.NumOfSamples > 0)
                     {
-                        //Testing accuracy as a sub-result wight
-                        weightedResult.AddSampleValue(computedValue, 1d - clusterMember.TestingErrorStat.ArithAvg);
+                        //Testing results are available
+                        //Combined accuracy as a resulting wight
+                        weight *= 1d - clusterMember.TestingErrorStat.ArithAvg;
                     }
-
                 }
+                weightedResult.AddSampleValue(computedValue, weight);
             }
             return weightedResult.Avg;
-        }
-
-
-        private double Compute_v1(double[] predictors, int clusterIdx)
-        {
-            string readoutUnitName = _settings.ReadoutUnitCfgCollection[clusterIdx].Name;
-            double[] readoutUnitPredictors = _predictorsMapper.CreateVector(readoutUnitName, predictors);
-            //Collect outputs from cluster members
-            List<double> computedValues = new List<double>(_clusterCollection[clusterIdx].Length);
-            BasicStat computedValuesStat = new BasicStat();
-            foreach(ReadoutUnit clusterMember in _clusterCollection[clusterIdx])
-            {
-                double computedValue = clusterMember.Network.Compute(readoutUnitPredictors)[0];
-                //Stat update
-                computedValues.Add(computedValue);
-                computedValuesStat.AddSampleValue(computedValue);
-            }
-            //Finalize result
-            if (_settings.ReadoutUnitCfgCollection[clusterIdx].TaskType == ReadoutUnit.TaskType.Classification)
-            {
-                return computedValuesStat.ArithAvg;
-                //return computedValuesStat.Max;
-            }
-            else
-            {
-                return computedValuesStat.ArithAvg;
-            }
-        }
-
-        private double Compute_org(double[] predictors, int clusterIdx)
-        {
-            WeightedAvg wAvg = new WeightedAvg();
-            string readoutUnitName = _settings.ReadoutUnitCfgCollection[clusterIdx].Name;
-            for (int readoutUnitIdx = 0; readoutUnitIdx < _clusterCollection[clusterIdx].Length; readoutUnitIdx++)
-            {
-                double[] outputValue = _clusterCollection[clusterIdx][readoutUnitIdx].Network.Compute(_predictorsMapper.CreateVector(readoutUnitName, predictors));
-                double weight = _clusterCollection[clusterIdx][readoutUnitIdx].TrainingErrorStat.NumOfSamples;
-                if(_clusterCollection[clusterIdx][readoutUnitIdx].TestingErrorStat != null)
-                {
-                    weight += _clusterCollection[clusterIdx][readoutUnitIdx].TestingErrorStat.NumOfSamples;
-                }
-                wAvg.AddSampleValue(outputValue[0], weight);
-                // Or flat weight
-                //wAvg.AddSampleValue(outputValue[0], 1);
-            }
-            return wAvg.Avg;
         }
 
         /// <summary>
@@ -586,124 +456,21 @@ namespace RCNet.Neural.Network.SM.Readout
         }
 
         /// <summary>
-        /// Returns rich readout data based on values vector
+        /// Returns rich readout data
         /// </summary>
         /// <param name="readoutLayerVector">Vector of values corresponding to readout units</param>
         public ReadoutData GetReadoutData(double[] readoutLayerVector)
         {
-            return new ReadoutData(readoutLayerVector, _settings);
+            return new ReadoutData(readoutLayerVector, _settings, _clusterErrStatisticsCollection);
         }
 
         /// <summary>
-        /// Computes readout layer output data
+        /// Computes readout layer rich output data
         /// </summary>
         /// <param name="predictors">The predictors</param>
         public ReadoutData ComputeReadoutData(double[] predictors)
         {
             return GetReadoutData(Compute(predictors));
-        }
-
-        private List<VectorBundle> DivideSamplesForClassificationTask(List<double[]> predictorsCollection,
-                                                                      List<double[]> idealValueCollection,
-                                                                      BinDistribution refBinDistr,
-                                                                      int bundleSize
-                                                                      )
-        {
-            int numOfBundles = idealValueCollection.Count / bundleSize;
-            List<VectorBundle> bundleCollection = new List<VectorBundle>(numOfBundles);
-            //Scan
-            int[] bin0SampleIdxs = new int[refBinDistr.NumOf[0]];
-            int bin0SamplesPos = 0;
-            int[] bin1SampleIdxs = new int[refBinDistr.NumOf[1]];
-            int bin1SamplesPos = 0;
-            for (int i = 0; i < idealValueCollection.Count; i++)
-            {
-                if(idealValueCollection[i][0] >= refBinDistr.BinBorder)
-                {
-                    bin1SampleIdxs[bin1SamplesPos++] = i;
-                }
-                else
-                {
-                    bin0SampleIdxs[bin0SamplesPos++] = i;
-                }
-            }
-            //Division
-            int bundleBin0Count = Math.Max(1, refBinDistr.NumOf[0] / numOfBundles);
-            int bundleBin1Count = Math.Max(1, refBinDistr.NumOf[1] / numOfBundles);
-            if(bundleBin0Count * numOfBundles > bin0SampleIdxs.Length)
-            {
-                throw new Exception("Insufficient bin 0 samples");
-            }
-            if (bundleBin1Count * numOfBundles > bin1SampleIdxs.Length)
-            {
-                throw new Exception("Insufficient bin 1 samples");
-            }
-            //Bundles creation
-            bin0SamplesPos = 0;
-            bin1SamplesPos = 0;
-            for(int bundleNum = 0; bundleNum < numOfBundles; bundleNum++)
-            {
-                VectorBundle bundle = new VectorBundle();
-                //Bin 0
-                for (int i = 0; i < bundleBin0Count; i++)
-                {
-                    bundle.InputVectorCollection.Add(predictorsCollection[bin0SampleIdxs[bin0SamplesPos]]);
-                    bundle.OutputVectorCollection.Add(idealValueCollection[bin0SampleIdxs[bin0SamplesPos]]);
-                    ++bin0SamplesPos;
-                }
-                //Bin 1
-                for (int i = 0; i < bundleBin1Count; i++)
-                {
-                    bundle.InputVectorCollection.Add(predictorsCollection[bin1SampleIdxs[bin1SamplesPos]]);
-                    bundle.OutputVectorCollection.Add(idealValueCollection[bin1SampleIdxs[bin1SamplesPos]]);
-                    ++bin1SamplesPos;
-                }
-                bundleCollection.Add(bundle);
-            }
-            //Remaining samples
-            for(int i = 0; i < bin0SampleIdxs.Length - bin0SamplesPos; i++)
-            {
-                int bundleIdx = i % bundleCollection.Count;
-                bundleCollection[bundleIdx].InputVectorCollection.Add(predictorsCollection[bin0SampleIdxs[bin0SamplesPos + i]]);
-                bundleCollection[bundleIdx].OutputVectorCollection.Add(idealValueCollection[bin0SampleIdxs[bin0SamplesPos + i]]);
-            }
-            for (int i = 0; i < bin1SampleIdxs.Length - bin1SamplesPos; i++)
-            {
-                int bundleIdx = i % bundleCollection.Count;
-                bundleCollection[bundleIdx].InputVectorCollection.Add(predictorsCollection[bin1SampleIdxs[bin1SamplesPos + i]]);
-                bundleCollection[bundleIdx].OutputVectorCollection.Add(idealValueCollection[bin1SampleIdxs[bin1SamplesPos + i]]);
-            }
-            return bundleCollection;
-        }
-
-        private List<VectorBundle> DivideSamplesForForecastTask(List<double[]> predictorsCollection,
-                                                                List<double[]> idealValueCollection,
-                                                                int bundleSize
-                                                                )
-        {
-            int numOfBundles = idealValueCollection.Count / bundleSize;
-            List<VectorBundle> bundleCollection = new List<VectorBundle>(numOfBundles);
-            //Bundles creation
-            int samplesPos = 0;
-            for (int bundleNum = 0; bundleNum < numOfBundles; bundleNum++)
-            {
-                VectorBundle bundle = new VectorBundle();
-                for (int i = 0; i < bundleSize && samplesPos < idealValueCollection.Count; i++)
-                {
-                    bundle.InputVectorCollection.Add(predictorsCollection[samplesPos]);
-                    bundle.OutputVectorCollection.Add(idealValueCollection[samplesPos]);
-                    ++samplesPos;
-                }
-                bundleCollection.Add(bundle);
-            }
-            //Remaining samples
-            for (int i = 0; i < idealValueCollection.Count - samplesPos; i++)
-            {
-                int bundleIdx = i % bundleCollection.Count;
-                bundleCollection[bundleIdx].InputVectorCollection.Add(predictorsCollection[samplesPos + i]);
-                bundleCollection[bundleIdx].OutputVectorCollection.Add(idealValueCollection[samplesPos + i]);
-            }
-            return bundleCollection;
         }
 
         //Inner classes
@@ -732,50 +499,28 @@ namespace RCNet.Neural.Network.SM.Readout
             /// </summary>
             /// <param name="dataVector">Vector of values corresponding to readout units</param>
             /// <param name="rls">Readout layer settings</param>
-            public ReadoutData(double[] dataVector, ReadoutLayerSettings rls)
+            /// <param name="ces">Collection of the cluster's error statistics</param>
+            public ReadoutData(double[] dataVector, ReadoutLayerSettings rls, List<ClusterErrStatistics> ces)
             {
+                //Alone units
                 DataVector = dataVector;
                 ReadoutUnitDataCollection = new Dictionary<string, ReadoutUnitData>();
                 foreach(ReadoutLayerSettings.ReadoutUnitSettings rus in rls.ReadoutUnitCfgCollection)
                 {
                     ReadoutUnitDataCollection.Add(rus.Name, new ReadoutUnitData() { Name = rus.Name, Index = rus.Index, Task = rus.TaskType, DataValue = DataVector[rus.Index] });
                 }
+                //One Winner groups
                 OneWinnerDataCollection = new Dictionary<string, OneWinnerGroupData>();
-                foreach(string oneWinnerGroupName in rls.OneWinnerGroupNameCollection.Values)
+                foreach (string oneWinnerGroupName in rls.OneWinnerGroupNameCollection.Values)
                 {
-                    List<ReadoutLayerSettings.ReadoutUnitSettings> rusCollection = rls.GetOneWinnerGroupMembers(oneWinnerGroupName);
-                    //Probabilities
-                    double[] probabilities = new double[rusCollection.Count];
-                    BasicStat pStat = new BasicStat();
-                    double plusMin = 0d;
-                    for (int i = 0; i < rusCollection.Count; i++)
+                    //There is One Winner group
+                    int winningUnitIndex = ReadoutLayer.DecideOneWinner(oneWinnerGroupName, dataVector, rls, ces);
+                    OneWinnerDataCollection.Add(oneWinnerGroupName, new OneWinnerGroupData()
                     {
-                        pStat.AddSampleValue(dataVector[rusCollection[i].Index]);
-                    }
-                    if(pStat.Min < 0)
-                    {
-                        plusMin = Math.Abs(pStat.Min);
-                        BasicStat transPStat = new BasicStat();
-                        for (int i = 0; i < rusCollection.Count; i++)
-                        {
-                            pStat.AddSampleValue(dataVector[rusCollection[i].Index] + plusMin);
-                        }
-                        pStat = transPStat;
-                    }
-                    int winningIndex = -1;
-                    for (int i = 0; i < rusCollection.Count; i++)
-                    {
-                        probabilities[i] = (dataVector[rusCollection[i].Index] + plusMin) / pStat.Sum;
-                        if(winningIndex == -1 || probabilities[i] > probabilities[winningIndex])
-                        {
-                            winningIndex = i;
-                        }
-                    }
-                    string winningReadoutUnitName = rusCollection[winningIndex].Name;
-                    OneWinnerDataCollection.Add(oneWinnerGroupName, new OneWinnerGroupData(){GroupName = oneWinnerGroupName,
-                                                                                             WinningReadoutUnitName = rusCollection[winningIndex].Name,
-                                                                                             WinningReadoutUnitIndex = winningIndex,
-                                                                                             Probabilities = probabilities });
+                        GroupName = oneWinnerGroupName,
+                        WinningReadoutUnitName = rls.ReadoutUnitCfgCollection[winningUnitIndex].Name,
+                        WinningReadoutUnitIndex = winningUnitIndex
+                    });
                 }
                 return;
             }
@@ -823,273 +568,9 @@ namespace RCNet.Neural.Network.SM.Readout
                 /// Zero-based index of the winning readout unit
                 /// </summary>
                 public int WinningReadoutUnitIndex { get; set; }
-                /// <summary>
-                /// Winning probabilities (within the group)
-                /// </summary>
-                public double[] Probabilities { get; set; }
             }//OneWinnerGroupData
 
         }//ReadoutData
-
-        /// <summary>
-        /// Summary statistics
-        /// </summary>
-        [Serializable]
-        public class SummaryResultStat
-        {
-            /// <summary>
-            /// Error statistics of individual readout units
-            /// </summary>
-            public List<ReadoutUnitStat> ReadoutUnitStatCollection { get; }
-            /// <summary>
-            /// Error statistics of one-winner groups of readout units
-            /// </summary>
-            public List<OneWinnerGroupStat> OneWinnerGroupStatCollection { get; }
-
-            //Constructor
-            /// <summary>
-            /// Creates initialized instance
-            /// </summary>
-            /// <param name="rls">Readout layer settings</param>
-            public SummaryResultStat(ReadoutLayerSettings rls)
-            {
-                ReadoutUnitStatCollection = new List<ReadoutUnitStat>(rls.ReadoutUnitCfgCollection.Count);
-                foreach(ReadoutLayerSettings.ReadoutUnitSettings rus in rls.ReadoutUnitCfgCollection)
-                {
-                    ReadoutUnitStatCollection.Add(new ReadoutUnitStat(rus));
-                }
-                OneWinnerGroupStatCollection = new List<OneWinnerGroupStat>();
-                foreach(string groupName in rls.OneWinnerGroupNameCollection.Values)
-                {
-                    OneWinnerGroupStatCollection.Add(new OneWinnerGroupStat(groupName, rls));
-                }
-                return;
-            }
-
-            //Methods
-            /// <summary>
-            /// Updates error statistics
-            /// </summary>
-            /// <param name="computedValues">Computed values</param>
-            /// <param name="idealValues">Ideal values</param>
-            /// <param name="rls">Readout layer settings</param>
-            public void Update(double[] computedValues, double[] idealValues, ReadoutLayerSettings rls)
-            {
-                foreach(ReadoutUnitStat ruStat in ReadoutUnitStatCollection)
-                {
-                    ruStat.Update(computedValues, idealValues);
-                }
-                foreach(OneWinnerGroupStat grStat in OneWinnerGroupStatCollection)
-                {
-                    grStat.Update(computedValues, idealValues, rls);
-                }
-                return;
-            }
-
-            /// <summary>
-            /// Returns textual summary statistics
-            /// </summary>
-            /// <param name="margin">Specifies how many spaces should be at the begining of each row.</param>
-            /// <returns>Built text report</returns>
-            public string GetReport(int margin)
-            {
-                string leftMargin = margin == 0 ? string.Empty : new string(' ', margin);
-                StringBuilder sb = new StringBuilder();
-                //Report
-                //Readout units separatelly
-                foreach (ReadoutUnitStat ruStat in ReadoutUnitStatCollection)
-                {
-                    sb.Append(leftMargin + $"Output field [{ruStat.Name}]" + Environment.NewLine);
-                    if (ruStat.Task == ReadoutUnit.TaskType.Classification)
-                    {
-                        //Classification task report
-                        sb.Append(leftMargin + $"  Classification of negative samples" + Environment.NewLine);
-                        sb.Append(leftMargin + $"    Number of samples: {ruStat.BinErrorStat.BinValErrStat[0].NumOfSamples}" + Environment.NewLine);
-                        sb.Append(leftMargin + $"     Number of errors: {ruStat.BinErrorStat.BinValErrStat[0].Sum.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
-                        sb.Append(leftMargin + $"           Error rate: {ruStat.BinErrorStat.BinValErrStat[0].ArithAvg.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
-                        sb.Append(leftMargin + $"             Accuracy: {(1 - ruStat.BinErrorStat.BinValErrStat[0].ArithAvg).ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
-                        sb.Append(leftMargin + $"  Classification of positive samples" + Environment.NewLine);
-                        sb.Append(leftMargin + $"    Number of samples: {ruStat.BinErrorStat.BinValErrStat[1].NumOfSamples}" + Environment.NewLine);
-                        sb.Append(leftMargin + $"     Number of errors: {ruStat.BinErrorStat.BinValErrStat[1].Sum.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
-                        sb.Append(leftMargin + $"           Error rate: {ruStat.BinErrorStat.BinValErrStat[1].ArithAvg.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
-                        sb.Append(leftMargin + $"             Accuracy: {(1 - ruStat.BinErrorStat.BinValErrStat[1].ArithAvg).ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
-                        sb.Append(leftMargin + $"  Overall classification results" + Environment.NewLine);
-                        sb.Append(leftMargin + $"    Number of samples: {ruStat.BinErrorStat.TotalErrStat.NumOfSamples}" + Environment.NewLine);
-                        sb.Append(leftMargin + $"     Number of errors: {ruStat.BinErrorStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
-                        sb.Append(leftMargin + $"           Error rate: {ruStat.BinErrorStat.TotalErrStat.ArithAvg.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
-                        sb.Append(leftMargin + $"             Accuracy: {(1 - ruStat.BinErrorStat.TotalErrStat.ArithAvg).ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
-                    }
-                    else
-                    {
-                        //Forecast task report
-                        sb.Append(leftMargin + $"  Number of samples: {ruStat.ErrorStat.NumOfSamples}" + Environment.NewLine);
-                        sb.Append(leftMargin + $"      Biggest error: {ruStat.ErrorStat.Max.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
-                        sb.Append(leftMargin + $"     Smallest error: {ruStat.ErrorStat.Min.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
-                        sb.Append(leftMargin + $"      Average error: {ruStat.ErrorStat.ArithAvg.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
-                    }
-                    sb.Append(Environment.NewLine);
-                }
-                //One-winner groups
-                foreach (OneWinnerGroupStat grStat in OneWinnerGroupStatCollection)
-                {
-                    sb.Append(leftMargin + $"One winner group [{grStat.Name}]" + Environment.NewLine);
-                    foreach(string className in grStat.ClassErrorStatCollection.Keys)
-                    {
-                        BasicStat errorStat = grStat.ClassErrorStatCollection[className];
-                        sb.Append(leftMargin + $"  Class {className}" + Environment.NewLine);
-                        sb.Append(leftMargin + $"    Number of samples: {errorStat.NumOfSamples}" + Environment.NewLine);
-                        sb.Append(leftMargin + $"     Number of errors: {errorStat.Sum.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
-                        sb.Append(leftMargin + $"           Error rate: {errorStat.ArithAvg.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
-                        sb.Append(leftMargin + $"             Accuracy: {(1 - errorStat.ArithAvg).ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
-                    }
-                    sb.Append(leftMargin + $"  Group total" + Environment.NewLine);
-                    sb.Append(leftMargin + $"    Number of samples: {grStat.GroupErrorStat.NumOfSamples}" + Environment.NewLine);
-                    sb.Append(leftMargin + $"     Number of errors: {grStat.GroupErrorStat.Sum.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
-                    sb.Append(leftMargin + $"           Error rate: {grStat.GroupErrorStat.ArithAvg.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
-                    sb.Append(leftMargin + $"             Accuracy: {(1 - grStat.GroupErrorStat.ArithAvg).ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
-
-                    sb.Append(Environment.NewLine);
-                }
-
-                return sb.ToString();
-            }
-
-
-
-            //Inner classes
-            /// <summary>
-            /// Readout unit statistics
-            /// </summary>
-            [Serializable]
-            public class ReadoutUnitStat
-            {
-                /// <summary>
-                /// Readout unit name
-                /// </summary>
-                public string Name { get; }
-                /// <summary>
-                /// Readout unit zero-based index
-                /// </summary>
-                public int Index { get; }
-                /// <summary>
-                /// Neural task
-                /// </summary>
-                public ReadoutUnit.TaskType Task { get; }
-                /// <summary>
-                /// Error statistics
-                /// </summary>
-                public BasicStat ErrorStat { get; }
-                /// <summary>
-                /// Binary error statistics. Relevant only for Classification task.
-                /// </summary>
-                public BinErrStat BinErrorStat { get; }
-
-                //Constructor
-                /// <summary>
-                /// Creates an unitialized instance
-                /// </summary>
-                /// <param name="rus">Readout unit settings</param>
-                public ReadoutUnitStat(ReadoutLayerSettings.ReadoutUnitSettings rus)
-                {
-                    Name = rus.Name;
-                    Index = rus.Index;
-                    Task = rus.TaskType;
-                    ErrorStat = new BasicStat();
-                    if(Task == ReadoutUnit.TaskType.Classification)
-                    {
-                        BinErrorStat = new BinErrStat(0.5d);
-                    }
-                    return;
-                }
-
-                //Methods
-                /// <summary>
-                /// Updates statistics
-                /// </summary>
-                /// <param name="computedValues">Computed values</param>
-                /// <param name="idealValues">Ideal values</param>
-                public void Update(double[] computedValues, double[] idealValues)
-                {
-                    ErrorStat.AddSampleValue(Math.Abs(computedValues[Index] - idealValues[Index]));
-                    if(Task == ReadoutUnit.TaskType.Classification)
-                    {
-                        BinErrorStat.Update(computedValues[Index], idealValues[Index]);
-                    }
-                    return;
-                }
-
-            }//ReadoutUnitStat
-
-            /// <summary>
-            /// One-winner group statistics
-            /// </summary>
-            [Serializable]
-            public class OneWinnerGroupStat
-            {
-                /// <summary>
-                /// Group name
-                /// </summary>
-                public string Name { get; }
-                /// <summary>
-                /// Group binary error statistics
-                /// </summary>
-                public BasicStat GroupErrorStat { get; }
-                /// <summary>
-                /// Collection of group sub-class error statistics
-                /// </summary>
-                public Dictionary<string, BasicStat> ClassErrorStatCollection { get; }
-
-                //Constructor
-                /// <summary>
-                /// Creates an unitialized instance
-                /// </summary>
-                /// <param name="groupName">One-winner group name</param>
-                /// <param name="rls">Readout layer settings</param>
-                public OneWinnerGroupStat(string groupName, ReadoutLayerSettings rls)
-                {
-                    Name = groupName;
-                    GroupErrorStat = new BasicStat();
-                    ClassErrorStatCollection = new Dictionary<string, BasicStat>();
-                    foreach(ReadoutLayerSettings.ReadoutUnitSettings rus in rls.GetOneWinnerGroupMembers(Name))
-                    {
-                        ClassErrorStatCollection.Add(rus.Name, new BasicStat());
-                    }
-                    return;
-                }
-
-                //Methods
-                /// <summary>
-                /// Updates error statistics
-                /// </summary>
-                /// <param name="computedValues">Computed values</param>
-                /// <param name="idealValues">Ideal values</param>
-                /// <param name="rls">Readout layer settings</param>
-                public void Update(double[] computedValues, double[] idealValues, ReadoutLayerSettings rls)
-                {
-                    List<ReadoutLayerSettings.ReadoutUnitSettings> grpMembers = rls.GetOneWinnerGroupMembers(Name);
-                    int maxComputedValueIdx = -1;
-                    int maxIdealValueIdx = -1;
-                    foreach(ReadoutLayerSettings.ReadoutUnitSettings rus in grpMembers)
-                    {
-                        if(maxComputedValueIdx == -1 || computedValues[rus.Index] > computedValues[maxComputedValueIdx])
-                        {
-                            maxComputedValueIdx = rus.Index;
-                        }
-                        if (maxIdealValueIdx == -1 || idealValues[rus.Index] > idealValues[maxIdealValueIdx])
-                        {
-                            maxIdealValueIdx = rus.Index;
-                        }
-                    }
-                    double err = maxComputedValueIdx == maxIdealValueIdx ? 0d : 1d;
-                    GroupErrorStat.AddSampleValue(err);
-                    ClassErrorStatCollection[rls.ReadoutUnitCfgCollection[maxIdealValueIdx].Name].AddSampleValue(err);
-                    return;
-                }
-
-            }//OneWinnerGroupStat
-
-        }//SummaryResultStat
-
 
         /// <summary>
         /// Maps specific predictors to readout units
@@ -1122,7 +603,7 @@ namespace RCNet.Neural.Network.SM.Readout
             }
 
             /// <summary>
-            /// Creates initialized instance
+            /// Creates an initialized instance
             /// </summary>
             /// <param name="predictorGeneralSwitchCollection">Collection of switches generally enabling/disabling predictors</param>
             public PredictorsMapper(bool[] predictorGeneralSwitchCollection)
@@ -1295,6 +776,14 @@ namespace RCNet.Neural.Network.SM.Readout
         {
             //Property attributes
             /// <summary>
+            /// Name of the readout unit
+            /// </summary>
+            public string ReadoutUnitName { get; }
+            /// <summary>
+            /// Index of the readout unit
+            /// </summary>
+            public int ReadoutUnitIndex { get; }
+            /// <summary>
             /// Type of the solved neural task
             /// </summary>
             public ReadoutUnit.TaskType TaskType { get; }
@@ -1319,13 +808,21 @@ namespace RCNet.Neural.Network.SM.Readout
             /// <summary>
             /// Constructs an instance prepared for initialization (updates)
             /// </summary>
+            /// <param name="readoutUnitName">Name of the readout unit</param>
+            /// <param name="readoutUnitIndex">Index of the readout unit</param>
             /// <param name="taskType">Type of neural task</param>
             /// <param name="numOfMembers">Number of computing networks within the cluster</param>
             /// <param name="binBorder">Binary 0/1 border. Double value LT this border is considered as 0 and GE as 1.
             /// (relevant only if task type is Classification)
             /// </param>
-            public ClusterErrStatistics(ReadoutUnit.TaskType taskType, int numOfMembers, double binBorder)
+            public ClusterErrStatistics(string readoutUnitName,
+                                        int readoutUnitIndex,
+                                        ReadoutUnit.TaskType taskType,
+                                        int numOfMembers,
+                                        double binBorder
+                                        )
             {
+                ReadoutUnitName = readoutUnitName;
                 TaskType = taskType;
                 NumOfMembers = numOfMembers;
                 NatPrecissionErrStat = new BasicStat();
@@ -1344,6 +841,8 @@ namespace RCNet.Neural.Network.SM.Readout
             /// <param name="source">Source instance</param>
             public ClusterErrStatistics(ClusterErrStatistics source)
             {
+                ReadoutUnitName = source.ReadoutUnitName;
+                ReadoutUnitIndex = source.ReadoutUnitIndex;
                 TaskType = source.TaskType;
                 NumOfMembers = source.NumOfMembers;
                 NatPrecissionErrStat = new BasicStat(source.NatPrecissionErrStat);
@@ -1383,6 +882,84 @@ namespace RCNet.Neural.Network.SM.Readout
             }
 
         }//ClusterErrStatistics
+
+        /// <summary>
+        /// Contains results of readout layer training (regression)
+        /// </summary>
+        [Serializable]
+        public class RegressionOverview
+        {
+            /// <summary>
+            /// Collection of error statistics related to readout units
+            /// </summary>
+            public List<ClusterErrStatistics> ClusterErrStatisticsCollection { get; }
+
+            /// <summary>
+            /// Original training data together with data computed by trained readout layer
+            /// </summary>
+            public ResultBundle TrainingDataResultBundle { get; }
+
+            /// <summary>
+            /// Creates an initialized instance
+            /// </summary>
+            /// <param name="clusterErrStatisticsCollection">Collection of error statistics related to readout units</param>
+            /// <param name="trainingDataResultBundle">Original training data together with data computed by trained readout layer</param>
+            public RegressionOverview(List<ClusterErrStatistics> clusterErrStatisticsCollection,
+                                      ResultBundle trainingDataResultBundle
+                                      )
+            {
+                ClusterErrStatisticsCollection = clusterErrStatisticsCollection;
+                TrainingDataResultBundle = trainingDataResultBundle;
+                return;
+            }
+
+            /// <summary>
+            /// Returns report of the readout layer training (regression)
+            /// </summary>
+            /// <param name="margin">Specifies how many spaces should be at the begining of each row.</param>
+            /// <returns>Built report</returns>
+            public string GetTrainingResultsReport(int margin)
+            {
+                string leftMargin = margin == 0 ? string.Empty : new string(' ', margin);
+                StringBuilder sb = new StringBuilder();
+                //Training results
+                for (int outputIdx = 0; outputIdx < ClusterErrStatisticsCollection.Count; outputIdx++)
+                {
+                    ReadoutLayer.ClusterErrStatistics ces = ClusterErrStatisticsCollection[outputIdx];
+                    sb.Append(leftMargin + $"Output field [{ces.ReadoutUnitName}]" + Environment.NewLine);
+                    if (ces.TaskType == ReadoutUnit.TaskType.Classification)
+                    {
+                        //Classification task report
+                        sb.Append(leftMargin + $"  Classification of negative samples" + Environment.NewLine);
+                        sb.Append(leftMargin + $"    Number of samples: {ces.BinaryErrStat.BinValErrStat[0].NumOfSamples}" + Environment.NewLine);
+                        sb.Append(leftMargin + $"     Number of errors: {ces.BinaryErrStat.BinValErrStat[0].Sum.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                        sb.Append(leftMargin + $"           Error rate: {ces.BinaryErrStat.BinValErrStat[0].ArithAvg.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                        sb.Append(leftMargin + $"             Accuracy: {(1 - ces.BinaryErrStat.BinValErrStat[0].ArithAvg).ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                        sb.Append(leftMargin + $"  Classification of positive samples" + Environment.NewLine);
+                        sb.Append(leftMargin + $"    Number of samples: {ces.BinaryErrStat.BinValErrStat[1].NumOfSamples}" + Environment.NewLine);
+                        sb.Append(leftMargin + $"     Number of errors: {ces.BinaryErrStat.BinValErrStat[1].Sum.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                        sb.Append(leftMargin + $"           Error rate: {ces.BinaryErrStat.BinValErrStat[1].ArithAvg.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                        sb.Append(leftMargin + $"             Accuracy: {(1 - ces.BinaryErrStat.BinValErrStat[1].ArithAvg).ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                        sb.Append(leftMargin + $"  Overall classification results" + Environment.NewLine);
+                        sb.Append(leftMargin + $"    Number of samples: {ces.BinaryErrStat.TotalErrStat.NumOfSamples}" + Environment.NewLine);
+                        sb.Append(leftMargin + $"     Number of errors: {ces.BinaryErrStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                        sb.Append(leftMargin + $"           Error rate: {ces.BinaryErrStat.TotalErrStat.ArithAvg.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                        sb.Append(leftMargin + $"             Accuracy: {(1 - ces.BinaryErrStat.TotalErrStat.ArithAvg).ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                    }
+                    else
+                    {
+                        //Forecast task report
+                        sb.Append(leftMargin + $"  Number of samples: {ces.NatPrecissionErrStat.NumOfSamples}" + Environment.NewLine);
+                        sb.Append(leftMargin + $"      Biggest error: {ces.NatPrecissionErrStat.Max.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                        sb.Append(leftMargin + $"     Smallest error: {ces.NatPrecissionErrStat.Min.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                        sb.Append(leftMargin + $"      Average error: {ces.NatPrecissionErrStat.ArithAvg.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                    }
+                    sb.Append(Environment.NewLine);
+                }
+                return sb.ToString();
+            }
+
+        }//RegressionOverview
 
     }//ReadoutLayer
 

@@ -50,8 +50,7 @@ namespace RCNet.Neural.Activation
         public AutoIzhikevichIFSettings(NeuronCommon.NeuronRole role,
                                         int refractoryPeriods = 1,
                                         ODENumSolver.Method solverMethod = ODENumSolver.Method.Euler,
-                                        int solverCompSteps = 2,
-                                        bool solveGradually = false
+                                        int solverCompSteps = 2
                                         )
         {
             Role = role;

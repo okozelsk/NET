@@ -35,6 +35,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// Each definition contains a specific setting for the reservoir and mapping of the input fields
         /// </summary>
         public List<ReservoirInstanceDefinition> ReservoirInstanceDefinitionCollection { get; set; }
+        /// <summary>
+        /// Specifies how many predictors having smallest standard deviation to be disabled 
+        /// </summary>
+        public double PredictorsReductionRatio { get; set; }
 
         //Constructors
         /// <summary>
@@ -50,6 +54,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             {
                 ReservoirInstanceDefinitionCollection.Add(mapping.DeepClone());
             }
+            PredictorsReductionRatio = source.PredictorsReductionRatio;
             return;
         }
 
@@ -70,6 +75,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
             XElement neuralPreprocessorSettingsElem = validator.Validate(elem, "rootElem");
             //Parsing
+            //Predictors reduction ratio
+            PredictorsReductionRatio = double.Parse(neuralPreprocessorSettingsElem.Attribute("predictorsReductionRatio").Value, CultureInfo.InvariantCulture);
             //Input
             InputConfig = new InputSettings(neuralPreprocessorSettingsElem.Descendants("input").First());
             //Collect available reservoir settings
@@ -128,7 +135,16 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                     //Add distinct name to the collection
                     if(resInpFieldNameCollection.IndexOf(inputFieldName) < 0)
                     {
-                        reservoirInstanceDefinition.InputFieldInfoCollection.Add(new ReservoirInstanceDefinition.InputFieldInfo(inputFieldName, inputFieldIdx, InputConfig.GetField(inputFieldName).SpikeTrainLength));
+                        InputSettings.Field fieldData = InputConfig.GetField(inputFieldName);
+                        reservoirInstanceDefinition.InputFieldInfoCollection.Add(new ReservoirInstanceDefinition.InputFieldInfo(inputFieldName,
+                                                                                                                                inputFieldIdx,
+                                                                                                                                fieldData.SpikeTrainLength,
+                                                                                                                                fieldData.TransDiffDistance,
+                                                                                                                                fieldData.TransNumOfLinearSteps,
+                                                                                                                                fieldData.TransPowerExponent,
+                                                                                                                                fieldData.TransFoldedPowerExponent,
+                                                                                                                                fieldData.TransMovingAverageWindowLength
+                                                                                                                                ));
                         resInpFieldNameCollection.Add(inputFieldName);
                     }
                 }
@@ -166,6 +182,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                     }
                     //Density
                     double density = double.Parse(inputConnectionElem.Attribute("density").Value, CultureInfo.InvariantCulture);
+                    //Signaling restriction
                     NeuronCommon.NeuronSignalingRestrictionType signalingRestriction = NeuronCommon.ParseNeuronSignalingRestriction(inputConnectionElem.Attribute("signalingRestriction").Value);
                     //Input synapse settings
                     InputSynapseSettings synapseCfg = new InputSynapseSettings(inputConnectionElem.Descendants("synapse").First());
@@ -193,7 +210,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             if (obj == null) return false;
             NeuralPreprocessorSettings cmpSettings = obj as NeuralPreprocessorSettings;
             if (!Equals(InputConfig, cmpSettings.InputConfig) ||
-                ReservoirInstanceDefinitionCollection.Count != cmpSettings.ReservoirInstanceDefinitionCollection.Count
+                ReservoirInstanceDefinitionCollection.Count != cmpSettings.ReservoirInstanceDefinitionCollection.Count||
+                PredictorsReductionRatio != cmpSettings.PredictorsReductionRatio
                 )
             {
                 return false;
@@ -325,46 +343,75 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                     {
                         BootCycles = int.Parse(bootCyclesAttrValue, CultureInfo.InvariantCulture);
                     }
-                    //Routing of input to readout layer
-                    RouteInputToReadout = bool.Parse(feedingElem.Attribute("routeToReadout").Value);
                 }
                 else
                 {
                     FeedingType = NeuralPreprocessor.InputFeedingType.Patterned;
                     Bidirectional = RouteInputToReadout = bool.Parse(feedingElem.Attribute("bidir").Value);
                     BootCycles = 0;
-                    RouteInputToReadout = false;
                 }
+                //Routing of input to readout layer
+                RouteInputToReadout = bool.Parse(feedingElem.Attribute("routeToReadout").Value);
                 //Fields
                 Dictionary<string, string> uniquenessChecker = new Dictionary<string, string>();
                 //External fields
-                foreach (XElement extFieldElem in settingsElem.Descendants("external").First().Descendants("field"))
+                foreach (XElement fieldElem in settingsElem.Descendants("external").First().Descendants("field"))
                 {
-                    string fieldName = extFieldElem.Attribute("name").Value;
-                    int spikeTrainLength = int.Parse(extFieldElem.Attribute("spikeTrainLength").Value, CultureInfo.InvariantCulture);
-                    bool allowRoutingToReadout = bool.Parse(extFieldElem.Attribute("allowRoutingToReadout").Value);
+                    string fieldName = fieldElem.Attribute("name").Value;
+                    bool allowRoutingToReadout = bool.Parse(fieldElem.Attribute("allowRoutingToReadout").Value);
+                    int spikeTrainLength = int.Parse(fieldElem.Attribute("spikeTrainLength").Value, CultureInfo.InvariantCulture);
+                    int transDiffDistance = int.Parse(fieldElem.Attribute("transDiffDistance").Value, CultureInfo.InvariantCulture);
+                    int transNumOfLinearSteps = int.Parse(fieldElem.Attribute("transNumOfLinearSteps").Value, CultureInfo.InvariantCulture);
+                    double transPowerExponent = double.Parse(fieldElem.Attribute("transPowerExponent").Value, CultureInfo.InvariantCulture);
+                    double transFoldedPowerExponent = double.Parse(fieldElem.Attribute("transFoldedPowerExponent").Value, CultureInfo.InvariantCulture);
+                    int transMovingAverageWindowLength = int.Parse(fieldElem.Attribute("transMovingAverageWindowLength").Value, CultureInfo.InvariantCulture);
+
                     if (uniquenessChecker.ContainsKey(fieldName))
                     {
                         throw new Exception($"Duplicit input field name {fieldName}");
                     }
                     uniquenessChecker.Add(fieldName, fieldName);
-                    ExternalFieldCollection.Add(new ExternalField(fieldName, spikeTrainLength, allowRoutingToReadout, extFieldElem.Descendants().FirstOrDefault()));
+                    ExternalFieldCollection.Add(new ExternalField(fieldName,
+                                                                  allowRoutingToReadout,
+                                                                  spikeTrainLength,
+                                                                  transDiffDistance,
+                                                                  transNumOfLinearSteps,
+                                                                  transPowerExponent,
+                                                                  transFoldedPowerExponent,
+                                                                  transMovingAverageWindowLength,
+                                                                  fieldElem.Descendants().FirstOrDefault()
+                                                                  ));
                 }
                 //Internal fields
                 XElement intFieldsElem = settingsElem.Descendants("internal").FirstOrDefault();
                 if (intFieldsElem != null)
                 {
-                    foreach (XElement intFieldElem in intFieldsElem.Descendants("field"))
+                    foreach (XElement fieldElem in intFieldsElem.Descendants("field"))
                     {
-                        string fieldName = intFieldElem.Attribute("name").Value;
-                        int spikeTrainLength = int.Parse(intFieldElem.Attribute("spikeTrainLength").Value, CultureInfo.InvariantCulture);
-                        bool allowRoutingToReadout = bool.Parse(intFieldElem.Attribute("allowRoutingToReadout").Value);
+                        string fieldName = fieldElem.Attribute("name").Value;
+                        bool allowRoutingToReadout = bool.Parse(fieldElem.Attribute("allowRoutingToReadout").Value);
+                        int spikeTrainLength = int.Parse(fieldElem.Attribute("spikeTrainLength").Value, CultureInfo.InvariantCulture);
+                        int transDiffDistance = int.Parse(fieldElem.Attribute("transDiffDistance").Value, CultureInfo.InvariantCulture);
+                        int transNumOfLinearSteps = int.Parse(fieldElem.Attribute("transNumOfLinearSteps").Value, CultureInfo.InvariantCulture);
+                        double transPowerExponent = double.Parse(fieldElem.Attribute("transPowerExponent").Value, CultureInfo.InvariantCulture);
+                        double transFoldedPowerExponent = double.Parse(fieldElem.Attribute("transFoldedPowerExponent").Value, CultureInfo.InvariantCulture);
+                        int transMovingAverageWindowLength = int.Parse(fieldElem.Attribute("transMovingAverageWindowLength").Value, CultureInfo.InvariantCulture);
+
                         if (uniquenessChecker.ContainsKey(fieldName))
                         {
                             throw new Exception($"Duplicit input field name: {fieldName}");
                         }
                         uniquenessChecker.Add(fieldName, fieldName);
-                        InternalFieldCollection.Add(new InternalField(fieldName, spikeTrainLength, allowRoutingToReadout, intFieldElem.Descendants().First()));
+                        InternalFieldCollection.Add(new InternalField(fieldName,
+                                                                      allowRoutingToReadout,
+                                                                      spikeTrainLength,
+                                                                      transDiffDistance,
+                                                                      transNumOfLinearSteps,
+                                                                      transPowerExponent,
+                                                                      transFoldedPowerExponent,
+                                                                      transMovingAverageWindowLength,
+                                                                      fieldElem.Descendants().First()
+                                                                      ));
                     }
                 }
                 return;
@@ -507,21 +554,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             public class Field
             {
                 //Constants
-                /// <summary>
-                /// Default length of the spike-train
-                /// </summary>
-                public const int DefaultSpikeTrainLength = 8;
-                
-                /// <summary>
-                /// Minimum length of the spike-train
-                /// </summary>
-                public const int MinSpikeTrainLength = 1;
-                
-                /// <summary>
-                /// Maximum length of the spike-train
-                /// </summary>
-                public const int MaxSpikeTrainLength = 32;
-                
+
                 //Attribute properties
                 /// <summary>
                 /// Field name
@@ -529,15 +562,40 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 public string Name { get; set; }
 
                 /// <summary>
+                /// The parameter specifies whether the field can be included among predictors
+                /// together with the predictors from the reservoirs.
+                /// </summary>
+                public bool AllowRoutingToReadout { get; set; }
+
+                /// <summary>
                 /// Length of the spike-train
                 /// </summary>
                 public int SpikeTrainLength { get; set; }
 
                 /// <summary>
-                /// The parameter specifies whether the field can be included among predictors
-                /// together with the predictors from the reservoirs.
+                /// Difference transformation. Distance of the past value for the computation of the difference of the current and the past value.
                 /// </summary>
-                public bool AllowRoutingToReadout { get; set; }
+                public int TransDiffDistance { get; set; }
+
+                /// <summary>
+                /// Linear steps transformation. Number of steps dividing data interval.
+                /// </summary>
+                public int TransNumOfLinearSteps { get; set; }
+
+                /// <summary>
+                /// Exponent of the Power transformation.
+                /// </summary>
+                public double TransPowerExponent { get; set; }
+
+                /// <summary>
+                /// Exponent of the Folded Power transformation.
+                /// </summary>
+                public double TransFoldedPowerExponent { get; set; }
+
+                /// <summary>
+                /// Number of the last data values involved in Moving Average transformation.
+                /// </summary>
+                public int TransMovingAverageWindowLength { get; set; }
 
 
                 //Constructors
@@ -545,13 +603,31 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 /// Creates an initialized instance
                 /// </summary>
                 /// <param name="name">Field name</param>
-                /// <param name="spikeTrainLength">Length of the spike-train</param>
                 /// <param name="allowRoutingToReadout">Specifies whether the field can be included among predictors</param>
-                public Field(string name, int spikeTrainLength, bool allowRoutingToReadout)
+                /// <param name="spikeTrainLength">Length of the spike-train</param>
+                /// <param name="transDiffDistance">Difference transformation. Distance of the past value for the computation of the difference of the current and the past value.</param>
+                /// <param name="transNumOfLinearSteps">Linear Steps transformation. Number of steps dividing data interval.</param>
+                /// <param name="transPowerExponent">Exponent of the Power transformation.</param>
+                /// <param name="transFoldedPowerExponent">Exponent of the Folded Power transformation.</param>
+                /// <param name="transMovingAverageWindowLength">Number of the last data values involved in Moving Average transformation.</param>
+                public Field(string name,
+                             bool allowRoutingToReadout,
+                             int spikeTrainLength,
+                             int transDiffDistance,
+                             int transNumOfLinearSteps,
+                             double transPowerExponent,
+                             double transFoldedPowerExponent,
+                             int transMovingAverageWindowLength
+                             )
                 {
                     Name = name;
-                    SpikeTrainLength = spikeTrainLength;
                     AllowRoutingToReadout = allowRoutingToReadout;
+                    SpikeTrainLength = spikeTrainLength;
+                    TransDiffDistance = transDiffDistance;
+                    TransNumOfLinearSteps = transNumOfLinearSteps;
+                    TransPowerExponent = transPowerExponent;
+                    TransFoldedPowerExponent = transFoldedPowerExponent;
+                    TransMovingAverageWindowLength = transMovingAverageWindowLength;
                     return;
                 }
 
@@ -562,8 +638,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 public Field(Field source)
                 {
                     Name = source.Name;
-                    SpikeTrainLength = source.SpikeTrainLength;
                     AllowRoutingToReadout = source.AllowRoutingToReadout;
+                    SpikeTrainLength = source.SpikeTrainLength;
+                    TransDiffDistance = source.TransDiffDistance;
+                    TransNumOfLinearSteps = source.TransNumOfLinearSteps;
+                    TransPowerExponent = source.TransPowerExponent;
+                    TransFoldedPowerExponent = source.TransFoldedPowerExponent;
+                    TransMovingAverageWindowLength = source.TransMovingAverageWindowLength;
                     return;
                 }
 
@@ -585,8 +666,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                     if (obj == null) return false;
                     Field cmpSettings = obj as Field;
                     if (Name != cmpSettings.Name ||
+                        AllowRoutingToReadout != cmpSettings.AllowRoutingToReadout ||
                         SpikeTrainLength != cmpSettings.SpikeTrainLength ||
-                        AllowRoutingToReadout != cmpSettings.AllowRoutingToReadout
+                        TransDiffDistance != cmpSettings.TransDiffDistance ||
+                        TransNumOfLinearSteps != cmpSettings.TransNumOfLinearSteps ||
+                        TransPowerExponent != cmpSettings.TransPowerExponent ||
+                        TransFoldedPowerExponent != cmpSettings.TransFoldedPowerExponent ||
+                        TransMovingAverageWindowLength != cmpSettings.TransMovingAverageWindowLength
                         )
                     {
                         return false;
@@ -621,11 +707,33 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 /// Creates an initialized instance
                 /// </summary>
                 /// <param name="name">Field name</param>
-                /// <param name="spikeTrainLength">Length of the spike-train</param>
                 /// <param name="allowRoutingToReadout">Specifies whether the field can be included among predictors</param>
+                /// <param name="spikeTrainLength">Length of the spike-train</param>
+                /// <param name="transDiffDistance">Difference transformation. Distance of the past value for the computation of the difference of the current and the past value.</param>
+                /// <param name="transNumOfLinearSteps">Linear Steps transformation. Number of steps dividing data interval.</param>
+                /// <param name="transPowerExponent">Exponent of the Power transformation.</param>
+                /// <param name="transFoldedPowerExponent">Exponent of the Folded Power transformation.</param>
+                /// <param name="transMovingAverageWindowLength">Number of the last data values involved in Moving Average transformation.</param>
                 /// <param name="settingsElem">Xml element containing associated feature filter settings</param>
-                public ExternalField(string name, int spikeTrainLength, bool allowRoutingToReadout, XElement settingsElem)
-                    : base(name, spikeTrainLength, allowRoutingToReadout)
+                public ExternalField(string name,
+                                     bool allowRoutingToReadout,
+                                     int spikeTrainLength,
+                                     int transDiffDistance,
+                                     int transNumOfLinearSteps,
+                                     double transPowerExponent,
+                                     double transFoldedPowerExponent,
+                                     int transMovingAverageWindowLength,
+                                     XElement settingsElem
+                                     )
+                    : base(name,
+                           allowRoutingToReadout,
+                           spikeTrainLength,
+                           transDiffDistance,
+                           transNumOfLinearSteps,
+                           transPowerExponent,
+                           transFoldedPowerExponent,
+                           transMovingAverageWindowLength
+                          )
                 {
                     FeatureFilterCfg = FeatureFilterFactory.LoadSettings(settingsElem);
                     return;
@@ -696,11 +804,33 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 /// Creates an initialized instance
                 /// </summary>
                 /// <param name="name">Field name</param>
-                /// <param name="spikeTrainLength">Length of the spike-train</param>
                 /// <param name="allowRoutingToReadout">Specifies whether the field can be included among predictors</param>
+                /// <param name="spikeTrainLength">Length of the spike-train</param>
+                /// <param name="transDiffDistance">Difference transformation. Distance of the past value for the computation of the difference of the current and the past value.</param>
+                /// <param name="transNumOfLinearSteps">Linear Steps transformation. Number of steps dividing data interval.</param>
+                /// <param name="transPowerExponent">Exponent of the Power transformation.</param>
+                /// <param name="transFoldedPowerExponent">Exponent of the Folded Power transformation.</param>
+                /// <param name="transMovingAverageWindowLength">Number of the last data values involved in Moving Average transformation.</param>
                 /// <param name="settingsElem">Xml element containing associated signal generator settings</param>
-                public InternalField(string name, int spikeTrainLength, bool allowRoutingToReadout, XElement settingsElem)
-                    :base(name, spikeTrainLength, allowRoutingToReadout)
+                public InternalField(string name,
+                                     bool allowRoutingToReadout,
+                                     int spikeTrainLength,
+                                     int transDiffDistance,
+                                     int transNumOfLinearSteps,
+                                     double transPowerExponent,
+                                     double transFoldedPowerExponent,
+                                     int transMovingAverageWindowLength,
+                                     XElement settingsElem
+                                     )
+                    :base(name,
+                          allowRoutingToReadout,
+                          spikeTrainLength,
+                          transDiffDistance,
+                          transNumOfLinearSteps,
+                          transPowerExponent,
+                          transFoldedPowerExponent,
+                          transMovingAverageWindowLength
+                         )
                 {
                     switch(settingsElem.Name.LocalName)
                     {
@@ -937,6 +1067,32 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 /// </summary>
                 public int SpikeTrainLength { get; set; }
 
+                /// <summary>
+                /// Difference transformation. Distance of the past value for the computation of the difference of the current and the past value.
+                /// </summary>
+                public int TransDiffDistance { get; set; }
+
+                /// <summary>
+                /// Linear steps transformation. Number of steps dividing data interval.
+                /// </summary>
+                public int TransNumOfLinearSteps { get; set; }
+
+                /// <summary>
+                /// Exponent of the Power transformation.
+                /// </summary>
+                public double TransPowerExponent { get; set; }
+
+                /// <summary>
+                /// Exponent of the Folded Power transformation.
+                /// </summary>
+                public double TransFoldedPowerExponent { get; set; }
+
+                /// <summary>
+                /// Number of the last data values involved in Moving Average transformation.
+                /// </summary>
+                public int TransMovingAverageWindowLength { get; set; }
+
+
                 //Constructors
                 /// <summary>
                 /// Creates an itialized instance.
@@ -944,11 +1100,29 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 /// <param name="fieldName">Name of the input field</param>
                 /// <param name="fieldIndex">Index of the field among NP input fields</param>
                 /// <param name="spikeTrainLength">Length of the spike-train of value representation</param>
-                public InputFieldInfo(string fieldName, int fieldIndex, int spikeTrainLength)
+                /// <param name="transDiffDistance">Difference transformation. Distance of the past value for the computation of the difference of the current and the past value.</param>
+                /// <param name="transNumOfLinearSteps">Linear Steps transformation. Number of steps dividing data interval.</param>
+                /// <param name="transPowerExponent">Exponent of the Power transformation.</param>
+                /// <param name="transFoldedPowerExponent">Exponent of the Folded Power transformation.</param>
+                /// <param name="transMovingAverageWindowLength">Number of the last data values involved in Moving Average transformation.</param>
+                public InputFieldInfo(string fieldName,
+                                      int fieldIndex,
+                                      int spikeTrainLength,
+                                      int transDiffDistance,
+                                      int transNumOfLinearSteps,
+                                      double transPowerExponent,
+                                      double transFoldedPowerExponent,
+                                      int transMovingAverageWindowLength
+                                      )
                 {
                     FieldName = fieldName;
                     FieldIndex = fieldIndex;
                     SpikeTrainLength = spikeTrainLength;
+                    TransDiffDistance = transDiffDistance;
+                    TransNumOfLinearSteps = transNumOfLinearSteps;
+                    TransPowerExponent = transPowerExponent;
+                    TransFoldedPowerExponent = transFoldedPowerExponent;
+                    TransMovingAverageWindowLength = transMovingAverageWindowLength;
                     return;
                 }
 
@@ -961,6 +1135,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                     FieldName = source.FieldName;
                     FieldIndex = source.FieldIndex;
                     SpikeTrainLength = source.SpikeTrainLength;
+                    TransDiffDistance = source.TransDiffDistance;
+                    TransNumOfLinearSteps = source.TransNumOfLinearSteps;
+                    TransPowerExponent = source.TransPowerExponent;
+                    TransFoldedPowerExponent = source.TransFoldedPowerExponent;
+                    TransMovingAverageWindowLength = source.TransMovingAverageWindowLength;
                     return;
                 }
 
@@ -983,7 +1162,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                     InputFieldInfo cmpSettings = obj as InputFieldInfo;
                     if (FieldName != cmpSettings.FieldName ||
                         FieldIndex != cmpSettings.FieldIndex ||
-                        SpikeTrainLength != cmpSettings.SpikeTrainLength
+                        SpikeTrainLength != cmpSettings.SpikeTrainLength ||
+                        TransDiffDistance != cmpSettings.TransDiffDistance ||
+                        TransNumOfLinearSteps != cmpSettings.TransNumOfLinearSteps ||
+                        TransPowerExponent != cmpSettings.TransPowerExponent ||
+                        TransFoldedPowerExponent != cmpSettings.TransFoldedPowerExponent ||
+                        TransMovingAverageWindowLength != cmpSettings.TransMovingAverageWindowLength
                         )
                     {
                         return false;
