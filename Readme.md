@@ -125,7 +125,7 @@ See the [wiki pages.](https://en.wikipedia.org/wiki/Biological_neuron_model)
 |--|--|
 |InputSynapse|Computes constantly weighted signal from external input and passes it to target neuron. Supports signal delay|
 |InternalSynapse|Computes dynamically weighted signal from source to target neuron. It supports pre-synaptic short-term plasticity.|
-|InputUnit|Provides external input for processing in the reservoir. Supports analog and spike-train codings (used spike-train coding method is from the "Sparse coding" family). Coded data is then further provided through set of InputNeurons.|
+|InputUnit|Provides external input for processing in the reservoir. Supports analog and spike-train codings (analog coding supports set of realtime transformations, spike-train coding method is from the "Sparse coding" family). Coded data is then further provided through set of InputNeurons.|
 |InputNeuron|Input neuron is the special type of very simple neuron. Its purpose is only to mediate input signal for a synapse|
 |HiddenNeuron|Supports both analog and spiking activation functions and can produce analog signal and/or spikes (neuron is able to fire spikes even when stateless analog activation is used). Supports Retainment property of analog activation (leaky integrator). Supports set of different predictors.|
 |Reservoir|Provides recurrent network supporting analog and spiking neurons working directly together. Main features: SpectralRadius (for weights of analog, spiking or both neurons), Multiple 3D pools of neurons, Pool to pool connections. It can work as the Echo State Network reservoir, Liquid State Machine reservoir or Mixed reservoir|
