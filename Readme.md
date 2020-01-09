@@ -48,7 +48,7 @@ Input data is expected in csv format where delimiter can be a semicolon or a com
 |QRD|QR decomposition of a matrix|
 |LUD|LU decomposition of a squared matrix|
 |ParamSeeker|Implements an error driven iterative search for the best value of a given parameter|
-|HurstExpEstim|Implements Hurst exponent estimator. It can be used to evaluate level of data randomness|
+|HurstExpEstim|Implements Hurst exponent estimator and Rescalled range. It can be used to evaluate level of data randomness|
 |"RandomValue"|Supports Uniform, Gaussian, Exponential and Gamma distributions|
 |Others|Set of small additional helper components like PhysUnit, Interval, Bitwise, Combinatorics, Factorial,...|
 
@@ -64,7 +64,7 @@ Input data is expected in csv format where delimiter can be a semicolon or a com
 |Component|Description|
 |--|--|
 |ElemValidator|Implements validation of alone xml element against specified type defined in xsd. It complements the apparently missing .net method and is necessary to comply with the overall RCNet xml settings concept.|
-|DocValidator|Provides the xml document loading/validation functionalities|
+|DocValidator|Envelopes xml document loading and validation|
 
 ### Data handling
 |Component|Description|
@@ -132,5 +132,6 @@ See the [wiki pages.](https://en.wikipedia.org/wiki/Biological_neuron_model)
 |NeuralPreprocessor|Provides data preprocessing to predictors. Supports multiple internal reservoirs. Supports virtual input data associated with predefined signal generators. Supports two input feeding regimes: Continuous and Patterned|
 |ReadoutUnit|Readout unit does the Forecast or Classification. Contains cluster of trained readout networks and related important error statistics. Trained unit can contain cluster of the Feed Forward Networks or the Parallel Perceptron Networks|
 |ReadoutLayer|Class implements independent readout layer concept useable separatedly or together with reservoir computing preprocessing. Supports x-fold cross validation together with clustering of the trained readout units.|
-|StateMachine|The main component. Encapsulates independent NeuralPreprocessor and ReadoutLayer components into the single component and adds support for routing specific predictors and input fields to the specific readout units. Allows to bypass NeuralPreprocessor and to use input data directly as a predictors for the readout layer.|
 
+### State Machine
+The main component. Encapsulates independent NeuralPreprocessor and ReadoutLayer components into the single component and adds support for routing specific predictors and input fields to the specific readout units. Allows to bypass NeuralPreprocessor and to use input data directly as a predictors for the readout layer.
