@@ -10,17 +10,15 @@ namespace RCNet.DemoConsoleApp
         {
             //Research - this is not a part of the demo - it is a free playground
             //(new Research()).Run();
-            SMDemo demoEngine = new SMDemo(new ConsoleLog());
-            demoEngine.RunDemo(@"DemoSettings.xml");
 
             //Standard execution of the Demo
             try
             {
                 //Run the demo
-                //SMDemo demoEngine = new SMDemo(new ConsoleLog());
-                //demoEngine.RunDemo(@"DemoSettings.xml");
+                SMDemo demoEngine = new SMDemo(new ConsoleLog());
+                demoEngine.RunDemo(@"DemoSettings.xml");
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine();
                 while(e != null)

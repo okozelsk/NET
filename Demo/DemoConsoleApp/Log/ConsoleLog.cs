@@ -19,7 +19,7 @@ namespace RCNet.DemoConsoleApp.Log
         private int _lastCursorTop;
 
         /// <summary>
-        /// Constructs console log and sets required console sizes (if necessary)
+        /// Constructs simple output journal using console
         /// </summary>
         public ConsoleLog()
         {
@@ -63,10 +63,9 @@ namespace RCNet.DemoConsoleApp.Log
         /// Writes a message to the system console
         /// </summary>
         /// <param name="message">Message to be written to console</param>
-        /// <param name="replaceLastMessage">Indicates if to replace a text of the last message by the new one.</param>
+        /// <param name="replaceLastMessage">Specifies if to replace text of the previous message.</param>
         public void Write(string message, bool replaceLastMessage = false)
         {
-
             if (replaceLastMessage)
             {
                 RestoreCursor();
