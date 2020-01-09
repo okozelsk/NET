@@ -50,7 +50,7 @@ namespace RCNet.Neural.Network.SM
         {
             //Copy
             RandomizerSeek = source.RandomizerSeek;
-            NeuralPreprocessorConfig = source.NeuralPreprocessorConfig.DeepClone();
+            NeuralPreprocessorConfig = source.NeuralPreprocessorConfig?.DeepClone();
             ReadoutLayerConfig = new ReadoutLayerSettings(source.ReadoutLayerConfig);
             MapperCfg = null;
             if(source.MapperCfg != null)
@@ -80,12 +80,13 @@ namespace RCNet.Neural.Network.SM
             //Randomizer seek
             RandomizerSeek = int.Parse(stateMachineSettingsElem.Attribute("randomizerSeek").Value);
             //Neural preprocessor
-            NeuralPreprocessorConfig = new NeuralPreprocessorSettings(stateMachineSettingsElem.Descendants("neuralPreprocessor").First());
+            XElement neuralPreprocessorElem = stateMachineSettingsElem.Descendants("neuralPreprocessor").FirstOrDefault();
+            NeuralPreprocessorConfig = neuralPreprocessorElem == null ? null : new NeuralPreprocessorSettings(neuralPreprocessorElem);
             //Readout layer
             ReadoutLayerConfig = new ReadoutLayerSettings(stateMachineSettingsElem.Descendants("readoutLayer").First());
             //Mapper
             XElement mapperSettingsElem = stateMachineSettingsElem.Descendants("mapper").FirstOrDefault();
-            if(mapperSettingsElem != null)
+            if(mapperSettingsElem != null && NeuralPreprocessorConfig != null)
             {
                 //Create mapper object
                 MapperCfg = new MapperSettings();

@@ -2230,7 +2230,7 @@
   <!-- StateMachine complete configuration -->
   <xs:complexType name="SMCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="NPCfgType" name="neuralPreprocessor" minOccurs="1" maxOccurs="1">
+      <xs:element type="NPCfgType" name="neuralPreprocessor" minOccurs="0" maxOccurs="1">
         <xs:key name="input_field_name">
           <xs:selector xpath="./input/*/field"/>
           <xs:field xpath="@name"/>

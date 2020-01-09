@@ -60,7 +60,7 @@ namespace RCNet.Neural.Network.SM
         {
             _settings = settings.DeepClone();
             //Neural preprocessor instance
-            NP = new NeuralPreprocessor(settings.NeuralPreprocessorConfig, settings.RandomizerSeek);
+            NP = settings.NeuralPreprocessorConfig == null ? null : new NeuralPreprocessor(settings.NeuralPreprocessorConfig, settings.RandomizerSeek);
             //Readout layer instance
             RL = new ReadoutLayer(_settings.ReadoutLayerConfig);
             return;
@@ -74,7 +74,7 @@ namespace RCNet.Neural.Network.SM
         public void Reset()
         {
             //Neural preprocessor reset
-            NP.Reset(true);
+            NP?.Reset(true);
             //ReadoutLayer reset
             RL.Reset();
             return;
@@ -85,74 +85,95 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         private ReadoutLayer.PredictorsMapper BuildPredictorsMapper()
         {
-            //Create empty instance of the mapper
-            ReadoutLayer.PredictorsMapper mapper = new ReadoutLayer.PredictorsMapper(NP.PredictorGeneralSwitchCollection);
-            if (_settings.MapperCfg != null)
+            if (NP == null)
             {
-                //Expand list of predicting neurons to array of predictor origin
-                StateMachineSettings.MapperSettings.AllowedPool[] neuronPoolRefCollection = new StateMachineSettings.MapperSettings.AllowedPool[NP.TotalNumOfPredictors];
-                int idx = 0;
-                foreach (HiddenNeuron neuron in NP.PredictorNeuronCollection)
+                //Neural preprocessor is bypassed -> no mapper
+                return null;
+            }
+            else
+            {
+                //Create empty instance of the mapper
+                ReadoutLayer.PredictorsMapper mapper = new ReadoutLayer.PredictorsMapper(NP.PredictorGeneralSwitchCollection);
+                if (_settings.MapperCfg != null)
                 {
-                    StateMachineSettings.MapperSettings.AllowedPool poolRef = new StateMachineSettings.MapperSettings.AllowedPool { _reservoirInstanceIdx = neuron.Placement.ReservoirID, _poolIdx = neuron.Placement.PoolID };
-                    for (int i = 0; i < neuron.PredictorsCfg.NumOfEnabledPredictors; i++)
+                    //Expand list of predicting neurons to array of predictor origin
+                    StateMachineSettings.MapperSettings.AllowedPool[] neuronPoolRefCollection = new StateMachineSettings.MapperSettings.AllowedPool[NP.TotalNumOfPredictors];
+                    int idx = 0;
+                    foreach (HiddenNeuron neuron in NP.PredictorNeuronCollection)
                     {
-                        neuronPoolRefCollection[idx] = poolRef;
-                        ++idx;
-                    }
-                }
-                //Iterate all readout units
-                foreach (string readoutUnitName in _settings.ReadoutLayerConfig.OutputFieldNameCollection)
-                {
-                    bool[] switches = new bool[NP.TotalNumOfPredictors];
-                    //Initially allow all valid predictors
-                    NP.PredictorGeneralSwitchCollection.CopyTo(switches, 0);
-                    //Exists specific mapping?
-                    if (_settings.MapperCfg != null && (_settings.MapperCfg.PoolsMap.ContainsKey(readoutUnitName) || _settings.MapperCfg.RoutedInputFieldsMap.ContainsKey(readoutUnitName)))
-                    {
-                        //Routed input fields
-                        if (_settings.MapperCfg.RoutedInputFieldsMap.ContainsKey(readoutUnitName))
+                        StateMachineSettings.MapperSettings.AllowedPool poolRef = new StateMachineSettings.MapperSettings.AllowedPool { _reservoirInstanceIdx = neuron.Placement.ReservoirID, _poolIdx = neuron.Placement.PoolID };
+                        for (int i = 0; i < neuron.PredictorsCfg.NumOfEnabledPredictors; i++)
                         {
-                            //Initially disable all routed input fields
-                            for (int i = NP.PredictorNeuronCollection.Count; i < NP.TotalNumOfPredictors; i++)
-                            {
-                                switches[i] = false;
-                            }
-                            //Enable enabled routed input fields
-                            List<int> enabledRoutedFieldsIdxs = _settings.MapperCfg.RoutedInputFieldsMap[readoutUnitName];
-                            for (int i = 0; i < enabledRoutedFieldsIdxs.Count; i++)
-                            {
-                                switches[NP.PredictorNeuronCollection.Count + enabledRoutedFieldsIdxs[i]] = NP.PredictorGeneralSwitchCollection[NP.PredictorNeuronCollection.Count + enabledRoutedFieldsIdxs[i]];
-                            }
+                            neuronPoolRefCollection[idx] = poolRef;
+                            ++idx;
                         }
-                        //Neuron predictors
-                        if (_settings.MapperCfg.PoolsMap.ContainsKey(readoutUnitName))
+                    }
+                    //Iterate all readout units
+                    foreach (string readoutUnitName in _settings.ReadoutLayerConfig.OutputFieldNameCollection)
+                    {
+                        bool[] switches = new bool[NP.TotalNumOfPredictors];
+                        //Initially allow all valid predictors
+                        NP.PredictorGeneralSwitchCollection.CopyTo(switches, 0);
+                        //Exists specific mapping?
+                        if (_settings.MapperCfg != null && (_settings.MapperCfg.PoolsMap.ContainsKey(readoutUnitName) || _settings.MapperCfg.RoutedInputFieldsMap.ContainsKey(readoutUnitName)))
                         {
-                            //Initially disable all neuron predictors
-                            for (int i = 0; i < NP.PredictorNeuronCollection.Count; i++)
+                            //Routed input fields
+                            if (_settings.MapperCfg.RoutedInputFieldsMap.ContainsKey(readoutUnitName))
                             {
-                                switches[i] = false;
+                                //Initially disable all routed input fields
+                                for (int i = NP.PredictorNeuronCollection.Count; i < NP.TotalNumOfPredictors; i++)
+                                {
+                                    switches[i] = false;
+                                }
+                                //Enable enabled routed input fields
+                                List<int> enabledRoutedFieldsIdxs = _settings.MapperCfg.RoutedInputFieldsMap[readoutUnitName];
+                                for (int i = 0; i < enabledRoutedFieldsIdxs.Count; i++)
+                                {
+                                    switches[NP.PredictorNeuronCollection.Count + enabledRoutedFieldsIdxs[i]] = NP.PredictorGeneralSwitchCollection[NP.PredictorNeuronCollection.Count + enabledRoutedFieldsIdxs[i]];
+                                }
                             }
-                            //Enable allowed neuron predictors
-                            foreach (StateMachineSettings.MapperSettings.AllowedPool allowedPool in _settings.MapperCfg.PoolsMap[readoutUnitName])
+                            //Neuron predictors
+                            if (_settings.MapperCfg.PoolsMap.ContainsKey(readoutUnitName))
                             {
-                                //Enable specific predictors from allowed pool (origin)
+                                //Initially disable all neuron predictors
                                 for (int i = 0; i < NP.PredictorNeuronCollection.Count; i++)
                                 {
-                                    if (neuronPoolRefCollection[i]._reservoirInstanceIdx == allowedPool._reservoirInstanceIdx && neuronPoolRefCollection[i]._poolIdx == allowedPool._poolIdx)
+                                    switches[i] = false;
+                                }
+                                //Enable allowed neuron predictors
+                                foreach (StateMachineSettings.MapperSettings.AllowedPool allowedPool in _settings.MapperCfg.PoolsMap[readoutUnitName])
+                                {
+                                    //Enable specific predictors from allowed pool (origin)
+                                    for (int i = 0; i < NP.PredictorNeuronCollection.Count; i++)
                                     {
-                                        //Enable predictor if it is valid
-                                        switches[i] = NP.PredictorGeneralSwitchCollection[i];
+                                        if (neuronPoolRefCollection[i]._reservoirInstanceIdx == allowedPool._reservoirInstanceIdx && neuronPoolRefCollection[i]._poolIdx == allowedPool._poolIdx)
+                                        {
+                                            //Enable predictor if it is valid
+                                            switches[i] = NP.PredictorGeneralSwitchCollection[i];
+                                        }
                                     }
                                 }
                             }
                         }
+                        //Add mapping to mapper
+                        mapper.Add(readoutUnitName, switches);
                     }
-                    //Add mapping to mapper
-                    mapper.Add(readoutUnitName, switches);
                 }
+                return mapper;
             }
-            return mapper;
+        }
+
+        private double[] PatternToVector(List<double[]> inputPattern)
+        {
+            int vectorSize = inputPattern[0].Length * inputPattern.Count;
+            double[] vector = new double[vectorSize];
+            int idx = 0;
+            foreach (double[] patternItem in inputPattern)
+            {
+                patternItem.CopyTo(vector, idx);
+                idx += patternItem.Length;
+            }
+            return vector;
         }
 
         /// <summary>
@@ -163,16 +184,24 @@ namespace RCNet.Neural.Network.SM
         /// <returns>Computed output values</returns>
         public double[] Compute(List<double[]> inputPattern)
         {
-            if (_settings.NeuralPreprocessorConfig.InputConfig.FeedingType == NeuralPreprocessor.InputFeedingType.Continuous)
-            {
-                throw new Exception("This version of Compute function is not useable for continuous input feeding.");
-            }
             if (!RL.Trained)
             {
                 throw new Exception("Readout layer is not trained.");
             }
-            //Compute and return output
-            return RL.Compute(NP.Preprocess(inputPattern));
+            if (NP == null)
+            {
+                //Neural preprocessor is bypassed
+                return RL.Compute(PatternToVector(inputPattern));
+            }
+            else
+            {
+                if (_settings.NeuralPreprocessorConfig.InputConfig.FeedingType == NeuralPreprocessor.InputFeedingType.Continuous)
+                {
+                    throw new Exception("This version of Compute function is not useable for continuous input feeding.");
+                }
+                //Compute and return output
+                return RL.Compute(NP.Preprocess(inputPattern));
+            }
         }
 
         /// <summary>
@@ -183,16 +212,24 @@ namespace RCNet.Neural.Network.SM
         /// <returns>Computed output values</returns>
         public double[] Compute(double[] inputVector)
         {
-            if (_settings.NeuralPreprocessorConfig.InputConfig.FeedingType == NeuralPreprocessor.InputFeedingType.Patterned)
-            {
-                throw new Exception("This version of Compute function is not useable for patterned input feeding.");
-            }
             if (!RL.Trained)
             {
                 throw new Exception("Readout layer is not trained.");
             }
-            //Compute and return output
-            return RL.Compute(NP.Preprocess(inputVector));
+            if (NP == null)
+            {
+                //Neural preprocessor is bypassed
+                return RL.Compute(inputVector);
+            }
+            else
+            {
+                if (_settings.NeuralPreprocessorConfig.InputConfig.FeedingType == NeuralPreprocessor.InputFeedingType.Patterned)
+                {
+                    throw new Exception("This version of Compute function is not useable for patterned input feeding.");
+                }
+                //Compute and return output
+                return RL.Compute(NP.Preprocess(inputVector));
+            }
         }
 
 
@@ -206,10 +243,20 @@ namespace RCNet.Neural.Network.SM
         {
             //StateMachine reset
             Reset();
-            //Neural preprocessing
-            VectorBundle preprocessedData = NP.InitializeAndPreprocessBundle(vectorBundle, out NeuralPreprocessor.PreprocessingOverview preprocessingOverview);
+            VectorBundle readoutInput;
+            NeuralPreprocessor.PreprocessingOverview preprocessingOverview = null;
+            if (NP == null)
+            {
+                //Neural preprocessor is bypassed
+                readoutInput = vectorBundle;
+            }
+            else
+            {
+                //Neural preprocessing
+                readoutInput = NP.InitializeAndPreprocessBundle(vectorBundle, out preprocessingOverview);
+            }
             //Training of the readout layer 
-            ReadoutLayer.RegressionOverview regressionOverview = RL.Build(preprocessedData, BuildPredictorsMapper(), regressionController);
+            ReadoutLayer.RegressionOverview regressionOverview = RL.Build(readoutInput, BuildPredictorsMapper(), regressionController);
             //Return compact results
             return new TrainingResults(preprocessingOverview, regressionOverview);
         }
@@ -225,10 +272,32 @@ namespace RCNet.Neural.Network.SM
         {
             //StateMachine reset
             Reset();
-            //Neural preprocessing
-            VectorBundle preprocessedData = NP.InitializeAndPreprocessBundle(patternBundle, out NeuralPreprocessor.PreprocessingOverview preprocessingOverview);
+            VectorBundle readoutInput;
+            NeuralPreprocessor.PreprocessingOverview preprocessingOverview = null;
+            if (NP == null)
+            {
+                //Neural preprocessor is bypassed
+                //Convert patterns to vectors
+                readoutInput = new VectorBundle(patternBundle.OutputVectorCollection.Count);
+                for(int i = 0; i < patternBundle.OutputVectorCollection.Count; i++)
+                {
+                    readoutInput.AddPair(PatternToVector(patternBundle.InputPatternCollection[i]), patternBundle.OutputVectorCollection[i]);
+                    if(i > 0)
+                    {
+                        if(readoutInput.InputVectorCollection[i].Length != readoutInput.InputVectorCollection[i - 1].Length)
+                        {
+                            throw new Exception("Inconsistent length of patterns.");
+                        }
+                    }
+                }
+            }
+            else
+            {
+                //Neural preprocessing
+                readoutInput = NP.InitializeAndPreprocessBundle(patternBundle, out preprocessingOverview);
+            }
             //Training of the readout layer 
-            ReadoutLayer.RegressionOverview regressionOverview = RL.Build(preprocessedData, BuildPredictorsMapper(), regressionController);
+            ReadoutLayer.RegressionOverview regressionOverview = RL.Build(readoutInput, BuildPredictorsMapper(), regressionController);
             //Return compact results
             return new TrainingResults(preprocessingOverview, regressionOverview);
         }
@@ -244,7 +313,17 @@ namespace RCNet.Neural.Network.SM
             VerificationResults verificationResults = new VerificationResults(_settings.ReadoutLayerConfig);
             for (int sampleIdx = 0; sampleIdx < vectorBundle.InputVectorCollection.Count; sampleIdx++)
             {
-                double[] predictors = NP.Preprocess(vectorBundle.InputVectorCollection[sampleIdx]);
+                double[] predictors;
+                if (NP == null)
+                {
+                    //Neural preprocessor is bypassed
+                    predictors = vectorBundle.InputVectorCollection[sampleIdx];
+                }
+                else
+                {
+                    //Neural preprocessing
+                    predictors = NP.Preprocess(vectorBundle.InputVectorCollection[sampleIdx]);
+                }
                 ReadoutLayer.ReadoutData readoutData = RL.ComputeReadoutData(predictors);
                 double[] result = RL.Compute(predictors);
                 verificationResults.Update(predictors, readoutData, vectorBundle.OutputVectorCollection[sampleIdx]);
@@ -264,7 +343,17 @@ namespace RCNet.Neural.Network.SM
             VerificationResults verificationResults = new VerificationResults(_settings.ReadoutLayerConfig);
             for (int sampleIdx = 0; sampleIdx < patternBundle.InputPatternCollection.Count; sampleIdx++)
             {
-                double[] predictors = NP.Preprocess(patternBundle.InputPatternCollection[sampleIdx]);
+                double[] predictors;
+                if (NP == null)
+                {
+                    //Neural preprocessor is bypassed
+                    predictors = PatternToVector(patternBundle.InputPatternCollection[sampleIdx]);
+                }
+                else
+                {
+                    //Neural preprocessing
+                    predictors = NP.Preprocess(patternBundle.InputPatternCollection[sampleIdx]);
+                }
                 ReadoutLayer.ReadoutData readoutData = RL.ComputeReadoutData(predictors);
                 double[] result = RL.Compute(predictors);
                 verificationResults.Update(predictors, readoutData, patternBundle.OutputVectorCollection[sampleIdx]);

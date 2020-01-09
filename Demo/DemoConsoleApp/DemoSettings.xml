@@ -1,6 +1,104 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <demo dataFolder=".\\Data" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="DemoSettings.xsd">
 
+  <!--
+    TEST ONLY. This demo case demonstrates bypassing of neural preprocessor.
+    Following simple configuration of the StateMachine's alone readout layer exhibits XX.XX% accuracy, XXX than the best algorithm
+    called ST, referenced at the dataset's home site:
+    "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
+    https://timeseriesclassification.com/description.php?Dataset=ProximalPhalanxOutlineAgeGroup.
+    This series of 11 classification problems were created as part of Luke Davis's PhD titled "Predictive Modelling of Bone Ageing".
+    They are all derived from the same images, extracted from Cao et al. "Digital hand atlas and web-based bone age assessment: system design and implementation".
+    They are designed to test the efficacy of hand and bone outline detection and whether these outlines could be helpful in bone
+    age prediction. Algorithms to automatically extract the hand outlines and then the outlines of three bones of the middle finger
+    (proximal, middle and distal phalanges) were applied to over 1300 images, and three human evaluators labelled the output
+    of the image outlining as correct or incorrect. This generated three classification problems: DistalPhalanxOutlineCorrect; MiddlePhalanxOutlineCorrect; and ProximalPhalanxOutlineCorrect.
+    The next stage of the project was to use the outlines to predict information about the subjects age.
+    The three problems {DistalPhalanxOutlineAgeGroup, MiddlePhalanxOutlineAgeGroup and ProximalPhalanxOutlineAgeGroup} involve using
+    the outline of one of the phalanges to predict whether the subject is one of three age groups: 0-6 years old, 7-12 years old
+    and 13-19 years old. Note that these problems are aligned by subject, and hence can be treated as a multi dimensional
+    TSC problem. Problem Phalanges contains the concatenation of all three problems. Bone age estimation is usually performed by
+    an expert with an algorithm called Tanner-Whitehouse. This involves scoring each bone into one of seven categories based on
+    the stage of development. The final three bone image classification problems, DistalPhalanxTW, MiddlePhalanxTW and ProximalPhalanxTW},
+    involve predicting the Tanner-Whitehouse score (as labelled by a human expert) from the outline.
+  -->
+  <case name="Classification task ProximalPhalanxOutlineAgeGroup: No preprocesing, Multilayer Feed forward network as a classifier (Resilient trainer)">
+    <samples trainingData="ProximalPhalanxOutlineAgeGroup_train.csv" verificationData="ProximalPhalanxOutlineAgeGroup_verify.csv"/>
+    <stateMachineCfg randomizerSeek="0">
+      <readoutLayer testDataRatio="0.5" folds="Auto">
+        <readoutUnit name="0-6 years">
+          <classification oneWinnerGroupName="AgeGroup">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationIdentity/>
+            <hiddenLayers>
+              <layer neurons="10">
+                <activationTanH/>
+              </layer>
+              <layer neurons="10">
+                <activationElliot/>
+              </layer>
+              <layer neurons="10">
+                <activationTanH/>
+              </layer>
+              <layer neurons="10">
+                <activationElliot/>
+              </layer>
+            </hiddenLayers>
+            <resPropTrainer attempts="5" attemptEpochs="500"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="7-12 years">
+          <classification oneWinnerGroupName="AgeGroup">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationIdentity/>
+            <hiddenLayers>
+              <layer neurons="10">
+                <activationTanH/>
+              </layer>
+              <layer neurons="10">
+                <activationElliot/>
+              </layer>
+              <layer neurons="10">
+                <activationTanH/>
+              </layer>
+              <layer neurons="10">
+                <activationElliot/>
+              </layer>
+            </hiddenLayers>
+            <resPropTrainer attempts="5" attemptEpochs="500"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="13-19 years">
+          <classification oneWinnerGroupName="AgeGroup">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationIdentity/>
+            <hiddenLayers>
+              <layer neurons="10">
+                <activationTanH/>
+              </layer>
+              <layer neurons="10">
+                <activationElliot/>
+              </layer>
+              <layer neurons="10">
+                <activationTanH/>
+              </layer>
+              <layer neurons="10">
+                <activationElliot/>
+              </layer>
+            </hiddenLayers>
+            <resPropTrainer attempts="5" attemptEpochs="500"/>
+          </ff>
+        </readoutUnit>
+      </readoutLayer>
+    </stateMachineCfg>
+  </case>
+
   
   
   <!--
@@ -53,6 +151,9 @@
                   <randomSchema density="0.1" relShareEE="1" relShareEI="1" relShareIE="1" relShareII="1" avgDistance="NA" allowSelfConnection="true">
                     <synapse/>
                   </randomSchema>
+                  <chainSchema ratio="1" circle="true">
+                    <synapse/>
+                  </chainSchema>
                 </interconnection>
               </pool>
               <pool name="Pool2" dimX="150" dimY="1" dimZ="1">
@@ -68,6 +169,9 @@
                   <randomSchema density="0.1" relShareEE="1" relShareEI="1" relShareIE="1" relShareII="1" avgDistance="NA" allowSelfConnection="true">
                     <synapse/>
                   </randomSchema>
+                  <chainSchema ratio="1" circle="true">
+                    <synapse/>
+                  </chainSchema>
                 </interconnection>
               </pool>
             </pools>
@@ -132,7 +236,7 @@
       </neuralPreprocessor>
       <readoutLayer testDataRatio="0.1" folds="Auto">
         <readoutUnit name="Cancel Call">
-          <classification oneWinnerGroupName="Signal">
+          <classification oneWinnerGroupName="Gesto">
             <binFeature/>
           </classification>
           <ff>
@@ -141,7 +245,7 @@
           </ff>
         </readoutUnit>
         <readoutUnit name="Dead Ball">
-          <classification oneWinnerGroupName="Signal">
+          <classification oneWinnerGroupName="Gesture">
             <binFeature/>
           </classification>
           <ff>
@@ -150,7 +254,7 @@
           </ff>
         </readoutUnit>
         <readoutUnit name="Four">
-          <classification oneWinnerGroupName="Signal">
+          <classification oneWinnerGroupName="Gesture">
             <binFeature/>
           </classification>
           <ff>
@@ -159,7 +263,7 @@
           </ff>
         </readoutUnit>
         <readoutUnit name="Last Hour">
-          <classification oneWinnerGroupName="Signal">
+          <classification oneWinnerGroupName="Gesture">
             <binFeature/>
           </classification>
           <ff>
@@ -168,7 +272,7 @@
           </ff>
         </readoutUnit>
         <readoutUnit name="Leg Bye">
-          <classification oneWinnerGroupName="Signal">
+          <classification oneWinnerGroupName="Gesture">
             <binFeature/>
           </classification>
           <ff>
@@ -177,7 +281,7 @@
           </ff>
         </readoutUnit>
         <readoutUnit name="No Ball">
-          <classification oneWinnerGroupName="Signal">
+          <classification oneWinnerGroupName="Gesture">
             <binFeature/>
           </classification>
           <ff>
@@ -186,7 +290,7 @@
           </ff>
         </readoutUnit>
         <readoutUnit name="One Short">
-          <classification oneWinnerGroupName="Signal">
+          <classification oneWinnerGroupName="Gesture">
             <binFeature/>
           </classification>
           <ff>
@@ -195,7 +299,7 @@
           </ff>
         </readoutUnit>
         <readoutUnit name="Out">
-          <classification oneWinnerGroupName="Signal">
+          <classification oneWinnerGroupName="Gesture">
             <binFeature/>
           </classification>
           <ff>
@@ -204,7 +308,7 @@
           </ff>
         </readoutUnit>
         <readoutUnit name="Penalty Runs">
-          <classification oneWinnerGroupName="Signal">
+          <classification oneWinnerGroupName="Gesture">
             <binFeature/>
           </classification>
           <ff>
@@ -213,7 +317,7 @@
           </ff>
         </readoutUnit>
         <readoutUnit name="Six">
-          <classification oneWinnerGroupName="Signal">
+          <classification oneWinnerGroupName="Gesture">
             <binFeature/>
           </classification>
           <ff>
@@ -222,7 +326,7 @@
           </ff>
         </readoutUnit>
         <readoutUnit name="TV Replay">
-          <classification oneWinnerGroupName="Signal">
+          <classification oneWinnerGroupName="Gesture">
             <binFeature/>
           </classification>
           <ff>
@@ -231,7 +335,7 @@
           </ff>
         </readoutUnit>
         <readoutUnit name="Wide">
-          <classification oneWinnerGroupName="Signal">
+          <classification oneWinnerGroupName="Gesture">
             <binFeature/>
           </classification>
           <ff>

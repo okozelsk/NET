@@ -79,6 +79,24 @@ namespace RCNet.Neural.Data
             return;
         }
 
+        /// <summary>
+        /// Function checks if the given file containd csv data in expected format for patterned feeding
+        /// </summary>
+        /// <param name="fileName">Data file name</param>
+        public static bool CheckIsPatternedCsv(string fileName)
+        {
+            using (StreamReader streamReader = new StreamReader(new FileStream(fileName, FileMode.Open)))
+            {
+                //The first row should contain the "#RepetitiveGroupOfAttributes" keyword followed by name(s) of attribute(s)
+                string delimitedRepetitiveGroupOfAttributes = streamReader.ReadLine();
+                if(!delimitedRepetitiveGroupOfAttributes.StartsWith("#RepetitiveGroupOfAttributes"))
+                {
+                    return false;
+                }
+                return true;
+            }
+        }
+
         //Static methods
         /// <summary>
         /// Loads the data and prepares PatternBundle.
@@ -122,6 +140,11 @@ namespace RCNet.Neural.Data
                 }
                 //Remove the #RepetitiveGroupOfAttributes keyword from the collection
                 repetitiveGroupOfAttributes.RemoveAt(0);
+                if(inputFieldNameCollection == null)
+                {
+                    //Substitute missing inputFieldNameCollection
+                    inputFieldNameCollection = repetitiveGroupOfAttributes.StringValueCollection;
+                }
                 //Check if attribute names match with the input fields collection
                 if (repetitiveGroupOfAttributes.NumOfStringValues < inputFieldNameCollection.Count)
                 {

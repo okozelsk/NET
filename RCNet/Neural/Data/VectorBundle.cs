@@ -120,15 +120,24 @@ namespace RCNet.Neural.Data
                 //Split column names
                 DelimitedStringValues columnNames = new DelimitedStringValues(csvDelimiter);
                 columnNames.LoadFromString(delimitedColumnNames);
-                //Check if the recognized data delimiter works properly
-                if (columnNames.NumOfStringValues < inputFieldNameCollection.Count)
+                if (inputFieldNameCollection != null)
                 {
-                    throw new FormatException("1st row of the file doesn't contain delimited column names or the value delimiter was not properly recognized.");
+                    //Check if the recognized data delimiter works properly
+                    if (columnNames.NumOfStringValues < inputFieldNameCollection.Count)
+                    {
+                        throw new FormatException("1st row of the file doesn't contain delimited column names or the value delimiter was not properly recognized.");
+                    }
+                    //Collect indexes of allowed fields
+                    foreach (string name in inputFieldNameCollection)
+                    {
+                        inputFieldIndexes.Add(columnNames.IndexOf(name));
+                    }
                 }
-                //Collect indexes of allowed fields
-                foreach (string name in inputFieldNameCollection)
+                else
                 {
-                    inputFieldIndexes.Add(columnNames.IndexOf(name));
+                    int[] indexes = new int[columnNames.NumOfStringValues];
+                    indexes.Indices();
+                    inputFieldIndexes = new List<int>(indexes);
                 }
                 for (int i = 0; i < outputFieldNameCollection.Count; i++)
                 {
