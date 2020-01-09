@@ -1637,8 +1637,8 @@
     </xs:sequence>
   </xs:complexType>
 
-  <!-- Pool - interconnection - configuration -->
-  <xs:complexType name="PoolInterconnectionCfgType">
+  <!-- Pool - interconnection - random schema - configuration -->
+  <xs:complexType name="PoolInterconnectionRandomSchemaCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="InternalSynapseCfgType" name="synapse" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
@@ -1678,7 +1678,55 @@
         <xs:documentation xml:lang="en">Default value is false</xs:documentation>
       </xs:annotation>
     </xs:attribute>
+    <xs:attribute type="xs:boolean" name="replaceExistingConnections" use="optional" default="true">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is true</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UIntGT0Type" name="repetitions" use="optional" default="1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
+
+  <!-- Pool - interconnection - chain schema - configuration -->
+  <xs:complexType name="PoolInterconnectionChainSchemaCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="InternalSynapseCfgType" name="synapse" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+    <xs:attribute type="UDoubleLE1Type" name="ratio" use="optional" default="1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="circle" use="optional" default="true">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is true</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="replaceExistingConnections" use="optional" default="true">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is true</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UIntGT0Type" name="repetitions" use="optional" default="1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <!-- Pool - interconnection - configuration -->
+  <xs:complexType name="PoolInterconnectionCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:choice minOccurs="1" maxOccurs="unbounded">
+        <xs:element type="PoolInterconnectionRandomSchemaCfgType" name="randomSchema" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="PoolInterconnectionChainSchemaCfgType" name="chainSchema" minOccurs="1" maxOccurs="1"/>
+      </xs:choice>
+    </xs:sequence>
+  </xs:complexType>
+
 
   <!-- Pool - spiking neuron group - configuration -->
   <xs:complexType name="PoolSpikingNeuronGroupCfgType">

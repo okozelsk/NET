@@ -1,84 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <demo dataFolder=".\\Data" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="DemoSettings.xsd">
 
-    
-  <case name="Classification task BeetleFly: Simple pure ESN reservoir generating FiringFadingSum predictors, Parallel Perceptron (one gate) as a classifier">
-    <samples trainingData="BeetleFly_train.csv" verificationData="BeetleFly_verify.csv"/>
-    <stateMachineCfg randomizerSeek="0">
-      <neuralPreprocessor predictorsReductionRatio="0">
-        <input>
-          <feedingPatterned bidir="false"/>
-          <external>
-            <field name="DistanceFromCenter">
-              <realFeature standardize="true" keepReserve="true"/>
-            </field>
-          </external>
-        </input>
-        <reservoirCfgContainer>
-          <reservoirCfg name="MainCfg">
-            <pools>
-              <pool name="PureESN" dimX="6" dimY="6" dimZ="5">
-                <neuronGroups>
-                  <analogGroup name="Exc-grp" role="Excitatory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction">
-                    <activationTanH/>
-                    <firingThreshold value="0.0015"/>
-                  </analogGroup>
-                  <analogGroup name="Inh-grp" role="Inhibitory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction">
-                    <activationTanH/>
-                    <firingThreshold value="0.0015"/>
-                  </analogGroup>
-                </neuronGroups>
-                <interconnection density="0.2" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
-                  <synapse/>
-                </interconnection>
-              </pool>
-            </pools>
-            <spectralRadius>
-              <analogScope value="0.9999"/>
-              <spikingScope value="NA"/>
-            </spectralRadius>
-          </reservoirCfg>
-        </reservoirCfgContainer>
-        <reservoirInstanceContainer>
-          <reservoirInstance name="Main" cfg="MainCfg">
-            <inputConnections>
-              <inputConnection fieldName="DistanceFromCenter" poolName="PureESN" density="1">
-                <synapse delayMethod="Random" maxDelay="0">
-                  <analogTarget scope="All">
-                    <weight min="0" max="1"/>
-                  </analogTarget>
-                </synapse>
-              </inputConnection>
-            </inputConnections>
-            <predictors>
-              <permission activation="false"
-                          activationSquare="false"
-                          activationFadingSum="false"
-                          activationMWAvg="false"
-                          firingFadingSum="true"
-                          firingMWAvg="false"
-                          firingCount="false"
-                          firingBinPattern="false"/>
-            </predictors>
-          </reservoirInstance>
-        </reservoirInstanceContainer>
-      </neuralPreprocessor>
-      <readoutLayer testDataRatio="0.1" folds="Auto">
-        <readoutUnit name="Beetle1Fly0">
-          <classification>
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationIdentity/>
-            <ridgeRegrTrainer attemptEpochs="1">
-              <lambda min="0.1" max="0.1" steps="2"/>
-            </ridgeRegrTrainer>
-          </ff>
-        </readoutUnit>
-      </readoutLayer>
-    </stateMachineCfg>
-  </case>
-
+  
   
   <!--
     Following configuration of the StateMachine exhibits XX% accuracy, slightly XXXX than the best algorithm
@@ -126,8 +49,10 @@
                     <activationTanH/>
                   </analogGroup>
                 </neuronGroups>
-                <interconnection density="0.1" relShareEE="1" relShareEI="1" relShareIE="1" relShareII="1" avgDistance="NA" allowSelfConnection="true">
-                  <synapse/>
+                <interconnection>
+                  <randomSchema density="0.1" relShareEE="1" relShareEI="1" relShareIE="1" relShareII="1" avgDistance="NA" allowSelfConnection="true">
+                    <synapse/>
+                  </randomSchema>
                 </interconnection>
               </pool>
               <pool name="Pool2" dimX="150" dimY="1" dimZ="1">
@@ -139,8 +64,10 @@
                     <activationTanH/>
                   </analogGroup>
                 </neuronGroups>
-                <interconnection density="0.1" relShareEE="1" relShareEI="1" relShareIE="1" relShareII="1" avgDistance="NA" allowSelfConnection="true">
-                  <synapse/>
+                <interconnection>
+                  <randomSchema density="0.1" relShareEE="1" relShareEI="1" relShareIE="1" relShareII="1" avgDistance="NA" allowSelfConnection="true">
+                    <synapse/>
+                  </randomSchema>
                 </interconnection>
               </pool>
             </pools>
@@ -365,8 +292,10 @@
                     <firingThreshold value="0.002"/>
                   </analogGroup>
                 </neuronGroups>
-                <interconnection density="0.1" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
-                  <synapse/>
+                <interconnection>
+                  <randomSchema density="0.1" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
+                    <synapse/>
+                  </randomSchema>
                 </interconnection>
               </pool>
             </pools>
@@ -479,8 +408,10 @@
                     <activationTanH/>
                   </analogGroup>
                 </neuronGroups>
-                <interconnection density="0.1" avgDistance="NA" allowSelfConnection="false">
-                  <synapse/>
+                <interconnection>
+                  <randomSchema density="0.1" avgDistance="NA" allowSelfConnection="false">
+                    <synapse/>
+                  </randomSchema>
                 </interconnection>
               </pool>
               <pool name="SpikingPool" dimX="6" dimY="6" dimZ="5">
@@ -492,8 +423,10 @@
                     <activationSimpleIF refractoryPeriods="0"/>
                   </spikingGroup>
                 </neuronGroups>
-                <interconnection density="0.3" avgDistance="NA" allowSelfConnection="false">
-                  <synapse/>
+                <interconnection>
+                  <randomSchema density="0.3" avgDistance="NA" allowSelfConnection="false">
+                    <synapse/>
+                  </randomSchema>
                 </interconnection>
               </pool>
             </pools>
@@ -608,8 +541,10 @@
                     <activationTanH/>
                   </analogGroup>
                 </neuronGroups>
-                <interconnection density="0.2" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
-                  <synapse/>
+                <interconnection>
+                  <randomSchema density="0.2" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
+                    <synapse/>
+                  </randomSchema>
                 </interconnection>
               </pool>
             </pools>
@@ -699,8 +634,10 @@
                     <firingThreshold value="0.0015"/>
                   </analogGroup>
                 </neuronGroups>
-                <interconnection density="0.2" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
-                  <synapse/>
+                <interconnection>
+                  <randomSchema density="0.2" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
+                    <synapse/>
+                  </randomSchema>
                 </interconnection>
               </pool>
             </pools>
@@ -812,8 +749,10 @@
                     </retainment>
                   </analogGroup>
                 </neuronGroups>
-                <interconnection density="0.1" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
+                <interconnection>
+                <randomSchema density="0.1" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
                   <synapse/>
+                </randomSchema>
                 </interconnection>
               </pool>
             </pools>
@@ -943,8 +882,10 @@
                     <firingThreshold value="0.00125"/>
                   </analogGroup>
                 </neuronGroups>
-                <interconnection density="0.2" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
-                  <synapse/>
+                <interconnection>
+                  <randomSchema density="0.2" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
+                    <synapse/>
+                  </randomSchema>
                 </interconnection>
               </pool>
             </pools>
@@ -1127,65 +1068,125 @@
 
   
   <!--
-    This demo case demonstrates how to instantiate two independent reservoirs. Configuration definies ESN reservoir
-    structure having one pool of 512 TanH analog neurons and two instances of the reservoir (hence in total 2x512=1024 analog neurons).
+    This demo case demonstrates how to instantiate two independent reservoirs. Configuration definies two ESN reservoir
+    structures each having two interconnected pools of 100 TanH analog neurons.
+    Two corresponding reservoirs are then instantiated (hence in total 2x2x100=400 analog neurons).
     QRD regression is used as predicting readout.
-    Dataset contains Mackey Glass chaotic time series (tau=17) and network forecasts the next value.
+    Dataset contains Mackey Glass chaotic time series (tau=17) and network very accurately forecasts the next value.
   -->
-  <case name="Forecast task Mackey Glass chaotic time series: Two analog reservoirs (ESN), QRD regression output">
+  <case name="Forecast task Mackey Glass chaotic time series: Two independent ESN reservoirs, QRD regression output">
     <samples trainingData="MackeyGlass_train.csv" verificationData="MackeyGlass_verify.csv"/>
     <stateMachineCfg randomizerSeek="0">
-      <neuralPreprocessor>
+      <neuralPreprocessor predictorsReductionRatio="0">
         <input>
-          <feedingContinuous bootCycles="Auto" routeToReadout="false"/>
+          <feedingContinuous bootCycles="Auto" routeToReadout="true"/>
           <external>
-            <field name="Value" allowRoutingToReadout="true">
+            <field name="Value" allowRoutingToReadout="true" transDiffDistance="15">
               <realFeature standardize="true" keepReserve="false"/>
             </field>
           </external>
         </input>
         <reservoirCfgContainer>
-          <reservoirCfg name="ESNCfg">
+          <reservoirCfg name="ESNCfg #1">
             <pools>
-              <pool name="Logistic pool" dimX="8" dimY="8" dimZ="8">
+              <pool name="Logistic chain pool" dimX="100" dimY="1" dimZ="1">
                 <neuronGroups>
                   <analogGroup name="Exc-Logistic" role="Excitatory" relShare="1">
                     <activationTanH/>
-                    <bias min="-0.75" max="0.75" randomSign="false" />
-                    <retainment density="1">
-                      <strength min="0.25" max="0.5" />
-                    </retainment>
                   </analogGroup>
                   <analogGroup name="Inh-Logistic" role="Inhibitory" relShare="1">
                     <activationTanH/>
-                    <bias min="-0.75" max="0.75" randomSign="false" />
-                    <retainment density="1">
-                      <strength min="0.25" max="0.5" />
-                    </retainment>
                   </analogGroup>
                 </neuronGroups>
-                <interconnection density="0.1" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
-                  <synapse/>
+                <interconnection>
+                  <chainSchema ratio="1" circle="false" repetitions="1">
+                    <synapse/>
+                  </chainSchema>
+                </interconnection>
+              </pool>
+              <pool name="Logistic random pool" dimX="100" dimY="1" dimZ="1">
+                <neuronGroups>
+                  <analogGroup name="Exc-Logistic" role="Excitatory" relShare="1">
+                    <activationTanH/>
+                  </analogGroup>
+                  <analogGroup name="Inh-Logistic" role="Inhibitory" relShare="1">
+                    <activationTanH/>
+                  </analogGroup>
+                </neuronGroups>
+                <interconnection>
+                  <randomSchema density="0.1" relShareEE="1" relShareEI="1" relShareIE="1" relShareII="1" avgDistance="NA" allowSelfConnection="true">
+                    <synapse/>
+                  </randomSchema>
                 </interconnection>
               </pool>
             </pools>
+            <pool2PoolConns>
+              <pool2PoolConn srcPool="Logistic chain pool" srcConnDensity="1" targetPool="Logistic random pool" targetConnDensity="0.01" relShareEE="1" relShareEI="1" relShareIE="1" relShareII="1">
+                <synapse/>
+              </pool2PoolConn>
+            </pool2PoolConns>
             <spectralRadius>
-              <analogScope value="0.65"/>
+              <analogScope value="0.9999"/>
+              <spikingScope value="NA"/>
+            </spectralRadius>
+          </reservoirCfg>
+          <reservoirCfg name="ESNCfg #2">
+            <pools>
+              <pool name="Logistic chain pool" dimX="100" dimY="1" dimZ="1">
+                <neuronGroups>
+                  <analogGroup name="Exc-Logistic" role="Excitatory" relShare="1">
+                    <activationTanH/>
+                  </analogGroup>
+                  <analogGroup name="Inh-Logistic" role="Inhibitory" relShare="1">
+                    <activationTanH/>
+                  </analogGroup>
+                </neuronGroups>
+                <interconnection>
+                  <chainSchema ratio="1" circle="false" repetitions="1">
+                    <synapse/>
+                  </chainSchema>
+                </interconnection>
+              </pool>
+              <pool name="Logistic random pool" dimX="100" dimY="1" dimZ="1">
+                <neuronGroups>
+                  <analogGroup name="Exc-Logistic" role="Excitatory" relShare="1">
+                    <activationTanH/>
+                  </analogGroup>
+                  <analogGroup name="Inh-Logistic" role="Inhibitory" relShare="1">
+                    <activationTanH/>
+                  </analogGroup>
+                </neuronGroups>
+                <interconnection>
+                  <randomSchema density="0.1" relShareEE="1" relShareEI="1" relShareIE="1" relShareII="1" avgDistance="NA" allowSelfConnection="true">
+                    <synapse/>
+                  </randomSchema>
+                </interconnection>
+              </pool>
+            </pools>
+            <pool2PoolConns>
+              <pool2PoolConn srcPool="Logistic random pool" srcConnDensity="1" targetPool="Logistic chain pool" targetConnDensity="0.05" relShareEE="1" relShareEI="1" relShareIE="1" relShareII="1">
+                <synapse/>
+              </pool2PoolConn>
+            </pool2PoolConns>
+            <spectralRadius>
+              <analogScope value="0.9999"/>
               <spikingScope value="NA"/>
             </spectralRadius>
           </reservoirCfg>
         </reservoirCfgContainer>
         <reservoirInstanceContainer>
-          <reservoirInstance name="ESN reservoir #1" cfg="ESNCfg">
+          <reservoirInstance name="ESN reservoir #1" cfg="ESNCfg #1">
             <inputConnections>
-              <inputConnection fieldName="Value" poolName="Logistic pool" density="0.5">
-                <synapse/>
+              <inputConnection fieldName="Value" poolName="Logistic chain pool" density="1">
+                <synapse maxDelay="0">
+                  <analogTarget scope="All" relShareOriginal="1" relShareTransDiff="1"/>
+                </synapse>
               </inputConnection>
             </inputConnections>
             <predictors>
               <permission activation="true"
-                          activationSquare="false"
-                          activationFadingSum="false"
+                          activationSquare="true"
+                          activationFadingSum="true"
                           activationMWAvg="false"
                           firingFadingSum="false"
                           firingMWAvg="false"
@@ -1193,16 +1194,18 @@
                           firingBinPattern="false"/>
             </predictors>
           </reservoirInstance>
-          <reservoirInstance name="ESN reservoir #2" cfg="ESNCfg">
+          <reservoirInstance name="ESN reservoir #2" cfg="ESNCfg #2">
             <inputConnections>
-              <inputConnection fieldName="Value" poolName="Logistic pool" density="0.5">
-                <synapse/>
+              <inputConnection fieldName="Value" poolName="Logistic random pool" density="1">
+                <synapse maxDelay="0">
+                  <analogTarget scope="All" relShareOriginal="1" relShareTransDiff="1"/>
+                </synapse>
               </inputConnection>
             </inputConnections>
             <predictors>
               <permission activation="true"
-                          activationSquare="false"
-                          activationFadingSum="false"
+                          activationSquare="true"
+                          activationFadingSum="true"
                           activationMWAvg="false"
                           firingFadingSum="false"
                           firingMWAvg="false"
@@ -1273,8 +1276,10 @@
                     </retainment>
                   </analogGroup>
                 </neuronGroups>
-                <interconnection density="0.1" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
-                  <synapse/>
+                <interconnection>
+                  <chainSchema ratio="1" circle="true" replaceExistingConnections="true" repetitions="3">
+                    <synapse/>
+                  </chainSchema>
                 </interconnection>
               </pool>
             </pools>
@@ -1395,8 +1400,10 @@
                     <activationAutoIzhikevichIF role="Inhibitory"/>
                   </spikingGroup>
                 </neuronGroups>
-                <interconnection density="0.1" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
-                  <synapse/>
+                <interconnection>
+                  <randomSchema density="0.1" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
+                    <synapse/>
+                  </randomSchema>
                 </interconnection>
               </pool>
             </pools>
@@ -1615,8 +1622,10 @@
                     <activationAdExpIF/>
                   </spikingGroup>
                 </neuronGroups>
-                <interconnection density="0.1" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
-                  <synapse/>
+                <interconnection>
+                  <randomSchema density="0.1" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
+                    <synapse/>
+                  </randomSchema>
                 </interconnection>
               </pool>
             </pools>
@@ -1839,8 +1848,10 @@
                     <firingThreshold value="0.00125"/>
                   </analogGroup>
                 </neuronGroups>
-                <interconnection density="0.1" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
-                  <synapse/>
+                <interconnection>
+                  <randomSchema density="0.1" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
+                    <synapse/>
+                  </randomSchema>
                 </interconnection>
               </pool>
             </pools>
@@ -2065,8 +2076,10 @@
                     <bias min="0" max="0" randomSign="false" />
                   </spikingGroup>
                 </neuronGroups>
-                <interconnection density="0.1" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
-                  <synapse/>
+                <interconnection>
+                  <randomSchema density="0.1" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
+                    <synapse/>
+                  </randomSchema>
                 </interconnection>
               </pool>
               <pool name="AnalogPool" dimX="5" dimY="5" dimZ="3">
@@ -2080,8 +2093,10 @@
                     <firingThreshold value="0.00125"/>
                   </analogGroup>
                 </neuronGroups>
-                <interconnection density="0.1" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
-                  <synapse/>
+                <interconnection>
+                  <randomSchema density="0.1" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
+                    <synapse/>
+                  </randomSchema>
                 </interconnection>
               </pool>
             </pools>
@@ -2314,8 +2329,10 @@
                     </retainment>
                   </analogGroup>
                 </neuronGroups>
-                <interconnection density="0.1" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
-                  <synapse/>
+                <interconnection>
+                  <randomSchema density="0.1" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
+                    <synapse/>
+                  </randomSchema>
                 </interconnection>
               </pool>
             </pools>
@@ -2427,8 +2444,10 @@
                     <activationTanH/>
                   </analogGroup>
                 </neuronGroups>
-                <interconnection density="0.05" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
-                  <synapse/>
+                <interconnection>
+                  <randomSchema density="0.05" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
+                    <synapse/>
+                  </randomSchema>
                 </interconnection>
               </pool>
             </pools>

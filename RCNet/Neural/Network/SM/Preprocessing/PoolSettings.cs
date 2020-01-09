@@ -450,59 +450,17 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             //Constants
             //Attribute properties
             /// <summary>
-            /// Density of interconnected neurons.
-            /// Each pool neuron will be connected as a source neuron for Dim.Size * InterconnectionDensity neurons.
+            /// Collection of interconnection schemas to be applied
             /// </summary>
-            public double Density { get; set; }
-            /// <summary>
-            /// EE synapses ratio
-            /// </summary>
-            public double RatioEE { get; set; }
-            /// <summary>
-            /// EI synapses ratio
-            /// </summary>
-            public double RatioEI { get; set; }
-            /// <summary>
-            /// IE synapses ratio
-            /// </summary>
-            public double RatioIE { get; set; }
-            /// <summary>
-            /// II synapses ratio
-            /// </summary>
-            public double RatioII { get; set; }
-            /// <summary>
-            /// Average distance of interconnected neurons.
-            /// 0 means random distance.
-            /// </summary>
-            public double AvgDistance { get; set; }
-            /// <summary>
-            /// Specifies whether to allow neurons to be self connected
-            /// </summary>
-            public bool AllowSelfConnection { get; set; }
-            /// <summary>
-            /// Specifies whether to keep for each neuron constant number of incoming interconnections
-            /// </summary>
-            public bool ConstantNumOfConnections { get; set; }
-            /// <summary>
-            /// Neurons in the pool are interconnected through synapses.
-            /// </summary>
-            public InternalSynapseSettings SynapseCfg { get; set; }
-
+            public List<object> Schemas { get; }
+            
             //Constructors
             /// <summary>
             /// Creates an uninitialized instance
             /// </summary>
             public InterconnectionSettings()
             {
-                Density = 0;
-                RatioEE = 0.3;
-                RatioEI = 0.2;
-                RatioIE = 0.4;
-                RatioII = 0.1;
-                AvgDistance = 0;
-                AllowSelfConnection = true;
-                ConstantNumOfConnections = false;
-                SynapseCfg = null;
+                Schemas = new List<object>();
                 return;
             }
 
@@ -512,15 +470,25 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             /// <param name="source">Source instance</param>
             public InterconnectionSettings(InterconnectionSettings source)
             {
-                Density = source.Density;
-                RatioEE = source.RatioEE;
-                RatioEI = source.RatioEI;
-                RatioIE = source.RatioIE;
-                RatioII = source.RatioII;
-                AvgDistance = source.AvgDistance;
-                AllowSelfConnection = source.AllowSelfConnection;
-                ConstantNumOfConnections = source.ConstantNumOfConnections;
-                SynapseCfg = source.SynapseCfg.DeepClone();
+                Schemas = new List<object>();
+                if(Schemas != null)
+                {
+                    foreach(Object sourceSchema in source.Schemas)
+                    {
+                        if(sourceSchema.GetType() == typeof(RandomSchemaSettings))
+                        {
+                            Schemas.Add(((RandomSchemaSettings)sourceSchema).DeepClone());
+                        }
+                        else if(sourceSchema.GetType() == typeof(ChainSchemaSettings))
+                        {
+                            Schemas.Add(((ChainSchemaSettings)sourceSchema).DeepClone());
+                        }
+                        else
+                        {
+                            throw new Exception("Unknown interconnection schema");
+                        }
+                    }
+                }
                 return;
             }
 
@@ -540,26 +508,24 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
                 XElement settingsElem = validator.Validate(elem, "rootElem");
                 //Parsing
-                //Density
-                Density = double.Parse(settingsElem.Attribute("density").Value, CultureInfo.InvariantCulture);
-                //Ratios
-                double relShareEE = double.Parse(settingsElem.Attribute("relShareEE").Value, CultureInfo.InvariantCulture);
-                double relShareEI = double.Parse(settingsElem.Attribute("relShareEI").Value, CultureInfo.InvariantCulture);
-                double relShareIE = double.Parse(settingsElem.Attribute("relShareIE").Value, CultureInfo.InvariantCulture);
-                double relShareII = double.Parse(settingsElem.Attribute("relShareII").Value, CultureInfo.InvariantCulture);
-                double sum = relShareEE + relShareEI + relShareIE + relShareII;
-                RatioEE = relShareEE / sum;
-                RatioEI = relShareEI / sum;
-                RatioIE = relShareIE / sum;
-                RatioII = relShareII / sum;
-                //Average distance
-                AvgDistance = settingsElem.Attribute("avgDistance").Value == "NA" ? 0d : double.Parse(settingsElem.Attribute("avgDistance").Value, CultureInfo.InvariantCulture);
-                //Allow self connections?
-                AllowSelfConnection = bool.Parse(settingsElem.Attribute("allowSelfConnection").Value);
-                //Will have each neuron the same number of connections?
-                ConstantNumOfConnections = bool.Parse(settingsElem.Attribute("constantNumOfConnections").Value);
-                //Synapse
-                SynapseCfg = new InternalSynapseSettings(settingsElem.Descendants("synapse").First());
+                Schemas = new List<object>();
+                foreach (XElement schemaElem in settingsElem.Descendants())
+                {
+                    if(schemaElem.Name.LocalName == "randomSchema")
+                    {
+                        Schemas.Add(new RandomSchemaSettings(schemaElem));
+                    }
+                    else if(schemaElem.Name.LocalName == "chainSchema")
+                    {
+                        Schemas.Add(new ChainSchemaSettings(schemaElem));
+                    }
+                    else
+                    {
+                        //Ignore
+                        ;
+                    }
+                }
+
                 return;
             }
 
@@ -571,18 +537,16 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             {
                 if (obj == null) return false;
                 InterconnectionSettings cmpSettings = obj as InterconnectionSettings;
-                if (Density != cmpSettings.Density ||
-                    RatioEE != cmpSettings.RatioEE ||
-                    RatioEI != cmpSettings.RatioEI ||
-                    RatioIE != cmpSettings.RatioIE ||
-                    RatioII != cmpSettings.RatioII ||
-                    AvgDistance != cmpSettings.AvgDistance ||
-                    AllowSelfConnection != cmpSettings.AllowSelfConnection ||
-                    ConstantNumOfConnections != cmpSettings.ConstantNumOfConnections ||
-                    !Equals(SynapseCfg, cmpSettings.SynapseCfg)
-                    )
+                if (Schemas.Count != cmpSettings.Schemas.Count)
                 {
                     return false;
+                }
+                for(int i = 0; i < Schemas.Count; i++)
+                {
+                    if (!Equals(Schemas[i], cmpSettings.Schemas[i]))
+                    {
+                        return false;
+                    }
                 }
                 return true;
             }
@@ -603,6 +567,305 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 InterconnectionSettings clone = new InterconnectionSettings(this);
                 return clone;
             }
+
+            //Inner classes
+            /// <summary>
+            /// Class contains configuration of the Random schema of pool's neurons interconnection
+            /// </summary>
+            [Serializable]
+            public class RandomSchemaSettings
+            {
+                //Constants
+                //Attribute properties
+                /// <summary>
+                /// Density of interconnected neurons.
+                /// Each pool neuron will be connected as a source neuron for Pool.Size * Density neurons.
+                /// </summary>
+                public double Density { get; set; }
+                /// <summary>
+                /// EE synapses ratio
+                /// </summary>
+                public double RatioEE { get; set; }
+                /// <summary>
+                /// EI synapses ratio
+                /// </summary>
+                public double RatioEI { get; set; }
+                /// <summary>
+                /// IE synapses ratio
+                /// </summary>
+                public double RatioIE { get; set; }
+                /// <summary>
+                /// II synapses ratio
+                /// </summary>
+                public double RatioII { get; set; }
+                /// <summary>
+                /// Average distance of interconnected neurons.
+                /// 0 means random distance.
+                /// </summary>
+                public double AvgDistance { get; set; }
+                /// <summary>
+                /// Specifies whether to allow neurons to be self connected
+                /// </summary>
+                public bool AllowSelfConnection { get; set; }
+                /// <summary>
+                /// Specifies whether to keep for each neuron constant number of incoming interconnections
+                /// </summary>
+                public bool ConstantNumOfConnections { get; set; }
+                /// <summary>
+                /// Specifies whether connections of this schema will replace existing connections
+                /// </summary>
+                public bool ReplaceExistingConnections { get; set; }
+                /// <summary>
+                /// Number of applications of this schema
+                /// </summary>
+                public int Repetitions { get; set; }
+                /// <summary>
+                /// Neurons in the pool are interconnected through synapses.
+                /// </summary>
+                public InternalSynapseSettings SynapseCfg { get; set; }
+
+                //Constructors
+                /// <summary>
+                /// Creates an uninitialized instance
+                /// </summary>
+                public RandomSchemaSettings()
+                {
+                    Density = 0;
+                    RatioEE = 0.3;
+                    RatioEI = 0.2;
+                    RatioIE = 0.4;
+                    RatioII = 0.1;
+                    AvgDistance = 0;
+                    AllowSelfConnection = true;
+                    ConstantNumOfConnections = false;
+                    ReplaceExistingConnections = true;
+                    Repetitions = 1;
+                    SynapseCfg = null;
+                    return;
+                }
+
+                /// <summary>
+                /// The deep copy constructor
+                /// </summary>
+                /// <param name="source">Source instance</param>
+                public RandomSchemaSettings(RandomSchemaSettings source)
+                {
+                    Density = source.Density;
+                    RatioEE = source.RatioEE;
+                    RatioEI = source.RatioEI;
+                    RatioIE = source.RatioIE;
+                    RatioII = source.RatioII;
+                    AvgDistance = source.AvgDistance;
+                    AllowSelfConnection = source.AllowSelfConnection;
+                    ConstantNumOfConnections = source.ConstantNumOfConnections;
+                    ReplaceExistingConnections = source.ReplaceExistingConnections;
+                    Repetitions = source.Repetitions;
+                    SynapseCfg = source.SynapseCfg.DeepClone();
+                    return;
+                }
+
+                /// <summary>
+                /// Creates the instance and initialize it from given xml element.
+                /// </summary>
+                /// <param name="settingsElem">
+                /// Xml data containing settings.
+                /// Content of xml element is always validated against the xml schema.
+                /// </param>
+                public RandomSchemaSettings(XElement settingsElem)
+                {
+                    //Parsing
+                    //Density
+                    Density = double.Parse(settingsElem.Attribute("density").Value, CultureInfo.InvariantCulture);
+                    //Ratios
+                    double relShareEE = double.Parse(settingsElem.Attribute("relShareEE").Value, CultureInfo.InvariantCulture);
+                    double relShareEI = double.Parse(settingsElem.Attribute("relShareEI").Value, CultureInfo.InvariantCulture);
+                    double relShareIE = double.Parse(settingsElem.Attribute("relShareIE").Value, CultureInfo.InvariantCulture);
+                    double relShareII = double.Parse(settingsElem.Attribute("relShareII").Value, CultureInfo.InvariantCulture);
+                    double sum = relShareEE + relShareEI + relShareIE + relShareII;
+                    RatioEE = relShareEE / sum;
+                    RatioEI = relShareEI / sum;
+                    RatioIE = relShareIE / sum;
+                    RatioII = relShareII / sum;
+                    //Average distance
+                    AvgDistance = settingsElem.Attribute("avgDistance").Value == "NA" ? 0d : double.Parse(settingsElem.Attribute("avgDistance").Value, CultureInfo.InvariantCulture);
+                    //Allow self connections?
+                    AllowSelfConnection = bool.Parse(settingsElem.Attribute("allowSelfConnection").Value);
+                    //Will each neuron have the same number of connections?
+                    ConstantNumOfConnections = bool.Parse(settingsElem.Attribute("constantNumOfConnections").Value);
+                    //Will be replaced existing connections?
+                    ReplaceExistingConnections = bool.Parse(settingsElem.Attribute("replaceExistingConnections").Value);
+                    //Number of schema repetitions
+                    Repetitions = int.Parse(settingsElem.Attribute("repetitions").Value, CultureInfo.InvariantCulture);
+                    //Synapse
+                    SynapseCfg = new InternalSynapseSettings(settingsElem.Descendants("synapse").First());
+                    return;
+                }
+
+                //Methods
+                /// <summary>
+                /// See the base.
+                /// </summary>
+                public override bool Equals(object obj)
+                {
+                    if (obj == null) return false;
+                    RandomSchemaSettings cmpSettings = obj as RandomSchemaSettings;
+                    if (Density != cmpSettings.Density ||
+                        RatioEE != cmpSettings.RatioEE ||
+                        RatioEI != cmpSettings.RatioEI ||
+                        RatioIE != cmpSettings.RatioIE ||
+                        RatioII != cmpSettings.RatioII ||
+                        AvgDistance != cmpSettings.AvgDistance ||
+                        AllowSelfConnection != cmpSettings.AllowSelfConnection ||
+                        ConstantNumOfConnections != cmpSettings.ConstantNumOfConnections ||
+                        ReplaceExistingConnections != cmpSettings.ReplaceExistingConnections ||
+                        Repetitions != cmpSettings.Repetitions ||
+                        !Equals(SynapseCfg, cmpSettings.SynapseCfg)
+                        )
+                    {
+                        return false;
+                    }
+                    return true;
+                }
+
+                /// <summary>
+                /// See the base.
+                /// </summary>
+                public override int GetHashCode()
+                {
+                    return base.GetHashCode();
+                }
+
+                /// <summary>
+                /// Creates the deep copy instance of this instance
+                /// </summary>
+                public RandomSchemaSettings DeepClone()
+                {
+                    RandomSchemaSettings clone = new RandomSchemaSettings(this);
+                    return clone;
+                }
+
+            }//RandomSchemaSettings
+
+            /// <summary>
+            /// Class contains configuration of the Chain schema of pool's neurons interconnection
+            /// </summary>
+            [Serializable]
+            public class ChainSchemaSettings
+            {
+                //Constants
+                //Attribute properties
+                /// <summary>
+                /// Ratio of involved neurons.
+                /// </summary>
+                public double Ratio { get; set; }
+                /// <summary>
+                /// Specifies whether the chain will be closed to circle
+                /// </summary>
+                public bool Circle { get; set; }
+                /// <summary>
+                /// Specifies whether connections of this schema will replace existing connections
+                /// </summary>
+                public bool ReplaceExistingConnections { get; set; }
+                /// <summary>
+                /// Number of applications of this schema
+                /// </summary>
+                public int Repetitions { get; set; }
+                /// <summary>
+                /// Neurons in the pool are interconnected through synapses.
+                /// </summary>
+                public InternalSynapseSettings SynapseCfg { get; set; }
+
+                //Constructors
+                /// <summary>
+                /// Creates an uninitialized instance
+                /// </summary>
+                public ChainSchemaSettings()
+                {
+                    Ratio = 0;
+                    Circle = false;
+                    ReplaceExistingConnections = true;
+                    Repetitions = 1;
+                    SynapseCfg = null;
+                    return;
+                }
+
+                /// <summary>
+                /// The deep copy constructor
+                /// </summary>
+                /// <param name="source">Source instance</param>
+                public ChainSchemaSettings(ChainSchemaSettings source)
+                {
+                    Ratio = source.Ratio;
+                    Circle = source.Circle;
+                    ReplaceExistingConnections = source.ReplaceExistingConnections;
+                    Repetitions = source.Repetitions;
+                    SynapseCfg = source.SynapseCfg.DeepClone();
+                    return;
+                }
+
+                /// <summary>
+                /// Creates the instance and initialize it from given xml element.
+                /// </summary>
+                /// <param name="settingsElem">
+                /// Xml data containing settings.
+                /// Content of xml element is always validated against the xml schema.
+                /// </param>
+                public ChainSchemaSettings(XElement settingsElem)
+                {
+                    //Parsing
+                    //Density
+                    Ratio = double.Parse(settingsElem.Attribute("ratio").Value, CultureInfo.InvariantCulture);
+                    //Will be chain closed to circle?
+                    Circle = bool.Parse(settingsElem.Attribute("circle").Value);
+                    //Will be replaced existing connections?
+                    ReplaceExistingConnections = bool.Parse(settingsElem.Attribute("replaceExistingConnections").Value);
+                    //Number of schema repetitions
+                    Repetitions = int.Parse(settingsElem.Attribute("repetitions").Value, CultureInfo.InvariantCulture);
+                    //Synapse
+                    SynapseCfg = new InternalSynapseSettings(settingsElem.Descendants("synapse").First());
+                    return;
+                }
+
+                //Methods
+                /// <summary>
+                /// See the base.
+                /// </summary>
+                public override bool Equals(object obj)
+                {
+                    if (obj == null) return false;
+                    ChainSchemaSettings cmpSettings = obj as ChainSchemaSettings;
+                    if (Ratio != cmpSettings.Ratio ||
+                        Circle != cmpSettings.Circle ||
+                        ReplaceExistingConnections != cmpSettings.ReplaceExistingConnections ||
+                        Repetitions != cmpSettings.Repetitions ||
+                        !Equals(SynapseCfg, cmpSettings.SynapseCfg)
+                        )
+                    {
+                        return false;
+                    }
+                    return true;
+                }
+
+                /// <summary>
+                /// See the base.
+                /// </summary>
+                public override int GetHashCode()
+                {
+                    return base.GetHashCode();
+                }
+
+                /// <summary>
+                /// Creates the deep copy instance of this instance
+                /// </summary>
+                public ChainSchemaSettings DeepClone()
+                {
+                    ChainSchemaSettings clone = new ChainSchemaSettings(this);
+                    return clone;
+                }
+
+            }//ChainSchemaSettings
+
+
 
         }//InterconnectionSettings
 

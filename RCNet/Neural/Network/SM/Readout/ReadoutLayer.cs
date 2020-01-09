@@ -126,8 +126,7 @@ namespace RCNet.Neural.Network.SM.Readout
         /// <param name="oneWinnerGroupName">Name of One Winner group</param>
         /// <param name="dataVector">Vector of values corresponding to readout units</param>
         /// <param name="rls">Readout layer settings</param>
-        /// <param name="ces">Collection of the cluster's error statistics</param>
-        public static int DecideOneWinner(string oneWinnerGroupName, double[] dataVector, ReadoutLayerSettings rls, List<ClusterErrStatistics> ces)
+        public static int DecideOneWinner(string oneWinnerGroupName, double[] dataVector, ReadoutLayerSettings rls)
         {
             //Obtain group members
             List<ReadoutLayerSettings.ReadoutUnitSettings> rusCollection = rls.GetOneWinnerGroupMembers(oneWinnerGroupName);
@@ -461,7 +460,7 @@ namespace RCNet.Neural.Network.SM.Readout
         /// <param name="readoutLayerVector">Vector of values corresponding to readout units</param>
         public ReadoutData GetReadoutData(double[] readoutLayerVector)
         {
-            return new ReadoutData(readoutLayerVector, _settings, _clusterErrStatisticsCollection);
+            return new ReadoutData(readoutLayerVector, _settings);
         }
 
         /// <summary>
@@ -499,8 +498,7 @@ namespace RCNet.Neural.Network.SM.Readout
             /// </summary>
             /// <param name="dataVector">Vector of values corresponding to readout units</param>
             /// <param name="rls">Readout layer settings</param>
-            /// <param name="ces">Collection of the cluster's error statistics</param>
-            public ReadoutData(double[] dataVector, ReadoutLayerSettings rls, List<ClusterErrStatistics> ces)
+            public ReadoutData(double[] dataVector, ReadoutLayerSettings rls)
             {
                 //Alone units
                 DataVector = dataVector;
@@ -514,7 +512,7 @@ namespace RCNet.Neural.Network.SM.Readout
                 foreach (string oneWinnerGroupName in rls.OneWinnerGroupNameCollection.Values)
                 {
                     //There is One Winner group
-                    int winningUnitIndex = ReadoutLayer.DecideOneWinner(oneWinnerGroupName, dataVector, rls, ces);
+                    int winningUnitIndex = ReadoutLayer.DecideOneWinner(oneWinnerGroupName, dataVector, rls);
                     OneWinnerDataCollection.Add(oneWinnerGroupName, new OneWinnerGroupData()
                     {
                         GroupName = oneWinnerGroupName,
