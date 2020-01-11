@@ -119,6 +119,11 @@ See the [wiki pages.](https://en.wikipedia.org/wiki/Biological_neuron_model)
 |||
 |ParallelPerceptron|Implements the parallel perceptron network|
 |PDeltaRuleTrainer|P-Delta rule trainer of the parallel perceptron network|
+|||
+|TrainedNetwork|Encapsulates trained non-recurrent network and related error statistics.|
+|TrainedNetworkBuilder|Builds single trained network.|
+|TrainedNetworkCluster|Encapsulates set of trained non-recurrent networks and related error statistics.|
+|TrainedNetworkClusterBuilder|Builds cluster of trained networks. Supports x-fold cross validation.|
 
 ### State Machine components
 |Component|Description|
@@ -130,8 +135,8 @@ See the [wiki pages.](https://en.wikipedia.org/wiki/Biological_neuron_model)
 |HiddenNeuron|Supports both analog and spiking activation functions and can produce analog signal and/or spikes (neuron is able to fire spikes even when stateless analog activation is used). Supports Retainment property of analog activation (leaky integrator). Supports set of different predictors.|
 |Reservoir|Provides recurrent network supporting analog and spiking neurons working directly together. Main features: SpectralRadius (for weights of analog, spiking or both neurons), Multiple 3D pools of neurons, Pool to pool connections. It can work as the Echo State Network reservoir, Liquid State Machine reservoir or Mixed reservoir|
 |NeuralPreprocessor|Provides data preprocessing to predictors. Supports multiple internal reservoirs. Supports virtual input data associated with predefined signal generators. Supports two input feeding regimes: Continuous and Patterned|
-|ReadoutUnit|Readout unit does the Forecast or Classification. Contains cluster of trained readout networks and related important error statistics. Trained unit can contain cluster of the Feed Forward Networks or the Parallel Perceptron Networks|
-|ReadoutLayer|Class implements independent readout layer consisting of trained readout units. Supports x-fold cross validation. Readout layer is useable separatedly or together with reservoir computing preprocessing.|
+|ReadoutUnit|Readout unit does the Forecast or Classification. Contains cluster of trained readout networks and related important error statistics. Trained unit can contain cluster of the Feed Forward Networks or the Parallel Perceptron Networks. Supports x-fold cross validation.|
+|ReadoutLayer|Class implements independent readout layer consisting of trained readout units. Readout layer is useable separatedly or together with reservoir computing preprocessing.|
 
 ### State Machine
 The main component. Encapsulates independent NeuralPreprocessor and ReadoutLayer components into the single component and adds support for routing specific predictors and input fields to the specific readout units. Allows to bypass NeuralPreprocessor and to use input data directly as a predictors for the readout layer.
