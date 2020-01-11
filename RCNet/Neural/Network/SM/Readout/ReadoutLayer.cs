@@ -9,6 +9,7 @@ using RCNet.Neural.Activation;
 using RCNet.Neural.Data;
 using RCNet.Extensions;
 using RCNet.Neural.Data.Filter;
+using RCNet.Neural.Network.NonRecurrent;
 
 namespace RCNet.Neural.Network.SM.Readout
 {
@@ -19,14 +20,6 @@ namespace RCNet.Neural.Network.SM.Readout
     public class ReadoutLayer
     {
         //Constants
-        /// <summary>
-        /// Maximum part of available samples useable for test purposes
-        /// </summary>
-        public const double MaxRatioOfTestData = 0.5d;
-        /// <summary>
-        /// Minimum length of the test dataset
-        /// </summary>
-        public const int MinLengthOfTestDataset = 2;
 
         //Static attributes
         /// <summary>
@@ -38,9 +31,9 @@ namespace RCNet.Neural.Network.SM.Readout
         /// <summary>
         /// Delegate of RegressionEpochDone event handler.
         /// </summary>
-        /// <param name="regrState">Current state of the regression process</param>
-        /// <param name="bestUnitChanged">Indicates that the best readout unit was changed as a result of the performed epoch</param>
-        public delegate void RegressionEpochDoneHandler(ReadoutUnitBuilder.RegrState regrState, bool bestUnitChanged);
+        /// <param name="buildingState">Current state of the regression process</param>
+        /// <param name="foundBetter">Indicates that the best network was found as a result of the performed epoch</param>
+        public delegate void RegressionEpochDoneHandler(TrainedNetworkBuilder.BuildingState buildingState, bool foundBetter);
 
         //Events
         /// <summary>
@@ -72,13 +65,9 @@ namespace RCNet.Neural.Network.SM.Readout
         /// </summary>
         private PredictorsMapper _predictorsMapper;
         /// <summary>
-        /// Collection of clusters of trained readout units. One cluster of units per output field.
+        /// Collection of trained readout units.
         /// </summary>
-        private ReadoutUnit[][] _clusterCollection;
-        /// <summary>
-        /// Cluster overall error statistics collection
-        /// </summary>
-        private List<ClusterErrStatistics> _clusterErrStatisticsCollection;
+        private ReadoutUnit[] _readoutUnitCollection;
 
 
 
@@ -103,17 +92,17 @@ namespace RCNet.Neural.Network.SM.Readout
 
         //Properties
         /// <summary>
-        /// Cluster overall error statistics collection
+        /// Cluster error statistics of readout units
         /// </summary>
-        public List<ClusterErrStatistics> ClusterErrStatisticsCollection
+        public List<TrainedNetworkCluster.ClusterErrStatistics> ClusterErrStatisticsCollection
         {
             get
             {
                 //Create and return the deep clone
-                List<ClusterErrStatistics> clonedStatisticsCollection = new List<ClusterErrStatistics>(_clusterErrStatisticsCollection.Count);
-                foreach (ClusterErrStatistics ces in _clusterErrStatisticsCollection)
+                List<TrainedNetworkCluster.ClusterErrStatistics> clonedStatisticsCollection = new List<TrainedNetworkCluster.ClusterErrStatistics>(_readoutUnitCollection.Length);
+                foreach (ReadoutUnit ru in _readoutUnitCollection)
                 {
-                    clonedStatisticsCollection.Add(ces.DeepClone());
+                    clonedStatisticsCollection.Add(ru.NetworkCluster.ErrorStats.DeepClone());
                 }
                 return clonedStatisticsCollection;
             }
@@ -151,16 +140,16 @@ namespace RCNet.Neural.Network.SM.Readout
             _predictorFeatureFilterCollection = null;
             _outputFeatureFilterCollection = null;
             _predictorsMapper = null;
-            _clusterCollection = new ReadoutUnit[_settings.ReadoutUnitCfgCollection.Count][];
-            _clusterErrStatisticsCollection = new List<ClusterErrStatistics>();
+            _readoutUnitCollection = new ReadoutUnit[_settings.ReadoutUnitCfgCollection.Count];
+            _readoutUnitCollection.Populate(null);
             Trained = false;
             return;
         }
 
-        private void OnRegressionEpochDone(ReadoutUnitBuilder.RegrState regrState, bool bestUnitChanged)
+        private void OnRegressionEpochDone(TrainedNetworkBuilder.BuildingState buildingState, bool foundBetter)
         {
             //Only raise up
-            RegressionEpochDone(regrState, bestUnitChanged);
+            RegressionEpochDone(buildingState, foundBetter);
             return;
         }
 
@@ -173,7 +162,7 @@ namespace RCNet.Neural.Network.SM.Readout
         /// <returns>Results of the regression</returns>
         public RegressionOverview Build(VectorBundle dataBundle,
                                         PredictorsMapper predictorsMapper = null,
-                                        ReadoutUnitBuilder.RegressionControllerDelegate controller = null
+                                        TrainedNetworkBuilder.RegressionControllerDelegate controller = null
                                         )
         {
             //Basic checks
@@ -242,94 +231,41 @@ namespace RCNet.Neural.Network.SM.Readout
                 normalizedIdealOutputsCollection[pairIdx] = outputs;
             });
 
-            //Data processing
             //Random object initialization
             Random rand = new Random(0);
-            //Test dataset size
-            if (_settings.TestDataRatio > MaxRatioOfTestData)
-            {
-                throw new ArgumentException($"Test data rato is greater than {MaxRatioOfTestData.ToString(CultureInfo.InvariantCulture)}", "TestDataSetSize");
-            }
-            int testDataSetLength = (int)Math.Round(normalizedIdealOutputsCollection.Length * _settings.TestDataRatio, 0);
-            if (testDataSetLength < MinLengthOfTestDataset)
-            {
-                throw new ArgumentException($"Num of test samples is less than {MinLengthOfTestDataset.ToString(CultureInfo.InvariantCulture)}", "TestDataSetSize");
-            }
-            //Number of folds
-            int numOfFolds = _settings.NumOfFolds;
-            if (numOfFolds <= 0)
-            {
-                //Auto setup
-                numOfFolds = normalizedIdealOutputsCollection.Length / testDataSetLength;
-            }
             //Create shuffled copy of the data
             VectorBundle shuffledData = new VectorBundle(normalizedPredictorsCollection, normalizedIdealOutputsCollection);
             shuffledData.Shuffle(rand);
-            //Data inspection, preparation of datasets and training of ReadoutUnits
-            //Clusters of readout units (one cluster per each output field)
-            for (int clusterIdx = 0; clusterIdx < _settings.ReadoutUnitCfgCollection.Count; clusterIdx++)
+            //Building of readout units
+            for (int unitIdx = 0; unitIdx < _settings.ReadoutUnitCfgCollection.Count; unitIdx++)
             {
-                _clusterCollection[clusterIdx] = new ReadoutUnit[numOfFolds];
                 List<double[]> idealValueCollection = new List<double[]>(normalizedIdealOutputsCollection.Length);
                 //Transformation of ideal vectors to a single value vectors
                 foreach (double[] idealVector in shuffledData.OutputVectorCollection)
                 {
                     double[] value = new double[1];
-                    value[0] = idealVector[clusterIdx];
+                    value[0] = idealVector[unitIdx];
                     idealValueCollection.Add(value);
                 }
-                List<double[]> readoutUnitInputVectorCollection = _predictorsMapper.CreateVectorCollection(_settings.ReadoutUnitCfgCollection[clusterIdx].Name, shuffledData.InputVectorCollection);
+                List<double[]> readoutUnitInputVectorCollection = _predictorsMapper.CreateVectorCollection(_settings.ReadoutUnitCfgCollection[unitIdx].Name, shuffledData.InputVectorCollection);
                 VectorBundle readoutUnitDataBundle = new VectorBundle(readoutUnitInputVectorCollection, idealValueCollection);
-                //Data split
-                List<VectorBundle> subBundleCollection = readoutUnitDataBundle.Split(testDataSetLength, (_settings.ReadoutUnitCfgCollection[clusterIdx].TaskType == ReadoutUnit.TaskType.Classification) ? DataRange.Mid : double.NaN);
-                //Instantiate cluster error statistics
-                ClusterErrStatistics ces = new ClusterErrStatistics(_settings.ReadoutUnitCfgCollection[clusterIdx].Name,
-                                                                    clusterIdx,
-                                                                    _settings.ReadoutUnitCfgCollection[clusterIdx].TaskType,
-                                                                    numOfFolds,
-                                                                    DataRange.Mid
-                                                                    );
-                //Train unit for each fold in the cluster.
-                for (int foldIdx = 0; foldIdx < numOfFolds; foldIdx++)
-                {
-                    //Prepare training data bundle
-                    VectorBundle trainingData = new VectorBundle();
-                    for (int bundleIdx = 0; bundleIdx < subBundleCollection.Count; bundleIdx++)
-                    {
-                        if (bundleIdx != foldIdx)
-                        {
-                            trainingData.Add(subBundleCollection[bundleIdx]);
-                        }
-                    }
-                    ReadoutUnitBuilder readoutUnitBuilder = new ReadoutUnitBuilder(_settings.ReadoutUnitCfgCollection[clusterIdx],
-                                                                                   foldIdx + 1,
-                                                                                   numOfFolds,
-                                                                                   trainingData,
-                                                                                   subBundleCollection[foldIdx],
-                                                                                   rand,
-                                                                                   controller
-                                                                                   );
-                    //Register notification
-                    readoutUnitBuilder.RegressionEpochDone += OnRegressionEpochDone;
-                    //Build trained readout unit. Trained unit becomes to be the predicting cluster member
-                    _clusterCollection[clusterIdx][foldIdx] = readoutUnitBuilder.Build();
-                    //Update cluster error statistics (pesimistic approach)
-                    for (int sampleIdx = 0; sampleIdx < subBundleCollection[foldIdx].OutputVectorCollection.Count; sampleIdx++)
-                    {
-                        double nrmComputedValue = _clusterCollection[clusterIdx][foldIdx].Network.Compute(subBundleCollection[foldIdx].InputVectorCollection[sampleIdx])[0];
-                        double natComputedValue = _outputFeatureFilterCollection[clusterIdx].ApplyReverse(nrmComputedValue);
-                        double natIdealValue = _outputFeatureFilterCollection[clusterIdx].ApplyReverse(subBundleCollection[foldIdx].OutputVectorCollection[sampleIdx][0]);
-                        ces.Update(nrmComputedValue,
-                                   subBundleCollection[foldIdx].OutputVectorCollection[sampleIdx][0],
-                                   natComputedValue,
-                                   natIdealValue
-                                   );
-                    }
-
-                }//foldIdx
-                _clusterErrStatisticsCollection.Add(ces);
-
-            }//clusterIdx
+                TrainedNetworkClusterBuilder readoutUnitBuilder = new TrainedNetworkClusterBuilder(_settings.ReadoutUnitCfgCollection[unitIdx].Name,
+                                                                                                   _settings.ReadoutUnitCfgCollection[unitIdx].NetSettings,
+                                                                                                   _settings.ReadoutUnitCfgCollection[unitIdx].BinBorder,
+                                                                                                   rand,
+                                                                                                   controller
+                                                                                                   );
+                //Register notification
+                readoutUnitBuilder.RegressionEpochDone += OnRegressionEpochDone;
+                //Build trained readout unit. Trained unit becomes to be the predicting cluster member
+                _readoutUnitCollection[unitIdx] = new ReadoutUnit(unitIdx,
+                                                                  readoutUnitBuilder.Build(readoutUnitDataBundle,
+                                                                                           _settings.TestDataRatio,
+                                                                                           _settings.NumOfFolds,
+                                                                                           new BaseFeatureFilter[] {_outputFeatureFilterCollection [unitIdx]}
+                                                                                           )
+                                                                  );
+            }//unitIdx
             
             //Result bundle (performs full recomputation of the original data)
             ResultBundle resultBundle = new ResultBundle(dataBundle.InputVectorCollection.Count);
@@ -359,45 +295,6 @@ namespace RCNet.Neural.Network.SM.Readout
                 sb.Append(leftMargin + $"Output field [{_settings.ReadoutUnitCfgCollection[outputIdx].Name}]: {predictedValues[outputIdx].ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
             }
             return sb.ToString();
-        }
-
-        private double Compute(double[] predictors, int clusterIdx)
-        {
-            string readoutUnitName = _settings.ReadoutUnitCfgCollection[clusterIdx].Name;
-            double[] readoutUnitPredictors = _predictorsMapper.CreateVector(readoutUnitName, predictors);
-            WeightedAvg weightedResult = new WeightedAvg();
-            //Loop cluster members' predictions
-            foreach (ReadoutUnit clusterMember in _clusterCollection[clusterIdx])
-            {
-                double computedValue = clusterMember.Network.Compute(readoutUnitPredictors)[0];
-                double weight = 0d;
-                if (_settings.ReadoutUnitCfgCollection[clusterIdx].TaskType == ReadoutUnit.TaskType.Classification)
-                {
-                    //Classification
-                    //Training accuracy as a weight base
-                    weight = 1d - clusterMember.TrainingBinErrorStat.TotalErrStat.ArithAvg;
-                    if (clusterMember.TestingBinErrorStat != null && clusterMember.TestingBinErrorStat.TotalErrStat.NumOfSamples > 0)
-                    {
-                        //Testing results are available
-                        //Combined accuracy as a resulting wight
-                        weight *= 1d - clusterMember.TestingBinErrorStat.TotalErrStat.ArithAvg;
-                    }
-                }
-                else
-                {
-                    //Forecast
-                    //Training accuracy as a weight base
-                    weight = 1d - clusterMember.TrainingErrorStat.ArithAvg;
-                    if (clusterMember.TestingErrorStat != null && clusterMember.TestingErrorStat.NumOfSamples > 0)
-                    {
-                        //Testing results are available
-                        //Combined accuracy as a resulting wight
-                        weight *= 1d - clusterMember.TestingErrorStat.ArithAvg;
-                    }
-                }
-                weightedResult.AddSampleValue(computedValue, weight);
-            }
-            return weightedResult.Avg;
         }
 
         /// <summary>
@@ -445,31 +342,22 @@ namespace RCNet.Neural.Network.SM.Readout
                 throw new Exception("Readout layer is not trained. Build function has to be called before Compute function can be used.");
             }
             double[] nrmPredictors = NormalizePredictors(predictors);
-            double[] outputVector = new double[_clusterCollection.Length];
-            for(int clusterIdx = 0; clusterIdx < _clusterCollection.Length; clusterIdx++)
+            double[] outputVector = new double[_readoutUnitCollection.Length];
+            for(int unitIdx = 0; unitIdx < _readoutUnitCollection.Length; unitIdx++)
             {
-                outputVector[clusterIdx] = Compute(nrmPredictors, clusterIdx);
+                outputVector[unitIdx] = _readoutUnitCollection[unitIdx].NetworkCluster.Compute(nrmPredictors, out List<double[]> memberOutputCollection)[0];
             }
             double[] natOuputVector = NaturalizeOutputs(outputVector);
             return natOuputVector;
         }
 
         /// <summary>
-        /// Returns rich readout data
-        /// </summary>
-        /// <param name="readoutLayerVector">Vector of values corresponding to readout units</param>
-        public ReadoutData GetReadoutData(double[] readoutLayerVector)
-        {
-            return new ReadoutData(readoutLayerVector, _settings);
-        }
-
-        /// <summary>
-        /// Computes readout layer rich output data
+        /// Computes readout layer and returns rich output data
         /// </summary>
         /// <param name="predictors">The predictors</param>
         public ReadoutData ComputeReadoutData(double[] predictors)
         {
-            return GetReadoutData(Compute(predictors));
+            return new ReadoutData(Compute(predictors), _settings);
         }
 
         //Inner classes
@@ -767,121 +655,6 @@ namespace RCNet.Neural.Network.SM.Readout
         }
 
         /// <summary>
-        /// Overall error statistics of the cluster of readout units
-        /// </summary>
-        [Serializable]
-        public class ClusterErrStatistics
-        {
-            //Property attributes
-            /// <summary>
-            /// Name of the readout unit
-            /// </summary>
-            public string ReadoutUnitName { get; }
-            /// <summary>
-            /// Index of the readout unit
-            /// </summary>
-            public int ReadoutUnitIndex { get; }
-            /// <summary>
-            /// Type of the solved neural task
-            /// </summary>
-            public ReadoutUnit.TaskType TaskType { get; }
-            /// <summary>
-            /// Number of computing networks within the cluster
-            /// </summary>
-            public int NumOfMembers { get; }
-            /// <summary>
-            /// Error statistics of the distance between computed and ideal valus in natural form
-            /// </summary>
-            public BasicStat NatPrecissionErrStat { get; }
-            /// <summary>
-            /// Error statistics of the distance between computed and ideal valus in normalized form
-            /// </summary>
-            public BasicStat NrmPrecissionErrStat { get; }
-            /// <summary>
-            /// Statistics of the binary errors.
-            /// Relevant only for the classification task type.
-            /// </summary>
-            public BinErrStat BinaryErrStat { get; }
-
-            /// <summary>
-            /// Constructs an instance prepared for initialization (updates)
-            /// </summary>
-            /// <param name="readoutUnitName">Name of the readout unit</param>
-            /// <param name="readoutUnitIndex">Index of the readout unit</param>
-            /// <param name="taskType">Type of neural task</param>
-            /// <param name="numOfMembers">Number of computing networks within the cluster</param>
-            /// <param name="binBorder">Binary 0/1 border. Double value LT this border is considered as 0 and GE as 1.
-            /// (relevant only if task type is Classification)
-            /// </param>
-            public ClusterErrStatistics(string readoutUnitName,
-                                        int readoutUnitIndex,
-                                        ReadoutUnit.TaskType taskType,
-                                        int numOfMembers,
-                                        double binBorder
-                                        )
-            {
-                ReadoutUnitName = readoutUnitName;
-                TaskType = taskType;
-                NumOfMembers = numOfMembers;
-                NatPrecissionErrStat = new BasicStat();
-                NrmPrecissionErrStat = new BasicStat();
-                BinaryErrStat = null;
-                if (TaskType == ReadoutUnit.TaskType.Classification)
-                {
-                    BinaryErrStat = new BinErrStat(binBorder);
-                }
-                return;
-            }
-
-            /// <summary>
-            /// A deep copy constructor
-            /// </summary>
-            /// <param name="source">Source instance</param>
-            public ClusterErrStatistics(ClusterErrStatistics source)
-            {
-                ReadoutUnitName = source.ReadoutUnitName;
-                ReadoutUnitIndex = source.ReadoutUnitIndex;
-                TaskType = source.TaskType;
-                NumOfMembers = source.NumOfMembers;
-                NatPrecissionErrStat = new BasicStat(source.NatPrecissionErrStat);
-                NrmPrecissionErrStat = new BasicStat(source.NrmPrecissionErrStat);
-                BinaryErrStat = null;
-                if (TaskType == ReadoutUnit.TaskType.Classification)
-                {
-                    BinaryErrStat = new BinErrStat(source.BinaryErrStat);
-                }
-                return;
-            }
-
-            /// <summary>
-            /// Updates cluster statistics
-            /// </summary>
-            /// <param name="nrmComputedValue">Normalized value computed by the cluster</param>
-            /// <param name="nrmIdealValue">Normalized ideal value</param>
-            /// <param name="natComputedValue">Naturalized value computed by the cluster</param>
-            /// <param name="natIdealValue">Naturalized ideal value</param>
-            public void Update(double nrmComputedValue, double nrmIdealValue, double natComputedValue, double natIdealValue)
-            {
-                NatPrecissionErrStat.AddSampleValue(Math.Abs(natComputedValue - natIdealValue));
-                NrmPrecissionErrStat.AddSampleValue(Math.Abs(nrmComputedValue - nrmIdealValue));
-                if (TaskType == ReadoutUnit.TaskType.Classification)
-                {
-                    BinaryErrStat.Update(nrmComputedValue, nrmIdealValue);
-                }
-                return;
-            }
-
-            /// <summary>
-            /// Creates a deep copy instance of this instance
-            /// </summary>
-            public ClusterErrStatistics DeepClone()
-            {
-                return new ClusterErrStatistics(this);
-            }
-
-        }//ClusterErrStatistics
-
-        /// <summary>
         /// Contains results of readout layer training (regression)
         /// </summary>
         [Serializable]
@@ -890,7 +663,7 @@ namespace RCNet.Neural.Network.SM.Readout
             /// <summary>
             /// Collection of error statistics related to readout units
             /// </summary>
-            public List<ClusterErrStatistics> ClusterErrStatisticsCollection { get; }
+            public List<TrainedNetworkCluster.ClusterErrStatistics> ClusterErrStatisticsCollection { get; }
 
             /// <summary>
             /// Original training data together with data computed by trained readout layer
@@ -902,7 +675,7 @@ namespace RCNet.Neural.Network.SM.Readout
             /// </summary>
             /// <param name="clusterErrStatisticsCollection">Collection of error statistics related to readout units</param>
             /// <param name="trainingDataResultBundle">Original training data together with data computed by trained readout layer</param>
-            public RegressionOverview(List<ClusterErrStatistics> clusterErrStatisticsCollection,
+            public RegressionOverview(List<TrainedNetworkCluster.ClusterErrStatistics> clusterErrStatisticsCollection,
                                       ResultBundle trainingDataResultBundle
                                       )
             {
@@ -923,9 +696,9 @@ namespace RCNet.Neural.Network.SM.Readout
                 //Training results
                 for (int outputIdx = 0; outputIdx < ClusterErrStatisticsCollection.Count; outputIdx++)
                 {
-                    ReadoutLayer.ClusterErrStatistics ces = ClusterErrStatisticsCollection[outputIdx];
-                    sb.Append(leftMargin + $"Output field [{ces.ReadoutUnitName}]" + Environment.NewLine);
-                    if (ces.TaskType == ReadoutUnit.TaskType.Classification)
+                    TrainedNetworkCluster.ClusterErrStatistics ces = ClusterErrStatisticsCollection[outputIdx];
+                    sb.Append(leftMargin + $"Output field [{ces.ClusterName}]" + Environment.NewLine);
+                    if (ces.BinaryOutput)
                     {
                         //Classification task report
                         sb.Append(leftMargin + $"  Classification of negative samples" + Environment.NewLine);

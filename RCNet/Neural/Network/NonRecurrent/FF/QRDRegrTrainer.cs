@@ -6,7 +6,7 @@ using RCNet.Neural.Activation;
 using RCNet.MathTools.MatrixMath;
 using RCNet.MathTools.PS;
 
-namespace RCNet.Neural.Network.FF
+namespace RCNet.Neural.Network.NonRecurrent.FF
 {
     /// <summary>
     /// Implements the QRD regression trainer.

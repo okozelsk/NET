@@ -6,7 +6,7 @@ using RCNet.Extensions;
 using RCNet.Neural.Activation;
 using RCNet.MathTools;
 
-namespace RCNet.Neural.Network.FF
+namespace RCNet.Neural.Network.NonRecurrent.FF
 {
     /// <summary>
     /// Implements the feed forward network supporting multiple hidden layers

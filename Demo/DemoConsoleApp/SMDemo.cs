@@ -14,6 +14,7 @@ using RCNet.Neural.Network.SM.Readout;
 using RCNet.DemoConsoleApp.Log;
 using System.Text;
 using System.Linq;
+using RCNet.Neural.Network.NonRecurrent;
 
 namespace RCNet.DemoConsoleApp
 {
@@ -83,22 +84,22 @@ namespace RCNet.DemoConsoleApp
         /// <summary>
         /// Displays information about the readout unit regression progress.
         /// </summary>
-        /// <param name="regrState">Current state of the regression process</param>
-        /// <param name="bestUnitChanged">Indicates that the best readout unit was changed as a result of the performed epoch</param>
-        private void OnRegressionEpochDone(ReadoutUnitBuilder.RegrState regrState, bool bestUnitChanged)
+        /// <param name="buildingState">Current state of the regression process</param>
+        /// <param name="foundBetter">Indicates that the best readout unit was changed as a result of the performed epoch</param>
+        private void OnRegressionEpochDone(TrainedNetworkBuilder.BuildingState buildingState, bool foundBetter)
         {
             int reportEpochsInterval = 5;
             //Progress info
-            if (bestUnitChanged ||
-                (regrState.Epoch % reportEpochsInterval) == 0 ||
-                regrState.Epoch == regrState.MaxEpochs ||
-                (regrState.Epoch == 1 && regrState.RegrAttemptNumber == 1)
+            if (foundBetter ||
+                (buildingState.Epoch % reportEpochsInterval) == 0 ||
+                buildingState.Epoch == buildingState.MaxEpochs ||
+                (buildingState.Epoch == 1 && buildingState.RegrAttemptNumber == 1)
                 )
             {
                 //Build progress report message
-                string progressText = regrState.GetProgressInfo(4);
+                string progressText = buildingState.GetProgressInfo(4);
                 //Report the progress
-                _log.Write(progressText, !(regrState.Epoch == 1 && regrState.RegrAttemptNumber == 1));
+                _log.Write(progressText, !(buildingState.Epoch == 1 && buildingState.RegrAttemptNumber == 1));
             }
             return;
         }

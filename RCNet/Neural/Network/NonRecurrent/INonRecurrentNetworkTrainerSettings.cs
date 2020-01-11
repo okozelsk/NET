@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RCNet.Neural
+namespace RCNet.Neural.Network.NonRecurrent
 {
     /// <summary>
     /// Common interface of setting classes for non-recurrent trainers

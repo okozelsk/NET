@@ -6,8 +6,8 @@ using System.Xml.Linq;
 using System.Reflection;
 using System.IO;
 using RCNet.Extensions;
-using RCNet.Neural.Network.FF;
-using RCNet.Neural.Network.PP;
+using RCNet.Neural.Network.NonRecurrent.FF;
+using RCNet.Neural.Network.NonRecurrent.PP;
 using RCNet.XmlTools;
 using RCNet.MathTools;
 using RCNet.Neural.Data.Filter;
@@ -359,7 +359,7 @@ namespace RCNet.Neural.Network.SM.Readout
             /// <summary>
             /// Binary border (for classification purposes only)
             /// </summary>
-            public double BinBorder { get { return OutputRange.Mid; } }
+            public double BinBorder { get { return (TaskType == ReadoutUnit.TaskType.Classification ? OutputRange.Mid : double.NaN); } }
             
             //Methods
             /// <summary>
@@ -401,6 +401,41 @@ namespace RCNet.Neural.Network.SM.Readout
             }
 
         }//ReadoutUnitSettings
+
+        /// <summary>
+        /// Configuration of "one winner: group
+        /// </summary>
+        [Serializable]
+        public class OneWinnerGroupSettings
+        {
+            /// <summary>
+            /// Name of the group
+            /// </summary>
+            public string Name { get; }
+            /// <summary>
+            /// Indexes of member units
+            /// </summary>
+            public List<int> MemberIndexCollection { get; }
+            /// <summary>
+            /// Ratio of the test calibration data
+            /// </summary>
+            public double TestDataRatio { get; }
+            /// <summary>
+            /// Number of folds of the test calibration data
+            /// </summary>
+            public int NumOfFolds { get; }
+            /// <summary>
+            /// Calibration network configuration
+            /// </summary>
+            public FeedForwardNetworkSettings CalibrationFFNetCfg { get; }
+
+            //Constructors
+            public OneWinnerGroupSettings()
+            {
+                return;
+            }
+
+        }//OneWinnerGroupSettings
 
     }//ReadoutLayerSettings
 

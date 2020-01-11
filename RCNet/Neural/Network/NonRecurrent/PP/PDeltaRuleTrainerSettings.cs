@@ -8,7 +8,7 @@ using System.Globalization;
 using System.Reflection;
 using RCNet.XmlTools;
 
-namespace RCNet.Neural.Network.PP
+namespace RCNet.Neural.Network.NonRecurrent.PP
 {
     /// <summary>
     /// Startup parameters for the parallel perceptron p-delta rule trainer
@@ -124,7 +124,7 @@ namespace RCNet.Neural.Network.PP
             //Validation
             ElemValidator validator = new ElemValidator();
             Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.PP.PDeltaRuleTrainerSettings.xsd");
+            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.NonRecurrent.PP.PDeltaRuleTrainerSettings.xsd");
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
             XElement settingsElem = validator.Validate(elem, "rootElem");
             //Parsing

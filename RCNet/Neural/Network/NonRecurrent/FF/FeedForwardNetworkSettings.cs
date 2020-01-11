@@ -9,7 +9,7 @@ using RCNet.XmlTools;
 using RCNet.Neural.Activation;
 using RCNet.MathTools;
 
-namespace RCNet.Neural.Network.FF
+namespace RCNet.Neural.Network.NonRecurrent.FF
 {
     /// <summary>
     /// The class contains feed forward network configuration parameters
@@ -88,7 +88,7 @@ namespace RCNet.Neural.Network.FF
             //Validation
             ElemValidator validator = new ElemValidator();
             Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.FF.FeedForwardNetworkSettings.xsd");
+            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.NonRecurrent.FF.FeedForwardNetworkSettings.xsd");
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
             XElement settingsElem = validator.Validate(elem, "rootElem");
             //Parsing

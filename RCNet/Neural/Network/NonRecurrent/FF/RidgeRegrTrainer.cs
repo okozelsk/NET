@@ -7,7 +7,7 @@ using RCNet.MathTools.MatrixMath;
 using RCNet.MathTools.VectorMath;
 using RCNet.MathTools.PS;
 
-namespace RCNet.Neural.Network.FF
+namespace RCNet.Neural.Network.NonRecurrent.FF
 {
     /// <summary>
     /// Implements the ridge regression trainer.

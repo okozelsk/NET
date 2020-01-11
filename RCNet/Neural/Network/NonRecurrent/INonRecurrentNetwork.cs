@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using RCNet.MathTools;
 
-namespace RCNet.Neural
+namespace RCNet.Neural.Network.NonRecurrent
 {
     /// <summary>
     /// Common interface of non-recurrent networks

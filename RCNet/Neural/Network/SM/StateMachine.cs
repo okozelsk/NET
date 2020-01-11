@@ -5,6 +5,7 @@ using System.Text;
 using RCNet.Extensions;
 using RCNet.MathTools;
 using RCNet.Neural.Data;
+using RCNet.Neural.Network.NonRecurrent;
 using RCNet.Neural.Network.SM.Neuron;
 using RCNet.Neural.Network.SM.Preprocessing;
 using RCNet.Neural.Network.SM.Readout;
@@ -239,7 +240,7 @@ namespace RCNet.Neural.Network.SM
         /// <param name="vectorBundle">Training data bundle (input vectors and desired output vectors)</param>
         /// <param name="regressionController">Optional regression controller.</param>
         /// <returns>Output of the regression stage</returns>
-        public TrainingResults Train(VectorBundle vectorBundle, ReadoutUnitBuilder.RegressionControllerDelegate regressionController = null)
+        public TrainingResults Train(VectorBundle vectorBundle, TrainedNetworkBuilder.RegressionControllerDelegate regressionController = null)
         {
             //StateMachine reset
             Reset();
@@ -268,7 +269,7 @@ namespace RCNet.Neural.Network.SM
         /// <param name="patternBundle">Training data bundle (input patterns and desired output vectors)</param>
         /// <param name="regressionController">Optional regression controller.</param>
         /// <returns>Output of the regression stage</returns>
-        public TrainingResults Train(PatternBundle patternBundle, ReadoutUnitBuilder.RegressionControllerDelegate regressionController = null)
+        public TrainingResults Train(PatternBundle patternBundle, TrainedNetworkBuilder.RegressionControllerDelegate regressionController = null)
         {
             //StateMachine reset
             Reset();

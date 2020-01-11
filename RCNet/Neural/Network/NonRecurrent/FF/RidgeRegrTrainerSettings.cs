@@ -9,15 +9,27 @@ using System.Reflection;
 using RCNet.XmlTools;
 using RCNet.MathTools.PS;
 
-namespace RCNet.Neural.Network.FF
+namespace RCNet.Neural.Network.NonRecurrent.FF
 {
     /// <summary>
-    /// Startup parameters for the elastic linear regression trainer
+    /// Startup parameters for the ridge regression trainer
     /// </summary>
     [Serializable]
-    public class ElasticRegrTrainerSettings : INonRecurrentNetworkTrainerSettings
+    public class RidgeRegrTrainerSettings : INonRecurrentNetworkTrainerSettings
     {
         //Constants
+        /// <summary>
+        /// Seeker's default min lambda
+        /// </summary>
+        public const double DefaultMinLambda = 0;
+        /// <summary>
+        /// Seeker's default max lambda
+        /// </summary>
+        public const double DefaultMaxLambda = 0.05;
+        /// <summary>
+        /// Seeker's default number of steps within the interval
+        /// </summary>
+        public const int DefaultSteps = 10;
 
         //Attribute properties
         /// <summary>
@@ -25,26 +37,27 @@ namespace RCNet.Neural.Network.FF
         /// </summary>
         public int NumOfAttemptEpochs { get; set; }
         /// <summary>
-        /// Ridge lambda hyperparameter
+        /// Configuration of seeker of lambda hyperparameter value
         /// </summary>
-        public double Lambda { get; set; }
-        /// <summary>
-        /// Trade-off ratio between Ridge (0) and Lasso (1) approach
-        /// </summary>
-        public double Alpha { get; set; }
+        public ParamSeekerSettings LambdaSeekerCfg { get; set; }
 
         //Constructors
         /// <summary>
         /// Constructs an initialized instance
         /// </summary>
         /// <param name="numOfAttemptEpochs">Number of attempt epochs</param>
-        /// <param name="lambda">L1 (lasso) hyperparameter</param>
-        /// <param name="alpha">L2 (ridge) hyperparameter</param>
-        public ElasticRegrTrainerSettings(int numOfAttemptEpochs, double lambda = 0, double alpha = 0)
+        /// <param name="lambdaSeekerCfg">Configuration of seeker of lambda hyperparameter value</param>
+        public RidgeRegrTrainerSettings(int numOfAttemptEpochs, ParamSeekerSettings lambdaSeekerCfg = null)
         {
             NumOfAttemptEpochs = numOfAttemptEpochs;
-            Lambda = lambda;
-            Alpha = alpha;
+            if (lambdaSeekerCfg == null)
+            {
+                LambdaSeekerCfg = new ParamSeekerSettings(DefaultMinLambda, DefaultMaxLambda, DefaultSteps);
+            }
+            else
+            {
+                LambdaSeekerCfg = lambdaSeekerCfg.DeepClone();
+            }
             return;
         }
 
@@ -52,11 +65,10 @@ namespace RCNet.Neural.Network.FF
         /// Deep copy constructor
         /// </summary>
         /// <param name="source">Source instance</param>
-        public ElasticRegrTrainerSettings(ElasticRegrTrainerSettings source)
+        public RidgeRegrTrainerSettings(RidgeRegrTrainerSettings source)
         {
             NumOfAttemptEpochs = source.NumOfAttemptEpochs;
-            Lambda = source.Lambda;
-            Alpha = source.Alpha;
+            LambdaSeekerCfg = source.LambdaSeekerCfg.DeepClone();
             return;
         }
 
@@ -64,19 +76,18 @@ namespace RCNet.Neural.Network.FF
         /// Creates the instance and initializes it from given xml element.
         /// Content of xml element is always validated against the xml schema.
         /// </summary>
-        /// <param name="elem">Xml data containing elastic linear regression trainer settings</param>
-        public ElasticRegrTrainerSettings(XElement elem)
+        /// <param name="elem">Xml data containing linear regression trainer settings</param>
+        public RidgeRegrTrainerSettings(XElement elem)
         {
             //Validation
             ElemValidator validator = new ElemValidator();
             Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.FF.ElasticRegrTrainerSettings.xsd");
+            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.NonRecurrent.FF.RidgeRegrTrainerSettings.xsd");
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
             XElement settingsElem = validator.Validate(elem, "rootElem");
             //Parsing
             NumOfAttemptEpochs = int.Parse(settingsElem.Attribute("attemptEpochs").Value, CultureInfo.InvariantCulture);
-            Lambda = double.Parse(settingsElem.Attribute("lambda").Value, CultureInfo.InvariantCulture);
-            Alpha = double.Parse(settingsElem.Attribute("alpha").Value, CultureInfo.InvariantCulture);
+            LambdaSeekerCfg = new ParamSeekerSettings(settingsElem.Descendants("lambda").First());
             return;
         }
 
@@ -93,10 +104,9 @@ namespace RCNet.Neural.Network.FF
         public override bool Equals(object obj)
         {
             if (obj == null) return false;
-            ElasticRegrTrainerSettings cmpSettings = obj as ElasticRegrTrainerSettings;
+            RidgeRegrTrainerSettings cmpSettings = obj as RidgeRegrTrainerSettings;
             if (NumOfAttemptEpochs != cmpSettings.NumOfAttemptEpochs ||
-                Lambda != cmpSettings.Lambda ||
-                Alpha != cmpSettings.Alpha
+                !LambdaSeekerCfg.Equals(cmpSettings.LambdaSeekerCfg)
                 )
             {
                 return false;
@@ -117,9 +127,9 @@ namespace RCNet.Neural.Network.FF
         /// </summary>
         public INonRecurrentNetworkTrainerSettings DeepClone()
         {
-            return new ElasticRegrTrainerSettings(this);
+            return new RidgeRegrTrainerSettings(this);
         }
 
-    }//ElasticRegrTrainerSettings
+    }//RidgeRegrTrainerSettings
 
 }//Namespace

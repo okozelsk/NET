@@ -4,13 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RCNet.Neural.Network.SM
+namespace RCNet.MathTools.Probability
 {
     /// <summary>
     /// Simple class for realtime decision what item to select based on probability distribution (relative shares)
     /// </summary>
     [Serializable]
-    public class RelShareRealtime<T>
+    public class RelShareSelector<T>
     {
         //Attributes
         private Random _rand;
@@ -21,7 +21,7 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// Creates an unitialized instance
         /// </summary>
-        public RelShareRealtime()
+        public RelShareSelector()
         {
             _rand = new Random(0);
             _origElements = new List<Tuple<double, T>>();
@@ -33,7 +33,7 @@ namespace RCNet.Neural.Network.SM
         /// Copy constructor
         /// </summary>
         /// <param name="sourceOrigElements"></param>
-        public RelShareRealtime(List<Tuple<double, T>> sourceOrigElements)
+        public RelShareSelector(List<Tuple<double, T>> sourceOrigElements)
             :this()
         {
             _origElements.AddRange(sourceOrigElements);
@@ -50,7 +50,7 @@ namespace RCNet.Neural.Network.SM
         {
             if(_probElements != null)
             {
-                throw new Exception("Instance was already closed for modifications.");
+                throw new Exception("Selector was already finalized and can not be modified.");
             }
             if (relShare > 0d)
             {
@@ -79,7 +79,7 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// Selects next item
         /// </summary>
-        public T GetNext()
+        public T SelectNext()
         {
             if (_probElements == null) FinalizeProbabilities();
             double p = _rand.NextDouble();
@@ -99,7 +99,7 @@ namespace RCNet.Neural.Network.SM
         public override bool Equals(object obj)
         {
             if (obj == null) return false;
-            RelShareRealtime<T> cmpObj = obj as RelShareRealtime<T>;
+            RelShareSelector<T> cmpObj = obj as RelShareSelector<T>;
             if (_origElements.Count != cmpObj._origElements.Count)
             {
                 return false;
@@ -127,9 +127,9 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>
-        public RelShareRealtime<T> DeepClone()
+        public RelShareSelector<T> DeepClone()
         {
-            RelShareRealtime<T> clone = new RelShareRealtime<T>(this._origElements);
+            RelShareSelector<T> clone = new RelShareSelector<T>(this._origElements);
             return clone;
         }
 

@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using RCNet.MathTools;
 
-namespace RCNet.Neural.Network.FF
+namespace RCNet.Neural.Network.NonRecurrent.FF
 {
     /// <summary>
     /// Implements the elastic linear regression trainer.

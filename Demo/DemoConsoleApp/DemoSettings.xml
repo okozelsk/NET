@@ -1,9 +1,130 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <demo dataFolder=".\\Data" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="DemoSettings.xsd">
 
+  <case name="Forecast task High and Low share prices of TTOO (T2 Biosystems, Inc.): Small analog reservoir (ESN), Elastic regression readout">
+    <samples trainingData="TTOO.csv"/>
+    <stateMachineCfg randomizerSeek="0">
+      <neuralPreprocessor>
+        <input>
+          <feedingContinuous bootCycles="Auto" routeToReadout="true"/>
+          <external>
+            <field name="High" allowRoutingToReadout="true">
+              <realFeature standardize="true" keepReserve="false"/>
+            </field>
+            <field name="Low" allowRoutingToReadout="true">
+              <realFeature standardize="true" keepReserve="false"/>
+            </field>
+            <field name="Adj Close" allowRoutingToReadout="true">
+              <realFeature standardize="true" keepReserve="false"/>
+            </field>
+          </external>
+        </input>
+        <reservoirCfgContainer>
+          <reservoirCfg name="MainCfg">
+            <pools>
+              <pool name="Logistic pool" dimX="6" dimY="6" dimZ="6">
+                <neuronGroups>
+                  <analogGroup name="Exc-Logistic" role="Excitatory" relShare="1" signalingRestriction="NoRestriction" readoutDensity="1">
+                    <activationTanH/>
+                    <retainment density="1">
+                      <strength min="0" max="0.75" />
+                    </retainment>
+                  </analogGroup>
+                  <analogGroup name="Inh-Logistic" role="Inhibitory" relShare="1" signalingRestriction="NoRestriction" readoutDensity="1">
+                    <activationTanH/>
+                    <retainment density="1">
+                      <strength min="0" max="0.75"/>
+                    </retainment>
+                  </analogGroup>
+                </neuronGroups>
+                <interconnection>
+                  <chainSchema ratio="1" circle="true" replaceExistingConnections="true" repetitions="3">
+                    <synapse/>
+                  </chainSchema>
+                </interconnection>
+              </pool>
+            </pools>
+            <spectralRadius>
+              <analogScope value="0.9999"/>
+              <spikingScope value="NA"/>
+            </spectralRadius>
+          </reservoirCfg>
+        </reservoirCfgContainer>
+        <reservoirInstanceContainer>
+          <reservoirInstance name="Main" cfg="MainCfg">
+            <inputConnections>
+              <inputConnection fieldName="High" poolName="Logistic pool" density="1">
+                <synapse delayMethod="Random" maxDelay="0">
+                  <analogTarget scope="All">
+                    <weight min="0" max="0.1" />
+                  </analogTarget>
+                </synapse>
+              </inputConnection>
+              <inputConnection fieldName="Low" poolName="Logistic pool" density="1">
+                <synapse delayMethod="Random" maxDelay="0">
+                  <analogTarget scope="All">
+                    <weight min="0" max="0.1" />
+                  </analogTarget>
+                </synapse>
+              </inputConnection>
+              <inputConnection fieldName="Adj Close" poolName="Logistic pool" density="1">
+                <synapse delayMethod="Random" maxDelay="0">
+                  <analogTarget scope="All">
+                    <weight min="0" max="0.1" />
+                  </analogTarget>
+                </synapse>
+              </inputConnection>
+            </inputConnections>
+            <predictors>
+              <permission activation="true"
+                          activationSquare="false"
+                          activationFadingSum="false"
+                          activationMWAvg="false"
+                          firingFadingSum="false"
+                          firingMWAvg="false"
+                          firingCount="false"
+                          firingBinPattern="false"/>
+            </predictors>
+          </reservoirInstance>
+        </reservoirInstanceContainer>
+      </neuralPreprocessor>
+      <readoutLayer testDataRatio="0.1" folds="Auto">
+        <readoutUnit name="High">
+          <forecast>
+            <realFeature standardize="true" keepReserve="true"/>
+          </forecast>
+          <ff>
+            <activationIdentity/>
+            <elasticRegrTrainer attemptEpochs="400" lambda="1e-6" alpha="0.5"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="Low">
+          <forecast>
+            <realFeature standardize="true" keepReserve="true"/>
+          </forecast>
+          <ff>
+            <activationIdentity/>
+            <elasticRegrTrainer attemptEpochs="400" lambda="1e-6" alpha="0.5"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="Adj Close">
+          <forecast>
+            <realFeature standardize="true" keepReserve="true"/>
+          </forecast>
+          <ff>
+            <activationIdentity/>
+            <elasticRegrTrainer attemptEpochs="400" lambda="1e-6" alpha="0.5"/>
+          </ff>
+        </readoutUnit>
+      </readoutLayer>
+    </stateMachineCfg>
+  </case>
+  
+  
+  
   <!--
-    TEST ONLY. This demo case demonstrates bypassing of neural preprocessor.
-    Following simple configuration of the StateMachine's alone readout layer exhibits XX.XX% accuracy, XXX than the best algorithm
+    This demo case demonstrates bypassing of neural preprocessor.
+    Following simple configuration of the StateMachine's alone readout layer exhibits 85.36% accuracy, slightly worse than the best algorithm
     called ST, referenced at the dataset's home site:
     "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
     https://timeseriesclassification.com/description.php?Dataset=ProximalPhalanxOutlineAgeGroup.
@@ -25,28 +146,19 @@
   <case name="Classification task ProximalPhalanxOutlineAgeGroup: No preprocesing, Multilayer Feed forward network as a classifier (Resilient trainer)">
     <samples trainingData="ProximalPhalanxOutlineAgeGroup_train.csv" verificationData="ProximalPhalanxOutlineAgeGroup_verify.csv"/>
     <stateMachineCfg randomizerSeek="0">
-      <readoutLayer testDataRatio="0.5" folds="Auto">
+      <readoutLayer testDataRatio="0.25" folds="Auto">
         <readoutUnit name="0-6 years">
           <classification oneWinnerGroupName="AgeGroup">
             <binFeature/>
           </classification>
           <ff>
-            <activationIdentity/>
+            <activationTanH/>
             <hiddenLayers>
-              <layer neurons="10">
+              <layer neurons="200">
                 <activationTanH/>
-              </layer>
-              <layer neurons="10">
-                <activationElliot/>
-              </layer>
-              <layer neurons="10">
-                <activationTanH/>
-              </layer>
-              <layer neurons="10">
-                <activationElliot/>
               </layer>
             </hiddenLayers>
-            <resPropTrainer attempts="5" attemptEpochs="500"/>
+            <resPropTrainer attempts="10" attemptEpochs="500"/>
           </ff>
         </readoutUnit>
         <readoutUnit name="7-12 years">
@@ -54,22 +166,13 @@
             <binFeature/>
           </classification>
           <ff>
-            <activationIdentity/>
+            <activationTanH/>
             <hiddenLayers>
-              <layer neurons="10">
+              <layer neurons="200">
                 <activationTanH/>
-              </layer>
-              <layer neurons="10">
-                <activationElliot/>
-              </layer>
-              <layer neurons="10">
-                <activationTanH/>
-              </layer>
-              <layer neurons="10">
-                <activationElliot/>
               </layer>
             </hiddenLayers>
-            <resPropTrainer attempts="5" attemptEpochs="500"/>
+            <resPropTrainer attempts="10" attemptEpochs="500"/>
           </ff>
         </readoutUnit>
         <readoutUnit name="13-19 years">
@@ -77,24 +180,28 @@
             <binFeature/>
           </classification>
           <ff>
+            <activationTanH/>
+            <hiddenLayers>
+              <layer neurons="100">
+                <activationTanH/>
+              </layer>
+            </hiddenLayers>
+            <resPropTrainer attempts="10" attemptEpochs="200"/>
+          </ff>
+        </readoutUnit>
+        <calibrations>
+          <group name="AgeGroup" testDataRatio="0.1" folds="Auto">
+            <ff>
             <activationIdentity/>
             <hiddenLayers>
               <layer neurons="10">
                 <activationTanH/>
               </layer>
-              <layer neurons="10">
-                <activationElliot/>
-              </layer>
-              <layer neurons="10">
-                <activationTanH/>
-              </layer>
-              <layer neurons="10">
-                <activationElliot/>
-              </layer>
             </hiddenLayers>
-            <resPropTrainer attempts="5" attemptEpochs="500"/>
-          </ff>
-        </readoutUnit>
+            <resPropTrainer attempts="10" attemptEpochs="500"/>
+            </ff>
+          </group>
+        </calibrations>
       </readoutLayer>
     </stateMachineCfg>
   </case>
@@ -236,7 +343,7 @@
       </neuralPreprocessor>
       <readoutLayer testDataRatio="0.1" folds="Auto">
         <readoutUnit name="Cancel Call">
-          <classification oneWinnerGroupName="Gesto">
+          <classification oneWinnerGroupName="Gesture">
             <binFeature/>
           </classification>
           <ff>

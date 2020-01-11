@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using RCNet.Extensions;
 using RCNet.MathTools;
 
-namespace RCNet.Neural.Network.PP
+namespace RCNet.Neural.Network.NonRecurrent.PP
 {
     /// <summary>
     /// Class implements a parallel perceptron.

@@ -448,7 +448,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                                 //Connect analog input neuron
                                 if (targetNeurons[targetNeuronIdx].TypeOfActivation == ActivationType.Analog)
                                 {
-                                    inputNeuron = _inputUnitCollection[inputConnection.FieldIdx].AnalogInputNeuronCollection[inputConnection.SynapseCfg.AnalogTransRelShares.GetNext()];
+                                    inputNeuron = _inputUnitCollection[inputConnection.FieldIdx].AnalogInputNeuronCollection[inputConnection.SynapseCfg.AnalogTransRelShares.SelectNext()];
                                 }
                                 else
                                 {

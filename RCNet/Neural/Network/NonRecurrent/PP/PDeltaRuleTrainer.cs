@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using RCNet.Extensions;
 
-namespace RCNet.Neural.Network.PP
+namespace RCNet.Neural.Network.NonRecurrent.PP
 {
     /// <summary>
     /// Implements parallel perceptron trainer (p-delta rule)

@@ -6,6 +6,7 @@ using System.Globalization;
 using System.Xml.Linq;
 using System.IO;
 using RCNet.Extensions;
+using RCNet.MathTools.Probability;
 using RCNet.XmlTools;
 using RCNet.RandomValue;
 using RCNet.Neural.Network.SM.Preprocessing;
@@ -41,7 +42,7 @@ namespace RCNet.Neural.Network.SM.Synapse
         /// <summary>
         /// Relative shares of analog signal tranformations
         /// </summary>
-        public RelShareRealtime<int> AnalogTransRelShares { get; set; }
+        public RelShareSelector<int> AnalogTransRelShares { get; set; }
 
         /// <summary>
         /// Specifies how will be decided synaptic delay
@@ -118,7 +119,7 @@ namespace RCNet.Neural.Network.SM.Synapse
             }
             //Analog target
             //Scope and analog rel shares of transformations
-            AnalogTransRelShares = new RelShareRealtime<int>();
+            AnalogTransRelShares = new RelShareSelector<int>();
             cfgElem = settingsElem.XPathSelectElement("./analogTarget");
             if (cfgElem != null)
             {

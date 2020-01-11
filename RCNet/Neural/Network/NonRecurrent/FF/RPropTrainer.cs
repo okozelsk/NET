@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
 using RCNet.Extensions;
 
-namespace RCNet.Neural.Network.FF
+namespace RCNet.Neural.Network.NonRecurrent.FF
 {
     /// <summary>
     /// Implements iRPROP+ method trainer

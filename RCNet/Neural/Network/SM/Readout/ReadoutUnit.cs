@@ -4,11 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using RCNet.MathTools;
+using RCNet.Neural.Network.NonRecurrent;
 
 namespace RCNet.Neural.Network.SM.Readout
 {
     /// <summary>
-    /// Contains trained network and related important error statistics associated with the output field.
+    /// Contains cluster of trained networks and related important error statistics associated with readout layer's output field.
     /// </summary>
     [Serializable]
     public class ReadoutUnit
@@ -31,56 +32,24 @@ namespace RCNet.Neural.Network.SM.Readout
 
         //Attribute properties
         /// <summary>
-        /// Trained network
+        /// Index of this readout unit within the readout layer
         /// </summary>
-        public INonRecurrentNetwork Network { get; set; }
+        public int Index { get; }
         /// <summary>
-        /// Informative message from trainer
+        /// Cluster of trained networks and associated error statistics
         /// </summary>
-        public string TrainerInfoMessage { get; set; }
-        /// <summary>
-        /// Training error statistics
-        /// </summary>
-        public BasicStat TrainingErrorStat { get; set; }
-        /// <summary>
-        /// Training binary error statistics. Relevant only for Classification task type.
-        /// </summary>
-        public BinErrStat TrainingBinErrorStat { get; set; }
-        /// <summary>
-        /// Testing error statistics
-        /// </summary>
-        public BasicStat TestingErrorStat { get; set; }
-        /// <summary>
-        /// Testing binary error statistics. Relevant only for Classification task type.
-        /// </summary>
-        public BinErrStat TestingBinErrorStat { get; set; }
-        /// <summary>
-        /// Statistics of the network weights
-        /// </summary>
-        public BasicStat OutputWeightsStat { get; set; }
-        /// <summary>
-        /// Achieved combined precision error
-        /// </summary>
-        public double CombinedPrecisionError { get; set; }
-        /// <summary>
-        /// Achieved combined binary error. Relevant only for Classification task type.
-        /// </summary>
-        public double CombinedBinaryError { get; set; }
+        public TrainedNetworkCluster NetworkCluster { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an unitialized instance
+        /// Creates an itialized instance
         /// </summary>
-        public ReadoutUnit()
+        /// <param name="index">Index of this readout unit within the readout layer</param>
+        /// <param name="networkCluster">Cluster of trained networks and associated error statistics</param>
+        public ReadoutUnit(int index, TrainedNetworkCluster networkCluster)
         {
-            Network = null;
-            TrainingErrorStat = null;
-            TrainingBinErrorStat = null;
-            TestingErrorStat = null;
-            TestingBinErrorStat = null;
-            OutputWeightsStat = null;
-            CombinedPrecisionError = -1;
-            CombinedBinaryError = -1;
+            Index = index;
+            NetworkCluster = networkCluster;
             return;
         }
 
@@ -90,19 +59,8 @@ namespace RCNet.Neural.Network.SM.Readout
         /// <param name="source">Source instance</param>
         public ReadoutUnit(ReadoutUnit source)
         {
-            Network = null;
-            if (source.Network != null)
-            {
-                Network = source.Network.DeepClone();
-            }
-            TrainerInfoMessage = source.TrainerInfoMessage;
-            TrainingErrorStat = source.TrainingErrorStat?.DeepClone();
-            TrainingBinErrorStat = source.TrainingBinErrorStat?.DeepClone();
-            TestingErrorStat = source.TestingErrorStat?.DeepClone();
-            TestingBinErrorStat = source.TestingBinErrorStat?.DeepClone();
-            OutputWeightsStat = source.OutputWeightsStat?.DeepClone();
-            CombinedPrecisionError = source.CombinedPrecisionError;
-            CombinedBinaryError = source.CombinedBinaryError;
+            Index = source.Index;
+            NetworkCluster = source.NetworkCluster.DeepClone();
             return;
         }
 

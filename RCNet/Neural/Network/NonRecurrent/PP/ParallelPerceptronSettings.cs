@@ -8,7 +8,7 @@ using System.IO;
 using RCNet.XmlTools;
 using RCNet.MathTools;
 
-namespace RCNet.Neural.Network.PP
+namespace RCNet.Neural.Network.NonRecurrent.PP
 {
     /// <summary>
     /// The class contains parallel perceptron configuration parameters
@@ -78,7 +78,7 @@ namespace RCNet.Neural.Network.PP
             //Validation
             ElemValidator validator = new ElemValidator();
             Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.PP.ParallelPerceptronSettings.xsd");
+            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.NonRecurrent.PP.ParallelPerceptronSettings.xsd");
             validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
             XElement settingsElem = validator.Validate(elem, "rootElem");
             //Parsing

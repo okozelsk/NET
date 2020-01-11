@@ -136,14 +136,18 @@
     <Compile Include="Neural\Data\Generators\IGenerator.cs" />
     <Compile Include="Neural\Data\Generators\RandomGenerator.cs" />
     <Compile Include="Neural\Data\Generators\PulseGeneratorSettings.cs" />
-    <Compile Include="Neural\INonRecurrentNetworkTrainerSettings.cs" />
-    <Compile Include="Neural\Network\FF\QRDRegrTrainer.cs" />
-    <Compile Include="Neural\Network\FF\QRDRegrTrainerSettings.cs" />
+    <Compile Include="Neural\Network\NonRecurrent\INonRecurrentNetworkTrainerSettings.cs" />
+    <Compile Include="Neural\Network\NonRecurrent\FF\QRDRegrTrainer.cs" />
+    <Compile Include="Neural\Network\NonRecurrent\FF\QRDRegrTrainerSettings.cs" />
     <Compile Include="MathTools\PS\ParamSeekerSettings.cs" />
     <Compile Include="MathTools\PS\ParamSeeker.cs" />
-    <Compile Include="Neural\Network\FF\ElasticRegrTrainer.cs" />
-    <Compile Include="Neural\Network\FF\ElasticRegrTrainerSettings.cs" />
-    <Compile Include="Neural\Network\FF\RidgeRegrTrainerSettings.cs" />
+    <Compile Include="Neural\Network\NonRecurrent\FF\ElasticRegrTrainer.cs" />
+    <Compile Include="Neural\Network\NonRecurrent\FF\ElasticRegrTrainerSettings.cs" />
+    <Compile Include="Neural\Network\NonRecurrent\FF\RidgeRegrTrainerSettings.cs" />
+    <Compile Include="Neural\Network\NonRecurrent\TrainedNetworkBuilder.cs" />
+    <Compile Include="Neural\Network\NonRecurrent\TrainedNetwork.cs" />
+    <Compile Include="Neural\Network\NonRecurrent\TrainedNetworkCluster.cs" />
+    <Compile Include="Neural\Network\NonRecurrent\TrainedNetworkClusterBuilder.cs" />
     <Compile Include="Neural\Network\SM\Neuron\HiddenNeuronPredictors.cs" />
     <Compile Include="Neural\Network\SM\Neuron\HiddenNeuron.cs" />
     <Compile Include="Neural\Network\SM\Neuron\NeuronCommon.cs" />
@@ -151,8 +155,7 @@
     <Compile Include="Neural\Network\SM\Preprocessing\NeuralPreprocessor.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\NeuralPreprocessorSettings.cs" />
     <Compile Include="Neural\Network\SM\Neuron\HiddenNeuronPredictorsSettings.cs" />
-    <Compile Include="Neural\Network\SM\Readout\ReadoutUnitBuilder.cs" />
-    <Compile Include="Neural\Network\SM\RelShareRealtime.cs" />
+    <Compile Include="MathTools\Probability\RelShareSelector.cs" />
     <Compile Include="Neural\Network\SM\Synapse\InternalSynapseSettings.cs" />
     <Compile Include="Neural\Network\SM\Synapse\InputSynapseSettings.cs" />
     <Compile Include="Neural\Network\SM\Synapse\InternalSynapse.cs" />
@@ -188,19 +191,19 @@
     <Compile Include="Neural\Data\PatternBundle.cs" />
     <Compile Include="Neural\Data\ResultBundle.cs" />
     <Compile Include="Neural\Data\VectorBundle.cs" />
-    <Compile Include="Neural\Network\PP\PDeltaRuleTrainerSettings.cs" />
-    <Compile Include="Neural\Network\FF\RPropTrainerSettings.cs" />
-    <Compile Include="Neural\Network\PP\ParallelPerceptronSettings.cs" />
-    <Compile Include="Neural\INonRecurrentNetwork.cs" />
-    <Compile Include="Neural\Network\PP\ParallelPerceptron.cs" />
-    <Compile Include="Neural\Network\PP\PDeltaRuleTrainer.cs" />
-    <Compile Include="Neural\Network\FF\FeedForwardNetworkSettings.cs" />
+    <Compile Include="Neural\Network\NonRecurrent\PP\PDeltaRuleTrainerSettings.cs" />
+    <Compile Include="Neural\Network\NonRecurrent\FF\RPropTrainerSettings.cs" />
+    <Compile Include="Neural\Network\NonRecurrent\PP\ParallelPerceptronSettings.cs" />
+    <Compile Include="Neural\Network\NonRecurrent\INonRecurrentNetwork.cs" />
+    <Compile Include="Neural\Network\NonRecurrent\PP\ParallelPerceptron.cs" />
+    <Compile Include="Neural\Network\NonRecurrent\PP\PDeltaRuleTrainer.cs" />
+    <Compile Include="Neural\Network\NonRecurrent\FF\FeedForwardNetworkSettings.cs" />
     <Compile Include="Neural\Network\SM\StateMachine.cs" />
     <Compile Include="Neural\Network\SM\StateMachineSettings.cs" />
-    <Compile Include="Neural\Network\FF\FeedForwardNetwork.cs" />
-    <Compile Include="Neural\INonRecurrentNetworkTrainer.cs" />
-    <Compile Include="Neural\Network\FF\RidgeRegrTrainer.cs" />
-    <Compile Include="Neural\Network\FF\RPropTrainer.cs" />
+    <Compile Include="Neural\Network\NonRecurrent\FF\FeedForwardNetwork.cs" />
+    <Compile Include="Neural\Network\NonRecurrent\INonRecurrentNetworkTrainer.cs" />
+    <Compile Include="Neural\Network\NonRecurrent\FF\RidgeRegrTrainer.cs" />
+    <Compile Include="Neural\Network\NonRecurrent\FF\RPropTrainer.cs" />
     <Compile Include="Neural\Network\SM\Readout\ReadoutLayerSettings.cs" />
     <Compile Include="Neural\Network\SM\Readout\ReadoutLayer.cs" />
     <Compile Include="Neural\Network\SM\Readout\ReadoutUnit.cs" />
@@ -224,19 +227,19 @@
     <EmbeddedResource Include="Neural\Network\SM\Readout\ReadoutLayerSettings.xsd" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Neural\Network\FF\FeedForwardNetworkSettings.xsd" />
+    <EmbeddedResource Include="Neural\Network\NonRecurrent\FF\FeedForwardNetworkSettings.xsd" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Neural\Network\PP\ParallelPerceptronSettings.xsd" />
+    <EmbeddedResource Include="Neural\Network\NonRecurrent\PP\ParallelPerceptronSettings.xsd" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="RandomValue\RandomValueSettings.xsd" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Neural\Network\PP\PDeltaRuleTrainerSettings.xsd" />
+    <EmbeddedResource Include="Neural\Network\NonRecurrent\PP\PDeltaRuleTrainerSettings.xsd" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Neural\Network\FF\RPropTrainerSettings.xsd" />
+    <EmbeddedResource Include="Neural\Network\NonRecurrent\FF\RPropTrainerSettings.xsd" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Neural\Network\SM\Preprocessing\PoolSettings.xsd" />
@@ -369,7 +372,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Neural\Network\FF\RidgeRegrTrainerSettings.xsd">
+    <EmbeddedResource Include="Neural\Network\NonRecurrent\FF\RidgeRegrTrainerSettings.xsd">
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
@@ -379,12 +382,12 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Neural\Network\FF\QRDRegrTrainerSettings.xsd">
+    <EmbeddedResource Include="Neural\Network\NonRecurrent\FF\QRDRegrTrainerSettings.xsd">
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Neural\Network\FF\ElasticRegrTrainerSettings.xsd">
+    <EmbeddedResource Include="Neural\Network\NonRecurrent\FF\ElasticRegrTrainerSettings.xsd">
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
