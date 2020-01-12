@@ -39,17 +39,17 @@ Input data is expected in csv format where delimiter can be a semicolon or a com
 |--|--|
 |![BasicStat](https://github.com/okozelsk/NET/blob/master/RCNet/MathTools/BasicStat.cs)|Provides basic statistics of given data (averages, sum of squares, standard deviation, etc.)|
 |![WeightedAvg](https://github.com/okozelsk/NET/blob/master/RCNet/MathTools/WeightedAvg.cs)|Computes weighted average of given value/weight data pairs|
-|MovingWeightedAvg|Computes weighted average of recent part of given data|
-|ODENumSolver|Implements ordinary differential equations (ODE) numerical solver supporting Euler and RK4 methods|
-|Vector|Implements vector of double values supporting basic mathematical operations|
-|Matrix|Implements matrix of double values supporting basic mathematical operations. Contains buit-in Power Iteration method for the largest eigen value quick estimation|
-|EVD|Full eigen values and vectors decomposition of a squared matrix|
-|SVD|Singular values decomposition of a matrix|
-|QRD|QR decomposition of a matrix|
-|LUD|LU decomposition of a squared matrix|
-|ParamSeeker|Implements an error driven iterative search for the best value of a given parameter|
-|HurstExpEstim|Implements Hurst exponent estimator and Rescalled range. It can be used to evaluate level of data randomness|
-|"RandomValue"|Supports Uniform, Gaussian, Exponential and Gamma distributions|
+|![MovingDataWindow](https://github.com/okozelsk/NET/blob/master/RCNet/MathTools/MovingDataWindow.cs)|Implements moving data window and offers computation of weighted average of recent part of given data|
+|![ODENumSolver](https://github.com/okozelsk/NET/blob/master/RCNet/MathTools/Differential/ODENumSolver.cs)|Implements ordinary differential equations (ODE) numerical solver supporting Euler and RK4 methods|
+|![Vector](https://github.com/okozelsk/NET/blob/master/RCNet/MathTools/VectorMath/Vector.cs)|Implements vector of double values supporting basic mathematical operations|
+|![Matrix](https://github.com/okozelsk/NET/blob/master/RCNet/MathTools/MatrixMath/Matrix.cs)|Implements matrix of double values supporting basic mathematical operations. Contains buit-in Power Iteration method for the largest eigen value quick estimation|
+|![EVD](https://github.com/okozelsk/NET/blob/master/RCNet/MathTools/MatrixMath/EVD.cs)|Full eigen values and vectors decomposition of a squared matrix|
+|![SVD](https://github.com/okozelsk/NET/blob/master/RCNet/MathTools/MatrixMath/SVD.cs)|Singular values decomposition of a matrix|
+|![QRD|](https://github.com/okozelsk/NET/blob/master/RCNet/MathTools/MatrixMath/QRD.cs)QR decomposition of a matrix|
+|![LUD](https://github.com/okozelsk/NET/blob/master/RCNet/MathTools/MatrixMath/LUD.cs)|LU decomposition of a squared matrix|
+|![ParamSeeker](https://github.com/okozelsk/NET/blob/master/RCNet/MathTools/PS/ParamSeeker.cs)|Implements an error driven iterative search for the best value of a given parameter|
+|![HurstExpEstim](https://github.com/okozelsk/NET/blob/master/RCNet/MathTools/Hurst/HurstExpEstim.cs)|Implements Hurst exponent estimator and Rescalled range. It can be used to evaluate level of data randomness|
+|!["RandomValue"](https://github.com/okozelsk/NET/tree/master/RCNet/RandomValue)|Supports Uniform, Gaussian, Exponential and Gamma distributions|
 |Others|Set of small additional helper components like PhysUnit, Interval, Bitwise, Combinatorics, Factorial,...|
 
 ### Signal generators
