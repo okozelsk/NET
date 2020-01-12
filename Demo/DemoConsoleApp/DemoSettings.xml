@@ -2,6 +2,255 @@
 <demo dataFolder=".\\Data" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="DemoSettings.xsd">
 
   <!--
+    Here StateMachine fails to exhibit good performance.
+    The best algorithm called COTE, referenced at the dataset's home site, exhibits accuracy 81.4%. It is very far for StateMachine results.
+    This is a good case for investigation and StateMachine improvements research :-)
+    "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
+    https://timeseriesclassification.com/description.php?Dataset=CricketX.
+    The series Cricket X, Y and Z are accelerometer data (in three dimensions) taken from actors performing cricket gestures.
+    The twelve classes are different umpire signals: Cancel Call, Dead Ball, Four, Last Hour, Leg Bye, No Ball,
+    One Short, Out, Penalty Runs, Six, TV Replay, and Wide.
+    They mounted two accelerometers orthogonal to each other, thus acceleration is measured in 3D space.
+    The accelerometers are housed in a small wrist watch sized enclosure worn in the form of a wrist band.
+    Taken together the data is a multivariate time series classificatin problem, but the serise are not alligned so in its
+    current format cannot be used s such Segmentation of intentional gestures for sports video annotation, Online Context Recognition
+    in Multisensor Systems using Dynamic Time Warping The data are multi-dimensional, but they are not aligned, so it is not possible.
+  -->
+  <case name="Classification task CricketX: pure ESN reservoir generating FiringFadingSum predictors, one Elliot neuron as a classifier (Resilient trainer)">
+    <samples trainingData="CricketX_train.csv" verificationData="CricketX_verify.csv"/>
+    <stateMachineCfg randomizerSeek="0">
+      <neuralPreprocessor predictorsReductionRatio="0">
+        <input>
+          <feedingPatterned bidir="true" routeToReadout="false"/>
+          <external>
+            <field name="Accel"
+                   allowRoutingToReadout="true"
+                   spikeTrainLength="5"
+                   transDiffDistance="1"
+                   transNumOfLinearSteps="16"
+                   transPowerExponent="0.5"
+                   transFoldedPowerExponent="0.5"
+                   transMovingAverageWindowLength="5"
+                   >
+              <realFeature standardize="true" keepReserve="true"/>
+            </field>
+          </external>
+        </input>
+        <reservoirCfgContainer>
+          <reservoirCfg name="MainCfg">
+            <pools>
+              <pool name="Pool1" dimX="150" dimY="1" dimZ="1">
+                <neuronGroups>
+                  <analogGroup name="Exc-grp" role="Excitatory" relShare="1" readoutDensity="1">
+                    <activationTanH/>
+                  </analogGroup>
+                  <analogGroup name="Inh-grp" role="Inhibitory" relShare="1" readoutDensity="1">
+                    <activationTanH/>
+                  </analogGroup>
+                </neuronGroups>
+                <interconnection>
+                  <randomSchema density="0.1" relShareEE="1" relShareEI="1" relShareIE="1" relShareII="1" avgDistance="NA" allowSelfConnection="true">
+                    <synapse/>
+                  </randomSchema>
+                  <chainSchema ratio="1" circle="true">
+                    <synapse/>
+                  </chainSchema>
+                </interconnection>
+              </pool>
+              <pool name="Pool2" dimX="150" dimY="1" dimZ="1">
+                <neuronGroups>
+                  <analogGroup name="Exc-grp" role="Excitatory" relShare="1" readoutDensity="1">
+                    <activationTanH/>
+                  </analogGroup>
+                  <analogGroup name="Inh-grp" role="Inhibitory" relShare="1" readoutDensity="1">
+                    <activationTanH/>
+                  </analogGroup>
+                </neuronGroups>
+                <interconnection>
+                  <randomSchema density="0.1" relShareEE="1" relShareEI="1" relShareIE="1" relShareII="1" avgDistance="NA" allowSelfConnection="true">
+                    <synapse/>
+                  </randomSchema>
+                  <chainSchema ratio="1" circle="true">
+                    <synapse/>
+                  </chainSchema>
+                </interconnection>
+              </pool>
+            </pools>
+            <spectralRadius>
+              <analogScope value="0.9999"/>
+              <spikingScope value="NA"/>
+            </spectralRadius>
+          </reservoirCfg>
+        </reservoirCfgContainer>
+        <reservoirInstanceContainer>
+          <reservoirInstance name="Main" cfg="MainCfg">
+            <inputConnections>
+              <inputConnection fieldName="Accel" poolName="Pool1" density="1" signalingRestriction="NoRestriction">
+                <synapse delayMethod="Random" maxDelay="150">
+                  <analogTarget scope="All"
+                                relShareOriginal="0"
+                                relShareTransDiff="0"
+                                relShareTransLinearSteps="0"
+                                relShareTransPower="1"
+                                relShareTransFoldedPower="1"
+                                relShareTransMovingAverage="0"
+                                >
+                    <weight min="0" max="1"/>
+                  </analogTarget>
+                </synapse>
+              </inputConnection>
+              <inputConnection fieldName="Accel" poolName="Pool2" density="1" signalingRestriction="NoRestriction">
+                <synapse delayMethod="Random" maxDelay="150">
+                  <analogTarget scope="All"
+                                relShareOriginal="0"
+                                relShareTransDiff="0"
+                                relShareTransLinearSteps="0"
+                                relShareTransPower="0"
+                                relShareTransFoldedPower="0"
+                                relShareTransMovingAverage="1"
+                                >
+                    <weight min="0" max="1"/>
+                  </analogTarget>
+                </synapse>
+              </inputConnection>
+            </inputConnections>
+            <predictors>
+              <settings>
+                <activationFadingSum/>
+                <activationMWAvg leakage="0" weights="Constant" window="300"/>
+                <firingFadingSum strength="0.05"/>
+                <firingMWAvg leakage="0" weights="Constant" window="300"/>
+                <firingCount/>
+                <firingBinPattern window="1"/>
+              </settings>
+              <permission activation="false"
+                          activationSquare="false"
+                          activationFadingSum="false"
+                          activationMWAvg="false"
+                          firingFadingSum="true"
+                          firingMWAvg="false"
+                          firingCount="false"
+                          firingBinPattern="false"/>
+            </predictors>
+          </reservoirInstance>
+        </reservoirInstanceContainer>
+      </neuralPreprocessor>
+      <readoutLayer testDataRatio="0.1" folds="Auto">
+        <readoutUnit name="Cancel Call">
+          <classification oneWinnerGroupName="Gesture">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationElliot/>
+            <resPropTrainer attempts="10" attemptEpochs="500"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="Dead Ball">
+          <classification oneWinnerGroupName="Gesture">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationElliot/>
+            <resPropTrainer attempts="10" attemptEpochs="500"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="Four">
+          <classification oneWinnerGroupName="Gesture">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationElliot/>
+            <resPropTrainer attempts="10" attemptEpochs="500"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="Last Hour">
+          <classification oneWinnerGroupName="Gesture">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationElliot/>
+            <resPropTrainer attempts="10" attemptEpochs="500"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="Leg Bye">
+          <classification oneWinnerGroupName="Gesture">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationElliot/>
+            <resPropTrainer attempts="10" attemptEpochs="500"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="No Ball">
+          <classification oneWinnerGroupName="Gesture">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationElliot/>
+            <resPropTrainer attempts="10" attemptEpochs="500"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="One Short">
+          <classification oneWinnerGroupName="Gesture">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationElliot/>
+            <resPropTrainer attempts="10" attemptEpochs="500"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="Out">
+          <classification oneWinnerGroupName="Gesture">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationElliot/>
+            <resPropTrainer attempts="10" attemptEpochs="500"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="Penalty Runs">
+          <classification oneWinnerGroupName="Gesture">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationElliot/>
+            <resPropTrainer attempts="10" attemptEpochs="500"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="Six">
+          <classification oneWinnerGroupName="Gesture">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationElliot/>
+            <resPropTrainer attempts="10" attemptEpochs="500"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="TV Replay">
+          <classification oneWinnerGroupName="Gesture">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationElliot/>
+            <resPropTrainer attempts="10" attemptEpochs="500"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="Wide">
+          <classification oneWinnerGroupName="Gesture">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationElliot/>
+            <resPropTrainer attempts="10" attemptEpochs="500"/>
+          </ff>
+        </readoutUnit>
+      </readoutLayer>
+    </stateMachineCfg>
+  </case>
+
+
+  
+  <!--
     This demo case demonstrates successful use of mixed analog and spiking neurons. Analog neurons get analog input, spiking neurons
     get spike-train spikes.
     Following configuration of the StateMachine exhibits 88.78% accuracy, slightly better than the best algorithm
@@ -338,252 +587,6 @@
 
   
   
-  <!--
-    Following configuration of the StateMachine exhibits XX% accuracy, slightly XXXX than the best algorithm
-    called COTE, referenced at the dataset's home site:
-    "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
-    https://timeseriesclassification.com/description.php?Dataset=CricketX.
-    The series Cricket X, Y and Z are accelerometer data (in three dimensions) taken from actors performing cricket gestures.
-    The twelve classes are different umpire signals: Cancel Call, Dead Ball, Four, Last Hour, Leg Bye, No Ball,
-    One Short, Out, Penalty Runs, Six, TV Replay, and Wide.
-    They mounted two accelerometers orthogonal to each other, thus acceleration is measured in 3D space.
-    The accelerometers are housed in a small wrist watch sized enclosure worn in the form of a wrist band.
-    Taken together the data is a multivariate time series classificatin problem, but the serise are not alligned so in its
-    current format cannot be used s such Segmentation of intentional gestures for sports video annotation, Online Context Recognition
-    in Multisensor Systems using Dynamic Time Warping The data are multi-dimensional, but they are not aligned, so it is not possible.
-  -->
-  <case name="Classification task CricketX: pure ESN reservoir generating FiringFadingSum predictors, one Elliot neuron as a classifier (Resilient trainer)">
-    <samples trainingData="CricketX_train.csv" verificationData="CricketX_verify.csv"/>
-    <stateMachineCfg randomizerSeek="0">
-      <neuralPreprocessor predictorsReductionRatio="0">
-        <input>
-          <feedingPatterned bidir="true" routeToReadout="false"/>
-          <external>
-            <field name="Accel"
-                   allowRoutingToReadout="true"
-                   spikeTrainLength="5"
-                   transDiffDistance="1"
-                   transNumOfLinearSteps="16"
-                   transPowerExponent="0.5"
-                   transFoldedPowerExponent="0.5"
-                   transMovingAverageWindowLength="5"
-                   >
-              <realFeature standardize="true" keepReserve="true"/>
-            </field>
-          </external>
-        </input>
-        <reservoirCfgContainer>
-          <reservoirCfg name="MainCfg">
-            <pools>
-              <pool name="Pool1" dimX="150" dimY="1" dimZ="1">
-                <neuronGroups>
-                  <analogGroup name="Exc-grp" role="Excitatory" relShare="1" readoutDensity="1">
-                    <activationTanH/>
-                  </analogGroup>
-                  <analogGroup name="Inh-grp" role="Inhibitory" relShare="1" readoutDensity="1">
-                    <activationTanH/>
-                  </analogGroup>
-                </neuronGroups>
-                <interconnection>
-                  <randomSchema density="0.1" relShareEE="1" relShareEI="1" relShareIE="1" relShareII="1" avgDistance="NA" allowSelfConnection="true">
-                    <synapse/>
-                  </randomSchema>
-                  <chainSchema ratio="1" circle="true">
-                    <synapse/>
-                  </chainSchema>
-                </interconnection>
-              </pool>
-              <pool name="Pool2" dimX="150" dimY="1" dimZ="1">
-                <neuronGroups>
-                  <analogGroup name="Exc-grp" role="Excitatory" relShare="1" readoutDensity="1">
-                    <activationTanH/>
-                  </analogGroup>
-                  <analogGroup name="Inh-grp" role="Inhibitory" relShare="1" readoutDensity="1">
-                    <activationTanH/>
-                  </analogGroup>
-                </neuronGroups>
-                <interconnection>
-                  <randomSchema density="0.1" relShareEE="1" relShareEI="1" relShareIE="1" relShareII="1" avgDistance="NA" allowSelfConnection="true">
-                    <synapse/>
-                  </randomSchema>
-                  <chainSchema ratio="1" circle="true">
-                    <synapse/>
-                  </chainSchema>
-                </interconnection>
-              </pool>
-            </pools>
-            <spectralRadius>
-              <analogScope value="0.9999"/>
-              <spikingScope value="NA"/>
-            </spectralRadius>
-          </reservoirCfg>
-        </reservoirCfgContainer>
-        <reservoirInstanceContainer>
-          <reservoirInstance name="Main" cfg="MainCfg">
-            <inputConnections>
-              <inputConnection fieldName="Accel" poolName="Pool1" density="1" signalingRestriction="NoRestriction">
-                <synapse delayMethod="Random" maxDelay="150">
-                  <analogTarget scope="All"
-                                relShareOriginal="0"
-                                relShareTransDiff="0"
-                                relShareTransLinearSteps="0"
-                                relShareTransPower="1"
-                                relShareTransFoldedPower="1"
-                                relShareTransMovingAverage="0"
-                                >
-                    <weight min="0" max="1"/>
-                  </analogTarget>
-                </synapse>
-              </inputConnection>
-              <inputConnection fieldName="Accel" poolName="Pool2" density="1" signalingRestriction="NoRestriction">
-                <synapse delayMethod="Random" maxDelay="150">
-                  <analogTarget scope="All"
-                                relShareOriginal="0"
-                                relShareTransDiff="0"
-                                relShareTransLinearSteps="0"
-                                relShareTransPower="0"
-                                relShareTransFoldedPower="0"
-                                relShareTransMovingAverage="1"
-                                >
-                    <weight min="0" max="1"/>
-                  </analogTarget>
-                </synapse>
-              </inputConnection>
-            </inputConnections>
-            <predictors>
-              <settings>
-                <activationFadingSum/>
-                <activationMWAvg leakage="0" weights="Constant" window="300"/>
-                <firingFadingSum strength="0.05"/>
-                <firingMWAvg leakage="0" weights="Constant" window="300"/>
-                <firingCount/>
-                <firingBinPattern window="1"/>
-              </settings>
-              <permission activation="false"
-                          activationSquare="false"
-                          activationFadingSum="false"
-                          activationMWAvg="false"
-                          firingFadingSum="true"
-                          firingMWAvg="false"
-                          firingCount="false"
-                          firingBinPattern="false"/>
-            </predictors>
-          </reservoirInstance>
-        </reservoirInstanceContainer>
-      </neuralPreprocessor>
-      <readoutLayer testDataRatio="0.1" folds="Auto">
-        <readoutUnit name="Cancel Call">
-          <classification oneWinnerGroupName="Gesture">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationElliot/>
-            <resPropTrainer attempts="10" attemptEpochs="500"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="Dead Ball">
-          <classification oneWinnerGroupName="Gesture">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationElliot/>
-            <resPropTrainer attempts="10" attemptEpochs="500"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="Four">
-          <classification oneWinnerGroupName="Gesture">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationElliot/>
-            <resPropTrainer attempts="10" attemptEpochs="500"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="Last Hour">
-          <classification oneWinnerGroupName="Gesture">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationElliot/>
-            <resPropTrainer attempts="10" attemptEpochs="500"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="Leg Bye">
-          <classification oneWinnerGroupName="Gesture">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationElliot/>
-            <resPropTrainer attempts="10" attemptEpochs="500"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="No Ball">
-          <classification oneWinnerGroupName="Gesture">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationElliot/>
-            <resPropTrainer attempts="10" attemptEpochs="500"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="One Short">
-          <classification oneWinnerGroupName="Gesture">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationElliot/>
-            <resPropTrainer attempts="10" attemptEpochs="500"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="Out">
-          <classification oneWinnerGroupName="Gesture">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationElliot/>
-            <resPropTrainer attempts="10" attemptEpochs="500"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="Penalty Runs">
-          <classification oneWinnerGroupName="Gesture">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationElliot/>
-            <resPropTrainer attempts="10" attemptEpochs="500"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="Six">
-          <classification oneWinnerGroupName="Gesture">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationElliot/>
-            <resPropTrainer attempts="10" attemptEpochs="500"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="TV Replay">
-          <classification oneWinnerGroupName="Gesture">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationElliot/>
-            <resPropTrainer attempts="10" attemptEpochs="500"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="Wide">
-          <classification oneWinnerGroupName="Gesture">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationElliot/>
-            <resPropTrainer attempts="10" attemptEpochs="500"/>
-          </ff>
-        </readoutUnit>
-      </readoutLayer>
-    </stateMachineCfg>
-  </case>
-
 
   <!--
     This demo case demonstrates successful use of the pure analog ESN reservoir for the fast and accurate classifications enabled by

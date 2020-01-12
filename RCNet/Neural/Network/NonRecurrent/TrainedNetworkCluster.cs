@@ -1,4 +1,5 @@
 ﻿using RCNet.MathTools;
+using RCNet.MathTools.Probability;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -74,6 +75,7 @@ namespace RCNet.Neural.Network.NonRecurrent
         /// Indicates that the whole network output is binary
         /// </summary>
         public bool BinaryOutput { get { return !double.IsNaN(BinBorder); } }
+
 
         //Methods
         /// <summary>

@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
+using System.Reflection;
 using System.Text;
+using System.Xml.Linq;
 using RCNet.Extensions;
 using RCNet.MathTools;
 using RCNet.Neural.Data;
@@ -9,7 +12,6 @@ using RCNet.Neural.Network.NonRecurrent;
 using RCNet.Neural.Network.SM.Neuron;
 using RCNet.Neural.Network.SM.Preprocessing;
 using RCNet.Neural.Network.SM.Readout;
-
 
 namespace RCNet.Neural.Network.SM
 {
@@ -52,21 +54,35 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         private readonly StateMachineSettings _settings;
 
-        //Constructor
+        //Constructors
         /// <summary>
-        /// Constructs an instance of State Machine
+        /// Creates an instance of StateMachine
         /// </summary>
-        /// <param name="settings">State Machine settings</param>
+        /// <param name="settings">StateMachine settings</param>
         public StateMachine(StateMachineSettings settings)
         {
             _settings = settings.DeepClone();
             //Neural preprocessor instance
-            NP = settings.NeuralPreprocessorConfig == null ? null : new NeuralPreprocessor(settings.NeuralPreprocessorConfig, settings.RandomizerSeek);
+            NP = _settings.NeuralPreprocessorConfig == null ? null : new NeuralPreprocessor(_settings.NeuralPreprocessorConfig, _settings.RandomizerSeek);
             //Readout layer instance
             RL = new ReadoutLayer(_settings.ReadoutLayerConfig);
             return;
         }
 
+        /// <summary>
+        /// Creates an instance of StateMachine
+        /// </summary>
+        /// <param name="settingsXmlFile">Xml file where root element matches StateMachine settings</param>
+        public StateMachine(string settingsXmlFile)
+        {
+            XDocument xmlDoc = XDocument.Load(settingsXmlFile);
+            _settings = new StateMachineSettings(xmlDoc.Root);
+            //Neural preprocessor instance
+            NP = _settings.NeuralPreprocessorConfig == null ? null : new NeuralPreprocessor(_settings.NeuralPreprocessorConfig, _settings.RandomizerSeek);
+            //Readout layer instance
+            RL = new ReadoutLayer(_settings.ReadoutLayerConfig);
+            return;
+        }
 
         //Methods
         /// <summary>
