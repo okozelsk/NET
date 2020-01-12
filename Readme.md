@@ -120,10 +120,10 @@ See the [wiki pages.](https://en.wikipedia.org/wiki/Biological_neuron_model)
 |ParallelPerceptron|Implements the parallel perceptron network|
 |PDeltaRuleTrainer|P-Delta rule trainer of the parallel perceptron network|
 |||
-|TrainedNetwork|Encapsulates trained non-recurrent network and related error statistics.|
-|TrainedNetworkBuilder|Builds single trained network.|
-|TrainedNetworkCluster|Encapsulates set of trained non-recurrent networks and related error statistics.|
-|TrainedNetworkClusterBuilder|Builds cluster of trained networks. Supports x-fold cross validation.|
+|TrainedNetwork|Encapsulates trained non-recurrent (Feed forward or Parallel perceptron) network and related error statistics.|
+|TrainedNetworkBuilder|Builds single trained (Feed forward or Parallel perceptron) network. Performs training epochs and offers control to user to evaluate the network.|
+|TrainedNetworkCluster|Encapsulates set of trained non-recurrent networks (cluster of TrainedNetwork instances) and related error statistics. Offers weighted cluster prediction and provides set of involved members alone predictions.|
+|TrainedNetworkClusterBuilder|Builds cluster of trained networks based on x-fold cross validation approach. Each cluster member is a fold specific trained network.|
 
 ### State Machine components
 |Component|Description|
