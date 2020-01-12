@@ -45,7 +45,7 @@ Input data is expected in csv format where delimiter can be a semicolon or a com
 |![Matrix](https://github.com/okozelsk/NET/blob/master/RCNet/MathTools/MatrixMath/Matrix.cs)|Implements matrix of double values supporting basic mathematical operations. Contains buit-in Power Iteration method for the largest eigen value quick estimation|
 |![EVD](https://github.com/okozelsk/NET/blob/master/RCNet/MathTools/MatrixMath/EVD.cs)|Full eigen values and vectors decomposition of a squared matrix|
 |![SVD](https://github.com/okozelsk/NET/blob/master/RCNet/MathTools/MatrixMath/SVD.cs)|Singular values decomposition of a matrix|
-|![QRD](https://github.com/okozelsk/NET/blob/master/RCNet/MathTools/MatrixMath/QRD.cs)QR decomposition of a matrix|
+|![QRD](https://github.com/okozelsk/NET/blob/master/RCNet/MathTools/MatrixMath/QRD.cs)|QR decomposition of a matrix|
 |![LUD](https://github.com/okozelsk/NET/blob/master/RCNet/MathTools/MatrixMath/LUD.cs)|LU decomposition of a squared matrix|
 |![ParamSeeker](https://github.com/okozelsk/NET/blob/master/RCNet/MathTools/PS/ParamSeeker.cs)|Implements an error driven iterative search for the best value of a given parameter|
 |![HurstExpEstim](https://github.com/okozelsk/NET/blob/master/RCNet/MathTools/Hurst/HurstExpEstim.cs)|Implements Hurst exponent estimator and Rescalled range. It can be used to evaluate level of data randomness|
