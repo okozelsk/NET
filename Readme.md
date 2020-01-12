@@ -55,28 +55,28 @@ Input data is expected in csv format where delimiter can be a semicolon or a com
 ### Signal generators
 |Component|Description|
 |--|--|
-|PulseGenerator|Generates constant pulses having specified average period. Pulse leaks follow specified random distribution or can be constant|
-|MackeyGlassGenerator|Generates Mackey-Glass chaotic signal|
-|RandomGenerator|Generates random signal following specified distribution|
-|SinusoidalGenerator|Generates sinusoidal signal|
+|![PulseGenerator](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Data/Generators/PulseGenerator.cs)|Generates constant pulses having specified average period. Pulse leaks follow specified random distribution or can be constant|
+|![MackeyGlassGenerator](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Data/Generators/MackeyGlassGenerator.cs)|Generates Mackey-Glass chaotic signal|
+|![RandomGenerator](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Data/Generators/RandomGenerator.cs)|Generates random signal following specified distribution|
+|![SinusoidalGenerator](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Data/Generators/SinusoidalGenerator.cs)|Generates sinusoidal signal|
 
 ### XML handling
 |Component|Description|
 |--|--|
-|ElemValidator|Implements validation of alone xml element against specified type defined in xsd. It complements the apparently missing .net method and is necessary to comply with the overall RCNet xml settings concept.|
-|DocValidator|Envelopes xml document loading and validation|
+|![ElemValidator](https://github.com/okozelsk/NET/blob/master/RCNet/XmlTools/ElemValidator.cs)|Implements validation of alone xml element against specified type defined in xsd. It complements the apparently missing .net method and is necessary to comply with the overall RCNet xml settings concept.|
+|![DocValidator](https://github.com/okozelsk/NET/blob/master/RCNet/XmlTools/DocValidator.cs)|Envelopes xml document loading and validation|
 
 ### Data handling
 |Component|Description|
 |--|--|
-|SimpleQueue|Implements quick and simple FIFO queue (template). Supports access to enqueued elements so it can be also used as the "sliding window"|
-|BinFeatureFilter|Binary (0/1) feature filter|
-|EnumFeatureFilter|Enumeration (1..N) feature filter|
-|RealFeatureFilter|Real number feature filter supporting standardization and range reserve for handling of unseen data in the future|
-|DelimitedStringValues|Helper encoder and decoder of data in csv format|
-|VectorBundle|Bundle of input data vectors and corresponding desired output vectors (1:1). Supports upload from csv file|
-|PatternBundle|Bundle of patterns of input data vectors and corresponding desired output vectors (n:1). Supports upload from csv file|
-|ResultBundle|Bundle of input, computed and desired output vectors (1:1:1)|
+|![SimpleQueue](https://github.com/okozelsk/NET/blob/master/RCNet/Queue/SimpleQueue.cs)|Implements quick and simple FIFO queue (template). Supports access to enqueued elements so it can be also used as the "sliding window"|
+|![BinFeatureFilter](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Data/Filter/BinFeatureFilter.cs)|Binary (0/1) feature filter|
+|![EnumFeatureFilter](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Data/Filter/EnumFeatureFIlter.cs)|Enumeration (1..N) feature filter|
+|![RealFeatureFilter](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Data/Filter/RealFeatureFilter.cs)|Real number feature filter supporting standardization and range reserve for handling of unseen data in the future|
+|![DelimitedStringValues](https://github.com/okozelsk/NET/blob/master/RCNet/CsvTools/DelimitedStringValues.cs)|Helper encoder and decoder of data in csv format|
+|![VectorBundle](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Data/VectorBundle.cs)|Bundle of input data vectors and corresponding desired output vectors (1:1). Supports upload from csv file|
+|![PatternBundle](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Data/PatternBundle.cs)|Bundle of patterns of input data vectors and corresponding desired output vectors (n:1). Supports upload from csv file|
+|![ResultBundle](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Data/ResultBundle.cs)|Bundle of input, computed and desired output vectors (1:1:1)|
 
 ### Analog activation functions (stateless)
 See the [wiki pages.](https://en.wikipedia.org/wiki/Activation_function)
