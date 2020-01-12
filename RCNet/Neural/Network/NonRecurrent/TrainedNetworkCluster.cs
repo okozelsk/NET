@@ -27,6 +27,10 @@ namespace RCNet.Neural.Network.NonRecurrent
         /// </summary>
         public List<TrainedNetwork> Members { get; }
         /// <summary>
+        /// Weights of cluster members
+        /// </summary>
+        public List<double> Weights { get; }
+        /// <summary>
         /// Error statistics of the cluster
         /// </summary>
         public ClusterErrStatistics ErrorStats { get; }
@@ -43,6 +47,7 @@ namespace RCNet.Neural.Network.NonRecurrent
             ClusterName = clusterName;
             BinBorder = binBorder;
             Members = new List<TrainedNetwork>(numOfMembers);
+            Weights = new List<double>(numOfMembers);
             ErrorStats = new ClusterErrStatistics(ClusterName, numOfMembers, BinBorder);
             return;
         }
@@ -60,6 +65,7 @@ namespace RCNet.Neural.Network.NonRecurrent
             {
                 Members.Add(tn.DeepClone());
             }
+            Weights = new List<double>(source.Weights);
             ErrorStats = source.ErrorStats.DeepClone();
         }
 
@@ -74,7 +80,7 @@ namespace RCNet.Neural.Network.NonRecurrent
         /// Computes weighted averaged output of the cluster member networks
         /// </summary>
         /// <param name="predictors">Input predictors</param>
-        /// <param name="memberOutputCollection">Collection of single network outputs</param>
+        /// <param name="memberOutputCollection">Collection of outputs of cluster member networks</param>
         public double[] Compute(double[] predictors, out List<double[]> memberOutputCollection)
         {
             int numOfOutputValues = Members[0].Network.NumOfOutputValues;
@@ -86,6 +92,7 @@ namespace RCNet.Neural.Network.NonRecurrent
             //Init member output collection
             memberOutputCollection = new List<double[]>(Members.Count);
             //Loop cluster members
+            int clusterMemberIdx = 0;
             foreach (TrainedNetwork clusterMember in Members)
             {
                 //Compute member
@@ -95,32 +102,9 @@ namespace RCNet.Neural.Network.NonRecurrent
                 //Add sub-results to weighted averages
                 for (int i = 0; i < numOfOutputValues; i++)
                 {
-                    double weight;
-                    if (BinaryOutput)
-                    {
-                        //Training accuracy as a weight base
-                        weight = 1d - clusterMember.TrainingBinErrorStat.TotalErrStat.ArithAvg;
-                        if (clusterMember.TestingBinErrorStat != null && clusterMember.TestingBinErrorStat.TotalErrStat.NumOfSamples > 0)
-                        {
-                            //Testing results are available
-                            //Combined accuracy as a resulting wight
-                            weight *= 1d - clusterMember.TestingBinErrorStat.TotalErrStat.ArithAvg;
-                        }
-                    }
-                    else
-                    {
-                        //Forecast
-                        //Training accuracy as a weight base
-                        weight = 1d - clusterMember.TrainingErrorStat.ArithAvg;
-                        if (clusterMember.TestingErrorStat != null && clusterMember.TestingErrorStat.NumOfSamples > 0)
-                        {
-                            //Testing results are available
-                            //Combined accuracy as a resulting wight
-                            weight *= 1d - clusterMember.TestingErrorStat.ArithAvg;
-                        }
-                    }
-                    weightedResultCollection[i].AddSampleValue(computedValues[i], weight);
+                    weightedResultCollection[i].AddSampleValue(computedValues[i], Weights[clusterMemberIdx]);
                 }
+                ++clusterMemberIdx;
             }
             //Return weighted average results
             double[] outputValues = new double[numOfOutputValues];
@@ -130,7 +114,6 @@ namespace RCNet.Neural.Network.NonRecurrent
             }
             return outputValues;
         }
-
 
         /// <summary>
         /// Creates the deep copy of this instance

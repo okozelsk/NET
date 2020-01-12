@@ -137,6 +137,7 @@ namespace RCNet.Neural.Network.NonRecurrent
                 netBuilder.RegressionEpochDone += OnRegressionEpochDone;
                 //Build trained network. Trained network becomes to be the cluster member
                 cluster.Members.Add(netBuilder.Build());
+                cluster.Weights.Add(1d);
                 //Update cluster error statistics (pesimistic approach)
                 for (int sampleIdx = 0; sampleIdx < subBundleCollection[foldIdx].OutputVectorCollection.Count; sampleIdx++)
                 {
@@ -154,6 +155,38 @@ namespace RCNet.Neural.Network.NonRecurrent
                 }//sampleIdx
 
             }//foldIdx
+            
+            //Set cluster members weights
+            if (cluster.BinaryOutput)
+            {
+                double sum = 0;
+                foreach(TrainedNetwork tn in cluster.Members)
+                {
+                    sum += (1d - tn.TrainingBinErrorStat.TotalErrStat.ArithAvg) * (1d - tn.TestingBinErrorStat.TotalErrStat.ArithAvg);
+                }
+                if(sum > 0)
+                {
+                    for(int i = 0; i < cluster.Members.Count; i++)
+                    {
+                        cluster.Weights[i] = ((1d - cluster.Members[i].TrainingBinErrorStat.TotalErrStat.ArithAvg) * (1d - cluster.Members[i].TestingBinErrorStat.TotalErrStat.ArithAvg)) / sum;
+                    }
+                }
+            }
+            else
+            {
+                double sum = 0;
+                foreach (TrainedNetwork tn in cluster.Members)
+                {
+                    sum += (1d - tn.TrainingErrorStat.ArithAvg) * (1d - tn.TestingErrorStat.ArithAvg);
+                }
+                if (sum > 0)
+                {
+                    for (int i = 0; i < cluster.Members.Count; i++)
+                    {
+                        cluster.Weights[i] = ((1d - cluster.Members[i].TrainingErrorStat.ArithAvg) * (1d - cluster.Members[i].TestingErrorStat.ArithAvg)) / sum;
+                    }
+                }
+            }
 
             //Return built cluster
             return cluster;

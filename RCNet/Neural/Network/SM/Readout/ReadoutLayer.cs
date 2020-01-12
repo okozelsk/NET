@@ -70,7 +70,6 @@ namespace RCNet.Neural.Network.SM.Readout
         private ReadoutUnit[] _readoutUnitCollection;
 
 
-
         //Constructor
         /// <summary>
         /// Creates an uninitialized instance
@@ -79,13 +78,6 @@ namespace RCNet.Neural.Network.SM.Readout
         public ReadoutLayer(ReadoutLayerSettings settings)
         {
             _settings = settings.DeepClone();
-            foreach (ReadoutLayerSettings.ReadoutUnitSettings rus in _settings.ReadoutUnitCfgCollection)
-            {
-                if (!rus.OutputRange.BelongsTo(DataRange.Min) || !rus.OutputRange.BelongsTo(DataRange.Max))
-                {
-                    throw new Exception($"Readout unit {rus.Name} does not support data range <{DataRange.Min}; {DataRange.Max}>.");
-                }
-            }
             Reset();
             return;
         }
@@ -94,7 +86,7 @@ namespace RCNet.Neural.Network.SM.Readout
         /// <summary>
         /// Cluster error statistics of readout units
         /// </summary>
-        public List<TrainedNetworkCluster.ClusterErrStatistics> ClusterErrStatisticsCollection
+        public List<TrainedNetworkCluster.ClusterErrStatistics> ReadoutUnitErrStatCollection
         {
             get
             {
@@ -118,7 +110,7 @@ namespace RCNet.Neural.Network.SM.Readout
         public static int DecideOneWinner(string oneWinnerGroupName, double[] dataVector, ReadoutLayerSettings rls)
         {
             //Obtain group members
-            List<ReadoutLayerSettings.ReadoutUnitSettings> rusCollection = rls.GetOneWinnerGroupMembers(oneWinnerGroupName);
+            List<ReadoutLayerSettings.ReadoutUnitSettings> rusCollection = rls.OneWinnerGroupCfgCollection[oneWinnerGroupName].Members;
             //Find the highest probability unit
             int maxPIdx = -1;
             for (int i = 0; i < rusCollection.Count; i++)
@@ -236,10 +228,11 @@ namespace RCNet.Neural.Network.SM.Readout
             //Create shuffled copy of the data
             VectorBundle shuffledData = new VectorBundle(normalizedPredictorsCollection, normalizedIdealOutputsCollection);
             shuffledData.Shuffle(rand);
+
             //Building of readout units
             for (int unitIdx = 0; unitIdx < _settings.ReadoutUnitCfgCollection.Count; unitIdx++)
             {
-                List<double[]> idealValueCollection = new List<double[]>(normalizedIdealOutputsCollection.Length);
+                List<double[]> idealValueCollection = new List<double[]>(shuffledData.OutputVectorCollection.Count);
                 //Transformation of ideal vectors to a single value vectors
                 foreach (double[] idealVector in shuffledData.OutputVectorCollection)
                 {
@@ -267,16 +260,9 @@ namespace RCNet.Neural.Network.SM.Readout
                                                                   );
             }//unitIdx
             
-            //Result bundle (performs full recomputation of the original data)
-            ResultBundle resultBundle = new ResultBundle(dataBundle.InputVectorCollection.Count);
-            for(int rowIdx = 0; rowIdx < dataBundle.InputVectorCollection.Count; rowIdx++)
-            {
-                double[] computedVector = Compute(dataBundle.InputVectorCollection[rowIdx]);
-                resultBundle.AddVectors(dataBundle.InputVectorCollection[rowIdx], computedVector, dataBundle.OutputVectorCollection[rowIdx]);
-            }
             //Readout layer is trained and ready
             Trained = true;
-            return new RegressionOverview(ClusterErrStatisticsCollection, resultBundle);
+            return new RegressionOverview(ReadoutUnitErrStatCollection);
         }
 
         /// <summary>
@@ -330,6 +316,41 @@ namespace RCNet.Neural.Network.SM.Readout
             return natOutputs;
         }
 
+        private double[] ToSingleArray(List<double[]> items)
+        {
+            int arrayLength = 0;
+            foreach(double[] item in items)
+            {
+                arrayLength += item.Length;
+            }
+            double[] result = new double[arrayLength];
+            int index = 0;
+            foreach (double[] item in items)
+            {
+                for(int i = 0; i < item.Length; i++)
+                {
+                    result[index++] = item[i];
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Computes readout layer output vector
+        /// </summary>
+        private double[] Compute(double[] predictors, out List<double[]> unitsAllSubResults)
+        {
+            unitsAllSubResults = new List<double[]>(_settings.ReadoutUnitCfgCollection.Count);
+            double[] outputVector = new double[_readoutUnitCollection.Length];
+            for(int unitIdx = 0; unitIdx < _readoutUnitCollection.Length; unitIdx++)
+            {
+                double[] readoutUnitInputVector = _predictorsMapper.CreateVector(_settings.ReadoutUnitCfgCollection[unitIdx].Name, predictors);
+                outputVector[unitIdx] = _readoutUnitCollection[unitIdx].NetworkCluster.Compute(readoutUnitInputVector, out List<double[]> memberOutputCollection)[0];
+                unitsAllSubResults.Add(ToSingleArray(memberOutputCollection));
+            }
+            return outputVector;
+        }
+
         /// <summary>
         /// Computes readout layer output vector
         /// </summary>
@@ -337,17 +358,15 @@ namespace RCNet.Neural.Network.SM.Readout
         public double[] Compute(double[] predictors)
         {
             //Check readyness
-            if(_predictorFeatureFilterCollection == null || _outputFeatureFilterCollection == null)
+            if (!Trained)
             {
                 throw new Exception("Readout layer is not trained. Build function has to be called before Compute function can be used.");
             }
             double[] nrmPredictors = NormalizePredictors(predictors);
-            double[] outputVector = new double[_readoutUnitCollection.Length];
-            for(int unitIdx = 0; unitIdx < _readoutUnitCollection.Length; unitIdx++)
-            {
-                outputVector[unitIdx] = _readoutUnitCollection[unitIdx].NetworkCluster.Compute(nrmPredictors, out List<double[]> memberOutputCollection)[0];
-            }
+            double[] outputVector = Compute(nrmPredictors, out _);
+            //Denormalization
             double[] natOuputVector = NaturalizeOutputs(outputVector);
+            //Return result
             return natOuputVector;
         }
 
@@ -397,7 +416,7 @@ namespace RCNet.Neural.Network.SM.Readout
                 }
                 //One Winner groups
                 OneWinnerDataCollection = new Dictionary<string, OneWinnerGroupData>();
-                foreach (string oneWinnerGroupName in rls.OneWinnerGroupNameCollection.Values)
+                foreach (string oneWinnerGroupName in rls.OneWinnerGroupCfgCollection.Keys)
                 {
                     //There is One Winner group
                     int winningUnitIndex = ReadoutLayer.DecideOneWinner(oneWinnerGroupName, dataVector, rls);
@@ -663,25 +682,51 @@ namespace RCNet.Neural.Network.SM.Readout
             /// <summary>
             /// Collection of error statistics related to readout units
             /// </summary>
-            public List<TrainedNetworkCluster.ClusterErrStatistics> ClusterErrStatisticsCollection { get; }
-
-            /// <summary>
-            /// Original training data together with data computed by trained readout layer
-            /// </summary>
-            public ResultBundle TrainingDataResultBundle { get; }
+            public List<TrainedNetworkCluster.ClusterErrStatistics> ReadoutUnitErrStatCollection { get; }
 
             /// <summary>
             /// Creates an initialized instance
             /// </summary>
-            /// <param name="clusterErrStatisticsCollection">Collection of error statistics related to readout units</param>
-            /// <param name="trainingDataResultBundle">Original training data together with data computed by trained readout layer</param>
-            public RegressionOverview(List<TrainedNetworkCluster.ClusterErrStatistics> clusterErrStatisticsCollection,
-                                      ResultBundle trainingDataResultBundle
-                                      )
+            /// <param name="readoutUnitErrStatCollection">Collection of error statistics related to readout units</param>
+            public RegressionOverview(List<TrainedNetworkCluster.ClusterErrStatistics> readoutUnitErrStatCollection)
             {
-                ClusterErrStatisticsCollection = clusterErrStatisticsCollection;
-                TrainingDataResultBundle = trainingDataResultBundle;
+                ReadoutUnitErrStatCollection = readoutUnitErrStatCollection;
                 return;
+            }
+
+            //Methods
+            private string BuildErrStatReport(string leftMargin, TrainedNetworkCluster.ClusterErrStatistics ces)
+            {
+                StringBuilder sb = new StringBuilder();
+                if (ces.BinaryOutput)
+                {
+                    //Classification task report
+                    sb.Append(leftMargin + $"  Classification of negative samples" + Environment.NewLine);
+                    sb.Append(leftMargin + $"    Number of samples: {ces.BinaryErrStat.BinValErrStat[0].NumOfSamples}" + Environment.NewLine);
+                    sb.Append(leftMargin + $"     Number of errors: {ces.BinaryErrStat.BinValErrStat[0].Sum.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                    sb.Append(leftMargin + $"           Error rate: {ces.BinaryErrStat.BinValErrStat[0].ArithAvg.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                    sb.Append(leftMargin + $"             Accuracy: {(1 - ces.BinaryErrStat.BinValErrStat[0].ArithAvg).ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                    sb.Append(leftMargin + $"  Classification of positive samples" + Environment.NewLine);
+                    sb.Append(leftMargin + $"    Number of samples: {ces.BinaryErrStat.BinValErrStat[1].NumOfSamples}" + Environment.NewLine);
+                    sb.Append(leftMargin + $"     Number of errors: {ces.BinaryErrStat.BinValErrStat[1].Sum.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                    sb.Append(leftMargin + $"           Error rate: {ces.BinaryErrStat.BinValErrStat[1].ArithAvg.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                    sb.Append(leftMargin + $"             Accuracy: {(1 - ces.BinaryErrStat.BinValErrStat[1].ArithAvg).ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                    sb.Append(leftMargin + $"  Overall classification results" + Environment.NewLine);
+                    sb.Append(leftMargin + $"    Number of samples: {ces.BinaryErrStat.TotalErrStat.NumOfSamples}" + Environment.NewLine);
+                    sb.Append(leftMargin + $"     Number of errors: {ces.BinaryErrStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                    sb.Append(leftMargin + $"           Error rate: {ces.BinaryErrStat.TotalErrStat.ArithAvg.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                    sb.Append(leftMargin + $"             Accuracy: {(1 - ces.BinaryErrStat.TotalErrStat.ArithAvg).ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                }
+                else
+                {
+                    //Forecast task report
+                    sb.Append(leftMargin + $"  Number of samples: {ces.NatPrecissionErrStat.NumOfSamples}" + Environment.NewLine);
+                    sb.Append(leftMargin + $"      Biggest error: {ces.NatPrecissionErrStat.Max.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                    sb.Append(leftMargin + $"     Smallest error: {ces.NatPrecissionErrStat.Min.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                    sb.Append(leftMargin + $"      Average error: {ces.NatPrecissionErrStat.ArithAvg.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                }
+                sb.Append(Environment.NewLine);
+                return sb.ToString();
             }
 
             /// <summary>
@@ -693,39 +738,11 @@ namespace RCNet.Neural.Network.SM.Readout
             {
                 string leftMargin = margin == 0 ? string.Empty : new string(' ', margin);
                 StringBuilder sb = new StringBuilder();
-                //Training results
-                for (int outputIdx = 0; outputIdx < ClusterErrStatisticsCollection.Count; outputIdx++)
+                //Training results of readout units
+                foreach (TrainedNetworkCluster.ClusterErrStatistics ces in ReadoutUnitErrStatCollection)
                 {
-                    TrainedNetworkCluster.ClusterErrStatistics ces = ClusterErrStatisticsCollection[outputIdx];
                     sb.Append(leftMargin + $"Output field [{ces.ClusterName}]" + Environment.NewLine);
-                    if (ces.BinaryOutput)
-                    {
-                        //Classification task report
-                        sb.Append(leftMargin + $"  Classification of negative samples" + Environment.NewLine);
-                        sb.Append(leftMargin + $"    Number of samples: {ces.BinaryErrStat.BinValErrStat[0].NumOfSamples}" + Environment.NewLine);
-                        sb.Append(leftMargin + $"     Number of errors: {ces.BinaryErrStat.BinValErrStat[0].Sum.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
-                        sb.Append(leftMargin + $"           Error rate: {ces.BinaryErrStat.BinValErrStat[0].ArithAvg.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
-                        sb.Append(leftMargin + $"             Accuracy: {(1 - ces.BinaryErrStat.BinValErrStat[0].ArithAvg).ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
-                        sb.Append(leftMargin + $"  Classification of positive samples" + Environment.NewLine);
-                        sb.Append(leftMargin + $"    Number of samples: {ces.BinaryErrStat.BinValErrStat[1].NumOfSamples}" + Environment.NewLine);
-                        sb.Append(leftMargin + $"     Number of errors: {ces.BinaryErrStat.BinValErrStat[1].Sum.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
-                        sb.Append(leftMargin + $"           Error rate: {ces.BinaryErrStat.BinValErrStat[1].ArithAvg.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
-                        sb.Append(leftMargin + $"             Accuracy: {(1 - ces.BinaryErrStat.BinValErrStat[1].ArithAvg).ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
-                        sb.Append(leftMargin + $"  Overall classification results" + Environment.NewLine);
-                        sb.Append(leftMargin + $"    Number of samples: {ces.BinaryErrStat.TotalErrStat.NumOfSamples}" + Environment.NewLine);
-                        sb.Append(leftMargin + $"     Number of errors: {ces.BinaryErrStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
-                        sb.Append(leftMargin + $"           Error rate: {ces.BinaryErrStat.TotalErrStat.ArithAvg.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
-                        sb.Append(leftMargin + $"             Accuracy: {(1 - ces.BinaryErrStat.TotalErrStat.ArithAvg).ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
-                    }
-                    else
-                    {
-                        //Forecast task report
-                        sb.Append(leftMargin + $"  Number of samples: {ces.NatPrecissionErrStat.NumOfSamples}" + Environment.NewLine);
-                        sb.Append(leftMargin + $"      Biggest error: {ces.NatPrecissionErrStat.Max.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
-                        sb.Append(leftMargin + $"     Smallest error: {ces.NatPrecissionErrStat.Min.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
-                        sb.Append(leftMargin + $"      Average error: {ces.NatPrecissionErrStat.ArithAvg.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
-                    }
-                    sb.Append(Environment.NewLine);
+                    sb.Append(BuildErrStatReport(leftMargin, ces));
                 }
                 return sb.ToString();
             }

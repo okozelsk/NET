@@ -206,6 +206,33 @@ namespace RCNet.Neural.Network.SM
         }
 
         /// <summary>
+        /// Compute function for a patterned input feeding.
+        /// Processes given input pattern and computes richer form of output.
+        /// </summary>
+        /// <param name="inputPattern">Input pattern</param>
+        public ReadoutLayer.ReadoutData ComputeReadoutData(List<double[]> inputPattern)
+        {
+            if (!RL.Trained)
+            {
+                throw new Exception("Readout layer is not trained.");
+            }
+            if (NP == null)
+            {
+                //Neural preprocessor is bypassed
+                return RL.ComputeReadoutData(PatternToVector(inputPattern));
+            }
+            else
+            {
+                if (_settings.NeuralPreprocessorConfig.InputConfig.FeedingType == NeuralPreprocessor.InputFeedingType.Continuous)
+                {
+                    throw new Exception("This version of Compute function is not useable for continuous input feeding.");
+                }
+                //Compute and return output
+                return RL.ComputeReadoutData(NP.Preprocess(inputPattern));
+            }
+        }
+
+        /// <summary>
         /// Compute fuction for a continuous input feeding.
         /// Processes given input values and computes (predicts) the output.
         /// </summary>
@@ -230,6 +257,33 @@ namespace RCNet.Neural.Network.SM
                 }
                 //Compute and return output
                 return RL.Compute(NP.Preprocess(inputVector));
+            }
+        }
+
+        /// <summary>
+        /// Compute fuction for a continuous input feeding.
+        /// Processes given input values and computes (predicts) richer form of output.
+        /// </summary>
+        /// <param name="inputVector">Input values</param>
+        public ReadoutLayer.ReadoutData ComputeReadoutData(double[] inputVector)
+        {
+            if (!RL.Trained)
+            {
+                throw new Exception("Readout layer is not trained.");
+            }
+            if (NP == null)
+            {
+                //Neural preprocessor is bypassed
+                return RL.ComputeReadoutData(inputVector);
+            }
+            else
+            {
+                if (_settings.NeuralPreprocessorConfig.InputConfig.FeedingType == NeuralPreprocessor.InputFeedingType.Patterned)
+                {
+                    throw new Exception("This version of Compute function is not useable for patterned input feeding.");
+                }
+                //Compute and return output
+                return RL.ComputeReadoutData(NP.Preprocess(inputVector));
             }
         }
 
@@ -326,7 +380,6 @@ namespace RCNet.Neural.Network.SM
                     predictors = NP.Preprocess(vectorBundle.InputVectorCollection[sampleIdx]);
                 }
                 ReadoutLayer.ReadoutData readoutData = RL.ComputeReadoutData(predictors);
-                double[] result = RL.Compute(predictors);
                 verificationResults.Update(predictors, readoutData, vectorBundle.OutputVectorCollection[sampleIdx]);
                 VerificationProgressChanged(vectorBundle.InputVectorCollection.Count, sampleIdx + 1);
             }
@@ -356,7 +409,6 @@ namespace RCNet.Neural.Network.SM
                     predictors = NP.Preprocess(patternBundle.InputPatternCollection[sampleIdx]);
                 }
                 ReadoutLayer.ReadoutData readoutData = RL.ComputeReadoutData(predictors);
-                double[] result = RL.Compute(predictors);
                 verificationResults.Update(predictors, readoutData, patternBundle.OutputVectorCollection[sampleIdx]);
                 VerificationProgressChanged(patternBundle.InputPatternCollection.Count, sampleIdx + 1);
             }
@@ -439,9 +491,9 @@ namespace RCNet.Neural.Network.SM
                     ReadoutUnitStatCollection.Add(new ReadoutUnitStat(rus));
                 }
                 OneWinnerGroupStatCollection = new List<OneWinnerGroupStat>();
-                foreach (string groupName in ReadoutLayerConfig.OneWinnerGroupNameCollection.Values)
+                foreach (string groupName in ReadoutLayerConfig.OneWinnerGroupCfgCollection.Keys)
                 {
-                    OneWinnerGroupStatCollection.Add(new OneWinnerGroupStat(groupName, ReadoutLayerConfig.GetOneWinnerGroupMembers(groupName)));
+                    OneWinnerGroupStatCollection.Add(new OneWinnerGroupStat(groupName, ReadoutLayerConfig.OneWinnerGroupCfgCollection[groupName].Members));
                 }
                 return;
             }

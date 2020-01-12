@@ -45,8 +45,7 @@ namespace RCNet.Neural.Network.SM.Readout
         /// <summary>
         /// Dictionary of names of "one winner" groups
         /// </summary>
-        public Dictionary<string, string> OneWinnerGroupNameCollection { get; set; }
-
+        public Dictionary<string, OneWinnerGroupSettings> OneWinnerGroupCfgCollection { get; set; }
 
         //Constructors
         /// <summary>
@@ -58,7 +57,7 @@ namespace RCNet.Neural.Network.SM.Readout
             TestDataRatio = 0;
             NumOfFolds = 0;
             ReadoutUnitCfgCollection = new List<ReadoutUnitSettings>();
-            OneWinnerGroupNameCollection = new Dictionary<string, string>();
+            OneWinnerGroupCfgCollection = new Dictionary<string, OneWinnerGroupSettings>();
             return;
         }
 
@@ -76,7 +75,11 @@ namespace RCNet.Neural.Network.SM.Readout
             {
                 ReadoutUnitCfgCollection.Add(rus.DeepClone());
             }
-            OneWinnerGroupNameCollection = new Dictionary<string, string>(source.OneWinnerGroupNameCollection);
+            OneWinnerGroupCfgCollection = new Dictionary<string, OneWinnerGroupSettings>();
+            foreach(OneWinnerGroupSettings wwgs in source.OneWinnerGroupCfgCollection.Values)
+            {
+                OneWinnerGroupCfgCollection.Add(wwgs.Name, wwgs.DeepClone());
+            }
             return;
         }
 
@@ -101,20 +104,25 @@ namespace RCNet.Neural.Network.SM.Readout
             NumOfFolds = readoutLayerSettingsElem.Attribute("folds").Value == "Auto" ? 0 : int.Parse(readoutLayerSettingsElem.Attribute("folds").Value);
             //Readout units
             ReadoutUnitCfgCollection = new List<ReadoutUnitSettings>();
-            OneWinnerGroupNameCollection = new Dictionary<string, string>();
             int unitIndex = 0;
+            List<string> owgs = new List<string>();
             foreach (XElement readoutUnitElem in readoutLayerSettingsElem.Descendants("readoutUnit"))
             {
                 ReadoutUnitSettings rus = new ReadoutUnitSettings(unitIndex, readoutUnitElem);
                 ReadoutUnitCfgCollection.Add(rus);
                 if(rus.OneWinnerGroupName != ReadoutUnitSettings.NoOneWinnerGroupName)
                 {
-                    if(!OneWinnerGroupNameCollection.TryGetValue(rus.OneWinnerGroupName, out string value))
+                    if(owgs.IndexOf(rus.OneWinnerGroupName) == -1)
                     {
-                        OneWinnerGroupNameCollection.Add(rus.OneWinnerGroupName, rus.OneWinnerGroupName);
+                        owgs.Add(rus.OneWinnerGroupName);
                     }
                 }
                 ++unitIndex;
+            }
+            OneWinnerGroupCfgCollection = new Dictionary<string, OneWinnerGroupSettings>(owgs.Count);
+            foreach (string oneWinnerGroupName in owgs)
+            {
+                OneWinnerGroupCfgCollection.Add(oneWinnerGroupName, new OneWinnerGroupSettings(oneWinnerGroupName, GetOneWinnerGroupMembers(oneWinnerGroupName)));
             }
             return;
         }
@@ -130,7 +138,7 @@ namespace RCNet.Neural.Network.SM.Readout
         /// Returns settings of readout units belonging into the specified one-winner group.
         /// </summary>
         /// <param name="groupName">One-winner group name</param>
-        public List<ReadoutUnitSettings> GetOneWinnerGroupMembers(string groupName)
+        private List<ReadoutUnitSettings> GetOneWinnerGroupMembers(string groupName)
         {
             return (from rus in ReadoutUnitCfgCollection where rus.OneWinnerGroupName == groupName select rus).ToList();
         }
@@ -146,25 +154,25 @@ namespace RCNet.Neural.Network.SM.Readout
             if (TestDataRatio != cmpSettings.TestDataRatio ||
                 NumOfFolds != cmpSettings.NumOfFolds ||
                 ReadoutUnitCfgCollection.Count != cmpSettings.ReadoutUnitCfgCollection.Count ||
-                OneWinnerGroupNameCollection.Count != cmpSettings.OneWinnerGroupNameCollection.Count
+                OneWinnerGroupCfgCollection.Count != cmpSettings.OneWinnerGroupCfgCollection.Count
                 )
             {
                 return false;
             }
             for(int i = 0; i < ReadoutUnitCfgCollection.Count; i++)
             {
-                if(!ReadoutUnitCfgCollection[i].Equals(cmpSettings.ReadoutUnitCfgCollection[i]))
+                if(!Equals(ReadoutUnitCfgCollection[i], cmpSettings.ReadoutUnitCfgCollection[i]))
                 {
                     return false;
                 }
             }
-            foreach(string name in OneWinnerGroupNameCollection.Keys)
+            foreach(string name in OneWinnerGroupCfgCollection.Keys)
             {
-                if(!cmpSettings.OneWinnerGroupNameCollection.TryGetValue(name, out string value))
+                if(!cmpSettings.OneWinnerGroupCfgCollection.TryGetValue(name, out _))
                 {
                     return false;
                 }
-                if(OneWinnerGroupNameCollection[name] != cmpSettings.OneWinnerGroupNameCollection[name])
+                if(!Equals(OneWinnerGroupCfgCollection[name], cmpSettings.OneWinnerGroupCfgCollection[name]))
                 {
                     return false;
                 }
@@ -352,6 +360,10 @@ namespace RCNet.Neural.Network.SM.Readout
                     NetSettings = new ParallelPerceptronSettings(netSettingsElem);
                     OutputRange = ((ParallelPerceptronSettings)NetSettings).OutputRange.DeepClone();
                 }
+                if (OutputRange.Min > ReadoutLayer.DataRange.Min || OutputRange.Max < ReadoutLayer.DataRange.Max)
+                {
+                    throw new Exception($"Readout unit {Name} does not support data range <{ReadoutLayer.DataRange.Min}; {ReadoutLayer.DataRange.Max}>.");
+                }
                 return;
             }
 
@@ -413,27 +425,78 @@ namespace RCNet.Neural.Network.SM.Readout
             /// </summary>
             public string Name { get; }
             /// <summary>
-            /// Indexes of member units
+            /// Indexes of member readout units
             /// </summary>
-            public List<int> MemberIndexCollection { get; }
-            /// <summary>
-            /// Ratio of the test calibration data
-            /// </summary>
-            public double TestDataRatio { get; }
-            /// <summary>
-            /// Number of folds of the test calibration data
-            /// </summary>
-            public int NumOfFolds { get; }
-            /// <summary>
-            /// Calibration network configuration
-            /// </summary>
-            public FeedForwardNetworkSettings CalibrationFFNetCfg { get; }
+            public List<ReadoutUnitSettings> Members { get; }
 
             //Constructors
-            public OneWinnerGroupSettings()
+            /// <summary>
+            /// Creates initialized instance
+            /// </summary>
+            /// <param name="name">One winner group name</param>
+            /// <param name="members">Member readout units</param>
+            public OneWinnerGroupSettings(string name, List<ReadoutUnitSettings> members)
             {
+                Name = name;
+                Members = members;
                 return;
             }
+
+            /// <summary>
+            /// Copy constructor
+            /// </summary>
+            /// <param name="source">Source instance</param>
+            public OneWinnerGroupSettings(OneWinnerGroupSettings source)
+            {
+                Name = source.Name;
+                Members = new List<ReadoutUnitSettings>(source.Members.Count);
+                foreach(ReadoutUnitSettings rus in source.Members)
+                {
+                    Members.Add(rus.DeepClone());
+                }
+                return;
+            }
+
+            //Methods
+            /// <summary>
+            /// See the base.
+            /// </summary>
+            public override bool Equals(object obj)
+            {
+                if (obj == null) return false;
+                OneWinnerGroupSettings cmpSettings = obj as OneWinnerGroupSettings;
+                if (Name != cmpSettings.Name ||
+                    Members.Count != cmpSettings.Members.Count
+                    )
+                {
+                    return false;
+                }
+                for(int i = 0; i < cmpSettings.Members.Count; i++)
+                {
+                    if(!Equals(Members[i], cmpSettings.Members[i]))
+                    {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            /// <summary>
+            /// See the base.
+            /// </summary>
+            public override int GetHashCode()
+            {
+                return base.GetHashCode();
+            }
+
+            /// <summary>
+            /// Creates the deep copy instance of this instance.
+            /// </summary>
+            public OneWinnerGroupSettings DeepClone()
+            {
+                return new OneWinnerGroupSettings(this);
+            }
+
 
         }//OneWinnerGroupSettings
 

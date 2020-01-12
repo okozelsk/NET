@@ -195,13 +195,13 @@ namespace RCNet.Neural.Data
         /// Method expects length of the output vectors = 1.
         /// </summary>
         /// <param name="subBundleSize">Sub-bundle size</param>
-        /// <param name="binBorder">If specified, method will keep balanced number of output values GE to binBorder in the each sub-bundle</param>
+        /// <param name="binBorder">If specified and there is only one output value, method will keep balanced number of output values GE to binBorder in the each sub-bundle</param>
         /// <returns>Collection of extracted sub-bundles</returns>
         public List<VectorBundle> Split(int subBundleSize, double binBorder = double.NaN)
         {
             int numOfBundles = OutputVectorCollection.Count / subBundleSize;
             List<VectorBundle> bundleCollection = new List<VectorBundle>(numOfBundles);
-            if (!double.IsNaN(binBorder))
+            if (!double.IsNaN(binBorder) && OutputVectorCollection[0].Length == 1)
             {
                 BinDistribution refBinDistr = new BinDistribution(binBorder);
                 refBinDistr.Update(OutputVectorCollection, 0);

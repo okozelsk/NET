@@ -982,43 +982,10 @@
     <xs:attribute type="xs:string" name="name" use="required"/>
   </xs:complexType>
 
-  <!-- One Winner Group - calibration network - configuration -->
-  <xs:complexType name="OneWinnerGroupCalibrationType">
-    <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="FFNetCfgType" name="ff" minOccurs="1" maxOccurs="1"/>
-    </xs:sequence>
-    <xs:attribute type="xs:string" name="name" use="required"/>
-    <xs:attribute name="testDataRatio" use="required">
-      <xs:simpleType>
-        <xs:restriction base="xs:double">
-          <xs:minExclusive value="0" />
-          <xs:maxInclusive value="0.5" />
-        </xs:restriction>
-      </xs:simpleType>
-    </xs:attribute>
-    <xs:attribute type="UIntGT0AutoOptionType" name="folds" use="optional" default="Auto">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is Auto</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-  </xs:complexType>
-
-  <!-- One Winner Groups - calibration networks - configuration -->
-  <xs:complexType name="OneWinnerGroupCalibrationsType">
-    <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="OneWinnerGroupCalibrationType" name="group" minOccurs="1" maxOccurs="unbounded"/>
-    </xs:sequence>
-  </xs:complexType>
-
   <!-- Readout layer configuration -->
   <xs:complexType name="ROutLayerCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:sequence minOccurs="1" maxOccurs="1">
-        <xs:element type="ROutLayerUnitCfgType" name="readoutUnit" minOccurs="1" maxOccurs="unbounded"/>
-      </xs:sequence>
-      <xs:sequence minOccurs="0" maxOccurs="1">
-        <xs:element type="OneWinnerGroupCalibrationsType" name="calibrations" minOccurs="1" maxOccurs="unbounded"/>
-      </xs:sequence>
+      <xs:element type="ROutLayerUnitCfgType" name="readoutUnit" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
     <xs:attribute name="testDataRatio" use="required">
       <xs:simpleType>

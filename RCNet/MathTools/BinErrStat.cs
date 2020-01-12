@@ -47,11 +47,10 @@ namespace RCNet.MathTools
         /// <param name="binBorder">Double value LT this border is considered as 0 and GE as 1</param>
         /// <param name="computedVectorCollection">Collection of computed vectors</param>
         /// <param name="idealVectorCollection">Collection of ideal vectors</param>
-        /// <param name="valueIdx">Index of a binary value within the vector</param>
-        public BinErrStat(double binBorder, IEnumerable<double[]> computedVectorCollection, IEnumerable<double[]> idealVectorCollection, int valueIdx = 0)
+        public BinErrStat(double binBorder, IEnumerable<double[]> computedVectorCollection, IEnumerable<double[]> idealVectorCollection)
             :this(binBorder)
         {
-            Update(computedVectorCollection, idealVectorCollection, valueIdx);
+            Update(computedVectorCollection, idealVectorCollection);
             return;
         }
 
@@ -112,24 +111,6 @@ namespace RCNet.MathTools
         /// <summary>
         /// Updates the statistics
         /// </summary>
-        /// <param name="computedVectorCollection">Collection of computed vectors</param>
-        /// <param name="idealVectorCollection">Collection of ideal vectors</param>
-        /// <param name="valueIdx">Index of a binary value within the vectors</param>
-        public void Update(IEnumerable<double[]> computedVectorCollection, IEnumerable<double[]> idealVectorCollection, int valueIdx = 0)
-        {
-            IEnumerator<double[]> idealVectorEnumerator = idealVectorCollection.GetEnumerator();
-            foreach (double[] computedVector in computedVectorCollection)
-            {
-                idealVectorEnumerator.MoveNext();
-                double[] idealVector = idealVectorEnumerator.Current;
-                Update(computedVector[valueIdx], idealVector[valueIdx]);
-            }
-            return;
-        }
-
-        /// <summary>
-        /// Updates the statistics
-        /// </summary>
         /// <param name="computedValueCollection">Collection of computed binary values</param>
         /// <param name="idealValueCollection">Collection of ideal binary values</param>
         public void Update(IEnumerable<double> computedValueCollection, IEnumerable<double> idealValueCollection)
@@ -140,6 +121,26 @@ namespace RCNet.MathTools
                 idealValueEnumerator.MoveNext();
                 double idealValue = idealValueEnumerator.Current;
                 Update(computedValue, idealValue);
+            }
+            return;
+        }
+
+        /// <summary>
+        /// Updates the statistics
+        /// </summary>
+        /// <param name="computedValuesCollection">Collection of computed binary values</param>
+        /// <param name="idealValuesCollection">Collection of ideal binary values</param>
+        public void Update(IEnumerable<double[]> computedValuesCollection, IEnumerable<double[]> idealValuesCollection)
+        {
+            IEnumerator<double[]> idealValueEnumerator = idealValuesCollection.GetEnumerator();
+            foreach (double[] computedValues in computedValuesCollection)
+            {
+                idealValueEnumerator.MoveNext();
+                double[] idealValues = idealValueEnumerator.Current;
+                for (int i = 0; i < idealValues.Length; i++)
+                {
+                    Update(computedValues[i], idealValues[i]);
+                }
             }
             return;
         }
