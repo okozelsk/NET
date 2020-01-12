@@ -37,8 +37,8 @@ Input data is expected in csv format where delimiter can be a semicolon or a com
 ### Math
 |Component|Description|
 |--|--|
-|BasicStat|Provides basic statistics of given data (averages, sum of squares, standard deviation, etc.)|
-|WeightedAvg|Computes weighted average of given value/weight data pairs|
+|![BasicStat](https://github.com/okozelsk/NET/blob/master/RCNet/MathTools/BasicStat.cs)|Provides basic statistics of given data (averages, sum of squares, standard deviation, etc.)|
+|![WeightedAvg](https://github.com/okozelsk/NET/blob/master/RCNet/MathTools/WeightedAvg.cs)|Computes weighted average of given value/weight data pairs|
 |MovingWeightedAvg|Computes weighted average of recent part of given data|
 |ODENumSolver|Implements ordinary differential equations (ODE) numerical solver supporting Euler and RK4 methods|
 |Vector|Implements vector of double values supporting basic mathematical operations|
