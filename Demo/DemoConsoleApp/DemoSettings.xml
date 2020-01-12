@@ -111,7 +111,7 @@
           </reservoirInstance>
         </reservoirInstanceContainer>
       </neuralPreprocessor>
-      <readoutLayer testDataRatio="0.25" folds="Auto">
+      <readoutLayer testDataRatio="0.25" folds="Auto" repetitions="1">
         <readoutUnit name="0-6 years">
           <classification oneWinnerGroupName="AgeGroup">
             <binFeature/>

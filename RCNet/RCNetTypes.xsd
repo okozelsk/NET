@@ -1000,6 +1000,11 @@
         <xs:documentation xml:lang="en">Default value is Auto</xs:documentation>
       </xs:annotation>
     </xs:attribute>
+    <xs:attribute type="UIntGT0Type" name="repetitions" use="optional" default="1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- ________________________________________SYNAPSE TYPES_________________________________________________ -->

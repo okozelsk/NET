@@ -83,10 +83,12 @@ namespace RCNet.Neural.Network.NonRecurrent
         /// <param name="dataBundle">Data to be used for training</param>
         /// <param name="testDataRatio">Ratio of test data to be used (determines fold size)</param>
         /// <param name="numOfFolds">Requested number of testing folds (determines number of cluster members). Value LE 0 causes automatic setup. </param>
+        /// <param name="repetitions">Defines how many times the generation of folds will be repeated. </param>
         /// <param name="outputFeatureFilterCollection">Output feature filters to be used for output data denormalization.</param>
         public TrainedNetworkCluster Build(VectorBundle dataBundle,
                                            double testDataRatio,
                                            int numOfFolds,
+                                           int repetitions,
                                            BaseFeatureFilter[] outputFeatureFilterCollection
                                            )
         {
@@ -106,56 +108,63 @@ namespace RCNet.Neural.Network.NonRecurrent
                 //Auto setup
                 numOfFolds = dataBundle.OutputVectorCollection.Count / testDataSetLength;
             }
-            //Data split to folds
-            List<VectorBundle> subBundleCollection = dataBundle.Split(testDataSetLength, _binBorder);
-            numOfFolds = Math.Min(numOfFolds, subBundleCollection.Count);
             //Clusters of trained networks
-            TrainedNetworkCluster cluster = new TrainedNetworkCluster(_clusterName, subBundleCollection.Count, _binBorder);
-            //Train alone network for each fold in the cluster.
-            for (int foldIdx = 0; foldIdx < numOfFolds; foldIdx++)
+            TrainedNetworkCluster cluster = new TrainedNetworkCluster(_clusterName, numOfFolds * repetitions, _binBorder);
+            for (int cycle = 0; cycle < repetitions; cycle++)
             {
-                //Prepare training data bundle
-                VectorBundle trainingData = new VectorBundle();
-                for (int bundleIdx = 0; bundleIdx < subBundleCollection.Count; bundleIdx++)
+                //Data split to folds
+                List<VectorBundle> subBundleCollection = dataBundle.Split(testDataSetLength, _binBorder);
+                numOfFolds = Math.Min(numOfFolds, subBundleCollection.Count);
+                //Train alone network for each fold in the cluster.
+                for (int foldIdx = 0; foldIdx < numOfFolds; foldIdx++)
                 {
-                    if (bundleIdx != foldIdx)
+                    //Prepare training data bundle
+                    VectorBundle trainingData = new VectorBundle();
+                    for (int bundleIdx = 0; bundleIdx < subBundleCollection.Count; bundleIdx++)
                     {
-                        trainingData.Add(subBundleCollection[bundleIdx]);
+                        if (bundleIdx != foldIdx)
+                        {
+                            trainingData.Add(subBundleCollection[bundleIdx]);
+                        }
                     }
-                }
-                TrainedNetworkBuilder netBuilder = new TrainedNetworkBuilder(_clusterName,
-                                                                             _networkSettings,
-                                                                             foldIdx + 1,
-                                                                             numOfFolds,
-                                                                             trainingData,
-                                                                             subBundleCollection[foldIdx],
-                                                                             _binBorder,
-                                                                             _rand,
-                                                                             _controller
-                                                                             );
-                //Register notification
-                netBuilder.RegressionEpochDone += OnRegressionEpochDone;
-                //Build trained network. Trained network becomes to be the cluster member
-                cluster.Members.Add(netBuilder.Build());
-                cluster.Weights.Add(1d);
-                //Update cluster error statistics (pesimistic approach)
-                for (int sampleIdx = 0; sampleIdx < subBundleCollection[foldIdx].OutputVectorCollection.Count; sampleIdx++)
-                {
-                    double[] nrmComputedValues = cluster.Members.Last().Network.Compute(subBundleCollection[foldIdx].InputVectorCollection[sampleIdx]);
-                    for (int i = 0; i < nrmComputedValues.Length; i++)
+                    TrainedNetworkBuilder netBuilder = new TrainedNetworkBuilder(_clusterName,
+                                                                                 _networkSettings,
+                                                                                 (cycle * numOfFolds) + foldIdx + 1,
+                                                                                 repetitions * numOfFolds,
+                                                                                 trainingData,
+                                                                                 subBundleCollection[foldIdx],
+                                                                                 _binBorder,
+                                                                                 _rand,
+                                                                                 _controller
+                                                                                 );
+                    //Register notification
+                    netBuilder.RegressionEpochDone += OnRegressionEpochDone;
+                    //Build trained network. Trained network becomes to be the cluster member
+                    cluster.Members.Add(netBuilder.Build());
+                    cluster.Weights.Add(1d);
+                    //Update cluster error statistics (pesimistic approach)
+                    for (int sampleIdx = 0; sampleIdx < subBundleCollection[foldIdx].OutputVectorCollection.Count; sampleIdx++)
                     {
-                        double natComputedValue = outputFeatureFilterCollection[i].ApplyReverse(nrmComputedValues[i]);
-                        double natIdealValue = outputFeatureFilterCollection[i].ApplyReverse(subBundleCollection[foldIdx].OutputVectorCollection[sampleIdx][i]);
-                        cluster.ErrorStats.Update(nrmComputedValues[i],
-                                                  subBundleCollection[foldIdx].OutputVectorCollection[sampleIdx][i],
-                                                  natComputedValue,
-                                                  natIdealValue
-                                                  );
-                    }//i
-                }//sampleIdx
+                        double[] nrmComputedValues = cluster.Members.Last().Network.Compute(subBundleCollection[foldIdx].InputVectorCollection[sampleIdx]);
+                        for (int i = 0; i < nrmComputedValues.Length; i++)
+                        {
+                            double natComputedValue = outputFeatureFilterCollection[i].ApplyReverse(nrmComputedValues[i]);
+                            double natIdealValue = outputFeatureFilterCollection[i].ApplyReverse(subBundleCollection[foldIdx].OutputVectorCollection[sampleIdx][i]);
+                            cluster.ErrorStats.Update(nrmComputedValues[i],
+                                                      subBundleCollection[foldIdx].OutputVectorCollection[sampleIdx][i],
+                                                      natComputedValue,
+                                                      natIdealValue
+                                                      );
+                        }//i
+                    }//sampleIdx
 
-            }//foldIdx
-            
+                }//foldIdx
+                if(cycle < repetitions - 1)
+                {
+                    //Reshuffle data
+                    dataBundle.Shuffle(_rand);
+                }
+            }
             //Set cluster members weights
             if (cluster.BinaryOutput)
             {

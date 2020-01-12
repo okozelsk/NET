@@ -39,6 +39,10 @@ namespace RCNet.Neural.Network.SM.Readout
         /// </summary>
         public int NumOfFolds { get; set; }
         /// <summary>
+        /// Defines how many times the generation of folds will be repeated
+        /// </summary>
+        public int Repetitions { get; set; }
+        /// <summary>
         /// Readout unit configurations
         /// </summary>
         public List<ReadoutUnitSettings> ReadoutUnitCfgCollection { get; set; }
@@ -56,6 +60,7 @@ namespace RCNet.Neural.Network.SM.Readout
             //Default settings
             TestDataRatio = 0;
             NumOfFolds = 0;
+            Repetitions = 0;
             ReadoutUnitCfgCollection = new List<ReadoutUnitSettings>();
             OneWinnerGroupCfgCollection = new Dictionary<string, OneWinnerGroupSettings>();
             return;
@@ -70,6 +75,7 @@ namespace RCNet.Neural.Network.SM.Readout
             //Copy
             TestDataRatio = source.TestDataRatio;
             NumOfFolds = source.NumOfFolds;
+            Repetitions = source.Repetitions;
             ReadoutUnitCfgCollection = new List<ReadoutUnitSettings>();
             foreach(ReadoutUnitSettings rus in source.ReadoutUnitCfgCollection)
             {
@@ -102,6 +108,7 @@ namespace RCNet.Neural.Network.SM.Readout
             //Parsing
             TestDataRatio = double.Parse(readoutLayerSettingsElem.Attribute("testDataRatio").Value, CultureInfo.InvariantCulture);
             NumOfFolds = readoutLayerSettingsElem.Attribute("folds").Value == "Auto" ? 0 : int.Parse(readoutLayerSettingsElem.Attribute("folds").Value);
+            Repetitions = int.Parse(readoutLayerSettingsElem.Attribute("repetitions").Value);
             //Readout units
             ReadoutUnitCfgCollection = new List<ReadoutUnitSettings>();
             int unitIndex = 0;
@@ -153,6 +160,7 @@ namespace RCNet.Neural.Network.SM.Readout
             ReadoutLayerSettings cmpSettings = obj as ReadoutLayerSettings;
             if (TestDataRatio != cmpSettings.TestDataRatio ||
                 NumOfFolds != cmpSettings.NumOfFolds ||
+                Repetitions != cmpSettings.Repetitions ||
                 ReadoutUnitCfgCollection.Count != cmpSettings.ReadoutUnitCfgCollection.Count ||
                 OneWinnerGroupCfgCollection.Count != cmpSettings.OneWinnerGroupCfgCollection.Count
                 )

@@ -255,6 +255,7 @@ namespace RCNet.Neural.Network.SM.Readout
                                                                   readoutUnitBuilder.Build(readoutUnitDataBundle,
                                                                                            _settings.TestDataRatio,
                                                                                            _settings.NumOfFolds,
+                                                                                           _settings.Repetitions,
                                                                                            new BaseFeatureFilter[] {_outputFeatureFilterCollection [unitIdx]}
                                                                                            )
                                                                   );
