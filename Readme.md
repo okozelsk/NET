@@ -50,7 +50,7 @@ Input data is expected in csv format where delimiter can be a semicolon or a com
 |![ParamSeeker](https://github.com/okozelsk/NET/blob/master/RCNet/MathTools/PS/ParamSeeker.cs)|Implements an error driven iterative search for the best value of a given parameter|
 |![HurstExpEstim](https://github.com/okozelsk/NET/blob/master/RCNet/MathTools/Hurst/HurstExpEstim.cs)|Implements Hurst exponent estimator and Rescalled range. It can be used to evaluate level of data randomness|
 |!["RandomValue"](https://github.com/okozelsk/NET/tree/master/RCNet/RandomValue)|Supports Uniform, Gaussian, Exponential and Gamma distributions|
-|Others|Set of small additional helper components like PhysUnit, Interval, Bitwise, Combinatorics, Factorial,...|
+|![Others](https://github.com/okozelsk/NET/tree/master/RCNet/MathTools)|Set of small additional helper components like PhysUnit, Interval, Bitwise, Combinatorics, Factorial,...|
 
 ### Signal generators
 |Component|Description|
@@ -141,3 +141,7 @@ See the [wiki pages.](https://en.wikipedia.org/wiki/Biological_neuron_model)
 ### State Machine
 ![StateMachine](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/StateMachine.cs)
 The main component. Encapsulates independent NeuralPreprocessor and ReadoutLayer components into the single component and adds support for routing specific predictors and input fields to the specific readout units. Allows to bypass NeuralPreprocessor and to use input data directly as a predictors for the readout layer.
+
+### Xml setup recipe
+![Xml types](https://github.com/okozelsk/NET/blob/master/RCNet/RCNetTypes.xsd)
+I know, I will have to make setup of StateMachine also xml less :-).
