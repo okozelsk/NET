@@ -49,7 +49,7 @@ Input data is expected in csv format where delimiter can be a semicolon or a com
 |![LUD](https://github.com/okozelsk/NET/blob/master/RCNet/MathTools/MatrixMath/LUD.cs)|LU decomposition of a squared matrix|
 |![ParamSeeker](https://github.com/okozelsk/NET/blob/master/RCNet/MathTools/PS/ParamSeeker.cs)|Implements an error driven iterative search for the best value of a given parameter|
 |![HurstExpEstim](https://github.com/okozelsk/NET/blob/master/RCNet/MathTools/Hurst/HurstExpEstim.cs)|Implements Hurst exponent estimator and Rescalled range. It can be used to evaluate level of data randomness|
-|!["RandomValue"](https://github.com/okozelsk/NET/tree/master/RCNet/RandomValue)|Supports Uniform, Gaussian, Exponential and Gamma distributions|
+|!["RandomValue"](https://github.com/okozelsk/NET/tree/master/RCNet/RandomValue)|Supports Uniform, Gaussian, Exponential and Gamma distributions. Here is ![extension code](https://github.com/okozelsk/NET/blob/master/RCNet/Extensions/RandomExtensions.cs)|
 |![Others](https://github.com/okozelsk/NET/tree/master/RCNet/MathTools)|Set of small additional helper components like PhysUnit, Interval, Bitwise, Combinatorics, Factorial,...|
 
 ### Signal generators
