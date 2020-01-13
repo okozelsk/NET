@@ -43,6 +43,7 @@ namespace RCNet.Neural.Network.NonRecurrent
         /// <summary>
         /// This informative event occurs every time the regression epoch is done
         /// </summary>
+        [field: NonSerialized]
         public event RegressionEpochDoneHandler RegressionEpochDone;
 
         //Constants

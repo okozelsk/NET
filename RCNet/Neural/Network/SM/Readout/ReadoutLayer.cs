@@ -39,6 +39,7 @@ namespace RCNet.Neural.Network.SM.Readout
         /// <summary>
         /// This informative event occurs every time the regression epoch is done
         /// </summary>
+        [field: NonSerialized]
         public event RegressionEpochDoneHandler RegressionEpochDone;
 
         //Attribute properties
