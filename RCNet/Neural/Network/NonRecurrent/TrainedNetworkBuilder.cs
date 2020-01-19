@@ -47,6 +47,8 @@ namespace RCNet.Neural.Network.NonRecurrent
         public event RegressionEpochDoneHandler RegressionEpochDone;
 
         //Constants
+        private const double MinExpectedAccuracy = 1e-6d;
+        private const double MaxExpectedAccuracy = 1d - 1e-6d;
 
         //Attributes
         private readonly string _networkName;
@@ -121,14 +123,29 @@ namespace RCNet.Neural.Network.NonRecurrent
         {
             if(binaryOutput)
             {
-                if (candidate.CombinedBinaryError < currentBest.CombinedBinaryError ||
-                    (candidate.CombinedBinaryError == currentBest.CombinedBinaryError &&
-                     candidate.CombinedPrecisionError < currentBest.CombinedPrecisionError)
-                   )
+                if (candidate.CombinedBinaryError < currentBest.CombinedBinaryError)
                 {
                     return true;
                 }
-                return false;
+                else if (candidate.CombinedBinaryError == currentBest.CombinedBinaryError &&
+                       (candidate.TestingBinErrorStat.BinValErrStat[0].Sum < currentBest.TestingBinErrorStat.BinValErrStat[0].Sum ||
+                       (candidate.TestingBinErrorStat.BinValErrStat[0].Sum == currentBest.TestingBinErrorStat.BinValErrStat[0].Sum && candidate.TrainingBinErrorStat.BinValErrStat[0].Sum < currentBest.TrainingBinErrorStat.BinValErrStat[0].Sum)
+                        ))
+                {
+                    return true;
+                }
+                else if (candidate.CombinedBinaryError == currentBest.CombinedBinaryError &&
+                         candidate.TestingBinErrorStat.BinValErrStat[0].Sum == currentBest.TestingBinErrorStat.BinValErrStat[0].Sum &&
+                         candidate.TrainingBinErrorStat.BinValErrStat[0].Sum == currentBest.TrainingBinErrorStat.BinValErrStat[0].Sum &&
+                         candidate.CombinedPrecisionError < currentBest.CombinedPrecisionError
+                         )
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
             else
             {
@@ -250,6 +267,14 @@ namespace RCNet.Neural.Network.NonRecurrent
                     currNetwork.TestingBinErrorStat = new BinErrStat(_binBorder, testingComputedOutputsCollection, _testingBundle.OutputVectorCollection);
                     currNetwork.CombinedBinaryError = Math.Max(currNetwork.CombinedBinaryError, currNetwork.TestingBinErrorStat.TotalErrStat.Sum);
                 }
+                //Expected accuracy
+                currNetwork.ExpectedAccuracy = ((1d - currNetwork.TrainingErrorStat.ArithAvg) * (1d - currNetwork.TestingErrorStat.ArithAvg));
+                if (BinaryOutput)
+                {
+                    currNetwork.ExpectedAccuracy *= ((1d - currNetwork.TrainingBinErrorStat.TotalErrStat.ArithAvg) * (1d - currNetwork.TestingBinErrorStat.TotalErrStat.ArithAvg));
+                }
+                currNetwork.ExpectedAccuracy = currNetwork.ExpectedAccuracy.Bound(MinExpectedAccuracy, MaxExpectedAccuracy);
+
                 //Restart lastImprovementEpoch when new trainer's attempt started
                 if (trainer.AttemptEpoch == 1)
                 {

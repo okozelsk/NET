@@ -58,6 +58,10 @@ namespace RCNet.Neural.Network.NonRecurrent
         /// Achieved training/testing combined binary error. Relevant only when network output fields are all binary.
         /// </summary>
         public double CombinedBinaryError { get; set; }
+        /// <summary>
+        /// Expected accuracy of this network.
+        /// </summary>
+        public double ExpectedAccuracy { get; set; }
 
         //Constructors
         /// <summary>
@@ -73,8 +77,9 @@ namespace RCNet.Neural.Network.NonRecurrent
             TestingErrorStat = null;
             TestingBinErrorStat = null;
             OutputWeightsStat = null;
-            CombinedPrecisionError = -1;
-            CombinedBinaryError = -1;
+            CombinedPrecisionError = -1d;
+            CombinedBinaryError = -1d;
+            ExpectedAccuracy = -1d;
             return;
         }
 
@@ -99,6 +104,7 @@ namespace RCNet.Neural.Network.NonRecurrent
             OutputWeightsStat = source.OutputWeightsStat?.DeepClone();
             CombinedPrecisionError = source.CombinedPrecisionError;
             CombinedBinaryError = source.CombinedBinaryError;
+            ExpectedAccuracy = source.ExpectedAccuracy;
             return;
         }
 

@@ -47,12 +47,12 @@ namespace RCNet.Neural.Network.SM.Readout
         /// Indicates if the readout layer is trained
         /// </summary>
         public bool Trained { get; private set; }
-
-        //Attributes
         /// <summary>
         /// Readout layer configuration
         /// </summary>
-        private readonly ReadoutLayerSettings _settings;
+        public ReadoutLayerSettings Settings { get; }
+
+        //Attributes
         /// <summary>
         /// Collection of feature filters of input predictors
         /// </summary>
@@ -78,7 +78,7 @@ namespace RCNet.Neural.Network.SM.Readout
         /// <param name="settings">Readout layer configuration</param>
         public ReadoutLayer(ReadoutLayerSettings settings)
         {
-            _settings = settings.DeepClone();
+            Settings = settings.DeepClone();
             Reset();
             return;
         }
@@ -101,29 +101,6 @@ namespace RCNet.Neural.Network.SM.Readout
             }
         }
 
-        //Static methods
-        /// <summary>
-        /// Decides what readout unit within the One Winner group is winning
-        /// </summary>
-        /// <param name="oneWinnerGroupName">Name of One Winner group</param>
-        /// <param name="dataVector">Vector of values corresponding to readout units</param>
-        /// <param name="rls">Readout layer settings</param>
-        public static int DecideOneWinner(string oneWinnerGroupName, double[] dataVector, ReadoutLayerSettings rls)
-        {
-            //Obtain group members
-            List<ReadoutLayerSettings.ReadoutUnitSettings> rusCollection = rls.OneWinnerGroupCfgCollection[oneWinnerGroupName].Members;
-            //Find the highest probability unit
-            int maxPIdx = -1;
-            for (int i = 0; i < rusCollection.Count; i++)
-            {
-                if (maxPIdx == -1 || dataVector[rusCollection[i].Index] > dataVector[maxPIdx])
-                {
-                    maxPIdx = rusCollection[i].Index;
-                }
-            }
-            return maxPIdx;
-        }
-
         //Methods
         /// <summary>
         /// Resets readout layer to its initial untrained state
@@ -133,7 +110,7 @@ namespace RCNet.Neural.Network.SM.Readout
             _predictorFeatureFilterCollection = null;
             _outputFeatureFilterCollection = null;
             _predictorsMapper = null;
-            _readoutUnitCollection = new ReadoutUnit[_settings.ReadoutUnitCfgCollection.Count];
+            _readoutUnitCollection = new ReadoutUnit[Settings.ReadoutUnitCfgCollection.Count];
             _readoutUnitCollection.Populate(null);
             Trained = false;
             return;
@@ -165,7 +142,7 @@ namespace RCNet.Neural.Network.SM.Readout
             {
                 throw new Exception("Number of predictors must be greater tham 0.");
             }
-            if (numOfOutputs != _settings.ReadoutUnitCfgCollection.Count)
+            if (numOfOutputs != Settings.ReadoutUnitCfgCollection.Count)
             {
                 throw new Exception("Incorrect length of output vectors.");
             }
@@ -187,7 +164,7 @@ namespace RCNet.Neural.Network.SM.Readout
             _outputFeatureFilterCollection = new BaseFeatureFilter[numOfOutputs];
             Parallel.For(0, _outputFeatureFilterCollection.Length, nrmIdx =>
             {
-                _outputFeatureFilterCollection[nrmIdx] = FeatureFilterFactory.Create(DataRange, _settings.ReadoutUnitCfgCollection[nrmIdx].FeatureFilterCfg);
+                _outputFeatureFilterCollection[nrmIdx] = FeatureFilterFactory.Create(DataRange, Settings.ReadoutUnitCfgCollection[nrmIdx].FeatureFilterCfg);
                 for (int pairIdx = 0; pairIdx < dataBundle.OutputVectorCollection.Count; pairIdx++)
                 {
                     //Adjust output normalizer
@@ -231,7 +208,7 @@ namespace RCNet.Neural.Network.SM.Readout
             shuffledData.Shuffle(rand);
 
             //Building of readout units
-            for (int unitIdx = 0; unitIdx < _settings.ReadoutUnitCfgCollection.Count; unitIdx++)
+            for (int unitIdx = 0; unitIdx < Settings.ReadoutUnitCfgCollection.Count; unitIdx++)
             {
                 List<double[]> idealValueCollection = new List<double[]>(shuffledData.OutputVectorCollection.Count);
                 //Transformation of ideal vectors to a single value vectors
@@ -241,11 +218,11 @@ namespace RCNet.Neural.Network.SM.Readout
                     value[0] = idealVector[unitIdx];
                     idealValueCollection.Add(value);
                 }
-                List<double[]> readoutUnitInputVectorCollection = _predictorsMapper.CreateVectorCollection(_settings.ReadoutUnitCfgCollection[unitIdx].Name, shuffledData.InputVectorCollection);
+                List<double[]> readoutUnitInputVectorCollection = _predictorsMapper.CreateVectorCollection(Settings.ReadoutUnitCfgCollection[unitIdx].Name, shuffledData.InputVectorCollection);
                 VectorBundle readoutUnitDataBundle = new VectorBundle(readoutUnitInputVectorCollection, idealValueCollection);
-                TrainedNetworkClusterBuilder readoutUnitBuilder = new TrainedNetworkClusterBuilder(_settings.ReadoutUnitCfgCollection[unitIdx].Name,
-                                                                                                   _settings.ReadoutUnitCfgCollection[unitIdx].NetSettings,
-                                                                                                   _settings.ReadoutUnitCfgCollection[unitIdx].BinBorder,
+                TrainedNetworkClusterBuilder readoutUnitBuilder = new TrainedNetworkClusterBuilder(Settings.ReadoutUnitCfgCollection[unitIdx].Name,
+                                                                                                   Settings.ReadoutUnitCfgCollection[unitIdx].NetSettings,
+                                                                                                   Settings.ReadoutUnitCfgCollection[unitIdx].BinBorder,
                                                                                                    rand,
                                                                                                    controller
                                                                                                    );
@@ -254,9 +231,9 @@ namespace RCNet.Neural.Network.SM.Readout
                 //Build trained readout unit. Trained unit becomes to be the predicting cluster member
                 _readoutUnitCollection[unitIdx] = new ReadoutUnit(unitIdx,
                                                                   readoutUnitBuilder.Build(readoutUnitDataBundle,
-                                                                                           _settings.TestDataRatio,
-                                                                                           _settings.NumOfFolds,
-                                                                                           _settings.Repetitions,
+                                                                                           Settings.TestDataRatio,
+                                                                                           Settings.NumOfFolds,
+                                                                                           Settings.Repetitions,
                                                                                            new BaseFeatureFilter[] {_outputFeatureFilterCollection [unitIdx]}
                                                                                            )
                                                                   );
@@ -278,9 +255,9 @@ namespace RCNet.Neural.Network.SM.Readout
             string leftMargin = margin == 0 ? string.Empty : new string(' ', margin);
             StringBuilder sb = new StringBuilder();
             //Results
-            for (int outputIdx = 0; outputIdx < _settings.ReadoutUnitCfgCollection.Count; outputIdx++)
+            for (int outputIdx = 0; outputIdx < Settings.ReadoutUnitCfgCollection.Count; outputIdx++)
             {
-                sb.Append(leftMargin + $"Output field [{_settings.ReadoutUnitCfgCollection[outputIdx].Name}]: {predictedValues[outputIdx].ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                sb.Append(leftMargin + $"Output field [{Settings.ReadoutUnitCfgCollection[outputIdx].Name}]: {predictedValues[outputIdx].ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
             }
             return sb.ToString();
         }
@@ -342,11 +319,11 @@ namespace RCNet.Neural.Network.SM.Readout
         /// </summary>
         private double[] Compute(double[] predictors, out List<double[]> unitsAllSubResults)
         {
-            unitsAllSubResults = new List<double[]>(_settings.ReadoutUnitCfgCollection.Count);
+            unitsAllSubResults = new List<double[]>(Settings.ReadoutUnitCfgCollection.Count);
             double[] outputVector = new double[_readoutUnitCollection.Length];
             for(int unitIdx = 0; unitIdx < _readoutUnitCollection.Length; unitIdx++)
             {
-                double[] readoutUnitInputVector = _predictorsMapper.CreateVector(_settings.ReadoutUnitCfgCollection[unitIdx].Name, predictors);
+                double[] readoutUnitInputVector = _predictorsMapper.CreateVector(Settings.ReadoutUnitCfgCollection[unitIdx].Name, predictors);
                 outputVector[unitIdx] = _readoutUnitCollection[unitIdx].NetworkCluster.Compute(readoutUnitInputVector, out List<double[]> memberOutputCollection)[0];
                 unitsAllSubResults.Add(ToSingleArray(memberOutputCollection));
             }
@@ -373,12 +350,41 @@ namespace RCNet.Neural.Network.SM.Readout
         }
 
         /// <summary>
+        /// Decides what readout unit within the "one winner" group is winning
+        /// </summary>
+        /// <param name="oneWinnerGroupName">Name of One Winner group</param>
+        /// <param name="dataVector">Vector of values corresponding to layer's readout units</param>
+        /// <param name="membersIndexes">Returned indexes of readout units belonging to specified "one winner" group</param>
+        /// <param name="membersWeightedDataVector">Returned weighted probabilities of specified "one winner" group member units (in the same order as returned indexes)</param>
+        public int DecideOneWinner(string oneWinnerGroupName, double[] dataVector, out int[] membersIndexes, out double[] membersWeightedDataVector)
+        {
+            //Obtain group members indexes
+            membersIndexes = (from member in Settings.OneWinnerGroupCfgCollection[oneWinnerGroupName].Members  select member.Index).ToArray();
+            //Compute members' weighted predictions
+            membersWeightedDataVector = new double[membersIndexes.Length];
+            for(int i = 0; i < membersIndexes.Length; i++)
+            {
+                membersWeightedDataVector[i] = dataVector[membersIndexes[i]];
+            }
+            //Find the highest probability unit
+            int maxPIdx = -1;
+            for (int i = 0; i < membersWeightedDataVector.Length; i++)
+            {
+                if (maxPIdx == -1 || membersWeightedDataVector[i] > dataVector[maxPIdx])
+                {
+                    maxPIdx = i;
+                }
+            }
+            return membersIndexes[maxPIdx];
+        }
+
+        /// <summary>
         /// Computes readout layer and returns rich output data
         /// </summary>
         /// <param name="predictors">The predictors</param>
         public ReadoutData ComputeReadoutData(double[] predictors)
         {
-            return new ReadoutData(Compute(predictors), _settings);
+            return new ReadoutData(Compute(predictors), this);
         }
 
         //Inner classes
@@ -406,27 +412,29 @@ namespace RCNet.Neural.Network.SM.Readout
             /// Creates an initialized instance
             /// </summary>
             /// <param name="dataVector">Vector of values corresponding to readout units</param>
-            /// <param name="rls">Readout layer settings</param>
-            public ReadoutData(double[] dataVector, ReadoutLayerSettings rls)
+            /// <param name="rl">Readout layer object</param>
+            public ReadoutData(double[] dataVector, ReadoutLayer rl)
             {
                 //Alone units
                 DataVector = dataVector;
                 ReadoutUnitDataCollection = new Dictionary<string, ReadoutUnitData>();
-                foreach(ReadoutLayerSettings.ReadoutUnitSettings rus in rls.ReadoutUnitCfgCollection)
+                foreach(ReadoutLayerSettings.ReadoutUnitSettings rus in rl.Settings.ReadoutUnitCfgCollection)
                 {
                     ReadoutUnitDataCollection.Add(rus.Name, new ReadoutUnitData() { Name = rus.Name, Index = rus.Index, Task = rus.TaskType, DataValue = DataVector[rus.Index] });
                 }
                 //One Winner groups
                 OneWinnerDataCollection = new Dictionary<string, OneWinnerGroupData>();
-                foreach (string oneWinnerGroupName in rls.OneWinnerGroupCfgCollection.Keys)
+                foreach (string oneWinnerGroupName in rl.Settings.OneWinnerGroupCfgCollection.Keys)
                 {
                     //There is One Winner group
-                    int winningUnitIndex = ReadoutLayer.DecideOneWinner(oneWinnerGroupName, dataVector, rls);
+                    int winningUnitIndex = rl.DecideOneWinner(oneWinnerGroupName, dataVector, out int[] membersIndexes, out double[] membersWeightedDataVector);
                     OneWinnerDataCollection.Add(oneWinnerGroupName, new OneWinnerGroupData()
                     {
                         GroupName = oneWinnerGroupName,
-                        WinningReadoutUnitName = rls.ReadoutUnitCfgCollection[winningUnitIndex].Name,
-                        WinningReadoutUnitIndex = winningUnitIndex
+                        WinningReadoutUnitName = rl.Settings.ReadoutUnitCfgCollection[winningUnitIndex].Name,
+                        WinningReadoutUnitIndex = winningUnitIndex,
+                        MemberReadoutUnitsIndexes = membersIndexes,
+                        MemberReadoutUnitsProbabilities = membersWeightedDataVector
                     });
                 }
                 return;
@@ -475,6 +483,14 @@ namespace RCNet.Neural.Network.SM.Readout
                 /// Zero-based index of the winning readout unit
                 /// </summary>
                 public int WinningReadoutUnitIndex { get; set; }
+                /// <summary>
+                /// Indexes of group member readout units
+                /// </summary>
+                public int[] MemberReadoutUnitsIndexes { get; set; }
+                /// <summary>
+                /// Computed probabilities by group member readout units (in the same order as MemberReadoutUnitsIndexes)
+                /// </summary>
+                public double[] MemberReadoutUnitsProbabilities { get; set; }
             }//OneWinnerGroupData
 
         }//ReadoutData

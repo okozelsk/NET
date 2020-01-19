@@ -1,4 +1,5 @@
-﻿using RCNet.Neural.Data;
+﻿using RCNet.Extensions;
+using RCNet.Neural.Data;
 using RCNet.Neural.Data.Filter;
 using System;
 using System.Collections.Generic;
@@ -167,16 +168,25 @@ namespace RCNet.Neural.Network.NonRecurrent
                 }
             }
             //Set cluster members weights
+            for (int i = 0; i < cluster.Members.Count; i++)
+            {
+                double rescalledAccuracy = 0.5d + (cluster.Members[i].ExpectedAccuracy / 2d);
+                cluster.Weights[i] = Math.Log(rescalledAccuracy / (1d - rescalledAccuracy));
+            }
+            //Cluster's expected accuracy
+            cluster.RecomputeExpectedAccuracy();
+
+            /*
             if (cluster.BinaryOutput)
             {
                 double sum = 0;
-                foreach(TrainedNetwork tn in cluster.Members)
+                foreach (TrainedNetwork tn in cluster.Members)
                 {
                     sum += (1d - tn.TrainingBinErrorStat.TotalErrStat.ArithAvg) * (1d - tn.TestingBinErrorStat.TotalErrStat.ArithAvg);
                 }
-                if(sum > 0)
+                if (sum > 0)
                 {
-                    for(int i = 0; i < cluster.Members.Count; i++)
+                    for (int i = 0; i < cluster.Members.Count; i++)
                     {
                         cluster.Weights[i] = ((1d - cluster.Members[i].TrainingBinErrorStat.TotalErrStat.ArithAvg) * (1d - cluster.Members[i].TestingBinErrorStat.TotalErrStat.ArithAvg)) / sum;
                     }
@@ -197,7 +207,7 @@ namespace RCNet.Neural.Network.NonRecurrent
                     }
                 }
             }
-
+            */
             //Return built cluster
             return cluster;
         }

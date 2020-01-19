@@ -35,6 +35,10 @@ namespace RCNet.Neural.Network.NonRecurrent
         /// Error statistics of the cluster
         /// </summary>
         public ClusterErrStatistics ErrorStats { get; }
+        /// <summary>
+        /// Expected accuracy of this cluster
+        /// </summary>
+        public double ExpectedAccuracy { get; private set; }
 
         //Constructors
         /// <summary>
@@ -50,6 +54,7 @@ namespace RCNet.Neural.Network.NonRecurrent
             Members = new List<TrainedNetwork>(numOfMembers);
             Weights = new List<double>(numOfMembers);
             ErrorStats = new ClusterErrStatistics(ClusterName, numOfMembers, BinBorder);
+            ExpectedAccuracy = -1d;
             return;
         }
 
@@ -68,6 +73,7 @@ namespace RCNet.Neural.Network.NonRecurrent
             }
             Weights = new List<double>(source.Weights);
             ErrorStats = source.ErrorStats.DeepClone();
+            ExpectedAccuracy = source.ExpectedAccuracy;
         }
 
         //Properties
@@ -115,6 +121,20 @@ namespace RCNet.Neural.Network.NonRecurrent
                 outputValues[i] = weightedResultCollection[i].Avg;
             }
             return outputValues;
+        }
+
+        /// <summary>
+        /// Recomputes weighted expected accuracy of this cluster
+        /// </summary>
+        public void RecomputeExpectedAccuracy()
+        {
+            WeightedAvg wAvg = new WeightedAvg();
+            for(int i = 0; i < Members.Count; i++)
+            {
+                wAvg.AddSampleValue(Members[i].ExpectedAccuracy, Weights[i]);
+            }
+            ExpectedAccuracy = wAvg.Avg;
+            return;
         }
 
         /// <summary>
