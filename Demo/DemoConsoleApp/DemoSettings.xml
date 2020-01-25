@@ -2,6 +2,571 @@
 <demo dataFolder=".\\Data" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="DemoSettings.xsd">
 
   <!--
+    Here StateMachine fails to exhibit good performance.
+    The best algorithm called COTE, referenced at the dataset's home site, exhibits accuracy 81.4%. It is very far for StateMachine results.
+    This is a good case for further investigation and StateMachine improvements research :-)
+    "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
+    https://timeseriesclassification.com/description.php?Dataset=CricketX.
+    The series Cricket X, Y and Z are accelerometer data (in three dimensions) taken from actors performing cricket gestures.
+    The twelve classes are different umpire signals: Cancel Call, Dead Ball, Four, Last Hour, Leg Bye, No Ball,
+    One Short, Out, Penalty Runs, Six, TV Replay, and Wide.
+    They mounted two accelerometers orthogonal to each other, thus acceleration is measured in 3D space.
+    The accelerometers are housed in a small wrist watch sized enclosure worn in the form of a wrist band.
+    Cricket X contains acceleration data only for dimension X: 150 datapoints for left hand and 150 datapoints for right hand.
+  -->
+  <case name="Classification task CricketX: pure ESN reservoir generating FiringFadingSum predictors, one Elliot neuron as a classifier (Resilient trainer)">
+    <samples trainingData="CricketX_train.csv" verificationData="CricketX_verify.csv"/>
+    <stateMachineCfg randomizerSeek="0">
+      <neuralPreprocessor predictorsReductionRatio="0">
+        <input>
+          <feedingPatterned bidir="false" routeToReadout="false" dataOrganization="Sequential"/>
+          <external>
+            <field name="LeftHandAccel" allowRoutingToReadout="true">
+              <realFeature standardize="true" keepReserve="true"/>
+            </field>
+            <field name="RightHandAccel" allowRoutingToReadout="true">
+              <realFeature standardize="true" keepReserve="true"/>
+            </field>
+          </external>
+        </input>
+        <reservoirCfgContainer>
+          <reservoirCfg name="MainCfg">
+            <pools>
+              <pool name="Pool1" dimX="150" dimY="1" dimZ="1">
+                <neuronGroups>
+                  <analogGroup name="Exc-grp" role="Excitatory" relShare="1" readoutDensity="1">
+                    <activationTanH/>
+                  </analogGroup>
+                  <analogGroup name="Inh-grp" role="Inhibitory" relShare="1" readoutDensity="1">
+                    <activationTanH/>
+                  </analogGroup>
+                </neuronGroups>
+                <interconnection>
+                  <randomSchema density="0.067" relShareEE="1" relShareEI="1" relShareIE="1" relShareII="1">
+                    <synapse/>
+                  </randomSchema>
+                </interconnection>
+              </pool>
+              <pool name="Pool2" dimX="150" dimY="1" dimZ="1">
+                <neuronGroups>
+                  <analogGroup name="Exc-grp" role="Excitatory" relShare="1" readoutDensity="1">
+                    <activationTanH/>
+                  </analogGroup>
+                  <analogGroup name="Inh-grp" role="Inhibitory" relShare="1" readoutDensity="1">
+                    <activationTanH/>
+                  </analogGroup>
+                </neuronGroups>
+                <interconnection>
+                  <randomSchema density="0.067" relShareEE="1" relShareEI="1" relShareIE="1" relShareII="1">
+                    <synapse/>
+                  </randomSchema>
+                </interconnection>
+              </pool>
+            </pools>
+            <spectralRadius>
+              <analogScope value="0.9999"/>
+              <spikingScope value="NA"/>
+            </spectralRadius>
+          </reservoirCfg>
+        </reservoirCfgContainer>
+        <reservoirInstanceContainer>
+          <reservoirInstance name="Main1" cfg="MainCfg">
+            <inputConnections>
+              <inputConnection fieldName="LeftHandAccel" poolName="Pool1" density="1" signalingRestriction="NoRestriction">
+                <synapse delayMethod="Random" maxDelay="0">
+                  <analogTarget relShareOriginal="1"
+                                relShareTransFoldedPower="0"
+                                relShareTransPower="0"
+                                >
+                    <weight min="0" max="1"/>
+                  </analogTarget>
+                </synapse>
+              </inputConnection>
+              <inputConnection fieldName="RightHandAccel" poolName="Pool2" density="1" signalingRestriction="NoRestriction">
+                <synapse delayMethod="Random" maxDelay="0">
+                  <analogTarget relShareOriginal="1"
+                                relShareTransFoldedPower="0"
+                                relShareTransPower="0"
+                                >
+                    <weight min="0" max="1"/>
+                  </analogTarget>
+                </synapse>
+              </inputConnection>
+            </inputConnections>
+            <predictors>
+              <permission activation="false"
+                          activationSquare="false"
+                          activationFadingSum="false"
+                          activationMWAvg="false"
+                          firingFadingSum="true"
+                          firingMWAvg="false"
+                          firingCount="false"
+                          firingBinPattern="false"/>
+            </predictors>
+          </reservoirInstance>
+        </reservoirInstanceContainer>
+      </neuralPreprocessor>
+      <readoutLayer testDataRatio="0.1" folds="Auto" repetitions="1">
+        <readoutUnit name="Cancel Call">
+          <classification oneWinnerGroupName="Gesture">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationElliot/>
+            <hiddenLayers>
+              <layer neurons="10">
+                <activationLeakyReLU/>
+              </layer>
+              <layer neurons="10">
+                <activationLeakyReLU/>
+              </layer>
+            </hiddenLayers>
+            <resPropTrainer attempts="10" attemptEpochs="500"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="Dead Ball">
+          <classification oneWinnerGroupName="Gesture">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationElliot/>
+            <hiddenLayers>
+              <layer neurons="10">
+                <activationLeakyReLU/>
+              </layer>
+              <layer neurons="10">
+                <activationLeakyReLU/>
+              </layer>
+            </hiddenLayers>
+            <resPropTrainer attempts="10" attemptEpochs="500"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="Four">
+          <classification oneWinnerGroupName="Gesture">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationElliot/>
+            <hiddenLayers>
+              <layer neurons="10">
+                <activationLeakyReLU/>
+              </layer>
+              <layer neurons="10">
+                <activationLeakyReLU/>
+              </layer>
+            </hiddenLayers>
+            <resPropTrainer attempts="10" attemptEpochs="500"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="Last Hour">
+          <classification oneWinnerGroupName="Gesture">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationElliot/>
+            <hiddenLayers>
+              <layer neurons="10">
+                <activationLeakyReLU/>
+              </layer>
+              <layer neurons="10">
+                <activationLeakyReLU/>
+              </layer>
+            </hiddenLayers>
+            <resPropTrainer attempts="10" attemptEpochs="500"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="Leg Bye">
+          <classification oneWinnerGroupName="Gesture">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationElliot/>
+            <hiddenLayers>
+              <layer neurons="10">
+                <activationLeakyReLU/>
+              </layer>
+              <layer neurons="10">
+                <activationLeakyReLU/>
+              </layer>
+            </hiddenLayers>
+            <resPropTrainer attempts="10" attemptEpochs="500"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="No Ball">
+          <classification oneWinnerGroupName="Gesture">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationElliot/>
+            <hiddenLayers>
+              <layer neurons="10">
+                <activationLeakyReLU/>
+              </layer>
+              <layer neurons="10">
+                <activationLeakyReLU/>
+              </layer>
+            </hiddenLayers>
+            <resPropTrainer attempts="10" attemptEpochs="500"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="One Short">
+          <classification oneWinnerGroupName="Gesture">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationElliot/>
+            <hiddenLayers>
+              <layer neurons="10">
+                <activationLeakyReLU/>
+              </layer>
+              <layer neurons="10">
+                <activationLeakyReLU/>
+              </layer>
+            </hiddenLayers>
+            <resPropTrainer attempts="10" attemptEpochs="500"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="Out">
+          <classification oneWinnerGroupName="Gesture">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationElliot/>
+            <hiddenLayers>
+              <layer neurons="10">
+                <activationLeakyReLU/>
+              </layer>
+              <layer neurons="10">
+                <activationLeakyReLU/>
+              </layer>
+            </hiddenLayers>
+            <resPropTrainer attempts="10" attemptEpochs="500"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="Penalty Runs">
+          <classification oneWinnerGroupName="Gesture">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationElliot/>
+            <hiddenLayers>
+              <layer neurons="10">
+                <activationLeakyReLU/>
+              </layer>
+              <layer neurons="10">
+                <activationLeakyReLU/>
+              </layer>
+            </hiddenLayers>
+            <resPropTrainer attempts="10" attemptEpochs="500"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="Six">
+          <classification oneWinnerGroupName="Gesture">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationElliot/>
+            <hiddenLayers>
+              <layer neurons="10">
+                <activationLeakyReLU/>
+              </layer>
+              <layer neurons="10">
+                <activationLeakyReLU/>
+              </layer>
+            </hiddenLayers>
+            <resPropTrainer attempts="10" attemptEpochs="500"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="TV Replay">
+          <classification oneWinnerGroupName="Gesture">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationElliot/>
+            <hiddenLayers>
+              <layer neurons="10">
+                <activationLeakyReLU/>
+              </layer>
+              <layer neurons="10">
+                <activationLeakyReLU/>
+              </layer>
+            </hiddenLayers>
+            <resPropTrainer attempts="10" attemptEpochs="500"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="Wide">
+          <classification oneWinnerGroupName="Gesture">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationElliot/>
+            <hiddenLayers>
+              <layer neurons="10">
+                <activationLeakyReLU/>
+              </layer>
+              <layer neurons="10">
+                <activationLeakyReLU/>
+              </layer>
+            </hiddenLayers>
+            <resPropTrainer attempts="10" attemptEpochs="500"/>
+          </ff>
+        </readoutUnit>
+      </readoutLayer>
+    </stateMachineCfg>
+  </case>
+
+
+
+
+  <!--
+    Here StateMachine fails to exhibit good performance.
+    The best algorithm called COTE, referenced at the dataset's home site, exhibits accuracy 81.4%. It is very far for StateMachine results.
+    This is a good case for investigation and StateMachine improvements research :-)
+    "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
+    https://timeseriesclassification.com/description.php?Dataset=CricketX.
+    The series Cricket X, Y and Z are accelerometer data (in three dimensions) taken from actors performing cricket gestures.
+    The twelve classes are different umpire signals: Cancel Call, Dead Ball, Four, Last Hour, Leg Bye, No Ball,
+    One Short, Out, Penalty Runs, Six, TV Replay, and Wide.
+    They mounted two accelerometers orthogonal to each other, thus acceleration is measured in 3D space.
+    The accelerometers are housed in a small wrist watch sized enclosure worn in the form of a wrist band.
+    Cricket X contains acceleration data only for dimension X: 150 datapoints for left hand and 150 datapoints for right hand.
+  -->
+  <case name="Classification task CricketX: pure ESN reservoir generating FiringFadingSum predictors, one Elliot neuron as a classifier (Resilient trainer)">
+    <samples trainingData="CricketX_train.csv" verificationData="CricketX_verify.csv"/>
+    <stateMachineCfg randomizerSeek="0">
+      <neuralPreprocessor predictorsReductionRatio="0">
+        <input>
+          <feedingPatterned bidir="true" routeToReadout="false"/>
+          <external>
+            <field name="Accel"
+                   allowRoutingToReadout="true"
+                   spikeTrainLength="5"
+                   transDiffDistance="1"
+                   transNumOfLinearSteps="16"
+                   transPowerExponent="0.5"
+                   transFoldedPowerExponent="0.5"
+                   transMovingAverageWindowLength="5"
+                   >
+              <realFeature standardize="true" keepReserve="true"/>
+            </field>
+          </external>
+        </input>
+        <reservoirCfgContainer>
+          <reservoirCfg name="MainCfg">
+            <pools>
+              <pool name="Pool1" dimX="150" dimY="1" dimZ="1">
+                <neuronGroups>
+                  <analogGroup name="Exc-grp" role="Excitatory" relShare="1" readoutDensity="1">
+                    <activationTanH/>
+                  </analogGroup>
+                  <analogGroup name="Inh-grp" role="Inhibitory" relShare="1" readoutDensity="1">
+                    <activationTanH/>
+                  </analogGroup>
+                </neuronGroups>
+                <interconnection>
+                  <randomSchema density="0.1" relShareEE="1" relShareEI="1" relShareIE="1" relShareII="1" avgDistance="NA" allowSelfConnection="true">
+                    <synapse/>
+                  </randomSchema>
+                  <chainSchema ratio="1" circle="true">
+                    <synapse/>
+                  </chainSchema>
+                </interconnection>
+              </pool>
+              <pool name="Pool2" dimX="150" dimY="1" dimZ="1">
+                <neuronGroups>
+                  <analogGroup name="Exc-grp" role="Excitatory" relShare="1" readoutDensity="1">
+                    <activationTanH/>
+                  </analogGroup>
+                  <analogGroup name="Inh-grp" role="Inhibitory" relShare="1" readoutDensity="1">
+                    <activationTanH/>
+                  </analogGroup>
+                </neuronGroups>
+                <interconnection>
+                  <randomSchema density="0.1" relShareEE="1" relShareEI="1" relShareIE="1" relShareII="1" avgDistance="NA" allowSelfConnection="true">
+                    <synapse/>
+                  </randomSchema>
+                  <chainSchema ratio="1" circle="true">
+                    <synapse/>
+                  </chainSchema>
+                </interconnection>
+              </pool>
+            </pools>
+            <spectralRadius>
+              <analogScope value="0.9999"/>
+              <spikingScope value="NA"/>
+            </spectralRadius>
+          </reservoirCfg>
+        </reservoirCfgContainer>
+        <reservoirInstanceContainer>
+          <reservoirInstance name="Main" cfg="MainCfg">
+            <inputConnections>
+              <inputConnection fieldName="Accel" poolName="Pool1" density="1" signalingRestriction="NoRestriction">
+                <synapse delayMethod="Random" maxDelay="150">
+                  <analogTarget scope="All"
+                                relShareOriginal="0"
+                                relShareTransDiff="0"
+                                relShareTransLinearSteps="0"
+                                relShareTransPower="1"
+                                relShareTransFoldedPower="1"
+                                relShareTransMovingAverage="0"
+                                >
+                    <weight min="0" max="1"/>
+                  </analogTarget>
+                </synapse>
+              </inputConnection>
+              <inputConnection fieldName="Accel" poolName="Pool2" density="1" signalingRestriction="NoRestriction">
+                <synapse delayMethod="Random" maxDelay="150">
+                  <analogTarget scope="All"
+                                relShareOriginal="0"
+                                relShareTransDiff="0"
+                                relShareTransLinearSteps="0"
+                                relShareTransPower="0"
+                                relShareTransFoldedPower="0"
+                                relShareTransMovingAverage="1"
+                                >
+                    <weight min="0" max="1"/>
+                  </analogTarget>
+                </synapse>
+              </inputConnection>
+            </inputConnections>
+            <predictors>
+              <settings>
+                <activationFadingSum/>
+                <activationMWAvg leakage="0" weights="Constant" window="300"/>
+                <firingFadingSum strength="0.05"/>
+                <firingMWAvg leakage="0" weights="Constant" window="300"/>
+                <firingCount/>
+                <firingBinPattern window="1"/>
+              </settings>
+              <permission activation="false"
+                          activationSquare="false"
+                          activationFadingSum="false"
+                          activationMWAvg="false"
+                          firingFadingSum="true"
+                          firingMWAvg="false"
+                          firingCount="false"
+                          firingBinPattern="false"/>
+            </predictors>
+          </reservoirInstance>
+        </reservoirInstanceContainer>
+      </neuralPreprocessor>
+      <readoutLayer testDataRatio="0.1" folds="Auto">
+        <readoutUnit name="Cancel Call">
+          <classification oneWinnerGroupName="Gesture">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationElliot/>
+            <resPropTrainer attempts="10" attemptEpochs="500"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="Dead Ball">
+          <classification oneWinnerGroupName="Gesture">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationElliot/>
+            <resPropTrainer attempts="10" attemptEpochs="500"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="Four">
+          <classification oneWinnerGroupName="Gesture">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationElliot/>
+            <resPropTrainer attempts="10" attemptEpochs="500"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="Last Hour">
+          <classification oneWinnerGroupName="Gesture">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationElliot/>
+            <resPropTrainer attempts="10" attemptEpochs="500"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="Leg Bye">
+          <classification oneWinnerGroupName="Gesture">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationElliot/>
+            <resPropTrainer attempts="10" attemptEpochs="500"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="No Ball">
+          <classification oneWinnerGroupName="Gesture">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationElliot/>
+            <resPropTrainer attempts="10" attemptEpochs="500"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="One Short">
+          <classification oneWinnerGroupName="Gesture">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationElliot/>
+            <resPropTrainer attempts="10" attemptEpochs="500"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="Out">
+          <classification oneWinnerGroupName="Gesture">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationElliot/>
+            <resPropTrainer attempts="10" attemptEpochs="500"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="Penalty Runs">
+          <classification oneWinnerGroupName="Gesture">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationElliot/>
+            <resPropTrainer attempts="10" attemptEpochs="500"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="Six">
+          <classification oneWinnerGroupName="Gesture">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationElliot/>
+            <resPropTrainer attempts="10" attemptEpochs="500"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="TV Replay">
+          <classification oneWinnerGroupName="Gesture">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationElliot/>
+            <resPropTrainer attempts="10" attemptEpochs="500"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="Wide">
+          <classification oneWinnerGroupName="Gesture">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationElliot/>
+            <resPropTrainer attempts="10" attemptEpochs="500"/>
+          </ff>
+        </readoutUnit>
+      </readoutLayer>
+    </stateMachineCfg>
+  </case>
+
+
+
+
+  <!--
     This demo case demonstrates successful use of mixed analog and spiking neurons. Analog neurons get analog input, spiking neurons
     get spike-train spikes.
     Following configuration of the StateMachine exhibits 88.29% accuracy, slightly better than the best algorithm
@@ -661,7 +1226,6 @@
     </stateMachineCfg>
   </case>
 
-
   <!--
     This demo case demonstrates successful use of the pure analog ESN reservoir for the fast and accurate classifications enabled by
     the new ability of the analog neurons to fire a spike.
@@ -683,7 +1247,7 @@
     <stateMachineCfg randomizerSeek="0">
       <neuralPreprocessor>
         <input>
-          <feedingPatterned bidir="true"/>
+          <feedingPatterned bidir="true" routeToReadout="false" dataOrganization="Groupped"/>
           <external>
             <field name="coord_abcissa">
               <realFeature standardize="true" keepReserve="true"/>
@@ -891,7 +1455,475 @@
     </stateMachineCfg>
   </case>
 
-  
+  <!--
+    This demo case demonstrates classical setup of LSM reservoir consisting of the neurons having spiking activation function.
+    The dataset is from https://archive.ics.uci.edu/ml/datasets/Libras+Movement and contains 15 classes of 24 instances each, where
+    each class references to a hand movement type in LIBRAS. The hand movement is represented as a bidimensional curve performed
+    by the hand in a period of time. The curves were obtained from videos of hand movements, with the Libras performance from 4 
+    different people, during 2 sessions. Each video corresponds to only one hand movement and has about 7 seconds.    
+    Each video corresponds to a function F in a functions space which is the continual version of the input dataset.
+    In the video pre-processing, a time normalization is carried out selecting 45 frames from each video, in according 
+    to an uniform distribution. In each frame, the centroid pixels of the segmented objects (the hand) are found, which 
+    compose the discrete version of the curve F with 45 points. All curves are normalized in the unitary space.
+    Each curve F is mapped in a representation with 90 features, with representing the coordinates of movement.
+    Each instance represents 45 points on a bi-dimensional space, which can be plotted in an ordered way (from 1 through
+    45 as the X co-ordinate) in order to draw the path of the movement.
+  -->
+  <case name="Classification task Libras Movement: Classical LSM reservoir generating FiringFadingSum predictors, One TanH neuron as a classifier (Resilient trainer)">
+    <samples trainingData="LibrasMovement_train.csv" verificationData="LibrasMovement_verify.csv"/>
+    <stateMachineCfg randomizerSeek="0">
+      <neuralPreprocessor>
+        <input>
+          <feedingPatterned bidir="true" routeToReadout="true" dataOrganization="Groupped"/>
+          <external>
+            <field name="coord_abcissa" spikeTrainLength="5">
+              <realFeature standardize="true" keepReserve="false"/>
+            </field>
+            <field name="coord_ordinate" spikeTrainLength="5">
+              <realFeature standardize="true" keepReserve="false"/>
+            </field>
+          </external>
+        </input>
+        <reservoirCfgContainer>
+          <reservoirCfg name="MainCfg">
+            <pools>
+              <pool name="PureLSM" dimX="5" dimY="5" dimZ="5">
+                <neuronGroups>
+                  <spikingGroup name="Exc-grp" role="Excitatory" relShare="4" readoutDensity="1">
+                    <activationLeakyIF/>
+                  </spikingGroup>
+                  <spikingGroup name="Inh-grp" role="Inhibitory" relShare="1" readoutDensity="1">
+                    <activationLeakyIF/>
+                  </spikingGroup>
+                </neuronGroups>
+                <interconnection>
+                  <randomSchema density="0.1" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
+                    <synapse/>
+                  </randomSchema>
+                </interconnection>
+              </pool>
+            </pools>
+            <spectralRadius>
+              <analogScope value="NA"/>
+              <spikingScope value="NA"/>
+            </spectralRadius>
+          </reservoirCfg>
+        </reservoirCfgContainer>
+        <reservoirInstanceContainer>
+          <reservoirInstance name="Main" cfg="MainCfg">
+            <inputConnections>
+              <inputConnection fieldName="coord_abcissa" poolName="PureLSM" density="0.5" signalingRestriction="NoRestriction">
+                <synapse maxDelay="0">
+                  <spikingTarget scope="All"/>
+                </synapse>
+              </inputConnection>
+              <inputConnection fieldName="coord_ordinate" poolName="PureLSM" density="0.5" signalingRestriction="NoRestriction">
+                <synapse maxDelay="0">
+                  <spikingTarget scope="All"/>
+                </synapse>
+              </inputConnection>
+            </inputConnections>
+            <predictors>
+              <permission activation="false"
+                          activationSquare="false"
+                          activationFadingSum="false"
+                          activationMWAvg="false"
+                          firingFadingSum="true"
+                          firingMWAvg="false"
+                          firingCount="false"
+                          firingBinPattern="false"/>
+            </predictors>
+          </reservoirInstance>
+        </reservoirInstanceContainer>
+      </neuralPreprocessor>
+      <readoutLayer testDataRatio="0.0825" folds="Auto">
+        <readoutUnit name="curved swing">
+          <classification oneWinnerGroupName="Hand movement type">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationTanH/>
+            <resPropTrainer attempts="5" attemptEpochs="400"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="horizontal swing">
+          <classification oneWinnerGroupName="Hand movement type">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationTanH/>
+            <resPropTrainer attempts="5" attemptEpochs="400"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="vertical swing">
+          <classification oneWinnerGroupName="Hand movement type">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationTanH/>
+            <resPropTrainer attempts="5" attemptEpochs="400"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="anti-clockwise arc">
+          <classification oneWinnerGroupName="Hand movement type">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationTanH/>
+            <resPropTrainer attempts="5" attemptEpochs="400"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="clockwise arc">
+          <classification oneWinnerGroupName="Hand movement type">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationTanH/>
+            <resPropTrainer attempts="5" attemptEpochs="400"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="circle">
+          <classification oneWinnerGroupName="Hand movement type">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationTanH/>
+            <resPropTrainer attempts="5" attemptEpochs="400"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="horizontal straight-line">
+          <classification oneWinnerGroupName="Hand movement type">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationTanH/>
+            <resPropTrainer attempts="5" attemptEpochs="400"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="vertical straight-line">
+          <classification oneWinnerGroupName="Hand movement type">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationTanH/>
+            <resPropTrainer attempts="5" attemptEpochs="400"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="horizontal zigzag">
+          <classification oneWinnerGroupName="Hand movement type">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationTanH/>
+            <resPropTrainer attempts="5" attemptEpochs="400"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="vertical zigzag">
+          <classification oneWinnerGroupName="Hand movement type">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationTanH/>
+            <resPropTrainer attempts="5" attemptEpochs="400"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="horizontal wavy">
+          <classification oneWinnerGroupName="Hand movement type">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationTanH/>
+            <resPropTrainer attempts="5" attemptEpochs="400"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="vertical wavy">
+          <classification oneWinnerGroupName="Hand movement type">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationTanH/>
+            <resPropTrainer attempts="5" attemptEpochs="400"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="face-up curve">
+          <classification oneWinnerGroupName="Hand movement type">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationTanH/>
+            <resPropTrainer attempts="5" attemptEpochs="400"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="face-down curve">
+          <classification oneWinnerGroupName="Hand movement type">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationTanH/>
+            <resPropTrainer attempts="5" attemptEpochs="400"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="tremble">
+          <classification oneWinnerGroupName="Hand movement type">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationTanH/>
+            <resPropTrainer attempts="5" attemptEpochs="400"/>
+          </ff>
+        </readoutUnit>
+      </readoutLayer>
+    </stateMachineCfg>
+  </case>
+
+  <!--
+    This demo case demonstrates experimental setup of reservoir consisting of the neurons having spiking and analog activation functions.
+    The dataset is from https://archive.ics.uci.edu/ml/datasets/Libras+Movement and contains 15 classes of 24 instances each, where
+    each class references to a hand movement type in LIBRAS. The hand movement is represented as a bidimensional curve performed
+    by the hand in a period of time. The curves were obtained from videos of hand movements, with the Libras performance from 4 
+    different people, during 2 sessions. Each video corresponds to only one hand movement and has about 7 seconds.    
+    Each video corresponds to a function F in a functions space which is the continual version of the input dataset.
+    In the video pre-processing, a time normalization is carried out selecting 45 frames from each video, in according 
+    to an uniform distribution. In each frame, the centroid pixels of the segmented objects (the hand) are found, which 
+    compose the discrete version of the curve F with 45 points. All curves are normalized in the unitary space.
+    Each curve F is mapped in a representation with 90 features, with representing the coordinates of movement.
+    Each instance represents 45 points on a bi-dimensional space, which can be plotted in an ordered way (from 1 through
+    45 as the X co-ordinate) in order to draw the path of the movement.
+  -->
+  <case name="Classification task Libras Movement: Experimental mixed reservoir generating FiringFadingSum predictors, one TanH neuron as a classifier (Resilient trainer)">
+    <samples trainingData="LibrasMovement_train.csv" verificationData="LibrasMovement_verify.csv"/>
+    <stateMachineCfg randomizerSeek="0">
+      <neuralPreprocessor>
+        <input>
+          <feedingPatterned bidir="true" routeToReadout="true" dataOrganization="Groupped"/>
+          <external>
+            <field name="coord_abcissa">
+              <realFeature standardize="true" keepReserve="false"/>
+            </field>
+            <field name="coord_ordinate">
+              <realFeature standardize="true" keepReserve="false"/>
+            </field>
+          </external>
+        </input>
+        <reservoirCfgContainer>
+          <reservoirCfg name="MainCfg">
+            <pools>
+              <pool name="SpikingPool" dimX="5" dimY="5" dimZ="3">
+                <neuronGroups>
+                  <spikingGroup name="Exc-grp-spiking" role="Excitatory" relShare="4" readoutDensity="1">
+                    <activationAdExpIF/>
+                    <bias min="0" max="0" randomSign="false" />
+                  </spikingGroup>
+                  <spikingGroup name="Inh-grp-spiking" role="Inhibitory" relShare="1" readoutDensity="1">
+                    <activationAdExpIF/>
+                    <bias min="0" max="0" randomSign="false" />
+                  </spikingGroup>
+                </neuronGroups>
+                <interconnection>
+                  <randomSchema density="0.1" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
+                    <synapse/>
+                  </randomSchema>
+                </interconnection>
+              </pool>
+              <pool name="AnalogPool" dimX="5" dimY="5" dimZ="3">
+                <neuronGroups>
+                  <analogGroup name="Exc-grp-analog" role="Excitatory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction">
+                    <activationTanH/>
+                    <firingThreshold value="0.00125"/>
+                  </analogGroup>
+                  <analogGroup name="Inh-grp-analog" role="Inhibitory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction">
+                    <activationTanH/>
+                    <firingThreshold value="0.00125"/>
+                  </analogGroup>
+                </neuronGroups>
+                <interconnection>
+                  <randomSchema density="0.1" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
+                    <synapse/>
+                  </randomSchema>
+                </interconnection>
+              </pool>
+            </pools>
+            <pool2PoolConns>
+              <pool2PoolConn srcPool="AnalogPool" srcConnDensity="0.5" targetPool="SpikingPool" targetConnDensity="0.1" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" constantNumOfConnections="false">
+                <synapse/>
+              </pool2PoolConn>
+            </pool2PoolConns>
+            <spectralRadius>
+              <analogScope value="0.9999"/>
+              <spikingScope value="NA"/>
+            </spectralRadius>
+          </reservoirCfg>
+        </reservoirCfgContainer>
+        <reservoirInstanceContainer>
+          <reservoirInstance name="Main" cfg="MainCfg">
+            <inputConnections>
+              <inputConnection fieldName="coord_abcissa" poolName="SpikingPool" density="0.25">
+                <synapse delayMethod="Random" maxDelay="0"/>
+              </inputConnection>
+              <inputConnection fieldName="coord_ordinate" poolName="SpikingPool" density="0.25">
+                <synapse delayMethod="Random" maxDelay="0"/>
+              </inputConnection>
+              <inputConnection fieldName="coord_abcissa" poolName="AnalogPool" density="0.25">
+                <synapse delayMethod="Random" maxDelay="0"/>
+              </inputConnection>
+              <inputConnection fieldName="coord_ordinate" poolName="AnalogPool" density="0.25">
+                <synapse delayMethod="Random" maxDelay="0"/>
+              </inputConnection>
+            </inputConnections>
+            <predictors>
+              <permission activation="false"
+                          activationSquare="false"
+                          activationFadingSum="false"
+                          activationMWAvg="false"
+                          firingFadingSum="true"
+                          firingMWAvg="false"
+                          firingCount="false"
+                          firingBinPattern="false"/>
+            </predictors>
+          </reservoirInstance>
+        </reservoirInstanceContainer>
+      </neuralPreprocessor>
+      <readoutLayer testDataRatio="0.0825" folds="Auto">
+        <readoutUnit name="curved swing">
+          <classification oneWinnerGroupName="Hand movement type">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationTanH/>
+            <resPropTrainer attempts="5" attemptEpochs="400"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="horizontal swing">
+          <classification oneWinnerGroupName="Hand movement type">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationTanH/>
+            <resPropTrainer attempts="5" attemptEpochs="400"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="vertical swing">
+          <classification oneWinnerGroupName="Hand movement type">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationTanH/>
+            <resPropTrainer attempts="5" attemptEpochs="400"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="anti-clockwise arc">
+          <classification oneWinnerGroupName="Hand movement type">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationTanH/>
+            <resPropTrainer attempts="5" attemptEpochs="400"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="clockwise arc">
+          <classification oneWinnerGroupName="Hand movement type">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationTanH/>
+            <resPropTrainer attempts="5" attemptEpochs="400"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="circle">
+          <classification oneWinnerGroupName="Hand movement type">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationTanH/>
+            <resPropTrainer attempts="5" attemptEpochs="400"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="horizontal straight-line">
+          <classification oneWinnerGroupName="Hand movement type">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationTanH/>
+            <resPropTrainer attempts="5" attemptEpochs="400"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="vertical straight-line">
+          <classification oneWinnerGroupName="Hand movement type">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationTanH/>
+            <resPropTrainer attempts="5" attemptEpochs="400"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="horizontal zigzag">
+          <classification oneWinnerGroupName="Hand movement type">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationTanH/>
+            <resPropTrainer attempts="5" attemptEpochs="400"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="vertical zigzag">
+          <classification oneWinnerGroupName="Hand movement type">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationTanH/>
+            <resPropTrainer attempts="5" attemptEpochs="400"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="horizontal wavy">
+          <classification oneWinnerGroupName="Hand movement type">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationTanH/>
+            <resPropTrainer attempts="5" attemptEpochs="400"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="vertical wavy">
+          <classification oneWinnerGroupName="Hand movement type">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationTanH/>
+            <resPropTrainer attempts="5" attemptEpochs="400"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="face-up curve">
+          <classification oneWinnerGroupName="Hand movement type">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationTanH/>
+            <resPropTrainer attempts="5" attemptEpochs="400"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="face-down curve">
+          <classification oneWinnerGroupName="Hand movement type">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationTanH/>
+            <resPropTrainer attempts="5" attemptEpochs="400"/>
+          </ff>
+        </readoutUnit>
+        <readoutUnit name="tremble">
+          <classification oneWinnerGroupName="Hand movement type">
+            <binFeature/>
+          </classification>
+          <ff>
+            <activationTanH/>
+            <resPropTrainer attempts="5" attemptEpochs="400"/>
+          </ff>
+        </readoutUnit>
+      </readoutLayer>
+    </stateMachineCfg>
+  </case>
+
+
   <!--
     This demo case demonstrates how to instantiate two independent reservoirs. Configuration definies two ESN reservoir
     structures each having two interconnected pools of 100 TanH analog neurons.
@@ -1182,712 +2214,23 @@
     </stateMachineCfg>
   </case>
 
-  <!--
-    This demo case demonstrates classical setup of LSM reservoir consisting of the neurons having spiking activation function.
-    The dataset is from https://archive.ics.uci.edu/ml/datasets/Libras+Movement and contains 15 classes of 24 instances each, where
-    each class references to a hand movement type in LIBRAS. The hand movement is represented as a bidimensional curve performed
-    by the hand in a period of time. The curves were obtained from videos of hand movements, with the Libras performance from 4 
-    different people, during 2 sessions. Each video corresponds to only one hand movement and has about 7 seconds.    
-    Each video corresponds to a function F in a functions space which is the continual version of the input dataset.
-    In the video pre-processing, a time normalization is carried out selecting 45 frames from each video, in according 
-    to an uniform distribution. In each frame, the centroid pixels of the segmented objects (the hand) are found, which 
-    compose the discrete version of the curve F with 45 points. All curves are normalized in the unitary space.
-    Each curve F is mapped in a representation with 90 features, with representing the coordinates of movement.
-    Each instance represents 45 points on a bi-dimensional space, which can be plotted in an ordered way (from 1 through
-    45 as the X co-ordinate) in order to draw the path of the movement.
-  -->
-  <case name="Classification task Libras Movement: Classical LSM reservoir generating FiringFadingSum predictors, One TanH neuron as a classifier (Resilient trainer)">
-    <samples trainingData="LibrasMovement_train.csv" verificationData="LibrasMovement_verify.csv"/>
-    <stateMachineCfg randomizerSeek="0">
-      <neuralPreprocessor>
-        <input>
-          <feedingPatterned/>
-          <external>
-            <field name="coord_abcissa">
-              <realFeature standardize="true" keepReserve="false"/>
-            </field>
-            <field name="coord_ordinate">
-              <realFeature standardize="true" keepReserve="false"/>
-            </field>
-          </external>
-        </input>
-        <reservoirCfgContainer>
-          <reservoirCfg name="MainCfg">
-            <pools>
-              <pool name="PureLSM" dimX="6" dimY="5" dimZ="5">
-                <neuronGroups>
-                  <spikingGroup name="Exc-grp" role="Excitatory" relShare="4" readoutDensity="1">
-                    <activationAutoIzhikevichIF role="Excitatory"/>
-                  </spikingGroup>
-                  <spikingGroup name="Inh-grp" role="Inhibitory" relShare="1" readoutDensity="1">
-                    <activationAutoIzhikevichIF role="Inhibitory"/>
-                  </spikingGroup>
-                </neuronGroups>
-                <interconnection>
-                  <randomSchema density="0.1" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
-                    <synapse/>
-                  </randomSchema>
-                </interconnection>
-              </pool>
-            </pools>
-            <spectralRadius>
-              <analogScope value="NA"/>
-              <spikingScope value="NA"/>
-            </spectralRadius>
-          </reservoirCfg>
-        </reservoirCfgContainer>
-        <reservoirInstanceContainer>
-          <reservoirInstance name="Main" cfg="MainCfg">
-            <inputConnections>
-              <inputConnection fieldName="coord_abcissa" poolName="PureLSM" density="1">
-                <synapse>
-                  <spikingTarget scope="Excitatory"/>
-                </synapse>
-              </inputConnection>
-              <inputConnection fieldName="coord_ordinate" poolName="PureLSM" density="1">
-                <synapse>
-                  <spikingTarget scope="Excitatory"/>
-                </synapse>
-              </inputConnection>
-            </inputConnections>
-            <predictors>
-              <permission activation="false"
-                          activationSquare="false"
-                          activationFadingSum="false"
-                          activationMWAvg="false"
-                          firingFadingSum="true"
-                          firingMWAvg="false"
-                          firingCount="false"
-                          firingBinPattern="false"/>
-            </predictors>
-          </reservoirInstance>
-        </reservoirInstanceContainer>
-      </neuralPreprocessor>
-      <readoutLayer testDataRatio="0.0825" folds="Auto">
-        <readoutUnit name="curved swing">
-          <classification>
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="horizontal swing">
-          <classification>
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="vertical swing">
-          <classification>
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="anti-clockwise arc">
-          <classification>
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="clockwise arc">
-          <classification>
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="circle">
-          <classification>
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="horizontal straight-line">
-          <classification>
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="vertical straight-line">
-          <classification>
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="horizontal zigzag">
-          <classification>
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="vertical zigzag">
-          <classification>
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="horizontal wavy">
-          <classification>
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="vertical wavy">
-          <classification>
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="face-up curve">
-          <classification>
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="face-down curve">
-          <classification>
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="tremble">
-          <classification>
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-      </readoutLayer>
-    </stateMachineCfg>
-  </case>
-
-
-  <!--
-    This demo case demonstrates classical setup of LSM reservoir consisting of the neurons having spiking activation function.
-    The dataset is from https://archive.ics.uci.edu/ml/datasets/Libras+Movement and contains 15 classes of 24 instances each, where
-    each class references to a hand movement type in LIBRAS. The hand movement is represented as a bidimensional curve performed
-    by the hand in a period of time. The curves were obtained from videos of hand movements, with the Libras performance from 4 
-    different people, during 2 sessions. Each video corresponds to only one hand movement and has about 7 seconds.    
-    Each video corresponds to a function F in a functions space which is the continual version of the input dataset.
-    In the video pre-processing, a time normalization is carried out selecting 45 frames from each video, in according 
-    to an uniform distribution. In each frame, the centroid pixels of the segmented objects (the hand) are found, which 
-    compose the discrete version of the curve F with 45 points. All curves are normalized in the unitary space.
-    Each curve F is mapped in a representation with 90 features, with representing the coordinates of movement.
-    Each instance represents 45 points on a bi-dimensional space, which can be plotted in an ordered way (from 1 through
-    45 as the X co-ordinate) in order to draw the path of the movement.
-  -->
-  <case name="Classification task Libras Movement: Classical LSM reservoir generating FiringCount predictors, one TanH neuron as a classifier (Resilient trainer)">
-    <samples trainingData="LibrasMovement_train.csv" verificationData="LibrasMovement_verify.csv"/>
-    <stateMachineCfg randomizerSeek="0">
-      <neuralPreprocessor>
-        <input>
-          <feedingPatterned/>
-          <external>
-            <field name="coord_abcissa">
-              <realFeature standardize="true" keepReserve="false"/>
-            </field>
-            <field name="coord_ordinate">
-              <realFeature standardize="true" keepReserve="false"/>
-            </field>
-          </external>
-        </input>
-        <reservoirCfgContainer>
-          <reservoirCfg name="MainCfg">
-            <pools>
-              <pool name="PureLSM" dimX="6" dimY="5" dimZ="5">
-                <neuronGroups>
-                  <spikingGroup name="Exc-grp" role="Excitatory" relShare="4" readoutDensity="1">
-                    <activationAdExpIF/>
-                  </spikingGroup>
-                  <spikingGroup name="Inh-grp" role="Inhibitory" relShare="1" readoutDensity="1">
-                    <activationAdExpIF/>
-                  </spikingGroup>
-                </neuronGroups>
-                <interconnection>
-                  <randomSchema density="0.1" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
-                    <synapse/>
-                  </randomSchema>
-                </interconnection>
-              </pool>
-            </pools>
-            <spectralRadius>
-              <analogScope value="NA"/>
-              <spikingScope value="NA"/>
-            </spectralRadius>
-          </reservoirCfg>
-        </reservoirCfgContainer>
-        <reservoirInstanceContainer>
-          <reservoirInstance name="Main" cfg="MainCfg">
-            <inputConnections>
-              <inputConnection fieldName="coord_abcissa" poolName="PureLSM" density="0.25">
-                <synapse delayMethod="Random" maxDelay="0">
-                  <spikingTarget scope="Excitatory"/>
-                </synapse>
-              </inputConnection>
-              <inputConnection fieldName="coord_ordinate" poolName="PureLSM" density="0.25">
-                <synapse delayMethod="Random" maxDelay="0">
-                  <spikingTarget scope="Excitatory"/>
-                </synapse>
-              </inputConnection>
-            </inputConnections>
-            <predictors>
-              <permission activation="false"
-                          activationSquare="false"
-                          activationFadingSum="false"
-                          activationMWAvg="false"
-                          firingFadingSum="false"
-                          firingMWAvg="false"
-                          firingCount="true"
-                          firingBinPattern="false"/>
-            </predictors>
-          </reservoirInstance>
-        </reservoirInstanceContainer>
-      </neuralPreprocessor>
-      <readoutLayer testDataRatio="0.0825" folds="Auto">
-        <readoutUnit name="curved swing">
-          <classification>
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="horizontal swing">
-          <classification>
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="vertical swing">
-          <classification>
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="anti-clockwise arc">
-          <classification>
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="clockwise arc">
-          <classification>
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="circle">
-          <classification>
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="horizontal straight-line">
-          <classification>
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="vertical straight-line">
-          <classification>
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="horizontal zigzag">
-          <classification>
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="vertical zigzag">
-          <classification>
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="horizontal wavy">
-          <classification>
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="vertical wavy">
-          <classification>
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="face-up curve">
-          <classification>
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="face-down curve">
-          <classification>
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="tremble">
-          <classification>
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-      </readoutLayer>
-    </stateMachineCfg>
-  </case>
-
-  <!--
-    This demo case demonstrates experimental setup of reservoir consisting of the neurons having spiking and analog activation functions.
-    The dataset is from https://archive.ics.uci.edu/ml/datasets/Libras+Movement and contains 15 classes of 24 instances each, where
-    each class references to a hand movement type in LIBRAS. The hand movement is represented as a bidimensional curve performed
-    by the hand in a period of time. The curves were obtained from videos of hand movements, with the Libras performance from 4 
-    different people, during 2 sessions. Each video corresponds to only one hand movement and has about 7 seconds.    
-    Each video corresponds to a function F in a functions space which is the continual version of the input dataset.
-    In the video pre-processing, a time normalization is carried out selecting 45 frames from each video, in according 
-    to an uniform distribution. In each frame, the centroid pixels of the segmented objects (the hand) are found, which 
-    compose the discrete version of the curve F with 45 points. All curves are normalized in the unitary space.
-    Each curve F is mapped in a representation with 90 features, with representing the coordinates of movement.
-    Each instance represents 45 points on a bi-dimensional space, which can be plotted in an ordered way (from 1 through
-    45 as the X co-ordinate) in order to draw the path of the movement.
-  -->
-  <case name="Classification task Libras Movement: Experimental mixed reservoir generating FiringCount predictors, one TanH neuron as a classifier (Resilient trainer)">
-    <samples trainingData="LibrasMovement_train.csv" verificationData="LibrasMovement_verify.csv"/>
-    <stateMachineCfg randomizerSeek="0">
-      <neuralPreprocessor>
-        <input>
-          <feedingPatterned/>
-          <external>
-            <field name="coord_abcissa">
-              <realFeature standardize="true" keepReserve="false"/>
-            </field>
-            <field name="coord_ordinate">
-              <realFeature standardize="true" keepReserve="false"/>
-            </field>
-          </external>
-        </input>
-        <reservoirCfgContainer>
-          <reservoirCfg name="MainCfg">
-            <pools>
-              <pool name="SpikingPool" dimX="5" dimY="5" dimZ="3">
-                <neuronGroups>
-                  <spikingGroup name="Exc-grp-spiking" role="Excitatory" relShare="4" readoutDensity="1">
-                    <activationAdExpIF/>
-                    <bias min="0" max="0" randomSign="false" />
-                  </spikingGroup>
-                  <spikingGroup name="Inh-grp-spiking" role="Inhibitory" relShare="1" readoutDensity="1">
-                    <activationAdExpIF/>
-                    <bias min="0" max="0" randomSign="false" />
-                  </spikingGroup>
-                </neuronGroups>
-                <interconnection>
-                  <randomSchema density="0.1" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
-                    <synapse/>
-                  </randomSchema>
-                </interconnection>
-              </pool>
-              <pool name="AnalogPool" dimX="5" dimY="5" dimZ="3">
-                <neuronGroups>
-                  <analogGroup name="Exc-grp-analog" role="Excitatory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction">
-                    <activationTanH/>
-                    <firingThreshold value="0.00125"/>
-                  </analogGroup>
-                  <analogGroup name="Inh-grp-analog" role="Inhibitory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction">
-                    <activationTanH/>
-                    <firingThreshold value="0.00125"/>
-                  </analogGroup>
-                </neuronGroups>
-                <interconnection>
-                  <randomSchema density="0.1" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
-                    <synapse/>
-                  </randomSchema>
-                </interconnection>
-              </pool>
-            </pools>
-            <pool2PoolConns>
-              <pool2PoolConn srcPool="AnalogPool" srcConnDensity="0.5" targetPool="SpikingPool" targetConnDensity="0.1" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" constantNumOfConnections="false">
-                <synapse/>
-              </pool2PoolConn>
-            </pool2PoolConns>
-            <spectralRadius>
-              <analogScope value="0.9999"/>
-              <spikingScope value="NA"/>
-            </spectralRadius>
-          </reservoirCfg>
-        </reservoirCfgContainer>
-        <reservoirInstanceContainer>
-          <reservoirInstance name="Main" cfg="MainCfg">
-            <inputConnections>
-              <inputConnection fieldName="coord_abcissa" poolName="SpikingPool" density="0.25">
-                <synapse delayMethod="Random" maxDelay="0"/>
-              </inputConnection>
-              <inputConnection fieldName="coord_ordinate" poolName="SpikingPool" density="0.25">
-                <synapse delayMethod="Random" maxDelay="0"/>
-              </inputConnection>
-              <inputConnection fieldName="coord_abcissa" poolName="AnalogPool" density="0.25">
-                <synapse delayMethod="Random" maxDelay="0"/>
-              </inputConnection>
-              <inputConnection fieldName="coord_ordinate" poolName="AnalogPool" density="0.25">
-                <synapse delayMethod="Random" maxDelay="0"/>
-              </inputConnection>
-            </inputConnections>
-            <predictors>
-              <permission activation="false"
-                          activationSquare="false"
-                          activationFadingSum="false"
-                          activationMWAvg="false"
-                          firingFadingSum="false"
-                          firingMWAvg="false"
-                          firingCount="true"
-                          firingBinPattern="false"/>
-            </predictors>
-          </reservoirInstance>
-        </reservoirInstanceContainer>
-      </neuralPreprocessor>
-      <readoutLayer testDataRatio="0.0825" folds="Auto">
-        <readoutUnit name="curved swing">
-          <classification>
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="horizontal swing">
-          <classification>
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="vertical swing">
-          <classification>
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="anti-clockwise arc">
-          <classification>
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="clockwise arc">
-          <classification>
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="circle">
-          <classification>
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="horizontal straight-line">
-          <classification>
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="vertical straight-line">
-          <classification>
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="horizontal zigzag">
-          <classification>
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="vertical zigzag">
-          <classification>
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="horizontal wavy">
-          <classification>
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="vertical wavy">
-          <classification>
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="face-up curve">
-          <classification>
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="face-down curve">
-          <classification>
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="tremble">
-          <classification>
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-      </readoutLayer>
-    </stateMachineCfg>
-  </case>
-
 
 
   <!--
     Used dataset is a pre-processed and re-structured/reshaped version of a very commonly used dataset featuring epileptic seizure detection.
     The dataset was converted from https://archive.ics.uci.edu/ml/datasets/Epileptic+Seizure+Recognition and contains 11500 EEG recordings
-    each for 1 second. After conversion there are only 2 classes, where each EEG pattern corresponds to an epileptic seizure or not.
+    each for 1 second. After conversion each EEG pattern corresponds to an epileptic seizure or not.
+    Achieved accuracy is 99.00%
     Relevant paper: http://users.fs.cvut.cz/ivo.bukovsky/PROJEKT/Data/Realna/BIO/EEG/reference/PRE61907.pdf
   -->
-  <case name="Classification task Recognition of the Epileptic Seizure Brain Activity (EEG):  Pure ESN reservoir (FiringFadingSum predictors), one Identity neuron as a classifier (Ridge regression trainer)">
+  <case name="Classification task Recognition of the Epileptic Seizure Brain Activity (EEG):  Pure ESN reservoir (FiringFadingSum predictors), Multilayer Feed forward network as a classifier (Resilient trainer)">
     <samples trainingData="EpilepticSeizureActivity_train.csv" verificationData="EpilepticSeizureActivity_verify.csv"/>
     <stateMachineCfg randomizerSeek="0">
       <neuralPreprocessor>
         <input>
-          <feedingPatterned bidir="true"/>
+          <feedingPatterned bidir="true" routeToReadout="false"/>
           <external>
-            <field name="EEG">
+            <field name="EEG" allowRoutingToReadout="true">
               <realFeature standardize="true" keepReserve="false"/>
             </field>
           </external>
@@ -1895,7 +2238,7 @@
         <reservoirCfgContainer>
           <reservoirCfg name="MainCfg">
             <pools>
-              <pool name="PureESN" dimX="6" dimY="6" dimZ="5">
+              <pool name="PureESN" dimX="178" dimY="1" dimZ="1">
                 <neuronGroups>
                   <analogGroup name="Exc-grp" role="Excitatory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction">
                     <activationTanH/>
@@ -1905,9 +2248,12 @@
                   </analogGroup>
                 </neuronGroups>
                 <interconnection>
-                  <randomSchema density="0.05" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
+                  <randomSchema density="0.1" relShareEE="1" relShareEI="1" relShareIE="1" relShareII="1" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
                     <synapse/>
                   </randomSchema>
+                  <chainSchema ratio="1" circle="true" repetitions="1">
+                    <synapse/>
+                  </chainSchema>
                 </interconnection>
               </pool>
             </pools>
@@ -1920,8 +2266,8 @@
         <reservoirInstanceContainer>
           <reservoirInstance name="Main" cfg="MainCfg">
             <inputConnections>
-              <inputConnection fieldName="EEG" poolName="PureESN" density="0.5">
-                <synapse delayMethod="Random" maxDelay="0">
+              <inputConnection fieldName="EEG" poolName="PureESN" density="1">
+                <synapse delayMethod="Random" maxDelay="89">
                   <analogTarget scope="All">
                     <weight min="0" max="1"/>
                   </analogTarget>
@@ -1929,6 +2275,14 @@
               </inputConnection>
             </inputConnections>
             <predictors>
+              <settings>
+                <activationFadingSum/>
+                <activationMWAvg weights="Constant" window="178"/>
+                <firingFadingSum strength="0.005"/>
+                <firingMWAvg weights="Constant" window="178"/>
+                <firingCount/>
+                <firingBinPattern/>
+              </settings>
               <permission activation="false"
                           activationSquare="false"
                           activationFadingSum="false"
@@ -1948,14 +2302,21 @@
           </classification>
           <ff>
             <activationIdentity/>
-            <ridgeRegrTrainer attemptEpochs="1">
-              <lambda min="0.1" max="0.1" steps="2"/>
-            </ridgeRegrTrainer>
+            <hiddenLayers>
+              <layer neurons="20">
+                <activationTanH/>
+              </layer>
+              <layer neurons="20">
+                <activationTanH/>
+              </layer>
+            </hiddenLayers>
+            <resPropTrainer attempts="2" attemptEpochs="1000"/>
           </ff>
         </readoutUnit>
       </readoutLayer>
     </stateMachineCfg>
   </case>
+
 
 
 

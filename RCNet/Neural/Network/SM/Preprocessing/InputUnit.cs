@@ -223,11 +223,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         {
             foreach (InputNeuron neuron in AnalogInputNeuronCollection)
             {
-                neuron.ComputeSignal(collectStatistics);
+                neuron.Recompute(collectStatistics);
             }
             foreach (InputNeuron neuron in SpikingInputNeuronCollection)
             {
-                neuron.ComputeSignal(collectStatistics);
+                neuron.Recompute(collectStatistics);
             }
             return;
         }

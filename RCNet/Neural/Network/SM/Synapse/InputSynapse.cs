@@ -17,6 +17,22 @@ namespace RCNet.Neural.Network.SM.Synapse
     [Serializable]
     public class InputSynapse : BaseSynapse, ISynapse
     {
+        //Enums
+        /// <summary>
+        /// Method to decide synapse delay
+        /// </summary>
+        public enum SynapticDelayMethod
+        {
+            /// <summary>
+            /// Synapse delay is decided randomly
+            /// </summary>
+            Random,
+            /// <summary>
+            /// Synapse delay depends on Euclidean distance
+            /// </summary>
+            Distance
+        }
+
         //Attribute properties
         /// <summary>
         /// Signal delaying (in computation cycles)
@@ -55,6 +71,22 @@ namespace RCNet.Neural.Network.SM.Synapse
             DelayMethod = delayMethod;
             _signalQueue = null;
             return;
+        }
+
+        //Static methods
+        /// <summary>
+        /// Parses method to decide synapse delay from a string code
+        /// </summary>
+        /// <param name="code">Method to decide synapse delay code</param>
+        public static SynapticDelayMethod ParseSynapticDelayMethod(string code)
+        {
+            switch (code.ToUpper())
+            {
+                case "RANDOM": return SynapticDelayMethod.Random;
+                case "DISTANCE": return SynapticDelayMethod.Distance;
+                default:
+                    throw new ArgumentException($"Unsupported synapse delay decision method: {code}", "code");
+            }
         }
 
         //Methods
@@ -123,7 +155,7 @@ namespace RCNet.Neural.Network.SM.Synapse
             {
                 //Signal to be delayed so use queue
                 //Enqueue
-                Signal sigObj = _signalQueue.GetElementOnEnqueuePosition();
+                Signal sigObj = _signalQueue.GetElementAtEnqueuePosition();
                 if (sigObj != null)
                 {
                     sigObj._weightedSignal = weightedSignal;

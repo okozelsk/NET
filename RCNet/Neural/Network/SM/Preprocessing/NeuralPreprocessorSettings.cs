@@ -250,11 +250,32 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         [Serializable]
         public class InputSettings
         {
+            //Enums
+            /// <summary>
+            /// Type of attributes organization in the input data
+            /// </summary>
+            public enum PatternedDataOrganization
+            {
+                /// <summary>
+                /// Attributes are groupped
+                /// </summary>
+                Groupped,
+                /// <summary>
+                /// Attributes are sequential
+                /// </summary>
+                Sequential
+            }
+
             //Attribute properties
             /// <summary>
             /// Type of input feeding
             /// </summary>
             public NeuralPreprocessor.InputFeedingType FeedingType { get; set; }
+
+            /// <summary>
+            /// Type of attributes organization in the input data in case of patterned input feeding
+            /// </summary>
+            public PatternedDataOrganization PatternedInputDataOrganization { get; set; }
 
             /// <summary>
             /// Parameter is relevant only for patterned feeding and specifies, if to preprocess time series in both time directions.
@@ -332,6 +353,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 {
                     FeedingType = NeuralPreprocessor.InputFeedingType.Continuous;
                     Bidirectional = false;
+                    PatternedInputDataOrganization = PatternedDataOrganization.Groupped;
                     //Number of booting cycles
                     string bootCyclesAttrValue = feedingElem.Attribute("bootCycles").Value;
                     if (bootCyclesAttrValue == "Auto")
@@ -347,7 +369,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 else
                 {
                     FeedingType = NeuralPreprocessor.InputFeedingType.Patterned;
-                    Bidirectional = RouteInputToReadout = bool.Parse(feedingElem.Attribute("bidir").Value);
+                    Bidirectional = bool.Parse(feedingElem.Attribute("bidir").Value);
+                    PatternedInputDataOrganization = ParsePatternedInputDataOrganization(feedingElem.Attribute("dataOrganization").Value);
                     BootCycles = 0;
                 }
                 //Routing of input to readout layer
@@ -422,6 +445,24 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             /// Total number of Neural Preprocessor input fields
             /// </summary>
             public int NumOfFields { get { return ExternalFieldCollection.Count + InternalFieldCollection.Count; } }
+
+            //Static methods
+            /// <summary>
+            /// Parses type of patterned input data organization
+            /// </summary>
+            /// <param name="code">Keyword</param>
+            public PatternedDataOrganization ParsePatternedInputDataOrganization(string code)
+            {
+                switch(code.ToUpper())
+                {
+                    case "SEQUENTIAL":
+                        return PatternedDataOrganization.Sequential;
+                    case "GROUPPED":
+                        return PatternedDataOrganization.Groupped;
+                    default:
+                        throw new Exception($"Unknown input data organization code: {code}");
+                }
+            }
 
             //Methods
             /// <summary>

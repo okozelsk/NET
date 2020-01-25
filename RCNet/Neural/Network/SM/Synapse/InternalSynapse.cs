@@ -12,12 +12,11 @@ namespace RCNet.Neural.Network.SM.Synapse
 {
     /// <summary>
     /// Internal synapse connecting two hidden neurons within the reservoir.
-    /// Supports the short-term-plasticity and post-synaptic dynamically decayed current.
+    /// Supports the short-term-plasticity.
     /// </summary>
     [Serializable]
     public class InternalSynapse : BaseSynapse, ISynapse
     {
-        //Constants
         //Attributes
         private readonly double _tauFacilitation;
         private readonly double _tauDepression;

@@ -4,6 +4,7 @@ using System.IO;
 using RCNet.Extensions;
 using RCNet.MathTools;
 using RCNet.CsvTools;
+using RCNet.Neural.Network.SM.Preprocessing;
 
 namespace RCNet.Neural.Data
 {
@@ -79,149 +80,94 @@ namespace RCNet.Neural.Data
             return;
         }
 
-        /// <summary>
-        /// Function checks if the given file containd csv data in expected format for patterned feeding
-        /// </summary>
-        /// <param name="fileName">Data file name</param>
-        public static bool CheckIsPatternedCsv(string fileName)
-        {
-            using (StreamReader streamReader = new StreamReader(new FileStream(fileName, FileMode.Open)))
-            {
-                //The first row should contain the "#RepetitiveGroupOfAttributes" keyword followed by name(s) of attribute(s)
-                string delimitedRepetitiveGroupOfAttributes = streamReader.ReadLine();
-                if(!delimitedRepetitiveGroupOfAttributes.StartsWith("#RepetitiveGroupOfAttributes"))
-                {
-                    return false;
-                }
-                return true;
-            }
-        }
-
         //Static methods
         /// <summary>
+        /// Converts one dimensional data array to a pattern.
+        /// </summary>
+        /// <param name="data">Data array</param>
+        /// <param name="numOfVariables">Number of variables at one timepoint</param>
+        /// <param name="patternedDataOrganization">Type of variables organization: groupped [v1(t1),v2(t1),v1(t2),v2(t2),v1(t3),v2(t3)] or sequential [v1(t1),v1(t2),v1(t3),v2(t1),v2(t2),v2(t3)]</param>
+        public static List<double[]> ArrayToPattern(double[] data, int numOfVariables, NeuralPreprocessorSettings.InputSettings.PatternedDataOrganization patternedDataOrganization)
+        {
+            //Check data length
+            if (data.Length < numOfVariables || (data.Length % numOfVariables) != 0)
+            {
+                throw new FormatException("Incorrect length of data array.");
+            }
+            //Pattern data
+            List<double[]> patternData = new List<double[]>(data.Length / numOfVariables);
+            if (patternedDataOrganization == NeuralPreprocessorSettings.InputSettings.PatternedDataOrganization.Groupped)
+            {
+                //Groupped format
+                for (int grpIdx = 0; grpIdx < data.Length / numOfVariables; grpIdx++)
+                {
+                    double[] inputVector = new double[numOfVariables];
+                    for (int i = 0; i < numOfVariables; i++)
+                    {
+                        inputVector[i] = data[grpIdx * numOfVariables + i];
+                    }
+                    patternData.Add(inputVector);
+                }//grpIdx
+            }
+            else
+            {
+                //Sequential format
+                int timePoints = data.Length / numOfVariables;
+                for(int timeIdx = 0; timeIdx < timePoints; timeIdx++)
+                {
+                    double[] inputVector = new double[numOfVariables];
+                    for (int i = 0; i < numOfVariables; i++)
+                    {
+                        inputVector[i] = data[i * timePoints + timeIdx];
+                    }
+                    patternData.Add(inputVector);
+                }
+            }
+            return patternData;
+        }
+
+        /// <summary>
         /// Loads the data and prepares PatternBundle.
-        /// 1st row of the file must start with the #RepetitiveGroupOfAttributes keyword followed by
-        /// attribute names.
-        /// 2nd row of the file must start with the #Outputs keyword followed by
-        /// output field names.
-        /// 3rd+ rows are the data rows.
-        /// The data row must begin with at least one complete set of values for defined repetitive attributes.
-        /// The data row must end with values of defined output fields.
+        /// The data row must begin with at least one complete set of values for defined repetitive variables.
+        /// The data row must end with values of defined output variables.
         /// </summary>
         /// <param name="fileName"> Data file name </param>
-        /// <param name="inputFieldNameCollection"> Input fields to be extracted from a file</param>
-        /// <param name="outputFieldNameCollection"> Output fields to be extracted from a file</param>
+        /// <param name="numOfInputVariables"> Number of repetitive input variables (fields)</param>
+        /// <param name="patternedDataOrganization">Type of input variables organization: groupped [v1(t1),v2(t1),v1(t2),v2(t2),v1(t3),v2(t3)] or sequential [v1(t1),v1(t2),v1(t3),v2(t1),v2(t2),v2(t3)]</param>
+        /// <param name="numOfOutputVariables"> Num of output variables (fields)</param>
         public static PatternBundle LoadFromCsv(string fileName,
-                                                List<string> inputFieldNameCollection,
-                                                List<string> outputFieldNameCollection
+                                                int numOfInputVariables,
+                                                NeuralPreprocessorSettings.InputSettings.PatternedDataOrganization patternedDataOrganization,
+                                                int numOfOutputVariables
                                                 )
         {
             PatternBundle bundle = new PatternBundle();
-            using (StreamReader streamReader = new StreamReader(new FileStream(fileName, FileMode.Open)))
+            CsvDataHolder cdh = new CsvDataHolder(fileName, false);
+            foreach(DelimitedStringValues dataRow in cdh.DataRowCollection)
             {
-                List<int> inputFieldGrpIndexes = new List<int>();
-                List<int> outputFieldIndexes = new List<int>();
-                //The first row contains the "#RepetitiveGroupOfAttributes" keyword followed by name(s) of attribute(s)
-                string delimitedRepetitiveGroupOfAttributes = streamReader.ReadLine();
-                if (!delimitedRepetitiveGroupOfAttributes.StartsWith("#RepetitiveGroupOfAttributes"))
+                int numOfInputValues = dataRow.NumOfStringValues - numOfOutputVariables;
+                //Check data length
+                if (dataRow.NumOfStringValues < numOfInputVariables + numOfOutputVariables ||
+                   (numOfInputValues % numOfInputVariables) != 0)
                 {
-                    throw new FormatException("1st row of the file doesn't start with the #RepetitiveGroupOfAttributes keyword.");
+                    throw new FormatException("Incorrect length of data row.");
                 }
-                //What data delimiter is used?
-                char csvDelimiter = DelimitedStringValues.RecognizeDelimiter(delimitedRepetitiveGroupOfAttributes);
-                //Split column names
-                DelimitedStringValues repetitiveGroupOfAttributes = new DelimitedStringValues(csvDelimiter);
-                repetitiveGroupOfAttributes.LoadFromString(delimitedRepetitiveGroupOfAttributes);
-                repetitiveGroupOfAttributes.RemoveTrailingWhites();
-                //Check if the recognized data delimiter works properly
-                if (repetitiveGroupOfAttributes.NumOfStringValues < 2)
+                //Input data
+                double[] inputData = new double[numOfInputValues];
+                for(int i = 0; i < numOfInputValues; i++)
                 {
-                    throw new FormatException("The value delimiter was not recognized or missing repetitive attribute(s) name(s).");
+                    inputData[i] = dataRow.GetValue(i).ParseDouble(true, $"Can't parse double data value {dataRow.GetValue(i)}.");
                 }
-                //Remove the #RepetitiveGroupOfAttributes keyword from the collection
-                repetitiveGroupOfAttributes.RemoveAt(0);
-                if(inputFieldNameCollection == null)
+                //Output data
+                double[] outputData = new double[numOfOutputVariables];
+                for (int i = 0; i < numOfOutputVariables; i++)
                 {
-                    //Substitute missing inputFieldNameCollection
-                    inputFieldNameCollection = repetitiveGroupOfAttributes.StringValueCollection;
+                    outputData[i] = dataRow.GetValue(numOfInputValues + i).ParseDouble(true, $"Can't parse double data value {dataRow.GetValue(numOfInputValues + i)}.");
                 }
-                //Check if attribute names match with the input fields collection
-                if (repetitiveGroupOfAttributes.NumOfStringValues < inputFieldNameCollection.Count)
-                {
-                    throw new FormatException("Inconsistent number of attributes in the file and number of specified input fields.");
-                }
-                foreach (string inputFieldName in inputFieldNameCollection)
-                {
-                    int index = repetitiveGroupOfAttributes.IndexOf(inputFieldName);
-                    if (index < 0)
-                    {
-                        throw new FormatException($"Input field name {inputFieldName} was not found among the repetitive attributes specified in the file.");
-                    }
-                    inputFieldGrpIndexes.Add(index);
-                }
-                //The second row contains the "#Outputs" keyword followed by name(s) of output class(es) or values(s)
-                string delimitedOutputNames = streamReader.ReadLine();
-                if (!delimitedOutputNames.StartsWith("#Outputs"))
-                {
-                    throw new FormatException("2nd row of the file doesn't start with the #Outputs keyword.");
-                }
-                DelimitedStringValues outputNames = new DelimitedStringValues(csvDelimiter);
-                outputNames.LoadFromString(delimitedOutputNames);
-                outputNames.RemoveTrailingWhites();
-                //Remove the #Outputs keyword from the collection
-                outputNames.RemoveAt(0);
-                //Check if the there is at least one output name
-                if (outputNames.NumOfStringValues < 1)
-                {
-                    throw new FormatException("Missing output name(es).");
-                }
-                //Check if output names match with the output fields collection
-                if (outputNames.NumOfStringValues < outputFieldNameCollection.Count)
-                {
-                    throw new FormatException("Inconsistent number of outputs in the file and number of specified output fields.");
-                }
-                foreach (string outputFieldName in outputFieldNameCollection)
-                {
-                    int index = outputNames.IndexOf(outputFieldName);
-                    if (index < 0)
-                    {
-                        throw new FormatException($"Output field name {outputFieldName} was not found among the outputs specified in the file.");
-                    }
-                    outputFieldIndexes.Add(index);
-                }
-                //Load data
-                DelimitedStringValues dataRow = new DelimitedStringValues(csvDelimiter);
-                while (!streamReader.EndOfStream)
-                {
-                    dataRow.LoadFromString(streamReader.ReadLine());
-                    dataRow.RemoveTrailingWhites();
-                    //Check data length
-                    if (dataRow.NumOfStringValues < repetitiveGroupOfAttributes.NumOfStringValues + outputNames.NumOfStringValues ||
-                       ((dataRow.NumOfStringValues - outputNames.NumOfStringValues) % repetitiveGroupOfAttributes.NumOfStringValues) != 0)
-                    {
-                        throw new FormatException("Incorrect length of data row.");
-                    }
-                    //Pattern data
-                    List<double[]> patternData = new List<double[]>();
-                    for (int grpIdx = 0; grpIdx < (dataRow.NumOfStringValues - outputNames.NumOfStringValues) / repetitiveGroupOfAttributes.NumOfStringValues; grpIdx++)
-                    {
-                        double[] inputVector = new double[inputFieldGrpIndexes.Count];
-                        for(int i = 0; i < inputFieldGrpIndexes.Count; i++)
-                        {
-                            inputVector[i] = dataRow.GetValue(grpIdx * repetitiveGroupOfAttributes.NumOfStringValues + inputFieldGrpIndexes[i]).ParseDouble(true, $"Can't parse double data value {dataRow.GetValue(grpIdx * repetitiveGroupOfAttributes.NumOfStringValues + inputFieldGrpIndexes[i])}.");
-                        }
-                        patternData.Add(inputVector);
-                    }//grpIdx
-                    //Output data
-                    double[] outputVector = new double[outputFieldIndexes.Count];
-                    int dataRowStartIdx = dataRow.NumOfStringValues - outputNames.NumOfStringValues;
-                    for (int i = 0; i < outputFieldIndexes.Count; i++)
-                    {
-                        outputVector[i] = dataRow.GetValue(dataRowStartIdx + outputFieldIndexes[i]).ParseDouble(true, $"Can't parse double value {dataRow.GetValue(dataRowStartIdx + outputFieldIndexes[i])}.");
-                    }
-                    bundle.AddPair(patternData, outputVector);
-                }//while !EOF
-            }//using streamReader
+                //Convert to pattern
+                List<double[]> patternData = ArrayToPattern(inputData, numOfInputVariables, patternedDataOrganization);
+                bundle.AddPair(patternData, outputData);
+            }
             return bundle;
         }//LoadFromCsv
 

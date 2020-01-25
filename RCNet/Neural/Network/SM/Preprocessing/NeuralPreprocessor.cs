@@ -249,30 +249,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             return;
         }
 
-        private void InitPredictorsGeneralSwitches_org(List<double[]> predictorsCollection)
-        {
-            PredictorGeneralSwitchCollection = new bool[TotalNumOfPredictors];
-            PredictorGeneralSwitchCollection.Populate(false);
-            //Test predictors
-            NumOfValidPredictors = 0;
-            for (int row = 1; row < predictorsCollection.Count; row++)
-            {
-                for (int i = 0; i < PredictorGeneralSwitchCollection.Length; i++)
-                {
-                    if (Math.Abs(predictorsCollection[row][i] - predictorsCollection[row - 1][i]) > MinPredictorValueDifference)
-                    {
-                        //Update number of valid predictors
-                        NumOfValidPredictors += PredictorGeneralSwitchCollection[i] ? 0 : 1;
-                        //Predictor exhibits different values => enable it
-                        PredictorGeneralSwitchCollection[i] = true;
-                    }
-                }
-                if (NumOfValidPredictors == PredictorGeneralSwitchCollection.Length) break;
-            }
-            return;
-        }
-
-
         /// <summary>
         /// Sets Neural Preprocessor internal state to initial state
         /// </summary>

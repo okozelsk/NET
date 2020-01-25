@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using RCNet.Extensions;
@@ -199,7 +200,7 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// Computes neuron's new output signal and updates statistics
         /// </summary>
         /// <param name="collectStatistics">Specifies whether to update internal statistics</param>
-        public void ComputeSignal(bool collectStatistics)
+        public void Recompute(bool collectStatistics)
         {
             //Spike leak handling
             if (_spikingSignal > 0)
@@ -243,17 +244,18 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// Signal is always within the range [0,1]
         /// </summary>
         /// <param name="targetActivationType">Specifies what type of the signal is preferred.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public double GetSignal(ActivationType targetActivationType)
         {
-            if (SignalingRestriction != NeuronCommon.NeuronSignalingRestrictionType.NoRestriction)
-            {
-                //Apply internal restriction
-                return SignalingRestriction == NeuronCommon.NeuronSignalingRestrictionType.AnalogOnly ? _analogSignal : _spikingSignal;
-            }
-            else
+            if (SignalingRestriction == NeuronCommon.NeuronSignalingRestrictionType.NoRestriction)
             {
                 //Return signal according to targetActivationType
                 return targetActivationType == ActivationType.Analog ? _analogSignal : _spikingSignal;
+            }
+            else
+            {
+                //Apply internal restriction
+                return SignalingRestriction == NeuronCommon.NeuronSignalingRestrictionType.AnalogOnly ? _analogSignal : _spikingSignal;
             }
         }
 

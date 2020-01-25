@@ -77,7 +77,7 @@ namespace RCNet.Queue
         /// Returns element from queue buffer on the next enqueue position.
         /// If element exists then it can be reused in immediately following Enqueue call.
         /// </summary>
-        public T GetElementOnEnqueuePosition()
+        public T GetElementAtEnqueuePosition()
         {
             return _queueBuffer[_enqueueIndex];
         }
@@ -88,6 +88,7 @@ namespace RCNet.Queue
         /// <param name="logicalPos">Logical position 0..(Count-1)</param>
         /// <param name="latestFirst">Specifies logical order (latest..oldest or vice versa)</param>
         /// <returns>Non-negative index</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private int GetElementIndex(int logicalPos, bool latestFirst = false)
         {
             if (logicalPos < 0 || logicalPos >= Count)
@@ -165,7 +166,7 @@ namespace RCNet.Queue
         /// <summary>
         /// Picks up next element from the queue (FIFO order)
         /// </summary>
-        /// <returns>Dequeued eklement</returns>
+        /// <returns>Dequeued element</returns>
         public T Dequeue()
         {
             if (Count > 0)

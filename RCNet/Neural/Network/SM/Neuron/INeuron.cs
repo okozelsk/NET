@@ -70,10 +70,10 @@ namespace RCNet.Neural.Network.SM.Neuron
 
         /// <summary>
         /// Computes neuron's new output signal, updates SpikeLeak, AfterFirstSpike and Statistics.
-        /// Must be called only once per reservoir computation cycle.
+        /// Must be called only once per stored incoming stimulation.
         /// </summary>
         /// <param name="collectStatistics">Specifies whether to update internal statistics</param>
-        void ComputeSignal(bool collectStatistics);
+        void Recompute(bool collectStatistics);
 
         /// <summary>
         /// Neuron's output signal.

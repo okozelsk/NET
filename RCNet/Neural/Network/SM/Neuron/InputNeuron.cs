@@ -131,7 +131,7 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// Prepares new output signal (input for hidden neurons).
         /// </summary>
         /// <param name="collectStatistics">Specifies whether to update internal statistics</param>
-        public void ComputeSignal(bool collectStatistics)
+        public void Recompute(bool collectStatistics)
         {
             _analogSignal = _tStimuli;
             if (SignalingRestriction == NeuronCommon.NeuronSignalingRestrictionType.AnalogOnly)

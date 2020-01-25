@@ -24,9 +24,9 @@ site. It is shown, that even without any massive tuning of StateMachine's parame
 
 
 ### Data format for the demo application
-Input data is expected in csv format where delimiter can be a semicolon or a comma.
-* **Continuous feeding regime** requires a standard csv format, where the first line contains the names of the data fields and each next line contains the numeric data. [Here](https://github.com/okozelsk/NET/blob/master/Demo/DemoConsoleApp/Data/TTOO.csv) is an example
-* **Patterned feeding regime** requires specific csv format. First line specifies names of repetitive input features of the pattern (first must be keyword "#RepetitiveGroupOfAttributes"). Second line specifies names of output values (first must be keyword "#Outputs"). Each next line then contains Nx values of repetitive pattern features followed by expected output values at the end. [Here](https://github.com/okozelsk/NET/blob/master/Demo/DemoConsoleApp/Data/LibrasMovement.csv) is an example
+Input data is expected in csv format where data delimiter can be a tab, semicolon or comma character.
+* **Continuous feeding regime** requires a standard csv format, where the first line contains the names of the data fields and each next line contains the data. [Here](https://github.com/okozelsk/NET/blob/master/Demo/DemoConsoleApp/Data/TTOO.csv) is an example
+* **Patterned feeding regime** requires specific csv format without colum names (header). Each data line contains values of repetitive pattern features followed by expected output values at the end. Values of repetitive pattern features can be organized in two ways: groupped [v1(t1),v2(t1),v1(t2),v2(t2),v1(t3),v2(t3)] or sequential [v1(t1),v1(t2),v1(t3),v2(t1),v2(t2),v2(t3)]. [Here](https://github.com/okozelsk/NET/blob/master/Demo/DemoConsoleApp/Data/LibrasMovement.csv) is an example
 
 ## Components overview
 
@@ -73,7 +73,8 @@ Input data is expected in csv format where delimiter can be a semicolon or a com
 |[BinFeatureFilter](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Data/Filter/BinFeatureFilter.cs)|Binary (0/1) feature filter|
 |[EnumFeatureFilter](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Data/Filter/EnumFeatureFIlter.cs)|Enumeration (1..N) feature filter|
 |[RealFeatureFilter](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Data/Filter/RealFeatureFilter.cs)|Real number feature filter supporting standardization and range reserve for handling of unseen data in the future|
-|[DelimitedStringValues](https://github.com/okozelsk/NET/blob/master/RCNet/CsvTools/DelimitedStringValues.cs)|Helper encoder and decoder of data in csv format|
+|[DelimitedStringValues](https://github.com/okozelsk/NET/blob/master/RCNet/CsvTools/DelimitedStringValues.cs)|Helper encoder and decoder of data line in csv format|
+|[CsvDataHolder](https://github.com/okozelsk/NET/blob/master/RCNet/CsvTools/CsvDataHolder.cs)|Provides simple loading and saving of csv data|
 |[VectorBundle](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Data/VectorBundle.cs)|Bundle of input data vectors and corresponding desired output vectors (1:1). Supports upload from csv file|
 |[PatternBundle](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Data/PatternBundle.cs)|Bundle of patterns of input data vectors and corresponding desired output vectors (n:1). Supports upload from csv file|
 |[ResultBundle](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Data/ResultBundle.cs)|Bundle of input, computed and desired output vectors (1:1:1)|

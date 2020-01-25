@@ -66,6 +66,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CsvTools\CsvDataHolder.cs" />
     <Compile Include="CsvTools\DelimitedStringValues.cs" />
     <Compile Include="Extensions\DoubleArrayExtensions.cs" />
     <Compile Include="MathTools\Differential\MovingDifferentiator.cs" />
@@ -430,6 +431,9 @@
     <EmbeddedResource Include="Neural\Activation\SQNLSettings.xsd">
       <SubType>Designer</SubType>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Neural\Data\Handling\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

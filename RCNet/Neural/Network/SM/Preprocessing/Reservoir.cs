@@ -1162,7 +1162,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             {
                 for (int neuronIdx = range.Item1; neuronIdx < range.Item2; neuronIdx++)
                 {
-                    _reservoirNeuronCollection[neuronIdx].ComputeSignal(updateStatistics);
+                    _reservoirNeuronCollection[neuronIdx].Recompute(updateStatistics);
                 }
             });
             return;

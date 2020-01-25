@@ -93,7 +93,7 @@ namespace RCNet.Neural.Data
 
         //Static methods
         /// <summary>
-        /// Loads the data and prepares TimeSeriesBundle.
+        /// Loads the data and prepares VectorBundle.
         /// The first line of the csv file must contain field names. These field names must
         /// match the names of the input and output fields.
         /// </summary>
@@ -107,86 +107,67 @@ namespace RCNet.Neural.Data
                                                out double[] remainingInputVector
                                                )
         {
-            VectorBundle bundle = null;
             remainingInputVector = null;
-            using (StreamReader streamReader = new StreamReader(new FileStream(fileName, FileMode.Open)))
+            CsvDataHolder cdh = new CsvDataHolder(fileName, true);
+            List<int> inputFieldIndexes = new List<int>();
+            List<int> outputFieldIndexes = new List<int>();
+            if (inputFieldNameCollection != null)
             {
-                List<int> inputFieldIndexes = new List<int>();
-                List<int> outputFieldIndexes = new List<int>();
-                //First row contains column names (data fields)
-                string delimitedColumnNames = streamReader.ReadLine();
-                //What data delimiter is used?
-                char csvDelimiter = DelimitedStringValues.RecognizeDelimiter(delimitedColumnNames);
-                //Split column names
-                DelimitedStringValues columnNames = new DelimitedStringValues(csvDelimiter);
-                columnNames.LoadFromString(delimitedColumnNames);
-                if (inputFieldNameCollection != null)
+                //Check if the recognized data delimiter works properly
+                if (cdh.ColNameCollection.NumOfStringValues < inputFieldNameCollection.Count)
                 {
-                    //Check if the recognized data delimiter works properly
-                    if (columnNames.NumOfStringValues < inputFieldNameCollection.Count)
-                    {
-                        throw new FormatException("1st row of the file doesn't contain delimited column names or the value delimiter was not properly recognized.");
-                    }
-                    //Collect indexes of allowed fields
-                    foreach (string name in inputFieldNameCollection)
-                    {
-                        inputFieldIndexes.Add(columnNames.IndexOf(name));
-                    }
+                    throw new FormatException("1st row of the file doesn't contain delimited column names or the value delimiter was not properly recognized.");
+                }
+                //Collect indexes of allowed input fields
+                foreach (string name in inputFieldNameCollection)
+                {
+                    inputFieldIndexes.Add(cdh.ColNameCollection.IndexOf(name));
+                }
+            }
+            else
+            {
+                int[] indexes = new int[cdh.ColNameCollection.NumOfStringValues];
+                indexes.Indices();
+                inputFieldIndexes = new List<int>(indexes);
+            }
+            for (int i = 0; i < outputFieldNameCollection.Count; i++)
+            {
+                outputFieldIndexes.Add(cdh.ColNameCollection.IndexOf(outputFieldNameCollection[i]));
+            }
+            //Prepare input and output vectors
+            List<double[]> inputVectorCollection = new List<double[]>(cdh.DataRowCollection.Count);
+            List<double[]> outputVectorCollection = new List<double[]>(cdh.DataRowCollection.Count);
+            for (int i = 0; i < cdh.DataRowCollection.Count; i++)
+            {
+                //Input vector
+                double[] inputVector = new double[inputFieldIndexes.Count];
+                for(int j = 0; j < inputFieldIndexes.Count; j++)
+                {
+                    inputVector[j] = cdh.DataRowCollection[i].GetValue(inputFieldIndexes[j]).ParseDouble(true, $"Can't parse double value {cdh.DataRowCollection[i].GetValue(inputFieldIndexes[j])}.");
+                }
+                if (i < cdh.DataRowCollection.Count - 1)
+                {
+                    //Within the bundle
+                    inputVectorCollection.Add(inputVector);
                 }
                 else
                 {
-                    int[] indexes = new int[columnNames.NumOfStringValues];
-                    indexes.Indices();
-                    inputFieldIndexes = new List<int>(indexes);
+                    //Remaining input vector out of the bundle
+                    remainingInputVector = inputVector;
                 }
-                for (int i = 0; i < outputFieldNameCollection.Count; i++)
+                if (i > 0)
                 {
-                    outputFieldIndexes.Add(columnNames.IndexOf(outputFieldNameCollection[i]));
+                    //Output vector
+                    double[] outputVector = new double[outputFieldIndexes.Count];
+                    for (int j = 0; j < outputFieldIndexes.Count; j++)
+                    {
+                        outputVector[j] = cdh.DataRowCollection[i].GetValue(outputFieldIndexes[j]).ParseDouble(true, $"Can't parse double value {cdh.DataRowCollection[i].GetValue(outputFieldIndexes[j])}.");
+                    }
+                    outputVectorCollection.Add(outputVector);
                 }
-                //Load full data in string form
-                List<DelimitedStringValues> fullData = new List<DelimitedStringValues>();
-                while (!streamReader.EndOfStream)
-                {
-                    DelimitedStringValues row = new DelimitedStringValues(csvDelimiter);
-                    row.LoadFromString(streamReader.ReadLine());
-                    fullData.Add(row);
-                }
-                //Prepare input and output vectors
-                List<double[]> inputVectorCollection = new List<double[]>(fullData.Count);
-                List<double[]> outputVectorCollection = new List<double[]>(fullData.Count);
-                for (int i = 0; i < fullData.Count; i++)
-                {
-                    //Input vector
-                    double[] inputVector = new double[inputFieldIndexes.Count];
-                    for(int j = 0; j < inputFieldIndexes.Count; j++)
-                    {
-                        inputVector[j] = fullData[i].GetValue(inputFieldIndexes[j]).ParseDouble(true, $"Can't parse double value {fullData[i].GetValue(inputFieldIndexes[j])}.");
-                    }
-                    if (i < fullData.Count - 1)
-                    {
-                        //Within the bundle
-                        inputVectorCollection.Add(inputVector);
-                    }
-                    else
-                    {
-                        //remaining input vector out of the bundle
-                        remainingInputVector = inputVector;
-                    }
-                    if (i > 0)
-                    {
-                        //Output vector
-                        double[] outputVector = new double[outputFieldIndexes.Count];
-                        for (int j = 0; j < outputFieldIndexes.Count; j++)
-                        {
-                            outputVector[j] = fullData[i].GetValue(outputFieldIndexes[j]).ParseDouble(true, $"Can't parse double value {fullData[i].GetValue(outputFieldIndexes[j])}.");
-                        }
-                        outputVectorCollection.Add(outputVector);
-                    }
-                }
-                //Create bundle
-                bundle = new VectorBundle(inputVectorCollection, outputVectorCollection);
             }
-            return bundle;
+            //Create and return bundle
+            return new VectorBundle(inputVectorCollection, outputVectorCollection);
         }//LoadFromCsv
 
         //Methods

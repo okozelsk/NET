@@ -17,6 +17,7 @@ using RCNet.Neural.Data.Filter;
 using RCNet.Neural.Network.SM.Preprocessing;
 using System.Globalization;
 using RCNet.Queue;
+using RCNet.CsvTools;
 
 namespace RCNet.DemoConsoleApp
 {
@@ -38,6 +39,14 @@ namespace RCNet.DemoConsoleApp
         //Methods
         public void Run()
         {
+            //CSV TEST
+            //CsvDataHolder cdh = new CsvDataHolder(".\\Data\\BeetleFly_train.csv");
+            CsvDataHolder cdh = new CsvDataHolder(".\\Data\\TTOO.csv");
+
+
+
+
+
             //Queue test
             int queueCapacity = 10;
             SimpleQueue<int> queue = new SimpleQueue<int>(queueCapacity);

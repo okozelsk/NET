@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
+using System.Threading;
 
 namespace RCNet.CsvTools
 {
@@ -20,6 +22,10 @@ namespace RCNet.CsvTools
         /// </summary>
         public const char CommaDelimiter = ',';
         /// <summary>
+        /// The tabelator
+        /// </summary>
+        public const char TabDelimiter = '\t';
+        /// <summary>
         /// The default delimiter
         /// </summary>
         public const char DefaultDelimiter = SemicolonDelimiter;
@@ -36,13 +42,37 @@ namespace RCNet.CsvTools
 
         //Constructor
         /// <summary>
-        /// Creates the new instance
+        /// Creates an empty instance
         /// </summary>
         /// <param name="delimiter">The delimiter of the string values</param>
         public DelimitedStringValues(char delimiter = DefaultDelimiter)
         {
             Delimiter = delimiter;
             StringValueCollection = new List<string>();
+            return;
+        }
+
+        /// <summary>
+        /// Creates an initialized instance
+        /// </summary>
+        /// <param name="data">String containing delimited string values</param>
+        /// <param name="delimiter">The delimiter of the string values</param>
+        public DelimitedStringValues(string data, char delimiter)
+        {
+            Delimiter = delimiter;
+            StringValueCollection = new List<string>();
+            LoadFromString(data, false, false);
+            return;
+        }
+
+        /// <summary>
+        /// Creates an initialized instance
+        /// </summary>
+        /// <param name="data">String containing delimited string values</param>
+        public DelimitedStringValues(string data)
+        {
+            StringValueCollection = new List<string>();
+            LoadFromString(data, false, true);
             return;
         }
 
@@ -61,15 +91,50 @@ namespace RCNet.CsvTools
         /// <returns>Found or default delimiter</returns>
         public static char RecognizeDelimiter(string sampleDelimitedData)
         {
+            //Apperance of candidate chars
+            //Is tab a candidate?
+            if(sampleDelimitedData.IndexOf(TabDelimiter) != -1)
+            {
+                //If tab is persent it is the most probable delimiter
+                return TabDelimiter;
+            }
+            //Is semicolon a candidate?
             if (sampleDelimitedData.IndexOf(SemicolonDelimiter) != -1)
             {
+                //If semicolon is persent it is the next most probable delimiter
                 return SemicolonDelimiter;
             }
-            if (sampleDelimitedData.IndexOf(CommaDelimiter) != -1)
+            //Decide floating point char
+            char floatingPointChar = Thread.CurrentThread.CurrentCulture.NumberFormat.NumberDecimalSeparator[0];
+            if (sampleDelimitedData.IndexOf('.') != -1)
             {
+                int index = sampleDelimitedData.IndexOf('.');
+                if(index > 0 && index < sampleDelimitedData.Length - 1)
+                {
+                    char charBefore = sampleDelimitedData[index - 1];
+                    if(charBefore >= '0' && charBefore <= '9')
+                    {
+                        char charAfter = sampleDelimitedData[index + 1];
+                        if (charAfter >= '0' && charAfter <= '9')
+                        {
+                            floatingPointChar = '.';
+                        }
+                    }
+                }
+            }
+            //Is comma a candidate?
+            bool comma = (sampleDelimitedData.IndexOf(CommaDelimiter) != -1 && floatingPointChar != CommaDelimiter);
+            //Remaining decision
+            if(comma)
+            {
+                //Comma is probable candidate
                 return CommaDelimiter;
             }
-            return DefaultDelimiter;
+            else
+            {
+                //Return default
+                return DefaultDelimiter;
+            }
         }
 
         /// <summary>
@@ -78,7 +143,7 @@ namespace RCNet.CsvTools
         /// <param name="stringValueCollection">Collection of string values</param>
         /// <param name="delimiter">Values delimiter to be used</param>
         /// <returns>Built string containing delimited values</returns>
-        public static string ValuesToDelimited(IEnumerable<string> stringValueCollection, char delimiter = DefaultDelimiter)
+        public static string ToString(IEnumerable<string> stringValueCollection, char delimiter = DefaultDelimiter)
         {
             StringBuilder output = new StringBuilder();
             bool firstVal = true;
@@ -95,12 +160,12 @@ namespace RCNet.CsvTools
         }
 
         /// <summary>
-        /// Splits the given string containing delimited values to the collection of string values
+        /// Splits the given string containing delimited values to the list of string values
         /// </summary>
         /// <param name="delimValues">String containing delimited values</param>
         /// <param name="delimiter">Delimiter of the values</param>
-        /// <returns>Collection of the string values</returns>
-        public static List<string> DelimitedToValues(string delimValues, char delimiter = DefaultDelimiter)
+        /// <returns>List of the string values</returns>
+        public static List<string> ToList(string delimValues, char delimiter = DefaultDelimiter)
         {
             List<string> values = new List<string>();
             if(delimValues.Length > 0)
@@ -172,7 +237,7 @@ namespace RCNet.CsvTools
         /// </summary>
         /// <param name="delimValues">String containing delimited values</param>
         /// <param name="reset">Indicates if to clear the internal collection before the load</param>
-        /// <param name="recognizeDelimiter">If false then the instance delimiter will be used. If true then delimiter will be tried to recognized from the given data.</param>
+        /// <param name="recognizeDelimiter">If false then the instance current delimiter will be used. If true then delimiter will be tried to recognized from the given data.</param>
         /// <returns>Number of string values in the internal collection after the operation</returns>
         public int LoadFromString(string delimValues, bool reset = true, bool recognizeDelimiter = false)
         {
@@ -180,9 +245,8 @@ namespace RCNet.CsvTools
             {
                 Reset();
             }
-            StringValueCollection.AddRange(DelimitedToValues(delimValues,
-                                            recognizeDelimiter ? RecognizeDelimiter(delimValues) : Delimiter
-                                            ));
+            Delimiter = recognizeDelimiter ? RecognizeDelimiter(delimValues) : Delimiter;
+            StringValueCollection.AddRange(ToList(delimValues, Delimiter));
             return StringValueCollection.Count;
         }
 
@@ -210,7 +274,7 @@ namespace RCNet.CsvTools
         /// <returns>Single string containing delimited values</returns>
         public override string ToString()
         {
-            return ValuesToDelimited(StringValueCollection, Delimiter);
+            return ToString(StringValueCollection, Delimiter);
         }
   
     }//DelimitedStringValues

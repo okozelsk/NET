@@ -30,6 +30,14 @@
     </xs:restriction>
   </xs:simpleType>
 
+  <!-- Enumeration of patterned data organization -->
+  <xs:simpleType name="PatternedDataOrganizationType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Groupped"/>
+      <xs:enumeration value="Sequential"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <!-- Enumeration of synaptic delay method -->
   <xs:simpleType name="SynapticDelayMethodType">
     <xs:restriction base="xs:string">
@@ -1974,6 +1982,11 @@
     <xs:attribute type="xs:boolean" name="routeToReadout" use="optional" default="false">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is false. If true is specified, all patterns have to have the same length.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="PatternedDataOrganizationType" name="dataOrganization" use="optional" default="Groupped">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is Groupped.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>

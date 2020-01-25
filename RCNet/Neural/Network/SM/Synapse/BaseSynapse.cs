@@ -18,21 +18,6 @@ namespace RCNet.Neural.Network.SM.Synapse
     {
         //Enums
         /// <summary>
-        /// Method to decide synapse delay
-        /// </summary>
-        public enum SynapticDelayMethod
-        {
-            /// <summary>
-            /// Synapse delay is decided randomly
-            /// </summary>
-            Random,
-            /// <summary>
-            /// Synapse delay is decided according to Euclidean distance
-            /// </summary>
-            Distance
-        }
-
-        /// <summary>
         /// Target scope of the synapse
         /// </summary>
         public enum SynapticTargetScope
@@ -112,7 +97,7 @@ namespace RCNet.Neural.Network.SM.Synapse
             }
             else
             {
-                //Weight sign is dependent on source neuron role
+                //Weight sign depends on source neuron role
                 Weight = Math.Abs(weight) * (SourceNeuron.Role == NeuronCommon.NeuronRole.Excitatory ? 1d : -1d);
             }
             //Efficacy statistics
@@ -120,22 +105,7 @@ namespace RCNet.Neural.Network.SM.Synapse
             return;
         }
 
-        //Methods
-        /// <summary>
-        /// Parses method to decide synapse delay from a string code
-        /// </summary>
-        /// <param name="code">Method to decide synapse delay code</param>
-        public static SynapticDelayMethod ParseSynapticDelayMethod(string code)
-        {
-            switch (code.ToUpper())
-            {
-                case "RANDOM": return SynapticDelayMethod.Random;
-                case "DISTANCE": return SynapticDelayMethod.Distance;
-                default:
-                    throw new ArgumentException($"Unsupported synapse delay decision method: {code}", "code");
-            }
-        }
-
+        //Static methods
         /// <summary>
         /// Parses target scope of the synapse from a string code
         /// </summary>
@@ -152,6 +122,7 @@ namespace RCNet.Neural.Network.SM.Synapse
             }
         }
 
+        //Methods
         /// <summary>
         /// Rescales the synapse weight.
         /// </summary>

@@ -144,38 +144,24 @@ namespace RCNet.DemoConsoleApp
                     //Patterned input feeding
                     //Load data bundle from csv file
                     PatternBundle trainingData = PatternBundle.LoadFromCsv(demoCaseParams.TrainingDataFileName,
-                                                                           demoCaseParams.StateMachineCfg.NeuralPreprocessorConfig.InputConfig.ExternalFieldNameCollection(),
-                                                                           demoCaseParams.StateMachineCfg.ReadoutLayerConfig.OutputFieldNameCollection
+                                                                           demoCaseParams.StateMachineCfg.NeuralPreprocessorConfig.InputConfig.ExternalFieldNameCollection().Count,
+                                                                           demoCaseParams.StateMachineCfg.NeuralPreprocessorConfig.InputConfig.PatternedInputDataOrganization,
+                                                                           demoCaseParams.StateMachineCfg.ReadoutLayerConfig.OutputFieldNameCollection.Count
                                                                            );
                     trainingResults = stateMachine.Train(trainingData);
                 }
             }
             else
             {
-                //Neural preprocessor is bypassed
-                bool patternedData = PatternBundle.CheckIsPatternedCsv(demoCaseParams.TrainingDataFileName);
-                if (!patternedData)
-                {
-                    //Continuous input feeding
-                    continuousFeedingData = true;
-                    //Load data bundle from csv file
-                    VectorBundle trainingData = VectorBundle.LoadFromCsv(demoCaseParams.TrainingDataFileName,
-                                                                         null,
-                                                                         demoCaseParams.StateMachineCfg.ReadoutLayerConfig.OutputFieldNameCollection,
-                                                                         out predictionInputVector
-                                                                         );
-                    trainingResults = stateMachine.Train(trainingData);
-                }
-                else
-                {
-                    //Patterned input feeding
-                    //Load data bundle from csv file
-                    PatternBundle trainingData = PatternBundle.LoadFromCsv(demoCaseParams.TrainingDataFileName,
-                                                                           null,
-                                                                           demoCaseParams.StateMachineCfg.ReadoutLayerConfig.OutputFieldNameCollection
-                                                                           );
-                    trainingResults = stateMachine.Train(trainingData);
-                }
+                //Neural preprocessor is bypassed -> patterned feeding
+                //Patterned input feeding
+                //Load data bundle from csv file
+                PatternBundle trainingData = PatternBundle.LoadFromCsv(demoCaseParams.TrainingDataFileName,
+                                                                       1,
+                                                                       NeuralPreprocessorSettings.InputSettings.PatternedDataOrganization.Sequential,
+                                                                       demoCaseParams.StateMachineCfg.ReadoutLayerConfig.OutputFieldNameCollection.Count
+                                                                       );
+                trainingResults = stateMachine.Train(trainingData);
             }
 
             _log.Write(string.Empty);
@@ -200,10 +186,10 @@ namespace RCNet.DemoConsoleApp
                     double[] predictionOutputVector = stateMachine.Compute(predictionInputVector);
                     //Load data bundle from csv file
                     VectorBundle verificationData = VectorBundle.LoadFromCsv(demoCaseParams.VerificationDataFileName,
-                                                                                stateMachine.NP != null ? demoCaseParams.StateMachineCfg.NeuralPreprocessorConfig.InputConfig.ExternalFieldNameCollection() : null,
-                                                                                demoCaseParams.StateMachineCfg.ReadoutLayerConfig.OutputFieldNameCollection,
-                                                                                out predictionInputVector
-                                                                                );
+                                                                             stateMachine.NP != null ? demoCaseParams.StateMachineCfg.NeuralPreprocessorConfig.InputConfig.ExternalFieldNameCollection() : null,
+                                                                             demoCaseParams.StateMachineCfg.ReadoutLayerConfig.OutputFieldNameCollection,
+                                                                             out predictionInputVector
+                                                                             );
                     verificationResults = stateMachine.Verify(verificationData);
                 }
                 else
@@ -211,9 +197,10 @@ namespace RCNet.DemoConsoleApp
                     //Patterned input feeding
                     //Load data bundle from csv file
                     PatternBundle verificationData = PatternBundle.LoadFromCsv(demoCaseParams.VerificationDataFileName,
-                                                                                stateMachine.NP != null ? demoCaseParams.StateMachineCfg.NeuralPreprocessorConfig.InputConfig.ExternalFieldNameCollection() : null,
-                                                                                demoCaseParams.StateMachineCfg.ReadoutLayerConfig.OutputFieldNameCollection
-                                                                                );
+                                                                               stateMachine.NP != null ? demoCaseParams.StateMachineCfg.NeuralPreprocessorConfig.InputConfig.ExternalFieldNameCollection().Count : 1,
+                                                                               stateMachine.NP != null ? demoCaseParams.StateMachineCfg.NeuralPreprocessorConfig.InputConfig.PatternedInputDataOrganization : NeuralPreprocessorSettings.InputSettings.PatternedDataOrganization.Sequential,
+                                                                               demoCaseParams.StateMachineCfg.ReadoutLayerConfig.OutputFieldNameCollection.Count
+                                                                               );
                     verificationResults = stateMachine.Verify(verificationData);
                 }
                 _log.Write(string.Empty);

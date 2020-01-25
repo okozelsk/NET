@@ -47,7 +47,7 @@ namespace RCNet.Neural.Network.SM.Synapse
         /// <summary>
         /// Specifies how will be decided synaptic delay
         /// </summary>
-        public BaseSynapse.SynapticDelayMethod DelayMethod { get; set; }
+        public InputSynapse.SynapticDelayMethod DelayMethod { get; set; }
         /// <summary>
         /// Maximum delay of the input signal
         /// </summary>
@@ -152,7 +152,7 @@ namespace RCNet.Neural.Network.SM.Synapse
                 AnalogTargetWeightCfg = new RandomValueSettings(0, 1);
             }
             //Delay
-            DelayMethod = BaseSynapse.ParseSynapticDelayMethod(settingsElem.Attribute("delayMethod").Value);
+            DelayMethod = InputSynapse.ParseSynapticDelayMethod(settingsElem.Attribute("delayMethod").Value);
             MaxDelay = int.Parse(settingsElem.Attribute("maxDelay").Value, CultureInfo.InvariantCulture);
             return;
         }
