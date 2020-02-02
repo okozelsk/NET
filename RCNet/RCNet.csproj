@@ -69,6 +69,7 @@
     <Compile Include="CsvTools\CsvDataHolder.cs" />
     <Compile Include="CsvTools\DelimitedStringValues.cs" />
     <Compile Include="Extensions\DoubleArrayExtensions.cs" />
+    <Compile Include="MathTools\Discrete.cs" />
     <Compile Include="MathTools\Differential\MovingDifferentiator.cs" />
     <Compile Include="MathTools\Differential\ODENumSolver.cs" />
     <Compile Include="MathTools\EuclideanDistance.cs" />
@@ -137,6 +138,7 @@
     <Compile Include="Neural\Data\Generators\IGenerator.cs" />
     <Compile Include="Neural\Data\Generators\RandomGenerator.cs" />
     <Compile Include="Neural\Data\Generators\PulseGeneratorSettings.cs" />
+    <Compile Include="Neural\Data\InputPattern.cs" />
     <Compile Include="Neural\Network\NonRecurrent\INonRecurrentNetworkTrainerSettings.cs" />
     <Compile Include="Neural\Network\NonRecurrent\FF\QRDRegrTrainer.cs" />
     <Compile Include="Neural\Network\NonRecurrent\FF\QRDRegrTrainerSettings.cs" />
@@ -179,7 +181,6 @@
     <Compile Include="MathTools\BinErrStat.cs" />
     <Compile Include="MathTools\Bitwise.cs" />
     <Compile Include="MathTools\Combinatorics.cs" />
-    <Compile Include="MathTools\Factorial.cs" />
     <Compile Include="MathTools\Hurst\HurstExpEstim.cs" />
     <Compile Include="MathTools\Hurst\RescalledRange.cs" />
     <Compile Include="MathTools\MatrixMath\EVD.cs" />
@@ -189,7 +190,6 @@
     <Compile Include="MathTools\MatrixMath\Matrix.cs" />
     <Compile Include="MathTools\MatrixMath\QRD.cs" />
     <Compile Include="MathTools\WeightedAvg.cs" />
-    <Compile Include="Neural\Data\PatternBundle.cs" />
     <Compile Include="Neural\Data\ResultBundle.cs" />
     <Compile Include="Neural\Data\VectorBundle.cs" />
     <Compile Include="Neural\Network\NonRecurrent\PP\PDeltaRuleTrainerSettings.cs" />
@@ -432,9 +432,7 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Neural\Data\Handling\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -243,7 +243,7 @@ namespace RCNet.CsvTools
         /// <param name="fileName">Target file name</param>
         public void Save(string fileName)
         {
-            using (StreamWriter streamWriter = new StreamWriter(new FileStream(fileName,FileMode.OpenOrCreate)))
+            using (StreamWriter streamWriter = new StreamWriter(new FileStream(fileName,FileMode.Create)))
             {
                 WriteToStream(streamWriter);
             }

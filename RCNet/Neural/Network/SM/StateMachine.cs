@@ -180,76 +180,7 @@ namespace RCNet.Neural.Network.SM
             }
         }
 
-        private double[] PatternToVector(List<double[]> inputPattern)
-        {
-            int vectorSize = inputPattern[0].Length * inputPattern.Count;
-            double[] vector = new double[vectorSize];
-            int idx = 0;
-            foreach (double[] patternItem in inputPattern)
-            {
-                patternItem.CopyTo(vector, idx);
-                idx += patternItem.Length;
-            }
-            return vector;
-        }
-
         /// <summary>
-        /// Compute function for a patterned input feeding.
-        /// Processes given input pattern and computes the output.
-        /// </summary>
-        /// <param name="inputPattern">Input pattern</param>
-        /// <returns>Computed output values</returns>
-        public double[] Compute(List<double[]> inputPattern)
-        {
-            if (!RL.Trained)
-            {
-                throw new Exception("Readout layer is not trained.");
-            }
-            if (NP == null)
-            {
-                //Neural preprocessor is bypassed
-                return RL.Compute(PatternToVector(inputPattern));
-            }
-            else
-            {
-                if (_settings.NeuralPreprocessorConfig.InputConfig.FeedingType == NeuralPreprocessor.InputFeedingType.Continuous)
-                {
-                    throw new Exception("This version of Compute function is not useable for continuous input feeding.");
-                }
-                //Compute and return output
-                return RL.Compute(NP.Preprocess(inputPattern));
-            }
-        }
-
-        /// <summary>
-        /// Compute function for a patterned input feeding.
-        /// Processes given input pattern and computes richer form of output.
-        /// </summary>
-        /// <param name="inputPattern">Input pattern</param>
-        public ReadoutLayer.ReadoutData ComputeReadoutData(List<double[]> inputPattern)
-        {
-            if (!RL.Trained)
-            {
-                throw new Exception("Readout layer is not trained.");
-            }
-            if (NP == null)
-            {
-                //Neural preprocessor is bypassed
-                return RL.ComputeReadoutData(PatternToVector(inputPattern));
-            }
-            else
-            {
-                if (_settings.NeuralPreprocessorConfig.InputConfig.FeedingType == NeuralPreprocessor.InputFeedingType.Continuous)
-                {
-                    throw new Exception("This version of Compute function is not useable for continuous input feeding.");
-                }
-                //Compute and return output
-                return RL.ComputeReadoutData(NP.Preprocess(inputPattern));
-            }
-        }
-
-        /// <summary>
-        /// Compute fuction for a continuous input feeding.
         /// Processes given input values and computes (predicts) the output.
         /// </summary>
         /// <param name="inputVector">Input values</param>
@@ -263,21 +194,16 @@ namespace RCNet.Neural.Network.SM
             if (NP == null)
             {
                 //Neural preprocessor is bypassed
-                return RL.Compute(inputVector);
+                return RL.Compute(inputVector, out List<double[]> unitsAllSubResults);
             }
             else
             {
-                if (_settings.NeuralPreprocessorConfig.InputConfig.FeedingType == NeuralPreprocessor.InputFeedingType.Patterned)
-                {
-                    throw new Exception("This version of Compute function is not useable for patterned input feeding.");
-                }
                 //Compute and return output
-                return RL.Compute(NP.Preprocess(inputVector));
+                return RL.Compute(NP.Preprocess(inputVector), out List<double[]> unitsAllSubResults);
             }
         }
 
         /// <summary>
-        /// Compute fuction for a continuous input feeding.
         /// Processes given input values and computes (predicts) richer form of output.
         /// </summary>
         /// <param name="inputVector">Input values</param>
@@ -290,19 +216,14 @@ namespace RCNet.Neural.Network.SM
             if (NP == null)
             {
                 //Neural preprocessor is bypassed
-                return RL.ComputeReadoutData(inputVector);
+                return RL.ComputeReadoutData(inputVector, out List<double[]> unitsAllSubResults);
             }
             else
             {
-                if (_settings.NeuralPreprocessorConfig.InputConfig.FeedingType == NeuralPreprocessor.InputFeedingType.Patterned)
-                {
-                    throw new Exception("This version of Compute function is not useable for patterned input feeding.");
-                }
                 //Compute and return output
-                return RL.ComputeReadoutData(NP.Preprocess(inputVector));
+                return RL.ComputeReadoutData(NP.Preprocess(inputVector), out List<double[]> unitsAllSubResults);
             }
         }
-
 
         /// <summary>
         /// Performs training of the StateMachine
@@ -334,50 +255,10 @@ namespace RCNet.Neural.Network.SM
 
 
         /// <summary>
-        /// Performs training of the StateMachine
-        /// </summary>
-        /// <param name="patternBundle">Training data bundle (input patterns and desired output vectors)</param>
-        /// <param name="regressionController">Optional regression controller.</param>
-        /// <returns>Output of the regression stage</returns>
-        public TrainingResults Train(PatternBundle patternBundle, TrainedNetworkBuilder.RegressionControllerDelegate regressionController = null)
-        {
-            //StateMachine reset
-            Reset();
-            VectorBundle readoutInput;
-            NeuralPreprocessor.PreprocessingOverview preprocessingOverview = null;
-            if (NP == null)
-            {
-                //Neural preprocessor is bypassed
-                //Convert patterns to vectors
-                readoutInput = new VectorBundle(patternBundle.OutputVectorCollection.Count);
-                for(int i = 0; i < patternBundle.OutputVectorCollection.Count; i++)
-                {
-                    readoutInput.AddPair(PatternToVector(patternBundle.InputPatternCollection[i]), patternBundle.OutputVectorCollection[i]);
-                    if(i > 0)
-                    {
-                        if(readoutInput.InputVectorCollection[i].Length != readoutInput.InputVectorCollection[i - 1].Length)
-                        {
-                            throw new Exception("Inconsistent length of patterns.");
-                        }
-                    }
-                }
-            }
-            else
-            {
-                //Neural preprocessing
-                readoutInput = NP.InitializeAndPreprocessBundle(patternBundle, out preprocessingOverview);
-            }
-            //Training of the readout layer 
-            ReadoutLayer.RegressionOverview regressionOverview = RL.Build(readoutInput, BuildPredictorsMapper(), regressionController);
-            //Return compact results
-            return new TrainingResults(preprocessingOverview, regressionOverview);
-        }
-
-        /// <summary>
         /// Performs given data bundle and evaluates computed results against ideal results
         /// Raises VerificationProgressChanged event.
         /// </summary>
-        /// <param name="vectorBundle">Data bundle containing known input vectors and desired output vectors (in time order)</param>
+        /// <param name="vectorBundle">Data bundle containing input vectors and desired output vectors</param>
         /// <returns>Verification result</returns>
         public VerificationResults Verify(VectorBundle vectorBundle)
         {
@@ -395,38 +276,9 @@ namespace RCNet.Neural.Network.SM
                     //Neural preprocessing
                     predictors = NP.Preprocess(vectorBundle.InputVectorCollection[sampleIdx]);
                 }
-                ReadoutLayer.ReadoutData readoutData = RL.ComputeReadoutData(predictors);
+                ReadoutLayer.ReadoutData readoutData = RL.ComputeReadoutData(predictors, out List<double[]> unitsAllSubResults);
                 verificationResults.Update(predictors, readoutData, vectorBundle.OutputVectorCollection[sampleIdx]);
                 VerificationProgressChanged(vectorBundle.InputVectorCollection.Count, sampleIdx + 1);
-            }
-            return verificationResults;
-        }
-
-        /// <summary>
-        /// Performs given data bundle and evaluates computed results against ideal results.
-        /// Raises VerificationProgressChanged event.
-        /// </summary>
-        /// <param name="patternBundle">Data bundle containing known sample input patterns and desired output vectors</param>
-        /// <returns>Verification result</returns>
-        public VerificationResults Verify(PatternBundle patternBundle)
-        {
-            VerificationResults verificationResults = new VerificationResults(_settings.ReadoutLayerConfig);
-            for (int sampleIdx = 0; sampleIdx < patternBundle.InputPatternCollection.Count; sampleIdx++)
-            {
-                double[] predictors;
-                if (NP == null)
-                {
-                    //Neural preprocessor is bypassed
-                    predictors = PatternToVector(patternBundle.InputPatternCollection[sampleIdx]);
-                }
-                else
-                {
-                    //Neural preprocessing
-                    predictors = NP.Preprocess(patternBundle.InputPatternCollection[sampleIdx]);
-                }
-                ReadoutLayer.ReadoutData readoutData = RL.ComputeReadoutData(predictors);
-                verificationResults.Update(predictors, readoutData, patternBundle.OutputVectorCollection[sampleIdx]);
-                VerificationProgressChanged(patternBundle.InputPatternCollection.Count, sampleIdx + 1);
             }
             return verificationResults;
         }
@@ -729,7 +581,7 @@ namespace RCNet.Neural.Network.SM
                             maxIdealValueName = unitData.Name;
                         }
                     }
-                    double err = winningUnitIndex == maxIdealValueIdx ? 0d : 1d;
+                    double err = (winningUnitIndex == maxIdealValueIdx ? 0d : 1d);
                     GroupErrorStat.AddSampleValue(err);
                     ClassErrorStatCollection[maxIdealValueName].AddSampleValue(err);
                     return;

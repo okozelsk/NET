@@ -93,59 +93,58 @@ namespace RCNet.Neural.Data
 
         //Static methods
         /// <summary>
-        /// Loads the data and prepares VectorBundle.
+        /// Loads the data and prepares VectorBundle for continuous feeding.
         /// The first line of the csv file must contain field names. These field names must
         /// match the names of the input and output fields.
         /// </summary>
-        /// <param name="fileName"> Data file name </param>
+        /// <param name="csvData"> Data in csv format</param>
         /// <param name="inputFieldNameCollection"> Input fields to be extracted from a file</param>
         /// <param name="outputFieldNameCollection"> Output fields to be extracted from a file</param>
         /// <param name="remainingInputVector"> Returned the last input vector unused in the bundle </param>
-        public static VectorBundle LoadFromCsv(string fileName,
-                                               List<string> inputFieldNameCollection,
-                                               List<string> outputFieldNameCollection,
-                                               out double[] remainingInputVector
-                                               )
+        public static VectorBundle Load(CsvDataHolder csvData,
+                                        List<string> inputFieldNameCollection,
+                                        List<string> outputFieldNameCollection,
+                                        out double[] remainingInputVector
+                                        )
         {
             remainingInputVector = null;
-            CsvDataHolder cdh = new CsvDataHolder(fileName, true);
             List<int> inputFieldIndexes = new List<int>();
             List<int> outputFieldIndexes = new List<int>();
             if (inputFieldNameCollection != null)
             {
                 //Check if the recognized data delimiter works properly
-                if (cdh.ColNameCollection.NumOfStringValues < inputFieldNameCollection.Count)
+                if (csvData.ColNameCollection.NumOfStringValues < inputFieldNameCollection.Count)
                 {
                     throw new FormatException("1st row of the file doesn't contain delimited column names or the value delimiter was not properly recognized.");
                 }
                 //Collect indexes of allowed input fields
                 foreach (string name in inputFieldNameCollection)
                 {
-                    inputFieldIndexes.Add(cdh.ColNameCollection.IndexOf(name));
+                    inputFieldIndexes.Add(csvData.ColNameCollection.IndexOf(name));
                 }
             }
             else
             {
-                int[] indexes = new int[cdh.ColNameCollection.NumOfStringValues];
+                int[] indexes = new int[csvData.ColNameCollection.NumOfStringValues];
                 indexes.Indices();
                 inputFieldIndexes = new List<int>(indexes);
             }
             for (int i = 0; i < outputFieldNameCollection.Count; i++)
             {
-                outputFieldIndexes.Add(cdh.ColNameCollection.IndexOf(outputFieldNameCollection[i]));
+                outputFieldIndexes.Add(csvData.ColNameCollection.IndexOf(outputFieldNameCollection[i]));
             }
             //Prepare input and output vectors
-            List<double[]> inputVectorCollection = new List<double[]>(cdh.DataRowCollection.Count);
-            List<double[]> outputVectorCollection = new List<double[]>(cdh.DataRowCollection.Count);
-            for (int i = 0; i < cdh.DataRowCollection.Count; i++)
+            List<double[]> inputVectorCollection = new List<double[]>(csvData.DataRowCollection.Count);
+            List<double[]> outputVectorCollection = new List<double[]>(csvData.DataRowCollection.Count);
+            for (int i = 0; i < csvData.DataRowCollection.Count; i++)
             {
                 //Input vector
                 double[] inputVector = new double[inputFieldIndexes.Count];
-                for(int j = 0; j < inputFieldIndexes.Count; j++)
+                for (int j = 0; j < inputFieldIndexes.Count; j++)
                 {
-                    inputVector[j] = cdh.DataRowCollection[i].GetValue(inputFieldIndexes[j]).ParseDouble(true, $"Can't parse double value {cdh.DataRowCollection[i].GetValue(inputFieldIndexes[j])}.");
+                    inputVector[j] = csvData.DataRowCollection[i].GetValue(inputFieldIndexes[j]).ParseDouble(true, $"Can't parse double value {csvData.DataRowCollection[i].GetValue(inputFieldIndexes[j])}.");
                 }
-                if (i < cdh.DataRowCollection.Count - 1)
+                if (i < csvData.DataRowCollection.Count - 1)
                 {
                     //Within the bundle
                     inputVectorCollection.Add(inputVector);
@@ -161,14 +160,49 @@ namespace RCNet.Neural.Data
                     double[] outputVector = new double[outputFieldIndexes.Count];
                     for (int j = 0; j < outputFieldIndexes.Count; j++)
                     {
-                        outputVector[j] = cdh.DataRowCollection[i].GetValue(outputFieldIndexes[j]).ParseDouble(true, $"Can't parse double value {cdh.DataRowCollection[i].GetValue(outputFieldIndexes[j])}.");
+                        outputVector[j] = csvData.DataRowCollection[i].GetValue(outputFieldIndexes[j]).ParseDouble(true, $"Can't parse double value {csvData.DataRowCollection[i].GetValue(outputFieldIndexes[j])}.");
                     }
                     outputVectorCollection.Add(outputVector);
                 }
             }
             //Create and return bundle
             return new VectorBundle(inputVectorCollection, outputVectorCollection);
-        }//LoadFromCsv
+        }
+
+        /// <summary>
+        /// Loads the data and prepares VectorBundle for patterned feeding.
+        /// The data row must begin with at least one complete set of values for defined repetitive variables.
+        /// The data row must end with values of defined output variables.
+        /// </summary>
+        /// <param name="csvData"> Data in csv format</param>
+        /// <param name="numOfOutputVariables"> Num of output variables (fields)</param>
+        public static VectorBundle Load(CsvDataHolder csvData, int numOfOutputVariables)
+        {
+            VectorBundle bundle = new VectorBundle();
+            foreach (DelimitedStringValues dataRow in csvData.DataRowCollection)
+            {
+                int numOfInputValues = dataRow.NumOfStringValues - numOfOutputVariables;
+                //Check data length
+                if (numOfInputValues <= 0)
+                {
+                    throw new FormatException("Incorrect length of data row.");
+                }
+                //Input data
+                double[] inputData = new double[numOfInputValues];
+                for (int i = 0; i < numOfInputValues; i++)
+                {
+                    inputData[i] = dataRow.GetValue(i).ParseDouble(true, $"Can't parse double data value {dataRow.GetValue(i)}.");
+                }
+                //Output data
+                double[] outputData = new double[numOfOutputVariables];
+                for (int i = 0; i < numOfOutputVariables; i++)
+                {
+                    outputData[i] = dataRow.GetValue(numOfInputValues + i).ParseDouble(true, $"Can't parse double data value {dataRow.GetValue(numOfInputValues + i)}.");
+                }
+                bundle.AddPair(inputData, outputData);
+            }
+            return bundle;
+        }
 
         //Methods
         /// <summary>

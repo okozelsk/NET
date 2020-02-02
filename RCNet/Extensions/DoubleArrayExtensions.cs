@@ -32,6 +32,40 @@ namespace RCNet.Extensions
             return;
         }
 
+        /// <summary>
+        /// Returns maximum value in the array
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double Max(this double[] array)
+        {
+            double max = double.MinValue;
+            for (int i = 0; i < array.Length; i++)
+            {
+                if(max < array[i])
+                {
+                    max = array[i];
+                }
+            }
+            return max;
+        }
+
+        /// <summary>
+        /// Returns minimum value in the array
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double Min(this double[] array)
+        {
+            double min = double.MaxValue;
+            for (int i = 0; i < array.Length; i++)
+            {
+                if (min > array[i])
+                {
+                    min = array[i];
+                }
+            }
+            return min;
+        }
+
     }//DoubleArrayExtensions
 
 }//Namespace

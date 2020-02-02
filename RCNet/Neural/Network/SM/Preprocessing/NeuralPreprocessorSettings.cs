@@ -11,6 +11,7 @@ using RCNet.Neural.Data.Generators;
 using RCNet.Neural.Network.SM.Neuron;
 using RCNet.Neural.Network.SM.Synapse;
 using RCNet.Neural.Data.Filter;
+using RCNet.Neural.Data;
 
 namespace RCNet.Neural.Network.SM.Preprocessing
 {
@@ -250,22 +251,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         [Serializable]
         public class InputSettings
         {
-            //Enums
-            /// <summary>
-            /// Type of attributes organization in the input data
-            /// </summary>
-            public enum PatternedDataOrganization
-            {
-                /// <summary>
-                /// Attributes are groupped
-                /// </summary>
-                Groupped,
-                /// <summary>
-                /// Attributes are sequential
-                /// </summary>
-                Sequential
-            }
-
             //Attribute properties
             /// <summary>
             /// Type of input feeding
@@ -275,7 +260,37 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             /// <summary>
             /// Type of attributes organization in the input data in case of patterned input feeding
             /// </summary>
-            public PatternedDataOrganization PatternedInputDataOrganization { get; set; }
+            public InputPattern.TimeOrderVarDataOrganization PatternedInputDataOrganization { get; set; }
+
+            /// <summary>
+            /// Specifies if to unify amlitudes of input data in case of patterned input feeding
+            /// </summary>
+            public bool UnifyAmplitude { get; set; }
+
+            /// <summary>
+            /// Specifies if to detrend input data in case of patterned input feeding
+            /// </summary>
+            public bool Detrend { get; set; }
+
+            /// <summary>
+            /// Sensitivity of signal begin detection in case of patterned input feeding
+            /// </summary>
+            public double ThresholdOfSignalBeginDetection { get; set; }
+
+            /// <summary>
+            /// Sensitivity of signal end detection in case of patterned input feeding
+            /// </summary>
+            public double ThresholdOfSignalEndDetection { get; set; }
+
+            /// <summary>
+            /// Specifies if to keep common resampling time-scale in case of patterned input feeding
+            /// </summary>
+            public bool KeepCommonTimeScale { get; set; }
+
+            /// <summary>
+            /// Number of target timepoints of the resampled pattern in case of patterned input feeding
+            /// </summary>
+            public int TargetTimePoints { get; set; }
 
             /// <summary>
             /// Parameter is relevant only for patterned feeding and specifies, if to preprocess time series in both time directions.
@@ -310,6 +325,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             private InputSettings()
             {
                 FeedingType = NeuralPreprocessor.InputFeedingType.Continuous;
+                UnifyAmplitude = false;
+                Detrend = false;
+                ThresholdOfSignalBeginDetection = 0d;
+                ThresholdOfSignalEndDetection = 0d;
+                KeepCommonTimeScale = true;
+                TargetTimePoints = -1;
                 Bidirectional = false;
                 BootCycles = -1;
                 RouteInputToReadout = false;
@@ -326,6 +347,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 :this()
             {
                 FeedingType = source.FeedingType;
+                UnifyAmplitude = source.UnifyAmplitude;
+                Detrend = source.Detrend;
+                ThresholdOfSignalBeginDetection = source.ThresholdOfSignalBeginDetection;
+                ThresholdOfSignalEndDetection = source.ThresholdOfSignalEndDetection;
+                KeepCommonTimeScale = source.KeepCommonTimeScale;
+                TargetTimePoints = source.TargetTimePoints;
                 Bidirectional = source.Bidirectional;
                 BootCycles = source.BootCycles;
                 RouteInputToReadout = source.RouteInputToReadout;
@@ -353,7 +380,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 {
                     FeedingType = NeuralPreprocessor.InputFeedingType.Continuous;
                     Bidirectional = false;
-                    PatternedInputDataOrganization = PatternedDataOrganization.Groupped;
+                    PatternedInputDataOrganization = InputPattern.TimeOrderVarDataOrganization.Groupped;
                     //Number of booting cycles
                     string bootCyclesAttrValue = feedingElem.Attribute("bootCycles").Value;
                     if (bootCyclesAttrValue == "Auto")
@@ -370,8 +397,20 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 {
                     FeedingType = NeuralPreprocessor.InputFeedingType.Patterned;
                     Bidirectional = bool.Parse(feedingElem.Attribute("bidir").Value);
-                    PatternedInputDataOrganization = ParsePatternedInputDataOrganization(feedingElem.Attribute("dataOrganization").Value);
+                    PatternedInputDataOrganization = InputPattern.ParseTimeOrderVarDataOrganization(feedingElem.Attribute("dataOrganization").Value);
                     BootCycles = 0;
+                    XElement unificationElem = feedingElem.Descendants("unification").First();
+                    UnifyAmplitude = bool.Parse(unificationElem.Attribute("unifyAmplitude").Value);
+                    Detrend = bool.Parse(unificationElem.Attribute("detrend").Value);
+                    XElement resamplingElem = unificationElem.Descendants("resampling").First();
+                    ThresholdOfSignalBeginDetection = double.Parse(resamplingElem.Attribute("thresholdOfSignalBeginDetection").Value, CultureInfo.InvariantCulture);
+                    ThresholdOfSignalEndDetection = double.Parse(resamplingElem.Attribute("thresholdOfSignalEndDetection").Value, CultureInfo.InvariantCulture);
+                    KeepCommonTimeScale = bool.Parse(resamplingElem.Attribute("keepCommonTimeScale").Value);
+                    TargetTimePoints = -1;
+                    if (resamplingElem.Attribute("targetTimePoints").Value != "Auto")
+                    {
+                        TargetTimePoints = int.Parse(resamplingElem.Attribute("targetTimePoints").Value, CultureInfo.InvariantCulture);
+                    }
                 }
                 //Routing of input to readout layer
                 RouteInputToReadout = bool.Parse(feedingElem.Attribute("routeToReadout").Value);
@@ -447,22 +486,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             public int NumOfFields { get { return ExternalFieldCollection.Count + InternalFieldCollection.Count; } }
 
             //Static methods
-            /// <summary>
-            /// Parses type of patterned input data organization
-            /// </summary>
-            /// <param name="code">Keyword</param>
-            public PatternedDataOrganization ParsePatternedInputDataOrganization(string code)
-            {
-                switch(code.ToUpper())
-                {
-                    case "SEQUENTIAL":
-                        return PatternedDataOrganization.Sequential;
-                    case "GROUPPED":
-                        return PatternedDataOrganization.Groupped;
-                    default:
-                        throw new Exception($"Unknown input data organization code: {code}");
-                }
-            }
 
             //Methods
             /// <summary>
@@ -553,6 +576,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 if (obj == null) return false;
                 InputSettings cmpSettings = obj as InputSettings;
                 if (FeedingType != cmpSettings.FeedingType ||
+                    UnifyAmplitude != cmpSettings.UnifyAmplitude ||
+                    Detrend != cmpSettings.Detrend ||
+                    ThresholdOfSignalBeginDetection != cmpSettings.ThresholdOfSignalBeginDetection ||
+                    ThresholdOfSignalEndDetection != cmpSettings.ThresholdOfSignalEndDetection ||
+                    KeepCommonTimeScale != cmpSettings.KeepCommonTimeScale ||
+                    TargetTimePoints != cmpSettings.TargetTimePoints ||
                     Bidirectional != cmpSettings.Bidirectional ||
                     BootCycles != cmpSettings.BootCycles ||
                     RouteInputToReadout != cmpSettings.RouteInputToReadout ||

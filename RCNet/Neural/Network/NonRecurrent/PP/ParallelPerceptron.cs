@@ -21,6 +21,34 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
         public const double BiasValue = 1d;
         private readonly int _numOfGateWeights;
         private readonly double[] _flatWeights;
+        
+        //Static members
+        /// <summary>
+        /// Output range
+        /// </summary>
+        public static Interval PPOutputRange = new Interval(-1d, 1d);
+
+        //Attribute properties
+        /// <summary>
+        /// Number of network's input values
+        /// </summary>
+        public int NumOfInputValues { get; }
+
+        /// <summary>
+        /// Number of network's treshold gates
+        /// </summary>
+        public int NumOfGates { get; }
+
+        /// <summary>
+        /// Network's output resolution
+        /// </summary>
+        public int Resolution { get; }
+
+        /// <summary>
+        /// Output squash coeeficient (= Resolution / 2)
+        /// </summary>
+        public double ResSquashCoeff { get; }
+
 
         //Constructors
         /// <summary>
@@ -65,26 +93,6 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
 
         //Properties
         /// <summary>
-        /// Number of network's input values
-        /// </summary>
-        public int NumOfInputValues { get; }
-
-        /// <summary>
-        /// Number of network's treshold gates
-        /// </summary>
-        public int NumOfGates { get; }
-
-        /// <summary>
-        /// Network's output resolution
-        /// </summary>
-        public int Resolution { get; }
-
-        /// <summary>
-        /// Output squash coeeficient (= Resolution / 2)
-        /// </summary>
-        public double ResSquashCoeff { get; }
-
-        /// <summary>
         /// Number of network's output values
         /// </summary>
         public int NumOfOutputValues { get { return 1; } }
@@ -93,6 +101,11 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
         /// Total number of network's weights
         /// </summary>
         public int NumOfWeights { get { return _flatWeights.Length; } }
+
+        /// <summary>
+        /// Output range of the output layer
+        /// </summary>
+        public Interval OutputRange { get { return PPOutputRange; } }
 
         //Methods
         //Static methods

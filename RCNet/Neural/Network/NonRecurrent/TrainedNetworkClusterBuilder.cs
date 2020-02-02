@@ -11,11 +11,15 @@ using System.Threading.Tasks;
 namespace RCNet.Neural.Network.NonRecurrent
 {
     /// <summary>
-    /// Builds computation cluster of trained networks
+    /// Builds computation cluster of trained networks.
+    /// Supported is only single output.
     /// </summary>
     public class TrainedNetworkClusterBuilder
     {
         //Constants
+        //Constants
+        private const double MinExpectedAccuracy = 1e-6d;
+        private const double MaxExpectedAccuracy = 1d - 1e-6d;
         /// <summary>
         /// Maximum part of available samples useable for test purposes
         /// </summary>
@@ -53,7 +57,7 @@ namespace RCNet.Neural.Network.NonRecurrent
         /// </summary>
         /// <param name="clusterName">Name of the cluster</param>
         /// <param name="networkSettings">Network configuration (FeedForwardNetworkSettings or ParallelPerceptronSettings object)</param>
-        /// <param name="binBorder">If specified, it indicates that the whole network output is binary and specifies numeric border where GE network output is decided as a 1 and LT output as a 0.</param>
+        /// <param name="binBorder">If specified, it indicates that the network ideal output is binary and specifies numeric border where GE network output is decided as a 1 and LT output as a 0.</param>
         /// <param name="rand">Random generator to be used (optional)</param>
         /// <param name="controller">Regression controller (optional)</param>
         public TrainedNetworkClusterBuilder(string clusterName,
@@ -70,6 +74,12 @@ namespace RCNet.Neural.Network.NonRecurrent
             _controller = controller;
             return;
         }
+
+        //Properties
+        /// <summary>
+        /// Indicates that the cluster ideal output is binary
+        /// </summary>
+        public bool BinaryOutput { get { return !double.IsNaN(_binBorder); } }
 
         //Methods
         private void OnRegressionEpochDone(TrainedNetworkBuilder.BuildingState buildingState, bool foundBetter)
@@ -167,47 +177,22 @@ namespace RCNet.Neural.Network.NonRecurrent
                     dataBundle.Shuffle(_rand);
                 }
             }
-            //Set cluster members weights
+
+            //Setup of cluster members weights
             for (int i = 0; i < cluster.Members.Count; i++)
             {
-                double rescalledAccuracy = 0.5d + (cluster.Members[i].ExpectedAccuracy / 2d);
-                cluster.Weights[i] = Math.Log(rescalledAccuracy / (1d - rescalledAccuracy));
+                double accuracyScore;
+                if (BinaryOutput)
+                {
+                    accuracyScore = (cluster.Members[i].ExpectedBinaryAccuracy * cluster.Members[i].ExpectedPrecisionAccuracy).Bound(MinExpectedAccuracy, MaxExpectedAccuracy);
+                }
+                else
+                {
+                    accuracyScore = cluster.Members[i].ExpectedPrecisionAccuracy.Bound(MinExpectedAccuracy, MaxExpectedAccuracy);
+                }
+                cluster.Weights[i] = Math.Log(accuracyScore / (1d - accuracyScore));
             }
-            //Cluster's expected accuracy
-            cluster.RecomputeExpectedAccuracy();
 
-            /*
-            if (cluster.BinaryOutput)
-            {
-                double sum = 0;
-                foreach (TrainedNetwork tn in cluster.Members)
-                {
-                    sum += (1d - tn.TrainingBinErrorStat.TotalErrStat.ArithAvg) * (1d - tn.TestingBinErrorStat.TotalErrStat.ArithAvg);
-                }
-                if (sum > 0)
-                {
-                    for (int i = 0; i < cluster.Members.Count; i++)
-                    {
-                        cluster.Weights[i] = ((1d - cluster.Members[i].TrainingBinErrorStat.TotalErrStat.ArithAvg) * (1d - cluster.Members[i].TestingBinErrorStat.TotalErrStat.ArithAvg)) / sum;
-                    }
-                }
-            }
-            else
-            {
-                double sum = 0;
-                foreach (TrainedNetwork tn in cluster.Members)
-                {
-                    sum += (1d - tn.TrainingErrorStat.ArithAvg) * (1d - tn.TestingErrorStat.ArithAvg);
-                }
-                if (sum > 0)
-                {
-                    for (int i = 0; i < cluster.Members.Count; i++)
-                    {
-                        cluster.Weights[i] = ((1d - cluster.Members[i].TrainingErrorStat.ArithAvg) * (1d - cluster.Members[i].TestingErrorStat.ArithAvg)) / sum;
-                    }
-                }
-            }
-            */
             //Return built cluster
             return cluster;
         }

@@ -9,6 +9,7 @@ namespace RCNet.Neural.Network.NonRecurrent
 {
     /// <summary>
     /// Contains trained network and related important error statistics from training/testing.
+    /// Expected is only single output network.
     /// </summary>
     [Serializable]
     public class TrainedNetwork
@@ -19,7 +20,7 @@ namespace RCNet.Neural.Network.NonRecurrent
         /// </summary>
         public string NetworkName { get; set; }
         /// <summary>
-        /// If specified, it indicates that the whole network output is binary and specifies numeric border where GE network output is decided as a 1 and LT output as a 0.
+        /// If specified, it indicates that the network ideal output is binary and specifies numeric border where GE network output is decided as a 1 and LT output as a 0.
         /// </summary>
         public double BinBorder { get; set; }
         /// <summary>
@@ -35,7 +36,8 @@ namespace RCNet.Neural.Network.NonRecurrent
         /// </summary>
         public BasicStat TrainingErrorStat { get; set; }
         /// <summary>
-        /// Training binary error statistics. Relevant only when network output fields are all binary.
+        /// Training binary error statistics.
+        /// Relevant only when network ideal output is binary.
         /// </summary>
         public BinErrStat TrainingBinErrorStat { get; set; }
         /// <summary>
@@ -43,7 +45,8 @@ namespace RCNet.Neural.Network.NonRecurrent
         /// </summary>
         public BasicStat TestingErrorStat { get; set; }
         /// <summary>
-        /// Testing binary error statistics. Relevant only when network output fields are all binary.
+        /// Testing binary error statistics.
+        /// Relevant only when network ideal output is binary.
         /// </summary>
         public BinErrStat TestingBinErrorStat { get; set; }
         /// <summary>
@@ -55,13 +58,19 @@ namespace RCNet.Neural.Network.NonRecurrent
         /// </summary>
         public double CombinedPrecisionError { get; set; }
         /// <summary>
-        /// Achieved training/testing combined binary error. Relevant only when network output fields are all binary.
+        /// Achieved training/testing combined binary error.
+        /// Relevant only when network ideal output is binary.
         /// </summary>
         public double CombinedBinaryError { get; set; }
         /// <summary>
-        /// Expected accuracy of this network.
+        /// Expected normalized precision accuracy of this network (0...1).
         /// </summary>
-        public double ExpectedAccuracy { get; set; }
+        public double ExpectedPrecisionAccuracy { get; set; }
+        /// <summary>
+        /// Expected normalized binary accuracy of this network (0...1).
+        /// Relevant only when network ideal output is binary.
+        /// </summary>
+        public double ExpectedBinaryAccuracy { get; set; }
 
         //Constructors
         /// <summary>
@@ -79,7 +88,8 @@ namespace RCNet.Neural.Network.NonRecurrent
             OutputWeightsStat = null;
             CombinedPrecisionError = -1d;
             CombinedBinaryError = -1d;
-            ExpectedAccuracy = -1d;
+            ExpectedPrecisionAccuracy = -1d;
+            ExpectedBinaryAccuracy = -1d;
             return;
         }
 
@@ -104,13 +114,14 @@ namespace RCNet.Neural.Network.NonRecurrent
             OutputWeightsStat = source.OutputWeightsStat?.DeepClone();
             CombinedPrecisionError = source.CombinedPrecisionError;
             CombinedBinaryError = source.CombinedBinaryError;
-            ExpectedAccuracy = source.ExpectedAccuracy;
+            ExpectedPrecisionAccuracy = source.ExpectedPrecisionAccuracy;
+            ExpectedBinaryAccuracy = source.ExpectedBinaryAccuracy;
             return;
         }
 
         //Properties
         /// <summary>
-        /// Indicates that the whole network output is binary
+        /// Indicates that the network ideal output is binary
         /// </summary>
         public bool BinaryOutput { get { return !double.IsNaN(BinBorder); } }
 

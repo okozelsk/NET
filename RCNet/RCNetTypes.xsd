@@ -177,6 +177,16 @@
     <xs:union memberTypes="UIntGT0Type AutoOptionType"/>
   </xs:simpleType>
 
+  <!-- UIntGT1Type with Auto option-->
+  <xs:simpleType name="UIntGT1AutoOptionType">
+    <xs:union memberTypes="UIntGT1Type AutoOptionType"/>
+  </xs:simpleType>
+
+  <!-- Double with NA option-->
+  <xs:simpleType name="DoubleNAOptionType">
+    <xs:union memberTypes="xs:double NAOptionType"/>
+  </xs:simpleType>
+
   <!-- Double LT 0 -->
   <xs:simpleType name="DoubleLT0Type">
     <xs:restriction base="xs:double">
@@ -212,37 +222,16 @@
   </xs:simpleType>
 
   <!-- Unsigned double GE 0 LT 1-->
-  <xs:simpleType name="UDoubleGE0LT1Type">
-    <xs:restriction base="xs:double">
-      <xs:minInclusive value="0" />
-      <xs:maxExclusive value="1" />
-    </xs:restriction>
-  </xs:simpleType>
-
-  <!-- Unsigned double GE 0 LE 1-->
-  <xs:simpleType name="UDoubleGE0LE1Type">
-    <xs:restriction base="xs:double">
-      <xs:minInclusive value="0" />
-      <xs:maxInclusive value="1" />
-    </xs:restriction>
-  </xs:simpleType>
-
-  <!-- Double with NA option-->
-  <xs:simpleType name="DoubleNAOptionType">
-    <xs:union memberTypes="xs:double NAOptionType"/>
-  </xs:simpleType>
-
-  <!-- UDoubleGT0Type with NA option-->
-  <xs:simpleType name="UDoubleGT0NAOptionType">
-    <xs:union memberTypes="UDoubleGT0Type NAOptionType"/>
-  </xs:simpleType>
-
-  <!-- Unsigned double less than 1 -->
   <xs:simpleType name="UDoubleLT1Type">
     <xs:restriction base="xs:double">
       <xs:minInclusive value="0" />
       <xs:maxExclusive value="1" />
     </xs:restriction>
+  </xs:simpleType>
+
+  <!-- UDoubleGT0Type with NA option-->
+  <xs:simpleType name="UDoubleGT0NAOptionType">
+    <xs:union memberTypes="UDoubleGT0Type NAOptionType"/>
   </xs:simpleType>
 
   <!-- Unsigned double GE 1-->
@@ -949,6 +938,11 @@
         <xs:documentation xml:lang="en">Default value is true</xs:documentation>
       </xs:annotation>
     </xs:attribute>
+    <xs:attribute type="xs:boolean" name="keepSign" use="optional" default="false">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is false</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- ________________________________________READOUT LAYER TYPES_________________________________________________ -->
@@ -1534,7 +1528,7 @@
 
   <!-- Predictor ActivationFadingSum - configuration -->
   <xs:complexType name="PredictorActivationFadingSumCfgType">
-    <xs:attribute type="UDoubleGE0LT1Type" name="strength" use="optional" default="0.1">
+    <xs:attribute type="UDoubleLT1Type" name="strength" use="optional" default="0.1">
       <xs:annotation>
         <xs:documentation xml:lang="en">Fading strength (GE0..LT1). Default value is 0.1</xs:documentation>
       </xs:annotation>
@@ -1543,7 +1537,7 @@
 
   <!-- Predictor FiringFadingSum - configuration -->
   <xs:complexType name="PredictorFiringFadingSumCfgType">
-    <xs:attribute type="UDoubleGE0LT1Type" name="strength" use="optional" default="0.005">
+    <xs:attribute type="UDoubleLT1Type" name="strength" use="optional" default="0.005">
       <xs:annotation>
         <xs:documentation xml:lang="en">Fading strength (GE0..LT1). Default value is 0.005</xs:documentation>
       </xs:annotation>
@@ -1972,8 +1966,53 @@
     </xs:attribute>
   </xs:complexType>
 
+  <!-- NeuralPreprocessor - patterned input feeding - resampling - configuration -->
+  <xs:complexType name="NPResamplingCfgType">
+    <xs:attribute type="UDoubleLT1Type" name="thresholdOfSignalBeginDetection" use="optional" default="0">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Sensitivity of signal begin detection. Default value is 0 (maximum sensitivity)</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleLT1Type" name="thresholdOfSignalEndDetection" use="optional" default="0">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Sensitivity of signal end detection. Default value is 0 (maximum sensitivity)</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="keepCommonTimeScale" use="optional" default="true">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is true.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UIntGT1AutoOptionType" name="targetTimePoints" use="optional" default="Auto">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Number of time-points of the resampled pattern. Default value is Auto (keeps original time points)</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <!-- NeuralPreprocessor - patterned input feeding - unification - configuration -->
+  <xs:complexType name="NPUnificationCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="NPResamplingCfgType" name="resampling" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+    <xs:attribute type="xs:boolean" name="detrend" use="optional" default="false">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is false.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="unifyAmplitude" use="optional" default="false">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is false.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+
   <!-- NeuralPreprocessor - patterned input feeding -configuration -->
   <xs:complexType name="NPInpFeedingPatternedCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="NPUnificationCfgType" name="unification" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
     <xs:attribute type="xs:boolean" name="bidir" use="optional" default="false">
       <xs:annotation>
         <xs:documentation xml:lang="en">Specifies, if to preprocess time series pattern in both time directions (doubles predictors). Default value is false</xs:documentation>

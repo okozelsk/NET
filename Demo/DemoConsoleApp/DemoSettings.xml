@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <demo dataFolder=".\\Data" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="DemoSettings.xsd">
 
+
   <!--
     Here StateMachine fails to exhibit good performance.
     The best algorithm called COTE, referenced at the dataset's home site, exhibits accuracy 81.4%. It is very far for StateMachine results.
@@ -19,13 +20,17 @@
     <stateMachineCfg randomizerSeek="0">
       <neuralPreprocessor predictorsReductionRatio="0">
         <input>
-          <feedingPatterned bidir="false" routeToReadout="false" dataOrganization="Sequential"/>
+          <feedingPatterned bidir="true" routeToReadout="true" dataOrganization="Sequential">
+            <unification unifyAmplitude="false" detrend="false">
+              <resampling thresholdOfSignalBeginDetection="0" thresholdOfSignalEndDetection="0" keepCommonTimeScale="true" targetTimePoints="Auto"/>
+            </unification>
+          </feedingPatterned>
           <external>
-            <field name="LeftHandAccel" allowRoutingToReadout="true">
-              <realFeature standardize="true" keepReserve="true"/>
+            <field name="LeftHandAccel" allowRoutingToReadout="true" transMovingAverageWindowLength="15">
+              <realFeature standardize="true" keepReserve="true" keepSign="false"/>
             </field>
-            <field name="RightHandAccel" allowRoutingToReadout="true">
-              <realFeature standardize="true" keepReserve="true"/>
+            <field name="RightHandAccel" allowRoutingToReadout="true" transMovingAverageWindowLength="15">
+              <realFeature standardize="true" keepReserve="true" keepSign="false"/>
             </field>
           </external>
         </input>
@@ -42,9 +47,12 @@
                   </analogGroup>
                 </neuronGroups>
                 <interconnection>
-                  <randomSchema density="0.067" relShareEE="1" relShareEI="1" relShareIE="1" relShareII="1">
+                  <randomSchema density="0.0667" relShareEE="1" relShareEI="1" relShareIE="1" relShareII="1">
                     <synapse/>
                   </randomSchema>
+                  <chainSchema ratio="1" circle="true" repetitions="1">
+                    <synapse/>
+                  </chainSchema>
                 </interconnection>
               </pool>
               <pool name="Pool2" dimX="150" dimY="1" dimZ="1">
@@ -57,12 +65,62 @@
                   </analogGroup>
                 </neuronGroups>
                 <interconnection>
-                  <randomSchema density="0.067" relShareEE="1" relShareEI="1" relShareIE="1" relShareII="1">
+                  <randomSchema density="0.0667" relShareEE="1" relShareEI="1" relShareIE="1" relShareII="1">
                     <synapse/>
                   </randomSchema>
+                  <chainSchema ratio="1" circle="true" repetitions="1">
+                    <synapse/>
+                  </chainSchema>
+                </interconnection>
+              </pool>
+              <pool name="Pool3" dimX="150" dimY="1" dimZ="1">
+                <neuronGroups>
+                  <analogGroup name="Exc-grp" role="Excitatory" relShare="1" readoutDensity="1">
+                    <activationTanH/>
+                  </analogGroup>
+                  <analogGroup name="Inh-grp" role="Inhibitory" relShare="1" readoutDensity="1">
+                    <activationTanH/>
+                  </analogGroup>
+                </neuronGroups>
+                <interconnection>
+                  <randomSchema density="0.0667" relShareEE="1" relShareEI="1" relShareIE="1" relShareII="1">
+                    <synapse/>
+                  </randomSchema>
+                  <chainSchema ratio="1" circle="true" repetitions="1">
+                    <synapse/>
+                  </chainSchema>
+                </interconnection>
+              </pool>
+              <pool name="Pool4" dimX="150" dimY="1" dimZ="1">
+                <neuronGroups>
+                  <analogGroup name="Exc-grp" role="Excitatory" relShare="1" readoutDensity="1">
+                    <activationTanH/>
+                  </analogGroup>
+                  <analogGroup name="Inh-grp" role="Inhibitory" relShare="1" readoutDensity="1">
+                    <activationTanH/>
+                  </analogGroup>
+                </neuronGroups>
+                <interconnection>
+                  <randomSchema density="0.0667" relShareEE="1" relShareEI="1" relShareIE="1" relShareII="1">
+                    <synapse/>
+                  </randomSchema>
+                  <chainSchema ratio="1" circle="true" repetitions="1">
+                    <synapse/>
+                  </chainSchema>
                 </interconnection>
               </pool>
             </pools>
+            <pool2PoolConns>
+              <pool2PoolConn srcPool="Pool1" srcConnDensity="1" targetPool="Pool4" targetConnDensity="0.02" relShareEE="1" relShareEI="1" relShareIE="1" relShareII="1">
+                <synapse/>
+              </pool2PoolConn>
+              <pool2PoolConn srcPool="Pool2" srcConnDensity="1" targetPool="Pool4" targetConnDensity="0.02" relShareEE="1" relShareEI="1" relShareIE="1" relShareII="1">
+                <synapse/>
+              </pool2PoolConn>
+              <pool2PoolConn srcPool="Pool3" srcConnDensity="1" targetPool="Pool4" targetConnDensity="0.02" relShareEE="1" relShareEI="1" relShareIE="1" relShareII="1">
+                <synapse/>
+              </pool2PoolConn>
+            </pool2PoolConns>
             <spectralRadius>
               <analogScope value="0.9999"/>
               <spikingScope value="NA"/>
@@ -72,21 +130,85 @@
         <reservoirInstanceContainer>
           <reservoirInstance name="Main1" cfg="MainCfg">
             <inputConnections>
-              <inputConnection fieldName="LeftHandAccel" poolName="Pool1" density="1" signalingRestriction="NoRestriction">
-                <synapse delayMethod="Random" maxDelay="0">
-                  <analogTarget relShareOriginal="1"
-                                relShareTransFoldedPower="0"
+              <inputConnection fieldName="LeftHandAccel" poolName="Pool1" density="0.5" signalingRestriction="NoRestriction">
+                <synapse delayMethod="Random" maxDelay="5">
+                  <analogTarget scope="All"
+                                relShareOriginal="1"
+                                relShareTransDiff="0"
+                                relShareTransLinearSteps="0"
                                 relShareTransPower="0"
+                                relShareTransFoldedPower="0"
+                                relShareTransMovingAverage="0"
                                 >
                     <weight min="0" max="1"/>
                   </analogTarget>
                 </synapse>
               </inputConnection>
-              <inputConnection fieldName="RightHandAccel" poolName="Pool2" density="1" signalingRestriction="NoRestriction">
-                <synapse delayMethod="Random" maxDelay="0">
-                  <analogTarget relShareOriginal="1"
-                                relShareTransFoldedPower="0"
+              <inputConnection fieldName="RightHandAccel" poolName="Pool1" density="0.5" signalingRestriction="NoRestriction">
+                <synapse delayMethod="Random" maxDelay="5">
+                  <analogTarget scope="All"
+                                relShareOriginal="1"
+                                relShareTransDiff="0"
+                                relShareTransLinearSteps="0"
                                 relShareTransPower="0"
+                                relShareTransFoldedPower="0"
+                                relShareTransMovingAverage="0"
+                                >
+                    <weight min="0" max="1"/>
+                  </analogTarget>
+                </synapse>
+              </inputConnection>
+              <inputConnection fieldName="LeftHandAccel" poolName="Pool2" density="0.5" signalingRestriction="NoRestriction">
+                <synapse delayMethod="Random" maxDelay="5">
+                  <analogTarget scope="All"
+                                relShareOriginal="0"
+                                relShareTransDiff="0"
+                                relShareTransLinearSteps="0"
+                                relShareTransPower="1"
+                                relShareTransFoldedPower="0"
+                                relShareTransMovingAverage="0"
+                                >
+                    <weight min="0" max="1"/>
+                  </analogTarget>
+                </synapse>
+              </inputConnection>
+              <inputConnection fieldName="RightHandAccel" poolName="Pool2" density="0.5" signalingRestriction="NoRestriction">
+                <synapse delayMethod="Random" maxDelay="5">
+                  <analogTarget scope="All"
+                                relShareOriginal="0"
+                                relShareTransDiff="0"
+                                relShareTransLinearSteps="0"
+                                relShareTransPower="1"
+                                relShareTransFoldedPower="0"
+                                relShareTransMovingAverage="0"
+                                >
+                    <weight min="0" max="1"/>
+                  </analogTarget>
+                </synapse>
+              </inputConnection>
+              <inputConnection fieldName="LeftHandAccel" poolName="Pool3" density="0.5" signalingRestriction="NoRestriction">
+                <synapse delayMethod="Random" maxDelay="0">
+                  <analogTarget scope="All"
+                                relShareOriginal="0"
+                                relShareTransDiff="0"
+                                relShareTransLinearSteps="0"
+                                relShareTransPower="0"
+                                relShareTransFoldedPower="0"
+                                relShareTransMovingAverage="1"
+                                >
+                    <weight min="0" max="1"/>
+                  </analogTarget>
+                </synapse>
+              </inputConnection>
+              <inputConnection fieldName="RightHandAccel" poolName="Pool3" density="0.5" signalingRestriction="NoRestriction">
+                <synapse delayMethod="Random" maxDelay="0">
+                  <analogTarget scope="All"
+                                relShareOriginal="0"
+                                relShareTransDiff="0"
+                                relShareTransLinearSteps="0"
+                                relShareTransPower="0"
+                                relShareTransFoldedPower="0"
+                                relShareTransMovingAverage="1"
                                 >
                     <weight min="0" max="1"/>
                   </analogTarget>
@@ -94,6 +216,14 @@
               </inputConnection>
             </inputConnections>
             <predictors>
+              <settings>
+                <activationFadingSum/>
+                <activationMWAvg weights="Constant" window="150"/>
+                <firingFadingSum/>
+                <firingMWAvg weights="Constant" window="150"/>
+                <firingCount/>
+                <firingBinPattern/>
+              </settings>
               <permission activation="false"
                           activationSquare="false"
                           activationFadingSum="false"
@@ -106,7 +236,7 @@
           </reservoirInstance>
         </reservoirInstanceContainer>
       </neuralPreprocessor>
-      <readoutLayer testDataRatio="0.1" folds="Auto" repetitions="1">
+      <readoutLayer testDataRatio="0.05" folds="Auto" repetitions="1">
         <readoutUnit name="Cancel Call">
           <classification oneWinnerGroupName="Gesture">
             <binFeature/>
@@ -336,7 +466,11 @@
     <stateMachineCfg randomizerSeek="0">
       <neuralPreprocessor predictorsReductionRatio="0">
         <input>
-          <feedingPatterned bidir="true" routeToReadout="false"/>
+          <feedingPatterned bidir="true" routeToReadout="false">
+            <unification unifyAmplitude="false" detrend="false">
+              <resampling thresholdOfSignalBeginDetection="0" thresholdOfSignalEndDetection="0" keepCommonTimeScale="true" targetTimePoints="Auto"/>
+            </unification>
+          </feedingPatterned>
           <external>
             <field name="Accel"
                    allowRoutingToReadout="true"
@@ -593,7 +727,11 @@
     <stateMachineCfg randomizerSeek="0">
       <neuralPreprocessor>
         <input>
-          <feedingPatterned bidir="true"/>
+          <feedingPatterned bidir="true">
+            <unification unifyAmplitude="false" detrend="false">
+              <resampling thresholdOfSignalBeginDetection="0" thresholdOfSignalEndDetection="0" keepCommonTimeScale="true" targetTimePoints="Auto"/>
+            </unification>
+          </feedingPatterned>
           <external>
             <field name="Outline" spikeTrainLength="5">
               <realFeature standardize="true" keepReserve="true"/>
@@ -736,7 +874,11 @@
     <stateMachineCfg randomizerSeek="0">
       <neuralPreprocessor>
         <input>
-          <feedingPatterned bidir="true"/>
+          <feedingPatterned bidir="true">
+            <unification unifyAmplitude="false" detrend="false">
+              <resampling thresholdOfSignalBeginDetection="0" thresholdOfSignalEndDetection="0" keepCommonTimeScale="true" targetTimePoints="Auto"/>
+            </unification>
+          </feedingPatterned>
           <external>
             <field name="Outline">
               <realFeature standardize="true" keepReserve="true"/>
@@ -915,7 +1057,11 @@
     <stateMachineCfg randomizerSeek="0">
       <neuralPreprocessor>
         <input>
-          <feedingPatterned bidir="false"/>
+          <feedingPatterned bidir="false">
+            <unification unifyAmplitude="false" detrend="false">
+              <resampling thresholdOfSignalBeginDetection="0" thresholdOfSignalEndDetection="0" keepCommonTimeScale="true" targetTimePoints="Auto"/>
+            </unification>
+          </feedingPatterned>
           <external>
             <field name="DistanceFromCenter">
               <realFeature standardize="true" keepReserve="true"/>
@@ -1006,7 +1152,11 @@
     <stateMachineCfg randomizerSeek="0">
       <neuralPreprocessor>
         <input>
-          <feedingPatterned bidir="false"/>
+          <feedingPatterned bidir="false">
+            <unification unifyAmplitude="false" detrend="false">
+              <resampling thresholdOfSignalBeginDetection="0" thresholdOfSignalEndDetection="0" keepCommonTimeScale="true" targetTimePoints="Auto"/>
+            </unification>
+          </feedingPatterned>
           <external>
             <field name="DistanceFromCenter">
               <realFeature standardize="true" keepReserve="true"/>
@@ -1112,7 +1262,11 @@
     <stateMachineCfg randomizerSeek="0">
       <neuralPreprocessor>
         <input>
-          <feedingPatterned bidir="false"/>
+          <feedingPatterned bidir="false">
+            <unification unifyAmplitude="false" detrend="false">
+              <resampling thresholdOfSignalBeginDetection="0" thresholdOfSignalEndDetection="0" keepCommonTimeScale="true" targetTimePoints="Auto"/>
+            </unification>
+          </feedingPatterned>
           <external>
             <field name="Eigenworm1">
               <realFeature standardize="true" keepReserve="true"/>
@@ -1247,7 +1401,11 @@
     <stateMachineCfg randomizerSeek="0">
       <neuralPreprocessor>
         <input>
-          <feedingPatterned bidir="true" routeToReadout="false" dataOrganization="Groupped"/>
+          <feedingPatterned bidir="true" routeToReadout="false" dataOrganization="Groupped">
+            <unification unifyAmplitude="false" detrend="false">
+              <resampling thresholdOfSignalBeginDetection="0" thresholdOfSignalEndDetection="0" keepCommonTimeScale="true" targetTimePoints="Auto"/>
+            </unification>
+          </feedingPatterned>
           <external>
             <field name="coord_abcissa">
               <realFeature standardize="true" keepReserve="true"/>
@@ -1474,7 +1632,11 @@
     <stateMachineCfg randomizerSeek="0">
       <neuralPreprocessor>
         <input>
-          <feedingPatterned bidir="true" routeToReadout="true" dataOrganization="Groupped"/>
+          <feedingPatterned bidir="true" routeToReadout="true" dataOrganization="Groupped">
+            <unification unifyAmplitude="false" detrend="false">
+              <resampling thresholdOfSignalBeginDetection="0" thresholdOfSignalEndDetection="0" keepCommonTimeScale="true" targetTimePoints="Auto"/>
+            </unification>
+          </feedingPatterned>
           <external>
             <field name="coord_abcissa" spikeTrainLength="5">
               <realFeature standardize="true" keepReserve="false"/>
@@ -1695,7 +1857,11 @@
     <stateMachineCfg randomizerSeek="0">
       <neuralPreprocessor>
         <input>
-          <feedingPatterned bidir="true" routeToReadout="true" dataOrganization="Groupped"/>
+          <feedingPatterned bidir="true" routeToReadout="true" dataOrganization="Groupped">
+            <unification unifyAmplitude="false" detrend="false">
+              <resampling thresholdOfSignalBeginDetection="0" thresholdOfSignalEndDetection="0" keepCommonTimeScale="true" targetTimePoints="Auto"/>
+            </unification>
+          </feedingPatterned>
           <external>
             <field name="coord_abcissa">
               <realFeature standardize="true" keepReserve="false"/>
@@ -2228,7 +2394,11 @@
     <stateMachineCfg randomizerSeek="0">
       <neuralPreprocessor>
         <input>
-          <feedingPatterned bidir="true" routeToReadout="false"/>
+          <feedingPatterned bidir="true" routeToReadout="false">
+            <unification unifyAmplitude="false" detrend="false">
+              <resampling thresholdOfSignalBeginDetection="0" thresholdOfSignalEndDetection="0" keepCommonTimeScale="true" targetTimePoints="Auto"/>
+            </unification>
+          </feedingPatterned>
           <external>
             <field name="EEG" allowRoutingToReadout="true">
               <realFeature standardize="true" keepReserve="false"/>

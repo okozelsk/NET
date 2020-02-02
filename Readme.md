@@ -26,7 +26,7 @@ site. It is shown, that even without any massive tuning of StateMachine's parame
 ### Data format for the demo application
 Input data is expected in csv format where data delimiter can be a tab, semicolon or comma character.
 * **Continuous feeding regime** requires a standard csv format, where the first line contains the names of the data fields and each next line contains the data. [Here](https://github.com/okozelsk/NET/blob/master/Demo/DemoConsoleApp/Data/TTOO.csv) is an example
-* **Patterned feeding regime** requires specific csv format without colum names (header). Each data line contains values of repetitive pattern features followed by expected output values at the end. Values of repetitive pattern features can be organized in two ways: groupped [v1(t1),v2(t1),v1(t2),v2(t2),v1(t3),v2(t3)] or sequential [v1(t1),v1(t2),v1(t3),v2(t1),v2(t2),v2(t3)]. [Here](https://github.com/okozelsk/NET/blob/master/Demo/DemoConsoleApp/Data/LibrasMovement.csv) is an example
+* **Patterned feeding regime** requires specific logical csv format without colum names (header). Each data line contains values of repetitive pattern features followed by expected output values at the end. Values of repetitive pattern features can be organized in two ways: groupped [v1(t1),v2(t1),v1(t2),v2(t2),v1(t3),v2(t3)] or sequential [v1(t1),v1(t2),v1(t3),v2(t1),v2(t2),v2(t3)]. [Here](https://github.com/okozelsk/NET/blob/master/Demo/DemoConsoleApp/Data/LibrasMovement.csv) is an example
 
 ## Components overview
 
@@ -50,7 +50,7 @@ Input data is expected in csv format where data delimiter can be a tab, semicolo
 |[ParamSeeker](https://github.com/okozelsk/NET/blob/master/RCNet/MathTools/PS/ParamSeeker.cs)|Implements an error driven iterative search for the best value of a given parameter|
 |[HurstExpEstim](https://github.com/okozelsk/NET/blob/master/RCNet/MathTools/Hurst/HurstExpEstim.cs)|Implements Hurst exponent estimator and Rescalled range. It can be used to evaluate level of data randomness|
 |["RandomValue"](https://github.com/okozelsk/NET/tree/master/RCNet/RandomValue)|Supports Uniform, Gaussian, Exponential and Gamma distributions. Here is [extension code](https://github.com/okozelsk/NET/blob/master/RCNet/Extensions/RandomExtensions.cs)|
-|[Others](https://github.com/okozelsk/NET/tree/master/RCNet/MathTools)|Set of small additional helper components like PhysUnit, Interval, Bitwise, Combinatorics, Factorial,...|
+|[Others](https://github.com/okozelsk/NET/tree/master/RCNet/MathTools)|Set of small additional helper components like PhysUnit, Interval, Bitwise, Combinatorics, Discrete,...|
 
 ### Signal generators
 |Component|Description|
@@ -76,7 +76,7 @@ Input data is expected in csv format where data delimiter can be a tab, semicolo
 |[DelimitedStringValues](https://github.com/okozelsk/NET/blob/master/RCNet/CsvTools/DelimitedStringValues.cs)|Helper encoder and decoder of data line in csv format|
 |[CsvDataHolder](https://github.com/okozelsk/NET/blob/master/RCNet/CsvTools/CsvDataHolder.cs)|Provides simple loading and saving of csv data|
 |[VectorBundle](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Data/VectorBundle.cs)|Bundle of input data vectors and corresponding desired output vectors (1:1). Supports upload from csv file|
-|[PatternBundle](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Data/PatternBundle.cs)|Bundle of patterns of input data vectors and corresponding desired output vectors (n:1). Supports upload from csv file|
+|[InputPattern](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Data/InputPattern.cs)|Input pattern supporting signal detection, unification and resampling features|
 |[ResultBundle](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Data/ResultBundle.cs)|Bundle of input, computed and desired output vectors (1:1:1)|
 
 ### Analog activation functions (stateless)

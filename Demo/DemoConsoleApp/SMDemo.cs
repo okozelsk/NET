@@ -15,6 +15,7 @@ using RCNet.DemoConsoleApp.Log;
 using System.Text;
 using System.Linq;
 using RCNet.Neural.Network.NonRecurrent;
+using RCNet.CsvTools;
 
 namespace RCNet.DemoConsoleApp
 {
@@ -105,12 +106,12 @@ namespace RCNet.DemoConsoleApp
         }
 
         /// <summary>
-        /// Performs one demo case.
+        /// Performs specified demo case.
         /// </summary>
         /// <param name="demoCaseParams">An instance of DemoSettings.CaseSettings to be performed</param>
         public void PerformDemoCase(DemoSettings.CaseSettings demoCaseParams)
         {
-            bool continuousFeedingData = false;
+            bool continuousFeedingDataFormat = false;
             //Prediction input vector (relevant only for input continuous feeding)
             double[] predictionInputVector = null;
             //Log start
@@ -123,49 +124,36 @@ namespace RCNet.DemoConsoleApp
             //Register to RegressionEpochDone event
             stateMachine.RL.RegressionEpochDone += OnRegressionEpochDone;
             StateMachine.TrainingResults trainingResults;
+            CsvDataHolder trainingCsvData = new CsvDataHolder(demoCaseParams.TrainingDataFileName);
+            VectorBundle trainingData;
+            if (trainingCsvData.ColNameCollection.NumOfStringValues > 0)
+            {
+                //Continuous feeding data format
+                continuousFeedingDataFormat = true;
+                //Check NeuralPreprocessor is not bypassed
+                if (stateMachine.NP == null)
+                {
+                    throw new Exception("Incorrect file format. When NeuralPreprocessor is bypassed, only patterned data are allowed.");
+                }
+                trainingData = VectorBundle.Load(trainingCsvData,
+                                                 demoCaseParams.StateMachineCfg.NeuralPreprocessorConfig.InputConfig.ExternalFieldNameCollection(),
+                                                 demoCaseParams.StateMachineCfg.ReadoutLayerConfig.OutputFieldNameCollection,
+                                                 out predictionInputVector
+                                                 );
+            }
+            else
+            {
+                //Patterned feeding data format
+                trainingData = VectorBundle.Load(trainingCsvData, demoCaseParams.StateMachineCfg.ReadoutLayerConfig.OutputFieldNameCollection.Count);
+            }
             if (stateMachine.NP != null)
             {
                 //Register to PreprocessingProgressChanged event
                 stateMachine.NP.PreprocessingProgressChanged += OnPreprocessingProgressChanged;
-                if (demoCaseParams.StateMachineCfg.NeuralPreprocessorConfig.InputConfig.FeedingType == NeuralPreprocessor.InputFeedingType.Continuous)
-                {
-                    //Continuous input feeding
-                    continuousFeedingData = true;
-                    //Load data bundle from csv file
-                    VectorBundle trainingData = VectorBundle.LoadFromCsv(demoCaseParams.TrainingDataFileName,
-                                                                         demoCaseParams.StateMachineCfg.NeuralPreprocessorConfig.InputConfig.ExternalFieldNameCollection(),
-                                                                         demoCaseParams.StateMachineCfg.ReadoutLayerConfig.OutputFieldNameCollection,
-                                                                         out predictionInputVector
-                                                                         );
-                    trainingResults = stateMachine.Train(trainingData);
-                }
-                else
-                {
-                    //Patterned input feeding
-                    //Load data bundle from csv file
-                    PatternBundle trainingData = PatternBundle.LoadFromCsv(demoCaseParams.TrainingDataFileName,
-                                                                           demoCaseParams.StateMachineCfg.NeuralPreprocessorConfig.InputConfig.ExternalFieldNameCollection().Count,
-                                                                           demoCaseParams.StateMachineCfg.NeuralPreprocessorConfig.InputConfig.PatternedInputDataOrganization,
-                                                                           demoCaseParams.StateMachineCfg.ReadoutLayerConfig.OutputFieldNameCollection.Count
-                                                                           );
-                    trainingResults = stateMachine.Train(trainingData);
-                }
             }
-            else
-            {
-                //Neural preprocessor is bypassed -> patterned feeding
-                //Patterned input feeding
-                //Load data bundle from csv file
-                PatternBundle trainingData = PatternBundle.LoadFromCsv(demoCaseParams.TrainingDataFileName,
-                                                                       1,
-                                                                       NeuralPreprocessorSettings.InputSettings.PatternedDataOrganization.Sequential,
-                                                                       demoCaseParams.StateMachineCfg.ReadoutLayerConfig.OutputFieldNameCollection.Count
-                                                                       );
-                trainingResults = stateMachine.Train(trainingData);
-            }
-
+            //Training
+            trainingResults = stateMachine.Train(trainingData);
             _log.Write(string.Empty);
-
             //Report training (regression) results
             _log.Write("    Training results", false);
             string trainingReport = trainingResults.RegressionResults.GetTrainingResultsReport(6);
@@ -178,31 +166,27 @@ namespace RCNet.DemoConsoleApp
             {
                 stateMachine.VerificationProgressChanged += OnVerificationProgressChanged;
                 StateMachine.VerificationResults verificationResults;
-                if (continuousFeedingData)
+                CsvDataHolder verificationCsvData = new CsvDataHolder(demoCaseParams.VerificationDataFileName);
+                VectorBundle verificationData;
+                if (continuousFeedingDataFormat)
                 {
                     //Continuous input feeding
-                    //Last known values from training must be pushed into the reservoirs to keep time series continuity
-                    //(first data in verification.csv is output of the last data in training.csv)
-                    double[] predictionOutputVector = stateMachine.Compute(predictionInputVector);
-                    //Load data bundle from csv file
-                    VectorBundle verificationData = VectorBundle.LoadFromCsv(demoCaseParams.VerificationDataFileName,
-                                                                             stateMachine.NP != null ? demoCaseParams.StateMachineCfg.NeuralPreprocessorConfig.InputConfig.ExternalFieldNameCollection() : null,
-                                                                             demoCaseParams.StateMachineCfg.ReadoutLayerConfig.OutputFieldNameCollection,
-                                                                             out predictionInputVector
-                                                                             );
-                    verificationResults = stateMachine.Verify(verificationData);
+                    //Last known input values from training (predictionInputVector) must be pushed into the reservoirs to keep time series continuity
+                    //(first input data in verification.csv is output of the last data in training.csv)
+                    double[] tmp = stateMachine.Compute(predictionInputVector);
+                    //Load verification data and get new predictionInputVector for final prediction
+                    verificationData = VectorBundle.Load(verificationCsvData,
+                                                         demoCaseParams.StateMachineCfg.NeuralPreprocessorConfig.InputConfig.ExternalFieldNameCollection(),
+                                                         demoCaseParams.StateMachineCfg.ReadoutLayerConfig.OutputFieldNameCollection,
+                                                         out predictionInputVector
+                                                         );
                 }
                 else
                 {
-                    //Patterned input feeding
-                    //Load data bundle from csv file
-                    PatternBundle verificationData = PatternBundle.LoadFromCsv(demoCaseParams.VerificationDataFileName,
-                                                                               stateMachine.NP != null ? demoCaseParams.StateMachineCfg.NeuralPreprocessorConfig.InputConfig.ExternalFieldNameCollection().Count : 1,
-                                                                               stateMachine.NP != null ? demoCaseParams.StateMachineCfg.NeuralPreprocessorConfig.InputConfig.PatternedInputDataOrganization : NeuralPreprocessorSettings.InputSettings.PatternedDataOrganization.Sequential,
-                                                                               demoCaseParams.StateMachineCfg.ReadoutLayerConfig.OutputFieldNameCollection.Count
-                                                                               );
-                    verificationResults = stateMachine.Verify(verificationData);
+                    //Patterned feeding data format
+                    verificationData = VectorBundle.Load(verificationCsvData, demoCaseParams.StateMachineCfg.ReadoutLayerConfig.OutputFieldNameCollection.Count);
                 }
+                verificationResults = stateMachine.Verify(verificationData);
                 _log.Write(string.Empty);
                 //Report verification results
                 _log.Write("    Verification results", false);
@@ -211,7 +195,7 @@ namespace RCNet.DemoConsoleApp
             }
 
             //Perform prediction in case the input feeding is continuous (we know the input but we don't know the ideal output)
-            if (continuousFeedingData)
+            if (continuousFeedingDataFormat)
             {
                 double[] predictionOutputVector = stateMachine.Compute(predictionInputVector);
                 string predictionReport = stateMachine.RL.GetForecastReport(predictionOutputVector, 6);

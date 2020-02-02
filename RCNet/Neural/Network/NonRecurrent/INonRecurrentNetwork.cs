@@ -27,7 +27,13 @@ namespace RCNet.Neural.Network.NonRecurrent
         /// Total number of network's weights
         /// </summary>
         int NumOfWeights { get; }
-        
+
+        /// <summary>
+        /// Output range
+        /// </summary>
+        Interval OutputRange { get; }
+
+
         //Methods
         /// <summary>
         /// Computes network output values

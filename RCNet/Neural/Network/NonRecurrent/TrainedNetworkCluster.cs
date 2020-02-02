@@ -9,7 +9,8 @@ using System.Threading.Tasks;
 namespace RCNet.Neural.Network.NonRecurrent
 {
     /// <summary>
-    /// Computation cluster of trained networks
+    /// Computation cluster of trained networks.
+    /// Supported are only single output networks.
     /// </summary>
     [Serializable]
     public class TrainedNetworkCluster
@@ -35,10 +36,6 @@ namespace RCNet.Neural.Network.NonRecurrent
         /// Error statistics of the cluster
         /// </summary>
         public ClusterErrStatistics ErrorStats { get; }
-        /// <summary>
-        /// Expected accuracy of this cluster
-        /// </summary>
-        public double ExpectedAccuracy { get; private set; }
 
         //Constructors
         /// <summary>
@@ -54,7 +51,6 @@ namespace RCNet.Neural.Network.NonRecurrent
             Members = new List<TrainedNetwork>(numOfMembers);
             Weights = new List<double>(numOfMembers);
             ErrorStats = new ClusterErrStatistics(ClusterName, numOfMembers, BinBorder);
-            ExpectedAccuracy = -1d;
             return;
         }
 
@@ -73,7 +69,6 @@ namespace RCNet.Neural.Network.NonRecurrent
             }
             Weights = new List<double>(source.Weights);
             ErrorStats = source.ErrorStats.DeepClone();
-            ExpectedAccuracy = source.ExpectedAccuracy;
         }
 
         //Properties
@@ -89,53 +84,27 @@ namespace RCNet.Neural.Network.NonRecurrent
         /// </summary>
         /// <param name="predictors">Input predictors</param>
         /// <param name="memberOutputCollection">Collection of outputs of cluster member networks</param>
-        public double[] Compute(double[] predictors, out List<double[]> memberOutputCollection)
+        public double Compute(double[] predictors, out double[] memberOutputCollection)
         {
-            int numOfOutputValues = Members[0].Network.NumOfOutputValues;
-            WeightedAvg[] weightedResultCollection = new WeightedAvg[numOfOutputValues];
-            for(int i = 0; i < numOfOutputValues; i++)
-            {
-                weightedResultCollection[i] = new WeightedAvg();
-            }
+            WeightedAvg weightedResult = new WeightedAvg();
             //Init member output collection
-            memberOutputCollection = new List<double[]>(Members.Count);
+            memberOutputCollection = new double[Members.Count];
             //Loop cluster members
             int clusterMemberIdx = 0;
             foreach (TrainedNetwork clusterMember in Members)
             {
                 //Compute member
-                double[] computedValues = clusterMember.Network.Compute(predictors);
+                double computedValue = clusterMember.Network.Compute(predictors)[0];
                 //Store sub-results
-                memberOutputCollection.Add(computedValues);
-                //Add sub-results to weighted averages
-                for (int i = 0; i < numOfOutputValues; i++)
-                {
-                    weightedResultCollection[i].AddSampleValue(computedValues[i], Weights[clusterMemberIdx]);
-                }
+                memberOutputCollection[clusterMemberIdx] = computedValue;
+                //Add sub-result to weighted average
+                weightedResult.AddSampleValue(computedValue, Weights[clusterMemberIdx]);
                 ++clusterMemberIdx;
             }
-            //Return weighted average results
-            double[] outputValues = new double[numOfOutputValues];
-            for(int i = 0; i < numOfOutputValues; i++)
-            {
-                outputValues[i] = weightedResultCollection[i].Avg;
-            }
-            return outputValues;
+            //Return weighted average result
+            return weightedResult.Avg;
         }
 
-        /// <summary>
-        /// Recomputes weighted expected accuracy of this cluster
-        /// </summary>
-        public void RecomputeExpectedAccuracy()
-        {
-            WeightedAvg wAvg = new WeightedAvg();
-            for(int i = 0; i < Members.Count; i++)
-            {
-                wAvg.AddSampleValue(Members[i].ExpectedAccuracy, Weights[i]);
-            }
-            ExpectedAccuracy = wAvg.Avg;
-            return;
-        }
 
         /// <summary>
         /// Creates the deep copy of this instance

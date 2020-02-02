@@ -13,7 +13,8 @@ using System.Globalization;
 namespace RCNet.Neural.Network.NonRecurrent
 {
     /// <summary>
-    /// Builds trained non-recurrent network
+    /// Builds trained non-recurrent network.
+    /// Supported is only single output network.
     /// </summary>
     public class TrainedNetworkBuilder
     {
@@ -45,10 +46,6 @@ namespace RCNet.Neural.Network.NonRecurrent
         /// </summary>
         [field: NonSerialized]
         public event RegressionEpochDoneHandler RegressionEpochDone;
-
-        //Constants
-        private const double MinExpectedAccuracy = 1e-6d;
-        private const double MaxExpectedAccuracy = 1d - 1e-6d;
 
         //Attributes
         private readonly string _networkName;
@@ -89,6 +86,11 @@ namespace RCNet.Neural.Network.NonRecurrent
             _networkSettings = networkSettings;
             _foldNum = foldNum;
             _numOfFolds = numOfFolds;
+            //Check num of output values is 1
+            if (trainingBundle.OutputVectorCollection[0].Length != 1)
+            {
+                throw new Exception("Only single output value is allowed.");
+            }
             _trainingBundle = trainingBundle;
             _testingBundle = testingBundle;
             _binBorder = binBorder;
@@ -99,7 +101,7 @@ namespace RCNet.Neural.Network.NonRecurrent
 
         //Properties
         /// <summary>
-        /// Indicates that the whole network output is binary
+        /// Indicates that the network ideal output is binary
         /// </summary>
         public bool BinaryOutput { get { return !double.IsNaN(_binBorder); } }
         /// <summary>
@@ -163,7 +165,6 @@ namespace RCNet.Neural.Network.NonRecurrent
                                            buildingState.CurrNetwork,
                                            buildingState.BestNetwork
                                            ),
-                /*StopCurrentAttempt = (((double)(regrState.Epoch - regrState.LastImprovementEpoch) / (double)regrState.MaxEpochs) >= stopAttemptBorder),*/
                 StopProcess = (BinaryOutput &&
                                buildingState.BestNetwork.TrainingBinErrorStat.TotalErrStat.Sum == 0 &&
                                buildingState.BestNetwork.TestingBinErrorStat.TotalErrStat.Sum == 0 &&
@@ -184,7 +185,7 @@ namespace RCNet.Neural.Network.NonRecurrent
             {
                 //Feed forward network
                 FeedForwardNetworkSettings netCfg = (FeedForwardNetworkSettings)_networkSettings;
-                FeedForwardNetwork ffn = new FeedForwardNetwork(_trainingBundle.InputVectorCollection[0].Length, _trainingBundle.OutputVectorCollection[0].Length, netCfg);
+                FeedForwardNetwork ffn = new FeedForwardNetwork(_trainingBundle.InputVectorCollection[0].Length, 1, netCfg);
                 net = ffn;
                 if (netCfg.TrainerCfg.GetType() == typeof(QRDRegrTrainerSettings))
                 {
@@ -210,11 +211,6 @@ namespace RCNet.Neural.Network.NonRecurrent
             else if(IsPP)
             {
                 //Parallel perceptron network
-                //Check num of output values is 1
-                if(_trainingBundle.OutputVectorCollection[0].Length != 1)
-                {
-                    throw new Exception("In case of parallel perceptron is allowed only single output value.");
-                }
                 ParallelPerceptronSettings netCfg = (ParallelPerceptronSettings)_networkSettings;
                 ParallelPerceptron ppn = new ParallelPerceptron(_trainingBundle.InputVectorCollection[0].Length, netCfg);
                 net = ppn;
@@ -267,13 +263,17 @@ namespace RCNet.Neural.Network.NonRecurrent
                     currNetwork.TestingBinErrorStat = new BinErrStat(_binBorder, testingComputedOutputsCollection, _testingBundle.OutputVectorCollection);
                     currNetwork.CombinedBinaryError = Math.Max(currNetwork.CombinedBinaryError, currNetwork.TestingBinErrorStat.TotalErrStat.Sum);
                 }
-                //Expected accuracy
-                currNetwork.ExpectedAccuracy = ((1d - currNetwork.TrainingErrorStat.ArithAvg) * (1d - currNetwork.TestingErrorStat.ArithAvg));
+                //Expected precision accuracy
+                currNetwork.ExpectedPrecisionAccuracy = Math.Min((1d - (currNetwork.TrainingErrorStat.ArithAvg / currNetwork.Network.OutputRange.Span)), (1d - (currNetwork.TestingErrorStat.ArithAvg / currNetwork.Network.OutputRange.Span)));
+                //Expected binary accuracy
                 if (BinaryOutput)
                 {
-                    currNetwork.ExpectedAccuracy *= ((1d - currNetwork.TrainingBinErrorStat.TotalErrStat.ArithAvg) * (1d - currNetwork.TestingBinErrorStat.TotalErrStat.ArithAvg));
+                    currNetwork.ExpectedBinaryAccuracy = Math.Min((1d - currNetwork.TrainingBinErrorStat.TotalErrStat.ArithAvg), (1d - currNetwork.TestingBinErrorStat.TotalErrStat.ArithAvg));
                 }
-                currNetwork.ExpectedAccuracy = currNetwork.ExpectedAccuracy.Bound(MinExpectedAccuracy, MaxExpectedAccuracy);
+                else
+                {
+                    currNetwork.ExpectedBinaryAccuracy = double.NaN;
+                }
 
                 //Restart lastImprovementEpoch when new trainer's attempt started
                 if (trainer.AttemptEpoch == 1)

@@ -18,6 +18,7 @@ using RCNet.Neural.Network.SM.Preprocessing;
 using System.Globalization;
 using RCNet.Queue;
 using RCNet.CsvTools;
+using RCNet.Neural.Data;
 
 namespace RCNet.DemoConsoleApp
 {
@@ -37,8 +38,94 @@ namespace RCNet.DemoConsoleApp
         }
 
         //Methods
+        private void TestInputPattern()
+        {
+            string inputFileName = ".\\Data\\CricketX_train.csv";
+            string outputFileName = ".\\Data\\CricketX_trans.csv";
+            CsvDataHolder csvInputDataHolder = new CsvDataHolder(inputFileName);
+            CsvDataHolder csvOutputDataHolder = new CsvDataHolder(DelimitedStringValues.DefaultDelimiter);
+            foreach(DelimitedStringValues dsv in csvInputDataHolder.DataRowCollection)
+            {
+                double[] inputData = new double[dsv.StringValueCollection.Count];
+                for(int i = 0; i < inputData.Length; i++)
+                {
+                    inputData[i] = dsv.GetValue(i).ParseDouble(true, $"Can't parse double data value {dsv.GetValue(i)}.");
+                }
+                int classIndex = 0;
+                if (inputData[(inputData.Length - 12) + classIndex] == 1)
+                {
+                    InputPattern inputPattern = new InputPattern(inputData,
+                                                                 0,
+                                                                 inputData.Length - 12,
+                                                                 2,
+                                                                 InputPattern.TimeOrderVarDataOrganization.Sequential,
+                                                                 false,
+                                                                 true,
+                                                                 0,
+                                                                 0,
+                                                                 true,
+                                                                 30
+                                                                 );
+                    DelimitedStringValues concatedData = new DelimitedStringValues();
+                    concatedData.LoadFromDoubleEnumerable(inputData);
+                    foreach(double[] resampledData in inputPattern.VarDataCollection)
+                    {
+                        concatedData.LoadFromDoubleEnumerable(resampledData, false);
+                    }
+                    csvOutputDataHolder.DataRowCollection.Add(concatedData);
+                }
+            }
+            //Save csvOutputDataHolder
+            csvOutputDataHolder.Save(outputFileName);
+            Console.WriteLine("Saved");
+
+            Console.ReadLine();
+            return;
+        }
+
+
         public void Run()
         {
+            TestInputPattern();
+
+            //Test real feature filter
+            RealFeatureFilter rff = new RealFeatureFilter(new Interval(-1, 1), true, true, true);
+            rff.Update(0);
+            rff.Update(1);
+            rff.Update(2);
+            rff.Update(-1);
+            rff.Update(-3);
+
+            double orgV, nrmV, bckOrgV;
+            orgV = 1.5;
+            nrmV = rff.ApplyFilter(orgV);
+            bckOrgV = rff.ApplyReverse(nrmV);
+            Console.WriteLine($"RFF Org={orgV} Nrm={nrmV} Bck={bckOrgV}");
+
+            orgV = -1.5;
+            nrmV = rff.ApplyFilter(orgV);
+            bckOrgV = rff.ApplyReverse(nrmV);
+            Console.WriteLine($"RFF Org={orgV} Nrm={nrmV} Bck={bckOrgV}");
+
+            Console.ReadLine();
+
+            //Filter test
+            rff = new RealFeatureFilter(new Interval(-1, 1));
+            for (int i = 1; i <= 1500; i++)
+            {
+                rff.Update(_rand.NextDouble() * _rand.Next(0, 10000));
+            }
+            double featureValue = 0.5;
+            double filterValue = rff.ApplyFilter(featureValue);
+            double reverseValue = rff.ApplyReverse(filterValue);
+            Console.WriteLine($"Feature: {featureValue} Filter: {filterValue} Reverse: {reverseValue}");
+
+            Console.ReadLine();
+
+
+
+
+
             //CSV TEST
             //CsvDataHolder cdh = new CsvDataHolder(".\\Data\\BeetleFly_train.csv");
             CsvDataHolder cdh = new CsvDataHolder(".\\Data\\TTOO.csv");
@@ -73,16 +160,6 @@ namespace RCNet.DemoConsoleApp
             Console.ReadLine();
 
 
-            //Filter test
-            RealFeatureFilter rff = new RealFeatureFilter(new Interval(-1, 1));
-            for(int i = 1; i <= 1500; i++)
-            {
-                rff.Update(_rand.NextDouble() * _rand.Next(0, 10000));
-            }
-            double featureValue = 0.5;
-            double filterValue = rff.ApplyFilter(featureValue);
-            double reverseValue = rff.ApplyReverse(filterValue);
-            Console.WriteLine($"Feature: {featureValue} Filter: {filterValue} Reverse: {reverseValue}");
 
 
 
@@ -227,6 +304,7 @@ namespace RCNet.DemoConsoleApp
             TestActivation(af, 800, 0.15, 10, 600);
             return;
         }
+
 
         private void TestActivation(IActivationFunction af, int simLength, double constCurrent, int from, int count)
         {

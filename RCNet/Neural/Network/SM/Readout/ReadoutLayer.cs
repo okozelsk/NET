@@ -295,37 +295,18 @@ namespace RCNet.Neural.Network.SM.Readout
             return natOutputs;
         }
 
-        private double[] ToSingleArray(List<double[]> items)
-        {
-            int arrayLength = 0;
-            foreach(double[] item in items)
-            {
-                arrayLength += item.Length;
-            }
-            double[] result = new double[arrayLength];
-            int index = 0;
-            foreach (double[] item in items)
-            {
-                for(int i = 0; i < item.Length; i++)
-                {
-                    result[index++] = item[i];
-                }
-            }
-            return result;
-        }
-
         /// <summary>
         /// Computes readout layer output vector
         /// </summary>
-        private double[] Compute(double[] predictors, out List<double[]> unitsAllSubResults)
+        private double[] ComputeInternal(double[] predictors, out List<double[]> unitsAllSubResults)
         {
             unitsAllSubResults = new List<double[]>(Settings.ReadoutUnitCfgCollection.Count);
             double[] outputVector = new double[_readoutUnitCollection.Length];
             for(int unitIdx = 0; unitIdx < _readoutUnitCollection.Length; unitIdx++)
             {
                 double[] readoutUnitInputVector = _predictorsMapper.CreateVector(Settings.ReadoutUnitCfgCollection[unitIdx].Name, predictors);
-                outputVector[unitIdx] = _readoutUnitCollection[unitIdx].NetworkCluster.Compute(readoutUnitInputVector, out List<double[]> memberOutputCollection)[0];
-                unitsAllSubResults.Add(ToSingleArray(memberOutputCollection));
+                outputVector[unitIdx] = _readoutUnitCollection[unitIdx].NetworkCluster.Compute(readoutUnitInputVector, out double[] memberOutputCollection);
+                unitsAllSubResults.Add(memberOutputCollection);
             }
             return outputVector;
         }
@@ -334,7 +315,7 @@ namespace RCNet.Neural.Network.SM.Readout
         /// Computes readout layer output vector
         /// </summary>
         /// <param name="predictors">The predictors</param>
-        public double[] Compute(double[] predictors)
+        public double[] Compute(double[] predictors, out List<double[]> unitsAllSubResults)
         {
             //Check readyness
             if (!Trained)
@@ -342,7 +323,7 @@ namespace RCNet.Neural.Network.SM.Readout
                 throw new Exception("Readout layer is not trained. Build function has to be called before Compute function can be used.");
             }
             double[] nrmPredictors = NormalizePredictors(predictors);
-            double[] outputVector = Compute(nrmPredictors, out _);
+            double[] outputVector = ComputeInternal(nrmPredictors, out unitsAllSubResults);
             //Denormalization
             double[] natOuputVector = NaturalizeOutputs(outputVector);
             //Return result
@@ -359,7 +340,7 @@ namespace RCNet.Neural.Network.SM.Readout
         public int DecideOneWinner(string oneWinnerGroupName, double[] dataVector, out int[] membersIndexes, out double[] membersWeightedDataVector)
         {
             //Obtain group members indexes
-            membersIndexes = (from member in Settings.OneWinnerGroupCfgCollection[oneWinnerGroupName].Members  select member.Index).ToArray();
+            membersIndexes = (from member in Settings.OneWinnerGroupCfgCollection[oneWinnerGroupName].Members select member.Index).ToArray();
             //Compute members' weighted predictions
             membersWeightedDataVector = new double[membersIndexes.Length];
             for(int i = 0; i < membersIndexes.Length; i++)
@@ -382,9 +363,9 @@ namespace RCNet.Neural.Network.SM.Readout
         /// Computes readout layer and returns rich output data
         /// </summary>
         /// <param name="predictors">The predictors</param>
-        public ReadoutData ComputeReadoutData(double[] predictors)
+        public ReadoutData ComputeReadoutData(double[] predictors, out List<double[]> unitsAllSubResults)
         {
-            return new ReadoutData(Compute(predictors), this);
+            return new ReadoutData(Compute(predictors, out unitsAllSubResults), this);
         }
 
         //Inner classes

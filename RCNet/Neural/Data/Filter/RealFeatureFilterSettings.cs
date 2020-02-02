@@ -27,6 +27,10 @@ namespace RCNet.Neural.Data.Filter
         /// Keep range reserve?
         /// </summary>
         public bool KeepReserve { get; set; }
+        /// <summary>
+        /// Keep sign?
+        /// </summary>
+        public bool KeepSign { get; set; }
 
         //Constructors
         /// <summary>
@@ -34,11 +38,12 @@ namespace RCNet.Neural.Data.Filter
         /// </summary>
         /// <param name="standardize">Standardize?</param>
         /// <param name="keepReserve">Keep range reserve?</param>
-        public RealFeatureFilterSettings(bool standardize, bool keepReserve)
+        public RealFeatureFilterSettings(bool standardize, bool keepReserve, bool keepSign)
             :base(BaseFeatureFilter.FeatureType.Real)
         {
             Standardize = standardize;
             KeepReserve = keepReserve;
+            KeepSign = keepSign;
             return;
         }
 
@@ -51,6 +56,7 @@ namespace RCNet.Neural.Data.Filter
         {
             Standardize = source.Standardize;
             KeepReserve = source.KeepReserve;
+            KeepSign = source.KeepSign;
             return;
         }
 
@@ -71,6 +77,7 @@ namespace RCNet.Neural.Data.Filter
             //Parsing
             Standardize = bool.Parse(settingsElem.Attribute("standardize").Value);
             KeepReserve = bool.Parse(settingsElem.Attribute("keepReserve").Value);
+            KeepSign = bool.Parse(settingsElem.Attribute("keepSign").Value);
             return;
         }
 
@@ -82,7 +89,7 @@ namespace RCNet.Neural.Data.Filter
         {
             if (obj == null) return false;
             RealFeatureFilterSettings cmpSettings = obj as RealFeatureFilterSettings;
-            if (Standardize != cmpSettings.Standardize || KeepReserve != cmpSettings.KeepReserve)
+            if (Standardize != cmpSettings.Standardize || KeepReserve != cmpSettings.KeepReserve || KeepSign != cmpSettings.KeepSign)
             {
                 return false;
             }

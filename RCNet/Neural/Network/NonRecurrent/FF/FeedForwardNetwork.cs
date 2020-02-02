@@ -102,6 +102,10 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         /// Total number of network's weights
         /// </summary>
         public int NumOfWeights { get { return _flatWeights.Length; } }
+        /// <summary>
+        /// Output range of the output layer
+        /// </summary>
+        public Interval OutputRange { get { return LayerCollection[LayerCollection.Count - 1].Activation.OutputRange; } }
 
         //Methods
         /// <summary>

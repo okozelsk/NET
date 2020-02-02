@@ -251,6 +251,25 @@ namespace RCNet.CsvTools
         }
 
         /// <summary>
+        /// Loads string values into the internal collection from a string containing delimited values
+        /// </summary>
+        /// <param name="values">IEnumerable containing double values</param>
+        /// <param name="reset">Indicates if to clear the internal collection before the load</param>
+        /// <returns>Number of string values in the internal collection after the operation</returns>
+        public int LoadFromDoubleEnumerable(IEnumerable<double> values, bool reset = true)
+        {
+            if (reset)
+            {
+                Reset();
+            }
+            foreach(double value in values)
+            {
+                StringValueCollection.Add(value.ToString());
+            }
+            return StringValueCollection.Count;
+        }
+
+        /// <summary>
         /// Returns the string value from the internal collection having given index
         /// </summary>
         /// <param name="idx">Index</param>
