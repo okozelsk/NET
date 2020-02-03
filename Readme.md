@@ -123,8 +123,8 @@ See the [wiki pages.](https://en.wikipedia.org/wiki/Biological_neuron_model)
 |||
 |[TrainedNetwork](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/NonRecurrent/TrainedNetwork.cs)|Encapsulates trained non-recurrent (Feed forward or Parallel perceptron) network and related error statistics.|
 |[TrainedNetworkBuilder](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/NonRecurrent/TrainedNetworkBuilder.cs)|Builds single trained (Feed forward or Parallel perceptron) network. Performs training epochs and offers control to user to evaluate the network.|
-|[TrainedNetworkCluster](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/NonRecurrent/TrainedNetworkCluster.cs)|Encapsulates set of trained non-recurrent networks (cluster of TrainedNetwork instances) and related error statistics. Offers weighted cluster prediction and provides set of involved members alone predictions.|
-|[TrainedNetworkClusterBuilder](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/NonRecurrent/TrainedNetworkClusterBuilder.cs)|Builds cluster of trained networks based on x-fold cross validation approach. Each cluster member is a fold specific trained network.|
+|[TrainedNetworkCluster](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/NonRecurrent/TrainedNetworkCluster.cs)|Encapsulates set of trained non-recurrent networks (cluster of TrainedNetwork instances) and related error statistics. Offers weighted cluster prediction and also publics all inner members sub-predictions.|
+|[TrainedNetworkClusterBuilder](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/NonRecurrent/TrainedNetworkClusterBuilder.cs)|Builds cluster of trained networks based on x-fold cross validation approach. Each fold can have associated number of various networks.|
 
 ### State Machine components
 |Component|Description|
@@ -136,8 +136,8 @@ See the [wiki pages.](https://en.wikipedia.org/wiki/Biological_neuron_model)
 |[HiddenNeuron](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/Neuron/HiddenNeuron.cs)|Supports both analog and spiking activation functions and can produce analog signal and/or spikes (neuron is able to fire spikes even when stateless analog activation is used). Supports Retainment property of analog activation (leaky integrator). Supports set of different predictors.|
 |[Reservoir](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/Preprocessing/Reservoir.cs)|Provides recurrent network supporting analog and spiking neurons working directly together. Main features: SpectralRadius (for weights of analog, spiking or both neurons), Multiple 3D pools of neurons, Pool to pool connections. It can work as the Echo State Network reservoir, Liquid State Machine reservoir or Mixed reservoir|
 |[NeuralPreprocessor](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/Preprocessing/NeuralPreprocessor.cs)|Provides data preprocessing to predictors. Supports multiple internal reservoirs. Supports virtual input data associated with predefined signal generators. Supports two input feeding regimes: Continuous and Patterned|
-|[ReadoutUnit](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/Readout/ReadoutUnit.cs)|Readout unit does the Forecast or Classification. Contains cluster of trained readout networks and related important error statistics. Trained unit can contain cluster of the Feed Forward Networks or the Parallel Perceptron Networks. Supports x-fold cross validation.|
-|[ReadoutLayer](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/Readout/ReadoutLayer.cs)|Class implements independent readout layer consisting of trained readout units. Readout layer is useable separatedly or together with reservoir computing preprocessing.|
+|[ReadoutUnit](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/Readout/ReadoutUnit.cs)|Readout unit does the Forecast or Classification and encapsulates TrainedNetworkCluster.|
+|[ReadoutLayer](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/Readout/ReadoutLayer.cs)|Implements independent readout layer consisting of trained readout units.|
 
 ### State Machine
 [StateMachine](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/StateMachine.cs)

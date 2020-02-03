@@ -908,7 +908,7 @@
   </xs:complexType>
 
   <xs:complexType name="PPNetCfgType">
-    <xs:sequence minOccurs="0" maxOccurs="1">
+    <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="PPNetPDeltaRuleTrainerCfgType" name="pDeltaRuleTrainer" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="UIntGT0Type" name="gates" use="optional" default="3">
