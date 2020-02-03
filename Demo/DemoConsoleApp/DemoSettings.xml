@@ -1,7 +1,128 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <demo dataFolder=".\\Data" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="DemoSettings.xsd">
 
+  <!--
+    This demo case demonstrates successful use of the pure analog ESN reservoir for the fast and accurate classifications enabled by
+    the new ability of the analog neurons to fire a spike.
+    Following straightforward configuration of the StateMachine exhibits 87.80% accuracy, slightly worse than the best algorithm
+    called ST, referenced at the dataset's home site:
+    "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
+    https://timeseriesclassification.com/description.php?Dataset=ProximalPhalanxOutlineAgeGroup.
+    This series of 11 classification problems were created as part of Luke Davis's PhD titled "Predictive Modelling of Bone Ageing".
+    They are all derived from the same images, extracted from Cao et al. "Digital hand atlas and web-based bone age assessment: system design and implementation".
+    They are designed to test the efficacy of hand and bone outline detection and whether these outlines could be helpful in bone
+    age prediction. Algorithms to automatically extract the hand outlines and then the outlines of three bones of the middle finger
+    (proximal, middle and distal phalanges) were applied to over 1300 images, and three human evaluators labelled the output
+    of the image outlining as correct or incorrect. This generated three classification problems: DistalPhalanxOutlineCorrect; MiddlePhalanxOutlineCorrect; and ProximalPhalanxOutlineCorrect.
+    The next stage of the project was to use the outlines to predict information about the subjects age.
+    The three problems {DistalPhalanxOutlineAgeGroup, MiddlePhalanxOutlineAgeGroup and ProximalPhalanxOutlineAgeGroup} involve using
+    the outline of one of the phalanges to predict whether the subject is one of three age groups: 0-6 years old, 7-12 years old
+    and 13-19 years old. Note that these problems are aligned by subject, and hence can be treated as a multi dimensional
+    TSC problem. Problem Phalanges contains the concatenation of all three problems. Bone age estimation is usually performed by
+    an expert with an algorithm called Tanner-Whitehouse. This involves scoring each bone into one of seven categories based on
+    the stage of development. The final three bone image classification problems, DistalPhalanxTW, MiddlePhalanxTW and ProximalPhalanxTW},
+    involve predicting the Tanner-Whitehouse score (as labelled by a human expert) from the outline.
+  -->
+  <case name="Classification task ProximalPhalanxOutlineAgeGroup: Simple pure ESN reservoir generating FiringFadingSum and Activation predictors, one Elliot neuron as a classifier (Resilient trainer)">
+    <samples trainingData="ProximalPhalanxOutlineAgeGroup_train.csv" verificationData="ProximalPhalanxOutlineAgeGroup_verify.csv"/>
+    <stateMachineCfg randomizerSeek="0">
+      <neuralPreprocessor>
+        <input>
+          <feedingPatterned bidir="true" routeToReadout="true">
+            <unification unifyAmplitude="true" detrend="false">
+              <resampling/>
+            </unification>
+          </feedingPatterned>
+          <external>
+            <field name="Outline">
+              <realFeature/>
+            </field>
+          </external>
+        </input>
+        <reservoirCfgContainer>
+          <reservoirCfg name="MainCfg">
+            <pools>
+              <pool name="PureESN" dimX="160" dimY="1" dimZ="1">
+                <neuronGroups>
+                  <analogGroup name="Exc-grp" role="Excitatory" relShare="1" readoutDensity="1">
+                    <activationTanH/>
+                    <firingThreshold value="0.0025"/>
+                  </analogGroup>
+                  <analogGroup name="Inh-grp" role="Inhibitory" relShare="1" readoutDensity="1">
+                    <activationTanH/>
+                    <firingThreshold value="0.0025"/>
+                  </analogGroup>
+                </neuronGroups>
+                <interconnection>
+                  <randomSchema density="0.3" relShareEE="1" relShareEI="1" relShareIE="1" relShareII="1">
+                    <synapse/>
+                  </randomSchema>
+                </interconnection>
+              </pool>
+            </pools>
+            <spectralRadius>
+              <analogScope value="0.9999"/>
+              <spikingScope value="NA"/>
+            </spectralRadius>
+          </reservoirCfg>
+        </reservoirCfgContainer>
+        <reservoirInstanceContainer>
+          <reservoirInstance name="Main" cfg="MainCfg">
+            <inputConnections>
+              <inputConnection fieldName="Outline" poolName="PureESN" density="1" signalingRestriction="AnalogOnly">
+                <synapse delayMethod="Random" maxDelay="0">
+                  <analogTarget scope="All">
+                    <weight min="0" max="1"/>
+                  </analogTarget>
+                </synapse>
+              </inputConnection>
+            </inputConnections>
+            <predictors>
+              <permission activation="true"
+                          activationSquare="false"
+                          activationFadingSum="false"
+                          activationMWAvg="false"
+                          firingFadingSum="true"
+                          firingMWAvg="false"
+                          firingCount="false"
+                          firingBinPattern="false"/>
+            </predictors>
+          </reservoirInstance>
+        </reservoirInstanceContainer>
+      </neuralPreprocessor>
+      <readoutLayer testDataRatio="0.25" folds="Auto" repetitions="1">
+        <defaultNetworks>
+          <classificationNetworksCfg>
+            <pp gates="3">
+              <pDeltaRuleTrainer attempts="10" attemptEpochs="1000"/>
+            </pp>
+            <ff>
+              <activationElliot/>
+              <resPropTrainer attempts="10" attemptEpochs="500"/>
+            </ff>
+            <ff>
+              <activationIdentity/>
+              <elasticRegrTrainer attemptEpochs="1000" alpha="1" lambda="0.01"/>
+            </ff>
+          </classificationNetworksCfg>
+        </defaultNetworks>
+        <readoutUnits>
+          <readoutUnit name="0-6 years">
+           <classification oneWinnerGroupName="AgeGroup"/>
+          </readoutUnit>
+          <readoutUnit name="7-12 years">
+            <classification oneWinnerGroupName="AgeGroup"/>
+          </readoutUnit>
+          <readoutUnit name="13-19 years">
+            <classification oneWinnerGroupName="AgeGroup"/>
+          </readoutUnit>
+        </readoutUnits>
+      </readoutLayer>
+    </stateMachineCfg>
+  </case>
 
+
+  
   <!--
     Here StateMachine fails to exhibit good performance.
     The best algorithm called COTE, referenced at the dataset's home site, exhibits accuracy 81.4%. It is very far for StateMachine results.
@@ -237,210 +358,60 @@
         </reservoirInstanceContainer>
       </neuralPreprocessor>
       <readoutLayer testDataRatio="0.05" folds="Auto" repetitions="1">
-        <readoutUnit name="Cancel Call">
-          <classification oneWinnerGroupName="Gesture">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationElliot/>
-            <hiddenLayers>
-              <layer neurons="10">
-                <activationLeakyReLU/>
-              </layer>
-              <layer neurons="10">
-                <activationLeakyReLU/>
-              </layer>
-            </hiddenLayers>
-            <resPropTrainer attempts="10" attemptEpochs="500"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="Dead Ball">
-          <classification oneWinnerGroupName="Gesture">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationElliot/>
-            <hiddenLayers>
-              <layer neurons="10">
-                <activationLeakyReLU/>
-              </layer>
-              <layer neurons="10">
-                <activationLeakyReLU/>
-              </layer>
-            </hiddenLayers>
-            <resPropTrainer attempts="10" attemptEpochs="500"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="Four">
-          <classification oneWinnerGroupName="Gesture">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationElliot/>
-            <hiddenLayers>
-              <layer neurons="10">
-                <activationLeakyReLU/>
-              </layer>
-              <layer neurons="10">
-                <activationLeakyReLU/>
-              </layer>
-            </hiddenLayers>
-            <resPropTrainer attempts="10" attemptEpochs="500"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="Last Hour">
-          <classification oneWinnerGroupName="Gesture">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationElliot/>
-            <hiddenLayers>
-              <layer neurons="10">
-                <activationLeakyReLU/>
-              </layer>
-              <layer neurons="10">
-                <activationLeakyReLU/>
-              </layer>
-            </hiddenLayers>
-            <resPropTrainer attempts="10" attemptEpochs="500"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="Leg Bye">
-          <classification oneWinnerGroupName="Gesture">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationElliot/>
-            <hiddenLayers>
-              <layer neurons="10">
-                <activationLeakyReLU/>
-              </layer>
-              <layer neurons="10">
-                <activationLeakyReLU/>
-              </layer>
-            </hiddenLayers>
-            <resPropTrainer attempts="10" attemptEpochs="500"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="No Ball">
-          <classification oneWinnerGroupName="Gesture">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationElliot/>
-            <hiddenLayers>
-              <layer neurons="10">
-                <activationLeakyReLU/>
-              </layer>
-              <layer neurons="10">
-                <activationLeakyReLU/>
-              </layer>
-            </hiddenLayers>
-            <resPropTrainer attempts="10" attemptEpochs="500"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="One Short">
-          <classification oneWinnerGroupName="Gesture">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationElliot/>
-            <hiddenLayers>
-              <layer neurons="10">
-                <activationLeakyReLU/>
-              </layer>
-              <layer neurons="10">
-                <activationLeakyReLU/>
-              </layer>
-            </hiddenLayers>
-            <resPropTrainer attempts="10" attemptEpochs="500"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="Out">
-          <classification oneWinnerGroupName="Gesture">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationElliot/>
-            <hiddenLayers>
-              <layer neurons="10">
-                <activationLeakyReLU/>
-              </layer>
-              <layer neurons="10">
-                <activationLeakyReLU/>
-              </layer>
-            </hiddenLayers>
-            <resPropTrainer attempts="10" attemptEpochs="500"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="Penalty Runs">
-          <classification oneWinnerGroupName="Gesture">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationElliot/>
-            <hiddenLayers>
-              <layer neurons="10">
-                <activationLeakyReLU/>
-              </layer>
-              <layer neurons="10">
-                <activationLeakyReLU/>
-              </layer>
-            </hiddenLayers>
-            <resPropTrainer attempts="10" attemptEpochs="500"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="Six">
-          <classification oneWinnerGroupName="Gesture">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationElliot/>
-            <hiddenLayers>
-              <layer neurons="10">
-                <activationLeakyReLU/>
-              </layer>
-              <layer neurons="10">
-                <activationLeakyReLU/>
-              </layer>
-            </hiddenLayers>
-            <resPropTrainer attempts="10" attemptEpochs="500"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="TV Replay">
-          <classification oneWinnerGroupName="Gesture">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationElliot/>
-            <hiddenLayers>
-              <layer neurons="10">
-                <activationLeakyReLU/>
-              </layer>
-              <layer neurons="10">
-                <activationLeakyReLU/>
-              </layer>
-            </hiddenLayers>
-            <resPropTrainer attempts="10" attemptEpochs="500"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="Wide">
-          <classification oneWinnerGroupName="Gesture">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationElliot/>
-            <hiddenLayers>
-              <layer neurons="10">
-                <activationLeakyReLU/>
-              </layer>
-              <layer neurons="10">
-                <activationLeakyReLU/>
-              </layer>
-            </hiddenLayers>
-            <resPropTrainer attempts="10" attemptEpochs="500"/>
-          </ff>
-        </readoutUnit>
+        <defaultNetworks>
+          <classificationNetworksCfg>
+            <ff>
+              <activationElliot/>
+              <hiddenLayers>
+                <layer neurons="10">
+                  <activationLeakyReLU/>
+                </layer>
+                <layer neurons="10">
+                  <activationLeakyReLU/>
+                </layer>
+              </hiddenLayers>
+              <resPropTrainer attempts="10" attemptEpochs="500"/>
+            </ff>
+          </classificationNetworksCfg>
+        </defaultNetworks>
+        <readoutUnits>
+          <readoutUnit name="Cancel Call">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="Dead Ball">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="Four">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="Last Hour">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="Leg Bye">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="No Ball">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="One Short">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="Out">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="Penalty Runs">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="Six">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="TV Replay">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="Wide">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+        </readoutUnits>
       </readoutLayer>
     </stateMachineCfg>
   </case>
@@ -585,114 +556,52 @@
         </reservoirInstanceContainer>
       </neuralPreprocessor>
       <readoutLayer testDataRatio="0.1" folds="Auto">
-        <readoutUnit name="Cancel Call">
-          <classification oneWinnerGroupName="Gesture">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationElliot/>
-            <resPropTrainer attempts="10" attemptEpochs="500"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="Dead Ball">
-          <classification oneWinnerGroupName="Gesture">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationElliot/>
-            <resPropTrainer attempts="10" attemptEpochs="500"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="Four">
-          <classification oneWinnerGroupName="Gesture">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationElliot/>
-            <resPropTrainer attempts="10" attemptEpochs="500"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="Last Hour">
-          <classification oneWinnerGroupName="Gesture">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationElliot/>
-            <resPropTrainer attempts="10" attemptEpochs="500"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="Leg Bye">
-          <classification oneWinnerGroupName="Gesture">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationElliot/>
-            <resPropTrainer attempts="10" attemptEpochs="500"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="No Ball">
-          <classification oneWinnerGroupName="Gesture">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationElliot/>
-            <resPropTrainer attempts="10" attemptEpochs="500"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="One Short">
-          <classification oneWinnerGroupName="Gesture">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationElliot/>
-            <resPropTrainer attempts="10" attemptEpochs="500"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="Out">
-          <classification oneWinnerGroupName="Gesture">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationElliot/>
-            <resPropTrainer attempts="10" attemptEpochs="500"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="Penalty Runs">
-          <classification oneWinnerGroupName="Gesture">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationElliot/>
-            <resPropTrainer attempts="10" attemptEpochs="500"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="Six">
-          <classification oneWinnerGroupName="Gesture">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationElliot/>
-            <resPropTrainer attempts="10" attemptEpochs="500"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="TV Replay">
-          <classification oneWinnerGroupName="Gesture">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationElliot/>
-            <resPropTrainer attempts="10" attemptEpochs="500"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="Wide">
-          <classification oneWinnerGroupName="Gesture">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationElliot/>
-            <resPropTrainer attempts="10" attemptEpochs="500"/>
-          </ff>
-        </readoutUnit>
+        <defaultNetworks>
+          <classificationNetworksCfg>
+            <ff>
+              <activationElliot/>
+              <resPropTrainer attempts="10" attemptEpochs="500"/>
+            </ff>
+          </classificationNetworksCfg>
+        </defaultNetworks>
+        <readoutUnits>
+          <readoutUnit name="Cancel Call">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="Dead Ball">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="Four">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="Last Hour">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="Leg Bye">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="No Ball">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="One Short">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="Out">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="Penalty Runs">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="Six">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="TV Replay">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="Wide">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+        </readoutUnits>
       </readoutLayer>
     </stateMachineCfg>
   </case>
@@ -815,33 +724,25 @@
         </reservoirInstanceContainer>
       </neuralPreprocessor>
       <readoutLayer testDataRatio="0.25" folds="Auto" repetitions="1">
-        <readoutUnit name="0-6 years">
-          <classification oneWinnerGroupName="AgeGroup">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationElliot/>
-            <resPropTrainer attempts="10" attemptEpochs="500"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="7-12 years">
-          <classification oneWinnerGroupName="AgeGroup">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationElliot/>
-            <resPropTrainer attempts="10" attemptEpochs="500"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="13-19 years">
-          <classification oneWinnerGroupName="AgeGroup">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationElliot/>
-            <resPropTrainer attempts="10" attemptEpochs="500"/>
-          </ff>
-        </readoutUnit>
+        <defaultNetworks>
+          <classificationNetworksCfg>
+            <ff>
+              <activationElliot/>
+              <resPropTrainer attempts="10" attemptEpochs="500"/>
+            </ff>
+          </classificationNetworksCfg>
+        </defaultNetworks>
+        <readoutUnits>
+          <readoutUnit name="0-6 years">
+            <classification oneWinnerGroupName="AgeGroup"/>
+          </readoutUnit>
+          <readoutUnit name="7-12 years">
+            <classification oneWinnerGroupName="AgeGroup"/>
+          </readoutUnit>
+          <readoutUnit name="13-19 years">
+            <classification oneWinnerGroupName="AgeGroup"/>
+          </readoutUnit>
+        </readoutUnits>
       </readoutLayer>
     </stateMachineCfg>
   </case>
@@ -937,33 +838,25 @@
         </reservoirInstanceContainer>
       </neuralPreprocessor>
       <readoutLayer testDataRatio="0.25" folds="Auto">
-        <readoutUnit name="0-6 years">
-          <classification oneWinnerGroupName="AgeGroup">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationElliot/>
-            <resPropTrainer attempts="10" attemptEpochs="500"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="7-12 years">
-          <classification oneWinnerGroupName="AgeGroup">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationElliot/>
-            <resPropTrainer attempts="10" attemptEpochs="500"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="13-19 years">
-          <classification oneWinnerGroupName="AgeGroup">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationElliot/>
-            <resPropTrainer attempts="10" attemptEpochs="500"/>
-          </ff>
-        </readoutUnit>
+        <defaultNetworks>
+          <classificationNetworksCfg>
+            <ff>
+              <activationElliot/>
+              <resPropTrainer attempts="10" attemptEpochs="500"/>
+            </ff>
+          </classificationNetworksCfg>
+        </defaultNetworks>
+        <readoutUnits>
+          <readoutUnit name="0-6 years">
+            <classification oneWinnerGroupName="AgeGroup"/>
+          </readoutUnit>
+          <readoutUnit name="7-12 years">
+            <classification oneWinnerGroupName="AgeGroup"/>
+          </readoutUnit>
+          <readoutUnit name="13-19 years">
+            <classification oneWinnerGroupName="AgeGroup"/>
+          </readoutUnit>
+        </readoutUnits>
       </readoutLayer>
     </stateMachineCfg>
   </case>
@@ -993,48 +886,30 @@
     <samples trainingData="ProximalPhalanxOutlineAgeGroup_train.csv" verificationData="ProximalPhalanxOutlineAgeGroup_verify.csv"/>
     <stateMachineCfg randomizerSeek="0">
       <readoutLayer testDataRatio="0.25" folds="Auto">
-        <readoutUnit name="0-6 years">
-          <classification oneWinnerGroupName="AgeGroup">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationIdentity/>
-            <hiddenLayers>
-              <layer neurons="50">
-                <activationTanH/>
-              </layer>
-            </hiddenLayers>
-            <resPropTrainer attempts="10" attemptEpochs="500"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="7-12 years">
-          <classification oneWinnerGroupName="AgeGroup">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationIdentity/>
-            <hiddenLayers>
-              <layer neurons="50">
-                <activationTanH/>
-              </layer>
-            </hiddenLayers>
-            <resPropTrainer attempts="10" attemptEpochs="500"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="13-19 years">
-          <classification oneWinnerGroupName="AgeGroup">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationIdentity/>
-            <hiddenLayers>
-              <layer neurons="50">
-                <activationTanH/>
-              </layer>
-            </hiddenLayers>
-            <resPropTrainer attempts="10" attemptEpochs="500"/>
-          </ff>
-        </readoutUnit>
+        <defaultNetworks>
+          <classificationNetworksCfg>
+            <ff>
+              <activationIdentity/>
+              <hiddenLayers>
+                <layer neurons="50">
+                  <activationTanH/>
+                </layer>
+              </hiddenLayers>
+              <resPropTrainer attempts="10" attemptEpochs="500"/>
+            </ff>
+          </classificationNetworksCfg>
+        </defaultNetworks>
+        <readoutUnits>
+          <readoutUnit name="0-6 years">
+            <classification oneWinnerGroupName="AgeGroup"/>
+          </readoutUnit>
+          <readoutUnit name="7-12 years">
+            <classification oneWinnerGroupName="AgeGroup"/>
+          </readoutUnit>
+          <readoutUnit name="13-19 years">
+            <classification oneWinnerGroupName="AgeGroup"/>
+          </readoutUnit>
+        </readoutUnits>
       </readoutLayer>
     </stateMachineCfg>
   </case>
@@ -1118,17 +993,21 @@
         </reservoirInstanceContainer>
       </neuralPreprocessor>
       <readoutLayer testDataRatio="0.1" folds="Auto">
-        <readoutUnit name="Chicken1Bird0">
-          <classification>
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationIdentity/>
-            <ridgeRegrTrainer attemptEpochs="1">
-              <lambda min="0.1" max="0.1" steps="2"/>
-            </ridgeRegrTrainer>
-          </ff>
-        </readoutUnit>
+        <defaultNetworks/>
+        <readoutUnits>
+          <readoutUnit name="Chicken1Bird0">
+            <classification>
+              <networks>
+                <ff>
+                  <activationIdentity/>
+                  <ridgeRegrTrainer attemptEpochs="1">
+                    <lambda min="0.1" max="0.1" steps="2"/>
+                  </ridgeRegrTrainer>
+                </ff>
+              </networks>
+            </classification>
+          </readoutUnit>
+        </readoutUnits>
       </readoutLayer>
     </stateMachineCfg>
   </case>
@@ -1215,17 +1094,21 @@
         </reservoirInstanceContainer>
       </neuralPreprocessor>
       <readoutLayer testDataRatio="0.1" folds="Auto">
-        <readoutUnit name="Beetle1Fly0">
-          <classification>
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationIdentity/>
-            <ridgeRegrTrainer attemptEpochs="1">
-              <lambda min="0.1" max="0.1" steps="2"/>
-            </ridgeRegrTrainer>
-          </ff>
-        </readoutUnit>
+        <defaultNetworks/>
+        <readoutUnits>
+          <readoutUnit name="Beetle1Fly0">
+            <classification>
+              <networks>
+                <ff>
+                  <activationIdentity/>
+                  <ridgeRegrTrainer attemptEpochs="1">
+                    <lambda min="0.1" max="0.1" steps="2"/>
+                  </ridgeRegrTrainer>
+                </ff>
+              </networks>
+            </classification>
+          </readoutUnit>
+        </readoutUnits>
       </readoutLayer>
     </stateMachineCfg>
   </case>
@@ -1331,51 +1214,31 @@
         </reservoirInstanceContainer>
       </neuralPreprocessor>
       <readoutLayer testDataRatio="0.1" folds="Auto">
-        <readoutUnit name="Wild-N2">
-          <classification oneWinnerGroupName="WormDNA">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationIdentity/>
-            <resPropTrainer attempts="10" attemptEpochs="1500"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="Mutant-goa1">
-          <classification oneWinnerGroupName="WormDNA">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationIdentity/>
-            <resPropTrainer attempts="10" attemptEpochs="1500"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="Mutant-unc1">
-          <classification oneWinnerGroupName="WormDNA">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationIdentity/>
-            <resPropTrainer attempts="10" attemptEpochs="1500"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="Mutant-unc38">
-          <classification oneWinnerGroupName="WormDNA">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationIdentity/>
-            <resPropTrainer attempts="10" attemptEpochs="1500"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="Mutant-unc63">
-          <classification oneWinnerGroupName="WormDNA">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationIdentity/>
-            <resPropTrainer attempts="10" attemptEpochs="1500"/>
-          </ff>
-        </readoutUnit>
+        <defaultNetworks>
+          <classificationNetworksCfg>
+            <ff>
+              <activationIdentity/>
+              <resPropTrainer attempts="10" attemptEpochs="1500"/>
+            </ff>
+          </classificationNetworksCfg>
+        </defaultNetworks>
+        <readoutUnits>
+          <readoutUnit name="Wild-N2">
+            <classification oneWinnerGroupName="WormDNA"/>
+          </readoutUnit>
+          <readoutUnit name="Mutant-goa1">
+            <classification oneWinnerGroupName="WormDNA"/>
+          </readoutUnit>
+          <readoutUnit name="Mutant-unc1">
+            <classification oneWinnerGroupName="WormDNA"/>
+          </readoutUnit>
+          <readoutUnit name="Mutant-unc38">
+            <classification oneWinnerGroupName="WormDNA"/>
+          </readoutUnit>
+          <readoutUnit name="Mutant-unc63">
+            <classification oneWinnerGroupName="WormDNA"/>
+          </readoutUnit>
+        </readoutUnits>
       </readoutLayer>
     </stateMachineCfg>
   </case>
@@ -1474,141 +1337,61 @@
         </reservoirInstanceContainer>
       </neuralPreprocessor>
       <readoutLayer testDataRatio="0.0825" folds="Auto">
-        <readoutUnit name="curved swing">
-          <classification oneWinnerGroupName="Hand movement type">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="horizontal swing">
-          <classification oneWinnerGroupName="Hand movement type">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="vertical swing">
-          <classification oneWinnerGroupName="Hand movement type">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="anti-clockwise arc">
-          <classification oneWinnerGroupName="Hand movement type">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="clockwise arc">
-          <classification oneWinnerGroupName="Hand movement type">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="circle">
-          <classification oneWinnerGroupName="Hand movement type">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="horizontal straight-line">
-          <classification oneWinnerGroupName="Hand movement type">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="vertical straight-line">
-          <classification oneWinnerGroupName="Hand movement type">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="horizontal zigzag">
-          <classification oneWinnerGroupName="Hand movement type">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="vertical zigzag">
-          <classification oneWinnerGroupName="Hand movement type">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="horizontal wavy">
-          <classification oneWinnerGroupName="Hand movement type">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="vertical wavy">
-          <classification oneWinnerGroupName="Hand movement type">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="face-up curve">
-          <classification oneWinnerGroupName="Hand movement type">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="face-down curve">
-          <classification oneWinnerGroupName="Hand movement type">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="tremble">
-          <classification oneWinnerGroupName="Hand movement type">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
+        <defaultNetworks>
+          <classificationNetworksCfg>
+            <ff>
+              <activationTanH/>
+              <resPropTrainer attempts="5" attemptEpochs="400"/>
+            </ff>
+          </classificationNetworksCfg>
+        </defaultNetworks>
+        <readoutUnits>
+          <readoutUnit name="curved swing">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="horizontal swing">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="vertical swing">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="anti-clockwise arc">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="clockwise arc">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="circle">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="horizontal straight-line">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="vertical straight-line">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="horizontal zigzag">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="vertical zigzag">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="horizontal wavy">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="vertical wavy">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="face-up curve">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="face-down curve">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="tremble">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+        </readoutUnits>
       </readoutLayer>
     </stateMachineCfg>
   </case>
@@ -1699,141 +1482,61 @@
         </reservoirInstanceContainer>
       </neuralPreprocessor>
       <readoutLayer testDataRatio="0.0825" folds="Auto">
-        <readoutUnit name="curved swing">
-          <classification oneWinnerGroupName="Hand movement type">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="horizontal swing">
-          <classification oneWinnerGroupName="Hand movement type">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="vertical swing">
-          <classification oneWinnerGroupName="Hand movement type">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="anti-clockwise arc">
-          <classification oneWinnerGroupName="Hand movement type">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="clockwise arc">
-          <classification oneWinnerGroupName="Hand movement type">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="circle">
-          <classification oneWinnerGroupName="Hand movement type">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="horizontal straight-line">
-          <classification oneWinnerGroupName="Hand movement type">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="vertical straight-line">
-          <classification oneWinnerGroupName="Hand movement type">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="horizontal zigzag">
-          <classification oneWinnerGroupName="Hand movement type">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="vertical zigzag">
-          <classification oneWinnerGroupName="Hand movement type">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="horizontal wavy">
-          <classification oneWinnerGroupName="Hand movement type">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="vertical wavy">
-          <classification oneWinnerGroupName="Hand movement type">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="face-up curve">
-          <classification oneWinnerGroupName="Hand movement type">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="face-down curve">
-          <classification oneWinnerGroupName="Hand movement type">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="tremble">
-          <classification oneWinnerGroupName="Hand movement type">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
+        <defaultNetworks>
+          <classificationNetworksCfg>
+            <ff>
+              <activationTanH/>
+              <resPropTrainer attempts="5" attemptEpochs="400"/>
+            </ff>
+          </classificationNetworksCfg>
+        </defaultNetworks>
+        <readoutUnits>
+          <readoutUnit name="curved swing">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="horizontal swing">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="vertical swing">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="anti-clockwise arc">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="clockwise arc">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="circle">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="horizontal straight-line">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="vertical straight-line">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="horizontal zigzag">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="vertical zigzag">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="horizontal wavy">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="vertical wavy">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="face-up curve">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="face-down curve">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="tremble">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+        </readoutUnits>
       </readoutLayer>
     </stateMachineCfg>
   </case>
@@ -1950,141 +1653,61 @@
         </reservoirInstanceContainer>
       </neuralPreprocessor>
       <readoutLayer testDataRatio="0.0825" folds="Auto">
-        <readoutUnit name="curved swing">
-          <classification oneWinnerGroupName="Hand movement type">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="horizontal swing">
-          <classification oneWinnerGroupName="Hand movement type">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="vertical swing">
-          <classification oneWinnerGroupName="Hand movement type">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="anti-clockwise arc">
-          <classification oneWinnerGroupName="Hand movement type">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="clockwise arc">
-          <classification oneWinnerGroupName="Hand movement type">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="circle">
-          <classification oneWinnerGroupName="Hand movement type">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="horizontal straight-line">
-          <classification oneWinnerGroupName="Hand movement type">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="vertical straight-line">
-          <classification oneWinnerGroupName="Hand movement type">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="horizontal zigzag">
-          <classification oneWinnerGroupName="Hand movement type">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="vertical zigzag">
-          <classification oneWinnerGroupName="Hand movement type">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="horizontal wavy">
-          <classification oneWinnerGroupName="Hand movement type">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="vertical wavy">
-          <classification oneWinnerGroupName="Hand movement type">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="face-up curve">
-          <classification oneWinnerGroupName="Hand movement type">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="face-down curve">
-          <classification oneWinnerGroupName="Hand movement type">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="tremble">
-          <classification oneWinnerGroupName="Hand movement type">
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationTanH/>
-            <resPropTrainer attempts="5" attemptEpochs="400"/>
-          </ff>
-        </readoutUnit>
+        <defaultNetworks>
+          <classificationNetworksCfg>
+            <ff>
+              <activationTanH/>
+              <resPropTrainer attempts="5" attemptEpochs="400"/>
+            </ff>
+          </classificationNetworksCfg>
+        </defaultNetworks>
+        <readoutUnits>
+          <readoutUnit name="curved swing">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="horizontal swing">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="vertical swing">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="anti-clockwise arc">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="clockwise arc">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="circle">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="horizontal straight-line">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="vertical straight-line">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="horizontal zigzag">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="vertical zigzag">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="horizontal wavy">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="vertical wavy">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="face-up curve">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="face-down curve">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="tremble">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+        </readoutUnits>
       </readoutLayer>
     </stateMachineCfg>
   </case>
@@ -2239,17 +1862,22 @@
         </reservoirInstanceContainer>
       </neuralPreprocessor>
       <readoutLayer testDataRatio="0.1" folds="1">
-        <readoutUnit name="Value">
-          <forecast>
-            <realFeature standardize="true" keepReserve="true"/>
-          </forecast>
-          <ff>
-            <activationIdentity/>
-            <qrdRegrTrainer attempts="1" attemptEpochs="1">
-              <maxNoise min="0" max="0" steps="2"/>
-            </qrdRegrTrainer>
-          </ff>
-        </readoutUnit>
+        <defaultNetworks/>
+        <readoutUnits>
+          <readoutUnit name="Value">
+            <forecast>
+              <realFeature standardize="true" keepReserve="true"/>
+              <networks>
+                <ff>
+                  <activationIdentity/>
+                  <qrdRegrTrainer attempts="1" attemptEpochs="1">
+                    <maxNoise min="0" max="0" steps="2"/>
+                  </qrdRegrTrainer>
+                </ff>
+              </networks>
+            </forecast>
+          </readoutUnit>
+        </readoutUnits>
       </readoutLayer>
     </stateMachineCfg>
   </case>
@@ -2349,33 +1977,31 @@
         </reservoirInstanceContainer>
       </neuralPreprocessor>
       <readoutLayer testDataRatio="0.1" folds="Auto">
-        <readoutUnit name="High">
-          <forecast>
-            <realFeature standardize="true" keepReserve="true"/>
-          </forecast>
-          <ff>
-            <activationIdentity/>
-            <elasticRegrTrainer attemptEpochs="400" lambda="1e-6" alpha="0.5"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="Low">
-          <forecast>
-            <realFeature standardize="true" keepReserve="true"/>
-          </forecast>
-          <ff>
-            <activationIdentity/>
-            <elasticRegrTrainer attemptEpochs="400" lambda="1e-6" alpha="0.5"/>
-          </ff>
-        </readoutUnit>
-        <readoutUnit name="Adj Close">
-          <forecast>
-            <realFeature standardize="true" keepReserve="true"/>
-          </forecast>
-          <ff>
-            <activationIdentity/>
-            <elasticRegrTrainer attemptEpochs="400" lambda="1e-6" alpha="0.5"/>
-          </ff>
-        </readoutUnit>
+        <defaultNetworks>
+          <forecastNetworksCfg>
+            <ff>
+              <activationIdentity/>
+              <elasticRegrTrainer attemptEpochs="400" lambda="1e-6" alpha="0.5"/>
+            </ff>
+          </forecastNetworksCfg>
+        </defaultNetworks>
+        <readoutUnits>
+          <readoutUnit name="High">
+            <forecast>
+              <realFeature standardize="true" keepReserve="true"/>
+            </forecast>
+          </readoutUnit>
+          <readoutUnit name="Low">
+            <forecast>
+              <realFeature standardize="true" keepReserve="true"/>
+            </forecast>
+          </readoutUnit>
+          <readoutUnit name="Adj Close">
+            <forecast>
+              <realFeature standardize="true" keepReserve="true"/>
+            </forecast>
+          </readoutUnit>
+        </readoutUnits>
       </readoutLayer>
     </stateMachineCfg>
   </case>
@@ -2466,23 +2092,27 @@
         </reservoirInstanceContainer>
       </neuralPreprocessor>
       <readoutLayer testDataRatio="0.1" folds="Auto">
-        <readoutUnit name="EpilepticSeizure">
-          <classification>
-            <binFeature/>
-          </classification>
-          <ff>
-            <activationIdentity/>
-            <hiddenLayers>
-              <layer neurons="20">
-                <activationTanH/>
-              </layer>
-              <layer neurons="20">
-                <activationTanH/>
-              </layer>
-            </hiddenLayers>
-            <resPropTrainer attempts="2" attemptEpochs="1000"/>
-          </ff>
-        </readoutUnit>
+        <defaultNetworks/>
+        <readoutUnits>
+          <readoutUnit name="EpilepticSeizure">
+            <classification>
+              <networks>
+                <ff>
+                  <activationIdentity/>
+                  <hiddenLayers>
+                    <layer neurons="20">
+                      <activationTanH/>
+                    </layer>
+                    <layer neurons="20">
+                      <activationTanH/>
+                    </layer>
+                  </hiddenLayers>
+                  <resPropTrainer attempts="2" attemptEpochs="1000"/>
+                </ff>
+              </networks>
+            </classification>
+          </readoutUnit>
+        </readoutUnits>
       </readoutLayer>
     </stateMachineCfg>
   </case>

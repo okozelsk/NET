@@ -52,6 +52,8 @@ namespace RCNet.Neural.Network.NonRecurrent
         private readonly object _networkSettings;
         private readonly int _foldNum;
         private readonly int _numOfFolds;
+        private readonly int _foldNetworkNum;
+        private readonly int _numOfFoldNetworks;
         private readonly VectorBundle _trainingBundle;
         private readonly VectorBundle _testingBundle;
         private readonly double _binBorder;
@@ -66,6 +68,8 @@ namespace RCNet.Neural.Network.NonRecurrent
         /// <param name="networkSettings">Network configuration (FeedForwardNetworkSettings or ParallelPerceptronSettings object)</param>
         /// <param name="foldNum">Current fold number</param>
         /// <param name="numOfFolds">Total number of the folds</param>
+        /// <param name="foldNetworkNum">Current fold network number</param>
+        /// <param name="numOfFoldNetworks">Total number of the fold networks</param>
         /// <param name="trainingBundle">Bundle of predictors and ideal values to be used for training purposes</param>
         /// <param name="testingBundle">Bundle of predictors and ideal values to be used for testing purposes</param>
         /// <param name="binBorder">If specified, it indicates that the whole network output is binary and specifies numeric border where GE network output is decided as a 1 and LT output as a 0.</param>
@@ -75,6 +79,8 @@ namespace RCNet.Neural.Network.NonRecurrent
                                      object networkSettings,
                                      int foldNum,
                                      int numOfFolds,
+                                     int foldNetworkNum,
+                                     int numOfFoldNetworks,
                                      VectorBundle trainingBundle,
                                      VectorBundle testingBundle,
                                      double binBorder = double.NaN,
@@ -86,6 +92,8 @@ namespace RCNet.Neural.Network.NonRecurrent
             _networkSettings = networkSettings;
             _foldNum = foldNum;
             _numOfFolds = numOfFolds;
+            _foldNetworkNum = foldNetworkNum;
+            _numOfFoldNetworks = numOfFoldNetworks;
             //Check num of output values is 1
             if (trainingBundle.OutputVectorCollection[0].Length != 1)
             {
@@ -285,7 +293,7 @@ namespace RCNet.Neural.Network.NonRecurrent
                 //First initialization of the best network
                 bestNetwork = bestNetwork ?? currNetwork.DeepClone();
                 //RegrState instance
-                BuildingState regrState = new BuildingState(_networkName, _binBorder, _foldNum, _numOfFolds, trainer.Attempt, trainer.MaxAttempt, trainer.AttemptEpoch, trainer.MaxAttemptEpoch, currNetwork, bestNetwork, lastImprovementEpoch);
+                BuildingState regrState = new BuildingState(_networkName, _binBorder, _foldNum, _numOfFolds, _foldNetworkNum, _numOfFoldNetworks, trainer.Attempt, trainer.MaxAttempt, trainer.AttemptEpoch, trainer.MaxAttemptEpoch, currNetwork, bestNetwork, lastImprovementEpoch);
                 //Call controller
                 BuildingInstr instructions = _controller(regrState);
                 //Better?
@@ -351,6 +359,14 @@ namespace RCNet.Neural.Network.NonRecurrent
             /// </summary>
             public int NumOfFolds { get; }
             /// <summary>
+            /// Current fold network number
+            /// </summary>
+            public int FoldNetworkNum { get; }
+            /// <summary>
+            /// Total number of the fold networks
+            /// </summary>
+            public int NumOfFoldNetworks { get; }
+            /// <summary>
             /// Current regression attempt number 
             /// </summary>
             public int RegrAttemptNumber { get; }
@@ -386,6 +402,8 @@ namespace RCNet.Neural.Network.NonRecurrent
             /// <param name="binBorder">If specified, it indicates that the whole network output is binary and specifies numeric border where GE network output is decided as a 1 and LT output as a 0.</param>
             /// <param name="foldNum">Current fold number</param>
             /// <param name="numOfFolds">Total number of the folds</param>
+            /// <param name="foldNetworkNum">Current fold network number</param>
+            /// <param name="numOfFoldNetworks">Total number of the fold networks</param>
             /// <param name="regrAttemptNumber">Current regression attempt number</param>
             /// <param name="regrMaxAttempts">Maximum number of regression attempts</param>
             /// <param name="epoch">Current epoch number</param>
@@ -397,6 +415,8 @@ namespace RCNet.Neural.Network.NonRecurrent
                                  double binBorder,
                                  int foldNum,
                                  int numOfFolds,
+                                 int foldNetworkNum,
+                                 int numOfFoldNetworks,
                                  int regrAttemptNumber,
                                  int regrMaxAttempts,
                                  int epoch,
@@ -410,6 +430,8 @@ namespace RCNet.Neural.Network.NonRecurrent
                 BinBorder = binBorder;
                 FoldNum = foldNum;
                 NumOfFolds = numOfFolds;
+                FoldNetworkNum = foldNetworkNum;
+                NumOfFoldNetworks = numOfFoldNetworks;
                 RegrAttemptNumber = regrAttemptNumber;
                 RegrMaxAttempts = regrMaxAttempts;
                 Epoch = epoch;
@@ -439,8 +461,9 @@ namespace RCNet.Neural.Network.NonRecurrent
                 progressText.Append(new string(' ', margin));
                 progressText.Append("Building ");
                 progressText.Append(NetworkName);
-                progressText.Append(" Fold/Attempt/Epoch: ");
+                progressText.Append(" Fold/Net/Attempt/Epoch: ");
                 progressText.Append(FoldNum.ToString().PadLeft(NumOfFolds.ToString().Length, '0') + "/");
+                progressText.Append(FoldNetworkNum.ToString().PadLeft(NumOfFoldNetworks.ToString().Length, '0') + "/");
                 progressText.Append(RegrAttemptNumber.ToString().PadLeft(RegrMaxAttempts.ToString().Length, '0') + "/");
                 progressText.Append(Epoch.ToString().PadLeft(MaxEpochs.ToString().Length, '0'));
                 progressText.Append(", DSet-Sizes: (");

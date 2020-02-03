@@ -11,6 +11,8 @@ using RCNet.Neural.Network.NonRecurrent.PP;
 using RCNet.XmlTools;
 using RCNet.MathTools;
 using RCNet.Neural.Data.Filter;
+using RCNet.Neural.Network.NonRecurrent;
+using RCNet.Neural.Activation;
 
 namespace RCNet.Neural.Network.SM.Readout
 {
@@ -29,9 +31,7 @@ namespace RCNet.Neural.Network.SM.Readout
         /// </summary>
         public double TestDataRatio { get; set; }
         /// <summary>
-        /// Number of predicting readout units for each output field.
-        /// It also detemines how many data sets for testing will be prepared.
-        /// (x-fold cross-validation)
+        /// The x in the x-fold cross-validation
         /// https://en.wikipedia.org/wiki/Cross-validation_(statistics)
         /// Parameter has two options.
         /// LE 0 - means auto setup to achieve full cross-validation if it is possible (related to specified TestDataRatio)
@@ -39,9 +39,19 @@ namespace RCNet.Neural.Network.SM.Readout
         /// </summary>
         public int NumOfFolds { get; set; }
         /// <summary>
-        /// Defines how many times the generation of folds will be repeated
+        /// Defines how many times the generation of whole folds will be repeated
         /// </summary>
         public int Repetitions { get; set; }
+        /// <summary>
+        /// Collection of networks to be applied when specific networks are not specified.
+        /// Relevant for classification tasks.
+        /// </summary>
+        public List<object> DefaultClassificationNetworkCfgCollection { get; set; }
+        /// <summary>
+        /// Collection of networks to be applied when specific networks are not specified.
+        /// Relevant for forecast tasks.
+        /// </summary>
+        public List<object> DefaultForecastNetworkCfgCollection { get; set; }
         /// <summary>
         /// Readout unit configurations
         /// </summary>
@@ -61,6 +71,8 @@ namespace RCNet.Neural.Network.SM.Readout
             TestDataRatio = 0;
             NumOfFolds = 0;
             Repetitions = 0;
+            DefaultClassificationNetworkCfgCollection = new List<object>();
+            DefaultForecastNetworkCfgCollection = new List<object>();
             ReadoutUnitCfgCollection = new List<ReadoutUnitSettings>();
             OneWinnerGroupCfgCollection = new Dictionary<string, OneWinnerGroupSettings>();
             return;
@@ -76,6 +88,16 @@ namespace RCNet.Neural.Network.SM.Readout
             TestDataRatio = source.TestDataRatio;
             NumOfFolds = source.NumOfFolds;
             Repetitions = source.Repetitions;
+            DefaultClassificationNetworkCfgCollection = new List<object>();
+            foreach(object networkCfg in source.DefaultClassificationNetworkCfgCollection)
+            {
+                DefaultClassificationNetworkCfgCollection.Add(NonRecurrentNetUtils.CloneSettings(networkCfg));
+            }
+            DefaultForecastNetworkCfgCollection = new List<object>();
+            foreach (object networkCfg in source.DefaultForecastNetworkCfgCollection)
+            {
+                DefaultForecastNetworkCfgCollection.Add(NonRecurrentNetUtils.CloneSettings(networkCfg));
+            }
             ReadoutUnitCfgCollection = new List<ReadoutUnitSettings>();
             foreach(ReadoutUnitSettings rus in source.ReadoutUnitCfgCollection)
             {
@@ -109,11 +131,24 @@ namespace RCNet.Neural.Network.SM.Readout
             TestDataRatio = double.Parse(readoutLayerSettingsElem.Attribute("testDataRatio").Value, CultureInfo.InvariantCulture);
             NumOfFolds = readoutLayerSettingsElem.Attribute("folds").Value == "Auto" ? 0 : int.Parse(readoutLayerSettingsElem.Attribute("folds").Value);
             Repetitions = int.Parse(readoutLayerSettingsElem.Attribute("repetitions").Value);
+            //Default networks settings
+            XElement defaultNetworksElem = readoutLayerSettingsElem.Descendants("defaultNetworks").First();
+            DefaultClassificationNetworkCfgCollection = NonRecurrentNetUtils.LoadSettingsCollection(defaultNetworksElem.Descendants("classificationNetworksCfg").FirstOrDefault());
+            if(DefaultClassificationNetworkCfgCollection.Count == 0)
+            {
+                DefaultClassificationNetworkCfgCollection.Add(GetSuperDefaultNetworkSettings());
+            }
+            DefaultForecastNetworkCfgCollection = NonRecurrentNetUtils.LoadSettingsCollection(defaultNetworksElem.Descendants("forecastNetworksCfg").FirstOrDefault());
+            if (DefaultForecastNetworkCfgCollection.Count == 0)
+            {
+                DefaultForecastNetworkCfgCollection.Add(GetSuperDefaultNetworkSettings());
+            }
             //Readout units
+            XElement readoutUnitsElem = readoutLayerSettingsElem.Descendants("readoutUnits").First();
             ReadoutUnitCfgCollection = new List<ReadoutUnitSettings>();
             int unitIndex = 0;
             List<string> owgs = new List<string>();
-            foreach (XElement readoutUnitElem in readoutLayerSettingsElem.Descendants("readoutUnit"))
+            foreach (XElement readoutUnitElem in readoutUnitsElem.Descendants("readoutUnit"))
             {
                 ReadoutUnitSettings rus = new ReadoutUnitSettings(unitIndex, readoutUnitElem);
                 ReadoutUnitCfgCollection.Add(rus);
@@ -141,6 +176,17 @@ namespace RCNet.Neural.Network.SM.Readout
         public List<string> OutputFieldNameCollection { get { return (from rus in ReadoutUnitCfgCollection select rus.Name).ToList(); } }
 
         //Methods
+        private object GetSuperDefaultNetworkSettings()
+        {
+            FeedForwardNetworkSettings cfg = new FeedForwardNetworkSettings();
+            ElliotSettings elliotCfg = new ElliotSettings();
+            IActivationFunction af = ActivationFactory.Create(elliotCfg, new Random(0));
+            cfg.OutputLayerActivation = elliotCfg;
+            cfg.OutputRange = af.OutputRange;
+            cfg.TrainerCfg = new RPropTrainerSettings(3, 1000);
+            return cfg;
+        }
+
         /// <summary>
         /// Returns settings of readout units belonging into the specified one-winner group.
         /// </summary>
@@ -149,7 +195,6 @@ namespace RCNet.Neural.Network.SM.Readout
         {
             return (from rus in ReadoutUnitCfgCollection where rus.OneWinnerGroupName == groupName select rus).ToList();
         }
-
         
         /// <summary>
         /// See the base.
@@ -161,13 +206,29 @@ namespace RCNet.Neural.Network.SM.Readout
             if (TestDataRatio != cmpSettings.TestDataRatio ||
                 NumOfFolds != cmpSettings.NumOfFolds ||
                 Repetitions != cmpSettings.Repetitions ||
+                DefaultClassificationNetworkCfgCollection.Count != cmpSettings.DefaultClassificationNetworkCfgCollection.Count ||
+                DefaultForecastNetworkCfgCollection.Count != cmpSettings.DefaultForecastNetworkCfgCollection.Count ||
                 ReadoutUnitCfgCollection.Count != cmpSettings.ReadoutUnitCfgCollection.Count ||
                 OneWinnerGroupCfgCollection.Count != cmpSettings.OneWinnerGroupCfgCollection.Count
                 )
             {
                 return false;
             }
-            for(int i = 0; i < ReadoutUnitCfgCollection.Count; i++)
+            for(int i = 0; i < DefaultClassificationNetworkCfgCollection.Count; i++)
+            {
+                if(!Equals(DefaultClassificationNetworkCfgCollection[i], cmpSettings.DefaultClassificationNetworkCfgCollection[i]))
+                {
+                    return false;
+                }
+            }
+            for (int i = 0; i < DefaultForecastNetworkCfgCollection.Count; i++)
+            {
+                if (!Equals(DefaultForecastNetworkCfgCollection[i], cmpSettings.DefaultForecastNetworkCfgCollection[i]))
+                {
+                    return false;
+                }
+            }
+            for (int i = 0; i < ReadoutUnitCfgCollection.Count; i++)
             {
                 if(!Equals(ReadoutUnitCfgCollection[i], cmpSettings.ReadoutUnitCfgCollection[i]))
                 {
@@ -205,7 +266,6 @@ namespace RCNet.Neural.Network.SM.Readout
             return clone;
         }
 
-        //Inner classes
         /// <summary>
         /// Readout unit settings
         /// </summary>
@@ -217,20 +277,6 @@ namespace RCNet.Neural.Network.SM.Readout
             /// Code indicating no membership in a One-winner group
             /// </summary>
             public const string NoOneWinnerGroupName = "NA";
-            /// <summary>
-            /// Supported types of readout unit networks
-            /// </summary>
-            public enum ReadoutUnitNetworkType
-            {
-                /// <summary>
-                /// Readout unit with feed forward network
-                /// </summary>
-                FF,
-                /// <summary>
-                /// Readout unit with parallel perceptron
-                /// </summary>
-                PP
-            }//ReadoutUnitNetworkType
 
             //Attributes
             /// <summary>
@@ -254,17 +300,9 @@ namespace RCNet.Neural.Network.SM.Readout
             /// </summary>
             public BaseFeatureFilterSettings FeatureFilterCfg;
             /// <summary>
-            /// Type of readout unit network
+            /// Collection of readout unit networks
             /// </summary>
-            public ReadoutUnitNetworkType NetType { get; set; }
-            /// <summary>
-            /// Settings of readout unit network
-            /// </summary>
-            public object NetSettings { get; set; }
-            /// <summary>
-            /// Unit's output values range.
-            /// </summary>
-            public Interval OutputRange { get; }
+            public List<object> NetCfgCollection { get; set; }
 
             //Constructors
             /// <summary>
@@ -277,9 +315,7 @@ namespace RCNet.Neural.Network.SM.Readout
                 TaskType = ReadoutUnit.TaskType.Forecast;
                 OneWinnerGroupName = NoOneWinnerGroupName;
                 FeatureFilterCfg = null;
-                NetType = ReadoutUnitNetworkType.FF;
-                NetSettings = null;
-                OutputRange = null;
+                NetCfgCollection = new List<object>();
                 return;
             }
 
@@ -294,20 +330,10 @@ namespace RCNet.Neural.Network.SM.Readout
                 TaskType = source.TaskType;
                 OneWinnerGroupName = source.OneWinnerGroupName;
                 FeatureFilterCfg = FeatureFilterFactory.DeepClone(source.FeatureFilterCfg);
-                NetType = source.NetType;
-                NetSettings = null;
-                OutputRange = null;
-                if (source.NetSettings != null)
+                NetCfgCollection = new List<object>();
+                foreach(object netCfg in source.NetCfgCollection)
                 {
-                    if (source.NetSettings.GetType() == typeof(FeedForwardNetworkSettings))
-                    {
-                        NetSettings = ((FeedForwardNetworkSettings)(source.NetSettings)).DeepClone();
-                    }
-                    else
-                    {
-                        NetSettings = ((ParallelPerceptronSettings)(source.NetSettings)).DeepClone();
-                    }
-                    OutputRange = source.OutputRange.DeepClone();
+                    NetCfgCollection.Add(NonRecurrentNetUtils.CloneSettings(netCfg));
                 }
                 return;
             }
@@ -322,16 +348,18 @@ namespace RCNet.Neural.Network.SM.Readout
                 //Name
                 Name = readoutUnitElem.Attribute("name").Value;
                 Index = index;
-                //Task and filter
+                //Task
                 XElement taskElem = readoutUnitElem.Descendants().First();
                 if(taskElem.Name.LocalName == "forecast")
                 {
                     TaskType = ReadoutUnit.TaskType.Forecast;
+                    FeatureFilterCfg = FeatureFilterFactory.LoadSettings(taskElem.Descendants().First());
                     OneWinnerGroupName = NoOneWinnerGroupName;
                 }
                 else
                 {
                     TaskType = ReadoutUnit.TaskType.Classification;
+                    FeatureFilterCfg = new BinFeatureFilterSettings();
                     //One winner group name
                     OneWinnerGroupName = taskElem.Attribute("oneWinnerGroupName").Value;
                     if(OneWinnerGroupName.ToUpper().Trim() == NoOneWinnerGroupName)
@@ -339,48 +367,11 @@ namespace RCNet.Neural.Network.SM.Readout
                         OneWinnerGroupName = NoOneWinnerGroupName;
                     }
                 }
-                //Feature filter
-                FeatureFilterCfg = FeatureFilterFactory.LoadSettings(taskElem.Descendants().First());
-                //Net settings
-                List<XElement> netSettingsElems = new List<XElement>();
-                netSettingsElems.AddRange(readoutUnitElem.Descendants("ff"));
-                netSettingsElems.AddRange(readoutUnitElem.Descendants("pp"));
-                if (netSettingsElems.Count != 1)
-                {
-                    throw new Exception("Only one network configuration can be specified within readout unit settings.");
-                }
-                if (netSettingsElems.Count == 0)
-                {
-                    throw new Exception("Network configuration is not specified in readout unit settings.");
-                }
-                XElement netSettingsElem = netSettingsElems[0];
-                //FF?
-                if (netSettingsElem.Name.LocalName == "ff")
-                {
-                    NetType = ReadoutUnitNetworkType.FF;
-                    NetSettings = new FeedForwardNetworkSettings(netSettingsElem);
-                    OutputRange = ((FeedForwardNetworkSettings)NetSettings).OutputRange.DeepClone();
-                }
-                else
-                {
-                    //PP
-                    NetType = ReadoutUnitNetworkType.PP;
-                    NetSettings = new ParallelPerceptronSettings(netSettingsElem);
-                    OutputRange = ((ParallelPerceptronSettings)NetSettings).OutputRange.DeepClone();
-                }
-                if (OutputRange.Min > ReadoutLayer.DataRange.Min || OutputRange.Max < ReadoutLayer.DataRange.Max)
-                {
-                    throw new Exception($"Readout unit {Name} does not support data range <{ReadoutLayer.DataRange.Min}; {ReadoutLayer.DataRange.Max}>.");
-                }
+                //Networks settings
+                NetCfgCollection = NonRecurrentNetUtils.LoadSettingsCollection(taskElem.Descendants().FirstOrDefault());
                 return;
             }
 
-            //Properties
-            /// <summary>
-            /// Binary border (for classification purposes only)
-            /// </summary>
-            public double BinBorder { get { return (TaskType == ReadoutUnit.TaskType.Classification ? OutputRange.Mid : double.NaN); } }
-            
             //Methods
             /// <summary>
             /// See the base.
@@ -394,12 +385,17 @@ namespace RCNet.Neural.Network.SM.Readout
                     TaskType != cmpSettings.TaskType ||
                     OneWinnerGroupName != cmpSettings.OneWinnerGroupName ||
                     !Equals(FeatureFilterCfg, cmpSettings.FeatureFilterCfg) ||
-                    NetType != cmpSettings.NetType ||
-                    !Equals(NetSettings, cmpSettings.NetSettings) ||
-                    !Equals(OutputRange, cmpSettings.OutputRange)
+                    NetCfgCollection.Count != cmpSettings.NetCfgCollection.Count
                     )
                 {
                     return false;
+                }
+                for(int i = 0; i < NetCfgCollection.Count; i++)
+                {
+                    if(!Equals(NetCfgCollection[i], cmpSettings.NetCfgCollection[i]))
+                    {
+                        return false;
+                    }
                 }
                 return true;
             }

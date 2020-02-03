@@ -147,6 +147,7 @@
     <Compile Include="Neural\Network\NonRecurrent\FF\ElasticRegrTrainer.cs" />
     <Compile Include="Neural\Network\NonRecurrent\FF\ElasticRegrTrainerSettings.cs" />
     <Compile Include="Neural\Network\NonRecurrent\FF\RidgeRegrTrainerSettings.cs" />
+    <Compile Include="Neural\Network\NonRecurrent\NonRecurrentNetUtils.cs" />
     <Compile Include="Neural\Network\NonRecurrent\TrainedNetworkBuilder.cs" />
     <Compile Include="Neural\Network\NonRecurrent\TrainedNetwork.cs" />
     <Compile Include="Neural\Network\NonRecurrent\TrainedNetworkCluster.cs" />

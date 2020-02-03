@@ -83,6 +83,12 @@ namespace RCNet.Neural.Network.SM.Readout
             return;
         }
 
+        //Static properties
+        /// <summary>
+        /// Binary border (for classification purposes only)
+        /// </summary>
+        public static double BinBorder { get { return DataRange.Mid; } }
+
         //Properties
         /// <summary>
         /// Cluster error statistics of readout units
@@ -220,9 +226,14 @@ namespace RCNet.Neural.Network.SM.Readout
                 }
                 List<double[]> readoutUnitInputVectorCollection = _predictorsMapper.CreateVectorCollection(Settings.ReadoutUnitCfgCollection[unitIdx].Name, shuffledData.InputVectorCollection);
                 VectorBundle readoutUnitDataBundle = new VectorBundle(readoutUnitInputVectorCollection, idealValueCollection);
+                List<object> netCfgCollection = Settings.ReadoutUnitCfgCollection[unitIdx].NetCfgCollection;
+                if(netCfgCollection.Count == 0)
+                {
+                    netCfgCollection = Settings.ReadoutUnitCfgCollection[unitIdx].TaskType == ReadoutUnit.TaskType.Classification ? Settings.DefaultClassificationNetworkCfgCollection : Settings.DefaultForecastNetworkCfgCollection;
+                }
                 TrainedNetworkClusterBuilder readoutUnitBuilder = new TrainedNetworkClusterBuilder(Settings.ReadoutUnitCfgCollection[unitIdx].Name,
-                                                                                                   Settings.ReadoutUnitCfgCollection[unitIdx].NetSettings,
-                                                                                                   Settings.ReadoutUnitCfgCollection[unitIdx].BinBorder,
+                                                                                                   netCfgCollection,
+                                                                                                   Settings.ReadoutUnitCfgCollection[unitIdx].TaskType == ReadoutUnit.TaskType.Classification ? BinBorder : double.NaN,
                                                                                                    rand,
                                                                                                    controller
                                                                                                    );
@@ -315,6 +326,7 @@ namespace RCNet.Neural.Network.SM.Readout
         /// Computes readout layer output vector
         /// </summary>
         /// <param name="predictors">The predictors</param>
+        /// <param name="unitsAllSubResults">All sub-predictions</param>
         public double[] Compute(double[] predictors, out List<double[]> unitsAllSubResults)
         {
             //Check readyness
@@ -363,6 +375,7 @@ namespace RCNet.Neural.Network.SM.Readout
         /// Computes readout layer and returns rich output data
         /// </summary>
         /// <param name="predictors">The predictors</param>
+        /// <param name="unitsAllSubResults">All sub-predictions</param>
         public ReadoutData ComputeReadoutData(double[] predictors, out List<double[]> unitsAllSubResults)
         {
             return new ReadoutData(Compute(predictors, out unitsAllSubResults), this);

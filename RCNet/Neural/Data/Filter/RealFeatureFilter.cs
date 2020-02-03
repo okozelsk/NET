@@ -46,6 +46,7 @@ namespace RCNet.Neural.Data.Filter
         /// <param name="outputRange">Filter's output range</param>
         /// <param name="standardize">Apply data standardization</param>
         /// <param name="keepReserve">Keep range reserve for future unseen data</param>
+        /// <param name="keepSign">Original sign will be kept</param>
         public RealFeatureFilter(Interval outputRange, bool standardize = true, bool keepReserve = true, bool keepSign = false)
             :base(FeatureType.Real, outputRange)
         {

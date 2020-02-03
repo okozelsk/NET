@@ -38,6 +38,7 @@ namespace RCNet.Neural.Data.Filter
         /// </summary>
         /// <param name="standardize">Standardize?</param>
         /// <param name="keepReserve">Keep range reserve?</param>
+        /// <param name="keepSign">Keep original sign?</param>
         public RealFeatureFilterSettings(bool standardize, bool keepReserve, bool keepSign)
             :base(BaseFeatureFilter.FeatureType.Real)
         {

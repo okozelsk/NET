@@ -911,8 +911,16 @@
     <xs:sequence minOccurs="0" maxOccurs="1">
       <xs:element type="PPNetPDeltaRuleTrainerCfgType" name="pDeltaRuleTrainer" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
-    <xs:attribute type="UIntGT0Type" name="gates" use="required"/>
-    <xs:attribute type="UIntGT0Type" name="resolution" use="required"/>
+    <xs:attribute type="UIntGT0Type" name="gates" use="optional" default="3">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 3</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UIntGT0Type" name="resolution" use="optional" default="2">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 2 (binary)</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- ________________________________________FEATURE FILTERS TYPES_____________________________________________ -->
@@ -947,24 +955,51 @@
 
   <!-- ________________________________________READOUT LAYER TYPES_________________________________________________ -->
 
+  <!-- Readout unit classification networks configuration -->
+  <xs:complexType name="ROutLayerUnitClassificationNetworksCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:choice minOccurs="1" maxOccurs="unbounded">
+        <xs:element type="FFNetCfgType" name="ff" minOccurs="0" maxOccurs="1"/>
+        <xs:element type="PPNetCfgType" name="pp" minOccurs="0" maxOccurs="1"/>
+      </xs:choice>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Readout unit forecast networks configuration -->
+  <xs:complexType name="ROutLayerUnitForecastNetworksCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="FFNetCfgType" name="ff" minOccurs="1" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Readout unit default networks configuration -->
+  <xs:complexType name="ROutLayerUnitDefaultNetworksCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="ROutLayerUnitClassificationNetworksCfgType" name="classificationNetworksCfg" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="ROutLayerUnitForecastNetworksCfgType" name="forecastNetworksCfg" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
 
   <!-- Readout unit forecast task configuration -->
   <xs:complexType name="ROutLayerUnitForecastTaskCfgType">
-    <xs:choice minOccurs="1" maxOccurs="1">
-      <xs:element type="BinFeatureFilterCfgType" name="binFeature" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="EnumFeatureFilterCfgType" name="enumFeature" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="RealFeatureFilterCfgType" name="realFeature" minOccurs="0" maxOccurs="1"/>
-    </xs:choice>
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:choice minOccurs="1" maxOccurs="1">
+        <xs:element type="BinFeatureFilterCfgType" name="binFeature" minOccurs="0" maxOccurs="1"/>
+        <xs:element type="EnumFeatureFilterCfgType" name="enumFeature" minOccurs="0" maxOccurs="1"/>
+        <xs:element type="RealFeatureFilterCfgType" name="realFeature" minOccurs="0" maxOccurs="1"/>
+      </xs:choice>
+      <xs:element type="ROutLayerUnitForecastNetworksCfgType" name="networks" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
   </xs:complexType>
 
   <!-- Readout unit classification task configuration -->
   <xs:complexType name="ROutLayerUnitClassificationTaskCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="BinFeatureFilterCfgType" name="binFeature" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="ROutLayerUnitClassificationNetworksCfgType" name="networks" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:string" name="oneWinnerGroupName" use="optional" default="NA">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Specifies membership in the group of possible classes where only one can win. Default value is NA (not applicable, ie. stand-alone class).</xs:documentation>
+        <xs:documentation xml:lang="en">Specifies the membership in a group of classes where only one can win. Default value is NA (not applicable, ie. stand-alone class).</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -976,18 +1011,22 @@
         <xs:element type="ROutLayerUnitForecastTaskCfgType" name="forecast" minOccurs="1" maxOccurs="1"/>
         <xs:element type="ROutLayerUnitClassificationTaskCfgType" name="classification" minOccurs="1" maxOccurs="1"/>
       </xs:choice>
-      <xs:choice minOccurs="1" maxOccurs="1">
-        <xs:element type="FFNetCfgType" name="ff" minOccurs="1" maxOccurs="1"/>
-        <xs:element type="PPNetCfgType" name="pp" minOccurs="1" maxOccurs="1"/>
-      </xs:choice>
     </xs:sequence>
     <xs:attribute type="xs:string" name="name" use="required"/>
+  </xs:complexType>
+
+  <!-- Readout units configuration -->
+  <xs:complexType name="ROutLayerUnitsCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="ROutLayerUnitCfgType" name="readoutUnit" minOccurs="1" maxOccurs="unbounded"/>
+    </xs:sequence>
   </xs:complexType>
 
   <!-- Readout layer configuration -->
   <xs:complexType name="ROutLayerCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="ROutLayerUnitCfgType" name="readoutUnit" minOccurs="1" maxOccurs="unbounded"/>
+      <xs:element type="ROutLayerUnitDefaultNetworksCfgType" name="defaultNetworks" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="ROutLayerUnitsCfgType" name="readoutUnits" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute name="testDataRatio" use="required">
       <xs:simpleType>

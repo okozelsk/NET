@@ -197,9 +197,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             double power = Math.Sign(iStimuli) * Math.Pow(Math.Abs(iStimuli), _powerExponent);
             AnalogInputNeuronCollection[(int)(AnalogCodingMethod.Power)].NewStimulation(power, 0d);
             //Folded power
-            double tStimuli = ZeroOneRange.Rescale(iStimuli, _inputRange);
-            double foldedPower = Math.Pow(tStimuli, _foldedPowerExponent) - Math.Pow(1d - tStimuli, _foldedPowerExponent);
-            AnalogInputNeuronCollection[(int)(AnalogCodingMethod.Power)].NewStimulation(foldedPower, 0d);
+            double foldedPower = Math.Pow(zeroOneStimuli, _foldedPowerExponent) - Math.Pow(1d - zeroOneStimuli, _foldedPowerExponent);
+            //foldedPower = _inputRange.Rescale(foldedPower, ZeroOneRange);
+            AnalogInputNeuronCollection[(int)(AnalogCodingMethod.FoldedPower)].NewStimulation(foldedPower, 0d);
             //Moving average
             _movingDW.AddSampleValue(iStimuli);
             double wAvg = _movingDW.NumOfSamples >= _movingAverageWindowLength ? _movingDW.GetWeightedAvg(null, true, _movingAverageWindowLength).Avg : 0d;

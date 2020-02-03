@@ -323,6 +323,48 @@ namespace RCNet.Neural.Data
             {
                 //Downsampling is necessary
                 double[] downsampledData = new double[targetLength];
+                for (int downsampledDataIdx = 0; downsampledDataIdx < targetLength; downsampledDataIdx++)
+                {
+                    if(downsampledDataIdx == 0)
+                    {
+                        //Select the last value in the group 
+                        downsampledData[downsampledDataIdx] = varData[downsampledDataIdx * downsamplingPoints + (downsamplingPoints - 1)];
+
+                    }
+                    else
+                    {
+                        //Select the most different value to previous selected value
+                        double refValue = downsampledData[downsampledDataIdx - 1];
+                        double maxAbsDifference = 0;
+                        for (int i = 0; i < downsamplingPoints; i++)
+                        {
+                            int varIndex = downsampledDataIdx * downsamplingPoints + i;
+                            double diff = Math.Abs(refValue - Math.Abs(varData[varIndex]));
+                            if (i == 0 || diff > maxAbsDifference)
+                            {
+                                maxAbsDifference = diff;
+                                downsampledData[downsampledDataIdx] = varData[varIndex];
+                            }
+                        }
+                    }
+                }
+                return downsampledData;
+            }
+            else
+            {
+                //No downsampling is necessary so simply return original data
+                return varData;
+            }
+        }
+
+        /*
+        private static double[] Downsample(double[] varData, int targetLength)
+        {
+            int downsamplingPoints = varData.Length / targetLength;
+            if (downsamplingPoints > 1)
+            {
+                //Downsampling is necessary
+                double[] downsampledData = new double[targetLength];
                 for (int downsampledDataIdx = 0, varDataIdx = downsamplingPoints - 1; downsampledDataIdx < targetLength; downsampledDataIdx++, varDataIdx += downsamplingPoints)
                 {
                     downsampledData[downsampledDataIdx] = varData[varDataIdx];
@@ -335,7 +377,7 @@ namespace RCNet.Neural.Data
                 return varData;
             }
         }
-        /*
+
         private static double[] Downsample(double[] varData, int targetLength)
         {
             int downsamplingPoints = varData.Length / targetLength;
