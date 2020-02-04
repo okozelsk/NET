@@ -151,6 +151,11 @@ namespace RCNet.Neural.Network.SM.Readout
             foreach (XElement readoutUnitElem in readoutUnitsElem.Descendants("readoutUnit"))
             {
                 ReadoutUnitSettings rus = new ReadoutUnitSettings(unitIndex, readoutUnitElem);
+                if(rus.NetCfgCollection.Count == 0)
+                {
+                    //No specific networks settings -> use default
+                    rus.NetCfgCollection.AddRange(rus.TaskType == ReadoutUnit.TaskType.Classification ? DefaultClassificationNetworkCfgCollection : DefaultForecastNetworkCfgCollection);
+                }
                 ReadoutUnitCfgCollection.Add(rus);
                 if(rus.OneWinnerGroupName != ReadoutUnitSettings.NoOneWinnerGroupName)
                 {
@@ -368,7 +373,7 @@ namespace RCNet.Neural.Network.SM.Readout
                     }
                 }
                 //Networks settings
-                NetCfgCollection = NonRecurrentNetUtils.LoadSettingsCollection(taskElem.Descendants().FirstOrDefault());
+                NetCfgCollection = NonRecurrentNetUtils.LoadSettingsCollection(taskElem.Descendants("networks").FirstOrDefault());
                 return;
             }
 

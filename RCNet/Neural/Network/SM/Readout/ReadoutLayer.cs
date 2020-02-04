@@ -226,13 +226,8 @@ namespace RCNet.Neural.Network.SM.Readout
                 }
                 List<double[]> readoutUnitInputVectorCollection = _predictorsMapper.CreateVectorCollection(Settings.ReadoutUnitCfgCollection[unitIdx].Name, shuffledData.InputVectorCollection);
                 VectorBundle readoutUnitDataBundle = new VectorBundle(readoutUnitInputVectorCollection, idealValueCollection);
-                List<object> netCfgCollection = Settings.ReadoutUnitCfgCollection[unitIdx].NetCfgCollection;
-                if(netCfgCollection.Count == 0)
-                {
-                    netCfgCollection = Settings.ReadoutUnitCfgCollection[unitIdx].TaskType == ReadoutUnit.TaskType.Classification ? Settings.DefaultClassificationNetworkCfgCollection : Settings.DefaultForecastNetworkCfgCollection;
-                }
                 TrainedNetworkClusterBuilder readoutUnitBuilder = new TrainedNetworkClusterBuilder(Settings.ReadoutUnitCfgCollection[unitIdx].Name,
-                                                                                                   netCfgCollection,
+                                                                                                   Settings.ReadoutUnitCfgCollection[unitIdx].NetCfgCollection,
                                                                                                    Settings.ReadoutUnitCfgCollection[unitIdx].TaskType == ReadoutUnit.TaskType.Classification ? BinBorder : double.NaN,
                                                                                                    rand,
                                                                                                    controller

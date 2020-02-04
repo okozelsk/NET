@@ -1,17 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <demo dataFolder=".\\Data" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="DemoSettings.xsd">
 
+  
   <!--
-    Here StateMachine fails to exhibit good performance.
-    The best algorithm called COTE, referenced at the dataset's home site, exhibits accuracy 81.4%. It is very far for StateMachine results.
-    This is a good case for further investigation and StateMachine improvements research :-)
+    The best algorithm called COTE, referenced at the dataset's home site, exhibits accuracy 81.4%.
+    It is much better than the results of StateMachine. This is a good case for finding other ways to improve StateMachine :-)
     "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
     https://timeseriesclassification.com/description.php?Dataset=CricketX.
     The series Cricket X, Y and Z are accelerometer data (in three dimensions) taken from actors performing cricket gestures.
-    The twelve classes are different umpire signals: Cancel Call, Dead Ball, Four, Last Hour, Leg Bye, No Ball,
-    One Short, Out, Penalty Runs, Six, TV Replay, and Wide.
-    They mounted two accelerometers orthogonal to each other, thus acceleration is measured in 3D space.
-    The accelerometers are housed in a small wrist watch sized enclosure worn in the form of a wrist band.
+    The twelve classes are different umpire signals: Cancel Call, Dead Ball, Four, Last Hour Leg Bye, No Ball, One Short, Out,
+    Penalty Runs, Six, TV Replay, and Wide. They mounted two accelerometers orthogonal to each other, thus acceleration is measured
+    in 3D space. The accelerometers are housed in a small wrist watch sized enclosure worn in the form of a wrist band.
+    Taken together the data is a multivariate time series classificatin problem, but the serise are not alligned so in its current
+    format cannot be used s such Segmentation of intentional gestures for sports video annotation, Online Context Recognition in Multisensor Systems using Dynamic Time Warping.
+    The data are multi-dimensional, but they are not aligned, so it is not possible.
     Cricket X contains acceleration data only for dimension X: 150 datapoints for left hand and 150 datapoints for right hand.
   -->
   <case name="Classification task CricketX: pure ESN reservoir generating FiringFadingSum predictors, one Elliot neuron as a classifier (Resilient trainer)">
@@ -239,7 +241,7 @@
         <defaultNetworks>
           <classificationNetworksCfg>
             <pp>
-              <pDeltaRuleTrainer attempts="5" attemptEpochs="1000"/>
+              <pDeltaRuleTrainer attempts="5" attemptEpochs="500"/>
             </pp>
             <ff>
               <activationElliot/>
@@ -301,16 +303,17 @@
 
 
   <!--
-    Here StateMachine fails to exhibit good performance.
-    The best algorithm called COTE, referenced at the dataset's home site, exhibits accuracy 81.4%. It is very far for StateMachine results.
-    This is a good case for investigation and StateMachine improvements research :-)
+    The best algorithm called COTE, referenced at the dataset's home site, exhibits accuracy 81.4%.
+    It is much better than the results of StateMachine. This is a good case for finding other ways to improve StateMachine :-)
     "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
     https://timeseriesclassification.com/description.php?Dataset=CricketX.
     The series Cricket X, Y and Z are accelerometer data (in three dimensions) taken from actors performing cricket gestures.
-    The twelve classes are different umpire signals: Cancel Call, Dead Ball, Four, Last Hour, Leg Bye, No Ball,
-    One Short, Out, Penalty Runs, Six, TV Replay, and Wide.
-    They mounted two accelerometers orthogonal to each other, thus acceleration is measured in 3D space.
-    The accelerometers are housed in a small wrist watch sized enclosure worn in the form of a wrist band.
+    The twelve classes are different umpire signals: Cancel Call, Dead Ball, Four, Last Hour Leg Bye, No Ball, One Short, Out,
+    Penalty Runs, Six, TV Replay, and Wide. They mounted two accelerometers orthogonal to each other, thus acceleration is measured
+    in 3D space. The accelerometers are housed in a small wrist watch sized enclosure worn in the form of a wrist band.
+    Taken together the data is a multivariate time series classificatin problem, but the serise are not alligned so in its current
+    format cannot be used s such Segmentation of intentional gestures for sports video annotation, Online Context Recognition in Multisensor Systems using Dynamic Time Warping.
+    The data are multi-dimensional, but they are not aligned, so it is not possible.
     Cricket X contains acceleration data only for dimension X: 150 datapoints for left hand and 150 datapoints for right hand.
   -->
   <case name="Classification task CricketX: pure ESN reservoir generating FiringFadingSum predictors, one Elliot neuron as a classifier (Resilient trainer)">
