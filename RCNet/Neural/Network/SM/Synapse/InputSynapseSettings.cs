@@ -29,7 +29,6 @@ namespace RCNet.Neural.Network.SM.Synapse
         /// Synapse's random weight settings for Input->Spiking connection
         /// </summary>
         public RandomValueSettings SpikingTargetWeightCfg { get; set; }
-
         /// <summary>
         /// Synapse's scope when targeting analog neurons
         /// </summary>
@@ -38,12 +37,6 @@ namespace RCNet.Neural.Network.SM.Synapse
         /// Synapse's random weight settings for Input->Analog connection
         /// </summary>
         public RandomValueSettings AnalogTargetWeightCfg { get; set; }
-
-        /// <summary>
-        /// Relative shares of analog signal tranformations
-        /// </summary>
-        public RelShareSelector<int> AnalogTransRelShares { get; set; }
-
         /// <summary>
         /// Specifies how will be decided synaptic delay
         /// </summary>
@@ -68,7 +61,6 @@ namespace RCNet.Neural.Network.SM.Synapse
                 SpikingTargetWeightCfg = source.SpikingTargetWeightCfg.DeepClone();
             }
             AnalogTargetScope = source.AnalogTargetScope;
-            AnalogTransRelShares = source.AnalogTransRelShares.DeepClone();
             AnalogTargetWeightCfg = null;
             if (source.AnalogTargetWeightCfg != null)
             {
@@ -118,28 +110,15 @@ namespace RCNet.Neural.Network.SM.Synapse
                 SpikingTargetWeightCfg = new RandomValueSettings(0, 1);
             }
             //Analog target
-            //Scope and analog rel shares of transformations
-            AnalogTransRelShares = new RelShareSelector<int>();
+            //Scope
             cfgElem = settingsElem.XPathSelectElement("./analogTarget");
             if (cfgElem != null)
             {
                 AnalogTargetScope = BaseSynapse.ParseSynapticTargetScope(cfgElem.Attribute("scope").Value);
-                AnalogTransRelShares.Add(double.Parse(cfgElem.Attribute("relShareOriginal").Value, CultureInfo.InvariantCulture), (int)InputUnit.AnalogCodingMethod.Original);
-                AnalogTransRelShares.Add(double.Parse(cfgElem.Attribute("relShareTransDiff").Value, CultureInfo.InvariantCulture), (int)InputUnit.AnalogCodingMethod.Difference);
-                AnalogTransRelShares.Add(double.Parse(cfgElem.Attribute("relShareTransLinearSteps").Value, CultureInfo.InvariantCulture), (int)InputUnit.AnalogCodingMethod.LinearSteps);
-                AnalogTransRelShares.Add(double.Parse(cfgElem.Attribute("relShareTransPower").Value, CultureInfo.InvariantCulture), (int)InputUnit.AnalogCodingMethod.Power);
-                AnalogTransRelShares.Add(double.Parse(cfgElem.Attribute("relShareTransFoldedPower").Value, CultureInfo.InvariantCulture), (int)InputUnit.AnalogCodingMethod.FoldedPower);
-                AnalogTransRelShares.Add(double.Parse(cfgElem.Attribute("relShareTransMovingAverage").Value, CultureInfo.InvariantCulture), (int)InputUnit.AnalogCodingMethod.MovingAverage);
             }
             else
             {
                 AnalogTargetScope = BaseSynapse.SynapticTargetScope.All;
-                AnalogTransRelShares.Add(1d, (int)InputUnit.AnalogCodingMethod.Original);
-                AnalogTransRelShares.Add(0d, (int)InputUnit.AnalogCodingMethod.Difference);
-                AnalogTransRelShares.Add(0d, (int)InputUnit.AnalogCodingMethod.LinearSteps);
-                AnalogTransRelShares.Add(0d, (int)InputUnit.AnalogCodingMethod.Power);
-                AnalogTransRelShares.Add(0d, (int)InputUnit.AnalogCodingMethod.FoldedPower);
-                AnalogTransRelShares.Add(0d, (int)InputUnit.AnalogCodingMethod.MovingAverage);
             }
             //Analog target Weight
             cfgElem = settingsElem.XPathSelectElement("./analogTarget/weight");
@@ -168,7 +147,6 @@ namespace RCNet.Neural.Network.SM.Synapse
             if (SpikingTargetScope != cmpSettings.SpikingTargetScope ||
                 !Equals(SpikingTargetWeightCfg, cmpSettings.SpikingTargetWeightCfg) ||
                 AnalogTargetScope != cmpSettings.AnalogTargetScope ||
-                !Equals(AnalogTransRelShares, cmpSettings.AnalogTransRelShares) ||
                 !Equals(AnalogTargetWeightCfg, cmpSettings.AnalogTargetWeightCfg) ||
                 DelayMethod != cmpSettings.DelayMethod ||
                 MaxDelay != cmpSettings.MaxDelay

@@ -111,16 +111,7 @@ namespace RCNet.Neural.Network.NonRecurrent
         /// <summary>
         /// Indicates that the network ideal output is binary
         /// </summary>
-        public bool BinaryOutput { get { return !double.IsNaN(_binBorder); } }
-        /// <summary>
-        /// Indicates the network is FeedForwardNetwork
-        /// </summary>
-        public bool IsFF { get { return (_networkSettings.GetType() == typeof(FeedForwardNetworkSettings)); } }
-        /// <summary>
-        /// Indicates the network is ParallelPerceptron
-        /// </summary>
-        public bool IsPP { get { return (_networkSettings.GetType() == typeof(ParallelPerceptronSettings)); } }
-
+        private bool BinaryOutput { get { return !double.IsNaN(_binBorder); } }
 
         //Static methods
         /// <summary>
@@ -166,7 +157,6 @@ namespace RCNet.Neural.Network.NonRecurrent
         //Methods
         private BuildingInstr DefaultRegressionController(BuildingState buildingState)
         {
-            //const double stopAttemptBorder = 0.25d;
             BuildingInstr instructions = new BuildingInstr
             {
                 CurrentIsBetter = IsBetter(buildingState.BinaryOutput,
@@ -183,56 +173,6 @@ namespace RCNet.Neural.Network.NonRecurrent
         }
 
         /// <summary>
-        /// Creates new network and associated trainer.
-        /// </summary>
-        /// <param name="net">Created network</param>
-        /// <param name="trainer">Created associated trainer</param>
-        private void NewNetworkAndTrainer(out INonRecurrentNetwork net, out INonRecurrentNetworkTrainer trainer)
-        {
-            if (IsFF)
-            {
-                //Feed forward network
-                FeedForwardNetworkSettings netCfg = (FeedForwardNetworkSettings)_networkSettings;
-                FeedForwardNetwork ffn = new FeedForwardNetwork(_trainingBundle.InputVectorCollection[0].Length, 1, netCfg);
-                net = ffn;
-                if (netCfg.TrainerCfg.GetType() == typeof(QRDRegrTrainerSettings))
-                {
-                    trainer = new QRDRegrTrainer(ffn, _trainingBundle.InputVectorCollection, _trainingBundle.OutputVectorCollection, (QRDRegrTrainerSettings)netCfg.TrainerCfg, _rand);
-                }
-                else if (netCfg.TrainerCfg.GetType() == typeof(RidgeRegrTrainerSettings))
-                {
-                    trainer = new RidgeRegrTrainer(ffn, _trainingBundle.InputVectorCollection, _trainingBundle.OutputVectorCollection, (RidgeRegrTrainerSettings)netCfg.TrainerCfg, _rand);
-                }
-                else if (netCfg.TrainerCfg.GetType() == typeof(ElasticRegrTrainerSettings))
-                {
-                    trainer = new ElasticRegrTrainer(ffn, _trainingBundle.InputVectorCollection, _trainingBundle.OutputVectorCollection, (ElasticRegrTrainerSettings)netCfg.TrainerCfg);
-                }
-                else if (netCfg.TrainerCfg.GetType() == typeof(RPropTrainerSettings))
-                {
-                    trainer = new RPropTrainer(ffn, _trainingBundle.InputVectorCollection, _trainingBundle.OutputVectorCollection, (RPropTrainerSettings)netCfg.TrainerCfg, _rand);
-                }
-                else
-                {
-                    throw new ArgumentException($"Unknown trainer {netCfg.TrainerCfg}");
-                }
-            }
-            else if(IsPP)
-            {
-                //Parallel perceptron network
-                ParallelPerceptronSettings netCfg = (ParallelPerceptronSettings)_networkSettings;
-                ParallelPerceptron ppn = new ParallelPerceptron(_trainingBundle.InputVectorCollection[0].Length, netCfg);
-                net = ppn;
-                trainer = new PDeltaRuleTrainer(ppn, _trainingBundle.InputVectorCollection, _trainingBundle.OutputVectorCollection, netCfg.PDeltaRuleTrainerCfg, _rand);
-            }
-            else
-            {
-                throw new Exception("Unknown network settings");
-            }
-            net.RandomizeWeights(_rand);
-            return;
-        }
-
-        /// <summary>
         /// Builds trained network
         /// </summary>
         /// <returns>Trained network</returns>
@@ -243,7 +183,13 @@ namespace RCNet.Neural.Network.NonRecurrent
             double lastImprovementCombinedPrecisionError = 0d;
             double lastImprovementCombinedBinaryError = 0d;
             //Create network and trainer
-            NewNetworkAndTrainer(out INonRecurrentNetwork net, out INonRecurrentNetworkTrainer trainer);
+            NonRecurrentNetUtils.CreateNetworkAndTrainer(_networkSettings,
+                                                         _trainingBundle.InputVectorCollection,
+                                                         _trainingBundle.OutputVectorCollection,
+                                                         _rand,
+                                                         out INonRecurrentNetwork net,
+                                                         out INonRecurrentNetworkTrainer trainer
+                                                         );
             //Iterate training cycles
             while (trainer.Iteration())
             {

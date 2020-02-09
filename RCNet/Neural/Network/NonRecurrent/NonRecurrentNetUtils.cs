@@ -114,6 +114,71 @@ namespace RCNet.Neural.Network.NonRecurrent
             return settingsCollection;
         }
 
+        /// <summary>
+        /// Creates new network and associated trainer.
+        /// </summary>
+        /// <param name="settings">Non-recurrent-network settings</param>
+        /// <param name="trainingInputVectors">Collection of training input samples</param>
+        /// <param name="trainingOutputVectors">Collection of training output (desired) samples</param>
+        /// <param name="rand">Random object to be used</param>
+        /// <param name="net">Created network</param>
+        /// <param name="trainer">Created associated trainer</param>
+        public static void CreateNetworkAndTrainer(object settings,
+                                                   List<double[]> trainingInputVectors,
+                                                   List<double[]> trainingOutputVectors,
+                                                   Random rand,
+                                                   out INonRecurrentNetwork net,
+                                                   out INonRecurrentNetworkTrainer trainer
+                                                   )
+        {
+            if (NonRecurrentNetUtils.IsFF(settings))
+            {
+                //Feed forward network
+                FeedForwardNetworkSettings netCfg = (FeedForwardNetworkSettings)settings;
+                FeedForwardNetwork ffn = new FeedForwardNetwork(trainingInputVectors[0].Length, trainingOutputVectors[0].Length, netCfg);
+                net = ffn;
+                if (netCfg.TrainerCfg.GetType() == typeof(QRDRegrTrainerSettings))
+                {
+                    trainer = new QRDRegrTrainer(ffn, trainingInputVectors, trainingOutputVectors, (QRDRegrTrainerSettings)netCfg.TrainerCfg, rand);
+                }
+                else if (netCfg.TrainerCfg.GetType() == typeof(RidgeRegrTrainerSettings))
+                {
+                    trainer = new RidgeRegrTrainer(ffn, trainingInputVectors, trainingOutputVectors, (RidgeRegrTrainerSettings)netCfg.TrainerCfg, rand);
+                }
+                else if (netCfg.TrainerCfg.GetType() == typeof(ElasticRegrTrainerSettings))
+                {
+                    trainer = new ElasticRegrTrainer(ffn, trainingInputVectors, trainingOutputVectors, (ElasticRegrTrainerSettings)netCfg.TrainerCfg);
+                }
+                else if (netCfg.TrainerCfg.GetType() == typeof(RPropTrainerSettings))
+                {
+                    trainer = new RPropTrainer(ffn, trainingInputVectors, trainingOutputVectors, (RPropTrainerSettings)netCfg.TrainerCfg, rand);
+                }
+                else
+                {
+                    throw new ArgumentException($"Unknown trainer {netCfg.TrainerCfg}");
+                }
+            }
+            else if (NonRecurrentNetUtils.IsPP(settings))
+            {
+                //Parallel perceptron network
+                //Check output
+                if(trainingOutputVectors[0].Length != 1)
+                {
+                    throw new Exception("Can't create ParallelPerceptron. Only single output value is allowed.");
+                }
+                ParallelPerceptronSettings netCfg = (ParallelPerceptronSettings)settings;
+                ParallelPerceptron ppn = new ParallelPerceptron(trainingInputVectors[0].Length, netCfg);
+                net = ppn;
+                trainer = new PDeltaRuleTrainer(ppn, trainingInputVectors, trainingOutputVectors, netCfg.PDeltaRuleTrainerCfg, rand);
+            }
+            else
+            {
+                throw new Exception("Unknown network settings");
+            }
+            net.RandomizeWeights(rand);
+            return;
+        }
+
 
     }//NonRecurrentNetUtils
 }//Namespace

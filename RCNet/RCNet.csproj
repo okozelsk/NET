@@ -160,6 +160,7 @@
     <Compile Include="Neural\Network\SM\Preprocessing\NeuralPreprocessorSettings.cs" />
     <Compile Include="Neural\Network\SM\Neuron\HiddenNeuronPredictorsSettings.cs" />
     <Compile Include="MathTools\Probability\RelShareSelector.cs" />
+    <Compile Include="Neural\Network\SM\Preprocessing\InputUnitSettings.cs" />
     <Compile Include="Neural\Network\SM\Synapse\InternalSynapseSettings.cs" />
     <Compile Include="Neural\Network\SM\Synapse\InputSynapseSettings.cs" />
     <Compile Include="Neural\Network\SM\Synapse\InternalSynapse.cs" />
@@ -433,7 +434,11 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="Neural\Network\SM\Preprocessing\InputUnitSettings.xsd">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

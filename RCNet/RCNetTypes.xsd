@@ -5,6 +5,10 @@
            xmlns="RCNetTypes"
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
            >
+  <!-- Xml is a standard way to parameterize RCNet components and this xsd document contains definition of all necessary xml structures.
+       It is impossible to define all constraints becouse of some limitations of xsd, thus conformity with the schema does not mean
+       that xml is fully consistent and will be accepted by the parameterized component.
+  -->
 
   <!-- ________________________________________LOW LEVEL TYPES_________________________________________________ -->
   <!-- SIMPLE TYPES -->
@@ -69,6 +73,19 @@
       <xs:enumeration value="NoRestriction"/>
       <xs:enumeration value="AnalogOnly"/>
       <xs:enumeration value="SpikingOnly"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Enumeration of methods of analog input value realtime coding -->
+  <xs:simpleType name="AnalogCodingMethodType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Actual"/>
+      <xs:enumeration value="Difference"/>
+      <xs:enumeration value="LinearStep"/>
+      <xs:enumeration value="Power"/>
+      <xs:enumeration value="FoldedPower"/>
+      <xs:enumeration value="MovingAverage"/>
+      <xs:enumeration value="Morlet"/>
     </xs:restriction>
   </xs:simpleType>
 
@@ -953,101 +970,6 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- ________________________________________READOUT LAYER TYPES_________________________________________________ -->
-
-  <!-- Readout unit classification networks configuration -->
-  <xs:complexType name="ROutLayerUnitClassificationNetworksCfgType">
-    <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:choice minOccurs="1" maxOccurs="unbounded">
-        <xs:element type="FFNetCfgType" name="ff" minOccurs="0" maxOccurs="1"/>
-        <xs:element type="PPNetCfgType" name="pp" minOccurs="0" maxOccurs="1"/>
-      </xs:choice>
-    </xs:sequence>
-  </xs:complexType>
-
-  <!-- Readout unit forecast networks configuration -->
-  <xs:complexType name="ROutLayerUnitForecastNetworksCfgType">
-    <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="FFNetCfgType" name="ff" minOccurs="1" maxOccurs="unbounded"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <!-- Readout unit default networks configuration -->
-  <xs:complexType name="ROutLayerUnitDefaultNetworksCfgType">
-    <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="ROutLayerUnitClassificationNetworksCfgType" name="classificationNetworksCfg" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="ROutLayerUnitForecastNetworksCfgType" name="forecastNetworksCfg" minOccurs="0" maxOccurs="1"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <!-- Readout unit forecast task configuration -->
-  <xs:complexType name="ROutLayerUnitForecastTaskCfgType">
-    <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:choice minOccurs="1" maxOccurs="1">
-        <xs:element type="BinFeatureFilterCfgType" name="binFeature" minOccurs="0" maxOccurs="1"/>
-        <xs:element type="EnumFeatureFilterCfgType" name="enumFeature" minOccurs="0" maxOccurs="1"/>
-        <xs:element type="RealFeatureFilterCfgType" name="realFeature" minOccurs="0" maxOccurs="1"/>
-      </xs:choice>
-      <xs:element type="ROutLayerUnitForecastNetworksCfgType" name="networks" minOccurs="0" maxOccurs="1"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <!-- Readout unit classification task configuration -->
-  <xs:complexType name="ROutLayerUnitClassificationTaskCfgType">
-    <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="ROutLayerUnitClassificationNetworksCfgType" name="networks" minOccurs="0" maxOccurs="1"/>
-    </xs:sequence>
-    <xs:attribute type="xs:string" name="oneWinnerGroupName" use="optional" default="NA">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Specifies the membership in a group of classes where only one can win. Default value is NA (not applicable, ie. stand-alone class).</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-  </xs:complexType>
-
-  <!-- Readout unit configuration -->
-  <xs:complexType name="ROutLayerUnitCfgType">
-    <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:choice minOccurs="1" maxOccurs="1">
-        <xs:element type="ROutLayerUnitForecastTaskCfgType" name="forecast" minOccurs="1" maxOccurs="1"/>
-        <xs:element type="ROutLayerUnitClassificationTaskCfgType" name="classification" minOccurs="1" maxOccurs="1"/>
-      </xs:choice>
-    </xs:sequence>
-    <xs:attribute type="xs:string" name="name" use="required"/>
-  </xs:complexType>
-
-  <!-- Readout units configuration -->
-  <xs:complexType name="ROutLayerUnitsCfgType">
-    <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="ROutLayerUnitCfgType" name="readoutUnit" minOccurs="1" maxOccurs="unbounded"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <!-- Readout layer configuration -->
-  <xs:complexType name="ROutLayerCfgType">
-    <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="ROutLayerUnitDefaultNetworksCfgType" name="defaultNetworks" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="ROutLayerUnitsCfgType" name="readoutUnits" minOccurs="1" maxOccurs="1"/>
-    </xs:sequence>
-    <xs:attribute name="testDataRatio" use="required">
-      <xs:simpleType>
-        <xs:restriction base="xs:double">
-          <xs:minExclusive value="0" />
-          <xs:maxInclusive value="0.5" />
-        </xs:restriction>
-      </xs:simpleType>
-    </xs:attribute>
-    <xs:attribute type="UIntGT0AutoOptionType" name="folds" use="optional" default="Auto">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is Auto</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="UIntGT0Type" name="repetitions" use="optional" default="1">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-  </xs:complexType>
-
   <!-- ________________________________________SYNAPSE TYPES_________________________________________________ -->
 
   <!-- Input synapse types-->
@@ -1069,36 +991,6 @@
     <xs:attribute type="SynapticTargetScopeType" name="scope" use="optional" default="All">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is All (Inhibitory and Excitatory neurons)</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="UDoubleType" name="relShareOriginal" use="optional" default="1">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="UDoubleType" name="relShareTransDiff" use="optional" default="0">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="UDoubleType" name="relShareTransLinearSteps" use="optional" default="0">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="UDoubleType" name="relShareTransPower" use="optional" default="0">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="UDoubleType" name="relShareTransFoldedPower" use="optional" default="0">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="UDoubleType" name="relShareTransMovingAverage" use="optional" default="0">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -1973,13 +1865,13 @@
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="ReservoirInputEntryPointType" name="inputEntryPoint" minOccurs="0" maxOccurs="1"/>
       <xs:element type="ReservoirPoolCfgContainerType" name="pools" minOccurs="1" maxOccurs="1">
-        <xs:unique name="unique_pool_name">
+        <xs:unique name="rescfg_unique_pool_name">
           <xs:selector xpath="./pool"/>
           <xs:field xpath="@name"/>
         </xs:unique>
       </xs:element>
       <xs:element type="ReservoirPool2PoolConnCfgContainerType" name="pool2PoolConns" minOccurs="0" maxOccurs="1">
-        <xs:unique name="unique_pool2pool_pools">
+        <xs:unique name="rescfg_unique_pool2pool">
           <xs:selector xpath="./pool2PoolConn"/>
           <xs:field xpath="@srcPool"/>
           <xs:field xpath="@targetPool"/>
@@ -2082,36 +1974,6 @@
         <xs:documentation xml:lang="en">Default value is true</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute type="UIntGE1LE32Type" name="spikeTrainLength" use="optional" default="8">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 8</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="UIntGE1LE1024Type" name="transDiffDistance" use="optional" default="1">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="UIntGT1Type" name="transNumOfLinearSteps" use="optional" default="16">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 16</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="UDoubleGT0Type" name="transPowerExponent" use="optional" default="0.5">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.5</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="UDoubleGT0Type" name="transFoldedPowerExponent" use="optional" default="0.5">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.5</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="UIntGE1LE1024Type" name="transMovingAverageWindowLength" use="optional" default="5">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 5</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
   </xs:complexType>
 
   
@@ -2128,36 +1990,6 @@
     <xs:attribute type="xs:boolean" name="allowRoutingToReadout" use="optional" default="false">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is false</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="UIntGE1LE32Type" name="spikeTrainLength" use="optional" default="8">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 8</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="UIntGE1LE1024Type" name="transDiffDistance" use="optional" default="1">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="UIntGT1Type" name="transNumOfLinearSteps" use="optional" default="16">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 16</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="UDoubleGT0Type" name="transPowerExponent" use="optional" default="0.5">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.5</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="UDoubleGT0Type" name="transFoldedPowerExponent" use="optional" default="0.5">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.5</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="UIntGE1LE1024Type" name="transMovingAverageWindowLength" use="optional" default="5">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 5</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -2197,6 +2029,49 @@
     </xs:sequence>
   </xs:complexType>
 
+  <!-- NeuralPreprocessor - reservoir instance - input unit configuration -->
+  <xs:complexType name="NPResInstanceInputUnitCfgType">
+    <xs:attribute type="xs:string" name="fieldName" use="required"/>
+    <xs:attribute type="UIntGE1LE32Type" name="spikeTrainLength" use="optional" default="8">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 8</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UIntGE1LE1024Type" name="differenceDistance" use="optional" default="1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UIntGT1Type" name="numOfLinearSteps" use="optional" default="16">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 16</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleGT0Type" name="powerExponent" use="optional" default="0.5">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.5</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleGT0Type" name="foldedPowerExponent" use="optional" default="0.5">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.5</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UIntGE1LE1024Type" name="movingAverageLength" use="optional" default="5">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 5</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <!-- NeuralPreprocessor - reservoir instance - input units configuration -->
+  <xs:complexType name="NPResInstanceInputUnitsCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="NPResInstanceInputUnitCfgType" name="inputUnit" minOccurs="1" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+
   <!-- NeuralPreprocessor - reservoir instance - input field connection configuration -->
   <xs:complexType name="NPResInstanceInputConnectionCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
@@ -2205,6 +2080,8 @@
     <xs:attribute type="xs:string" name="fieldName" use="required"/>
     <xs:attribute type="xs:string" name="poolName" use="required"/>
     <xs:attribute type="UDoubleGT0Type" name="density" use="required"/>
+    <xs:attribute type="AnalogCodingMethodType" name="coding" use="optional" default="Actual"/>
+    <xs:attribute type="xs:boolean" name="oppositeAmplitude" use="optional" default="false"/>
     <xs:attribute type="SignalingRestrictionType" name="signalingRestriction" use="optional" default="AnalogOnly">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is AnalogOnly</xs:documentation>
@@ -2222,13 +2099,13 @@
   <!-- NeuralPreprocessor - reservoir instance - configuration -->
   <xs:complexType name="NPResInstanceCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="NPResInstanceInputConnectionsCfgType" name="inputConnections" minOccurs="1" maxOccurs="1">
-        <xs:unique name="unique_input_field_assignment">
-          <xs:selector xpath="./inputFieldAssignment"/>
-          <xs:field xpath="@inputFieldName"/>
-          <xs:field xpath="@poolName"/>
+      <xs:element type="NPResInstanceInputUnitsCfgType" name="inputUnits" minOccurs="0" maxOccurs="1">
+        <xs:unique name="resinst_unique_input_unit">
+          <xs:selector xpath=".//inputUnit"/>
+          <xs:field xpath="@fieldName"/>
         </xs:unique>
       </xs:element>
+      <xs:element type="NPResInstanceInputConnectionsCfgType" name="inputConnections" minOccurs="1" maxOccurs="1"/>
       <xs:element type="PredictorsCfgType" name="predictors" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:string" name="name" use="required" />
@@ -2246,19 +2123,19 @@
   <xs:complexType name="NPCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="NPInputCfgType" name="input" minOccurs="1" maxOccurs="1">
-        <xs:unique name="unique_input_field_name">
+        <xs:unique name="np_unique_input_field_name">
           <xs:selector xpath=".//field"/>
           <xs:field xpath="@name"/>
         </xs:unique>
       </xs:element>
       <xs:element type="NPResCfgContainerType" name="reservoirCfgContainer" minOccurs="1" maxOccurs="1">
-        <xs:unique name="unique_reservoir_configuration_name">
+        <xs:unique name="np_unique_rescfg_name">
           <xs:selector xpath="./reservoirCfg"/>
           <xs:field xpath="@name"/>
         </xs:unique>
       </xs:element>
       <xs:element type="NPResInstanceContainerType" name="reservoirInstanceContainer" minOccurs="1" maxOccurs="1">
-        <xs:unique name="unique_reservoir_instance_name">
+        <xs:unique name="np_unique_resinst_name">
           <xs:selector xpath="./reservoirInstance"/>
           <xs:field xpath="@name"/>
         </xs:unique>
@@ -2267,6 +2144,106 @@
     <xs:attribute type="UDoubleLT1Type" name="predictorsReductionRatio" use="optional" default="0">
       <xs:annotation>
         <xs:documentation xml:lang="en">Specifies how many predictors having smallest standard deviation to be disabled. Default value is 0.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <!-- ________________________________________READOUT LAYER TYPES_________________________________________________ -->
+
+  <!-- Readout unit classification networks configuration -->
+  <xs:complexType name="ROutLayerUnitClassificationNetworksCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:choice minOccurs="1" maxOccurs="unbounded">
+        <xs:element type="FFNetCfgType" name="ff" minOccurs="0" maxOccurs="1"/>
+        <xs:element type="PPNetCfgType" name="pp" minOccurs="0" maxOccurs="1"/>
+      </xs:choice>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Readout unit forecast networks configuration -->
+  <xs:complexType name="ROutLayerUnitForecastNetworksCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="FFNetCfgType" name="ff" minOccurs="1" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Readout unit default networks configuration -->
+  <xs:complexType name="ROutLayerUnitDefaultNetworksCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="ROutLayerUnitClassificationNetworksCfgType" name="classificationNetworksCfg" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="ROutLayerUnitForecastNetworksCfgType" name="forecastNetworksCfg" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Readout unit forecast task configuration -->
+  <xs:complexType name="ROutLayerUnitForecastTaskCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:choice minOccurs="1" maxOccurs="1">
+        <xs:element type="BinFeatureFilterCfgType" name="binFeature" minOccurs="0" maxOccurs="1"/>
+        <xs:element type="EnumFeatureFilterCfgType" name="enumFeature" minOccurs="0" maxOccurs="1"/>
+        <xs:element type="RealFeatureFilterCfgType" name="realFeature" minOccurs="0" maxOccurs="1"/>
+      </xs:choice>
+      <xs:element type="ROutLayerUnitForecastNetworksCfgType" name="networks" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Readout unit classification task configuration -->
+  <xs:complexType name="ROutLayerUnitClassificationTaskCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="ROutLayerUnitClassificationNetworksCfgType" name="networks" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
+    <xs:attribute type="xs:string" name="oneWinnerGroupName" use="optional" default="NA">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Specifies the membership in a group of classes where only one can win. Default value is NA (not applicable, ie. stand-alone class).</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <!-- Readout unit configuration -->
+  <xs:complexType name="ROutLayerUnitCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:choice minOccurs="1" maxOccurs="1">
+        <xs:element type="ROutLayerUnitForecastTaskCfgType" name="forecast" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="ROutLayerUnitClassificationTaskCfgType" name="classification" minOccurs="1" maxOccurs="1"/>
+      </xs:choice>
+    </xs:sequence>
+    <xs:attribute type="xs:string" name="name" use="required"/>
+  </xs:complexType>
+
+  <!-- Readout units configuration -->
+  <xs:complexType name="ROutLayerUnitsCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="ROutLayerUnitCfgType" name="readoutUnit" minOccurs="1" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Readout layer configuration -->
+  <xs:complexType name="ROutLayerCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="ROutLayerUnitDefaultNetworksCfgType" name="defaultNetworks" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="ROutLayerUnitsCfgType" name="readoutUnits" minOccurs="1" maxOccurs="1">
+        <xs:unique name="rol_unique_readout_unit">
+          <xs:selector xpath="./readoutUnit"/>
+          <xs:field xpath="@name"/>
+        </xs:unique>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="testDataRatio" use="required">
+      <xs:simpleType>
+        <xs:restriction base="xs:double">
+          <xs:minExclusive value="0" />
+          <xs:maxInclusive value="0.5" />
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+    <xs:attribute type="UIntGT0AutoOptionType" name="folds" use="optional" default="Auto">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is Auto</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UIntGT0Type" name="repetitions" use="optional" default="1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -2311,12 +2288,12 @@
   <xs:complexType name="SMMapperType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="SMMapperReadoutUnitAllowedPredictorsType" name="map" minOccurs="1" maxOccurs="unbounded">
-        <xs:unique name="unique_allowed_res_instance_pool">
+        <xs:unique name="smm_unique_allowed_resinst_pool">
           <xs:selector xpath="./allowedPools/pool"/>
           <xs:field xpath="@reservoirInstanceName"/>
           <xs:field xpath="@poolName"/>
         </xs:unique>
-        <xs:unique name="unique_allowed_input_field">
+        <xs:unique name="smm_unique_allowed_input_field">
           <xs:selector xpath="./allowedInputFields/field"/>
           <xs:field xpath="@name"/>
         </xs:unique>
@@ -2324,25 +2301,32 @@
     </xs:sequence>
   </xs:complexType>
 
-  <!-- StateMachine complete configuration -->
+  <!-- StateMachine configuration -->
   <xs:complexType name="SMCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="NPCfgType" name="neuralPreprocessor" minOccurs="0" maxOccurs="1">
-        <xs:key name="input_field_name">
+        <xs:key name="np_input_field">
           <xs:selector xpath="./input/*/field"/>
           <xs:field xpath="@name"/>
         </xs:key>
-        <xs:keyref name="existing_input_field" refer="input_field_name">
-          <xs:selector xpath=".//inputConnection" />
+        <xs:key name="np_rescfg_name">
+          <xs:selector xpath="./reservoirCfgContainer/reservoirCfg"/>
+          <xs:field xpath="@name"/>
+        </xs:key>
+        <xs:keyref name="iconn_existing_input_field" refer="np_input_field">
+          <xs:selector xpath="./reservoirInstanceContainer/reservoirInstance/inputConnections/inputConnection" />
           <xs:field xpath="@fieldName" />
         </xs:keyref>
+        <xs:keyref name="iunit_existing_input_field" refer="np_input_field">
+          <xs:selector xpath="./reservoirInstanceContainer/reservoirInstance/inputUnits/inputUnit" />
+          <xs:field xpath="@fieldName" />
+        </xs:keyref>
+        <xs:keyref name="resinst_existing_rescfg" refer="np_rescfg_name">
+          <xs:selector xpath="./reservoirInstanceContainer/reservoirInstance" />
+          <xs:field xpath="@cfg" />
+        </xs:keyref>
       </xs:element>
-      <xs:element type="ROutLayerCfgType" name="readoutLayer" minOccurs="1" maxOccurs="1">
-        <xs:unique name="unique_output_field_name">
-          <xs:selector xpath="./readoutUnit"/>
-          <xs:field xpath="@name"/>
-        </xs:unique>
-      </xs:element>
+      <xs:element type="ROutLayerCfgType" name="readoutLayer" minOccurs="1" maxOccurs="1"/>
       <xs:element type="SMMapperType" name="mapper" minOccurs="0" maxOccurs="1">
         <xs:unique name="unique_readout_unit_name">
           <xs:selector xpath="./map"/>

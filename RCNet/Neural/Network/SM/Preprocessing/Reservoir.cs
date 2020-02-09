@@ -88,19 +88,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             //Initialization of neurons
             //-----------------------------------------------------------------------------
             //Input neurons
-            _inputUnitCollection = new InputUnit[InstanceDefinition.InputFieldInfoCollection.Count];
-            for (int i = 0; i < InstanceDefinition.InputFieldInfoCollection.Count; i++)
+            _inputUnitCollection = new InputUnit[InstanceDefinition.InputUnitCfgCollection.Count];
+            for (int i = 0; i < InstanceDefinition.InputUnitCfgCollection.Count; i++)
             {
-                _inputUnitCollection[i] = new InputUnit(InstanceDefinition.Settings.InputEntryPoint,
-                                                        i,
-                                                        inputRange,
-                                                        InstanceDefinition.InputFieldInfoCollection[i].SpikeTrainLength,
-                                                        InstanceDefinition.InputFieldInfoCollection[i].TransDiffDistance,
-                                                        InstanceDefinition.InputFieldInfoCollection[i].TransNumOfLinearSteps,
-                                                        InstanceDefinition.InputFieldInfoCollection[i].TransPowerExponent,
-                                                        InstanceDefinition.InputFieldInfoCollection[i].TransFoldedPowerExponent,
-                                                        InstanceDefinition.InputFieldInfoCollection[i].TransMovingAverageWindowLength
-                                                        );
+                _inputUnitCollection[i] = new InputUnit(inputRange, InstanceDefinition.InputUnitCfgCollection[i]);
             }
             BasicStat[] inputDistanceStatCollection = new BasicStat[InstanceDefinition.Settings.PoolSettingsCollection.Count];
             for(int i = 0; i < inputDistanceStatCollection.Length; i++)
@@ -435,6 +426,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                         indices.Indices();
                         rand.Shuffle(indices);
                         int spikingNeuronSubIndex = 0;
+                        InputNeuron analogInputNeuron = _inputUnitCollection[inputConnection.FieldIdx].GetAnalogInputNeuron(inputConnection.Coding, inputConnection.OppositeAmplitude);
+                        InputNeuron[] spikeTrainInputNeurons = _inputUnitCollection[inputConnection.FieldIdx].GetSpikeTrainInputNeurons(inputConnection.Coding, inputConnection.OppositeAmplitude);
                         for (int i = 0; i < connectionsPerInput; i++)
                         {
                             int targetNeuronIdx = indices[i];
@@ -445,22 +438,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                                (inputConnection.SignalingRestriction == NeuronCommon.NeuronSignalingRestrictionType.NoRestriction && targetNeurons[targetNeuronIdx].TypeOfActivation == ActivationType.Analog)
                                )
                             {
-                                //Connect analog input neuron
-                                if (targetNeurons[targetNeuronIdx].TypeOfActivation == ActivationType.Analog)
-                                {
-                                    inputNeuron = _inputUnitCollection[inputConnection.FieldIdx].AnalogInputNeuronCollection[inputConnection.SynapseCfg.AnalogTransRelShares.SelectNext()];
-                                }
-                                else
-                                {
-                                    inputNeuron = _inputUnitCollection[inputConnection.FieldIdx].AnalogInputNeuronCollection[(int)InputUnit.AnalogCodingMethod.Original];
-                                }
+                                inputNeuron = analogInputNeuron;
                             }
                             else
                             {
-                                //Connect train spiking input neuron
-                                inputNeuron = _inputUnitCollection[inputConnection.FieldIdx].SpikingInputNeuronCollection[spikingNeuronSubIndex];
+                                //Connect spike train input neuron
+                                inputNeuron = spikeTrainInputNeurons[spikingNeuronSubIndex];
                                 ++spikingNeuronSubIndex;
-                                if (spikingNeuronSubIndex == _inputUnitCollection[inputConnection.FieldIdx].SpikingInputNeuronCollection.Length)
+                                if (spikingNeuronSubIndex == spikeTrainInputNeurons.Length)
                                 {
                                     spikingNeuronSubIndex = 0;
                                 }

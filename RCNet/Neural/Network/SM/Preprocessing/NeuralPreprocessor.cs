@@ -405,10 +405,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             //Compute reservoir(s)
             foreach (Reservoir reservoir in ReservoirCollection)
             {
-                double[] reservoirInput = new double[reservoir.InstanceDefinition.InputFieldInfoCollection.Count];
-                for (int i = 0; i < reservoir.InstanceDefinition.InputFieldInfoCollection.Count; i++)
+                double[] reservoirInput = new double[reservoir.InstanceDefinition.InputUnitCfgCollection.Count];
+                for (int i = 0; i < reservoir.InstanceDefinition.InputUnitCfgCollection.Count; i++)
                 {
-                    reservoirInput[i] = completedInputVector[reservoir.InstanceDefinition.InputFieldInfoCollection[i].FieldIndex];
+                    reservoirInput[i] = completedInputVector[reservoir.InstanceDefinition.InputUnitCfgCollection[i].InputFieldIndex];
                 }
                 //Compute reservoir
                 reservoir.Compute(reservoirInput, collectStatistics);
@@ -467,7 +467,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             //Compute reservoir(s)
             foreach (Reservoir reservoir in ReservoirCollection)
             {
-                double[] reservoirInput = new double[reservoir.InstanceDefinition.InputFieldInfoCollection.Count];
+                double[] reservoirInput = new double[reservoir.InstanceDefinition.InputUnitCfgCollection.Count];
                 List<InputPattern> stepInputPatterns = new List<InputPattern>() { completedInputPattern };
                 if(_settings.InputConfig.Bidirectional)
                 {
@@ -483,9 +483,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                     for(int idx = 0; idx < stepInputPattern.VarDataCollection[0].Length; idx++)
                     {
                         double[] inputVector = stepInputPattern.GetDataAtTimePoint(idx);
-                        for (int i = 0; i < reservoir.InstanceDefinition.InputFieldInfoCollection.Count; i++)
+                        for (int i = 0; i < reservoir.InstanceDefinition.InputUnitCfgCollection.Count; i++)
                         {
-                            reservoirInput[i] = inputVector[reservoir.InstanceDefinition.InputFieldInfoCollection[i].FieldIndex];
+                            reservoirInput[i] = inputVector[reservoir.InstanceDefinition.InputUnitCfgCollection[i].InputFieldIndex];
                         }
                         //Compute the reservoir
                         reservoir.Compute(reservoirInput, collectStatistics);
