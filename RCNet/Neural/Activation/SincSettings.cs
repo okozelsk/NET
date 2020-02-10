@@ -17,9 +17,13 @@ namespace RCNet.Neural.Activation
     /// Class encaptulates arguments of the Sinc activation function
     /// </summary>
     [Serializable]
-    public class SincSettings
+    public class SincSettings : RCNetBaseSettings
     {
-        //Attribute properties
+        //Constants
+        /// <summary>
+        /// Name of the associated xsd type
+        /// </summary>
+        public const string XsdTypeName = "ActivationSincCfgType";
 
         //Constructors
         /// <summary>
@@ -49,41 +53,18 @@ namespace RCNet.Neural.Activation
         public SincSettings(XElement elem)
         {
             //Validation
-            ElemValidator validator = new ElemValidator();
-            Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Activation.SincSettings.xsd");
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
-            XElement activationSettingsElem = validator.Validate(elem, "rootElem");
+            XElement activationSettingsElem = Validate(elem, XsdTypeName);
             //Parsing
             return;
         }
 
         //Methods
         /// <summary>
-        /// See the base.
-        /// </summary>
-        public override bool Equals(object obj)
-        {
-            if (obj == null) return false;
-            SincSettings cmpSettings = obj as SincSettings;
-            return true;
-        }
-
-        /// <summary>
-        /// See the base.
-        /// </summary>
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-
-        /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>
         public SincSettings DeepClone()
         {
-            SincSettings clone = new SincSettings(this);
-            return clone;
+            return new SincSettings(this);
         }
 
     }//SincSettings

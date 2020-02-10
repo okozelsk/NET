@@ -19,8 +19,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing
     /// Configuration of neural pool.
     /// </summary>
     [Serializable]
-    public class PoolSettings
+    public class PoolSettings : RCNetBaseSettings
     {
+        //Constants
+        /// <summary>
+        /// Name of the associated xsd type
+        /// </summary>
+        public const string XsdTypeName = "PoolCfgType";
+
         //Attribute properties
         /// <summary>
         /// Name of this pool
@@ -76,11 +82,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         public PoolSettings(XElement elem)
         {
             //Validation
-            ElemValidator validator = new ElemValidator();
-            Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.SM.Preprocessing.PoolSettings.xsd");
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
-            XElement poolSettingsElem = validator.Validate(elem, "rootElem");
+            XElement poolSettingsElem = Validate(elem, XsdTypeName);
             //Parsing
             //Name
             Name = poolSettingsElem.Attribute("name").Value;
@@ -159,46 +161,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing
 
         //Methods
         /// <summary>
-        /// See the base.
-        /// </summary>
-        public override bool Equals(object obj)
-        {
-            if (obj == null) return false;
-            PoolSettings cmpSettings = obj as PoolSettings;
-            if (Name != cmpSettings.Name ||
-                NeuronGroups.Count != NeuronGroups.Count ||
-                !Equals(Dim, cmpSettings.Dim) ||
-                !Equals(PredictorsCfg, cmpSettings.PredictorsCfg) ||
-                !Equals(InterconnectionCfg, cmpSettings.InterconnectionCfg)
-                )
-            {
-                return false;
-            }
-            for (int i = 0; i < NeuronGroups.Count; i++)
-            {
-                if(!Equals(NeuronGroups[i], cmpSettings.NeuronGroups[i]))
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        /// <summary>
-        /// See the base.
-        /// </summary>
-        public override int GetHashCode()
-        {
-            return Name.GetHashCode();
-        }
-
-        /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>
         public PoolSettings DeepClone()
         {
-            PoolSettings clone = new PoolSettings(this);
-            return clone;
+            return new PoolSettings(this);
         }
 
         //Inner classes
@@ -296,26 +263,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             /// <summary>
             /// Creates the instance and initialize it from given xml element.
             /// </summary>
-            /// <param name="elem">
-            /// Xml data containing settings.
-            /// Content of xml element is always validated against the appropriate xml schema.
-            /// </param>
+            /// <param name="settingsElem">Xml data containing settings.</param>
             /// <param name="activationType">Specifies sub-type of the neuron group</param>
-            public NeuronGroupSettings(XElement elem, ActivationType activationType)
+            public NeuronGroupSettings(XElement settingsElem, ActivationType activationType)
             {
-                //Validation
-                ElemValidator validator = new ElemValidator();
-                Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-                if (activationType == ActivationType.Analog)
-                {
-                    validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.SM.Preprocessing.PoolAnalogNeuronGroupSettings.xsd");
-                }
-                else
-                {
-                    validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.SM.Preprocessing.PoolSpikingNeuronGroupSettings.xsd");
-                }
-                validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
-                XElement settingsElem = validator.Validate(elem, "rootElem");
                 ActivationType = activationType;
                 //Parsing
                 //Name
@@ -395,47 +346,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             }
 
             /// <summary>
-            /// See the base.
-            /// </summary>
-            public override bool Equals(object obj)
-            {
-                if (obj == null) return false;
-                NeuronGroupSettings cmpSettings = obj as NeuronGroupSettings;
-                if (Name != cmpSettings.Name ||
-                    Role != cmpSettings.Role ||
-                    RelativeShare != cmpSettings.RelativeShare ||
-                    ReadoutNeuronsDensity != cmpSettings.ReadoutNeuronsDensity ||
-                    Count != cmpSettings.Count ||
-                    ActivationType != cmpSettings.ActivationType ||
-                    !Equals(ActivationCfg, cmpSettings.ActivationCfg) ||
-                    SignalingRestriction != cmpSettings.SignalingRestriction ||
-                    !Equals(BiasCfg, cmpSettings.BiasCfg) ||
-                    AnalogFiringThreshold != cmpSettings.AnalogFiringThreshold ||
-                    RetainmentNeuronsDensity != cmpSettings.RetainmentNeuronsDensity ||
-                    !Equals(RetainmentStrengthCfg, cmpSettings.RetainmentStrengthCfg) ||
-                    !Equals(PredictorsCfg, cmpSettings.PredictorsCfg)
-                    )
-                {
-                    return false;
-                }
-                return true;
-            }
-
-            /// <summary>
-            /// See the base.
-            /// </summary>
-            public override int GetHashCode()
-            {
-                return base.GetHashCode();
-            }
-
-            /// <summary>
             /// Creates the deep copy instance of this instance
             /// </summary>
             public NeuronGroupSettings DeepClone()
             {
-                NeuronGroupSettings clone = new NeuronGroupSettings(this);
-                return clone;
+                return new NeuronGroupSettings(this);
             }
 
 
@@ -495,18 +410,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             /// <summary>
             /// Creates the instance and initialize it from given xml element.
             /// </summary>
-            /// <param name="elem">
-            /// Xml data containing settings.
-            /// Content of xml element is always validated against the xml schema.
-            /// </param>
-            public InterconnectionSettings(XElement elem)
+            /// <param name="settingsElem">Xml data containing settings.</param>
+            public InterconnectionSettings(XElement settingsElem)
             {
-                //Validation
-                ElemValidator validator = new ElemValidator();
-                Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-                validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.SM.Preprocessing.PoolInterconnectionSettings.xsd");
-                validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
-                XElement settingsElem = validator.Validate(elem, "rootElem");
                 //Parsing
                 Schemas = new List<object>();
                 foreach (XElement schemaElem in settingsElem.Descendants())
@@ -531,41 +437,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing
 
             //Methods
             /// <summary>
-            /// See the base.
-            /// </summary>
-            public override bool Equals(object obj)
-            {
-                if (obj == null) return false;
-                InterconnectionSettings cmpSettings = obj as InterconnectionSettings;
-                if (Schemas.Count != cmpSettings.Schemas.Count)
-                {
-                    return false;
-                }
-                for(int i = 0; i < Schemas.Count; i++)
-                {
-                    if (!Equals(Schemas[i], cmpSettings.Schemas[i]))
-                    {
-                        return false;
-                    }
-                }
-                return true;
-            }
-
-            /// <summary>
-            /// See the base.
-            /// </summary>
-            public override int GetHashCode()
-            {
-                return base.GetHashCode();
-            }
-
-            /// <summary>
             /// Creates the deep copy instance of this instance
             /// </summary>
             public InterconnectionSettings DeepClone()
             {
-                InterconnectionSettings clone = new InterconnectionSettings(this);
-                return clone;
+                return new InterconnectionSettings(this);
             }
 
             //Inner classes
@@ -703,45 +579,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing
 
                 //Methods
                 /// <summary>
-                /// See the base.
-                /// </summary>
-                public override bool Equals(object obj)
-                {
-                    if (obj == null) return false;
-                    RandomSchemaSettings cmpSettings = obj as RandomSchemaSettings;
-                    if (Density != cmpSettings.Density ||
-                        RatioEE != cmpSettings.RatioEE ||
-                        RatioEI != cmpSettings.RatioEI ||
-                        RatioIE != cmpSettings.RatioIE ||
-                        RatioII != cmpSettings.RatioII ||
-                        AvgDistance != cmpSettings.AvgDistance ||
-                        AllowSelfConnection != cmpSettings.AllowSelfConnection ||
-                        ConstantNumOfConnections != cmpSettings.ConstantNumOfConnections ||
-                        ReplaceExistingConnections != cmpSettings.ReplaceExistingConnections ||
-                        Repetitions != cmpSettings.Repetitions ||
-                        !Equals(SynapseCfg, cmpSettings.SynapseCfg)
-                        )
-                    {
-                        return false;
-                    }
-                    return true;
-                }
-
-                /// <summary>
-                /// See the base.
-                /// </summary>
-                public override int GetHashCode()
-                {
-                    return base.GetHashCode();
-                }
-
-                /// <summary>
                 /// Creates the deep copy instance of this instance
                 /// </summary>
                 public RandomSchemaSettings DeepClone()
                 {
-                    RandomSchemaSettings clone = new RandomSchemaSettings(this);
-                    return clone;
+                    return new RandomSchemaSettings(this);
                 }
 
             }//RandomSchemaSettings
@@ -828,33 +670,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing
 
                 //Methods
                 /// <summary>
-                /// See the base.
-                /// </summary>
-                public override bool Equals(object obj)
-                {
-                    if (obj == null) return false;
-                    ChainSchemaSettings cmpSettings = obj as ChainSchemaSettings;
-                    if (Ratio != cmpSettings.Ratio ||
-                        Circle != cmpSettings.Circle ||
-                        ReplaceExistingConnections != cmpSettings.ReplaceExistingConnections ||
-                        Repetitions != cmpSettings.Repetitions ||
-                        !Equals(SynapseCfg, cmpSettings.SynapseCfg)
-                        )
-                    {
-                        return false;
-                    }
-                    return true;
-                }
-
-                /// <summary>
-                /// See the base.
-                /// </summary>
-                public override int GetHashCode()
-                {
-                    return base.GetHashCode();
-                }
-
-                /// <summary>
                 /// Creates the deep copy instance of this instance
                 /// </summary>
                 public ChainSchemaSettings DeepClone()
@@ -865,10 +680,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
 
             }//ChainSchemaSettings
 
-
-
         }//InterconnectionSettings
-
 
     }//PoolSettings
 

@@ -15,11 +15,17 @@ using RCNet.MathTools.Differential;
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Class encaptulates arguments of the IzhikevichIF activation function
+    /// Class encaptulates arguments for the setup of IzhikevichIF activation function in automatic role-driven mode
     /// </summary>
     [Serializable]
-    public class AutoIzhikevichIFSettings
+    public class AutoIzhikevichIFSettings : RCNetBaseSettings
     {
+        //Constants
+        /// <summary>
+        /// Name of the associated xsd type
+        /// </summary>
+        public const string XsdTypeName = "ActivationAutoIzhikevichIFCfgType";
+
         //Attribute properties
         /// <summary>
         /// Role of the neuron (excitatory or inhibitory)
@@ -77,17 +83,13 @@ namespace RCNet.Neural.Activation
         /// Creates an instance and initializes it from given xml element.
         /// </summary>
         /// <param name="elem">
-        /// Xml data containing IzhikevichIF activation settings.
+        /// Xml data containing activation settings.
         /// Content of xml element is always validated against the xml schema.
         /// </param>
         public AutoIzhikevichIFSettings(XElement elem)
         {
             //Validation
-            ElemValidator validator = new ElemValidator();
-            Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Activation.AutoIzhikevichIFSettings.xsd");
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
-            XElement activationSettingsElem = validator.Validate(elem, "rootElem");
+            XElement activationSettingsElem = Validate(elem, XsdTypeName);
             //Parsing
             Role = NeuronCommon.ParseNeuronRole(activationSettingsElem.Attribute("role").Value);
             RefractoryPeriods = int.Parse(activationSettingsElem.Attribute("refractoryPeriods").Value, CultureInfo.InvariantCulture);
@@ -98,38 +100,11 @@ namespace RCNet.Neural.Activation
 
         //Methods
         /// <summary>
-        /// See the base.
-        /// </summary>
-        public override bool Equals(object obj)
-        {
-            if (obj == null) return false;
-            AutoIzhikevichIFSettings cmpSettings = obj as AutoIzhikevichIFSettings;
-            if (Role != cmpSettings.Role ||
-                RefractoryPeriods != cmpSettings.RefractoryPeriods ||
-                SolverMethod != cmpSettings.SolverMethod ||
-                SolverCompSteps != cmpSettings.SolverCompSteps
-                )
-            {
-                return false;
-            }
-            return true;
-        }
-
-        /// <summary>
-        /// See the base.
-        /// </summary>
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-
-        /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>
         public AutoIzhikevichIFSettings DeepClone()
         {
-            AutoIzhikevichIFSettings clone = new AutoIzhikevichIFSettings(this);
-            return clone;
+            return new AutoIzhikevichIFSettings(this);
         }
 
     }//AutoIzhikevichIFSettings

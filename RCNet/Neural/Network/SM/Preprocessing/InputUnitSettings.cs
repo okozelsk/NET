@@ -15,9 +15,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing
     /// Configuration of an input unit associated with the input field
     /// </summary>
     [Serializable]
-    public class InputUnitSettings
+    public class InputUnitSettings : RCNetBaseSettings
     {
         //Constants
+        /// <summary>
+        /// Name of the associated xsd type
+        /// </summary>
+        public const string XsdTypeName = "NPResInstanceInputUnitCfgType";
         /// <summary>
         /// Default length of the spike-train representation of analog value
         /// </summary>
@@ -143,11 +147,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             InputFieldIndex = inputFieldIndex;
             InputEntryPoint = (int[])inputEntryPoint.Clone();
             //Validation
-            ElemValidator validator = new ElemValidator();
-            Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.SM.Preprocessing.InputUnitSettings.xsd");
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
-            XElement inputUnitSettingsElem = validator.Validate(elem, "rootElem");
+            XElement inputUnitSettingsElem = Validate(elem, XsdTypeName);
             //Parsing
             InputFieldName = inputUnitSettingsElem.Attribute("fieldName").Value;
             SpikeTrainLength = int.Parse(inputUnitSettingsElem.Attribute("spikeTrainLength").Value, CultureInfo.InvariantCulture);
@@ -185,37 +185,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         public InputUnitSettings DeepClone()
         {
             return new InputUnitSettings(this);
-        }
-
-        /// <summary>
-        /// See the base.
-        /// </summary>
-        public override bool Equals(object obj)
-        {
-            if (obj == null) return false;
-            InputUnitSettings cmpSettings = obj as InputUnitSettings;
-            if (InputFieldName != cmpSettings.InputFieldName ||
-                InputFieldIndex != cmpSettings.InputFieldIndex ||
-                !InputEntryPoint.ContainsEqualValues(cmpSettings.InputEntryPoint) ||
-                SpikeTrainLength != cmpSettings.SpikeTrainLength ||
-                DifferenceDistance != cmpSettings.DifferenceDistance ||
-                NumOfLinearSteps != cmpSettings.NumOfLinearSteps ||
-                PowerExponent != cmpSettings.PowerExponent ||
-                FoldedPowerExponent != cmpSettings.FoldedPowerExponent ||
-                MovingAverageLength != cmpSettings.MovingAverageLength
-                )
-            {
-                return false;
-            }
-            return true;
-        }
-
-        /// <summary>
-        /// See the base.
-        /// </summary>
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
         }
 
     }//InputUnitSettings

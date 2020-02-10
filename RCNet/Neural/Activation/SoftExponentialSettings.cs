@@ -18,9 +18,14 @@ namespace RCNet.Neural.Activation
     /// Arguments are in RandomValue form to allow their dynamic random initialization within the specified ranges.
     /// </summary>
     [Serializable]
-    public class SoftExponentialSettings
+    public class SoftExponentialSettings : RCNetBaseSettings
     {
         //Constants
+        /// <summary>
+        /// Name of the associated xsd type
+        /// </summary>
+        public const string XsdTypeName = "ActivationSoftExponentialCfgType";
+
         //Typical values
         /// <summary>
         /// Typical alpha value
@@ -64,11 +69,7 @@ namespace RCNet.Neural.Activation
         public SoftExponentialSettings(XElement elem)
         {
             //Validation
-            ElemValidator validator = new ElemValidator();
-            Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Activation.SoftExponentialSettings.xsd");
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
-            XElement activationSettingsElem = validator.Validate(elem, "rootElem");
+            XElement activationSettingsElem = Validate(elem, XsdTypeName);
             //Parsing
             Alpha = RandomValueSettings.LoadOrDefault(activationSettingsElem, "alpha", TypicalAlpha);
             return;
@@ -76,34 +77,11 @@ namespace RCNet.Neural.Activation
 
         //Methods
         /// <summary>
-        /// See the base.
-        /// </summary>
-        public override bool Equals(object obj)
-        {
-            if (obj == null) return false;
-            SoftExponentialSettings cmpSettings = obj as SoftExponentialSettings;
-            if (!Equals(Alpha, cmpSettings.Alpha))
-            {
-                return false;
-            }
-            return true;
-        }
-
-        /// <summary>
-        /// See the base.
-        /// </summary>
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-
-        /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>
         public SoftExponentialSettings DeepClone()
         {
-            SoftExponentialSettings clone = new SoftExponentialSettings(this);
-            return clone;
+            return new SoftExponentialSettings(this);
         }
 
     }//SoftExponentialSettings

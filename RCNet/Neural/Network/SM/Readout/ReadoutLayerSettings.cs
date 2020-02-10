@@ -21,9 +21,13 @@ namespace RCNet.Neural.Network.SM.Readout
     /// The easiest and safest way to create an instance is to use the xml constructor.
     /// </summary>
     [Serializable]
-    public class ReadoutLayerSettings
+    public class ReadoutLayerSettings : RCNetBaseSettings
     {
         //Constants
+        /// <summary>
+        /// Name of the associated xsd type
+        /// </summary>
+        public const string XsdTypeName = "ROutLayerCfgType";
 
         //Attribute properties
         /// <summary>
@@ -122,11 +126,7 @@ namespace RCNet.Neural.Network.SM.Readout
         public ReadoutLayerSettings(XElement elem)
         {
             //Validation
-            ElemValidator validator = new ElemValidator();
-            Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.SM.Readout.ReadoutLayerSettings.xsd");
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
-            XElement readoutLayerSettingsElem = validator.Validate(elem, "rootElem");
+            XElement readoutLayerSettingsElem = Validate(elem, XsdTypeName);
             //Parsing
             TestDataRatio = double.Parse(readoutLayerSettingsElem.Attribute("testDataRatio").Value, CultureInfo.InvariantCulture);
             NumOfFolds = readoutLayerSettingsElem.Attribute("folds").Value == "Auto" ? 0 : int.Parse(readoutLayerSettingsElem.Attribute("folds").Value);
@@ -202,73 +202,11 @@ namespace RCNet.Neural.Network.SM.Readout
         }
         
         /// <summary>
-        /// See the base.
-        /// </summary>
-        public override bool Equals(object obj)
-        {
-            if (obj == null) return false;
-            ReadoutLayerSettings cmpSettings = obj as ReadoutLayerSettings;
-            if (TestDataRatio != cmpSettings.TestDataRatio ||
-                NumOfFolds != cmpSettings.NumOfFolds ||
-                Repetitions != cmpSettings.Repetitions ||
-                DefaultClassificationNetworkCfgCollection.Count != cmpSettings.DefaultClassificationNetworkCfgCollection.Count ||
-                DefaultForecastNetworkCfgCollection.Count != cmpSettings.DefaultForecastNetworkCfgCollection.Count ||
-                ReadoutUnitCfgCollection.Count != cmpSettings.ReadoutUnitCfgCollection.Count ||
-                OneWinnerGroupCfgCollection.Count != cmpSettings.OneWinnerGroupCfgCollection.Count
-                )
-            {
-                return false;
-            }
-            for(int i = 0; i < DefaultClassificationNetworkCfgCollection.Count; i++)
-            {
-                if(!Equals(DefaultClassificationNetworkCfgCollection[i], cmpSettings.DefaultClassificationNetworkCfgCollection[i]))
-                {
-                    return false;
-                }
-            }
-            for (int i = 0; i < DefaultForecastNetworkCfgCollection.Count; i++)
-            {
-                if (!Equals(DefaultForecastNetworkCfgCollection[i], cmpSettings.DefaultForecastNetworkCfgCollection[i]))
-                {
-                    return false;
-                }
-            }
-            for (int i = 0; i < ReadoutUnitCfgCollection.Count; i++)
-            {
-                if(!Equals(ReadoutUnitCfgCollection[i], cmpSettings.ReadoutUnitCfgCollection[i]))
-                {
-                    return false;
-                }
-            }
-            foreach(string name in OneWinnerGroupCfgCollection.Keys)
-            {
-                if(!cmpSettings.OneWinnerGroupCfgCollection.TryGetValue(name, out _))
-                {
-                    return false;
-                }
-                if(!Equals(OneWinnerGroupCfgCollection[name], cmpSettings.OneWinnerGroupCfgCollection[name]))
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        /// <summary>
-        /// See the base.
-        /// </summary>
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-
-        /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>
         public ReadoutLayerSettings DeepClone()
         {
-            ReadoutLayerSettings clone = new ReadoutLayerSettings(this);
-            return clone;
+            return new ReadoutLayerSettings(this);
         }
 
         /// <summary>
@@ -379,41 +317,6 @@ namespace RCNet.Neural.Network.SM.Readout
 
             //Methods
             /// <summary>
-            /// See the base.
-            /// </summary>
-            public override bool Equals(object obj)
-            {
-                if (obj == null) return false;
-                ReadoutUnitSettings cmpSettings = obj as ReadoutUnitSettings;
-                if (Name != cmpSettings.Name ||
-                    Index != cmpSettings.Index ||
-                    TaskType != cmpSettings.TaskType ||
-                    OneWinnerGroupName != cmpSettings.OneWinnerGroupName ||
-                    !Equals(FeatureFilterCfg, cmpSettings.FeatureFilterCfg) ||
-                    NetCfgCollection.Count != cmpSettings.NetCfgCollection.Count
-                    )
-                {
-                    return false;
-                }
-                for(int i = 0; i < NetCfgCollection.Count; i++)
-                {
-                    if(!Equals(NetCfgCollection[i], cmpSettings.NetCfgCollection[i]))
-                    {
-                        return false;
-                    }
-                }
-                return true;
-            }
-
-            /// <summary>
-            /// See the base.
-            /// </summary>
-            public override int GetHashCode()
-            {
-                return base.GetHashCode();
-            }
-
-            /// <summary>
             /// Creates the deep copy instance of this instance.
             /// </summary>
             public ReadoutUnitSettings DeepClone()
@@ -467,37 +370,6 @@ namespace RCNet.Neural.Network.SM.Readout
             }
 
             //Methods
-            /// <summary>
-            /// See the base.
-            /// </summary>
-            public override bool Equals(object obj)
-            {
-                if (obj == null) return false;
-                OneWinnerGroupSettings cmpSettings = obj as OneWinnerGroupSettings;
-                if (Name != cmpSettings.Name ||
-                    Members.Count != cmpSettings.Members.Count
-                    )
-                {
-                    return false;
-                }
-                for(int i = 0; i < cmpSettings.Members.Count; i++)
-                {
-                    if(!Equals(Members[i], cmpSettings.Members[i]))
-                    {
-                        return false;
-                    }
-                }
-                return true;
-            }
-
-            /// <summary>
-            /// See the base.
-            /// </summary>
-            public override int GetHashCode()
-            {
-                return base.GetHashCode();
-            }
-
             /// <summary>
             /// Creates the deep copy instance of this instance.
             /// </summary>

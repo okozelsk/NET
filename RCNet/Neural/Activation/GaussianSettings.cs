@@ -17,9 +17,13 @@ namespace RCNet.Neural.Activation
     /// Class encaptulates arguments of the Gaussian activation function
     /// </summary>
     [Serializable]
-    public class GaussianSettings
+    public class GaussianSettings : RCNetBaseSettings
     {
-        //Attribute properties
+        //Constants
+        /// <summary>
+        /// Name of the associated xsd type
+        /// </summary>
+        public const string XsdTypeName = "ActivationGaussianCfgType";
 
         //Constructors
         /// <summary>
@@ -49,41 +53,18 @@ namespace RCNet.Neural.Activation
         public GaussianSettings(XElement elem)
         {
             //Validation
-            ElemValidator validator = new ElemValidator();
-            Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Activation.GaussianSettings.xsd");
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
-            XElement activationSettingsElem = validator.Validate(elem, "rootElem");
+            XElement activationSettingsElem = Validate(elem, XsdTypeName);
             //Parsing
             return;
         }
 
         //Methods
         /// <summary>
-        /// See the base.
-        /// </summary>
-        public override bool Equals(object obj)
-        {
-            if (obj == null) return false;
-            GaussianSettings cmpSettings = obj as GaussianSettings;
-            return true;
-        }
-
-        /// <summary>
-        /// See the base.
-        /// </summary>
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-
-        /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>
         public GaussianSettings DeepClone()
         {
-            GaussianSettings clone = new GaussianSettings(this);
-            return clone;
+            return new GaussianSettings(this);
         }
 
     }//GaussianSettings

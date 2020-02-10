@@ -19,9 +19,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing
     /// Neural Preprocessor configuration parameters
     /// </summary>
     [Serializable]
-    public class NeuralPreprocessorSettings
+    public class NeuralPreprocessorSettings : RCNetBaseSettings
     {
         //Constants
+        /// <summary>
+        /// Name of the associated xsd type
+        /// </summary>
+        public const string XsdTypeName = "NPCfgType";
         /// <summary>
         /// Value indicates to decide Neural Preprocessor's boot cycles automatically based on number of neurons within the resrvoirs
         /// </summary>
@@ -70,11 +74,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         public NeuralPreprocessorSettings(XElement elem)
         {
             //Validation
-            ElemValidator validator = new ElemValidator();
-            Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.SM.Preprocessing.NeuralPreprocessorSettings.xsd");
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
-            XElement neuralPreprocessorSettingsElem = validator.Validate(elem, "rootElem");
+            XElement neuralPreprocessorSettingsElem = Validate(elem, XsdTypeName);
             //Parsing
             //Predictors reduction ratio
             PredictorsReductionRatio = double.Parse(neuralPreprocessorSettingsElem.Attribute("predictorsReductionRatio").Value, CultureInfo.InvariantCulture);
@@ -222,38 +222,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         }
 
         //Methods
-        /// <summary>
-        /// See the base.
-        /// </summary>
-        public override bool Equals(object obj)
-        {
-            if (obj == null) return false;
-            NeuralPreprocessorSettings cmpSettings = obj as NeuralPreprocessorSettings;
-            if (!Equals(InputConfig, cmpSettings.InputConfig) ||
-                ReservoirInstanceDefinitionCollection.Count != cmpSettings.ReservoirInstanceDefinitionCollection.Count||
-                PredictorsReductionRatio != cmpSettings.PredictorsReductionRatio
-                )
-            {
-                return false;
-            }
-            for (int i = 0; i < ReservoirInstanceDefinitionCollection.Count; i++)
-            {
-                if (!ReservoirInstanceDefinitionCollection[i].Equals(cmpSettings.ReservoirInstanceDefinitionCollection[i]))
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        /// <summary>
-        /// See the base.
-        /// </summary>
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-
         /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>
@@ -561,54 +529,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 return new InputSettings(this);
             }
 
-            /// <summary>
-            /// See the base.
-            /// </summary>
-            public override bool Equals(object obj)
-            {
-                if (obj == null) return false;
-                InputSettings cmpSettings = obj as InputSettings;
-                if (FeedingType != cmpSettings.FeedingType ||
-                    UnifyAmplitude != cmpSettings.UnifyAmplitude ||
-                    Detrend != cmpSettings.Detrend ||
-                    ThresholdOfSignalBeginDetection != cmpSettings.ThresholdOfSignalBeginDetection ||
-                    ThresholdOfSignalEndDetection != cmpSettings.ThresholdOfSignalEndDetection ||
-                    KeepCommonTimeScale != cmpSettings.KeepCommonTimeScale ||
-                    TargetTimePoints != cmpSettings.TargetTimePoints ||
-                    Bidirectional != cmpSettings.Bidirectional ||
-                    BootCycles != cmpSettings.BootCycles ||
-                    RouteInputToReadout != cmpSettings.RouteInputToReadout ||
-                    ExternalFieldCollection.Count != cmpSettings.ExternalFieldCollection.Count ||
-                    InternalFieldCollection.Count != cmpSettings.InternalFieldCollection.Count)
-                {
-                    return false;
-                }
-                for (int i = 0; i < ExternalFieldCollection.Count; i++)
-                {
-                    if(!Equals(ExternalFieldCollection[i], cmpSettings.ExternalFieldCollection[i]))
-                    {
-                        return false;
-                    }
-                }
-                for (int i = 0; i < InternalFieldCollection.Count; i++)
-                {
-                    if (!Equals(InternalFieldCollection[i], cmpSettings.InternalFieldCollection[i]))
-                    {
-                        return false;
-                    }
-                }
-                return true;
-            }
-
-            /// <summary>
-            /// See the base.
-            /// </summary>
-            public override int GetHashCode()
-            {
-                return base.GetHashCode();
-            }
-
-
             //Inner classes
             /// <summary>
             /// Base class of fields
@@ -664,30 +584,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                     return new Field(this);
                 }
 
-                /// <summary>
-                /// See the base.
-                /// </summary>
-                public override bool Equals(object obj)
-                {
-                    if (obj == null) return false;
-                    Field cmpSettings = obj as Field;
-                    if (Name != cmpSettings.Name ||
-                        AllowRoutingToReadout != cmpSettings.AllowRoutingToReadout
-                        )
-                    {
-                        return false;
-                    }
-                    return true;
-                }
-
-                /// <summary>
-                /// See the base.
-                /// </summary>
-                public override int GetHashCode()
-                {
-                    return Name.GetHashCode();
-                }
-
             }//Field
 
             /// <summary>
@@ -738,30 +634,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 public override Field DeepClone()
                 {
                     return new ExternalField(this);
-                }
-
-                /// <summary>
-                /// See the base.
-                /// </summary>
-                public override bool Equals(object obj)
-                {
-                    if (obj == null) return false;
-                    ExternalField cmpSettings = obj as ExternalField;
-                    if (!base.Equals(obj) ||
-                        !Equals(FeatureFilterCfg, cmpSettings.FeatureFilterCfg)
-                        )
-                    {
-                        return false;
-                    }
-                    return true;
-                }
-
-                /// <summary>
-                /// See the base.
-                /// </summary>
-                public override int GetHashCode()
-                {
-                    return base.GetHashCode();
                 }
 
             }//ExternalField
@@ -852,30 +724,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                     return new InternalField(this);
                 }
 
-                /// <summary>
-                /// See the base.
-                /// </summary>
-                public override bool Equals(object obj)
-                {
-                    if (obj == null) return false;
-                    InternalField cmpSettings = obj as InternalField;
-                    if (!base.Equals(obj) || 
-                        !Equals(GeneratorSettings, cmpSettings.GeneratorSettings)
-                        )
-                    {
-                        return false;
-                    }
-                    return true;
-                }
-
-                /// <summary>
-                /// See the base.
-                /// </summary>
-                public override int GetHashCode()
-                {
-                    return base.GetHashCode();
-                }
-
             }//InternalField
 
         }//InputSettings
@@ -961,48 +809,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             public ReservoirInstanceDefinition DeepClone()
             {
                 return new ReservoirInstanceDefinition(this);
-            }
-
-            /// <summary>
-            /// See the base.
-            /// </summary>
-            public override bool Equals(object obj)
-            {
-                if (obj == null) return false;
-                ReservoirInstanceDefinition cmpSettings = obj as ReservoirInstanceDefinition;
-                if (InstanceID != cmpSettings.InstanceID ||
-                    InstanceName != cmpSettings.InstanceName ||
-                    !Equals(Settings, cmpSettings.Settings) ||
-                    InputUnitCfgCollection.Count != cmpSettings.InputUnitCfgCollection.Count ||
-                    InputConnectionCollection.Count != cmpSettings.InputConnectionCollection.Count ||
-                    !Equals(PredictorsCfg, cmpSettings.PredictorsCfg)
-                    )
-                {
-                    return false;
-                }
-                for(int i = 0; i < InputUnitCfgCollection.Count; i++)
-                {
-                    if (!Equals(InputUnitCfgCollection[i], cmpSettings.InputUnitCfgCollection[i]))
-                    {
-                        return false;
-                    }
-                }
-                for (int i = 0; i < InputConnectionCollection.Count; i++)
-                {
-                    if(!Equals(InputConnectionCollection[i], cmpSettings.InputConnectionCollection[i]))
-                    {
-                        return false;
-                    }
-                }
-                return true;
-            }
-
-            /// <summary>
-            /// See the base.
-            /// </summary>
-            public override int GetHashCode()
-            {
-                return InstanceName.GetHashCode();
             }
 
             //Inner classes
@@ -1098,35 +904,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 public InputConnection DeepClone()
                 {
                     return new InputConnection(this);
-                }
-
-                /// <summary>
-                /// See the base.
-                /// </summary>
-                public override bool Equals(object obj)
-                {
-                    if (obj == null) return false;
-                    InputConnection cmpSettings = obj as InputConnection;
-                    if (FieldIdx != cmpSettings.FieldIdx ||
-                        PoolID != cmpSettings.PoolID ||
-                        Density != cmpSettings.Density ||
-                        Coding != cmpSettings.Coding ||
-                        OppositeAmplitude != cmpSettings.OppositeAmplitude ||
-                        SignalingRestriction != cmpSettings.SignalingRestriction ||
-                        !Equals(SynapseCfg, cmpSettings.SynapseCfg)
-                        )
-                    {
-                        return false;
-                    }
-                    return true;
-                }
-
-                /// <summary>
-                /// See the base.
-                /// </summary>
-                public override int GetHashCode()
-                {
-                    return base.GetHashCode();
                 }
 
             }//InputConnection

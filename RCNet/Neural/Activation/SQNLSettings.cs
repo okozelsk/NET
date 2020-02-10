@@ -17,8 +17,14 @@ namespace RCNet.Neural.Activation
     /// Class encaptulates arguments of the SQNL (Square nonlinearity) activation function.
     /// </summary>
     [Serializable]
-    public class SQNLSettings
+    public class SQNLSettings : RCNetBaseSettings
     {
+        //Constants
+        /// <summary>
+        /// Name of the associated xsd type
+        /// </summary>
+        public const string XsdTypeName = "ActivationSQNLCfgType";
+
         //Constructors
         /// <summary>
         /// Creates an initialized instance
@@ -46,40 +52,18 @@ namespace RCNet.Neural.Activation
         public SQNLSettings(XElement elem)
         {
             //Validation
-            ElemValidator validator = new ElemValidator();
-            Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Activation.SQNLSettings.xsd");
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
-            XElement activationSettingsElem = validator.Validate(elem, "rootElem");
+            XElement activationSettingsElem = Validate(elem, XsdTypeName);
+            //Parsing
             return;
         }
 
         //Methods
         /// <summary>
-        /// See the base.
-        /// </summary>
-        public override bool Equals(object obj)
-        {
-            if (obj == null) return false;
-            SQNLSettings cmpSettings = obj as SQNLSettings;
-            return true;
-        }
-
-        /// <summary>
-        /// See the base.
-        /// </summary>
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-
-        /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>
         public SQNLSettings DeepClone()
         {
-            SQNLSettings clone = new SQNLSettings(this);
-            return clone;
+            return new SQNLSettings(this);
         }
 
     }//SQNLSettings

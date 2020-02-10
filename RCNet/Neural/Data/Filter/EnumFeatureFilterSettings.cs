@@ -17,6 +17,10 @@ namespace RCNet.Neural.Data.Filter
     public class EnumFeatureFilterSettings : BaseFeatureFilterSettings
     {
         //Constants
+        /// <summary>
+        /// Name of the associated xsd type
+        /// </summary>
+        public const string XsdTypeName = "EnumFeatureFilterCfgType";
 
         //Attribute properties
         /// <summary>
@@ -56,39 +60,13 @@ namespace RCNet.Neural.Data.Filter
             :base(BaseFeatureFilter.FeatureType.Enum)
         {
             //Validation
-            ElemValidator validator = new ElemValidator();
-            Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Data.Filter.EnumFeatureFilterSettings.xsd");
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
-            XElement settingsElem = validator.Validate(elem, "rootElem");
+            XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
             NumOfElements = int.Parse(settingsElem.Attribute("numOfElements").Value, CultureInfo.InvariantCulture);
             return;
         }
 
         //Methods
-        /// <summary>
-        /// See the base.
-        /// </summary>
-        public override bool Equals(object obj)
-        {
-            if (obj == null) return false;
-            EnumFeatureFilterSettings cmpSettings = obj as EnumFeatureFilterSettings;
-            if (NumOfElements != cmpSettings.NumOfElements)
-            {
-                return false;
-            }
-            return base.Equals(obj);
-        }
-
-        /// <summary>
-        /// See the base.
-        /// </summary>
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-
         /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>

@@ -18,9 +18,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing
     /// Contains reservoir configuration parameters.
     /// </summary>
     [Serializable]
-    public class ReservoirSettings
+    public class ReservoirSettings : RCNetBaseSettings
     {
         //Constants
+        /// <summary>
+        /// Name of the associated xsd type
+        /// </summary>
+        public const string XsdTypeName = "ReservoirCfgType";
         /// <summary>
         /// Value indicates no application of the spectral radius
         /// </summary>
@@ -98,11 +102,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         public ReservoirSettings(XElement elem)
         {
             //Validation
-            ElemValidator validator = new ElemValidator();
-            Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.SM.Preprocessing.ReservoirSettings.xsd");
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
-            XElement reservoirSettingsElem = validator.Validate(elem, "rootElem");
+            XElement reservoirSettingsElem = Validate(elem, XsdTypeName);
             //Parsing
             SettingsName = reservoirSettingsElem.Attribute("name").Value;
             //Input entry point
@@ -156,66 +156,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing
 
         //Methods
         /// <summary>
-        /// See the base.
-        /// </summary>
-        public override bool Equals(object obj)
-        {
-            if (obj == null) return false;
-            ReservoirSettings cmpSettings = obj as ReservoirSettings;
-            if (SettingsName != cmpSettings.SettingsName ||
-                (PoolSettingsCollection == null && cmpSettings.PoolSettingsCollection != null) ||
-                (PoolSettingsCollection != null && cmpSettings.PoolSettingsCollection == null) ||
-                (PoolSettingsCollection != null && PoolSettingsCollection.Count != cmpSettings.PoolSettingsCollection.Count) ||
-                (PoolsInterconnectionCollection == null && cmpSettings.PoolsInterconnectionCollection != null) ||
-                (PoolsInterconnectionCollection != null && cmpSettings.PoolsInterconnectionCollection == null) ||
-                (PoolsInterconnectionCollection != null && PoolsInterconnectionCollection.Count != cmpSettings.PoolsInterconnectionCollection.Count) ||
-                AnalogScopeSpectralRadius != cmpSettings.AnalogScopeSpectralRadius ||
-                SpikingScopeSpectralRadius != cmpSettings.SpikingScopeSpectralRadius
-                )
-            {
-                return false;
-            }
-
-            if (PoolSettingsCollection != null)
-            {
-                for (int i = 0; i < PoolSettingsCollection.Count; i++)
-                {
-                    if (!Equals(PoolSettingsCollection[i], cmpSettings.PoolSettingsCollection[i]))
-                    {
-                        return false;
-                    }
-                }
-            }
-
-            if (PoolsInterconnectionCollection != null)
-            {
-                for (int i = 0; i < PoolsInterconnectionCollection.Count; i++)
-                {
-                    if (!Equals(PoolsInterconnectionCollection[i], cmpSettings.PoolsInterconnectionCollection[i]))
-                    {
-                        return false;
-                    }
-                }
-            }
-
-            return true;
-        }
-
-        /// <summary>
-        /// See the base.
-        /// </summary>
-        public override int GetHashCode()
-        {
-            return SettingsName.GetHashCode();
-        }
-
-        /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>
         public ReservoirSettings DeepClone()
         {
-            ReservoirSettings clone = new ReservoirSettings(this);
-            return clone;
+            return new ReservoirSettings(this);
         }
 
 
@@ -362,44 +307,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing
 
             //Methods
             /// <summary>
-            /// See the base.
-            /// </summary>
-            public override bool Equals(object obj)
-            {
-                if (obj == null) return false;
-                PoolsInterconnection cmpSettings = obj as PoolsInterconnection;
-                if (SourcePoolName != cmpSettings.SourcePoolName ||
-                    SourceConnectionDensity != cmpSettings.SourceConnectionDensity ||
-                    TargetPoolName != cmpSettings.TargetPoolName ||
-                    TargetConnectionDensity != cmpSettings.TargetConnectionDensity ||
-                    RatioEE != cmpSettings.RatioEE ||
-                    RatioEI != cmpSettings.RatioEI ||
-                    RatioIE != cmpSettings.RatioIE ||
-                    RatioII != cmpSettings.RatioII ||
-                    !Equals(SynapseCfg, cmpSettings.SynapseCfg) ||
-                    ConstantNumOfConnections != cmpSettings.ConstantNumOfConnections
-                    )
-                {
-                    return false;
-                }
-                return true;
-            }
-
-            /// <summary>
-            /// See the base.
-            /// </summary>
-            public override int GetHashCode()
-            {
-                return base.GetHashCode();
-            }
-
-            /// <summary>
             /// Creates the deep copy instance of this instance
             /// </summary>
             public PoolsInterconnection DeepClone()
             {
-                PoolsInterconnection clone = new PoolsInterconnection(this);
-                return clone;
+                return new PoolsInterconnection(this);
             }
 
         }//PoolsInterconnection

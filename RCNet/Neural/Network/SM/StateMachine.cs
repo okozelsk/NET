@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Xml.Linq;
 using RCNet.Extensions;
@@ -84,7 +85,58 @@ namespace RCNet.Neural.Network.SM
             return;
         }
 
+        //Static methods
+        /// <summary>
+        /// Deserializes StateMachine instance from the given stream
+        /// </summary>
+        /// <param name="stream">Stream to be used</param>
+        /// <returns>Instance of the StateMachine</returns>
+        public static StateMachine Deserialize(Stream stream)
+        {
+            BinaryFormatter formatter = new BinaryFormatter();
+            return (StateMachine)formatter.Deserialize(stream);
+        }
+
+        /// <summary>
+        /// Deserializes StateMachine instance from the given file
+        /// </summary>
+        /// <param name="fileName">Name of the file</param>
+        /// <returns>Instance of the StateMachine</returns>
+        public static StateMachine LoadFromFile(string fileName)
+        {
+            using (Stream stream = File.Open(fileName, FileMode.Open))
+            {
+                return Deserialize(stream);
+            }
+        }
+
         //Methods
+        /// <summary>
+        /// Serializes this instance into the given stream
+        /// </summary>
+        /// <param name="stream">Stream to be used</param>
+        public void Serialize(Stream stream)
+        {
+            BinaryFormatter formatter = new BinaryFormatter();
+            formatter.Serialize(stream, this);
+            return;
+        }
+
+        /// <summary>
+        /// Serializes this instance into the given file
+        /// </summary>
+        /// <param name="fileName">Name of the file</param>
+        public void SaveToFile(string fileName)
+        {
+            using (Stream stream = File.Open(fileName, FileMode.Create))
+            {
+                Serialize(stream);
+            }
+            return;
+        }
+
+
+
         /// <summary>
         /// Sets StateMachine internal state to its initial state
         /// </summary>

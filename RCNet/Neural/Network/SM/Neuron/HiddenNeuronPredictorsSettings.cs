@@ -17,8 +17,14 @@ namespace RCNet.Neural.Network.SM.Neuron
     /// Configuration of the availble predictors
     /// </summary>
     [Serializable]
-    public class HiddenNeuronPredictorsSettings
+    public class HiddenNeuronPredictorsSettings : RCNetBaseSettings
     {
+        //Constants
+        /// <summary>
+        /// Name of the associated xsd type
+        /// </summary>
+        public const string XsdTypeName = "PredictorsCfgType";
+
         //Attribute properties
         //Configuration
         /// <summary>
@@ -145,11 +151,7 @@ namespace RCNet.Neural.Network.SM.Neuron
         public HiddenNeuronPredictorsSettings(XElement elem)
         {
             //Validation
-            ElemValidator validator = new ElemValidator();
-            Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.SM.Neuron.HiddenNeuronPredictorsSettings.xsd");
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
-            XElement predictorsElem = validator.Validate(elem, "rootElem");
+            XElement predictorsElem = Validate(elem, XsdTypeName);
             //Parsing of params
             Params = null;
             XElement paramsElem = predictorsElem.Descendants("settings").FirstOrDefault();
@@ -188,38 +190,6 @@ namespace RCNet.Neural.Network.SM.Neuron
             count += FiringCount ? 1 : 0;
             count += FiringBinPattern ? 1 : 0;
             return count;
-        }
-
-        /// <summary>
-        /// See the base.
-        /// </summary>
-        public override bool Equals(object obj)
-        {
-            if (obj == null) return false;
-            HiddenNeuronPredictorsSettings cmpSettings = obj as HiddenNeuronPredictorsSettings;
-            if (!Equals(Params, cmpSettings.Params) ||
-                Activation != cmpSettings.Activation ||
-                ActivationSquare != cmpSettings.ActivationSquare ||
-                ActivationFadingSum != cmpSettings.ActivationFadingSum ||
-                ActivationMWAvg != cmpSettings.ActivationMWAvg ||
-                FiringFadingSum != cmpSettings.FiringFadingSum ||
-                FiringMWAvg != cmpSettings.FiringMWAvg ||
-                FiringCount != cmpSettings.FiringCount ||
-                FiringBinPattern != cmpSettings.FiringBinPattern ||
-                NumOfEnabledPredictors != cmpSettings.NumOfEnabledPredictors
-                )
-            {
-                return false;
-            }
-            return true;
-        }
-
-        /// <summary>
-        /// See the base.
-        /// </summary>
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
         }
 
         /// <summary>
@@ -383,44 +353,11 @@ namespace RCNet.Neural.Network.SM.Neuron
 
             //Methods
             /// <summary>
-            /// See the base.
-            /// </summary>
-            public override bool Equals(object obj)
-            {
-                if (obj == null) return false;
-                Settings cmpSettings = obj as Settings;
-                if (ActivationFadingSumStrength != cmpSettings.ActivationFadingSumStrength ||
-                    ActivationMWAvgWindow != cmpSettings.ActivationMWAvgWindow ||
-                    ActivationMWAvgLeakage != cmpSettings.ActivationMWAvgLeakage ||
-                    ActivationMWAvgWeightsType != cmpSettings.ActivationMWAvgWeightsType ||
-                    FiringFadingSumStrength != cmpSettings.FiringFadingSumStrength ||
-                    FiringMWAvgWindow != cmpSettings.FiringMWAvgWindow ||
-                    FiringMWAvgLeakage != cmpSettings.FiringMWAvgLeakage ||
-                    FiringMWAvgWeightsType != cmpSettings.FiringMWAvgWeightsType ||
-                    FiringCountWindow != cmpSettings.FiringCountWindow ||
-                    FiringBinPatternWindow != cmpSettings.FiringBinPatternWindow
-                    )
-                {
-                    return false;
-                }
-                return true;
-            }
-
-            /// <summary>
-            /// See the base.
-            /// </summary>
-            public override int GetHashCode()
-            {
-                return base.GetHashCode();
-            }
-
-            /// <summary>
             /// Creates the deep copy instance of this instance
             /// </summary>
             public Settings DeepClone()
             {
-                Settings clone = new Settings(this);
-                return clone;
+                return new Settings(this);
             }
 
         }//Settings

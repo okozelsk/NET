@@ -19,6 +19,7 @@ using System.Globalization;
 using RCNet.Queue;
 using RCNet.CsvTools;
 using RCNet.Neural.Data;
+using System.Xml.Linq;
 
 namespace RCNet.DemoConsoleApp
 {
@@ -86,7 +87,18 @@ namespace RCNet.DemoConsoleApp
 
         public void Run()
         {
-            TestInputPattern();
+            //Research - XElement Validation against XSD type
+
+            XElement testElem = new XElement("inputUnit", new XAttribute("fieldName", "inpField1"));
+            testElem = RCNetBaseSettings.Validate(testElem, "NPResInstanceInputUnitCfgType");
+            Console.WriteLine(testElem);
+
+            Console.ReadLine();
+
+
+
+
+            //TestInputPattern();
 
             //Test real feature filter
             RealFeatureFilter rff = new RealFeatureFilter(new Interval(-1, 1), true, true, true);

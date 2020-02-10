@@ -17,9 +17,13 @@ namespace RCNet.Neural.Activation
     /// Class encaptulates arguments of the BentIdentity activation function
     /// </summary>
     [Serializable]
-    public class BentIdentitySettings
+    public class BentIdentitySettings : RCNetBaseSettings
     {
-        //Attribute properties
+        //Constants
+        /// <summary>
+        /// Name of the associated xsd type
+        /// </summary>
+        public const string XsdTypeName = "ActivationBentIdentityCfgType";
 
         //Constructors
         /// <summary>
@@ -49,41 +53,18 @@ namespace RCNet.Neural.Activation
         public BentIdentitySettings(XElement elem)
         {
             //Validation
-            ElemValidator validator = new ElemValidator();
-            Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Activation.BentIdentitySettings.xsd");
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
-            XElement activationSettingsElem = validator.Validate(elem, "rootElem");
+            XElement activationSettingsElem = Validate(elem, XsdTypeName);
             //Parsing
             return;
         }
 
         //Methods
         /// <summary>
-        /// See the base.
-        /// </summary>
-        public override bool Equals(object obj)
-        {
-            if (obj == null) return false;
-            BentIdentitySettings cmpSettings = obj as BentIdentitySettings;
-            return true;
-        }
-
-        /// <summary>
-        /// See the base.
-        /// </summary>
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-
-        /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>
         public BentIdentitySettings DeepClone()
         {
-            BentIdentitySettings clone = new BentIdentitySettings(this);
-            return clone;
+            return new BentIdentitySettings(this);
         }
 
     }//BentIdentitySettings

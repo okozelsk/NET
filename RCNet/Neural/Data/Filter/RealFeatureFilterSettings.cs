@@ -17,6 +17,10 @@ namespace RCNet.Neural.Data.Filter
     public class RealFeatureFilterSettings : BaseFeatureFilterSettings
     {
         //Constants
+        /// <summary>
+        /// Name of the associated xsd type
+        /// </summary>
+        public const string XsdTypeName = "RealFeatureFilterCfgType";
 
         //Attribute properties
         /// <summary>
@@ -70,11 +74,7 @@ namespace RCNet.Neural.Data.Filter
             :base(BaseFeatureFilter.FeatureType.Real)
         {
             //Validation
-            ElemValidator validator = new ElemValidator();
-            Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Data.Filter.RealFeatureFilterSettings.xsd");
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
-            XElement settingsElem = validator.Validate(elem, "rootElem");
+            XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
             Standardize = bool.Parse(settingsElem.Attribute("standardize").Value);
             KeepReserve = bool.Parse(settingsElem.Attribute("keepReserve").Value);
@@ -83,28 +83,6 @@ namespace RCNet.Neural.Data.Filter
         }
 
         //Methods
-        /// <summary>
-        /// See the base.
-        /// </summary>
-        public override bool Equals(object obj)
-        {
-            if (obj == null) return false;
-            RealFeatureFilterSettings cmpSettings = obj as RealFeatureFilterSettings;
-            if (Standardize != cmpSettings.Standardize || KeepReserve != cmpSettings.KeepReserve || KeepSign != cmpSettings.KeepSign)
-            {
-                return false;
-            }
-            return base.Equals(obj);
-        }
-
-        /// <summary>
-        /// See the base.
-        /// </summary>
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-
         /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>

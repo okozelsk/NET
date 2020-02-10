@@ -15,8 +15,14 @@ namespace RCNet.RandomValue
     /// Class specifies properties of randomly generated values
     /// </summary>
     [Serializable]
-    public class RandomValueSettings
+    public class RandomValueSettings : RCNetBaseSettings
     {
+        //Constants
+        /// <summary>
+        /// Name of the associated xsd type
+        /// </summary>
+        public const string XsdTypeName = "RandomValueType";
+
         //Attribute properties
         /// <summary>
         /// Min random value
@@ -52,10 +58,10 @@ namespace RCNet.RandomValue
         /// <param name="randomSign">Specifies whether to randomize value sign</param>
         /// <param name="distrCfg">Specific parameters of the distribution</param>
         public RandomValueSettings(double min = -1,
-                                    double max = 1,
-                                    bool randomSign = false,
-                                    IDistrSettings distrCfg = null
-                                    )
+                                   double max = 1,
+                                   bool randomSign = false,
+                                   IDistrSettings distrCfg = null
+                                   )
         {
             Min = min;
             Max = max;
@@ -106,23 +112,16 @@ namespace RCNet.RandomValue
         /// <summary>
         /// Creates an instance and initializes it from given xml element.
         /// </summary>
-        /// <param name="elem">
-        /// Xml data containing RandomValueSettings settings.
-        /// Content of xml element is always validated against the xml schema.
-        /// </param>
+        /// <param name="elem">Xml data containing RandomValueSettings settings.</param>
         public RandomValueSettings(XElement elem)
         {
             //Validation
-            ElemValidator validator = new ElemValidator();
-            Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.RandomValue.RandomValueSettings.xsd");
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
-            XElement randomValueSettingsElem = validator.Validate(elem, "rootElem");
+            XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
-            Min = double.Parse(randomValueSettingsElem.Attribute("min").Value, CultureInfo.InvariantCulture);
-            Max = double.Parse(randomValueSettingsElem.Attribute("max").Value, CultureInfo.InvariantCulture);
-            RandomSign = bool.Parse(randomValueSettingsElem.Attribute("randomSign").Value);
-            XElement distrParamsElem = randomValueSettingsElem.Elements().FirstOrDefault();
+            Min = double.Parse(settingsElem.Attribute("min").Value, CultureInfo.InvariantCulture);
+            Max = double.Parse(settingsElem.Attribute("max").Value, CultureInfo.InvariantCulture);
+            RandomSign = bool.Parse(settingsElem.Attribute("randomSign").Value);
+            XElement distrParamsElem = settingsElem.Elements().FirstOrDefault();
             if (distrParamsElem == null)
             {
                 DistrType = RandomExtensions.DistributionType.Uniform;
@@ -218,33 +217,6 @@ namespace RCNet.RandomValue
         }
         
         /// <summary>
-        /// See the base.
-        /// </summary>
-        public override bool Equals(object obj)
-        {
-            if (obj == null) return false;
-            RandomValueSettings cmpSettings = obj as RandomValueSettings;
-            if (Min != cmpSettings.Min ||
-                Max != cmpSettings.Max ||
-                RandomSign != cmpSettings.RandomSign ||
-                DistrType != cmpSettings.DistrType ||
-                !Equals(DistrCfg, cmpSettings.DistrCfg)
-                )
-            {
-                return false;
-            }
-            return true;
-        }
-
-        /// <summary>
-        /// See the base.
-        /// </summary>
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-
-        /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>
         public RandomValueSettings DeepClone()
@@ -296,23 +268,6 @@ namespace RCNet.RandomValue
             private void Check()
             {
                 return;
-            }
-
-            /// <summary>
-            /// See the base.
-            /// </summary>
-            public override bool Equals(object obj)
-            {
-                if (obj == null) return false;
-                return true;
-            }
-
-            /// <summary>
-            /// See the base.
-            /// </summary>
-            public override int GetHashCode()
-            {
-                return base.GetHashCode();
             }
 
             /// <summary>
@@ -391,28 +346,6 @@ namespace RCNet.RandomValue
             }
 
             /// <summary>
-            /// See the base.
-            /// </summary>
-            public override bool Equals(object obj)
-            {
-                if (obj == null) return false;
-                GaussianDistrSettings cmpSettings = obj as GaussianDistrSettings;
-                if (Mean != cmpSettings.Mean || StdDev != cmpSettings.StdDev)
-                {
-                    return false;
-                }
-                return true;
-            }
-
-            /// <summary>
-            /// See the base.
-            /// </summary>
-            public override int GetHashCode()
-            {
-                return base.GetHashCode();
-            }
-
-            /// <summary>
             /// Creates the deep copy instance of this instance
             /// </summary>
             public IDistrSettings DeepClone()
@@ -476,28 +409,6 @@ namespace RCNet.RandomValue
                     throw new Exception($"Incorrect Mean ({Mean.ToString(CultureInfo.InvariantCulture)}) value. Mean must not be EQ to 0.");
                 }
                 return;
-            }
-
-            /// <summary>
-            /// See the base.
-            /// </summary>
-            public override bool Equals(object obj)
-            {
-                if (obj == null) return false;
-                ExponentialDistrSettings cmpSettings = obj as ExponentialDistrSettings;
-                if (Mean != cmpSettings.Mean)
-                {
-                    return false;
-                }
-                return true;
-            }
-
-            /// <summary>
-            /// See the base.
-            /// </summary>
-            public override int GetHashCode()
-            {
-                return base.GetHashCode();
             }
 
             /// <summary>
@@ -577,28 +488,6 @@ namespace RCNet.RandomValue
                     throw new Exception($"Incorrect Beta ({Beta.ToString(CultureInfo.InvariantCulture)}) value. Beta must be GT 0.");
                 }
                 return;
-            }
-
-            /// <summary>
-            /// See the base.
-            /// </summary>
-            public override bool Equals(object obj)
-            {
-                if (obj == null) return false;
-                GammaDistrSettings cmpSettings = obj as GammaDistrSettings;
-                if (Alpha != cmpSettings.Alpha || Beta != cmpSettings.Beta)
-                {
-                    return false;
-                }
-                return true;
-            }
-
-            /// <summary>
-            /// See the base.
-            /// </summary>
-            public override int GetHashCode()
-            {
-                return base.GetHashCode();
             }
 
             /// <summary>

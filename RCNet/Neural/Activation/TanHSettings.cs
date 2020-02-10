@@ -17,9 +17,13 @@ namespace RCNet.Neural.Activation
     /// Class encaptulates arguments of the TanH activation function
     /// </summary>
     [Serializable]
-    public class TanHSettings
+    public class TanHSettings : RCNetBaseSettings
     {
-        //Attribute properties
+        //Constants
+        /// <summary>
+        /// Name of the associated xsd type
+        /// </summary>
+        public const string XsdTypeName = "ActivationTanHCfgType";
 
         //Constructors
         /// <summary>
@@ -49,41 +53,18 @@ namespace RCNet.Neural.Activation
         public TanHSettings(XElement elem)
         {
             //Validation
-            ElemValidator validator = new ElemValidator();
-            Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Activation.TanHSettings.xsd");
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
-            XElement activationSettingsElem = validator.Validate(elem, "rootElem");
+            XElement activationSettingsElem = Validate(elem, XsdTypeName);
             //Parsing
             return;
         }
 
         //Methods
         /// <summary>
-        /// See the base.
-        /// </summary>
-        public override bool Equals(object obj)
-        {
-            if (obj == null) return false;
-            TanHSettings cmpSettings = obj as TanHSettings;
-            return true;
-        }
-
-        /// <summary>
-        /// See the base.
-        /// </summary>
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-
-        /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>
         public TanHSettings DeepClone()
         {
-            TanHSettings clone = new TanHSettings(this);
-            return clone;
+            return new TanHSettings(this);
         }
 
     }//TanHSettings

@@ -18,8 +18,14 @@ namespace RCNet.Neural.Network.SM.Synapse
     /// Configuration parameters of an input synapse
     /// </summary>
     [Serializable]
-    public class InputSynapseSettings
+    public class InputSynapseSettings : RCNetBaseSettings
     {
+        //Constants
+        /// <summary>
+        /// Name of the associated xsd type
+        /// </summary>
+        public const string XsdTypeName = "InputSynapseCfgType";
+
         //Attribute properties
         /// <summary>
         /// Synapse's scope when targeting spiking neurons
@@ -81,11 +87,7 @@ namespace RCNet.Neural.Network.SM.Synapse
         public InputSynapseSettings(XElement elem)
         {
             //Validation
-            ElemValidator validator = new ElemValidator();
-            Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.SM.Synapse.InputSynapseSettings.xsd");
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
-            XElement settingsElem = validator.Validate(elem, "rootElem");
+            XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
             XElement cfgElem;
             //Spiking target
@@ -138,40 +140,11 @@ namespace RCNet.Neural.Network.SM.Synapse
 
         //Methods
         /// <summary>
-        /// See the base.
-        /// </summary>
-        public override bool Equals(object obj)
-        {
-            if (obj == null) return false;
-            InputSynapseSettings cmpSettings = obj as InputSynapseSettings;
-            if (SpikingTargetScope != cmpSettings.SpikingTargetScope ||
-                !Equals(SpikingTargetWeightCfg, cmpSettings.SpikingTargetWeightCfg) ||
-                AnalogTargetScope != cmpSettings.AnalogTargetScope ||
-                !Equals(AnalogTargetWeightCfg, cmpSettings.AnalogTargetWeightCfg) ||
-                DelayMethod != cmpSettings.DelayMethod ||
-                MaxDelay != cmpSettings.MaxDelay
-                )
-            {
-                return false;
-            }
-            return true;
-        }
-
-        /// <summary>
-        /// See the base.
-        /// </summary>
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-
-        /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>
         public InputSynapseSettings DeepClone()
         {
-            InputSynapseSettings clone = new InputSynapseSettings(this);
-            return clone;
+            return new InputSynapseSettings(this);
         }
 
     }//InputSynapseSettings

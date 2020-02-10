@@ -18,9 +18,14 @@ namespace RCNet.Neural.Activation
     /// Arguments are in RandomValue form to allow their dynamic random initialization within the specified ranges.
     /// </summary>
     [Serializable]
-    public class AdExpIFSettings
+    public class AdExpIFSettings : RCNetBaseSettings
     {
         //Constants
+        /// <summary>
+        /// Name of the associated xsd type
+        /// </summary>
+        public const string XsdTypeName = "ActivationAdExpIFCfgType";
+
         //Typical values
         /// <summary>
         /// Typical value of time scale
@@ -191,11 +196,7 @@ namespace RCNet.Neural.Activation
         public AdExpIFSettings(XElement elem)
         {
             //Validation
-            ElemValidator validator = new ElemValidator();
-            Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Activation.AdExpIFSettings.xsd");
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
-            XElement activationSettingsElem = validator.Validate(elem, "rootElem");
+            XElement activationSettingsElem = Validate(elem, XsdTypeName);
             //Parsing
             TimeScale = RandomValueSettings.LoadOrDefault(activationSettingsElem, "timeScale", TypicalTimeScale);
             Resistance = RandomValueSettings.LoadOrDefault(activationSettingsElem, "resistance", TypicalResistance);
@@ -213,40 +214,6 @@ namespace RCNet.Neural.Activation
         }
 
         //Methods
-        /// <summary>
-        /// See the base.
-        /// </summary>
-        public override bool Equals(object obj)
-        {
-            if (obj == null) return false;
-            AdExpIFSettings cmpSettings = obj as AdExpIFSettings;
-            if (!Equals(TimeScale, cmpSettings.TimeScale) ||
-                !Equals(Resistance, cmpSettings.Resistance) ||
-                !Equals(RestV, cmpSettings.RestV) ||
-                !Equals(ResetV, cmpSettings.ResetV) ||
-                !Equals(RheobaseV, cmpSettings.RheobaseV) ||
-                !Equals(FiringThresholdV, cmpSettings.FiringThresholdV) ||
-                !Equals(SharpnessDeltaT, cmpSettings.SharpnessDeltaT) ||
-                !Equals(AdaptationVoltageCoupling, cmpSettings.AdaptationVoltageCoupling) ||
-                !Equals(AdaptationTimeConstant, cmpSettings.AdaptationTimeConstant) ||
-                !Equals(AdaptationSpikeTriggeredIncrement, cmpSettings.AdaptationSpikeTriggeredIncrement) ||
-                SolverMethod != cmpSettings.SolverMethod ||
-                SolverCompSteps != cmpSettings.SolverCompSteps
-                )
-            {
-                return false;
-            }
-            return true;
-        }
-
-        /// <summary>
-        /// See the base.
-        /// </summary>
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-
         /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>

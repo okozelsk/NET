@@ -14,9 +14,13 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
     /// Setup parameters for the resilient propagation trainer
     /// </summary>
     [Serializable]
-    public class RPropTrainerSettings : INonRecurrentNetworkTrainerSettings
+    public class RPropTrainerSettings : RCNetBaseSettings, INonRecurrentNetworkTrainerSettings
     {
         //Constants
+        /// <summary>
+        /// Name of the associated xsd type
+        /// </summary>
+        public const string XsdTypeName = "FFNetRPropTrainerCfgType";
         /// <summary>
         /// A default absolute value that is still considered as zero
         /// </summary>
@@ -134,11 +138,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         public RPropTrainerSettings(XElement elem)
         {
             //Validation
-            ElemValidator validator = new ElemValidator();
-            Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.NonRecurrent.FF.RPropTrainerSettings.xsd");
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
-            XElement settingsElem = validator.Validate(elem, "rootElem");
+            XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
             NumOfAttempts = int.Parse(settingsElem.Attribute("attempts").Value, CultureInfo.InvariantCulture);
             NumOfAttemptEpochs = int.Parse(settingsElem.Attribute("attemptEpochs").Value, CultureInfo.InvariantCulture);
@@ -152,36 +152,6 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         }
 
         //Methods
-        /// <summary>
-        /// See the base.
-        /// </summary>
-        public override bool Equals(object obj)
-        {
-            if (obj == null) return false;
-            RPropTrainerSettings cmpSettings = obj as RPropTrainerSettings;
-            if (NumOfAttempts != cmpSettings.NumOfAttempts ||
-                NumOfAttemptEpochs != cmpSettings.NumOfAttemptEpochs ||
-                ZeroTolerance != cmpSettings.ZeroTolerance ||
-                PositiveEta != cmpSettings.PositiveEta ||
-                NegativeEta != cmpSettings.NegativeEta ||
-                IniDelta != cmpSettings.IniDelta ||
-                MinDelta != cmpSettings.MinDelta ||
-                MaxDelta != cmpSettings.MaxDelta
-                )
-            {
-                return false;
-            }
-            return true;
-        }
-
-        /// <summary>
-        /// See the base.
-        /// </summary>
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-
         /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>

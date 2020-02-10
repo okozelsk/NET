@@ -15,9 +15,13 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
     /// Startup parameters for the ridge regression trainer
     /// </summary>
     [Serializable]
-    public class RidgeRegrTrainerSettings : INonRecurrentNetworkTrainerSettings
+    public class RidgeRegrTrainerSettings : RCNetBaseSettings, INonRecurrentNetworkTrainerSettings
     {
         //Constants
+        /// <summary>
+        /// Name of the associated xsd type
+        /// </summary>
+        public const string XsdTypeName = "FFNetRidgeRegrTrainerCfgType";
         /// <summary>
         /// Seeker's default min lambda
         /// </summary>
@@ -80,11 +84,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         public RidgeRegrTrainerSettings(XElement elem)
         {
             //Validation
-            ElemValidator validator = new ElemValidator();
-            Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.NonRecurrent.FF.RidgeRegrTrainerSettings.xsd");
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
-            XElement settingsElem = validator.Validate(elem, "rootElem");
+            XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
             NumOfAttemptEpochs = int.Parse(settingsElem.Attribute("attemptEpochs").Value, CultureInfo.InvariantCulture);
             LambdaSeekerCfg = new ParamSeekerSettings(settingsElem.Descendants("lambda").First());
@@ -98,30 +98,6 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         public int NumOfAttempts { get { return 1; } }
 
         //Methods
-        /// <summary>
-        /// See the base.
-        /// </summary>
-        public override bool Equals(object obj)
-        {
-            if (obj == null) return false;
-            RidgeRegrTrainerSettings cmpSettings = obj as RidgeRegrTrainerSettings;
-            if (NumOfAttemptEpochs != cmpSettings.NumOfAttemptEpochs ||
-                !LambdaSeekerCfg.Equals(cmpSettings.LambdaSeekerCfg)
-                )
-            {
-                return false;
-            }
-            return true;
-        }
-
-        /// <summary>
-        /// See the base.
-        /// </summary>
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-
         /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>

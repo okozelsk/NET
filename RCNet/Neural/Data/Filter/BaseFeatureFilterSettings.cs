@@ -14,7 +14,7 @@ namespace RCNet.Neural.Data.Filter
     /// Base class of feature filters setup
     /// </summary>
     [Serializable]
-    public abstract class BaseFeatureFilterSettings
+    public abstract class BaseFeatureFilterSettings : RCNetBaseSettings
     {
         //Constants
 
@@ -46,27 +46,6 @@ namespace RCNet.Neural.Data.Filter
         }
 
         //Methods
-        /// <summary>
-        /// See the base.
-        /// </summary>
-        public override bool Equals(object obj)
-        {
-            if (obj == null) return false;
-            BaseFeatureFilterSettings cmpSettings = obj as BaseFeatureFilterSettings;
-            if (Type != cmpSettings.Type)
-            {
-                return false;
-            }
-            return true;
-        }
-
-        /// <summary>
-        /// See the base.
-        /// </summary>
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
 
     }//BaseFeatureFilterSettings
 

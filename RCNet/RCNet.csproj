@@ -121,6 +121,7 @@
     <Compile Include="Neural\Activation\TanH.cs" />
     <Compile Include="Neural\Activation\ExpIF.cs" />
     <Compile Include="Neural\Activation\SimpleIF.cs" />
+    <Compile Include="RCNetBaseSettings.cs" />
     <Compile Include="Neural\Data\Filter\BinFeatureFilterSettings.cs" />
     <Compile Include="Neural\Data\Filter\FeatureFilterFactory.cs" />
     <Compile Include="Neural\Data\Filter\RealFeatureFilterSettings.cs" />
@@ -215,7 +216,6 @@
     <Compile Include="RandomValue\RandomValueSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Queue\SimpleQueue.cs" />
-    <Compile Include="XmlTools\ElemValidator.cs" />
     <Compile Include="XmlTools\DocValidator.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -224,220 +224,11 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Neural\Network\SM\StateMachineSettings.xsd" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Neural\Network\SM\Readout\ReadoutLayerSettings.xsd" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Neural\Network\NonRecurrent\FF\FeedForwardNetworkSettings.xsd" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Neural\Network\NonRecurrent\PP\ParallelPerceptronSettings.xsd" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="RandomValue\RandomValueSettings.xsd" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Neural\Network\NonRecurrent\PP\PDeltaRuleTrainerSettings.xsd" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Neural\Network\NonRecurrent\FF\RPropTrainerSettings.xsd" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Neural\Network\SM\Preprocessing\PoolSettings.xsd" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Neural\Network\SM\Preprocessing\ReservoirSettings.xsd" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Docs\Imgs\ReservoirComputing_BasicSchema.png" />
     <Content Include="Docs\Imgs\StateMachine_EntityRelationship.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Neural\Activation\SimpleIFSettings.xsd">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Neural\Activation\LeakyIFSettings.xsd">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Neural\Activation\ExpIFSettings.xsd">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Neural\Activation\AdExpIFSettings.xsd">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Neural\Activation\BentIdentitySettings.xsd">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Neural\Activation\ElliotSettings.xsd">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Neural\Activation\IdentitySettings.xsd">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Neural\Activation\GaussianSettings.xsd">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Neural\Activation\ISRUSettings.xsd">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Neural\Activation\LeakyReLUSettings.xsd">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Neural\Activation\SigmoidSettings.xsd">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Neural\Activation\SincSettings.xsd">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Neural\Activation\SinusoidSettings.xsd">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Neural\Activation\SoftExponentialSettings.xsd">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Neural\Activation\SoftPlusSettings.xsd">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Neural\Activation\TanHSettings.xsd">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Neural\Activation\IzhikevichIFSettings.xsd">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Neural\Network\SM\Preprocessing\PoolAnalogNeuronGroupSettings.xsd">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Neural\Activation\AutoIzhikevichIFSettings.xsd">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Neural\Network\SM\Preprocessing\PoolInterconnectionSettings.xsd">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Neural\Data\Generators\PulseGeneratorSettings.xsd">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Neural\Data\Generators\SinusoidalGeneratorSettings.xsd">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Neural\Data\Generators\MackeyGlassGeneratorSettings.xsd">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Neural\Network\SM\Preprocessing\NeuralPreprocessorSettings.xsd">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Neural\Network\NonRecurrent\FF\RidgeRegrTrainerSettings.xsd">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="MathTools\PS\ParamSeekerSettings.xsd">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Neural\Network\NonRecurrent\FF\QRDRegrTrainerSettings.xsd">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Neural\Network\NonRecurrent\FF\ElasticRegrTrainerSettings.xsd">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Neural\Data\Filter\BinFeatureFilterSettings.xsd">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Neural\Network\SM\Synapse\InputSynapseSettings.xsd">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Neural\Network\SM\Synapse\InternalSynapseSettings.xsd">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Neural\Network\SM\Preprocessing\PoolSpikingNeuronGroupSettings.xsd">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Neural\Network\SM\Neuron\HiddenNeuronPredictorsSettings.xsd">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Neural\Data\Filter\EnumFeatureFilterSettings.xsd">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Neural\Data\Filter\RealFeatureFilterSettings.xsd">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Neural\Activation\SQNLSettings.xsd">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Neural\Network\SM\Preprocessing\InputUnitSettings.xsd">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

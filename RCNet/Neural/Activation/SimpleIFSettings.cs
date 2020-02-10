@@ -19,9 +19,14 @@ namespace RCNet.Neural.Activation
     /// Arguments are in RandomValue form to allow their dynamic random initialization within the specified ranges.
     /// </summary>
     [Serializable]
-    public class SimpleIFSettings
+    public class SimpleIFSettings : RCNetBaseSettings
     {
         //Constants
+        /// <summary>
+        /// Name of the associated xsd type
+        /// </summary>
+        public const string XsdTypeName = "ActivationSimpleIFCfgType";
+
         //Typical values
         /// <summary>
         /// Typical value of resistance
@@ -110,11 +115,7 @@ namespace RCNet.Neural.Activation
         public SimpleIFSettings(XElement elem)
         {
             //Validation
-            ElemValidator validator = new ElemValidator();
-            Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Activation.SimpleIFSettings.xsd");
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
-            XElement activationSettingsElem = validator.Validate(elem, "rootElem");
+            XElement activationSettingsElem = Validate(elem, XsdTypeName);
             //Parsing
             Resistance = RandomValueSettings.LoadOrDefault(activationSettingsElem, "resistance", TypicalResistance);
             DecayRate = RandomValueSettings.LoadOrDefault(activationSettingsElem, "decayRate", TypicalDecayRate);
@@ -126,39 +127,11 @@ namespace RCNet.Neural.Activation
 
         //Methods
         /// <summary>
-        /// See the base.
-        /// </summary>
-        public override bool Equals(object obj)
-        {
-            if (obj == null) return false;
-            SimpleIFSettings cmpSettings = obj as SimpleIFSettings;
-            if (!Equals(Resistance, cmpSettings.Resistance) ||
-                !Equals(DecayRate, cmpSettings.DecayRate) ||
-                !Equals(ResetV, cmpSettings.ResetV) ||
-                !Equals(FiringThresholdV, cmpSettings.FiringThresholdV) ||
-                RefractoryPeriods != cmpSettings.RefractoryPeriods
-                )
-            {
-                return false;
-            }
-            return true;
-        }
-
-        /// <summary>
-        /// See the base.
-        /// </summary>
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-
-        /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>
         public SimpleIFSettings DeepClone()
         {
-            SimpleIFSettings clone = new SimpleIFSettings(this);
-            return clone;
+            return new SimpleIFSettings(this);
         }
 
     }//SimpleIFSettings

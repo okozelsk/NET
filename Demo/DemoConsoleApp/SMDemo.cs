@@ -203,6 +203,7 @@ namespace RCNet.DemoConsoleApp
                 _log.Write(predictionReport);
                 _log.Write(string.Empty);
             }
+
             return;
         }
 

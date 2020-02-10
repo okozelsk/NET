@@ -14,8 +14,14 @@ namespace RCNet.Neural.Data.Generators
     /// Setup parameters for the Sinusoidal signal generator
     /// </summary>
     [Serializable]
-    public class SinusoidalGeneratorSettings
+    public class SinusoidalGeneratorSettings : RCNetBaseSettings
     {
+        //Constants
+        /// <summary>
+        /// Name of the associated xsd type
+        /// </summary>
+        public const string XsdTypeName = "SinusoidalGeneratorCfgType";
+
         //Attribute properties
         /// <summary>
         /// Phase shift
@@ -68,11 +74,7 @@ namespace RCNet.Neural.Data.Generators
         public SinusoidalGeneratorSettings(XElement elem)
         {
             //Validation
-            ElemValidator validator = new ElemValidator();
-            Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Data.Generators.SinusoidalGeneratorSettings.xsd");
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
-            XElement settingsElem = validator.Validate(elem, "rootElem");
+            XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
             Phase = double.Parse(settingsElem.Attribute("phase").Value, CultureInfo.InvariantCulture);
             Freq = double.Parse(settingsElem.Attribute("freq").Value, CultureInfo.InvariantCulture);
@@ -81,31 +83,6 @@ namespace RCNet.Neural.Data.Generators
         }
 
         //Methods
-        /// <summary>
-        /// See the base.
-        /// </summary>
-        public override bool Equals(object obj)
-        {
-            if (obj == null) return false;
-            SinusoidalGeneratorSettings cmpSettings = obj as SinusoidalGeneratorSettings;
-            if (Phase != cmpSettings.Phase ||
-                Freq != cmpSettings.Freq ||
-                Ampl != cmpSettings.Ampl
-                )
-            {
-                return false;
-            }
-            return true;
-        }
-
-        /// <summary>
-        /// See the base.
-        /// </summary>
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-
         /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>

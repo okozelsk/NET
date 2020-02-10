@@ -14,9 +14,13 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
     /// Startup parameters for the parallel perceptron p-delta rule trainer
     /// </summary>
     [Serializable]
-    public class PDeltaRuleTrainerSettings : INonRecurrentNetworkTrainerSettings
+    public class PDeltaRuleTrainerSettings : RCNetBaseSettings, INonRecurrentNetworkTrainerSettings
     {
         //Constants
+        /// <summary>
+        /// Name of the associated xsd type
+        /// </summary>
+        public const string XsdTypeName = "PPNetPDeltaRuleTrainerCfgType";
         /// <summary>
         /// Default initial learning rate
         /// </summary>
@@ -122,11 +126,7 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
         public PDeltaRuleTrainerSettings(XElement elem)
         {
             //Validation
-            ElemValidator validator = new ElemValidator();
-            Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.NonRecurrent.PP.PDeltaRuleTrainerSettings.xsd");
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
-            XElement settingsElem = validator.Validate(elem, "rootElem");
+            XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
             NumOfAttempts = int.Parse(settingsElem.Attribute("attempts").Value, CultureInfo.InvariantCulture);
             NumOfAttemptEpochs = int.Parse(settingsElem.Attribute("attemptEpochs").Value, CultureInfo.InvariantCulture);
@@ -139,35 +139,6 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
         }
 
         //Methods
-        /// <summary>
-        /// See the base.
-        /// </summary>
-        public override bool Equals(object obj)
-        {
-            if (obj == null) return false;
-            PDeltaRuleTrainerSettings cmpSettings = obj as PDeltaRuleTrainerSettings;
-            if (NumOfAttempts != cmpSettings.NumOfAttempts ||
-                NumOfAttemptEpochs != cmpSettings.NumOfAttemptEpochs ||
-                IniLR != cmpSettings.IniLR ||
-                IncLR != cmpSettings.IncLR ||
-                DecLR != cmpSettings.DecLR ||
-                MinLR != cmpSettings.MinLR ||
-                MaxLR != cmpSettings.MaxLR
-                )
-            {
-                return false;
-            }
-            return true;
-        }
-
-        /// <summary>
-        /// See the base.
-        /// </summary>
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-
         /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>

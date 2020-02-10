@@ -6,7 +6,7 @@ using System.Xml.Schema;
 namespace RCNet.XmlTools
 {
     /// <summary>
-    /// The class provides the xml loading/validation functionalities
+    /// The class provides helper xml document loading/validation functionalities
     /// </summary>
     public class DocValidator
     {
@@ -26,7 +26,18 @@ namespace RCNet.XmlTools
 
         //Methods
         /// <summary>
-        /// Loads and adds the new xml schema from a given stream.
+        /// Adds given xml schema into the schema set.
+        /// </summary>
+        /// <param name="xmlSchema">Xml schema to be added</param>
+        public void AddSchema(XmlSchema xmlSchema)
+        {
+            //Add the schema into the schema set
+            _schemaSet.Add(xmlSchema);
+            return;
+        }
+
+        /// <summary>
+        /// Loads xml schema from a given stream and adds it into the schema set.
         /// </summary>
         /// <param name="schemaStream">A stream from which to load the xml schema</param>
         public void AddSchema(Stream schemaStream)
@@ -34,7 +45,7 @@ namespace RCNet.XmlTools
             //Load the schema
             XmlSchema schema = XmlSchema.Read(schemaStream, new ValidationEventHandler(XmlValidationCallback));
             //Add the schema into the schema set
-            _schemaSet.Add(schema);
+            AddSchema(schema);
             return;
         }
 
@@ -72,7 +83,7 @@ namespace RCNet.XmlTools
             throw new Exception($"Validation error: {args.Message}");
         }
 
-    }//XMLValidator
+    }//DocValidator
 
 }//Namespace
 

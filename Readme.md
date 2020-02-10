@@ -63,8 +63,7 @@ Input data is expected in csv format where data delimiter can be a tab, semicolo
 ### XML handling
 |Component|Description|
 |--|--|
-|[ElemValidator](https://github.com/okozelsk/NET/blob/master/RCNet/XmlTools/ElemValidator.cs)|Implements validation of alone xml element against specified type defined in xsd. It complements the apparently missing .net method and is necessary to comply with the overall RCNet xml settings concept.|
-|[DocValidator](https://github.com/okozelsk/NET/blob/master/RCNet/XmlTools/DocValidator.cs)|Envelopes xml document loading and validation|
+|[DocValidator](https://github.com/okozelsk/NET/blob/master/RCNet/XmlTools/DocValidator.cs)|Helper class for xml document loading and validation|
 
 ### Data handling
 |Component|Description|

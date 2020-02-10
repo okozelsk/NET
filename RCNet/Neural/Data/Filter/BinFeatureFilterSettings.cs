@@ -17,8 +17,10 @@ namespace RCNet.Neural.Data.Filter
     public class BinFeatureFilterSettings : BaseFeatureFilterSettings
     {
         //Constants
-
-        //Attribute properties
+        /// <summary>
+        /// Name of the associated xsd type
+        /// </summary>
+        public const string XsdTypeName = "BinFeatureFilterCfgType";
 
         //Constructors
         /// <summary>
@@ -49,34 +51,11 @@ namespace RCNet.Neural.Data.Filter
             :base(BaseFeatureFilter.FeatureType.Binary)
         {
             //Validation
-            ElemValidator validator = new ElemValidator();
-            Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Data.Filter.BinFeatureFilterSettings.xsd");
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
-            XElement settingsElem = validator.Validate(elem, "rootElem");
+            XElement settingsElem = Validate(elem, XsdTypeName);
             return;
         }
 
-        //Properties
-
         //Methods
-        /// <summary>
-        /// See the base.
-        /// </summary>
-        public override bool Equals(object obj)
-        {
-            if (obj == null) return false;
-            return base.Equals(obj);
-        }
-
-        /// <summary>
-        /// See the base.
-        /// </summary>
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-
         /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>

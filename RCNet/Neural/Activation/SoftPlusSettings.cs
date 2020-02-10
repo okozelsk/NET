@@ -17,9 +17,13 @@ namespace RCNet.Neural.Activation
     /// Class encaptulates arguments of the SoftPlus activation function
     /// </summary>
     [Serializable]
-    public class SoftPlusSettings
+    public class SoftPlusSettings : RCNetBaseSettings
     {
-        //Attribute properties
+        //Constants
+        /// <summary>
+        /// Name of the associated xsd type
+        /// </summary>
+        public const string XsdTypeName = "ActivationSoftPlusCfgType";
 
         //Constructors
         /// <summary>
@@ -49,41 +53,18 @@ namespace RCNet.Neural.Activation
         public SoftPlusSettings(XElement elem)
         {
             //Validation
-            ElemValidator validator = new ElemValidator();
-            Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Activation.SoftPlusSettings.xsd");
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
-            XElement activationSettingsElem = validator.Validate(elem, "rootElem");
+            XElement activationSettingsElem = Validate(elem, XsdTypeName);
             //Parsing
             return;
         }
 
         //Methods
         /// <summary>
-        /// See the base.
-        /// </summary>
-        public override bool Equals(object obj)
-        {
-            if (obj == null) return false;
-            SoftPlusSettings cmpSettings = obj as SoftPlusSettings;
-            return true;
-        }
-
-        /// <summary>
-        /// See the base.
-        /// </summary>
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-
-        /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>
         public SoftPlusSettings DeepClone()
         {
-            SoftPlusSettings clone = new SoftPlusSettings(this);
-            return clone;
+            return new SoftPlusSettings(this);
         }
 
     }//SoftPlusSettings

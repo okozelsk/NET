@@ -18,9 +18,14 @@ namespace RCNet.Neural.Activation
     /// Arguments are in RandomValue form to allow their dynamic random initialization within the specified ranges.
     /// </summary>
     [Serializable]
-    public class ISRUSettings
+    public class ISRUSettings : RCNetBaseSettings
     {
         //Constants
+        /// <summary>
+        /// Name of the associated xsd type
+        /// </summary>
+        public const string XsdTypeName = "ActivationISRUCfgType";
+
         //Typical values
         /// <summary>
         /// Typical alpha value
@@ -64,11 +69,7 @@ namespace RCNet.Neural.Activation
         public ISRUSettings(XElement elem)
         {
             //Validation
-            ElemValidator validator = new ElemValidator();
-            Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Activation.ISRUSettings.xsd");
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
-            XElement activationSettingsElem = validator.Validate(elem, "rootElem");
+            XElement activationSettingsElem = Validate(elem, XsdTypeName);
             //Parsing
             Alpha = RandomValueSettings.LoadOrDefault(activationSettingsElem, "alpha", TypicalAlpha);
             return;
@@ -76,34 +77,11 @@ namespace RCNet.Neural.Activation
 
         //Methods
         /// <summary>
-        /// See the base.
-        /// </summary>
-        public override bool Equals(object obj)
-        {
-            if (obj == null) return false;
-            ISRUSettings cmpSettings = obj as ISRUSettings;
-            if (!Equals(Alpha, cmpSettings.Alpha))
-            {
-                return false;
-            }
-            return true;
-        }
-
-        /// <summary>
-        /// See the base.
-        /// </summary>
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-
-        /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>
         public ISRUSettings DeepClone()
         {
-            ISRUSettings clone = new ISRUSettings(this);
-            return clone;
+            return new ISRUSettings(this);
         }
 
     }//ISRUSettings

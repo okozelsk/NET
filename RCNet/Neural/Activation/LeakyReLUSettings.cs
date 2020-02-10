@@ -18,9 +18,14 @@ namespace RCNet.Neural.Activation
     /// Arguments are in RandomValue form to allow their dynamic random initialization within the specified ranges.
     /// </summary>
     [Serializable]
-    public class LeakyReLUSettings
+    public class LeakyReLUSettings : RCNetBaseSettings
     {
         //Constants
+        /// <summary>
+        /// Name of the associated xsd type
+        /// </summary>
+        public const string XsdTypeName = "ActivationLeakyReLUCfgType";
+
         //Typical values
         /// <summary>
         /// Typical negative slope
@@ -64,11 +69,7 @@ namespace RCNet.Neural.Activation
         public LeakyReLUSettings(XElement elem)
         {
             //Validation
-            ElemValidator validator = new ElemValidator();
-            Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Activation.LeakyReLUSettings.xsd");
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
-            XElement activationSettingsElem = validator.Validate(elem, "rootElem");
+            XElement activationSettingsElem = Validate(elem, XsdTypeName);
             //Parsing
             NegSlope = RandomValueSettings.LoadOrDefault(activationSettingsElem, "negSlope", TypicalNegSlope);
             return;
@@ -76,34 +77,11 @@ namespace RCNet.Neural.Activation
 
         //Methods
         /// <summary>
-        /// See the base.
-        /// </summary>
-        public override bool Equals(object obj)
-        {
-            if (obj == null) return false;
-            LeakyReLUSettings cmpSettings = obj as LeakyReLUSettings;
-            if (!Equals(NegSlope, cmpSettings.NegSlope))
-            {
-                return false;
-            }
-            return true;
-        }
-
-        /// <summary>
-        /// See the base.
-        /// </summary>
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-
-        /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>
         public LeakyReLUSettings DeepClone()
         {
-            LeakyReLUSettings clone = new LeakyReLUSettings(this);
-            return clone;
+            return new LeakyReLUSettings(this);
         }
 
     }//LeakyReLUSettings

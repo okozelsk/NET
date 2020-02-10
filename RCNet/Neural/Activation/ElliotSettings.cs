@@ -18,9 +18,11 @@ namespace RCNet.Neural.Activation
     /// Arguments are in RandomValue form to allow their dynamic random initialization within the specified ranges.
     /// </summary>
     [Serializable]
-    public class ElliotSettings
+    public class ElliotSettings : RCNetBaseSettings
     {
         //Constants
+        public const string XsdTypeName = "ActivationElliotCfgType";
+
         //Typical values
         /// <summary>
         /// Curve slope
@@ -64,39 +66,13 @@ namespace RCNet.Neural.Activation
         public ElliotSettings(XElement elem)
         {
             //Validation
-            ElemValidator validator = new ElemValidator();
-            Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Activation.ElliotSettings.xsd");
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
-            XElement activationSettingsElem = validator.Validate(elem, "rootElem");
+            XElement activationSettingsElem = Validate(elem, XsdTypeName);
             //Parsing
             Slope = RandomValueSettings.LoadOrDefault(activationSettingsElem, "slope", TypicalSlope);
             return;
         }
 
         //Methods
-        /// <summary>
-        /// See the base.
-        /// </summary>
-        public override bool Equals(object obj)
-        {
-            if (obj == null) return false;
-            ElliotSettings cmpSettings = obj as ElliotSettings;
-            if (!Equals(Slope, cmpSettings.Slope))
-            {
-                return false;
-            }
-            return true;
-        }
-
-        /// <summary>
-        /// See the base.
-        /// </summary>
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-
         /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>

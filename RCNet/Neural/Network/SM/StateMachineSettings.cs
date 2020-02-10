@@ -18,8 +18,14 @@ namespace RCNet.Neural.Network.SM
     /// State Machine configuration.
     /// </summary>
     [Serializable]
-    public class StateMachineSettings
+    public class StateMachineSettings : RCNetBaseSettings
     {
+        //Constants
+        /// <summary>
+        /// Name of the associated xsd type
+        /// </summary>
+        public const string XsdTypeName = "SMCfgType";
+
         //Attribute properties
         /// <summary>
         /// A value greater than or equal to 0 will always ensure the same initialization of the internal
@@ -71,11 +77,7 @@ namespace RCNet.Neural.Network.SM
         public StateMachineSettings(XElement elem)
         {
             //Validation
-            ElemValidator validator = new ElemValidator();
-            Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.SM.StateMachineSettings.xsd");
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
-            XElement stateMachineSettingsElem = validator.Validate(elem, "rootElem");
+            XElement stateMachineSettingsElem = Validate(elem, XsdTypeName);
             //Parsing
             //Randomizer seek
             RandomizerSeek = int.Parse(stateMachineSettingsElem.Attribute("randomizerSeek").Value);
@@ -179,40 +181,11 @@ namespace RCNet.Neural.Network.SM
 
         //Methods
         /// <summary>
-        /// See the base.
-        /// </summary>
-        public override bool Equals(object obj)
-        {
-            if (obj == null) return false;
-            StateMachineSettings cmpSettings = obj as StateMachineSettings;
-            if (RandomizerSeek != cmpSettings.RandomizerSeek ||
-                !Equals(NeuralPreprocessorConfig, cmpSettings.NeuralPreprocessorConfig) ||
-                !Equals(ReadoutLayerConfig, cmpSettings.ReadoutLayerConfig) ||
-                (MapperCfg == null && cmpSettings.MapperCfg != null) ||
-                (MapperCfg != null && cmpSettings.MapperCfg == null) ||
-                (MapperCfg != null && !Equals(MapperCfg, cmpSettings.MapperCfg))
-                )
-            {
-                return false;
-            }
-            return true;
-        }
-
-        /// <summary>
-        /// See the base.
-        /// </summary>
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-
-        /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>
         public StateMachineSettings DeepClone()
         {
-            StateMachineSettings clone = new StateMachineSettings(this);
-            return clone;
+            return new StateMachineSettings(this);
         }
 
         //Inner classes
@@ -243,100 +216,6 @@ namespace RCNet.Neural.Network.SM
             }
 
             //Methods
-            /// <summary>
-            /// See the base.
-            /// </summary>
-            public override bool Equals(object obj)
-            {
-                if (obj == null) return false;
-                MapperSettings cmpSettings = obj as MapperSettings;
-                //Pools map
-                if (PoolsMap.Count != cmpSettings.PoolsMap.Count)
-                {
-                    return false;
-                }
-                foreach(string key in PoolsMap.Keys)
-                {
-                    List<AllowedPool> myAllowedPools = PoolsMap[key];
-                    List<AllowedPool> cmpAllowedPools = null;
-                    try
-                    {
-                        cmpAllowedPools = cmpSettings.PoolsMap[key];
-                    }
-                    catch
-                    {
-                        return false;
-                    }
-                    if(myAllowedPools.Count != cmpAllowedPools.Count)
-                    {
-                        return false;
-                    }
-                    foreach(AllowedPool allowedPool in myAllowedPools)
-                    {
-                        for(int i = 0; i < cmpAllowedPools.Count; i++)
-                        {
-                            if(cmpAllowedPools[i]._reservoirInstanceIdx == allowedPool._reservoirInstanceIdx && cmpAllowedPools[i]._poolIdx == allowedPool._poolIdx)
-                            {
-                                break;
-                            }
-                            else if(i == cmpAllowedPools.Count - 1)
-                            {
-                                return false;
-                            }
-                        }
-                    }
-                }
-
-
-                //Input fields map
-                if (RoutedInputFieldsMap.Count != cmpSettings.RoutedInputFieldsMap.Count)
-                {
-                    return false;
-                }
-                foreach (string key in RoutedInputFieldsMap.Keys)
-                {
-                    List<int> myAllowedRoutedInputFieldsIdxs = RoutedInputFieldsMap[key];
-                    List<int> cmpAllowedRoutedInputFieldsIdxs = null;
-                    try
-                    {
-                        cmpAllowedRoutedInputFieldsIdxs = cmpSettings.RoutedInputFieldsMap[key];
-                    }
-                    catch
-                    {
-                        return false;
-                    }
-                    if (myAllowedRoutedInputFieldsIdxs.Count != cmpAllowedRoutedInputFieldsIdxs.Count)
-                    {
-                        return false;
-                    }
-                    foreach (int allowedInputField in myAllowedRoutedInputFieldsIdxs)
-                    {
-                        for (int i = 0; i < cmpAllowedRoutedInputFieldsIdxs.Count; i++)
-                        {
-                            if (cmpAllowedRoutedInputFieldsIdxs[i] == allowedInputField)
-                            {
-                                break;
-                            }
-                            else if (i == cmpAllowedRoutedInputFieldsIdxs.Count - 1)
-                            {
-                                return false;
-                            }
-                        }
-                    }
-                }
-
-
-                return true;
-            }
-
-            /// <summary>
-            /// See the base.
-            /// </summary>
-            public override int GetHashCode()
-            {
-                return base.GetHashCode();
-            }
-
             /// <summary>
             /// Creates the deep copy instance of this instance
             /// </summary>
@@ -382,31 +261,6 @@ namespace RCNet.Neural.Network.SM
                 /// Index of the pool within the reservoir instance
                 /// </summary>
                 public int _poolIdx;
-
-                //Methods
-                /// <summary>
-                /// See the base.
-                /// </summary>
-                public override bool Equals(object obj)
-                {
-                    if (obj == null) return false;
-                    AllowedPool cmpSettings = obj as AllowedPool;
-                    if (_reservoirInstanceIdx != cmpSettings._reservoirInstanceIdx ||
-                        _poolIdx != cmpSettings._poolIdx
-                        )
-                    {
-                        return false;
-                    }
-                    return true;
-                }
-
-                /// <summary>
-                /// See the base.
-                /// </summary>
-                public override int GetHashCode()
-                {
-                    return base.GetHashCode();
-                }
 
             }//AllowedPool
 

@@ -15,8 +15,14 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
     /// The easiest and safest way to create an instance is to use the xml constructor.
     /// </summary>
     [Serializable]
-    public class ParallelPerceptronSettings
+    public class ParallelPerceptronSettings : RCNetBaseSettings
     {
+        //Constants
+        /// <summary>
+        /// Name of the associated xsd type
+        /// </summary>
+        public const string XsdTypeName = "PPNetCfgType";
+
         //Attribute properties
         /// <summary>
         /// Number of treshold gates inside the parallel perceptron
@@ -76,11 +82,7 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
         public ParallelPerceptronSettings(XElement elem)
         {
             //Validation
-            ElemValidator validator = new ElemValidator();
-            Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.NonRecurrent.PP.ParallelPerceptronSettings.xsd");
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
-            XElement settingsElem = validator.Validate(elem, "rootElem");
+            XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
             NumOfGates = int.Parse(settingsElem.Attribute("gates").Value, CultureInfo.InvariantCulture);
             Resolution = int.Parse(settingsElem.Attribute("resolution").Value, CultureInfo.InvariantCulture);
@@ -91,34 +93,6 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
         }
 
         //Methods
-        /// <summary>
-        /// See the base.
-        /// </summary>
-        public override bool Equals(object obj)
-        {
-            if (obj == null) return false;
-            ParallelPerceptronSettings cmpSettings = obj as ParallelPerceptronSettings;
-            if (NumOfGates != cmpSettings.NumOfGates ||
-                Resolution != cmpSettings.Resolution ||
-                !Equals(OutputRange, cmpSettings.OutputRange) ||
-                (PDeltaRuleTrainerCfg == null && cmpSettings.PDeltaRuleTrainerCfg != null) ||
-                (PDeltaRuleTrainerCfg != null && cmpSettings.PDeltaRuleTrainerCfg == null) ||
-                (PDeltaRuleTrainerCfg != null && !PDeltaRuleTrainerCfg.Equals(cmpSettings.PDeltaRuleTrainerCfg))
-                )
-            {
-                return false;
-            }
-            return true;
-        }
-
-        /// <summary>
-        /// See the base.
-        /// </summary>
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-
         /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>

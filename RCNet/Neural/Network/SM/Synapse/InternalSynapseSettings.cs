@@ -18,8 +18,14 @@ namespace RCNet.Neural.Network.SM.Synapse
     /// Setup parameters of internal synapse
     /// </summary>
     [Serializable]
-    public class InternalSynapseSettings
+    public class InternalSynapseSettings : RCNetBaseSettings
     {
+        //Constants
+        /// <summary>
+        /// Name of the associated xsd type
+        /// </summary>
+        public const string XsdTypeName = "InternalSynapseCfgType";
+
         //Attribute properties
         /// <summary>
         /// Synapse's dynamics settings for S2S E2E neurons
@@ -148,11 +154,7 @@ namespace RCNet.Neural.Network.SM.Synapse
         public InternalSynapseSettings(XElement elem)
         {
             //Validation
-            ElemValidator validator = new ElemValidator();
-            Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.SM.Synapse.InternalSynapseSettings.xsd");
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
-            XElement settingsElem = validator.Validate(elem, "rootElem");
+            XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
             //Spiking target
             XElement dynamicsCfgElem;
@@ -356,55 +358,16 @@ namespace RCNet.Neural.Network.SM.Synapse
         }
 
         /// <summary>
-        /// See the base.
-        /// </summary>
-        public override bool Equals(object obj)
-        {
-            if (obj == null) return false;
-            InternalSynapseSettings cmpSettings = obj as InternalSynapseSettings;
-            if (!Equals(S2SSynapseE2EDynamicsCfg, cmpSettings.S2SSynapseE2EDynamicsCfg) ||
-                !Equals(S2SSynapseE2IDynamicsCfg, cmpSettings.S2SSynapseE2IDynamicsCfg) ||
-                !Equals(S2SSynapseI2EDynamicsCfg, cmpSettings.S2SSynapseI2EDynamicsCfg) ||
-                !Equals(S2SSynapseI2IDynamicsCfg, cmpSettings.S2SSynapseI2IDynamicsCfg) ||
-                !Equals(A2SSynapseE2EDynamicsCfg, cmpSettings.A2SSynapseE2EDynamicsCfg) ||
-                !Equals(A2SSynapseE2IDynamicsCfg, cmpSettings.A2SSynapseE2IDynamicsCfg) ||
-                !Equals(A2SSynapseI2EDynamicsCfg, cmpSettings.A2SSynapseI2EDynamicsCfg) ||
-                !Equals(A2SSynapseI2IDynamicsCfg, cmpSettings.A2SSynapseI2IDynamicsCfg) ||
-                !Equals(S2ASynapseE2EDynamicsCfg, cmpSettings.S2ASynapseE2EDynamicsCfg) ||
-                !Equals(S2ASynapseI2EDynamicsCfg, cmpSettings.S2ASynapseI2EDynamicsCfg) ||
-                !Equals(S2ASynapseE2IDynamicsCfg, cmpSettings.S2ASynapseE2IDynamicsCfg) ||
-                !Equals(S2ASynapseI2IDynamicsCfg, cmpSettings.S2ASynapseI2IDynamicsCfg) ||
-                !Equals(A2ASynapseE2EDynamicsCfg, cmpSettings.A2ASynapseE2EDynamicsCfg) ||
-                !Equals(A2ASynapseI2EDynamicsCfg, cmpSettings.A2ASynapseI2EDynamicsCfg) ||
-                !Equals(A2ASynapseE2IDynamicsCfg, cmpSettings.A2ASynapseE2IDynamicsCfg) ||
-                !Equals(A2ASynapseI2IDynamicsCfg, cmpSettings.A2ASynapseI2IDynamicsCfg)
-                )
-            {
-                return false;
-            }
-            return true;
-        }
-
-        /// <summary>
-        /// See the base.
-        /// </summary>
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-
-        /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>
         public InternalSynapseSettings DeepClone()
         {
-            InternalSynapseSettings clone = new InternalSynapseSettings(this);
-            return clone;
+            return new InternalSynapseSettings(this);
         }
 
         //Inner classes
         /// <summary>
-        /// COnfiguration of synapse dynamics
+        /// Configuration of synapse dynamics
         /// </summary>
         [Serializable]
         public class DynamicsSettings
@@ -522,44 +485,14 @@ namespace RCNet.Neural.Network.SM.Synapse
 
             //Methods
             /// <summary>
-            /// See the base.
-            /// </summary>
-            public override bool Equals(object obj)
-            {
-                if (obj == null) return false;
-                DynamicsSettings cmpSettings = obj as DynamicsSettings;
-                if (RestingEfficacy != cmpSettings.RestingEfficacy ||
-                    TauFacilitation != cmpSettings.TauFacilitation ||
-                    TauDepression != cmpSettings.TauDepression ||
-                    ApplyShortTermPlasticity != cmpSettings.ApplyShortTermPlasticity ||
-                    !Equals(WeightCfg, cmpSettings.WeightCfg)
-                    )
-                {
-                    return false;
-                }
-                return true;
-            }
-
-            /// <summary>
-            /// See the base.
-            /// </summary>
-            public override int GetHashCode()
-            {
-                return base.GetHashCode();
-            }
-
-            /// <summary>
             /// Creates the deep copy instance of this instance
             /// </summary>
             public DynamicsSettings DeepClone()
             {
-                DynamicsSettings clone = new DynamicsSettings(this);
-                return clone;
+                return new DynamicsSettings(this);
             }
 
         }//DynamicsSettings
-
-
 
     }//InternalSynapseSettings
 

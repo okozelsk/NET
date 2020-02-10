@@ -15,9 +15,13 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
     /// Startup parameters for the elastic linear regression trainer
     /// </summary>
     [Serializable]
-    public class ElasticRegrTrainerSettings : INonRecurrentNetworkTrainerSettings
+    public class ElasticRegrTrainerSettings : RCNetBaseSettings, INonRecurrentNetworkTrainerSettings
     {
         //Constants
+        /// <summary>
+        /// Name of the associated xsd type
+        /// </summary>
+        public const string XsdTypeName = "FFNetElasticRegrTrainerCfgType";
 
         //Attribute properties
         /// <summary>
@@ -68,11 +72,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         public ElasticRegrTrainerSettings(XElement elem)
         {
             //Validation
-            ElemValidator validator = new ElemValidator();
-            Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.NonRecurrent.FF.ElasticRegrTrainerSettings.xsd");
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
-            XElement settingsElem = validator.Validate(elem, "rootElem");
+            XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
             NumOfAttemptEpochs = int.Parse(settingsElem.Attribute("attemptEpochs").Value, CultureInfo.InvariantCulture);
             Lambda = double.Parse(settingsElem.Attribute("lambda").Value, CultureInfo.InvariantCulture);
@@ -87,31 +87,6 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         public int NumOfAttempts { get { return 1; } }
 
         //Methods
-        /// <summary>
-        /// See the base.
-        /// </summary>
-        public override bool Equals(object obj)
-        {
-            if (obj == null) return false;
-            ElasticRegrTrainerSettings cmpSettings = obj as ElasticRegrTrainerSettings;
-            if (NumOfAttemptEpochs != cmpSettings.NumOfAttemptEpochs ||
-                Lambda != cmpSettings.Lambda ||
-                Alpha != cmpSettings.Alpha
-                )
-            {
-                return false;
-            }
-            return true;
-        }
-
-        /// <summary>
-        /// See the base.
-        /// </summary>
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-
         /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>

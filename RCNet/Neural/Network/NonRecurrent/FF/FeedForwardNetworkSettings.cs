@@ -16,8 +16,14 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
     /// The easiest and safest way to create an instance is to use the xml constructor.
     /// </summary>
     [Serializable]
-    public class FeedForwardNetworkSettings
+    public class FeedForwardNetworkSettings : RCNetBaseSettings
     {
+        //Constants
+        /// <summary>
+        /// Name of the associated xsd type
+        /// </summary>
+        public const string XsdTypeName = "FFNetCfgType";
+
         //Attribute properties
         /// <summary>
         /// Collection of hidden layer definitions. Hidden layers are optional.
@@ -86,11 +92,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         public FeedForwardNetworkSettings(XElement elem)
         {
             //Validation
-            ElemValidator validator = new ElemValidator();
-            Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.NonRecurrent.FF.FeedForwardNetworkSettings.xsd");
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
-            XElement settingsElem = validator.Validate(elem, "rootElem");
+            XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
             OutputLayerActivation = ActivationFactory.LoadSettings(settingsElem.Descendants().First());
             if (!IsAllowedActivation(OutputLayerActivation, out Interval outputRange))
@@ -158,40 +160,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             return true;
         }
 
-        //Instance methods
-        /// <summary>
-        /// See the base.
-        /// </summary>
-        public override bool Equals(object obj)
-        {
-            if (obj == null) return false;
-            FeedForwardNetworkSettings cmpSettings = obj as FeedForwardNetworkSettings;
-            if (!Equals(OutputLayerActivation, cmpSettings.OutputLayerActivation) ||
-                !Equals(OutputRange, cmpSettings.OutputRange) ||
-                HiddenLayerCollection.Count != cmpSettings.HiddenLayerCollection.Count ||
-                !Equals(TrainerCfg, cmpSettings.TrainerCfg)
-                )
-            {
-                return false;
-            }
-            for (int i = 0; i < HiddenLayerCollection.Count; i++)
-            {
-                if (!HiddenLayerCollection[i].Equals(cmpSettings.HiddenLayerCollection[i]))
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        /// <summary>
-        /// See the base.
-        /// </summary>
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-
+        //Methods
         /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>
@@ -261,30 +230,6 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             }
 
             //Methods
-            /// <summary>
-            /// See the base.
-            /// </summary>
-            public override bool Equals(object obj)
-            {
-                if (obj == null) return false;
-                HiddenLayerSettings cmpSettings = obj as HiddenLayerSettings;
-                if (NumOfNeurons != cmpSettings.NumOfNeurons ||
-                    !Equals(Activation, cmpSettings.Activation)
-                    )
-                {
-                    return false;
-                }
-                return true;
-            }
-
-            /// <summary>
-            /// See the base.
-            /// </summary>
-            public override int GetHashCode()
-            {
-                return NumOfNeurons.GetHashCode();
-            }
-
             /// <summary>
             /// Creates the deep copy instance of this instance.
             /// </summary>

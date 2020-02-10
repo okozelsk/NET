@@ -15,9 +15,13 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
     /// Startup parameters for the QRD regression trainer
     /// </summary>
     [Serializable]
-    public class QRDRegrTrainerSettings : INonRecurrentNetworkTrainerSettings
+    public class QRDRegrTrainerSettings : RCNetBaseSettings, INonRecurrentNetworkTrainerSettings
     {
         //Constants
+        /// <summary>
+        /// Name of the associated xsd type
+        /// </summary>
+        public const string XsdTypeName = "FFNetQRDRegrTrainerCfgType";
         /// <summary>
         /// Default margin of noise values from zero
         /// </summary>
@@ -102,11 +106,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         public QRDRegrTrainerSettings(XElement elem)
         {
             //Validation
-            ElemValidator validator = new ElemValidator();
-            Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.Neural.Network.NonRecurrent.FF.QRDRegrTrainerSettings.xsd");
-            validator.AddXsdFromResources(assemblyRCNet, "RCNet.RCNetTypes.xsd");
-            XElement settingsElem = validator.Validate(elem, "rootElem");
+            XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
             NumOfAttempts = int.Parse(settingsElem.Attribute("attempts").Value, CultureInfo.InvariantCulture);
             NumOfAttemptEpochs = int.Parse(settingsElem.Attribute("attemptEpochs").Value, CultureInfo.InvariantCulture);
@@ -116,32 +116,6 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         }
 
         //Methods
-        /// <summary>
-        /// See the base.
-        /// </summary>
-        public override bool Equals(object obj)
-        {
-            if (obj == null) return false;
-            QRDRegrTrainerSettings cmpSettings = obj as QRDRegrTrainerSettings;
-            if (NumOfAttempts != cmpSettings.NumOfAttempts ||
-                NumOfAttemptEpochs != cmpSettings.NumOfAttemptEpochs ||
-                NoiseZeroMargin != cmpSettings.NoiseZeroMargin ||
-                !Equals(MaxNoiseSeekerCfg, cmpSettings.MaxNoiseSeekerCfg)
-                )
-            {
-                return false;
-            }
-            return true;
-        }
-
-        /// <summary>
-        /// See the base.
-        /// </summary>
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-
         /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>
