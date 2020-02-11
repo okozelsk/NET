@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using RCNet.DemoConsoleApp.Log;
+using Demo.DemoConsoleApp.Log;
+using Demo.DemoConsoleApp.SM;
 
-namespace RCNet.DemoConsoleApp
+namespace Demo.DemoConsoleApp
 {
     class Program
     {
@@ -16,7 +17,7 @@ namespace RCNet.DemoConsoleApp
             {
                 //Run the demo
                 SMDemo demoEngine = new SMDemo(new ConsoleLog());
-                demoEngine.RunDemo(@"DemoSettings.xml");
+                demoEngine.RunDemo(@"SM\SMDemoSettings.xml");
             }
             catch (Exception e)
             {

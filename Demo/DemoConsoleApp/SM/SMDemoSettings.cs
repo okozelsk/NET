@@ -5,18 +5,17 @@ using System.Xml.Linq;
 using System.Globalization;
 using System.Reflection;
 using System.IO;
+using RCNet;
 using RCNet.XmlTools;
-using RCNet.Neural;
 using RCNet.Neural.Network.SM;
-using RCNet.MathTools;
 
-namespace RCNet.DemoConsoleApp
+namespace Demo.DemoConsoleApp.SM
 {
     /// <summary>
-    /// Encapsulates demo cases configurations.
+    /// Encapsulates StateMachine demo cases configurations.
     /// One and only way to create an instance is to use the xml constructor.
     /// </summary>
-    public class DemoSettings
+    public class SMDemoSettings
     {
         //Constants
         //Attribute properties
@@ -32,23 +31,22 @@ namespace RCNet.DemoConsoleApp
         //Constructor
         /// <summary>
         /// Creates initialized instance based on given xml file.
-        /// This is the only way to instantiate demo settings.
+        /// This is the only way to instantiate StateMachine demo settings.
         /// </summary>
         /// <param name="fileName">Xml file consisting of demo cases definitions</param>
-        public DemoSettings(string fileName)
+        public SMDemoSettings(string fileName)
         {
             //Validate xml file and load the document 
             DocValidator validator = new DocValidator();
-            Assembly demoAssembly = Assembly.GetExecutingAssembly();
-            Assembly assemblyRCNet = Assembly.Load("RCNet");
-            using (Stream schemaStream = demoAssembly.GetManifestResourceStream("RCNet.DemoConsoleApp.DemoSettings.xsd"))
+            //Add RCNetTypes.xsd
+            validator.AddSchema(RCNetBaseSettings.LoadRCNetTypesSchema());
+            //Add SMDemoSettings.xsd
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            using (Stream schemaStream = assembly.GetManifestResourceStream("Demo.DemoConsoleApp.SM.SMDemoSettings.xsd"))
             {
                 validator.AddSchema(schemaStream);
             }
-            using (Stream schemaStream = assemblyRCNet.GetManifestResourceStream("RCNet.RCNetTypes.xsd"))
-            {
-                validator.AddSchema(schemaStream);
-            }
+            //Load the xml
             XDocument xmlDoc = validator.LoadXDocFromFile(fileName);
             //Parsing
             //Data folder

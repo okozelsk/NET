@@ -7,10 +7,12 @@
     <ProjectGuid>{D18DB05D-F4C4-4388-846A-52BA4B3722D1}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>RCNet.DemoConsoleApp</RootNamespace>
+    <RootNamespace>Demo.DemoConsoleApp</RootNamespace>
     <AssemblyName>DemoConsoleApp</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <TargetFrameworkProfile />
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -23,10 +25,8 @@
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -83,7 +83,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DemoSettings.cs" />
+    <Compile Include="SM\SMDemoSettings.cs" />
     <Compile Include="Log\ConsoleLog.cs" />
     <Compile Include="Log\IOutputLog.cs" />
     <Compile Include="Program.cs" />
@@ -94,13 +94,14 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Research.cs" />
-    <Compile Include="SMDemo.cs" />
+    <Compile Include="SM\SMDemo.cs" />
     <Compile Include="TimeSeriesGenerator.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <EmbeddedResource Include="DemoSettings.xsd">
+    <EmbeddedResource Include="SM\SMDemoSettings.xsd">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <Content Include="Data\EpilepticSeizureActivity_train.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -179,7 +180,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="DemoSettings.xml">
+    <Content Include="SM\SMDemoSettings.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <SubType>Designer</SubType>
     </Content>

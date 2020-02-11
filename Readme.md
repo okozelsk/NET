@@ -15,16 +15,16 @@ More detailed documentation will be posted [here](https://github.com/okozelsk/NE
 I welcome questions, ideas and suggestions for improvements, usage experiences, bug alerts, constructive comments, etc... Please use my email address oldrich.kozelsky@email.cz to contact me.
 
 
-## Demo application
-Main functionality and possibilities are demonstrated in a simple [demo application](https://github.com/okozelsk/NET/tree/master/Demo/DemoConsoleApp). Application has no startup parameters, all necessary settins are specified in [DemoSettings.xml](https://github.com/okozelsk/NET/blob/master/Demo/DemoConsoleApp/DemoSettings.xml) file. DemoSettings.xml has to be in the same folder as the executable DemoConsoleApp.exe. Application performs sequence of tasks defined in DemoSettings.xml. You can easily insert new task or tune existing one by simple modification of DemoSettings.xml. Each task is defined in the xml element "case".
+## State Machine demo application
+Main functionality and possibilities of the State Machine are demonstrated in a simple [demo application](https://github.com/okozelsk/NET/tree/master/Demo/DemoConsoleApp). Application has no startup parameters, all necessary settins are specified in [SMDemoSettings.xml](https://github.com/okozelsk/NET/blob/master/Demo/DemoConsoleApp/SM/SMDemoSettings.xml) file. SMDemoSettings.xml has to be located in the SM sub-folder relative to the location of the executable DemoConsoleApp.exe. Application performs sequence of defined tasks, each task is defined in the xml element "case" so you can easily insert new task or tune existing one by simple modification of xml.
 <br>
-DemoSettings.xml contains several classification problems from the:
+SMDemoSettings.xml includes several classification problems from the:
 [Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com](https://timeseriesclassification.com)
-site. It is shown, that even without any massive tuning of StateMachine's parameters, it exhibits very similar or better classification accuracy as the best algorithms referenced on the site.
+site. State Machine usually achieves very similar results to the best classification algorithms referenced on the website.
 
 
 ### Data format for the demo application
-Input data is expected in csv format where data delimiter can be a tab, semicolon or comma character.
+Input data is standardly located in the Data sub-folder relative to the location of the executable DemoConsoleApp.exe. Data is expected in csv format and data delimiter can be a tab, semicolon or comma character.
 * **Continuous feeding regime** requires a standard csv format, where the first line contains the names of the data fields and each next line contains the data. [Here](https://github.com/okozelsk/NET/blob/master/Demo/DemoConsoleApp/Data/TTOO.csv) is an example
 * **Patterned feeding regime** requires specific logical csv format without colum names (header). Each data line contains values of repetitive pattern features followed by expected output values at the end. Values of repetitive pattern features can be organized in two ways: groupped [v1(t1),v2(t1),v1(t2),v2(t2),v1(t3),v2(t3)] or sequential [v1(t1),v1(t2),v1(t3),v2(t1),v2(t2),v2(t3)]. [Here](https://github.com/okozelsk/NET/blob/master/Demo/DemoConsoleApp/Data/LibrasMovement.csv) is an example
 

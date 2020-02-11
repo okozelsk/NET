@@ -31,12 +31,7 @@ namespace RCNet
         /// </summary>
         static RCNetBaseSettings()
         {
-            //Load shared schema instance of RCNetTypes.xsd
-            Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
-            using (Stream schemaStream = assemblyRCNet.GetManifestResourceStream("RCNet.RCNetTypes.xsd"))
-            {
-                _RCNetTypesSchema = XmlSchema.Read(schemaStream, null);
-            }
+            _RCNetTypesSchema = LoadRCNetTypesSchema();
             return;
         }
 
@@ -48,6 +43,18 @@ namespace RCNet
         }
 
         //Static methods
+        /// <summary>
+        /// Loads schema instance of RCNetTypes.xsd
+        /// </summary>
+        public static XmlSchema LoadRCNetTypesSchema()
+        {
+            //Load shared schema instance of RCNetTypes.xsd
+            Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
+            using (Stream schemaStream = assemblyRCNet.GetManifestResourceStream("RCNet.RCNetTypes.xsd"))
+            {
+                return XmlSchema.Read(schemaStream, null);
+            }
+        }
         /// <summary>
         /// Validates and completes given xml element against specified xsd type defined in RCNetTypes.xsd
         /// </summary>

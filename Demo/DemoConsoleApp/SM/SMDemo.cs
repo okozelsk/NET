@@ -4,6 +4,8 @@ using System.IO;
 using System.Globalization;
 using System.Diagnostics;
 using System.Threading;
+using Demo.DemoConsoleApp.Log;
+using RCNet;
 using RCNet.Extensions;
 using RCNet.MathTools;
 using RCNet.Neural;
@@ -11,13 +13,10 @@ using RCNet.Neural.Data;
 using RCNet.Neural.Network.SM;
 using RCNet.Neural.Network.SM.Preprocessing;
 using RCNet.Neural.Network.SM.Readout;
-using RCNet.DemoConsoleApp.Log;
-using System.Text;
-using System.Linq;
 using RCNet.Neural.Network.NonRecurrent;
 using RCNet.CsvTools;
 
-namespace RCNet.DemoConsoleApp
+namespace Demo.DemoConsoleApp.SM
 {
     /// <summary>
     /// Demonstrates the State Machine usage, performing demo cases defined in xml file.
@@ -109,7 +108,7 @@ namespace RCNet.DemoConsoleApp
         /// Performs specified demo case.
         /// </summary>
         /// <param name="demoCaseParams">An instance of DemoSettings.CaseSettings to be performed</param>
-        public void PerformDemoCase(DemoSettings.CaseSettings demoCaseParams)
+        public void PerformDemoCase(SMDemoSettings.CaseSettings demoCaseParams)
         {
             bool continuousFeedingDataFormat = false;
             //Prediction input vector (relevant only for input continuous feeding)
@@ -216,10 +215,10 @@ namespace RCNet.DemoConsoleApp
         {
             _log.Write("State Machine demo started");
             //Instantiate demo settings from the xml file
-            DemoSettings demoSettings = new DemoSettings(demoSettingsXmlFile);
+            SMDemoSettings demoSettings = new SMDemoSettings(demoSettingsXmlFile);
             //Loop through all demo cases
             Stopwatch sw = new Stopwatch();
-            foreach (DemoSettings.CaseSettings demoCaseParams in demoSettings.CaseCfgCollection)
+            foreach (SMDemoSettings.CaseSettings demoCaseParams in demoSettings.CaseCfgCollection)
             {
                 sw.Reset();
                 sw.Start();

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace RCNet.DemoConsoleApp.Log
+namespace Demo.DemoConsoleApp.Log
 {
     /// <summary>
     /// Interface for a simple output journal

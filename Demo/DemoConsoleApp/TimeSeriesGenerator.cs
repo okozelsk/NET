@@ -6,7 +6,7 @@ using System.Globalization;
 using RCNet.RandomValue;
 using RCNet.Neural.Data.Generators;
 
-namespace RCNet.DemoConsoleApp
+namespace Demo.DemoConsoleApp
 {
     /// <summary>
     /// A tool for generating some frequently used time series and saving them to a csv file
@@ -84,19 +84,19 @@ namespace RCNet.DemoConsoleApp
         /// <param name="cultureInfo">Culture info to be used</param>
         public static void SaveTimeSeriesToCsvFile(string fileName, string valueColumnName, List<double> dataCollection, CultureInfo cultureInfo)
         {
-            using (StreamWriter stream = new StreamWriter(new FileStream(fileName, FileMode.Create)))
+            using (StreamWriter streamWriter = new StreamWriter(new FileStream(fileName, FileMode.Create)))
             {
-                stream.WriteLine(valueColumnName);
+                streamWriter.WriteLine(valueColumnName);
                 foreach (double value in dataCollection)
                 {
-                    stream.WriteLine(value.ToString("F20", cultureInfo));
+                    streamWriter.WriteLine(value.ToString("F20", cultureInfo));
                 }
             }
             return;
         }
 
         /// <summary>
-        /// Function generates ans saves three types of time series in csv format for demo purposes.
+        /// Function generates and saves three types of time series in csv format for demo purposes.
         /// (Random, Sinusoid and Mackey Glass)
         /// </summary>
         /// <param name="dir">The output directory</param>

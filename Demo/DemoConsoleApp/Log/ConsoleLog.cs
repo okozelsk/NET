@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
 
-namespace RCNet.DemoConsoleApp.Log
+namespace Demo.DemoConsoleApp.Log
 {
     /// <summary>
     /// Implements a simple output journal (IOutputLog interface).
