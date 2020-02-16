@@ -189,6 +189,14 @@
     </xs:restriction>
   </xs:simpleType>
 
+  <!-- Unsigned integer greater equal to 2 and less equal to 18-->
+  <xs:simpleType name="UIntGE2LE18Type">
+    <xs:restriction base="xs:unsignedInt">
+      <xs:minInclusive value="2" />
+      <xs:maxInclusive value="18" />
+    </xs:restriction>
+  </xs:simpleType>
+
   <!-- UIntGT0Type with Auto option-->
   <xs:simpleType name="UIntGT0AutoOptionType">
     <xs:union memberTypes="UIntGT0Type AutoOptionType"/>
@@ -285,8 +293,16 @@
 
   <!-- Gaussian distribution configuration element -->
   <xs:complexType name="GaussianDistrCfgType">
-    <xs:attribute type="xs:double" name="mean" use="required"/>
-    <xs:attribute type="UDoubleGT0Type" name="stdDev" use="required"/>
+    <xs:attribute type="xs:double" name="mean" use="optional" default="0">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleGT0Type" name="stdDev" use="optional" default="1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- Exponential distribution configuration element -->
@@ -319,8 +335,16 @@
 
   <!-- Unsigned gaussian distribution configuration element -->
   <xs:complexType name="UGaussianDistrCfgType">
-    <xs:attribute type="UDoubleGT0Type" name="mean" use="required"/>
-    <xs:attribute type="UDoubleGT0Type" name="stdDev" use="required"/>
+    <xs:attribute type="UDoubleGT0Type" name="mean" use="optional" default="0.5">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.5</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleGT0Type" name="stdDev" use="optional" default="1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- Unsigned Exponential distribution configuration element -->
@@ -377,7 +401,7 @@
 
   <!-- Mackey Glass generator configuration element -->
   <xs:complexType name="MackeyGlassGeneratorCfgType">
-    <xs:attribute type="xs:unsignedInt" name="tau" use="optional" default="18">
+    <xs:attribute type="UIntGE2LE18Type" name="tau" use="optional" default="18">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is 18</xs:documentation>
       </xs:annotation>
@@ -782,7 +806,7 @@
   <!-- FF network - QRD regression trainer - configuration -->
   <xs:complexType name="FFNetQRDRegrTrainerCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="ParamSeekerCfgType" name="maxNoise" minOccurs="1" maxOccurs="1">
+      <xs:element type="ParamSeekerCfgType" name="noise" minOccurs="0" maxOccurs="1">
         <xs:annotation>
           <xs:documentation xml:lang="en">The usual values are: min=0, max=0.1, steps=10</xs:documentation>
         </xs:annotation>
@@ -800,9 +824,9 @@
   <!-- FF network - ridge regression trainer - configuration -->
   <xs:complexType name="FFNetRidgeRegrTrainerCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="ParamSeekerCfgType" name="lambda" minOccurs="1" maxOccurs="1">
+      <xs:element type="ParamSeekerCfgType" name="lambda" minOccurs="0" maxOccurs="1">
         <xs:annotation>
-          <xs:documentation xml:lang="en">The usual values are: min=0, max=2, steps=10</xs:documentation>
+          <xs:documentation xml:lang="en">The usual values are: min=0, max=0.5, steps=10</xs:documentation>
         </xs:annotation>
       </xs:element>
     </xs:sequence>
@@ -935,7 +959,7 @@
     </xs:attribute>
     <xs:attribute type="UIntGT0Type" name="resolution" use="optional" default="2">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 2 (binary)</xs:documentation>
+        <xs:documentation xml:lang="en">Default value is 2 (binary resolution)</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -1017,7 +1041,7 @@
   <!-- Internal synapse - Spiking target configurations -->
   <xs:complexType name="S2SSynapseE2EDynamicsCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="URandomValueType" name="weight" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="URandomValueType" name="weight" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="optional" default="0.5">
       <xs:annotation>
@@ -1043,7 +1067,7 @@
 
   <xs:complexType name="S2SSynapseE2IDynamicsCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="URandomValueType" name="weight" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="URandomValueType" name="weight" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="optional" default="0.05">
       <xs:annotation>
@@ -1069,7 +1093,7 @@
 
   <xs:complexType name="S2SSynapseI2EDynamicsCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="URandomValueType" name="weight" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="URandomValueType" name="weight" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="optional" default="0.25">
       <xs:annotation>
@@ -1095,7 +1119,7 @@
 
   <xs:complexType name="S2SSynapseI2IDynamicsCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="URandomValueType" name="weight" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="URandomValueType" name="weight" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="optional" default="0.32">
       <xs:annotation>
@@ -1121,7 +1145,7 @@
 
   <xs:complexType name="A2SSynapseE2EDynamicsCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="URandomValueType" name="weight" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="URandomValueType" name="weight" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="optional" default="0.5">
       <xs:annotation>
@@ -1147,7 +1171,7 @@
 
   <xs:complexType name="A2SSynapseE2IDynamicsCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="URandomValueType" name="weight" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="URandomValueType" name="weight" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="optional" default="0.05">
       <xs:annotation>
@@ -1173,7 +1197,7 @@
 
   <xs:complexType name="A2SSynapseI2EDynamicsCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="URandomValueType" name="weight" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="URandomValueType" name="weight" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="optional" default="0.25">
       <xs:annotation>
@@ -1199,7 +1223,7 @@
 
   <xs:complexType name="A2SSynapseI2IDynamicsCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="URandomValueType" name="weight" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="URandomValueType" name="weight" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="optional" default="0.32">
       <xs:annotation>
@@ -1226,7 +1250,7 @@
   <!-- Internal synapse - Analog target configurations -->
   <xs:complexType name="S2ASynapseE2EDynamicsCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="URandomValueType" name="weight" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="URandomValueType" name="weight" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="optional" default="0.5">
       <xs:annotation>
@@ -1252,7 +1276,7 @@
 
   <xs:complexType name="S2ASynapseI2EDynamicsCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="URandomValueType" name="weight" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="URandomValueType" name="weight" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="optional" default="0.5">
       <xs:annotation>
@@ -1278,7 +1302,7 @@
 
   <xs:complexType name="S2ASynapseE2IDynamicsCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="URandomValueType" name="weight" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="URandomValueType" name="weight" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="optional" default="0.5">
       <xs:annotation>
@@ -1304,7 +1328,7 @@
 
   <xs:complexType name="S2ASynapseI2IDynamicsCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="URandomValueType" name="weight" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="URandomValueType" name="weight" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="optional" default="0.5">
       <xs:annotation>
@@ -1330,7 +1354,7 @@
 
   <xs:complexType name="A2ASynapseE2EDynamicsCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="URandomValueType" name="weight" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="URandomValueType" name="weight" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="optional" default="0.5">
       <xs:annotation>
@@ -1356,7 +1380,7 @@
 
   <xs:complexType name="A2ASynapseI2EDynamicsCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="URandomValueType" name="weight" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="URandomValueType" name="weight" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="optional" default="0.5">
       <xs:annotation>
@@ -1382,7 +1406,7 @@
 
   <xs:complexType name="A2ASynapseE2IDynamicsCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="URandomValueType" name="weight" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="URandomValueType" name="weight" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="optional" default="0.5">
       <xs:annotation>
@@ -1408,7 +1432,7 @@
 
   <xs:complexType name="A2ASynapseI2IDynamicsCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="URandomValueType" name="weight" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="URandomValueType" name="weight" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="optional" default="0.5">
       <xs:annotation>
@@ -1434,24 +1458,24 @@
 
   <!-- Internal synapse - configuration -->
   <xs:complexType name="InternalSynapseCfgType">
-    <xs:sequence minOccurs="0" maxOccurs="1">
-      <xs:element type="S2SSynapseE2EDynamicsCfgType" name="dynamicsS2SEE" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="S2SSynapseI2EDynamicsCfgType" name="dynamicsS2SIE" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="S2SSynapseE2IDynamicsCfgType" name="dynamicsS2SEI" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="S2SSynapseI2IDynamicsCfgType" name="dynamicsS2SII" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="A2SSynapseE2EDynamicsCfgType" name="dynamicsA2SEE" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="A2SSynapseI2EDynamicsCfgType" name="dynamicsA2SIE" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="A2SSynapseE2IDynamicsCfgType" name="dynamicsA2SEI" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="A2SSynapseI2IDynamicsCfgType" name="dynamicsA2SII" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="S2ASynapseE2EDynamicsCfgType" name="dynamicsS2AEE" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="S2ASynapseI2EDynamicsCfgType" name="dynamicsS2AIE" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="S2ASynapseE2IDynamicsCfgType" name="dynamicsS2AEI" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="S2ASynapseI2IDynamicsCfgType" name="dynamicsS2AII" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="A2ASynapseE2EDynamicsCfgType" name="dynamicsA2AEE" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="A2ASynapseI2EDynamicsCfgType" name="dynamicsA2AIE" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="A2ASynapseE2IDynamicsCfgType" name="dynamicsA2AEI" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="A2ASynapseI2IDynamicsCfgType" name="dynamicsA2AII" minOccurs="0" maxOccurs="1"/>
-    </xs:sequence>
+    <xs:choice minOccurs="0" maxOccurs="16">
+      <xs:element type="S2SSynapseE2EDynamicsCfgType" name="dynamicsS2SEE" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="S2SSynapseI2EDynamicsCfgType" name="dynamicsS2SIE" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="S2SSynapseE2IDynamicsCfgType" name="dynamicsS2SEI" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="S2SSynapseI2IDynamicsCfgType" name="dynamicsS2SII" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="A2SSynapseE2EDynamicsCfgType" name="dynamicsA2SEE" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="A2SSynapseI2EDynamicsCfgType" name="dynamicsA2SIE" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="A2SSynapseE2IDynamicsCfgType" name="dynamicsA2SEI" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="A2SSynapseI2IDynamicsCfgType" name="dynamicsA2SII" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="S2ASynapseE2EDynamicsCfgType" name="dynamicsS2AEE" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="S2ASynapseI2EDynamicsCfgType" name="dynamicsS2AIE" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="S2ASynapseE2IDynamicsCfgType" name="dynamicsS2AEI" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="S2ASynapseI2IDynamicsCfgType" name="dynamicsS2AII" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="A2ASynapseE2EDynamicsCfgType" name="dynamicsA2AEE" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="A2ASynapseI2EDynamicsCfgType" name="dynamicsA2AIE" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="A2ASynapseE2IDynamicsCfgType" name="dynamicsA2AEI" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="A2ASynapseI2IDynamicsCfgType" name="dynamicsA2AII" minOccurs="1" maxOccurs="1"/>
+    </xs:choice>
   </xs:complexType>
 
 
@@ -1512,20 +1536,23 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Predictors settings - configuration -->
-  <xs:complexType name="PredictorsSettingsCfgType">
-    <xs:sequence minOccurs="1" maxOccurs="1">
+  <!-- Predictors params - configuration -->
+  <xs:complexType name="PredictorsParamsCfgType">
+    <xs:choice minOccurs="0" maxOccurs="6">
       <xs:element type="PredictorActivationFadingSumCfgType" name="activationFadingSum" minOccurs="1" maxOccurs="1"/>
       <xs:element type="PredictorMWAvgCfgType" name="activationMWAvg" minOccurs="1" maxOccurs="1"/>
       <xs:element type="PredictorFiringFadingSumCfgType" name="firingFadingSum" minOccurs="1" maxOccurs="1"/>
       <xs:element type="PredictorMWAvgCfgType" name="firingMWAvg" minOccurs="1" maxOccurs="1"/>
       <xs:element type="PredictorFiringCountCfgType" name="firingCount" minOccurs="1" maxOccurs="1"/>
       <xs:element type="PredictorFiringBinPatternCfgType" name="firingBinPattern" minOccurs="1" maxOccurs="1"/>
-    </xs:sequence>
+    </xs:choice>
   </xs:complexType>
 
-  <!-- Predictors permission - configuration -->
-  <xs:complexType name="PredictorsPermissionCfgType">
+  <!-- Predictors - configuration -->
+  <xs:complexType name="PredictorsCfgType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="PredictorsParamsCfgType" name="params" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
     <xs:attribute type="xs:boolean" name="activation" use="optional" default="true">
       <xs:annotation>
         <xs:documentation xml:lang="en">Current activation state. Default value is true</xs:documentation>
@@ -1568,18 +1595,10 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Predictors - configuration -->
-  <xs:complexType name="PredictorsCfgType">
-    <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="PredictorsSettingsCfgType" name="settings" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="PredictorsPermissionCfgType" name="permission" minOccurs="1" maxOccurs="1"/>
-    </xs:sequence>
-  </xs:complexType>
-
   <!-- Pool - interconnection - random schema - configuration -->
   <xs:complexType name="PoolInterconnectionRandomSchemaCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="InternalSynapseCfgType" name="synapse" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="InternalSynapseCfgType" name="synapse" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="UDoubleLE1Type" name="density" use="required"/>
     <xs:attribute type="UDoubleType" name="relShareEE" use="optional" default="0.3">
@@ -1632,7 +1651,7 @@
   <!-- Pool - interconnection - chain schema - configuration -->
   <xs:complexType name="PoolInterconnectionChainSchemaCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="InternalSynapseCfgType" name="synapse" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="InternalSynapseCfgType" name="synapse" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="UDoubleLE1Type" name="ratio" use="optional" default="1">
       <xs:annotation>
@@ -1803,7 +1822,7 @@
   <!-- Reservoir - pool to pool connection - configuration -->
   <xs:complexType name="ReservoirPool2PoolConnCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="InternalSynapseCfgType" name="synapse" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="InternalSynapseCfgType" name="synapse" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:string" name="srcPool" use="required"/>
     <xs:attribute type="UDoubleLE1Type" name="srcConnDensity" use="required"/>
@@ -2170,8 +2189,8 @@
   <!-- Readout unit default networks configuration -->
   <xs:complexType name="ROutLayerUnitDefaultNetworksCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="ROutLayerUnitClassificationNetworksCfgType" name="classificationNetworksCfg" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="ROutLayerUnitForecastNetworksCfgType" name="forecastNetworksCfg" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="ROutLayerUnitClassificationNetworksCfgType" name="classification" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="ROutLayerUnitForecastNetworksCfgType" name="forecast" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
   </xs:complexType>
 
@@ -2179,9 +2198,9 @@
   <xs:complexType name="ROutLayerUnitForecastTaskCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:choice minOccurs="1" maxOccurs="1">
-        <xs:element type="BinFeatureFilterCfgType" name="binFeature" minOccurs="0" maxOccurs="1"/>
-        <xs:element type="EnumFeatureFilterCfgType" name="enumFeature" minOccurs="0" maxOccurs="1"/>
-        <xs:element type="RealFeatureFilterCfgType" name="realFeature" minOccurs="0" maxOccurs="1"/>
+        <xs:element type="BinFeatureFilterCfgType" name="binFeature" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="EnumFeatureFilterCfgType" name="enumFeature" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="RealFeatureFilterCfgType" name="realFeature" minOccurs="1" maxOccurs="1"/>
       </xs:choice>
       <xs:element type="ROutLayerUnitForecastNetworksCfgType" name="networks" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
@@ -2220,7 +2239,7 @@
   <!-- Readout layer configuration -->
   <xs:complexType name="ROutLayerCfgType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="ROutLayerUnitDefaultNetworksCfgType" name="defaultNetworks" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="ROutLayerUnitDefaultNetworksCfgType" name="defaultNetworks" minOccurs="0" maxOccurs="1"/>
       <xs:element type="ROutLayerUnitsCfgType" name="readoutUnits" minOccurs="1" maxOccurs="1">
         <xs:unique name="rol_unique_readout_unit">
           <xs:selector xpath="./readoutUnit"/>

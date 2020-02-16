@@ -62,7 +62,7 @@ namespace RCNet.Neural.Network.SM
         /// <param name="settings">StateMachine settings</param>
         public StateMachine(StateMachineSettings settings)
         {
-            _settings = settings.DeepClone();
+            _settings = (StateMachineSettings)settings.DeepClone();
             //Neural preprocessor instance
             NP = _settings.NeuralPreprocessorConfig == null ? null : new NeuralPreprocessor(_settings.NeuralPreprocessorConfig, _settings.RandomizerSeek);
             //Readout layer instance
@@ -403,17 +403,17 @@ namespace RCNet.Neural.Network.SM
             /// <param name="readoutLayerConfig">Configuration of the Readout Layer</param>
             public VerificationResults(ReadoutLayerSettings readoutLayerConfig)
             {
-                ReadoutLayerConfig = readoutLayerConfig.DeepClone();
+                ReadoutLayerConfig = (ReadoutLayerSettings)readoutLayerConfig.DeepClone();
                 ComputationResultBundle = new ResultBundle();
-                ReadoutUnitStatCollection = new List<ReadoutUnitStat>(ReadoutLayerConfig.ReadoutUnitCfgCollection.Count);
-                foreach (ReadoutLayerSettings.ReadoutUnitSettings rus in ReadoutLayerConfig.ReadoutUnitCfgCollection)
+                ReadoutUnitStatCollection = new List<ReadoutUnitStat>(ReadoutLayerConfig.ReadoutUnitsCfg.ReadoutUnitCfgCollection.Count);
+                foreach (ReadoutUnitSettings rus in ReadoutLayerConfig.ReadoutUnitsCfg.ReadoutUnitCfgCollection)
                 {
                     ReadoutUnitStatCollection.Add(new ReadoutUnitStat(rus));
                 }
                 OneWinnerGroupStatCollection = new List<OneWinnerGroupStat>();
-                foreach (string groupName in ReadoutLayerConfig.OneWinnerGroupCfgCollection.Keys)
+                foreach (string groupName in ReadoutLayerConfig.ReadoutUnitsCfg.OneWinnerGroupCollection.Keys)
                 {
-                    OneWinnerGroupStatCollection.Add(new OneWinnerGroupStat(groupName, ReadoutLayerConfig.OneWinnerGroupCfgCollection[groupName].Members));
+                    OneWinnerGroupStatCollection.Add(new OneWinnerGroupStat(groupName, ReadoutLayerConfig.ReadoutUnitsCfg.OneWinnerGroupCollection[groupName].Members));
                 }
                 return;
             }
@@ -546,11 +546,11 @@ namespace RCNet.Neural.Network.SM
                 /// Creates an unitialized instance
                 /// </summary>
                 /// <param name="rus">Readout unit settings</param>
-                public ReadoutUnitStat(ReadoutLayerSettings.ReadoutUnitSettings rus)
+                public ReadoutUnitStat(ReadoutUnitSettings rus)
                 {
                     Name = rus.Name;
                     Index = rus.Index;
-                    Task = rus.TaskType;
+                    Task = rus.TaskSettings.Type;
                     ErrorStat = new BasicStat();
                     if (Task == ReadoutUnit.TaskType.Classification)
                     {
@@ -602,12 +602,12 @@ namespace RCNet.Neural.Network.SM
                 /// </summary>
                 /// <param name="groupName">One-winner group name</param>
                 /// <param name="members">One-winner group members</param>
-                public OneWinnerGroupStat(string groupName, List<ReadoutLayerSettings.ReadoutUnitSettings> members)
+                public OneWinnerGroupStat(string groupName, List<ReadoutUnitSettings> members)
                 {
                     Name = groupName;
                     GroupErrorStat = new BasicStat();
                     ClassErrorStatCollection = new Dictionary<string, BasicStat>();
-                    foreach (ReadoutLayerSettings.ReadoutUnitSettings rus in members)
+                    foreach (ReadoutUnitSettings rus in members)
                     {
                         ClassErrorStatCollection.Add(rus.Name, new BasicStat());
                     }

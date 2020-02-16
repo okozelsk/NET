@@ -75,7 +75,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 PoolSettingsCollection = new List<PoolSettings>(source.PoolSettingsCollection.Count);
                 foreach(PoolSettings srcPoolSettings in source.PoolSettingsCollection)
                 {
-                    PoolSettingsCollection.Add(srcPoolSettings.DeepClone());
+                    PoolSettingsCollection.Add((PoolSettings)srcPoolSettings.DeepClone());
                 }
             }
             PoolsInterconnectionCollection = null;
@@ -158,7 +158,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>
-        public ReservoirSettings DeepClone()
+        public override RCNetBaseSettings DeepClone()
         {
             return new ReservoirSettings(this);
         }
@@ -241,7 +241,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 RatioIE = source.RatioIE;
                 RatioII = source.RatioII;
                 ConstantNumOfConnections = source.ConstantNumOfConnections;
-                SynapseCfg = source.SynapseCfg.DeepClone();
+                SynapseCfg = (InternalSynapseSettings)source.SynapseCfg.DeepClone();
                 return;
             }
 

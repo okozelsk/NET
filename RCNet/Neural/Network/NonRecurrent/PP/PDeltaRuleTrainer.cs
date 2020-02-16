@@ -147,7 +147,7 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
                 //Store MSE
                 _prevMSE = MSE;
                 //Adjust clear margin
-                for (int i = 0; i < _net.NumOfGates; i++)
+                for (int i = 0; i < _net.Gates; i++)
                 {
                     _clearMargin += clearMarginLR * (_minM - Math.Min(_maxM, M));
                 }
@@ -209,12 +209,12 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
             double[] adjustedNetworkWeights = _net.GetWeights();
             Parallel.ForEach(_workerRangeCollection, worker =>
             {
-                double[] gateSums = new double[_net.NumOfGates];
+                double[] gateSums = new double[_net.Gates];
                 for (int row = worker.FromRow; row <= worker.ToRow; row++)
                 {
                     double computedOutput = _net.Compute(_inputVectorCollection[row], gateSums)[0];
                     double idealOutput = _outputVectorCollection[row][0];
-                    for (int gateIdx = 0; gateIdx < _net.NumOfGates; gateIdx++)
+                    for (int gateIdx = 0; gateIdx < _net.Gates; gateIdx++)
                     {
                         double x = 0;
                         if (computedOutput > (idealOutput + _acceptableError) && gateSums[gateIdx] >= 0)

@@ -50,17 +50,17 @@ namespace RCNet.Neural.Data.Generators
         /// <summary>
         /// Pulse signal
         /// </summary>
-        public double Signal { get; set; }
+        public double Signal { get; }
 
         /// <summary>
         /// Average period of the pulse
         /// </summary>
-        public double AvgPeriod { get; set; }
+        public double AvgPeriod { get; }
 
         /// <summary>
         /// Pulse timing mode
         /// </summary>
-        public TimingMode Mode { get; set; }
+        public TimingMode Mode { get; }
 
         //Constructors
         /// <summary>
@@ -69,11 +69,15 @@ namespace RCNet.Neural.Data.Generators
         /// <param name="signal">Pulse signal</param>
         /// <param name="avgPeriod">Pulse average period</param>
         /// <param name="mode">Pulse timing mode</param>
-        public PulseGeneratorSettings(double signal, double avgPeriod, TimingMode mode)
+        public PulseGeneratorSettings(double signal,
+                                      double avgPeriod,
+                                      TimingMode mode
+                                      )
         {
             Signal = signal;
             AvgPeriod = Math.Abs(avgPeriod);
             Mode = mode;
+            Check();
             return;
         }
 
@@ -102,8 +106,15 @@ namespace RCNet.Neural.Data.Generators
             Signal = double.Parse(settingsElem.Attribute("signal").Value, CultureInfo.InvariantCulture);
             AvgPeriod = Math.Abs(double.Parse(settingsElem.Attribute("avgPeriod").Value, CultureInfo.InvariantCulture));
             Mode = ParseTimingMode(settingsElem.Attribute("mode").Value);
+            Check();
             return;
         }
+
+        //Properties
+        /// <summary>
+        /// Identifies settings containing only default values
+        /// </summary>
+        public override bool ContainsOnlyDefaults { get { return false; } }
 
         //Methods
         //Static methods
@@ -126,11 +137,47 @@ namespace RCNet.Neural.Data.Generators
 
         //Instance methods
         /// <summary>
+        /// Checks validity
+        /// </summary>
+        private void Check()
+        {
+            if (AvgPeriod < 1)
+            {
+                throw new Exception($"Invalid AvgPeriod {AvgPeriod.ToString(CultureInfo.InvariantCulture)}. AvgPeriod must be GE to 1.");
+            }
+            return;
+        }
+
+        /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>
-        public PulseGeneratorSettings DeepClone()
+        public override RCNetBaseSettings DeepClone()
         {
             return new PulseGeneratorSettings(this);
+        }
+
+        /// <summary>
+        /// Generates xml element containing the settings.
+        /// </summary>
+        /// <param name="rootElemName">Name to be used as a name of the root element.</param>
+        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <returns>XElement containing the settings</returns>
+        public override XElement GetXml(string rootElemName, bool suppressDefaults)
+        {
+            return Validate(new XElement(rootElemName, new XAttribute("signal", Signal.ToString(CultureInfo.InvariantCulture)),
+                                                       new XAttribute("avgPeriod", AvgPeriod.ToString(CultureInfo.InvariantCulture)),
+                                                       new XAttribute("mode", Mode.ToString())),
+                                                       XsdTypeName);
+        }
+
+        /// <summary>
+        /// Generates default named xml element containing the settings.
+        /// </summary>
+        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <returns>XElement containing the settings</returns>
+        public override XElement GetXml(bool suppressDefaults)
+        {
+            return GetXml("pulse", suppressDefaults);
         }
 
     }//PulseGeneratorSettings

@@ -25,7 +25,7 @@ namespace RCNet.MathTools.PS
         /// <param name="settings">Configuration parameters</param>
         public ParamSeeker(ParamSeekerSettings settings)
         {
-            _settings = settings.DeepClone();
+            _settings = (ParamSeekerSettings)settings.DeepClone();
             _plannedValues = new ValueError[_settings.NumOfSteps + 1];
             Replan(_settings.Min, double.NaN, _settings.Max, double.NaN);
             return;

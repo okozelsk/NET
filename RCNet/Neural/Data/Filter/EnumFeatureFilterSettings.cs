@@ -14,7 +14,7 @@ namespace RCNet.Neural.Data.Filter
     /// Startup parameters for the enumeration feature filter
     /// </summary>
     [Serializable]
-    public class EnumFeatureFilterSettings : BaseFeatureFilterSettings
+    public class EnumFeatureFilterSettings : RCNetBaseSettings, IFeatureFilterSettings
     {
         //Constants
         /// <summary>
@@ -26,7 +26,7 @@ namespace RCNet.Neural.Data.Filter
         /// <summary>
         /// Number of enum elements
         /// </summary>
-        public int NumOfElements { get; set; }
+        public int NumOfElements { get; }
 
         //Constructors
         /// <summary>
@@ -34,9 +34,9 @@ namespace RCNet.Neural.Data.Filter
         /// </summary>
         /// <param name="numOfElements">Number of feature's enumerated elements</param>
         public EnumFeatureFilterSettings(int numOfElements)
-            :base(BaseFeatureFilter.FeatureType.Enum)
         {
             NumOfElements = numOfElements;
+            Check();
             return;
         }
 
@@ -45,7 +45,6 @@ namespace RCNet.Neural.Data.Filter
         /// </summary>
         /// <param name="source">Source instance</param>
         public EnumFeatureFilterSettings(EnumFeatureFilterSettings source)
-            :base(source)
         {
             NumOfElements = source.NumOfElements;
             return;
@@ -57,22 +56,67 @@ namespace RCNet.Neural.Data.Filter
         /// </summary>
         /// <param name="elem">Xml data containing settings</param>
         public EnumFeatureFilterSettings(XElement elem)
-            :base(BaseFeatureFilter.FeatureType.Enum)
         {
             //Validation
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
             NumOfElements = int.Parse(settingsElem.Attribute("numOfElements").Value, CultureInfo.InvariantCulture);
+            Check();
             return;
         }
 
+        //Properties
+        /// <summary>
+        /// Feature type
+        /// </summary>
+        public BaseFeatureFilter.FeatureType Type { get { return BaseFeatureFilter.FeatureType.Enum; } }
+
+        /// <summary>
+        /// Identifies settings containing only default values
+        /// </summary>
+        public override bool ContainsOnlyDefaults { get { return false; } }
+
         //Methods
+        /// <summary>
+        /// Checks validity
+        /// </summary>
+        private void Check()
+        {
+            if (NumOfElements < 2)
+            {
+                throw new Exception($"Invalid NumOfElements {NumOfElements.ToString(CultureInfo.InvariantCulture)}. NumOfElements must be GE to 2.");
+            }
+            return;
+        }
+
         /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>
-        public EnumFeatureFilterSettings DeepClone()
+        public override RCNetBaseSettings DeepClone()
         {
             return new EnumFeatureFilterSettings(this);
+        }
+
+        /// <summary>
+        /// Generates xml element containing the settings.
+        /// </summary>
+        /// <param name="rootElemName">Name to be used as a name of the root element.</param>
+        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <returns>XElement containing the settings</returns>
+        public override XElement GetXml(string rootElemName, bool suppressDefaults)
+        {
+            return Validate(new XElement(rootElemName, new XAttribute("numOfElements", NumOfElements.ToString(CultureInfo.InvariantCulture))),
+                                                       XsdTypeName);
+        }
+
+        /// <summary>
+        /// Generates default named xml element containing the settings.
+        /// </summary>
+        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <returns>XElement containing the settings</returns>
+        public override XElement GetXml(bool suppressDefaults)
+        {
+            return GetXml("enumFeature", suppressDefaults);
         }
 
     }//EnumFeatureFilterSettings

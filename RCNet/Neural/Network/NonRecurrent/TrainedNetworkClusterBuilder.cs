@@ -46,7 +46,7 @@ namespace RCNet.Neural.Network.NonRecurrent
 
         //Attributes
         private readonly string _clusterName;
-        private readonly List<object> _networkSettingsCollection;
+        private readonly List<INonRecurrentNetworkSettings> _networkSettingsCollection;
         private readonly double _binBorder;
         private readonly Random _rand;
         private readonly TrainedNetworkBuilder.RegressionControllerDelegate _controller;
@@ -61,7 +61,7 @@ namespace RCNet.Neural.Network.NonRecurrent
         /// <param name="rand">Random generator to be used (optional)</param>
         /// <param name="controller">Regression controller (optional)</param>
         public TrainedNetworkClusterBuilder(string clusterName,
-                                            List<object> networkSettingsCollection,
+                                            List<INonRecurrentNetworkSettings> networkSettingsCollection,
                                             double binBorder = double.NaN,
                                             Random rand = null,
                                             TrainedNetworkBuilder.RegressionControllerDelegate controller = null

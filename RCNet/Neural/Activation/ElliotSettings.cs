@@ -21,6 +21,9 @@ namespace RCNet.Neural.Activation
     public class ElliotSettings : RCNetBaseSettings
     {
         //Constants
+        /// <summary>
+        /// Name of the associated xsd type
+        /// </summary>
         public const string XsdTypeName = "ActivationElliotCfgType";
 
         //Typical values
@@ -33,16 +36,16 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Slope of the curve
         /// </summary>
-        public RandomValueSettings Slope { get; }
+        public URandomValueSettings Slope { get; }
 
         //Constructors
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
         /// <param name="slope">Slope of the curve</param>
-        public ElliotSettings(RandomValueSettings slope = null)
+        public ElliotSettings(URandomValueSettings slope = null)
         {
-            Slope = RandomValueSettings.CloneOrDefault(slope, TypicalSlope);
+            Slope = URandomValueSettings.CloneOrDefault(slope, TypicalSlope);
             return;
         }
 
@@ -52,7 +55,7 @@ namespace RCNet.Neural.Activation
         /// <param name="source">Source instance</param>
         public ElliotSettings(ElliotSettings source)
         {
-            Slope = source.Slope.DeepClone();
+            Slope = (URandomValueSettings)source.Slope.DeepClone();
             return;
         }
 
@@ -68,18 +71,57 @@ namespace RCNet.Neural.Activation
             //Validation
             XElement activationSettingsElem = Validate(elem, XsdTypeName);
             //Parsing
-            Slope = RandomValueSettings.LoadOrDefault(activationSettingsElem, "slope", TypicalSlope);
+            Slope = URandomValueSettings.LoadOrDefault(activationSettingsElem, "slope", TypicalSlope);
             return;
         }
+
+        //Properties
+        /// <summary>
+        /// Checks if settings are default
+        /// </summary>
+        public bool IsDefaultSlope { get { return (Slope.Min == TypicalSlope && Slope.Max == TypicalSlope && Slope.DistrType == RandomCommon.DistributionType.Uniform); } }
+
+        /// <summary>
+        /// Identifies settings containing only default values
+        /// </summary>
+        public override bool ContainsOnlyDefaults { get { return IsDefaultSlope; } }
+
 
         //Methods
         /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>
-        public ElliotSettings DeepClone()
+        public override RCNetBaseSettings DeepClone()
         {
-            ElliotSettings clone = new ElliotSettings(this);
-            return clone;
+            return new ElliotSettings(this);
+        }
+
+        /// <summary>
+        /// Generates xml element containing the settings.
+        /// </summary>
+        /// <param name="rootElemName">Name to be used as a name of the root element.</param>
+        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <returns>XElement containing the settings</returns>
+        public override XElement GetXml(string rootElemName, bool suppressDefaults)
+        {
+            XElement rootElem = new XElement(rootElemName);
+            if (!suppressDefaults || !IsDefaultSlope)
+            {
+                rootElem.Add(Slope.GetXml("slope", suppressDefaults));
+            }
+
+            Validate(rootElem, XsdTypeName);
+            return rootElem;
+        }
+
+        /// <summary>
+        /// Generates default named xml element containing the settings.
+        /// </summary>
+        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <returns>XElement containing the settings</returns>
+        public override XElement GetXml(bool suppressDefaults)
+        {
+            return GetXml("activationElliot", suppressDefaults);
         }
 
     }//ElliotSettings

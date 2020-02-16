@@ -18,7 +18,7 @@ namespace RCNet.Neural.Data.Filter
         /// </summary>
         /// <param name="elem">Element containing settings</param>
         /// <returns></returns>
-        public static BaseFeatureFilterSettings LoadSettings(XElement elem)
+        public static IFeatureFilterSettings LoadSettings(XElement elem)
         {
             switch(elem.Name.LocalName)
             {
@@ -38,7 +38,7 @@ namespace RCNet.Neural.Data.Filter
         /// </summary>
         /// <param name="outputRange">Output range of feature filter</param>
         /// <param name="settings">Settings of feature filter</param>
-        public static BaseFeatureFilter Create(Interval outputRange, BaseFeatureFilterSettings settings)
+        public static BaseFeatureFilter Create(Interval outputRange, IFeatureFilterSettings settings)
         {
             switch(settings.Type)
             {
@@ -57,7 +57,7 @@ namespace RCNet.Neural.Data.Filter
         /// Creates deep copy of given settings
         /// </summary>
         /// <param name="settings">Settings of feature filter</param>
-        public static BaseFeatureFilterSettings DeepClone(BaseFeatureFilterSettings settings)
+        public static IFeatureFilterSettings DeepClone(IFeatureFilterSettings settings)
         {
             switch (settings.Type)
             {

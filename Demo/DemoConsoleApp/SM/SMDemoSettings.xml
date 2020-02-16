@@ -77,27 +77,26 @@
                 </synapse>
               </inputConnection>
             </inputConnections>
-            <predictors>
-              <permission activation="true"
-                          activationSquare="false"
-                          activationFadingSum="false"
-                          activationMWAvg="false"
-                          firingFadingSum="true"
-                          firingMWAvg="false"
-                          firingCount="false"
-                          firingBinPattern="false"/>
+            <predictors activation="true"
+                        activationSquare="false"
+                        activationFadingSum="false"
+                        activationMWAvg="false"
+                        firingFadingSum="true"
+                        firingMWAvg="false"
+                        firingCount="false"
+                        firingBinPattern="false">
             </predictors>
           </reservoirInstance>
         </reservoirInstanceContainer>
       </neuralPreprocessor>
       <readoutLayer testDataRatio="0.25" folds="Auto" repetitions="1">
         <defaultNetworks>
-          <classificationNetworksCfg>
+          <classification>
             <ff>
               <activationIdentity/>
               <elasticRegrTrainer attemptEpochs="1000" alpha="1" lambda="0.01"/>
             </ff>
-          </classificationNetworksCfg>
+          </classification>
         </defaultNetworks>
         <readoutUnits>
           <readoutUnit name="0-6 years">
@@ -219,27 +218,26 @@
                 </synapse>
               </inputConnection>
             </inputConnections>
-            <predictors>
-              <permission activation="true"
-                          activationSquare="false"
-                          activationFadingSum="false"
-                          activationMWAvg="false"
-                          firingFadingSum="true"
-                          firingMWAvg="false"
-                          firingCount="false"
-                          firingBinPattern="false"/>
+            <predictors activation="true"
+                        activationSquare="false"
+                        activationFadingSum="false"
+                        activationMWAvg="false"
+                        firingFadingSum="true"
+                        firingMWAvg="false"
+                        firingCount="false"
+                        firingBinPattern="false">
             </predictors>
           </reservoirInstance>
         </reservoirInstanceContainer>
       </neuralPreprocessor>
       <readoutLayer testDataRatio="0.25" folds="Auto" repetitions="1">
         <defaultNetworks>
-          <classificationNetworksCfg>
+          <classification>
             <ff>
               <activationElliot/>
               <resPropTrainer attempts="10" attemptEpochs="500"/>
             </ff>
-          </classificationNetworksCfg>
+          </classification>
         </defaultNetworks>
         <readoutUnits>
           <readoutUnit name="0-6 years">
@@ -283,7 +281,7 @@
     <stateMachineCfg randomizerSeek="0">
       <readoutLayer testDataRatio="0.25" folds="Auto">
         <defaultNetworks>
-          <classificationNetworksCfg>
+          <classification>
             <ff>
               <activationIdentity/>
               <hiddenLayers>
@@ -293,7 +291,7 @@
               </hiddenLayers>
               <resPropTrainer attempts="10" attemptEpochs="500"/>
             </ff>
-          </classificationNetworksCfg>
+          </classification>
         </defaultNetworks>
         <readoutUnits>
           <readoutUnit name="0-6 years">
@@ -375,15 +373,14 @@
                 </synapse>
               </inputConnection>
             </inputConnections>
-            <predictors>
-              <permission activation="false"
-                          activationSquare="false"
-                          activationFadingSum="false"
-                          activationMWAvg="false"
-                          firingFadingSum="true"
-                          firingMWAvg="false"
-                          firingCount="false"
-                          firingBinPattern="false"/>
+            <predictors activation="false"
+                        activationSquare="false"
+                        activationFadingSum="false"
+                        activationMWAvg="false"
+                        firingFadingSum="true"
+                        firingMWAvg="false"
+                        firingCount="false"
+                        firingBinPattern="false">
             </predictors>
           </reservoirInstance>
         </reservoirInstanceContainer>
@@ -476,15 +473,14 @@
                 </synapse>
               </inputConnection>
             </inputConnections>
-            <predictors>
-              <permission activation="false"
-                          activationSquare="false"
-                          activationFadingSum="false"
-                          activationMWAvg="false"
-                          firingFadingSum="true"
-                          firingMWAvg="false"
-                          firingCount="false"
-                          firingBinPattern="false"/>
+            <predictors activation="false"
+                        activationSquare="false"
+                        activationFadingSum="false"
+                        activationMWAvg="false"
+                        firingFadingSum="true"
+                        firingMWAvg="false"
+                        firingCount="false"
+                        firingBinPattern="false">
             </predictors>
           </reservoirInstance>
         </reservoirInstanceContainer>
@@ -596,27 +592,26 @@
                 </synapse>
               </inputConnection>
             </inputConnections>
-            <predictors>
-              <permission activation="false"
-                          activationSquare="false"
-                          activationFadingSum="false"
-                          activationMWAvg="false"
-                          firingFadingSum="true"
-                          firingMWAvg="false"
-                          firingCount="false"
-                          firingBinPattern="false"/>
+            <predictors activation="false"
+                        activationSquare="false"
+                        activationFadingSum="false"
+                        activationMWAvg="false"
+                        firingFadingSum="true"
+                        firingMWAvg="false"
+                        firingCount="false"
+                        firingBinPattern="false">
             </predictors>
           </reservoirInstance>
         </reservoirInstanceContainer>
       </neuralPreprocessor>
       <readoutLayer testDataRatio="0.1" folds="Auto">
         <defaultNetworks>
-          <classificationNetworksCfg>
+          <classification>
             <ff>
               <activationIdentity/>
               <resPropTrainer attempts="10" attemptEpochs="1500"/>
             </ff>
-          </classificationNetworksCfg>
+          </classification>
         </defaultNetworks>
         <readoutUnits>
           <readoutUnit name="Wild-N2">
@@ -719,27 +714,26 @@
                 </synapse>
               </inputConnection>
             </inputConnections>
-            <predictors>
-              <permission activation="false"
-                          activationSquare="false"
-                          activationFadingSum="false"
-                          activationMWAvg="false"
-                          firingFadingSum="false"
-                          firingMWAvg="false"
-                          firingCount="true"
-                          firingBinPattern="false"/>
+            <predictors activation="false"
+                        activationSquare="false"
+                        activationFadingSum="false"
+                        activationMWAvg="false"
+                        firingFadingSum="false"
+                        firingMWAvg="false"
+                        firingCount="true"
+                        firingBinPattern="false">
             </predictors>
           </reservoirInstance>
         </reservoirInstanceContainer>
       </neuralPreprocessor>
       <readoutLayer testDataRatio="0.0825" folds="Auto">
         <defaultNetworks>
-          <classificationNetworksCfg>
+          <classification>
             <ff>
               <activationTanH/>
               <resPropTrainer attempts="5" attemptEpochs="400"/>
             </ff>
-          </classificationNetworksCfg>
+          </classification>
         </defaultNetworks>
         <readoutUnits>
           <readoutUnit name="curved swing">
@@ -877,27 +871,26 @@
                 </synapse>
               </inputConnection>
             </inputConnections>
-            <predictors>
-              <permission activation="false"
-                          activationSquare="false"
-                          activationFadingSum="false"
-                          activationMWAvg="false"
-                          firingFadingSum="false"
-                          firingMWAvg="false"
-                          firingCount="true"
-                          firingBinPattern="false"/>
+            <predictors activation="false"
+                        activationSquare="false"
+                        activationFadingSum="false"
+                        activationMWAvg="false"
+                        firingFadingSum="false"
+                        firingMWAvg="false"
+                        firingCount="true"
+                        firingBinPattern="false">
             </predictors>
           </reservoirInstance>
         </reservoirInstanceContainer>
       </neuralPreprocessor>
       <readoutLayer testDataRatio="0.0825" folds="Auto">
         <defaultNetworks>
-          <classificationNetworksCfg>
+          <classification>
             <ff>
               <activationTanH/>
               <resPropTrainer attempts="5" attemptEpochs="400"/>
             </ff>
-          </classificationNetworksCfg>
+          </classification>
         </defaultNetworks>
         <readoutUnits>
           <readoutUnit name="curved swing">
@@ -1052,27 +1045,26 @@
                 <synapse/>
               </inputConnection>
             </inputConnections>
-            <predictors>
-              <permission activation="false"
-                          activationSquare="false"
-                          activationFadingSum="false"
-                          activationMWAvg="false"
-                          firingFadingSum="false"
-                          firingMWAvg="false"
-                          firingCount="true"
-                          firingBinPattern="false"/>
+            <predictors activation="false"
+                        activationSquare="false"
+                        activationFadingSum="false"
+                        activationMWAvg="false"
+                        firingFadingSum="false"
+                        firingMWAvg="false"
+                        firingCount="true"
+                        firingBinPattern="false">
             </predictors>
           </reservoirInstance>
         </reservoirInstanceContainer>
       </neuralPreprocessor>
       <readoutLayer testDataRatio="0.0825" folds="Auto">
         <defaultNetworks>
-          <classificationNetworksCfg>
+          <classification>
             <ff>
               <activationTanH/>
               <resPropTrainer attempts="5" attemptEpochs="400"/>
             </ff>
-          </classificationNetworksCfg>
+          </classification>
         </defaultNetworks>
         <readoutUnits>
           <readoutUnit name="curved swing">
@@ -1242,15 +1234,14 @@
                 </synapse>
               </inputConnection>
             </inputConnections>
-            <predictors>
-              <permission activation="true"
-                          activationSquare="true"
-                          activationFadingSum="true"
-                          activationMWAvg="false"
-                          firingFadingSum="false"
-                          firingMWAvg="false"
-                          firingCount="false"
-                          firingBinPattern="false"/>
+            <predictors activation="true"
+                        activationSquare="true"
+                        activationFadingSum="true"
+                        activationMWAvg="false"
+                        firingFadingSum="false"
+                        firingMWAvg="false"
+                        firingCount="false"
+                        firingBinPattern="false">
             </predictors>
           </reservoirInstance>
           <reservoirInstance name="ESN reservoir #2" cfg="ESNCfg #2">
@@ -1261,15 +1252,14 @@
                 </synapse>
               </inputConnection>
             </inputConnections>
-            <predictors>
-              <permission activation="true"
-                          activationSquare="true"
-                          activationFadingSum="true"
-                          activationMWAvg="false"
-                          firingFadingSum="false"
-                          firingMWAvg="false"
-                          firingCount="false"
-                          firingBinPattern="false"/>
+            <predictors activation="true"
+                        activationSquare="true"
+                        activationFadingSum="true"
+                        activationMWAvg="false"
+                        firingFadingSum="false"
+                        firingMWAvg="false"
+                        firingCount="false"
+                        firingBinPattern="false">
             </predictors>
           </reservoirInstance>
         </reservoirInstanceContainer>
@@ -1284,7 +1274,7 @@
                 <ff>
                   <activationIdentity/>
                   <qrdRegrTrainer attempts="1" attemptEpochs="1">
-                    <maxNoise min="0" max="0" steps="2"/>
+                    <noise min="0" max="0" steps="2"/>
                   </qrdRegrTrainer>
                 </ff>
               </networks>
@@ -1376,27 +1366,26 @@
                 </synapse>
               </inputConnection>
             </inputConnections>
-            <predictors>
-              <permission activation="true"
-                          activationSquare="false"
-                          activationFadingSum="false"
-                          activationMWAvg="false"
-                          firingFadingSum="false"
-                          firingMWAvg="false"
-                          firingCount="false"
-                          firingBinPattern="false"/>
+            <predictors activation="true"
+                        activationSquare="false"
+                        activationFadingSum="false"
+                        activationMWAvg="false"
+                        firingFadingSum="false"
+                        firingMWAvg="false"
+                        firingCount="false"
+                        firingBinPattern="false">
             </predictors>
           </reservoirInstance>
         </reservoirInstanceContainer>
       </neuralPreprocessor>
       <readoutLayer testDataRatio="0.1" folds="Auto">
         <defaultNetworks>
-          <forecastNetworksCfg>
+          <forecast>
             <ff>
               <activationIdentity/>
               <elasticRegrTrainer attemptEpochs="400" lambda="1e-6" alpha="0.5"/>
             </ff>
-          </forecastNetworksCfg>
+          </forecast>
         </defaultNetworks>
         <readoutUnits>
           <readoutUnit name="High">
@@ -1483,23 +1472,22 @@
                 </synapse>
               </inputConnection>
             </inputConnections>
-            <predictors>
-              <settings>
+            <predictors activation="false"
+                        activationSquare="false"
+                        activationFadingSum="false"
+                        activationMWAvg="false"
+                        firingFadingSum="true"
+                        firingMWAvg="false"
+                        firingCount="false"
+                        firingBinPattern="false">
+              <params>
                 <activationFadingSum/>
                 <activationMWAvg weights="Constant" window="178"/>
                 <firingFadingSum strength="0.005"/>
                 <firingMWAvg weights="Constant" window="178"/>
                 <firingCount/>
                 <firingBinPattern/>
-              </settings>
-              <permission activation="false"
-                          activationSquare="false"
-                          activationFadingSum="false"
-                          activationMWAvg="false"
-                          firingFadingSum="true"
-                          firingMWAvg="false"
-                          firingCount="false"
-                          firingBinPattern="false"/>
+              </params>
             </predictors>
           </reservoirInstance>
         </reservoirInstanceContainer>
@@ -1652,30 +1640,29 @@
                 </synapse>
               </inputConnection>
             </inputConnections>
-            <predictors>
-              <settings>
+            <predictors activation="false"
+                        activationSquare="false"
+                        activationFadingSum="false"
+                        activationMWAvg="false"
+                        firingFadingSum="true"
+                        firingMWAvg="false"
+                        firingCount="false"
+                        firingBinPattern="false">
+              <params>
                 <activationFadingSum/>
                 <activationMWAvg leakage="0" weights="Constant" window="300"/>
                 <firingFadingSum strength="0.005"/>
                 <firingMWAvg leakage="0" weights="Constant" window="300"/>
                 <firingCount/>
                 <firingBinPattern window="1"/>
-              </settings>
-              <permission activation="false"
-                          activationSquare="false"
-                          activationFadingSum="false"
-                          activationMWAvg="false"
-                          firingFadingSum="true"
-                          firingMWAvg="false"
-                          firingCount="false"
-                          firingBinPattern="false"/>
+              </params>
             </predictors>
           </reservoirInstance>
         </reservoirInstanceContainer>
       </neuralPreprocessor>
       <readoutLayer testDataRatio="0.1" folds="Auto">
         <defaultNetworks>
-          <classificationNetworksCfg>
+          <classification>
             <ff>
               <activationElliot/>
               <hiddenLayers>
@@ -1688,7 +1675,7 @@
               </hiddenLayers>
               <resPropTrainer attempts="10" attemptEpochs="500"/>
             </ff>
-          </classificationNetworksCfg>
+          </classification>
         </defaultNetworks>
         <readoutUnits>
           <readoutUnit name="Cancel Call">
@@ -1905,30 +1892,29 @@
                 </synapse>
               </inputConnection>
             </inputConnections>
-            <predictors>
-              <settings>
+            <predictors activation="false"
+                        activationSquare="false"
+                        activationFadingSum="false"
+                        activationMWAvg="false"
+                        firingFadingSum="true"
+                        firingMWAvg="false"
+                        firingCount="false"
+                        firingBinPattern="false">
+              <params>
                 <activationFadingSum/>
                 <activationMWAvg weights="Constant" window="150"/>
                 <firingFadingSum/>
                 <firingMWAvg weights="Constant" window="150"/>
                 <firingCount/>
                 <firingBinPattern/>
-              </settings>
-              <permission activation="false"
-                          activationSquare="false"
-                          activationFadingSum="false"
-                          activationMWAvg="false"
-                          firingFadingSum="true"
-                          firingMWAvg="false"
-                          firingCount="false"
-                          firingBinPattern="false"/>
+              </params>
             </predictors>
           </reservoirInstance>
         </reservoirInstanceContainer>
       </neuralPreprocessor>
       <readoutLayer testDataRatio="0.05" folds="Auto" repetitions="1">
         <defaultNetworks>
-          <classificationNetworksCfg>
+          <classification>
             <pp>
               <pDeltaRuleTrainer attempts="5" attemptEpochs="500"/>
             </pp>
@@ -1944,7 +1930,7 @@
               </hiddenLayers>
               <resPropTrainer attempts="10" attemptEpochs="500"/>
             </ff>
-          </classificationNetworksCfg>
+          </classification>
         </defaultNetworks>
         <readoutUnits>
           <readoutUnit name="Cancel Call">
@@ -2085,35 +2071,34 @@
                 </synapse>
               </inputConnection>
             </inputConnections>
-            <predictors>
-              <settings>
+            <predictors activation="false"
+                        activationSquare="false"
+                        activationFadingSum="false"
+                        activationMWAvg="false"
+                        firingFadingSum="true"
+                        firingMWAvg="false"
+                        firingCount="false"
+                        firingBinPattern="false">
+              <params>
                 <activationFadingSum/>
                 <activationMWAvg leakage="0" weights="Constant" window="300"/>
                 <firingFadingSum strength="0.05"/>
                 <firingMWAvg leakage="0" weights="Constant" window="300"/>
                 <firingCount/>
                 <firingBinPattern window="1"/>
-              </settings>
-              <permission activation="false"
-                          activationSquare="false"
-                          activationFadingSum="false"
-                          activationMWAvg="false"
-                          firingFadingSum="true"
-                          firingMWAvg="false"
-                          firingCount="false"
-                          firingBinPattern="false"/>
+              </params>
             </predictors>
           </reservoirInstance>
         </reservoirInstanceContainer>
       </neuralPreprocessor>
       <readoutLayer testDataRatio="0.1" folds="Auto">
         <defaultNetworks>
-          <classificationNetworksCfg>
+          <classification>
             <ff>
               <activationElliot/>
               <resPropTrainer attempts="10" attemptEpochs="500"/>
             </ff>
-          </classificationNetworksCfg>
+          </classification>
         </defaultNetworks>
         <readoutUnits>
           <readoutUnit name="Cancel Call">

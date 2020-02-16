@@ -121,12 +121,59 @@
     <Compile Include="Neural\Activation\TanH.cs" />
     <Compile Include="Neural\Activation\ExpIF.cs" />
     <Compile Include="Neural\Activation\SimpleIF.cs" />
+    <Compile Include="Neural\Data\Filter\IFeatureFilterSettings.cs" />
+    <Compile Include="Neural\Network\NonRecurrent\FF\HiddenLayerSettings.cs" />
+    <Compile Include="Neural\Network\NonRecurrent\FF\HiddenLayersSettings.cs" />
+    <Compile Include="Neural\Network\NonRecurrent\INonRecurrentNetworkSettings.cs" />
+    <Compile Include="Neural\Network\SM\Neuron\IPredictorParamsSettings.cs" />
+    <Compile Include="Neural\Network\SM\Neuron\PredictorFiringBinPatternSettings.cs" />
+    <Compile Include="Neural\Network\SM\Neuron\PredictorFiringCountSettings.cs" />
+    <Compile Include="Neural\Network\SM\Neuron\PredictorFiringMWAvgSettings.cs" />
+    <Compile Include="Neural\Network\SM\Neuron\PredictorFiringFadingSumSettings.cs" />
+    <Compile Include="Neural\Network\SM\Neuron\PredictorMWAvgSettings.cs" />
+    <Compile Include="Neural\Network\SM\Neuron\PredictorActivationMWAvgSettings.cs" />
+    <Compile Include="Neural\Network\SM\Neuron\PredictorActivationFadingSumSettings.cs" />
+    <Compile Include="Neural\Network\SM\Neuron\PredictorsParamsSettings.cs" />
+    <Compile Include="Neural\Network\SM\Readout\ReadoutUnitsSettings.cs" />
+    <Compile Include="Neural\Network\SM\Readout\ClassificationTaskSettings.cs" />
+    <Compile Include="Neural\Network\SM\Readout\ForecastTaskSettings.cs" />
+    <Compile Include="Neural\Network\SM\Readout\DefaultNetworksSettings.cs" />
+    <Compile Include="Neural\Network\SM\Readout\ForecastNetworksSettings.cs" />
+    <Compile Include="Neural\Network\SM\Readout\ClassificationNetworksSettings.cs" />
+    <Compile Include="Neural\Network\SM\Readout\ITaskSettings.cs" />
+    <Compile Include="Neural\Network\SM\Readout\ReadoutUnitSettings.cs" />
+    <Compile Include="Neural\Network\SM\Synapse\A2ASynapseI2IDynamicsSettings.cs" />
+    <Compile Include="Neural\Network\SM\Synapse\A2ASynapseE2IDynamicsSettings.cs" />
+    <Compile Include="Neural\Network\SM\Synapse\A2ASynapseI2EDynamicsSettings.cs" />
+    <Compile Include="Neural\Network\SM\Synapse\AnalogTargetSettings.cs" />
+    <Compile Include="Neural\Network\SM\Synapse\DynamicsSettings.cs" />
+    <Compile Include="Neural\Network\SM\Synapse\A2SSynapseE2EDynamicsSettings.cs" />
+    <Compile Include="Neural\Network\SM\Synapse\A2SSynapseE2IDynamicsSettings.cs" />
+    <Compile Include="Neural\Network\SM\Synapse\A2SSynapseI2EDynamicsSettings.cs" />
+    <Compile Include="Neural\Network\SM\Synapse\A2SSynapseI2IDynamicsSettings.cs" />
+    <Compile Include="Neural\Network\SM\Synapse\A2ASynapseE2EDynamicsSettings.cs" />
+    <Compile Include="Neural\Network\SM\Synapse\S2ASynapseI2IDynamicsSettings.cs" />
+    <Compile Include="Neural\Network\SM\Synapse\S2ASynapseE2IDynamicsSettings.cs" />
+    <Compile Include="Neural\Network\SM\Synapse\S2ASynapseI2EDynamicsSettings.cs" />
+    <Compile Include="Neural\Network\SM\Synapse\S2ASynapseE2EDynamicsSettings.cs" />
+    <Compile Include="Neural\Network\SM\Synapse\S2SSynapseI2IDynamicsSettings.cs" />
+    <Compile Include="Neural\Network\SM\Synapse\S2SSynapseI2EDynamicsSettings.cs" />
+    <Compile Include="Neural\Network\SM\Synapse\S2SSynapseE2IDynamicsSettings.cs" />
+    <Compile Include="Neural\Network\SM\Synapse\S2SSynapseE2EDynamicsSettings.cs" />
+    <Compile Include="Neural\Network\SM\Synapse\SpikingTargetSettings.cs" />
+    <Compile Include="RandomValue\UExponentialDistrSettings.cs" />
+    <Compile Include="RandomValue\ExponentialDistrSettings.cs" />
+    <Compile Include="RandomValue\GammaDistrSettings.cs" />
+    <Compile Include="RandomValue\UGaussianDistrSettings.cs" />
+    <Compile Include="RandomValue\GaussianDistrSettings.cs" />
+    <Compile Include="RandomValue\RandomCommon.cs" />
+    <Compile Include="RandomValue\URandomValueSettings.cs" />
+    <Compile Include="RandomValue\UniformDistrSettings.cs" />
     <Compile Include="RCNetBaseSettings.cs" />
     <Compile Include="Neural\Data\Filter\BinFeatureFilterSettings.cs" />
     <Compile Include="Neural\Data\Filter\FeatureFilterFactory.cs" />
     <Compile Include="Neural\Data\Filter\RealFeatureFilterSettings.cs" />
     <Compile Include="Neural\Data\Filter\EnumFeatureFilterSettings.cs" />
-    <Compile Include="Neural\Data\Filter\BaseFeatureFilterSettings.cs" />
     <Compile Include="Neural\Data\Filter\RealFeatureFilter.cs" />
     <Compile Include="Neural\Data\Filter\EnumFeatureFilter.cs" />
     <Compile Include="Neural\Data\Filter\BinFeatureFilter.cs" />
@@ -140,7 +187,6 @@
     <Compile Include="Neural\Data\Generators\RandomGenerator.cs" />
     <Compile Include="Neural\Data\Generators\PulseGeneratorSettings.cs" />
     <Compile Include="Neural\Data\InputPattern.cs" />
-    <Compile Include="Neural\Network\NonRecurrent\INonRecurrentNetworkTrainerSettings.cs" />
     <Compile Include="Neural\Network\NonRecurrent\FF\QRDRegrTrainer.cs" />
     <Compile Include="Neural\Network\NonRecurrent\FF\QRDRegrTrainerSettings.cs" />
     <Compile Include="MathTools\PS\ParamSeekerSettings.cs" />
@@ -153,13 +199,13 @@
     <Compile Include="Neural\Network\NonRecurrent\TrainedNetwork.cs" />
     <Compile Include="Neural\Network\NonRecurrent\TrainedNetworkCluster.cs" />
     <Compile Include="Neural\Network\NonRecurrent\TrainedNetworkClusterBuilder.cs" />
-    <Compile Include="Neural\Network\SM\Neuron\HiddenNeuronPredictors.cs" />
+    <Compile Include="Neural\Network\SM\Neuron\Predictors.cs" />
     <Compile Include="Neural\Network\SM\Neuron\HiddenNeuron.cs" />
     <Compile Include="Neural\Network\SM\Neuron\NeuronCommon.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\InputUnit.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\NeuralPreprocessor.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\NeuralPreprocessorSettings.cs" />
-    <Compile Include="Neural\Network\SM\Neuron\HiddenNeuronPredictorsSettings.cs" />
+    <Compile Include="Neural\Network\SM\Neuron\PredictorsSettings.cs" />
     <Compile Include="MathTools\Probability\RelShareSelector.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\InputUnitSettings.cs" />
     <Compile Include="Neural\Network\SM\Synapse\InternalSynapseSettings.cs" />
@@ -222,9 +268,6 @@
     <EmbeddedResource Include="RCNetTypes.xsd">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Neural\Network\SM\Preprocessing\PoolSettings.xsd" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Docs\Imgs\ReservoirComputing_BasicSchema.png" />

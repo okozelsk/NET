@@ -49,7 +49,7 @@ namespace RCNet.Neural.Network.NonRecurrent
 
         //Attributes
         private readonly string _networkName;
-        private readonly object _networkSettings;
+        private readonly INonRecurrentNetworkSettings _networkSettings;
         private readonly int _foldNum;
         private readonly int _numOfFolds;
         private readonly int _foldNetworkNum;
@@ -76,7 +76,7 @@ namespace RCNet.Neural.Network.NonRecurrent
         /// <param name="rand">Random generator to be used (optional)</param>
         /// <param name="controller">Regression controller (optional)</param>
         public TrainedNetworkBuilder(string networkName,
-                                     object networkSettings,
+                                     INonRecurrentNetworkSettings networkSettings,
                                      int foldNum,
                                      int numOfFolds,
                                      int foldNetworkNum,

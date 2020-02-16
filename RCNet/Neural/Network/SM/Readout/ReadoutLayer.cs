@@ -78,7 +78,7 @@ namespace RCNet.Neural.Network.SM.Readout
         /// <param name="settings">Readout layer configuration</param>
         public ReadoutLayer(ReadoutLayerSettings settings)
         {
-            Settings = settings.DeepClone();
+            Settings = (ReadoutLayerSettings)settings.DeepClone();
             Reset();
             return;
         }
@@ -116,7 +116,7 @@ namespace RCNet.Neural.Network.SM.Readout
             _predictorFeatureFilterCollection = null;
             _outputFeatureFilterCollection = null;
             _predictorsMapper = null;
-            _readoutUnitCollection = new ReadoutUnit[Settings.ReadoutUnitCfgCollection.Count];
+            _readoutUnitCollection = new ReadoutUnit[Settings.ReadoutUnitsCfg.ReadoutUnitCfgCollection.Count];
             _readoutUnitCollection.Populate(null);
             Trained = false;
             return;
@@ -148,7 +148,7 @@ namespace RCNet.Neural.Network.SM.Readout
             {
                 throw new Exception("Number of predictors must be greater tham 0.");
             }
-            if (numOfOutputs != Settings.ReadoutUnitCfgCollection.Count)
+            if (numOfOutputs != Settings.ReadoutUnitsCfg.ReadoutUnitCfgCollection.Count)
             {
                 throw new Exception("Incorrect length of output vectors.");
             }
@@ -170,7 +170,7 @@ namespace RCNet.Neural.Network.SM.Readout
             _outputFeatureFilterCollection = new BaseFeatureFilter[numOfOutputs];
             Parallel.For(0, _outputFeatureFilterCollection.Length, nrmIdx =>
             {
-                _outputFeatureFilterCollection[nrmIdx] = FeatureFilterFactory.Create(DataRange, Settings.ReadoutUnitCfgCollection[nrmIdx].FeatureFilterCfg);
+                _outputFeatureFilterCollection[nrmIdx] = FeatureFilterFactory.Create(DataRange, Settings.ReadoutUnitsCfg.ReadoutUnitCfgCollection[nrmIdx].TaskSettings.FeatureFilterCfg);
                 for (int pairIdx = 0; pairIdx < dataBundle.OutputVectorCollection.Count; pairIdx++)
                 {
                     //Adjust output normalizer
@@ -214,7 +214,7 @@ namespace RCNet.Neural.Network.SM.Readout
             shuffledData.Shuffle(rand);
 
             //Building of readout units
-            for (int unitIdx = 0; unitIdx < Settings.ReadoutUnitCfgCollection.Count; unitIdx++)
+            for (int unitIdx = 0; unitIdx < Settings.ReadoutUnitsCfg.ReadoutUnitCfgCollection.Count; unitIdx++)
             {
                 List<double[]> idealValueCollection = new List<double[]>(shuffledData.OutputVectorCollection.Count);
                 //Transformation of ideal vectors to a single value vectors
@@ -224,11 +224,11 @@ namespace RCNet.Neural.Network.SM.Readout
                     value[0] = idealVector[unitIdx];
                     idealValueCollection.Add(value);
                 }
-                List<double[]> readoutUnitInputVectorCollection = _predictorsMapper.CreateVectorCollection(Settings.ReadoutUnitCfgCollection[unitIdx].Name, shuffledData.InputVectorCollection);
+                List<double[]> readoutUnitInputVectorCollection = _predictorsMapper.CreateVectorCollection(Settings.ReadoutUnitsCfg.ReadoutUnitCfgCollection[unitIdx].Name, shuffledData.InputVectorCollection);
                 VectorBundle readoutUnitDataBundle = new VectorBundle(readoutUnitInputVectorCollection, idealValueCollection);
-                TrainedNetworkClusterBuilder readoutUnitBuilder = new TrainedNetworkClusterBuilder(Settings.ReadoutUnitCfgCollection[unitIdx].Name,
-                                                                                                   Settings.ReadoutUnitCfgCollection[unitIdx].NetCfgCollection,
-                                                                                                   Settings.ReadoutUnitCfgCollection[unitIdx].TaskType == ReadoutUnit.TaskType.Classification ? BinBorder : double.NaN,
+                TrainedNetworkClusterBuilder readoutUnitBuilder = new TrainedNetworkClusterBuilder(Settings.ReadoutUnitsCfg.ReadoutUnitCfgCollection[unitIdx].Name,
+                                                                                                   Settings.GetReadoutUnitNetworksCollection(unitIdx),
+                                                                                                   Settings.ReadoutUnitsCfg.ReadoutUnitCfgCollection[unitIdx].TaskSettings.Type == ReadoutUnit.TaskType.Classification ? BinBorder : double.NaN,
                                                                                                    rand,
                                                                                                    controller
                                                                                                    );
@@ -238,7 +238,7 @@ namespace RCNet.Neural.Network.SM.Readout
                 _readoutUnitCollection[unitIdx] = new ReadoutUnit(unitIdx,
                                                                   readoutUnitBuilder.Build(readoutUnitDataBundle,
                                                                                            Settings.TestDataRatio,
-                                                                                           Settings.NumOfFolds,
+                                                                                           Settings.Folds,
                                                                                            Settings.Repetitions,
                                                                                            new BaseFeatureFilter[] {_outputFeatureFilterCollection [unitIdx]}
                                                                                            )
@@ -261,9 +261,9 @@ namespace RCNet.Neural.Network.SM.Readout
             string leftMargin = margin == 0 ? string.Empty : new string(' ', margin);
             StringBuilder sb = new StringBuilder();
             //Results
-            for (int outputIdx = 0; outputIdx < Settings.ReadoutUnitCfgCollection.Count; outputIdx++)
+            for (int outputIdx = 0; outputIdx < Settings.ReadoutUnitsCfg.ReadoutUnitCfgCollection.Count; outputIdx++)
             {
-                sb.Append(leftMargin + $"Output field [{Settings.ReadoutUnitCfgCollection[outputIdx].Name}]: {predictedValues[outputIdx].ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                sb.Append(leftMargin + $"Output field [{Settings.ReadoutUnitsCfg.ReadoutUnitCfgCollection[outputIdx].Name}]: {predictedValues[outputIdx].ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
             }
             return sb.ToString();
         }
@@ -306,11 +306,11 @@ namespace RCNet.Neural.Network.SM.Readout
         /// </summary>
         private double[] ComputeInternal(double[] predictors, out List<double[]> unitsAllSubResults)
         {
-            unitsAllSubResults = new List<double[]>(Settings.ReadoutUnitCfgCollection.Count);
+            unitsAllSubResults = new List<double[]>(Settings.ReadoutUnitsCfg.ReadoutUnitCfgCollection.Count);
             double[] outputVector = new double[_readoutUnitCollection.Length];
             for(int unitIdx = 0; unitIdx < _readoutUnitCollection.Length; unitIdx++)
             {
-                double[] readoutUnitInputVector = _predictorsMapper.CreateVector(Settings.ReadoutUnitCfgCollection[unitIdx].Name, predictors);
+                double[] readoutUnitInputVector = _predictorsMapper.CreateVector(Settings.ReadoutUnitsCfg.ReadoutUnitCfgCollection[unitIdx].Name, predictors);
                 outputVector[unitIdx] = _readoutUnitCollection[unitIdx].NetworkCluster.Compute(readoutUnitInputVector, out double[] memberOutputCollection);
                 unitsAllSubResults.Add(memberOutputCollection);
             }
@@ -347,7 +347,7 @@ namespace RCNet.Neural.Network.SM.Readout
         public int DecideOneWinner(string oneWinnerGroupName, double[] dataVector, out int[] membersIndexes, out double[] membersWeightedDataVector)
         {
             //Obtain group members indexes
-            membersIndexes = (from member in Settings.OneWinnerGroupCfgCollection[oneWinnerGroupName].Members select member.Index).ToArray();
+            membersIndexes = (from member in Settings.ReadoutUnitsCfg.OneWinnerGroupCollection[oneWinnerGroupName].Members select member.Index).ToArray();
             //Compute members' weighted predictions
             membersWeightedDataVector = new double[membersIndexes.Length];
             for(int i = 0; i < membersIndexes.Length; i++)
@@ -407,20 +407,20 @@ namespace RCNet.Neural.Network.SM.Readout
                 //Alone units
                 DataVector = dataVector;
                 ReadoutUnitDataCollection = new Dictionary<string, ReadoutUnitData>();
-                foreach(ReadoutLayerSettings.ReadoutUnitSettings rus in rl.Settings.ReadoutUnitCfgCollection)
+                foreach(ReadoutUnitSettings rus in rl.Settings.ReadoutUnitsCfg.ReadoutUnitCfgCollection)
                 {
-                    ReadoutUnitDataCollection.Add(rus.Name, new ReadoutUnitData() { Name = rus.Name, Index = rus.Index, Task = rus.TaskType, DataValue = DataVector[rus.Index] });
+                    ReadoutUnitDataCollection.Add(rus.Name, new ReadoutUnitData() { Name = rus.Name, Index = rus.Index, Task = rus.TaskSettings.Type, DataValue = DataVector[rus.Index] });
                 }
                 //One Winner groups
                 OneWinnerDataCollection = new Dictionary<string, OneWinnerGroupData>();
-                foreach (string oneWinnerGroupName in rl.Settings.OneWinnerGroupCfgCollection.Keys)
+                foreach (string oneWinnerGroupName in rl.Settings.ReadoutUnitsCfg.OneWinnerGroupCollection.Keys)
                 {
                     //There is One Winner group
                     int winningUnitIndex = rl.DecideOneWinner(oneWinnerGroupName, dataVector, out int[] membersIndexes, out double[] membersWeightedDataVector);
                     OneWinnerDataCollection.Add(oneWinnerGroupName, new OneWinnerGroupData()
                     {
                         GroupName = oneWinnerGroupName,
-                        WinningReadoutUnitName = rl.Settings.ReadoutUnitCfgCollection[winningUnitIndex].Name,
+                        WinningReadoutUnitName = rl.Settings.ReadoutUnitsCfg.ReadoutUnitCfgCollection[winningUnitIndex].Name,
                         WinningReadoutUnitIndex = winningUnitIndex,
                         MemberReadoutUnitsIndexes = membersIndexes,
                         MemberReadoutUnitsProbabilities = membersWeightedDataVector

@@ -59,7 +59,7 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// <summary>
         /// Swithes enabling/disabling neuron's predictors
         /// </summary>
-        public HiddenNeuronPredictorsSettings PredictorsCfg { get; }
+        public PredictorsSettings PredictorsCfg { get; }
 
         //Attributes
         /// <summary>
@@ -98,7 +98,7 @@ namespace RCNet.Neural.Network.SM.Neuron
         /// <summary>
         /// Predictors
         /// </summary>
-        private readonly HiddenNeuronPredictors _predictors;
+        private readonly Predictors _predictors;
 
 
         //Constructor
@@ -117,7 +117,7 @@ namespace RCNet.Neural.Network.SM.Neuron
                             NeuronCommon.NeuronRole role,
                             IActivationFunction activation,
                             NeuronCommon.NeuronSignalingRestrictionType signalingRestriction,
-                            HiddenNeuronPredictorsSettings predictorsCfg,
+                            PredictorsSettings predictorsCfg,
                             double bias = 0,
                             double analogFiringThreshold = PoolSettings.NeuronGroupSettings.DefaultAnalogFiringThreshold,
                             double retainmentStrength = 0
@@ -148,7 +148,7 @@ namespace RCNet.Neural.Network.SM.Neuron
                 _analogFiringThreshold = analogFiringThreshold;
                 _retainmentStrength = retainmentStrength;
             }
-            _predictors = predictorsCfg != null ? new HiddenNeuronPredictors(predictorsCfg) : null;
+            _predictors = predictorsCfg != null ? new Predictors(predictorsCfg) : null;
             Reset(false);
             return;
         }

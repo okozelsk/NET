@@ -15,7 +15,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
     /// Startup parameters for the ridge regression trainer
     /// </summary>
     [Serializable]
-    public class RidgeRegrTrainerSettings : RCNetBaseSettings, INonRecurrentNetworkTrainerSettings
+    public class RidgeRegrTrainerSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
@@ -29,7 +29,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         /// <summary>
         /// Seeker's default max lambda
         /// </summary>
-        public const double DefaultMaxLambda = 0.05;
+        public const double DefaultMaxLambda = 0.5;
         /// <summary>
         /// Seeker's default number of steps within the interval
         /// </summary>
@@ -39,11 +39,11 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         /// <summary>
         /// Number of attempt epochs
         /// </summary>
-        public int NumOfAttemptEpochs { get; set; }
+        public int NumOfAttemptEpochs { get; }
         /// <summary>
         /// Configuration of seeker of lambda hyperparameter value
         /// </summary>
-        public ParamSeekerSettings LambdaSeekerCfg { get; set; }
+        public ParamSeekerSettings LambdaSeekerCfg { get; }
 
         //Constructors
         /// <summary>
@@ -60,8 +60,9 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             }
             else
             {
-                LambdaSeekerCfg = lambdaSeekerCfg.DeepClone();
+                LambdaSeekerCfg = (ParamSeekerSettings)lambdaSeekerCfg.DeepClone();
             }
+            Check();
             return;
         }
 
@@ -72,7 +73,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         public RidgeRegrTrainerSettings(RidgeRegrTrainerSettings source)
         {
             NumOfAttemptEpochs = source.NumOfAttemptEpochs;
-            LambdaSeekerCfg = source.LambdaSeekerCfg.DeepClone();
+            LambdaSeekerCfg = (ParamSeekerSettings)source.LambdaSeekerCfg.DeepClone();
             return;
         }
 
@@ -87,7 +88,16 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
             NumOfAttemptEpochs = int.Parse(settingsElem.Attribute("attemptEpochs").Value, CultureInfo.InvariantCulture);
-            LambdaSeekerCfg = new ParamSeekerSettings(settingsElem.Descendants("lambda").First());
+            XElement lambdaSeekerSettingsElem = settingsElem.Descendants("lambda").FirstOrDefault();
+            if (lambdaSeekerSettingsElem != null)
+            {
+                LambdaSeekerCfg = new ParamSeekerSettings(lambdaSeekerSettingsElem);
+            }
+            else
+            {
+                LambdaSeekerCfg = new ParamSeekerSettings(DefaultMinLambda, DefaultMaxLambda, DefaultSteps);
+            }
+            Check();
             return;
         }
 
@@ -97,13 +107,62 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         /// </summary>
         public int NumOfAttempts { get { return 1; } }
 
+        /// <summary>
+        /// Checks if settings are default
+        /// </summary>
+        public bool IsDefaultLambdaSeeker { get { return (LambdaSeekerCfg.Min == DefaultMinLambda && LambdaSeekerCfg.Max == DefaultMaxLambda && LambdaSeekerCfg.NumOfSteps == DefaultSteps); } }
+
+        /// <summary>
+        /// Identifies settings containing only default values
+        /// </summary>
+        public override bool ContainsOnlyDefaults { get { return false; } }
+
         //Methods
+        /// <summary>
+        /// Checks validity
+        /// </summary>
+        private void Check()
+        {
+            if (NumOfAttemptEpochs < 1)
+            {
+                throw new Exception($"Invalid NumOfAttemptEpochs {NumOfAttemptEpochs.ToString(CultureInfo.InvariantCulture)}. NumOfAttemptEpochs must be GE to 1.");
+            }
+            return;
+        }
+
         /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>
-        public INonRecurrentNetworkTrainerSettings DeepClone()
+        public override RCNetBaseSettings DeepClone()
         {
             return new RidgeRegrTrainerSettings(this);
+        }
+
+        /// <summary>
+        /// Generates xml element containing the settings.
+        /// </summary>
+        /// <param name="rootElemName">Name to be used as a name of the root element.</param>
+        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <returns>XElement containing the settings</returns>
+        public override XElement GetXml(string rootElemName, bool suppressDefaults)
+        {
+            XElement rootElem = new XElement(rootElemName, new XAttribute("attemptEpochs", NumOfAttemptEpochs.ToString(CultureInfo.InvariantCulture)));
+            if (!suppressDefaults || !IsDefaultLambdaSeeker)
+            {
+                rootElem.Add(LambdaSeekerCfg.GetXml("lambda", suppressDefaults));
+            }
+            Validate(rootElem, XsdTypeName);
+            return rootElem;
+        }
+
+        /// <summary>
+        /// Generates default named xml element containing the settings.
+        /// </summary>
+        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <returns>XElement containing the settings</returns>
+        public override XElement GetXml(bool suppressDefaults)
+        {
+            return GetXml("ridgeRegrTrainer", suppressDefaults);
         }
 
     }//RidgeRegrTrainerSettings

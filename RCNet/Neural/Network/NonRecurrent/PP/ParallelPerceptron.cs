@@ -37,7 +37,7 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
         /// <summary>
         /// Number of network's treshold gates
         /// </summary>
-        public int NumOfGates { get; }
+        public int Gates { get; }
 
         /// <summary>
         /// Network's output resolution
@@ -55,28 +55,28 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
         /// Creates an initialized instance
         /// </summary>
         /// <param name="numOfInputs">Number of input values</param>
-        /// <param name="numOfGates">Number of parallel treshold gates</param>
+        /// <param name="gates">Number of parallel treshold gates</param>
         /// <param name="resolution">Requiered output resolution (number of distinct values)</param>
-        public ParallelPerceptron(int numOfInputs, int numOfGates, int resolution)
+        public ParallelPerceptron(int numOfInputs, int gates, int resolution)
         {
             NumOfInputValues = numOfInputs;
             if (NumOfInputValues < 1)
             {
                 throw new ArgumentException($"Invalid number of input values {numOfInputs}", "numOfInputs");
             }
-            NumOfGates = numOfGates;
-            if(NumOfGates < 1)
+            Gates = gates;
+            if(Gates < 1)
             {
-                throw new ArgumentException($"Invalid number of gates {numOfGates}", "numOfGates");
+                throw new ArgumentException($"Invalid number of gates {gates}", "gates");
             }
             Resolution = resolution;
-            if (Resolution < 2 || Resolution > NumOfGates * 2)
+            if (Resolution < 2 || Resolution > Gates * 2)
             {
-                throw new ArgumentException($"Invalid resolution {resolution}. Resolution must be GE 2 and LE to (number of gates * 2).", "resolution");
+                throw new ArgumentException($"Invalid resolution {resolution}. Resolution must be GE 2 and LE to (gates * 2).", "resolution");
             }
             ResSquashCoeff = (double)Resolution / 2d;
             _numOfGateWeights = (numOfInputs + 1);
-            _flatWeights = new double[NumOfGates * _numOfGateWeights];
+            _flatWeights = new double[Gates * _numOfGateWeights];
             return;
         }
 
@@ -86,7 +86,7 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
         /// <param name="numOfInputs">Number of input values</param>
         /// <param name="settings">Configuration parameters</param>
         public ParallelPerceptron(int numOfInputs, ParallelPerceptronSettings settings)
-            :this(numOfInputs, settings.NumOfGates, settings.Resolution)
+            :this(numOfInputs, settings.Gates, settings.Resolution)
         {
             return;
         }
@@ -150,7 +150,7 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
         public double[] Compute(double[] input)
         {
             double sum = 0;
-            for (int i = 0; i < NumOfGates; i++)
+            for (int i = 0; i < Gates; i++)
             {
                 sum += ComputeGate(i, input, out _);
             }
@@ -166,7 +166,7 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
         public double[] Compute(double[] input, double[] gateSums)
         {
             double sum = 0;
-            for(int i = 0; i < NumOfGates; i++)
+            for(int i = 0; i < Gates; i++)
             {
                 sum += ComputeGate(i, input, out gateSums[i]);
             }
@@ -265,7 +265,7 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
         /// </summary>
         public void NormalizeWeights()
         {
-            Parallel.For(0, NumOfGates, gateIdx =>
+            Parallel.For(0, Gates, gateIdx =>
             {
                 int weightFlatIdx = gateIdx * (NumOfInputValues + 1);
                 double norm = 0;
@@ -290,7 +290,7 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
         /// </summary>
         public INonRecurrentNetwork DeepClone()
         {
-            ParallelPerceptron clone = new ParallelPerceptron(NumOfInputValues, NumOfGates, Resolution);
+            ParallelPerceptron clone = new ParallelPerceptron(NumOfInputValues, Gates, Resolution);
             clone.SetWeights(_flatWeights);
             return clone;
         }

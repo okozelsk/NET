@@ -36,16 +36,16 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// The negative slope
         /// </summary>
-        public RandomValueSettings NegSlope { get; set; }
+        public URandomValueSettings NegSlope { get; }
 
         //Constructors
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
         /// <param name="negSlope">The negative slope</param>
-        public LeakyReLUSettings(RandomValueSettings negSlope = null)
+        public LeakyReLUSettings(URandomValueSettings negSlope = null)
         {
-            NegSlope = RandomValueSettings.CloneOrDefault(negSlope, TypicalNegSlope);
+            NegSlope = URandomValueSettings.CloneOrDefault(negSlope, TypicalNegSlope);
             return;
         }
 
@@ -55,7 +55,7 @@ namespace RCNet.Neural.Activation
         /// <param name="source">Source instance</param>
         public LeakyReLUSettings(LeakyReLUSettings source)
         {
-            NegSlope = source.NegSlope.DeepClone();
+            NegSlope = (URandomValueSettings)source.NegSlope.DeepClone();
             return;
         }
 
@@ -71,17 +71,56 @@ namespace RCNet.Neural.Activation
             //Validation
             XElement activationSettingsElem = Validate(elem, XsdTypeName);
             //Parsing
-            NegSlope = RandomValueSettings.LoadOrDefault(activationSettingsElem, "negSlope", TypicalNegSlope);
+            NegSlope = URandomValueSettings.LoadOrDefault(activationSettingsElem, "negSlope", TypicalNegSlope);
             return;
         }
+
+        //Properties
+        /// <summary>
+        /// Checks if settings are default
+        /// </summary>
+        public bool IsDefaultNegSlope { get { return (NegSlope.Min == TypicalNegSlope && NegSlope.Max == TypicalNegSlope && NegSlope.DistrType == RandomCommon.DistributionType.Uniform); } }
+
+        /// <summary>
+        /// Identifies settings containing only default values
+        /// </summary>
+        public override bool ContainsOnlyDefaults { get { return IsDefaultNegSlope; } }
 
         //Methods
         /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>
-        public LeakyReLUSettings DeepClone()
+        public override RCNetBaseSettings DeepClone()
         {
             return new LeakyReLUSettings(this);
+        }
+
+        /// <summary>
+        /// Generates xml element containing the settings.
+        /// </summary>
+        /// <param name="rootElemName">Name to be used as a name of the root element.</param>
+        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <returns>XElement containing the settings</returns>
+        public override XElement GetXml(string rootElemName, bool suppressDefaults)
+        {
+            XElement rootElem = new XElement(rootElemName);
+            if (!suppressDefaults || !IsDefaultNegSlope)
+            {
+                rootElem.Add(NegSlope.GetXml("negSlope", suppressDefaults));
+            }
+
+            Validate(rootElem, XsdTypeName);
+            return rootElem;
+        }
+
+        /// <summary>
+        /// Generates default named xml element containing the settings.
+        /// </summary>
+        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <returns>XElement containing the settings</returns>
+        public override XElement GetXml(bool suppressDefaults)
+        {
+            return GetXml("activationLeakyReLU", suppressDefaults);
         }
 
     }//LeakyReLUSettings

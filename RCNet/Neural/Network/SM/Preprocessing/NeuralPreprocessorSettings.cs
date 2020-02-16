@@ -102,7 +102,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                     Settings = (from settings in availableResSettings
                                          where settings.SettingsName == reservoirInstanceElem.Attribute("cfg").Value
                                          select settings).FirstOrDefault(),
-                    PredictorsCfg = new HiddenNeuronPredictorsSettings(reservoirInstanceElem.Descendants("predictors").First())
+                    PredictorsCfg = new PredictorsSettings(reservoirInstanceElem.Descendants("predictors").First())
                 };
                 if (reservoirInstanceDefinition.Settings == null)
                 {
@@ -153,11 +153,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                         InputUnitSettings ius = null;
                         if(inputUnitElem == null)
                         {
-                            ius = new InputUnitSettings(inputFieldName, inputFieldIdx, reservoirInstanceDefinition.Settings.InputEntryPoint);
+                            ius = new InputUnitSettings(inputFieldName);
                         }
                         else
                         {
-                            ius = new InputUnitSettings(inputFieldIdx, reservoirInstanceDefinition.Settings.InputEntryPoint, inputUnitElem);
+                            ius = new InputUnitSettings(inputUnitElem);
                         }
                         //Add new InputFieldInfo
                         reservoirInstanceDefinition.InputUnitCfgCollection.Add(ius);
@@ -225,7 +225,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>
-        public NeuralPreprocessorSettings DeepClone()
+        public override RCNetBaseSettings DeepClone()
         {
             NeuralPreprocessorSettings clone = new NeuralPreprocessorSettings(this);
             return clone;
@@ -453,7 +453,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             /// Function searches for index of the specified field among all Neural Preprocessor input fields
             /// </summary>
             /// <param name="fieldName">Name of the searched field</param>
-            /// <returns>Zero based index of the field or -1 if searching fails</returns>
+            /// <returns>Zero based index of the field.</returns>
             public int IndexOf(string fieldName)
             {
                 for(int i = 0; i < ExternalFieldCollection.Count; i++)
@@ -470,7 +470,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                         return ExternalFieldCollection.Count + i;
                     }
                 }
-                return -1;
+                throw new Exception($"Input field {fieldName} not found among NP input fields.");
             }
 
             /// <summary>
@@ -596,7 +596,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 /// <summary>
                 /// Feature filter configuration
                 /// </summary>
-                public BaseFeatureFilterSettings FeatureFilterCfg { get; set; }
+                public IFeatureFilterSettings FeatureFilterCfg { get; set; }
 
                 //Constructors
                 /// <summary>
@@ -761,7 +761,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             /// <summary>
             /// Configuration of the predictors
             /// </summary>
-            public HiddenNeuronPredictorsSettings PredictorsCfg { get; set; }
+            public PredictorsSettings PredictorsCfg { get; set; }
 
             //Constructors
             /// <summary>
@@ -786,18 +786,18 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             {
                 InstanceID = source.InstanceID;
                 InstanceName = source.InstanceName;
-                Settings = source.Settings.DeepClone();
+                Settings = (ReservoirSettings)source.Settings.DeepClone();
                 InputUnitCfgCollection = new List<InputUnitSettings>(source.InputUnitCfgCollection.Count);
                 foreach(InputUnitSettings ifi in source.InputUnitCfgCollection)
                 {
-                    InputUnitCfgCollection.Add(ifi.DeepClone());
+                    InputUnitCfgCollection.Add((InputUnitSettings)ifi.DeepClone());
                 }
                 InputConnectionCollection = new List<InputConnection>(source.InputConnectionCollection.Count);
                 foreach(InputConnection ifa in source.InputConnectionCollection)
                 {
                     InputConnectionCollection.Add(ifa.DeepClone());
                 }
-                PredictorsCfg = source.PredictorsCfg?.DeepClone();
+                PredictorsCfg = (PredictorsSettings)source.PredictorsCfg?.DeepClone();
                 return;
             }
             
@@ -876,7 +876,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                     Coding = coding;
                     OppositeAmplitude = oppositeAmplitude;
                     SignalingRestriction = signalingRestriction;
-                    SynapseCfg = synapseCfg.DeepClone();
+                    SynapseCfg = (InputSynapseSettings)synapseCfg.DeepClone();
                     return;
                 }
 
@@ -892,7 +892,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                     Coding = source.Coding;
                     OppositeAmplitude = source.OppositeAmplitude;
                     SignalingRestriction = source.SignalingRestriction;
-                    SynapseCfg = source.SynapseCfg.DeepClone();
+                    SynapseCfg = (InputSynapseSettings)source.SynapseCfg.DeepClone();
                     return;
                 }
 

@@ -36,16 +36,16 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// The Alpha
         /// </summary>
-        public RandomValueSettings Alpha { get; }
+        public URandomValueSettings Alpha { get; }
 
         //Constructors
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
         /// <param name="alpha">The Alpha</param>
-        public SoftExponentialSettings(RandomValueSettings alpha = null)
+        public SoftExponentialSettings(URandomValueSettings alpha = null)
         {
-            Alpha = RandomValueSettings.CloneOrDefault(alpha, TypicalAlpha);
+            Alpha = URandomValueSettings.CloneOrDefault(alpha, TypicalAlpha);
             return;
         }
 
@@ -55,7 +55,7 @@ namespace RCNet.Neural.Activation
         /// <param name="source">Source instance</param>
         public SoftExponentialSettings(SoftExponentialSettings source)
         {
-            Alpha = source.Alpha.DeepClone();
+            Alpha = (URandomValueSettings)source.Alpha.DeepClone();
             return;
         }
 
@@ -71,17 +71,57 @@ namespace RCNet.Neural.Activation
             //Validation
             XElement activationSettingsElem = Validate(elem, XsdTypeName);
             //Parsing
-            Alpha = RandomValueSettings.LoadOrDefault(activationSettingsElem, "alpha", TypicalAlpha);
+            Alpha = URandomValueSettings.LoadOrDefault(activationSettingsElem, "alpha", TypicalAlpha);
             return;
         }
+
+        //Properties
+        /// <summary>
+        /// Checks if settings are default
+        /// </summary>
+        public bool IsDefaultAlpha { get { return (Alpha.Min == TypicalAlpha && Alpha.Max == TypicalAlpha && Alpha.DistrType == RandomCommon.DistributionType.Uniform); } }
+
+        /// <summary>
+        /// Identifies settings containing only default values
+        /// </summary>
+        public override bool ContainsOnlyDefaults { get { return IsDefaultAlpha; } }
+
 
         //Methods
         /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>
-        public SoftExponentialSettings DeepClone()
+        public override RCNetBaseSettings DeepClone()
         {
             return new SoftExponentialSettings(this);
+        }
+
+        /// <summary>
+        /// Generates xml element containing the settings.
+        /// </summary>
+        /// <param name="rootElemName">Name to be used as a name of the root element.</param>
+        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <returns>XElement containing the settings</returns>
+        public override XElement GetXml(string rootElemName, bool suppressDefaults)
+        {
+            XElement rootElem = new XElement(rootElemName);
+            if (!suppressDefaults || !IsDefaultAlpha)
+            {
+                rootElem.Add(Alpha.GetXml("alpha", suppressDefaults));
+            }
+
+            Validate(rootElem, XsdTypeName);
+            return rootElem;
+        }
+
+        /// <summary>
+        /// Generates default named xml element containing the settings.
+        /// </summary>
+        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <returns>XElement containing the settings</returns>
+        public override XElement GetXml(bool suppressDefaults)
+        {
+            return GetXml("activationSoftExponential", suppressDefaults);
         }
 
     }//SoftExponentialSettings

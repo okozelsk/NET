@@ -56,7 +56,7 @@ namespace RCNet.Neural.Network.SM
         {
             //Copy
             RandomizerSeek = source.RandomizerSeek;
-            NeuralPreprocessorConfig = source.NeuralPreprocessorConfig?.DeepClone();
+            NeuralPreprocessorConfig = (NeuralPreprocessorSettings)source.NeuralPreprocessorConfig?.DeepClone();
             ReadoutLayerConfig = new ReadoutLayerSettings(source.ReadoutLayerConfig);
             MapperCfg = null;
             if(source.MapperCfg != null)
@@ -98,14 +98,14 @@ namespace RCNet.Neural.Network.SM
                     //Readout unit name
                     string readoutUnitName = mapElem.Attribute("readoutUnitName").Value;
                     int readoutUnitIdx = -1;
-                    for (int i = 0; i < ReadoutLayerConfig.ReadoutUnitCfgCollection.Count; i++)
+                    for (int i = 0; i < ReadoutLayerConfig.ReadoutUnitsCfg.ReadoutUnitCfgCollection.Count; i++)
                     {
-                        if(ReadoutLayerConfig.ReadoutUnitCfgCollection[i].Name == readoutUnitName)
+                        if(ReadoutLayerConfig.ReadoutUnitsCfg.ReadoutUnitCfgCollection[i].Name == readoutUnitName)
                         {
                             readoutUnitIdx = i;
                             break;
                         }
-                        else if(i == ReadoutLayerConfig.ReadoutUnitCfgCollection.Count - 1)
+                        else if(i == ReadoutLayerConfig.ReadoutUnitsCfg.ReadoutUnitCfgCollection.Count - 1)
                         {
                             throw new Exception($"Name {readoutUnitName} not found among readout units.");
                         }
@@ -183,7 +183,7 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>
-        public StateMachineSettings DeepClone()
+        public override RCNetBaseSettings DeepClone()
         {
             return new StateMachineSettings(this);
         }

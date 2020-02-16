@@ -16,46 +16,6 @@ namespace RCNet.Extensions
         private static readonly double GammaAlgConst = 1d + Math.Log(4.5d);
 
         /// <summary>
-        /// Supported distribution types
-        /// </summary>
-        public enum DistributionType
-        {
-            /// <summary>
-            /// Uniform distribution
-            /// </summary>
-            Uniform,
-            /// <summary>
-            /// Gaussian distribution
-            /// </summary>
-            Gaussian,
-            /// <summary>
-            /// Exponential distribution
-            /// </summary>
-            Exponential,
-            /// <summary>
-            /// Gamma distribution
-            /// </summary>
-            Gamma
-        }
-
-        /// <summary>
-        /// Parses code to DistributionType 
-        /// </summary>
-        /// <param name="code">code</param>
-        public static DistributionType ParseDistributionType(string code)
-        {
-            switch(code.ToUpper())
-            {
-                case "UNIFORM":return DistributionType.Uniform;
-                case "GAUSSIAN": return DistributionType.Gaussian;
-                case "EXPONENTIAL": return DistributionType.Exponential;
-                case "GAMMA": return DistributionType.Gamma;
-                default:
-                    throw new ArgumentException($"Unsupported distribution type code {code}", "code");
-            }
-        }
-
-        /// <summary>
         /// Randomly shuffles an array of objects
         /// </summary>
         /// <param name="array">Array of objects to be randomly shuffled</param>
@@ -152,7 +112,7 @@ namespace RCNet.Extensions
         /// </summary>
         /// <param name="rand"></param>
         /// <param name="distrParams">Gaussian distribution parameters</param>
-        public static double NextGaussianDouble(this Random rand, RandomValueSettings.GaussianDistrSettings distrParams)
+        public static double NextGaussianDouble(this Random rand, GaussianDistrSettings distrParams)
         {
             return NextGaussianDouble(rand, distrParams.Mean, distrParams.StdDev);
         }
@@ -211,7 +171,7 @@ namespace RCNet.Extensions
         /// </summary>
         /// <param name="rand"></param>
         /// <param name="distrParams">Exponential distribution parameters</param>
-        public static double NextExponentialDouble(this Random rand, RandomValueSettings.ExponentialDistrSettings distrParams)
+        public static double NextExponentialDouble(this Random rand, ExponentialDistrSettings distrParams)
         {
             return NextExponentialDouble(rand, distrParams.Mean);
         }
@@ -327,7 +287,7 @@ namespace RCNet.Extensions
         /// </summary>
         /// <param name="rand"></param>
         /// <param name="distrParams">Gamma distribution parameters</param>
-        public static double NextGammaDouble(this Random rand, RandomValueSettings.GammaDistrSettings distrParams)
+        public static double NextGammaDouble(this Random rand, GammaDistrSettings distrParams)
         {
             return NextGammaDouble(rand, distrParams.Alpha, distrParams.Beta);
         }
@@ -379,13 +339,13 @@ namespace RCNet.Extensions
             double value;
             switch (settings.DistrType)
             {
-                case DistributionType.Uniform:
+                case RandomCommon.DistributionType.Uniform:
                     value = rand.NextRangedUniformDouble(settings.Min, settings.Max);
                     break;
-                case DistributionType.Gaussian:
+                case RandomCommon.DistributionType.Gaussian:
                     if(settings.DistrCfg != null)
                     {
-                        RandomValueSettings.GaussianDistrSettings gaussianCfg = settings.DistrCfg as RandomValueSettings.GaussianDistrSettings;
+                        GaussianDistrSettings gaussianCfg = settings.DistrCfg as GaussianDistrSettings;
                         value = rand.NextFilterredGaussianDouble(gaussianCfg.Mean, gaussianCfg.StdDev, settings.Min, settings.Max);
                     }
                     else
@@ -393,10 +353,10 @@ namespace RCNet.Extensions
                         throw new Exception($"Configuration of Gaussian distribution is missing");
                     }
                     break;
-                case DistributionType.Exponential:
+                case RandomCommon.DistributionType.Exponential:
                     if (settings.DistrCfg != null)
                     {
-                        RandomValueSettings.ExponentialDistrSettings exponentialCfg = settings.DistrCfg as RandomValueSettings.ExponentialDistrSettings;
+                        ExponentialDistrSettings exponentialCfg = settings.DistrCfg as ExponentialDistrSettings;
                         value = rand.NextFilterredExponentialDouble(exponentialCfg.Mean, settings.Min, settings.Max);
                     }
                     else
@@ -404,10 +364,10 @@ namespace RCNet.Extensions
                         throw new Exception($"Configuration of Exponential distribution is missing");
                     }
                     break;
-                case DistributionType.Gamma:
+                case RandomCommon.DistributionType.Gamma:
                     if (settings.DistrCfg != null)
                     {
-                        RandomValueSettings.GammaDistrSettings gammaCfg = settings.DistrCfg as RandomValueSettings.GammaDistrSettings;
+                        GammaDistrSettings gammaCfg = settings.DistrCfg as GammaDistrSettings;
                         value = rand.NextFilterredGammaDouble(gammaCfg.Alpha, gammaCfg.Beta, settings.Min, settings.Max);
                     }
                     else
@@ -421,6 +381,59 @@ namespace RCNet.Extensions
             if (settings.RandomSign)
             {
                 value *= rand.NextSign();
+            }
+            return value;
+        }
+
+        /// <summary>
+        /// Returns random unsigned double according to specified settings.
+        /// </summary>
+        /// <param name="rand"></param>
+        /// <param name="settings">Encapsulated settings</param>
+        public static double NextDouble(this Random rand, URandomValueSettings settings)
+        {
+
+            double value;
+            switch (settings.DistrType)
+            {
+                case RandomCommon.DistributionType.Uniform:
+                    value = rand.NextRangedUniformDouble(settings.Min, settings.Max);
+                    break;
+                case RandomCommon.DistributionType.Gaussian:
+                    if (settings.DistrCfg != null)
+                    {
+                        GaussianDistrSettings gaussianCfg = settings.DistrCfg as GaussianDistrSettings;
+                        value = rand.NextFilterredGaussianDouble(gaussianCfg.Mean, gaussianCfg.StdDev, settings.Min, settings.Max);
+                    }
+                    else
+                    {
+                        throw new Exception($"Configuration of Gaussian distribution is missing");
+                    }
+                    break;
+                case RandomCommon.DistributionType.Exponential:
+                    if (settings.DistrCfg != null)
+                    {
+                        ExponentialDistrSettings exponentialCfg = settings.DistrCfg as ExponentialDistrSettings;
+                        value = rand.NextFilterredExponentialDouble(exponentialCfg.Mean, settings.Min, settings.Max);
+                    }
+                    else
+                    {
+                        throw new Exception($"Configuration of Exponential distribution is missing");
+                    }
+                    break;
+                case RandomCommon.DistributionType.Gamma:
+                    if (settings.DistrCfg != null)
+                    {
+                        GammaDistrSettings gammaCfg = settings.DistrCfg as GammaDistrSettings;
+                        value = rand.NextFilterredGammaDouble(gammaCfg.Alpha, gammaCfg.Beta, settings.Min, settings.Max);
+                    }
+                    else
+                    {
+                        throw new Exception($"Configuration of Gamma distribution is missing");
+                    }
+                    break;
+                default:
+                    throw new Exception($"Unknown distribution type {settings.DistrType}.");
             }
             return value;
         }
@@ -445,13 +458,30 @@ namespace RCNet.Extensions
         }
 
         /// <summary>
-        /// Fills array with random values.
+        /// Fills array with random doubles.
         /// </summary>
         /// <param name="rand"></param>
         /// <param name="array">The array to be filled</param>
         /// <param name="settings">Encapsulated settings</param>
         /// <param name="count">Specifies how many elements of the array to be filled</param>
         public static void Fill(this Random rand, double[] array, RandomValueSettings settings, int count = -1)
+        {
+            if (count < 0) count = array.Length;
+            for (int i = 0; i < count; i++)
+            {
+                array[i] = rand.NextDouble(settings);
+            }
+            return;
+        }
+
+        /// <summary>
+        /// Fills array with random unsigned doubles.
+        /// </summary>
+        /// <param name="rand"></param>
+        /// <param name="array">The array to be filled</param>
+        /// <param name="settings">Encapsulated settings</param>
+        /// <param name="count">Specifies how many elements of the array to be filled</param>
+        public static void Fill(this Random rand, double[] array, URandomValueSettings settings, int count = -1)
         {
             if (count < 0) count = array.Length;
             for (int i = 0; i < count; i++)

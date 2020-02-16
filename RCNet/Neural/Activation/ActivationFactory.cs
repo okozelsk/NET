@@ -6,6 +6,7 @@ using System.Xml.Linq;
 using RCNet.Extensions;
 using RCNet.RandomValue;
 using RCNet.Neural.Network.SM.Neuron;
+using RCNet.MathTools.Differential;
 
 namespace RCNet.Neural.Activation
 {
@@ -14,6 +15,24 @@ namespace RCNet.Neural.Activation
     /// </summary>
     public static class ActivationFactory
     {
+        //Constants
+        //Default values
+        /// <summary>
+        /// Default value of refractory periods
+        /// </summary>
+        public const int DefaultRefractoryPeriods = 1;
+
+        /// <summary>
+        /// Default ODE numerical solver method
+        /// </summary>
+        public const ODENumSolver.Method DefaultSolverMethod = ODENumSolver.Method.Euler;
+
+        /// <summary>
+        /// Default ODE numerical solver computation steps
+        /// </summary>
+        public const int DefaultSolverCompSteps = 2;
+
+
         //Methods
         /// <summary>
         /// Returns the instance of the activation function settings
@@ -21,7 +40,7 @@ namespace RCNet.Neural.Activation
         /// <param name="settingsElem">
         /// XML element containing specific activation settings
         /// </param>
-        public static Object LoadSettings(XElement settingsElem)
+        public static RCNetBaseSettings LoadSettings(XElement settingsElem)
         {
             switch (settingsElem.Name.LocalName)
             {
@@ -73,7 +92,7 @@ namespace RCNet.Neural.Activation
         /// </summary>
         /// <param name="settings">Specific activation function settings </param>
         /// <param name="rand">Random object to be used for randomly generated parameters</param>
-        public static IActivationFunction Create(Object settings, Random rand)
+        public static IActivationFunction Create(RCNetBaseSettings settings, Random rand)
         {
             IActivationFunction af;
             Type settingsType = settings.GetType();
@@ -254,7 +273,7 @@ namespace RCNet.Neural.Activation
         /// <param name="settings">
         /// Specific activation function settings
         /// </param>
-        public static Object DeepCloneActivationSettings(Object settings)
+        public static RCNetBaseSettings DeepCloneActivationSettings(RCNetBaseSettings settings)
         {
             Type settingsType = settings.GetType();
             if (settingsType == typeof(AdExpIFSettings))

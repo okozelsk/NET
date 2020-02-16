@@ -30,7 +30,7 @@ namespace RCNet.Neural.Data.Generators
         /// </param>
         public RandomGenerator(RandomValueSettings settings, int seek = 0)
         {
-            _settings = settings.DeepClone();
+            _settings = (RandomValueSettings)settings.DeepClone();
             _seek = seek;
             Reset();
             return;

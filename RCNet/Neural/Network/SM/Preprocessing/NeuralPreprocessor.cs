@@ -125,7 +125,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// </param>
         public NeuralPreprocessor(NeuralPreprocessorSettings settings, int randomizerSeek)
         {
-            _settings = settings.DeepClone();
+            _settings = (NeuralPreprocessorSettings)settings.DeepClone();
             _featureFilterCollection = null;
             //Internal input generators
             _internalInputGeneratorCollection = new List<IGenerator>();
@@ -165,7 +165,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             ReservoirCollection = new List<Reservoir>(_settings.ReservoirInstanceDefinitionCollection.Count);
             foreach(NeuralPreprocessorSettings.ReservoirInstanceDefinition instanceDefinition in _settings.ReservoirInstanceDefinitionCollection)
             {
-                Reservoir reservoir = new Reservoir(instanceDefinition, _dataRange, rand);
+                Reservoir reservoir = new Reservoir(_settings.InputConfig, instanceDefinition, _dataRange, rand);
                 ReservoirCollection.Add(reservoir);
                 PredictorNeuronCollection.AddRange(reservoir.PredictingNeuronCollection);
                 NumOfNeurons += reservoir.Size;
@@ -405,10 +405,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             //Compute reservoir(s)
             foreach (Reservoir reservoir in ReservoirCollection)
             {
-                double[] reservoirInput = new double[reservoir.InstanceDefinition.InputUnitCfgCollection.Count];
-                for (int i = 0; i < reservoir.InstanceDefinition.InputUnitCfgCollection.Count; i++)
+                double[] reservoirInput = new double[reservoir.InputUnitCollection.Length];
+                for (int i = 0; i < reservoir.InputUnitCollection.Length; i++)
                 {
-                    reservoirInput[i] = completedInputVector[reservoir.InstanceDefinition.InputUnitCfgCollection[i].InputFieldIndex];
+                    reservoirInput[i] = completedInputVector[reservoir.InputUnitCollection[i].InputFieldIdx];
                 }
                 //Compute reservoir
                 reservoir.Compute(reservoirInput, collectStatistics);
@@ -483,9 +483,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                     for(int idx = 0; idx < stepInputPattern.VarDataCollection[0].Length; idx++)
                     {
                         double[] inputVector = stepInputPattern.GetDataAtTimePoint(idx);
-                        for (int i = 0; i < reservoir.InstanceDefinition.InputUnitCfgCollection.Count; i++)
+                        for (int i = 0; i < reservoir.InputUnitCollection.Length; i++)
                         {
-                            reservoirInput[i] = inputVector[reservoir.InstanceDefinition.InputUnitCfgCollection[i].InputFieldIndex];
+                            reservoirInput[i] = inputVector[reservoir.InputUnitCollection[i].InputFieldIdx];
                         }
                         //Compute the reservoir
                         reservoir.Compute(reservoirInput, collectStatistics);

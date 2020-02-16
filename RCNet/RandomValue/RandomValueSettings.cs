@@ -23,6 +23,16 @@ namespace RCNet.RandomValue
         /// </summary>
         public const string XsdTypeName = "RandomValueType";
 
+        //Default values
+        /// <summary>
+        /// Default value of RandomSign
+        /// </summary>
+        public const bool DefaultRandomSignValue = false;
+        /// <summary>
+        /// Default type of distribution
+        /// </summary>
+        public const RandomCommon.DistributionType DefaultDistributionType = RandomCommon.DistributionType.Uniform;
+
         //Attribute properties
         /// <summary>
         /// Min random value
@@ -40,14 +50,9 @@ namespace RCNet.RandomValue
         public bool RandomSign { get; }
         
         /// <summary>
-        /// Specifies what distribution to use
-        /// </summary>
-        public RandomExtensions.DistributionType DistrType { get; }
-
-        /// <summary>
         /// Distribution parameters
         /// </summary>
-        public IDistrSettings DistrCfg { get; set; }
+        public IDistrSettings DistrCfg { get; }
 
         //Constructors
         /// <summary>
@@ -56,10 +61,10 @@ namespace RCNet.RandomValue
         /// <param name="min">Min random value</param>
         /// <param name="max">Max random value</param>
         /// <param name="randomSign">Specifies whether to randomize value sign</param>
-        /// <param name="distrCfg">Specific parameters of the distribution</param>
-        public RandomValueSettings(double min = -1,
-                                   double max = 1,
-                                   bool randomSign = false,
+        /// <param name="distrCfg">Specific parameters of the distribution to be used</param>
+        public RandomValueSettings(double min,
+                                   double max,
+                                   bool randomSign = DefaultRandomSignValue,
                                    IDistrSettings distrCfg = null
                                    )
         {
@@ -69,27 +74,7 @@ namespace RCNet.RandomValue
             DistrCfg = distrCfg;
             if(DistrCfg == null)
             {
-                DistrType = RandomExtensions.DistributionType.Uniform;
-            }
-            else
-            {
-                Type dcType = DistrCfg.GetType();
-                if(dcType == typeof(GaussianDistrSettings))
-                {
-                    DistrType = RandomExtensions.DistributionType.Gaussian;
-                }
-                else if(dcType == typeof(ExponentialDistrSettings))
-                {
-                    DistrType = RandomExtensions.DistributionType.Exponential;
-                }
-                else if (dcType == typeof(GammaDistrSettings))
-                {
-                    DistrType = RandomExtensions.DistributionType.Gamma;
-                }
-                else
-                {
-                    throw new Exception($"Unexpected distribution configuration");
-                }
+                DistrCfg = new UniformDistrSettings();
             }
             Check();
             return;
@@ -104,8 +89,7 @@ namespace RCNet.RandomValue
             Min = source.Min;
             Max = source.Max;
             RandomSign = source.RandomSign;
-            DistrType = source.DistrType;
-            DistrCfg = source.DistrCfg?.DeepClone();
+            DistrCfg = (IDistrSettings)((RCNetBaseSettings)source.DistrCfg).DeepClone();
             return;
         }
 
@@ -124,36 +108,31 @@ namespace RCNet.RandomValue
             XElement distrParamsElem = settingsElem.Elements().FirstOrDefault();
             if (distrParamsElem == null)
             {
-                DistrType = RandomExtensions.DistributionType.Uniform;
                 DistrCfg = new UniformDistrSettings();
             }
             else
             {
-                switch (distrParamsElem.Name.LocalName)
-                {
-                    case "uniformDistr":
-                        DistrType = RandomExtensions.DistributionType.Uniform;
-                        DistrCfg = new UniformDistrSettings(distrParamsElem);
-                        break;
-                    case "gaussianDistr":
-                        DistrType = RandomExtensions.DistributionType.Gaussian;
-                        DistrCfg = new GaussianDistrSettings(distrParamsElem);
-                        break;
-                    case "exponentialDistr":
-                        DistrType = RandomExtensions.DistributionType.Exponential;
-                        DistrCfg = new ExponentialDistrSettings(distrParamsElem);
-                        break;
-                    case "gammaDistr":
-                        DistrType = RandomExtensions.DistributionType.Gamma;
-                        DistrCfg = new GammaDistrSettings(distrParamsElem);
-                        break;
-                    default:
-                        throw new Exception($"Unexpected element {distrParamsElem.Name.LocalName}");
-                }
+                DistrCfg = RandomCommon.CreateDistrSettings(distrParamsElem);
             }
             Check();
             return;
         }
+
+        //Properties
+        /// <summary>
+        /// Checks if settings are default
+        /// </summary>
+        public bool IsDefaultDistrType { get { return DistrType == RandomCommon.DistributionType.Uniform; } }
+
+        /// <summary>
+        /// Identifies settings containing only default values
+        /// </summary>
+        public override bool ContainsOnlyDefaults { get { return false; } }
+
+        /// <summary>
+        /// Type of used random distribution
+        /// </summary>
+        public RandomCommon.DistributionType DistrType { get { return DistrCfg.Type; } }
 
         //Methods
         //Static methods
@@ -194,7 +173,7 @@ namespace RCNet.RandomValue
             }
             else
             {
-                return source.DeepClone();
+                return (RandomValueSettings)source.DeepClone();
             }
         }
 
@@ -206,7 +185,7 @@ namespace RCNet.RandomValue
             return CloneOrDefault(source, defaultConst, defaultConst, randomSign);
         }
 
-        //Instance methods
+        //Methods
         private void Check()
         {
             if(Max < Min)
@@ -219,286 +198,32 @@ namespace RCNet.RandomValue
         /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>
-        public RandomValueSettings DeepClone()
+        public override RCNetBaseSettings DeepClone()
         {
             return new RandomValueSettings(this);
         }
 
-        //Inner classes
         /// <summary>
-        /// Uniform distribution parameters
+        /// Generates xml element containing the settings.
         /// </summary>
-        [Serializable]
-        public class UniformDistrSettings : IDistrSettings
+        /// <param name="rootElemName">Name to be used as a name of the root element.</param>
+        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <returns>XElement containing the settings</returns>
+        public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
-            //Attributes
-
-            //Constructors
-            /// <summary>
-            /// Creates an initialized instance
-            /// </summary>
-            public UniformDistrSettings()
+            XElement rootElem = new XElement(rootElemName, new XAttribute("min", Min.ToString(CultureInfo.InvariantCulture)),
+                                                           new XAttribute("max", Max.ToString(CultureInfo.InvariantCulture)));
+            if(!suppressDefaults || RandomSign != DefaultRandomSignValue)
             {
-                Check();
-                return;
+                rootElem.Add(new XAttribute("randomSign", RandomSign.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()));
             }
-
-            /// <summary>
-            /// Copy constructor
-            /// </summary>
-            /// <param name="source">Source instance</param>
-            public UniformDistrSettings(UniformDistrSettings source)
+            if (!suppressDefaults || DistrType != RandomCommon.DistributionType.Uniform)
             {
-                return;
+                rootElem.Add(((RCNetBaseSettings)DistrCfg).GetXml(suppressDefaults));
             }
-
-            /// <summary>
-            /// Creates an instance and initializes it from given xml element.
-            /// </summary>
-            /// <param name="elem"> Xml data containing settings.</param>
-            public UniformDistrSettings(XElement elem)
-            {
-                //Parsing
-                //Nothing to do
-                Check();
-                return;
-            }
-
-            //Methods
-            private void Check()
-            {
-                return;
-            }
-
-            /// <summary>
-            /// Creates the deep copy instance of this instance
-            /// </summary>
-            public IDistrSettings DeepClone()
-            {
-                return new UniformDistrSettings(this);
-            }
-
-        }//UniformDistrSettings
-
-        /// <summary>
-        /// Gaussian distribution parameters
-        /// </summary>
-        [Serializable]
-        public class GaussianDistrSettings : IDistrSettings
-        {
-            //Attributes
-            /// <summary>
-            /// Mean
-            /// </summary>
-            public double Mean { get; }
-            
-            /// <summary>
-            /// Standard deviation
-            /// </summary>
-            public double StdDev { get; }
-
-            //Constructors
-            /// <summary>
-            /// Creates an initialized instance
-            /// </summary>
-            /// <param name="mean">Mean</param>
-            /// <param name="stdDev">Standard deviation</param>
-            public GaussianDistrSettings(double mean = 0, double stdDev = 1)
-            {
-                Mean = mean;
-                StdDev = stdDev;
-                Check();
-                return;
-            }
-
-            /// <summary>
-            /// Copy constructor
-            /// </summary>
-            /// <param name="source">Source instance</param>
-            public GaussianDistrSettings(GaussianDistrSettings source)
-            {
-                Mean = source.Mean;
-                StdDev = source.StdDev;
-                return;
-            }
-
-            /// <summary>
-            /// Creates an instance and initializes it from given xml element.
-            /// </summary>
-            /// <param name="elem"> Xml data containing settings.</param>
-            public GaussianDistrSettings(XElement elem)
-            {
-                //Parsing
-                Mean = double.Parse(elem.Attribute("mean").Value, CultureInfo.InvariantCulture);
-                StdDev = double.Parse(elem.Attribute("stdDev").Value, CultureInfo.InvariantCulture);
-                Check();
-                return;
-            }
-
-            //Methods
-            private void Check()
-            {
-                if (StdDev <= 0)
-                {
-                    throw new Exception($"Incorrect StdDev ({StdDev.ToString(CultureInfo.InvariantCulture)}) value. StdDev must be GT 0.");
-                }
-                return;
-            }
-
-            /// <summary>
-            /// Creates the deep copy instance of this instance
-            /// </summary>
-            public IDistrSettings DeepClone()
-            {
-                return new GaussianDistrSettings(this);
-            }
-
-        }//GaussianDistrSettings
-
-        /// <summary>
-        /// Exponential distribution parameters
-        /// </summary>
-        [Serializable]
-        public class ExponentialDistrSettings : IDistrSettings
-        {
-            //Attributes
-            /// <summary>
-            /// Mean
-            /// </summary>
-            public double Mean { get; }
-
-            //Constructors
-            /// <summary>
-            /// Creates an initialized instance
-            /// </summary>
-            /// <param name="mean">Mean</param>
-            public ExponentialDistrSettings(double mean)
-            {
-                Mean = mean;
-                Check();
-                return;
-            }
-
-            /// <summary>
-            /// Copy constructor
-            /// </summary>
-            /// <param name="source">Source instance</param>
-            public ExponentialDistrSettings(ExponentialDistrSettings source)
-            {
-                Mean = source.Mean;
-                return;
-            }
-
-            /// <summary>
-            /// Creates an instance and initializes it from given xml element.
-            /// </summary>
-            /// <param name="elem"> Xml data containing settings.</param>
-            public ExponentialDistrSettings(XElement elem)
-            {
-                //Parsing
-                Mean = double.Parse(elem.Attribute("mean").Value, CultureInfo.InvariantCulture);
-                Check();
-                return;
-            }
-
-            //Methods
-            private void Check()
-            {
-                if (Mean == 0)
-                {
-                    throw new Exception($"Incorrect Mean ({Mean.ToString(CultureInfo.InvariantCulture)}) value. Mean must not be EQ to 0.");
-                }
-                return;
-            }
-
-            /// <summary>
-            /// Creates the deep copy instance of this instance
-            /// </summary>
-            public IDistrSettings DeepClone()
-            {
-                return new ExponentialDistrSettings(this);
-            }
-
-        }//ExponentialDistrSettings
-
-        /// <summary>
-        /// Gamma distribution parameters
-        /// </summary>
-        [Serializable]
-        public class GammaDistrSettings : IDistrSettings
-        {
-            //Attributes
-            /// <summary>
-            /// Alpha, the shape parameter
-            /// </summary>
-            public double Alpha { get; }
-
-            /// <summary>
-            /// Beta, the rate parameter
-            /// </summary>
-            public double Beta { get; }
-
-            //Constructors
-            /// <summary>
-            /// Creates an initialized instance
-            /// </summary>
-            /// <param name="alpha">Shape parameter (alpha)</param>
-            /// <param name="beta">Rate parameter (beta)</param>
-            public GammaDistrSettings(double alpha, double beta)
-            {
-                Alpha = alpha;
-                Beta = beta;
-                Check();
-                return;
-            }
-
-            /// <summary>
-            /// Copy constructor
-            /// </summary>
-            /// <param name="source">Source instance</param>
-            public GammaDistrSettings(GammaDistrSettings source)
-            {
-                Alpha = source.Alpha;
-                Beta = source.Beta;
-                return;
-            }
-
-            /// <summary>
-            /// Creates an instance and initializes it from given xml element.
-            /// </summary>
-            /// <param name="elem"> Xml data containing settings.</param>
-            public GammaDistrSettings(XElement elem)
-            {
-                //Parsing
-                Alpha = double.Parse(elem.Attribute("alpha").Value, CultureInfo.InvariantCulture);
-                Beta = double.Parse(elem.Attribute("beta").Value, CultureInfo.InvariantCulture);
-                Check();
-                return;
-            }
-
-            //Methods
-            private void Check()
-            {
-                if (Alpha <= 0)
-                {
-                    throw new Exception($"Incorrect Alpha ({Alpha.ToString(CultureInfo.InvariantCulture)}) value. Alpha must be GT 0.");
-                }
-                if (Beta <= 0)
-                {
-                    throw new Exception($"Incorrect Beta ({Beta.ToString(CultureInfo.InvariantCulture)}) value. Beta must be GT 0.");
-                }
-                return;
-            }
-
-            /// <summary>
-            /// Creates the deep copy instance of this instance
-            /// </summary>
-            public IDistrSettings DeepClone()
-            {
-                return new GammaDistrSettings(this);
-            }
-
-        }//GammaDistrSettings
+            Validate(rootElem, XsdTypeName);
+            return rootElem;
+        }
 
     }//RandomValueSettings
 

@@ -18,7 +18,6 @@ namespace RCNet.Neural.Network.SM.Readout
 {
     /// <summary>
     /// The class contains readout layer configuration parameters.
-    /// The easiest and safest way to create an instance is to use the xml constructor.
     /// </summary>
     [Serializable]
     public class ReadoutLayerSettings : RCNetBaseSettings
@@ -28,57 +27,85 @@ namespace RCNet.Neural.Network.SM.Readout
         /// Name of the associated xsd type
         /// </summary>
         public const string XsdTypeName = "ROutLayerCfgType";
+        /// <summary>
+        /// Maximum allowed test data ratio
+        /// </summary>
+        public const double MaxTestDataRatio = 0.5d;
+        //Default values
+        /// <summary>
+        /// Default number of folds - string code
+        /// </summary>
+        public const string DefaultFoldsString = "Auto";
+        /// <summary>
+        /// Default number of folds - numeric code
+        /// </summary>
+        public const int DefaultFoldsNum = 0;
+        /// <summary>
+        /// Default number of repetitions
+        /// </summary>
+        public const int DefaultRepetitions = 1;
+
 
         //Attribute properties
         /// <summary>
-        /// Parameter specifies how big part of available samples will be used for testing.
+        /// Specifies how big part of available samples will be used as testing samples during the training
         /// </summary>
-        public double TestDataRatio { get; set; }
+        public double TestDataRatio { get; }
+
         /// <summary>
         /// The x in the x-fold cross-validation
         /// https://en.wikipedia.org/wiki/Cross-validation_(statistics)
         /// Parameter has two options.
-        /// LE 0 - means auto setup to achieve full cross-validation if it is possible (related to specified TestDataRatio)
+        /// 0 - means auto setup to achieve full cross-validation if it is possible (related to specified TestDataRatio)
         /// GT 0 - means exact number of the folds
         /// </summary>
-        public int NumOfFolds { get; set; }
+        public int Folds { get; }
+
         /// <summary>
         /// Defines how many times the generation of whole folds will be repeated
         /// </summary>
-        public int Repetitions { get; set; }
+        public int Repetitions { get; }
+
         /// <summary>
-        /// Collection of networks to be applied when specific networks are not specified.
-        /// Relevant for classification tasks.
+        /// Task dependent networks settings to be applied when specific networks for readout unit are not specified
         /// </summary>
-        public List<object> DefaultClassificationNetworkCfgCollection { get; set; }
+        public DefaultNetworksSettings DefaultNetworksCfg { get; }
+
         /// <summary>
-        /// Collection of networks to be applied when specific networks are not specified.
-        /// Relevant for forecast tasks.
+        /// Readout units settings
         /// </summary>
-        public List<object> DefaultForecastNetworkCfgCollection { get; set; }
-        /// <summary>
-        /// Readout unit configurations
-        /// </summary>
-        public List<ReadoutUnitSettings> ReadoutUnitCfgCollection { get; set; }
-        /// <summary>
-        /// Dictionary of names of "one winner" groups
-        /// </summary>
-        public Dictionary<string, OneWinnerGroupSettings> OneWinnerGroupCfgCollection { get; set; }
+        public ReadoutUnitsSettings ReadoutUnitsCfg { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an uninitialized instance.
+        /// Creates an initialized instance.
         /// </summary>
-        public ReadoutLayerSettings()
+        /// <param name="readoutUnitsCfg">Readout units settings</param>
+        /// <param name="testDataRatio">Specifies how big part of available samples will be used as testing samples during the training</param>
+        /// <param name="folds">The x in the x-fold cross-validation</param>
+        /// <param name="repetitions">Defines how many times the generation of whole folds will be repeated</param>
+        /// <param name="defaultNetworksCfg">Task dependent networks settings to be applied when specific networks for readout unit are not specified</param>
+        public ReadoutLayerSettings(ReadoutUnitsSettings readoutUnitsCfg,
+                                    double testDataRatio,
+                                    int folds = DefaultFoldsNum,
+                                    int repetitions = DefaultRepetitions,
+                                    DefaultNetworksSettings defaultNetworksCfg = null
+                                    )
         {
             //Default settings
-            TestDataRatio = 0;
-            NumOfFolds = 0;
-            Repetitions = 0;
-            DefaultClassificationNetworkCfgCollection = new List<object>();
-            DefaultForecastNetworkCfgCollection = new List<object>();
-            ReadoutUnitCfgCollection = new List<ReadoutUnitSettings>();
-            OneWinnerGroupCfgCollection = new Dictionary<string, OneWinnerGroupSettings>();
+            TestDataRatio = testDataRatio;
+            Folds = folds;
+            Repetitions = repetitions;
+            ReadoutUnitsCfg = (ReadoutUnitsSettings)readoutUnitsCfg.DeepClone();
+            if(defaultNetworksCfg == null)
+            {
+                DefaultNetworksCfg = new DefaultNetworksSettings();
+            }
+            else
+            {
+                DefaultNetworksCfg = (DefaultNetworksSettings)defaultNetworksCfg.DeepClone();
+            }
+            Check();
             return;
         }
 
@@ -87,31 +114,8 @@ namespace RCNet.Neural.Network.SM.Readout
         /// </summary>
         /// <param name="source">Source instance</param>
         public ReadoutLayerSettings(ReadoutLayerSettings source)
+            :this(source.ReadoutUnitsCfg, source.TestDataRatio, source.Folds, source.Repetitions, source.DefaultNetworksCfg)
         {
-            //Copy
-            TestDataRatio = source.TestDataRatio;
-            NumOfFolds = source.NumOfFolds;
-            Repetitions = source.Repetitions;
-            DefaultClassificationNetworkCfgCollection = new List<object>();
-            foreach(object networkCfg in source.DefaultClassificationNetworkCfgCollection)
-            {
-                DefaultClassificationNetworkCfgCollection.Add(NonRecurrentNetUtils.CloneSettings(networkCfg));
-            }
-            DefaultForecastNetworkCfgCollection = new List<object>();
-            foreach (object networkCfg in source.DefaultForecastNetworkCfgCollection)
-            {
-                DefaultForecastNetworkCfgCollection.Add(NonRecurrentNetUtils.CloneSettings(networkCfg));
-            }
-            ReadoutUnitCfgCollection = new List<ReadoutUnitSettings>();
-            foreach(ReadoutUnitSettings rus in source.ReadoutUnitCfgCollection)
-            {
-                ReadoutUnitCfgCollection.Add(rus.DeepClone());
-            }
-            OneWinnerGroupCfgCollection = new Dictionary<string, OneWinnerGroupSettings>();
-            foreach(OneWinnerGroupSettings wwgs in source.OneWinnerGroupCfgCollection.Values)
-            {
-                OneWinnerGroupCfgCollection.Add(wwgs.Name, wwgs.DeepClone());
-            }
             return;
         }
 
@@ -129,48 +133,15 @@ namespace RCNet.Neural.Network.SM.Readout
             XElement readoutLayerSettingsElem = Validate(elem, XsdTypeName);
             //Parsing
             TestDataRatio = double.Parse(readoutLayerSettingsElem.Attribute("testDataRatio").Value, CultureInfo.InvariantCulture);
-            NumOfFolds = readoutLayerSettingsElem.Attribute("folds").Value == "Auto" ? 0 : int.Parse(readoutLayerSettingsElem.Attribute("folds").Value);
-            Repetitions = int.Parse(readoutLayerSettingsElem.Attribute("repetitions").Value);
+            Folds = readoutLayerSettingsElem.Attribute("folds").Value == DefaultFoldsString ? DefaultFoldsNum : int.Parse(readoutLayerSettingsElem.Attribute("folds").Value, CultureInfo.InvariantCulture);
+            Repetitions = int.Parse(readoutLayerSettingsElem.Attribute("repetitions").Value, CultureInfo.InvariantCulture);
             //Default networks settings
-            XElement defaultNetworksElem = readoutLayerSettingsElem.Descendants("defaultNetworks").First();
-            DefaultClassificationNetworkCfgCollection = NonRecurrentNetUtils.LoadSettingsCollection(defaultNetworksElem.Descendants("classificationNetworksCfg").FirstOrDefault());
-            if(DefaultClassificationNetworkCfgCollection.Count == 0)
-            {
-                DefaultClassificationNetworkCfgCollection.Add(GetSuperDefaultNetworkSettings());
-            }
-            DefaultForecastNetworkCfgCollection = NonRecurrentNetUtils.LoadSettingsCollection(defaultNetworksElem.Descendants("forecastNetworksCfg").FirstOrDefault());
-            if (DefaultForecastNetworkCfgCollection.Count == 0)
-            {
-                DefaultForecastNetworkCfgCollection.Add(GetSuperDefaultNetworkSettings());
-            }
+            XElement defaultNetworksElem = readoutLayerSettingsElem.Descendants("defaultNetworks").FirstOrDefault();
+            DefaultNetworksCfg = defaultNetworksElem == null ? new DefaultNetworksSettings() : new DefaultNetworksSettings(defaultNetworksElem);
             //Readout units
             XElement readoutUnitsElem = readoutLayerSettingsElem.Descendants("readoutUnits").First();
-            ReadoutUnitCfgCollection = new List<ReadoutUnitSettings>();
-            int unitIndex = 0;
-            List<string> owgs = new List<string>();
-            foreach (XElement readoutUnitElem in readoutUnitsElem.Descendants("readoutUnit"))
-            {
-                ReadoutUnitSettings rus = new ReadoutUnitSettings(unitIndex, readoutUnitElem);
-                if(rus.NetCfgCollection.Count == 0)
-                {
-                    //No specific networks settings -> use default
-                    rus.NetCfgCollection.AddRange(rus.TaskType == ReadoutUnit.TaskType.Classification ? DefaultClassificationNetworkCfgCollection : DefaultForecastNetworkCfgCollection);
-                }
-                ReadoutUnitCfgCollection.Add(rus);
-                if(rus.OneWinnerGroupName != ReadoutUnitSettings.NoOneWinnerGroupName)
-                {
-                    if(owgs.IndexOf(rus.OneWinnerGroupName) == -1)
-                    {
-                        owgs.Add(rus.OneWinnerGroupName);
-                    }
-                }
-                ++unitIndex;
-            }
-            OneWinnerGroupCfgCollection = new Dictionary<string, OneWinnerGroupSettings>(owgs.Count);
-            foreach (string oneWinnerGroupName in owgs)
-            {
-                OneWinnerGroupCfgCollection.Add(oneWinnerGroupName, new OneWinnerGroupSettings(oneWinnerGroupName, GetOneWinnerGroupMembers(oneWinnerGroupName)));
-            }
+            ReadoutUnitsCfg = new ReadoutUnitsSettings(readoutUnitsElem);
+            Check();
             return;
         }
 
@@ -178,208 +149,122 @@ namespace RCNet.Neural.Network.SM.Readout
         /// <summary>
         /// Collection of names of output fields
         /// </summary>
-        public List<string> OutputFieldNameCollection { get { return (from rus in ReadoutUnitCfgCollection select rus.Name).ToList(); } }
-
-        //Methods
-        private object GetSuperDefaultNetworkSettings()
+        public List<string> OutputFieldNameCollection
         {
-            FeedForwardNetworkSettings cfg = new FeedForwardNetworkSettings();
-            ElliotSettings elliotCfg = new ElliotSettings();
-            IActivationFunction af = ActivationFactory.Create(elliotCfg, new Random(0));
-            cfg.OutputLayerActivation = elliotCfg;
-            cfg.OutputRange = af.OutputRange;
-            cfg.TrainerCfg = new RPropTrainerSettings(3, 1000);
-            return cfg;
+            get
+            {
+                return (from rus in ReadoutUnitsCfg.ReadoutUnitCfgCollection select rus.Name).ToList();
+            }
         }
 
         /// <summary>
-        /// Returns settings of readout units belonging into the specified one-winner group.
+        /// Checks if settings are default
         /// </summary>
-        /// <param name="groupName">One-winner group name</param>
-        private List<ReadoutUnitSettings> GetOneWinnerGroupMembers(string groupName)
+        public bool IsDefaultFolds { get { return (Folds == DefaultFoldsNum); } }
+
+        /// <summary>
+        /// Checks if settings are default
+        /// </summary>
+        public bool IsDefaultRepetitions { get { return (Repetitions == DefaultRepetitions); } }
+
+        /// <summary>
+        /// Identifies settings containing only default values
+        /// </summary>
+        public override bool ContainsOnlyDefaults { get { return false; } }
+
+        //Methods
+        /// <summary>
+        /// Checks validity and completes the instance
+        /// </summary>
+        private void Check()
         {
-            return (from rus in ReadoutUnitCfgCollection where rus.OneWinnerGroupName == groupName select rus).ToList();
+            if(TestDataRatio <= 0 || TestDataRatio > MaxTestDataRatio)
+            {
+                throw new Exception($"Invalid TestDataRatio {TestDataRatio.ToString(CultureInfo.InvariantCulture)}. TestDataRatio must be GT 0 and GE {MaxTestDataRatio.ToString(CultureInfo.InvariantCulture)}.");
+            }
+            if (Folds < 0)
+            {
+                throw new Exception($"Invalid Folds {Folds.ToString(CultureInfo.InvariantCulture)}. Folds must be GE to 0 (0 means Auto folds).");
+            }
+            if (Repetitions < 1)
+            {
+                throw new Exception($"Invalid Repetitions {Repetitions.ToString(CultureInfo.InvariantCulture)}. Repetitions must be GE to 1.");
+            }
+            foreach (ReadoutUnitSettings rus in ReadoutUnitsCfg.ReadoutUnitCfgCollection)
+            {
+                if (rus.TaskSettings.NetworkCfgCollection.Count == 0)
+                {
+                    if (DefaultNetworksCfg.GetTaskNetworksCfgs(rus.TaskSettings.Type).Count == 0)
+                    {
+                        throw new Exception($"Readout unit {rus.Name} has not associated network(s) settings.");
+                    }
+                }
+            }
+            return;
         }
-        
+
+        /// <summary>
+        /// Return network configurations associated with readout unit or default network configurations if no specific network configurations.
+        /// </summary>
+        /// <param name="readoutUnitIndex">Index of the readout unit</param>
+        /// <returns></returns>
+        public List<INonRecurrentNetworkSettings> GetReadoutUnitNetworksCollection(int readoutUnitIndex)
+        {
+            if(ReadoutUnitsCfg.ReadoutUnitCfgCollection[readoutUnitIndex].TaskSettings.NetworkCfgCollection.Count > 0)
+            {
+                return ReadoutUnitsCfg.ReadoutUnitCfgCollection[readoutUnitIndex].TaskSettings.NetworkCfgCollection;
+            }
+            else
+            {
+                return DefaultNetworksCfg.GetTaskNetworksCfgs(ReadoutUnitsCfg.ReadoutUnitCfgCollection[readoutUnitIndex].TaskSettings.Type);
+            }
+        }
+
         /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>
-        public ReadoutLayerSettings DeepClone()
+        public override RCNetBaseSettings DeepClone()
         {
             return new ReadoutLayerSettings(this);
         }
 
         /// <summary>
-        /// Readout unit settings
+        /// Generates xml element containing the settings.
         /// </summary>
-        [Serializable]
-        public class ReadoutUnitSettings
+        /// <param name="rootElemName">Name to be used as a name of the root element.</param>
+        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <returns>XElement containing the settings</returns>
+        public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
-            //Constants
-            /// <summary>
-            /// Code indicating no membership in a One-winner group
-            /// </summary>
-            public const string NoOneWinnerGroupName = "NA";
-
-            //Attributes
-            /// <summary>
-            /// Output field name
-            /// </summary>
-            public string Name { get; set; }
-            /// <summary>
-            /// Readout unit zero-based index
-            /// </summary>
-            public int Index { get; set; }
-            /// <summary>
-            /// Neural task type
-            /// </summary>
-            public ReadoutUnit.TaskType TaskType;
-            /// <summary>
-            /// Specifies membership in the group of possible classes where only one can win.
-            /// </summary>
-            public readonly string OneWinnerGroupName;
-            /// <summary>
-            /// Feature filter configuration
-            /// </summary>
-            public BaseFeatureFilterSettings FeatureFilterCfg;
-            /// <summary>
-            /// Collection of readout unit networks
-            /// </summary>
-            public List<object> NetCfgCollection { get; set; }
-
-            //Constructors
-            /// <summary>
-            /// Creates an unitialized instance
-            /// </summary>
-            public ReadoutUnitSettings()
+            XElement rootElem = new XElement(rootElemName);
+            rootElem.Add(new XAttribute("testDataRatio", TestDataRatio.ToString(CultureInfo.InvariantCulture)));
+            if(!suppressDefaults || !IsDefaultFolds)
             {
-                Name = string.Empty;
-                Index = -1;
-                TaskType = ReadoutUnit.TaskType.Forecast;
-                OneWinnerGroupName = NoOneWinnerGroupName;
-                FeatureFilterCfg = null;
-                NetCfgCollection = new List<object>();
-                return;
+                rootElem.Add(new XAttribute("folds", Folds == DefaultFoldsNum ? DefaultFoldsString : Folds.ToString(CultureInfo.InvariantCulture)));
             }
-
-            /// <summary>
-            /// Copy constructor
-            /// </summary>
-            /// <param name="source">Source instance</param>
-            public ReadoutUnitSettings(ReadoutUnitSettings source)
+            if (!suppressDefaults || !IsDefaultRepetitions)
             {
-                Name = source.Name;
-                Index = source.Index;
-                TaskType = source.TaskType;
-                OneWinnerGroupName = source.OneWinnerGroupName;
-                FeatureFilterCfg = FeatureFilterFactory.DeepClone(source.FeatureFilterCfg);
-                NetCfgCollection = new List<object>();
-                foreach(object netCfg in source.NetCfgCollection)
-                {
-                    NetCfgCollection.Add(NonRecurrentNetUtils.CloneSettings(netCfg));
-                }
-                return;
+                rootElem.Add(new XAttribute("repetitions", Repetitions.ToString(CultureInfo.InvariantCulture)));
             }
-
-            /// <summary>
-            /// Creates the instance and initializes it from given xml element.
-            /// </summary>
-            /// <param name="index">Zero-based index of this readout unit</param>
-            /// <param name="readoutUnitElem">Xml data containing the settings.</param>
-            public ReadoutUnitSettings(int index, XElement readoutUnitElem)
+            if(!DefaultNetworksCfg.ContainsOnlyDefaults)
             {
-                //Name
-                Name = readoutUnitElem.Attribute("name").Value;
-                Index = index;
-                //Task
-                XElement taskElem = readoutUnitElem.Descendants().First();
-                if(taskElem.Name.LocalName == "forecast")
-                {
-                    TaskType = ReadoutUnit.TaskType.Forecast;
-                    FeatureFilterCfg = FeatureFilterFactory.LoadSettings(taskElem.Descendants().First());
-                    OneWinnerGroupName = NoOneWinnerGroupName;
-                }
-                else
-                {
-                    TaskType = ReadoutUnit.TaskType.Classification;
-                    FeatureFilterCfg = new BinFeatureFilterSettings();
-                    //One winner group name
-                    OneWinnerGroupName = taskElem.Attribute("oneWinnerGroupName").Value;
-                    if(OneWinnerGroupName.ToUpper().Trim() == NoOneWinnerGroupName)
-                    {
-                        OneWinnerGroupName = NoOneWinnerGroupName;
-                    }
-                }
-                //Networks settings
-                NetCfgCollection = NonRecurrentNetUtils.LoadSettingsCollection(taskElem.Descendants("networks").FirstOrDefault());
-                return;
+                rootElem.Add(DefaultNetworksCfg.GetXml(suppressDefaults));
             }
-
-            //Methods
-            /// <summary>
-            /// Creates the deep copy instance of this instance.
-            /// </summary>
-            public ReadoutUnitSettings DeepClone()
-            {
-                return new ReadoutUnitSettings(this);
-            }
-
-        }//ReadoutUnitSettings
+            rootElem.Add(ReadoutUnitsCfg.GetXml(suppressDefaults));
+            Validate(rootElem, XsdTypeName);
+            return rootElem;
+        }
 
         /// <summary>
-        /// Configuration of "one winner: group
+        /// Generates default named xml element containing the settings.
         /// </summary>
-        [Serializable]
-        public class OneWinnerGroupSettings
+        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <returns>XElement containing the settings</returns>
+        public override XElement GetXml(bool suppressDefaults)
         {
-            /// <summary>
-            /// Name of the group
-            /// </summary>
-            public string Name { get; }
-            /// <summary>
-            /// Indexes of member readout units
-            /// </summary>
-            public List<ReadoutUnitSettings> Members { get; }
+            return GetXml("readoutLayer", suppressDefaults);
+        }
 
-            //Constructors
-            /// <summary>
-            /// Creates initialized instance
-            /// </summary>
-            /// <param name="name">One winner group name</param>
-            /// <param name="members">Member readout units</param>
-            public OneWinnerGroupSettings(string name, List<ReadoutUnitSettings> members)
-            {
-                Name = name;
-                Members = members;
-                return;
-            }
-
-            /// <summary>
-            /// Copy constructor
-            /// </summary>
-            /// <param name="source">Source instance</param>
-            public OneWinnerGroupSettings(OneWinnerGroupSettings source)
-            {
-                Name = source.Name;
-                Members = new List<ReadoutUnitSettings>(source.Members.Count);
-                foreach(ReadoutUnitSettings rus in source.Members)
-                {
-                    Members.Add(rus.DeepClone());
-                }
-                return;
-            }
-
-            //Methods
-            /// <summary>
-            /// Creates the deep copy instance of this instance.
-            /// </summary>
-            public OneWinnerGroupSettings DeepClone()
-            {
-                return new OneWinnerGroupSettings(this);
-            }
-
-
-        }//OneWinnerGroupSettings
 
     }//ReadoutLayerSettings
 

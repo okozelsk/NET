@@ -25,7 +25,7 @@ namespace RCNet.Neural.Data.Generators
         /// <param name="settings">Configuration</param>
         public SinusoidalGenerator(SinusoidalGeneratorSettings settings)
         {
-            _settings = settings.DeepClone();
+            _settings = (SinusoidalGeneratorSettings)settings.DeepClone();
             Reset();
             return;
         }

@@ -77,9 +77,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// </summary>
         private static readonly Interval MOnePOneRange = new Interval(-1d, 1d);
 
+        //Attribute properties
+        public int InputFieldIdx { get; }
+
         //Attributes
         private readonly Interval _inputRange;
         private readonly InputUnitSettings _settings;
+        private readonly int[] _inputEntryPoint;
         private readonly MovingDataWindow _movingDW;
         private readonly TransformedValueUnit[] _transUnits;
 
@@ -88,11 +92,15 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// Creates an initialized instance
         /// </summary>
         /// <param name="inputRange">Input data range.</param>
+        /// <param name="inputEntryPoint">Input entry point</param>
+        /// <param name="inputFieldIdx">Index of the associated input field</param>
         /// <param name="settings">Configuration parameters.</param>
-        public InputUnit(Interval inputRange, InputUnitSettings settings)
+        public InputUnit(Interval inputRange, int[] inputEntryPoint, int inputFieldIdx, InputUnitSettings settings)
         {
             _inputRange = inputRange.DeepClone();
-            _settings = settings.DeepClone();
+            _settings = (InputUnitSettings)settings.DeepClone();
+            _inputEntryPoint = (int[])inputEntryPoint.Clone();
+            InputFieldIdx = inputFieldIdx;
             _movingDW = new MovingDataWindow(MovingDataWindowMaxSize);
             _transUnits = new TransformedValueUnit[NumOfAnalogCodingMethods];
             _transUnits.Populate(null);
@@ -128,7 +136,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         {
             if(_transUnits[(int)acm] == null)
             {
-                _transUnits[(int)acm] = new TransformedValueUnit(_settings.InputEntryPoint, _settings.InputFieldIndex, _inputRange, _settings.SpikeTrainLength);
+                _transUnits[(int)acm] = new TransformedValueUnit(_inputEntryPoint, InputFieldIdx, _inputRange, _settings.SpikeTrainLength);
             }
             return;
         }

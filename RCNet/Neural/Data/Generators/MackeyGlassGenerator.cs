@@ -28,7 +28,7 @@ namespace RCNet.Neural.Data.Generators
         /// <param name="settings">Configuration</param>
         public MackeyGlassGenerator(MackeyGlassGeneratorSettings settings)
         {
-            _settings = settings.DeepClone();
+            _settings = (MackeyGlassGeneratorSettings)settings.DeepClone();
             Reset();
             return;
         }

@@ -83,13 +83,13 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         {
             Random rand = new Random(1);
             //Initialize FF network
-            for (int i = 0; i < settings.HiddenLayerCollection.Count; i++)
+            for (int i = 0; i < settings.HiddenLayersCfg.HiddenLayerCfgCollection.Count; i++)
             {
-                AddLayer(settings.HiddenLayerCollection[i].NumOfNeurons,
-                         ActivationFactory.Create(settings.HiddenLayerCollection[i].Activation, rand)
+                AddLayer(settings.HiddenLayersCfg.HiddenLayerCfgCollection[i].NumOfNeurons,
+                         ActivationFactory.Create(settings.HiddenLayersCfg.HiddenLayerCfgCollection[i].ActivationCfg, rand)
                          );
             }
-            FinalizeStructure(ActivationFactory.Create(settings.OutputLayerActivation, rand));
+            FinalizeStructure(ActivationFactory.Create(settings.OutputActivationCfg, rand));
             return;
         }
 

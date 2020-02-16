@@ -54,8 +54,8 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         private readonly List<double[]> _outputVectorCollection;
         private readonly List<Matrix> _outputSingleColMatrixCollection;
         private readonly Random _rand;
-        private double _currMaxNoise;
-        private ParamSeeker _maxNoiseSeeker;
+        private double _currNoise;
+        private ParamSeeker _noiseSeeker;
 
         //Constructor
         /// <summary>
@@ -120,7 +120,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         public INonRecurrentNetwork Net { get { return _net; } }
 
         //Methods
-        private Matrix PreparePredictors(double maxNoise)
+        private Matrix PreparePredictors(double noise)
         {
             Matrix predictors = new Matrix(_inputVectorCollection.Count, _net.NumOfInputValues + 1);
             for (int row = 0; row < _inputVectorCollection.Count; row++)
@@ -129,7 +129,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
                 for(int col = 0; col < _net.NumOfInputValues; col++)
                 {
                     double predictor = _inputVectorCollection[row][col];
-                    predictors.Data[row][col] = predictor * (1d + _rand.NextRangedUniformDouble(maxNoise * _settings.NoiseZeroMargin, maxNoise) * _rand.NextSign());
+                    predictors.Data[row][col] = predictor * (1d + _rand.NextRangedUniformDouble(noise * _settings.NoiseZeroMargin, noise) * _rand.NextSign());
                 }
                 //Add constant bias to predictors
                 predictors.Data[row][_net.NumOfInputValues] = 1;
@@ -148,8 +148,8 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
                 //Next attempt is allowed
                 ++Attempt;
                 //Reset
-                _maxNoiseSeeker = new ParamSeeker(_settings.MaxNoiseSeekerCfg);
-                _currMaxNoise = 1e6;
+                _noiseSeeker = new ParamSeeker(_settings.NoiseSeekerCfg);
+                _currNoise = 1e6;
                 MSE = 0;
                 AttemptEpoch = 0;
                 return true;
@@ -167,9 +167,9 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         public bool Iteration()
         {
             //Fetch next noise intensity
-            double newMaxNoise = _maxNoiseSeeker.Next;
+            double newNoise = _noiseSeeker.Next;
             //Check continue conditions
-            if (AttemptEpoch == MaxAttemptEpoch || Math.Abs(_currMaxNoise - newMaxNoise) < StopNoiseDifference)
+            if (AttemptEpoch == MaxAttemptEpoch || Math.Abs(_currNoise - newNoise) < StopNoiseDifference)
             {
                 //Try new attempt
                 if (!NextAttempt())
@@ -179,15 +179,15 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
                 }
                 else
                 {
-                    newMaxNoise = _maxNoiseSeeker.Next;
+                    newNoise = _noiseSeeker.Next;
                 }
             }
             //Next epoch
             ++AttemptEpoch;
-            _currMaxNoise = newMaxNoise;
-            InfoMessage = $"maxNoise={_currMaxNoise.ToString(CultureInfo.InvariantCulture)}";
+            _currNoise = newNoise;
+            InfoMessage = $"noise={_currNoise.ToString(CultureInfo.InvariantCulture)}";
             //Adjusted predictors
-            Matrix predictors = PreparePredictors(_currMaxNoise);
+            Matrix predictors = PreparePredictors(_currNoise);
             //Decomposition
             QRD decomposition = null;
             bool useableQRD = true;
@@ -229,7 +229,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
                 _net.SetWeights(newWeights);
                 MSE = _net.ComputeBatchErrorStat(_inputVectorCollection, _outputVectorCollection).MeanSquare;
             }
-            _maxNoiseSeeker.ProcessError(MSE);
+            _noiseSeeker.ProcessError(MSE);
             return true;
         }
 

@@ -68,16 +68,15 @@ namespace RCNet.Neural.Activation
         /// </summary>
         public const double TypicalAdaptationSpikeTriggeredIncrement = 7;
 
-
         //Attribute properties
         /// <summary>
         /// Membrane time scale (ms)
         /// </summary>
-        public RandomValueSettings TimeScale { get; }
+        public URandomValueSettings TimeScale { get; }
         /// <summary>
         /// Membrane resistance (Mohm)
         /// </summary>
-        public RandomValueSettings Resistance { get; }
+        public URandomValueSettings Resistance { get; }
         /// <summary>
         /// Membrane rest potential (mV)
         /// </summary>
@@ -97,19 +96,19 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Sharpness of membrane potential change (mV)
         /// </summary>
-        public RandomValueSettings SharpnessDeltaT { get; }
+        public URandomValueSettings SharpnessDeltaT { get; }
         /// <summary>
         /// Adaptation voltage coupling (nS)
         /// </summary>
-        public RandomValueSettings AdaptationVoltageCoupling { get; }
+        public URandomValueSettings AdaptationVoltageCoupling { get; }
         /// <summary>
         /// Adaptation time constant (ms)
         /// </summary>
-        public RandomValueSettings AdaptationTimeConstant { get; }
+        public URandomValueSettings AdaptationTimeConstant { get; }
         /// <summary>
         /// Spike triggered adaptation increment (pA)
         /// </summary>
-        public RandomValueSettings AdaptationSpikeTriggeredIncrement { get; }
+        public URandomValueSettings AdaptationSpikeTriggeredIncrement { get; }
         /// <summary>
         /// ODE numerical solver method
         /// </summary>
@@ -136,32 +135,33 @@ namespace RCNet.Neural.Activation
         /// <param name="adaptationSpikeTriggeredIncrement">Spike triggered adaptation increment (pA)</param>
         /// <param name="solverMethod">ODE numerical solver method</param>
         /// <param name="solverCompSteps">ODE numerical solver computation steps of the time step</param>
-        public AdExpIFSettings(RandomValueSettings timeScale = null,
-                               RandomValueSettings resistance = null,
+        public AdExpIFSettings(URandomValueSettings timeScale = null,
+                               URandomValueSettings resistance = null,
                                RandomValueSettings restV = null,
                                RandomValueSettings resetV = null,
                                RandomValueSettings rheobaseV = null,
                                RandomValueSettings firingThresholdV = null,
-                               RandomValueSettings sharpnessDeltaT = null,
-                               RandomValueSettings adaptationVoltageCoupling = null,
-                               RandomValueSettings adaptationTimeConstant = null,
-                               RandomValueSettings adaptationSpikeTriggeredIncrement = null,
-                               ODENumSolver.Method solverMethod = ODENumSolver.Method.Euler,
-                               int solverCompSteps = 2
+                               URandomValueSettings sharpnessDeltaT = null,
+                               URandomValueSettings adaptationVoltageCoupling = null,
+                               URandomValueSettings adaptationTimeConstant = null,
+                               URandomValueSettings adaptationSpikeTriggeredIncrement = null,
+                               ODENumSolver.Method solverMethod = ActivationFactory.DefaultSolverMethod,
+                               int solverCompSteps = ActivationFactory.DefaultSolverCompSteps
                                )
         {
-            TimeScale = RandomValueSettings.CloneOrDefault(timeScale, TypicalTimeScale);
-            Resistance = RandomValueSettings.CloneOrDefault(resistance, TypicalResistance);
+            TimeScale = URandomValueSettings.CloneOrDefault(timeScale, TypicalTimeScale);
+            Resistance = URandomValueSettings.CloneOrDefault(resistance, TypicalResistance);
             RestV = RandomValueSettings.CloneOrDefault(restV, TypicalRestV);
             ResetV = RandomValueSettings.CloneOrDefault(resetV, TypicalResetV);
             RheobaseV = RandomValueSettings.CloneOrDefault(rheobaseV, TypicalRheobaseV);
             FiringThresholdV = RandomValueSettings.CloneOrDefault(firingThresholdV, TypicalFiringThresholdV);
-            SharpnessDeltaT = RandomValueSettings.CloneOrDefault(sharpnessDeltaT, TypicalSharpnessDeltaT);
-            AdaptationVoltageCoupling = RandomValueSettings.CloneOrDefault(adaptationVoltageCoupling, TypicalAdaptationVoltageCoupling);
-            AdaptationTimeConstant = RandomValueSettings.CloneOrDefault(adaptationTimeConstant, TypicalAdaptationTimeConstant);
-            AdaptationSpikeTriggeredIncrement = RandomValueSettings.CloneOrDefault(adaptationSpikeTriggeredIncrement, TypicalAdaptationSpikeTriggeredIncrement);
+            SharpnessDeltaT = URandomValueSettings.CloneOrDefault(sharpnessDeltaT, TypicalSharpnessDeltaT);
+            AdaptationVoltageCoupling = URandomValueSettings.CloneOrDefault(adaptationVoltageCoupling, TypicalAdaptationVoltageCoupling);
+            AdaptationTimeConstant = URandomValueSettings.CloneOrDefault(adaptationTimeConstant, TypicalAdaptationTimeConstant);
+            AdaptationSpikeTriggeredIncrement = URandomValueSettings.CloneOrDefault(adaptationSpikeTriggeredIncrement, TypicalAdaptationSpikeTriggeredIncrement);
             SolverMethod = solverMethod;
             SolverCompSteps = solverCompSteps;
+            Check();
             return;
         }
 
@@ -171,16 +171,16 @@ namespace RCNet.Neural.Activation
         /// <param name="source">Source instance</param>
         public AdExpIFSettings(AdExpIFSettings source)
         {
-            TimeScale = source.TimeScale.DeepClone();
-            Resistance = source.Resistance.DeepClone();
-            RestV = source.RestV.DeepClone();
-            ResetV = source.ResetV.DeepClone();
-            RheobaseV = source.RheobaseV.DeepClone();
-            FiringThresholdV = source.FiringThresholdV.DeepClone();
-            SharpnessDeltaT = source.SharpnessDeltaT.DeepClone();
-            AdaptationVoltageCoupling = source.AdaptationVoltageCoupling.DeepClone();
-            AdaptationTimeConstant = source.AdaptationTimeConstant.DeepClone();
-            AdaptationSpikeTriggeredIncrement = source.AdaptationSpikeTriggeredIncrement.DeepClone();
+            TimeScale = (URandomValueSettings)source.TimeScale.DeepClone();
+            Resistance = (URandomValueSettings)source.Resistance.DeepClone();
+            RestV = (RandomValueSettings)source.RestV.DeepClone();
+            ResetV = (RandomValueSettings)source.ResetV.DeepClone();
+            RheobaseV = (RandomValueSettings)source.RheobaseV.DeepClone();
+            FiringThresholdV = (RandomValueSettings)source.FiringThresholdV.DeepClone();
+            SharpnessDeltaT = (URandomValueSettings)source.SharpnessDeltaT.DeepClone();
+            AdaptationVoltageCoupling = (URandomValueSettings)source.AdaptationVoltageCoupling.DeepClone();
+            AdaptationTimeConstant = (URandomValueSettings)source.AdaptationTimeConstant.DeepClone();
+            AdaptationSpikeTriggeredIncrement = (URandomValueSettings)source.AdaptationSpikeTriggeredIncrement.DeepClone();
             SolverMethod = source.SolverMethod;
             SolverCompSteps = source.SolverCompSteps;
             return;
@@ -198,29 +198,190 @@ namespace RCNet.Neural.Activation
             //Validation
             XElement activationSettingsElem = Validate(elem, XsdTypeName);
             //Parsing
-            TimeScale = RandomValueSettings.LoadOrDefault(activationSettingsElem, "timeScale", TypicalTimeScale);
-            Resistance = RandomValueSettings.LoadOrDefault(activationSettingsElem, "resistance", TypicalResistance);
+            TimeScale = URandomValueSettings.LoadOrDefault(activationSettingsElem, "timeScale", TypicalTimeScale);
+            Resistance = URandomValueSettings.LoadOrDefault(activationSettingsElem, "resistance", TypicalResistance);
             RestV = RandomValueSettings.LoadOrDefault(activationSettingsElem, "restV", TypicalRestV);
             ResetV = RandomValueSettings.LoadOrDefault(activationSettingsElem, "resetV", TypicalResetV);
             RheobaseV = RandomValueSettings.LoadOrDefault(activationSettingsElem, "rheobaseV", TypicalRheobaseV);
             FiringThresholdV = RandomValueSettings.LoadOrDefault(activationSettingsElem, "firingThresholdV", TypicalFiringThresholdV);
-            SharpnessDeltaT = RandomValueSettings.LoadOrDefault(activationSettingsElem, "sharpnessDeltaT", TypicalSharpnessDeltaT);
-            AdaptationVoltageCoupling = RandomValueSettings.LoadOrDefault(activationSettingsElem, "adaptationVoltageCoupling", TypicalAdaptationVoltageCoupling);
-            AdaptationTimeConstant = RandomValueSettings.LoadOrDefault(activationSettingsElem, "adaptationTimeConstant", TypicalAdaptationTimeConstant);
-            AdaptationSpikeTriggeredIncrement = RandomValueSettings.LoadOrDefault(activationSettingsElem, "adaptationSpikeTriggeredIncrement", TypicalAdaptationSpikeTriggeredIncrement);
+            SharpnessDeltaT = URandomValueSettings.LoadOrDefault(activationSettingsElem, "sharpnessDeltaT", TypicalSharpnessDeltaT);
+            AdaptationVoltageCoupling = URandomValueSettings.LoadOrDefault(activationSettingsElem, "adaptationVoltageCoupling", TypicalAdaptationVoltageCoupling);
+            AdaptationTimeConstant = URandomValueSettings.LoadOrDefault(activationSettingsElem, "adaptationTimeConstant", TypicalAdaptationTimeConstant);
+            AdaptationSpikeTriggeredIncrement = URandomValueSettings.LoadOrDefault(activationSettingsElem, "adaptationSpikeTriggeredIncrement", TypicalAdaptationSpikeTriggeredIncrement);
             SolverMethod = ODENumSolver.ParseComputationMethodType(activationSettingsElem.Attribute("solverMethod").Value);
             SolverCompSteps = int.Parse(activationSettingsElem.Attribute("solverCompSteps").Value, CultureInfo.InvariantCulture);
+            Check();
             return;
         }
 
+        //Properties
+        /// <summary>
+        /// Checks if settings are default
+        /// </summary>
+        public bool IsDefaultTimeScale { get { return (TimeScale.Min == TypicalTimeScale && TimeScale.Max == TypicalTimeScale && TimeScale.DistrType == RandomCommon.DistributionType.Uniform); } }
+
+        /// <summary>
+        /// Checks if settings are default
+        /// </summary>
+        public bool IsDefaultResistance { get { return (Resistance.Min == TypicalResistance && Resistance.Max == TypicalResistance && Resistance.DistrType == RandomCommon.DistributionType.Uniform); } }
+
+        /// <summary>
+        /// Checks if settings are default
+        /// </summary>
+        public bool IsDefaultRestV { get { return (RestV.Min == TypicalRestV && RestV.Max == TypicalRestV && !RestV.RandomSign && RestV.DistrType == RandomCommon.DistributionType.Uniform); } }
+
+        /// <summary>
+        /// Checks if settings are default
+        /// </summary>
+        public bool IsDefaultResetV { get { return (ResetV.Min == TypicalResetV && ResetV.Max == TypicalResetV && !ResetV.RandomSign && ResetV.DistrType == RandomCommon.DistributionType.Uniform); } }
+
+        /// <summary>
+        /// Checks if settings are default
+        /// </summary>
+        public bool IsDefaultRheobaseV { get { return (RheobaseV.Min == TypicalRheobaseV && RheobaseV.Max == TypicalRheobaseV && !RheobaseV.RandomSign && RheobaseV.DistrType == RandomCommon.DistributionType.Uniform); } }
+
+        /// <summary>
+        /// Checks if settings are default
+        /// </summary>
+        public bool IsDefaultFiringThresholdV { get { return (FiringThresholdV.Min == TypicalFiringThresholdV && FiringThresholdV.Max == TypicalFiringThresholdV && !FiringThresholdV.RandomSign && FiringThresholdV.DistrType == RandomCommon.DistributionType.Uniform); } }
+
+        /// <summary>
+        /// Checks if settings are default
+        /// </summary>
+        public bool IsDefaultSharpnessDeltaT { get { return (SharpnessDeltaT.Min == TypicalSharpnessDeltaT && SharpnessDeltaT.Max == TypicalSharpnessDeltaT && SharpnessDeltaT.DistrType == RandomCommon.DistributionType.Uniform); } }
+
+        /// <summary>
+        /// Checks if settings are default
+        /// </summary>
+        public bool IsDefaultAdaptationVoltageCoupling { get { return (AdaptationVoltageCoupling.Min == TypicalAdaptationVoltageCoupling && AdaptationVoltageCoupling.Max == TypicalAdaptationVoltageCoupling && AdaptationVoltageCoupling.DistrType == RandomCommon.DistributionType.Uniform); } }
+
+        /// <summary>
+        /// Checks if settings are default
+        /// </summary>
+        public bool IsDefaultAdaptationTimeConstant { get { return (AdaptationTimeConstant.Min == TypicalAdaptationTimeConstant && AdaptationTimeConstant.Max == TypicalAdaptationTimeConstant && AdaptationTimeConstant.DistrType == RandomCommon.DistributionType.Uniform); } }
+
+        /// <summary>
+        /// Checks if settings are default
+        /// </summary>
+        public bool IsDefaultAdaptationSpikeTriggeredIncrement { get { return (AdaptationSpikeTriggeredIncrement.Min == TypicalAdaptationSpikeTriggeredIncrement && AdaptationSpikeTriggeredIncrement.Max == TypicalAdaptationSpikeTriggeredIncrement && AdaptationSpikeTriggeredIncrement.DistrType == RandomCommon.DistributionType.Uniform); } }
+
+        /// <summary>
+        /// Checks if settings are default
+        /// </summary>
+        public bool IsDefaultSolverMethod { get { return (SolverMethod == ActivationFactory.DefaultSolverMethod); } }
+
+        /// <summary>
+        /// Checks if settings are default
+        /// </summary>
+        public bool IsDefaultSolverCompSteps { get { return (SolverCompSteps == ActivationFactory.DefaultSolverCompSteps); } }
+
+        /// <summary>
+        /// Identifies settings containing only default values
+        /// </summary>
+        public override bool ContainsOnlyDefaults { get { return IsDefaultTimeScale &&
+                                                                 IsDefaultResistance &&
+                                                                 IsDefaultRestV &&
+                                                                 IsDefaultResetV &&
+                                                                 IsDefaultRheobaseV &&
+                                                                 IsDefaultFiringThresholdV &&
+                                                                 IsDefaultSharpnessDeltaT &&
+                                                                 IsDefaultAdaptationVoltageCoupling &&
+                                                                 IsDefaultAdaptationTimeConstant &&
+                                                                 IsDefaultAdaptationSpikeTriggeredIncrement &&
+                                                                 IsDefaultSolverMethod &&
+                                                                 IsDefaultSolverCompSteps; } }
+
         //Methods
+        /// <summary>
+        /// Checks validity
+        /// </summary>
+        private void Check()
+        {
+            if(SolverCompSteps < 1)
+            {
+                throw new Exception($"Invalid SolverCompSteps {SolverCompSteps.ToString(CultureInfo.InvariantCulture)}. SolverCompSteps must be GE to 1.");
+            }
+            return;
+        }
+
         /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>
-        public AdExpIFSettings DeepClone()
+        public override RCNetBaseSettings DeepClone()
         {
-            AdExpIFSettings clone = new AdExpIFSettings(this);
-            return clone;
+            return new AdExpIFSettings(this);
+        }
+
+        /// <summary>
+        /// Generates xml element containing the settings.
+        /// </summary>
+        /// <param name="rootElemName">Name to be used as a name of the root element.</param>
+        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <returns>XElement containing the settings</returns>
+        public override XElement GetXml(string rootElemName, bool suppressDefaults)
+        {
+            XElement rootElem = new XElement(rootElemName);
+            if(!suppressDefaults || !IsDefaultSolverMethod)
+            {
+                rootElem.Add(new XAttribute("solverMethod", SolverMethod.ToString()));
+            }
+            if (!suppressDefaults || !IsDefaultSolverCompSteps)
+            {
+                rootElem.Add(new XAttribute("solverCompSteps", SolverCompSteps.ToString(CultureInfo.InvariantCulture)));
+            }
+            if (!suppressDefaults || !IsDefaultTimeScale)
+            {
+                rootElem.Add(TimeScale.GetXml("timeScale", suppressDefaults));
+            }
+            if (!suppressDefaults || !IsDefaultResistance)
+            {
+                rootElem.Add(Resistance.GetXml("resistance", suppressDefaults));
+            }
+            if (!suppressDefaults || !IsDefaultRestV)
+            {
+                rootElem.Add(RestV.GetXml("restV", suppressDefaults));
+            }
+            if (!suppressDefaults || !IsDefaultResetV)
+            {
+                rootElem.Add(ResetV.GetXml("resetV", suppressDefaults));
+            }
+            if (!suppressDefaults || !IsDefaultRheobaseV)
+            {
+                rootElem.Add(RheobaseV.GetXml("rheobaseV", suppressDefaults));
+            }
+            if (!suppressDefaults || !IsDefaultFiringThresholdV)
+            {
+                rootElem.Add(FiringThresholdV.GetXml("firingThresholdV", suppressDefaults));
+            }
+            if (!suppressDefaults || !IsDefaultSharpnessDeltaT)
+            {
+                rootElem.Add(SharpnessDeltaT.GetXml("sharpnessDeltaT", suppressDefaults));
+            }
+            if (!suppressDefaults || !IsDefaultAdaptationVoltageCoupling)
+            {
+                rootElem.Add(AdaptationVoltageCoupling.GetXml("adaptationVoltageCoupling", suppressDefaults));
+            }
+            if (!suppressDefaults || !IsDefaultAdaptationTimeConstant)
+            {
+                rootElem.Add(AdaptationTimeConstant.GetXml("adaptationTimeConstant", suppressDefaults));
+            }
+            if (!suppressDefaults || !IsDefaultAdaptationSpikeTriggeredIncrement)
+            {
+                rootElem.Add(AdaptationSpikeTriggeredIncrement.GetXml("adaptationSpikeTriggeredIncrement", suppressDefaults));
+            }
+
+            Validate(rootElem, XsdTypeName);
+            return rootElem;
+        }
+
+        /// <summary>
+        /// Generates default named xml element containing the settings.
+        /// </summary>
+        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <returns>XElement containing the settings</returns>
+        public override XElement GetXml(bool suppressDefaults)
+        {
+            return GetXml("activationAdExpIF", suppressDefaults);
         }
 
     }//AdExpIFSettings

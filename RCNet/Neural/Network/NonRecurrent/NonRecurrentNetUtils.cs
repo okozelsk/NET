@@ -18,7 +18,7 @@ namespace RCNet.Neural.Network.NonRecurrent
         /// Determines if given settings object is FeedForwardNetworkSettings
         /// </summary>
         /// <param name="settings">Non-recurrent-network settings</param>
-        public static bool IsFF(object settings)
+        public static bool IsFF(INonRecurrentNetworkSettings settings)
         {
             return (settings.GetType() == typeof(FeedForwardNetworkSettings));
         }
@@ -36,7 +36,7 @@ namespace RCNet.Neural.Network.NonRecurrent
         /// Determines if given settings object is ParallelPerceptronSettings
         /// </summary>
         /// <param name="settings">Non-recurrent-network settings</param>
-        public static bool IsPP(object settings)
+        public static bool IsPP(INonRecurrentNetworkSettings settings)
         {
             return (settings.GetType() == typeof(ParallelPerceptronSettings));
         }
@@ -51,33 +51,12 @@ namespace RCNet.Neural.Network.NonRecurrent
         }
 
 
-
-        /// <summary>
-        /// Deeply clones given settings
-        /// </summary>
-        /// <param name="settings">Non-recurrent-network settings</param>
-        public static object CloneSettings(object settings)
-        {
-            if (IsFF(settings))
-            {
-                return ((FeedForwardNetworkSettings)(settings)).DeepClone();
-            }
-            else if(IsPP(settings))
-            {
-                return ((ParallelPerceptronSettings)(settings)).DeepClone();
-            }
-            else
-            {
-                throw new Exception($"Unsupported type of given settings: {settings.GetType().ToString()}");
-            }
-        }
-
         /// <summary>
         /// Instantiates appropriate non-recurrent-network settings from given xml element.
         /// Type of settings is determined using element local name.
         /// </summary>
         /// <param name="cfgElem">XML element containing settings</param>
-        public static object InstantiateSettings(XElement cfgElem)
+        public static INonRecurrentNetworkSettings InstantiateSettings(XElement cfgElem)
         {
             if(IsFFElem(cfgElem))
             {
@@ -98,9 +77,9 @@ namespace RCNet.Neural.Network.NonRecurrent
         /// If rootElem is null then empty collection is returned
         /// </summary>
         /// <param name="rootElem">Root element</param>
-        public static List<object> LoadSettingsCollection(XElement rootElem)
+        public static List<INonRecurrentNetworkSettings> LoadSettingsCollection(XElement rootElem)
         {
-            List<object> settingsCollection = new List<object>();
+            List<INonRecurrentNetworkSettings> settingsCollection = new List<INonRecurrentNetworkSettings>();
             if (rootElem != null)
             {
                 foreach (XElement cfgElem in rootElem.Descendants())
@@ -123,7 +102,7 @@ namespace RCNet.Neural.Network.NonRecurrent
         /// <param name="rand">Random object to be used</param>
         /// <param name="net">Created network</param>
         /// <param name="trainer">Created associated trainer</param>
-        public static void CreateNetworkAndTrainer(object settings,
+        public static void CreateNetworkAndTrainer(INonRecurrentNetworkSettings settings,
                                                    List<double[]> trainingInputVectors,
                                                    List<double[]> trainingOutputVectors,
                                                    Random rand,
@@ -131,7 +110,7 @@ namespace RCNet.Neural.Network.NonRecurrent
                                                    out INonRecurrentNetworkTrainer trainer
                                                    )
         {
-            if (NonRecurrentNetUtils.IsFF(settings))
+            if (IsFF(settings))
             {
                 //Feed forward network
                 FeedForwardNetworkSettings netCfg = (FeedForwardNetworkSettings)settings;
@@ -158,7 +137,7 @@ namespace RCNet.Neural.Network.NonRecurrent
                     throw new ArgumentException($"Unknown trainer {netCfg.TrainerCfg}");
                 }
             }
-            else if (NonRecurrentNetUtils.IsPP(settings))
+            else if (IsPP(settings))
             {
                 //Parallel perceptron network
                 //Check output
@@ -179,6 +158,6 @@ namespace RCNet.Neural.Network.NonRecurrent
             return;
         }
 
-
     }//NonRecurrentNetUtils
+
 }//Namespace

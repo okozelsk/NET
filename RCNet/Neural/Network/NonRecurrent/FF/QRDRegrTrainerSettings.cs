@@ -15,7 +15,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
     /// Startup parameters for the QRD regression trainer
     /// </summary>
     [Serializable]
-    public class QRDRegrTrainerSettings : RCNetBaseSettings, INonRecurrentNetworkTrainerSettings
+    public class QRDRegrTrainerSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
@@ -33,7 +33,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         /// <summary>
         /// Seeker's default max noise intensity
         /// </summary>
-        public const double DefaultMaxNoise = 0.05;
+        public const double DefaultMaxNoise = 0.1;
         /// <summary>
         /// Seeker's default number of steps within the interval
         /// </summary>
@@ -43,19 +43,19 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         /// <summary>
         /// Number of attempts
         /// </summary>
-        public int NumOfAttempts { get; set; }
+        public int NumOfAttempts { get; }
         /// <summary>
         /// Number of attempt epochs
         /// </summary>
-        public int NumOfAttemptEpochs { get; set; }
+        public int NumOfAttemptEpochs { get; }
         /// <summary>
         /// Margin of noise values from zero
         /// </summary>
-        public double NoiseZeroMargin { get; set; }
+        public double NoiseZeroMargin { get; }
         /// <summary>
-        /// Configuration of seeker of MaxNoise hyperparameter value
+        /// Configuration of seeker of Noise hyperparameter value
         /// </summary>
-        public ParamSeekerSettings MaxNoiseSeekerCfg { get; set; }
+        public ParamSeekerSettings NoiseSeekerCfg { get; }
 
         //Constructors
         /// <summary>
@@ -64,24 +64,25 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         /// <param name="numOfAttempts">Number of attempts</param>
         /// <param name="numOfAttemptEpochs">Number of attempt epochs</param>
         /// <param name="noiseZeroMargin">Margin of noise values from zero</param>
-        /// <param name="maxNoiseSeekerCfg">Configuration of seeker of MaxNoise hyperparameter value</param>
+        /// <param name="noiseSeekerCfg">Configuration of seeker of MaxNoise hyperparameter value</param>
         public QRDRegrTrainerSettings(int numOfAttempts,
                                       int numOfAttemptEpochs,
                                       double noiseZeroMargin = DefaultNoiseZeroMargin,
-                                      ParamSeekerSettings maxNoiseSeekerCfg = null
+                                      ParamSeekerSettings noiseSeekerCfg = null
                                       )
         {
             NumOfAttempts = numOfAttempts;
             NumOfAttemptEpochs = numOfAttemptEpochs;
             NoiseZeroMargin = noiseZeroMargin;
-            if (maxNoiseSeekerCfg == null)
+            if (noiseSeekerCfg == null)
             {
-                MaxNoiseSeekerCfg = new ParamSeekerSettings(DefaultMinNoise, DefaultMaxNoise, DefaultSteps);
+                NoiseSeekerCfg = new ParamSeekerSettings(DefaultMinNoise, DefaultMaxNoise, DefaultSteps);
             }
             else
             {
-                MaxNoiseSeekerCfg = maxNoiseSeekerCfg.DeepClone();
+                NoiseSeekerCfg = (ParamSeekerSettings)noiseSeekerCfg.DeepClone();
             }
+            Check();
             return;
         }
 
@@ -94,7 +95,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             NumOfAttempts = source.NumOfAttempts;
             NumOfAttemptEpochs = source.NumOfAttemptEpochs;
             NoiseZeroMargin = source.NoiseZeroMargin;
-            MaxNoiseSeekerCfg = source.MaxNoiseSeekerCfg.DeepClone();
+            NoiseSeekerCfg = (ParamSeekerSettings)source.NoiseSeekerCfg.DeepClone();
             return;
         }
 
@@ -111,17 +112,95 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             NumOfAttempts = int.Parse(settingsElem.Attribute("attempts").Value, CultureInfo.InvariantCulture);
             NumOfAttemptEpochs = int.Parse(settingsElem.Attribute("attemptEpochs").Value, CultureInfo.InvariantCulture);
             NoiseZeroMargin = double.Parse(settingsElem.Attribute("noiseZeroMargin").Value, CultureInfo.InvariantCulture);
-            MaxNoiseSeekerCfg = new ParamSeekerSettings(settingsElem.Descendants("maxNoise").First());
+            XElement noiseSeekerSettingsElem = settingsElem.Descendants("noise").FirstOrDefault();
+            if (noiseSeekerSettingsElem != null)
+            {
+                NoiseSeekerCfg = new ParamSeekerSettings(noiseSeekerSettingsElem);
+            }
+            else
+            {
+                NoiseSeekerCfg = new ParamSeekerSettings(DefaultMinNoise, DefaultMaxNoise, DefaultSteps);
+            }
+            Check();
             return;
         }
 
+        //Properties
+        /// <summary>
+        /// Checks if settings are default
+        /// </summary>
+        public bool IsDefaultNoiseZeroMargin { get { return (NoiseZeroMargin == DefaultNoiseZeroMargin); } }
+
+        /// <summary>
+        /// Checks if settings are default
+        /// </summary>
+        public bool IsDefaultNoiseSeeker { get { return (NoiseSeekerCfg.Min == DefaultMinNoise && NoiseSeekerCfg.Max == DefaultMaxNoise && NoiseSeekerCfg.NumOfSteps == DefaultSteps); } }
+
+        /// <summary>
+        /// Identifies settings containing only default values
+        /// </summary>
+        public override bool ContainsOnlyDefaults { get { return false; } }
+
+
         //Methods
+        /// <summary>
+        /// Checks validity
+        /// </summary>
+        private void Check()
+        {
+            if (NumOfAttempts < 1)
+            {
+                throw new Exception($"Invalid NumOfAttempts {NumOfAttempts.ToString(CultureInfo.InvariantCulture)}. NumOfAttempts must be GE to 1.");
+            }
+            if (NumOfAttemptEpochs < 1)
+            {
+                throw new Exception($"Invalid NumOfAttemptEpochs {NumOfAttemptEpochs.ToString(CultureInfo.InvariantCulture)}. NumOfAttemptEpochs must be GE to 1.");
+            }
+            if (NoiseZeroMargin < 0 || NoiseZeroMargin >= 1)
+            {
+                throw new Exception($"Invalid NoiseZeroMargin {NoiseZeroMargin.ToString(CultureInfo.InvariantCulture)}. NoiseZeroMargin must be GE to 0 and LT 1.");
+            }
+            return;
+        }
+
         /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>
-        public INonRecurrentNetworkTrainerSettings DeepClone()
+        public override RCNetBaseSettings DeepClone()
         {
             return new QRDRegrTrainerSettings(this);
+        }
+
+        /// <summary>
+        /// Generates xml element containing the settings.
+        /// </summary>
+        /// <param name="rootElemName">Name to be used as a name of the root element.</param>
+        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <returns>XElement containing the settings</returns>
+        public override XElement GetXml(string rootElemName, bool suppressDefaults)
+        {
+            XElement rootElem = new XElement(rootElemName, new XAttribute("attempts", NumOfAttempts.ToString(CultureInfo.InvariantCulture)),
+                                                           new XAttribute("attemptEpochs", NumOfAttemptEpochs.ToString(CultureInfo.InvariantCulture)));
+            if (!suppressDefaults || !IsDefaultNoiseZeroMargin)
+            {
+                rootElem.Add(new XAttribute("noiseZeroMargin", NoiseZeroMargin.ToString(CultureInfo.InvariantCulture)));
+            }
+            if (!suppressDefaults || !IsDefaultNoiseSeeker)
+            {
+                rootElem.Add(NoiseSeekerCfg.GetXml("noise", suppressDefaults));
+            }
+            Validate(rootElem, XsdTypeName);
+            return rootElem;
+        }
+
+        /// <summary>
+        /// Generates default named xml element containing the settings.
+        /// </summary>
+        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <returns>XElement containing the settings</returns>
+        public override XElement GetXml(bool suppressDefaults)
+        {
+            return GetXml("qrdRegrTrainer", suppressDefaults);
         }
 
     }//QRDRegrTrainerSettings

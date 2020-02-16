@@ -30,92 +30,169 @@ namespace RCNet.Neural.Network.SM.Synapse
         /// <summary>
         /// Synapse's dynamics settings for S2S E2E neurons
         /// </summary>
-        public DynamicsSettings S2SSynapseE2EDynamicsCfg { get; set; }
+        public S2SSynapseE2EDynamicsSettings S2SSynapseE2EDynamicsCfg { get; }
         /// <summary>
         /// Synapse's dynamics settings for S2S E2I neurons
         /// </summary>
-        public DynamicsSettings S2SSynapseE2IDynamicsCfg { get; set; }
+        public S2SSynapseE2IDynamicsSettings S2SSynapseE2IDynamicsCfg { get; }
         /// <summary>
         /// Synapse's dynamics settings for S2S I2E neurons
         /// </summary>
-        public DynamicsSettings S2SSynapseI2EDynamicsCfg { get; set; }
+        public S2SSynapseI2EDynamicsSettings S2SSynapseI2EDynamicsCfg { get; }
         /// <summary>
         /// Synapse's dynamics settings for S2S I2I neurons
         /// </summary>
-        public DynamicsSettings S2SSynapseI2IDynamicsCfg { get; set; }
+        public S2SSynapseI2IDynamicsSettings S2SSynapseI2IDynamicsCfg { get; }
         /// <summary>
         /// Synapse's dynamics settings for A2S E2E neurons
         /// </summary>
-        public DynamicsSettings A2SSynapseE2EDynamicsCfg { get; set; }
+        public A2SSynapseE2EDynamicsSettings A2SSynapseE2EDynamicsCfg { get; }
         /// <summary>
         /// Synapse's dynamics settings for A2S E2I neurons
         /// </summary>
-        public DynamicsSettings A2SSynapseE2IDynamicsCfg { get; set; }
+        public A2SSynapseE2IDynamicsSettings A2SSynapseE2IDynamicsCfg { get; }
         /// <summary>
         /// Synapse's dynamics settings for A2S I2E neurons
         /// </summary>
-        public DynamicsSettings A2SSynapseI2EDynamicsCfg { get; set; }
+        public A2SSynapseI2EDynamicsSettings A2SSynapseI2EDynamicsCfg { get; }
         /// <summary>
         /// Synapse's dynamics settings for A2S I2I neurons
         /// </summary>
-        public DynamicsSettings A2SSynapseI2IDynamicsCfg { get; set; }
+        public A2SSynapseI2IDynamicsSettings A2SSynapseI2IDynamicsCfg { get; }
         /// <summary>
         /// Synapse's dynamics settings for S2A E2E neurons
         /// </summary>
-        public DynamicsSettings S2ASynapseE2EDynamicsCfg { get; set; }
+        public S2ASynapseE2EDynamicsSettings S2ASynapseE2EDynamicsCfg { get; }
         /// <summary>
         /// Synapse's dynamics settings for S2A I2E neurons
         /// </summary>
-        public DynamicsSettings S2ASynapseI2EDynamicsCfg { get; set; }
+        public S2ASynapseI2EDynamicsSettings S2ASynapseI2EDynamicsCfg { get; }
         /// <summary>
         /// Synapse's dynamics settings for S2A E2I neurons
         /// </summary>
-        public DynamicsSettings S2ASynapseE2IDynamicsCfg { get; set; }
+        public S2ASynapseE2IDynamicsSettings S2ASynapseE2IDynamicsCfg { get; }
         /// <summary>
         /// Synapse's dynamics settings for S2A I2I neurons
         /// </summary>
-        public DynamicsSettings S2ASynapseI2IDynamicsCfg { get; set; }
+        public S2ASynapseI2IDynamicsSettings S2ASynapseI2IDynamicsCfg { get; }
         /// <summary>
         /// Synapse's dynamics settings for A2A E2E neurons
         /// </summary>
-        public DynamicsSettings A2ASynapseE2EDynamicsCfg { get; set; }
+        public A2ASynapseE2EDynamicsSettings A2ASynapseE2EDynamicsCfg { get; }
         /// <summary>
         /// Synapse's dynamics settings for A2A I2E neurons
         /// </summary>
-        public DynamicsSettings A2ASynapseI2EDynamicsCfg { get; set; }
+        public A2ASynapseI2EDynamicsSettings A2ASynapseI2EDynamicsCfg { get; }
         /// <summary>
         /// Synapse's dynamics settings for A2A E2I neurons
         /// </summary>
-        public DynamicsSettings A2ASynapseE2IDynamicsCfg { get; set; }
+        public A2ASynapseE2IDynamicsSettings A2ASynapseE2IDynamicsCfg { get; }
         /// <summary>
         /// Synapse's dynamics settings for A2A I2I neurons
         /// </summary>
-        public DynamicsSettings A2ASynapseI2IDynamicsCfg { get; set; }
+        public A2ASynapseI2IDynamicsSettings A2ASynapseI2IDynamicsCfg { get; }
 
 
 
         //Constructors
         /// <summary>
-        /// Creates an uninitialized instance
+        /// Creates an initialized instance
         /// </summary>
         public InternalSynapseSettings()
         {
-            S2SSynapseE2EDynamicsCfg = null;
-            S2SSynapseE2IDynamicsCfg = null;
-            S2SSynapseI2EDynamicsCfg = null;
-            S2SSynapseI2IDynamicsCfg = null;
-            A2SSynapseE2EDynamicsCfg = null;
-            A2SSynapseE2IDynamicsCfg = null;
-            A2SSynapseI2EDynamicsCfg = null;
-            A2SSynapseI2IDynamicsCfg = null;
-            S2ASynapseE2EDynamicsCfg = null;
-            S2ASynapseI2EDynamicsCfg = null;
-            S2ASynapseE2IDynamicsCfg = null;
-            S2ASynapseI2IDynamicsCfg = null;
-            A2ASynapseE2EDynamicsCfg = null;
-            A2ASynapseI2EDynamicsCfg = null;
-            A2ASynapseE2IDynamicsCfg = null;
-            A2ASynapseI2IDynamicsCfg = null;
+            S2SSynapseE2EDynamicsCfg = new S2SSynapseE2EDynamicsSettings();
+            S2SSynapseE2IDynamicsCfg = new S2SSynapseE2IDynamicsSettings();
+            S2SSynapseI2EDynamicsCfg = new S2SSynapseI2EDynamicsSettings();
+            S2SSynapseI2IDynamicsCfg = new S2SSynapseI2IDynamicsSettings();
+            A2SSynapseE2EDynamicsCfg = new A2SSynapseE2EDynamicsSettings();
+            A2SSynapseE2IDynamicsCfg = new A2SSynapseE2IDynamicsSettings();
+            A2SSynapseI2EDynamicsCfg = new A2SSynapseI2EDynamicsSettings();
+            A2SSynapseI2IDynamicsCfg = new A2SSynapseI2IDynamicsSettings();
+            S2ASynapseE2EDynamicsCfg = new S2ASynapseE2EDynamicsSettings();
+            S2ASynapseI2EDynamicsCfg = new S2ASynapseI2EDynamicsSettings();
+            S2ASynapseE2IDynamicsCfg = new S2ASynapseE2IDynamicsSettings();
+            S2ASynapseI2IDynamicsCfg = new S2ASynapseI2IDynamicsSettings();
+            A2ASynapseE2EDynamicsCfg = new A2ASynapseE2EDynamicsSettings();
+            A2ASynapseI2EDynamicsCfg = new A2ASynapseI2EDynamicsSettings();
+            A2ASynapseE2IDynamicsCfg = new A2ASynapseE2IDynamicsSettings();
+            A2ASynapseI2IDynamicsCfg = new A2ASynapseI2IDynamicsSettings();
+            return;
+        }
+
+        /// <summary>
+        /// Creates an initialized instance
+        /// </summary>
+        /// <param name="dynamicSettings">Specific dynamics settings</param>
+        public InternalSynapseSettings(params DynamicsSettings[] dynamicSettings)
+            :this()
+        {
+            foreach(DynamicsSettings ds in dynamicSettings)
+            {
+                if(ds.GetType() == typeof(S2SSynapseE2EDynamicsSettings))
+                {
+                    S2SSynapseE2EDynamicsCfg = (S2SSynapseE2EDynamicsSettings)ds;
+                }
+                else if (ds.GetType() == typeof(S2SSynapseE2IDynamicsSettings))
+                {
+                    S2SSynapseE2IDynamicsCfg = (S2SSynapseE2IDynamicsSettings)ds;
+                }
+                else if (ds.GetType() == typeof(S2SSynapseI2EDynamicsSettings))
+                {
+                    S2SSynapseI2EDynamicsCfg = (S2SSynapseI2EDynamicsSettings)ds;
+                }
+                else if (ds.GetType() == typeof(S2SSynapseI2IDynamicsSettings))
+                {
+                    S2SSynapseI2IDynamicsCfg = (S2SSynapseI2IDynamicsSettings)ds;
+                }
+                else if (ds.GetType() == typeof(A2SSynapseE2EDynamicsSettings))
+                {
+                    A2SSynapseE2EDynamicsCfg = (A2SSynapseE2EDynamicsSettings)ds;
+                }
+                else if (ds.GetType() == typeof(A2SSynapseE2IDynamicsSettings))
+                {
+                    A2SSynapseE2IDynamicsCfg = (A2SSynapseE2IDynamicsSettings)ds;
+                }
+                else if (ds.GetType() == typeof(A2SSynapseI2EDynamicsSettings))
+                {
+                    A2SSynapseI2EDynamicsCfg = (A2SSynapseI2EDynamicsSettings)ds;
+                }
+                else if (ds.GetType() == typeof(A2SSynapseI2IDynamicsSettings))
+                {
+                    A2SSynapseI2IDynamicsCfg = (A2SSynapseI2IDynamicsSettings)ds;
+                }
+                else if (ds.GetType() == typeof(S2ASynapseE2EDynamicsSettings))
+                {
+                    S2ASynapseE2EDynamicsCfg = (S2ASynapseE2EDynamicsSettings)ds;
+                }
+                else if (ds.GetType() == typeof(S2ASynapseE2IDynamicsSettings))
+                {
+                    S2ASynapseE2IDynamicsCfg = (S2ASynapseE2IDynamicsSettings)ds;
+                }
+                else if (ds.GetType() == typeof(S2ASynapseI2EDynamicsSettings))
+                {
+                    S2ASynapseI2EDynamicsCfg = (S2ASynapseI2EDynamicsSettings)ds;
+                }
+                else if (ds.GetType() == typeof(S2ASynapseI2IDynamicsSettings))
+                {
+                    S2ASynapseI2IDynamicsCfg = (S2ASynapseI2IDynamicsSettings)ds;
+                }
+                else if (ds.GetType() == typeof(A2ASynapseE2EDynamicsSettings))
+                {
+                    A2ASynapseE2EDynamicsCfg = (A2ASynapseE2EDynamicsSettings)ds;
+                }
+                else if (ds.GetType() == typeof(A2ASynapseE2IDynamicsSettings))
+                {
+                    A2ASynapseE2IDynamicsCfg = (A2ASynapseE2IDynamicsSettings)ds;
+                }
+                else if (ds.GetType() == typeof(A2ASynapseI2EDynamicsSettings))
+                {
+                    A2ASynapseI2EDynamicsCfg = (A2ASynapseI2EDynamicsSettings)ds;
+                }
+                else if (ds.GetType() == typeof(A2ASynapseI2IDynamicsSettings))
+                {
+                    A2ASynapseI2IDynamicsCfg = (A2ASynapseI2IDynamicsSettings)ds;
+                }
+            }
             return;
         }
 
@@ -125,22 +202,22 @@ namespace RCNet.Neural.Network.SM.Synapse
         /// <param name="source">Source instance</param>
         public InternalSynapseSettings(InternalSynapseSettings source)
         {
-            S2SSynapseE2EDynamicsCfg = source.S2SSynapseE2EDynamicsCfg?.DeepClone();
-            S2SSynapseE2IDynamicsCfg = source.S2SSynapseE2IDynamicsCfg?.DeepClone();
-            S2SSynapseI2EDynamicsCfg = source.S2SSynapseI2EDynamicsCfg?.DeepClone();
-            S2SSynapseI2IDynamicsCfg = source.S2SSynapseI2IDynamicsCfg?.DeepClone();
-            A2SSynapseE2EDynamicsCfg = source.A2SSynapseE2EDynamicsCfg?.DeepClone();
-            A2SSynapseE2IDynamicsCfg = source.A2SSynapseE2IDynamicsCfg?.DeepClone();
-            A2SSynapseI2EDynamicsCfg = source.A2SSynapseI2EDynamicsCfg?.DeepClone();
-            A2SSynapseI2IDynamicsCfg = source.A2SSynapseI2IDynamicsCfg?.DeepClone();
-            S2ASynapseE2EDynamicsCfg = source.S2ASynapseE2EDynamicsCfg?.DeepClone();
-            S2ASynapseI2EDynamicsCfg = source.S2ASynapseI2EDynamicsCfg?.DeepClone();
-            S2ASynapseE2IDynamicsCfg = source.S2ASynapseE2IDynamicsCfg?.DeepClone();
-            S2ASynapseI2IDynamicsCfg = source.S2ASynapseI2IDynamicsCfg?.DeepClone();
-            A2ASynapseE2EDynamicsCfg = source.A2ASynapseE2EDynamicsCfg?.DeepClone();
-            A2ASynapseI2EDynamicsCfg = source.A2ASynapseI2EDynamicsCfg?.DeepClone();
-            A2ASynapseE2IDynamicsCfg = source.A2ASynapseE2IDynamicsCfg?.DeepClone();
-            A2ASynapseI2IDynamicsCfg = source.A2ASynapseI2IDynamicsCfg?.DeepClone();
+            S2SSynapseE2EDynamicsCfg = (S2SSynapseE2EDynamicsSettings)source.S2SSynapseE2EDynamicsCfg.DeepClone();
+            S2SSynapseE2IDynamicsCfg = (S2SSynapseE2IDynamicsSettings)source.S2SSynapseE2IDynamicsCfg.DeepClone();
+            S2SSynapseI2EDynamicsCfg = (S2SSynapseI2EDynamicsSettings)source.S2SSynapseI2EDynamicsCfg.DeepClone();
+            S2SSynapseI2IDynamicsCfg = (S2SSynapseI2IDynamicsSettings)source.S2SSynapseI2IDynamicsCfg.DeepClone();
+            A2SSynapseE2EDynamicsCfg = (A2SSynapseE2EDynamicsSettings)source.A2SSynapseE2EDynamicsCfg.DeepClone();
+            A2SSynapseE2IDynamicsCfg = (A2SSynapseE2IDynamicsSettings)source.A2SSynapseE2IDynamicsCfg.DeepClone();
+            A2SSynapseI2EDynamicsCfg = (A2SSynapseI2EDynamicsSettings)source.A2SSynapseI2EDynamicsCfg.DeepClone();
+            A2SSynapseI2IDynamicsCfg = (A2SSynapseI2IDynamicsSettings)source.A2SSynapseI2IDynamicsCfg.DeepClone();
+            S2ASynapseE2EDynamicsCfg = (S2ASynapseE2EDynamicsSettings)source.S2ASynapseE2EDynamicsCfg.DeepClone();
+            S2ASynapseI2EDynamicsCfg = (S2ASynapseI2EDynamicsSettings)source.S2ASynapseI2EDynamicsCfg.DeepClone();
+            S2ASynapseE2IDynamicsCfg = (S2ASynapseE2IDynamicsSettings)source.S2ASynapseE2IDynamicsCfg.DeepClone();
+            S2ASynapseI2IDynamicsCfg = (S2ASynapseI2IDynamicsSettings)source.S2ASynapseI2IDynamicsCfg.DeepClone();
+            A2ASynapseE2EDynamicsCfg = (A2ASynapseE2EDynamicsSettings)source.A2ASynapseE2EDynamicsCfg.DeepClone();
+            A2ASynapseI2EDynamicsCfg = (A2ASynapseI2EDynamicsSettings)source.A2ASynapseI2EDynamicsCfg.DeepClone();
+            A2ASynapseE2IDynamicsCfg = (A2ASynapseE2IDynamicsSettings)source.A2ASynapseE2IDynamicsCfg.DeepClone();
+            A2ASynapseI2IDynamicsCfg = (A2ASynapseI2IDynamicsSettings)source.A2ASynapseI2IDynamicsCfg.DeepClone();
             return;
         }
 
@@ -160,55 +237,81 @@ namespace RCNet.Neural.Network.SM.Synapse
             XElement dynamicsCfgElem;
             //S2SSynapseE2EDynamicsCfg
             dynamicsCfgElem = settingsElem.XPathSelectElement("./dynamicsS2SEE");
-            S2SSynapseE2EDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0.5, 1100, 50, true) : new DynamicsSettings(dynamicsCfgElem);
+            S2SSynapseE2EDynamicsCfg = dynamicsCfgElem == null ? new S2SSynapseE2EDynamicsSettings() : new S2SSynapseE2EDynamicsSettings(dynamicsCfgElem);
             //S2SSynapseE2IDynamicsCfg
             dynamicsCfgElem = settingsElem.XPathSelectElement("./dynamicsS2SEI");
-            S2SSynapseE2IDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0.05, 125, 1200, true) : new DynamicsSettings(dynamicsCfgElem);
+            S2SSynapseE2IDynamicsCfg = dynamicsCfgElem == null ? new S2SSynapseE2IDynamicsSettings() : new S2SSynapseE2IDynamicsSettings(dynamicsCfgElem);
             //S2SSynapseI2EDynamicsCfg
             dynamicsCfgElem = settingsElem.XPathSelectElement("./dynamicsS2SIE");
-            S2SSynapseI2EDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0.25, 700, 20, true) : new DynamicsSettings(dynamicsCfgElem);
+            S2SSynapseI2EDynamicsCfg = dynamicsCfgElem == null ? new S2SSynapseI2EDynamicsSettings() : new S2SSynapseI2EDynamicsSettings(dynamicsCfgElem);
             //S2SSynapseI2IDynamicsCfg
             dynamicsCfgElem = settingsElem.XPathSelectElement("./dynamicsS2SII");
-            S2SSynapseI2IDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0.32, 144, 60, true) : new DynamicsSettings(dynamicsCfgElem);
+            S2SSynapseI2IDynamicsCfg = dynamicsCfgElem == null ? new S2SSynapseI2IDynamicsSettings() : new S2SSynapseI2IDynamicsSettings(dynamicsCfgElem);
             //A2SSynapseE2EDynamicsCfg
             dynamicsCfgElem = settingsElem.XPathSelectElement("./dynamicsA2SEE");
-            A2SSynapseE2EDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0.5, 1100, 50, true) : new DynamicsSettings(dynamicsCfgElem);
+            A2SSynapseE2EDynamicsCfg = dynamicsCfgElem == null ? new A2SSynapseE2EDynamicsSettings() : new A2SSynapseE2EDynamicsSettings(dynamicsCfgElem);
             //A2SSynapseE2IDynamicsCfg
             dynamicsCfgElem = settingsElem.XPathSelectElement("./dynamicsA2SEI");
-            A2SSynapseE2IDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0.05, 125, 1200, true) : new DynamicsSettings(dynamicsCfgElem);
+            A2SSynapseE2IDynamicsCfg = dynamicsCfgElem == null ? new A2SSynapseE2IDynamicsSettings() : new A2SSynapseE2IDynamicsSettings(dynamicsCfgElem);
             //A2SSynapseI2EDynamicsCfg
             dynamicsCfgElem = settingsElem.XPathSelectElement("./dynamicsA2SIE");
-            A2SSynapseI2EDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0.25, 700, 20, true) : new DynamicsSettings(dynamicsCfgElem);
+            A2SSynapseI2EDynamicsCfg = dynamicsCfgElem == null ? new A2SSynapseI2EDynamicsSettings() : new A2SSynapseI2EDynamicsSettings(dynamicsCfgElem);
             //A2SSynapseI2IDynamicsCfg
             dynamicsCfgElem = settingsElem.XPathSelectElement("./dynamicsA2SII");
-            A2SSynapseI2IDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0.32, 144, 60, true) : new DynamicsSettings(dynamicsCfgElem);
-
+            A2SSynapseI2IDynamicsCfg = dynamicsCfgElem == null ? new A2SSynapseI2IDynamicsSettings() : new A2SSynapseI2IDynamicsSettings(dynamicsCfgElem);
             //Analog target
             //S2ASynapseE2EDynamicsCfg
             dynamicsCfgElem = settingsElem.XPathSelectElement("./dynamicsS2AEE");
-            S2ASynapseE2EDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0, 0, 0, false) : new DynamicsSettings(dynamicsCfgElem);
+            S2ASynapseE2EDynamicsCfg = dynamicsCfgElem == null ? new S2ASynapseE2EDynamicsSettings() : new S2ASynapseE2EDynamicsSettings(dynamicsCfgElem);
             //S2ASynapseI2EDynamicsCfg
             dynamicsCfgElem = settingsElem.XPathSelectElement("./dynamicsS2AIE");
-            S2ASynapseI2EDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0, 0, 0, false) : new DynamicsSettings(dynamicsCfgElem);
+            S2ASynapseI2EDynamicsCfg = dynamicsCfgElem == null ? new S2ASynapseI2EDynamicsSettings() : new S2ASynapseI2EDynamicsSettings(dynamicsCfgElem);
             //S2ASynapseE2IDynamicsCfg
             dynamicsCfgElem = settingsElem.XPathSelectElement("./dynamicsS2AEI");
-            S2ASynapseE2IDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0, 0, 0, false) : new DynamicsSettings(dynamicsCfgElem);
+            S2ASynapseE2IDynamicsCfg = dynamicsCfgElem == null ? new S2ASynapseE2IDynamicsSettings() : new S2ASynapseE2IDynamicsSettings(dynamicsCfgElem);
             //S2ASynapseI2IDynamicsCfg
             dynamicsCfgElem = settingsElem.XPathSelectElement("./dynamicsS2AII");
-            S2ASynapseI2IDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0, 0, 0, false) : new DynamicsSettings(dynamicsCfgElem);
+            S2ASynapseI2IDynamicsCfg = dynamicsCfgElem == null ? new S2ASynapseI2IDynamicsSettings() : new S2ASynapseI2IDynamicsSettings(dynamicsCfgElem);
             //A2ASynapseE2EDynamicsCfg
             dynamicsCfgElem = settingsElem.XPathSelectElement("./dynamicsA2AEE");
-            A2ASynapseE2EDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0, 0, 0, false) : new DynamicsSettings(dynamicsCfgElem);
+            A2ASynapseE2EDynamicsCfg = dynamicsCfgElem == null ? new A2ASynapseE2EDynamicsSettings() : new A2ASynapseE2EDynamicsSettings(dynamicsCfgElem);
             //A2ASynapseI2EDynamicsCfg
             dynamicsCfgElem = settingsElem.XPathSelectElement("./dynamicsA2AIE");
-            A2ASynapseI2EDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0, 0, 0, false) : new DynamicsSettings(dynamicsCfgElem);
+            A2ASynapseI2EDynamicsCfg = dynamicsCfgElem == null ? new A2ASynapseI2EDynamicsSettings() : new A2ASynapseI2EDynamicsSettings(dynamicsCfgElem);
             //A2ASynapseE2IDynamicsCfg
             dynamicsCfgElem = settingsElem.XPathSelectElement("./dynamicsA2AEI");
-            A2ASynapseE2IDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0, 0, 0, false) : new DynamicsSettings(dynamicsCfgElem);
+            A2ASynapseE2IDynamicsCfg = dynamicsCfgElem == null ? new A2ASynapseE2IDynamicsSettings() : new A2ASynapseE2IDynamicsSettings(dynamicsCfgElem);
             //A2ASynapseI2IDynamicsCfg
             dynamicsCfgElem = settingsElem.XPathSelectElement("./dynamicsA2AII");
-            A2ASynapseI2IDynamicsCfg = dynamicsCfgElem == null ? new DynamicsSettings(0, 0, 0, false) : new DynamicsSettings(dynamicsCfgElem);
+            A2ASynapseI2IDynamicsCfg = dynamicsCfgElem == null ? new A2ASynapseI2IDynamicsSettings() : new A2ASynapseI2IDynamicsSettings(dynamicsCfgElem);
             return;
+        }
+
+        //Properties
+        /// <summary>
+        /// Identifies settings containing only default values
+        /// </summary>
+        public override bool ContainsOnlyDefaults
+        {
+            get
+            {
+                return S2SSynapseE2EDynamicsCfg.ContainsOnlyDefaults &&
+                       S2SSynapseE2IDynamicsCfg.ContainsOnlyDefaults &&
+                       S2SSynapseI2EDynamicsCfg.ContainsOnlyDefaults &&
+                       S2SSynapseI2IDynamicsCfg.ContainsOnlyDefaults &&
+                       A2SSynapseE2EDynamicsCfg.ContainsOnlyDefaults &&
+                       A2SSynapseE2IDynamicsCfg.ContainsOnlyDefaults &&
+                       A2SSynapseI2EDynamicsCfg.ContainsOnlyDefaults &&
+                       A2SSynapseI2IDynamicsCfg.ContainsOnlyDefaults &&
+                       S2ASynapseE2EDynamicsCfg.ContainsOnlyDefaults &&
+                       S2ASynapseI2EDynamicsCfg.ContainsOnlyDefaults &&
+                       S2ASynapseE2IDynamicsCfg.ContainsOnlyDefaults &&
+                       S2ASynapseI2IDynamicsCfg.ContainsOnlyDefaults &&
+                       A2ASynapseE2EDynamicsCfg.ContainsOnlyDefaults &&
+                       A2ASynapseI2EDynamicsCfg.ContainsOnlyDefaults &&
+                       A2ASynapseE2IDynamicsCfg.ContainsOnlyDefaults &&
+                       A2ASynapseI2IDynamicsCfg.ContainsOnlyDefaults;
+            }
         }
 
         //Methods
@@ -360,139 +463,99 @@ namespace RCNet.Neural.Network.SM.Synapse
         /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>
-        public InternalSynapseSettings DeepClone()
+        public override RCNetBaseSettings DeepClone()
         {
             return new InternalSynapseSettings(this);
         }
 
-        //Inner classes
         /// <summary>
-        /// Configuration of synapse dynamics
+        /// Generates xml element containing the settings.
         /// </summary>
-        [Serializable]
-        public class DynamicsSettings
+        /// <param name="rootElemName">Name to be used as a name of the root element.</param>
+        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <returns>XElement containing the settings</returns>
+        public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
-            //Attribute properties
-            /// <summary>
-            /// Synapse's resting efficacy (average probability of neurotransmitter release)
-            /// </summary>
-            public double RestingEfficacy { get; set; }
-            /// <summary>
-            /// Synapse's efficacy depression model time constant (ms)
-            /// </summary>
-            public double TauDepression { get; set; }
-            /// <summary>
-            /// Synapse's efficacy facilitation model time constant (ms)
-            /// </summary>
-            public double TauFacilitation { get; set; }
-            /// <summary>
-            /// Specifies whether to apply short-term plasticity
-            /// </summary>
-            public bool ApplyShortTermPlasticity { get; set; }
-            /// <summary>
-            /// Synapse's random weight settings
-            /// </summary>
-            public RandomValueSettings WeightCfg { get; set; }
-
-            //Constructors
-            /// <summary>
-            /// Creates an uninitialized instance
-            /// </summary>
-            public DynamicsSettings()
+            XElement rootElem = new XElement(rootElemName);
+            if (!suppressDefaults || !S2SSynapseE2EDynamicsCfg.ContainsOnlyDefaults)
             {
-                RestingEfficacy = 0;
-                TauFacilitation = 0;
-                TauDepression = 0;
-                ApplyShortTermPlasticity = true;
-                WeightCfg = null;
-                return;
+                rootElem.Add(S2SSynapseE2EDynamicsCfg.GetXml(suppressDefaults));
+            }
+            if (!suppressDefaults || !S2SSynapseE2IDynamicsCfg.ContainsOnlyDefaults)
+            {
+                rootElem.Add(S2SSynapseE2IDynamicsCfg.GetXml(suppressDefaults));
+            }
+            if (!suppressDefaults || !S2SSynapseI2EDynamicsCfg.ContainsOnlyDefaults)
+            {
+                rootElem.Add(S2SSynapseI2EDynamicsCfg.GetXml(suppressDefaults));
+            }
+            if (!suppressDefaults || !S2SSynapseI2IDynamicsCfg.ContainsOnlyDefaults)
+            {
+                rootElem.Add(S2SSynapseI2IDynamicsCfg.GetXml(suppressDefaults));
+            }
+            if (!suppressDefaults || !A2SSynapseE2EDynamicsCfg.ContainsOnlyDefaults)
+            {
+                rootElem.Add(A2SSynapseE2EDynamicsCfg.GetXml(suppressDefaults));
+            }
+            if (!suppressDefaults || !A2SSynapseE2IDynamicsCfg.ContainsOnlyDefaults)
+            {
+                rootElem.Add(A2SSynapseE2IDynamicsCfg.GetXml(suppressDefaults));
+            }
+            if (!suppressDefaults || !A2SSynapseI2EDynamicsCfg.ContainsOnlyDefaults)
+            {
+                rootElem.Add(A2SSynapseI2EDynamicsCfg.GetXml(suppressDefaults));
+            }
+            if (!suppressDefaults || !A2SSynapseI2IDynamicsCfg.ContainsOnlyDefaults)
+            {
+                rootElem.Add(A2SSynapseI2IDynamicsCfg.GetXml(suppressDefaults));
+            }
+            if (!suppressDefaults || !S2ASynapseE2EDynamicsCfg.ContainsOnlyDefaults)
+            {
+                rootElem.Add(S2ASynapseE2EDynamicsCfg.GetXml(suppressDefaults));
+            }
+            if (!suppressDefaults || !S2ASynapseE2IDynamicsCfg.ContainsOnlyDefaults)
+            {
+                rootElem.Add(S2ASynapseE2IDynamicsCfg.GetXml(suppressDefaults));
+            }
+            if (!suppressDefaults || !S2ASynapseI2EDynamicsCfg.ContainsOnlyDefaults)
+            {
+                rootElem.Add(S2ASynapseI2EDynamicsCfg.GetXml(suppressDefaults));
+            }
+            if (!suppressDefaults || !S2ASynapseI2IDynamicsCfg.ContainsOnlyDefaults)
+            {
+                rootElem.Add(S2ASynapseI2IDynamicsCfg.GetXml(suppressDefaults));
+            }
+            if (!suppressDefaults || !A2ASynapseE2EDynamicsCfg.ContainsOnlyDefaults)
+            {
+                rootElem.Add(A2ASynapseE2EDynamicsCfg.GetXml(suppressDefaults));
+            }
+            if (!suppressDefaults || !A2ASynapseE2IDynamicsCfg.ContainsOnlyDefaults)
+            {
+                rootElem.Add(A2ASynapseE2IDynamicsCfg.GetXml(suppressDefaults));
+            }
+            if (!suppressDefaults || !A2ASynapseI2EDynamicsCfg.ContainsOnlyDefaults)
+            {
+                rootElem.Add(A2ASynapseI2EDynamicsCfg.GetXml(suppressDefaults));
+            }
+            if (!suppressDefaults || !A2ASynapseI2IDynamicsCfg.ContainsOnlyDefaults)
+            {
+                rootElem.Add(A2ASynapseI2IDynamicsCfg.GetXml(suppressDefaults));
             }
 
-            /// <summary>
-            /// The deep copy constructor
-            /// </summary>
-            /// <param name="source">Source instance</param>
-            public DynamicsSettings(DynamicsSettings source)
-            {
-                RestingEfficacy = source.RestingEfficacy;
-                TauFacilitation = source.TauFacilitation;
-                TauDepression = source.TauDepression;
-                ApplyShortTermPlasticity = source.ApplyShortTermPlasticity;
-                WeightCfg = null;
-                if (source.WeightCfg != null)
-                {
-                    WeightCfg = source.WeightCfg.DeepClone();
-                }
-                return;
-            }
+            Validate(rootElem, XsdTypeName);
+            return rootElem;
+        }
 
-            /// <summary>
-            /// Creates the instance and initialize it from given xml element.
-            /// </summary>
-            /// <param name="settingsElem">
-            /// Xml data containing settings.
-            /// Content of xml element is not validated against the xml schema.
-            /// </param>
-            public DynamicsSettings(XElement settingsElem)
-            {
-                if (settingsElem != null)
-                {
-                    //Parsing
-                    //Resting efficacy
-                    RestingEfficacy = double.Parse(settingsElem.Attribute("restingEfficacy").Value, CultureInfo.InvariantCulture);
-                    //Efficacy depression
-                    TauDepression = double.Parse(settingsElem.Attribute("tauDepression").Value, CultureInfo.InvariantCulture);
-                    //Efficacy facilitation
-                    TauFacilitation = double.Parse(settingsElem.Attribute("tauFacilitation").Value, CultureInfo.InvariantCulture);
-                    //Apply short-term plasticity ?
-                    ApplyShortTermPlasticity = bool.Parse(settingsElem.Attribute("applyShortTermPlasticity").Value);
-                    //Weight
-                    XElement weightCfgElem = settingsElem.Descendants("weight").FirstOrDefault();
-                    if (weightCfgElem != null)
-                    {
-                        WeightCfg = new RandomValueSettings(settingsElem.Descendants("weight").FirstOrDefault());
-                    }
-                    else
-                    {
-                        WeightCfg = new RandomValueSettings(0, 1);
-                    }
-                }
-                return;
-            }
+        /// <summary>
+        /// Generates default named xml element containing the settings.
+        /// </summary>
+        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <returns>XElement containing the settings</returns>
+        public override XElement GetXml(bool suppressDefaults)
+        {
+            return GetXml("synapse", suppressDefaults);
+        }
 
-            /// <summary>
-            /// Creates initialized instance
-            /// </summary>
-            /// <param name="restingEfficacy">Synapse's resting efficacy (average probability of neurotransmitter release)</param>
-            /// <param name="tauDepression">Synapse's efficacy depression model time constant (ms)</param>
-            /// <param name="tauFacilitation">Synapse's efficacy facilitation model time constant (ms)</param>
-            /// <param name="applyShortTermPlasticity">Specifies whether to apply short-term plasticity</param>
-            /// <param name="weightCfg">Synapse's random weight settings</param>
-            public DynamicsSettings(double restingEfficacy,
-                                    double tauDepression,
-                                    double tauFacilitation,
-                                    bool applyShortTermPlasticity,
-                                    RandomValueSettings weightCfg = null
-                                    )
-            {
-                RestingEfficacy = restingEfficacy;
-                TauDepression = tauDepression;
-                TauFacilitation = tauFacilitation;
-                ApplyShortTermPlasticity = applyShortTermPlasticity;
-                WeightCfg = (weightCfg == null ? new RandomValueSettings(0, 1) : weightCfg.DeepClone());
-                return;
-            }
-
-            //Methods
-            /// <summary>
-            /// Creates the deep copy instance of this instance
-            /// </summary>
-            public DynamicsSettings DeepClone()
-            {
-                return new DynamicsSettings(this);
-            }
-
-        }//DynamicsSettings
 
     }//InternalSynapseSettings
 

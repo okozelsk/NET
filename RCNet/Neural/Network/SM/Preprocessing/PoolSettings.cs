@@ -43,7 +43,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// <summary>
         /// Configuration of the predictors
         /// </summary>
-        public HiddenNeuronPredictorsSettings PredictorsCfg { get; set; }
+        public PredictorsSettings PredictorsCfg { get; set; }
         /// <summary>
         /// Configuration of the pool's neurons interconnection
         /// </summary>
@@ -67,7 +67,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             {
                 NeuronGroups.Add(item.DeepClone());
             }
-            PredictorsCfg = source.PredictorsCfg?.DeepClone();
+            PredictorsCfg = (PredictorsSettings)source.PredictorsCfg?.DeepClone();
             InterconnectionCfg = source.InterconnectionCfg.DeepClone();
             return;
         }
@@ -150,7 +150,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             XElement predictorsElem = poolSettingsElem.Descendants("predictors").FirstOrDefault();
             if (predictorsElem != null)
             {
-                PredictorsCfg = new HiddenNeuronPredictorsSettings(predictorsElem);
+                PredictorsCfg = new PredictorsSettings(predictorsElem);
             }
 
             //Interconnection
@@ -163,7 +163,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>
-        public PoolSettings DeepClone()
+        public override RCNetBaseSettings DeepClone()
         {
             return new PoolSettings(this);
         }
@@ -208,7 +208,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             /// <summary>
             /// Common activation settings of the groupped neurons
             /// </summary>
-            public Object ActivationCfg { get; set; }
+            public RCNetBaseSettings ActivationCfg { get; set; }
             /// <summary>
             /// Restriction of neuron's output signaling
             /// </summary>
@@ -235,7 +235,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             /// <summary>
             /// Configuration of the predictors
             /// </summary>
-            public HiddenNeuronPredictorsSettings PredictorsCfg { get; set; }
+            public PredictorsSettings PredictorsCfg { get; set; }
 
             //Constructors
             /// <summary>
@@ -252,11 +252,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 ActivationType = source.ActivationType;
                 ActivationCfg = ActivationFactory.DeepCloneActivationSettings(source.ActivationCfg);
                 SignalingRestriction = source.SignalingRestriction;
-                BiasCfg = source.BiasCfg?.DeepClone();
+                BiasCfg = (RandomValueSettings)source.BiasCfg?.DeepClone();
                 AnalogFiringThreshold = source.AnalogFiringThreshold;
                 RetainmentNeuronsDensity = source.RetainmentNeuronsDensity;
-                RetainmentStrengthCfg = source.RetainmentStrengthCfg?.DeepClone();
-                PredictorsCfg = source.PredictorsCfg?.DeepClone();
+                RetainmentStrengthCfg = (RandomValueSettings)source.RetainmentStrengthCfg?.DeepClone();
+                PredictorsCfg = (PredictorsSettings)source.PredictorsCfg?.DeepClone();
                 return;
             }
 
@@ -319,7 +319,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 XElement predictorsElem = settingsElem.Descendants("predictors").FirstOrDefault();
                 if (predictorsElem != null)
                 {
-                    PredictorsCfg = new HiddenNeuronPredictorsSettings(predictorsElem);
+                    PredictorsCfg = new PredictorsSettings(predictorsElem);
                 }
                 return;
             }
@@ -536,7 +536,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                     ConstantNumOfConnections = source.ConstantNumOfConnections;
                     ReplaceExistingConnections = source.ReplaceExistingConnections;
                     Repetitions = source.Repetitions;
-                    SynapseCfg = source.SynapseCfg.DeepClone();
+                    SynapseCfg = (InternalSynapseSettings)source.SynapseCfg.DeepClone();
                     return;
                 }
 
@@ -641,7 +641,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                     Circle = source.Circle;
                     ReplaceExistingConnections = source.ReplaceExistingConnections;
                     Repetitions = source.Repetitions;
-                    SynapseCfg = source.SynapseCfg.DeepClone();
+                    SynapseCfg = (InternalSynapseSettings)source.SynapseCfg.DeepClone();
                     return;
                 }
 

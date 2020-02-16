@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace RCNet.RandomValue
 {
@@ -12,10 +13,9 @@ namespace RCNet.RandomValue
     public interface IDistrSettings
     {
         /// <summary>
-        /// Creates deep clone
+        /// Type of random distribution
         /// </summary>
-        /// <returns></returns>
-        IDistrSettings DeepClone();
+        RandomCommon.DistributionType Type { get; }
 
     }//IDistrSettings
 }

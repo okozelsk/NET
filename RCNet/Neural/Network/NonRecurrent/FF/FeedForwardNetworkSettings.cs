@@ -16,7 +16,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
     /// The easiest and safest way to create an instance is to use the xml constructor.
     /// </summary>
     [Serializable]
-    public class FeedForwardNetworkSettings : RCNetBaseSettings
+    public class FeedForwardNetworkSettings : RCNetBaseSettings, INonRecurrentNetworkSettings
     {
         //Constants
         /// <summary>
@@ -26,32 +26,47 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
 
         //Attribute properties
         /// <summary>
-        /// Collection of hidden layer definitions. Hidden layers are optional.
+        /// Hidden layers configuration. Hidden layers are optional.
         /// </summary>
-        public List<HiddenLayerSettings> HiddenLayerCollection { get; set; }
+        public HiddenLayersSettings HiddenLayersCfg { get; }
         /// <summary>
-        /// Activation function settings of the output layer.
+        /// Output layer activation configuration
         /// </summary>
-        public Object OutputLayerActivation { get; set; }
+        public RCNetBaseSettings OutputActivationCfg { get; }
         /// <summary>
         /// Network output values range.
         /// </summary>
-        public Interval OutputRange { get; set; }
+        public Interval OutputRange { get; }
         /// <summary>
-        /// Startup parameters for the trainer
+        /// Configuration of associated trainer
         /// </summary>
-        public INonRecurrentNetworkTrainerSettings TrainerCfg { get; set; }
+        public RCNetBaseSettings TrainerCfg { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an uninitialized instance
+        /// Creates an initialized instance
         /// </summary>
-        public FeedForwardNetworkSettings()
+        /// <param name="outputActivationCfg">Output layer activation configuration</param>
+        /// <param name="hiddenLayersCfg">Hidden layers configuration. Hidden layers are optional.</param>
+        /// <param name="trainerCfg">Configuration of associated trainer</param>
+        public FeedForwardNetworkSettings(RCNetBaseSettings outputActivationCfg,
+                                          HiddenLayersSettings hiddenLayersCfg,
+                                          RCNetBaseSettings trainerCfg
+                                          )
         {
-            OutputLayerActivation = null;
-            OutputRange = null;
-            HiddenLayerCollection = new List<HiddenLayerSettings>();
-            TrainerCfg = null;
+            OutputActivationCfg = ActivationFactory.DeepCloneActivationSettings(outputActivationCfg);
+            CheckAllowedActivation(OutputActivationCfg, out Interval outputRange);
+            OutputRange = outputRange;
+            HiddenLayersCfg = hiddenLayersCfg == null ? new HiddenLayersSettings() : (HiddenLayersSettings)hiddenLayersCfg.DeepClone();
+            if(trainerCfg.GetType() != typeof(QRDRegrTrainerSettings) &&
+               trainerCfg.GetType() != typeof(RidgeRegrTrainerSettings) &&
+               trainerCfg.GetType() != typeof(ElasticRegrTrainerSettings) &&
+               trainerCfg.GetType() != typeof(RPropTrainerSettings)
+               )
+            {
+                throw new Exception("Unsupported trainer settings.");
+            }
+            TrainerCfg = trainerCfg.DeepClone();
             return;
         }
 
@@ -61,23 +76,10 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         /// <param name="source">Source instance</param>
         public FeedForwardNetworkSettings(FeedForwardNetworkSettings source)
         {
-            OutputLayerActivation = null;
-            OutputRange = null;
-            if (source.OutputLayerActivation != null)
-            {
-                OutputLayerActivation = ActivationFactory.DeepCloneActivationSettings(source.OutputLayerActivation);
-                OutputRange = source.OutputRange.DeepClone();
-            }
-            HiddenLayerCollection = new List<HiddenLayerSettings>(source.HiddenLayerCollection.Count);
-            foreach(HiddenLayerSettings shls in source.HiddenLayerCollection)
-            {
-                HiddenLayerCollection.Add(shls.DeepClone());
-            }
-            TrainerCfg = null;
-            if (source.TrainerCfg != null)
-            {
-                TrainerCfg = source.TrainerCfg.DeepClone();
-            }
+            OutputActivationCfg = ActivationFactory.DeepCloneActivationSettings(source.OutputActivationCfg);
+            OutputRange = source.OutputRange.DeepClone();
+            HiddenLayersCfg = (HiddenLayersSettings)source.HiddenLayersCfg.DeepClone();
+            TrainerCfg = source.TrainerCfg.DeepClone();
             return;
         }
 
@@ -94,21 +96,18 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             //Validation
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
-            OutputLayerActivation = ActivationFactory.LoadSettings(settingsElem.Descendants().First());
-            if (!IsAllowedActivation(OutputLayerActivation, out Interval outputRange))
-            {
-                throw new ApplicationException($"Activation can't be used in FF network. Activation function has to be stateless and has to support derivative calculation.");
-            }
+            OutputActivationCfg = ActivationFactory.LoadSettings(settingsElem.Descendants().First());
+            CheckAllowedActivation(OutputActivationCfg, out Interval outputRange);
             OutputRange = outputRange;
             //Hidden layers
-            HiddenLayerCollection = new List<HiddenLayerSettings>();
             XElement hiddenLayersElem = settingsElem.Descendants("hiddenLayers").FirstOrDefault();
             if (hiddenLayersElem != null)
             {
-                foreach (XElement layerElem in hiddenLayersElem.Descendants("layer"))
-                {
-                    HiddenLayerCollection.Add(new HiddenLayerSettings(layerElem));
-                }
+                HiddenLayersCfg = new HiddenLayersSettings(hiddenLayersElem);
+            }
+            else
+            {
+                HiddenLayersCfg = new HiddenLayersSettings();
             }
             //Trainer configuration
             TrainerCfg = null;
@@ -117,21 +116,21 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
                 if(candidate.Name.LocalName == "qrdRegrTrainer")
                 {
                     TrainerCfg = new QRDRegrTrainerSettings(candidate);
+                    break;
                 }
                 else if (candidate.Name.LocalName == "ridgeRegrTrainer")
                 {
                     TrainerCfg = new RidgeRegrTrainerSettings(candidate);
+                    break;
                 }
                 else if (candidate.Name.LocalName == "elasticRegrTrainer")
                 {
                     TrainerCfg = new ElasticRegrTrainerSettings(candidate);
+                    break;
                 }
                 else if (candidate.Name.LocalName == "resPropTrainer")
                 {
                     TrainerCfg = new RPropTrainerSettings(candidate);
-                }
-                if (TrainerCfg != null)
-                {
                     break;
                 }
             }
@@ -142,14 +141,19 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             return;
         }
 
-        //Methods
+        //Properties
+        /// <summary>
+        /// Identifies settings containing only default values
+        /// </summary>
+        public override bool ContainsOnlyDefaults { get { return false; } }
+
         //Static methods
         /// <summary>
-        /// Fuction checks if specified activation can be used in FF network 
+        /// Fuction tests if specified activation can be used in FF network 
         /// </summary>
         /// <param name="activationSettings">Activation settings</param>
         /// <param name="outputRange">Returned range of the activation function</param>
-        public static bool IsAllowedActivation(Object activationSettings, out Interval outputRange)
+        public static bool IsAllowedActivation(RCNetBaseSettings activationSettings, out Interval outputRange)
         {
             IActivationFunction af = ActivationFactory.Create(activationSettings, new Random());
             outputRange = af.OutputRange.DeepClone();
@@ -160,85 +164,57 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             return true;
         }
 
+        /// <summary>
+        /// Fuction checks if specified activation can be used in FF network 
+        /// </summary>
+        /// <param name="activationSettings">Activation settings</param>
+        /// <param name="outputRange">Returned range of the activation function</param>
+        public static void CheckAllowedActivation(RCNetBaseSettings activationSettings, out Interval outputRange)
+        {
+            if(!IsAllowedActivation(activationSettings, out outputRange))
+            {
+                throw new ApplicationException($"Activation can't be used in FF network. Activation function has to be stateless and has to support derivative calculation.");
+            }
+            return;
+        }
+
         //Methods
         /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>
-        public FeedForwardNetworkSettings DeepClone()
+        public override RCNetBaseSettings DeepClone()
         {
             return new FeedForwardNetworkSettings(this);
         }
 
-        //Inner classes
         /// <summary>
-        /// Feed forward network hidden layer settings
+        /// Generates xml element containing the settings.
         /// </summary>
-        [Serializable]
-        public class HiddenLayerSettings
+        /// <param name="rootElemName">Name to be used as a name of the root element.</param>
+        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <returns>XElement containing the settings</returns>
+        public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
-            //Attributes
-            /// <summary>
-            /// Number of hidden layer neurons
-            /// </summary>
-            public int NumOfNeurons { get; set; }
-            /// <summary>
-            /// Settings of activation function of the hidden layer neurons
-            /// </summary>
-            public Object Activation { get; set; }
-
-            //Constructors
-            /// <summary>
-            /// Creates an uninitialized instance
-            /// </summary>
-            public HiddenLayerSettings()
+            XElement rootElem = new XElement(rootElemName);
+            rootElem.Add(OutputActivationCfg.GetXml(suppressDefaults));
+            if (!HiddenLayersCfg.ContainsOnlyDefaults)
             {
-                NumOfNeurons = 0;
-                Activation = null;
-                return;
+                rootElem.Add(HiddenLayersCfg.GetXml(suppressDefaults));
             }
+            rootElem.Add(TrainerCfg.GetXml(suppressDefaults));
+            Validate(rootElem, XsdTypeName);
+            return rootElem;
+        }
 
-            /// <summary>
-            /// Copy constructor
-            /// </summary>
-            /// <param name="source">Source instance</param>
-            public HiddenLayerSettings(HiddenLayerSettings source)
-            {
-                NumOfNeurons = source.NumOfNeurons;
-                Activation = null;
-                if (source.Activation != null)
-                {
-                    Activation = ActivationFactory.DeepCloneActivationSettings(source.Activation);
-                }
-                return;
-            }
-
-            /// <summary>
-            /// Creates the instance and initializes it from given xml element.
-            /// </summary>
-            /// <param name="elem">
-            /// Xml data containing the settings.
-            /// </param>
-            public HiddenLayerSettings(XElement elem)
-            {
-                NumOfNeurons = int.Parse(elem.Attribute("neurons").Value);
-                Activation = ActivationFactory.LoadSettings(elem.Descendants().First());
-                if (!IsAllowedActivation(Activation, out Interval outputRange))
-                {
-                    throw new ApplicationException($"Activation can't be used in FF network. Activation has to be time independent and has to support derivative.");
-                }
-                return;
-            }
-
-            //Methods
-            /// <summary>
-            /// Creates the deep copy instance of this instance.
-            /// </summary>
-            public HiddenLayerSettings DeepClone()
-            {
-                return new HiddenLayerSettings(this);
-            }
-
-        }//HiddenLayerSettings
+        /// <summary>
+        /// Generates default named xml element containing the settings.
+        /// </summary>
+        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <returns>XElement containing the settings</returns>
+        public override XElement GetXml(bool suppressDefaults)
+        {
+            return GetXml("ff", suppressDefaults);
+        }
 
     }//FeedForwardNetworkSettings
 
