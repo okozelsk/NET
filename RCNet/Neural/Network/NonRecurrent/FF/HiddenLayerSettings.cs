@@ -20,7 +20,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         /// <summary>
         /// Name of the associated xsd type
         /// </summary>
-        public const string XsdTypeName = "FFNetHiddenLayerCfgType";
+        public const string XsdTypeName = "FFNetHiddenLayerType";
 
         //Attributes
         /// <summary>

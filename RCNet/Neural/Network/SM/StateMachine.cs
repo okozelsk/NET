@@ -10,8 +10,8 @@ using RCNet.Extensions;
 using RCNet.MathTools;
 using RCNet.Neural.Data;
 using RCNet.Neural.Network.NonRecurrent;
-using RCNet.Neural.Network.SM.Neuron;
 using RCNet.Neural.Network.SM.Preprocessing;
+using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron;
 using RCNet.Neural.Network.SM.Readout;
 
 namespace RCNet.Neural.Network.SM
@@ -170,7 +170,7 @@ namespace RCNet.Neural.Network.SM
                     int idx = 0;
                     foreach (HiddenNeuron neuron in NP.PredictorNeuronCollection)
                     {
-                        StateMachineSettings.MapperSettings.AllowedPool poolRef = new StateMachineSettings.MapperSettings.AllowedPool { _reservoirInstanceIdx = neuron.Placement.ReservoirID, _poolIdx = neuron.Placement.PoolID };
+                        StateMachineSettings.MapperSettings.AllowedPool poolRef = new StateMachineSettings.MapperSettings.AllowedPool { _reservoirInstanceIdx = neuron.Location.ReservoirID, _poolIdx = neuron.Location.PoolID };
                         for (int i = 0; i < neuron.PredictorsCfg.NumOfEnabledPredictors; i++)
                         {
                             neuronPoolRefCollection[idx] = poolRef;
@@ -550,7 +550,7 @@ namespace RCNet.Neural.Network.SM
                 {
                     Name = rus.Name;
                     Index = rus.Index;
-                    Task = rus.TaskSettings.Type;
+                    Task = rus.TaskCfg.Type;
                     ErrorStat = new BasicStat();
                     if (Task == ReadoutUnit.TaskType.Classification)
                     {

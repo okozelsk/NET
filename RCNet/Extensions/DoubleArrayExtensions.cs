@@ -13,6 +13,21 @@ namespace RCNet.Extensions
 
         //Methods
         /// <summary>
+        /// Multiplicates all array values by the given coefficient
+        /// </summary>
+        /// <param name="coeff">Coefficient</param>
+        /// <param name="array"></param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Scale(this double[] array, double coeff)
+        {
+            for (int idx = 0; idx < array.Length; idx++)
+            {
+                array[idx] *= coeff;
+            }
+            return;
+        }
+
+        /// <summary>
         /// Rescales all array elements to the new range
         /// </summary>
         /// <param name="newRange">New range (min max interval)</param>

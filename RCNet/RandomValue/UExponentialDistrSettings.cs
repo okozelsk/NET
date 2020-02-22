@@ -18,7 +18,7 @@ namespace RCNet.RandomValue
         /// <summary>
         /// Name of the associated xsd type
         /// </summary>
-        public const string XsdTypeName = "UExponentialDistrCfgType";
+        public const string XsdTypeName = "UExponentialDistrType";
 
         //Attributes
         /// <summary>

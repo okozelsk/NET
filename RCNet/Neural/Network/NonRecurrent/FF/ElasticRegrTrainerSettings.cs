@@ -21,7 +21,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         /// <summary>
         /// Name of the associated xsd type
         /// </summary>
-        public const string XsdTypeName = "FFNetElasticRegrTrainerCfgType";
+        public const string XsdTypeName = "FFNetElasticRegrTrainerType";
         //Default values
         /// <summary>
         /// Default value of lambda argument

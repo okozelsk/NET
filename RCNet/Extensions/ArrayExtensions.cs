@@ -169,48 +169,6 @@ namespace RCNet.Extensions
             return clone;
         }
 
-        /// <summary>
-        /// Multiplicates all array values by the given coefficient
-        /// </summary>
-        /// <param name="coeff">Coefficient</param>
-        /// <param name="array"></param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Scale(this double[] array, double coeff)
-        {
-            for (int idx = 0; idx < array.Length; idx++)
-            {
-                array[idx] *= coeff;
-            }
-            return;
-        }
-
-        /// <summary>
-        /// Fills array with the indexes 0...(Array.Length - 1)
-        /// </summary>
-        /// <param name="array"></param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Indices(this int[] array)
-        {
-            for (int i = 0; i < array.Length; i++)
-            {
-                array[i] = i;
-            }
-            return;
-        }
-
-        /// <summary>
-        /// Fills array with randomly shuffled indexes 0...(ArrayLength - 1)
-        /// </summary>
-        /// <param name="rand">Random generator to be used</param>
-        /// <param name="array"></param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void ShuffledIndices(this int[] array, Random rand)
-        {
-            array.Indices();
-            rand.Shuffle(array);
-            return;
-        }
-
     }//ArrayExtensions
 
 }//Namespace

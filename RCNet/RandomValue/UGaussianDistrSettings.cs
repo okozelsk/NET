@@ -18,7 +18,7 @@ namespace RCNet.RandomValue
         /// <summary>
         /// Name of the associated xsd type
         /// </summary>
-        public const string XsdTypeName = "UGaussianDistrCfgType";
+        public const string XsdTypeName = "UGaussianDistrType";
         //Default values
         /// <summary>
         /// Default value of Mean

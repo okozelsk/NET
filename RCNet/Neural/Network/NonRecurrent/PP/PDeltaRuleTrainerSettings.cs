@@ -20,7 +20,7 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
         /// <summary>
         /// Name of the associated xsd type
         /// </summary>
-        public const string XsdTypeName = "PPNetPDeltaRuleTrainerCfgType";
+        public const string XsdTypeName = "PPNetPDeltaRuleTrainerType";
 
         /// <summary>
         /// Default initial learning rate

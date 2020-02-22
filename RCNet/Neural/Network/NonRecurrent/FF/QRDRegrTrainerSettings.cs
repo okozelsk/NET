@@ -21,7 +21,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         /// <summary>
         /// Name of the associated xsd type
         /// </summary>
-        public const string XsdTypeName = "FFNetQRDRegrTrainerCfgType";
+        public const string XsdTypeName = "FFNetQRDRegrTrainerType";
         /// <summary>
         /// Default margin of noise values from zero
         /// </summary>

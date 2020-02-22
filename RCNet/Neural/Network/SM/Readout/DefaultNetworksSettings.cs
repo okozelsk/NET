@@ -27,7 +27,7 @@ namespace RCNet.Neural.Network.SM.Readout
         /// <summary>
         /// Name of the associated xsd type
         /// </summary>
-        public const string XsdTypeName = "ROutLayerUnitDefaultNetworksCfgType";
+        public const string XsdTypeName = "ROutLayerUnitDefaultNetworksType";
 
         //Attribute properties
         /// <summary>

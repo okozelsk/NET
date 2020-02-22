@@ -18,27 +18,26 @@ namespace RCNet.Neural.Data
     {
         //Enums
         /// <summary>
-        /// Type of variables' time-order data organization in the 1D input data array
+        /// Schema of variables organization in an input pattern
         /// </summary>
-        public enum TimeOrderVarDataOrganization
+        public enum VariablesSchema
         {
             /// <summary>
-            /// Variables' data are groupped in time-order:
             /// [v1(t1),v2(t1),v1(t2),v2(t2),v1(t3),v2(t3)]
+            /// where "v" means variable and "t" means time point.
             /// </summary>
             Groupped,
             /// <summary>
-            /// Variables' data are sequential in time-order:
             /// [v1(t1),v1(t2),v1(t3),v2(t1),v2(t2),v2(t3)]
+            /// where "v" means variable and "t" means time point.
             /// </summary>
             Sequential
         }
 
         /// <summary>
-        /// Collection of member variables data.
-        /// Each pattern member variable has time-ordered data in its own double[] array.
+        /// Translated pattern data. Each variable has its own row of time ordered data.
         /// </summary>
-        public List<double[]> VarDataCollection { get; }
+        public List<double[]> VariablesDataCollection { get; }
 
         //Constructors
         /// <summary>
@@ -47,10 +46,10 @@ namespace RCNet.Neural.Data
         /// <param name="source">Source input pattern</param>
         public InputPattern(InputPattern source)
         {
-            VarDataCollection = new List<double[]>(source.VarDataCollection.Count);
-            foreach(double[] vector in source.VarDataCollection)
+            VariablesDataCollection = new List<double[]>(source.VariablesDataCollection.Count);
+            foreach(double[] vector in source.VariablesDataCollection)
             {
-                VarDataCollection.Add((double[])vector.Clone());
+                VariablesDataCollection.Add((double[])vector.Clone());
             }
             return;
         }
@@ -61,7 +60,7 @@ namespace RCNet.Neural.Data
         /// <param name="numOfVariables">Number of pattern variables</param>
         public InputPattern(int numOfVariables = 1)
         {
-            VarDataCollection = new List<double[]>(numOfVariables);
+            VariablesDataCollection = new List<double[]>(numOfVariables);
             return;
         }
 
@@ -69,32 +68,28 @@ namespace RCNet.Neural.Data
         /// Instantiates an initialized instance.
         /// Supports data resampling (including simple detection of signal begin/end) and amplitude unification.
         /// </summary>
-        /// <param name="inputData">1D array containing pattern input data</param>
-        /// <param name="dataStartIndex">Specifies the zero-based starting index of pattern input data in the given 1D input data array</param>
-        /// <param name="dataLength">Specifies the length of pattern input data in the given 1D input data array</param>
+        /// <param name="inputData">1D array containing the pattern input data</param>
         /// <param name="numOfVariables">Number of pattern variables</param>
-        /// <param name="varDataOrganization">Variables' time-order data organization in the given 1D input data array</param>
+        /// <param name="variablesSchema">Schema of variables organization in the 1D input pattern</param>
         /// <param name="detrend">Specifies if to remove trend from the variables' data</param>
         /// <param name="unifyAmplitudes">Specifies if to unify amplitude of variable's data over the time dimension</param>
-        /// <param name="thresholdOfSignalBeginDetection">If specified (GT 0), signal begin will be decided at timepoint Tx where (abs(s(Tx) - s(T0)) / s(max) - s(min)) >= given threshold (x in order 0..last)</param>
-        /// <param name="thresholdOfSignalEndDetection">If specified (GT 0), signal end will be decided at timepoint Tx where (abs(s(Tx) - s(T last)) / s(max) - s(min)) >= given threshold (x in order last..0)</param>
-        /// <param name="keepCommonTimeScale">If false then each variable will have its own time dimension</param>
+        /// <param name="signalBeginThreshold">If specified (GT 0), signal begin will be decided at timepoint Tx where (abs(s(Tx) - s(T0)) / s(max) - s(min)) >= given threshold (x in order 0..last)</param>
+        /// <param name="signalEndThreshold">If specified (GT 0), signal end will be decided at timepoint Tx where (abs(s(Tx) - s(T last)) / s(max) - s(min)) >= given threshold (x in order last..0)</param>
+        /// <param name="uniformTimeScale">If false then each variable will have its own time dimension</param>
         /// <param name="targetTimePoints">If specified, resulting parttern variable's data will be upsampled and/or downsampled to have specified fixed length (time points)</param>
         public InputPattern(double[] inputData,
-                            int dataStartIndex,
-                            int dataLength,
                             int numOfVariables,
-                            TimeOrderVarDataOrganization varDataOrganization,
+                            VariablesSchema variablesSchema,
                             bool detrend = false,
                             bool unifyAmplitudes = false,
-                            double thresholdOfSignalBeginDetection = 0d,
-                            double thresholdOfSignalEndDetection = 0d,
-                            bool keepCommonTimeScale = true,
+                            double signalBeginThreshold = 0d,
+                            double signalEndThreshold = 0d,
+                            bool uniformTimeScale = true,
                             int targetTimePoints = -1
                             )
             : this(numOfVariables)
         {
-            List<double[]> patternRawData = PatternDataFromArray(inputData, dataStartIndex, dataLength, numOfVariables, varDataOrganization);
+            List<double[]> patternRawData = PatternDataFromArray(inputData, 0, inputData.Length, numOfVariables, variablesSchema);
             int rawTimePoints = patternRawData[0].Length;
             //Remove trend?
             if(detrend)
@@ -117,35 +112,35 @@ namespace RCNet.Neural.Data
             int[] signalEndIdxs = new int[numOfVariables];
             signalEndIdxs.Populate(rawTimePoints - 1);
             //Detection of signal begin?
-            if (thresholdOfSignalBeginDetection > 0d)
+            if (signalBeginThreshold > 0d)
             {
                 int minSignalBeginIdx = -1;
                 for (int varIdx = 0; varIdx < numOfVariables; varIdx++)
                 {
-                    signalBeginIdxs[varIdx] = DetectSignalBegin(patternRawData[varIdx], thresholdOfSignalBeginDetection);
+                    signalBeginIdxs[varIdx] = DetectSignalBegin(patternRawData[varIdx], signalBeginThreshold);
                     if(minSignalBeginIdx == -1 || minSignalBeginIdx > signalBeginIdxs[varIdx])
                     {
                         minSignalBeginIdx = signalBeginIdxs[varIdx];
                     }
                 }
-                if(keepCommonTimeScale)
+                if(uniformTimeScale)
                 {
                     signalBeginIdxs.Populate(minSignalBeginIdx);
                 }
             }
             //Detection of signal end?
-            if (thresholdOfSignalEndDetection > 0d)
+            if (signalEndThreshold > 0d)
             {
                 int maxSignalEndIdx = -1;
                 for (int varIdx = 0; varIdx < numOfVariables; varIdx++)
                 {
-                    signalEndIdxs[varIdx] = DetectSignalEnd(patternRawData[varIdx], thresholdOfSignalEndDetection);
+                    signalEndIdxs[varIdx] = DetectSignalEnd(patternRawData[varIdx], signalEndThreshold);
                     if (maxSignalEndIdx == -1 || maxSignalEndIdx < signalEndIdxs[varIdx])
                     {
                         maxSignalEndIdx = signalEndIdxs[varIdx];
                     }
                 }
-                if (keepCommonTimeScale)
+                if (uniformTimeScale)
                 {
                     signalEndIdxs.Populate(maxSignalEndIdx);
                 }
@@ -173,7 +168,7 @@ namespace RCNet.Neural.Data
                     double[] upsampledData = Upsample(patternRawData[varIdx], signalBeginIdxs[varIdx], signalEndIdxs[varIdx], lcm);
                     //Downsample
                     double[] downsampledData = Downsample(upsampledData, targetTimePoints);
-                    VarDataCollection.Add(downsampledData);
+                    VariablesDataCollection.Add(downsampledData);
                 }
                 else
                 {
@@ -183,7 +178,7 @@ namespace RCNet.Neural.Data
                     {
                         signalData[i] = patternRawData[varIdx][signalBeginIdxs[varIdx] + i];
                     }
-                    VarDataCollection.Add(signalData);
+                    VariablesDataCollection.Add(signalData);
                 }
             }
 
@@ -200,59 +195,17 @@ namespace RCNet.Neural.Data
         /// Parses type of variables' time-order data organization in the 1D input data array
         /// </summary>
         /// <param name="code">Keyword</param>
-        public static TimeOrderVarDataOrganization ParseTimeOrderVarDataOrganization(string code)
+        public static VariablesSchema ParseVariablesSchema(string code)
         {
             switch (code.ToUpper())
             {
                 case "SEQUENTIAL":
-                    return TimeOrderVarDataOrganization.Sequential;
+                    return VariablesSchema.Sequential;
                 case "GROUPPED":
-                    return TimeOrderVarDataOrganization.Groupped;
+                    return VariablesSchema.Groupped;
                 default:
-                    throw new Exception($"Unknown type of variables' time-order data organization in the 1D input data array: {code}");
+                    throw new Exception($"Unknown variables schema: {code}");
             }
-        }
-
-        /// <summary>
-        /// Creates an initialized instance of InputPattern.
-        /// Supports data resampling (including simple detection of signal begin/end), detrending and amplitude unification.
-        /// </summary>
-        /// <param name="inputData">1D array containing pattern input data</param>
-        /// <param name="dataStartIndex">Specifies the zero-based starting index of pattern input data in the given 1D input data array</param>
-        /// <param name="dataLength">Specifies the length of pattern input data in the given 1D input data array</param>
-        /// <param name="numOfVariables">Number of pattern variables</param>
-        /// <param name="varDataOrganization">Variables' time-order data organization in the given 1D input data array</param>
-        /// <param name="detrend">Specifies if to remove trend from the variables' data</param>
-        /// <param name="unifyAmplitudes">Specifies if to unify amplitude of variable's data over the time dimension</param>
-        /// <param name="thresholdOfSignalBeginDetection">If specified (GT 0), signal begin will be decided at timepoint Tx where (abs(s(Tx) - s(T0)) / s(max) - s(min)) >= given threshold (x in order 0..last)</param>
-        /// <param name="thresholdOfSignalEndDetection">If specified (GT 0), signal end will be decided at timepoint Tx where (abs(s(Tx) - s(T last)) / s(max) - s(min)) >= given threshold (x in order last..0)</param>
-        /// <param name="keepCommonTimeScale">If false then each variable will have its own time dimension</param>
-        /// <param name="targetTimePoins">If specified, resulting parttern variable's data will be upsampled and/or downsampled to have specified fixed length (time points)</param>
-        public InputPattern FromVector(double[] inputData,
-                                       int dataStartIndex,
-                                       int dataLength,
-                                       int numOfVariables,
-                                       TimeOrderVarDataOrganization varDataOrganization,
-                                       bool detrend = false,
-                                       bool unifyAmplitudes = false,
-                                       double thresholdOfSignalBeginDetection = 0d,
-                                       double thresholdOfSignalEndDetection = 0d,
-                                       bool keepCommonTimeScale = true,
-                                       int targetTimePoins = -1
-                                       )
-        {
-            return new InputPattern(inputData,
-                                    dataStartIndex,
-                                    dataLength,
-                                    numOfVariables,
-                                    varDataOrganization,
-                                    detrend,
-                                    unifyAmplitudes,
-                                    thresholdOfSignalBeginDetection,
-                                    thresholdOfSignalEndDetection,
-                                    keepCommonTimeScale,
-                                    targetTimePoins
-                                    );
         }
 
         private static int DetectSignalBegin(double[] varData, double thresholdOfSignalDetection)
@@ -412,10 +365,10 @@ namespace RCNet.Neural.Data
         /// <returns>Variable's data at specified time point</returns>
         public double[] GetDataAtTimePoint(int timePointIndex)
         {
-            double[] data = new double[VarDataCollection.Count];
-            for(int i = 0; i < VarDataCollection.Count; i++)
+            double[] data = new double[VariablesDataCollection.Count];
+            for(int i = 0; i < VariablesDataCollection.Count; i++)
             {
-                data[i] = VarDataCollection[i][timePointIndex];
+                data[i] = VariablesDataCollection[i][timePointIndex];
             }
             return data;
         }
@@ -428,7 +381,7 @@ namespace RCNet.Neural.Data
         /// <param name="dataLength">Specifies the length of pattern input data in the given 1D input data array</param>
         /// <param name="numOfVariables">Number of pattern variables</param>
         /// <param name="varDataOrganization">Variables' time-order data organization in the given 1D input data array</param>
-        public List<double[]> PatternDataFromArray(double[] inputData, int dataStartIndex, int dataLength, int numOfVariables, TimeOrderVarDataOrganization varDataOrganization)
+        public List<double[]> PatternDataFromArray(double[] inputData, int dataStartIndex, int dataLength, int numOfVariables, VariablesSchema varDataOrganization)
         {
             //Check data length
             if (dataLength < numOfVariables || (dataLength % numOfVariables) != 0)
@@ -446,7 +399,7 @@ namespace RCNet.Neural.Data
             {
                 for (int i = 0; i < numOfVariables; i++)
                 {
-                    double varValue = varDataOrganization == TimeOrderVarDataOrganization.Groupped ? inputData[dataStartIndex + timeIdx * numOfVariables + i] : inputData[dataStartIndex + i * timePoints + timeIdx];
+                    double varValue = varDataOrganization == VariablesSchema.Groupped ? inputData[dataStartIndex + timeIdx * numOfVariables + i] : inputData[dataStartIndex + i * timePoints + timeIdx];
                     patternData[i][timeIdx] = varValue;
                 }
             }//timeIdx
@@ -458,7 +411,7 @@ namespace RCNet.Neural.Data
         /// </summary>
         public void UnifyAmplitudes()
         {
-            foreach (double[] timeData in VarDataCollection)
+            foreach (double[] timeData in VariablesDataCollection)
             {
                 Interval dataRange = new Interval(timeData);
                 if (dataRange.Max > dataRange.Min)
@@ -473,6 +426,6 @@ namespace RCNet.Neural.Data
         }
 
 
-    }//Pattern
+    }//InputPattern
 
 }//Namespace

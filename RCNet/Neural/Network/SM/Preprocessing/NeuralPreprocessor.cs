@@ -2,16 +2,18 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Globalization;
+using System.Text;
 using RCNet.Extensions;
 using RCNet.MathTools;
+using RCNet.MathTools.Hurst;
+using RCNet.RandomValue;
 using RCNet.Neural.Data;
 using RCNet.Neural.Data.Generators;
 using RCNet.Neural.Data.Filter;
-using RCNet.Neural.Network.SM.Neuron;
-using RCNet.RandomValue;
-using System.Globalization;
-using System.Text;
-using RCNet.MathTools.Hurst;
+using RCNet.Neural.Network.SM.Preprocessing.Reservoir;
+using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron;
+using RCNet.Neural.Network.SM.Preprocessing.Input;
 
 namespace RCNet.Neural.Network.SM.Preprocessing
 {
@@ -69,10 +71,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// Settings used for instance creation.
         /// </summary>
         private readonly NeuralPreprocessorSettings _settings;
+
         /// <summary>
         /// Collection of the internal input generators associated with the internal input fields
         /// </summary>
         private readonly List<IGenerator> _internalInputGeneratorCollection;
+
         /// <summary>
         /// Collection of input feature filters
         /// </summary>
@@ -82,32 +86,44 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// <summary>
         /// Collection of reservoir instances.
         /// </summary>
-        public List<Reservoir> ReservoirCollection { get; }
+        public List<ReservoirInstance> ReservoirCollection { get; }
+        
         /// <summary>
         /// All predicting neurons.
         /// </summary>
         public List<HiddenNeuron> PredictorNeuronCollection { get; }
+        
+        /// <summary>
+        /// Number of boot cycles
+        /// </summary>
+        public int BootCycles { get; }
+        
         /// <summary>
         /// Number of neurons
         /// </summary>
         public int NumOfNeurons { get; }
+        
         /// <summary>
         /// Number of internal synapses
         /// </summary>
         public int NumOfInternalSynapses { get; }
+        
         /// <summary>
         /// -1 (no constraint) for continuous feeding or patterned feeding without routing input to readout.
         /// Required constant length of the input pattern  for patterned feeding without routing input to readout.
         /// </summary>
         public int InputPatternLengthConstraint { get; private set; }
+        
         /// <summary>
         /// Total number of predictors
         /// </summary>
         public int TotalNumOfPredictors { get; private set; }
+        
         /// <summary>
         /// Number of active predictors
         /// </summary>
         public int NumOfActivePredictors { get; private set; }
+        
         /// <summary>
         /// Collection of switches generally enabling/disabling predictors
         /// </summary>
@@ -129,30 +145,34 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             _featureFilterCollection = null;
             //Internal input generators
             _internalInputGeneratorCollection = new List<IGenerator>();
-            foreach(NeuralPreprocessorSettings.InputSettings.InternalField field in _settings.InputConfig.InternalFieldCollection)
+            if (_settings.InputCfg.FieldsCfg.InternalFieldsCfg != null)
             {
-                if(field.GeneratorSettings.GetType() == typeof(PulseGeneratorSettings))
+                foreach (InternalFieldSettings fieldCfg in _settings.InputCfg.FieldsCfg.InternalFieldsCfg.FieldCfgCollection)
                 {
-                    _internalInputGeneratorCollection.Add(new PulseGenerator((PulseGeneratorSettings)field.GeneratorSettings));
-                }
-                else if (field.GeneratorSettings.GetType() == typeof(RandomValueSettings))
-                {
-                    _internalInputGeneratorCollection.Add(new RandomGenerator((RandomValueSettings)field.GeneratorSettings));
-                }
-                else if (field.GeneratorSettings.GetType() == typeof(SinusoidalGeneratorSettings))
-                {
-                    _internalInputGeneratorCollection.Add(new SinusoidalGenerator((SinusoidalGeneratorSettings)field.GeneratorSettings));
-                }
-                else if (field.GeneratorSettings.GetType() == typeof(MackeyGlassGeneratorSettings))
-                {
-                    _internalInputGeneratorCollection.Add(new MackeyGlassGenerator((MackeyGlassGeneratorSettings)field.GeneratorSettings));
-                }
-                else
-                {
-                    throw new Exception($"Unsupported internal signal generator for field {field.Name}");
+                    if (fieldCfg.GeneratorCfg.GetType() == typeof(PulseGeneratorSettings))
+                    {
+                        _internalInputGeneratorCollection.Add(new PulseGenerator((PulseGeneratorSettings)fieldCfg.GeneratorCfg));
+                    }
+                    else if (fieldCfg.GeneratorCfg.GetType() == typeof(RandomValueSettings))
+                    {
+                        _internalInputGeneratorCollection.Add(new RandomGenerator((RandomValueSettings)fieldCfg.GeneratorCfg));
+                    }
+                    else if (fieldCfg.GeneratorCfg.GetType() == typeof(SinusoidalGeneratorSettings))
+                    {
+                        _internalInputGeneratorCollection.Add(new SinusoidalGenerator((SinusoidalGeneratorSettings)fieldCfg.GeneratorCfg));
+                    }
+                    else if (fieldCfg.GeneratorCfg.GetType() == typeof(MackeyGlassGeneratorSettings))
+                    {
+                        _internalInputGeneratorCollection.Add(new MackeyGlassGenerator((MackeyGlassGeneratorSettings)fieldCfg.GeneratorCfg));
+                    }
+                    else
+                    {
+                        throw new Exception($"Unsupported internal signal generator for field {fieldCfg.Name}");
+                    }
                 }
             }
             //Reservoir instance(s)
+            BootCycles = 0;
             //Random generator used for reservoir structure initialization
             Random rand = (randomizerSeek < 0 ? new Random() : new Random(randomizerSeek));
             PredictorNeuronCollection = new List<HiddenNeuron>();
@@ -162,14 +182,33 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             TotalNumOfPredictors = -1;
             NumOfActivePredictors = 0;
             PredictorGeneralSwitchCollection = null;
-            ReservoirCollection = new List<Reservoir>(_settings.ReservoirInstanceDefinitionCollection.Count);
-            foreach(NeuralPreprocessorSettings.ReservoirInstanceDefinition instanceDefinition in _settings.ReservoirInstanceDefinitionCollection)
+            ReservoirCollection = new List<ReservoirInstance>(_settings.ReservoirInstancesCfg.ReservoirInstanceCfgCollection.Count);
+            int reservoirInstanceID = 0;
+            int biggestInterconnectedArea = 0;
+            foreach(ReservoirInstanceSettings reservoirInstanceCfg in _settings.ReservoirInstancesCfg.ReservoirInstanceCfgCollection)
             {
-                Reservoir reservoir = new Reservoir(_settings.InputConfig, instanceDefinition, _dataRange, rand);
+                ReservoirStructureSettings structCfg = _settings.ReservoirStructuresCfg.GetReservoirStructureCfg(reservoirInstanceCfg.StructureCfgName);
+                ReservoirInstance reservoir = new ReservoirInstance(reservoirInstanceID++,
+                                                                    _settings.InputCfg,
+                                                                    structCfg,
+                                                                    reservoirInstanceCfg,
+                                                                    _dataRange,
+                                                                    rand
+                                                                    );
                 ReservoirCollection.Add(reservoir);
                 PredictorNeuronCollection.AddRange(reservoir.PredictingNeuronCollection);
                 NumOfNeurons += reservoir.Size;
                 NumOfInternalSynapses += reservoir.NumOfInternalSynapses;
+                biggestInterconnectedArea = Math.Max(biggestInterconnectedArea, structCfg.LargestInterconnectedAreaSize);
+            }
+            if (_settings.InputCfg.FeedingCfg.FeedingType == InputFeedingType.Continuous)
+            {
+                FeedingContinuousSettings feedCfg = (FeedingContinuousSettings)settings.InputCfg.FeedingCfg;
+                BootCycles = feedCfg.BootCycles == FeedingContinuousSettings.AutoBootCyclesNum ? biggestInterconnectedArea : feedCfg.BootCycles;
+            }
+            else
+            {
+                BootCycles = 0;
             }
             return;
         }
@@ -185,23 +224,27 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         {
             TotalNumOfPredictors = 0;
             //Input fields as the predictors
-            int inpFieldInstancesCoeff = _settings.InputConfig.FeedingType == InputFeedingType.Patterned ? inputPatternLength : 1;
-            if (_settings.InputConfig.RouteInputToReadout)
+            int inpFieldInstancesCoeff = _settings.InputCfg.FeedingCfg.FeedingType == InputFeedingType.Patterned ? inputPatternLength : 1;
+            if (_settings.InputCfg.FeedingCfg.RouteToReadout)
             {
                 InputPatternLengthConstraint = inputPatternLength;
-                foreach (NeuralPreprocessorSettings.InputSettings.Field field in _settings.InputConfig.ExternalFieldCollection)
+                foreach (ExternalFieldSettings fieldCfg in _settings.InputCfg.FieldsCfg.ExternalFieldsCfg.FieldCfgCollection)
                 {
-                    if (field.AllowRoutingToReadout) TotalNumOfPredictors += inpFieldInstancesCoeff;
+                    if (fieldCfg.RouteToReadout) TotalNumOfPredictors += inpFieldInstancesCoeff;
                 }
-                foreach (NeuralPreprocessorSettings.InputSettings.Field field in _settings.InputConfig.InternalFieldCollection)
+                if (_settings.InputCfg.FieldsCfg.InternalFieldsCfg != null)
                 {
-                    if (field.AllowRoutingToReadout) TotalNumOfPredictors += inpFieldInstancesCoeff;
+                    foreach (InternalFieldSettings fieldCfg in _settings.InputCfg.FieldsCfg.InternalFieldsCfg.FieldCfgCollection)
+                    {
+                        if (fieldCfg.RouteToReadout) TotalNumOfPredictors += inpFieldInstancesCoeff;
+                    }
                 }
             }
             //All reservoirs' predictors
-            foreach (Reservoir reservoir in ReservoirCollection)
+            foreach (ReservoirInstance reservoir in ReservoirCollection)
             {
-                TotalNumOfPredictors += (_settings.InputConfig.Bidirectional ? 2 : 1) * reservoir.NumOfPredictors;
+                bool bidir = _settings.InputCfg.FeedingCfg.FeedingType == InputFeedingType.Patterned && ((FeedingPatternedSettings)_settings.InputCfg.FeedingCfg).Bidir;
+                TotalNumOfPredictors += (bidir ? 2 : 1) * reservoir.NumOfPredictors;
             }
             return;
         }
@@ -261,7 +304,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 generator.Reset();
             }
             //Reset reservoirs
-            foreach(Reservoir reservoir in ReservoirCollection)
+            foreach(ReservoirInstance reservoir in ReservoirCollection)
             {
                 reservoir.Reset(resetStatistics);
             }
@@ -274,14 +317,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// <param name="externalInputVector">External input values</param>
         private double[] AddInputsFromInternalGenerators(double[] externalInputVector)
         {
-            if (_settings.InputConfig.InternalFieldCollection.Count > 0)
+            if (_settings.InputCfg.FieldsCfg.InternalFieldsCfg != null)
             {
                 //There are defined internal fields
-                double[] inputVector = new double[_settings.InputConfig.NumOfFields];
+                double[] inputVector = new double[_settings.InputCfg.FieldsCfg.TotalNumOfFields];
                 externalInputVector.CopyTo(inputVector, 0);
                 for (int i = 0; i < _internalInputGeneratorCollection.Count; i++)
                 {
-                    inputVector[_settings.InputConfig.ExternalFieldCollection.Count + i] = _internalInputGeneratorCollection[i].Next();
+                    inputVector[_settings.InputCfg.FieldsCfg.ExternalFieldsCfg.FieldCfgCollection.Count + i] = _internalInputGeneratorCollection[i].Next();
                 }
                 return inputVector;
             }
@@ -301,12 +344,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             InputPattern pattern = new InputPattern(inputPattern);
             for (int genIdx = 0; genIdx < _internalInputGeneratorCollection.Count; genIdx++)
             {
-                double[] inputVector = new double[inputPattern.VarDataCollection[0].Length];
+                double[] inputVector = new double[inputPattern.VariablesDataCollection[0].Length];
                 for (int i = 0; i < inputVector.Length; i++)
                 {
                     inputVector[i] = _internalInputGeneratorCollection[genIdx].Next();
                 }
-                pattern.VarDataCollection.Add(inputVector);
+                pattern.VariablesDataCollection.Add(inputVector);
             }
             return pattern;
         }
@@ -318,10 +361,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         private void InitializeFeatureFilters(List<double[]> inputVectorCollection)
         {
             //Instantiate filters
-            _featureFilterCollection = new BaseFeatureFilter[_settings.InputConfig.ExternalFieldCollection.Count];
+            _featureFilterCollection = new BaseFeatureFilter[_settings.InputCfg.FieldsCfg.ExternalFieldsCfg.FieldCfgCollection.Count];
             Parallel.For(0, _featureFilterCollection.Length, i =>
             {
-                _featureFilterCollection[i] = FeatureFilterFactory.Create(_dataRange, _settings.InputConfig.ExternalFieldCollection[i].FeatureFilterCfg);
+                _featureFilterCollection[i] = FeatureFilterFactory.Create(_dataRange, _settings.InputCfg.FieldsCfg.ExternalFieldsCfg.FieldCfgCollection[i].FeatureFilterCfg);
                 //Update filter
                 foreach (double[] vector in inputVectorCollection)
                 {
@@ -338,15 +381,15 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         private void InitializeFeatureFilters(List<InputPattern> inputPatternCollection)
         {
             //Instantiate and adjust feature filters
-            _featureFilterCollection = new BaseFeatureFilter[_settings.InputConfig.ExternalFieldCollection.Count];
-            Parallel.For(0, _settings.InputConfig.ExternalFieldCollection.Count, varIdx =>
+            _featureFilterCollection = new BaseFeatureFilter[_settings.InputCfg.FieldsCfg.ExternalFieldsCfg.FieldCfgCollection.Count];
+            Parallel.For(0, _settings.InputCfg.FieldsCfg.ExternalFieldsCfg.FieldCfgCollection.Count, varIdx =>
             {
-                _featureFilterCollection[varIdx] = FeatureFilterFactory.Create(_dataRange, _settings.InputConfig.ExternalFieldCollection[varIdx].FeatureFilterCfg);
+                _featureFilterCollection[varIdx] = FeatureFilterFactory.Create(_dataRange, _settings.InputCfg.FieldsCfg.ExternalFieldsCfg.FieldCfgCollection[varIdx].FeatureFilterCfg);
                 foreach (InputPattern pattern in inputPatternCollection)
                 {
-                    for(int i = 0; i < pattern.VarDataCollection[varIdx].Length; i++)
+                    for(int i = 0; i < pattern.VariablesDataCollection[varIdx].Length; i++)
                     {
-                        _featureFilterCollection[varIdx].Update(pattern.VarDataCollection[varIdx][i]);
+                        _featureFilterCollection[varIdx].Update(pattern.VariablesDataCollection[varIdx][i]);
                     }
                 }
             });
@@ -375,16 +418,16 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// <returns>Filterred input pattern</returns>
         private InputPattern ApplyFiltersOnInputPattern(InputPattern pattern)
         {
-            InputPattern filterPattern = new InputPattern(pattern.VarDataCollection.Count);
+            InputPattern filterPattern = new InputPattern(pattern.VariablesDataCollection.Count);
             int varIdx = 0;
-            foreach (double[] vector in pattern.VarDataCollection)
+            foreach (double[] vector in pattern.VariablesDataCollection)
             {
                 double[] filterVector = new double[vector.Length];
                 for(int i = 0; i < vector.Length; i++)
                 {
                     filterVector[i] = _featureFilterCollection[varIdx].ApplyFilter(vector[i]);
                 }
-                filterPattern.VarDataCollection.Add(filterVector);
+                filterPattern.VariablesDataCollection.Add(filterVector);
                 ++varIdx;
             }
             return filterPattern;
@@ -403,7 +446,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             double[] predictors = new double[TotalNumOfPredictors];
             int predictorsIdx = 0;
             //Compute reservoir(s)
-            foreach (Reservoir reservoir in ReservoirCollection)
+            foreach (ReservoirInstance reservoir in ReservoirCollection)
             {
                 double[] reservoirInput = new double[reservoir.InputUnitCollection.Length];
                 for (int i = 0; i < reservoir.InputUnitCollection.Length; i++)
@@ -415,25 +458,28 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 reservoir.CopyPredictorsTo(predictors, predictorsIdx);
                 predictorsIdx += reservoir.NumOfPredictors;
             }
-            if (_settings.InputConfig.RouteInputToReadout)
+            if (_settings.InputCfg.FeedingCfg.RouteToReadout)
             {
                 int fieldIdx = 0;
-                foreach (NeuralPreprocessorSettings.InputSettings.Field field in _settings.InputConfig.ExternalFieldCollection)
+                foreach (ExternalFieldSettings fieldCfg in _settings.InputCfg.FieldsCfg.ExternalFieldsCfg.FieldCfgCollection)
                 {
-                    if (field.AllowRoutingToReadout)
+                    if (fieldCfg.RouteToReadout)
                     {
                         //Route original values
                         predictors[predictorsIdx++] = externalInputVector[fieldIdx];
                     }
                     ++fieldIdx;
                 }
-                foreach (NeuralPreprocessorSettings.InputSettings.Field field in _settings.InputConfig.InternalFieldCollection)
+                if (_settings.InputCfg.FieldsCfg.InternalFieldsCfg != null)
                 {
-                    if (field.AllowRoutingToReadout)
+                    foreach (InternalFieldSettings fieldCfg in _settings.InputCfg.FieldsCfg.InternalFieldsCfg.FieldCfgCollection)
                     {
-                        predictors[predictorsIdx++] = completedInputVector[fieldIdx];
+                        if (fieldCfg.RouteToReadout)
+                        {
+                            predictors[predictorsIdx++] = completedInputVector[fieldIdx];
+                        }
+                        ++fieldIdx;
                     }
-                    ++fieldIdx;
                 }
             }
             return predictors;
@@ -453,9 +499,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             //Check pattern length costraint
             if(InputPatternLengthConstraint != -1)
             {
-                if(externalInputPattern.VarDataCollection[0].Length != InputPatternLengthConstraint)
+                if(externalInputPattern.VariablesDataCollection[0].Length != InputPatternLengthConstraint)
                 {
-                    throw new Exception($"Incorrect length of input pattern ({externalInputPattern.VarDataCollection[0].Length}). Length must be equal to {InputPatternLengthConstraint}.");
+                    throw new Exception($"Incorrect length of input pattern ({externalInputPattern.VariablesDataCollection[0].Length}). Length must be equal to {InputPatternLengthConstraint}.");
                 }
             }
             //Reset SM but keep statistics
@@ -465,22 +511,22 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             //Add internal input
             InputPattern completedInputPattern = AddInputsFromInternalGenerators(normalizedInputPattern);
             //Compute reservoir(s)
-            foreach (Reservoir reservoir in ReservoirCollection)
+            foreach (ReservoirInstance reservoir in ReservoirCollection)
             {
-                double[] reservoirInput = new double[reservoir.InstanceDefinition.InputUnitCfgCollection.Count];
+                double[] reservoirInput = new double[reservoir.InstanceCfg.InputUnitsCfg.InputUnitCfgCollection.Count];
                 List<InputPattern> stepInputPatterns = new List<InputPattern>() { completedInputPattern };
-                if(_settings.InputConfig.Bidirectional)
+                if(((FeedingPatternedSettings)_settings.InputCfg.FeedingCfg).Bidir)
                 {
-                    InputPattern reversedInputPattern = new InputPattern(completedInputPattern.VarDataCollection.Count);
-                    foreach(double[] data in completedInputPattern.VarDataCollection)
+                    InputPattern reversedInputPattern = new InputPattern(completedInputPattern.VariablesDataCollection.Count);
+                    foreach(double[] data in completedInputPattern.VariablesDataCollection)
                     {
-                        reversedInputPattern.VarDataCollection.Add(data.Reverse().ToArray());
+                        reversedInputPattern.VariablesDataCollection.Add(data.Reverse().ToArray());
                     }
                     stepInputPatterns.Add(reversedInputPattern);
                 }
                 foreach (InputPattern stepInputPattern in stepInputPatterns)
                 {
-                    for(int idx = 0; idx < stepInputPattern.VarDataCollection[0].Length; idx++)
+                    for(int idx = 0; idx < stepInputPattern.VariablesDataCollection[0].Length; idx++)
                     {
                         double[] inputVector = stepInputPattern.GetDataAtTimePoint(idx);
                         for (int i = 0; i < reservoir.InputUnitCollection.Length; i++)
@@ -496,32 +542,35 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             }
 
             //Route input fields as the predictors
-            if (_settings.InputConfig.RouteInputToReadout)
+            if (_settings.InputCfg.FeedingCfg.RouteToReadout)
             {
                 int fieldIdx = 0;
-                foreach (NeuralPreprocessorSettings.InputSettings.Field field in _settings.InputConfig.ExternalFieldCollection)
+                foreach (ExternalFieldSettings fieldCfg in _settings.InputCfg.FieldsCfg.ExternalFieldsCfg.FieldCfgCollection)
                 {
-                    if (field.AllowRoutingToReadout)
+                    if (fieldCfg.RouteToReadout)
                     {
                         //Route original values
-                        for(int i = 0; i < externalInputPattern.VarDataCollection[fieldIdx].Length; i++)
+                        for(int i = 0; i < externalInputPattern.VariablesDataCollection[fieldIdx].Length; i++)
                         {
-                            predictors[predictorsIdx++] = externalInputPattern.VarDataCollection[fieldIdx][i];
+                            predictors[predictorsIdx++] = externalInputPattern.VariablesDataCollection[fieldIdx][i];
                         }
                     }
                     ++fieldIdx;
                 }
-                foreach (NeuralPreprocessorSettings.InputSettings.Field field in _settings.InputConfig.InternalFieldCollection)
+                if (_settings.InputCfg.FieldsCfg.InternalFieldsCfg != null)
                 {
-                    if (field.AllowRoutingToReadout)
+                    foreach (InternalFieldSettings fieldCfg in _settings.InputCfg.FieldsCfg.InternalFieldsCfg.FieldCfgCollection)
                     {
-                        //Route internal values
-                        for (int i = 0; i < completedInputPattern.VarDataCollection[fieldIdx].Length; i++)
+                        if (fieldCfg.RouteToReadout)
                         {
-                            predictors[predictorsIdx++] = completedInputPattern.VarDataCollection[fieldIdx][i];
+                            //Route internal values
+                            for (int i = 0; i < completedInputPattern.VariablesDataCollection[fieldIdx].Length; i++)
+                            {
+                                predictors[predictorsIdx++] = completedInputPattern.VariablesDataCollection[fieldIdx][i];
+                            }
                         }
+                        ++fieldIdx;
                     }
-                    ++fieldIdx;
                 }
             }
 
@@ -539,24 +588,23 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             {
                 throw new Exception("Preprocessor was not initialized by the sample data bundle (feature filters are not instantiated yet).");
             }
-            if(_settings.InputConfig.FeedingType == InputFeedingType.Continuous)
+            if(_settings.InputCfg.FeedingCfg.FeedingType == InputFeedingType.Continuous)
             {
                 //Push input vector into the preprocessor and return result
                 return PushInputVector(input, false);
             }
             else
             {
+                FeedingPatternedSettings feedingCfg = (FeedingPatternedSettings)_settings.InputCfg.FeedingCfg;
                 InputPattern inputPattern = new InputPattern(input,
-                                                             0,
-                                                             input.Length,
-                                                             _settings.InputConfig.ExternalFieldCollection.Count,
-                                                             _settings.InputConfig.PatternedInputDataOrganization,
-                                                             _settings.InputConfig.Detrend,
-                                                             _settings.InputConfig.UnifyAmplitude,
-                                                             _settings.InputConfig.ThresholdOfSignalBeginDetection,
-                                                             _settings.InputConfig.ThresholdOfSignalEndDetection,
-                                                             _settings.InputConfig.KeepCommonTimeScale,
-                                                             _settings.InputConfig.TargetTimePoints
+                                                             _settings.InputCfg.FieldsCfg.ExternalFieldsCfg.FieldCfgCollection.Count,
+                                                             feedingCfg.VarSchema,
+                                                             feedingCfg.UnificationCfg.Detrend,
+                                                             feedingCfg.UnificationCfg.UnifyAmplitude,
+                                                             feedingCfg.UnificationCfg.ResamplingCfg.SignalBeginThreshold,
+                                                             feedingCfg.UnificationCfg.ResamplingCfg.SignalEndThreshold,
+                                                             feedingCfg.UnificationCfg.ResamplingCfg.UniformTimeScale,
+                                                             feedingCfg.UnificationCfg.ResamplingCfg.TargetTimePoints
                                                              );
 
                 //Push input pattern into the preprocessor and return result
@@ -577,11 +625,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             //Initialize feature filters
             InitializeFeatureFilters(vectorBundle.InputVectorCollection);
             //Allocate output bundle
-            VectorBundle outputBundle = new VectorBundle(vectorBundle.InputVectorCollection.Count - _settings.InputConfig.BootCycles);
+            VectorBundle outputBundle = new VectorBundle(vectorBundle.InputVectorCollection.Count - BootCycles);
             //Collect predictors
             for (int dataSetIdx = 0; dataSetIdx < vectorBundle.InputVectorCollection.Count; dataSetIdx++)
             {
-                bool afterBoot = (dataSetIdx >= _settings.InputConfig.BootCycles);
+                bool afterBoot = (dataSetIdx >= BootCycles);
                 //Push input data into the network
                 double[] predictors = PushInputVector(vectorBundle.InputVectorCollection[dataSetIdx], afterBoot);
                 //Is boot sequence passed? Collect predictors?
@@ -620,7 +668,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             //Reset the internal states and also statistics
             Reset(true);
             //Initialize total number of predictors
-            InitTotalNumOfPredictors(patterns[0].VarDataCollection[0].Length);
+            InitTotalNumOfPredictors(patterns[0].VariablesDataCollection[0].Length);
             //Initialize feature filters
             InitializeFeatureFilters(patterns);
             //Allocate output bundle
@@ -662,7 +710,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// <param name="preprocessingOverview">Reservoir(s) statistics and other important information as a result of the preprocessing phase.</param>
         public VectorBundle InitializeAndPreprocessBundle(VectorBundle inputBundle, out PreprocessingOverview preprocessingOverview)
         {
-            if(_settings.InputConfig.FeedingType == InputFeedingType.Continuous)
+            if(_settings.InputCfg.FeedingCfg.FeedingType == InputFeedingType.Continuous)
             {
                 //Simply use inputBundle
                 return PreprocessVectorBundle(inputBundle, out preprocessingOverview);
@@ -673,17 +721,16 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 List<InputPattern> patterns = new List<InputPattern>(inputBundle.InputVectorCollection.Count);
                 foreach(double[] vector in inputBundle.InputVectorCollection)
                 {
+                    FeedingPatternedSettings feedingCfg = (FeedingPatternedSettings)_settings.InputCfg.FeedingCfg;
                     InputPattern inputPattern = new InputPattern(vector,
-                                                                 0,
-                                                                 vector.Length,
-                                                                 _settings.InputConfig.ExternalFieldCollection.Count,
-                                                                 _settings.InputConfig.PatternedInputDataOrganization,
-                                                                 _settings.InputConfig.Detrend,
-                                                                 _settings.InputConfig.UnifyAmplitude,
-                                                                 _settings.InputConfig.ThresholdOfSignalBeginDetection,
-                                                                 _settings.InputConfig.ThresholdOfSignalEndDetection,
-                                                                 _settings.InputConfig.KeepCommonTimeScale,
-                                                                 _settings.InputConfig.TargetTimePoints
+                                                                 _settings.InputCfg.FieldsCfg.ExternalFieldsCfg.FieldCfgCollection.Count,
+                                                                 feedingCfg.VarSchema,
+                                                                 feedingCfg.UnificationCfg.Detrend,
+                                                                 feedingCfg.UnificationCfg.UnifyAmplitude,
+                                                                 feedingCfg.UnificationCfg.ResamplingCfg.SignalBeginThreshold,
+                                                                 feedingCfg.UnificationCfg.ResamplingCfg.SignalEndThreshold,
+                                                                 feedingCfg.UnificationCfg.ResamplingCfg.UniformTimeScale,
+                                                                 feedingCfg.UnificationCfg.ResamplingCfg.TargetTimePoints
                                                                  );
                     patterns.Add(inputPattern);
                 }
@@ -702,7 +749,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         public List<ReservoirStat> CollectStatatistics()
         {
             List<ReservoirStat> stats = new List<ReservoirStat>();
-            foreach (Reservoir reservoir in ReservoirCollection)
+            foreach (ReservoirInstance reservoir in ReservoirCollection)
             {
                 stats.Add(reservoir.CollectStatistics());
             }

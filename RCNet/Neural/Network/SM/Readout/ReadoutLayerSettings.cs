@@ -26,7 +26,7 @@ namespace RCNet.Neural.Network.SM.Readout
         /// <summary>
         /// Name of the associated xsd type
         /// </summary>
-        public const string XsdTypeName = "ROutLayerCfgType";
+        public const string XsdTypeName = "ROutLayerType";
         /// <summary>
         /// Maximum allowed test data ratio
         /// </summary>
@@ -192,9 +192,9 @@ namespace RCNet.Neural.Network.SM.Readout
             }
             foreach (ReadoutUnitSettings rus in ReadoutUnitsCfg.ReadoutUnitCfgCollection)
             {
-                if (rus.TaskSettings.NetworkCfgCollection.Count == 0)
+                if (rus.TaskCfg.NetworkCfgCollection.Count == 0)
                 {
-                    if (DefaultNetworksCfg.GetTaskNetworksCfgs(rus.TaskSettings.Type).Count == 0)
+                    if (DefaultNetworksCfg.GetTaskNetworksCfgs(rus.TaskCfg.Type).Count == 0)
                     {
                         throw new Exception($"Readout unit {rus.Name} has not associated network(s) settings.");
                     }
@@ -210,13 +210,13 @@ namespace RCNet.Neural.Network.SM.Readout
         /// <returns></returns>
         public List<INonRecurrentNetworkSettings> GetReadoutUnitNetworksCollection(int readoutUnitIndex)
         {
-            if(ReadoutUnitsCfg.ReadoutUnitCfgCollection[readoutUnitIndex].TaskSettings.NetworkCfgCollection.Count > 0)
+            if(ReadoutUnitsCfg.ReadoutUnitCfgCollection[readoutUnitIndex].TaskCfg.NetworkCfgCollection.Count > 0)
             {
-                return ReadoutUnitsCfg.ReadoutUnitCfgCollection[readoutUnitIndex].TaskSettings.NetworkCfgCollection;
+                return ReadoutUnitsCfg.ReadoutUnitCfgCollection[readoutUnitIndex].TaskCfg.NetworkCfgCollection;
             }
             else
             {
-                return DefaultNetworksCfg.GetTaskNetworksCfgs(ReadoutUnitsCfg.ReadoutUnitCfgCollection[readoutUnitIndex].TaskSettings.Type);
+                return DefaultNetworksCfg.GetTaskNetworksCfgs(ReadoutUnitsCfg.ReadoutUnitCfgCollection[readoutUnitIndex].TaskCfg.Type);
             }
         }
 

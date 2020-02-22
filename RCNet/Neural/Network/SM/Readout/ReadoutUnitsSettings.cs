@@ -27,7 +27,7 @@ namespace RCNet.Neural.Network.SM.Readout
         /// <summary>
         /// Name of the associated xsd type
         /// </summary>
-        public const string XsdTypeName = "ROutLayerUnitsCfgType";
+        public const string XsdTypeName = "ROutLayerUnitsType";
 
         //Attribute properties
         /// <summary>
@@ -86,13 +86,8 @@ namespace RCNet.Neural.Network.SM.Readout
         /// </summary>
         /// <param name="source">Source instance</param>
         public ReadoutUnitsSettings(ReadoutUnitsSettings source)
-            : this()
+            : this(source.ReadoutUnitCfgCollection)
         {
-            foreach (ReadoutUnitSettings rucfg in source.ReadoutUnitCfgCollection)
-            {
-                ReadoutUnitCfgCollection.Add((ReadoutUnitSettings)rucfg.DeepClone());
-            }
-            CheckAndComplete();
             return;
         }
 
@@ -134,6 +129,18 @@ namespace RCNet.Neural.Network.SM.Readout
             {
                 throw new Exception($"Collection of readout units settings can not be empty.");
             }
+            //Uniqueness of readout units names
+            string[] names = new string[ReadoutUnitCfgCollection.Count];
+            names[0] = ReadoutUnitCfgCollection[0].Name;
+            for (int i = 1; i < ReadoutUnitCfgCollection.Count; i++)
+            {
+                if (names.Contains(ReadoutUnitCfgCollection[i].Name))
+                {
+                    throw new Exception($"Readout unit name {ReadoutUnitCfgCollection[i].Name} is not unique.");
+                }
+                names[i] = ReadoutUnitCfgCollection[i].Name;
+            }
+            //One winner groups
             OneWinnerGroupCollection = new Dictionary<string, OneWinnerGroup>();
             List<string> owgs = new List<string>();
             for (int index = 0; index < ReadoutUnitCfgCollection.Count; index++)
@@ -142,9 +149,9 @@ namespace RCNet.Neural.Network.SM.Readout
                 {
                     throw new Exception($"Inconsistent indexes of readout units.");
                 }
-                if(ReadoutUnitCfgCollection[index].TaskSettings.Type == ReadoutUnit.TaskType.Classification)
+                if(ReadoutUnitCfgCollection[index].TaskCfg.Type == ReadoutUnit.TaskType.Classification)
                 {
-                    ClassificationTaskSettings cts = (ClassificationTaskSettings)ReadoutUnitCfgCollection[index].TaskSettings;
+                    ClassificationTaskSettings cts = (ClassificationTaskSettings)ReadoutUnitCfgCollection[index].TaskCfg;
                     if (cts.OneWinnerGroupName != ClassificationTaskSettings.DefaultOneWinnerGroupName)
                     {
                         if (owgs.IndexOf(cts.OneWinnerGroupName) == -1)
@@ -158,7 +165,7 @@ namespace RCNet.Neural.Network.SM.Readout
             {
                 OneWinnerGroupCollection.Add(oneWinnerGroupName,
                                              new OneWinnerGroup(oneWinnerGroupName,
-                                                                (from rus in ReadoutUnitCfgCollection where rus.TaskSettings.Type == ReadoutUnit.TaskType.Classification && ((ClassificationTaskSettings)rus.TaskSettings).OneWinnerGroupName == oneWinnerGroupName select rus).ToList()
+                                                                (from rus in ReadoutUnitCfgCollection where rus.TaskCfg.Type == ReadoutUnit.TaskType.Classification && ((ClassificationTaskSettings)rus.TaskCfg).OneWinnerGroupName == oneWinnerGroupName select rus).ToList()
                                                                 )
                                              );
             }

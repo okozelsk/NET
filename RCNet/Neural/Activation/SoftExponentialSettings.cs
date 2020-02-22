@@ -24,7 +24,7 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Name of the associated xsd type
         /// </summary>
-        public const string XsdTypeName = "ActivationSoftExponentialCfgType";
+        public const string XsdTypeName = "ActivationSoftExponentialType";
 
         //Typical values
         /// <summary>

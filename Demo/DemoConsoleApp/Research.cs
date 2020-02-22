@@ -11,22 +11,28 @@ using RCNet.Neural.Activation;
 using RCNet.Extensions;
 using RCNet.MathTools;
 using RCNet.MathTools.MatrixMath;
-using RCNet.Neural.Network.SM;
 using RCNet.MathTools.Differential;
 using RCNet.MathTools.VectorMath;
+using RCNet.MathTools.PS;
 using RCNet.RandomValue;
-using RCNet.Neural.Data.Generators;
-using RCNet.Neural.Data.Filter;
-using RCNet.Neural.Network.SM.Preprocessing;
-using RCNet.Neural.Network.SM.Neuron;
 using RCNet.Queue;
 using RCNet.CsvTools;
 using RCNet.Neural.Data;
-using RCNet.MathTools.PS;
+using RCNet.Neural.Data.Generators;
+using RCNet.Neural.Data.Filter;
 using RCNet.Neural.Network.NonRecurrent.FF;
 using RCNet.Neural.Network.NonRecurrent.PP;
 using RCNet.Neural.Network.NonRecurrent;
-using RCNet.Neural.Network.SM.Synapse;
+using RCNet.Neural.Network.SM;
+using RCNet.Neural.Network.SM.Preprocessing;
+using RCNet.Neural.Network.SM.Preprocessing.Reservoir;
+using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Space3D;
+using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron;
+using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor;
+using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Synapse;
+using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Synapse.Dynamics;
+using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool;
+using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup;
 using RCNet.Neural.Network.SM.Readout;
 
 namespace Demo.DemoConsoleApp
@@ -257,15 +263,15 @@ namespace Demo.DemoConsoleApp
             Console.WriteLine(settings.GetXml(false));
             Console.WriteLine();
 
-            PredictorsParamsSettings predictorsParamsSettings = new PredictorsParamsSettings(new PredictorFiringFadingSumSettings(0.001));
+            PredictorsParamsSettings predictorsParamsCfg = new PredictorsParamsSettings(new FiringFadingSumSettings(0.001));
             
-            settings = predictorsParamsSettings;
+            settings = predictorsParamsCfg;
             Console.WriteLine(settings.GetXml(true));
             Console.WriteLine(settings.GetXml(false));
             Console.WriteLine();
 
 
-            PredictorsSettings predictorsSettings = new PredictorsSettings(false,
+            PredictorsSettings predictorsCfg = new PredictorsSettings(false,
                                                                            false,
                                                                            false,
                                                                            false,
@@ -273,15 +279,15 @@ namespace Demo.DemoConsoleApp
                                                                            false,
                                                                            false,
                                                                            false,
-                                                                           predictorsParamsSettings
+                                                                           predictorsParamsCfg
                                                                            );
 
-            settings = predictorsSettings;
+            settings = predictorsCfg;
             Console.WriteLine(settings.GetXml(true));
             Console.WriteLine(settings.GetXml(false));
             Console.WriteLine();
 
-            settings = new InputUnitSettings("inputField1");
+            settings = new InputUnitSettings("inputField1", new InputUnitConnsSettings(new InputUnitConnSettings("Pool1", 0.5)));
             Console.WriteLine(settings.GetXml(true));
             Console.WriteLine(settings.GetXml(false));
             Console.WriteLine();
@@ -363,6 +369,120 @@ namespace Demo.DemoConsoleApp
             Console.WriteLine(settings.GetXml(true));
             Console.WriteLine(settings.GetXml(false));
             Console.WriteLine();
+
+            ChainSchemaSettings chainSchemaCfg = new ChainSchemaSettings(0.5);
+
+            settings = chainSchemaCfg;
+            Console.WriteLine(settings.GetXml(true));
+            Console.WriteLine(settings.GetXml(false));
+            Console.WriteLine();
+
+            RandomSchemaSettings randSchemaCfg = new RandomSchemaSettings(new ConnDistrFlatSettings(),  0.2);
+
+            settings = randSchemaCfg;
+            Console.WriteLine(settings.GetXml(true));
+            Console.WriteLine(settings.GetXml(false));
+            Console.WriteLine();
+
+            InterconnSettings pInterconnCfg = new InterconnSettings(randSchemaCfg, chainSchemaCfg);
+
+            settings = pInterconnCfg;
+            Console.WriteLine(settings.GetXml(true));
+            Console.WriteLine(settings.GetXml(false));
+            Console.WriteLine();
+
+            SpikingNeuronGroupSettings psngExcitatoryCfg = new SpikingNeuronGroupSettings("ana-exc-grp1",
+                                                                                                  NeuronCommon.NeuronRole.Excitatory,
+                                                                                                  1,
+                                                                                                  new SimpleIFSettings(),
+                                                                                                  0.5,
+                                                                                                  new RandomValueSettings(-0.1, 0.1),
+                                                                                                  predictorsCfg
+                                                                                                  );
+
+            settings = psngExcitatoryCfg;
+            Console.WriteLine(settings.GetXml(true));
+            Console.WriteLine(settings.GetXml(false));
+            Console.WriteLine();
+
+            AnalogRetainmentSettings anRetainmentCfg = new AnalogRetainmentSettings(1d, new URandomValueSettings(0.1d, 0.75d));
+            settings = anRetainmentCfg;
+            Console.WriteLine(settings.GetXml(true));
+            Console.WriteLine(settings.GetXml(false));
+            Console.WriteLine();
+
+            AnalogNeuronGroupSettings pangExcitatoryCfg = new AnalogNeuronGroupSettings("spiking-exc-grp1",
+                                                                                                NeuronCommon.NeuronRole.Excitatory,
+                                                                                                1,
+                                                                                                new TanHSettings(),
+                                                                                                0.0015,
+                                                                                                NeuronCommon.NeuronSignalingRestrictionType.AnalogOnly,
+                                                                                                0.5,
+                                                                                                new RandomValueSettings(-0.1, 0.1),
+                                                                                                new AnalogRetainmentSettings(1, new URandomValueSettings(0.25, 0.75)),
+                                                                                                predictorsCfg
+                                                                                                );
+
+            settings = pangExcitatoryCfg;
+            Console.WriteLine(settings.GetXml(true));
+            Console.WriteLine(settings.GetXml(false));
+            Console.WriteLine();
+
+            NeuronGroupsSettings groupsCfg = new NeuronGroupsSettings(psngExcitatoryCfg, pangExcitatoryCfg);
+
+            settings = groupsCfg;
+            Console.WriteLine(settings.GetXml(true));
+            Console.WriteLine(settings.GetXml(false));
+            Console.WriteLine();
+
+            ProportionsSettings proportionsCfg = new ProportionsSettings(5, 5, 5);
+
+            settings = proportionsCfg;
+            Console.WriteLine(settings.GetXml(true));
+            Console.WriteLine(settings.GetXml(false));
+            Console.WriteLine();
+
+            PoolSettings pool1Cfg = new PoolSettings("Pool1", proportionsCfg, groupsCfg, pInterconnCfg, predictorsCfg);
+
+            settings = pool1Cfg;
+            Console.WriteLine(settings.GetXml(true));
+            Console.WriteLine(settings.GetXml(false));
+            Console.WriteLine();
+
+            PoolSettings pool2Cfg = new PoolSettings("Pool2", proportionsCfg, groupsCfg, pInterconnCfg, predictorsCfg);
+
+            PoolsSettings poolsCfg = new PoolsSettings(pool1Cfg, pool2Cfg);
+
+            settings = poolsCfg;
+            Console.WriteLine(settings.GetXml(true));
+            Console.WriteLine(settings.GetXml(false));
+            Console.WriteLine();
+
+            InterPoolConnSettings interPoolConnCfg = new InterPoolConnSettings(new ConnDistrFlatSettings(),
+                                                                                                                               "Pool1",
+                                                                                                                               0.5,
+                                                                                                                               "Pool2",
+                                                                                                                               0.05
+                                                                                                                               );
+            settings = interPoolConnCfg;
+            Console.WriteLine(settings.GetXml(true));
+            Console.WriteLine(settings.GetXml(false));
+            Console.WriteLine();
+
+            InterPoolConnsSettings interPoolConnsCfg = new InterPoolConnsSettings(interPoolConnCfg);
+
+            settings = interPoolConnsCfg;
+            Console.WriteLine(settings.GetXml(true));
+            Console.WriteLine(settings.GetXml(false));
+            Console.WriteLine();
+
+            ReservoirStructureSettings resStructCfg = new ReservoirStructureSettings("MainCfg", poolsCfg, interPoolConnsCfg);
+
+            settings = resStructCfg;
+            Console.WriteLine(settings.GetXml(true));
+            Console.WriteLine(settings.GetXml(false));
+            Console.WriteLine();
+
 
             Console.ReadLine();
             

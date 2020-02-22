@@ -170,7 +170,7 @@ namespace RCNet.Neural.Network.SM.Readout
             _outputFeatureFilterCollection = new BaseFeatureFilter[numOfOutputs];
             Parallel.For(0, _outputFeatureFilterCollection.Length, nrmIdx =>
             {
-                _outputFeatureFilterCollection[nrmIdx] = FeatureFilterFactory.Create(DataRange, Settings.ReadoutUnitsCfg.ReadoutUnitCfgCollection[nrmIdx].TaskSettings.FeatureFilterCfg);
+                _outputFeatureFilterCollection[nrmIdx] = FeatureFilterFactory.Create(DataRange, Settings.ReadoutUnitsCfg.ReadoutUnitCfgCollection[nrmIdx].TaskCfg.FeatureFilterCfg);
                 for (int pairIdx = 0; pairIdx < dataBundle.OutputVectorCollection.Count; pairIdx++)
                 {
                     //Adjust output normalizer
@@ -228,7 +228,7 @@ namespace RCNet.Neural.Network.SM.Readout
                 VectorBundle readoutUnitDataBundle = new VectorBundle(readoutUnitInputVectorCollection, idealValueCollection);
                 TrainedNetworkClusterBuilder readoutUnitBuilder = new TrainedNetworkClusterBuilder(Settings.ReadoutUnitsCfg.ReadoutUnitCfgCollection[unitIdx].Name,
                                                                                                    Settings.GetReadoutUnitNetworksCollection(unitIdx),
-                                                                                                   Settings.ReadoutUnitsCfg.ReadoutUnitCfgCollection[unitIdx].TaskSettings.Type == ReadoutUnit.TaskType.Classification ? BinBorder : double.NaN,
+                                                                                                   Settings.ReadoutUnitsCfg.ReadoutUnitCfgCollection[unitIdx].TaskCfg.Type == ReadoutUnit.TaskType.Classification ? BinBorder : double.NaN,
                                                                                                    rand,
                                                                                                    controller
                                                                                                    );
@@ -409,7 +409,7 @@ namespace RCNet.Neural.Network.SM.Readout
                 ReadoutUnitDataCollection = new Dictionary<string, ReadoutUnitData>();
                 foreach(ReadoutUnitSettings rus in rl.Settings.ReadoutUnitsCfg.ReadoutUnitCfgCollection)
                 {
-                    ReadoutUnitDataCollection.Add(rus.Name, new ReadoutUnitData() { Name = rus.Name, Index = rus.Index, Task = rus.TaskSettings.Type, DataValue = DataVector[rus.Index] });
+                    ReadoutUnitDataCollection.Add(rus.Name, new ReadoutUnitData() { Name = rus.Name, Index = rus.Index, Task = rus.TaskCfg.Type, DataValue = DataVector[rus.Index] });
                 }
                 //One Winner groups
                 OneWinnerDataCollection = new Dictionary<string, OneWinnerGroupData>();

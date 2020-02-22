@@ -8,7 +8,7 @@ using System.Xml.Linq;
 using System.Reflection;
 using RCNet.Extensions;
 using RCNet.RandomValue;
-using RCNet.Neural.Network.SM.Neuron;
+using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron;
 using RCNet.XmlTools;
 using RCNet.MathTools.Differential;
 
@@ -24,7 +24,7 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Name of the associated xsd type
         /// </summary>
-        public const string XsdTypeName = "ActivationAutoIzhikevichIFCfgType";
+        public const string XsdTypeName = "ActivationAutoIzhikevichIFType";
 
         //Attribute properties
         /// <summary>

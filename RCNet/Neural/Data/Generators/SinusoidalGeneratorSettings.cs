@@ -20,7 +20,7 @@ namespace RCNet.Neural.Data.Generators
         /// <summary>
         /// Name of the associated xsd type
         /// </summary>
-        public const string XsdTypeName = "SinusoidalGeneratorCfgType";
+        public const string XsdTypeName = "SinusoidalGeneratorType";
         //Default values
         /// <summary>
         /// Default value of phase argument

@@ -27,7 +27,7 @@ namespace RCNet.Neural.Network.SM.Readout
         /// <summary>
         /// Name of the associated xsd type
         /// </summary>
-        public const string XsdTypeName = "ROutLayerUnitClassificationTaskCfgType";
+        public const string XsdTypeName = "ROutLayerUnitClassificationTaskType";
         //Default values
         /// <summary>
         /// Means no membership to one winner group

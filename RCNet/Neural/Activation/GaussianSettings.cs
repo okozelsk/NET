@@ -23,7 +23,7 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Name of the associated xsd type
         /// </summary>
-        public const string XsdTypeName = "ActivationGaussianCfgType";
+        public const string XsdTypeName = "ActivationGaussianType";
 
         //Constructors
         /// <summary>

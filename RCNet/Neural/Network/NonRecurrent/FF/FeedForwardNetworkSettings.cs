@@ -22,7 +22,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         /// <summary>
         /// Name of the associated xsd type
         /// </summary>
-        public const string XsdTypeName = "FFNetCfgType";
+        public const string XsdTypeName = "FFNetType";
 
         //Attribute properties
         /// <summary>

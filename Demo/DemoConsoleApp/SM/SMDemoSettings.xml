@@ -4,6 +4,111 @@
   <!--
     This demo case demonstrates successful use of the pure analog ESN reservoir for the fast and accurate classifications enabled by
     the new ability of the analog neurons to fire a spike.
+    Following straightforward configuration of the StateMachine exhibits 100% accuracy, slightly better than the best algorithm
+    called BOSS, referenced at the dataset's home site:
+    "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
+    https://timeseriesclassification.com/description.php?Dataset=BirdChicken.
+    MPEG-7 CE Shape-1 Part B is a database of binary images developed for testing MPEG-7 shape descriptors, and is available free online. 
+    It is used for testing contour/image and skeleton-based descriptors. Classes of images vary broadly, and include classes that are
+    similar in shape to one another. There are 20 instances of each class, and 60 classes in total.
+    We have extracted the outlines of these images and mapped them into 1-D series of distances to the centre. 
+    Bird/Chicken is the problem of distinguishing between an outline of a bird and a chicken.
+  -->
+  <case name="Classification task BirdChicken: Simple pure ESN reservoir generating FiringFadingSum predictors, one Identity neuron as a classifier (Ridge regression trainer)">
+    <samples trainingData="BirdChicken_train.csv" verificationData="BirdChicken_verify.csv"/>
+    <stateMachineCfg randomizerSeek="0">
+      <neuralPreprocessor>
+        <input>
+          <feedingPatterned bidir="false">
+            <unification unifyAmplitude="false" detrend="false">
+              <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
+            </unification>
+          </feedingPatterned>
+          <fields>
+            <externalFields>
+              <field name="DistanceFromCenter">
+                <realFeature standardize="true" keepReserve="true"/>
+              </field>
+            </externalFields>
+          </fields>
+        </input>
+        <reservoirStructures>
+          <reservoirStructure name="MainCfg">
+            <pools>
+              <pool name="PureESN">
+                <proportions dimX="6" dimY="6" dimZ="5"/>
+                <coordinates x="-25" y="13" z="6"/>
+                <neuronGroups>
+                  <analogGroup name="Exc-grp" role="Excitatory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction">
+                    <activationTanH/>
+                  </analogGroup>
+                  <analogGroup name="Inh-grp" role="Inhibitory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction">
+                    <activationTanH/>
+                  </analogGroup>
+                </neuronGroups>
+                <interconnection>
+                  <randomSchema density="0.2" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
+                    <distributionFlat/>
+                  </randomSchema>
+                </interconnection>
+              </pool>
+            </pools>
+          </reservoirStructure>
+        </reservoirStructures>
+        <reservoirInstances>
+          <reservoirInstance name="Main" reservoirStructure="MainCfg">
+            <inputUnits>
+              <inputUnit inputFieldName="DistanceFromCenter">
+                <coordinates x="160" y="230" z="190"/>
+                <connections>
+                  <connection poolName="PureESN" density="1">
+                    <synapse delayMethod="Distance" maxDelay="10">
+                      <analogTarget scope="All">
+                        <weight min="0" max="1"/>
+                      </analogTarget>
+                    </synapse>
+                  </connection>
+                </connections>
+              </inputUnit>
+            </inputUnits>
+            <predictors activation="false"
+                        activationSquare="false"
+                        activationFadingSum="false"
+                        activationMWAvg="false"
+                        firingFadingSum="true"
+                        firingMWAvg="false"
+                        firingCount="false"
+                        firingBinPattern="false">
+            </predictors>
+          </reservoirInstance>
+        </reservoirInstances>
+      </neuralPreprocessor>
+      <readoutLayer testDataRatio="0.1" folds="Auto">
+        <defaultNetworks/>
+        <readoutUnits>
+          <readoutUnit name="Chicken1Bird0">
+            <classification>
+              <networks>
+                <ff>
+                  <activationIdentity/>
+                  <ridgeRegrTrainer attemptEpochs="1">
+                    <lambda min="0.1" max="0.1" steps="2"/>
+                  </ridgeRegrTrainer>
+                </ff>
+              </networks>
+            </classification>
+          </readoutUnit>
+        </readoutUnits>
+      </readoutLayer>
+    </stateMachineCfg>
+  </case>
+
+
+
+
+  <!--
+    This demo case demonstrates successful use of the pure analog ESN reservoir for the fast and accurate classifications enabled by
+    the new ability of the analog neurons to fire a spike.
     Following straightforward configuration of the StateMachine exhibits 88.29% accuracy, slightly better than the best algorithm
     called ST, referenced at the dataset's home site:
     "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
@@ -33,50 +138,45 @@
               <resampling/>
             </unification>
           </feedingPatterned>
-          <external>
-            <field name="Outline">
-              <realFeature/>
-            </field>
-          </external>
+          <fields>
+            <externalFields>
+              <field name="Outline">
+                <realFeature/>
+              </field>
+            </externalFields>
+          </fields>
         </input>
-        <reservoirCfgContainer>
-          <reservoirCfg name="MainCfg">
+        <reservoirStructures>
+          <reservoirStructure name="MainCfg">
             <pools>
-              <pool name="PureESN" dimX="160" dimY="1" dimZ="1">
+              <pool name="PureESN">
+                <proportions dimX="160" dimY="1" dimZ="1"/>
                 <neuronGroups>
-                  <analogGroup name="Exc-grp" role="Excitatory" relShare="1" readoutDensity="1">
+                  <analogGroup name="Exc-grp" role="Excitatory" relShare="1" firingThreshold="0.0025" readoutDensity="1">
                     <activationTanH/>
-                    <firingThreshold value="0.0025"/>
                   </analogGroup>
-                  <analogGroup name="Inh-grp" role="Inhibitory" relShare="1" readoutDensity="1">
+                  <analogGroup name="Inh-grp" role="Inhibitory" relShare="1" firingThreshold="0.0025" readoutDensity="1">
                     <activationTanH/>
-                    <firingThreshold value="0.0025"/>
                   </analogGroup>
                 </neuronGroups>
                 <interconnection>
-                  <randomSchema density="0.3" relShareEE="1" relShareEI="1" relShareIE="1" relShareII="1">
-                    <synapse/>
+                  <randomSchema density="0.3">
+                    <distributionFlat/>
                   </randomSchema>
                 </interconnection>
               </pool>
             </pools>
-            <spectralRadius>
-              <analogScope value="0.9999"/>
-              <spikingScope value="NA"/>
-            </spectralRadius>
-          </reservoirCfg>
-        </reservoirCfgContainer>
-        <reservoirInstanceContainer>
-          <reservoirInstance name="Main" cfg="MainCfg">
-            <inputConnections>
-              <inputConnection fieldName="Outline" poolName="PureESN" density="1" signalingRestriction="AnalogOnly">
-                <synapse delayMethod="Random" maxDelay="0">
-                  <analogTarget scope="All">
-                    <weight min="0" max="1"/>
-                  </analogTarget>
-                </synapse>
-              </inputConnection>
-            </inputConnections>
+          </reservoirStructure>
+        </reservoirStructures>
+        <reservoirInstances>
+          <reservoirInstance name="Main" reservoirStructure="MainCfg">
+            <inputUnits>
+              <inputUnit inputFieldName="Outline">
+                <connections>
+                  <connection poolName="PureESN" density="1" signalingRestriction="AnalogOnly"/>
+                </connections>
+              </inputUnit>
+            </inputUnits>
             <predictors activation="true"
                         activationSquare="false"
                         activationFadingSum="false"
@@ -87,7 +187,7 @@
                         firingBinPattern="false">
             </predictors>
           </reservoirInstance>
-        </reservoirInstanceContainer>
+        </reservoirInstances>
       </neuralPreprocessor>
       <readoutLayer testDataRatio="0.25" folds="Auto" repetitions="1">
         <defaultNetworks>
@@ -143,19 +243,22 @@
         <input>
           <feedingPatterned bidir="true">
             <unification unifyAmplitude="false" detrend="false">
-              <resampling thresholdOfSignalBeginDetection="0" thresholdOfSignalEndDetection="0" keepCommonTimeScale="true" targetTimePoints="Auto"/>
+              <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
             </unification>
           </feedingPatterned>
-          <external>
-            <field name="Outline">
-              <realFeature standardize="true" keepReserve="true"/>
-            </field>
-          </external>
+          <fields>
+            <externalFields>
+              <field name="Outline">
+                <realFeature standardize="true" keepReserve="true"/>
+              </field>
+            </externalFields>
+          </fields>
         </input>
-        <reservoirCfgContainer>
-          <reservoirCfg name="MainCfg">
+        <reservoirStructures>
+          <reservoirStructure name="MainCfg">
             <pools>
-              <pool name="AnalogPool" dimX="6" dimY="6" dimZ="5">
+              <pool name="AnalogPool">
+                <proportions dimX="6" dimY="6" dimZ="5"/>
                 <neuronGroups>
                   <analogGroup name="Exc-grp-analog" role="Excitatory" relShare="1" readoutDensity="1">
                     <activationTanH/>
@@ -166,11 +269,12 @@
                 </neuronGroups>
                 <interconnection>
                   <randomSchema density="0.1" avgDistance="NA" allowSelfConnection="false">
-                    <synapse/>
+                    <distributionLSM/>
                   </randomSchema>
                 </interconnection>
               </pool>
-              <pool name="SpikingPool" dimX="6" dimY="6" dimZ="5">
+              <pool name="SpikingPool">
+                <proportions dimX="6" dimY="6" dimZ="5"/>
                 <neuronGroups>
                   <spikingGroup name="Exc-grp-spiking" role="Excitatory" relShare="4" readoutDensity="1">
                     <activationSimpleIF refractoryPeriods="0"/>
@@ -181,43 +285,40 @@
                 </neuronGroups>
                 <interconnection>
                   <randomSchema density="0.3" avgDistance="NA" allowSelfConnection="false">
-                    <synapse/>
+                    <distributionLSM/>
                   </randomSchema>
                 </interconnection>
               </pool>
             </pools>
-            <pool2PoolConns>
-              <pool2PoolConn srcPool="AnalogPool" srcConnDensity="1" targetPool="SpikingPool" targetConnDensity="0.05">
-                <synapse/>
-              </pool2PoolConn>
-            </pool2PoolConns>
-            <spectralRadius>
-              <analogScope value="0.9999"/>
-              <spikingScope value="NA"/>
-            </spectralRadius>
-          </reservoirCfg>
-        </reservoirCfgContainer>
-        <reservoirInstanceContainer>
-          <reservoirInstance name="Main" cfg="MainCfg">
+            <interPoolConnections>
+              <interPoolConnection sourcePool="AnalogPool" sourceConnDensity="1" targetPool="SpikingPool" targetConnDensity="0.05">
+                <distributionLSM/>
+              </interPoolConnection>
+            </interPoolConnections>
+          </reservoirStructure>
+        </reservoirStructures>
+        <reservoirInstances>
+          <reservoirInstance name="Main" reservoirStructure="MainCfg">
             <inputUnits>
-              <inputUnit fieldName="Outline" spikeTrainLength="5"/>
+              <inputUnit inputFieldName="Outline" spikeTrainLength="5">
+                <connections>
+                  <connection poolName="AnalogPool" density="1" signalingRestriction="NoRestriction">
+                    <synapse delayMethod="Random" maxDelay="10">
+                      <analogTarget scope="Excitatory">
+                        <weight min="0" max="1"/>
+                      </analogTarget>
+                    </synapse>
+                  </connection>
+                  <connection poolName="SpikingPool" density="1" signalingRestriction="NoRestriction">
+                    <synapse delayMethod="Random" maxDelay="10">
+                      <spikingTarget scope="Excitatory">
+                        <weight min="0" max="1"/>
+                      </spikingTarget>
+                    </synapse>
+                  </connection>
+                </connections>
+              </inputUnit>
             </inputUnits>
-            <inputConnections>
-              <inputConnection fieldName="Outline" poolName="AnalogPool" density="1" signalingRestriction="NoRestriction">
-                <synapse delayMethod="Random" maxDelay="10">
-                  <analogTarget scope="Excitatory">
-                    <weight min="0" max="1"/>
-                  </analogTarget>
-                </synapse>
-              </inputConnection>
-              <inputConnection fieldName="Outline" poolName="SpikingPool" density="1" signalingRestriction="NoRestriction">
-                <synapse delayMethod="Random" maxDelay="10">
-                  <spikingTarget scope="Excitatory">
-                    <weight min="0" max="1"/>
-                  </spikingTarget>
-                </synapse>
-              </inputConnection>
-            </inputConnections>
             <predictors activation="true"
                         activationSquare="false"
                         activationFadingSum="false"
@@ -228,7 +329,7 @@
                         firingBinPattern="false">
             </predictors>
           </reservoirInstance>
-        </reservoirInstanceContainer>
+        </reservoirInstances>
       </neuralPreprocessor>
       <readoutLayer testDataRatio="0.25" folds="Auto" repetitions="1">
         <defaultNetworks>
@@ -328,19 +429,22 @@
         <input>
           <feedingPatterned bidir="false">
             <unification unifyAmplitude="false" detrend="false">
-              <resampling thresholdOfSignalBeginDetection="0" thresholdOfSignalEndDetection="0" keepCommonTimeScale="true" targetTimePoints="Auto"/>
+              <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
             </unification>
           </feedingPatterned>
-          <external>
-            <field name="DistanceFromCenter">
-              <realFeature standardize="true" keepReserve="true"/>
-            </field>
-          </external>
+          <fields>
+            <externalFields>
+              <field name="DistanceFromCenter">
+                <realFeature standardize="true" keepReserve="true"/>
+              </field>
+            </externalFields>
+          </fields>
         </input>
-        <reservoirCfgContainer>
-          <reservoirCfg name="MainCfg">
+        <reservoirStructures>
+          <reservoirStructure name="MainCfg">
             <pools>
-              <pool name="PureESN" dimX="6" dimY="6" dimZ="5">
+              <pool name="PureESN">
+                <proportions dimX="6" dimY="6" dimZ="5"/>
                 <neuronGroups>
                   <analogGroup name="Exc-grp" role="Excitatory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction">
                     <activationTanH/>
@@ -350,29 +454,23 @@
                   </analogGroup>
                 </neuronGroups>
                 <interconnection>
-                  <randomSchema density="0.2" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
-                    <synapse/>
+                  <randomSchema density="0.2" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
+                    <distributionFlat/>
                   </randomSchema>
                 </interconnection>
               </pool>
             </pools>
-            <spectralRadius>
-              <analogScope value="0.9999"/>
-              <spikingScope value="NA"/>
-            </spectralRadius>
-          </reservoirCfg>
-        </reservoirCfgContainer>
-        <reservoirInstanceContainer>
-          <reservoirInstance name="Main" cfg="MainCfg">
-            <inputConnections>
-              <inputConnection fieldName="DistanceFromCenter" poolName="PureESN" density="1">
-                <synapse delayMethod="Random" maxDelay="0">
-                  <analogTarget scope="All">
-                    <weight min="0" max="1"/>
-                  </analogTarget>
-                </synapse>
-              </inputConnection>
-            </inputConnections>
+          </reservoirStructure>
+        </reservoirStructures>
+        <reservoirInstances>
+          <reservoirInstance name="Main" reservoirStructure="MainCfg">
+            <inputUnits>
+              <inputUnit inputFieldName="DistanceFromCenter">
+                <connections>
+                  <connection poolName="PureESN" density="1"/>
+                </connections>
+              </inputUnit>
+            </inputUnits>
             <predictors activation="false"
                         activationSquare="false"
                         activationFadingSum="false"
@@ -383,7 +481,7 @@
                         firingBinPattern="false">
             </predictors>
           </reservoirInstance>
-        </reservoirInstanceContainer>
+        </reservoirInstances>
       </neuralPreprocessor>
       <readoutLayer testDataRatio="0.1" folds="Auto">
         <defaultNetworks/>
@@ -426,53 +524,48 @@
         <input>
           <feedingPatterned bidir="false">
             <unification unifyAmplitude="false" detrend="false">
-              <resampling thresholdOfSignalBeginDetection="0" thresholdOfSignalEndDetection="0" keepCommonTimeScale="true" targetTimePoints="Auto"/>
+              <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
             </unification>
           </feedingPatterned>
-          <external>
-            <field name="DistanceFromCenter">
-              <realFeature standardize="true" keepReserve="true"/>
-            </field>
-          </external>
+          <fields>
+            <externalFields>
+              <field name="DistanceFromCenter">
+                <realFeature standardize="true" keepReserve="true"/>
+              </field>
+            </externalFields>
+          </fields>
         </input>
-        <reservoirCfgContainer>
-          <reservoirCfg name="MainCfg">
+        <reservoirStructures>
+          <reservoirStructure name="MainCfg">
             <pools>
-              <pool name="PureESN" dimX="6" dimY="6" dimZ="5">
+              <pool name="PureESN">
+                <proportions dimX="6" dimY="6" dimZ="5"/>
                 <neuronGroups>
-                  <analogGroup name="Exc-grp" role="Excitatory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction">
+                  <analogGroup name="Exc-grp" role="Excitatory" relShare="1" firingThreshold="0.0015" readoutDensity="1" signalingRestriction="NoRestriction">
                     <activationTanH/>
-                    <firingThreshold value="0.0015"/>
                   </analogGroup>
-                  <analogGroup name="Inh-grp" role="Inhibitory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction">
+                  <analogGroup name="Inh-grp" role="Inhibitory" relShare="1" firingThreshold="0.0015" readoutDensity="1" signalingRestriction="NoRestriction">
                     <activationTanH/>
-                    <firingThreshold value="0.0015"/>
                   </analogGroup>
                 </neuronGroups>
                 <interconnection>
-                  <randomSchema density="0.2" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
-                    <synapse/>
+                  <randomSchema density="0.2" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
+                    <distributionFlat/>
                   </randomSchema>
                 </interconnection>
               </pool>
             </pools>
-            <spectralRadius>
-              <analogScope value="0.9999"/>
-              <spikingScope value="NA"/>
-            </spectralRadius>
-          </reservoirCfg>
-        </reservoirCfgContainer>
-        <reservoirInstanceContainer>
-          <reservoirInstance name="Main" cfg="MainCfg">
-            <inputConnections>
-              <inputConnection fieldName="DistanceFromCenter" poolName="PureESN" density="1">
-                <synapse delayMethod="Random" maxDelay="0">
-                  <analogTarget scope="All">
-                    <weight min="0" max="1"/>
-                  </analogTarget>
-                </synapse>
-              </inputConnection>
-            </inputConnections>
+          </reservoirStructure>
+        </reservoirStructures>
+        <reservoirInstances>
+          <reservoirInstance name="Main" reservoirStructure="MainCfg">
+            <inputUnits>
+              <inputUnit inputFieldName="DistanceFromCenter">
+                <connections>
+                  <connection poolName="PureESN" density="1"/>
+                </connections>
+              </inputUnit>
+            </inputUnits>
             <predictors activation="false"
                         activationSquare="false"
                         activationFadingSum="false"
@@ -483,7 +576,7 @@
                         firingBinPattern="false">
             </predictors>
           </reservoirInstance>
-        </reservoirInstanceContainer>
+        </reservoirInstances>
       </neuralPreprocessor>
       <readoutLayer testDataRatio="0.1" folds="Auto">
         <defaultNetworks/>
@@ -539,59 +632,54 @@
         <input>
           <feedingPatterned bidir="false">
             <unification unifyAmplitude="false" detrend="false">
-              <resampling thresholdOfSignalBeginDetection="0" thresholdOfSignalEndDetection="0" keepCommonTimeScale="true" targetTimePoints="Auto"/>
+              <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
             </unification>
           </feedingPatterned>
-          <external>
-            <field name="Eigenworm1">
-              <realFeature standardize="true" keepReserve="true"/>
-            </field>
-          </external>
+          <fields>
+            <externalFields>
+              <field name="Eigenworm1">
+                <realFeature standardize="true" keepReserve="true"/>
+              </field>
+            </externalFields>
+          </fields>
         </input>
-        <reservoirCfgContainer>
-          <reservoirCfg name="MainCfg">
+        <reservoirStructures>
+          <reservoirStructure name="MainCfg">
             <pools>
-              <pool name="PureESN" dimX="7" dimY="7" dimZ="7">
+              <pool name="PureESN">
+                <proportions dimX="7" dimY="7" dimZ="7"/>
                 <neuronGroups>
-                  <analogGroup name="Exc-grp" role="Excitatory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction">
+                  <analogGroup name="Exc-grp" role="Excitatory" relShare="1" firingThreshold="0.00125" readoutDensity="1" signalingRestriction="NoRestriction">
                     <activationTanH/>
-                    <firingThreshold value="0.00125"/>
                     <retainment density="1">
                       <strength min="0" max="0.5"/>
                     </retainment>
                   </analogGroup>
-                  <analogGroup name="Inh-grp" role="Inhibitory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction">
+                  <analogGroup name="Inh-grp" role="Inhibitory" relShare="1" firingThreshold="0.00125" readoutDensity="1" signalingRestriction="NoRestriction">
                     <activationTanH/>
-                    <firingThreshold value="0.00125"/>
                     <retainment density="1">
                       <strength min="0" max="0.5"/>
                     </retainment>
                   </analogGroup>
                 </neuronGroups>
                 <interconnection>
-                <randomSchema density="0.1" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
-                  <synapse/>
+                <randomSchema density="0.1" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
+                  <distributionFlat/>
                 </randomSchema>
                 </interconnection>
               </pool>
             </pools>
-            <spectralRadius>
-              <analogScope value="0.9999"/>
-              <spikingScope value="NA"/>
-            </spectralRadius>
-          </reservoirCfg>
-        </reservoirCfgContainer>
-        <reservoirInstanceContainer>
-          <reservoirInstance name="Main" cfg="MainCfg">
-            <inputConnections>
-              <inputConnection fieldName="Eigenworm1" poolName="PureESN" density="1">
-                <synapse delayMethod="Random" maxDelay="0">
-                  <analogTarget scope="All">
-                    <weight min="0" max="1"/>
-                  </analogTarget>
-                </synapse>
-              </inputConnection>
-            </inputConnections>
+          </reservoirStructure>
+        </reservoirStructures>
+        <reservoirInstances>
+          <reservoirInstance name="Main" reservoirStructure="MainCfg">
+            <inputUnits>
+              <inputUnit inputFieldName="Eigenworm1">
+                <connections>
+                  <connection poolName="PureESN" density="1"/>
+                </connections>
+              </inputUnit>
+            </inputUnits>
             <predictors activation="false"
                         activationSquare="false"
                         activationFadingSum="false"
@@ -602,7 +690,7 @@
                         firingBinPattern="false">
             </predictors>
           </reservoirInstance>
-        </reservoirInstanceContainer>
+        </reservoirInstances>
       </neuralPreprocessor>
       <readoutLayer testDataRatio="0.1" folds="Auto">
         <defaultNetworks>
@@ -655,65 +743,58 @@
     <stateMachineCfg randomizerSeek="0">
       <neuralPreprocessor>
         <input>
-          <feedingPatterned bidir="true" routeToReadout="false" dataOrganization="Groupped">
+          <feedingPatterned bidir="true" routeToReadout="false" variablesSchema="Groupped">
             <unification unifyAmplitude="false" detrend="false">
-              <resampling thresholdOfSignalBeginDetection="0" thresholdOfSignalEndDetection="0" keepCommonTimeScale="true" targetTimePoints="Auto"/>
+              <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
             </unification>
           </feedingPatterned>
-          <external>
-            <field name="coord_abcissa">
-              <realFeature standardize="true" keepReserve="true"/>
-            </field>
-            <field name="coord_ordinate">
-              <realFeature standardize="true" keepReserve="true"/>
-            </field>
-          </external>
+          <fields>
+            <externalFields>
+              <field name="coord_abcissa">
+                <realFeature standardize="true" keepReserve="true"/>
+              </field>
+              <field name="coord_ordinate">
+                <realFeature standardize="true" keepReserve="true"/>
+              </field>
+            </externalFields>
+          </fields>
         </input>
-        <reservoirCfgContainer>
-          <reservoirCfg name="MainCfg">
+        <reservoirStructures>
+          <reservoirStructure name="MainCfg">
             <pools>
-              <pool name="PureESN" dimX="5" dimY="5" dimZ="4">
+              <pool name="PureESN">
+                <proportions dimX="5" dimY="5" dimZ="4"/>
                 <neuronGroups>
-                  <analogGroup name="Exc-grp" role="Excitatory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction">
+                  <analogGroup name="Exc-grp" role="Excitatory" relShare="1" firingThreshold="0.00125" readoutDensity="1" signalingRestriction="NoRestriction">
                     <activationTanH/>
-                    <firingThreshold value="0.00125"/>
                   </analogGroup>
-                  <analogGroup name="Inh-grp" role="Inhibitory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction">
+                  <analogGroup name="Inh-grp" role="Inhibitory" relShare="1" firingThreshold="0.00125" readoutDensity="1" signalingRestriction="NoRestriction">
                     <activationTanH/>
-                    <firingThreshold value="0.00125"/>
                   </analogGroup>
                 </neuronGroups>
                 <interconnection>
-                  <randomSchema density="0.2" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
-                    <synapse/>
+                  <randomSchema density="0.2" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
+                    <distributionFlat/>
                   </randomSchema>
                 </interconnection>
               </pool>
             </pools>
-            <spectralRadius>
-              <analogScope value="0.9999"/>
-              <spikingScope value="NA"/>
-            </spectralRadius>
-          </reservoirCfg>
-        </reservoirCfgContainer>
-        <reservoirInstanceContainer>
-          <reservoirInstance name="Main" cfg="MainCfg">
-            <inputConnections>
-              <inputConnection fieldName="coord_abcissa" poolName="PureESN" density="0.25">
-                <synapse delayMethod="Random" maxDelay="0">
-                  <analogTarget scope="All">
-                    <weight min="0" max="1"/>
-                  </analogTarget>
-                </synapse>
-              </inputConnection>
-              <inputConnection fieldName="coord_ordinate" poolName="PureESN" density="0.25">
-                <synapse delayMethod="Random" maxDelay="0">
-                  <analogTarget scope="All">
-                    <weight min="0" max="1"/>
-                  </analogTarget>
-                </synapse>
-              </inputConnection>
-            </inputConnections>
+          </reservoirStructure>
+        </reservoirStructures>
+        <reservoirInstances>
+          <reservoirInstance name="Main" reservoirStructure="MainCfg">
+            <inputUnits>
+              <inputUnit inputFieldName="coord_abcissa">
+                <connections>
+                  <connection poolName="PureESN" density="0.25"/>
+                </connections>
+              </inputUnit>
+              <inputUnit inputFieldName="coord_ordinate">
+                <connections>
+                  <connection poolName="PureESN" density="0.25"/>
+                </connections>
+              </inputUnit>
+            </inputUnits>
             <predictors activation="false"
                         activationSquare="false"
                         activationFadingSum="false"
@@ -724,7 +805,7 @@
                         firingBinPattern="false">
             </predictors>
           </reservoirInstance>
-        </reservoirInstanceContainer>
+        </reservoirInstances>
       </neuralPreprocessor>
       <readoutLayer testDataRatio="0.0825" folds="Auto">
         <defaultNetworks>
@@ -805,29 +886,32 @@
     <stateMachineCfg randomizerSeek="0">
       <neuralPreprocessor>
         <input>
-          <feedingPatterned bidir="true" routeToReadout="true" dataOrganization="Groupped">
+          <feedingPatterned bidir="true" routeToReadout="true" variablesSchema="Groupped">
             <unification unifyAmplitude="false" detrend="false">
-              <resampling thresholdOfSignalBeginDetection="0" thresholdOfSignalEndDetection="0" keepCommonTimeScale="true" targetTimePoints="Auto"/>
+              <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
             </unification>
           </feedingPatterned>
-          <external>
-            <field name="coord_abcissa">
-              <realFeature standardize="true" keepReserve="false"/>
-            </field>
-            <field name="coord_ordinate">
-              <realFeature standardize="true" keepReserve="false"/>
-            </field>
-          </external>
-          <internal>
-            <field name="thalamic_noise" allowRoutingToReadout="false">
-              <random min="0" max="0.5"/>
-            </field>
-          </internal>
+          <fields>
+            <externalFields>
+              <field name="coord_abcissa">
+                <realFeature standardize="true" keepReserve="false"/>
+              </field>
+              <field name="coord_ordinate">
+                <realFeature standardize="true" keepReserve="false"/>
+              </field>
+            </externalFields>
+            <internalFields>
+              <field name="thalamic_noise" routeToReadout="false">
+                <random min="0" max="0.5"/>
+              </field>
+            </internalFields>
+          </fields>
         </input>
-        <reservoirCfgContainer>
-          <reservoirCfg name="MainCfg">
+        <reservoirStructures>
+          <reservoirStructure name="MainCfg">
             <pools>
-              <pool name="PureLSM" dimX="5" dimY="5" dimZ="5">
+              <pool name="PureLSM">
+                <proportions dimX="5" dimY="5" dimZ="5"/>
                 <neuronGroups>
                   <spikingGroup name="Exc-grp" role="Excitatory" relShare="4" readoutDensity="1">
                     <activationLeakyIF/>
@@ -837,40 +921,40 @@
                   </spikingGroup>
                 </neuronGroups>
                 <interconnection>
-                  <randomSchema density="0.2" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
-                    <synapse/>
+                  <randomSchema density="0.2" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
+                    <distributionFlat/>
                   </randomSchema>
                 </interconnection>
               </pool>
             </pools>
-            <spectralRadius>
-              <analogScope value="NA"/>
-              <spikingScope value="NA"/>
-            </spectralRadius>
-          </reservoirCfg>
-        </reservoirCfgContainer>
-        <reservoirInstanceContainer>
-          <reservoirInstance name="Main" cfg="MainCfg">
+          </reservoirStructure>
+        </reservoirStructures>
+        <reservoirInstances>
+          <reservoirInstance name="Main" reservoirStructure="MainCfg">
             <inputUnits>
-              <inputUnit fieldName="coord_abcissa" spikeTrainLength="5"/>
-              <inputUnit fieldName="coord_ordinate" spikeTrainLength="5"/>
+              <inputUnit inputFieldName="coord_abcissa" spikeTrainLength="5">
+                <connections>
+                  <connection poolName="PureLSM" density="0.5" signalingRestriction="NoRestriction">
+                    <synapse maxDelay="0">
+                      <spikingTarget scope="Excitatory">
+                        <weight min="0" max="0.5"/>
+                      </spikingTarget>
+                    </synapse>
+                  </connection>
+                </connections>
+              </inputUnit>
+              <inputUnit inputFieldName="coord_ordinate" spikeTrainLength="5">
+                <connections>
+                  <connection poolName="PureLSM" density="0.5" signalingRestriction="NoRestriction">
+                    <synapse maxDelay="0">
+                      <spikingTarget scope="Excitatory">
+                        <weight min="0" max="0.5"/>
+                      </spikingTarget>
+                    </synapse>
+                  </connection>
+                </connections>
+              </inputUnit>
             </inputUnits>
-            <inputConnections>
-              <inputConnection fieldName="coord_abcissa" poolName="PureLSM" density="0.5" signalingRestriction="NoRestriction">
-                <synapse maxDelay="0">
-                  <spikingTarget scope="Excitatory">
-                    <weight min="0" max="0.5"/>
-                  </spikingTarget>
-                </synapse>
-              </inputConnection>
-              <inputConnection fieldName="coord_ordinate" poolName="PureLSM" density="0.5" signalingRestriction="NoRestriction">
-                <synapse maxDelay="0">
-                  <spikingTarget scope="Excitatory">
-                    <weight min="0" max="0.5"/>
-                  </spikingTarget>
-                </synapse>
-              </inputConnection>
-            </inputConnections>
             <predictors activation="false"
                         activationSquare="false"
                         activationFadingSum="false"
@@ -881,7 +965,7 @@
                         firingBinPattern="false">
             </predictors>
           </reservoirInstance>
-        </reservoirInstanceContainer>
+        </reservoirInstances>
       </neuralPreprocessor>
       <readoutLayer testDataRatio="0.0825" folds="Auto">
         <defaultNetworks>
@@ -962,24 +1046,27 @@
     <stateMachineCfg randomizerSeek="0">
       <neuralPreprocessor>
         <input>
-          <feedingPatterned bidir="true" routeToReadout="true" dataOrganization="Groupped">
+          <feedingPatterned bidir="true" routeToReadout="true" variablesSchema="Groupped">
             <unification unifyAmplitude="false" detrend="false">
-              <resampling thresholdOfSignalBeginDetection="0" thresholdOfSignalEndDetection="0" keepCommonTimeScale="true" targetTimePoints="Auto"/>
+              <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
             </unification>
           </feedingPatterned>
-          <external>
-            <field name="coord_abcissa">
-              <realFeature standardize="true" keepReserve="false"/>
-            </field>
-            <field name="coord_ordinate">
-              <realFeature standardize="true" keepReserve="false"/>
-            </field>
-          </external>
+          <fields>
+            <externalFields>
+              <field name="coord_abcissa">
+                <realFeature standardize="true" keepReserve="false"/>
+              </field>
+              <field name="coord_ordinate">
+                <realFeature standardize="true" keepReserve="false"/>
+              </field>
+            </externalFields>
+          </fields>
         </input>
-        <reservoirCfgContainer>
-          <reservoirCfg name="MainCfg">
+        <reservoirStructures>
+          <reservoirStructure name="MainCfg">
             <pools>
-              <pool name="SpikingPool" dimX="5" dimY="5" dimZ="3">
+              <pool name="SpikingPool">
+                <proportions dimX="5" dimY="5" dimZ="3"/>
                 <neuronGroups>
                   <spikingGroup name="Exc-grp-spiking" role="Excitatory" relShare="4" readoutDensity="1">
                     <activationAdExpIF/>
@@ -991,60 +1078,51 @@
                   </spikingGroup>
                 </neuronGroups>
                 <interconnection>
-                  <randomSchema density="0.1" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
-                    <synapse/>
+                  <randomSchema density="0.1" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false">
+                    <distributionLSM/>
                   </randomSchema>
                 </interconnection>
               </pool>
-              <pool name="AnalogPool" dimX="5" dimY="5" dimZ="3">
+              <pool name="AnalogPool">
+                <proportions dimX="5" dimY="5" dimZ="3"/>
                 <neuronGroups>
-                  <analogGroup name="Exc-grp-analog" role="Excitatory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction">
+                  <analogGroup name="Exc-grp-analog" role="Excitatory" relShare="1" firingThreshold="0.00125" readoutDensity="1" signalingRestriction="NoRestriction">
                     <activationTanH/>
-                    <firingThreshold value="0.00125"/>
                   </analogGroup>
-                  <analogGroup name="Inh-grp-analog" role="Inhibitory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction">
+                  <analogGroup name="Inh-grp-analog" role="Inhibitory" relShare="1" firingThreshold="0.00125" readoutDensity="1" signalingRestriction="NoRestriction">
                     <activationTanH/>
-                    <firingThreshold value="0.00125"/>
                   </analogGroup>
                 </neuronGroups>
                 <interconnection>
-                  <randomSchema density="0.1" relShareEE="0.25" relShareEI="0.25" relShareIE="0.25" relShareII="0.25" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
-                    <synapse/>
+                  <randomSchema density="0.1" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
+                    <distributionFlat/>
                   </randomSchema>
                 </interconnection>
               </pool>
             </pools>
-            <pool2PoolConns>
-              <pool2PoolConn srcPool="AnalogPool" srcConnDensity="0.5" targetPool="SpikingPool" targetConnDensity="0.0667" relShareEE="0.3" relShareEI="0.2" relShareIE="0.4" relShareII="0.1" constantNumOfConnections="false">
-                <synapse/>
-              </pool2PoolConn>
-            </pool2PoolConns>
-            <spectralRadius>
-              <analogScope value="0.9999"/>
-              <spikingScope value="NA"/>
-            </spectralRadius>
-          </reservoirCfg>
-        </reservoirCfgContainer>
-        <reservoirInstanceContainer>
-          <reservoirInstance name="Main" cfg="MainCfg">
+            <interPoolConnections>
+              <interPoolConnection sourcePool="AnalogPool" sourceConnDensity="0.5" targetPool="SpikingPool" targetConnDensity="0.0667">
+                <distributionLSM/>
+              </interPoolConnection>
+            </interPoolConnections>
+          </reservoirStructure>
+        </reservoirStructures>
+        <reservoirInstances>
+          <reservoirInstance name="Main" reservoirStructure="MainCfg">
             <inputUnits>
-              <inputUnit fieldName="coord_abcissa" spikeTrainLength="5" differenceDistance="1"/>
-              <inputUnit fieldName="coord_ordinate" spikeTrainLength="5" differenceDistance="1"/>
+              <inputUnit inputFieldName="coord_abcissa" spikeTrainLength="5" differenceDistance="1">
+                <connections>
+                  <connection poolName="SpikingPool" density="0.25" coding="Difference" signalingRestriction="SpikingOnly"/>
+                  <connection poolName="AnalogPool" density="0.25" signalingRestriction="AnalogOnly"/>
+                </connections>
+              </inputUnit>
+              <inputUnit inputFieldName="coord_ordinate" spikeTrainLength="5" differenceDistance="1">
+                <connections>
+                  <connection poolName="SpikingPool" density="0.25" coding="Difference" signalingRestriction="SpikingOnly"/>
+                  <connection poolName="AnalogPool" density="0.25" signalingRestriction="AnalogOnly"/>
+                </connections>
+              </inputUnit>
             </inputUnits>
-            <inputConnections>
-              <inputConnection fieldName="coord_abcissa" poolName="SpikingPool" density="0.25" coding="Difference" signalingRestriction="SpikingOnly">
-                <synapse/>
-              </inputConnection>
-              <inputConnection fieldName="coord_ordinate" poolName="SpikingPool" density="0.25" coding="Difference" signalingRestriction="SpikingOnly">
-                <synapse/>
-              </inputConnection>
-              <inputConnection fieldName="coord_abcissa" poolName="AnalogPool" density="0.25" signalingRestriction="AnalogOnly">
-                <synapse/>
-              </inputConnection>
-              <inputConnection fieldName="coord_ordinate" poolName="AnalogPool" density="0.25" signalingRestriction="AnalogOnly">
-                <synapse/>
-              </inputConnection>
-            </inputConnections>
             <predictors activation="false"
                         activationSquare="false"
                         activationFadingSum="false"
@@ -1055,7 +1133,7 @@
                         firingBinPattern="false">
             </predictors>
           </reservoirInstance>
-        </reservoirInstanceContainer>
+        </reservoirInstances>
       </neuralPreprocessor>
       <readoutLayer testDataRatio="0.0825" folds="Auto">
         <defaultNetworks>
@@ -1131,16 +1209,19 @@
       <neuralPreprocessor predictorsReductionRatio="0">
         <input>
           <feedingContinuous bootCycles="Auto" routeToReadout="true"/>
-          <external>
-            <field name="Value" allowRoutingToReadout="true">
-              <realFeature standardize="true" keepReserve="false"/>
-            </field>
-          </external>
+          <fields>
+            <externalFields>
+              <field name="Value" routeToReadout="true">
+                <realFeature standardize="true" keepReserve="false"/>
+              </field>
+            </externalFields>
+          </fields>
         </input>
-        <reservoirCfgContainer>
-          <reservoirCfg name="ESNCfg #1">
+        <reservoirStructures>
+          <reservoirStructure name="ESNCfg #1">
             <pools>
-              <pool name="Logistic chain pool" dimX="100" dimY="1" dimZ="1">
+              <pool name="Logistic chain pool">
+                <proportions dimX="100" dimY="1" dimZ="1"/>
                 <neuronGroups>
                   <analogGroup name="Exc-Logistic" role="Excitatory" relShare="1">
                     <activationTanH/>
@@ -1155,7 +1236,8 @@
                   </chainSchema>
                 </interconnection>
               </pool>
-              <pool name="Logistic random pool" dimX="100" dimY="1" dimZ="1">
+              <pool name="Logistic random pool">
+                <proportions dimX="100" dimY="1" dimZ="1"/>
                 <neuronGroups>
                   <analogGroup name="Exc-Logistic" role="Excitatory" relShare="1">
                     <activationTanH/>
@@ -1165,25 +1247,22 @@
                   </analogGroup>
                 </neuronGroups>
                 <interconnection>
-                  <randomSchema density="0.1" relShareEE="1" relShareEI="1" relShareIE="1" relShareII="1" avgDistance="NA" allowSelfConnection="true">
-                    <synapse/>
+                  <randomSchema density="0.1" avgDistance="NA" allowSelfConnection="true">
+                    <distributionFlat/>
                   </randomSchema>
                 </interconnection>
               </pool>
             </pools>
-            <pool2PoolConns>
-              <pool2PoolConn srcPool="Logistic chain pool" srcConnDensity="1" targetPool="Logistic random pool" targetConnDensity="0.01" relShareEE="1" relShareEI="1" relShareIE="1" relShareII="1">
-                <synapse/>
-              </pool2PoolConn>
-            </pool2PoolConns>
-            <spectralRadius>
-              <analogScope value="0.9999"/>
-              <spikingScope value="NA"/>
-            </spectralRadius>
-          </reservoirCfg>
-          <reservoirCfg name="ESNCfg #2">
+            <interPoolConnections>
+              <interPoolConnection sourcePool="Logistic chain pool" sourceConnDensity="1" targetPool="Logistic random pool" targetConnDensity="0.01">
+                <distributionFlat/>
+              </interPoolConnection>
+            </interPoolConnections>
+          </reservoirStructure>
+          <reservoirStructure name="ESNCfg #2">
             <pools>
-              <pool name="Logistic chain pool" dimX="100" dimY="1" dimZ="1">
+              <pool name="Logistic chain pool">
+                <proportions dimX="100" dimY="1" dimZ="1"/>
                 <neuronGroups>
                   <analogGroup name="Exc-Logistic" role="Excitatory" relShare="1">
                     <activationTanH/>
@@ -1198,7 +1277,8 @@
                   </chainSchema>
                 </interconnection>
               </pool>
-              <pool name="Logistic random pool" dimX="100" dimY="1" dimZ="1">
+              <pool name="Logistic random pool">
+                <proportions dimX="100" dimY="1" dimZ="1"/>
                 <neuronGroups>
                   <analogGroup name="Exc-Logistic" role="Excitatory" relShare="1">
                     <activationTanH/>
@@ -1208,32 +1288,28 @@
                   </analogGroup>
                 </neuronGroups>
                 <interconnection>
-                  <randomSchema density="0.1" relShareEE="1" relShareEI="1" relShareIE="1" relShareII="1" avgDistance="NA" allowSelfConnection="true">
-                    <synapse/>
+                  <randomSchema density="0.1" avgDistance="NA" allowSelfConnection="true">
+                    <distributionFlat/>
                   </randomSchema>
                 </interconnection>
               </pool>
             </pools>
-            <pool2PoolConns>
-              <pool2PoolConn srcPool="Logistic random pool" srcConnDensity="1" targetPool="Logistic chain pool" targetConnDensity="0.05" relShareEE="1" relShareEI="1" relShareIE="1" relShareII="1">
-                <synapse/>
-              </pool2PoolConn>
-            </pool2PoolConns>
-            <spectralRadius>
-              <analogScope value="0.9999"/>
-              <spikingScope value="NA"/>
-            </spectralRadius>
-          </reservoirCfg>
-        </reservoirCfgContainer>
-        <reservoirInstanceContainer>
-          <reservoirInstance name="ESN reservoir #1" cfg="ESNCfg #1">
-            <inputConnections>
-              <inputConnection fieldName="Value" poolName="Logistic chain pool" density="1" coding="Actual" oppositeAmplitude="false">
-                <synapse maxDelay="0">
-                  <analogTarget scope="All"/>
-                </synapse>
-              </inputConnection>
-            </inputConnections>
+            <interPoolConnections>
+              <interPoolConnection sourcePool="Logistic random pool" sourceConnDensity="1" targetPool="Logistic chain pool" targetConnDensity="0.05">
+                <distributionFlat/>
+              </interPoolConnection>
+            </interPoolConnections>
+          </reservoirStructure>
+        </reservoirStructures>
+        <reservoirInstances>
+          <reservoirInstance name="ESN reservoir #1" reservoirStructure="ESNCfg #1">
+            <inputUnits>
+              <inputUnit inputFieldName="Value">
+                <connections>
+                  <connection poolName="Logistic chain pool" density="1" coding="Actual" oppositeAmplitude="false"/>
+                </connections>
+              </inputUnit>
+            </inputUnits>
             <predictors activation="true"
                         activationSquare="true"
                         activationFadingSum="true"
@@ -1244,14 +1320,14 @@
                         firingBinPattern="false">
             </predictors>
           </reservoirInstance>
-          <reservoirInstance name="ESN reservoir #2" cfg="ESNCfg #2">
-            <inputConnections>
-              <inputConnection fieldName="Value" poolName="Logistic random pool" density="1" coding="Actual" oppositeAmplitude="false">
-                <synapse maxDelay="0">
-                  <analogTarget scope="All"/>
-                </synapse>
-              </inputConnection>
-            </inputConnections>
+          <reservoirInstance name="ESN reservoir #2" reservoirStructure="ESNCfg #2">
+            <inputUnits>
+              <inputUnit inputFieldName="Value">
+                <connections>
+                  <connection poolName="Logistic random pool" density="1" coding="Actual" oppositeAmplitude="false"/>
+                </connections>
+              </inputUnit>
+            </inputUnits>
             <predictors activation="true"
                         activationSquare="true"
                         activationFadingSum="true"
@@ -1262,7 +1338,7 @@
                         firingBinPattern="false">
             </predictors>
           </reservoirInstance>
-        </reservoirInstanceContainer>
+        </reservoirInstances>
       </neuralPreprocessor>
       <readoutLayer testDataRatio="0.1" folds="1">
         <defaultNetworks/>
@@ -1298,22 +1374,25 @@
       <neuralPreprocessor>
         <input>
           <feedingContinuous bootCycles="Auto" routeToReadout="true"/>
-          <external>
-            <field name="High" allowRoutingToReadout="true">
-              <realFeature standardize="true" keepReserve="false"/>
-            </field>
-            <field name="Low" allowRoutingToReadout="true">
-              <realFeature standardize="true" keepReserve="false"/>
-            </field>
-            <field name="Adj Close" allowRoutingToReadout="true">
-              <realFeature standardize="true" keepReserve="false"/>
-            </field>
-          </external>
+          <fields>
+            <externalFields>
+              <field name="High" routeToReadout="true">
+                <realFeature standardize="true" keepReserve="false"/>
+              </field>
+              <field name="Low" routeToReadout="true">
+                <realFeature standardize="true" keepReserve="false"/>
+              </field>
+              <field name="Adj Close" routeToReadout="true">
+                <realFeature standardize="true" keepReserve="false"/>
+              </field>
+            </externalFields>
+          </fields>
         </input>
-        <reservoirCfgContainer>
-          <reservoirCfg name="MainCfg">
+        <reservoirStructures>
+          <reservoirStructure name="MainCfg">
             <pools>
-              <pool name="Logistic pool" dimX="6" dimY="6" dimZ="6">
+              <pool name="Logistic pool">
+                <proportions dimX="6" dimY="6" dimZ="6"/>
                 <neuronGroups>
                   <analogGroup name="Exc-Logistic" role="Excitatory" relShare="1" signalingRestriction="NoRestriction" readoutDensity="1">
                     <activationTanH/>
@@ -1335,37 +1414,45 @@
                 </interconnection>
               </pool>
             </pools>
-            <spectralRadius>
-              <analogScope value="0.9999"/>
-              <spikingScope value="NA"/>
-            </spectralRadius>
-          </reservoirCfg>
-        </reservoirCfgContainer>
-        <reservoirInstanceContainer>
-          <reservoirInstance name="Main" cfg="MainCfg">
-            <inputConnections>
-              <inputConnection fieldName="High" poolName="Logistic pool" density="1">
-                <synapse delayMethod="Random" maxDelay="0">
-                  <analogTarget scope="All">
-                    <weight min="0" max="0.1" />
-                  </analogTarget>
-                </synapse>
-              </inputConnection>
-              <inputConnection fieldName="Low" poolName="Logistic pool" density="1">
-                <synapse delayMethod="Random" maxDelay="0">
-                  <analogTarget scope="All">
-                    <weight min="0" max="0.1" />
-                  </analogTarget>
-                </synapse>
-              </inputConnection>
-              <inputConnection fieldName="Adj Close" poolName="Logistic pool" density="1">
-                <synapse delayMethod="Random" maxDelay="0">
-                  <analogTarget scope="All">
-                    <weight min="0" max="0.1" />
-                  </analogTarget>
-                </synapse>
-              </inputConnection>
-            </inputConnections>
+          </reservoirStructure>
+        </reservoirStructures>
+        <reservoirInstances>
+          <reservoirInstance name="Main" reservoirStructure="MainCfg">
+            <inputUnits>
+              <inputUnit inputFieldName="High">
+                <connections>
+                  <connection poolName="Logistic pool" density="1">
+                    <synapse delayMethod="Random" maxDelay="0">
+                      <analogTarget scope="All">
+                        <weight min="0" max="0.1" />
+                      </analogTarget>
+                    </synapse>
+                  </connection>
+                </connections>
+              </inputUnit>
+              <inputUnit inputFieldName="Low">
+                <connections>
+                  <connection poolName="Logistic pool" density="1">
+                    <synapse delayMethod="Random" maxDelay="0">
+                      <analogTarget scope="All">
+                        <weight min="0" max="0.1" />
+                      </analogTarget>
+                    </synapse>
+                  </connection>
+                </connections>
+              </inputUnit>
+              <inputUnit inputFieldName="Adj Close">
+                <connections>
+                  <connection poolName="Logistic pool" density="1">
+                    <synapse delayMethod="Random" maxDelay="0">
+                      <analogTarget scope="All">
+                        <weight min="0" max="0.1" />
+                      </analogTarget>
+                    </synapse>
+                  </connection>
+                </connections>
+              </inputUnit>
+            </inputUnits>
             <predictors activation="true"
                         activationSquare="false"
                         activationFadingSum="false"
@@ -1376,7 +1463,7 @@
                         firingBinPattern="false">
             </predictors>
           </reservoirInstance>
-        </reservoirInstanceContainer>
+        </reservoirInstances>
       </neuralPreprocessor>
       <readoutLayer testDataRatio="0.1" folds="Auto">
         <defaultNetworks>
@@ -1424,19 +1511,22 @@
         <input>
           <feedingPatterned bidir="true" routeToReadout="false">
             <unification unifyAmplitude="false" detrend="false">
-              <resampling thresholdOfSignalBeginDetection="0" thresholdOfSignalEndDetection="0" keepCommonTimeScale="true" targetTimePoints="Auto"/>
+              <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
             </unification>
           </feedingPatterned>
-          <external>
-            <field name="EEG" allowRoutingToReadout="true">
-              <realFeature standardize="true" keepReserve="false"/>
-            </field>
-          </external>
+          <fields>
+            <externalFields>
+              <field name="EEG" routeToReadout="true">
+                <realFeature standardize="true" keepReserve="false"/>
+              </field>
+            </externalFields>
+          </fields>
         </input>
-        <reservoirCfgContainer>
-          <reservoirCfg name="MainCfg">
+        <reservoirStructures>
+          <reservoirStructure name="MainCfg">
             <pools>
-              <pool name="PureESN" dimX="178" dimY="1" dimZ="1">
+              <pool name="PureESN">
+                <proportions dimX="178" dimY="1" dimZ="1"/>
                 <neuronGroups>
                   <analogGroup name="Exc-grp" role="Excitatory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction">
                     <activationTanH/>
@@ -1446,8 +1536,8 @@
                   </analogGroup>
                 </neuronGroups>
                 <interconnection>
-                  <randomSchema density="0.1" relShareEE="1" relShareEI="1" relShareIE="1" relShareII="1" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
-                    <synapse/>
+                  <randomSchema density="0.1" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
+                    <distributionFlat/>
                   </randomSchema>
                   <chainSchema ratio="1" circle="true" repetitions="1">
                     <synapse/>
@@ -1455,23 +1545,23 @@
                 </interconnection>
               </pool>
             </pools>
-            <spectralRadius>
-              <analogScope value="0.9999"/>
-              <spikingScope value="NA"/>
-            </spectralRadius>
-          </reservoirCfg>
-        </reservoirCfgContainer>
-        <reservoirInstanceContainer>
-          <reservoirInstance name="Main" cfg="MainCfg">
-            <inputConnections>
-              <inputConnection fieldName="EEG" poolName="PureESN" density="1">
-                <synapse delayMethod="Random" maxDelay="89">
-                  <analogTarget scope="All">
-                    <weight min="0" max="1"/>
-                  </analogTarget>
-                </synapse>
-              </inputConnection>
-            </inputConnections>
+          </reservoirStructure>
+        </reservoirStructures>
+        <reservoirInstances>
+          <reservoirInstance name="Main" reservoirStructure="MainCfg">
+            <inputUnits>
+              <inputUnit inputFieldName="EEG">
+                <connections>
+                  <connection poolName="PureESN" density="1">
+                    <synapse delayMethod="Random" maxDelay="89">
+                      <analogTarget scope="All">
+                        <weight min="0" max="1"/>
+                      </analogTarget>
+                    </synapse>
+                  </connection>
+                </connections>
+              </inputUnit>
+            </inputUnits>
             <predictors activation="false"
                         activationSquare="false"
                         activationFadingSum="false"
@@ -1490,7 +1580,7 @@
               </params>
             </predictors>
           </reservoirInstance>
-        </reservoirInstanceContainer>
+        </reservoirInstances>
       </neuralPreprocessor>
       <readoutLayer testDataRatio="0.1" folds="Auto">
         <defaultNetworks/>
@@ -1546,22 +1636,25 @@
         <input>
           <feedingPatterned bidir="true" routeToReadout="false">
             <unification unifyAmplitude="false" detrend="false">
-              <resampling thresholdOfSignalBeginDetection="0" thresholdOfSignalEndDetection="0" keepCommonTimeScale="true" targetTimePoints="Auto"/>
+              <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
             </unification>
           </feedingPatterned>
-          <external>
-            <field name="LeftHandAccel" allowRoutingToReadout="true">
-              <realFeature standardize="true" keepReserve="true" keepSign="false"/>
-            </field>
-            <field name="RightHandAccel" allowRoutingToReadout="true">
-              <realFeature standardize="true" keepReserve="true" keepSign="false"/>
-            </field>
-          </external>
+          <fields>
+            <externalFields>
+              <field name="LeftHandAccel" routeToReadout="true">
+                <realFeature standardize="true" keepReserve="true" keepSign="false"/>
+              </field>
+              <field name="RightHandAccel" routeToReadout="true">
+                <realFeature standardize="true" keepReserve="true" keepSign="false"/>
+              </field>
+            </externalFields>
+          </fields>
         </input>
-        <reservoirCfgContainer>
-          <reservoirCfg name="MainCfg">
+        <reservoirStructures>
+          <reservoirStructure name="MainCfg">
             <pools>
-              <pool name="Pool1" dimX="150" dimY="1" dimZ="1">
+              <pool name="Pool1">
+                <proportions dimX="150" dimY="1" dimZ="1"/>
                 <neuronGroups>
                   <analogGroup name="Exc-grp" role="Excitatory" relShare="1" readoutDensity="1">
                     <activationTanH/>
@@ -1571,15 +1664,16 @@
                   </analogGroup>
                 </neuronGroups>
                 <interconnection>
-                  <randomSchema density="0.1" relShareEE="1" relShareEI="1" relShareIE="1" relShareII="1" avgDistance="NA" allowSelfConnection="true">
-                    <synapse/>
+                  <randomSchema density="0.1" avgDistance="NA" allowSelfConnection="true">
+                    <distributionFlat/>
                   </randomSchema>
                   <chainSchema ratio="1" circle="true">
                     <synapse/>
                   </chainSchema>
                 </interconnection>
               </pool>
-              <pool name="Pool2" dimX="150" dimY="1" dimZ="1">
+              <pool name="Pool2">
+                <proportions dimX="150" dimY="1" dimZ="1"/>
                 <neuronGroups>
                   <analogGroup name="Exc-grp" role="Excitatory" relShare="1" readoutDensity="1">
                     <activationTanH/>
@@ -1589,8 +1683,8 @@
                   </analogGroup>
                 </neuronGroups>
                 <interconnection>
-                  <randomSchema density="0.1" relShareEE="1" relShareEI="1" relShareIE="1" relShareII="1" avgDistance="NA" allowSelfConnection="true">
-                    <synapse/>
+                  <randomSchema density="0.1" avgDistance="NA" allowSelfConnection="true">
+                    <distributionFlat/>
                   </randomSchema>
                   <chainSchema ratio="1" circle="true">
                     <synapse/>
@@ -1598,48 +1692,48 @@
                 </interconnection>
               </pool>
             </pools>
-            <spectralRadius>
-              <analogScope value="0.9999"/>
-              <spikingScope value="NA"/>
-            </spectralRadius>
-          </reservoirCfg>
-        </reservoirCfgContainer>
-        <reservoirInstanceContainer>
-          <reservoirInstance name="Main" cfg="MainCfg">
+          </reservoirStructure>
+        </reservoirStructures>
+        <reservoirInstances>
+          <reservoirInstance name="Main" reservoirStructure="MainCfg">
             <inputUnits>
-              <inputUnit fieldName="LeftHandAccel"/>
-              <inputUnit fieldName="RightHandAccel"/>
+              <inputUnit inputFieldName="LeftHandAccel">
+                <connections>
+                  <connection poolName="Pool1" density="0.5" coding="Actual" oppositeAmplitude="false" signalingRestriction="NoRestriction">
+                    <synapse delayMethod="Random" maxDelay="0">
+                      <analogTarget scope="All">
+                        <weight min="0" max="1"/>
+                      </analogTarget>
+                    </synapse>
+                  </connection>
+                  <connection poolName="Pool2" density="0.5" coding="Actual" oppositeAmplitude="true" signalingRestriction="NoRestriction">
+                    <synapse delayMethod="Random" maxDelay="0">
+                      <analogTarget scope="All">
+                        <weight min="0" max="1"/>
+                      </analogTarget>
+                    </synapse>
+                  </connection>
+                </connections>
+              </inputUnit>
+              <inputUnit inputFieldName="RightHandAccel">
+                <connections>
+                  <connection poolName="Pool1" density="0.5" coding="Actual" oppositeAmplitude="false" signalingRestriction="NoRestriction">
+                    <synapse delayMethod="Random" maxDelay="0">
+                      <analogTarget scope="All">
+                        <weight min="0" max="1"/>
+                      </analogTarget>
+                    </synapse>
+                  </connection>
+                  <connection poolName="Pool2" density="0.5" coding="Actual" oppositeAmplitude="true" signalingRestriction="NoRestriction">
+                    <synapse delayMethod="Random" maxDelay="0">
+                      <analogTarget scope="All">
+                        <weight min="0" max="1"/>
+                      </analogTarget>
+                    </synapse>
+                  </connection>
+                </connections>
+              </inputUnit>
             </inputUnits>
-            <inputConnections>
-              <inputConnection fieldName="LeftHandAccel" poolName="Pool1" density="0.5" coding="Actual" oppositeAmplitude="false" signalingRestriction="NoRestriction">
-                <synapse delayMethod="Random" maxDelay="0">
-                  <analogTarget scope="All">
-                    <weight min="0" max="1"/>
-                  </analogTarget>
-                </synapse>
-              </inputConnection>
-              <inputConnection fieldName="RightHandAccel" poolName="Pool1" density="0.5" coding="Actual" oppositeAmplitude="false" signalingRestriction="NoRestriction">
-                <synapse delayMethod="Random" maxDelay="0">
-                  <analogTarget scope="All">
-                    <weight min="0" max="1"/>
-                  </analogTarget>
-                </synapse>
-              </inputConnection>
-              <inputConnection fieldName="LeftHandAccel" poolName="Pool2" density="0.5" coding="Actual" oppositeAmplitude="true" signalingRestriction="NoRestriction">
-                <synapse delayMethod="Random" maxDelay="0">
-                  <analogTarget scope="All">
-                    <weight min="0" max="1"/>
-                  </analogTarget>
-                </synapse>
-              </inputConnection>
-              <inputConnection fieldName="RightHandAccel" poolName="Pool2" density="0.5" coding="Actual" oppositeAmplitude="true" signalingRestriction="NoRestriction">
-                <synapse delayMethod="Random" maxDelay="0">
-                  <analogTarget scope="All">
-                    <weight min="0" max="1"/>
-                  </analogTarget>
-                </synapse>
-              </inputConnection>
-            </inputConnections>
             <predictors activation="false"
                         activationSquare="false"
                         activationFadingSum="false"
@@ -1658,7 +1752,7 @@
               </params>
             </predictors>
           </reservoirInstance>
-        </reservoirInstanceContainer>
+        </reservoirInstances>
       </neuralPreprocessor>
       <readoutLayer testDataRatio="0.1" folds="Auto">
         <defaultNetworks>
@@ -1739,24 +1833,27 @@
     <stateMachineCfg randomizerSeek="0">
       <neuralPreprocessor predictorsReductionRatio="0">
         <input>
-          <feedingPatterned bidir="true" routeToReadout="true" dataOrganization="Sequential">
+          <feedingPatterned bidir="true" routeToReadout="true" variablesSchema="Sequential">
             <unification unifyAmplitude="false" detrend="false">
-              <resampling thresholdOfSignalBeginDetection="0" thresholdOfSignalEndDetection="0" keepCommonTimeScale="true" targetTimePoints="Auto"/>
+              <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
             </unification>
           </feedingPatterned>
-          <external>
-            <field name="LeftHandAccel" allowRoutingToReadout="true">
-              <realFeature standardize="true" keepReserve="true" keepSign="false"/>
-            </field>
-            <field name="RightHandAccel" allowRoutingToReadout="true">
-              <realFeature standardize="true" keepReserve="true" keepSign="false"/>
-            </field>
-          </external>
+          <fields>
+            <externalFields>
+              <field name="LeftHandAccel" routeToReadout="true">
+                <realFeature standardize="true" keepReserve="true" keepSign="false"/>
+              </field>
+              <field name="RightHandAccel" routeToReadout="true">
+                <realFeature standardize="true" keepReserve="true" keepSign="false"/>
+              </field>
+            </externalFields>
+          </fields>
         </input>
-        <reservoirCfgContainer>
-          <reservoirCfg name="MainCfg">
+        <reservoirStructures>
+          <reservoirStructure name="MainCfg">
             <pools>
-              <pool name="Pool1" dimX="150" dimY="1" dimZ="1">
+              <pool name="Pool1">
+                <proportions dimX="150" dimY="1" dimZ="1"/>
                 <neuronGroups>
                   <analogGroup name="Exc-grp" role="Excitatory" relShare="1" readoutDensity="1">
                     <activationTanH/>
@@ -1766,15 +1863,16 @@
                   </analogGroup>
                 </neuronGroups>
                 <interconnection>
-                  <randomSchema density="0.0667" relShareEE="1" relShareEI="1" relShareIE="1" relShareII="1">
-                    <synapse/>
+                  <randomSchema density="0.0667">
+                    <distributionFlat/>
                   </randomSchema>
                   <chainSchema ratio="1" circle="true" repetitions="1">
                     <synapse/>
                   </chainSchema>
                 </interconnection>
               </pool>
-              <pool name="Pool2" dimX="150" dimY="1" dimZ="1">
+              <pool name="Pool2">
+                <proportions dimX="150" dimY="1" dimZ="1"/>
                 <neuronGroups>
                   <analogGroup name="Exc-grp" role="Excitatory" relShare="1" readoutDensity="1">
                     <activationTanH/>
@@ -1784,15 +1882,16 @@
                   </analogGroup>
                 </neuronGroups>
                 <interconnection>
-                  <randomSchema density="0.0667" relShareEE="1" relShareEI="1" relShareIE="1" relShareII="1">
-                    <synapse/>
+                  <randomSchema density="0.0667">
+                    <distributionFlat/>
                   </randomSchema>
                   <chainSchema ratio="1" circle="true" repetitions="1">
                     <synapse/>
                   </chainSchema>
                 </interconnection>
               </pool>
-              <pool name="Pool3" dimX="150" dimY="1" dimZ="1">
+              <pool name="Pool3">
+                <proportions dimX="150" dimY="1" dimZ="1"/>
                 <neuronGroups>
                   <analogGroup name="Exc-grp" role="Excitatory" relShare="1" readoutDensity="1">
                     <activationTanH/>
@@ -1802,15 +1901,16 @@
                   </analogGroup>
                 </neuronGroups>
                 <interconnection>
-                  <randomSchema density="0.0667" relShareEE="1" relShareEI="1" relShareIE="1" relShareII="1">
-                    <synapse/>
+                  <randomSchema density="0.0667">
+                    <distributionFlat/>
                   </randomSchema>
                   <chainSchema ratio="1" circle="true" repetitions="1">
                     <synapse/>
                   </chainSchema>
                 </interconnection>
               </pool>
-              <pool name="Pool4" dimX="150" dimY="1" dimZ="1">
+              <pool name="Pool4">
+                <proportions dimX="150" dimY="1" dimZ="1"/>
                 <neuronGroups>
                   <analogGroup name="Exc-grp" role="Excitatory" relShare="1" readoutDensity="1">
                     <activationTanH/>
@@ -1820,8 +1920,8 @@
                   </analogGroup>
                 </neuronGroups>
                 <interconnection>
-                  <randomSchema density="0.0667" relShareEE="1" relShareEI="1" relShareIE="1" relShareII="1">
-                    <synapse/>
+                  <randomSchema density="0.0667">
+                    <distributionFlat/>
                   </randomSchema>
                   <chainSchema ratio="1" circle="true" repetitions="1">
                     <synapse/>
@@ -1829,69 +1929,73 @@
                 </interconnection>
               </pool>
             </pools>
-            <pool2PoolConns>
-              <pool2PoolConn srcPool="Pool1" srcConnDensity="1" targetPool="Pool4" targetConnDensity="0.02" relShareEE="1" relShareEI="1" relShareIE="1" relShareII="1">
-                <synapse/>
-              </pool2PoolConn>
-              <pool2PoolConn srcPool="Pool2" srcConnDensity="1" targetPool="Pool4" targetConnDensity="0.02" relShareEE="1" relShareEI="1" relShareIE="1" relShareII="1">
-                <synapse/>
-              </pool2PoolConn>
-              <pool2PoolConn srcPool="Pool3" srcConnDensity="1" targetPool="Pool4" targetConnDensity="0.02" relShareEE="1" relShareEI="1" relShareIE="1" relShareII="1">
-                <synapse/>
-              </pool2PoolConn>
-            </pool2PoolConns>
-            <spectralRadius>
-              <analogScope value="0.9999"/>
-              <spikingScope value="NA"/>
-            </spectralRadius>
-          </reservoirCfg>
-        </reservoirCfgContainer>
-        <reservoirInstanceContainer>
-          <reservoirInstance name="Main1" cfg="MainCfg">
-            <inputConnections>
-              <inputConnection fieldName="LeftHandAccel" poolName="Pool1" density="0.5" coding="Actual" oppositeAmplitude="false" signalingRestriction="NoRestriction">
-                <synapse delayMethod="Random" maxDelay="5">
-                  <analogTarget scope="All">
-                    <weight min="0" max="1"/>
-                  </analogTarget>
-                </synapse>
-              </inputConnection>
-              <inputConnection fieldName="RightHandAccel" poolName="Pool1" density="0.5" coding="Actual" oppositeAmplitude="false" signalingRestriction="NoRestriction">
-                <synapse delayMethod="Random" maxDelay="5">
-                  <analogTarget scope="All">
-                    <weight min="0" max="1"/>
-                  </analogTarget>
-                </synapse>
-              </inputConnection>
-              <inputConnection fieldName="LeftHandAccel" poolName="Pool2" density="0.5" coding="Power" oppositeAmplitude="false" signalingRestriction="NoRestriction">
-                <synapse delayMethod="Random" maxDelay="5">
-                  <analogTarget scope="All">
-                    <weight min="0" max="1"/>
-                  </analogTarget>
-                </synapse>
-              </inputConnection>
-              <inputConnection fieldName="RightHandAccel" poolName="Pool2" density="0.5" coding="Power" oppositeAmplitude="false" signalingRestriction="NoRestriction">
-                <synapse delayMethod="Random" maxDelay="5">
-                  <analogTarget scope="All">
-                    <weight min="0" max="1"/>
-                  </analogTarget>
-                </synapse>
-              </inputConnection>
-              <inputConnection fieldName="LeftHandAccel" poolName="Pool3" density="0.5" coding="MovingAverage" oppositeAmplitude="false" signalingRestriction="NoRestriction">
-                <synapse delayMethod="Random" maxDelay="0">
-                  <analogTarget scope="All">
-                    <weight min="0" max="1"/>
-                  </analogTarget>
-                </synapse>
-              </inputConnection>
-              <inputConnection fieldName="RightHandAccel" poolName="Pool3" density="0.5" coding="MovingAverage" oppositeAmplitude="false" signalingRestriction="NoRestriction">
-                <synapse delayMethod="Random" maxDelay="0">
-                  <analogTarget scope="All">
-                    <weight min="0" max="1"/>
-                  </analogTarget>
-                </synapse>
-              </inputConnection>
-            </inputConnections>
+            <interPoolConnections>
+              <interPoolConnection sourcePool="Pool1" sourceConnDensity="1" targetPool="Pool4" targetConnDensity="0.02">
+                <distributionFlat/>
+              </interPoolConnection>
+              <interPoolConnection sourcePool="Pool2" sourceConnDensity="1" targetPool="Pool4" targetConnDensity="0.02">
+                <distributionFlat/>
+              </interPoolConnection>
+              <interPoolConnection sourcePool="Pool3" sourceConnDensity="1" targetPool="Pool4" targetConnDensity="0.02">
+                <distributionFlat/>
+              </interPoolConnection>
+            </interPoolConnections>
+          </reservoirStructure>
+        </reservoirStructures>
+        <reservoirInstances>
+          <reservoirInstance name="Main1" reservoirStructure="MainCfg">
+            <inputUnits>
+              <inputUnit inputFieldName="LeftHandAccel">
+                <connections>
+                  <connection poolName="Pool1" density="0.5" coding="Actual" oppositeAmplitude="false" signalingRestriction="NoRestriction">
+                    <synapse delayMethod="Random" maxDelay="5">
+                      <analogTarget scope="All">
+                        <weight min="0" max="1"/>
+                      </analogTarget>
+                    </synapse>
+                  </connection>
+                  <connection poolName="Pool2" density="0.5" coding="Power" oppositeAmplitude="false" signalingRestriction="NoRestriction">
+                    <synapse delayMethod="Random" maxDelay="5">
+                      <analogTarget scope="All">
+                        <weight min="0" max="1"/>
+                      </analogTarget>
+                    </synapse>
+                  </connection>
+                  <connection poolName="Pool3" density="0.5" coding="MovingAverage" oppositeAmplitude="false" signalingRestriction="NoRestriction">
+                    <synapse delayMethod="Random" maxDelay="0">
+                      <analogTarget scope="All">
+                        <weight min="0" max="1"/>
+                      </analogTarget>
+                    </synapse>
+                  </connection>
+                </connections>
+              </inputUnit>
+              <inputUnit inputFieldName="RightHandAccel">
+                <connections>
+                  <connection poolName="Pool1" density="0.5" coding="Actual" oppositeAmplitude="false" signalingRestriction="NoRestriction">
+                    <synapse delayMethod="Random" maxDelay="5">
+                      <analogTarget scope="All">
+                        <weight min="0" max="1"/>
+                      </analogTarget>
+                    </synapse>
+                  </connection>
+                  <connection poolName="Pool2" density="0.5" coding="Power" oppositeAmplitude="false" signalingRestriction="NoRestriction">
+                    <synapse delayMethod="Random" maxDelay="5">
+                      <analogTarget scope="All">
+                        <weight min="0" max="1"/>
+                      </analogTarget>
+                    </synapse>
+                  </connection>
+                  <connection poolName="Pool3" density="0.5" coding="MovingAverage" oppositeAmplitude="false" signalingRestriction="NoRestriction">
+                    <synapse delayMethod="Random" maxDelay="0">
+                      <analogTarget scope="All">
+                        <weight min="0" max="1"/>
+                      </analogTarget>
+                    </synapse>
+                  </connection>
+                </connections>
+              </inputUnit>
+            </inputUnits>
             <predictors activation="false"
                         activationSquare="false"
                         activationFadingSum="false"
@@ -1910,7 +2014,7 @@
               </params>
             </predictors>
           </reservoirInstance>
-        </reservoirInstanceContainer>
+        </reservoirInstances>
       </neuralPreprocessor>
       <readoutLayer testDataRatio="0.05" folds="Auto" repetitions="1">
         <defaultNetworks>
@@ -1998,19 +2102,22 @@
         <input>
           <feedingPatterned bidir="true" routeToReadout="false">
             <unification unifyAmplitude="false" detrend="false">
-              <resampling thresholdOfSignalBeginDetection="0" thresholdOfSignalEndDetection="0" keepCommonTimeScale="true" targetTimePoints="Auto"/>
+              <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
             </unification>
           </feedingPatterned>
-          <external>
-            <field name="Accel" allowRoutingToReadout="true">
-              <realFeature standardize="true" keepReserve="true"/>
-            </field>
-          </external>
+          <fields>
+            <externalFields>
+              <field name="Accel" routeToReadout="true">
+                <realFeature standardize="true" keepReserve="true"/>
+              </field>
+            </externalFields>
+          </fields>
         </input>
-        <reservoirCfgContainer>
-          <reservoirCfg name="MainCfg">
+        <reservoirStructures>
+          <reservoirStructure name="MainCfg">
             <pools>
-              <pool name="Pool1" dimX="150" dimY="1" dimZ="1">
+              <pool name="Pool1">
+                <proportions dimX="150" dimY="1" dimZ="1"/>
                 <neuronGroups>
                   <analogGroup name="Exc-grp" role="Excitatory" relShare="1" readoutDensity="1">
                     <activationTanH/>
@@ -2020,15 +2127,16 @@
                   </analogGroup>
                 </neuronGroups>
                 <interconnection>
-                  <randomSchema density="0.1" relShareEE="1" relShareEI="1" relShareIE="1" relShareII="1" avgDistance="NA" allowSelfConnection="true">
-                    <synapse/>
+                  <randomSchema density="0.1" avgDistance="NA" allowSelfConnection="true">
+                    <distributionFlat/>
                   </randomSchema>
                   <chainSchema ratio="1" circle="true">
                     <synapse/>
                   </chainSchema>
                 </interconnection>
               </pool>
-              <pool name="Pool2" dimX="150" dimY="1" dimZ="1">
+              <pool name="Pool2">
+                <proportions dimX="150" dimY="1" dimZ="1"/>
                 <neuronGroups>
                   <analogGroup name="Exc-grp" role="Excitatory" relShare="1" readoutDensity="1">
                     <activationTanH/>
@@ -2038,8 +2146,8 @@
                   </analogGroup>
                 </neuronGroups>
                 <interconnection>
-                  <randomSchema density="0.1" relShareEE="1" relShareEI="1" relShareIE="1" relShareII="1" avgDistance="NA" allowSelfConnection="true">
-                    <synapse/>
+                  <randomSchema density="0.1" avgDistance="NA" allowSelfConnection="true">
+                    <distributionFlat/>
                   </randomSchema>
                   <chainSchema ratio="1" circle="true">
                     <synapse/>
@@ -2047,30 +2155,30 @@
                 </interconnection>
               </pool>
             </pools>
-            <spectralRadius>
-              <analogScope value="0.9999"/>
-              <spikingScope value="NA"/>
-            </spectralRadius>
-          </reservoirCfg>
-        </reservoirCfgContainer>
-        <reservoirInstanceContainer>
-          <reservoirInstance name="Main" cfg="MainCfg">
-            <inputConnections>
-              <inputConnection fieldName="Accel" poolName="Pool1" density="1" coding="Power" oppositeAmplitude="false" signalingRestriction="NoRestriction">
-                <synapse delayMethod="Random" maxDelay="150">
-                  <analogTarget scope="All">
-                    <weight min="0" max="1"/>
-                  </analogTarget>
-                </synapse>
-              </inputConnection>
-              <inputConnection fieldName="Accel" poolName="Pool2" density="1" coding="MovingAverage" oppositeAmplitude="false" signalingRestriction="NoRestriction">
-                <synapse delayMethod="Random" maxDelay="150">
-                  <analogTarget scope="All">
-                    <weight min="0" max="1"/>
-                  </analogTarget>
-                </synapse>
-              </inputConnection>
-            </inputConnections>
+          </reservoirStructure>
+        </reservoirStructures>
+        <reservoirInstances>
+          <reservoirInstance name="Main" reservoirStructure="MainCfg">
+            <inputUnits>
+              <inputUnit inputFieldName="Accel">
+                <connections>
+                  <connection poolName="Pool1" density="1" coding="Power" oppositeAmplitude="false" signalingRestriction="NoRestriction">
+                    <synapse delayMethod="Random" maxDelay="150">
+                      <analogTarget scope="All">
+                        <weight min="0" max="1"/>
+                      </analogTarget>
+                    </synapse>
+                  </connection>
+                  <connection poolName="Pool2" density="1" coding="MovingAverage" oppositeAmplitude="false" signalingRestriction="NoRestriction">
+                    <synapse delayMethod="Random" maxDelay="150">
+                      <analogTarget scope="All">
+                        <weight min="0" max="1"/>
+                      </analogTarget>
+                    </synapse>
+                  </connection>
+                </connections>
+              </inputUnit>
+            </inputUnits>
             <predictors activation="false"
                         activationSquare="false"
                         activationFadingSum="false"
@@ -2089,7 +2197,7 @@
               </params>
             </predictors>
           </reservoirInstance>
-        </reservoirInstanceContainer>
+        </reservoirInstances>
       </neuralPreprocessor>
       <readoutLayer testDataRatio="0.1" folds="Auto">
         <defaultNetworks>
@@ -2124,8 +2232,7 @@
           </readoutUnit>
           <readoutUnit name="Out">
             <classification oneWinnerGroupName="Gesture"/>
-          </readoutUnit>
-          <readoutUnit name="Penalty Runs">
+          </readoutUnit><readoutUnit name="Penalty Runs">
             <classification oneWinnerGroupName="Gesture"/>
           </readoutUnit>
           <readoutUnit name="Six">
@@ -2141,11 +2248,6 @@
       </readoutLayer>
     </stateMachineCfg>
   </case>
-
-
-
-
-
 
 
 

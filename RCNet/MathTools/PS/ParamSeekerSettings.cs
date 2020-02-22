@@ -20,7 +20,7 @@ namespace RCNet.MathTools.PS
         /// <summary>
         /// Name of the associated xsd type
         /// </summary>
-        public const string XsdTypeName = "ParamSeekerCfgType";
+        public const string XsdTypeName = "ParamSeekerType";
 
         //Attribute properties
         /// <summary>

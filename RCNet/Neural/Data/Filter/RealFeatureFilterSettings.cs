@@ -20,7 +20,7 @@ namespace RCNet.Neural.Data.Filter
         /// <summary>
         /// Name of the associated xsd type
         /// </summary>
-        public const string XsdTypeName = "RealFeatureFilterCfgType";
+        public const string XsdTypeName = "RealFeatureFilterType";
 
         //Default values
         /// <summary>

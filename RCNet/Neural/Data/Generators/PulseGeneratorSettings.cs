@@ -20,7 +20,7 @@ namespace RCNet.Neural.Data.Generators
         /// <summary>
         /// Name of the associated xsd type
         /// </summary>
-        public const string XsdTypeName = "PulseGeneratorCfgType";
+        public const string XsdTypeName = "PulseGeneratorType";
 
         //Enums
         /// <summary>

@@ -26,7 +26,7 @@ namespace RCNet.Neural.Network.SM.Readout
         /// <summary>
         /// Name of the associated xsd type
         /// </summary>
-        public const string XsdTypeName = "ROutLayerUnitCfgType";
+        public const string XsdTypeName = "ROutLayerUnitType";
 
         //Attribute properties
         /// <summary>
@@ -42,7 +42,7 @@ namespace RCNet.Neural.Network.SM.Readout
         /// <summary>
         /// Readout unit's Forecast or Classification task settings
         /// </summary>
-        public ITaskSettings TaskSettings { get; }
+        public ITaskSettings TaskCfg { get; }
 
         //Constructors
         /// <summary>
@@ -50,12 +50,12 @@ namespace RCNet.Neural.Network.SM.Readout
         /// </summary>
         /// <param name="index">Readout unit's zero-based index within output fields</param>
         /// <param name="name">Output field name</param>
-        /// <param name="taskSettings">Readout unit's Forecast or Classification task settings</param>
-        public ReadoutUnitSettings(int index, string name, ITaskSettings taskSettings)
+        /// <param name="taskCfg">Readout unit's Forecast or Classification task settings</param>
+        public ReadoutUnitSettings(int index, string name, ITaskSettings taskCfg)
         {
             Index = index;
             Name = name;
-            TaskSettings = (ITaskSettings)taskSettings.DeepClone();
+            TaskCfg = (ITaskSettings)taskCfg.DeepClone();
             Check();
             return;
         }
@@ -65,7 +65,7 @@ namespace RCNet.Neural.Network.SM.Readout
         /// </summary>
         /// <param name="source">Source instance</param>
         public ReadoutUnitSettings(ReadoutUnitSettings source)
-            :this(source.Index, source.Name, source.TaskSettings)
+            :this(source.Index, source.Name, source.TaskCfg)
         {
             return;
         }
@@ -87,11 +87,11 @@ namespace RCNet.Neural.Network.SM.Readout
             XElement taskSettingsElem = settingsElem.Descendants().First();
             if (taskSettingsElem.Name.LocalName == "forecast")
             {
-                TaskSettings = new ForecastTaskSettings(taskSettingsElem);
+                TaskCfg = new ForecastTaskSettings(taskSettingsElem);
             }
             else
             {
-                TaskSettings = new ClassificationTaskSettings(taskSettingsElem);
+                TaskCfg = new ClassificationTaskSettings(taskSettingsElem);
             }
             Check();
             return;
@@ -138,7 +138,7 @@ namespace RCNet.Neural.Network.SM.Readout
         {
             XElement rootElem = new XElement(rootElemName);
             rootElem.Add(new XAttribute("name", Name));
-            rootElem.Add(TaskSettings.GetXml(suppressDefaults));
+            rootElem.Add(TaskCfg.GetXml(suppressDefaults));
             Validate(rootElem, XsdTypeName);
             return rootElem;
         }

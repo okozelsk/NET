@@ -21,7 +21,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         /// <summary>
         /// Name of the associated xsd type
         /// </summary>
-        public const string XsdTypeName = "FFNetRidgeRegrTrainerCfgType";
+        public const string XsdTypeName = "FFNetRidgeRegrTrainerType";
         /// <summary>
         /// Seeker's default min lambda
         /// </summary>

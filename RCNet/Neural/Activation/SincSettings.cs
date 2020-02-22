@@ -23,7 +23,7 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Name of the associated xsd type
         /// </summary>
-        public const string XsdTypeName = "ActivationSincCfgType";
+        public const string XsdTypeName = "ActivationSincType";
 
         //Constructors
         /// <summary>

@@ -21,7 +21,7 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
         /// <summary>
         /// Name of the associated xsd type
         /// </summary>
-        public const string XsdTypeName = "PPNetCfgType";
+        public const string XsdTypeName = "PPNetType";
 
         //Default values
         /// <summary>

@@ -35,7 +35,7 @@
   </xs:simpleType>
 
   <!-- Enumeration of patterned data organization -->
-  <xs:simpleType name="PatternedDataOrganizationType">
+  <xs:simpleType name="VariablesSchemaType">
     <xs:restriction base="xs:string">
       <xs:enumeration value="Groupped"/>
       <xs:enumeration value="Sequential"/>
@@ -287,12 +287,39 @@
     <xs:attribute type="xs:string" name="name" use="required"/>
   </xs:complexType>
 
+
+  <!-- Coordinates - configuration -->
+  <xs:complexType name="CoordinatesType">
+    <xs:attribute type="xs:int" name="x" use="optional" default="0">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:int" name="y" use="optional" default="0">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:int" name="z" use="optional" default="0">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <!-- Proportions - configuration -->
+  <xs:complexType name="ProportionsType">
+    <xs:attribute type="UIntGT0Type" name="dimX" use="required" />
+    <xs:attribute type="UIntGT0Type" name="dimY" use="required" />
+    <xs:attribute type="UIntGT0Type" name="dimZ" use="required" />
+  </xs:complexType>
+
   <!-- Uniform distribution configuration element -->
-  <xs:complexType name="UniformDistrCfgType">
+  <xs:complexType name="UniformDistrType">
   </xs:complexType>
 
   <!-- Gaussian distribution configuration element -->
-  <xs:complexType name="GaussianDistrCfgType">
+  <xs:complexType name="GaussianDistrType">
     <xs:attribute type="xs:double" name="mean" use="optional" default="0">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is 0</xs:documentation>
@@ -306,12 +333,12 @@
   </xs:complexType>
 
   <!-- Exponential distribution configuration element -->
-  <xs:complexType name="ExponentialDistrCfgType">
+  <xs:complexType name="ExponentialDistrType">
     <xs:attribute type="DoubleNotEq0Type" name="mean" use="required"/>
   </xs:complexType>
 
   <!-- Gamma distribution configuration element -->
-  <xs:complexType name="GammaDistrCfgType">
+  <xs:complexType name="GammaDistrType">
     <xs:attribute type="UDoubleGT0Type" name="alpha" use="required"/>
     <xs:attribute type="UDoubleGT0Type" name="beta" use="required"/>
   </xs:complexType>
@@ -319,10 +346,10 @@
   <!-- Random value element -->
   <xs:complexType name="RandomValueType">
     <xs:choice minOccurs="0" maxOccurs="1">
-      <xs:element type="UniformDistrCfgType" name="uniformDistr" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="GaussianDistrCfgType" name="gaussianDistr" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="ExponentialDistrCfgType" name="exponentialDistr" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="GammaDistrCfgType" name="gammaDistr" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="UniformDistrType" name="uniformDistr" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="GaussianDistrType" name="gaussianDistr" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="ExponentialDistrType" name="exponentialDistr" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="GammaDistrType" name="gammaDistr" minOccurs="1" maxOccurs="1"/>
     </xs:choice>
     <xs:attribute type="xs:double" name="min" use="required"/>
     <xs:attribute type="xs:double" name="max" use="required"/>
@@ -334,7 +361,7 @@
   </xs:complexType>
 
   <!-- Unsigned gaussian distribution configuration element -->
-  <xs:complexType name="UGaussianDistrCfgType">
+  <xs:complexType name="UGaussianDistrType">
     <xs:attribute type="UDoubleGT0Type" name="mean" use="optional" default="0.5">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is 0.5</xs:documentation>
@@ -348,24 +375,24 @@
   </xs:complexType>
 
   <!-- Unsigned Exponential distribution configuration element -->
-  <xs:complexType name="UExponentialDistrCfgType">
+  <xs:complexType name="UExponentialDistrType">
     <xs:attribute type="UDoubleGT0Type" name="mean" use="required"/>
   </xs:complexType>
 
   <!-- Unsigned random value element -->
   <xs:complexType name="URandomValueType">
     <xs:choice minOccurs="0" maxOccurs="1">
-      <xs:element type="UniformDistrCfgType" name="uniformDistr" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="UGaussianDistrCfgType" name="gaussianDistr" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="UExponentialDistrCfgType" name="exponentialDistr" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="GammaDistrCfgType" name="gammaDistr" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="UniformDistrType" name="uniformDistr" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="UGaussianDistrType" name="gaussianDistr" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="UExponentialDistrType" name="exponentialDistr" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="GammaDistrType" name="gammaDistr" minOccurs="1" maxOccurs="1"/>
     </xs:choice>
     <xs:attribute type="UDoubleType" name="min" use="required"/>
     <xs:attribute type="UDoubleGT0Type" name="max" use="required"/>
   </xs:complexType>
 
   <!-- Parameter value seeker - configuration -->
-  <xs:complexType name="ParamSeekerCfgType">
+  <xs:complexType name="ParamSeekerType">
     <xs:attribute type="xs:double" name="min" use="required"/>
     <xs:attribute type="xs:double" name="max" use="required"/>
     <xs:attribute type="UIntGT1Type" name="steps" use="required"/>
@@ -374,14 +401,14 @@
   <!-- ________________________________________SIGNAL GENERATORS TYPES_____________________________________________ -->
 
   <!-- Pulse generator configuration element -->
-  <xs:complexType name="PulseGeneratorCfgType">
+  <xs:complexType name="PulseGeneratorType">
     <xs:attribute type="xs:double" name="signal" use="required"/>
     <xs:attribute type="UDoubleGE1Type" name="avgPeriod" use="required"/>
     <xs:attribute type="PulseGeneratorModeType" name="mode" use="required"/>
   </xs:complexType>
 
   <!-- Sinusoidal generator configuration element -->
-  <xs:complexType name="SinusoidalGeneratorCfgType">
+  <xs:complexType name="SinusoidalGeneratorType">
     <xs:attribute type="xs:double" name="phase" use="optional" default="0">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is 0</xs:documentation>
@@ -400,7 +427,7 @@
   </xs:complexType>
 
   <!-- Mackey Glass generator configuration element -->
-  <xs:complexType name="MackeyGlassGeneratorCfgType">
+  <xs:complexType name="MackeyGlassGeneratorType">
     <xs:attribute type="UIntGE2LE18Type" name="tau" use="optional" default="18">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is 18</xs:documentation>
@@ -422,7 +449,7 @@
   <!-- ________________________________________SPIKING ACTIVATION TYPES_____________________________________________ -->
 
   <!-- Activation SimpleIF configuration element -->
-  <xs:complexType name="ActivationSimpleIFCfgType">
+  <xs:complexType name="ActivationSimpleIFType">
     <xs:sequence minOccurs="0" maxOccurs="1">
       <xs:element type="URandomValueType" name="resistance" minOccurs="0" maxOccurs="1">
         <xs:annotation>
@@ -453,7 +480,7 @@
   </xs:complexType>
 
   <!-- Activation LeakyIF configuration element -->
-  <xs:complexType name="ActivationLeakyIFCfgType">
+  <xs:complexType name="ActivationLeakyIFType">
     <xs:sequence minOccurs="0" maxOccurs="1">
       <xs:element type="URandomValueType" name="timeScale" minOccurs="0" maxOccurs="1">
         <xs:annotation>
@@ -499,7 +526,7 @@
   </xs:complexType>
 
   <!-- Activation ExpIF configuration element -->
-  <xs:complexType name="ActivationExpIFCfgType">
+  <xs:complexType name="ActivationExpIFType">
     <xs:sequence minOccurs="0" maxOccurs="1">
       <xs:element type="URandomValueType" name="timeScale" minOccurs="0" maxOccurs="1">
         <xs:annotation>
@@ -555,7 +582,7 @@
   </xs:complexType>
 
   <!-- Activation AdExpIF configuration element -->
-  <xs:complexType name="ActivationAdExpIFCfgType">
+  <xs:complexType name="ActivationAdExpIFType">
     <xs:sequence minOccurs="0" maxOccurs="1">
       <xs:element type="URandomValueType" name="timeScale" minOccurs="0" maxOccurs="1">
         <xs:annotation>
@@ -621,7 +648,7 @@
   </xs:complexType>
 
   <!-- Activation IzhikevichIF configuration element -->
-  <xs:complexType name="ActivationIzhikevichIFCfgType">
+  <xs:complexType name="ActivationIzhikevichIFType">
     <xs:sequence minOccurs="0" maxOccurs="1">
       <xs:element type="URandomValueType" name="recoveryTimeScale" minOccurs="0" maxOccurs="1">
         <xs:annotation>
@@ -672,7 +699,7 @@
   </xs:complexType>
 
   <!-- Activation AutoIzhikevichIF configuration element -->
-  <xs:complexType name="ActivationAutoIzhikevichIFCfgType">
+  <xs:complexType name="ActivationAutoIzhikevichIFType">
     <xs:attribute type="NeuronRoleType" name="role" use="required"/>
     <xs:attribute type="xs:unsignedInt" name="refractoryPeriods" use="optional" default="1">
       <xs:annotation>
@@ -694,15 +721,15 @@
   <!-- ________________________________________ANALOG ACTIVATION TYPES_____________________________________________ -->
 
   <!-- Activation SQNL configuration element -->
-  <xs:complexType name="ActivationSQNLCfgType">
+  <xs:complexType name="ActivationSQNLType">
   </xs:complexType>
 
   <!-- Activation BentIdentity configuration element -->
-  <xs:complexType name="ActivationBentIdentityCfgType">
+  <xs:complexType name="ActivationBentIdentityType">
   </xs:complexType>
 
   <!-- Activation Elliot configuration element -->
-  <xs:complexType name="ActivationElliotCfgType">
+  <xs:complexType name="ActivationElliotType">
     <xs:sequence minOccurs="0" maxOccurs="1">
       <xs:element type="URandomValueType" name="slope" minOccurs="0" maxOccurs="1">
         <xs:annotation>
@@ -713,15 +740,15 @@
   </xs:complexType>
 
   <!-- Activation Gaussian configuration element -->
-  <xs:complexType name="ActivationGaussianCfgType">
+  <xs:complexType name="ActivationGaussianType">
   </xs:complexType>
 
   <!-- Activation Identity configuration element -->
-  <xs:complexType name="ActivationIdentityCfgType">
+  <xs:complexType name="ActivationIdentityType">
   </xs:complexType>
 
   <!-- Activation ISRU configuration element -->
-  <xs:complexType name="ActivationISRUCfgType">
+  <xs:complexType name="ActivationISRUType">
     <xs:sequence minOccurs="0" maxOccurs="1">
       <xs:element type="URandomValueType" name="alpha" minOccurs="0" maxOccurs="1">
         <xs:annotation>
@@ -732,7 +759,7 @@
   </xs:complexType>
 
   <!-- Activation LeakyReLU configuration element -->
-  <xs:complexType name="ActivationLeakyReLUCfgType">
+  <xs:complexType name="ActivationLeakyReLUType">
     <xs:sequence minOccurs="0" maxOccurs="1">
       <xs:element type="URandomValueType" name="negSlope" minOccurs="0" maxOccurs="1">
         <xs:annotation>
@@ -743,19 +770,19 @@
   </xs:complexType>
 
   <!-- Activation Sigmoid configuration element -->
-  <xs:complexType name="ActivationSigmoidCfgType">
+  <xs:complexType name="ActivationSigmoidType">
   </xs:complexType>
 
   <!-- Activation Sinc configuration element -->
-  <xs:complexType name="ActivationSincCfgType">
+  <xs:complexType name="ActivationSincType">
   </xs:complexType>
 
   <!-- Activation Sinusoid configuration element -->
-  <xs:complexType name="ActivationSinusoidCfgType">
+  <xs:complexType name="ActivationSinusoidType">
   </xs:complexType>
 
   <!-- Activation SoftExponential configuration element -->
-  <xs:complexType name="ActivationSoftExponentialCfgType">
+  <xs:complexType name="ActivationSoftExponentialType">
     <xs:sequence minOccurs="0" maxOccurs="1">
       <xs:element type="URandomValueType" name="alpha" minOccurs="0" maxOccurs="1">
         <xs:annotation>
@@ -766,47 +793,47 @@
   </xs:complexType>
 
   <!-- Activation SoftPlus configuration element -->
-  <xs:complexType name="ActivationSoftPlusCfgType">
+  <xs:complexType name="ActivationSoftPlusType">
   </xs:complexType>
 
   <!-- Activation TanH configuration element -->
-  <xs:complexType name="ActivationTanHCfgType">
+  <xs:complexType name="ActivationTanHType">
   </xs:complexType>
 
 
   <!-- ________________________________________FF NETWORK TYPES_________________________________________________ -->
 
   <!-- FF network - hidden layer - configuration -->
-  <xs:complexType name="FFNetHiddenLayerCfgType">
+  <xs:complexType name="FFNetHiddenLayerType">
     <xs:choice minOccurs="1" maxOccurs="1">
-      <xs:element type="ActivationSQNLCfgType" name="activationSQNL" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="ActivationBentIdentityCfgType" name="activationBentIdentity" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="ActivationElliotCfgType" name="activationElliot" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="ActivationGaussianCfgType" name="activationGaussian" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="ActivationIdentityCfgType" name="activationIdentity" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="ActivationISRUCfgType" name="activationISRU" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="ActivationLeakyReLUCfgType" name="activationLeakyReLU" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="ActivationSigmoidCfgType" name="activationSigmoid" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="ActivationSincCfgType" name="activationSinc" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="ActivationSinusoidCfgType" name="activationSinusoid" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="ActivationSoftExponentialCfgType" name="activationSoftExponential" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="ActivationSoftPlusCfgType" name="activationSoftPlus" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="ActivationTanHCfgType" name="activationTanH" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="ActivationSQNLType" name="activationSQNL" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="ActivationBentIdentityType" name="activationBentIdentity" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="ActivationElliotType" name="activationElliot" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="ActivationGaussianType" name="activationGaussian" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="ActivationIdentityType" name="activationIdentity" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="ActivationISRUType" name="activationISRU" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="ActivationLeakyReLUType" name="activationLeakyReLU" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="ActivationSigmoidType" name="activationSigmoid" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="ActivationSincType" name="activationSinc" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="ActivationSinusoidType" name="activationSinusoid" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="ActivationSoftExponentialType" name="activationSoftExponential" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="ActivationSoftPlusType" name="activationSoftPlus" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="ActivationTanHType" name="activationTanH" minOccurs="1" maxOccurs="1"/>
     </xs:choice>
     <xs:attribute type="UIntGT0Type" name="neurons" use="required"/>
   </xs:complexType>
 
   <!-- FF network - hidden layers - configuration -->
-  <xs:complexType name="FFNetHiddenLayersCfgType">
+  <xs:complexType name="FFNetHiddenLayersType">
     <xs:sequence minOccurs="0" maxOccurs="1">
-      <xs:element type="FFNetHiddenLayerCfgType" name="layer" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element type="FFNetHiddenLayerType" name="layer" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
   <!-- FF network - QRD regression trainer - configuration -->
-  <xs:complexType name="FFNetQRDRegrTrainerCfgType">
+  <xs:complexType name="FFNetQRDRegrTrainerType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="ParamSeekerCfgType" name="noise" minOccurs="0" maxOccurs="1">
+      <xs:element type="ParamSeekerType" name="noise" minOccurs="0" maxOccurs="1">
         <xs:annotation>
           <xs:documentation xml:lang="en">The usual values are: min=0, max=0.1, steps=10</xs:documentation>
         </xs:annotation>
@@ -822,9 +849,9 @@
   </xs:complexType>
 
   <!-- FF network - ridge regression trainer - configuration -->
-  <xs:complexType name="FFNetRidgeRegrTrainerCfgType">
+  <xs:complexType name="FFNetRidgeRegrTrainerType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="ParamSeekerCfgType" name="lambda" minOccurs="0" maxOccurs="1">
+      <xs:element type="ParamSeekerType" name="lambda" minOccurs="0" maxOccurs="1">
         <xs:annotation>
           <xs:documentation xml:lang="en">The usual values are: min=0, max=0.5, steps=10</xs:documentation>
         </xs:annotation>
@@ -834,7 +861,7 @@
   </xs:complexType>
 
   <!-- FF network - elastic net linear regression trainer - configuration -->
-  <xs:complexType name="FFNetElasticRegrTrainerCfgType">
+  <xs:complexType name="FFNetElasticRegrTrainerType">
     <xs:attribute type="UIntGT0Type" name="attemptEpochs" use="required"/>
     <xs:attribute type="UDoubleType" name="lambda" use="optional" default="1e-6">
       <xs:annotation>
@@ -849,7 +876,7 @@
   </xs:complexType>
 
   <!-- FF network - resilient propagation trainer - configuration -->
-  <xs:complexType name="FFNetRPropTrainerCfgType">
+  <xs:complexType name="FFNetRPropTrainerType">
     <xs:attribute type="UIntGT0Type" name="attempts" use="required"/>
     <xs:attribute type="UIntGT0Type" name="attemptEpochs" use="required"/>
     <xs:attribute type="UDoubleLT1Type" name="zeroTolerance" use="optional" default="1E-17">
@@ -885,31 +912,31 @@
   </xs:complexType>
 
   <!-- FF network configuration -->
-  <xs:complexType name="FFNetCfgType">
+  <xs:complexType name="FFNetType">
     <xs:sequence minOccurs="0" maxOccurs="1">
       <xs:sequence minOccurs="1" maxOccurs="1">
         <xs:choice minOccurs="1" maxOccurs="1">
-          <xs:element type="ActivationSQNLCfgType" name="activationSQNL" minOccurs="1" maxOccurs="1"/>
-          <xs:element type="ActivationBentIdentityCfgType" name="activationBentIdentity" minOccurs="1" maxOccurs="1"/>
-          <xs:element type="ActivationElliotCfgType" name="activationElliot" minOccurs="1" maxOccurs="1"/>
-          <xs:element type="ActivationGaussianCfgType" name="activationGaussian" minOccurs="1" maxOccurs="1"/>
-          <xs:element type="ActivationIdentityCfgType" name="activationIdentity" minOccurs="1" maxOccurs="1"/>
-          <xs:element type="ActivationISRUCfgType" name="activationISRU" minOccurs="1" maxOccurs="1"/>
-          <xs:element type="ActivationLeakyReLUCfgType" name="activationLeakyReLU" minOccurs="1" maxOccurs="1"/>
-          <xs:element type="ActivationSigmoidCfgType" name="activationSigmoid" minOccurs="1" maxOccurs="1"/>
-          <xs:element type="ActivationSincCfgType" name="activationSinc" minOccurs="1" maxOccurs="1"/>
-          <xs:element type="ActivationSinusoidCfgType" name="activationSinusoid" minOccurs="1" maxOccurs="1"/>
-          <xs:element type="ActivationSoftExponentialCfgType" name="activationSoftExponential" minOccurs="1" maxOccurs="1"/>
-          <xs:element type="ActivationSoftPlusCfgType" name="activationSoftPlus" minOccurs="1" maxOccurs="1"/>
-          <xs:element type="ActivationTanHCfgType" name="activationTanH" minOccurs="1" maxOccurs="1"/>
+          <xs:element type="ActivationSQNLType" name="activationSQNL" minOccurs="1" maxOccurs="1"/>
+          <xs:element type="ActivationBentIdentityType" name="activationBentIdentity" minOccurs="1" maxOccurs="1"/>
+          <xs:element type="ActivationElliotType" name="activationElliot" minOccurs="1" maxOccurs="1"/>
+          <xs:element type="ActivationGaussianType" name="activationGaussian" minOccurs="1" maxOccurs="1"/>
+          <xs:element type="ActivationIdentityType" name="activationIdentity" minOccurs="1" maxOccurs="1"/>
+          <xs:element type="ActivationISRUType" name="activationISRU" minOccurs="1" maxOccurs="1"/>
+          <xs:element type="ActivationLeakyReLUType" name="activationLeakyReLU" minOccurs="1" maxOccurs="1"/>
+          <xs:element type="ActivationSigmoidType" name="activationSigmoid" minOccurs="1" maxOccurs="1"/>
+          <xs:element type="ActivationSincType" name="activationSinc" minOccurs="1" maxOccurs="1"/>
+          <xs:element type="ActivationSinusoidType" name="activationSinusoid" minOccurs="1" maxOccurs="1"/>
+          <xs:element type="ActivationSoftExponentialType" name="activationSoftExponential" minOccurs="1" maxOccurs="1"/>
+          <xs:element type="ActivationSoftPlusType" name="activationSoftPlus" minOccurs="1" maxOccurs="1"/>
+          <xs:element type="ActivationTanHType" name="activationTanH" minOccurs="1" maxOccurs="1"/>
         </xs:choice>
-        <xs:element type="FFNetHiddenLayersCfgType" name="hiddenLayers" minOccurs="0" maxOccurs="1"/>
+        <xs:element type="FFNetHiddenLayersType" name="hiddenLayers" minOccurs="0" maxOccurs="1"/>
       </xs:sequence>
       <xs:choice minOccurs="1" maxOccurs="1">
-        <xs:element type="FFNetElasticRegrTrainerCfgType" name="elasticRegrTrainer" minOccurs="1" maxOccurs="1"/>
-        <xs:element type="FFNetQRDRegrTrainerCfgType" name="qrdRegrTrainer" minOccurs="1" maxOccurs="1"/>
-        <xs:element type="FFNetRidgeRegrTrainerCfgType" name="ridgeRegrTrainer" minOccurs="1" maxOccurs="1"/>
-        <xs:element type="FFNetRPropTrainerCfgType" name="resPropTrainer" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="FFNetElasticRegrTrainerType" name="elasticRegrTrainer" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="FFNetQRDRegrTrainerType" name="qrdRegrTrainer" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="FFNetRidgeRegrTrainerType" name="ridgeRegrTrainer" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="FFNetRPropTrainerType" name="resPropTrainer" minOccurs="1" maxOccurs="1"/>
       </xs:choice>
     </xs:sequence>
   </xs:complexType>
@@ -918,7 +945,7 @@
   <!-- ________________________________________PP NETWORK TYPES_________________________________________________ -->
 
   <!-- Parallel Perceptron - p-delta rule trainer - configuration -->
-  <xs:complexType name="PPNetPDeltaRuleTrainerCfgType">
+  <xs:complexType name="PPNetPDeltaRuleTrainerType">
     <xs:attribute type="UIntGT0Type" name="attempts" use="required"/>
     <xs:attribute type="UIntGT0Type" name="attemptEpochs" use="required"/>
     <xs:attribute type="UDoubleLT1Type" name="iniLR" use="optional" default="0.01">
@@ -948,9 +975,9 @@
     </xs:attribute>
   </xs:complexType>
 
-  <xs:complexType name="PPNetCfgType">
+  <xs:complexType name="PPNetType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="PPNetPDeltaRuleTrainerCfgType" name="pDeltaRuleTrainer" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="PPNetPDeltaRuleTrainerType" name="pDeltaRuleTrainer" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="UIntGT0Type" name="gates" use="optional" default="3">
       <xs:annotation>
@@ -967,16 +994,16 @@
   <!-- ________________________________________FEATURE FILTERS TYPES_____________________________________________ -->
 
   <!-- Binary feature filter configuration element -->
-  <xs:complexType name="BinFeatureFilterCfgType">
+  <xs:complexType name="BinFeatureFilterType">
   </xs:complexType>
 
   <!-- Standard enumeration feature filter configuration element -->
-  <xs:complexType name="EnumFeatureFilterCfgType">
+  <xs:complexType name="EnumFeatureFilterType">
     <xs:attribute type="UIntGT0Type" name="numOfElements" use="required"/>
   </xs:complexType>
 
   <!-- Real number feature filter configuration element -->
-  <xs:complexType name="RealFeatureFilterCfgType">
+  <xs:complexType name="RealFeatureFilterType">
     <xs:attribute type="xs:boolean" name="standardize" use="optional" default="true">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is true</xs:documentation>
@@ -997,7 +1024,7 @@
   <!-- ________________________________________SYNAPSE TYPES_________________________________________________ -->
 
   <!-- Input synapse types-->
-  <xs:complexType name="InputSynapseSpikingTargetCfgType">
+  <xs:complexType name="InputSynapseSpikingTargetType">
     <xs:sequence minOccurs="0" maxOccurs="1">
       <xs:element type="URandomValueType" name="weight" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
@@ -1008,7 +1035,7 @@
     </xs:attribute>
   </xs:complexType>
 
-  <xs:complexType name="InputSynapseAnalogTargetCfgType">
+  <xs:complexType name="InputSynapseAnalogTargetType">
     <xs:sequence minOccurs="0" maxOccurs="1">
       <xs:element type="URandomValueType" name="weight" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
@@ -1020,10 +1047,10 @@
   </xs:complexType>
 
   <!-- Input synapse - configuration -->
-  <xs:complexType name="InputSynapseCfgType">
+  <xs:complexType name="InputSynapseType">
     <xs:sequence minOccurs="0" maxOccurs="1">
-      <xs:element type="InputSynapseSpikingTargetCfgType" name="spikingTarget" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="InputSynapseAnalogTargetCfgType" name="analogTarget" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="InputSynapseSpikingTargetType" name="spikingTarget" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="InputSynapseAnalogTargetType" name="analogTarget" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="SynapticDelayMethodType" name="delayMethod" use="optional" default="Random">
       <xs:annotation>
@@ -1039,7 +1066,7 @@
 
   <!-- Internal synapse types-->
   <!-- Internal synapse - Spiking target configurations -->
-  <xs:complexType name="S2SSynapseE2EDynamicsCfgType">
+  <xs:complexType name="S2SSynapseE2EDynamicsType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="URandomValueType" name="weight" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
@@ -1065,7 +1092,7 @@
     </xs:attribute>
   </xs:complexType>
 
-  <xs:complexType name="S2SSynapseE2IDynamicsCfgType">
+  <xs:complexType name="S2SSynapseE2IDynamicsType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="URandomValueType" name="weight" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
@@ -1091,7 +1118,7 @@
     </xs:attribute>
   </xs:complexType>
 
-  <xs:complexType name="S2SSynapseI2EDynamicsCfgType">
+  <xs:complexType name="S2SSynapseI2EDynamicsType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="URandomValueType" name="weight" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
@@ -1117,7 +1144,7 @@
     </xs:attribute>
   </xs:complexType>
 
-  <xs:complexType name="S2SSynapseI2IDynamicsCfgType">
+  <xs:complexType name="S2SSynapseI2IDynamicsType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="URandomValueType" name="weight" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
@@ -1143,7 +1170,7 @@
     </xs:attribute>
   </xs:complexType>
 
-  <xs:complexType name="A2SSynapseE2EDynamicsCfgType">
+  <xs:complexType name="A2SSynapseE2EDynamicsType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="URandomValueType" name="weight" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
@@ -1169,7 +1196,7 @@
     </xs:attribute>
   </xs:complexType>
 
-  <xs:complexType name="A2SSynapseE2IDynamicsCfgType">
+  <xs:complexType name="A2SSynapseE2IDynamicsType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="URandomValueType" name="weight" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
@@ -1195,7 +1222,7 @@
     </xs:attribute>
   </xs:complexType>
 
-  <xs:complexType name="A2SSynapseI2EDynamicsCfgType">
+  <xs:complexType name="A2SSynapseI2EDynamicsType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="URandomValueType" name="weight" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
@@ -1221,7 +1248,7 @@
     </xs:attribute>
   </xs:complexType>
 
-  <xs:complexType name="A2SSynapseI2IDynamicsCfgType">
+  <xs:complexType name="A2SSynapseI2IDynamicsType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="URandomValueType" name="weight" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
@@ -1248,7 +1275,7 @@
   </xs:complexType>
 
   <!-- Internal synapse - Analog target configurations -->
-  <xs:complexType name="S2ASynapseE2EDynamicsCfgType">
+  <xs:complexType name="S2ASynapseE2EDynamicsType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="URandomValueType" name="weight" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
@@ -1274,7 +1301,7 @@
     </xs:attribute>
   </xs:complexType>
 
-  <xs:complexType name="S2ASynapseI2EDynamicsCfgType">
+  <xs:complexType name="S2ASynapseI2EDynamicsType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="URandomValueType" name="weight" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
@@ -1300,7 +1327,7 @@
     </xs:attribute>
   </xs:complexType>
 
-  <xs:complexType name="S2ASynapseE2IDynamicsCfgType">
+  <xs:complexType name="S2ASynapseE2IDynamicsType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="URandomValueType" name="weight" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
@@ -1326,7 +1353,7 @@
     </xs:attribute>
   </xs:complexType>
 
-  <xs:complexType name="S2ASynapseI2IDynamicsCfgType">
+  <xs:complexType name="S2ASynapseI2IDynamicsType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="URandomValueType" name="weight" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
@@ -1352,7 +1379,7 @@
     </xs:attribute>
   </xs:complexType>
 
-  <xs:complexType name="A2ASynapseE2EDynamicsCfgType">
+  <xs:complexType name="A2ASynapseE2EDynamicsType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="URandomValueType" name="weight" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
@@ -1378,7 +1405,7 @@
     </xs:attribute>
   </xs:complexType>
 
-  <xs:complexType name="A2ASynapseI2EDynamicsCfgType">
+  <xs:complexType name="A2ASynapseI2EDynamicsType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="URandomValueType" name="weight" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
@@ -1404,7 +1431,7 @@
     </xs:attribute>
   </xs:complexType>
 
-  <xs:complexType name="A2ASynapseE2IDynamicsCfgType">
+  <xs:complexType name="A2ASynapseE2IDynamicsType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="URandomValueType" name="weight" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
@@ -1430,7 +1457,7 @@
     </xs:attribute>
   </xs:complexType>
 
-  <xs:complexType name="A2ASynapseI2IDynamicsCfgType">
+  <xs:complexType name="A2ASynapseI2IDynamicsType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="URandomValueType" name="weight" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
@@ -1457,24 +1484,24 @@
   </xs:complexType>
 
   <!-- Internal synapse - configuration -->
-  <xs:complexType name="InternalSynapseCfgType">
+  <xs:complexType name="InternalSynapseType">
     <xs:choice minOccurs="0" maxOccurs="16">
-      <xs:element type="S2SSynapseE2EDynamicsCfgType" name="dynamicsS2SEE" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="S2SSynapseI2EDynamicsCfgType" name="dynamicsS2SIE" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="S2SSynapseE2IDynamicsCfgType" name="dynamicsS2SEI" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="S2SSynapseI2IDynamicsCfgType" name="dynamicsS2SII" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="A2SSynapseE2EDynamicsCfgType" name="dynamicsA2SEE" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="A2SSynapseI2EDynamicsCfgType" name="dynamicsA2SIE" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="A2SSynapseE2IDynamicsCfgType" name="dynamicsA2SEI" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="A2SSynapseI2IDynamicsCfgType" name="dynamicsA2SII" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="S2ASynapseE2EDynamicsCfgType" name="dynamicsS2AEE" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="S2ASynapseI2EDynamicsCfgType" name="dynamicsS2AIE" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="S2ASynapseE2IDynamicsCfgType" name="dynamicsS2AEI" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="S2ASynapseI2IDynamicsCfgType" name="dynamicsS2AII" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="A2ASynapseE2EDynamicsCfgType" name="dynamicsA2AEE" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="A2ASynapseI2EDynamicsCfgType" name="dynamicsA2AIE" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="A2ASynapseE2IDynamicsCfgType" name="dynamicsA2AEI" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="A2ASynapseI2IDynamicsCfgType" name="dynamicsA2AII" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="S2SSynapseE2EDynamicsType" name="dynamicsS2SEE" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="S2SSynapseI2EDynamicsType" name="dynamicsS2SIE" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="S2SSynapseE2IDynamicsType" name="dynamicsS2SEI" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="S2SSynapseI2IDynamicsType" name="dynamicsS2SII" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="A2SSynapseE2EDynamicsType" name="dynamicsA2SEE" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="A2SSynapseI2EDynamicsType" name="dynamicsA2SIE" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="A2SSynapseE2IDynamicsType" name="dynamicsA2SEI" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="A2SSynapseI2IDynamicsType" name="dynamicsA2SII" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="S2ASynapseE2EDynamicsType" name="dynamicsS2AEE" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="S2ASynapseI2EDynamicsType" name="dynamicsS2AIE" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="S2ASynapseE2IDynamicsType" name="dynamicsS2AEI" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="S2ASynapseI2IDynamicsType" name="dynamicsS2AII" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="A2ASynapseE2EDynamicsType" name="dynamicsA2AEE" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="A2ASynapseI2EDynamicsType" name="dynamicsA2AIE" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="A2ASynapseE2IDynamicsType" name="dynamicsA2AEI" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="A2ASynapseI2IDynamicsType" name="dynamicsA2AII" minOccurs="1" maxOccurs="1"/>
     </xs:choice>
   </xs:complexType>
 
@@ -1482,7 +1509,7 @@
   <!-- ________________________________________NEURAL POOL TYPES_________________________________________________ -->
 
   <!-- Predictor ActivationFadingSum - configuration -->
-  <xs:complexType name="PredictorActivationFadingSumCfgType">
+  <xs:complexType name="PredictorActivationFadingSumType">
     <xs:attribute type="UDoubleLT1Type" name="strength" use="optional" default="0.1">
       <xs:annotation>
         <xs:documentation xml:lang="en">Fading strength (GE0..LT1). Default value is 0.1</xs:documentation>
@@ -1491,7 +1518,7 @@
   </xs:complexType>
 
   <!-- Predictor FiringFadingSum - configuration -->
-  <xs:complexType name="PredictorFiringFadingSumCfgType">
+  <xs:complexType name="PredictorFiringFadingSumType">
     <xs:attribute type="UDoubleLT1Type" name="strength" use="optional" default="0.005">
       <xs:annotation>
         <xs:documentation xml:lang="en">Fading strength (GE0..LT1). Default value is 0.005</xs:documentation>
@@ -1500,7 +1527,7 @@
   </xs:complexType>
 
   <!-- Predictor MWAvg - configuration -->
-  <xs:complexType name="PredictorMWAvgCfgType">
+  <xs:complexType name="PredictorMWAvgType">
     <xs:attribute type="UIntGT0Type" name="window" use="optional" default="64">
       <xs:annotation>
         <xs:documentation xml:lang="en">Sliding window size (1..64 for Exp weights, 1..10240 for Lin weights and 1..N for Const weights). Default value is 64</xs:documentation>
@@ -1519,7 +1546,7 @@
   </xs:complexType>
 
   <!-- Predictor FiringCount - configuration -->
-  <xs:complexType name="PredictorFiringCountCfgType">
+  <xs:complexType name="PredictorFiringCountType">
     <xs:attribute type="UIntGE1LE64Type" name="window" use="optional" default="64">
       <xs:annotation>
         <xs:documentation xml:lang="en">Sliding window size (1..64). Default value is 64</xs:documentation>
@@ -1528,7 +1555,7 @@
   </xs:complexType>
 
   <!-- Predictor FiringBinPattern - configuration -->
-  <xs:complexType name="PredictorFiringBinPatternCfgType">
+  <xs:complexType name="PredictorFiringBinPatternType">
     <xs:attribute type="UIntGE1LE32Type" name="window" use="optional" default="32">
       <xs:annotation>
         <xs:documentation xml:lang="en">Sliding window size (1..32). Default value is 32</xs:documentation>
@@ -1537,21 +1564,21 @@
   </xs:complexType>
 
   <!-- Predictors params - configuration -->
-  <xs:complexType name="PredictorsParamsCfgType">
+  <xs:complexType name="PredictorsParamsType">
     <xs:choice minOccurs="0" maxOccurs="6">
-      <xs:element type="PredictorActivationFadingSumCfgType" name="activationFadingSum" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="PredictorMWAvgCfgType" name="activationMWAvg" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="PredictorFiringFadingSumCfgType" name="firingFadingSum" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="PredictorMWAvgCfgType" name="firingMWAvg" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="PredictorFiringCountCfgType" name="firingCount" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="PredictorFiringBinPatternCfgType" name="firingBinPattern" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="PredictorActivationFadingSumType" name="activationFadingSum" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="PredictorMWAvgType" name="activationMWAvg" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="PredictorFiringFadingSumType" name="firingFadingSum" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="PredictorMWAvgType" name="firingMWAvg" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="PredictorFiringCountType" name="firingCount" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="PredictorFiringBinPatternType" name="firingBinPattern" minOccurs="1" maxOccurs="1"/>
     </xs:choice>
   </xs:complexType>
 
   <!-- Predictors - configuration -->
-  <xs:complexType name="PredictorsCfgType">
+  <xs:complexType name="PredictorsType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="PredictorsParamsCfgType" name="params" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="PredictorsParamsType" name="params" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:boolean" name="activation" use="optional" default="true">
       <xs:annotation>
@@ -1595,28 +1622,33 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Pool - interconnection - random schema - configuration -->
-  <xs:complexType name="PoolInterconnectionRandomSchemaCfgType">
+  <!-- Connection distribution - custom - configuration -->
+  <xs:complexType name="ConnDistrCustomType">
+    <xs:attribute type="UDoubleType" name="relShareEE" use="required"/>
+    <xs:attribute type="UDoubleType" name="relShareEI" use="required"/>
+    <xs:attribute type="UDoubleType" name="relShareIE" use="required"/>
+    <xs:attribute type="UDoubleType" name="relShareII" use="required"/>
+  </xs:complexType>
+
+  <!-- Connection distribution - flat - configuration -->
+  <xs:complexType name="ConnDistrFlatType">
+  </xs:complexType>
+
+  <!-- Connection probabilities - lsm - configuration -->
+  <xs:complexType name="ConnDistrLSMType">
+  </xs:complexType>
+  
+  <!-- Connection distribution - random schema - configuration -->
+  <xs:complexType name="PoolInterconnectionRandomSchemaType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="InternalSynapseCfgType" name="synapse" minOccurs="0" maxOccurs="1"/>
+      <xs:choice minOccurs="1" maxOccurs="1">
+        <xs:element type="ConnDistrCustomType" name="distributionCustom" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="ConnDistrFlatType" name="distributionFlat" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="ConnDistrLSMType" name="distributionLSM" minOccurs="1" maxOccurs="1"/>
+      </xs:choice>
+      <xs:element type="InternalSynapseType" name="synapse" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
-    <xs:attribute type="UDoubleLE1Type" name="density" use="required"/>
-    <xs:attribute type="UDoubleType" name="relShareEE" use="optional" default="0.3">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.3</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="UDoubleType" name="relShareEI" use="optional" default="0.2">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.2</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="UDoubleType" name="relShareIE" use="optional" default="0.4">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.4</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="UDoubleType" name="relShareII" use="optional" default="0.1">
+    <xs:attribute type="UDoubleLE1Type" name="density" use="optional" default="0.1">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is 0.1</xs:documentation>
       </xs:annotation>
@@ -1649,9 +1681,9 @@
   </xs:complexType>
 
   <!-- Pool - interconnection - chain schema - configuration -->
-  <xs:complexType name="PoolInterconnectionChainSchemaCfgType">
+  <xs:complexType name="PoolInterconnectionChainSchemaType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="InternalSynapseCfgType" name="synapse" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="InternalSynapseType" name="synapse" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="UDoubleLE1Type" name="ratio" use="optional" default="1">
       <xs:annotation>
@@ -1676,29 +1708,29 @@
   </xs:complexType>
 
   <!-- Pool - interconnection - configuration -->
-  <xs:complexType name="PoolInterconnectionCfgType">
+  <xs:complexType name="PoolInterconnectionType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:choice minOccurs="1" maxOccurs="unbounded">
-        <xs:element type="PoolInterconnectionRandomSchemaCfgType" name="randomSchema" minOccurs="1" maxOccurs="1"/>
-        <xs:element type="PoolInterconnectionChainSchemaCfgType" name="chainSchema" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="PoolInterconnectionRandomSchemaType" name="randomSchema" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="PoolInterconnectionChainSchemaType" name="chainSchema" minOccurs="1" maxOccurs="1"/>
       </xs:choice>
     </xs:sequence>
   </xs:complexType>
 
 
   <!-- Pool - spiking neuron group - configuration -->
-  <xs:complexType name="PoolSpikingNeuronGroupCfgType">
+  <xs:complexType name="PoolSpikingNeuronGroupType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:choice minOccurs="1" maxOccurs="1">
-        <xs:element type="ActivationSimpleIFCfgType" name="activationSimpleIF" minOccurs="1" maxOccurs="1"/>
-        <xs:element type="ActivationLeakyIFCfgType" name="activationLeakyIF" minOccurs="1" maxOccurs="1"/>
-        <xs:element type="ActivationExpIFCfgType" name="activationExpIF" minOccurs="1" maxOccurs="1"/>
-        <xs:element type="ActivationAdExpIFCfgType" name="activationAdExpIF" minOccurs="1" maxOccurs="1"/>
-        <xs:element type="ActivationIzhikevichIFCfgType" name="activationIzhikevichIF" minOccurs="1" maxOccurs="1"/>
-        <xs:element type="ActivationAutoIzhikevichIFCfgType" name="activationAutoIzhikevichIF" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="ActivationSimpleIFType" name="activationSimpleIF" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="ActivationLeakyIFType" name="activationLeakyIF" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="ActivationExpIFType" name="activationExpIF" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="ActivationAdExpIFType" name="activationAdExpIF" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="ActivationIzhikevichIFType" name="activationIzhikevichIF" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="ActivationAutoIzhikevichIFType" name="activationAutoIzhikevichIF" minOccurs="1" maxOccurs="1"/>
       </xs:choice>
       <xs:element type="RandomValueType" name="bias" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="PredictorsCfgType" name="predictors" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="PredictorsType" name="predictors" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:string" name="name" use="required" />
     <xs:attribute type="NeuronRoleType" name="role" use="required"/>
@@ -1710,44 +1742,39 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Pool - analog neuron group - retainment neurons -configuration -->
-  <xs:complexType name="PoolAnalogNeuronsRetanmentCfgType">
+  <!-- Pool - analog neuron group - retainment - configuration -->
+  <xs:complexType name="PoolAnalogNeuronGroupRetainmentType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="URandomValueType" name="strength" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="UDoubleLE1Type" name="density" use="required"/>
   </xs:complexType>
 
-  <!-- Pool - analog neuron group - firing threshold -configuration -->
-  <xs:complexType name="PoolAnalogNeuronsFiringThresholdCfgType">
-    <xs:attribute type="UDoubleLE1Type" name="value" use="optional" default="0.00125">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">A number between 0 and 1 (LT1). Every time the new normalized activation value is higher than the previous normalized activation value by at least the threshold, it is evaluated as a firing event. Default value is 0.00125.</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-  </xs:complexType>
-
   <!-- Pool - analog neuron group - configuration -->
-  <xs:complexType name="PoolAnalogNeuronGroupCfgType">
+  <xs:complexType name="PoolAnalogNeuronGroupType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:choice minOccurs="1" maxOccurs="1">
-        <xs:element type="ActivationSQNLCfgType" name="activationSQNL" minOccurs="1" maxOccurs="1"/>
-        <xs:element type="ActivationElliotCfgType" name="activationElliot" minOccurs="1" maxOccurs="1"/>
-        <xs:element type="ActivationGaussianCfgType" name="activationGaussian" minOccurs="1" maxOccurs="1"/>
-        <xs:element type="ActivationISRUCfgType" name="activationISRU" minOccurs="1" maxOccurs="1"/>
-        <xs:element type="ActivationSigmoidCfgType" name="activationSigmoid" minOccurs="1" maxOccurs="1"/>
-        <xs:element type="ActivationSincCfgType" name="activationSinc" minOccurs="1" maxOccurs="1"/>
-        <xs:element type="ActivationSinusoidCfgType" name="activationSinusoid" minOccurs="1" maxOccurs="1"/>
-        <xs:element type="ActivationTanHCfgType" name="activationTanH" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="ActivationSQNLType" name="activationSQNL" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="ActivationElliotType" name="activationElliot" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="ActivationGaussianType" name="activationGaussian" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="ActivationISRUType" name="activationISRU" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="ActivationSigmoidType" name="activationSigmoid" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="ActivationSincType" name="activationSinc" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="ActivationSinusoidType" name="activationSinusoid" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="ActivationTanHType" name="activationTanH" minOccurs="1" maxOccurs="1"/>
       </xs:choice>
       <xs:element type="RandomValueType" name="bias" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="PoolAnalogNeuronsFiringThresholdCfgType" name="firingThreshold" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="PoolAnalogNeuronsRetanmentCfgType" name="retainment" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="PredictorsCfgType" name="predictors" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="PoolAnalogNeuronGroupRetainmentType" name="retainment" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="PredictorsType" name="predictors" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:string" name="name" use="required" />
     <xs:attribute type="NeuronRoleType" name="role" use="required"/>
     <xs:attribute type="UDoubleType" name="relShare" use="required"/>
+    <xs:attribute type="UDoubleLE1Type" name="firingThreshold" use="optional" default="0.00125">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">A number between 0 and 1 (LT1). Every time the new normalized activation value is higher than the previous normalized activation value by at least the threshold, it is evaluated as a firing event. Default value is 0.00125.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
     <xs:attribute type="SignalingRestrictionType" name="signalingRestriction" use="optional" default="NoRestriction">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is NoRestriction</xs:documentation>
@@ -1761,93 +1788,55 @@
   </xs:complexType>
 
   <!-- Pool - neuron groups - configuration -->
-  <xs:complexType name="PoolNeuronGroupsCfgType">
+  <xs:complexType name="PoolNeuronGroupsType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:choice minOccurs="1" maxOccurs="unbounded">
-        <xs:element type="PoolAnalogNeuronGroupCfgType" name="analogGroup" minOccurs="1" maxOccurs="1"/>
-        <xs:element type="PoolSpikingNeuronGroupCfgType" name="spikingGroup" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="PoolAnalogNeuronGroupType" name="analogGroup" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="PoolSpikingNeuronGroupType" name="spikingGroup" minOccurs="1" maxOccurs="1"/>
       </xs:choice>
     </xs:sequence>
   </xs:complexType>
 
   <!-- Pool configuration -->
-  <xs:complexType name="PoolCfgType">
+  <xs:complexType name="PoolType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="PoolNeuronGroupsCfgType" name="neuronGroups" minOccurs="1" maxOccurs="1">
+      <xs:element type="ProportionsType" name="proportions" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="CoordinatesType" name="coordinates" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="PoolNeuronGroupsType" name="neuronGroups" minOccurs="1" maxOccurs="1">
         <xs:unique name="unique_neuron_group_name">
           <xs:selector xpath="./*"/>
           <xs:field xpath="@name"/>
         </xs:unique>
       </xs:element>
-      <xs:element type="PredictorsCfgType" name="predictors" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="PoolInterconnectionCfgType" name="interconnection" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="PoolInterconnectionType" name="interconnection" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="PredictorsType" name="predictors" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:string" name="name" use="required" />
-    <xs:attribute type="xs:int" name="x" use="optional" default="0">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="xs:int" name="y" use="optional" default="0">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="xs:int" name="z" use="optional" default="0">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="xs:unsignedInt" name="dimX" use="required" />
-    <xs:attribute type="xs:unsignedInt" name="dimY" use="required" />
-    <xs:attribute type="xs:unsignedInt" name="dimZ" use="required" />
   </xs:complexType>
 
   <!-- ________________________________________RESERVOIR TYPES_________________________________________________ -->
 
-  <!-- Reservoir - input entry point - configuration -->
-  <xs:complexType name="ReservoirInputEntryPointType">
-    <xs:attribute type="xs:int" name="x" use="required" />
-    <xs:attribute type="xs:int" name="y" use="required" />
-    <xs:attribute type="xs:int" name="z" use="required" />
-  </xs:complexType>
-
-  <!-- Reservoir - pools container - configuration -->
-  <xs:complexType name="ReservoirPoolCfgContainerType">
+  <!-- Reservoir structure - pools - configuration -->
+  <xs:complexType name="ResStructPoolsType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="PoolCfgType" name="pool" minOccurs="1" maxOccurs="unbounded"/>
+      <xs:element type="PoolType" name="pool" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
-  <!-- Reservoir - pool to pool connection - configuration -->
-  <xs:complexType name="ReservoirPool2PoolConnCfgType">
+  <!-- Reservoir structure - pool to pool connection - configuration -->
+  <xs:complexType name="ResStructInterPoolConnectionType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="InternalSynapseCfgType" name="synapse" minOccurs="0" maxOccurs="1"/>
+      <xs:choice minOccurs="1" maxOccurs="1">
+        <xs:element type="ConnDistrCustomType" name="distributionCustom" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="ConnDistrFlatType" name="distributionFlat" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="ConnDistrLSMType" name="distributionLSM" minOccurs="1" maxOccurs="1"/>
+      </xs:choice>
+      <xs:element type="InternalSynapseType" name="synapse" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
-    <xs:attribute type="xs:string" name="srcPool" use="required"/>
-    <xs:attribute type="UDoubleLE1Type" name="srcConnDensity" use="required"/>
+    <xs:attribute type="xs:string" name="sourcePool" use="required"/>
+    <xs:attribute type="UDoubleLE1Type" name="sourceConnDensity" use="required"/>
     <xs:attribute type="xs:string" name="targetPool" use="required"/>
     <xs:attribute type="UDoubleLE1Type" name="targetConnDensity" use="required"/>
-    <xs:attribute type="UDoubleType" name="relShareEE" use="optional" default="0.3">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.3</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="UDoubleType" name="relShareEI" use="optional" default="0.2">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.2</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="UDoubleType" name="relShareIE" use="optional" default="0.4">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.4</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="UDoubleType" name="relShareII" use="optional" default="0.1">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.1</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
     <xs:attribute type="xs:boolean" name="constantNumOfConnections" use="optional" default="false">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is false</xs:documentation>
@@ -1855,55 +1844,36 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Reservoir - pools interconnection container - configuration -->
-  <xs:complexType name="ReservoirPool2PoolConnCfgContainerType">
+  <!-- Reservoir structure - inter pool connections - configuration -->
+  <xs:complexType name="ResStructInterPoolConnectionsType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="ReservoirPool2PoolConnCfgType" name="pool2PoolConn" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element type="ResStructInterPoolConnectionType" name="interPoolConnection" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
-  <!-- Reservoir - spectral radius - value - configuration -->
-  <xs:complexType name="ReservoirSpectralRadiusValueCfgType">
-    <xs:attribute type="UDoubleGT0NAOptionType" name="value" use="required">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Use NA to disable spectral radius application.</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-  </xs:complexType>
-  
-  <!-- Reservoir - spectral radius - configuration -->
-  <xs:complexType name="ReservoirSpectralRadiusCfgType">
+  <!-- Reservoir structure configuration -->
+  <xs:complexType name="ResStructType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="ReservoirSpectralRadiusValueCfgType" name="analogScope" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="ReservoirSpectralRadiusValueCfgType" name="spikingScope" minOccurs="1" maxOccurs="1"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <!-- Reservoir configuration -->
-  <xs:complexType name="ReservoirCfgType">
-    <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="ReservoirInputEntryPointType" name="inputEntryPoint" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="ReservoirPoolCfgContainerType" name="pools" minOccurs="1" maxOccurs="1">
-        <xs:unique name="rescfg_unique_pool_name">
+      <xs:element type="ResStructPoolsType" name="pools" minOccurs="1" maxOccurs="1">
+        <xs:unique name="resstruct_unique_pool_name">
           <xs:selector xpath="./pool"/>
           <xs:field xpath="@name"/>
         </xs:unique>
       </xs:element>
-      <xs:element type="ReservoirPool2PoolConnCfgContainerType" name="pool2PoolConns" minOccurs="0" maxOccurs="1">
-        <xs:unique name="rescfg_unique_pool2pool">
-          <xs:selector xpath="./pool2PoolConn"/>
+      <xs:element type="ResStructInterPoolConnectionsType" name="interPoolConnections" minOccurs="0" maxOccurs="1">
+        <xs:unique name="resstruct_unique_pool2pool">
+          <xs:selector xpath="./interPoolConnection"/>
           <xs:field xpath="@srcPool"/>
           <xs:field xpath="@targetPool"/>
         </xs:unique>
       </xs:element>
-      <xs:element type="ReservoirSpectralRadiusCfgType" name="spectralRadius" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:string" name="name" use="required" />
   </xs:complexType>
 
   <!-- ________________________________________NEURAL PREPROCESSOR TYPES_________________________________________________ -->
   <!-- NeuralPreprocessor - continuous input feeding -configuration -->
-  <xs:complexType name="NPInpFeedingContinuousCfgType">
+  <xs:complexType name="NPInpFeedingContinuousType">
     <xs:attribute type="UIntGT0AutoOptionType" name="bootCycles" use="optional" default="Auto">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is Auto</xs:documentation>
@@ -1917,33 +1887,33 @@
   </xs:complexType>
 
   <!-- NeuralPreprocessor - patterned input feeding - resampling - configuration -->
-  <xs:complexType name="NPResamplingCfgType">
-    <xs:attribute type="UDoubleLT1Type" name="thresholdOfSignalBeginDetection" use="optional" default="0">
+  <xs:complexType name="NPResamplingType">
+    <xs:attribute type="UDoubleLT1Type" name="signalBeginThreshold" use="optional" default="0">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Sensitivity of signal begin detection. Default value is 0 (maximum sensitivity)</xs:documentation>
+        <xs:documentation xml:lang="en">Threshold of signal begin detection. Default value is 0 (maximum sensitivity)</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute type="UDoubleLT1Type" name="thresholdOfSignalEndDetection" use="optional" default="0">
+    <xs:attribute type="UDoubleLT1Type" name="signalEndThreshold" use="optional" default="0">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Sensitivity of signal end detection. Default value is 0 (maximum sensitivity)</xs:documentation>
+        <xs:documentation xml:lang="en">Threshold of signal end detection. Default value is 0 (maximum sensitivity)</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute type="xs:boolean" name="keepCommonTimeScale" use="optional" default="true">
+    <xs:attribute type="xs:boolean" name="uniformTimeScale" use="optional" default="true">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is true.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UIntGT1AutoOptionType" name="targetTimePoints" use="optional" default="Auto">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Number of time-points of the resampled pattern. Default value is Auto (keeps original time points)</xs:documentation>
+        <xs:documentation xml:lang="en">Number of time-points of the resampled pattern (resampled pattern length). Default value is Auto (keeps original time points)</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
 
   <!-- NeuralPreprocessor - patterned input feeding - unification - configuration -->
-  <xs:complexType name="NPUnificationCfgType">
+  <xs:complexType name="NPUnificationType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="NPResamplingCfgType" name="resampling" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="NPResamplingType" name="resampling" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:boolean" name="detrend" use="optional" default="false">
       <xs:annotation>
@@ -1959,13 +1929,13 @@
 
 
   <!-- NeuralPreprocessor - patterned input feeding -configuration -->
-  <xs:complexType name="NPInpFeedingPatternedCfgType">
+  <xs:complexType name="NPInpFeedingPatternedType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="NPUnificationCfgType" name="unification" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="NPUnificationType" name="unification" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:boolean" name="bidir" use="optional" default="false">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Specifies, if to preprocess time series pattern in both time directions (doubles predictors). Default value is false</xs:documentation>
+        <xs:documentation xml:lang="en">Specifies if to preprocess time series pattern in both time directions (doubles predictors). Default value is false</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="xs:boolean" name="routeToReadout" use="optional" default="false">
@@ -1973,7 +1943,7 @@
         <xs:documentation xml:lang="en">Default value is false. If true is specified, all patterns have to have the same length.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute type="PatternedDataOrganizationType" name="dataOrganization" use="optional" default="Groupped">
+    <xs:attribute type="VariablesSchemaType" name="variablesSchema" use="optional" default="Groupped">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is Groupped.</xs:documentation>
       </xs:annotation>
@@ -1981,76 +1951,115 @@
   </xs:complexType>
 
   <!-- NeuralPreprocessor - external input field -configuration -->
-  <xs:complexType name="NPExternalInpFieldCfgType">
+  <xs:complexType name="NPExternalInpFieldType">
     <xs:choice minOccurs="1" maxOccurs="1">
-      <xs:element type="BinFeatureFilterCfgType" name="binFeature" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="EnumFeatureFilterCfgType" name="enumFeature" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="RealFeatureFilterCfgType" name="realFeature" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="BinFeatureFilterType" name="binFeature" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="EnumFeatureFilterType" name="enumFeature" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="RealFeatureFilterType" name="realFeature" minOccurs="0" maxOccurs="1"/>
     </xs:choice>
     <xs:attribute type="xs:string" name="name" use="required"/>
-    <xs:attribute type="xs:boolean" name="allowRoutingToReadout" use="optional" default="true">
+    <xs:attribute type="xs:boolean" name="routeToReadout" use="optional" default="true">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is true</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
 
-  
+  <!-- NeuralPreprocessor - external input fields -configuration -->
+  <xs:complexType name="NPExternalInpFieldsType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="NPExternalInpFieldType" name="field" minOccurs="1" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
 
   <!-- NeuralPreprocessor - internal input field -configuration -->
-  <xs:complexType name="NPInternalInpFieldCfgType">
+  <xs:complexType name="NPInternalInpFieldType">
     <xs:choice minOccurs="1" maxOccurs="1">
-      <xs:element type="PulseGeneratorCfgType" name="pulse" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="PulseGeneratorType" name="pulse" minOccurs="1" maxOccurs="1"/>
       <xs:element type="RandomValueType" name="random" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="SinusoidalGeneratorCfgType" name="sinusoidal" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="MackeyGlassGeneratorCfgType" name="mackeyGlass" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="SinusoidalGeneratorType" name="sinusoidal" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="MackeyGlassGeneratorType" name="mackeyGlass" minOccurs="1" maxOccurs="1"/>
     </xs:choice>
     <xs:attribute type="xs:string" name="name" use="required"/>
-    <xs:attribute type="xs:boolean" name="allowRoutingToReadout" use="optional" default="false">
+    <xs:attribute type="xs:boolean" name="routeToReadout" use="optional" default="false">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is false</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
 
-
   <!-- NeuralPreprocessor - internal input fields -configuration -->
-  <xs:complexType name="NPInternalInpFieldsCfgType">
+  <xs:complexType name="NPInternalInpFieldsType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="NPInternalInpFieldCfgType" name="field" minOccurs="1" maxOccurs="unbounded"/>
+      <xs:element type="NPInternalInpFieldType" name="field" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
 
-  <!-- NeuralPreprocessor - external input fields -configuration -->
-  <xs:complexType name="NPExternalInpFieldsCfgType">
+  <!-- NeuralPreprocessor - input fields- configuration -->
+  <xs:complexType name="NPInpFieldsType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="NPExternalInpFieldCfgType" name="field" minOccurs="1" maxOccurs="unbounded"/>
+      <xs:element type="NPExternalInpFieldsType" name="externalFields" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="NPInternalInpFieldsType" name="internalFields" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
   </xs:complexType>
-
+  
   <!-- NeuralPreprocessor - input -configuration -->
-  <xs:complexType name="NPInputCfgType">
+  <xs:complexType name="NPInputType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:choice minOccurs="1" maxOccurs="1">
-        <xs:element type="NPInpFeedingContinuousCfgType" name="feedingContinuous" minOccurs="1" maxOccurs="1"/>
-        <xs:element type="NPInpFeedingPatternedCfgType" name="feedingPatterned" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="NPInpFeedingContinuousType" name="feedingContinuous" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="NPInpFeedingPatternedType" name="feedingPatterned" minOccurs="1" maxOccurs="1"/>
       </xs:choice>
-      <xs:element type="NPExternalInpFieldsCfgType" name="external" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="NPInternalInpFieldsCfgType" name="internal" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="NPInpFieldsType" name="fields" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
   </xs:complexType>
 
-  <!-- NeuralPreprocessor - reservoirs configuration - container -->
-  <xs:complexType name="NPResCfgContainerType">
+  <!-- NeuralPreprocessor - reservoir structures -->
+  <xs:complexType name="NPResStructsType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="ReservoirCfgType" name="reservoirCfg" minOccurs="1" maxOccurs="unbounded"/>
+      <xs:element type="ResStructType" name="reservoirStructure" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
-  <!-- NeuralPreprocessor - reservoir instance - input unit configuration -->
-  <xs:complexType name="NPResInstanceInputUnitCfgType">
-    <xs:attribute type="xs:string" name="fieldName" use="required"/>
+  <!-- NeuralPreprocessor - reservoir instance - input unit - connection - configuration -->
+  <xs:complexType name="NPResInstanceInputUnitConnectionType">
+    <xs:sequence minOccurs="0" maxOccurs="1">
+      <xs:element type="InputSynapseType" name="synapse" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+    <xs:attribute type="xs:string" name="poolName" use="required"/>
+    <xs:attribute type="UDoubleLE1Type" name="density" use="required"/>
+    <xs:attribute type="AnalogCodingMethodType" name="coding" use="optional" default="Actual">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is Actual</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="oppositeAmplitude" use="optional" default="false">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is false</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="SignalingRestrictionType" name="signalingRestriction" use="optional" default="AnalogOnly">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is AnalogOnly</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <!-- NeuralPreprocessor - reservoir instance - input unit - connections - configuration -->
+  <xs:complexType name="NPResInstanceInputUnitConnectionsType">
+    <xs:sequence minOccurs="1" maxOccurs="unbounded">
+      <xs:element type="NPResInstanceInputUnitConnectionType" name="connection" minOccurs="1" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- NeuralPreprocessor - reservoir instance - input unit - configuration -->
+  <xs:complexType name="NPResInstanceInputUnitType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="CoordinatesType" name="coordinates" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="NPResInstanceInputUnitConnectionsType" name="connections" minOccurs="1" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute type="xs:string" name="inputFieldName" use="required"/>
     <xs:attribute type="UIntGE1LE32Type" name="spikeTrainLength" use="optional" default="8">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is 8</xs:documentation>
@@ -2083,77 +2092,61 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- NeuralPreprocessor - reservoir instance - input units configuration -->
-  <xs:complexType name="NPResInstanceInputUnitsCfgType">
+  <!-- NeuralPreprocessor - reservoir instance - input units - configuration -->
+  <xs:complexType name="NPResInstanceInputUnitsType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="NPResInstanceInputUnitCfgType" name="inputUnit" minOccurs="1" maxOccurs="unbounded"/>
+      <xs:element type="NPResInstanceInputUnitType" name="inputUnit" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
-
-
-  <!-- NeuralPreprocessor - reservoir instance - input field connection configuration -->
-  <xs:complexType name="NPResInstanceInputConnectionCfgType">
+  
+  <!-- NeuralPreprocessor - reservoir instance - configuration -->
+  <xs:complexType name="NPResInstanceType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="InputSynapseCfgType" name="synapse" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="NPResInstanceInputUnitsType" name="inputUnits" minOccurs="1" maxOccurs="1">
+        <xs:unique name="resinst_unique_input_unit">
+          <xs:selector xpath=".//inputUnit"/>
+          <xs:field xpath="@inputFieldName"/>
+        </xs:unique>
+      </xs:element>
+      <xs:element type="PredictorsType" name="predictors" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
-    <xs:attribute type="xs:string" name="fieldName" use="required"/>
-    <xs:attribute type="xs:string" name="poolName" use="required"/>
-    <xs:attribute type="UDoubleGT0Type" name="density" use="required"/>
-    <xs:attribute type="AnalogCodingMethodType" name="coding" use="optional" default="Actual"/>
-    <xs:attribute type="xs:boolean" name="oppositeAmplitude" use="optional" default="false"/>
-    <xs:attribute type="SignalingRestrictionType" name="signalingRestriction" use="optional" default="AnalogOnly">
+    <xs:attribute type="xs:string" name="name" use="required" />
+    <xs:attribute type="xs:string" name="reservoirStructure" use="required" />
+    <xs:attribute type="UDoubleGT0NAOptionType" name="analogScopeSpectralRadius" use="optional" default="0.9999">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is AnalogOnly</xs:documentation>
+        <xs:documentation xml:lang="en">Default value is 0.9999. Use NA to disable spectral radius application.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleGT0NAOptionType" name="spikingScopeSpectralRadius" use="optional" default="NA">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.9999. Use NA to disable spectral radius application.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
 
-  <!-- NeuralPreprocessor - reservoir instance - input field connection - configuration collection -->
-  <xs:complexType name="NPResInstanceInputConnectionsCfgType">
-    <xs:sequence minOccurs="1" maxOccurs="unbounded">
-      <xs:element type="NPResInstanceInputConnectionCfgType" name="inputConnection" minOccurs="1" maxOccurs="unbounded"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <!-- NeuralPreprocessor - reservoir instance - configuration -->
-  <xs:complexType name="NPResInstanceCfgType">
+  <!-- NeuralPreprocessor - reservoir instances -->
+  <xs:complexType name="NPResInstancesType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="NPResInstanceInputUnitsCfgType" name="inputUnits" minOccurs="0" maxOccurs="1">
-        <xs:unique name="resinst_unique_input_unit">
-          <xs:selector xpath=".//inputUnit"/>
-          <xs:field xpath="@fieldName"/>
-        </xs:unique>
-      </xs:element>
-      <xs:element type="NPResInstanceInputConnectionsCfgType" name="inputConnections" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="PredictorsCfgType" name="predictors" minOccurs="1" maxOccurs="1"/>
-    </xs:sequence>
-    <xs:attribute type="xs:string" name="name" use="required" />
-    <xs:attribute type="xs:string" name="cfg" use="required" />
-  </xs:complexType>
-
-  <!-- NeuralPreprocessor - reservoir instances - container -->
-  <xs:complexType name="NPResInstanceContainerType">
-    <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="NPResInstanceCfgType" name="reservoirInstance" minOccurs="1" maxOccurs="unbounded"/>
+      <xs:element type="NPResInstanceType" name="reservoirInstance" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
   <!-- NeuralPreprocessor configuration -->
-  <xs:complexType name="NPCfgType">
+  <xs:complexType name="NPType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="NPInputCfgType" name="input" minOccurs="1" maxOccurs="1">
+      <xs:element type="NPInputType" name="input" minOccurs="1" maxOccurs="1">
         <xs:unique name="np_unique_input_field_name">
           <xs:selector xpath=".//field"/>
           <xs:field xpath="@name"/>
         </xs:unique>
       </xs:element>
-      <xs:element type="NPResCfgContainerType" name="reservoirCfgContainer" minOccurs="1" maxOccurs="1">
-        <xs:unique name="np_unique_rescfg_name">
-          <xs:selector xpath="./reservoirCfg"/>
+      <xs:element type="NPResStructsType" name="reservoirStructures" minOccurs="1" maxOccurs="1">
+        <xs:unique name="np_unique_resstruct_name">
+          <xs:selector xpath="./reservoirStructure"/>
           <xs:field xpath="@name"/>
         </xs:unique>
       </xs:element>
-      <xs:element type="NPResInstanceContainerType" name="reservoirInstanceContainer" minOccurs="1" maxOccurs="1">
+      <xs:element type="NPResInstancesType" name="reservoirInstances" minOccurs="1" maxOccurs="1">
         <xs:unique name="np_unique_resinst_name">
           <xs:selector xpath="./reservoirInstance"/>
           <xs:field xpath="@name"/>
@@ -2162,7 +2155,7 @@
     </xs:sequence>
     <xs:attribute type="UDoubleLT1Type" name="predictorsReductionRatio" use="optional" default="0">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Specifies how many predictors having smallest standard deviation to be disabled. Default value is 0.</xs:documentation>
+        <xs:documentation xml:lang="en">Specifies how many predictors having smallest rescalled range to be disabled. Default value is 0.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -2170,46 +2163,46 @@
   <!-- ________________________________________READOUT LAYER TYPES_________________________________________________ -->
 
   <!-- Readout unit classification networks configuration -->
-  <xs:complexType name="ROutLayerUnitClassificationNetworksCfgType">
+  <xs:complexType name="ROutLayerUnitClassificationNetworksType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:choice minOccurs="1" maxOccurs="unbounded">
-        <xs:element type="FFNetCfgType" name="ff" minOccurs="0" maxOccurs="1"/>
-        <xs:element type="PPNetCfgType" name="pp" minOccurs="0" maxOccurs="1"/>
+        <xs:element type="FFNetType" name="ff" minOccurs="0" maxOccurs="1"/>
+        <xs:element type="PPNetType" name="pp" minOccurs="0" maxOccurs="1"/>
       </xs:choice>
     </xs:sequence>
   </xs:complexType>
 
   <!-- Readout unit forecast networks configuration -->
-  <xs:complexType name="ROutLayerUnitForecastNetworksCfgType">
+  <xs:complexType name="ROutLayerUnitForecastNetworksType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="FFNetCfgType" name="ff" minOccurs="1" maxOccurs="unbounded"/>
+      <xs:element type="FFNetType" name="ff" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
   <!-- Readout unit default networks configuration -->
-  <xs:complexType name="ROutLayerUnitDefaultNetworksCfgType">
+  <xs:complexType name="ROutLayerUnitDefaultNetworksType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="ROutLayerUnitClassificationNetworksCfgType" name="classification" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="ROutLayerUnitForecastNetworksCfgType" name="forecast" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="ROutLayerUnitClassificationNetworksType" name="classification" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="ROutLayerUnitForecastNetworksType" name="forecast" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
   </xs:complexType>
 
   <!-- Readout unit forecast task configuration -->
-  <xs:complexType name="ROutLayerUnitForecastTaskCfgType">
+  <xs:complexType name="ROutLayerUnitForecastTaskType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:choice minOccurs="1" maxOccurs="1">
-        <xs:element type="BinFeatureFilterCfgType" name="binFeature" minOccurs="1" maxOccurs="1"/>
-        <xs:element type="EnumFeatureFilterCfgType" name="enumFeature" minOccurs="1" maxOccurs="1"/>
-        <xs:element type="RealFeatureFilterCfgType" name="realFeature" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="BinFeatureFilterType" name="binFeature" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="EnumFeatureFilterType" name="enumFeature" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="RealFeatureFilterType" name="realFeature" minOccurs="1" maxOccurs="1"/>
       </xs:choice>
-      <xs:element type="ROutLayerUnitForecastNetworksCfgType" name="networks" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="ROutLayerUnitForecastNetworksType" name="networks" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
   </xs:complexType>
 
   <!-- Readout unit classification task configuration -->
-  <xs:complexType name="ROutLayerUnitClassificationTaskCfgType">
+  <xs:complexType name="ROutLayerUnitClassificationTaskType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="ROutLayerUnitClassificationNetworksCfgType" name="networks" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="ROutLayerUnitClassificationNetworksType" name="networks" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:string" name="oneWinnerGroupName" use="optional" default="NA">
       <xs:annotation>
@@ -2219,28 +2212,28 @@
   </xs:complexType>
 
   <!-- Readout unit configuration -->
-  <xs:complexType name="ROutLayerUnitCfgType">
+  <xs:complexType name="ROutLayerUnitType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:choice minOccurs="1" maxOccurs="1">
-        <xs:element type="ROutLayerUnitForecastTaskCfgType" name="forecast" minOccurs="1" maxOccurs="1"/>
-        <xs:element type="ROutLayerUnitClassificationTaskCfgType" name="classification" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="ROutLayerUnitForecastTaskType" name="forecast" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="ROutLayerUnitClassificationTaskType" name="classification" minOccurs="1" maxOccurs="1"/>
       </xs:choice>
     </xs:sequence>
     <xs:attribute type="xs:string" name="name" use="required"/>
   </xs:complexType>
 
   <!-- Readout units configuration -->
-  <xs:complexType name="ROutLayerUnitsCfgType">
+  <xs:complexType name="ROutLayerUnitsType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="ROutLayerUnitCfgType" name="readoutUnit" minOccurs="1" maxOccurs="unbounded"/>
+      <xs:element type="ROutLayerUnitType" name="readoutUnit" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
   <!-- Readout layer configuration -->
-  <xs:complexType name="ROutLayerCfgType">
+  <xs:complexType name="ROutLayerType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="ROutLayerUnitDefaultNetworksCfgType" name="defaultNetworks" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="ROutLayerUnitsCfgType" name="readoutUnits" minOccurs="1" maxOccurs="1">
+      <xs:element type="ROutLayerUnitDefaultNetworksType" name="defaultNetworks" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="ROutLayerUnitsType" name="readoutUnits" minOccurs="1" maxOccurs="1">
         <xs:unique name="rol_unique_readout_unit">
           <xs:selector xpath="./readoutUnit"/>
           <xs:field xpath="@name"/>
@@ -2321,31 +2314,31 @@
   </xs:complexType>
 
   <!-- StateMachine configuration -->
-  <xs:complexType name="SMCfgType">
+  <xs:complexType name="SMType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="NPCfgType" name="neuralPreprocessor" minOccurs="0" maxOccurs="1">
+      <xs:element type="NPType" name="neuralPreprocessor" minOccurs="0" maxOccurs="1">
         <xs:key name="np_input_field">
           <xs:selector xpath="./input/*/field"/>
           <xs:field xpath="@name"/>
         </xs:key>
         <xs:key name="np_rescfg_name">
-          <xs:selector xpath="./reservoirCfgContainer/reservoirCfg"/>
+          <xs:selector xpath="./reservoirStructures/reservoirStructure"/>
           <xs:field xpath="@name"/>
         </xs:key>
         <xs:keyref name="iconn_existing_input_field" refer="np_input_field">
-          <xs:selector xpath="./reservoirInstanceContainer/reservoirInstance/inputConnections/inputConnection" />
+          <xs:selector xpath="./reservoirInstances/reservoirInstance/inputConnections/inputConnection" />
           <xs:field xpath="@fieldName" />
         </xs:keyref>
         <xs:keyref name="iunit_existing_input_field" refer="np_input_field">
-          <xs:selector xpath="./reservoirInstanceContainer/reservoirInstance/inputUnits/inputUnit" />
+          <xs:selector xpath="./reservoirInstances/reservoirInstance/inputUnits/inputUnit" />
           <xs:field xpath="@fieldName" />
         </xs:keyref>
         <xs:keyref name="resinst_existing_rescfg" refer="np_rescfg_name">
-          <xs:selector xpath="./reservoirInstanceContainer/reservoirInstance" />
-          <xs:field xpath="@cfg" />
+          <xs:selector xpath="./reservoirInstances/reservoirInstance" />
+          <xs:field xpath="@reservoirStructure" />
         </xs:keyref>
       </xs:element>
-      <xs:element type="ROutLayerCfgType" name="readoutLayer" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="ROutLayerType" name="readoutLayer" minOccurs="1" maxOccurs="1"/>
       <xs:element type="SMMapperType" name="mapper" minOccurs="0" maxOccurs="1">
         <xs:unique name="unique_readout_unit_name">
           <xs:selector xpath="./map"/>

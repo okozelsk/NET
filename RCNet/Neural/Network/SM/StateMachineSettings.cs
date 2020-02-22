@@ -7,9 +7,8 @@ using System.Reflection;
 using RCNet.Extensions;
 using RCNet.XmlTools;
 using RCNet.RandomValue;
-using RCNet.Neural.Data.Generators;
-using RCNet.Neural.Network.SM.Neuron;
 using RCNet.Neural.Network.SM.Preprocessing;
+using RCNet.Neural.Network.SM.Preprocessing.Reservoir;
 using RCNet.Neural.Network.SM.Readout;
 
 namespace RCNet.Neural.Network.SM
@@ -24,7 +23,7 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// Name of the associated xsd type
         /// </summary>
-        public const string XsdTypeName = "SMCfgType";
+        public const string XsdTypeName = "SMType";
 
         //Attribute properties
         /// <summary>
@@ -120,31 +119,31 @@ namespace RCNet.Neural.Network.SM
                             //Reservoir instance name
                             string reservoirInstanceName = allowedPoolElem.Attribute("reservoirInstanceName").Value;
                             int reservoirInstanceIdx = -1;
-                            for (int i = 0; i < NeuralPreprocessorConfig.ReservoirInstanceDefinitionCollection.Count; i++)
+                            for (int i = 0; i < NeuralPreprocessorConfig.ReservoirInstancesCfg.ReservoirInstanceCfgCollection.Count; i++)
                             {
-                                if (NeuralPreprocessorConfig.ReservoirInstanceDefinitionCollection[i].InstanceName == reservoirInstanceName)
+                                if (NeuralPreprocessorConfig.ReservoirInstancesCfg.ReservoirInstanceCfgCollection[i].Name == reservoirInstanceName)
                                 {
                                     reservoirInstanceIdx = i;
                                     break;
                                 }
-                                else if (i == NeuralPreprocessorConfig.ReservoirInstanceDefinitionCollection.Count - 1)
+                                else if (i == NeuralPreprocessorConfig.ReservoirInstancesCfg.ReservoirInstanceCfgCollection.Count - 1)
                                 {
                                     throw new Exception($"Name {reservoirInstanceName} not found among resevoir instances.");
                                 }
                             }
                             //Pool name
-                            string reservoirCfgName = NeuralPreprocessorConfig.ReservoirInstanceDefinitionCollection[reservoirInstanceIdx].Settings.SettingsName;
-                            ReservoirSettings reservoirSettings = NeuralPreprocessorConfig.ReservoirInstanceDefinitionCollection[reservoirInstanceIdx].Settings;
+                            string reservoirStructureName = NeuralPreprocessorConfig.ReservoirInstancesCfg.ReservoirInstanceCfgCollection[reservoirInstanceIdx].StructureCfgName;
+                            ReservoirStructureSettings reservoirStructureCfg = NeuralPreprocessorConfig.ReservoirStructuresCfg.GetReservoirStructureCfg(reservoirStructureName);
                             string poolName = allowedPoolElem.Attribute("poolName").Value;
                             int poolIdx = -1;
-                            for (int i = 0; i < reservoirSettings.PoolSettingsCollection.Count; i++)
+                            for (int i = 0; i < reservoirStructureCfg.PoolsCfg.PoolCfgCollection.Count; i++)
                             {
-                                if (reservoirSettings.PoolSettingsCollection[i].Name == poolName)
+                                if (reservoirStructureCfg.PoolsCfg.PoolCfgCollection[i].Name == poolName)
                                 {
                                     poolIdx = i;
                                     break;
                                 }
-                                else if (i == reservoirSettings.PoolSettingsCollection.Count - 1)
+                                else if (i == reservoirStructureCfg.PoolsCfg.PoolCfgCollection.Count - 1)
                                 {
                                     throw new Exception($"Name {poolName} not found among resevoir's pools.");
                                 }
@@ -157,7 +156,7 @@ namespace RCNet.Neural.Network.SM
                     //Allowed routed input fields
                     List<int> allowedRoutedFieldsIdxs = new List<int>();
                     XElement allowedInputFieldsElem = mapElem.Descendants("allowedInputFields").FirstOrDefault();
-                    List<string> routedInputFieldNames = NeuralPreprocessorConfig.InputConfig.RoutedFieldNameCollection();
+                    List<string> routedInputFieldNames = NeuralPreprocessorConfig.InputCfg.GetRoutedFieldNames();
                     if (allowedInputFieldsElem != null)
                     {
                         foreach (XElement allowedInputFieldElem in allowedInputFieldsElem.Descendants("field"))

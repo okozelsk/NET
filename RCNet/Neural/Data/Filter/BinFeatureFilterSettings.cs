@@ -20,7 +20,7 @@ namespace RCNet.Neural.Data.Filter
         /// <summary>
         /// Name of the associated xsd type
         /// </summary>
-        public const string XsdTypeName = "BinFeatureFilterCfgType";
+        public const string XsdTypeName = "BinFeatureFilterType";
 
         //Constructors
         /// <summary>

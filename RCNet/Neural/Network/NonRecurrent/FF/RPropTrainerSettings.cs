@@ -20,7 +20,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         /// <summary>
         /// Name of the associated xsd type
         /// </summary>
-        public const string XsdTypeName = "FFNetRPropTrainerCfgType";
+        public const string XsdTypeName = "FFNetRPropTrainerType";
         /// <summary>
         /// A default absolute value that is still considered as zero
         /// </summary>

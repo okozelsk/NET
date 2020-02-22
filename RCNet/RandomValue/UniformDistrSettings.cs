@@ -17,7 +17,7 @@ namespace RCNet.RandomValue
         /// <summary>
         /// Name of the associated xsd type
         /// </summary>
-        public const string XsdTypeName = "UniformDistrCfgType";
+        public const string XsdTypeName = "UniformDistrType";
 
         //Constructors
         /// <summary>
