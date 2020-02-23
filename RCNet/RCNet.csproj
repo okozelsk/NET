@@ -314,6 +314,7 @@
   <ItemGroup>
     <Content Include="Docs\Imgs\ReservoirComputing_BasicSchema.png" />
     <Content Include="Docs\Imgs\StateMachine_EntityRelationship.png" />
+    <Content Include="Docs\Imgs\TanH.jpg" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
