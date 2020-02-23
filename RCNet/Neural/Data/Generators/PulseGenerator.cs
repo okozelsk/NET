@@ -13,10 +13,34 @@ namespace RCNet.Neural.Data.Generators
     [Serializable]
     public class PulseGenerator : IGenerator
     {
+        //Enums
+        /// <summary>
+        /// Method of the pulse timing
+        /// </summary>
+        public enum TimingMode
+        {
+            /// <summary>
+            /// Period of the pulses is constant
+            /// </summary>
+            Constant,
+            /// <summary>
+            /// Period of the pulses follows the Uniform distribution
+            /// </summary>
+            Uniform,
+            /// <summary>
+            /// Period of the pulses follows the Gaussian distribution
+            /// </summary>
+            Gaussian,
+            /// <summary>
+            /// Period of the pulses follows the Poisson (Exponential) distribution
+            /// </summary>
+            Poisson
+        }
+
         //Attributes
         private readonly double _signal;
         private readonly double _avgPeriod;
-        private readonly PulseGeneratorSettings.TimingMode _mode;
+        private readonly TimingMode _mode;
         private Random _rand;
         private int _t;
         private int _nextPulseTime;
@@ -28,7 +52,7 @@ namespace RCNet.Neural.Data.Generators
         /// <param name="signal">Pulse signal value</param>
         /// <param name="avgPeriod">Pulse average leak</param>
         /// <param name="mode">Pulse timing mode</param>
-        public PulseGenerator(double signal, double avgPeriod, PulseGeneratorSettings.TimingMode mode)
+        public PulseGenerator(double signal, double avgPeriod, TimingMode mode)
         {
             _signal = signal;
             _avgPeriod = Math.Abs(avgPeriod);
@@ -62,16 +86,16 @@ namespace RCNet.Neural.Data.Generators
             int timeIncrement;
             switch(_mode)
             {
-                case PulseGeneratorSettings.TimingMode.Constant:
+                case TimingMode.Constant:
                     timeIncrement = (_t == 0) ? 1 : (int)Math.Round(_avgPeriod);
                     break;
-                case PulseGeneratorSettings.TimingMode.Uniform:
+                case TimingMode.Uniform:
                     timeIncrement = (int)Math.Round(_rand.NextRangedUniformDouble(minPeriod, maxPeriod));
                     break;
-                case PulseGeneratorSettings.TimingMode.Gaussian:
+                case TimingMode.Gaussian:
                     timeIncrement = (int)Math.Round(_rand.NextFilterredGaussianDouble(_avgPeriod, spanPeriod / 6d, minPeriod, maxPeriod));
                     break;
-                case PulseGeneratorSettings.TimingMode.Poisson:
+                case TimingMode.Poisson:
                     timeIncrement = (int)Math.Round(_rand.NextExponentialDouble(_avgPeriod));
                     break;
                 default:

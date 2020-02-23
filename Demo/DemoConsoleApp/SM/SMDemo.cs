@@ -135,15 +135,15 @@ namespace Demo.DemoConsoleApp.SM
                     throw new Exception("Incorrect file format. When NeuralPreprocessor is bypassed, only patterned data are allowed.");
                 }
                 trainingData = VectorBundle.Load(trainingCsvData,
-                                                 demoCaseParams.StateMachineCfg.NeuralPreprocessorConfig.InputCfg.FieldsCfg.ExternalFieldsCfg.GetFieldNames(),
-                                                 demoCaseParams.StateMachineCfg.ReadoutLayerConfig.OutputFieldNameCollection,
+                                                 demoCaseParams.StateMachineCfg.NeuralPreprocessorCfg.InputCfg.FieldsCfg.ExternalFieldsCfg.GetFieldNames(),
+                                                 demoCaseParams.StateMachineCfg.ReadoutLayerCfg.OutputFieldNameCollection,
                                                  out predictionInputVector
                                                  );
             }
             else
             {
                 //Patterned feeding data format
-                trainingData = VectorBundle.Load(trainingCsvData, demoCaseParams.StateMachineCfg.ReadoutLayerConfig.OutputFieldNameCollection.Count);
+                trainingData = VectorBundle.Load(trainingCsvData, demoCaseParams.StateMachineCfg.ReadoutLayerCfg.OutputFieldNameCollection.Count);
             }
             if (stateMachine.NP != null)
             {
@@ -175,15 +175,15 @@ namespace Demo.DemoConsoleApp.SM
                     double[] tmp = stateMachine.Compute(predictionInputVector);
                     //Load verification data and get new predictionInputVector for final prediction
                     verificationData = VectorBundle.Load(verificationCsvData,
-                                                         demoCaseParams.StateMachineCfg.NeuralPreprocessorConfig.InputCfg.FieldsCfg.ExternalFieldsCfg.GetFieldNames(),
-                                                         demoCaseParams.StateMachineCfg.ReadoutLayerConfig.OutputFieldNameCollection,
+                                                         demoCaseParams.StateMachineCfg.NeuralPreprocessorCfg.InputCfg.FieldsCfg.ExternalFieldsCfg.GetFieldNames(),
+                                                         demoCaseParams.StateMachineCfg.ReadoutLayerCfg.OutputFieldNameCollection,
                                                          out predictionInputVector
                                                          );
                 }
                 else
                 {
                     //Patterned feeding data format
-                    verificationData = VectorBundle.Load(verificationCsvData, demoCaseParams.StateMachineCfg.ReadoutLayerConfig.OutputFieldNameCollection.Count);
+                    verificationData = VectorBundle.Load(verificationCsvData, demoCaseParams.StateMachineCfg.ReadoutLayerCfg.OutputFieldNameCollection.Count);
                 }
                 verificationResults = stateMachine.Verify(verificationData);
                 _log.Write(string.Empty);

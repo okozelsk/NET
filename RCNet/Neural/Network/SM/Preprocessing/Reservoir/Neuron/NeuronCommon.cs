@@ -69,54 +69,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron
             Constant
         }
 
-        //Methods
-        /// <summary>
-        /// Parses neuron role from a string code
-        /// </summary>
-        /// <param name="code">Neuron role code</param>
-        public static NeuronRole ParseNeuronRole(string code)
-        {
-            switch (code.ToUpper())
-            {
-                case "INPUT": return NeuronRole.Input;
-                case "EXCITATORY": return NeuronRole.Excitatory;
-                case "INHIBITORY": return NeuronRole.Inhibitory;
-                default:
-                    throw new ArgumentException($"Unsupported neuron role {code}", "code");
-            }
-        }
-
-        /// <summary>
-        /// Parses neuron's output signaling restriction
-        /// </summary>
-        /// <param name="code">Restriction code</param>
-        public static NeuronSignalingRestrictionType ParseNeuronSignalingRestriction(string code)
-        {
-            switch (code.ToUpper())
-            {
-                case "NORESTRICTION": return NeuronSignalingRestrictionType.NoRestriction;
-                case "ANALOGONLY": return NeuronSignalingRestrictionType.AnalogOnly;
-                case "SPIKINGONLY": return NeuronSignalingRestrictionType.SpikingOnly;
-                default:
-                    throw new ArgumentException($"Unsupported neuron output signaling restriction {code}", "code");
-            }
-        }
-
-        /// <summary>
-        /// Parses type of weights used by moving weighted average neuron's predictors
-        /// </summary>
-        /// <param name="code">Restriction code</param>
-        public static NeuronPredictorMWAvgWeightsType ParseNeuronPredictorMWAvgWeightsType(string code)
-        {
-            switch (code.ToUpper())
-            {
-                case "EXPONENTIAL": return NeuronPredictorMWAvgWeightsType.Exponential;
-                case "LINEAR": return NeuronPredictorMWAvgWeightsType.Linear;
-                case "CONSTANT": return NeuronPredictorMWAvgWeightsType.Constant;
-                default:
-                    throw new ArgumentException($"Unsupported type of weights used by moving weighted average neuron's predictors {code}", "code");
-            }
-        }
 
     }//NeuronCommon
 

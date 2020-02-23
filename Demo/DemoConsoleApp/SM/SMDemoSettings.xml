@@ -19,7 +19,7 @@
     <stateMachineCfg randomizerSeek="0">
       <neuralPreprocessor>
         <input>
-          <feedingPatterned bidir="false">
+          <feedingPatterned bidir="false" routeToReadout="false">
             <unification unifyAmplitude="false" detrend="false">
               <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
             </unification>
@@ -100,10 +100,15 @@
           </readoutUnit>
         </readoutUnits>
       </readoutLayer>
+      <mapper>
+        <map readoutUnitName="Chicken1Bird0">
+          <allowedPools>
+            <pool reservoirInstanceName="Main" poolName="PureESN"/>
+          </allowedPools>
+        </map>
+      </mapper>
     </stateMachineCfg>
   </case>
-
-
 
 
   <!--

@@ -109,26 +109,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             return;
         }
 
-        //Static methods
-        /// <summary>
-        /// Parses given code of AnalogCodingMethod
-        /// </summary>
-        /// <param name="code">Code to be parsed</param>
-        public static AnalogCodingMethod ParseAnalogCodingMethod(string code)
-        {
-            switch(code.ToUpper())
-            {
-                case "ACTUAL": return AnalogCodingMethod.Actual;
-                case "DIFFERENCE": return AnalogCodingMethod.Difference;
-                case "LINEARSTEP": return AnalogCodingMethod.LinearSteps;
-                case "POWER": return AnalogCodingMethod.Power;
-                case "FOLDEDPOWER": return AnalogCodingMethod.FoldedPower;
-                case "MOVINGAVERAGE": return AnalogCodingMethod.MovingAverage;
-                case "MORLET": return AnalogCodingMethod.Morlet;
-                default: throw new Exception($"Unsupported AnalogCodingMethod code: {code}.");
-            }
-        }
-
         //Methods
         /// <summary>
         /// Instantiates TransformedValueUnit associated with given AnalogCodingMethod if it doesn't exist yet.

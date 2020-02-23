@@ -22,30 +22,6 @@ namespace RCNet.Neural.Data.Generators
         /// </summary>
         public const string XsdTypeName = "PulseGeneratorType";
 
-        //Enums
-        /// <summary>
-        /// Method of the pulse timing
-        /// </summary>
-        public enum TimingMode
-        {
-            /// <summary>
-            /// Period of the pulses is constant
-            /// </summary>
-            Constant,
-            /// <summary>
-            /// Period of the pulses follows the Uniform distribution
-            /// </summary>
-            Uniform,
-            /// <summary>
-            /// Period of the pulses follows the Gaussian distribution
-            /// </summary>
-            Gaussian,
-            /// <summary>
-            /// Period of the pulses follows the Poisson (Exponential) distribution
-            /// </summary>
-            Poisson
-        }
-
         //Attribute properties
         /// <summary>
         /// Pulse signal
@@ -60,7 +36,7 @@ namespace RCNet.Neural.Data.Generators
         /// <summary>
         /// Pulse timing mode
         /// </summary>
-        public TimingMode Mode { get; }
+        public PulseGenerator.TimingMode Mode { get; }
 
         //Constructors
         /// <summary>
@@ -71,7 +47,7 @@ namespace RCNet.Neural.Data.Generators
         /// <param name="mode">Pulse timing mode</param>
         public PulseGeneratorSettings(double signal,
                                       double avgPeriod,
-                                      TimingMode mode
+                                      PulseGenerator.TimingMode mode
                                       )
         {
             Signal = signal;
@@ -105,7 +81,7 @@ namespace RCNet.Neural.Data.Generators
             //Parsing
             Signal = double.Parse(settingsElem.Attribute("signal").Value, CultureInfo.InvariantCulture);
             AvgPeriod = Math.Abs(double.Parse(settingsElem.Attribute("avgPeriod").Value, CultureInfo.InvariantCulture));
-            Mode = ParseTimingMode(settingsElem.Attribute("mode").Value);
+            Mode = (PulseGenerator.TimingMode)Enum.Parse(typeof(PulseGenerator.TimingMode), settingsElem.Attribute("mode").Value);
             Check();
             return;
         }
@@ -117,25 +93,6 @@ namespace RCNet.Neural.Data.Generators
         public override bool ContainsOnlyDefaults { get { return false; } }
 
         //Methods
-        //Static methods
-        /// <summary>
-        /// Parses the timing mode from a string code
-        /// </summary>
-        /// <param name="code">Mode code</param>
-        public static TimingMode ParseTimingMode(string code)
-        {
-            switch (code.ToUpper())
-            {
-                case "CONSTANT": return TimingMode.Constant;
-                case "UNIFORM": return TimingMode.Uniform;
-                case "GAUSSIAN": return TimingMode.Gaussian;
-                case "POISSON": return TimingMode.Poisson;
-                default:
-                    throw new ArgumentException($"Unsupported mode code {code}", "code");
-            }
-        }
-
-        //Instance methods
         /// <summary>
         /// Checks validity
         /// </summary>

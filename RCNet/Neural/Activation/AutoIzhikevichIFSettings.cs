@@ -92,9 +92,9 @@ namespace RCNet.Neural.Activation
             //Validation
             XElement activationSettingsElem = Validate(elem, XsdTypeName);
             //Parsing
-            Role = NeuronCommon.ParseNeuronRole(activationSettingsElem.Attribute("role").Value);
+            Role = (NeuronCommon.NeuronRole)Enum.Parse(typeof(NeuronCommon.NeuronRole), activationSettingsElem.Attribute("role").Value, true);
             RefractoryPeriods = int.Parse(activationSettingsElem.Attribute("refractoryPeriods").Value, CultureInfo.InvariantCulture);
-            SolverMethod = ODENumSolver.ParseComputationMethodType(activationSettingsElem.Attribute("solverMethod").Value);
+            SolverMethod = (ODENumSolver.Method)Enum.Parse(typeof(ODENumSolver.Method), activationSettingsElem.Attribute("solverMethod").Value, true);
             SolverCompSteps = int.Parse(activationSettingsElem.Attribute("solverCompSteps").Value, CultureInfo.InvariantCulture);
             Check();
             return;

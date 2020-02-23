@@ -36,23 +36,6 @@ namespace RCNet.RandomValue
 
         //Static methods
         /// <summary>
-        /// Parses code to DistributionType 
-        /// </summary>
-        /// <param name="code">code</param>
-        public static DistributionType ParseDistributionType(string code)
-        {
-            switch (code.ToUpper())
-            {
-                case "UNIFORM": return DistributionType.Uniform;
-                case "GAUSSIAN": return DistributionType.Gaussian;
-                case "EXPONENTIAL": return DistributionType.Exponential;
-                case "GAMMA": return DistributionType.Gamma;
-                default:
-                    throw new ArgumentException($"Unsupported distribution type code {code}", "code");
-            }
-        }
-
-        /// <summary>
         /// Returns default name of the xml element containing settings for given distribution type
         /// </summary>
         /// <param name="distrType">Distribution type</param>

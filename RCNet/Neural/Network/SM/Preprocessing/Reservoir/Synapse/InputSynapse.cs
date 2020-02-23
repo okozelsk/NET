@@ -75,22 +75,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Synapse
             return;
         }
 
-        //Static methods
-        /// <summary>
-        /// Parses method to decide synapse delay from a string code
-        /// </summary>
-        /// <param name="code">Method to decide synapse delay code</param>
-        public static SynapticDelayMethod ParseSynapticDelayMethod(string code)
-        {
-            switch (code.ToUpper())
-            {
-                case "RANDOM": return SynapticDelayMethod.Random;
-                case "DISTANCE": return SynapticDelayMethod.Distance;
-                default:
-                    throw new ArgumentException($"Unsupported synapse delay decision method: {code}", "code");
-            }
-        }
-
         //Methods
         /// <summary>
         /// Resets synapse.

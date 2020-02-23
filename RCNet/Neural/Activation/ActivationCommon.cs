@@ -22,4 +22,28 @@ namespace RCNet.Neural.Activation
         Analog
     };
 
+    /// <summary>
+    /// Helper class for activations
+    /// </summary>
+    public static class ActivationCommon
+    {
+        /// <summary>
+        /// Parses ActivationType from the given code
+        /// </summary>
+        /// <param name="code">Activation type code</param>
+        public static ActivationType ParseActivationType(string code)
+        {
+            switch(code.ToUpper())
+            {
+                case "ANALOG":
+                    return ActivationType.Analog;
+                case "SPIKING":
+                    return ActivationType.Spiking;
+                default:
+                    throw new Exception($"Unknown activation type code {code}.");
+            }
+        }
+
+    }//ActivationCommon
+
 }//Namespace

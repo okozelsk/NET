@@ -105,23 +105,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Synapse
             return;
         }
 
-        //Static methods
-        /// <summary>
-        /// Parses target scope of the synapse from a string code
-        /// </summary>
-        /// <param name="code">Scope code</param>
-        public static SynapticTargetScope ParseSynapticTargetScope(string code)
-        {
-            switch (code.ToUpper())
-            {
-                case "ALL": return SynapticTargetScope.All;
-                case "EXCITATORY": return SynapticTargetScope.Excitatory;
-                case "INHIBITORY": return SynapticTargetScope.Inhibitory;
-                default:
-                    throw new ArgumentException($"Unsupported synaptic target scope {code}", "code");
-            }
-        }
-
         //Methods
         /// <summary>
         /// Rescales the synapse weight.

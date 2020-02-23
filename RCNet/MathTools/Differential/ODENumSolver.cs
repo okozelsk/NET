@@ -34,22 +34,6 @@ namespace RCNet.MathTools.Differential
         }
 
         /// <summary>
-        /// Parses given string code of the computation method.
-        /// </summary>
-        /// <param name="code">A code of the computation method.</param>
-        public static Method ParseComputationMethodType(string code)
-        {
-            switch (code.ToUpper())
-            {
-                case "EULER": return Method.Euler;
-                case "RK4": return Method.RK4;
-                default:
-                    throw new ArgumentException($"Unsupported computation method code: {code}");
-            }
-        }
-
-
-        /// <summary>
         /// Delegate of unknown ordinary differential equation (or couple of equations)
         /// </summary>
         /// <param name="t">Time</param>

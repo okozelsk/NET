@@ -54,8 +54,19 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
         }//PredictorID
 
         //Constants
+        /// <summary>
+        /// Maximum number of buffered bits
+        /// </summary>
         public const int MaxBinBufferSize = sizeof(ulong) * 8;
+        
+        /// <summary>
+        /// Maximum number of exponential weights
+        /// </summary>
         public const int MaxExpWeightsSize = 64;
+        
+        /// <summary>
+        /// Maximum number of linear weights
+        /// </summary>
         public const int MaxLinWeightsSize = 10*1024;
 
         //Static

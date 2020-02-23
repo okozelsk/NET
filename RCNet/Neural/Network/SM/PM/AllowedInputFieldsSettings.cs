@@ -12,44 +12,44 @@ using RCNet.XmlTools;
 using RCNet.RandomValue;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool;
 
-namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
+namespace RCNet.Neural.Network.SM.PM
 {
     /// <summary>
-    /// Collection of pool settings
+    /// Collection of predictors mapper's allowed input field settings
     /// </summary>
     [Serializable]
-    public class PoolsSettings : RCNetBaseSettings
+    public class AllowedInputFieldsSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
         /// Name of the associated xsd type
         /// </summary>
-        public const string XsdTypeName = "ResStructPoolsType";
+        public const string XsdTypeName = "SMMapperAllowedInputFieldsType";
 
         //Attribute properties
         /// <summary>
         /// Collection of pools settings
         /// </summary>
-        public List<PoolSettings> PoolCfgCollection { get; }
+        public List<AllowedInputFieldSettings> AllowedInputFieldCfgCollection { get; }
 
         //Constructors
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
-        private PoolsSettings()
+        private AllowedInputFieldsSettings()
         {
-            PoolCfgCollection = new List<PoolSettings>();
+            AllowedInputFieldCfgCollection = new List<AllowedInputFieldSettings>();
             return;
         }
 
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
-        /// <param name="poolCfgCollection">Pool settings collection</param>
-        public PoolsSettings(IEnumerable<PoolSettings> poolCfgCollection)
+        /// <param name="allowedInputFieldCfgCollection">Allowed input field settings collection</param>
+        public AllowedInputFieldsSettings(IEnumerable<AllowedInputFieldSettings> allowedInputFieldCfgCollection)
             : this()
         {
-            AddPools(poolCfgCollection);
+            AddAllowedInputFields(allowedInputFieldCfgCollection);
             Check();
             return;
         }
@@ -57,11 +57,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
-        /// <param name="poolCfgCollection">Pool settings collection</param>
-        public PoolsSettings(params PoolSettings[] poolCfgCollection)
+        /// <param name="allowedInputFieldCfgCollection">Allowed input field settings collection</param>
+        public AllowedInputFieldsSettings(params AllowedInputFieldSettings[] allowedInputFieldCfgCollection)
             : this()
         {
-            AddPools(poolCfgCollection);
+            AddAllowedInputFields(allowedInputFieldCfgCollection);
             Check();
             return;
         }
@@ -70,10 +70,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// The deep copy constructor
         /// </summary>
         /// <param name="source">Source instance</param>
-        public PoolsSettings(PoolsSettings source)
+        public AllowedInputFieldsSettings(AllowedInputFieldsSettings source)
             : this()
         {
-            AddPools(source.PoolCfgCollection);
+            AddAllowedInputFields(source.AllowedInputFieldCfgCollection);
             return;
         }
 
@@ -81,37 +81,21 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// Creates the instance and initialize it from given xml element.
         /// </summary>
         /// <param name="elem">Xml data containing settings.</param>
-        public PoolsSettings(XElement elem)
+        public AllowedInputFieldsSettings(XElement elem)
         {
             //Validation
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
-            PoolCfgCollection = new List<PoolSettings>();
-            foreach (XElement poolElem in settingsElem.Descendants("pool"))
+            AllowedInputFieldCfgCollection = new List<AllowedInputFieldSettings>();
+            foreach (XElement fieldElem in settingsElem.Descendants("field"))
             {
-                PoolCfgCollection.Add(new PoolSettings(poolElem));
+                AllowedInputFieldCfgCollection.Add(new AllowedInputFieldSettings(fieldElem));
             }
             Check();
             return;
         }
 
         //Properties
-        /// <summary>
-        /// Total number of hidden neurons within the pools
-        /// </summary>
-        public int TotalSize
-        {
-            get
-            {
-                int sum = 0;
-                foreach (PoolSettings poolCfg in PoolCfgCollection)
-                {
-                    sum += poolCfg.ProportionsCfg.Size;
-                }
-                return sum;
-            }
-        }
-
         /// <summary>
         /// Identifies settings containing only default values
         /// </summary>
@@ -123,60 +107,35 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// </summary>
         private void Check()
         {
-            if (PoolCfgCollection.Count == 0)
+            if (AllowedInputFieldCfgCollection.Count == 0)
             {
-                throw new Exception($"At least one pool configuration must be specified.");
+                throw new Exception($"At least one allowed input field configuration must be specified.");
             }
-            //Uniqueness of pool names
-            string[] names = new string[PoolCfgCollection.Count];
-            names[0] = PoolCfgCollection[0].Name;
-            for(int i = 1; i < PoolCfgCollection.Count; i++)
+            //Uniqueness of pool references
+            string[] names = new string[AllowedInputFieldCfgCollection.Count];
+            names[0] = AllowedInputFieldCfgCollection[0].Name;
+            for(int i = 1; i < AllowedInputFieldCfgCollection.Count; i++)
             {
-                if(names.Contains(PoolCfgCollection[i].Name))
+                if (names.Contains(AllowedInputFieldCfgCollection[i].Name))
                 {
-                    throw new Exception($"Pool name {PoolCfgCollection[i].Name} is not unique.");
+                    throw new Exception($"Input field name {AllowedInputFieldCfgCollection[i].Name} is not unique.");
                 }
-                names[i] = PoolCfgCollection[i].Name;
+                names[i] = AllowedInputFieldCfgCollection[i].Name;
             }
             return;
         }
 
         /// <summary>
-        /// Adds cloned pool configurations from given collection into the internal collection
+        /// Adds cloned allowed input field configurations from given collection into the internal collection
         /// </summary>
-        /// <param name="poolCfgCollection"></param>
-        private void AddPools(IEnumerable<PoolSettings> poolCfgCollection)
+        /// <param name="allowedInputFieldCfgCollection">Allowed input field settings collection</param>
+        private void AddAllowedInputFields(IEnumerable<AllowedInputFieldSettings> allowedInputFieldCfgCollection)
         {
-            foreach (PoolSettings poolCfg in poolCfgCollection)
+            foreach (AllowedInputFieldSettings allowedInputFieldCfg in allowedInputFieldCfgCollection)
             {
-                PoolCfgCollection.Add((PoolSettings)poolCfg.DeepClone());
+                AllowedInputFieldCfgCollection.Add((AllowedInputFieldSettings)allowedInputFieldCfg.DeepClone());
             }
             return;
-        }
-
-        /// <summary>
-        /// Returns ID (index) of the given pool
-        /// </summary>
-        /// <param name="poolName">Pool name</param>
-        public int GetPoolID(string poolName)
-        {
-            for(int i = 0; i < PoolCfgCollection.Count; i++)
-            {
-                if(PoolCfgCollection[i].Name == poolName)
-                {
-                    return i;
-                }
-            }
-            throw new Exception($"Pool name {poolName} not found.");
-        }
-
-        /// <summary>
-        /// Returns configuration of the given pool
-        /// </summary>
-        /// <param name="poolName">Pool name</param>
-        public PoolSettings GetPoolCfg(string poolName)
-        {
-            return PoolCfgCollection[GetPoolID(poolName)];
         }
 
         /// <summary>
@@ -184,7 +143,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// </summary>
         public override RCNetBaseSettings DeepClone()
         {
-            return new PoolsSettings(this);
+            return new AllowedInputFieldsSettings(this);
         }
 
         /// <summary>
@@ -196,9 +155,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             XElement rootElem = new XElement(rootElemName);
-            foreach (PoolSettings poolCfg in PoolCfgCollection)
+            foreach (AllowedInputFieldSettings allowedInputFieldCfg in AllowedInputFieldCfgCollection)
             {
-                rootElem.Add(poolCfg.GetXml(suppressDefaults));
+                rootElem.Add(allowedInputFieldCfg.GetXml(suppressDefaults));
             }
             Validate(rootElem, XsdTypeName);
             return rootElem;
@@ -211,9 +170,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(bool suppressDefaults)
         {
-            return GetXml("pools", suppressDefaults);
+            return GetXml("allowedInputFields", suppressDefaults);
         }
 
-    }//ReservoirStructurePoolsSettings
+    }//AllowedInputFieldsSettings
 
 }//Namespace

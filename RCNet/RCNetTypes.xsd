@@ -76,6 +76,14 @@
     </xs:restriction>
   </xs:simpleType>
 
+  <!-- Enumeration of neuron's activation type -->
+  <xs:simpleType name="ActivationType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Analog"/>
+      <xs:enumeration value="Spiking"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <!-- Enumeration of methods of analog input value realtime coding -->
   <xs:simpleType name="AnalogCodingMethodType">
     <xs:restriction base="xs:string">
@@ -95,6 +103,21 @@
       <xs:enumeration value="Exponential"/>
       <xs:enumeration value="Linear"/>
       <xs:enumeration value="Constant"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+
+  <!-- Enumeration of available predictors -->
+  <xs:simpleType name="PredictorIDType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Activation"/>
+      <xs:enumeration value="ActivationSquare"/>
+      <xs:enumeration value="ActivationFadingSum"/>
+      <xs:enumeration value="ActivationMWAvg"/>
+      <xs:enumeration value="FiringFadingSum"/>
+      <xs:enumeration value="FiringMWAvg"/>
+      <xs:enumeration value="FiringCount"/>
+      <xs:enumeration value="FiringBinPattern"/>
     </xs:restriction>
   </xs:simpleType>
 
@@ -2271,7 +2294,7 @@
   <!-- StateMachine - Mapper - Allowed pools predictors - configuration -->
   <xs:complexType name="SMMapperAllowedPoolsType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="SMMapperAllowedPoolType" name="pool" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element type="SMMapperAllowedPoolType" name="pool" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
@@ -2283,12 +2306,12 @@
   <!-- StateMachine - Mapper - Allowed input fields - configuration -->
   <xs:complexType name="SMMapperAllowedInputFieldsType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="SMMapperAllowedInputFieldType" name="field" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element type="SMMapperAllowedInputFieldType" name="field" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
-  <!-- StateMachine - Mapper - Allowed predictors for specific readout unit - configuration -->
-  <xs:complexType name="SMMapperReadoutUnitAllowedPredictorsType">
+  <!-- StateMachine - Mapper - Readout unit map - configuration -->
+  <xs:complexType name="SMMapperReadoutUnitMapType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="SMMapperAllowedPoolsType" name="allowedPools" minOccurs="0" maxOccurs="unbounded"/>
       <xs:element type="SMMapperAllowedInputFieldsType" name="allowedInputFields" minOccurs="0" maxOccurs="unbounded"/>
@@ -2299,7 +2322,7 @@
   <!-- StateMachine - Mapper - configuration -->
   <xs:complexType name="SMMapperType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="SMMapperReadoutUnitAllowedPredictorsType" name="map" minOccurs="1" maxOccurs="unbounded">
+      <xs:element type="SMMapperReadoutUnitMapType" name="map" minOccurs="1" maxOccurs="unbounded">
         <xs:unique name="smm_unique_allowed_resinst_pool">
           <xs:selector xpath="./allowedPools/pool"/>
           <xs:field xpath="@reservoirInstanceName"/>

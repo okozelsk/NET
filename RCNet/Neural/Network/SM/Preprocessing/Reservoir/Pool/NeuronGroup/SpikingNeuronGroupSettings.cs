@@ -124,7 +124,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
             //Name
             Name = settingsElem.Attribute("name").Value;
             //Role
-            Role = NeuronCommon.ParseNeuronRole(settingsElem.Attribute("role").Value);
+            Role = (NeuronCommon.NeuronRole)Enum.Parse(typeof(NeuronCommon.NeuronRole), settingsElem.Attribute("role").Value, true);
             //Relative share
             RelShare = double.Parse(settingsElem.Attribute("relShare").Value, CultureInfo.InvariantCulture);
             //Activation settings

@@ -64,22 +64,6 @@ namespace RCNet.Neural.Network.SM.Readout
             return;
         }
 
-        //Static methods
-        /// <summary>
-        /// Parses the task type from a string code
-        /// </summary>
-        /// <param name="code">Task type code</param>
-        public static TaskType ParseTaskType(string code)
-        {
-            switch (code.ToUpper())
-            {
-                case "FORECAST": return TaskType.Forecast;
-                case "CLASSIFICATION": return TaskType.Classification;
-                default:
-                    throw new ArgumentException($"Unsupported task type {code}", "code");
-            }
-        }
-
         //Methods
         /// <summary>
         /// Creates the deep copy instance of this instance

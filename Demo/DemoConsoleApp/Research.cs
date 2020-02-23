@@ -203,7 +203,7 @@ namespace Demo.DemoConsoleApp
             Console.WriteLine(settings.GetXml(false));
             Console.WriteLine();
 
-            settings = new PulseGeneratorSettings(0.5, 3, PulseGeneratorSettings.TimingMode.Constant);
+            settings = new PulseGeneratorSettings(0.5, 3, PulseGenerator.TimingMode.Constant);
             Console.WriteLine(settings.GetXml(true));
             Console.WriteLine(settings.GetXml(false));
             Console.WriteLine();

@@ -90,7 +90,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
             //Parsing
             Window = int.Parse(settingsElem.Attribute("window").Value, CultureInfo.InvariantCulture);
             Leakage = int.Parse(settingsElem.Attribute("leakage").Value, CultureInfo.InvariantCulture);
-            Weights = NeuronCommon.ParseNeuronPredictorMWAvgWeightsType(settingsElem.Attribute("weights").Value);
+            Weights = (NeuronCommon.NeuronPredictorMWAvgWeightsType)Enum.Parse(typeof(NeuronCommon.NeuronPredictorMWAvgWeightsType), settingsElem.Attribute("weights").Value, true);
             Check();
             return;
         }

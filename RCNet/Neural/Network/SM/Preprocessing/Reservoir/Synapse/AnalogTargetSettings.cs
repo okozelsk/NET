@@ -96,7 +96,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Synapse
             //Validation
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
-            Scope = BaseSynapse.ParseSynapticTargetScope(settingsElem.Attribute("scope").Value);
+            Scope = (BaseSynapse.SynapticTargetScope)Enum.Parse(typeof(BaseSynapse.SynapticTargetScope), settingsElem.Attribute("scope").Value, true);
             XElement weightSettingsElem = settingsElem.Descendants("weight").FirstOrDefault();
             if(weightSettingsElem != null)
             {

@@ -115,7 +115,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Synapse
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
             //Delay
-            DelayMethod = InputSynapse.ParseSynapticDelayMethod(settingsElem.Attribute("delayMethod").Value);
+            DelayMethod = (InputSynapse.SynapticDelayMethod)Enum.Parse(typeof(InputSynapse.SynapticDelayMethod), settingsElem.Attribute("delayMethod").Value, true);
             MaxDelay = int.Parse(settingsElem.Attribute("maxDelay").Value, CultureInfo.InvariantCulture);
             //Targets
             XElement cfgElem;

@@ -12,44 +12,44 @@ using RCNet.XmlTools;
 using RCNet.RandomValue;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool;
 
-namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
+namespace RCNet.Neural.Network.SM.PM
 {
     /// <summary>
-    /// Collection of pool settings
+    /// Collection of predictors mapper's allowed pool settings
     /// </summary>
     [Serializable]
-    public class PoolsSettings : RCNetBaseSettings
+    public class AllowedPoolsSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
         /// Name of the associated xsd type
         /// </summary>
-        public const string XsdTypeName = "ResStructPoolsType";
+        public const string XsdTypeName = "SMMapperAllowedPoolsType";
 
         //Attribute properties
         /// <summary>
         /// Collection of pools settings
         /// </summary>
-        public List<PoolSettings> PoolCfgCollection { get; }
+        public List<AllowedPoolSettings> AllowedPoolCfgCollection { get; }
 
         //Constructors
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
-        private PoolsSettings()
+        private AllowedPoolsSettings()
         {
-            PoolCfgCollection = new List<PoolSettings>();
+            AllowedPoolCfgCollection = new List<AllowedPoolSettings>();
             return;
         }
 
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
-        /// <param name="poolCfgCollection">Pool settings collection</param>
-        public PoolsSettings(IEnumerable<PoolSettings> poolCfgCollection)
+        /// <param name="allowedPoolCfgCollection">Allowed pool settings collection</param>
+        public AllowedPoolsSettings(IEnumerable<AllowedPoolSettings> allowedPoolCfgCollection)
             : this()
         {
-            AddPools(poolCfgCollection);
+            AddAllowedPools(allowedPoolCfgCollection);
             Check();
             return;
         }
@@ -57,11 +57,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
-        /// <param name="poolCfgCollection">Pool settings collection</param>
-        public PoolsSettings(params PoolSettings[] poolCfgCollection)
+        /// <param name="allowedPoolCfgCollection">Allowed pool settings collection</param>
+        public AllowedPoolsSettings(params AllowedPoolSettings[] allowedPoolCfgCollection)
             : this()
         {
-            AddPools(poolCfgCollection);
+            AddAllowedPools(allowedPoolCfgCollection);
             Check();
             return;
         }
@@ -70,10 +70,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// The deep copy constructor
         /// </summary>
         /// <param name="source">Source instance</param>
-        public PoolsSettings(PoolsSettings source)
+        public AllowedPoolsSettings(AllowedPoolsSettings source)
             : this()
         {
-            AddPools(source.PoolCfgCollection);
+            AddAllowedPools(source.AllowedPoolCfgCollection);
             return;
         }
 
@@ -81,37 +81,21 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// Creates the instance and initialize it from given xml element.
         /// </summary>
         /// <param name="elem">Xml data containing settings.</param>
-        public PoolsSettings(XElement elem)
+        public AllowedPoolsSettings(XElement elem)
         {
             //Validation
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
-            PoolCfgCollection = new List<PoolSettings>();
+            AllowedPoolCfgCollection = new List<AllowedPoolSettings>();
             foreach (XElement poolElem in settingsElem.Descendants("pool"))
             {
-                PoolCfgCollection.Add(new PoolSettings(poolElem));
+                AllowedPoolCfgCollection.Add(new AllowedPoolSettings(poolElem));
             }
             Check();
             return;
         }
 
         //Properties
-        /// <summary>
-        /// Total number of hidden neurons within the pools
-        /// </summary>
-        public int TotalSize
-        {
-            get
-            {
-                int sum = 0;
-                foreach (PoolSettings poolCfg in PoolCfgCollection)
-                {
-                    sum += poolCfg.ProportionsCfg.Size;
-                }
-                return sum;
-            }
-        }
-
         /// <summary>
         /// Identifies settings containing only default values
         /// </summary>
@@ -123,60 +107,36 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// </summary>
         private void Check()
         {
-            if (PoolCfgCollection.Count == 0)
+            if (AllowedPoolCfgCollection.Count == 0)
             {
-                throw new Exception($"At least one pool configuration must be specified.");
+                throw new Exception($"At least one allowed pool configuration must be specified.");
             }
-            //Uniqueness of pool names
-            string[] names = new string[PoolCfgCollection.Count];
-            names[0] = PoolCfgCollection[0].Name;
-            for(int i = 1; i < PoolCfgCollection.Count; i++)
+            //Uniqueness of pool references
+            string[] names = new string[AllowedPoolCfgCollection.Count];
+            names[0] = AllowedPoolCfgCollection[0].ReservoirInstanceName + "." + AllowedPoolCfgCollection[0].PoolName;
+            for(int i = 1; i < AllowedPoolCfgCollection.Count; i++)
             {
-                if(names.Contains(PoolCfgCollection[i].Name))
+                string refName = AllowedPoolCfgCollection[i].ReservoirInstanceName + "." + AllowedPoolCfgCollection[i].PoolName;
+                if (names.Contains(refName))
                 {
-                    throw new Exception($"Pool name {PoolCfgCollection[i].Name} is not unique.");
+                    throw new Exception($"Pool reference {refName} is not unique.");
                 }
-                names[i] = PoolCfgCollection[i].Name;
+                names[i] = refName;
             }
             return;
         }
 
         /// <summary>
-        /// Adds cloned pool configurations from given collection into the internal collection
+        /// Adds cloned allowed pool configurations from given collection into the internal collection
         /// </summary>
-        /// <param name="poolCfgCollection"></param>
-        private void AddPools(IEnumerable<PoolSettings> poolCfgCollection)
+        /// <param name="allowedPoolCfgCollection">Allowed pool settings collection</param>
+        private void AddAllowedPools(IEnumerable<AllowedPoolSettings> allowedPoolCfgCollection)
         {
-            foreach (PoolSettings poolCfg in poolCfgCollection)
+            foreach (AllowedPoolSettings allowedPoolCfg in allowedPoolCfgCollection)
             {
-                PoolCfgCollection.Add((PoolSettings)poolCfg.DeepClone());
+                AllowedPoolCfgCollection.Add((AllowedPoolSettings)allowedPoolCfg.DeepClone());
             }
             return;
-        }
-
-        /// <summary>
-        /// Returns ID (index) of the given pool
-        /// </summary>
-        /// <param name="poolName">Pool name</param>
-        public int GetPoolID(string poolName)
-        {
-            for(int i = 0; i < PoolCfgCollection.Count; i++)
-            {
-                if(PoolCfgCollection[i].Name == poolName)
-                {
-                    return i;
-                }
-            }
-            throw new Exception($"Pool name {poolName} not found.");
-        }
-
-        /// <summary>
-        /// Returns configuration of the given pool
-        /// </summary>
-        /// <param name="poolName">Pool name</param>
-        public PoolSettings GetPoolCfg(string poolName)
-        {
-            return PoolCfgCollection[GetPoolID(poolName)];
         }
 
         /// <summary>
@@ -184,7 +144,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// </summary>
         public override RCNetBaseSettings DeepClone()
         {
-            return new PoolsSettings(this);
+            return new AllowedPoolsSettings(this);
         }
 
         /// <summary>
@@ -196,9 +156,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             XElement rootElem = new XElement(rootElemName);
-            foreach (PoolSettings poolCfg in PoolCfgCollection)
+            foreach (AllowedPoolSettings allowedPoolCfg in AllowedPoolCfgCollection)
             {
-                rootElem.Add(poolCfg.GetXml(suppressDefaults));
+                rootElem.Add(allowedPoolCfg.GetXml(suppressDefaults));
             }
             Validate(rootElem, XsdTypeName);
             return rootElem;
@@ -211,9 +171,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(bool suppressDefaults)
         {
-            return GetXml("pools", suppressDefaults);
+            return GetXml("allowedPools", suppressDefaults);
         }
 
-    }//ReservoirStructurePoolsSettings
+    }//AllowedPoolsSettings
 
 }//Namespace

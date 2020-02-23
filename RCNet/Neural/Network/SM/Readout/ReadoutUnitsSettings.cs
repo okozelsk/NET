@@ -174,6 +174,32 @@ namespace RCNet.Neural.Network.SM.Readout
         }
 
         /// <summary>
+        /// Returns ID (zero based index) of the readout unit having the given name
+        /// </summary>
+        /// <param name="readoutUnitName">Readout unit name</param>
+        public int GetReadoutUnitID(string readoutUnitName)
+        {
+            for(int i = 0; i < ReadoutUnitCfgCollection.Count; i++)
+            {
+                if(ReadoutUnitCfgCollection[i].Name == readoutUnitName)
+                {
+                    return i;
+                }
+            }
+            throw new Exception($"Readout unit name {readoutUnitName} not found.");
+        }
+
+        /// <summary>
+        /// Returns configuration of the readout unit having the given name
+        /// </summary>
+        /// <param name="readoutUnitName">Readout unit name</param>
+        /// <returns></returns>
+        public ReadoutUnitSettings GetReadoutunitCfg(string readoutUnitName)
+        {
+            return ReadoutUnitCfgCollection[GetReadoutUnitID(readoutUnitName)];
+        }
+
+        /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>
         public override RCNetBaseSettings DeepClone()

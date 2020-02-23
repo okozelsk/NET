@@ -12,44 +12,44 @@ using RCNet.XmlTools;
 using RCNet.RandomValue;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool;
 
-namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
+namespace RCNet.Neural.Network.SM.PM
 {
     /// <summary>
-    /// Collection of pool settings
+    /// Collection of predictors mapper
     /// </summary>
     [Serializable]
-    public class PoolsSettings : RCNetBaseSettings
+    public class MapperSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
         /// Name of the associated xsd type
         /// </summary>
-        public const string XsdTypeName = "ResStructPoolsType";
+        public const string XsdTypeName = "SMMapperType";
 
         //Attribute properties
         /// <summary>
-        /// Collection of pools settings
+        /// Collection of readout unit map configurations
         /// </summary>
-        public List<PoolSettings> PoolCfgCollection { get; }
+        public List<ReadoutUnitMapSettings> MapCfgCollection { get; }
 
         //Constructors
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
-        private PoolsSettings()
+        private MapperSettings()
         {
-            PoolCfgCollection = new List<PoolSettings>();
+            MapCfgCollection = new List<ReadoutUnitMapSettings>();
             return;
         }
 
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
-        /// <param name="poolCfgCollection">Pool settings collection</param>
-        public PoolsSettings(IEnumerable<PoolSettings> poolCfgCollection)
+        /// <param name="mapCfgCollection">Collection of readout unit map configurations</param>
+        public MapperSettings(IEnumerable<ReadoutUnitMapSettings> mapCfgCollection)
             : this()
         {
-            AddPools(poolCfgCollection);
+            AddMaps(mapCfgCollection);
             Check();
             return;
         }
@@ -57,11 +57,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
-        /// <param name="poolCfgCollection">Pool settings collection</param>
-        public PoolsSettings(params PoolSettings[] poolCfgCollection)
+        /// <param name="mapCfgCollection">Collection of readout unit map configurations</param>
+        public MapperSettings(params ReadoutUnitMapSettings[] mapCfgCollection)
             : this()
         {
-            AddPools(poolCfgCollection);
+            AddMaps(mapCfgCollection);
             Check();
             return;
         }
@@ -70,10 +70,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// The deep copy constructor
         /// </summary>
         /// <param name="source">Source instance</param>
-        public PoolsSettings(PoolsSettings source)
+        public MapperSettings(MapperSettings source)
             : this()
         {
-            AddPools(source.PoolCfgCollection);
+            AddMaps(source.MapCfgCollection);
             return;
         }
 
@@ -81,37 +81,21 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// Creates the instance and initialize it from given xml element.
         /// </summary>
         /// <param name="elem">Xml data containing settings.</param>
-        public PoolsSettings(XElement elem)
+        public MapperSettings(XElement elem)
         {
             //Validation
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
-            PoolCfgCollection = new List<PoolSettings>();
-            foreach (XElement poolElem in settingsElem.Descendants("pool"))
+            MapCfgCollection = new List<ReadoutUnitMapSettings>();
+            foreach (XElement mapElem in settingsElem.Descendants("map"))
             {
-                PoolCfgCollection.Add(new PoolSettings(poolElem));
+                MapCfgCollection.Add(new ReadoutUnitMapSettings(mapElem));
             }
             Check();
             return;
         }
 
         //Properties
-        /// <summary>
-        /// Total number of hidden neurons within the pools
-        /// </summary>
-        public int TotalSize
-        {
-            get
-            {
-                int sum = 0;
-                foreach (PoolSettings poolCfg in PoolCfgCollection)
-                {
-                    sum += poolCfg.ProportionsCfg.Size;
-                }
-                return sum;
-            }
-        }
-
         /// <summary>
         /// Identifies settings containing only default values
         /// </summary>
@@ -123,60 +107,70 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// </summary>
         private void Check()
         {
-            if (PoolCfgCollection.Count == 0)
+            if (MapCfgCollection.Count == 0)
             {
-                throw new Exception($"At least one pool configuration must be specified.");
+                throw new Exception($"At least one readout unit map configuration must be specified.");
             }
-            //Uniqueness of pool names
-            string[] names = new string[PoolCfgCollection.Count];
-            names[0] = PoolCfgCollection[0].Name;
-            for(int i = 1; i < PoolCfgCollection.Count; i++)
+            //Uniqueness of readout unit name
+            string[] names = new string[MapCfgCollection.Count];
+            names[0] = MapCfgCollection[0].ReadoutUnitName;
+            for(int i = 1; i < MapCfgCollection.Count; i++)
             {
-                if(names.Contains(PoolCfgCollection[i].Name))
+                if (names.Contains(MapCfgCollection[i].ReadoutUnitName))
                 {
-                    throw new Exception($"Pool name {PoolCfgCollection[i].Name} is not unique.");
+                    throw new Exception($"Readout unit name {MapCfgCollection[i].ReadoutUnitName} is not unique.");
                 }
-                names[i] = PoolCfgCollection[i].Name;
+                names[i] = MapCfgCollection[i].ReadoutUnitName;
             }
             return;
         }
 
         /// <summary>
-        /// Adds cloned pool configurations from given collection into the internal collection
+        /// Adds cloned readout unit map configurations from given collection into the internal collection
         /// </summary>
-        /// <param name="poolCfgCollection"></param>
-        private void AddPools(IEnumerable<PoolSettings> poolCfgCollection)
+        /// <param name="mapCfgCollection">Collection of readout unit map configurations</param>
+        private void AddMaps(IEnumerable<ReadoutUnitMapSettings> mapCfgCollection)
         {
-            foreach (PoolSettings poolCfg in poolCfgCollection)
+            foreach (ReadoutUnitMapSettings mapCfg in mapCfgCollection)
             {
-                PoolCfgCollection.Add((PoolSettings)poolCfg.DeepClone());
+                MapCfgCollection.Add((ReadoutUnitMapSettings)mapCfg.DeepClone());
             }
             return;
         }
 
         /// <summary>
-        /// Returns ID (index) of the given pool
+        /// Returns ID (index) of the map for given readout unit or -1 if the map not found (ex = false)
         /// </summary>
-        /// <param name="poolName">Pool name</param>
-        public int GetPoolID(string poolName)
+        /// <param name="readoutUnitName">Readout unit name</param>
+        /// <param name="ex">Specifies if to throw exception or return -1 if the map for given readout unit name not found</param>
+        public int GetMapID(string readoutUnitName, bool ex = false)
         {
-            for(int i = 0; i < PoolCfgCollection.Count; i++)
+            for (int i = 0; i < MapCfgCollection.Count; i++)
             {
-                if(PoolCfgCollection[i].Name == poolName)
+                if (MapCfgCollection[i].ReadoutUnitName == readoutUnitName)
                 {
                     return i;
                 }
             }
-            throw new Exception($"Pool name {poolName} not found.");
+            if (ex)
+            {
+                throw new Exception($"Readout unit name {readoutUnitName} not found.");
+            }
+            else
+            {
+                return -1;
+            }
         }
 
         /// <summary>
         /// Returns configuration of the given pool
         /// </summary>
-        /// <param name="poolName">Pool name</param>
-        public PoolSettings GetPoolCfg(string poolName)
+        /// <param name="readoutUnitName">Readout unit name</param>
+        /// <param name="ex">Specifies if to throw exception or return -1 if the map for given readout unit name not found</param>
+        public ReadoutUnitMapSettings GetMapCfg(string readoutUnitName, bool ex = false)
         {
-            return PoolCfgCollection[GetPoolID(poolName)];
+            int mapID = GetMapID(readoutUnitName, ex);
+            return mapID == -1 ? null : MapCfgCollection[mapID];
         }
 
         /// <summary>
@@ -184,7 +178,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// </summary>
         public override RCNetBaseSettings DeepClone()
         {
-            return new PoolsSettings(this);
+            return new MapperSettings(this);
         }
 
         /// <summary>
@@ -196,9 +190,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             XElement rootElem = new XElement(rootElemName);
-            foreach (PoolSettings poolCfg in PoolCfgCollection)
+            foreach (ReadoutUnitMapSettings mapCfg in MapCfgCollection)
             {
-                rootElem.Add(poolCfg.GetXml(suppressDefaults));
+                rootElem.Add(mapCfg.GetXml(suppressDefaults));
             }
             Validate(rootElem, XsdTypeName);
             return rootElem;
@@ -211,9 +205,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(bool suppressDefaults)
         {
-            return GetXml("pools", suppressDefaults);
+            return GetXml("mapper", suppressDefaults);
         }
 
-    }//ReservoirStructurePoolsSettings
+    }//MapperSettings
 
 }//Namespace

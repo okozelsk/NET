@@ -208,7 +208,7 @@ namespace RCNet.Neural.Activation
             AdaptationVoltageCoupling = URandomValueSettings.LoadOrDefault(activationSettingsElem, "adaptationVoltageCoupling", TypicalAdaptationVoltageCoupling);
             AdaptationTimeConstant = URandomValueSettings.LoadOrDefault(activationSettingsElem, "adaptationTimeConstant", TypicalAdaptationTimeConstant);
             AdaptationSpikeTriggeredIncrement = URandomValueSettings.LoadOrDefault(activationSettingsElem, "adaptationSpikeTriggeredIncrement", TypicalAdaptationSpikeTriggeredIncrement);
-            SolverMethod = ODENumSolver.ParseComputationMethodType(activationSettingsElem.Attribute("solverMethod").Value);
+            SolverMethod = (ODENumSolver.Method)Enum.Parse(typeof(ODENumSolver.Method), activationSettingsElem.Attribute("solverMethod").Value, true);
             SolverCompSteps = int.Parse(activationSettingsElem.Attribute("solverCompSteps").Value, CultureInfo.InvariantCulture);
             Check();
             return;

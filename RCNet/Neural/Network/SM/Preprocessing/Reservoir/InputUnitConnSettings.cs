@@ -119,9 +119,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             //Parsing
             PoolName = settingsElem.Attribute("poolName").Value;
             Density = double.Parse(settingsElem.Attribute("density").Value, CultureInfo.InvariantCulture);
-            AnalogCoding = InputUnit.ParseAnalogCodingMethod(settingsElem.Attribute("coding").Value);
+            AnalogCoding = (InputUnit.AnalogCodingMethod)Enum.Parse(typeof(InputUnit.AnalogCodingMethod), settingsElem.Attribute("coding").Value, true);
             OppositeAmplitude = bool.Parse(settingsElem.Attribute("oppositeAmplitude").Value);
-            SignalingRestriction = NeuronCommon.ParseNeuronSignalingRestriction(settingsElem.Attribute("signalingRestriction").Value);
+            SignalingRestriction = (NeuronCommon.NeuronSignalingRestrictionType)Enum.Parse(typeof(NeuronCommon.NeuronSignalingRestrictionType), settingsElem.Attribute("signalingRestriction").Value, true);
             XElement synapseElem = settingsElem.Descendants("synapse").FirstOrDefault();
             SynapseCfg = synapseElem == null ? new InputSynapseSettings() : new InputSynapseSettings(synapseElem);
             Check();

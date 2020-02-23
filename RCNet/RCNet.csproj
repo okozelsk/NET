@@ -126,6 +126,12 @@
     <Compile Include="Neural\Network\NonRecurrent\FF\HiddenLayerSettings.cs" />
     <Compile Include="Neural\Network\NonRecurrent\FF\HiddenLayersSettings.cs" />
     <Compile Include="Neural\Network\NonRecurrent\INonRecurrentNetworkSettings.cs" />
+    <Compile Include="Neural\Network\SM\PM\MapperSettings.cs" />
+    <Compile Include="Neural\Network\SM\PM\ReadoutUnitMapSettings.cs" />
+    <Compile Include="Neural\Network\SM\PM\AllowedInputFieldSettings.cs" />
+    <Compile Include="Neural\Network\SM\PM\AllowedPoolSettings.cs" />
+    <Compile Include="Neural\Network\SM\PM\AllowedInputFieldsSettings.cs" />
+    <Compile Include="Neural\Network\SM\PM\AllowedPoolsSettings.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\Input\InputSettings.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\Input\FieldsSettings.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\Input\InternalFieldsSettings.cs" />
@@ -170,6 +176,7 @@
     <Compile Include="Neural\Network\SM\Preprocessing\Reservoir\Pool\NeuronGroup\AnalogNeuronGroupSettings.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\Reservoir\Pool\NeuronGroup\AnalogRetainmentSettings.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\Reservoir\Pool\NeuronGroup\SpikingNeuronGroupSettings.cs" />
+    <Compile Include="Neural\Network\SM\Readout\PredictorsMapper.cs" />
     <Compile Include="Neural\Network\SM\Readout\ReadoutUnitsSettings.cs" />
     <Compile Include="Neural\Network\SM\Readout\ClassificationTaskSettings.cs" />
     <Compile Include="Neural\Network\SM\Readout\ForecastTaskSettings.cs" />

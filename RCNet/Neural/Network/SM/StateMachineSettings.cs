@@ -10,6 +10,7 @@ using RCNet.RandomValue;
 using RCNet.Neural.Network.SM.Preprocessing;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir;
 using RCNet.Neural.Network.SM.Readout;
+using RCNet.Neural.Network.SM.PM;
 
 namespace RCNet.Neural.Network.SM
 {
@@ -24,161 +25,143 @@ namespace RCNet.Neural.Network.SM
         /// Name of the associated xsd type
         /// </summary>
         public const string XsdTypeName = "SMType";
+        //Default values
+        /// <summary>
+        /// Default value of randomizer seek
+        /// </summary>
+        public const int DefaultRandomizerSeek = 0;
 
         //Attribute properties
         /// <summary>
-        /// A value greater than or equal to 0 will always ensure the same initialization of the internal
-        /// random number generator and therefore the same network structure, which is good for tuning
-        /// other parameters.
-        /// A value less than 0 causes a fully random initialization when creating a network instance.
+        /// Configuration of the neural preprocessor
         /// </summary>
-        public int RandomizerSeek { get; set; }
-        /// <summary>
-        /// Settings of Neural Preprocessor
-        /// </summary>
-        public NeuralPreprocessorSettings NeuralPreprocessorConfig { get; set; }
+        public NeuralPreprocessorSettings NeuralPreprocessorCfg { get; }
+        
         /// <summary>
         /// Configuration of the readout layer
         /// </summary>
-        public ReadoutLayerSettings ReadoutLayerConfig { get; set; }
+        public ReadoutLayerSettings ReadoutLayerCfg { get; }
+        
         /// <summary>
         /// Configuration of mapper of predictors to readout units
         /// </summary>
-        public MapperSettings MapperCfg { get; set; }
+        public MapperSettings MapperCfg { get; }
+
+        /// <summary>
+        /// Specifies random number generator initialization seek.
+        /// A value greater than or equal to 0 will always ensure the same initialization of the internal
+        /// random number generator and therefore the same network structure.
+        /// A value less than 0 causes a fully random initialization when creating an instance.
+        /// </summary>
+        public int RandomizerSeek { get; }
 
         //Constructors
+        /// <summary>
+        /// Creates an initialized instance
+        /// </summary>
+        /// <param name="neuralPreprocessorCfg">Configuration of the neural preprocessor</param>
+        /// <param name="readoutLayerCfg">Configuration of the readout layer</param>
+        /// <param name="mapperCfg">Configuration of mapper of predictors to readout units</param>
+        /// <param name="randomizerSeek">Specifies random number generator initialization seek</param>
+        public StateMachineSettings(NeuralPreprocessorSettings neuralPreprocessorCfg,
+                                    ReadoutLayerSettings readoutLayerCfg,
+                                    MapperSettings mapperCfg = null,
+                                    int randomizerSeek = DefaultRandomizerSeek)
+        {
+            NeuralPreprocessorCfg = neuralPreprocessorCfg == null ? null : (NeuralPreprocessorSettings)neuralPreprocessorCfg.DeepClone();
+            ReadoutLayerCfg = (ReadoutLayerSettings)readoutLayerCfg.DeepClone();
+            MapperCfg = mapperCfg == null ? null : (MapperSettings)mapperCfg.DeepClone();
+            RandomizerSeek = randomizerSeek;
+            Check();
+            return;
+        }
+
         /// <summary>
         /// The deep copy constructor
         /// </summary>
         /// <param name="source">Source instance</param>
         public StateMachineSettings(StateMachineSettings source)
+            :this(source.NeuralPreprocessorCfg, source.ReadoutLayerCfg, source.MapperCfg, source.RandomizerSeek)
         {
-            //Copy
-            RandomizerSeek = source.RandomizerSeek;
-            NeuralPreprocessorConfig = (NeuralPreprocessorSettings)source.NeuralPreprocessorConfig?.DeepClone();
-            ReadoutLayerConfig = new ReadoutLayerSettings(source.ReadoutLayerConfig);
-            MapperCfg = null;
-            if(source.MapperCfg != null)
-            {
-                MapperCfg = source.MapperCfg.DeepClone();
-            }
             return;
         }
 
         /// <summary>
         /// Creates the instance and initializes it from given xml element.
-        /// This is the preferred way to instantiate State Machine settings.
         /// </summary>
-        /// <param name="elem">
-        /// Xml data containing State Machine settings.
-        /// Content of xml element is always validated against the xml schema.
-        /// </param>
+        /// <param name="elem">Xml data containing settings</param>
         public StateMachineSettings(XElement elem)
         {
             //Validation
-            XElement stateMachineSettingsElem = Validate(elem, XsdTypeName);
+            XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
-            //Randomizer seek
-            RandomizerSeek = int.Parse(stateMachineSettingsElem.Attribute("randomizerSeek").Value);
+            RandomizerSeek = int.Parse(settingsElem.Attribute("randomizerSeek").Value);
             //Neural preprocessor
-            XElement neuralPreprocessorElem = stateMachineSettingsElem.Descendants("neuralPreprocessor").FirstOrDefault();
-            NeuralPreprocessorConfig = neuralPreprocessorElem == null ? null : new NeuralPreprocessorSettings(neuralPreprocessorElem);
+            XElement neuralPreprocessorElem = settingsElem.Descendants("neuralPreprocessor").FirstOrDefault();
+            NeuralPreprocessorCfg = neuralPreprocessorElem == null ? null : new NeuralPreprocessorSettings(neuralPreprocessorElem);
             //Readout layer
-            ReadoutLayerConfig = new ReadoutLayerSettings(stateMachineSettingsElem.Descendants("readoutLayer").First());
+            ReadoutLayerCfg = new ReadoutLayerSettings(settingsElem.Descendants("readoutLayer").First());
             //Mapper
-            XElement mapperSettingsElem = stateMachineSettingsElem.Descendants("mapper").FirstOrDefault();
-            if(mapperSettingsElem != null && NeuralPreprocessorConfig != null)
+            XElement mapperSettingsElem = settingsElem.Descendants("mapper").FirstOrDefault();
+            MapperCfg = mapperSettingsElem == null ? null : new MapperSettings(mapperSettingsElem);
+            Check();
+            return;
+        }
+
+        //Properties
+        /// <summary>
+        /// Checks if settings are default
+        /// </summary>
+        public bool IsDefaultRandomizerSeek { get { return RandomizerSeek == DefaultRandomizerSeek; } }
+
+        /// <summary>
+        /// Identifies settings containing only default values
+        /// </summary>
+        public override bool ContainsOnlyDefaults { get { return false; } }
+
+        //Methods
+        /// <summary>
+        /// Checks validity and integrity
+        /// </summary>
+        private void Check()
+        {
+            if(MapperCfg != null && NeuralPreprocessorCfg == null)
             {
-                //Create mapper object
-                MapperCfg = new MapperSettings();
-                //Loop through mappings
-                foreach(XElement mapElem in mapperSettingsElem.Descendants("map"))
+                throw new Exception($"Mapper can not be specified when neural preprocessor is not defined.");
+            }
+            if(MapperCfg != null)
+            {
+                foreach(ReadoutUnitMapSettings map in MapperCfg.MapCfgCollection)
                 {
-                    //Readout unit name
-                    string readoutUnitName = mapElem.Attribute("readoutUnitName").Value;
-                    int readoutUnitIdx = -1;
-                    for (int i = 0; i < ReadoutLayerConfig.ReadoutUnitsCfg.ReadoutUnitCfgCollection.Count; i++)
+                    ReadoutUnitSettings rus = ReadoutLayerCfg.ReadoutUnitsCfg.GetReadoutunitCfg(map.ReadoutUnitName);
+                    //Pools
+                    if (map.AllowedPoolsCfg != null)
                     {
-                        if(ReadoutLayerConfig.ReadoutUnitsCfg.ReadoutUnitCfgCollection[i].Name == readoutUnitName)
+                        foreach (AllowedPoolSettings aps in map.AllowedPoolsCfg.AllowedPoolCfgCollection)
                         {
-                            readoutUnitIdx = i;
-                            break;
-                        }
-                        else if(i == ReadoutLayerConfig.ReadoutUnitsCfg.ReadoutUnitCfgCollection.Count - 1)
-                        {
-                            throw new Exception($"Name {readoutUnitName} not found among readout units.");
+                            ReservoirInstanceSettings ris = NeuralPreprocessorCfg.ReservoirInstancesCfg.GetReservoirInstanceCfg(aps.ReservoirInstanceName);
+                            ReservoirStructureSettings rss = NeuralPreprocessorCfg.ReservoirStructuresCfg.GetReservoirStructureCfg(ris.StructureCfgName);
+                            rss.PoolsCfg.GetPoolID(aps.PoolName);
                         }
                     }
-                    //Allowed pools
-                    List<MapperSettings.AllowedPool> allowedPools = new List<MapperSettings.AllowedPool>();
-                    XElement allowedPoolsElem = mapElem.Descendants("allowedPools").FirstOrDefault();
-                    if (allowedPoolsElem != null)
+                    //Input fields
+                    if(map.AllowedInputFieldsCfg != null)
                     {
-                        foreach (XElement allowedPoolElem in allowedPoolsElem.Descendants("pool"))
+                        string[] routedFieldNames = NeuralPreprocessorCfg.InputCfg.GetRoutedFieldNames().ToArray();
+                        foreach (AllowedInputFieldSettings aifs in map.AllowedInputFieldsCfg.AllowedInputFieldCfgCollection)
                         {
-                            //Reservoir instance name
-                            string reservoirInstanceName = allowedPoolElem.Attribute("reservoirInstanceName").Value;
-                            int reservoirInstanceIdx = -1;
-                            for (int i = 0; i < NeuralPreprocessorConfig.ReservoirInstancesCfg.ReservoirInstanceCfgCollection.Count; i++)
+                            if(Array.IndexOf(routedFieldNames, aifs.Name) == -1)
                             {
-                                if (NeuralPreprocessorConfig.ReservoirInstancesCfg.ReservoirInstanceCfgCollection[i].Name == reservoirInstanceName)
-                                {
-                                    reservoirInstanceIdx = i;
-                                    break;
-                                }
-                                else if (i == NeuralPreprocessorConfig.ReservoirInstancesCfg.ReservoirInstanceCfgCollection.Count - 1)
-                                {
-                                    throw new Exception($"Name {reservoirInstanceName} not found among resevoir instances.");
-                                }
+                                throw new Exception($"Specified input field {aifs.Name} to be allowed for readout unit {map.ReadoutUnitName} is not among fields routed to readout layer.");
                             }
-                            //Pool name
-                            string reservoirStructureName = NeuralPreprocessorConfig.ReservoirInstancesCfg.ReservoirInstanceCfgCollection[reservoirInstanceIdx].StructureCfgName;
-                            ReservoirStructureSettings reservoirStructureCfg = NeuralPreprocessorConfig.ReservoirStructuresCfg.GetReservoirStructureCfg(reservoirStructureName);
-                            string poolName = allowedPoolElem.Attribute("poolName").Value;
-                            int poolIdx = -1;
-                            for (int i = 0; i < reservoirStructureCfg.PoolsCfg.PoolCfgCollection.Count; i++)
-                            {
-                                if (reservoirStructureCfg.PoolsCfg.PoolCfgCollection[i].Name == poolName)
-                                {
-                                    poolIdx = i;
-                                    break;
-                                }
-                                else if (i == reservoirStructureCfg.PoolsCfg.PoolCfgCollection.Count - 1)
-                                {
-                                    throw new Exception($"Name {poolName} not found among resevoir's pools.");
-                                }
-                            }
-                            allowedPools.Add(new MapperSettings.AllowedPool { _reservoirInstanceIdx = reservoirInstanceIdx, _poolIdx = poolIdx });
+                            NeuralPreprocessorCfg.InputCfg.FieldsCfg.GetFieldID(aifs.Name, true);
                         }
-                        MapperCfg.PoolsMap.Add(readoutUnitName, allowedPools);
                     }
-
-                    //Allowed routed input fields
-                    List<int> allowedRoutedFieldsIdxs = new List<int>();
-                    XElement allowedInputFieldsElem = mapElem.Descendants("allowedInputFields").FirstOrDefault();
-                    List<string> routedInputFieldNames = NeuralPreprocessorConfig.InputCfg.GetRoutedFieldNames();
-                    if (allowedInputFieldsElem != null)
-                    {
-                        foreach (XElement allowedInputFieldElem in allowedInputFieldsElem.Descendants("field"))
-                        {
-                            //Input field name
-                            string inputFieldName = allowedInputFieldElem.Attribute("name").Value;
-                            int routedFieldIdx = routedInputFieldNames.IndexOf(inputFieldName);
-                            if (routedFieldIdx == -1)
-                            {
-                                throw new Exception($"Name {inputFieldName} not found among input fields allowed to be routed to readout.");
-                            }
-                            allowedRoutedFieldsIdxs.Add(routedFieldIdx);
-                        }
-                        MapperCfg.RoutedInputFieldsMap.Add(readoutUnitName, allowedRoutedFieldsIdxs);
-                    }
-
                 }
             }
             return;
         }
 
-        //Methods
         /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>
@@ -187,83 +170,41 @@ namespace RCNet.Neural.Network.SM
             return new StateMachineSettings(this);
         }
 
-        //Inner classes
         /// <summary>
-        /// Configuration of mapper of predictors to readout units
+        /// Generates xml element containing the settings.
         /// </summary>
-        [Serializable]
-        public class MapperSettings
+        /// <param name="rootElemName">Name to be used as a name of the root element.</param>
+        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <returns>XElement containing the settings</returns>
+        public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
-            /// <summary>
-            /// Mapping of readout unit and allowed predictors pools
-            /// </summary>
-            public Dictionary<string, List<AllowedPool>> PoolsMap { get; }
-
-            /// <summary>
-            /// Mapping of readout unit and allowed routed input fields indexes
-            /// </summary>
-            public Dictionary<string, List<int>> RoutedInputFieldsMap { get; }
-
-            /// <summary>
-            /// Creates an empty initialized instance
-            /// </summary>
-            public MapperSettings()
+            XElement rootElem = new XElement(rootElemName);
+            if(!suppressDefaults || !IsDefaultRandomizerSeek)
             {
-                PoolsMap = new Dictionary<string, List<AllowedPool>>();
-                RoutedInputFieldsMap = new Dictionary<string, List<int>>();
-                return;
+                rootElem.Add(new XAttribute("randomizerSeek", RandomizerSeek.ToString(CultureInfo.InvariantCulture)));
             }
-
-            //Methods
-            /// <summary>
-            /// Creates the deep copy instance of this instance
-            /// </summary>
-            public MapperSettings DeepClone()
+            if (NeuralPreprocessorCfg != null)
             {
-                MapperSettings clonnedMapper = new MapperSettings();
-                //Allowed pools
-                foreach (KeyValuePair<string, List<AllowedPool>> keyValuePair in PoolsMap)
-                {
-                    List<AllowedPool> clonnedAllowedPoolsList = new List<AllowedPool>(keyValuePair.Value.Count);
-                    foreach (AllowedPool allowedPool in keyValuePair.Value)
-                    {
-                        AllowedPool clonnedAllowedPool = new AllowedPool { _reservoirInstanceIdx = allowedPool._reservoirInstanceIdx, _poolIdx = allowedPool._poolIdx };
-                        clonnedAllowedPoolsList.Add(clonnedAllowedPool);
-                    }
-                    clonnedMapper.PoolsMap.Add(keyValuePair.Key, clonnedAllowedPoolsList);
-                }
-                //Allowed input fields
-                foreach (KeyValuePair<string, List<int>> keyValuePair in RoutedInputFieldsMap)
-                {
-                    List<int> clonnedAllowedRoutedInputFieldsIdxs = new List<int>(keyValuePair.Value.Count);
-                    foreach (int allowedRoutedInputFieldIdx in keyValuePair.Value)
-                    {
-                        clonnedAllowedRoutedInputFieldsIdxs.Add(allowedRoutedInputFieldIdx);
-                    }
-                    clonnedMapper.RoutedInputFieldsMap.Add(keyValuePair.Key, clonnedAllowedRoutedInputFieldsIdxs);
-                }
-                return clonnedMapper;
+                rootElem.Add(NeuralPreprocessorCfg.GetXml(suppressDefaults));
             }
-
-            //Inner classes
-            /// <summary>
-            /// Identification of the pool from which are allowed predictors
-            /// </summary>
-            [Serializable]
-            public class AllowedPool
+            rootElem.Add(ReadoutLayerCfg.GetXml(suppressDefaults));
+            if(MapperCfg != null)
             {
-                /// <summary>
-                /// Index of the reservoir instance
-                /// </summary>
-                public int _reservoirInstanceIdx;
-                /// <summary>
-                /// Index of the pool within the reservoir instance
-                /// </summary>
-                public int _poolIdx;
+                rootElem.Add(MapperCfg.GetXml(suppressDefaults));
+            }
+            Validate(rootElem, XsdTypeName);
+            return rootElem;
+        }
 
-            }//AllowedPool
-
-        }//MapperSettings
+        /// <summary>
+        /// Generates default named xml element containing the settings.
+        /// </summary>
+        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <returns>XElement containing the settings</returns>
+        public override XElement GetXml(bool suppressDefaults)
+        {
+            return GetXml("stateMachine", suppressDefaults);
+        }
 
     }//StateMachineSettings
 

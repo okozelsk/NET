@@ -191,23 +191,6 @@ namespace RCNet.Neural.Data
         }
 
         //Static methods
-        /// <summary>
-        /// Parses type of variables' time-order data organization in the 1D input data array
-        /// </summary>
-        /// <param name="code">Keyword</param>
-        public static VariablesSchema ParseVariablesSchema(string code)
-        {
-            switch (code.ToUpper())
-            {
-                case "SEQUENTIAL":
-                    return VariablesSchema.Sequential;
-                case "GROUPPED":
-                    return VariablesSchema.Groupped;
-                default:
-                    throw new Exception($"Unknown variables schema: {code}");
-            }
-        }
-
         private static int DetectSignalBegin(double[] varData, double thresholdOfSignalDetection)
         {
             //Detection of signal begin

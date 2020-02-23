@@ -19,9 +19,7 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
         /// Dummy bias input value
         /// </summary>
         public const double BiasValue = 1d;
-        private readonly int _numOfGateWeights;
-        private readonly double[] _flatWeights;
-        
+
         //Static members
         /// <summary>
         /// Output range
@@ -48,6 +46,10 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
         /// Output squash coeeficient (= Resolution / 2)
         /// </summary>
         public double ResSquashCoeff { get; }
+
+        //Attributes
+        private readonly int _numOfGateWeights;
+        private readonly double[] _flatWeights;
 
 
         //Constructors
