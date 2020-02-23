@@ -4,10 +4,10 @@
 The aim of this project is to make the [reservoir computing](https://en.wikipedia.org/wiki/Reservoir_computing) methods  easy to use and available for .net platform without any other dependencies.
 Two main reservoir computing methods are called Echo State Network (ESN) and Liquid State Machine (LSM).
 RCNet supports both of these methods. Moreover, since ESN and LSM are based on similar general principles, RCNet allows to design complex "hybrid" recurrent reservoirs consisting of spiking and analog neurons synaptically linked together.
-Mutual cooperation of hidden neurons having stateless analog and spiking activation functions is enabled by specific implementation of hidden neuron. Hidden neuron is not stateless and it can fire spikes even in case of stateless analog activation is used. "Anaolog spikes" are based on defined firing event depending on current and previous values of activation.
+Mutual cooperation of hidden neurons having stateless analog and stateful spiking activation functions is enabled by specific implementation of hidden neuron. Hidden neuron is not stateless and it can fire spikes even in case of stateless analog activation is used. "Anaolog spikes" are based on defined firing event depending on current and previous values of the stateles activation.
 Hidden neuron also provides a standardized set of predictors no matter what activation function is used. According to preliminary results, it seems that it is no longer true that ESN is not capable to generalize and separate input signal enaugh to perform excellent classification. On the contrary. It now appears that the use of pure analog activations (like TanH) and the simple classical ESN reservoir design could be an "unexpected" competitor to spiking LSM reservoirs.
 <br/>
-The main component of RCNet is called "**State Machine**" and it has to be instantiated through xml configuration. "**State Machine**" is serializable so it is easily possible to instantiate and train it and than use it as a real-time loadable component in the solution.
+The main component of RCNet is called "**State Machine**" and it has to be instantiated through its settings class. "**State Machine**" is serializable so it is easily possible to instantiate and train it and than use it as a real-time loadable component in the solution.
 <br/>
 Source code is written in C# 7.3 (.NET framework 4.7.2).
 More detailed documentation will be posted [here](https://github.com/okozelsk/NET/wiki) as soon as the current stage of the wild changes is over.
@@ -142,6 +142,9 @@ See the [wiki pages.](https://en.wikipedia.org/wiki/Biological_neuron_model)
 [StateMachine](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/StateMachine.cs)
 The main component. Encapsulates independent NeuralPreprocessor and ReadoutLayer components into the single component and adds support for routing specific predictors and input fields to the specific readout units. Allows to bypass NeuralPreprocessor and to use input data directly as a predictors for the readout layer.
 
-### Xml setup recipe
-[RCNetTypes.xsd](https://github.com/okozelsk/NET/blob/master/RCNet/RCNetTypes.xsd)
-Defines all necessary types used in StateMachine's xml setup.
+#### Setup
+Every component needed for State Machine setup (including State Machine itself) has it own related settings class which is required by component's constructor.
+</br>
+Every settings class can be instantiated manually or from the xml element. [RCNetTypes.xsd](https://github.com/okozelsk/NET/blob/master/RCNet/RCNetTypes.xsd) defines all necessary types used for instantiation of the settings classes.
+</br>
+Every settings class has implemented GetXml method so it can be instantiated manually from the code and then can be exported appropriate xml using its GetXml method.
