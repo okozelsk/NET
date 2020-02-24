@@ -2285,13 +2285,25 @@
 
 
   <!-- ________________________________________STATE MACHINE TYPES_________________________________________________ -->
-  <!-- StateMachine - Mapper - Allowed pool predictors - configuration -->
+  <!-- StateMachine - Mapper - Allowed predictor - configuration -->
+  <xs:complexType name="SMMapperAllowedPredictorType">
+    <xs:attribute type="PredictorIDType" name="name" use="required"/>
+  </xs:complexType>
+
+  <!-- StateMachine - Mapper - Allowed predictors - configuration -->
+  <xs:complexType name="SMMapperAllowedPredictorsType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="SMMapperAllowedPredictorType" name="predictor" minOccurs="1" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- StateMachine - Mapper - Allowed pool - configuration -->
   <xs:complexType name="SMMapperAllowedPoolType">
     <xs:attribute type="xs:string" name="reservoirInstanceName" use="required"/>
     <xs:attribute type="xs:string" name="poolName" use="required"/>
   </xs:complexType>
   
-  <!-- StateMachine - Mapper - Allowed pools predictors - configuration -->
+  <!-- StateMachine - Mapper - Allowed pools - configuration -->
   <xs:complexType name="SMMapperAllowedPoolsType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="SMMapperAllowedPoolType" name="pool" minOccurs="1" maxOccurs="unbounded"/>
@@ -2313,6 +2325,7 @@
   <!-- StateMachine - Mapper - Readout unit map - configuration -->
   <xs:complexType name="SMMapperReadoutUnitMapType">
     <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="SMMapperAllowedPredictorsType" name="allowedPredictors" minOccurs="0" maxOccurs="unbounded"/>
       <xs:element type="SMMapperAllowedPoolsType" name="allowedPools" minOccurs="0" maxOccurs="unbounded"/>
       <xs:element type="SMMapperAllowedInputFieldsType" name="allowedInputFields" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>

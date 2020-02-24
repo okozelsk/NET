@@ -15,6 +15,7 @@ using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron;
 using RCNet.Neural.Network.SM.Readout;
 using RCNet.Neural.Network.SM.PM;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir;
+using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor;
 
 namespace RCNet.Neural.Network.SM
 {
@@ -167,16 +168,17 @@ namespace RCNet.Neural.Network.SM
                 PredictorsMapper mapper = new PredictorsMapper(NP.PredictorGeneralSwitchCollection);
                 if (_settings.MapperCfg != null)
                 {
-                    //Expand list of predicting neurons to array of predictor origin
-                    Tuple<int, int>[] neuronPoolRefCollection = new Tuple<int, int>[NP.PredictorNeuronCollection.Count];
-                    int idx = 0;
+                    //Expand list of predicting neurons to array of predictor and its origin
+                    List<Tuple<int, int, PredictorsProvider.PredictorID>> predictorInfoCollection = new List<Tuple<int, int, PredictorsProvider.PredictorID>>();
                     foreach (HiddenNeuron neuron in NP.PredictorNeuronCollection)
                     {
                         Tuple<int, int> poolRef = new Tuple<int, int>(neuron.Location.ReservoirID, neuron.Location.PoolID);
-                        for (int i = 0; i < neuron.PredictorsCfg.NumOfEnabledPredictors; i++)
+                        for(int predictorID = 0; predictorID < PredictorsProvider.NumOfPredictors; predictorID++)
                         {
-                            neuronPoolRefCollection[idx] = poolRef;
-                            ++idx;
+                            if(neuron.PredictorsCfg.IsEnabled((PredictorsProvider.PredictorID)predictorID))
+                            {
+                                predictorInfoCollection.Add(new Tuple<int, int, PredictorsProvider.PredictorID>(neuron.Location.ReservoirID, neuron.Location.PoolID, (PredictorsProvider.PredictorID)predictorID));
+                            }
                         }
                     }
                     //Iterate all readout units
@@ -189,6 +191,32 @@ namespace RCNet.Neural.Network.SM
                         ReadoutUnitMapSettings rums = _settings.MapperCfg.GetMapCfg(readoutUnitName, false);
                         if (rums != null)
                         {
+                            //Neuron predictors
+                            if (rums.AllowedPoolsCfg != null || rums.AllowedPredictorsCfg != null)
+                            {
+                                for (int i = 0; i < predictorInfoCollection.Count; i++)
+                                {
+                                    if(switches[i] && rums.AllowedPoolsCfg != null)
+                                    {
+                                        //Disable not allowed origin
+                                        string reservoirInstanceName = _settings.NeuralPreprocessorCfg.ReservoirInstancesCfg.ReservoirInstanceCfgCollection[predictorInfoCollection[i].Item1].Name;
+                                        ReservoirStructureSettings rss = _settings.NeuralPreprocessorCfg.ReservoirStructuresCfg.GetReservoirStructureCfg(_settings.NeuralPreprocessorCfg.ReservoirInstancesCfg.ReservoirInstanceCfgCollection[predictorInfoCollection[i].Item1].StructureCfgName);
+                                        string poolName = rss.PoolsCfg.PoolCfgCollection[predictorInfoCollection[i].Item2].Name;
+                                        if(!rums.AllowedPoolsCfg.IsAllowed(reservoirInstanceName, poolName))
+                                        {
+                                            switches[i] = false;
+                                        }
+                                    }
+                                    if (switches[i] && rums.AllowedPredictorsCfg != null)
+                                    {
+                                        //Disable not allowed predictor
+                                        if(!rums.AllowedPredictorsCfg.IsAllowed(predictorInfoCollection[i].Item3))
+                                        {
+                                            switches[i] = false;
+                                        }
+                                    }
+                                }
+                            }
                             //Routed input fields
                             if (rums.AllowedInputFieldsCfg != null)
                             {
@@ -199,35 +227,10 @@ namespace RCNet.Neural.Network.SM
                                 }
                                 string[] routedFieldNames = _settings.NeuralPreprocessorCfg.InputCfg.GetRoutedFieldNames().ToArray();
                                 //Enable enabled routed input fields
-                                foreach(AllowedInputFieldSettings aifs in rums.AllowedInputFieldsCfg.AllowedInputFieldCfgCollection)
+                                foreach (AllowedInputFieldSettings aifs in rums.AllowedInputFieldsCfg.AllowedInputFieldCfgCollection)
                                 {
                                     int routedFieldIdx = NP.PredictorNeuronCollection.Count + Array.IndexOf(routedFieldNames, aifs.Name);
                                     switches[routedFieldIdx] = NP.PredictorGeneralSwitchCollection[routedFieldIdx];
-                                }
-                            }
-                            //Neuron predictors
-                            if (rums.AllowedPoolsCfg != null)
-                            {
-                                //Initially disable all neuron predictors
-                                for (int i = 0; i < NP.PredictorNeuronCollection.Count; i++)
-                                {
-                                    switches[i] = false;
-                                }
-                                //Enable allowed neuron predictors
-                                foreach (AllowedPoolSettings allowedPool in rums.AllowedPoolsCfg.AllowedPoolCfgCollection)
-                                {
-                                    int reservoirInstanceID = _settings.NeuralPreprocessorCfg.ReservoirInstancesCfg.GetReservoirInstanceID(allowedPool.ReservoirInstanceName);
-                                    ReservoirStructureSettings rss = _settings.NeuralPreprocessorCfg.ReservoirStructuresCfg.GetReservoirStructureCfg(_settings.NeuralPreprocessorCfg.ReservoirInstancesCfg.ReservoirInstanceCfgCollection[reservoirInstanceID].StructureCfgName);
-                                    int poolID = rss.PoolsCfg.GetPoolID(allowedPool.PoolName);
-                                    //Enable specific predictors from allowed pool (origin)
-                                    for (int i = 0; i < NP.PredictorNeuronCollection.Count; i++)
-                                    {
-                                        if (neuronPoolRefCollection[i].Item1 == reservoirInstanceID && neuronPoolRefCollection[i].Item2 == poolID)
-                                        {
-                                            //Enable predictor if it is valid
-                                            switches[i] = NP.PredictorGeneralSwitchCollection[i];
-                                        }
-                                    }
                                 }
                             }
                         }

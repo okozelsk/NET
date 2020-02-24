@@ -11,45 +11,46 @@ using RCNet.MathTools.Probability;
 using RCNet.XmlTools;
 using RCNet.RandomValue;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool;
+using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor;
 
 namespace RCNet.Neural.Network.SM.PM
 {
     /// <summary>
-    /// Collection of predictors mapper's allowed pool settings
+    /// Collection of predictors mapper's allowed predictors settings
     /// </summary>
     [Serializable]
-    public class AllowedPoolsSettings : RCNetBaseSettings
+    public class AllowedPredictorsSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
         /// Name of the associated xsd type
         /// </summary>
-        public const string XsdTypeName = "SMMapperAllowedPoolsType";
+        public const string XsdTypeName = "SMMapperAllowedPredictorsType";
 
         //Attribute properties
         /// <summary>
-        /// Collection of pools settings
+        /// Collection of predictors settings
         /// </summary>
-        public List<AllowedPoolSettings> AllowedPoolCfgCollection { get; }
+        public List<AllowedPredictorSettings> AllowedPredictorCfgCollection { get; }
 
         //Constructors
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
-        private AllowedPoolsSettings()
+        private AllowedPredictorsSettings()
         {
-            AllowedPoolCfgCollection = new List<AllowedPoolSettings>();
+            AllowedPredictorCfgCollection = new List<AllowedPredictorSettings>();
             return;
         }
 
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
-        /// <param name="allowedPoolCfgCollection">Allowed pool settings collection</param>
-        public AllowedPoolsSettings(IEnumerable<AllowedPoolSettings> allowedPoolCfgCollection)
+        /// <param name="allowedPredictorCfgCollection">Allowed predictor settings collection</param>
+        public AllowedPredictorsSettings(IEnumerable<AllowedPredictorSettings> allowedPredictorCfgCollection)
             : this()
         {
-            AddAllowedPools(allowedPoolCfgCollection);
+            AddAllowedPredictors(allowedPredictorCfgCollection);
             Check();
             return;
         }
@@ -57,11 +58,11 @@ namespace RCNet.Neural.Network.SM.PM
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
-        /// <param name="allowedPoolCfgCollection">Allowed pool settings collection</param>
-        public AllowedPoolsSettings(params AllowedPoolSettings[] allowedPoolCfgCollection)
+        /// <param name="allowedPredictorCfgCollection">Allowed predictor settings collection</param>
+        public AllowedPredictorsSettings(params AllowedPredictorSettings[] allowedPredictorCfgCollection)
             : this()
         {
-            AddAllowedPools(allowedPoolCfgCollection);
+            AddAllowedPredictors(allowedPredictorCfgCollection);
             Check();
             return;
         }
@@ -70,10 +71,10 @@ namespace RCNet.Neural.Network.SM.PM
         /// The deep copy constructor
         /// </summary>
         /// <param name="source">Source instance</param>
-        public AllowedPoolsSettings(AllowedPoolsSettings source)
+        public AllowedPredictorsSettings(AllowedPredictorsSettings source)
             : this()
         {
-            AddAllowedPools(source.AllowedPoolCfgCollection);
+            AddAllowedPredictors(source.AllowedPredictorCfgCollection);
             return;
         }
 
@@ -81,15 +82,15 @@ namespace RCNet.Neural.Network.SM.PM
         /// Creates the instance and initialize it from given xml element.
         /// </summary>
         /// <param name="elem">Xml data containing settings.</param>
-        public AllowedPoolsSettings(XElement elem)
+        public AllowedPredictorsSettings(XElement elem)
         {
             //Validation
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
-            AllowedPoolCfgCollection = new List<AllowedPoolSettings>();
-            foreach (XElement poolElem in settingsElem.Descendants("pool"))
+            AllowedPredictorCfgCollection = new List<AllowedPredictorSettings>();
+            foreach (XElement predictorElem in settingsElem.Descendants("predictor"))
             {
-                AllowedPoolCfgCollection.Add(new AllowedPoolSettings(poolElem));
+                AllowedPredictorCfgCollection.Add(new AllowedPredictorSettings(predictorElem));
             }
             Check();
             return;
@@ -107,48 +108,46 @@ namespace RCNet.Neural.Network.SM.PM
         /// </summary>
         private void Check()
         {
-            if (AllowedPoolCfgCollection.Count == 0)
+            if (AllowedPredictorCfgCollection.Count == 0)
             {
-                throw new Exception($"At least one allowed pool configuration must be specified.");
+                throw new Exception($"At least one allowed predictor configuration must be specified.");
             }
-            //Uniqueness of pool references
-            string[] names = new string[AllowedPoolCfgCollection.Count];
-            names[0] = AllowedPoolCfgCollection[0].ReservoirInstanceName + "." + AllowedPoolCfgCollection[0].PoolName;
-            for(int i = 1; i < AllowedPoolCfgCollection.Count; i++)
+            //Uniqueness of predictor ID
+            string[] names = new string[AllowedPredictorCfgCollection.Count];
+            names[0] = AllowedPredictorCfgCollection[0].PredictorID.ToString();
+            for(int i = 1; i < AllowedPredictorCfgCollection.Count; i++)
             {
-                string refName = AllowedPoolCfgCollection[i].ReservoirInstanceName + "." + AllowedPoolCfgCollection[i].PoolName;
-                if (names.Contains(refName))
+                if (names.Contains(AllowedPredictorCfgCollection[i].PredictorID.ToString()))
                 {
-                    throw new Exception($"Pool reference {refName} is not unique.");
+                    throw new Exception($"Predictor {AllowedPredictorCfgCollection[i].PredictorID.ToString()} is not unique.");
                 }
-                names[i] = refName;
+                names[i] = AllowedPredictorCfgCollection[i].PredictorID.ToString();
             }
             return;
         }
 
         /// <summary>
-        /// Adds cloned allowed pool configurations from given collection into the internal collection
+        /// Adds cloned allowed predictor configurations from given collection into the internal collection
         /// </summary>
-        /// <param name="allowedPoolCfgCollection">Allowed pool settings collection</param>
-        private void AddAllowedPools(IEnumerable<AllowedPoolSettings> allowedPoolCfgCollection)
+        /// <param name="allowedPredictorCfgCollection">Allowed predictor settings collection</param>
+        private void AddAllowedPredictors(IEnumerable<AllowedPredictorSettings> allowedPredictorCfgCollection)
         {
-            foreach (AllowedPoolSettings allowedPoolCfg in allowedPoolCfgCollection)
+            foreach (AllowedPredictorSettings allowedPredictorCfg in allowedPredictorCfgCollection)
             {
-                AllowedPoolCfgCollection.Add((AllowedPoolSettings)allowedPoolCfg.DeepClone());
+                AllowedPredictorCfgCollection.Add((AllowedPredictorSettings)allowedPredictorCfg.DeepClone());
             }
             return;
         }
 
         /// <summary>
-        /// Check if specified pool is allowed
+        /// Check if specified predictor is allowed
         /// </summary>
-        /// <param name="reservoirInstanceName">Name of the reservoir instance</param>
-        /// <param name="poolName">Name of the pool</param>
-        public bool IsAllowed(string reservoirInstanceName, string poolName)
+        /// <param name="predictorID">Predictor ID</param>
+        public bool IsAllowed(PredictorsProvider.PredictorID predictorID)
         {
-            foreach(AllowedPoolSettings poolCfg in AllowedPoolCfgCollection)
+            foreach (AllowedPredictorSettings predictorCfg in AllowedPredictorCfgCollection)
             {
-                if(poolCfg.ReservoirInstanceName == reservoirInstanceName && poolCfg.PoolName == poolName)
+                if (predictorCfg.PredictorID == predictorID)
                 {
                     return true;
                 }
@@ -161,7 +160,7 @@ namespace RCNet.Neural.Network.SM.PM
         /// </summary>
         public override RCNetBaseSettings DeepClone()
         {
-            return new AllowedPoolsSettings(this);
+            return new AllowedPredictorsSettings(this);
         }
 
         /// <summary>
@@ -173,9 +172,9 @@ namespace RCNet.Neural.Network.SM.PM
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             XElement rootElem = new XElement(rootElemName);
-            foreach (AllowedPoolSettings allowedPoolCfg in AllowedPoolCfgCollection)
+            foreach (AllowedPredictorSettings allowedPredictorCfg in AllowedPredictorCfgCollection)
             {
-                rootElem.Add(allowedPoolCfg.GetXml(suppressDefaults));
+                rootElem.Add(allowedPredictorCfg.GetXml(suppressDefaults));
             }
             Validate(rootElem, XsdTypeName);
             return rootElem;
@@ -188,9 +187,9 @@ namespace RCNet.Neural.Network.SM.PM
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(bool suppressDefaults)
         {
-            return GetXml("allowedPools", suppressDefaults);
+            return GetXml("allowedPredictors", suppressDefaults);
         }
 
-    }//AllowedPoolsSettings
+    }//AllowedPredictorsSettings
 
 }//Namespace

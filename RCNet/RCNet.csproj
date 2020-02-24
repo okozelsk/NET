@@ -126,6 +126,8 @@
     <Compile Include="Neural\Network\NonRecurrent\FF\HiddenLayerSettings.cs" />
     <Compile Include="Neural\Network\NonRecurrent\FF\HiddenLayersSettings.cs" />
     <Compile Include="Neural\Network\NonRecurrent\INonRecurrentNetworkSettings.cs" />
+    <Compile Include="Neural\Network\SM\PM\AllowedPredictorsSettings.cs" />
+    <Compile Include="Neural\Network\SM\PM\AllowedPredictorSettings.cs" />
     <Compile Include="Neural\Network\SM\PM\MapperSettings.cs" />
     <Compile Include="Neural\Network\SM\PM\ReadoutUnitMapSettings.cs" />
     <Compile Include="Neural\Network\SM\PM\AllowedInputFieldSettings.cs" />

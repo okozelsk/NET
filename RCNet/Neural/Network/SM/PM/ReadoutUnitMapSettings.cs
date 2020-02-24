@@ -32,10 +32,14 @@ namespace RCNet.Neural.Network.SM.PM
         public string ReadoutUnitName { get; }
 
         /// <summary>
+        /// Allowed predictors
+        /// </summary>
+        public AllowedPredictorsSettings AllowedPredictorsCfg { get; }
+
+        /// <summary>
         /// Allowed pools
         /// </summary>
         public AllowedPoolsSettings AllowedPoolsCfg { get; }
-
 
         /// <summary>
         /// Allowed input fields
@@ -47,13 +51,16 @@ namespace RCNet.Neural.Network.SM.PM
         /// Creates an initialized instance
         /// </summary>
         /// <param name="readoutUnitName">Name of the readout unit</param>
+        /// <param name="allowedPredictorsCfg">Allowed predictors</param>
         /// <param name="allowedPoolsCfg">Allowed pools</param>
         /// <param name="allowedInputFieldsCfg">Allowed input fields</param>
         public ReadoutUnitMapSettings(string readoutUnitName,
+                                      AllowedPredictorsSettings allowedPredictorsCfg,
                                       AllowedPoolsSettings allowedPoolsCfg,
                                       AllowedInputFieldsSettings allowedInputFieldsCfg)
         {
             ReadoutUnitName = readoutUnitName;
+            AllowedPredictorsCfg = allowedPredictorsCfg == null ? null : (AllowedPredictorsSettings)allowedPredictorsCfg.DeepClone();
             AllowedPoolsCfg = allowedPoolsCfg == null ? null : (AllowedPoolsSettings)allowedPoolsCfg.DeepClone();
             AllowedInputFieldsCfg = allowedInputFieldsCfg == null ? null : (AllowedInputFieldsSettings)allowedInputFieldsCfg.DeepClone();
             Check();
@@ -65,7 +72,7 @@ namespace RCNet.Neural.Network.SM.PM
         /// </summary>
         /// <param name="source">Source instance</param>
         public ReadoutUnitMapSettings(ReadoutUnitMapSettings source)
-            :this(source.ReadoutUnitName, source.AllowedPoolsCfg, source.AllowedInputFieldsCfg)
+            :this(source.ReadoutUnitName, source.AllowedPredictorsCfg, source.AllowedPoolsCfg, source.AllowedInputFieldsCfg)
         {
             return;
         }
@@ -83,6 +90,8 @@ namespace RCNet.Neural.Network.SM.PM
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
             ReadoutUnitName = settingsElem.Attribute("readoutUnitName").Value;
+            XElement allowedPredictorsElem = settingsElem.Descendants("allowedPredictors").FirstOrDefault();
+            AllowedPredictorsCfg = allowedPredictorsElem == null ? null : new AllowedPredictorsSettings(allowedPredictorsElem);
             XElement allowedPoolsElem = settingsElem.Descendants("allowedPools").FirstOrDefault();
             AllowedPoolsCfg = allowedPoolsElem == null ? null : new AllowedPoolsSettings(allowedPoolsElem);
             XElement allowedInputFieldsElem = settingsElem.Descendants("allowedInputFields").FirstOrDefault();
@@ -136,7 +145,11 @@ namespace RCNet.Neural.Network.SM.PM
             XElement rootElem = new XElement(rootElemName,
                                              new XAttribute("readoutUnitName", ReadoutUnitName)
                                              );
-            if(AllowedPoolsCfg != null && (!suppressDefaults || !AllowedPoolsCfg.ContainsOnlyDefaults))
+            if (AllowedPredictorsCfg != null && (!suppressDefaults || !AllowedPredictorsCfg.ContainsOnlyDefaults))
+            {
+                rootElem.Add(AllowedPredictorsCfg.GetXml(suppressDefaults));
+            }
+            if (AllowedPoolsCfg != null && (!suppressDefaults || !AllowedPoolsCfg.ContainsOnlyDefaults))
             {
                 rootElem.Add(AllowedPoolsCfg.GetXml(suppressDefaults));
             }

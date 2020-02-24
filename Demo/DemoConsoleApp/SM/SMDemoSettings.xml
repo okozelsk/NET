@@ -71,7 +71,7 @@
                 </connections>
               </inputUnit>
             </inputUnits>
-            <predictors activation="false"
+            <predictors activation="true"
                         activationSquare="false"
                         activationFadingSum="false"
                         activationMWAvg="false"
@@ -102,6 +102,9 @@
       </readoutLayer>
       <mapper>
         <map readoutUnitName="Chicken1Bird0">
+          <allowedPredictors>
+            <predictor name="FiringFadingSum"/>
+          </allowedPredictors>
           <allowedPools>
             <pool reservoirInstanceName="Main" poolName="PureESN"/>
           </allowedPools>

@@ -111,7 +111,7 @@ namespace RCNet.Neural.Network.SM.PM
             {
                 throw new Exception($"At least one allowed input field configuration must be specified.");
             }
-            //Uniqueness of pool references
+            //Uniqueness of field name
             string[] names = new string[AllowedInputFieldCfgCollection.Count];
             names[0] = AllowedInputFieldCfgCollection[0].Name;
             for(int i = 1; i < AllowedInputFieldCfgCollection.Count; i++)
@@ -136,6 +136,22 @@ namespace RCNet.Neural.Network.SM.PM
                 AllowedInputFieldCfgCollection.Add((AllowedInputFieldSettings)allowedInputFieldCfg.DeepClone());
             }
             return;
+        }
+
+        /// <summary>
+        /// Check if specified input field is allowed
+        /// </summary>
+        /// <param name="inputFieldName">Name of the input field</param>
+        public bool IsAllowed(string inputFieldName)
+        {
+            foreach (AllowedInputFieldSettings fieldCfg in AllowedInputFieldCfgCollection)
+            {
+                if (fieldCfg.Name == inputFieldName)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         /// <summary>
