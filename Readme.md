@@ -142,8 +142,8 @@ See the [wiki pages.](https://en.wikipedia.org/wiki/Biological_neuron_model)
 The main component [StateMachine](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/StateMachine.cs) encapsulates independent NeuralPreprocessor and ReadoutLayer components into the single component and adds support for routing specific predictors and input fields to the specific readout units. Allows to bypass NeuralPreprocessor and to use input data directly as a predictors for the readout layer.
 
 #### Setup
-Every component needed for State Machine setup (including State Machine itself) has it own related settings class which is required by component's constructor.
+Each component that makes up StateMachine (including StateMachine itself) has its own related settings class, which is required by the component's constructor.
 </br>
-Every settings class can be instantiated manually or from the xml element. [RCNetTypes.xsd](https://github.com/okozelsk/NET/blob/master/RCNet/RCNetTypes.xsd) defines all necessary types used for instantiation of the settings classes.
+Each settings class can be instantiated from scratch or from an xml element. [RCNetTypes.xsd](https://github.com/okozelsk/NET/blob/master/RCNet/RCNetTypes.xsd) defines all necessary xml elements for creating settings classes using xml constructors.
 </br>
-Every settings class has implemented GetXml method so it can be instantiated manually from the code and then can be exported appropriate xml using its GetXml method.
+Each settings class also implements the GetXml method so it can be instantiated from scratch and then export the initialization xml element using the GetXml method. Using xml constructors is generally preferable because the initialization xml can be edited without the need to modify your own source code.
