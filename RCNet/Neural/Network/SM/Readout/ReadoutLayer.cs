@@ -347,7 +347,7 @@ namespace RCNet.Neural.Network.SM.Readout
         public int DecideOneWinner(string oneWinnerGroupName, double[] dataVector, out int[] membersIndexes, out double[] membersWeightedDataVector)
         {
             //Obtain group members indexes
-            membersIndexes = (from member in Settings.ReadoutUnitsCfg.OneWinnerGroupCollection[oneWinnerGroupName].Members select member.Index).ToArray();
+            membersIndexes = (from member in Settings.ReadoutUnitsCfg.OneWinnerGroupCollection[oneWinnerGroupName].Members select Settings.ReadoutUnitsCfg.GetReadoutUnitID(member.Name)).ToArray();
             //Compute members' weighted predictions
             membersWeightedDataVector = new double[membersIndexes.Length];
             for(int i = 0; i < membersIndexes.Length; i++)
@@ -407,9 +407,10 @@ namespace RCNet.Neural.Network.SM.Readout
                 //Alone units
                 DataVector = dataVector;
                 ReadoutUnitDataCollection = new Dictionary<string, ReadoutUnitData>();
-                foreach(ReadoutUnitSettings rus in rl.Settings.ReadoutUnitsCfg.ReadoutUnitCfgCollection)
+                for(int i = 0; i < rl.Settings.ReadoutUnitsCfg.ReadoutUnitCfgCollection.Count; i++)
                 {
-                    ReadoutUnitDataCollection.Add(rus.Name, new ReadoutUnitData() { Name = rus.Name, Index = rus.Index, Task = rus.TaskCfg.Type, DataValue = DataVector[rus.Index] });
+                    ReadoutUnitSettings rus = rl.Settings.ReadoutUnitsCfg.ReadoutUnitCfgCollection[i];
+                    ReadoutUnitDataCollection.Add(rus.Name, new ReadoutUnitData() { Name = rus.Name, Index = i, Task = rus.TaskCfg.Type, DataValue = DataVector[i] });
                 }
                 //One Winner groups
                 OneWinnerDataCollection = new Dictionary<string, OneWinnerGroupData>();

@@ -413,9 +413,9 @@ namespace RCNet.Neural.Network.SM
                 ReadoutLayerConfig = (ReadoutLayerSettings)readoutLayerConfig.DeepClone();
                 ComputationResultBundle = new ResultBundle();
                 ReadoutUnitStatCollection = new List<ReadoutUnitStat>(ReadoutLayerConfig.ReadoutUnitsCfg.ReadoutUnitCfgCollection.Count);
-                foreach (ReadoutUnitSettings rus in ReadoutLayerConfig.ReadoutUnitsCfg.ReadoutUnitCfgCollection)
+                for(int i = 0; i < ReadoutLayerConfig.ReadoutUnitsCfg.ReadoutUnitCfgCollection.Count; i++)
                 {
-                    ReadoutUnitStatCollection.Add(new ReadoutUnitStat(rus));
+                    ReadoutUnitStatCollection.Add(new ReadoutUnitStat(i, ReadoutLayerConfig.ReadoutUnitsCfg.ReadoutUnitCfgCollection[i]));
                 }
                 OneWinnerGroupStatCollection = new List<OneWinnerGroupStat>();
                 foreach (string groupName in ReadoutLayerConfig.ReadoutUnitsCfg.OneWinnerGroupCollection.Keys)
@@ -532,7 +532,7 @@ namespace RCNet.Neural.Network.SM
                 /// </summary>
                 public string Name { get; }
                 /// <summary>
-                /// Readout unit zero-based index
+                /// Readout unit's zero-based index
                 /// </summary>
                 public int Index { get; }
                 /// <summary>
@@ -552,11 +552,12 @@ namespace RCNet.Neural.Network.SM
                 /// <summary>
                 /// Creates an unitialized instance
                 /// </summary>
+                /// <param name="index">Readout unit's zero-based index</param>
                 /// <param name="rus">Readout unit settings</param>
-                public ReadoutUnitStat(ReadoutUnitSettings rus)
+                public ReadoutUnitStat(int index, ReadoutUnitSettings rus)
                 {
                     Name = rus.Name;
-                    Index = rus.Index;
+                    Index = index;
                     Task = rus.TaskCfg.Type;
                     ErrorStat = new BasicStat();
                     if (Task == ReadoutUnit.TaskType.Classification)

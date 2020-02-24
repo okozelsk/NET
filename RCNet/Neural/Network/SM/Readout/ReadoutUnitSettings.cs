@@ -30,11 +30,6 @@ namespace RCNet.Neural.Network.SM.Readout
 
         //Attribute properties
         /// <summary>
-        /// Readout unit's zero-based index within output fields
-        /// </summary>
-        public int Index { get; }
-
-        /// <summary>
         /// Output field name
         /// </summary>
         public string Name { get; }
@@ -48,12 +43,10 @@ namespace RCNet.Neural.Network.SM.Readout
         /// <summary>
         /// Creates an unitialized instance
         /// </summary>
-        /// <param name="index">Readout unit's zero-based index within output fields</param>
         /// <param name="name">Output field name</param>
         /// <param name="taskCfg">Readout unit's Forecast or Classification task settings</param>
-        public ReadoutUnitSettings(int index, string name, ITaskSettings taskCfg)
+        public ReadoutUnitSettings(string name, ITaskSettings taskCfg)
         {
-            Index = index;
             Name = name;
             TaskCfg = (ITaskSettings)taskCfg.DeepClone();
             Check();
@@ -65,7 +58,7 @@ namespace RCNet.Neural.Network.SM.Readout
         /// </summary>
         /// <param name="source">Source instance</param>
         public ReadoutUnitSettings(ReadoutUnitSettings source)
-            :this(source.Index, source.Name, source.TaskCfg)
+            :this(source.Name, source.TaskCfg)
         {
             return;
         }
@@ -73,11 +66,9 @@ namespace RCNet.Neural.Network.SM.Readout
         /// <summary>
         /// Creates the instance and initializes it from given xml element.
         /// </summary>
-        /// <param name="index">Readout unit's zero-based index within output fields</param>
         /// <param name="elem">Xml data containing the settings.</param>
-        public ReadoutUnitSettings(int index, XElement elem)
+        public ReadoutUnitSettings(XElement elem)
         {
-            Index = index;
             //Validation
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
@@ -109,10 +100,6 @@ namespace RCNet.Neural.Network.SM.Readout
         /// </summary>
         private void Check()
         {
-            if (Index < 0)
-            {
-                throw new Exception($"Invalid Index {Index.ToString(CultureInfo.InvariantCulture)}. Index must be GE to 0.");
-            }
             if (Name.Length == 0)
             {
                 throw new Exception($"Name can not be empty.");

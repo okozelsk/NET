@@ -347,14 +347,14 @@ namespace Demo.DemoConsoleApp
             Console.WriteLine(settings.GetXml(false));
             Console.WriteLine();
 
-            ReadoutUnitSettings ru0Cfg = new ReadoutUnitSettings(0, "field1", fcTaskCfg);
+            ReadoutUnitSettings ru0Cfg = new ReadoutUnitSettings("field1", fcTaskCfg);
             
             settings = ru0Cfg;
             Console.WriteLine(settings.GetXml(true));
             Console.WriteLine(settings.GetXml(false));
             Console.WriteLine();
 
-            ReadoutUnitSettings ru1Cfg = new ReadoutUnitSettings(1, "field2", clTaskCfg);
+            ReadoutUnitSettings ru1Cfg = new ReadoutUnitSettings("field2", clTaskCfg);
 
             ReadoutUnitsSettings roUnitsCfg = new ReadoutUnitsSettings(ru0Cfg, ru1Cfg);
 

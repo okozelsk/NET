@@ -104,10 +104,9 @@ namespace RCNet.Neural.Network.SM.Readout
             //Validation
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
-            int index = 0;
             foreach (XElement unitElem in settingsElem.Descendants("readoutUnit"))
             {
-                ReadoutUnitCfgCollection.Add(new ReadoutUnitSettings(index++, unitElem));
+                ReadoutUnitCfgCollection.Add(new ReadoutUnitSettings(unitElem));
             }
             CheckAndComplete();
             return;
@@ -145,10 +144,6 @@ namespace RCNet.Neural.Network.SM.Readout
             List<string> owgs = new List<string>();
             for (int index = 0; index < ReadoutUnitCfgCollection.Count; index++)
             {
-                if(ReadoutUnitCfgCollection[index].Index != index)
-                {
-                    throw new Exception($"Inconsistent indexes of readout units.");
-                }
                 if(ReadoutUnitCfgCollection[index].TaskCfg.Type == ReadoutUnit.TaskType.Classification)
                 {
                     ClassificationTaskSettings cts = (ClassificationTaskSettings)ReadoutUnitCfgCollection[index].TaskCfg;
