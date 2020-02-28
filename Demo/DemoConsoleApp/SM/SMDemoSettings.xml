@@ -1,7 +1,117 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <demo dataFolder=".\\Data" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="SMDemoSettings.xsd">
 
-  
+  <!--
+    Used dataset is a pre-processed and re-structured/reshaped version of a very commonly used dataset featuring epileptic seizure detection.
+    The dataset was converted from https://archive.ics.uci.edu/ml/datasets/Epileptic+Seizure+Recognition and contains 11500 EEG recordings
+    each for 1 second. After conversion each EEG pattern corresponds to an epileptic seizure or not.
+    Achieved accuracy is 99.00%
+    Relevant paper: http://users.fs.cvut.cz/ivo.bukovsky/PROJEKT/Data/Realna/BIO/EEG/reference/PRE61907.pdf
+  -->
+  <case name="Classification task Recognition of the Epileptic Seizure Brain Activity (EEG):  Pure ESN reservoir (FiringFadingSum predictors), Multilayer Feed forward network as a classifier (Resilient trainer)">
+    <samples trainingData="EpilepticSeizureActivity_train.csv" verificationData="EpilepticSeizureActivity_verify.csv"/>
+    <stateMachineCfg randomizerSeek="0">
+      <neuralPreprocessor>
+        <input>
+          <feedingPatterned bidir="true" routeToReadout="false">
+            <unification unifyAmplitude="false" detrend="false">
+              <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
+            </unification>
+          </feedingPatterned>
+          <fields>
+            <externalFields>
+              <field name="EEG" routeToReadout="true">
+                <realFeature standardize="true" keepReserve="false"/>
+              </field>
+            </externalFields>
+          </fields>
+        </input>
+        <reservoirStructures>
+          <reservoirStructure name="MainCfg">
+            <pools>
+              <pool name="PureESN">
+                <proportions dimX="178" dimY="1" dimZ="1"/>
+                <neuronGroups>
+                  <analogGroup name="Exc-grp" role="Excitatory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction">
+                    <activationTanH/>
+                  </analogGroup>
+                  <analogGroup name="Inh-grp" role="Inhibitory" relShare="1" readoutDensity="1" signalingRestriction="NoRestriction">
+                    <activationTanH/>
+                  </analogGroup>
+                </neuronGroups>
+                <interconnection>
+                  <randomSchema density="0.1" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
+                    <distributionFlat/>
+                  </randomSchema>
+                  <chainSchema ratio="1" circle="true" repetitions="1"/>
+                </interconnection>
+              </pool>
+            </pools>
+          </reservoirStructure>
+        </reservoirStructures>
+        <reservoirInstances>
+          <reservoirInstance name="Main" reservoirStructure="MainCfg">
+            <inputUnits>
+              <inputUnit inputFieldName="EEG">
+                <connections>
+                  <connection poolName="PureESN">
+                    <spikingTarget density="0"/>
+                    <analogTarget scope="All" density="1"/>
+                  </connection>
+                </connections>
+              </inputUnit>
+            </inputUnits>
+            <synapse inputDelayMethod="Random" inputMaxDelay="89">
+              <internalWeights analogScopeSpectralRadius="0.9999" spikingScopeSpectralRadius="NA"/>
+            </synapse>
+            <predictors activation="false"
+                        activationSquare="false"
+                        activationFadingSum="false"
+                        activationMWAvg="false"
+                        firingFadingSum="true"
+                        firingMWAvg="false"
+                        firingCount="false"
+                        firingBinPattern="false">
+              <params>
+                <activationFadingSum/>
+                <activationMWAvg weights="Constant" window="178"/>
+                <firingFadingSum strength="0.005"/>
+                <firingMWAvg weights="Constant" window="178"/>
+                <firingCount/>
+                <firingBinPattern/>
+              </params>
+            </predictors>
+          </reservoirInstance>
+        </reservoirInstances>
+      </neuralPreprocessor>
+      <readoutLayer testDataRatio="0.1" folds="Auto">
+        <defaultNetworks/>
+        <readoutUnits>
+          <readoutUnit name="EpilepticSeizure">
+            <classification>
+              <networks>
+                <ff>
+                  <activationIdentity/>
+                  <hiddenLayers>
+                    <layer neurons="20">
+                      <activationTanH/>
+                    </layer>
+                    <layer neurons="20">
+                      <activationTanH/>
+                    </layer>
+                  </hiddenLayers>
+                  <resPropTrainer attempts="2" attemptEpochs="1000"/>
+                </ff>
+              </networks>
+            </classification>
+          </readoutUnit>
+        </readoutUnits>
+      </readoutLayer>
+    </stateMachineCfg>
+  </case>
+
+
+
   <!--
     This demo case demonstrates successful use of the pure analog ESN reservoir for the fast and accurate classifications enabled by
     the new ability of the analog neurons to fire a spike.
@@ -69,7 +179,12 @@
                 </connections>
               </inputUnit>
             </inputUnits>
-            <synapse inputDelayMethod="Distance" inputMaxDelay="10"/>
+            <synapse inputDelayMethod="Distance" inputMaxDelay="10">
+              <internalWeights analogScopeSpectralRadius="0.9999" spikingScopeSpectralRadius="NA">
+                <weightAA min="0" max="1"/>
+                <weightSS min="0" max="1"/>
+              </internalWeights>
+            </synapse>
             <predictors activation="true"
                         activationSquare="false"
                         activationFadingSum="false"
@@ -1556,7 +1671,10 @@
             <inputUnits>
               <inputUnit inputFieldName="EEG">
                 <connections>
-                  <connection poolName="PureESN"/>
+                  <connection poolName="PureESN">
+                    <spikingTarget density="0"/>
+                    <analogTarget scope="All" density="1"/>
+                  </connection>
                 </connections>
               </inputUnit>
             </inputUnits>

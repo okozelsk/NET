@@ -1144,22 +1144,22 @@
 
   <!-- Synapse - Plasticity - configuration -->
   <xs:complexType name="SynapsePlasticityType">
-    <xs:choice minOccurs="0" maxOccurs="4">
-      <xs:element type="SynapseDynamicsEEType" name="dynamicsEE" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="SynapseDynamicsIEType" name="dynamicsIE" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="SynapseDynamicsEIType" name="dynamicsEI" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="SynapseDynamicsIIType" name="dynamicsII" minOccurs="1" maxOccurs="1"/>
-    </xs:choice>
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="SynapseDynamicsEEType" name="dynamicsEE" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="SynapseDynamicsIEType" name="dynamicsIE" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="SynapseDynamicsEIType" name="dynamicsEI" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="SynapseDynamicsIIType" name="dynamicsII" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
   </xs:complexType>
   
   <!-- Synapse - Internal weights - configuration -->
   <xs:complexType name="SynapseInternalWeightsType">
-    <xs:choice minOccurs="0" maxOccurs="4">
-      <xs:element type="URandomValueType" name="weightAA" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="URandomValueType" name="weightAS" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="URandomValueType" name="weightSA" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="URandomValueType" name="weightSS" minOccurs="1" maxOccurs="1"/>
-    </xs:choice>
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="URandomValueType" name="weightAA" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="URandomValueType" name="weightAS" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="URandomValueType" name="weightSA" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="URandomValueType" name="weightSS" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
     <xs:attribute type="UDoubleGT0NAOptionType" name="analogScopeSpectralRadius" use="optional" default="0.9999">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is 0.9999. Use NA to disable spectral radius application.</xs:documentation>

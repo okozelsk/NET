@@ -651,7 +651,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                                                   InstanceCfg.SynapseCfg.InternalMaxDelay,
                                                   InstanceCfg.SynapseCfg.PlasticityCfg.GetDynamicsSettings(nccSource.Neuron.Role, tmpRelTargetNeuronCollection[targetNeuronIndex].Neuron.Role)
                                                   );
-                    
+                    InternalDistancesStat.AddSampleValue(synapse.Distance);
                     SetInterconnection(_neuronNeuronConnectionsCollection, synapse, replaceExistingConnections);
                     //Remove targetNeuron from tmp collection
                     tmpRelTargetNeuronCollection.RemoveAt(targetNeuronIndex);
@@ -761,6 +761,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                                                   InstanceCfg.SynapseCfg.InternalMaxDelay,
                                                   InstanceCfg.SynapseCfg.PlasticityCfg.GetDynamicsSettings(connPair.Item1.Role, connPair.Item2.Role)
                                                   );
+                    InternalDistancesStat.AddSampleValue(synapse.Distance);
                     SetInterconnection(_neuronNeuronConnectionsCollection, synapse, settings.ReplaceExistingConnections);
                 }
 
@@ -895,6 +896,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                                                   InstanceCfg.SynapseCfg.InternalMaxDelay,
                                                   InstanceCfg.SynapseCfg.PlasticityCfg.GetDynamicsSettings(nccSource.Neuron.Role, tmpRelTargetNeuronCollection[targetNeuronIndex].Neuron.Role)
                                                   );
+                    InternalDistancesStat.AddSampleValue(synapse.Distance);
                     SetInterconnection(_neuronNeuronConnectionsCollection, synapse);
                     //Remove targetNeuron from tmp collection
                     tmpRelTargetNeuronCollection.RemoveAt(targetNeuronIndex);
