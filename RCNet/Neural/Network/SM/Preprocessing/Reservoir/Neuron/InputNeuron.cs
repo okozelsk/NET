@@ -61,11 +61,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron
         /// </summary>
         public bool AfterFirstSpike { get { return false; } }
 
-        /// <summary>
-        /// Distance statistics of connected neurons receiving input
-        /// </summary>
-        public BasicStat DistancesStat { get; }
-
         //Attributes
         private readonly Interval _inputRange;
         private double _iStimuli;
@@ -86,19 +81,22 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron
         /// It is very recommended to have input values normalized and standardized before
         /// they are passed as an input.
         /// </param>
-        /// <param name="signalingRestriction">Distinguish between analog/spiking provided signal</param>
+        /// <param name="signalingRestriction">Distinguish between analog/spiking provided signal (NoRestriction is forbidden)</param>
         public InputNeuron(int reservoirID,
                            int[] inputEntryPoint,
                            int inputFieldIdx,
                            Interval inputRange,
-                           NeuronCommon.NeuronSignalingRestrictionType signalingRestriction = NeuronCommon.NeuronSignalingRestrictionType.AnalogOnly
+                           NeuronCommon.NeuronSignalingRestrictionType signalingRestriction
                            )
         {
             Location = new NeuronLocation(reservoirID, inputFieldIdx, - 1, inputFieldIdx, 0, inputEntryPoint[0], inputEntryPoint[1], inputEntryPoint[2]);
             _inputRange = inputRange.DeepClone();
+            if(signalingRestriction == NeuronCommon.NeuronSignalingRestrictionType.NoRestriction)
+            {
+                throw new ArgumentException("Invalid signaling restriction. NeuronSignalingRestrictionType.NoRestriction is forbidden for the InputNeuron.", "signalingRestriction");
+            }
             SignalingRestriction = signalingRestriction;
             Statistics = new NeuronStatistics();
-            DistancesStat = new BasicStat();
             Reset(false);
             return;
         }

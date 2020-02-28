@@ -128,8 +128,7 @@ See the [wiki pages.](https://en.wikipedia.org/wiki/Biological_neuron_model)
 ### State Machine components
 |Component|Description|
 |--|--|
-|[InputSynapse](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/Preprocessing/Reservoir/Synapse/InputSynapse.cs)|Computes constantly weighted signal from external input and passes it to target neuron. Supports signal delay|
-|[InternalSynapse](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/Preprocessing/Reservoir/Synapse/InternalSynapse.cs)|Computes dynamically weighted signal from source to target neuron. It supports pre-synaptic short-term plasticity.|
+|[Synapse](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/Preprocessing/Reservoir/Synapse/Synapse.cs)|Computes dynamically weighted signal from source to target neuron. It supports short-term plasticity and signal delay.|
 |[InputUnit](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/Preprocessing/Reservoir/InputUnit.cs)|Provides external input for processing in the reservoir. Supports set of various realtime input transformations and provides analog and spike-train output through set of InputNeuron instances.|
 |[InputNeuron](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/Preprocessing/Reservoir/Neuron/InputNeuron.cs)|Input neuron is the special type of very simple neuron. Its purpose is only to mediate input signal for a synapse|
 |[HiddenNeuron](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/Preprocessing/Reservoir/Neuron/HiddenNeuron.cs)|Supports both analog and spiking activation functions and can produce analog signal and/or spikes (neuron is able to fire spikes even when stateless analog activation is used). Supports Retainment property of analog activation (leaky integrator). Supports set of different predictors.|

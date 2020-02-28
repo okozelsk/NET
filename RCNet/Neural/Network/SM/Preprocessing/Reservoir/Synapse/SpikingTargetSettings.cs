@@ -11,7 +11,7 @@ using RCNet.XmlTools;
 using RCNet.RandomValue;
 using System.Xml.XPath;
 
-namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Synapse
+namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
 {
     /// <summary>
     /// Configuration parameters of an input synapse spiking target
@@ -23,13 +23,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Synapse
         /// <summary>
         /// Name of the associated xsd type
         /// </summary>
-        public const string XsdTypeName = "InputSynapseSpikingTargetType";
+        public const string XsdTypeName = "NPResInstanceInputUnitConnectionSpikingTargetType";
         
         //Default values
         /// <summary>
         /// Default synapse's scope when targeting spiking neurons
         /// </summary>
-        public const BaseSynapse.SynapticTargetScope DefaultScope = BaseSynapse.SynapticTargetScope.Excitatory;
+        public const Synapse.SynapticTargetScope DefaultScope = Synapse.SynapticTargetScope.Excitatory;
         /// <summary>
         /// Default minimum weight
         /// </summary>
@@ -38,12 +38,22 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Synapse
         /// Default maximum weight
         /// </summary>
         public const double DefaultMaxWeight = 1d;
+        /// <summary>
+        /// Default density
+        /// </summary>
+        public const double DefaultDensity = 1d;
 
         //Attribute properties
         /// <summary>
-        /// Synapse's scope when targeting spiking neurons
+        /// Connection scope when targeting spiking neurons
         /// </summary>
-        public BaseSynapse.SynapticTargetScope Scope { get; }
+        public Synapse.SynapticTargetScope Scope { get; }
+
+        /// <summary>
+        /// Connection density within the scope
+        /// </summary>
+        public double Density { get; }
+
         /// <summary>
         /// Synapse's random weight settings for Input->Spiking connection
         /// </summary>
@@ -53,21 +63,18 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Synapse
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
-        /// <param name="scope">Synapse's scope when targeting spiking neurons</param>
+        /// <param name="scope">Connection scope when targeting spiking neurons</param>
+        /// <param name="density">Connection density within the scope</param>
         /// <param name="weightCfg">Synapse's random weight settings for Input->Spiking connection</param>
-        public SpikingTargetSettings(BaseSynapse.SynapticTargetScope scope = DefaultScope,
+        public SpikingTargetSettings(Synapse.SynapticTargetScope scope = DefaultScope,
+                                     double density = DefaultDensity,
                                      URandomValueSettings weightCfg = null
                                      )
         {
             Scope = scope;
-            if(weightCfg != null)
-            {
-                WeightCfg = (URandomValueSettings)weightCfg.DeepClone();
-            }
-            else
-            {
-                WeightCfg = new URandomValueSettings(DefaultMinWeight, DefaultMaxWeight);
-            }
+            Density = density;
+            WeightCfg = weightCfg == null ? new URandomValueSettings(DefaultMinWeight, DefaultMaxWeight) : (URandomValueSettings)weightCfg.DeepClone();
+            Check();
             return;
         }
 
@@ -77,10 +84,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Synapse
         /// </summary>
         /// <param name="source">Source instance</param>
         public SpikingTargetSettings(SpikingTargetSettings source)
+            :this(source.Scope, source.Density, source.WeightCfg)
         {
 
-            Scope = source.Scope;
-            WeightCfg = (URandomValueSettings)source.WeightCfg.DeepClone();
             return;
         }
 
@@ -96,16 +102,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Synapse
             //Validation
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
-            Scope = (BaseSynapse.SynapticTargetScope)Enum.Parse(typeof(BaseSynapse.SynapticTargetScope), settingsElem.Attribute("scope").Value, true);
+            Scope = (Synapse.SynapticTargetScope)Enum.Parse(typeof(Synapse.SynapticTargetScope), settingsElem.Attribute("scope").Value, true);
+            Density = double.Parse(settingsElem.Attribute("density").Value, CultureInfo.InvariantCulture);
+            //Weights
             XElement weightSettingsElem = settingsElem.Descendants("weight").FirstOrDefault();
-            if(weightSettingsElem != null)
-            {
-                WeightCfg = new URandomValueSettings(weightSettingsElem);
-            }
-            else
-            {
-                WeightCfg = new URandomValueSettings(DefaultMinWeight, DefaultMaxWeight);
-            }
+            WeightCfg = weightSettingsElem == null ? new URandomValueSettings(DefaultMinWeight, DefaultMaxWeight) : new URandomValueSettings(weightSettingsElem);
+            Check();
             return;
         }
 
@@ -118,15 +120,32 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Synapse
         /// <summary>
         /// Checks if settings are default
         /// </summary>
+        public bool IsDefaultDensity { get { return (Density == DefaultDensity); } }
+
+        /// <summary>
+        /// Checks if settings are default
+        /// </summary>
         public bool IsDefaultWeightCfg { get { return (WeightCfg.Min == DefaultMinWeight && WeightCfg.Max == DefaultMaxWeight && WeightCfg.IsDefaultDistrType); } }
 
         /// <summary>
         /// Identifies settings containing only default values
         /// </summary>
-        public override bool ContainsOnlyDefaults { get { return IsDefaultScope && IsDefaultWeightCfg; } }
+        public override bool ContainsOnlyDefaults { get { return IsDefaultScope && IsDefaultDensity && IsDefaultWeightCfg; } }
 
 
         //Methods
+        /// <summary>
+        /// Checks validity
+        /// </summary>
+        private void Check()
+        {
+            if (Density < 0)
+            {
+                throw new Exception($"Invalid Density {Density.ToString(CultureInfo.InvariantCulture)}. Density must be GE to 0.");
+            }
+            return;
+        }
+
         /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>
@@ -147,6 +166,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Synapse
             if (!suppressDefaults || !IsDefaultScope)
             {
                 rootElem.Add(new XAttribute("scope", Scope.ToString()));
+            }
+            if (!suppressDefaults || !IsDefaultDensity)
+            {
+                rootElem.Add(new XAttribute("density", Density.ToString(CultureInfo.InvariantCulture)));
             }
             if (!suppressDefaults || !IsDefaultWeightCfg)
             {

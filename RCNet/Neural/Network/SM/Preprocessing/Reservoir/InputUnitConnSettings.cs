@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using RCNet.Extensions;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Synapse;
+using RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
 {
@@ -42,11 +42,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         public string PoolName { get; }
 
         /// <summary>
-        /// Specifies what part of trgeted neurons will be connected
-        /// </summary>
-        public double Density { get; }
-
-        /// <summary>
         /// Analog coding method to be used
         /// </summary>
         public InputUnit.AnalogCodingMethod AnalogCoding { get; }
@@ -62,34 +57,39 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         public NeuronCommon.NeuronSignalingRestrictionType SignalingRestriction { get; }
 
         /// <summary>
-        /// Input neuron to target pool's neuron synapse settings
+        /// Spiking target settings
         /// </summary>
-        public InputSynapseSettings SynapseCfg { get; }
+        public SpikingTargetSettings SpikingTargetCfg { get; }
+
+        /// <summary>
+        /// Analog target settings
+        /// </summary>
+        public AnalogTargetSettings AnalogTargetCfg { get; }
 
         //Constructors
         /// <summary>
         /// Creates an itialized instance.
         /// </summary>
         /// <param name="poolName">Name of target pool</param>
-        /// <param name="density">Specifies what part of trgeted neurons will be connected</param>
         /// <param name="analogCoding">Analog coding method to be used</param>
         /// <param name="oppositeAmplitude">Specifies if to opposite amplitude of the input</param>
         /// <param name="signalingRestriction">Signaling restriction of associated input neuron</param>
-        /// <param name="synapseCfg">Input neuron to target pool's neuron synapse settings</param>
+        /// <param name="spikingTargetCfg">Spiking target settings</param>
+        /// <param name="analogTargetCfg">Analog target settings</param>
         public InputUnitConnSettings(string poolName,
-                                 double density,
-                                 InputUnit.AnalogCodingMethod analogCoding = DefaultAnalogCoding,
-                                 bool oppositeAmplitude = DefaultOppositeAmplitude,
-                                 NeuronCommon.NeuronSignalingRestrictionType signalingRestriction = DefaultSignalingRestriction,
-                                 InputSynapseSettings synapseCfg = null
-                                 )
+                                     InputUnit.AnalogCodingMethod analogCoding = DefaultAnalogCoding,
+                                     bool oppositeAmplitude = DefaultOppositeAmplitude,
+                                     NeuronCommon.NeuronSignalingRestrictionType signalingRestriction = DefaultSignalingRestriction,
+                                     SpikingTargetSettings spikingTargetCfg = null,
+                                     AnalogTargetSettings analogTargetCfg = null
+                                     )
         {
             PoolName = poolName;
-            Density = density;
             AnalogCoding = analogCoding;
             OppositeAmplitude = oppositeAmplitude;
             SignalingRestriction = signalingRestriction;
-            SynapseCfg = synapseCfg == null ? new InputSynapseSettings() : (InputSynapseSettings)synapseCfg.DeepClone();
+            SpikingTargetCfg = spikingTargetCfg == null ? new SpikingTargetSettings() : (SpikingTargetSettings)spikingTargetCfg.DeepClone();
+            AnalogTargetCfg = analogTargetCfg == null ? new AnalogTargetSettings() : (AnalogTargetSettings)analogTargetCfg.DeepClone();
             Check();
             return;
         }
@@ -99,8 +99,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// </summary>
         /// <param name="source">Source instance</param>
         public InputUnitConnSettings(InputUnitConnSettings source)
-            : this(source.PoolName, source.Density, source.AnalogCoding, source.OppositeAmplitude,
-                  source.SignalingRestriction, source.SynapseCfg)
+            : this(source.PoolName, source.AnalogCoding, source.OppositeAmplitude,
+                  source.SignalingRestriction, source.SpikingTargetCfg, source.AnalogTargetCfg)
         {
             return;
         }
@@ -118,12 +118,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
             PoolName = settingsElem.Attribute("poolName").Value;
-            Density = double.Parse(settingsElem.Attribute("density").Value, CultureInfo.InvariantCulture);
             AnalogCoding = (InputUnit.AnalogCodingMethod)Enum.Parse(typeof(InputUnit.AnalogCodingMethod), settingsElem.Attribute("coding").Value, true);
             OppositeAmplitude = bool.Parse(settingsElem.Attribute("oppositeAmplitude").Value);
             SignalingRestriction = (NeuronCommon.NeuronSignalingRestrictionType)Enum.Parse(typeof(NeuronCommon.NeuronSignalingRestrictionType), settingsElem.Attribute("signalingRestriction").Value, true);
-            XElement synapseElem = settingsElem.Descendants("synapse").FirstOrDefault();
-            SynapseCfg = synapseElem == null ? new InputSynapseSettings() : new InputSynapseSettings(synapseElem);
+            XElement spikingTargetElem = settingsElem.Descendants("spikingTarget").FirstOrDefault();
+            SpikingTargetCfg = spikingTargetElem == null ? new SpikingTargetSettings() : new SpikingTargetSettings(spikingTargetElem);
+            XElement analogTargetElem = settingsElem.Descendants("analogTarget").FirstOrDefault();
+            AnalogTargetCfg = analogTargetElem == null ? new AnalogTargetSettings() : new AnalogTargetSettings(analogTargetElem);
             Check();
             return;
         }
@@ -159,10 +160,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             {
                 throw new Exception($"Pool name can not be empty.");
             }
-            if (Density < 0)
-            {
-                throw new Exception($"Invalid Density {Density.ToString(CultureInfo.InvariantCulture)}. Density must be GE to 0 and LE to 1.");
-            }
             return;
         }
 
@@ -182,8 +179,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
-            XElement rootElem = new XElement(rootElemName, new XAttribute("poolName", PoolName),
-                                                           new XAttribute("density", Density.ToString(CultureInfo.InvariantCulture)));
+            XElement rootElem = new XElement(rootElemName, new XAttribute("poolName", PoolName));
             if (!suppressDefaults || !IsDefaultAnalogCoding)
             {
                 rootElem.Add(new XAttribute("coding", AnalogCoding.ToString()));
@@ -195,6 +191,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             if (!suppressDefaults || !IsDefaultSignalingRestriction)
             {
                 rootElem.Add(new XAttribute("signalingRestriction", SignalingRestriction.ToString()));
+            }
+            if (!suppressDefaults || !SpikingTargetCfg.ContainsOnlyDefaults)
+            {
+                rootElem.Add(SpikingTargetCfg.GetXml(suppressDefaults));
+            }
+            if (!suppressDefaults || !AnalogTargetCfg.ContainsOnlyDefaults)
+            {
+                rootElem.Add(AnalogTargetCfg.GetXml(suppressDefaults));
             }
             Validate(rootElem, XsdTypeName);
             return rootElem;

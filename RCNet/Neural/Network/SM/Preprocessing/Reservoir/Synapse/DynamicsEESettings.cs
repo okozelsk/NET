@@ -4,47 +4,40 @@ using System.Linq;
 using System.Reflection;
 using System.Globalization;
 using System.Xml.Linq;
-using System.IO;
-using RCNet.Extensions;
-using RCNet.MathTools.Probability;
-using RCNet.XmlTools;
-using RCNet.RandomValue;
-using System.Xml.XPath;
 
-namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Synapse.Dynamics
+namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
 {
     /// <summary>
-    /// Configuration parameters of the dynamics of a synapse connecting Spiking-Inhibitory and Spiking-Inhibitory neurons
+    /// Configuration parameters of the synapse dynamics connecting Excitatory-Excitatory neurons
     /// </summary>
     [Serializable]
-    public class S2SSynapseI2IDynamicsSettings : DynamicsSettings
+    public class DynamicsEESettings : DynamicsSettings
     {
         //Constants
         /// <summary>
         /// Name of the associated xsd type
         /// </summary>
-        public const string XsdTypeName = "S2SSynapseI2IDynamicsType";
+        public const string XsdTypeName = "SynapseDynamicsEEType";
         
         //Default values
         /// <summary>
         /// Default resting efficacy
         /// </summary>
-        public const double DefaultRestingEfficacy = 0.32d;
+        public const double DefaultRestingEfficacy = 0.5d;
         /// <summary>
         /// Default tau depression
         /// </summary>
-        public const double DefaultTauDepression = 144d;
+        public const double DefaultTauDepression = 1100d;
         /// <summary>
         /// Default tau facilitation
         /// </summary>
-        public const double DefaultTauFacilitation = 60d;
+        public const double DefaultTauFacilitation = 50d;
         /// <summary>
         /// Default apply short term plasticity
         /// </summary>
-        public const bool DefaultApplyShortTermPlasticity = true;
+        public const bool DefaultApply = true;
 
 
-        //Constructors
         //Constructors
         /// <summary>
         /// Creates an initialized instance
@@ -52,15 +45,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Synapse.Dynamics
         /// <param name="restingEfficacy">Synapse's resting efficacy (average probability of neurotransmitter release)</param>
         /// <param name="tauDepression">Synapse's efficacy depression model time constant (ms)</param>
         /// <param name="tauFacilitation">Synapse's efficacy facilitation model time constant (ms)</param>
-        /// <param name="applyShortTermPlasticity">Specifies whether to apply short-term plasticity</param>
-        /// <param name="weightCfg">Synapse's random weight settings</param>
-        public S2SSynapseI2IDynamicsSettings(double restingEfficacy = DefaultRestingEfficacy,
-                                             double tauDepression = DefaultTauDepression,
-                                             double tauFacilitation = DefaultTauFacilitation,
-                                             bool applyShortTermPlasticity = DefaultApplyShortTermPlasticity,
-                                             URandomValueSettings weightCfg = null
-                                             )
-            :base(restingEfficacy, tauDepression, tauFacilitation, applyShortTermPlasticity, weightCfg)
+        /// <param name="apply">Specifies whether to apply short-term plasticity</param>
+        public DynamicsEESettings(double restingEfficacy = DefaultRestingEfficacy,
+                                  double tauDepression = DefaultTauDepression,
+                                  double tauFacilitation = DefaultTauFacilitation,
+                                  bool apply = DefaultApply
+                                  )
+            :base(restingEfficacy, tauDepression, tauFacilitation, apply)
         {
             return;
         }
@@ -69,7 +60,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Synapse.Dynamics
         /// The deep copy constructor
         /// </summary>
         /// <param name="source">Source instance</param>
-        public S2SSynapseI2IDynamicsSettings(S2SSynapseI2IDynamicsSettings source)
+        public DynamicsEESettings(DynamicsEESettings source)
             :base(source)
         {
             return;
@@ -78,11 +69,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Synapse.Dynamics
         /// <summary>
         /// Creates the instance and initialize it from given xml element.
         /// </summary>
-        /// <param name="settingsElem">
-        /// Xml data containing settings.
-        /// Content of xml element is not validated against the xml schema.
-        /// </param>
-        public S2SSynapseI2IDynamicsSettings(XElement elem)
+        /// <param name="elem">Xml data containing settings</param>
+        public DynamicsEESettings(XElement elem)
             :base(elem, XsdTypeName)
         {
             return;
@@ -107,7 +95,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Synapse.Dynamics
         /// <summary>
         /// Checks if settings are default
         /// </summary>
-        public bool IsDefaultApplyShortTermPlasticity { get { return (ApplyShortTermPlasticity == DefaultApplyShortTermPlasticity); } }
+        public bool IsDefaultApply { get { return (Apply == DefaultApply); } }
 
 
         /// <summary>
@@ -120,8 +108,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Synapse.Dynamics
                 return IsDefaultRestingEfficacy &&
                        IsDefaultTauDepression &&
                        IsDefaultTauFacilitation &&
-                       IsDefaultApplyShortTermPlasticity &&
-                       IsDefaultWeightCfg;
+                       IsDefaultApply;
             }
         }
 
@@ -132,7 +119,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Synapse.Dynamics
         /// </summary>
         public override RCNetBaseSettings DeepClone()
         {
-            return new S2SSynapseI2IDynamicsSettings(this);
+            return new DynamicsEESettings(this);
         }
 
         /// <summary>
@@ -156,13 +143,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Synapse.Dynamics
             {
                 rootElem.Add(new XAttribute("tauFacilitation", TauFacilitation.ToString(CultureInfo.InvariantCulture)));
             }
-            if (!suppressDefaults || !IsDefaultApplyShortTermPlasticity)
+            if (!suppressDefaults || !IsDefaultApply)
             {
-                rootElem.Add(new XAttribute("applyShortTermPlasticity", ApplyShortTermPlasticity.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()));
-            }
-            if (!suppressDefaults || !IsDefaultWeightCfg)
-            {
-                rootElem.Add(WeightCfg.GetXml("weight", suppressDefaults));
+                rootElem.Add(new XAttribute("apply", Apply.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()));
             }
             Validate(rootElem, XsdTypeName);
             return rootElem;
@@ -175,10 +158,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Synapse.Dynamics
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(bool suppressDefaults)
         {
-            return GetXml("dynamicsS2SII", suppressDefaults);
+            return GetXml("dynamicsEE", suppressDefaults);
         }
 
-    }//S2SSynapseI2IDynamicsSettings
+    }//DynamicsEESettings
 
 }//Namespace
 

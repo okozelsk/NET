@@ -29,8 +29,7 @@ using RCNet.Neural.Network.SM.Preprocessing.Reservoir;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Space3D;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Synapse;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Synapse.Dynamics;
+using RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup;
 using RCNet.Neural.Network.SM.Readout;
@@ -77,7 +76,7 @@ namespace Demo.DemoConsoleApp
 
         private void TestXmlSettings()
         {
-            RCNetBaseSettings settings = null;
+            RCNetBaseSettings settings;
             settings = new RandomValueSettings(-1, 1);
             Console.WriteLine(settings.GetXml("root", true));
             Console.WriteLine(settings.GetXml("root", false));
@@ -287,7 +286,7 @@ namespace Demo.DemoConsoleApp
             Console.WriteLine(settings.GetXml(false));
             Console.WriteLine();
 
-            settings = new InputUnitSettings("inputField1", new InputUnitConnsSettings(new InputUnitConnSettings("Pool1", 0.5)));
+            settings = new InputUnitSettings("inputField1", new InputUnitConnsSettings(new InputUnitConnSettings("Pool1")));
             Console.WriteLine(settings.GetXml(true));
             Console.WriteLine(settings.GetXml(false));
             Console.WriteLine();
@@ -302,12 +301,7 @@ namespace Demo.DemoConsoleApp
             Console.WriteLine(settings.GetXml(false));
             Console.WriteLine();
 
-            settings = new InputSynapseSettings();
-            Console.WriteLine(settings.GetXml(true));
-            Console.WriteLine(settings.GetXml(false));
-            Console.WriteLine();
-
-            settings = new InternalSynapseSettings(new S2SSynapseE2EDynamicsSettings(0.4), new S2ASynapseE2EDynamicsSettings(0.8));
+            settings = new SynapseSettings();
             Console.WriteLine(settings.GetXml(true));
             Console.WriteLine(settings.GetXml(false));
             Console.WriteLine();

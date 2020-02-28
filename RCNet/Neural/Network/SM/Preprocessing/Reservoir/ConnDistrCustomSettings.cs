@@ -10,7 +10,7 @@ using RCNet.Extensions;
 using RCNet.MathTools.Probability;
 using RCNet.XmlTools;
 using RCNet.RandomValue;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Synapse;
+using RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
 {

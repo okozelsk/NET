@@ -11,24 +11,14 @@ using RCNet.XmlTools;
 using RCNet.RandomValue;
 using System.Xml.XPath;
 
-namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Synapse.Dynamics
+namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
 {
     /// <summary>
-    /// Configuration of synapse dynamics
+    /// Configuration of synapse short-term plasticity dynamics
     /// </summary>
     [Serializable]
     public abstract class DynamicsSettings : RCNetBaseSettings
     {
-        //Constants
-        /// <summary>
-        /// Default minimum weight
-        /// </summary>
-        public const double DefaultMinWeight = 0d;
-        /// <summary>
-        /// Default maximum weight
-        /// </summary>
-        public const double DefaultMaxWeight = 1d;
-
         //Attribute properties
         /// <summary>
         /// Synapse's resting efficacy (average probability of neurotransmitter release)
@@ -45,11 +35,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Synapse.Dynamics
         /// <summary>
         /// Specifies whether to apply short-term plasticity
         /// </summary>
-        public bool ApplyShortTermPlasticity { get; }
-        /// <summary>
-        /// Synapse's random weight settings
-        /// </summary>
-        public URandomValueSettings WeightCfg { get; }
+        public bool Apply { get; }
 
         //Constructors
         /// <summary>
@@ -58,20 +44,17 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Synapse.Dynamics
         /// <param name="restingEfficacy">Synapse's resting efficacy (average probability of neurotransmitter release)</param>
         /// <param name="tauDepression">Synapse's efficacy depression model time constant (ms)</param>
         /// <param name="tauFacilitation">Synapse's efficacy facilitation model time constant (ms)</param>
-        /// <param name="applyShortTermPlasticity">Specifies whether to apply short-term plasticity</param>
-        /// <param name="weightCfg">Synapse's random weight settings</param>
+        /// <param name="apply">Specifies whether to apply short-term plasticity</param>
         public DynamicsSettings(double restingEfficacy,
                                 double tauDepression,
                                 double tauFacilitation,
-                                bool applyShortTermPlasticity,
-                                URandomValueSettings weightCfg
+                                bool apply
                                 )
         {
             RestingEfficacy = restingEfficacy;
             TauDepression = tauDepression;
             TauFacilitation = tauFacilitation;
-            ApplyShortTermPlasticity = applyShortTermPlasticity;
-            WeightCfg = (weightCfg == null ? new URandomValueSettings(DefaultMinWeight, DefaultMaxWeight) : (URandomValueSettings)weightCfg.DeepClone());
+            Apply = apply;
             Check();
             return;
         }
@@ -81,26 +64,20 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Synapse.Dynamics
         /// </summary>
         /// <param name="source">Source instance</param>
         public DynamicsSettings(DynamicsSettings source)
+            :this(source.RestingEfficacy, source.TauFacilitation, source.TauDepression, source.Apply)
         {
-            RestingEfficacy = source.RestingEfficacy;
-            TauFacilitation = source.TauFacilitation;
-            TauDepression = source.TauDepression;
-            ApplyShortTermPlasticity = source.ApplyShortTermPlasticity;
-            WeightCfg = (URandomValueSettings)source.WeightCfg.DeepClone();
             return;
         }
 
         /// <summary>
         /// Creates the instance and initialize it from given xml element.
         /// </summary>
-        /// <param name="settingsElem">
-        /// Xml data containing settings.
-        /// Content of xml element is not validated against the xml schema.
-        /// </param>
-        public DynamicsSettings(XElement elem, string XsdTypeName)
+        /// <param name="elem">Xml data containing settings</param>
+        /// <param name="xsdTypeName">Name of the associated type defined in xsd</param>
+        public DynamicsSettings(XElement elem, string xsdTypeName)
         {
             //Validation
-            XElement settingsElem = Validate(elem, XsdTypeName);
+            XElement settingsElem = Validate(elem, xsdTypeName);
             //Parsing
             //Resting efficacy
             RestingEfficacy = double.Parse(settingsElem.Attribute("restingEfficacy").Value, CultureInfo.InvariantCulture);
@@ -109,27 +86,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Synapse.Dynamics
             //Efficacy facilitation
             TauFacilitation = double.Parse(settingsElem.Attribute("tauFacilitation").Value, CultureInfo.InvariantCulture);
             //Apply short-term plasticity ?
-            ApplyShortTermPlasticity = bool.Parse(settingsElem.Attribute("applyShortTermPlasticity").Value);
-            //Weight
-            XElement weightCfgElem = settingsElem.Descendants("weight").FirstOrDefault();
-            if (weightCfgElem != null)
-            {
-                WeightCfg = new URandomValueSettings(weightCfgElem);
-            }
-            else
-            {
-                WeightCfg = new URandomValueSettings(DefaultMinWeight, DefaultMaxWeight);
-            }
+            Apply = bool.Parse(settingsElem.Attribute("apply").Value);
             Check();
             return;
         }
-
-        //Properties
-        /// <summary>
-        /// Checks if settings are default
-        /// </summary>
-        public bool IsDefaultWeightCfg { get { return (WeightCfg.Min == DefaultMinWeight && WeightCfg.Max == DefaultMaxWeight && WeightCfg.IsDefaultDistrType); } }
-
 
         //Methods
         /// <summary>

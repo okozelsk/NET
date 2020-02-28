@@ -10,7 +10,7 @@ using RCNet.Extensions;
 using RCNet.MathTools.Probability;
 using RCNet.XmlTools;
 using RCNet.RandomValue;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Synapse;
+using RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
 {
@@ -87,10 +87,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
         /// Number of applications of this schema
         /// </summary>
         public int Repetitions { get; }
-        /// <summary>
-        /// Synapse settings
-        /// </summary>
-        public InternalSynapseSettings SynapseCfg { get; }
 
         //Constructors
         /// <summary>
@@ -103,15 +99,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
         /// <param name="constantNumOfConnections">Specifies whether to keep for each neuron constant number of synapses</param>
         /// <param name="replaceExistingConnections">Specifies whether connections of this schema will replace existing connections</param>
         /// <param name="repetitions">Number of applications of this schema</param>
-        /// <param name="synapseCfg">Synapse settings</param>
         public RandomSchemaSettings(IConnDistrSettings connDistrCfg,
                                     double density = DefaultDensity,
                                     double avgDistance = DefaultAvgDistanceNum,
                                     bool allowSelfConnection = DefaultAllowSelfConnection,
                                     bool constantNumOfConnections = DefaultConstantNumOfConnections,
                                     bool replaceExistingConnections = DefaultReplaceExistingConnections,
-                                    int repetitions = DefaultRepetitions,
-                                    InternalSynapseSettings synapseCfg = null
+                                    int repetitions = DefaultRepetitions
                                     )
         {
             ConnDistrCfg = (IConnDistrSettings)connDistrCfg.DeepClone();
@@ -121,7 +115,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
             ConstantNumOfConnections = constantNumOfConnections;
             ReplaceExistingConnections = replaceExistingConnections;
             Repetitions = repetitions;
-            SynapseCfg = synapseCfg == null ? new InternalSynapseSettings() : (InternalSynapseSettings)synapseCfg.DeepClone();
             Check();
             return;
         }
@@ -132,8 +125,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
         /// <param name="source">Source instance</param>
         public RandomSchemaSettings(RandomSchemaSettings source)
             :this(source.ConnDistrCfg, source.Density, source.AvgDistance, source.AllowSelfConnection,
-                  source.ConstantNumOfConnections, source.ReplaceExistingConnections, source.Repetitions,
-                  source.SynapseCfg)
+                  source.ConstantNumOfConnections, source.ReplaceExistingConnections, source.Repetitions)
         {
             return;
         }
@@ -178,9 +170,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
                 default:
                     throw new Exception($"Unknown connection distribution {connDistrSettings.Name.LocalName}.");
             }
-            //Synapse
-            XElement synapseSettingsElem = settingsElem.Descendants("synapse").FirstOrDefault();
-            SynapseCfg = synapseSettingsElem == null ? new InternalSynapseSettings() : new InternalSynapseSettings(settingsElem.Descendants("synapse").First());
             Check();
             return;
         }
@@ -291,10 +280,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
                 rootElem.Add(new XAttribute("repetitions", Repetitions.ToString(CultureInfo.InvariantCulture)));
             }
             rootElem.Add(ConnDistrCfg.GetXml(suppressDefaults));
-            if (!suppressDefaults || !SynapseCfg.ContainsOnlyDefaults)
-            {
-                rootElem.Add(SynapseCfg.GetXml(suppressDefaults));
-            }
             Validate(rootElem, XsdTypeName);
             return rootElem;
         }
@@ -310,6 +295,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
         }
 
 
-    }//PoolInterconnectionRandomSchemaSettings
+    }//RandomSchemaSettings
 
 }//Namespace

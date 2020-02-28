@@ -11,6 +11,7 @@ using RCNet.XmlTools;
 using RCNet.RandomValue;
 using RCNet.Neural.Network.SM.Preprocessing.Input;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor;
+using RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
 {
@@ -25,23 +26,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// Name of the associated xsd type
         /// </summary>
         public const string XsdTypeName = "NPResInstanceType";
-        /// <summary>
-        /// Numeric value indicating no application of the spectral radius
-        /// </summary>
-        public const double NASpectralRadiusNum = -1d;
-        /// <summary>
-        /// Code indicating no application of the spectral radius
-        /// </summary>
-        public const string NASpectralRadiusCode = "NA";
-        //Default values
-        /// <summary>
-        /// Default spectral radius for analog neurons part of the reservoir (num)
-        /// </summary>
-        public const double DefaultAnalogScopeSpectralRadiusNum = 0.9999d;
-        /// <summary>
-        /// Default spectral radius for analog neurons part of the reservoir
-        /// </summary>
-        public const double DefaultSpikingScopeSpectralRadiusNum = NASpectralRadiusNum;
 
         //Attribute properties
         /// <summary>
@@ -53,21 +37,16 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// Name of the reservoir structure settings
         /// </summary>
         public string StructureCfgName { get; }
-        
-        /// <summary>
-        /// Spectral radius for analog neurons part of the reservoir
-        /// </summary>
-        public double AnalogScopeSpectralRadius { get; }
-
-        /// <summary>
-        /// Spectral radius for spiking neurons part of the reservoir
-        /// </summary>
-        public double SpikingScopeSpectralRadius { get; }
 
         /// <summary>
         /// Collection of input unit settings
         /// </summary>
         public InputUnitsSettings InputUnitsCfg { get; }
+
+        /// <summary>
+        /// Synapse configuration
+        /// </summary>
+        public SynapseSettings SynapseCfg { get; }
 
         /// <summary>
         /// Configuration of the predictors
@@ -81,23 +60,20 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// <param name="name">Name of the reservoir structure settings</param>
         /// <param name="structureCfgName">Name of the reservoir structure settings</param>
         /// <param name="inputUnitsCfg">Collection of input unit settings</param>
+        /// <param name="synapseCfg">Synapse configuration</param>
         /// <param name="predictorsCfg">Configuration of the predictors</param>
-        /// <param name="analogScopeSpectralRadius">Spectral radius for analog neurons part of the reservoir</param>
-        /// <param name="spikingScopeSpectralRadius">Spectral radius for spiking neurons part of the reservoir</param>
         public ReservoirInstanceSettings(string name,
                                          string structureCfgName,
                                          InputUnitsSettings inputUnitsCfg,
-                                         PredictorsSettings predictorsCfg = null,
-                                         double analogScopeSpectralRadius = DefaultAnalogScopeSpectralRadiusNum,
-                                         double spikingScopeSpectralRadius = DefaultSpikingScopeSpectralRadiusNum
+                                         SynapseSettings synapseCfg = null,
+                                         PredictorsSettings predictorsCfg = null
                                          )
         {
             Name = name;
             StructureCfgName = structureCfgName;
             InputUnitsCfg = (InputUnitsSettings)inputUnitsCfg.DeepClone();
+            SynapseCfg = synapseCfg == null ? null : (SynapseSettings)synapseCfg.DeepClone();
             PredictorsCfg = predictorsCfg == null ? null : (PredictorsSettings)predictorsCfg.DeepClone();
-            AnalogScopeSpectralRadius = analogScopeSpectralRadius;
-            SpikingScopeSpectralRadius = spikingScopeSpectralRadius;
             Check();
             return;
         }
@@ -107,8 +83,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// </summary>
         /// <param name="source">Source instance</param>
         public ReservoirInstanceSettings(ReservoirInstanceSettings source)
-            :this(source.Name, source.StructureCfgName, source.InputUnitsCfg, source.PredictorsCfg,
-                  source.AnalogScopeSpectralRadius, source.SpikingScopeSpectralRadius)
+            :this(source.Name, source.StructureCfgName, source.InputUnitsCfg, source.SynapseCfg, source.PredictorsCfg)
         {
             return;
         }
@@ -127,12 +102,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             //Parsing
             Name = settingsElem.Attribute("name").Value;
             StructureCfgName = settingsElem.Attribute("reservoirStructure").Value;
-            string attrValue = settingsElem.Attribute("analogScopeSpectralRadius").Value;
-            AnalogScopeSpectralRadius = attrValue == NASpectralRadiusCode ? NASpectralRadiusNum : double.Parse(attrValue, CultureInfo.InvariantCulture);
-            attrValue = settingsElem.Attribute("spikingScopeSpectralRadius").Value;
-            SpikingScopeSpectralRadius = attrValue == NASpectralRadiusCode ? NASpectralRadiusNum : double.Parse(attrValue, CultureInfo.InvariantCulture);
             //Input units
             InputUnitsCfg = new InputUnitsSettings(settingsElem.Descendants("inputUnits").First());
+            //Synapse
+            XElement synapseElem = settingsElem.Descendants("synapse").FirstOrDefault();
+            SynapseCfg = synapseElem == null ? new SynapseSettings() : new SynapseSettings(synapseElem);
             //Predictors
             XElement predictorsElem = settingsElem.Descendants("predictors").FirstOrDefault();
             if (predictorsElem != null)
@@ -144,16 +118,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         }
 
         //Properties
-        /// <summary>
-        /// Checks if settings are default
-        /// </summary>
-        public bool IsDefaultAnalogScopeSpectralRadius { get { return (AnalogScopeSpectralRadius == DefaultAnalogScopeSpectralRadiusNum); } }
-
-        /// <summary>
-        /// Checks if settings are default
-        /// </summary>
-        public bool IsDefaultSpikingScopeSpectralRadius { get { return (SpikingScopeSpectralRadius == DefaultSpikingScopeSpectralRadiusNum); } }
-
         /// <summary>
         /// Identifies settings containing only default values
         /// </summary>
@@ -226,13 +190,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                                              new XAttribute("reservoirStructure", StructureCfgName),
                                              InputUnitsCfg.GetXml(suppressDefaults));
 
-            if (!suppressDefaults || !IsDefaultAnalogScopeSpectralRadius)
+            if (SynapseCfg != null && !SynapseCfg.ContainsOnlyDefaults)
             {
-                rootElem.Add(new XAttribute("analogScopeSpectralRadius", AnalogScopeSpectralRadius == NASpectralRadiusNum ? NASpectralRadiusCode : AnalogScopeSpectralRadius.ToString(CultureInfo.InvariantCulture)));
-            }
-            if (!suppressDefaults || !IsDefaultSpikingScopeSpectralRadius)
-            {
-                rootElem.Add(new XAttribute("spikingScopeSpectralRadius", SpikingScopeSpectralRadius == NASpectralRadiusNum ? NASpectralRadiusCode : SpikingScopeSpectralRadius.ToString(CultureInfo.InvariantCulture)));
+                rootElem.Add(SynapseCfg.GetXml(suppressDefaults));
             }
             if (PredictorsCfg != null && !PredictorsCfg.ContainsOnlyDefaults)
             {

@@ -10,7 +10,7 @@ using RCNet.Extensions;
 using RCNet.MathTools.Probability;
 using RCNet.XmlTools;
 using RCNet.RandomValue;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Synapse;
+using RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
 {
@@ -61,10 +61,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
         /// Number of applications of this schema
         /// </summary>
         public int Repetitions { get; }
-        /// <summary>
-        /// Synapse settings
-        /// </summary>
-        public InternalSynapseSettings SynapseCfg { get; }
 
         //Constructors
         /// <summary>
@@ -74,19 +70,16 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
         /// <param name="circle">Specifies whether the chain will be closed to circle</param>
         /// <param name="replaceExistingConnections">Specifies whether connections of this schema will replace existing connections</param>
         /// <param name="repetitions">Number of applications of this schema</param>
-        /// <param name="synapseCfg">Synapse settings</param>
         public ChainSchemaSettings(double ratio = DefaultRatio,
                                                       bool circle = DefaultCircle,
                                                       bool replaceExistingConnections = DefaultReplaceExistingConnections,
-                                                      int repetitions = DefaultRepetitions,
-                                                      InternalSynapseSettings synapseCfg = null
+                                                      int repetitions = DefaultRepetitions
                                                       )
         {
             Ratio = ratio;
             Circle = circle;
             ReplaceExistingConnections = replaceExistingConnections;
             Repetitions = repetitions;
-            SynapseCfg = synapseCfg == null ? new InternalSynapseSettings() : (InternalSynapseSettings)synapseCfg.DeepClone();
             Check();
             return;
         }
@@ -96,7 +89,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
         /// </summary>
         /// <param name="source">Source instance</param>
         public ChainSchemaSettings(ChainSchemaSettings source)
-            :this(source.Ratio, source.Circle, source.ReplaceExistingConnections, source.Repetitions, source.SynapseCfg)
+            :this(source.Ratio, source.Circle, source.ReplaceExistingConnections, source.Repetitions)
         {
             return;
         }
@@ -121,9 +114,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
             ReplaceExistingConnections = bool.Parse(settingsElem.Attribute("replaceExistingConnections").Value);
             //Number of schema repetitions
             Repetitions = int.Parse(settingsElem.Attribute("repetitions").Value, CultureInfo.InvariantCulture);
-            //Synapse
-            XElement synapseSettingsElem = settingsElem.Descendants("synapse").FirstOrDefault();
-            SynapseCfg = synapseSettingsElem == null ? new InternalSynapseSettings() : new InternalSynapseSettings(settingsElem.Descendants("synapse").First());
             Check();
             return;
         }
@@ -159,8 +149,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
                 return IsDefaultRatio &&
                        IsDefaultCircle &&
                        IsDefaultReplaceExistingConnections &&
-                       IsDefaultRepetitions &&
-                       SynapseCfg.ContainsOnlyDefaults;
+                       IsDefaultRepetitions;
             }
         }
 
@@ -214,10 +203,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
             {
                 rootElem.Add(new XAttribute("repetitions", Repetitions.ToString(CultureInfo.InvariantCulture)));
             }
-            if (!suppressDefaults || !SynapseCfg.ContainsOnlyDefaults)
-            {
-                rootElem.Add(SynapseCfg.GetXml(suppressDefaults));
-            }
             Validate(rootElem, XsdTypeName);
             return rootElem;
         }
@@ -232,6 +217,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
             return GetXml("chainSchema", suppressDefaults);
         }
 
-    }//PoolInterconnectionChainSchemaSettings
+    }//ChainSchemaSettings
 
 }//Namespace

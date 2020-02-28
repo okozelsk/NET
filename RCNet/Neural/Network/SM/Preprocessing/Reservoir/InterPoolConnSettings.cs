@@ -10,7 +10,7 @@ using RCNet.Extensions;
 using RCNet.MathTools.Probability;
 using RCNet.XmlTools;
 using RCNet.RandomValue;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Synapse;
+using RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
 {
@@ -57,10 +57,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// Specifies whether to keep for each neuron from source pool constant number of synapses
         /// </summary>
         public bool ConstantNumOfConnections { get; }
-        /// <summary>
-        /// Synapse settings
-        /// </summary>
-        public InternalSynapseSettings SynapseCfg { get; }
 
         //Constructors
         /// <summary>
@@ -72,15 +68,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// <param name="targetPoolName">Name of the target pool</param>
         /// <param name="targetConnectionDensity">Determines how many neurons from the target pool will be connected to one neuron from source pool</param>
         /// <param name="constantNumOfConnections">Specifies whether to keep for each neuron constant number of synapses</param>
-        /// <param name="synapseCfg">Synapse settings</param>
         public InterPoolConnSettings(IConnDistrSettings connDistrCfg,
-                                                             string sourcePoolName,
-                                                             double sourceConnectionDensity,
-                                                             string targetPoolName,
-                                                             double targetConnectionDensity,
-                                                             bool constantNumOfConnections = DefaultConstantNumOfConnections,
-                                                             InternalSynapseSettings synapseCfg = null
-                                                             )
+                                     string sourcePoolName,
+                                     double sourceConnectionDensity,
+                                     string targetPoolName,
+                                     double targetConnectionDensity,
+                                     bool constantNumOfConnections = DefaultConstantNumOfConnections
+                                     )
         {
             ConnDistrCfg = (IConnDistrSettings)connDistrCfg.DeepClone();
             SourcePoolName = sourcePoolName;
@@ -88,7 +82,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             TargetPoolName = targetPoolName;
             TargetConnectionDensity = targetConnectionDensity;
             ConstantNumOfConnections = constantNumOfConnections;
-            SynapseCfg = synapseCfg == null ? new InternalSynapseSettings() : (InternalSynapseSettings)synapseCfg.DeepClone();
             Check();
             return;
         }
@@ -99,7 +92,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// <param name="source">Source instance</param>
         public InterPoolConnSettings(InterPoolConnSettings source)
             :this(source.ConnDistrCfg, source.SourcePoolName, source.SourceConnectionDensity, source.TargetPoolName,
-                  source.TargetConnectionDensity, source.ConstantNumOfConnections, source.SynapseCfg)
+                  source.TargetConnectionDensity, source.ConstantNumOfConnections)
         {
             return;
         }
@@ -137,9 +130,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                 default:
                     throw new Exception($"Unknown connection distribution {connDistrSettings.Name.LocalName}.");
             }
-            //Synapse
-            XElement synapseSettingsElem = settingsElem.Descendants("synapse").FirstOrDefault();
-            SynapseCfg = synapseSettingsElem == null ? new InternalSynapseSettings() : new InternalSynapseSettings(settingsElem.Descendants("synapse").First());
             Check();
             return;
         }
@@ -218,10 +208,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                 rootElem.Add(new XAttribute("constantNumOfConnections", ConstantNumOfConnections.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()));
             }
             rootElem.Add(ConnDistrCfg.GetXml(suppressDefaults));
-            if (!suppressDefaults || !SynapseCfg.ContainsOnlyDefaults)
-            {
-                rootElem.Add(SynapseCfg.GetXml(suppressDefaults));
-            }
             Validate(rootElem, XsdTypeName);
             return rootElem;
         }
@@ -237,6 +223,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         }
 
 
-    }//ReservoirStructureInterPoolConnectionSettings
+    }//InterPoolConnectionSettings
 
 }//Namespace

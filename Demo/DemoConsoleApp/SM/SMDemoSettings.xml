@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <demo dataFolder=".\\Data" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="SMDemoSettings.xsd">
 
+  
   <!--
     This demo case demonstrates successful use of the pure analog ESN reservoir for the fast and accurate classifications enabled by
     the new ability of the analog neurons to fire a spike.
@@ -61,16 +62,14 @@
               <inputUnit inputFieldName="DistanceFromCenter">
                 <coordinates x="160" y="230" z="190"/>
                 <connections>
-                  <connection poolName="PureESN" density="1">
-                    <synapse delayMethod="Distance" maxDelay="10">
-                      <analogTarget scope="All">
-                        <weight min="0" max="1"/>
-                      </analogTarget>
-                    </synapse>
+                  <connection poolName="PureESN" coding="Power">
+                    <spikingTarget density="0"/>
+                    <analogTarget density="1"/>
                   </connection>
                 </connections>
               </inputUnit>
             </inputUnits>
+            <synapse inputDelayMethod="Distance" inputMaxDelay="10"/>
             <predictors activation="true"
                         activationSquare="false"
                         activationFadingSum="false"
@@ -181,7 +180,7 @@
             <inputUnits>
               <inputUnit inputFieldName="Outline">
                 <connections>
-                  <connection poolName="PureESN" density="1" signalingRestriction="AnalogOnly"/>
+                  <connection poolName="PureESN" signalingRestriction="AnalogOnly"/>
                 </connections>
               </inputUnit>
             </inputUnits>
@@ -310,23 +309,18 @@
             <inputUnits>
               <inputUnit inputFieldName="Outline" spikeTrainLength="5">
                 <connections>
-                  <connection poolName="AnalogPool" density="1" signalingRestriction="NoRestriction">
-                    <synapse delayMethod="Random" maxDelay="10">
-                      <analogTarget scope="Excitatory">
-                        <weight min="0" max="1"/>
-                      </analogTarget>
-                    </synapse>
+                  <connection poolName="AnalogPool" signalingRestriction="NoRestriction">
+                    <spikingTarget scope="All" density="0"/>
+                    <analogTarget scope="Excitatory" density="1"/>
                   </connection>
-                  <connection poolName="SpikingPool" density="1" signalingRestriction="NoRestriction">
-                    <synapse delayMethod="Random" maxDelay="10">
-                      <spikingTarget scope="Excitatory">
-                        <weight min="0" max="1"/>
-                      </spikingTarget>
-                    </synapse>
+                  <connection poolName="SpikingPool" signalingRestriction="NoRestriction">
+                    <spikingTarget scope="Excitatory" density="1"/>
+                    <analogTarget scope="All" density="0"/>
                   </connection>
                 </connections>
               </inputUnit>
             </inputUnits>
+            <synapse inputDelayMethod="Random" inputMaxDelay="10"/>
             <predictors activation="true"
                         activationSquare="false"
                         activationFadingSum="false"
@@ -475,7 +469,7 @@
             <inputUnits>
               <inputUnit inputFieldName="DistanceFromCenter">
                 <connections>
-                  <connection poolName="PureESN" density="1"/>
+                  <connection poolName="PureESN"/>
                 </connections>
               </inputUnit>
             </inputUnits>
@@ -570,7 +564,7 @@
             <inputUnits>
               <inputUnit inputFieldName="DistanceFromCenter">
                 <connections>
-                  <connection poolName="PureESN" density="1"/>
+                  <connection poolName="PureESN"/>
                 </connections>
               </inputUnit>
             </inputUnits>
@@ -684,7 +678,7 @@
             <inputUnits>
               <inputUnit inputFieldName="Eigenworm1">
                 <connections>
-                  <connection poolName="PureESN" density="1"/>
+                  <connection poolName="PureESN"/>
                 </connections>
               </inputUnit>
             </inputUnits>
@@ -794,12 +788,18 @@
             <inputUnits>
               <inputUnit inputFieldName="coord_abcissa">
                 <connections>
-                  <connection poolName="PureESN" density="0.25"/>
+                  <connection poolName="PureESN">
+                    <spikingTarget scope="All" density="0"/>
+                    <analogTarget scope="All" density="0.25"/>
+                  </connection>
                 </connections>
               </inputUnit>
               <inputUnit inputFieldName="coord_ordinate">
                 <connections>
-                  <connection poolName="PureESN" density="0.25"/>
+                  <connection poolName="PureESN">
+                    <spikingTarget scope="All" density="0"/>
+                    <analogTarget scope="All" density="0.25"/>
+                  </connection>
                 </connections>
               </inputUnit>
             </inputUnits>
@@ -942,23 +942,21 @@
             <inputUnits>
               <inputUnit inputFieldName="coord_abcissa" spikeTrainLength="5">
                 <connections>
-                  <connection poolName="PureLSM" density="0.5" signalingRestriction="NoRestriction">
-                    <synapse maxDelay="0">
-                      <spikingTarget scope="Excitatory">
-                        <weight min="0" max="0.5"/>
-                      </spikingTarget>
-                    </synapse>
+                  <connection poolName="PureLSM" signalingRestriction="NoRestriction">
+                    <spikingTarget scope="Excitatory" density="0.5">
+                      <weight min="0" max="0.5"/>
+                    </spikingTarget>
+                    <analogTarget scope="All" density="0"/>
                   </connection>
                 </connections>
               </inputUnit>
               <inputUnit inputFieldName="coord_ordinate" spikeTrainLength="5">
                 <connections>
-                  <connection poolName="PureLSM" density="0.5" signalingRestriction="NoRestriction">
-                    <synapse maxDelay="0">
-                      <spikingTarget scope="Excitatory">
-                        <weight min="0" max="0.5"/>
-                      </spikingTarget>
-                    </synapse>
+                  <connection poolName="PureLSM" signalingRestriction="NoRestriction">
+                    <spikingTarget scope="Excitatory" density="0.5">
+                      <weight min="0" max="0.5"/>
+                    </spikingTarget>
+                    <analogTarget scope="All" density="0"/>
                   </connection>
                 </connections>
               </inputUnit>
@@ -1120,14 +1118,26 @@
             <inputUnits>
               <inputUnit inputFieldName="coord_abcissa" spikeTrainLength="5" differenceDistance="1">
                 <connections>
-                  <connection poolName="SpikingPool" density="0.25" coding="Difference" signalingRestriction="SpikingOnly"/>
-                  <connection poolName="AnalogPool" density="0.25" signalingRestriction="AnalogOnly"/>
+                  <connection poolName="SpikingPool" coding="Difference" signalingRestriction="SpikingOnly">
+                    <spikingTarget density="0.25"/>
+                    <analogTarget density="0"/>
+                  </connection>
+                  <connection poolName="AnalogPool" signalingRestriction="AnalogOnly">
+                    <spikingTarget density="0"/>
+                    <analogTarget density="0.25"/>
+                  </connection>
                 </connections>
               </inputUnit>
               <inputUnit inputFieldName="coord_ordinate" spikeTrainLength="5" differenceDistance="1">
                 <connections>
-                  <connection poolName="SpikingPool" density="0.25" coding="Difference" signalingRestriction="SpikingOnly"/>
-                  <connection poolName="AnalogPool" density="0.25" signalingRestriction="AnalogOnly"/>
+                  <connection poolName="SpikingPool" coding="Difference" signalingRestriction="SpikingOnly">
+                    <spikingTarget density="0.25"/>
+                    <analogTarget density="0"/>
+                  </connection>
+                  <connection poolName="AnalogPool" signalingRestriction="AnalogOnly">
+                    <spikingTarget density="0"/>
+                    <analogTarget density="0.25"/>
+                  </connection>
                 </connections>
               </inputUnit>
             </inputUnits>
@@ -1239,9 +1249,7 @@
                   </analogGroup>
                 </neuronGroups>
                 <interconnection>
-                  <chainSchema ratio="1" circle="false" repetitions="1">
-                    <synapse/>
-                  </chainSchema>
+                  <chainSchema ratio="1" circle="false" repetitions="1"/>
                 </interconnection>
               </pool>
               <pool name="Logistic random pool">
@@ -1280,9 +1288,7 @@
                   </analogGroup>
                 </neuronGroups>
                 <interconnection>
-                  <chainSchema ratio="1" circle="false" repetitions="1">
-                    <synapse/>
-                  </chainSchema>
+                  <chainSchema ratio="1" circle="false" repetitions="1"/>
                 </interconnection>
               </pool>
               <pool name="Logistic random pool">
@@ -1314,7 +1320,7 @@
             <inputUnits>
               <inputUnit inputFieldName="Value">
                 <connections>
-                  <connection poolName="Logistic chain pool" density="1" coding="Actual" oppositeAmplitude="false"/>
+                  <connection poolName="Logistic chain pool" coding="Actual" oppositeAmplitude="false"/>
                 </connections>
               </inputUnit>
             </inputUnits>
@@ -1332,7 +1338,7 @@
             <inputUnits>
               <inputUnit inputFieldName="Value">
                 <connections>
-                  <connection poolName="Logistic random pool" density="1" coding="Actual" oppositeAmplitude="false"/>
+                  <connection poolName="Logistic random pool" coding="Actual" oppositeAmplitude="false"/>
                 </connections>
               </inputUnit>
             </inputUnits>
@@ -1416,9 +1422,7 @@
                   </analogGroup>
                 </neuronGroups>
                 <interconnection>
-                  <chainSchema ratio="1" circle="true" replaceExistingConnections="true" repetitions="3">
-                    <synapse/>
-                  </chainSchema>
+                  <chainSchema ratio="1" circle="true" replaceExistingConnections="true" repetitions="3"/>
                 </interconnection>
               </pool>
             </pools>
@@ -1429,34 +1433,28 @@
             <inputUnits>
               <inputUnit inputFieldName="High">
                 <connections>
-                  <connection poolName="Logistic pool" density="1">
-                    <synapse delayMethod="Random" maxDelay="0">
-                      <analogTarget scope="All">
-                        <weight min="0" max="0.1" />
-                      </analogTarget>
-                    </synapse>
+                  <connection poolName="Logistic pool">
+                    <analogTarget>
+                      <weight min="0" max="0.1"/>
+                    </analogTarget>
                   </connection>
                 </connections>
               </inputUnit>
               <inputUnit inputFieldName="Low">
                 <connections>
-                  <connection poolName="Logistic pool" density="1">
-                    <synapse delayMethod="Random" maxDelay="0">
-                      <analogTarget scope="All">
-                        <weight min="0" max="0.1" />
-                      </analogTarget>
-                    </synapse>
+                  <connection poolName="Logistic pool">
+                    <analogTarget>
+                      <weight min="0" max="0.1"/>
+                    </analogTarget>
                   </connection>
                 </connections>
               </inputUnit>
               <inputUnit inputFieldName="Adj Close">
                 <connections>
-                  <connection poolName="Logistic pool" density="1">
-                    <synapse delayMethod="Random" maxDelay="0">
-                      <analogTarget scope="All">
-                        <weight min="0" max="0.1" />
-                      </analogTarget>
-                    </synapse>
+                  <connection poolName="Logistic pool">
+                    <analogTarget>
+                      <weight min="0" max="0.1"/>
+                    </analogTarget>
                   </connection>
                 </connections>
               </inputUnit>
@@ -1547,9 +1545,7 @@
                   <randomSchema density="0.1" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false">
                     <distributionFlat/>
                   </randomSchema>
-                  <chainSchema ratio="1" circle="true" repetitions="1">
-                    <synapse/>
-                  </chainSchema>
+                  <chainSchema ratio="1" circle="true" repetitions="1"/>
                 </interconnection>
               </pool>
             </pools>
@@ -1560,16 +1556,11 @@
             <inputUnits>
               <inputUnit inputFieldName="EEG">
                 <connections>
-                  <connection poolName="PureESN" density="1">
-                    <synapse delayMethod="Random" maxDelay="89">
-                      <analogTarget scope="All">
-                        <weight min="0" max="1"/>
-                      </analogTarget>
-                    </synapse>
-                  </connection>
+                  <connection poolName="PureESN"/>
                 </connections>
               </inputUnit>
             </inputUnits>
+            <synapse inputDelayMethod="Random" inputMaxDelay="89"/>
             <predictors activation="false"
                         activationSquare="false"
                         activationFadingSum="false"
@@ -1675,9 +1666,7 @@
                   <randomSchema density="0.1" avgDistance="NA" allowSelfConnection="true">
                     <distributionFlat/>
                   </randomSchema>
-                  <chainSchema ratio="1" circle="true">
-                    <synapse/>
-                  </chainSchema>
+                  <chainSchema ratio="1" circle="true"/>
                 </interconnection>
               </pool>
               <pool name="Pool2">
@@ -1694,9 +1683,7 @@
                   <randomSchema density="0.1" avgDistance="NA" allowSelfConnection="true">
                     <distributionFlat/>
                   </randomSchema>
-                  <chainSchema ratio="1" circle="true">
-                    <synapse/>
-                  </chainSchema>
+                  <chainSchema ratio="1" circle="true"/>
                 </interconnection>
               </pool>
             </pools>
@@ -1707,37 +1694,21 @@
             <inputUnits>
               <inputUnit inputFieldName="LeftHandAccel">
                 <connections>
-                  <connection poolName="Pool1" density="0.5" coding="Actual" oppositeAmplitude="false" signalingRestriction="NoRestriction">
-                    <synapse delayMethod="Random" maxDelay="0">
-                      <analogTarget scope="All">
-                        <weight min="0" max="1"/>
-                      </analogTarget>
-                    </synapse>
+                  <connection poolName="Pool1" coding="Actual" oppositeAmplitude="false" signalingRestriction="NoRestriction">
+                    <analogTarget density="0.5"/>
                   </connection>
-                  <connection poolName="Pool2" density="0.5" coding="Actual" oppositeAmplitude="true" signalingRestriction="NoRestriction">
-                    <synapse delayMethod="Random" maxDelay="0">
-                      <analogTarget scope="All">
-                        <weight min="0" max="1"/>
-                      </analogTarget>
-                    </synapse>
+                  <connection poolName="Pool2" coding="Actual" oppositeAmplitude="true" signalingRestriction="NoRestriction">
+                    <analogTarget density="0.5"/>
                   </connection>
                 </connections>
               </inputUnit>
               <inputUnit inputFieldName="RightHandAccel">
                 <connections>
-                  <connection poolName="Pool1" density="0.5" coding="Actual" oppositeAmplitude="false" signalingRestriction="NoRestriction">
-                    <synapse delayMethod="Random" maxDelay="0">
-                      <analogTarget scope="All">
-                        <weight min="0" max="1"/>
-                      </analogTarget>
-                    </synapse>
+                  <connection poolName="Pool1" coding="Actual" oppositeAmplitude="false" signalingRestriction="NoRestriction">
+                    <analogTarget density="0.5"/>
                   </connection>
-                  <connection poolName="Pool2" density="0.5" coding="Actual" oppositeAmplitude="true" signalingRestriction="NoRestriction">
-                    <synapse delayMethod="Random" maxDelay="0">
-                      <analogTarget scope="All">
-                        <weight min="0" max="1"/>
-                      </analogTarget>
-                    </synapse>
+                  <connection poolName="Pool2" coding="Actual" oppositeAmplitude="true" signalingRestriction="NoRestriction">
+                    <analogTarget density="0.5"/>
                   </connection>
                 </connections>
               </inputUnit>
@@ -1874,9 +1845,7 @@
                   <randomSchema density="0.0667">
                     <distributionFlat/>
                   </randomSchema>
-                  <chainSchema ratio="1" circle="true" repetitions="1">
-                    <synapse/>
-                  </chainSchema>
+                  <chainSchema ratio="1" circle="true" repetitions="1"/>
                 </interconnection>
               </pool>
               <pool name="Pool2">
@@ -1893,9 +1862,7 @@
                   <randomSchema density="0.0667">
                     <distributionFlat/>
                   </randomSchema>
-                  <chainSchema ratio="1" circle="true" repetitions="1">
-                    <synapse/>
-                  </chainSchema>
+                  <chainSchema ratio="1" circle="true" repetitions="1"/>
                 </interconnection>
               </pool>
               <pool name="Pool3">
@@ -1912,9 +1879,7 @@
                   <randomSchema density="0.0667">
                     <distributionFlat/>
                   </randomSchema>
-                  <chainSchema ratio="1" circle="true" repetitions="1">
-                    <synapse/>
-                  </chainSchema>
+                  <chainSchema ratio="1" circle="true" repetitions="1"/>
                 </interconnection>
               </pool>
               <pool name="Pool4">
@@ -1931,9 +1896,7 @@
                   <randomSchema density="0.0667">
                     <distributionFlat/>
                   </randomSchema>
-                  <chainSchema ratio="1" circle="true" repetitions="1">
-                    <synapse/>
-                  </chainSchema>
+                  <chainSchema ratio="1" circle="true" repetitions="1"/>
                 </interconnection>
               </pool>
             </pools>
@@ -1955,55 +1918,32 @@
             <inputUnits>
               <inputUnit inputFieldName="LeftHandAccel">
                 <connections>
-                  <connection poolName="Pool1" density="0.5" coding="Actual" oppositeAmplitude="false" signalingRestriction="NoRestriction">
-                    <synapse delayMethod="Random" maxDelay="5">
-                      <analogTarget scope="All">
-                        <weight min="0" max="1"/>
-                      </analogTarget>
-                    </synapse>
+                  <connection poolName="Pool1" coding="Actual" oppositeAmplitude="false" signalingRestriction="NoRestriction">
+                    <analogTarget density="0.5"/>
                   </connection>
-                  <connection poolName="Pool2" density="0.5" coding="Power" oppositeAmplitude="false" signalingRestriction="NoRestriction">
-                    <synapse delayMethod="Random" maxDelay="5">
-                      <analogTarget scope="All">
-                        <weight min="0" max="1"/>
-                      </analogTarget>
-                    </synapse>
+                  <connection poolName="Pool2" coding="Power" oppositeAmplitude="false" signalingRestriction="NoRestriction">
+                    <analogTarget density="0.5"/>
                   </connection>
-                  <connection poolName="Pool3" density="0.5" coding="MovingAverage" oppositeAmplitude="false" signalingRestriction="NoRestriction">
-                    <synapse delayMethod="Random" maxDelay="0">
-                      <analogTarget scope="All">
-                        <weight min="0" max="1"/>
-                      </analogTarget>
-                    </synapse>
+                  <connection poolName="Pool3" coding="MovingAverage" oppositeAmplitude="false" signalingRestriction="NoRestriction">
+                    <analogTarget density="0.5"/>
                   </connection>
                 </connections>
               </inputUnit>
               <inputUnit inputFieldName="RightHandAccel">
                 <connections>
-                  <connection poolName="Pool1" density="0.5" coding="Actual" oppositeAmplitude="false" signalingRestriction="NoRestriction">
-                    <synapse delayMethod="Random" maxDelay="5">
-                      <analogTarget scope="All">
-                        <weight min="0" max="1"/>
-                      </analogTarget>
-                    </synapse>
+                  <connection poolName="Pool1" coding="Actual" oppositeAmplitude="false" signalingRestriction="NoRestriction">
+                    <analogTarget density="0.5"/>
                   </connection>
-                  <connection poolName="Pool2" density="0.5" coding="Power" oppositeAmplitude="false" signalingRestriction="NoRestriction">
-                    <synapse delayMethod="Random" maxDelay="5">
-                      <analogTarget scope="All">
-                        <weight min="0" max="1"/>
-                      </analogTarget>
-                    </synapse>
+                  <connection poolName="Pool2" coding="Power" oppositeAmplitude="false" signalingRestriction="NoRestriction">
+                    <analogTarget density="0.5"/>
                   </connection>
-                  <connection poolName="Pool3" density="0.5" coding="MovingAverage" oppositeAmplitude="false" signalingRestriction="NoRestriction">
-                    <synapse delayMethod="Random" maxDelay="0">
-                      <analogTarget scope="All">
-                        <weight min="0" max="1"/>
-                      </analogTarget>
-                    </synapse>
+                  <connection poolName="Pool3" coding="MovingAverage" oppositeAmplitude="false" signalingRestriction="NoRestriction">
+                    <analogTarget density="0.5"/>
                   </connection>
                 </connections>
               </inputUnit>
             </inputUnits>
+            <synapse inputDelayMethod="Random" inputMaxDelay="5"/>
             <predictors activation="false"
                         activationSquare="false"
                         activationFadingSum="false"
@@ -2138,9 +2078,7 @@
                   <randomSchema density="0.1" avgDistance="NA" allowSelfConnection="true">
                     <distributionFlat/>
                   </randomSchema>
-                  <chainSchema ratio="1" circle="true">
-                    <synapse/>
-                  </chainSchema>
+                  <chainSchema ratio="1" circle="true"/>
                 </interconnection>
               </pool>
               <pool name="Pool2">
@@ -2157,9 +2095,7 @@
                   <randomSchema density="0.1" avgDistance="NA" allowSelfConnection="true">
                     <distributionFlat/>
                   </randomSchema>
-                  <chainSchema ratio="1" circle="true">
-                    <synapse/>
-                  </chainSchema>
+                  <chainSchema ratio="1" circle="true"/>
                 </interconnection>
               </pool>
             </pools>
@@ -2170,23 +2106,12 @@
             <inputUnits>
               <inputUnit inputFieldName="Accel">
                 <connections>
-                  <connection poolName="Pool1" density="1" coding="Power" oppositeAmplitude="false" signalingRestriction="NoRestriction">
-                    <synapse delayMethod="Random" maxDelay="150">
-                      <analogTarget scope="All">
-                        <weight min="0" max="1"/>
-                      </analogTarget>
-                    </synapse>
-                  </connection>
-                  <connection poolName="Pool2" density="1" coding="MovingAverage" oppositeAmplitude="false" signalingRestriction="NoRestriction">
-                    <synapse delayMethod="Random" maxDelay="150">
-                      <analogTarget scope="All">
-                        <weight min="0" max="1"/>
-                      </analogTarget>
-                    </synapse>
-                  </connection>
+                  <connection poolName="Pool1" coding="Power" oppositeAmplitude="false" signalingRestriction="NoRestriction"/>
+                  <connection poolName="Pool2" coding="MovingAverage" oppositeAmplitude="false" signalingRestriction="NoRestriction"/>
                 </connections>
               </inputUnit>
             </inputUnits>
+            <synapse inputDelayMethod="Random" inputMaxDelay="150"/>
             <predictors activation="false"
                         activationSquare="false"
                         activationFadingSum="false"
