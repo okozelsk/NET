@@ -43,6 +43,11 @@ namespace RCNet.Neural.Network.SM
 
         //Attribute properties
         /// <summary>
+        /// Configuration
+        /// </summary>
+        public StateMachineSettings Config { get; }
+
+        /// <summary>
         /// Neural preprocessor.
         /// </summary>
         public NeuralPreprocessor NP { get; private set; }
@@ -52,24 +57,18 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         public ReadoutLayer RL { get; private set; }
 
-        //Attributes
-        /// <summary>
-        /// Settings used for instance creation.
-        /// </summary>
-        private readonly StateMachineSettings _settings;
-
         //Constructors
         /// <summary>
         /// Creates an instance of StateMachine
         /// </summary>
-        /// <param name="settings">StateMachine settings</param>
+        /// <param name="settings">StateMachine configuration</param>
         public StateMachine(StateMachineSettings settings)
         {
-            _settings = (StateMachineSettings)settings.DeepClone();
+            Config = (StateMachineSettings)settings.DeepClone();
             //Neural preprocessor instance
-            NP = _settings.NeuralPreprocessorCfg == null ? null : new NeuralPreprocessor(_settings.NeuralPreprocessorCfg, _settings.RandomizerSeek);
+            NP = Config.NeuralPreprocessorCfg == null ? null : new NeuralPreprocessor(Config.NeuralPreprocessorCfg, Config.RandomizerSeek);
             //Readout layer instance
-            RL = new ReadoutLayer(_settings.ReadoutLayerCfg);
+            RL = new ReadoutLayer(Config.ReadoutLayerCfg);
             return;
         }
 
@@ -80,11 +79,11 @@ namespace RCNet.Neural.Network.SM
         public StateMachine(string settingsXmlFile)
         {
             XDocument xmlDoc = XDocument.Load(settingsXmlFile);
-            _settings = new StateMachineSettings(xmlDoc.Root);
+            Config = new StateMachineSettings(xmlDoc.Root);
             //Neural preprocessor instance
-            NP = _settings.NeuralPreprocessorCfg == null ? null : new NeuralPreprocessor(_settings.NeuralPreprocessorCfg, _settings.RandomizerSeek);
+            NP = Config.NeuralPreprocessorCfg == null ? null : new NeuralPreprocessor(Config.NeuralPreprocessorCfg, Config.RandomizerSeek);
             //Readout layer instance
-            RL = new ReadoutLayer(_settings.ReadoutLayerCfg);
+            RL = new ReadoutLayer(Config.ReadoutLayerCfg);
             return;
         }
 
@@ -166,7 +165,7 @@ namespace RCNet.Neural.Network.SM
             {
                 //Create empty instance of the mapper
                 PredictorsMapper mapper = new PredictorsMapper(NP.PredictorGeneralSwitchCollection);
-                if (_settings.MapperCfg != null)
+                if (Config.MapperCfg != null)
                 {
                     //Expand list of predicting neurons to array of predictor and its origin
                     List<Tuple<int, int, PredictorsProvider.PredictorID>> predictorInfoCollection = new List<Tuple<int, int, PredictorsProvider.PredictorID>>();
@@ -182,13 +181,13 @@ namespace RCNet.Neural.Network.SM
                         }
                     }
                     //Iterate all readout units
-                    foreach (string readoutUnitName in _settings.ReadoutLayerCfg.OutputFieldNameCollection)
+                    foreach (string readoutUnitName in Config.ReadoutLayerCfg.OutputFieldNameCollection)
                     {
                         bool[] switches = new bool[NP.TotalNumOfPredictors];
                         //Initially allow all valid predictors
                         NP.PredictorGeneralSwitchCollection.CopyTo(switches, 0);
                         //Exists specific mapping?
-                        ReadoutUnitMapSettings rums = _settings.MapperCfg.GetMapCfg(readoutUnitName, false);
+                        ReadoutUnitMapSettings rums = Config.MapperCfg.GetMapCfg(readoutUnitName, false);
                         if (rums != null)
                         {
                             //Neuron predictors
@@ -199,8 +198,8 @@ namespace RCNet.Neural.Network.SM
                                     if(switches[i] && rums.AllowedPoolsCfg != null)
                                     {
                                         //Disable not allowed origin
-                                        string reservoirInstanceName = _settings.NeuralPreprocessorCfg.ReservoirInstancesCfg.ReservoirInstanceCfgCollection[predictorInfoCollection[i].Item1].Name;
-                                        ReservoirStructureSettings rss = _settings.NeuralPreprocessorCfg.ReservoirStructuresCfg.GetReservoirStructureCfg(_settings.NeuralPreprocessorCfg.ReservoirInstancesCfg.ReservoirInstanceCfgCollection[predictorInfoCollection[i].Item1].StructureCfgName);
+                                        string reservoirInstanceName = Config.NeuralPreprocessorCfg.ReservoirInstancesCfg.ReservoirInstanceCfgCollection[predictorInfoCollection[i].Item1].Name;
+                                        ReservoirStructureSettings rss = Config.NeuralPreprocessorCfg.ReservoirStructuresCfg.GetReservoirStructureCfg(Config.NeuralPreprocessorCfg.ReservoirInstancesCfg.ReservoirInstanceCfgCollection[predictorInfoCollection[i].Item1].StructureCfgName);
                                         string poolName = rss.PoolsCfg.PoolCfgCollection[predictorInfoCollection[i].Item2].Name;
                                         if(!rums.AllowedPoolsCfg.IsAllowed(reservoirInstanceName, poolName))
                                         {
@@ -225,7 +224,7 @@ namespace RCNet.Neural.Network.SM
                                 {
                                     switches[i] = false;
                                 }
-                                string[] routedFieldNames = _settings.NeuralPreprocessorCfg.InputCfg.GetRoutedFieldNames().ToArray();
+                                string[] routedFieldNames = Config.NeuralPreprocessorCfg.InputCfg.GetRoutedFieldNames().ToArray();
                                 //Enable enabled routed input fields
                                 foreach (AllowedInputFieldSettings aifs in rums.AllowedInputFieldsCfg.AllowedInputFieldCfgCollection)
                                 {
@@ -324,7 +323,7 @@ namespace RCNet.Neural.Network.SM
         /// <returns>Verification result</returns>
         public VerificationResults Verify(VectorBundle vectorBundle)
         {
-            VerificationResults verificationResults = new VerificationResults(_settings.ReadoutLayerCfg);
+            VerificationResults verificationResults = new VerificationResults(Config.ReadoutLayerCfg);
             for (int sampleIdx = 0; sampleIdx < vectorBundle.InputVectorCollection.Count; sampleIdx++)
             {
                 double[] predictors;

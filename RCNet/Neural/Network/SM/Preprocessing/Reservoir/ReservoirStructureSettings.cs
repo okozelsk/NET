@@ -48,7 +48,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// <param name="InterPoolConnectionsCfg">Collection of pools interconnection settings</param>
         public ReservoirStructureSettings(string name,
                                           PoolsSettings poolsCfg,
-                                          InterPoolConnsSettings interPoolConnectionsCfg
+                                          InterPoolConnsSettings interPoolConnectionsCfg = null
                                           )
         {
             Name = name;

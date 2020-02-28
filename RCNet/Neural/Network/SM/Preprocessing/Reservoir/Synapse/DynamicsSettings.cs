@@ -64,7 +64,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         /// </summary>
         /// <param name="source">Source instance</param>
         public DynamicsSettings(DynamicsSettings source)
-            :this(source.RestingEfficacy, source.TauFacilitation, source.TauDepression, source.Apply)
+            :this(source.RestingEfficacy, source.TauDepression, source.TauFacilitation, source.Apply)
         {
             return;
         }

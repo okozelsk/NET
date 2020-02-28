@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Demo.DemoConsoleApp.Examples;
 using Demo.DemoConsoleApp.Log;
 using Demo.DemoConsoleApp.SM;
 
@@ -11,26 +12,68 @@ namespace Demo.DemoConsoleApp
         {
             //Research - this is not a part of the demo - it is a free playground
             //(new Research()).Run();
-
-            //Standard execution of the Demo
-            try
+            //
+            //(new ForecastFromScratch()).Run();
+            while (true)
             {
-                //Run the demo
-                SMDemo demoEngine = new SMDemo(new ConsoleLog());
-                demoEngine.RunDemo(@"SM\SMDemoSettings.xml");
-            }
-            catch (Exception e)
-            {
+                //Main menu
+                Console.Clear();
+                Console.WriteLine("Main menu:");
+                Console.WriteLine("  1. State Machine demo tasks (execution of SMDemoSettings.xml)");
+                Console.WriteLine("  2. State Machine forecast setup from scratch (code example)");
+                Console.WriteLine("  9. Exit");
                 Console.WriteLine();
-                while(e != null)
+                Console.WriteLine("  Press digit...");
+                ConsoleKeyInfo consoleKeyInfo = Console.ReadKey(true);
+                switch (consoleKeyInfo.KeyChar)
                 {
-                    Console.WriteLine(e.Message);
-                    e = e.InnerException;
-                }
-            }
-            Console.WriteLine("Press Enter.");
-            Console.ReadLine();
-            return;
+                    case '1':
+                        try
+                        {
+                            //Run the demo
+                            SMDemo demoEngine = new SMDemo(new ConsoleLog());
+                            demoEngine.RunDemo(@"SM\SMDemoSettings.xml");
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine();
+                            while (e != null)
+                            {
+                                Console.WriteLine(e.Message);
+                                e = e.InnerException;
+                            }
+                        }
+                        break;
+
+                    case '2':
+                        try
+                        {
+                            (new ForecastFromScratch()).Run();
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine();
+                            while (e != null)
+                            {
+                                Console.WriteLine(e.Message);
+                                e = e.InnerException;
+                            }
+                        }
+                        break;
+
+                    case '9':
+                        return;
+
+                    default:
+                        break;
+
+                }//Switch choice
+                //Loop the menu
+                Console.WriteLine();
+                Console.WriteLine("Press Enter to return to menu...");
+                Console.ReadLine();
+            }//Menu loop
+
         }//Main
 
     }//Program

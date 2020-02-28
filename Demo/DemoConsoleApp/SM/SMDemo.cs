@@ -49,9 +49,6 @@ namespace Demo.DemoConsoleApp.SM
             return;
         }
 
-
-        //Methods
-
         /// <summary>
         /// Displays information about the preprocessing progress and at the end displays important NeuralPreprocessor's statistics.
         /// </summary>
@@ -104,6 +101,7 @@ namespace Demo.DemoConsoleApp.SM
             return;
         }
 
+        //Methods
         /// <summary>
         /// Performs specified demo case.
         /// </summary>

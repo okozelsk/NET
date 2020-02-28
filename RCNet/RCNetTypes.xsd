@@ -1146,8 +1146,8 @@
   <xs:complexType name="SynapsePlasticityType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="SynapseDynamicsEEType" name="dynamicsEE" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="SynapseDynamicsIEType" name="dynamicsIE" minOccurs="0" maxOccurs="1"/>
       <xs:element type="SynapseDynamicsEIType" name="dynamicsEI" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="SynapseDynamicsIEType" name="dynamicsIE" minOccurs="0" maxOccurs="1"/>
       <xs:element type="SynapseDynamicsIIType" name="dynamicsII" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
   </xs:complexType>
