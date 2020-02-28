@@ -11,6 +11,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
     /// <summary>
     /// Firing count predictor settings
     /// </summary>
+    [Serializable]
     public class FiringCountSettings : RCNetBaseSettings, IPredictorParamsSettings
     {
         //Constants

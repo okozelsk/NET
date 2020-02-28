@@ -3,20 +3,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
+using RCNet.RandomValue;
 using RCNet.Neural.Data.Filter;
+using RCNet.Neural.Activation;
+using RCNet.Neural.Network.NonRecurrent.FF;
 using RCNet.Neural.Network.SM.Preprocessing.Input;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Space3D;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup;
-using RCNet.Neural.Activation;
-using RCNet.RandomValue;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor;
 using RCNet.Neural.Network.SM.Preprocessing;
 using RCNet.Neural.Network.SM.Readout;
-using RCNet.Neural.Network.NonRecurrent.FF;
 using RCNet.Neural.Network.SM;
 
 namespace Demo.DemoConsoleApp.Examples
@@ -259,13 +260,40 @@ namespace Demo.DemoConsoleApp.Examples
             
             //StateMachine training
             TrainStateMachine(stateMachine, ".\\Data\\TTOO.csv", out double[] predictionInputVector);
-            
-            //StateMachine prediction
+
+            //Create Examples directory
+            Directory.CreateDirectory(".\\Examples");
+
+            //Store StateMachine xml configuration
+            string configXml = stateMachineCfg.GetXml(true).ToString();
+            string configFileName = ".\\Examples\\ForecastFromScratchSMConfig.xml";
+            using (StreamWriter writer = new StreamWriter(File.Create(configFileName)))
+            {
+                writer.Write(configXml);
+            }
+
+            //Serialize StateMachine
+            string serializationFileName = ".\\Examples\\ForecastFromScratchSM.dat";
+            stateMachine.SaveToFile(serializationFileName);
+
+            //Forecast
             ReadoutLayer.ReadoutData readoutData = stateMachine.ComputeReadoutData(predictionInputVector);
             string predictionReport = stateMachine.RL.GetForecastReport(readoutData.DataVector, 6);
             _log.Write("    Forecasts", false);
             _log.Write(predictionReport);
             _log.Write(string.Empty);
+
+            //New StateMachine instance from the file
+            StateMachine stateMachineNewInstance = StateMachine.LoadFromFile(serializationFileName);
+
+            //New StateMachine instance prediction
+            readoutData = stateMachineNewInstance.ComputeReadoutData(predictionInputVector);
+            predictionReport = stateMachineNewInstance.RL.GetForecastReport(readoutData.DataVector, 6);
+            _log.Write("    Forecasts (new StateMachine instance)", false);
+            _log.Write(predictionReport);
+            _log.Write(string.Empty);
+
+
 
 
 

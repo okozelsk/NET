@@ -130,7 +130,7 @@ namespace RCNet.Neural.Network.SM
         /// <param name="fileName">Name of the file</param>
         public void SaveToFile(string fileName)
         {
-            using (Stream stream = File.Open(fileName, FileMode.Create))
+            using (Stream stream = File.Create(fileName))
             {
                 Serialize(stream);
             }

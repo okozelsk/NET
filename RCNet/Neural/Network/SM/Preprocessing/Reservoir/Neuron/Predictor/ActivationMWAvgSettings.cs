@@ -11,6 +11,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
     /// <summary>
     /// Activation state moving weighted average predictor settings
     /// </summary>
+    [Serializable]
     public class ActivationMWAvgSettings : MWAvgPredictorSettings, IPredictorParamsSettings
     {
         //Constants

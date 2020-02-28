@@ -11,6 +11,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
     /// <summary>
     /// Fading sum of the firing predictor settings
     /// </summary>
+    [Serializable]
     public class FiringFadingSumSettings : RCNetBaseSettings, IPredictorParamsSettings
     {
         //Constants

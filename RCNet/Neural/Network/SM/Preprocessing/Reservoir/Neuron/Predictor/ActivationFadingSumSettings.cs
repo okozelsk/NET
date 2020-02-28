@@ -11,6 +11,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
     /// <summary>
     /// Fading sum of the activation state
     /// </summary>
+    [Serializable]
     public class ActivationFadingSumSettings : RCNetBaseSettings, IPredictorParamsSettings
     {
         //Constants

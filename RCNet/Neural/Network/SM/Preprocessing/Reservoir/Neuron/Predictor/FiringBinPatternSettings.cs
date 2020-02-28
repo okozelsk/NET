@@ -11,6 +11,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
     /// <summary>
     /// Firing binary pattern predictor settings
     /// </summary>
+    [Serializable]
     public class FiringBinPatternSettings : RCNetBaseSettings, IPredictorParamsSettings
     {
         //Constants
