@@ -41,7 +41,7 @@ namespace Demo.DemoConsoleApp.Examples
         {
             //Create configuration of the feed forward network having Identity output layer and two LeakyReLU hidden layers
             //with associated resilient back propagation trainer configuration
-            const int HiddenLayerSize = 5;
+            const int HiddenLayerSize = 3;
             HiddenLayerSettings hiddenLayerCfg = new HiddenLayerSettings(HiddenLayerSize, new LeakyReLUSettings());
             FeedForwardNetworkSettings ffNetCfg = new FeedForwardNetworkSettings(new IdentitySettings(),
                                                                                  new HiddenLayersSettings(hiddenLayerCfg, hiddenLayerCfg),
@@ -50,7 +50,12 @@ namespace Demo.DemoConsoleApp.Examples
             //Collect training data
             VectorBundle trainingData = CreateTrainingData();
             //Create network instance
+            //We specify 2 input values, 3 output values and previously prepared network structure configuration
             FeedForwardNetwork ffNet = new FeedForwardNetwork(2, 3, ffNetCfg);
+
+            //Training
+            _log.Write("Training");
+            _log.Write("--------");
             //Create trainer instance
             RPropTrainer trainer = new RPropTrainer(ffNet,
                                                     trainingData.InputVectorCollection,
@@ -58,31 +63,27 @@ namespace Demo.DemoConsoleApp.Examples
                                                     (RPropTrainerSettings)ffNetCfg.TrainerCfg,
                                                     new Random(0)
                                                     );
-
-            //Training
-            _log.Write("Training");
-            _log.Write(string.Empty);
-            while (trainer.Iteration())
+            //Training loop
+            while (trainer.Iteration() && trainer.MSE > 1e-6)
             {
-                _log.Write($"  Attempt {trainer.Attempt} / Epoch {trainer.AttemptEpoch} mse = {trainer.MSE.ToString(CultureInfo.InvariantCulture)}", true);
-                if(trainer.MSE < 1e-6)
-                {
-                    break;
-                }
+                _log.Write($"  Attempt {trainer.Attempt} / Epoch {trainer.AttemptEpoch.ToString().PadRight(3)} Mean Squared Error = {Math.Round(trainer.MSE, 8).ToString(CultureInfo.InvariantCulture)}", false);
             }
             _log.Write(string.Empty);
 
+            //Training is done
             //Display network computation results
             _log.Write("Trained network computations:");
+            _log.Write("-----------------------------");
             foreach (double[] input in trainingData.InputVectorCollection)
             {
                 double[] results = ffNet.Compute(input);
                 _log.Write($"  Input {input[0]} {input[1]} Results: AND={Math.Round(results[0])} OR={Math.Round(results[1])} XOR={Math.Round(results[2])}");
             }
+            _log.Write(string.Empty);
 
-
+            //Finished
             return;
-        }
+        }//Run
 
     }//FFNetBoolAlg
 

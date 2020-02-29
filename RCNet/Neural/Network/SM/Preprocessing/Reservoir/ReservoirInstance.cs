@@ -1018,15 +1018,26 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                         poolStat.NeuronGroupStatCollection[neuron.Location.PoolGroupID].MaxFiringStat.AddSampleValue(neuron.Statistics.FiringStat.Max);
                         poolStat.NeuronGroupStatCollection[neuron.Location.PoolGroupID].MinFiringStat.AddSampleValue(neuron.Statistics.FiringStat.Min);
                     }
-                    //Synapses efficacy statistics
+                    //Input synapses efficacy statistics
+                    foreach (Synapse iSynapse in _neuronInputConnectionsCollection[neuron.Location.ReservoirFlatIdx].Values)
+                    {
+                        if (iSynapse.EfficacyStat.NumOfSamples > 0)
+                        {
+                            poolStat.NeuronGroupStatCollection[neuron.Location.PoolGroupID].AvgInpSynEfficacyStat.AddSampleValue(iSynapse.EfficacyStat.ArithAvg);
+                            poolStat.NeuronGroupStatCollection[neuron.Location.PoolGroupID].MaxInpSynEfficacyStat.AddSampleValue(iSynapse.EfficacyStat.Max);
+                            poolStat.NeuronGroupStatCollection[neuron.Location.PoolGroupID].MinInpSynEfficacyStat.AddSampleValue(iSynapse.EfficacyStat.Min);
+                            poolStat.NeuronGroupStatCollection[neuron.Location.PoolGroupID].InpSynEfficacySpansStat.AddSampleValue(iSynapse.EfficacyStat.Span);
+                        }
+                    }
+                    //Internal synapses efficacy statistics
                     foreach (Synapse rSynapse in _neuronNeuronConnectionsCollection[neuron.Location.ReservoirFlatIdx].Values)
                     {
                         if (rSynapse.EfficacyStat.NumOfSamples > 0)
                         {
-                            poolStat.NeuronGroupStatCollection[neuron.Location.PoolGroupID].AvgSynEfficacyStat.AddSampleValue(rSynapse.EfficacyStat.ArithAvg);
-                            poolStat.NeuronGroupStatCollection[neuron.Location.PoolGroupID].MaxSynEfficacyStat.AddSampleValue(rSynapse.EfficacyStat.Max);
-                            poolStat.NeuronGroupStatCollection[neuron.Location.PoolGroupID].MinSynEfficacyStat.AddSampleValue(rSynapse.EfficacyStat.Min);
-                            poolStat.NeuronGroupStatCollection[neuron.Location.PoolGroupID].SynEfficacySpansStat.AddSampleValue(rSynapse.EfficacyStat.Span);
+                            poolStat.NeuronGroupStatCollection[neuron.Location.PoolGroupID].AvgIntSynEfficacyStat.AddSampleValue(rSynapse.EfficacyStat.ArithAvg);
+                            poolStat.NeuronGroupStatCollection[neuron.Location.PoolGroupID].MaxIntSynEfficacyStat.AddSampleValue(rSynapse.EfficacyStat.Max);
+                            poolStat.NeuronGroupStatCollection[neuron.Location.PoolGroupID].MinIntSynEfficacyStat.AddSampleValue(rSynapse.EfficacyStat.Min);
+                            poolStat.NeuronGroupStatCollection[neuron.Location.PoolGroupID].IntSynEfficacySpansStat.AddSampleValue(rSynapse.EfficacyStat.Span);
                         }
                     }
                     if (neuron.Statistics.ReservoirStimuliStat.NumOfNonzeroSamples == 0)
@@ -1542,21 +1553,37 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                 /// </summary>
                 public BasicStat MinFiringStat { get; }
                 /// <summary>
-                /// Statistics of the synapses' average efficacy
+                /// Statistics of the input synapses' average efficacy
                 /// </summary>
-                public BasicStat AvgSynEfficacyStat { get; }
+                public BasicStat AvgInpSynEfficacyStat { get; }
                 /// <summary>
-                /// Statistics of the synapses' max efficacy
+                /// Statistics of the input synapses' max efficacy
                 /// </summary>
-                public BasicStat MaxSynEfficacyStat { get; }
+                public BasicStat MaxInpSynEfficacyStat { get; }
                 /// <summary>
-                /// Statistics of the synapses' min efficacy
+                /// Statistics of the input synapses' min efficacy
                 /// </summary>
-                public BasicStat MinSynEfficacyStat { get; }
+                public BasicStat MinInpSynEfficacyStat { get; }
                 /// <summary>
-                /// Statistics of the synapses' efficacy span
+                /// Statistics of the input synapses' efficacy span
                 /// </summary>
-                public BasicStat SynEfficacySpansStat { get; }
+                public BasicStat InpSynEfficacySpansStat { get; }
+                /// <summary>
+                /// Statistics of the internal synapses' average efficacy
+                /// </summary>
+                public BasicStat AvgIntSynEfficacyStat { get; }
+                /// <summary>
+                /// Statistics of the internal synapses' max efficacy
+                /// </summary>
+                public BasicStat MaxIntSynEfficacyStat { get; }
+                /// <summary>
+                /// Statistics of the internal synapses' min efficacy
+                /// </summary>
+                public BasicStat MinIntSynEfficacyStat { get; }
+                /// <summary>
+                /// Statistics of the internal synapses' efficacy span
+                /// </summary>
+                public BasicStat IntSynEfficacySpansStat { get; }
                 /// <summary>
                 /// Number of neurons getting no stimulation from connected reservoir's neurons
                 /// </summary>
@@ -1609,10 +1636,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                     AvgFiringStat = new BasicStat();
                     MaxFiringStat = new BasicStat();
                     MinFiringStat = new BasicStat();
-                    AvgSynEfficacyStat = new BasicStat();
-                    MaxSynEfficacyStat = new BasicStat();
-                    MinSynEfficacyStat = new BasicStat();
-                    SynEfficacySpansStat = new BasicStat();
+                    AvgInpSynEfficacyStat = new BasicStat();
+                    MaxInpSynEfficacyStat = new BasicStat();
+                    MinInpSynEfficacyStat = new BasicStat();
+                    InpSynEfficacySpansStat = new BasicStat();
+                    AvgIntSynEfficacyStat = new BasicStat();
+                    MaxIntSynEfficacyStat = new BasicStat();
+                    MinIntSynEfficacyStat = new BasicStat();
+                    IntSynEfficacySpansStat = new BasicStat();
                     NumOfNoRStimuliNeurons = 0;
                     NumOfNoAnalogOutputSignalNeurons = 0;
                     NumOfConstAnalogOutputSignalNeurons = 0;

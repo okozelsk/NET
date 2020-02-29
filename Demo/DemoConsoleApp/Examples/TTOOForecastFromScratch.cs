@@ -254,11 +254,15 @@ namespace Demo.DemoConsoleApp.Examples
             //Initially we set all switches to false - all available predictors are forbidden
             bool[] predictorSwitches = new bool[PredictorsProvider.NumOfPredictors];
             predictorSwitches.Populate(false);
-            //Now we enable ActivationSquare and ActivationFadingSum predictors
-            predictorSwitches[(int)PredictorsProvider.PredictorID.ActivationSquare] = true;
-            predictorSwitches[(int)PredictorsProvider.PredictorID.ActivationFadingSum] = true;
-            //Create predictors configuration using boolean switches and default (null) predictors parameters
-            PredictorsSettings predictorsCfg = new PredictorsSettings(predictorSwitches, null);
+            //Now we enable Activation and ActivationMWAvg predictors
+            predictorSwitches[(int)PredictorsProvider.PredictorID.Activation] = true;
+            predictorSwitches[(int)PredictorsProvider.PredictorID.ActivationMWAvg] = true;
+            //We configure activation moving average predictor to use constant weights and last 7 values without the leaks
+            ActivationMWAvgSettings activationMWAvgCfg = new ActivationMWAvgSettings(7, 0, NeuronCommon.NeuronPredictorMWAvgWeightsType.Constant);
+            //We create predictors parameters configuration including custom configuration of activation moving average predictor
+            PredictorsParamsSettings predictorsParamsCfg = new PredictorsParamsSettings(activationMWAvgCfg);
+            //Create predictors configuration using prepared boolean switches and predictors parameters
+            PredictorsSettings predictorsCfg = new PredictorsSettings(predictorSwitches, predictorsParamsCfg);
             //Create reservoir instance configuration
             ReservoirInstanceSettings resInstCfg = new ReservoirInstanceSettings(instName,
                                                                                  structName,
