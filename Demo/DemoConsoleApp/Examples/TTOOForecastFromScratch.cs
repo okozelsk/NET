@@ -24,11 +24,14 @@ using RCNet.Neural.Network.SM;
 namespace Demo.DemoConsoleApp.Examples
 {
     /// <summary>
-    /// Example uses TTOO.csv from ./Data subfolder and stores data to ./Examples folder.
+    /// Example uses TTOO.csv from ./Data subfolder.
+    /// Time series contains real share prices of TTOO title from https://finance.yahoo.com/quote/TTOO/history?p=TTOO.
+    /// The last recorded prices are from 2018/03/02 so StateMachine is predicting next High and Low prices for the following
+    /// business day 2018/03/05 (where real prices were High = 6.58$ and Low=5.99$).
     /// Example code shows how to:
     ///   setup StateMachine from scratch,
-    ///   store configuration xml,
-    ///   train and serialize StateMachine,
+    ///   store configuration xml (writes in Examples sub-folder),
+    ///   train and serialize StateMachine (writes in Examples sub-folder),
     ///   load serialized StateMachine and forecast next values
     /// </summary>
     public class TTOOForecastFromScratch : BaseExample

@@ -21,6 +21,7 @@ namespace Demo.DemoConsoleApp
                 Console.WriteLine("Main menu:");
                 Console.WriteLine("  1. State Machine performance demo (execution of the tasks defined in the SMDemoSettings.xml)");
                 Console.WriteLine("  2. Code example of TTOO share prices forecast (State Machine setup from scratch)");
+                Console.WriteLine("  3. Code example of Feed Forward network trained to solve boolean algebra");
                 Console.WriteLine("  0. Exit");
                 Console.WriteLine();
                 Console.WriteLine("  Press the digit...");
@@ -49,6 +50,22 @@ namespace Demo.DemoConsoleApp
                         try
                         {
                             (new TTOOForecastFromScratch()).Run();
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine();
+                            while (e != null)
+                            {
+                                Console.WriteLine(e.Message);
+                                e = e.InnerException;
+                            }
+                        }
+                        break;
+
+                    case '3':
+                        try
+                        {
+                            (new FFNetBoolAlg()).Run();
                         }
                         catch (Exception e)
                         {
