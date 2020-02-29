@@ -31,15 +31,23 @@ namespace RCNet.Neural.Network.SM.Readout
         /// Maximum allowed test data ratio
         /// </summary>
         public const double MaxTestDataRatio = 0.5d;
+        /// <summary>
+        /// Automatic number of folds (code)
+        /// </summary>
+        public const string AutoFoldsCode = "Auto";
+        /// <summary>
+        /// Automatic number of folds (num)
+        /// </summary>
+        public const int AutoFolds = 0;
         //Default values
         /// <summary>
         /// Default number of folds - string code
         /// </summary>
-        public const string DefaultFoldsString = "Auto";
+        public const string DefaultFoldsString = AutoFoldsCode;
         /// <summary>
         /// Default number of folds - numeric code
         /// </summary>
-        public const int DefaultFoldsNum = 0;
+        public const int DefaultFoldsNum = AutoFolds;
         /// <summary>
         /// Default number of repetitions
         /// </summary>
