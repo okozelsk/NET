@@ -115,7 +115,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// Creates the instance and initialize it from given xml element.
         /// </summary>
         /// <param name="elem">Xml data containing settings.</param>
-        /// <param name="activationType">Specifies sub-type of the neuron group</param>
         public SpikingNeuronGroupSettings(XElement elem)
         {
             //Validation

@@ -171,7 +171,6 @@ namespace RCNet.Neural.Network.SM
                     List<Tuple<int, int, PredictorsProvider.PredictorID>> predictorInfoCollection = new List<Tuple<int, int, PredictorsProvider.PredictorID>>();
                     foreach (HiddenNeuron neuron in NP.PredictorNeuronCollection)
                     {
-                        Tuple<int, int> poolRef = new Tuple<int, int>(neuron.Location.ReservoirID, neuron.Location.PoolID);
                         for(int predictorID = 0; predictorID < PredictorsProvider.NumOfPredictors; predictorID++)
                         {
                             if(neuron.PredictorsCfg.IsEnabled((PredictorsProvider.PredictorID)predictorID))
@@ -255,12 +254,12 @@ namespace RCNet.Neural.Network.SM
             if (NP == null)
             {
                 //Neural preprocessor is bypassed
-                return RL.Compute(inputVector, out List<double[]> unitsAllSubResults);
+                return RL.Compute(inputVector, out _);
             }
             else
             {
                 //Compute and return output
-                return RL.Compute(NP.Preprocess(inputVector), out List<double[]> unitsAllSubResults);
+                return RL.Compute(NP.Preprocess(inputVector), out _);
             }
         }
 
@@ -277,12 +276,12 @@ namespace RCNet.Neural.Network.SM
             if (NP == null)
             {
                 //Neural preprocessor is bypassed
-                return RL.ComputeReadoutData(inputVector, out List<double[]> unitsAllSubResults);
+                return RL.ComputeReadoutData(inputVector, out _);
             }
             else
             {
                 //Compute and return output
-                return RL.ComputeReadoutData(NP.Preprocess(inputVector), out List<double[]> unitsAllSubResults);
+                return RL.ComputeReadoutData(NP.Preprocess(inputVector), out _);
             }
         }
 

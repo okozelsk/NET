@@ -7,7 +7,9 @@ using System.Xml.Linq;
 
 namespace RCNet.RandomValue
 {
-
+    /// <summary>
+    /// Helper class supporting random values concept
+    /// </summary>
     public static class RandomCommon
     {
         //Enums

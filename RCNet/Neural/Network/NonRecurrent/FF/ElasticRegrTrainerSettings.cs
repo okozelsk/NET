@@ -25,6 +25,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         //Default values
         /// <summary>
         /// Default value of lambda argument
+        /// </summary>
         public const double DefaultLambda = 1e-6d;
         /// <summary>
         /// Default value of alpha argument

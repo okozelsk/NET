@@ -19,11 +19,11 @@ namespace Demo.DemoConsoleApp
                 //Main menu
                 Console.Clear();
                 Console.WriteLine("Main menu:");
-                Console.WriteLine("  1. State Machine demo tasks (execution of SMDemoSettings.xml)");
-                Console.WriteLine("  2. State Machine forecast setup from scratch (code example)");
-                Console.WriteLine("  9. Exit");
+                Console.WriteLine("  1. State Machine performance demo (execution of the tasks defined in the SMDemoSettings.xml)");
+                Console.WriteLine("  2. Code example of TTOO share prices forecast (State Machine setup from scratch)");
+                Console.WriteLine("  0. Exit");
                 Console.WriteLine();
-                Console.WriteLine("  Press digit...");
+                Console.WriteLine("  Press the digit...");
                 ConsoleKeyInfo consoleKeyInfo = Console.ReadKey(true);
                 switch (consoleKeyInfo.KeyChar)
                 {
@@ -48,7 +48,7 @@ namespace Demo.DemoConsoleApp
                     case '2':
                         try
                         {
-                            (new ForecastFromScratch()).Run();
+                            (new TTOOForecastFromScratch()).Run();
                         }
                         catch (Exception e)
                         {
@@ -61,7 +61,7 @@ namespace Demo.DemoConsoleApp
                         }
                         break;
 
-                    case '9':
+                    case '0':
                         return;
 
                     default:

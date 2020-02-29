@@ -112,6 +112,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// Returns the zero-based index of the field among concated external and internal fields or -1 if name was not found.
         /// </summary>
         /// <param name="fieldName">Name of the field</param>
+        /// <param name="ex">Specifies if to throw exception when not found</param>
         public int GetFieldID(string fieldName, bool ex = true)
         {
             int index = ExternalFieldsCfg.GetFieldID(fieldName, false);

@@ -78,6 +78,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         private static readonly Interval MOnePOneRange = new Interval(-1d, 1d);
 
         //Attribute properties
+        /// <summary>
+        /// Index of the associated input field
+        /// </summary>
         public int InputFieldIdx { get; }
 
         //Attributes

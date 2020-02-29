@@ -54,6 +54,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
         }
 
         //Properties
+        /// <summary>
+        /// Predictor's ID
+        /// </summary>
         public PredictorsProvider.PredictorID ID { get { return PredictorsProvider.PredictorID.FiringMWAvg; } }
 
         //Methods

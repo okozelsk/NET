@@ -102,6 +102,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// A number between 0 and 1 (LT1). Every time the new normalized activation value is higher than the previous
         /// normalized activation value by at least the threshold, it is evaluated as a firing event.
         /// </param>
+        /// <param name="signalingRestriction">Specifies what type of signal will be supported</param>
         /// <param name="readoutDensity">Specifies what ratio of the neurons from this group can be used as a source of the readout predictors</param>
         /// <param name="biasCfg">Each neuron within the group receives constant input bias. Value of the neuron's bias is driven by this random settings</param>
         /// <param name="retainmentCfg">Neurons' retainment property settings</param>
@@ -147,7 +148,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// Creates the instance and initialize it from given xml element.
         /// </summary>
         /// <param name="elem">Xml data containing settings.</param>
-        /// <param name="activationType">Specifies sub-type of the neuron group</param>
         public AnalogNeuronGroupSettings(XElement elem)
         {
             //Validation

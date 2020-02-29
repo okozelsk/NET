@@ -84,7 +84,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Examples\BaseExample.cs" />
-    <Compile Include="Examples\ForecastFromScratch.cs" />
+    <Compile Include="Examples\TTOOForecastFromScratch.cs" />
     <Compile Include="SM\SMDemoSettings.cs" />
     <Compile Include="Log\ConsoleLog.cs" />
     <Compile Include="Log\IOutputLog.cs" />

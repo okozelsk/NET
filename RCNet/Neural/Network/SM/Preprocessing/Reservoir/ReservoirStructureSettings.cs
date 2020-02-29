@@ -44,8 +44,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// Creates an initialized instance
         /// </summary>
         /// <param name="name">Name of the reservoir structure settings</param>
-        /// <param name="PoolsCfg">Collection of neural pools settings</param>
-        /// <param name="InterPoolConnectionsCfg">Collection of pools interconnection settings</param>
+        /// <param name="poolsCfg">Collection of neural pools settings</param>
+        /// <param name="interPoolConnectionsCfg">Collection of pools interconnection settings</param>
         public ReservoirStructureSettings(string name,
                                           PoolsSettings poolsCfg,
                                           InterPoolConnsSettings interPoolConnectionsCfg = null

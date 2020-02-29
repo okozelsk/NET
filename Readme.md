@@ -16,12 +16,22 @@ I welcome questions, ideas and suggestions for improvements, usage experiences, 
 
 
 ## State Machine demo application
-Main functionality and possibilities of the State Machine are demonstrated in a simple [demo application](https://github.com/okozelsk/NET/tree/master/Demo/DemoConsoleApp). Application has no startup parameters, all necessary settins are specified in [SMDemoSettings.xml](https://github.com/okozelsk/NET/blob/master/Demo/DemoConsoleApp/SM/SMDemoSettings.xml) file. SMDemoSettings.xml has to be located in the SM sub-folder relative to the location of the executable DemoConsoleApp.exe. Application performs sequence of defined tasks, each task is defined in the xml element "case" so you can easily insert new task or tune existing one by simple modification of xml.
-<br>
-SMDemoSettings.xml includes several classification problems from the:
-[Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com](https://timeseriesclassification.com)
-site. State Machine usually achieves very similar results to the best classification algorithms referenced on the website.
+Main functionality and possibilities of the State Machine are demonstrated in a simple [demo application](https://github.com/okozelsk/NET/tree/master/Demo/DemoConsoleApp).
+Application has no startup parameters and when started, it shows the menu.
+Application's menu consists of two main parts.
 
+### Performance demonstration (1. choice)
+Application performs sequence of defined tasks.
+Tasks are defined in the [SMDemoSettings.xml](https://github.com/okozelsk/NET/blob/master/Demo/DemoConsoleApp/SM/SMDemoSettings.xml) xml file, where each task is defined in the xml element "case" so you can easily insert new task or tune existing one by simple modification of xml content.
+SMDemoSettings.xml has to be located in the SM sub-folder relative to the location of the executable DemoConsoleApp.exe. 
+<br>
+SMDemoSettings.xml currently also includes several classification problems from the:
+[Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com](https://timeseriesclassification.com)
+site and State Machine usually achieves very similar results to the best classification algorithms referenced on the website.
+
+### Code examples (2, 3, ... choices)
+Several examples showing how to use State Machine (currently under construction).
+If necessary, examples use Examples sub-folder relative to the location of the executable DemoConsoleApp.exe.
 
 ### Data format for the demo application
 Input data is standardly located in the Data sub-folder relative to the location of the executable DemoConsoleApp.exe. Data is expected in csv format and data delimiter can be a tab, semicolon or comma character.
