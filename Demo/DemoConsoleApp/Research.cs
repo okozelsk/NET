@@ -93,7 +93,7 @@ namespace Demo.DemoConsoleApp
 
             StateMachineDesigner smd = new StateMachineDesigner(inputCfg, readoutCfg);
 
-            StateMachineSettings esnCfg = smd.CreatePureESNCfg(200, 0.1d, 0, 0, 0.05d, 0.75d, PredictorsProvider.PredictorID.Activation, PredictorsProvider.PredictorID.ActivationSquare);
+            StateMachineSettings esnCfg = smd.CreatePureESNCfg(200, 1, 0, 0.1d, 0, 0.05d, 0.75d, PredictorsProvider.PredictorID.Activation, PredictorsProvider.PredictorID.ActivationSquare);
 
             Console.WriteLine(esnCfg.GetXml(true).ToString());
             Console.ReadLine();

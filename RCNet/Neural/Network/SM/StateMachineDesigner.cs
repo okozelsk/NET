@@ -280,34 +280,42 @@ namespace RCNet.Neural.Network.SM
         /// Creates StateMachine configuration following pure ESN design
         /// </summary>
         /// <param name="totalSize">Total number of hidden neurons</param>
-        /// <param name="interconnectionDensity">Density of the hidden neurons interconnection</param>
+        /// <param name="inputConnectionDensity">Density of the input field connections to hidden neurons</param>
         /// <param name="maxInputDelay">Maximum delay of input synapse</param>
+        /// <param name="interconnectionDensity">Density of the hidden neurons interconnection</param>
         /// <param name="maxInternalDelay">Maximum delay of internal synapse</param>
         /// <param name="maxAbsBias">Maximum absolute value of the bias (0 means bias is not required)</param>
         /// <param name="maxRetainmentStrength">Maximum retainment strength (0 means retainment property is not required)</param>
         /// <param name="allowedPredictor">Allowed predictor</param>
         public StateMachineSettings CreatePureESNCfg(int totalSize,
-                                                     double interconnectionDensity,
+                                                     double inputConnectionDensity,
                                                      int maxInputDelay,
+                                                     double interconnectionDensity,
                                                      int maxInternalDelay,
                                                      double maxAbsBias,
                                                      double maxRetainmentStrength,
                                                      params PredictorsProvider.PredictorID[] allowedPredictor
                                                      )
         {
+            const double MaxInputWeightSum = 2d;
+            //Default ESN activation
             RCNetBaseSettings aFnCfg = new TanHSettings();
+            //Two neuron groups (Excitatory/Inhibitory)
             AnalogNeuronGroupSettings excGrp = CreateAnalogGroup(NeuronCommon.NeuronRole.Excitatory, aFnCfg, maxAbsBias, maxRetainmentStrength);
             AnalogNeuronGroupSettings inhGrp = CreateAnalogGroup(NeuronCommon.NeuronRole.Inhibitory, aFnCfg, maxAbsBias, maxRetainmentStrength);
+            //Simple analog pool
             PoolSettings poolCfg = new PoolSettings(GetPoolName(ActivationContent.Analog, 0),
                                                     new ProportionsSettings(totalSize, 1, 1),
                                                     new NeuronGroupsSettings(excGrp, inhGrp),
                                                     new InterconnSettings(new RandomSchemaSettings(new ConnDistrFlatSettings(), interconnectionDensity))
                                                     );
+            //Simple reservoir structure
             ReservoirStructureSettings resStructCfg = new ReservoirStructureSettings(GetResStructName(ActivationContent.Analog, 0),
                                                                                      new PoolsSettings(poolCfg)
                                                                                      );
+            //Input units and connections configuration
             List<InputUnitSettings> inputUnits = new List<InputUnitSettings>(InputCfg.FieldsCfg.ExternalFieldsCfg.FieldCfgCollection.Count);
-            double maxInpSynWeight = 2d / InputCfg.FieldsCfg.ExternalFieldsCfg.FieldCfgCollection.Count;
+            double maxInpSynWeight = MaxInputWeightSum / InputCfg.FieldsCfg.ExternalFieldsCfg.FieldCfgCollection.Count;
             foreach (ExternalFieldSettings fieldCfg in InputCfg.FieldsCfg.ExternalFieldsCfg.FieldCfgCollection)
             {
                 InputUnitConnSettings inputUnitConnCfg = new InputUnitConnSettings(poolCfg.Name,
@@ -316,35 +324,34 @@ namespace RCNet.Neural.Network.SM
                                                                                    NeuronCommon.NeuronSignalingRestrictionType.AnalogOnly,
                                                                                    null,
                                                                                    new AnalogTargetSettings(Synapse.SynapticTargetScope.All,
-                                                                                                            1,
+                                                                                                            inputConnectionDensity,
                                                                                                             new URandomValueSettings(0d, maxInpSynWeight)
                                                                                                             )
                                                                                    );
                 inputUnits.Add(new InputUnitSettings(fieldCfg.Name, new InputUnitConnsSettings(inputUnitConnCfg)));
             }
+            //Synapse general configuration
             SynapseSettings synapseCfg = new SynapseSettings(Synapse.SynapticDelayMethod.Random, maxInputDelay,
                                                              Synapse.SynapticDelayMethod.Random, maxInternalDelay
                                                              );
 
-            //Initially we set all switches to false - all available predictors are forbidden
+            //Initially set all switches to false - all available predictors are forbidden
             bool[] predictorSwitches = new bool[PredictorsProvider.NumOfPredictors];
             predictorSwitches.Populate(false);
-            //Now enable specific predictors
+            //Enable specified predictors
             foreach(PredictorsProvider.PredictorID predictorID in allowedPredictor)
             {
                 predictorSwitches[(int)predictorID] = true;
             }
             //Create predictors configuration using default params
             PredictorsSettings predictorsCfg = new PredictorsSettings(predictorSwitches, null);
-
+            //Create reservoir instance
             ReservoirInstanceSettings resInstCfg = new ReservoirInstanceSettings(GetResInstName(ResDesign.PureESN, 0),
                                                                                  resStructCfg.Name,
                                                                                  new InputUnitsSettings(inputUnits),
                                                                                  synapseCfg,
                                                                                  predictorsCfg
                                                                                  );
-
-
             //Build and return SM configuration
             return new StateMachineSettings(new NeuralPreprocessorSettings(InputCfg,
                                                                            new ReservoirStructuresSettings(resStructCfg),

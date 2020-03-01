@@ -85,6 +85,7 @@
   <ItemGroup>
     <Compile Include="Examples\BaseExample.cs" />
     <Compile Include="Examples\FFNetBoolAlg.cs" />
+    <Compile Include="Examples\LibrasClassificationDesigner.cs" />
     <Compile Include="Examples\TTOOForecastDesigner.cs" />
     <Compile Include="Examples\TTOOForecastFromScratch.cs" />
     <Compile Include="SM\SMDemoSettings.cs" />

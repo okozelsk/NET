@@ -20,8 +20,9 @@ namespace Demo.DemoConsoleApp
                 Console.WriteLine("Main menu:");
                 Console.WriteLine("  1. State Machine performance demo (execution of the tasks defined in the SMDemoSettings.xml)");
                 Console.WriteLine("  2. Feed Forward network trained to solve boolean algebra");
-                Console.WriteLine("  3. TTOO share prices forecast (State Machine setup from scratch)");
-                Console.WriteLine("  4. TTOO share prices forecast (State Machine setup using StateMachineDesigner)");
+                Console.WriteLine("  3. TTOO share prices forecast (State Machine ESN setup from scratch)");
+                Console.WriteLine("  4. TTOO share prices forecast (State Machine ESN setup using StateMachineDesigner)");
+                Console.WriteLine("  5. Libras Movement classification (State Machine ESN setup using StateMachineDesigner)");
                 Console.WriteLine("  0. Exit");
                 Console.WriteLine();
                 Console.WriteLine("  Press the digit...");
@@ -82,6 +83,22 @@ namespace Demo.DemoConsoleApp
                         try
                         {
                             (new TTOOForecastDesigner()).Run();
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine();
+                            while (e != null)
+                            {
+                                Console.WriteLine(e.Message);
+                                e = e.InnerException;
+                            }
+                        }
+                        break;
+
+                    case '5':
+                        try
+                        {
+                            (new LibrasClassificationDesigner()).Run();
                         }
                         catch (Exception e)
                         {

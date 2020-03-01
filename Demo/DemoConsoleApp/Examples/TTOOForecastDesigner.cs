@@ -24,11 +24,11 @@ using RCNet.Neural.Network.SM;
 namespace Demo.DemoConsoleApp.Examples
 {
     /// <summary>
+    /// Example code shows how to setup StateMachine using StateMachineDesigner.
     /// Example uses TTOO.csv from ./Data subfolder.
     /// Time series contains real share prices of TTOO title from https://finance.yahoo.com/quote/TTOO/history?p=TTOO.
     /// The last recorded prices are from 2018/03/02 so StateMachine is predicting next High and Low prices for the following
     /// business day 2018/03/05 (where real prices were High = 6.58$ and Low=5.99$).
-    /// Example code shows how to setup StateMachine using StateMachineDesigner.
     /// </summary>
     public class TTOOForecastDesigner : BaseExample
     {
@@ -53,7 +53,7 @@ namespace Demo.DemoConsoleApp.Examples
             //Create designer instance
             StateMachineDesigner smd = new StateMachineDesigner(inputCfg, readoutCfg);
             //Create pure ESN fashioned StateMachine configuration
-            StateMachineSettings stateMachineCfg = smd.CreatePureESNCfg(250, 0.1d, 0, 0, 0.05d, 0.75d, PredictorsProvider.PredictorID.Activation, PredictorsProvider.PredictorID.ActivationSquare);
+            StateMachineSettings stateMachineCfg = smd.CreatePureESNCfg(250, 1, 7, 0.1d, 0, 0.05d, 0.75d, PredictorsProvider.PredictorID.Activation, PredictorsProvider.PredictorID.ActivationSquare);
             //Display StateMachine xml configuration
             string xmlConfig = stateMachineCfg.GetXml(true).ToString();
             _log.Write("StateMachine configuration xml:");
