@@ -36,6 +36,7 @@ namespace Demo.DemoConsoleApp.Examples
     /// </summary>
     public class TTOOForecastFromScratch : BaseExample
     {
+        //Methods
         /// <summary>
         /// Creates input part of the neural preprocessor's configuration.
         /// </summary>
@@ -371,6 +372,7 @@ namespace Demo.DemoConsoleApp.Examples
             _log.Write("StateMachine configuration xml:");
             _log.Write("-------------------------------");
             _log.Write(xmlConfig);
+            _log.Write(string.Empty);
             _log.Write("Pres Enter to continue (StateMachine training)...");
             _log.Write(string.Empty);
             Console.ReadLine();

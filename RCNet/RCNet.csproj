@@ -202,6 +202,7 @@
     <Compile Include="Neural\Network\SM\Readout\ReadoutUnitSettings.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\Reservoir\Synapse\AnalogTargetSettings.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\Reservoir\Synapse\SpikingTargetSettings.cs" />
+    <Compile Include="Neural\Network\SM\StateMachineDesigner.cs" />
     <Compile Include="RandomValue\UExponentialDistrSettings.cs" />
     <Compile Include="RandomValue\ExponentialDistrSettings.cs" />
     <Compile Include="RandomValue\GammaDistrSettings.cs" />

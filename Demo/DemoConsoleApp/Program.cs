@@ -12,16 +12,16 @@ namespace Demo.DemoConsoleApp
         {
             //Research - this is not a part of the demo - it is a free playground
             //(new Research()).Run();
-            //
-            //(new ForecastFromScratch()).Run();
+
             while (true)
             {
                 //Main menu
                 Console.Clear();
                 Console.WriteLine("Main menu:");
                 Console.WriteLine("  1. State Machine performance demo (execution of the tasks defined in the SMDemoSettings.xml)");
-                Console.WriteLine("  2. Code example of TTOO share prices forecast (State Machine setup from scratch)");
-                Console.WriteLine("  3. Code example of Feed Forward network trained to solve boolean algebra");
+                Console.WriteLine("  2. Feed Forward network trained to solve boolean algebra");
+                Console.WriteLine("  3. TTOO share prices forecast (State Machine setup from scratch)");
+                Console.WriteLine("  4. TTOO share prices forecast (State Machine setup using StateMachineDesigner)");
                 Console.WriteLine("  0. Exit");
                 Console.WriteLine();
                 Console.WriteLine("  Press the digit...");
@@ -49,7 +49,7 @@ namespace Demo.DemoConsoleApp
                     case '2':
                         try
                         {
-                            (new TTOOForecastFromScratch()).Run();
+                            (new FFNetBoolAlg()).Run();
                         }
                         catch (Exception e)
                         {
@@ -65,7 +65,23 @@ namespace Demo.DemoConsoleApp
                     case '3':
                         try
                         {
-                            (new FFNetBoolAlg()).Run();
+                            (new TTOOForecastFromScratch()).Run();
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine();
+                            while (e != null)
+                            {
+                                Console.WriteLine(e.Message);
+                                e = e.InnerException;
+                            }
+                        }
+                        break;
+
+                    case '4':
+                        try
+                        {
+                            (new TTOOForecastDesigner()).Run();
                         }
                         catch (Exception e)
                         {
