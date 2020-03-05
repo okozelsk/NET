@@ -156,3 +156,5 @@ Each component that makes up StateMachine (including StateMachine itself) has it
 Each settings class can be instantiated from scratch or from an xml element. [RCNetTypes.xsd](https://github.com/okozelsk/NET/blob/master/RCNet/RCNetTypes.xsd) defines all necessary xml elements for creating settings classes using xml constructors.
 </br>
 Each settings class also implements the GetXml method so it can be instantiated from scratch and then export the initialization xml element using the GetXml method. Using xml constructors is generally preferable because the initialization xml can be edited without the need to modify your own source code.
+</br>
+RCNet has also implemented helper component [StateMachineDesigner](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/StateMachineDesigner.cs) for easy setup of simple ESN and LSM StateMachine configurations from code (see examples in demo application).
