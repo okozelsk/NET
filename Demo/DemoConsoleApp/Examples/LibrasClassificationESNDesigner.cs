@@ -24,7 +24,7 @@ using RCNet.Neural.Network.SM;
 namespace Demo.DemoConsoleApp.Examples
 {
     /// <summary>
-    /// Example code shows how to setup StateMachine using StateMachineDesigner.
+    /// Example code shows how to setup StateMachine as a pure ESN for classification using StateMachineDesigner.
     /// Example uses LibrasMovement_train.csv and LibrasMovement_verify.csv from ./Data subfolder.
     /// The dataset is from https://archive.ics.uci.edu/ml/datasets/Libras+Movement and contains 15 classes of 24 instances each, where
     /// each class references to a hand movement type in LIBRAS.The hand movement is represented as a bidimensional curve performed
@@ -38,7 +38,7 @@ namespace Demo.DemoConsoleApp.Examples
     /// Each instance represents 45 points on a bi-dimensional space, which can be plotted in an ordered way (from 1 through
     /// 45 as the X co-ordinate) in order to draw the path of the movement.
     /// </summary>
-    public class LibrasClassificationDesigner : BaseExample
+    public class LibrasClassificationESNDesigner : BaseExample
     {
         /// <summary>
         /// Runs the example code.
@@ -52,7 +52,7 @@ namespace Demo.DemoConsoleApp.Examples
                                                                          new ExternalFieldSettings("coord_ordinate", new RealFeatureFilterSettings())
                                                                          );
             //Simplified readout layer configuration
-            ReadoutLayerSettings readoutCfg = StateMachineDesigner.CreateClassificationReadoutCfg(StateMachineDesigner.CreateElliotRegrNet(5, 400),
+            ReadoutLayerSettings readoutCfg = StateMachineDesigner.CreateClassificationReadoutCfg(StateMachineDesigner.CreateSingleLayerRegrNet(new ElliotSettings(), 5, 400),
                                                                                                   0.0825d,
                                                                                                   "Hand movement",
                                                                                                   "curved swing",
@@ -104,6 +104,6 @@ namespace Demo.DemoConsoleApp.Examples
             return;
         }
 
-    }//LibrasClassificationDesigner
+    }//LibrasClassificationESNDesigner
 
 }//Namespace

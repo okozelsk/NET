@@ -53,6 +53,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
             Distance
         }
 
+        //Constants
+        private const double PlasticityParamGaussianCoeff = 0.25d;
+        private const double PlasticityParamMinGaussianCoeff = (1d - PlasticityParamGaussianCoeff);
+        private const double PlasticityParamMaxGaussianCoeff = (1d + PlasticityParamGaussianCoeff);
+
         //Attribute properties
         /// <summary>
         /// Source neuron - signal emitter
@@ -112,12 +117,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         /// <param name="delayMethod">Synaptic delay method to be used</param>
         /// <param name="maxDelay">Maximum synaptic delay</param>
         /// <param name="dynamicsCfg">Synapse's short-term plasticity dynamics configuration</param>
+        /// <param name="rand">Random object to be used to setup plasticity parameters</param>
         public Synapse(INeuron sourceNeuron,
                        INeuron targetNeuron,
                        double weight,
                        SynapticDelayMethod delayMethod,
                        int maxDelay,
-                       DynamicsSettings dynamicsCfg
+                       DynamicsSettings dynamicsCfg,
+                       Random rand
                        )
         {
             //Neurons to be connected
@@ -134,14 +141,15 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
             if(dynamicsCfg != null &&
                dynamicsCfg.Apply &&
                TargetNeuron.TypeOfActivation == ActivationType.Spiking &&
+               SourceNeuron.Role != NeuronCommon.NeuronRole.Input &&
                (SourceNeuron.SignalingRestriction == NeuronCommon.NeuronSignalingRestrictionType.SpikingOnly ||
                 SourceNeuron.SignalingRestriction == NeuronCommon.NeuronSignalingRestrictionType.NoRestriction)
                )
             {
                 _applyPlasticity = true;
-                _restingEfficacy = dynamicsCfg.RestingEfficacy;
-                _tauFacilitation = dynamicsCfg.TauFacilitation;
-                _tauDepression = dynamicsCfg.TauDepression;
+                _restingEfficacy = rand.NextFilterredGaussianDouble(dynamicsCfg.RestingEfficacy, Math.Sqrt(dynamicsCfg.RestingEfficacy / 2d), dynamicsCfg.RestingEfficacy * PlasticityParamMinGaussianCoeff, dynamicsCfg.RestingEfficacy * PlasticityParamMaxGaussianCoeff);
+                _tauFacilitation = rand.NextFilterredGaussianDouble(dynamicsCfg.TauFacilitation, Math.Sqrt(dynamicsCfg.TauFacilitation / 2d), dynamicsCfg.TauFacilitation * PlasticityParamMinGaussianCoeff, dynamicsCfg.TauFacilitation * PlasticityParamMaxGaussianCoeff);
+                _tauDepression = rand.NextFilterredGaussianDouble(dynamicsCfg.TauDepression, Math.Sqrt(dynamicsCfg.TauDepression / 2d), dynamicsCfg.TauDepression * PlasticityParamMinGaussianCoeff, dynamicsCfg.TauDepression * PlasticityParamMaxGaussianCoeff);
             }
             else
             {
@@ -150,6 +158,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
                 _tauFacilitation = 0d;
                 _tauDepression = 0d;
             }
+
             //Weight sign rules
             if (SourceNeuron.Role == NeuronCommon.NeuronRole.Input)
             {

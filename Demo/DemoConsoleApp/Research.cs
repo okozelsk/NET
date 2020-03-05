@@ -78,38 +78,9 @@ namespace Demo.DemoConsoleApp
 
         public void Run()
         {
-            InputSettings inputCfg = StateMachineDesigner.CreateInputCfg(new FeedingContinuousSettings(FeedingContinuousSettings.AutoBootCyclesNum, true),
-                                                                         new ExternalFieldSettings("High", new RealFeatureFilterSettings()),
-                                                                         new ExternalFieldSettings("Low", new RealFeatureFilterSettings()),
-                                                                         new ExternalFieldSettings("Adj Close", new RealFeatureFilterSettings())
-                                                                         );
-
-            ReadoutLayerSettings readoutCfg = StateMachineDesigner.CreateForecastReadoutCfg(StateMachineDesigner.CreateIdentityRegrNet(2, 800),
-                                                                                            0.1d,
-                                                                                            "High",
-                                                                                            "Low",
-                                                                                            "Adj Close"
-                                                                                            );
-
-            StateMachineDesigner smd = new StateMachineDesigner(inputCfg, readoutCfg);
-
-            StateMachineSettings esnCfg = smd.CreatePureESNCfg(200, 1, 0, 0.1d, 0, 0.05d, 0.75d, PredictorsProvider.PredictorID.Activation, PredictorsProvider.PredictorID.ActivationSquare);
-
-            Console.WriteLine(esnCfg.GetXml(true).ToString());
-            Console.ReadLine();
-
-            //string name = smd.GetResInstName(StateMachineDesigner.ResDesign.Hybrid, 0);
-
-            ;
-
-            SimpleIFSettings settings = new SimpleIFSettings(new URandomValueSettings(15, 15),
-                                                             new URandomValueSettings(0.05, 0.05),
-                                                             new URandomValueSettings(5, 5),
-                                                             new URandomValueSettings(20, 20),
-                                                             0
-                                                             );
+            RCNetBaseSettings settings = new LeakyIFSettings();
             IActivationFunction af = ActivationFactory.Create(settings, new Random(0));
-            TestActivation(af, 800, 0.15, 10, 600);
+            TestActivation(af, 800, 0.1, 10, 600);
             return;
         }
 

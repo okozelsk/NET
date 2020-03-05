@@ -82,6 +82,26 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         public int NumOfInternalSynapses { get; private set; }
 
         /// <summary>
+        /// Number of internal EE synapses
+        /// </summary>
+        public int NumOfInternalEESynapses { get; private set; }
+
+        /// <summary>
+        /// Number of internal EI synapses
+        /// </summary>
+        public int NumOfInternalEISynapses { get; private set; }
+
+        /// <summary>
+        /// Number of internal IE synapses
+        /// </summary>
+        public int NumOfInternalIESynapses { get; private set; }
+
+        /// <summary>
+        /// Number of internal II synapses
+        /// </summary>
+        public int NumOfInternalIISynapses { get; private set; }
+
+        /// <summary>
         /// Input distances statistics
         /// </summary>
         BasicStat InputDistancesStat { get; }
@@ -122,14 +142,17 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             //Initialization of neurons
             //-----------------------------------------------------------------------------
             //Input neurons
+            int inputNeuronsStartIdx = 0;
             InputUnitCollection = new InputUnit[InstanceCfg.InputUnitsCfg.InputUnitCfgCollection.Count];
             for (int i = 0; i < InstanceCfg.InputUnitsCfg.InputUnitCfgCollection.Count; i++)
             {
                 InputUnitCollection[i] = new InputUnit(instanceID,
                                                        inputRange,
                                                        inputCfg.FieldsCfg.GetFieldID(InstanceCfg.InputUnitsCfg.InputUnitCfgCollection[i].InputFieldName),
+                                                       inputNeuronsStartIdx,
                                                        InstanceCfg.InputUnitsCfg.InputUnitCfgCollection[i]
                                                        );
+                inputNeuronsStartIdx += InputUnitCollection[i].NumOfInputNeurons;
             }
             //-----------------------------------------------------------------------------
             //Reservoir neurons
@@ -259,6 +282,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             InputDistancesStat = new BasicStat(false);
             InternalDistancesStat = new BasicStat(true);
             NumOfInternalSynapses = 0;
+            NumOfInternalEESynapses = 0;
+            NumOfInternalEISynapses = 0;
+            NumOfInternalIESynapses = 0;
+            NumOfInternalIISynapses = 0;
             //Connection banks allocations
             _neuronInputConnectionsCollection = new SortedList<int, Synapse>[_reservoirNeuronCollection.Length];
             _neuronNeuronConnectionsCollection = new SortedList<int, Synapse>[_reservoirNeuronCollection.Length];
@@ -272,7 +299,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             //Input connections
             for(int i = 0; i < InputUnitCollection.Length; i++)
             {
-                SetInputConnections(rand, InputUnitCollection[i].InputFieldIdx, InstanceCfg.InputUnitsCfg.InputUnitCfgCollection[i].ConnsCfg.ConnCfgCollection);
+                ConnectInputUnit(InstanceCfg.InputUnitsCfg.InputUnitCfgCollection[i], InputUnitCollection[i], rand);
+                //SetInputConnections(rand, InputUnitCollection[i].InputFieldIdx, InstanceCfg.InputUnitsCfg.InputUnitCfgCollection[i].ConnsCfg.ConnCfgCollection);
             }
 
             //-----------------------------------------------------------------------------
@@ -326,6 +354,28 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                 {
                     synapse.SetupDelay(InternalDistancesStat, rand);
                     ++NumOfInternalSynapses;
+                    if(synapse.SourceNeuron.Role == NeuronCommon.NeuronRole.Excitatory)
+                    {
+                        if(synapse.TargetNeuron.Role == NeuronCommon.NeuronRole.Excitatory)
+                        {
+                            ++NumOfInternalEESynapses;
+                        }
+                        else
+                        {
+                            ++NumOfInternalEISynapses;
+                        }
+                    }
+                    else
+                    {
+                        if (synapse.TargetNeuron.Role == NeuronCommon.NeuronRole.Excitatory)
+                        {
+                            ++NumOfInternalIESynapses;
+                        }
+                        else
+                        {
+                            ++NumOfInternalIISynapses;
+                        }
+                    }
                 }
             }
 
@@ -440,30 +490,90 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             }
         }
 
-        private void SetInputConnections(Random rand, int inputFieldID, List<InputUnitConnSettings> inputConnectionCollection)
+        private void ConnectInputUnit_org(InputUnitSettings inputUnitCfg, InputUnit inputUnit, Random rand)
+        {
+            foreach (InputUnitConnSettings inputConnCfg in inputUnitCfg.ConnsCfg.ConnCfgCollection)
+            {
+                //Get associated analog input neuron
+                InputNeuron[] analogInputNeurons = new InputNeuron[] { inputUnit.GetAnalogInputNeuron(inputConnCfg.AnalogCoding, inputConnCfg.OppositeAmplitude) };
+                //Get associated spike-train input neurons
+                InputNeuron[] spikeTrainInputNeurons = inputUnit.GetSpikeTrainInputNeurons(inputConnCfg.AnalogCoding, inputConnCfg.OppositeAmplitude);
+                //Target pool index
+                int targetPoolID = StructureCfg.PoolsCfg.GetPoolID(inputConnCfg.PoolName);
+                //Select available target neurons according to connection's target scope configuration
+                List<HiddenNeuron>[] targetNeuronsByActivation = new List<HiddenNeuron>[Enum.GetValues(typeof(ActivationType)).Length];
+                //Spiking target scope
+                targetNeuronsByActivation[(int)ActivationType.Spiking] = new List<HiddenNeuron>(from neuron in _poolNeuronsCollection[targetPoolID]
+                                                                                                   where (neuron.TypeOfActivation == ActivationType.Spiking && (inputConnCfg.SpikingTargetCfg.Scope == Synapse.SynapticTargetScope.All || (neuron.Role == NeuronCommon.NeuronRole.Excitatory && inputConnCfg.SpikingTargetCfg.Scope == Synapse.SynapticTargetScope.Excitatory) || (neuron.Role == NeuronCommon.NeuronRole.Inhibitory && inputConnCfg.SpikingTargetCfg.Scope == Synapse.SynapticTargetScope.Inhibitory)))
+                                                                                                   select neuron
+                                                                                                   );
+                //Analog target scope
+                targetNeuronsByActivation[(int)ActivationType.Analog] = new List<HiddenNeuron>(from neuron in _poolNeuronsCollection[targetPoolID]
+                                                                                                  where (neuron.TypeOfActivation == ActivationType.Analog && (inputConnCfg.AnalogTargetCfg.Scope == Synapse.SynapticTargetScope.All || (neuron.Role == NeuronCommon.NeuronRole.Excitatory && inputConnCfg.AnalogTargetCfg.Scope == Synapse.SynapticTargetScope.Excitatory) || (neuron.Role == NeuronCommon.NeuronRole.Inhibitory && inputConnCfg.AnalogTargetCfg.Scope == Synapse.SynapticTargetScope.Inhibitory)))
+                                                                                                  select neuron
+                                                                                                  );
+                //Loop through target activation scope
+                for (int activationType = 0; activationType < targetNeuronsByActivation.Length; activationType++)
+                {
+                    //Available target neurons
+                    List<HiddenNeuron> targetNeurons = targetNeuronsByActivation[activationType];
+                    //Density
+                    double density = activationType == (int)ActivationType.Spiking ? inputConnCfg.SpikingTargetCfg.Density : inputConnCfg.AnalogTargetCfg.Density;
+                    //Number of synapses
+                    int numOfSynapses = (int)Math.Round(targetNeurons.Count * density, 0);
+                    if (targetNeurons.Count > 0 && numOfSynapses > 0)
+                    {
+                        //Weight configuration
+                        URandomValueSettings weightCfg = activationType == (int)ActivationType.Spiking ? inputConnCfg.SpikingTargetCfg.WeightCfg : inputConnCfg.AnalogTargetCfg.WeightCfg;
+                        foreach (InputNeuron inputNeuron in (activationType == (int)ActivationType.Spiking ? spikeTrainInputNeurons : analogInputNeurons))
+                        {
+                            rand.Shuffle(targetNeurons);
+                            for(int i = 0; i < numOfSynapses; i++)
+                            {
+                                //Create synapse
+                                Synapse synapse = new Synapse(inputNeuron,
+                                                              targetNeurons[i],
+                                                              rand.NextDouble(weightCfg),
+                                                              InstanceCfg.SynapseCfg.InputDelayMethod,
+                                                              InstanceCfg.SynapseCfg.InputMaxDelay,
+                                                              InstanceCfg.SynapseCfg.PlasticityCfg.GetDynamicsSettings(inputNeuron.Role, targetNeurons[i].Role),
+                                                              rand
+                                                              );
+                                InputDistancesStat.AddSampleValue(synapse.Distance);
+                                SetInterconnection(_neuronInputConnectionsCollection, synapse);
+                            }//for i
+                        }//foreach inputNeuron
+                    }//targetNeurons.Count > 0 && numOfSynapses > 0
+                }//for activationType
+            }//foreach inputConnCfg
+            return;
+        }
+
+
+        private void ConnectInputUnit(InputUnitSettings inputUnitCfg, InputUnit inputUnit, Random rand)
         {
             //Create connections
-            foreach (InputUnitConnSettings inputConnection in inputConnectionCollection)
+            foreach (InputUnitConnSettings inputConnCfg in inputUnitCfg.ConnsCfg.ConnCfgCollection)
             {
-                int poolID = StructureCfg.PoolsCfg.GetPoolID(inputConnection.PoolName);
+                int poolID = StructureCfg.PoolsCfg.GetPoolID(inputConnCfg.PoolName);
                 //Select available targets according to connection's allowed scope
                 List<HiddenNeuron>[] targetNeuronsByActivation = new List<HiddenNeuron>[Enum.GetValues(typeof(ActivationType)).Length];
                 //Spiking target scope
                 targetNeuronsByActivation[(int)ActivationType.Spiking] = new List<HiddenNeuron>(from neuron in _poolNeuronsCollection[poolID]
-                                                                                                where (neuron.TypeOfActivation == ActivationType.Spiking && (inputConnection.SpikingTargetCfg.Scope == Synapse.SynapticTargetScope.All || (neuron.Role == NeuronCommon.NeuronRole.Excitatory && inputConnection.SpikingTargetCfg.Scope == Synapse.SynapticTargetScope.Excitatory) || (neuron.Role == NeuronCommon.NeuronRole.Inhibitory && inputConnection.SpikingTargetCfg.Scope == Synapse.SynapticTargetScope.Inhibitory)))
+                                                                                                where (neuron.TypeOfActivation == ActivationType.Spiking && (inputConnCfg.SpikingTargetCfg.Scope == Synapse.SynapticTargetScope.All || (neuron.Role == NeuronCommon.NeuronRole.Excitatory && inputConnCfg.SpikingTargetCfg.Scope == Synapse.SynapticTargetScope.Excitatory) || (neuron.Role == NeuronCommon.NeuronRole.Inhibitory && inputConnCfg.SpikingTargetCfg.Scope == Synapse.SynapticTargetScope.Inhibitory)))
                                                                                                 select neuron
                                                                                                 );
                 //Analog target scope
                 targetNeuronsByActivation[(int)ActivationType.Analog] = new List<HiddenNeuron>(from neuron in _poolNeuronsCollection[poolID]
-                                                                                               where (neuron.TypeOfActivation == ActivationType.Analog && (inputConnection.AnalogTargetCfg.Scope == Synapse.SynapticTargetScope.All || (neuron.Role == NeuronCommon.NeuronRole.Excitatory && inputConnection.AnalogTargetCfg.Scope == Synapse.SynapticTargetScope.Excitatory) || (neuron.Role == NeuronCommon.NeuronRole.Inhibitory && inputConnection.AnalogTargetCfg.Scope == Synapse.SynapticTargetScope.Inhibitory)))
+                                                                                               where (neuron.TypeOfActivation == ActivationType.Analog && (inputConnCfg.AnalogTargetCfg.Scope == Synapse.SynapticTargetScope.All || (neuron.Role == NeuronCommon.NeuronRole.Excitatory && inputConnCfg.AnalogTargetCfg.Scope == Synapse.SynapticTargetScope.Excitatory) || (neuron.Role == NeuronCommon.NeuronRole.Inhibitory && inputConnCfg.AnalogTargetCfg.Scope == Synapse.SynapticTargetScope.Inhibitory)))
                                                                                                select neuron
                                                                                                );
                 //Scopes processing
                 for (int activationType = 0; activationType < targetNeuronsByActivation.Length; activationType++)
                 {
                     List<HiddenNeuron> targetNeurons = targetNeuronsByActivation[activationType];
-                    double density = activationType == (int)ActivationType.Spiking ? inputConnection.SpikingTargetCfg.Density : inputConnection.AnalogTargetCfg.Density;
-                    URandomValueSettings weightCfg = activationType == (int)ActivationType.Spiking ? inputConnection.SpikingTargetCfg.WeightCfg : inputConnection.AnalogTargetCfg.WeightCfg;
+                    double density = activationType == (int)ActivationType.Spiking ? inputConnCfg.SpikingTargetCfg.Density : inputConnCfg.AnalogTargetCfg.Density;
+                    URandomValueSettings weightCfg = activationType == (int)ActivationType.Spiking ? inputConnCfg.SpikingTargetCfg.WeightCfg : inputConnCfg.AnalogTargetCfg.WeightCfg;
 
                     int connectionsPerInput = (int)Math.Round(targetNeurons.Count * density, 0);
                     if (connectionsPerInput > 0)
@@ -472,23 +582,28 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                         indices.Indices();
                         rand.Shuffle(indices);
                         int spikingNeuronSubIndex = 0;
-                        InputNeuron analogInputNeuron = InputUnitCollection[inputFieldID].GetAnalogInputNeuron(inputConnection.AnalogCoding, inputConnection.OppositeAmplitude);
-                        InputNeuron[] spikeTrainInputNeurons = InputUnitCollection[inputFieldID].GetSpikeTrainInputNeurons(inputConnection.AnalogCoding, inputConnection.OppositeAmplitude);
+                        InputNeuron analogInputNeuron = inputUnit.GetAnalogInputNeuron(inputConnCfg.AnalogCoding, inputConnCfg.OppositeAmplitude);
+                        InputNeuron[] spikeTrainInputNeurons = inputUnit.GetSpikeTrainInputNeurons(inputConnCfg.AnalogCoding, inputConnCfg.OppositeAmplitude);
+                        double weight = 0d;
                         for (int i = 0; i < connectionsPerInput; i++)
                         {
                             int targetNeuronIdx = indices[i];
-                            double weight = rand.NextDouble(weightCfg);
                             INeuron inputNeuron;
                             //Input neuron
-                            if (inputConnection.SignalingRestriction == NeuronCommon.NeuronSignalingRestrictionType.AnalogOnly ||
-                                (inputConnection.SignalingRestriction == NeuronCommon.NeuronSignalingRestrictionType.NoRestriction && targetNeurons[targetNeuronIdx].TypeOfActivation == ActivationType.Analog)
+                            if (inputConnCfg.SignalingRestriction == NeuronCommon.NeuronSignalingRestrictionType.AnalogOnly ||
+                                (inputConnCfg.SignalingRestriction == NeuronCommon.NeuronSignalingRestrictionType.NoRestriction && targetNeurons[targetNeuronIdx].TypeOfActivation == ActivationType.Analog)
                                 )
                             {
+                                weight = rand.NextDouble(weightCfg);
                                 inputNeuron = analogInputNeuron;
                             }
                             else
                             {
                                 //Connect spike train input neuron
+                                if (spikingNeuronSubIndex == 0)
+                                {
+                                    weight = rand.NextDouble(weightCfg);
+                                }
                                 inputNeuron = spikeTrainInputNeurons[spikingNeuronSubIndex];
                                 ++spikingNeuronSubIndex;
                                 if (spikingNeuronSubIndex == spikeTrainInputNeurons.Length)
@@ -501,7 +616,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                                                           weight,
                                                           InstanceCfg.SynapseCfg.InputDelayMethod,
                                                           InstanceCfg.SynapseCfg.InputMaxDelay,
-                                                          InstanceCfg.SynapseCfg.PlasticityCfg.GetDynamicsSettings(inputNeuron.Role, targetNeurons[targetNeuronIdx].Role)
+                                                          InstanceCfg.SynapseCfg.PlasticityCfg.GetDynamicsSettings(inputNeuron.Role, targetNeurons[targetNeuronIdx].Role),
+                                                          rand
                                                           );
                             InputDistancesStat.AddSampleValue(synapse.Distance);
                             SetInterconnection(_neuronInputConnectionsCollection, synapse);
@@ -511,6 +627,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             }
             return;
         }
+
 
         private void InterconnectPoolNeurons(Random rand,
                                              int poolID,
@@ -644,12 +761,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                         targetNeuronIndex = threadRandObj.Next(tmpRelTargetNeuronCollection.Count);
                     }
                     //Establish connection
+                    URandomValueSettings weightCfg = InstanceCfg.SynapseCfg.InternalWeightsCfg.GetWeightsSettings(nccSource.Neuron.TypeOfActivation, nccSource.Neuron.Role, tmpRelTargetNeuronCollection[targetNeuronIndex].Neuron.TypeOfActivation, tmpRelTargetNeuronCollection[targetNeuronIndex].Neuron.Role, out double wScale);
                     Synapse synapse = new Synapse(nccSource.Neuron,
                                                   tmpRelTargetNeuronCollection[targetNeuronIndex].Neuron,
-                                                  threadRandObj.NextDouble(InstanceCfg.SynapseCfg.InternalWeightsCfg.GetWeightsSettings(nccSource.Neuron.TypeOfActivation, tmpRelTargetNeuronCollection[targetNeuronIndex].Neuron.TypeOfActivation)),
+                                                  threadRandObj.NextDouble(weightCfg) * wScale,
                                                   InstanceCfg.SynapseCfg.InternalDelayMethod,
                                                   InstanceCfg.SynapseCfg.InternalMaxDelay,
-                                                  InstanceCfg.SynapseCfg.PlasticityCfg.GetDynamicsSettings(nccSource.Neuron.Role, tmpRelTargetNeuronCollection[targetNeuronIndex].Neuron.Role)
+                                                  InstanceCfg.SynapseCfg.PlasticityCfg.GetDynamicsSettings(nccSource.Neuron.Role, tmpRelTargetNeuronCollection[targetNeuronIndex].Neuron.Role),
+                                                  threadRandObj
                                                   );
                     InternalDistancesStat.AddSampleValue(synapse.Distance);
                     SetInterconnection(_neuronNeuronConnectionsCollection, synapse, replaceExistingConnections);
@@ -754,12 +873,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                 foreach(Tuple<HiddenNeuron, HiddenNeuron> connPair in connPairs)
                 {
                     //Establish connection
+                    URandomValueSettings weightCfg = InstanceCfg.SynapseCfg.InternalWeightsCfg.GetWeightsSettings(connPair.Item1.TypeOfActivation, connPair.Item1.Role, connPair.Item2.TypeOfActivation, connPair.Item2.Role, out double wScale);
                     Synapse synapse = new Synapse(connPair.Item1,
                                                   connPair.Item2,
-                                                  rand.NextDouble(InstanceCfg.SynapseCfg.InternalWeightsCfg.GetWeightsSettings(connPair.Item1.TypeOfActivation, connPair.Item2.TypeOfActivation)),
+                                                  rand.NextDouble(weightCfg) * wScale,
                                                   InstanceCfg.SynapseCfg.InternalDelayMethod,
                                                   InstanceCfg.SynapseCfg.InternalMaxDelay,
-                                                  InstanceCfg.SynapseCfg.PlasticityCfg.GetDynamicsSettings(connPair.Item1.Role, connPair.Item2.Role)
+                                                  InstanceCfg.SynapseCfg.PlasticityCfg.GetDynamicsSettings(connPair.Item1.Role, connPair.Item2.Role),
+                                                  rand
                                                   );
                     InternalDistancesStat.AddSampleValue(synapse.Distance);
                     SetInterconnection(_neuronNeuronConnectionsCollection, synapse, settings.ReplaceExistingConnections);
@@ -889,12 +1010,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                     //Pure random selection
                     targetNeuronIndex = threadRandObj.Next(tmpRelTargetNeuronCollection.Count);
                     //Establish connection
+                    URandomValueSettings weightCfg = InstanceCfg.SynapseCfg.InternalWeightsCfg.GetWeightsSettings(nccSource.Neuron.TypeOfActivation, nccSource.Neuron.Role, tmpRelTargetNeuronCollection[targetNeuronIndex].Neuron.TypeOfActivation, tmpRelTargetNeuronCollection[targetNeuronIndex].Neuron.Role, out double wScale);
                     Synapse synapse = new Synapse(nccSource.Neuron,
                                                   tmpRelTargetNeuronCollection[targetNeuronIndex].Neuron,
-                                                  threadRandObj.NextDouble(InstanceCfg.SynapseCfg.InternalWeightsCfg.GetWeightsSettings(nccSource.Neuron.TypeOfActivation, tmpRelTargetNeuronCollection[targetNeuronIndex].Neuron.TypeOfActivation)),
+                                                  threadRandObj.NextDouble(weightCfg) * wScale,
                                                   InstanceCfg.SynapseCfg.InternalDelayMethod,
                                                   InstanceCfg.SynapseCfg.InternalMaxDelay,
-                                                  InstanceCfg.SynapseCfg.PlasticityCfg.GetDynamicsSettings(nccSource.Neuron.Role, tmpRelTargetNeuronCollection[targetNeuronIndex].Neuron.Role)
+                                                  InstanceCfg.SynapseCfg.PlasticityCfg.GetDynamicsSettings(nccSource.Neuron.Role, tmpRelTargetNeuronCollection[targetNeuronIndex].Neuron.Role),
+                                                  threadRandObj
                                                   );
                     InternalDistancesStat.AddSampleValue(synapse.Distance);
                     SetInterconnection(_neuronNeuronConnectionsCollection, synapse);
@@ -972,7 +1095,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                                                     Size,
                                                     _reservoirExcitatoryNeuronsRatio,
                                                     NumOfPredictors,
-                                                    NumOfInternalSynapses
+                                                    NumOfInternalSynapses,
+                                                    NumOfInternalEESynapses,
+                                                    NumOfInternalEISynapses,
+                                                    NumOfInternalIESynapses,
+                                                    NumOfInternalIISynapses
                                                     );
             int poolID = 0;
             foreach (PoolSettings poolSettings in StructureCfg.PoolsCfg.PoolCfgCollection)
@@ -981,6 +1108,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                 //Neurons statistics
                 foreach (HiddenNeuron neuron in _poolNeuronsCollection[poolID])
                 {
+                    ++poolStat.NeuronGroupStatCollection[neuron.Location.PoolGroupID].NumOfNeurons;
                     poolStat.NeuronGroupStatCollection[neuron.Location.PoolGroupID].AvgActivationStatesStat.AddSampleValue(neuron.Statistics.ActivationStat.ArithAvg);
                     poolStat.NeuronGroupStatCollection[neuron.Location.PoolGroupID].MaxActivationStatesStat.AddSampleValue(neuron.Statistics.ActivationStat.Max);
                     poolStat.NeuronGroupStatCollection[neuron.Location.PoolGroupID].MinActivationStatesStat.AddSampleValue(neuron.Statistics.ActivationStat.Min);
@@ -1006,7 +1134,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                         poolStat.NeuronGroupStatCollection[neuron.Location.PoolGroupID].MinTStimuliStat.AddSampleValue(neuron.Statistics.TotalStimuliStat.Min);
                         poolStat.NeuronGroupStatCollection[neuron.Location.PoolGroupID].TStimuliSpansStat.AddSampleValue(neuron.Statistics.TotalStimuliStat.Span);
                     }
-                    if (neuron.Statistics.AnalogSignalStat.NumOfNonzeroSamples > 0)
+                    if (neuron.Statistics.AnalogSignalStat.NumOfSamples > 0)
                     {
                         poolStat.NeuronGroupStatCollection[neuron.Location.PoolGroupID].AvgAnalogSignalStat.AddSampleValue(neuron.Statistics.AnalogSignalStat.ArithAvg);
                         poolStat.NeuronGroupStatCollection[neuron.Location.PoolGroupID].MaxAnalogSignalStat.AddSampleValue(neuron.Statistics.AnalogSignalStat.Max);
@@ -1302,6 +1430,28 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// Total number of internal synapses
         /// </summary>
         public int TotalNumOfInternalSynapses { get; }
+
+        /// <summary>
+        /// Number of EE synapses
+        /// </summary>
+        public int NumOfEESynapses { get; }
+
+        /// <summary>
+        /// Number of EI synapses
+        /// </summary>
+        public int NumOfEISynapses { get; }
+
+        /// <summary>
+        /// Number of IE synapses
+        /// </summary>
+        public int NumOfIESynapses { get; }
+
+        /// <summary>
+        /// Number of II synapses
+        /// </summary>
+        public int NumOfIISynapses { get; }
+
+
         /// <summary>
         /// Collection of resrvoir pools stats
         /// </summary>
@@ -1337,12 +1487,20 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// <param name="excitatoryNeuronsRatio">Total ratio of the excitatory neurons</param>
         /// <param name="numOfPredictors">Total number of predictors</param>
         /// <param name="numOfInternalSynapses">Total number of synapses</param>
+        /// <param name="numOfInternalEESynapses">Number of EE synapses</param>
+        /// <param name="numOfInternalEISynapses">Number of EI synapses</param>
+        /// <param name="numOfInternalIESynapses">Number of IE synapses</param>
+        /// <param name="numOfInternalIISynapses">Number of II synapses</param>
         public ReservoirStat(string reservoirInstanceName,
                              string reservoirSettingsName,
                              int numOfNeurons,
                              double excitatoryNeuronsRatio,
                              int numOfPredictors,
-                             int numOfInternalSynapses
+                             int numOfInternalSynapses,
+                             int numOfInternalEESynapses,
+                             int numOfInternalEISynapses,
+                             int numOfInternalIESynapses,
+                             int numOfInternalIISynapses
                              )
         {
             ReservoirInstanceName = reservoirInstanceName;
@@ -1351,6 +1509,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             ExcitatoryNeuronsRatio = excitatoryNeuronsRatio;
             TotalNumOfPredictors = numOfPredictors;
             TotalNumOfInternalSynapses = numOfInternalSynapses;
+            NumOfEESynapses = numOfInternalEESynapses;
+            NumOfEISynapses = numOfInternalEISynapses;
+            NumOfIESynapses = numOfInternalIESynapses;
+            NumOfIISynapses = numOfInternalIISynapses;
             PoolStatCollection = new List<PoolStat>();
             NumOfNoRStimuliNeurons = 0;
             NumOfNoAnalogOutputSignalNeurons = 0;
@@ -1381,7 +1543,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             /// Number of neurons within the pool
             /// </summary>
             public double ExcitatoryNeuronsRatio { get; }
-
             /// <summary>
             /// Collection of the neuron group statistics
             /// </summary>
@@ -1422,14 +1583,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             /// </summary>
             public BasicStat InternalSpikingWeightsStat { get; }
 
-            //Constructor
-            /// <summary>
-            /// Creates an unitialized instance
-            /// </summary>
-            /// <param name="poolSettings">Settings of the neuron pool</param>
-            /// <param name="numOfNeurons">Number of neurons within the pool</param>
-            /// <param name="excitatoryNeuronsRatio">Ratio of excitatory neurons within the pool</param>
-            public PoolStat(PoolSettings poolSettings,
+        //Constructor
+        /// <summary>
+        /// Creates an unitialized instance
+        /// </summary>
+        /// <param name="poolSettings">Settings of the neuron pool</param>
+        /// <param name="numOfNeurons">Number of neurons within the pool</param>
+        /// <param name="excitatoryNeuronsRatio">Ratio of excitatory neurons within the pool</param>
+        public PoolStat(PoolSettings poolSettings,
                             int numOfNeurons,
                             double excitatoryNeuronsRatio
                             )
@@ -1585,6 +1746,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                 /// </summary>
                 public BasicStat IntSynEfficacySpansStat { get; }
                 /// <summary>
+                /// Number of neurons in the group
+                /// </summary>
+                public int NumOfNeurons { get; set; }
+                /// <summary>
                 /// Number of neurons getting no stimulation from connected reservoir's neurons
                 /// </summary>
                 public int NumOfNoRStimuliNeurons { get; set; }
@@ -1644,6 +1809,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                     MaxIntSynEfficacyStat = new BasicStat();
                     MinIntSynEfficacyStat = new BasicStat();
                     IntSynEfficacySpansStat = new BasicStat();
+                    NumOfNeurons = 0;
                     NumOfNoRStimuliNeurons = 0;
                     NumOfNoAnalogOutputSignalNeurons = 0;
                     NumOfConstAnalogOutputSignalNeurons = 0;

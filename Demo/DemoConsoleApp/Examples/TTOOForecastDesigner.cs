@@ -45,7 +45,7 @@ namespace Demo.DemoConsoleApp.Examples
                                                                          new ExternalFieldSettings("Adj Close", new RealFeatureFilterSettings())
                                                                          );
             //Simplified readout layer configuration
-            ReadoutLayerSettings readoutCfg = StateMachineDesigner.CreateForecastReadoutCfg(StateMachineDesigner.CreateIdentityRegrNet(2, 1000),
+            ReadoutLayerSettings readoutCfg = StateMachineDesigner.CreateForecastReadoutCfg(StateMachineDesigner.CreateSingleLayerRegrNet(new IdentitySettings(), 2, 1000),
                                                                                             0.1d,
                                                                                             "High",
                                                                                             "Low"

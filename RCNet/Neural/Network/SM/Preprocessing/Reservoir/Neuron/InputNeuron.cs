@@ -52,14 +52,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron
         public double Bias { get { return 0; } }
 
         /// <summary>
-        /// Computation cycles gone from the last emitted spike
+        /// Computation cycles gone from the last emitted spike or start (if no spike emitted before current computation cycle)
         /// </summary>
-        public int SpikeLeak { get { throw new NotImplementedException("SpikeLeak is unsupported for InputNeuron"); } }
+        public int SpikeLeak { get; private set; }
 
         /// <summary>
-        /// Specifies, if neuron has already emitted output spike
+        /// Specifies, if neuron has already emitted spike before current computation cycle
         /// </summary>
-        public bool AfterFirstSpike { get { return false; } }
+        public bool AfterFirstSpike { get; private set; }
 
         //Attributes
         private readonly Interval _inputRange;
@@ -75,21 +75,17 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron
         /// </summary>
         /// <param name="reservoirID">Reservoir ID</param>
         /// <param name="inputEntryPoint">Input entry point coordinates within the 3D space</param>
-        /// <param name="inputFieldIdx">Index of the corresponding reservoir's input field.</param>
-        /// <param name="inputRange">
-        /// Range of input value.
-        /// It is very recommended to have input values normalized and standardized before
-        /// they are passed as an input.
-        /// </param>
+        /// <param name="flatIdx">Index of this neuron among all input neurons.</param>
+        /// <param name="inputRange">Range of input value</param>
         /// <param name="signalingRestriction">Distinguish between analog/spiking provided signal (NoRestriction is forbidden)</param>
         public InputNeuron(int reservoirID,
                            int[] inputEntryPoint,
-                           int inputFieldIdx,
+                           int flatIdx,
                            Interval inputRange,
                            NeuronCommon.NeuronSignalingRestrictionType signalingRestriction
                            )
         {
-            Location = new NeuronLocation(reservoirID, inputFieldIdx, - 1, inputFieldIdx, 0, inputEntryPoint[0], inputEntryPoint[1], inputEntryPoint[2]);
+            Location = new NeuronLocation(reservoirID, flatIdx, - 1, flatIdx, 0, inputEntryPoint[0], inputEntryPoint[1], inputEntryPoint[2]);
             _inputRange = inputRange.DeepClone();
             if(signalingRestriction == NeuronCommon.NeuronSignalingRestrictionType.NoRestriction)
             {
@@ -113,6 +109,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron
             _tStimuli = 0;
             _analogSignal = 0;
             _spikingSignal = 0;
+            SpikeLeak = 0;
+            AfterFirstSpike = false;
             if (statistics)
             {
                 Statistics.Reset();
@@ -139,15 +137,22 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron
         /// <param name="collectStatistics">Specifies whether to update internal statistics</param>
         public void Recompute(bool collectStatistics)
         {
+            //Spike leak and first spike handling
+            if (SignalingRestriction == NeuronCommon.NeuronSignalingRestrictionType.SpikingOnly)
+            {
+                if (_spikingSignal > 0)
+                {
+                    //Spike during previous cycle, so reset the counter
+                    AfterFirstSpike = true;
+                    SpikeLeak = 0;
+                }
+                ++SpikeLeak;
+            }
+            //Analog signal is exactly the same as stimulation
             _analogSignal = _tStimuli;
-            if (SignalingRestriction == NeuronCommon.NeuronSignalingRestrictionType.AnalogOnly)
-            {
-                _spikingSignal = _spikingTargetRange.Rescale(_tStimuli, _inputRange);
-            }
-            else
-            {
-                _spikingSignal = _tStimuli;
-            }
+            //Spiking signal must be always between 0 and 1
+            _spikingSignal = _spikingTargetRange.Rescale(_tStimuli, _inputRange);
+            //Statistics
             if (collectStatistics)
             {
                 Statistics.Update(_iStimuli, _rStimuli, _tStimuli, _tStimuli, _analogSignal, _spikingSignal);
@@ -156,19 +161,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron
         }
 
         /// <summary>
-        /// Neuron returns input for neuron having activation of specified type.
+        /// Returns input for hidden neuron having activation of specified type.
         /// </summary>
         /// <param name="targetActivationType">Specifies what type of the signal is required.</param>
         public double GetSignal(ActivationType targetActivationType)
         {
-            if (targetActivationType == ActivationType.Spiking)
-            {
-                return _spikingSignal;
-            }
-            else
-            {
-                return _analogSignal;
-            }
+            return targetActivationType == ActivationType.Spiking ? _spikingSignal : _analogSignal;
         }
 
 

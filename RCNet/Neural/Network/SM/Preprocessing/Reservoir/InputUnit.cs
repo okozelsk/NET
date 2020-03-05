@@ -90,6 +90,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         private readonly int[] _inputEntryPoint;
         private readonly MovingDataWindow _movingDW;
         private readonly TransformedValueUnit[] _transUnits;
+        private readonly int _numOfActiveTransUnits;
 
         //Constructor
         /// <summary>
@@ -98,8 +99,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// <param name="reservoirID">Reservoir ID</param>
         /// <param name="inputRange">Input data range</param>
         /// <param name="inputFieldIdx">Index of the associated input field</param>
+        /// <param name="inputNeuronsStartIdx">Index of the first input neuron of this unit among all input neurons</param>
         /// <param name="settings">Configuration parameters.</param>
-        public InputUnit(int reservoirID, Interval inputRange, int inputFieldIdx, InputUnitSettings settings)
+        public InputUnit(int reservoirID, Interval inputRange, int inputFieldIdx, int inputNeuronsStartIdx, InputUnitSettings settings)
         {
             _reservoirID = reservoirID;
             _inputRange = inputRange.DeepClone();
@@ -109,44 +111,44 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             _movingDW = new MovingDataWindow(MovingDataWindowMaxSize);
             _transUnits = new TransformedValueUnit[NumOfAnalogCodingMethods];
             _transUnits.Populate(null);
+            _numOfActiveTransUnits = 0;
+            foreach (InputUnitConnSettings connCfg in _settings.ConnsCfg.ConnCfgCollection)
+            {
+                if(_transUnits[(int)connCfg.AnalogCoding] == null)
+                {
+                    _transUnits[(int)connCfg.AnalogCoding] = new TransformedValueUnit(_reservoirID, _inputEntryPoint, inputNeuronsStartIdx, _inputRange, _settings.SpikeTrainLength);
+                    ++_numOfActiveTransUnits;
+                    inputNeuronsStartIdx += (2 * (1 + _settings.SpikeTrainLength));
+                }
+            }
+
             return;
         }
+
+        //Properties
+        /// <summary>
+        /// Index of the associated input field
+        /// </summary>
+        public int NumOfInputNeurons { get { return _numOfActiveTransUnits * (2 * (1 + _settings.SpikeTrainLength)); } }
 
         //Methods
         /// <summary>
-        /// Instantiates TransformedValueUnit associated with given AnalogCodingMethod if it doesn't exist yet.
-        /// </summary>
-        /// <param name="acm">Analog coding method</param>
-        private void InstantiateTransUnit(AnalogCodingMethod acm)
-        {
-            if(_transUnits[(int)acm] == null)
-            {
-                _transUnits[(int)acm] = new TransformedValueUnit(_reservoirID, _inputEntryPoint, InputFieldIdx, _inputRange, _settings.SpikeTrainLength);
-            }
-            return;
-        }
-
-        /// <summary>
-        /// Instantiates TransformedValueUnit associated with given analog coding method if it doesn't exist yet and
-        /// returns input neuron associated with specified analog coding method.
+        /// Returns input neuron associated with specified analog coding method.
         /// </summary>
         /// <param name="acm">Analog coding method</param>
         /// <param name="oppositeAmplitude">Specifies if to return variant having opposite amplitude</param>
         public InputNeuron GetAnalogInputNeuron(AnalogCodingMethod acm, bool oppositeAmplitude)
         {
-            InstantiateTransUnit(acm);
             return oppositeAmplitude ? _transUnits[(int)acm].OppoAmplAnalogInputNeuron : _transUnits[(int)acm].UnchAmplAnalogInputNeuron;
         }
 
         /// <summary>
-        /// Instantiates TransformedValueUnit associated with given analog coding method if it doesn't exist yet and
-        /// returns collection of input neurons representing spike train associated with specified analog coding method
+        /// Returns collection of input neurons representing spike train associated with specified analog coding method
         /// </summary>
         /// <param name="acm">Analog coding method</param>
         /// <param name="oppositeAmplitude">Specifies if to return variant having opposite amplitude</param>
         public InputNeuron[] GetSpikeTrainInputNeurons(AnalogCodingMethod acm, bool oppositeAmplitude)
         {
-            InstantiateTransUnit(acm);
             return oppositeAmplitude ? _transUnits[(int)acm].OppoAmplSpikeTrainInputNeuronCollection : _transUnits[(int)acm].UnchAmplSpikeTrainInputNeuronCollection;
         }
 
@@ -291,12 +293,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             /// </summary>
             /// <param name="reservoirID">Reservoir ID</param>
             /// <param name="inputEntryPoint">Input entry point coordinates within the 3D space</param>
-            /// <param name="inputFieldIdx">Index of the corresponding reservoir's input field.</param>
+            /// <param name="inputNeuronsStartIdx">Global flat index of the first input neuron of this TransformedValueUnit.</param>
             /// <param name="inputRange">Input data range.</param>
             /// <param name="spikeTrainLength">Length of the spike-train (number of bits) representing input analog value.</param>
             public TransformedValueUnit(int reservoirID,
                                         int[] inputEntryPoint,
-                                        int inputFieldIdx,
+                                        int inputNeuronsStartIdx,
                                         Interval inputRange,
                                         int spikeTrainLength
                                         )
@@ -304,14 +306,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                 _inputRange = inputRange;
                 _precisionPiece = _inputRange.Span / Math.Pow(2d, spikeTrainLength);
                 _maxPrecisionBitMask = (uint)Math.Round(Math.Pow(2d, spikeTrainLength) - 1d);
-                UnchAmplAnalogInputNeuron = new InputNeuron(reservoirID, inputEntryPoint, inputFieldIdx, _inputRange, NeuronCommon.NeuronSignalingRestrictionType.AnalogOnly);
-                OppoAmplAnalogInputNeuron = new InputNeuron(reservoirID, inputEntryPoint, inputFieldIdx, _inputRange, NeuronCommon.NeuronSignalingRestrictionType.AnalogOnly);
+                UnchAmplAnalogInputNeuron = new InputNeuron(reservoirID, inputEntryPoint, inputNeuronsStartIdx++, _inputRange, NeuronCommon.NeuronSignalingRestrictionType.AnalogOnly);
+                OppoAmplAnalogInputNeuron = new InputNeuron(reservoirID, inputEntryPoint, inputNeuronsStartIdx++, _inputRange, NeuronCommon.NeuronSignalingRestrictionType.AnalogOnly);
                 UnchAmplSpikeTrainInputNeuronCollection = new InputNeuron[spikeTrainLength];
                 OppoAmplSpikeTrainInputNeuronCollection = new InputNeuron[spikeTrainLength];
                 for(int i = 0; i < spikeTrainLength; i++)
                 {
-                    UnchAmplSpikeTrainInputNeuronCollection[i] = new InputNeuron(reservoirID, inputEntryPoint, inputFieldIdx, ZeroOneRange, NeuronCommon.NeuronSignalingRestrictionType.SpikingOnly);
-                    OppoAmplSpikeTrainInputNeuronCollection[i] = new InputNeuron(reservoirID, inputEntryPoint, inputFieldIdx, ZeroOneRange, NeuronCommon.NeuronSignalingRestrictionType.SpikingOnly);
+                    UnchAmplSpikeTrainInputNeuronCollection[i] = new InputNeuron(reservoirID, inputEntryPoint, inputNeuronsStartIdx++, ZeroOneRange, NeuronCommon.NeuronSignalingRestrictionType.SpikingOnly);
+                    OppoAmplSpikeTrainInputNeuronCollection[i] = new InputNeuron(reservoirID, inputEntryPoint, inputNeuronsStartIdx++, ZeroOneRange, NeuronCommon.NeuronSignalingRestrictionType.SpikingOnly);
                 }
                 return;
             }
@@ -370,12 +372,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                 uint unchSpikeTrainBits = GetSpikeTrain(analogValue);
                 for (int i = 0; i < UnchAmplSpikeTrainInputNeuronCollection.Length; i++)
                 {
-                    UnchAmplSpikeTrainInputNeuronCollection[i].NewStimulation(Bitwise.GetBit(unchSpikeTrainBits, i), 0d);
+                    double spikeVal = Bitwise.GetBit(unchSpikeTrainBits, i);
+                    UnchAmplSpikeTrainInputNeuronCollection[i].NewStimulation(spikeVal, 0d);
                 }
                 uint oppoSpikeTrainBits = GetSpikeTrain(oppoAnalogValue);
                 for (int i = 0; i < OppoAmplSpikeTrainInputNeuronCollection.Length; i++)
                 {
-                    OppoAmplSpikeTrainInputNeuronCollection[i].NewStimulation(Bitwise.GetBit(oppoSpikeTrainBits, i), 0d);
+                    double spikeVal = Bitwise.GetBit(oppoSpikeTrainBits, i);
+                    OppoAmplSpikeTrainInputNeuronCollection[i].NewStimulation(spikeVal, 0d);
                 }
                 return;
             }

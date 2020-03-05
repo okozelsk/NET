@@ -810,7 +810,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
 
             private string StatLine(BasicStat stat)
             {
-                return $"Avg:{FNum(stat.ArithAvg)},  Max:{FNum(stat.Max)},  Min:{FNum(stat.Min)},  SDdev:{FNum(stat.StdDev)}";
+                return $"Avg:{FNum(stat.ArithAvg)},  Max:{FNum(stat.Max)},  Min:{FNum(stat.Min)},  StdDev:{FNum(stat.StdDev)}";
             }
 
             /// <summary>
@@ -827,6 +827,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 foreach (ReservoirStat resStat in ReservoirStatCollection)
                 {
                     sb.Append(leftMargin + $"    Reservoir instance: {resStat.ReservoirInstanceName} (configuration {resStat.ReservoirSettingsName}, {resStat.TotalNumOfNeurons} neurons, {Math.Round(resStat.ExcitatoryNeuronsRatio * 100, 1).ToString(CultureInfo.InvariantCulture)}% excitatory neurons, {resStat.TotalNumOfInternalSynapses} internal synapses)" + Environment.NewLine);
+                    sb.Append(leftMargin + $"        Synapses distribution" + Environment.NewLine);
+                    sb.Append(leftMargin + $"            EE: {((double)resStat.NumOfEESynapses / (double)resStat.TotalNumOfInternalSynapses).ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                    sb.Append(leftMargin + $"            EI: {((double)resStat.NumOfEISynapses / (double)resStat.TotalNumOfInternalSynapses).ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                    sb.Append(leftMargin + $"            IE: {((double)resStat.NumOfIESynapses / (double)resStat.TotalNumOfInternalSynapses).ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                    sb.Append(leftMargin + $"            II: {((double)resStat.NumOfIISynapses / (double)resStat.TotalNumOfInternalSynapses).ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
                     sb.Append(leftMargin + $"        Activity" + Environment.NewLine);
                     sb.Append(leftMargin + $"            {resStat.NumOfNoRStimuliNeurons} neurons receive no stimulation from the reservoir" + Environment.NewLine);
                     sb.Append(leftMargin + $"            {resStat.NumOfNoAnalogOutputSignalNeurons} neurons produce no analog signal" + Environment.NewLine);
@@ -848,7 +853,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                         sb.Append(leftMargin + $"                Int. Spiking>  {StatLine(poolStat.InternalSpikingWeightsStat)}" + Environment.NewLine);
                         foreach (ReservoirStat.PoolStat.NeuronGroupStat groupStat in poolStat.NeuronGroupStatCollection)
                         {
-                            sb.Append(leftMargin + $"            Group of neurons: {groupStat.GroupName} ({groupStat.AvgAnalogSignalStat.NumOfSamples} neurons)" + Environment.NewLine);
+                            sb.Append(leftMargin + $"            Group of neurons: {groupStat.GroupName} ({groupStat.NumOfNeurons} neurons)" + Environment.NewLine);
                             sb.Append(leftMargin + $"                Activity" + Environment.NewLine);
                             sb.Append(leftMargin + $"                    {groupStat.NumOfNoRStimuliNeurons} neurons receive no stimulation from the reservoir" + Environment.NewLine);
                             sb.Append(leftMargin + $"                    {groupStat.NumOfNoAnalogOutputSignalNeurons} neurons produce no analog signal" + Environment.NewLine);

@@ -10,6 +10,7 @@ using RCNet.Extensions;
 using RCNet.XmlTools;
 using RCNet.RandomValue;
 using RCNet.Neural.Activation;
+using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
 {
@@ -66,22 +67,22 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         /// <summary>
         /// Synapse's weight configuration when analog-analog neurons are connected
         /// </summary>
-        public InternalWeightsAASettings InternalWeightsAACfg { get; }
+        public InternalWeightAASettings InternalWeightAACfg { get; }
 
         /// <summary>
         /// Synapse's weight configuration when analog-spiking neurons are connected
         /// </summary>
-        public InternalWeightsASSettings InternalWeightsASCfg { get; }
+        public InternalWeightASSettings InternalWeightASCfg { get; }
 
         /// <summary>
         /// Synapse's weight configuration when spiking-analog neurons are connected
         /// </summary>
-        public InternalWeightsSASettings InternalWeightsSACfg { get; }
+        public InternalWeightSASettings InternalWeightSACfg { get; }
 
         /// <summary>
         /// Synapse's weight configuration when spiking-spiking neurons are connected
         /// </summary>
-        public InternalWeightsSSSettings InternalWeightsSSCfg { get; }
+        public InternalWeightSSSettings InternalWeightSSCfg { get; }
 
         //Constructors
         /// <summary>
@@ -97,37 +98,37 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         {
             AnalogScopeSpectralRadius = analogScopeSpectralRadius;
             SpikingScopeSpectralRadius = spikingScopeSpectralRadius;
-            InternalWeightsAACfg = null;
-            InternalWeightsASCfg = null;
-            InternalWeightsSACfg = null;
-            InternalWeightsSSCfg = null;
+            InternalWeightAACfg = null;
+            InternalWeightASCfg = null;
+            InternalWeightSACfg = null;
+            InternalWeightSSCfg = null;
             if (weightsSettings != null)
             {
                 foreach (URandomValueSettings ws in weightsSettings)
                 {
-                    if (ws.GetType() == typeof(InternalWeightsAASettings))
+                    if (ws.GetType() == typeof(InternalWeightAASettings))
                     {
-                        InternalWeightsAACfg = (InternalWeightsAASettings)ws.DeepClone();
+                        InternalWeightAACfg = (InternalWeightAASettings)ws.DeepClone();
                     }
-                    else if (ws.GetType() == typeof(InternalWeightsASSettings))
+                    else if (ws.GetType() == typeof(InternalWeightASSettings))
                     {
-                        InternalWeightsASCfg = (InternalWeightsASSettings)ws.DeepClone();
+                        InternalWeightASCfg = (InternalWeightASSettings)ws.DeepClone();
                     }
-                    else if (ws.GetType() == typeof(InternalWeightsSASettings))
+                    else if (ws.GetType() == typeof(InternalWeightSASettings))
                     {
-                        InternalWeightsSACfg = (InternalWeightsSASettings)ws.DeepClone();
+                        InternalWeightSACfg = (InternalWeightSASettings)ws.DeepClone();
                     }
-                    else if (ws.GetType() == typeof(InternalWeightsSSSettings))
+                    else if (ws.GetType() == typeof(InternalWeightSSSettings))
                     {
-                        InternalWeightsSSCfg = (InternalWeightsSSSettings)ws.DeepClone();
+                        InternalWeightSSCfg = (InternalWeightSSSettings)ws.DeepClone();
                     }
                 }
             }
             //Defaults weights settings when not specific
-            InternalWeightsAACfg = InternalWeightsAACfg ?? new InternalWeightsAASettings(DefaultMinWeight, DefaultMaxWeight);
-            InternalWeightsASCfg = InternalWeightsASCfg ?? new InternalWeightsASSettings(DefaultMinWeight, DefaultMaxWeight);
-            InternalWeightsSACfg = InternalWeightsSACfg ?? new InternalWeightsSASettings(DefaultMinWeight, DefaultMaxWeight);
-            InternalWeightsSSCfg = InternalWeightsSSCfg ?? new InternalWeightsSSSettings(DefaultMinWeight, DefaultMaxWeight);
+            InternalWeightAACfg = InternalWeightAACfg ?? new InternalWeightAASettings(DefaultMinWeight, DefaultMaxWeight);
+            InternalWeightASCfg = InternalWeightASCfg ?? new InternalWeightASSettings(DefaultMinWeight, DefaultMaxWeight);
+            InternalWeightSACfg = InternalWeightSACfg ?? new InternalWeightSASettings(DefaultMinWeight, DefaultMaxWeight);
+            InternalWeightSSCfg = InternalWeightSSCfg ?? new InternalWeightSSSettings(DefaultMinWeight, DefaultMaxWeight);
             Check();
             return;
         }
@@ -153,7 +154,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         /// <param name="source">Source instance</param>
         public InternalWeightsSettings(InternalWeightsSettings source)
             :this(source.AnalogScopeSpectralRadius, source.SpikingScopeSpectralRadius,
-                  source.InternalWeightsAACfg, source.InternalWeightsASCfg, source.InternalWeightsSACfg, source.InternalWeightsSSCfg)
+                  source.InternalWeightAACfg, source.InternalWeightASCfg, source.InternalWeightSACfg, source.InternalWeightSSCfg)
         {
             return;
         }
@@ -176,19 +177,19 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
             attrValue = settingsElem.Attribute("spikingScopeSpectralRadius").Value;
             SpikingScopeSpectralRadius = attrValue == NASpectralRadiusCode ? NASpectralRadiusNum : double.Parse(attrValue, CultureInfo.InvariantCulture);
             //Weights
-            XElement weightsCfgElem;
-            //WeightsAACfg
-            weightsCfgElem = settingsElem.XPathSelectElement("./weightsAA");
-            InternalWeightsAACfg = weightsCfgElem == null ? new InternalWeightsAASettings(DefaultMinWeight, DefaultMaxWeight) : new InternalWeightsAASettings(weightsCfgElem);
-            //WeightsASCfg
-            weightsCfgElem = settingsElem.XPathSelectElement("./weightsAS");
-            InternalWeightsASCfg = weightsCfgElem == null ? new InternalWeightsASSettings(DefaultMinWeight, DefaultMaxWeight) : new InternalWeightsASSettings(weightsCfgElem);
-            //WeightsSACfg
-            weightsCfgElem = settingsElem.XPathSelectElement("./weightsSA");
-            InternalWeightsSACfg = weightsCfgElem == null ? new InternalWeightsSASettings(DefaultMinWeight, DefaultMaxWeight) : new InternalWeightsSASettings(weightsCfgElem);
-            //WeightsSSCfg
-            weightsCfgElem = settingsElem.XPathSelectElement("./weightsSS");
-            InternalWeightsSSCfg = weightsCfgElem == null ? new InternalWeightsSSSettings(DefaultMinWeight, DefaultMaxWeight) : new InternalWeightsSSSettings(weightsCfgElem);
+            XElement weightCfgElem;
+            //WeightAACfg
+            weightCfgElem = settingsElem.XPathSelectElement("./weightAA");
+            InternalWeightAACfg = weightCfgElem == null ? new InternalWeightAASettings(DefaultMinWeight, DefaultMaxWeight) : new InternalWeightAASettings(weightCfgElem);
+            //WeightASCfg
+            weightCfgElem = settingsElem.XPathSelectElement("./weightAS");
+            InternalWeightASCfg = weightCfgElem == null ? new InternalWeightASSettings(DefaultMinWeight, DefaultMaxWeight) : new InternalWeightASSettings(weightCfgElem);
+            //WeightSACfg
+            weightCfgElem = settingsElem.XPathSelectElement("./weightSA");
+            InternalWeightSACfg = weightCfgElem == null ? new InternalWeightSASettings(DefaultMinWeight, DefaultMaxWeight) : new InternalWeightSASettings(weightCfgElem);
+            //WeightSSCfg
+            weightCfgElem = settingsElem.XPathSelectElement("./weightSS");
+            InternalWeightSSCfg = weightCfgElem == null ? new InternalWeightSSSettings(DefaultMinWeight, DefaultMaxWeight) : new InternalWeightSSSettings(weightCfgElem);
             Check();
             return;
         }
@@ -207,22 +208,22 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         /// <summary>
         /// Checks if settings are default
         /// </summary>
-        public bool IsDefaultWeightsAA { get { return InternalWeightsAACfg.Min == DefaultMinWeight && InternalWeightsAACfg.Max == DefaultMaxWeight && InternalWeightsAACfg.IsDefaultDistrType; } }
+        public bool IsDefaultWeightAA { get { return InternalWeightAACfg.Min == DefaultMinWeight && InternalWeightAACfg.Max == DefaultMaxWeight && InternalWeightAACfg.IsDefaultDistrType; } }
 
         /// <summary>
         /// Checks if settings are default
         /// </summary>
-        public bool IsDefaultWeightsAS { get { return InternalWeightsASCfg.Min == DefaultMinWeight && InternalWeightsASCfg.Max == DefaultMaxWeight && InternalWeightsASCfg.IsDefaultDistrType; } }
+        public bool IsDefaultWeightAS { get { return InternalWeightASCfg.Min == DefaultMinWeight && InternalWeightASCfg.Max == DefaultMaxWeight && InternalWeightASCfg.IsDefaultDistrType; } }
 
         /// <summary>
         /// Checks if settings are default
         /// </summary>
-        public bool IsDefaultWeightsSA { get { return InternalWeightsSACfg.Min == DefaultMinWeight && InternalWeightsSACfg.Max == DefaultMaxWeight && InternalWeightsSACfg.IsDefaultDistrType; } }
+        public bool IsDefaultWeightSA { get { return InternalWeightSACfg.Min == DefaultMinWeight && InternalWeightSACfg.Max == DefaultMaxWeight && InternalWeightSACfg.IsDefaultDistrType; } }
 
         /// <summary>
         /// Checks if settings are default
         /// </summary>
-        public bool IsDefaultWeightsSS { get { return InternalWeightsSSCfg.Min == DefaultMinWeight && InternalWeightsSSCfg.Max == DefaultMaxWeight && InternalWeightsSSCfg.IsDefaultDistrType; } }
+        public bool IsDefaultWeightSS { get { return InternalWeightSSCfg.Min == DefaultMinWeight && InternalWeightSSCfg.Max == DefaultMaxWeight && InternalWeightSSCfg.IsDefaultDistrType; } }
 
         /// <summary>
         /// Identifies settings containing only default values
@@ -233,10 +234,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
             {
                 return IsDefaultAnalogScopeSpectralRadius &&
                        IsDefaultSpikingScopeSpectralRadius &&
-                       IsDefaultWeightsAA &&
-                       IsDefaultWeightsAS &&
-                       IsDefaultWeightsSA &&
-                       IsDefaultWeightsSS;
+                       IsDefaultWeightAA &&
+                       IsDefaultWeightAS &&
+                       IsDefaultWeightSA &&
+                       IsDefaultWeightSS;
             }
         }
 
@@ -260,9 +261,15 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         /// Returns appropriate weights settings
         /// </summary>
         /// <param name="sourceActivationType">Activation type of the source neuron</param>
+        /// <param name="sourceRole">Role of the source neuron</param>
         /// <param name="targetActivationType">Activation type of the target neuron</param>
+        /// <param name="targetRole">Role of the target neuron</param>
+        /// <param name="scale">Scale factor dependent on neuron roles to be applied</param>
         public URandomValueSettings GetWeightsSettings(ActivationType sourceActivationType,
-                                                       ActivationType targetActivationType
+                                                       NeuronCommon.NeuronRole sourceRole,
+                                                       ActivationType targetActivationType,
+                                                       NeuronCommon.NeuronRole targetRole,
+                                                       out double scale
                                                        )
         {
             //Choose appropriate weioghts
@@ -270,26 +277,91 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
                 targetActivationType == ActivationType.Analog
                 )
             {
-                return InternalWeightsAACfg;
+                if(sourceRole == NeuronCommon.NeuronRole.Excitatory && targetRole == NeuronCommon.NeuronRole.Excitatory)
+                {
+                    scale = InternalWeightAASettings.ScaleEE;
+                }
+                else if(sourceRole == NeuronCommon.NeuronRole.Excitatory && targetRole == NeuronCommon.NeuronRole.Inhibitory)
+                {
+                    scale = InternalWeightAASettings.ScaleEI;
+                }
+                else if (sourceRole == NeuronCommon.NeuronRole.Inhibitory && targetRole == NeuronCommon.NeuronRole.Excitatory)
+                {
+                    scale = InternalWeightAASettings.ScaleIE;
+                }
+                else
+                {
+                    scale = InternalWeightAASettings.ScaleII;
+                }
+                return InternalWeightAACfg;
             }
             else if (sourceActivationType == ActivationType.Analog &&
                      targetActivationType == ActivationType.Spiking
                      )
             {
-                return InternalWeightsASCfg;
+                if (sourceRole == NeuronCommon.NeuronRole.Excitatory && targetRole == NeuronCommon.NeuronRole.Excitatory)
+                {
+                    scale = InternalWeightASSettings.ScaleEE;
+                }
+                else if (sourceRole == NeuronCommon.NeuronRole.Excitatory && targetRole == NeuronCommon.NeuronRole.Inhibitory)
+                {
+                    scale = InternalWeightASSettings.ScaleEI;
+                }
+                else if (sourceRole == NeuronCommon.NeuronRole.Inhibitory && targetRole == NeuronCommon.NeuronRole.Excitatory)
+                {
+                    scale = InternalWeightASSettings.ScaleIE;
+                }
+                else
+                {
+                    scale = InternalWeightASSettings.ScaleII;
+                }
+                return InternalWeightASCfg;
             }
             else if (sourceActivationType == ActivationType.Spiking &&
                      targetActivationType == ActivationType.Analog
                      )
             {
-                return InternalWeightsSACfg;
+                if (sourceRole == NeuronCommon.NeuronRole.Excitatory && targetRole == NeuronCommon.NeuronRole.Excitatory)
+                {
+                    scale = InternalWeightSASettings.ScaleEE;
+                }
+                else if (sourceRole == NeuronCommon.NeuronRole.Excitatory && targetRole == NeuronCommon.NeuronRole.Inhibitory)
+                {
+                    scale = InternalWeightSASettings.ScaleEI;
+                }
+                else if (sourceRole == NeuronCommon.NeuronRole.Inhibitory && targetRole == NeuronCommon.NeuronRole.Excitatory)
+                {
+                    scale = InternalWeightSASettings.ScaleIE;
+                }
+                else
+                {
+                    scale = InternalWeightSASettings.ScaleII;
+                }
+                return InternalWeightSACfg;
             }
             else if (sourceActivationType == ActivationType.Spiking &&
                      targetActivationType == ActivationType.Spiking
                      )
             {
-                return InternalWeightsSSCfg;
+                if (sourceRole == NeuronCommon.NeuronRole.Excitatory && targetRole == NeuronCommon.NeuronRole.Excitatory)
+                {
+                    scale = InternalWeightSSSettings.ScaleEE;
+                }
+                else if (sourceRole == NeuronCommon.NeuronRole.Excitatory && targetRole == NeuronCommon.NeuronRole.Inhibitory)
+                {
+                    scale = InternalWeightSSSettings.ScaleEI;
+                }
+                else if (sourceRole == NeuronCommon.NeuronRole.Inhibitory && targetRole == NeuronCommon.NeuronRole.Excitatory)
+                {
+                    scale = InternalWeightSSSettings.ScaleIE;
+                }
+                else
+                {
+                    scale = InternalWeightSSSettings.ScaleII;
+                }
+                return InternalWeightSSCfg;
             }
+            scale = 0d;
             return null;
         }
 
@@ -318,21 +390,21 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
             {
                 rootElem.Add(new XAttribute("spikingScopeSpectralRadius", SpikingScopeSpectralRadius == NASpectralRadiusNum ? NASpectralRadiusCode : SpikingScopeSpectralRadius.ToString(CultureInfo.InvariantCulture)));
             }
-            if (!suppressDefaults || !IsDefaultWeightsAA)
+            if (!suppressDefaults || !IsDefaultWeightAA)
             {
-                rootElem.Add(InternalWeightsAACfg.GetXml(suppressDefaults));
+                rootElem.Add(InternalWeightAACfg.GetXml(suppressDefaults));
             }
-            if (!suppressDefaults || !IsDefaultWeightsAS)
+            if (!suppressDefaults || !IsDefaultWeightAS)
             {
-                rootElem.Add(InternalWeightsASCfg.GetXml(suppressDefaults));
+                rootElem.Add(InternalWeightASCfg.GetXml(suppressDefaults));
             }
-            if (!suppressDefaults || !IsDefaultWeightsSA)
+            if (!suppressDefaults || !IsDefaultWeightSA)
             {
-                rootElem.Add(InternalWeightsSACfg.GetXml(suppressDefaults));
+                rootElem.Add(InternalWeightSACfg.GetXml(suppressDefaults));
             }
-            if (!suppressDefaults || !IsDefaultWeightsSS)
+            if (!suppressDefaults || !IsDefaultWeightSS)
             {
-                rootElem.Add(InternalWeightsSSCfg.GetXml(suppressDefaults));
+                rootElem.Add(InternalWeightSSCfg.GetXml(suppressDefaults));
             }
             Validate(rootElem, XsdTypeName);
             return rootElem;

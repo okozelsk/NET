@@ -9,12 +9,31 @@ using RCNet.RandomValue;
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
 {
     /// <summary>
-    /// Configuration parameters of the synapse's weight when connecting internal Spiking-Spiking neurons
+    /// Configuration parameters of the synapse's weight when connecting internal Spiking-Analog neurons
     /// </summary>
     [Serializable]
-    public class InternalWeightsSSSettings : URandomValueSettings
+    public class InternalWeightSASettings : URandomValueSettings
     {
         //Constants
+        /// <summary>
+        /// Weight scale factor when EE synapse
+        /// </summary>
+        public const double ScaleEE = 1d;
+
+        /// <summary>
+        /// Weight scale factor when EI synapse
+        /// </summary>
+        public const double ScaleEI = 1d;
+
+        /// <summary>
+        /// Weight scale factor when IE synapse
+        /// </summary>
+        public const double ScaleIE = 1d;
+
+        /// <summary>
+        /// Weight scale factor when II synapse
+        /// </summary>
+        public const double ScaleII = 1d;
 
         //Constructors
         /// <summary>
@@ -23,7 +42,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         /// <param name="min">Min random value</param>
         /// <param name="max">Max random value</param>
         /// <param name="distrCfg">Specific parameters of the distribution</param>
-        public InternalWeightsSSSettings(double min,
+        public InternalWeightSASettings(double min,
                                          double max,
                                          IDistrSettings distrCfg = null
                                          )
@@ -36,7 +55,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         /// The deep copy constructor
         /// </summary>
         /// <param name="source">Source instance</param>
-        public InternalWeightsSSSettings(InternalWeightsSSSettings source)
+        public InternalWeightSASettings(InternalWeightSASettings source)
             :base(source)
         {
             return;
@@ -46,7 +65,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         /// Creates the instance and initialize it from given xml element.
         /// </summary>
         /// <param name="elem">Xml data containing settings</param>
-        public InternalWeightsSSSettings(XElement elem)
+        public InternalWeightSASettings(XElement elem)
             :base(elem)
         {
             return;
@@ -58,7 +77,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         /// </summary>
         public override RCNetBaseSettings DeepClone()
         {
-            return new InternalWeightsSSSettings(this);
+            return new InternalWeightSASettings(this);
         }
 
         /// <summary>
@@ -68,10 +87,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(bool suppressDefaults)
         {
-            return GetXml("weightsSS", suppressDefaults);
+            return GetXml("weightSA", suppressDefaults);
         }
 
-    }//InternalWeightsSSSettings
+    }//InternalWeightSASettings
 
 }//Namespace
 

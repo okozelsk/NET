@@ -179,10 +179,10 @@
     <Compile Include="Neural\Network\SM\Preprocessing\Reservoir\Pool\NeuronGroup\AnalogRetainmentSettings.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\Reservoir\Pool\NeuronGroup\SpikingNeuronGroupSettings.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\Reservoir\Synapse\SynapseSettings.cs" />
-    <Compile Include="Neural\Network\SM\Preprocessing\Reservoir\Synapse\InternalWeightsSSSettings.cs" />
-    <Compile Include="Neural\Network\SM\Preprocessing\Reservoir\Synapse\InternalWeightsSASettings.cs" />
-    <Compile Include="Neural\Network\SM\Preprocessing\Reservoir\Synapse\InternalWeightsASSettings.cs" />
-    <Compile Include="Neural\Network\SM\Preprocessing\Reservoir\Synapse\InternalWeightsAASettings.cs" />
+    <Compile Include="Neural\Network\SM\Preprocessing\Reservoir\Synapse\InternalWeightSSSettings.cs" />
+    <Compile Include="Neural\Network\SM\Preprocessing\Reservoir\Synapse\InternalWeightSASettings.cs" />
+    <Compile Include="Neural\Network\SM\Preprocessing\Reservoir\Synapse\InternalWeightASSettings.cs" />
+    <Compile Include="Neural\Network\SM\Preprocessing\Reservoir\Synapse\InternalWeightAASettings.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\Reservoir\Synapse\DynamicsIISettings.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\Reservoir\Synapse\DynamicsIESettings.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\Reservoir\Synapse\DynamicsEISettings.cs" />

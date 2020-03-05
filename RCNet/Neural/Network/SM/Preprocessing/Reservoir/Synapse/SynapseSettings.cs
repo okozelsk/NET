@@ -107,7 +107,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         /// </summary>
         /// <param name="source">Source instance</param>
         public SynapseSettings(SynapseSettings source)
-            :this(source.InputDelayMethod, source.InputMaxDelay, source.InternalDelayMethod, source.InputMaxDelay,
+            :this(source.InputDelayMethod, source.InputMaxDelay, source.InternalDelayMethod, source.InternalMaxDelay,
                   source.PlasticityCfg, source.InternalWeightsCfg)
         {
             return;

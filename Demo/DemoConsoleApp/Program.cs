@@ -12,7 +12,6 @@ namespace Demo.DemoConsoleApp
         {
             //Research - this is not a part of the demo - it is a free playground
             //(new Research()).Run();
-
             while (true)
             {
                 //Main menu
@@ -23,6 +22,7 @@ namespace Demo.DemoConsoleApp
                 Console.WriteLine("  3. TTOO share prices forecast (State Machine ESN setup from scratch)");
                 Console.WriteLine("  4. TTOO share prices forecast (State Machine ESN setup using StateMachineDesigner)");
                 Console.WriteLine("  5. Libras Movement classification (State Machine ESN setup using StateMachineDesigner)");
+                Console.WriteLine("  6. Libras Movement classification (State Machine LSM setup using StateMachineDesigner)");
                 Console.WriteLine("  0. Exit");
                 Console.WriteLine();
                 Console.WriteLine("  Press the digit...");
@@ -98,7 +98,23 @@ namespace Demo.DemoConsoleApp
                     case '5':
                         try
                         {
-                            (new LibrasClassificationDesigner()).Run();
+                            (new LibrasClassificationESNDesigner()).Run();
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine();
+                            while (e != null)
+                            {
+                                Console.WriteLine(e.Message);
+                                e = e.InnerException;
+                            }
+                        }
+                        break;
+
+                    case '6':
+                        try
+                        {
+                            (new LibrasClassificationLSMDesigner()).Run();
                         }
                         catch (Exception e)
                         {
