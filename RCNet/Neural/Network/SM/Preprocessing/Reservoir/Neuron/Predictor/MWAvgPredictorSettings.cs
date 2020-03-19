@@ -30,7 +30,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
         /// <summary>
         /// Default weights type
         /// </summary>
-        public const NeuronCommon.NeuronPredictorMWAvgWeightsType DefaultWeights = NeuronCommon.NeuronPredictorMWAvgWeightsType.Exponential;
+        public const PredictorsProvider.PredictorMWAvgWeightsType DefaultWeights = PredictorsProvider.PredictorMWAvgWeightsType.Exponential;
 
         //Attribute properties
         /// <summary>
@@ -47,7 +47,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
         /// <summary>
         /// Type of weighting
         /// </summary>
-        public NeuronCommon.NeuronPredictorMWAvgWeightsType Weights { get; }
+        public PredictorsProvider.PredictorMWAvgWeightsType Weights { get; }
 
         //Constructors
         /// <summary>
@@ -58,7 +58,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
         /// <param name="weights">Type of weighting</param>
         public MWAvgPredictorSettings(int window = DefaultWindow,
                                       int leakage = DefaultLeakage,
-                                      NeuronCommon.NeuronPredictorMWAvgWeightsType weights = DefaultWeights
+                                      PredictorsProvider.PredictorMWAvgWeightsType weights = DefaultWeights
                                       )
         {
             Window = window;
@@ -91,7 +91,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
             //Parsing
             Window = int.Parse(settingsElem.Attribute("window").Value, CultureInfo.InvariantCulture);
             Leakage = int.Parse(settingsElem.Attribute("leakage").Value, CultureInfo.InvariantCulture);
-            Weights = (NeuronCommon.NeuronPredictorMWAvgWeightsType)Enum.Parse(typeof(NeuronCommon.NeuronPredictorMWAvgWeightsType), settingsElem.Attribute("weights").Value, true);
+            Weights = (PredictorsProvider.PredictorMWAvgWeightsType)Enum.Parse(typeof(PredictorsProvider.PredictorMWAvgWeightsType), settingsElem.Attribute("weights").Value, true);
             Check();
             return;
         }
@@ -131,11 +131,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
             {
                 throw new Exception($"Invalid Leakage {Leakage.ToString(CultureInfo.InvariantCulture)}. Leakage must be GE to 0.");
             }
-            if(Weights == NeuronCommon.NeuronPredictorMWAvgWeightsType.Exponential && Window > 64)
+            if(Weights == PredictorsProvider.PredictorMWAvgWeightsType.Exponential && Window > 64)
             {
                 throw new Exception($"Invalid Strength {Window.ToString(CultureInfo.InvariantCulture)}. Window must be LE to 64.");
             }
-            if (Weights == NeuronCommon.NeuronPredictorMWAvgWeightsType.Linear && Window > 10240)
+            if (Weights == PredictorsProvider.PredictorMWAvgWeightsType.Linear && Window > 10240)
             {
                 throw new Exception($"Invalid Strength {Window.ToString(CultureInfo.InvariantCulture)}. Window must be LE to 10240.");
             }

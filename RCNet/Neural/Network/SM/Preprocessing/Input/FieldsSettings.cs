@@ -10,11 +10,12 @@ using RCNet.Extensions;
 using RCNet.MathTools.Probability;
 using RCNet.XmlTools;
 using RCNet.RandomValue;
+using RCNet.Neural.Data.Transformers;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Input
 {
     /// <summary>
-    /// Contains configuration of external and internal input fields
+    /// Contains configuration of external and generated input fields
     /// </summary>
     [Serializable]
     public class FieldsSettings : RCNetBaseSettings
@@ -32,22 +33,30 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         public ExternalFieldsSettings ExternalFieldsCfg { get; }
 
         /// <summary>
-        /// Internal input fields settings
+        /// Transformed input fields settings
         /// </summary>
-        public InternalFieldsSettings InternalFieldsCfg { get; }
+        public TransformedFieldsSettings TransformedFieldsCfg { get; }
+
+        /// <summary>
+        /// Generated input fields settings
+        /// </summary>
+        public GeneratedFieldsSettings GeneratedFieldsCfg { get; }
 
         //Constructors
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
         /// <param name="externalFieldsCfg">External input fields settings</param>
-        /// <param name="internalFieldsCfg">Internal input fields settings</param>
+        /// <param name="transformedFieldsCfg">Transformed input fields settings</param>
+        /// <param name="generatedFieldsCfg">generated input fields settings</param>
         public FieldsSettings(ExternalFieldsSettings externalFieldsCfg,
-                              InternalFieldsSettings internalFieldsCfg = null
+                              TransformedFieldsSettings transformedFieldsCfg = null,
+                              GeneratedFieldsSettings generatedFieldsCfg = null
                               )
         {
             ExternalFieldsCfg = (ExternalFieldsSettings)externalFieldsCfg.DeepClone();
-            InternalFieldsCfg = internalFieldsCfg == null ? null : (InternalFieldsSettings)internalFieldsCfg.DeepClone();
+            TransformedFieldsCfg = transformedFieldsCfg == null ? null : (TransformedFieldsSettings)transformedFieldsCfg.DeepClone();
+            GeneratedFieldsCfg = generatedFieldsCfg == null ? null : (GeneratedFieldsSettings)generatedFieldsCfg.DeepClone();
             Check();
             return;
         }
@@ -57,7 +66,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// </summary>
         /// <param name="source">Source instance</param>
         public FieldsSettings(FieldsSettings source)
-            :this(source.ExternalFieldsCfg, source.InternalFieldsCfg)
+            :this(source.ExternalFieldsCfg, source.TransformedFieldsCfg, source.GeneratedFieldsCfg)
         {
             return;
         }
@@ -72,17 +81,27 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
             ExternalFieldsCfg = new ExternalFieldsSettings(settingsElem.Descendants("externalFields").First());
-            XElement internalFieldsElem = settingsElem.Descendants("internalFields").FirstOrDefault();
-            InternalFieldsCfg = internalFieldsElem == null ? null : new InternalFieldsSettings(internalFieldsElem);
+            XElement transformedFieldsElem = settingsElem.Descendants("transformedFields").FirstOrDefault();
+            TransformedFieldsCfg = transformedFieldsElem == null ? null : new TransformedFieldsSettings(transformedFieldsElem);
+            XElement generatedFieldsElem = settingsElem.Descendants("generatedFields").FirstOrDefault();
+            GeneratedFieldsCfg = generatedFieldsElem == null ? null : new GeneratedFieldsSettings(generatedFieldsElem);
             Check();
             return;
         }
 
         //Properties
         /// <summary>
-        /// Total number of fields (external + internal)
+        /// Total number of fields (external + transformed + generated)
         /// </summary>
-        public int TotalNumOfFields { get { return ExternalFieldsCfg.FieldCfgCollection.Count + (InternalFieldsCfg == null ? 0 : InternalFieldsCfg.FieldCfgCollection.Count); } }
+        public int TotalNumOfFields
+        {
+            get
+            {
+                return ExternalFieldsCfg.FieldCfgCollection.Count +
+                       (TransformedFieldsCfg == null ? 0 : TransformedFieldsCfg.FieldCfgCollection.Count) +
+                       (GeneratedFieldsCfg == null ? 0 : GeneratedFieldsCfg.FieldCfgCollection.Count);
+            }
+        }
 
         /// <summary>
         /// Identifies settings containing only default values
@@ -95,37 +114,110 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// </summary>
         private void Check()
         {
-            if (InternalFieldsCfg != null)
+            List<string> names = new List<string>(TotalNumOfFields);
+            int index = 0;
+            foreach (ExternalFieldSettings externalFieldCfg in ExternalFieldsCfg.FieldCfgCollection)
             {
-                foreach(InternalFieldSettings internalFieldCfg in InternalFieldsCfg.FieldCfgCollection)
+                names.Add(externalFieldCfg.Name);
+                ++index;
+            }
+            if (TransformedFieldsCfg != null)
+            {
+                foreach (TransformedFieldSettings transformedFieldCfg in TransformedFieldsCfg.FieldCfgCollection)
                 {
-                    if(ExternalFieldsCfg.GetFieldID(internalFieldCfg.Name, false) != -1)
+                    if(names.IndexOf(transformedFieldCfg.Name) != -1)
                     {
-                        throw new Exception($"Internal field name {internalFieldCfg.Name} found among external fields.");
+                        throw new Exception($"Field name {transformedFieldCfg.Name} is not unique.");
                     }
+                    foreach(string name in TransformerFactory.GetAssociatedNames(transformedFieldCfg.TransformerCfg))
+                    {
+                        if (names.IndexOf(name) == -1)
+                        {
+                            throw new Exception($"Inconsistent input field name {name} as an input for transformed field. Field {name} is used before its definition or does not exist.");
+                        }
+                    }
+                    names.Add(transformedFieldCfg.Name);
+                    ++index;
+                }
+            }
+            if (GeneratedFieldsCfg != null)
+            {
+                foreach (GeneratedFieldSettings generatedFieldCfg in GeneratedFieldsCfg.FieldCfgCollection)
+                {
+                    if (names.IndexOf(generatedFieldCfg.Name) != -1)
+                    {
+                        throw new Exception($"Field name {generatedFieldCfg.Name} is not unique.");
+                    }
+                    names.Add(generatedFieldCfg.Name);
+                    ++index;
                 }
             }
             return;
         }
 
         /// <summary>
-        /// Returns the zero-based index of the field among concated external and internal fields or -1 if name was not found.
+        /// Returns names of all defined input fields
+        /// </summary>
+        public List<string> GetNames()
+        {
+            List<string> names = new List<string>(TotalNumOfFields);
+            foreach(ExternalFieldSettings externalFieldCfg in ExternalFieldsCfg.FieldCfgCollection)
+            {
+                names.Add(externalFieldCfg.Name);
+            }
+            if(TransformedFieldsCfg != null)
+            {
+                foreach (TransformedFieldSettings transformedFieldCfg in TransformedFieldsCfg.FieldCfgCollection)
+                {
+                    names.Add(transformedFieldCfg.Name);
+                }
+            }
+            if (GeneratedFieldsCfg != null)
+            {
+                foreach (GeneratedFieldSettings generatedFieldCfg in GeneratedFieldsCfg.FieldCfgCollection)
+                {
+                    names.Add(generatedFieldCfg.Name);
+                }
+            }
+            return names;
+        }
+
+        /// <summary>
+        /// Returns the zero-based index of the field among concated external and generated fields or -1 if name was not found.
         /// </summary>
         /// <param name="fieldName">Name of the field</param>
         /// <param name="ex">Specifies if to throw exception when not found</param>
         public int GetFieldID(string fieldName, bool ex = true)
         {
-            int index = ExternalFieldsCfg.GetFieldID(fieldName, false);
-            if(index != -1)
+            int index = 0;
+            foreach (ExternalFieldSettings externalFieldCfg in ExternalFieldsCfg.FieldCfgCollection)
             {
-                return index;
-            }
-            if (InternalFieldsCfg != null)
-            {
-                index = InternalFieldsCfg.GetFieldID(fieldName, false);
-                if (index != -1)
+                if(fieldName == externalFieldCfg.Name)
                 {
-                    return ExternalFieldsCfg.FieldCfgCollection.Count + index;
+                    return index;
+                }
+                ++index;
+            }
+            if (TransformedFieldsCfg != null)
+            {
+                foreach (TransformedFieldSettings transformedFieldCfg in TransformedFieldsCfg.FieldCfgCollection)
+                {
+                    if (fieldName == transformedFieldCfg.Name)
+                    {
+                        return index;
+                    }
+                    ++index;
+                }
+            }
+            if (GeneratedFieldsCfg != null)
+            {
+                foreach (GeneratedFieldSettings generatedFieldCfg in GeneratedFieldsCfg.FieldCfgCollection)
+                {
+                    if (fieldName == generatedFieldCfg.Name)
+                    {
+                        return index;
+                    }
+                    ++index;
                 }
             }
             if (ex)
@@ -149,12 +241,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             {
                 return ExternalFieldsCfg.FieldCfgCollection[index];
             }
-            if (InternalFieldsCfg != null)
+            if (GeneratedFieldsCfg != null)
             {
-                index = InternalFieldsCfg.GetFieldID(fieldName, false);
+                index = GeneratedFieldsCfg.GetFieldID(fieldName, false);
                 if (index != -1)
                 {
-                    return InternalFieldsCfg.FieldCfgCollection[index];
+                    return GeneratedFieldsCfg.FieldCfgCollection[index];
                 }
             }
             throw new Exception($"Field name {fieldName} not found.");
@@ -179,9 +271,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             XElement rootElem = new XElement(rootElemName,
                                              ExternalFieldsCfg.GetXml(suppressDefaults)
                                              );
-            if(InternalFieldsCfg != null)
+            if(GeneratedFieldsCfg != null)
             {
-                rootElem.Add(InternalFieldsCfg.GetXml(suppressDefaults));
+                rootElem.Add(GeneratedFieldsCfg.GetXml(suppressDefaults));
             }
             Validate(rootElem, XsdTypeName);
             return rootElem;

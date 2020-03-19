@@ -12,8 +12,14 @@ namespace RCNet.MathTools.Probability
     [Serializable]
     public class RelShareSelector<T>
     {
+        //Attribute properties
+        /// <summary>
+        /// collection of elements to choose from
+        /// </summary>
+        public List<T> Elements { get; }
+
         //Attributes
-        private Random _rand;
+        private readonly Random _rand;
         private readonly List<Tuple<double, T>> _origElements;
         private List<Tuple<double, T>> _probElements;
 
@@ -21,9 +27,11 @@ namespace RCNet.MathTools.Probability
         /// <summary>
         /// Creates an unitialized instance
         /// </summary>
-        public RelShareSelector()
+        /// <param name="seek">Initial random generator seek</param>
+        public RelShareSelector(int seek = 0)
         {
-            _rand = new Random(0);
+            _rand = new Random(seek);
+            Elements = new List<T>();
             _origElements = new List<Tuple<double, T>>();
             _probElements = null;
             return;
@@ -45,8 +53,8 @@ namespace RCNet.MathTools.Probability
         /// Adds new item
         /// </summary>
         /// <param name="relShare">Relative share</param>
-        /// <param name="item">Item</param>
-        public void Add(double relShare, T item)
+        /// <param name="element">Element</param>
+        public void Add(double relShare, T element)
         {
             if(_probElements != null)
             {
@@ -54,30 +62,34 @@ namespace RCNet.MathTools.Probability
             }
             if (relShare > 0d)
             {
-                _origElements.Add(new Tuple<double, T>(relShare, item));
+                Elements.Add(element);
+                _origElements.Add(new Tuple<double, T>(relShare, element));
             }
             return;
         }
 
         private void FinalizeProbabilities()
         {
-            double sum = 0;
-            foreach(Tuple<double, T> element in _origElements)
+            if (_probElements == null)
             {
-                sum += element.Item1;
-            }
-            _probElements = new List<Tuple<double, T>>(_origElements.Count);
-            double borderP = 0;
-            foreach (Tuple<double, T> element in _origElements)
-            {
-                borderP += element.Item1 / sum;
-                _probElements.Add(new Tuple<double, T>(borderP, element.Item2));
+                double sum = 0;
+                foreach (Tuple<double, T> element in _origElements)
+                {
+                    sum += element.Item1;
+                }
+                _probElements = new List<Tuple<double, T>>(_origElements.Count);
+                double borderP = 0;
+                foreach (Tuple<double, T> element in _origElements)
+                {
+                    borderP += element.Item1 / sum;
+                    _probElements.Add(new Tuple<double, T>(borderP, element.Item2));
+                }
             }
             return;
         }
 
         /// <summary>
-        /// Selects next item
+        /// Probabilistic selection of the next element
         /// </summary>
         public T SelectNext()
         {
@@ -133,6 +145,6 @@ namespace RCNet.MathTools.Probability
             return clone;
         }
 
-    }//RelShareRealtime
+    }//RelShareSelector
 
 }//Namespace

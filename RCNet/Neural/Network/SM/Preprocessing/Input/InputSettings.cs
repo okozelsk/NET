@@ -106,9 +106,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
                         names.Add(fieldCfg.Name);
                     }
                 }
-                if (FieldsCfg.InternalFieldsCfg != null)
+                if (FieldsCfg.GeneratedFieldsCfg != null)
                 {
-                    foreach (InternalFieldSettings fieldCfg in FieldsCfg.InternalFieldsCfg.FieldCfgCollection)
+                    foreach (GeneratedFieldSettings fieldCfg in FieldsCfg.GeneratedFieldsCfg.FieldCfgCollection)
                     {
                         if (fieldCfg.RouteToReadout)
                         {

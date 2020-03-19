@@ -65,9 +65,8 @@ namespace Demo.DemoConsoleApp.Examples
         /// Creates configuration of group of analog neurons having TanH activation.
         /// </summary>
         /// <param name="groupName">Name of the group</param>
-        /// <param name="role">Role of the neurons within the group (Excitatory/Inhibitory)</param>
         /// <param name="relShare">Relative share. It determines how big part of the pool will be occupied by this neuron group</param>
-        private AnalogNeuronGroupSettings CreateTanHGroup(string groupName, NeuronCommon.NeuronRole role, double relShare)
+        private AnalogNeuronGroupSettings CreateTanHGroup(string groupName, double relShare)
         {
             //Each neuron within the group will have its own constant bias
             //selected from the range -0.05 to 0.05 using gaussian (normal) distribution
@@ -77,17 +76,17 @@ namespace Demo.DemoConsoleApp.Examples
             //Each neuron will have its own constant retainment strength
             //selected from the range 0 to 0.75 using uniform distribution
             URandomValueSettings retainmentStrengthCfg = new URandomValueSettings(0, 0.75);
-            AnalogRetainmentSettings retainmentCfg = new AnalogRetainmentSettings(RetainmentDensity, retainmentStrengthCfg);
+            RetainmentSettings retainmentCfg = new RetainmentSettings(RetainmentDensity, retainmentStrengthCfg);
             //Create neuron group configuration
             AnalogNeuronGroupSettings groupCfg = new AnalogNeuronGroupSettings(groupName,
-                                                                               role,
                                                                                relShare,
                                                                                new TanHSettings(),
                                                                                AnalogNeuronGroupSettings.DefaultFiringThreshold,
                                                                                AnalogNeuronGroupSettings.DefaultSignalingRestriction,
-                                                                               AnalogNeuronGroupSettings.DefaultReadoutDensity,
                                                                                biasCfg,
-                                                                               retainmentCfg
+                                                                               retainmentCfg,
+                                                                               null,
+                                                                               AnalogNeuronGroupSettings.DefaultReadoutDensity
                                                                                );
             return groupCfg;
         }
@@ -102,20 +101,17 @@ namespace Demo.DemoConsoleApp.Examples
         /// <param name="randomInterconnectionDensity">Random schema interconnection density</param>
         private PoolSettings CreateAnalogPoolCfg(string poolName, int dimX, int dimY, int dimZ, double randomInterconnectionDensity)
         {
-            //Create excitatory and Inhibitory neuron groups configuration. Ratio of excitatory and inhibitory neurons will be 1:1,
-            //because both groups have the same relative share.
-            AnalogNeuronGroupSettings excitatoryGrpCfg = CreateTanHGroup("Exc-TanH-Grp", NeuronCommon.NeuronRole.Excitatory, 1);
-            AnalogNeuronGroupSettings inhibitoryGrpCfg = CreateTanHGroup("Inh-TanH-Grp", NeuronCommon.NeuronRole.Inhibitory, 1);
+            //Create TanH group of neurons
+            AnalogNeuronGroupSettings grpCfg = CreateTanHGroup("Exc-TanH-Grp", 1);
             //We use two interconnection schemas
-            //Random schema. We use ConnDistrFlatSettings so number of Excitatory->Excitatory,
-            //Excitatory->Inhibitory, Inhibitory->Excitatory and Inhibitory->Inhibitory connections will be the same
-            RandomSchemaSettings randomSchemaCfg = new RandomSchemaSettings(new ConnDistrFlatSettings(), randomInterconnectionDensity);
+            //Random schema
+            RandomSchemaSettings randomSchemaCfg = new RandomSchemaSettings(randomInterconnectionDensity);
             //Chain circle shaped schema. We use ratio 1 so all neurons within the pool will be connected into the circle shaped chain.
             ChainSchemaSettings chainSchemaCfg = new ChainSchemaSettings(1d, true);
             //Create pool configuration
             PoolSettings poolCfg = new PoolSettings(poolName,
                                                     new ProportionsSettings(dimX, dimY, dimZ),
-                                                    new NeuronGroupsSettings(excitatoryGrpCfg, inhibitoryGrpCfg),
+                                                    new NeuronGroupsSettings(grpCfg),
                                                     new InterconnSettings(randomSchemaCfg, chainSchemaCfg)
                                                     );
             return poolCfg;
@@ -132,21 +128,18 @@ namespace Demo.DemoConsoleApp.Examples
             //Our pools will have the 5x5x5 cube shape each. So 125 neurons in each pool and 250 neurons in total.
             const int DimX = 5, DimY = 5, DimZ = 5;
             //Each pool will have random internal interconnection of the density = 0.05. In our case it means that
-            //each neuron will be randomly connected to 0.05 * 125 = 6 other neurons within the pool.
+            //each neuron will receive synapses from 0.05 * 125 = 6 other neurons within the pool.
             const double RandomInterconnectionDensity = 0.05;
             //Create pools
             PoolSettings pool1Cfg = CreateAnalogPoolCfg(pool1Name, DimX, DimY, DimZ, RandomInterconnectionDensity);
             PoolSettings pool2Cfg = CreateAnalogPoolCfg(pool2Name, DimX, DimY, DimZ, RandomInterconnectionDensity);
             //Pool to pool interconnection
-            //We use ConnDistrFlatSettings so number of Excitatory->Excitatory,
-            //Excitatory->Inhibitory, Inhibitory->Excitatory and Inhibitory->Inhibitory connections will be the same.
-            IConnDistrSettings connDistrCfg = new ConnDistrFlatSettings();
-            //Connections from Pool1 to Pool2. We use sourcePoolDensity=1 and targetPoolDensity 0.02, so each neuron from
-            //Pool1 will be randomly connected to 125 * 0.02 = 3 neurons from Pool2
-            InterPoolConnSettings pool1To2ConnCfg = new InterPoolConnSettings(connDistrCfg, pool1Name, 1d, pool2Name, 0.02d);
-            //Connections from Pool2 to Pool1. We use sourcePoolDensity=1 and targetPoolDensity 0.02, so each neuron from
+            //Connections from Pool1 to Pool2. We use targetPoolDensity=1 and sourcePoolDensity-0.02, so each neuron from
             //Pool2 will be randomly connected to 125 * 0.02 = 3 neurons from Pool1
-            InterPoolConnSettings pool2To1ConnCfg = new InterPoolConnSettings(connDistrCfg, pool2Name, 1d, pool1Name, 0.02d);
+            InterPoolConnSettings pool1To2ConnCfg = new InterPoolConnSettings(pool2Name, 1d, pool1Name, 0.02d);
+            //Connections from Pool2 to Pool1. We use targetPoolDensity=1 and sourcePoolDensity=0.02, so each neuron from
+            //Pool1 will be randomly connected to 125 * 0.02 = 3 neurons from Pool2
+            InterPoolConnSettings pool2To1ConnCfg = new InterPoolConnSettings(pool1Name, 1d, pool2Name, 0.02d);
             //Create named reservoir structure configuration
             ReservoirStructureSettings resStructCfg = new ReservoirStructureSettings(structName,
                                                                                      new PoolsSettings(pool1Cfg, pool2Cfg),
@@ -159,28 +152,13 @@ namespace Demo.DemoConsoleApp.Examples
         /// Creates configuration of input connection (from input unit to target pool)
         /// </summary>
         /// <param name="poolName">Target pool name</param>
-        /// <param name="codingMethod">Analog coding method. It specifies what type of available analog value to be transmitted through input connection.</param>
-        /// <param name="connMaxWeight">Maximum weight of the inut connection</param>
-        private InputUnitConnSettings CreateInputUnitConnCfg(string poolName,
-                                                             InputUnit.AnalogCodingMethod codingMethod,
-                                                             double connMaxWeight
-                                                             )
+        private InputUnitConnSettings CreateInputUnitConnCfg(string poolName)
         {
-            //We have no neurons with spikng activation so spiking target configuration is irrelevant
-            SpikingTargetSettings spikingTargetCfg = null;
-            //Inpt connection weight will be randomly selected from the range 0 to connMaxWeight using uniform distribution
-            URandomValueSettings weightCfg = new URandomValueSettings(0, connMaxWeight);
-            //We specify target scope = Synapse.SynapticTargetScope.All so both Excitatory and Inhibitory hidden neurons are
-            //allowed to get input connection.
-            //We use density = 1 so each hidden neuron within the scope (Synapse.SynapticTargetScope.All) will be really connected.
-            AnalogTargetSettings analogTargetCfg = new AnalogTargetSettings(Synapse.SynapticTargetScope.All, 1, weightCfg);
             //Create connection configuration
             InputUnitConnSettings inputUnitConnCfg = new InputUnitConnSettings(poolName,
-                                                                               codingMethod,
-                                                                               InputUnitConnSettings.DefaultOppositeAmplitude,
-                                                                               InputUnitConnSettings.DefaultSignalingRestriction,
-                                                                               spikingTargetCfg,
-                                                                               analogTargetCfg
+                                                                               0,
+                                                                               1,
+                                                                               NeuronCommon.NeuronSignalingRestrictionType.AnalogOnly
                                                                                );
             return inputUnitConnCfg;
         }
@@ -191,12 +169,10 @@ namespace Demo.DemoConsoleApp.Examples
         /// </summary>
         /// <param name="inpFieldName">Input field name</param>
         /// <param name="poolName">Target pool name</param>
-        /// <param name="codingMethod">Analog coding method. It specifies what type of available analog value to be transmitted through input connection.</param>
-        /// <param name="connMaxWeight">Maximum weight of the inut connection</param>
-        private InputUnitSettings CreateInputUnitCfg(string inpFieldName, string poolName, InputUnit.AnalogCodingMethod codingMethod, double connMaxWeight)
+        private InputUnitSettings CreateInputUnitCfg(string inpFieldName, string poolName)
         {
             return new InputUnitSettings(inpFieldName,
-                                         new InputUnitConnsSettings(CreateInputUnitConnCfg(poolName, codingMethod, connMaxWeight))
+                                         new InputUnitConnsSettings(CreateInputUnitConnCfg(poolName))
                                          );
         }
 
@@ -208,13 +184,11 @@ namespace Demo.DemoConsoleApp.Examples
         /// <param name="inpFieldName">Input field name</param>
         /// <param name="pool1Name">First target pool name</param>
         /// <param name="pool2Name">Second target pool name</param>
-        /// <param name="codingMethod">Analog coding method. It specifies what type of available analog value to be transmitted through input connection.</param>
-        /// <param name="connMaxWeight">Maximum weight of the inut connection</param>
-        private InputUnitSettings CreateInputUnitCfg(string inpFieldName, string pool1Name, string pool2Name, InputUnit.AnalogCodingMethod codingMethod, double connMaxWeight)
+        private InputUnitSettings CreateInputUnitCfg(string inpFieldName, string pool1Name, string pool2Name)
         {
             return new InputUnitSettings(inpFieldName,
-                                         new InputUnitConnsSettings(CreateInputUnitConnCfg(pool1Name, codingMethod, connMaxWeight),
-                                                                    CreateInputUnitConnCfg(pool2Name, codingMethod, connMaxWeight)
+                                         new InputUnitConnsSettings(CreateInputUnitConnCfg(pool1Name),
+                                                                    CreateInputUnitConnCfg(pool2Name)
                                                                     )
                                          );
         }
@@ -241,15 +215,17 @@ namespace Demo.DemoConsoleApp.Examples
             //Create input units (and connections) configurations for each input field
             //We use InputUnit.AnalogCodingMethod.Actual so synapses will transmit unchanged (not transformed) input values
             //We connect High input field to Pool1
-            InputUnitSettings inpUnitHighCfg = CreateInputUnitCfg("High", pool1Name, InputUnit.AnalogCodingMethod.Actual, ConnMaxWeight);
+            InputUnitSettings inpUnitHighCfg = CreateInputUnitCfg("High", pool1Name);
             //We connect Low input field to Pool2
-            InputUnitSettings inpUnitLowCfg = CreateInputUnitCfg("Low", pool2Name, InputUnit.AnalogCodingMethod.Actual, ConnMaxWeight);
+            InputUnitSettings inpUnitLowCfg = CreateInputUnitCfg("Low", pool2Name);
             //We connect Adj Close input field to both pools
-            InputUnitSettings inpUnitAdjCloseCfg = CreateInputUnitCfg("Adj Close", pool1Name, pool2Name, InputUnit.AnalogCodingMethod.Difference, ConnMaxWeight / 2d);
+            InputUnitSettings inpUnitAdjCloseCfg = CreateInputUnitCfg("Adj Close", pool1Name, pool2Name);
             //Synapse general configuration
-            SynapseSettings synapseCfg = new SynapseSettings(Synapse.SynapticDelayMethod.Random, inputMaxDelay,
-                                                             Synapse.SynapticDelayMethod.Random, internalMaxDelay
-                                                             );
+            AnalogSourceSettings asc = new AnalogSourceSettings(new URandomValueSettings(0, ConnMaxWeight));
+            SynapseATInputSettings synapseATInputSettings = new SynapseATInputSettings(Synapse.SynapticDelayMethod.Random, inputMaxDelay, asc, null);
+            SynapseATIndifferentSettings synapseATIndifferentSettings = new SynapseATIndifferentSettings(Synapse.SynapticDelayMethod.Random, internalMaxDelay);
+            SynapseATSettings synapseATCfg = new SynapseATSettings(SynapseATSettings.DefaultSpectralRadiusNum, synapseATInputSettings, synapseATIndifferentSettings);
+            SynapseSettings synapseCfg = new SynapseSettings(null, synapseATCfg);
             //Predictors configuration
             //We use constructor accepting array of boolean switches
             //Initially we set all switches to false - all available predictors are forbidden
@@ -259,7 +235,7 @@ namespace Demo.DemoConsoleApp.Examples
             predictorSwitches[(int)PredictorsProvider.PredictorID.Activation] = true;
             predictorSwitches[(int)PredictorsProvider.PredictorID.ActivationMWAvg] = true;
             //We configure activation moving average predictor to use constant weights and last 7 values without the leaks
-            ActivationMWAvgSettings activationMWAvgCfg = new ActivationMWAvgSettings(7, 0, NeuronCommon.NeuronPredictorMWAvgWeightsType.Constant);
+            ActivationMWAvgSettings activationMWAvgCfg = new ActivationMWAvgSettings(7, 0, PredictorsProvider.PredictorMWAvgWeightsType.Constant);
             //We create predictors parameters configuration including custom configuration of activation moving average predictor
             PredictorsParamsSettings predictorsParamsCfg = new PredictorsParamsSettings(activationMWAvgCfg);
             //Create predictors configuration using prepared boolean switches and predictors parameters
@@ -411,5 +387,4 @@ namespace Demo.DemoConsoleApp.Examples
         }
     
     }//TTOOForecastFromScratch
-
 }//Namespace

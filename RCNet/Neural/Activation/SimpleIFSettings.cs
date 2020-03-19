@@ -43,7 +43,7 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Typical value of firing voltage
         /// </summary>
-        public const double TypicalFiringThresholdV = 20;
+        public const double TypicalFiringThresholdV = 7.5;
 
         //Attribute properties
         /// <summary>

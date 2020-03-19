@@ -27,19 +27,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         ActivationType Type { get; }
 
         /// <summary>
-        /// Excitatory or Inhibitory role of the neurons
+        /// Common activation function settings of the groupped neurons
         /// </summary>
-        NeuronCommon.NeuronRole Role { get; }
+        RCNetBaseSettings ActivationCfg { get; }
 
         /// <summary>
         /// Specifies how big relative portion of pool's neurons is formed by this group of the neurons
         /// </summary>
         double RelShare { get; }
-        
-        /// <summary>
-        /// Common activation function settings of the groupped neurons
-        /// </summary>
-        RCNetBaseSettings ActivationCfg { get; }
 
         /// <summary>
         /// Restriction of neuron's output signaling
@@ -64,7 +59,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
 
         /// <summary>
         /// Additional helper computed field.
-        /// Specifies exact number of neurons of the group within the current context.
+        /// Specifies exact number of neurons from this group within the current context.
         /// </summary>
         int Count { get; set; }
 

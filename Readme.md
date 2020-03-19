@@ -18,9 +18,10 @@ I welcome questions, ideas and suggestions for improvements, usage experiences, 
 ## State Machine demo application
 Main functionality and possibilities of the State Machine are demonstrated in a simple [demo application](https://github.com/okozelsk/NET/tree/master/Demo/DemoConsoleApp).
 Application has no startup parameters and when started, it shows the menu.
-Application's menu consists of two main parts.
+<br>
+Note that if necessary, examples use Examples sub-folder relative to the location of the executable DemoConsoleApp.exe.
 
-### Performance demonstration (1. choice)
+### Performance demonstration (1. menu choice)
 Application performs sequence of defined tasks.
 Tasks are defined in the [SMDemoSettings.xml](https://github.com/okozelsk/NET/blob/master/Demo/DemoConsoleApp/SM/SMDemoSettings.xml) xml file, where each task is defined in the xml element "case" so you can easily insert new task or tune existing one by simple modification of xml content.
 SMDemoSettings.xml has to be located in the SM sub-folder relative to the location of the executable DemoConsoleApp.exe. 
@@ -29,9 +30,14 @@ SMDemoSettings.xml currently also includes several classification problems from 
 [Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com](https://timeseriesclassification.com)
 site and State Machine usually achieves very similar results to the best classification algorithms referenced on the website.
 
-### Code examples (2, 3, ... choices)
-Several examples showing how to use State Machine (currently under construction).
-If necessary, examples use Examples sub-folder relative to the location of the executable DemoConsoleApp.exe.
+### Code examples (2. menu choice)
+The "Hello World" example shows how to learn Feed Forward Network component to solve boolean algebra.
+
+### Code examples (3. menu choice)
+Example shows how to setup State Machine from scratch.
+
+### Code examples (4, ... menu choices)
+Several examples show how to simply setup State Machine using State Machine Designer component.
 
 ### Data format for the demo application
 Input data is standardly located in the Data sub-folder relative to the location of the executable DemoConsoleApp.exe. Data is expected in csv format and data delimiter can be a tab, semicolon or comma character.
@@ -62,7 +68,12 @@ Input data is standardly located in the Data sub-folder relative to the location
 |["RandomValue"](https://github.com/okozelsk/NET/tree/master/RCNet/RandomValue)|Supports Uniform, Gaussian, Exponential and Gamma distributions. Here is [extension code](https://github.com/okozelsk/NET/blob/master/RCNet/Extensions/RandomExtensions.cs)|
 |[Others](https://github.com/okozelsk/NET/tree/master/RCNet/MathTools)|Set of small additional helper components like PhysUnit, Interval, Bitwise, Combinatorics, Discrete,...|
 
-### Signal generators
+### XML handling
+|Component|Description|
+|--|--|
+|[DocValidator](https://github.com/okozelsk/NET/blob/master/RCNet/XmlTools/DocValidator.cs)|Helper class for xml document loading and validation|
+
+### Data generators
 |Component|Description|
 |--|--|
 |[PulseGenerator](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Data/Generators/PulseGenerator.cs)|Generates constant pulses having specified average period. Pulse leaks follow specified random distribution or can be constant|
@@ -70,18 +81,32 @@ Input data is standardly located in the Data sub-folder relative to the location
 |[RandomGenerator](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Data/Generators/RandomGenerator.cs)|Generates random signal following specified distribution|
 |[SinusoidalGenerator](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Data/Generators/SinusoidalGenerator.cs)|Generates sinusoidal signal|
 
-### XML handling
+### Data Filtering
 |Component|Description|
 |--|--|
-|[DocValidator](https://github.com/okozelsk/NET/blob/master/RCNet/XmlTools/DocValidator.cs)|Helper class for xml document loading and validation|
-
-### Data handling
-|Component|Description|
-|--|--|
-|[SimpleQueue](https://github.com/okozelsk/NET/blob/master/RCNet/Queue/SimpleQueue.cs)|Implements quick and simple FIFO queue (template). Supports access to enqueued elements so it can be also used as the "sliding window"|
 |[BinFeatureFilter](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Data/Filter/BinFeatureFilter.cs)|Binary (0/1) feature filter|
 |[EnumFeatureFilter](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Data/Filter/EnumFeatureFIlter.cs)|Enumeration (1..N) feature filter|
 |[RealFeatureFilter](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Data/Filter/RealFeatureFilter.cs)|Real number feature filter supporting standardization and range reserve for handling of unseen data in the future|
+
+### Chainable Data Transformations
+|Component|Description|
+|--|--|
+|[CDivTransformer](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Data/Transformers/CDivTransformer.cs)|Provides "constant divided by an input field value" transformation|
+|[DiffTransformer](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Data/Transformers/DiffTransformer.cs)|Transforms input field value as a difference between current value and a past value|
+|[DivTransformer](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Data/Transformers/DivTransformer.cs)|Divides the value of the first input field by the value of the second input field|
+|[ExpTransformer](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Data/Transformers/ExpTransformer.cs)|Specified base powered by an input field value|
+|[LinearTransformer](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Data/Transformers/LinearTransformer.cs)|Two input fields linear transformation (a*X + b*Y)|
+|[LogTransformer](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Data/Transformers/LogTransformer.cs)|Transforms input field value to its logarithm of specified base|
+|[MulTransformer](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Data/Transformers/MulTransformer.cs)|Multiplies the value of the first input field by the value of the second input field|
+|[MWStatTransformer](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Data/Transformers/MWStatTransformer.cs)|Keeps stat of input field recent values and provides statistical features as a transformed values (Sum, NegSum, PosSum, SumOfSquares, Min, Max, Mid, Span, ArithAvg, MeanSquare, RootMeanSquare, Variance, StdDev, SpanDev)|
+|[PowerTransformer](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Data/Transformers/PowerTransformer.cs)|Transforms input field value to value^exponent|
+|[YeoJohnsonTransformer](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Data/Transformers/YeoJohnsonTransformer.cs)|Applies Yeo-Johnson transformation to input field value. See the [wiki pages](https://en.wikipedia.org/wiki/Power_transform#Yeo%E2%80%93Johnson_transformation).|
+
+
+### Data holding
+|Component|Description|
+|--|--|
+|[SimpleQueue](https://github.com/okozelsk/NET/blob/master/RCNet/Queue/SimpleQueue.cs)|Implements quick and simple FIFO queue (template). Supports access to enqueued elements so it can be also used as the "sliding window"|
 |[DelimitedStringValues](https://github.com/okozelsk/NET/blob/master/RCNet/CsvTools/DelimitedStringValues.cs)|Helper encoder and decoder of data line in csv format|
 |[CsvDataHolder](https://github.com/okozelsk/NET/blob/master/RCNet/CsvTools/CsvDataHolder.cs)|Provides simple loading and saving of csv data|
 |[VectorBundle](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Data/VectorBundle.cs)|Bundle of input data vectors and corresponding desired output vectors (1:1). Supports upload from csv file|
@@ -142,8 +167,8 @@ See the [wiki pages.](https://en.wikipedia.org/wiki/Biological_neuron_model)
 |[InputUnit](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/Preprocessing/Reservoir/InputUnit.cs)|Provides external input for processing in the reservoir. Supports set of various realtime input transformations and provides analog and spike-train output through set of InputNeuron instances.|
 |[InputNeuron](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/Preprocessing/Reservoir/Neuron/InputNeuron.cs)|Input neuron is the special type of very simple neuron. Its purpose is only to mediate input signal for a synapse|
 |[HiddenNeuron](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/Preprocessing/Reservoir/Neuron/HiddenNeuron.cs)|Supports both analog and spiking activation functions and can produce analog signal and/or spikes (neuron is able to fire spikes even when stateless analog activation is used). Supports Retainment property of analog activation (leaky integrator). Supports set of different predictors.|
-|[ReservoirInstance](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/Preprocessing/Reservoir/ReservoirInstance.cs)|Provides recurrent network supporting analog and spiking neurons working directly together. Main features: SpectralRadius (for weights of analog, spiking or both neurons), Multiple 3D pools of neurons, Pool to pool connections. It can work as the Echo State Network reservoir, Liquid State Machine reservoir or Mixed reservoir|
-|[NeuralPreprocessor](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/Preprocessing/NeuralPreprocessor.cs)|Provides data preprocessing to predictors. Supports multiple internal reservoirs. Supports virtual input data associated with predefined signal generators. Supports two input feeding regimes: Continuous and Patterned|
+|[ReservoirInstance](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/Preprocessing/Reservoir/ReservoirInstance.cs)|Provides recurrent network supporting analog and spiking neurons working directly together. Supports SpectralRadius (for weights of analog neurons), Homogenous excitability of spiking neurons, Multiple 3D pools of neurons, Pool to pool connections. It can work as the Echo State Network reservoir, Liquid State Machine reservoir or Mixed reservoir|
+|[NeuralPreprocessor](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/Preprocessing/NeuralPreprocessor.cs)|Provides data preprocessing to predictors. Supports multiple internal reservoirs. Supports virtual input data associated with predefined signal generators and transformers. Supports two input feeding regimes: Continuous and Patterned|
 |[ReadoutUnit](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/Readout/ReadoutUnit.cs)|Readout unit does the Forecast or Classification and encapsulates TrainedNetworkCluster.|
 |[ReadoutLayer](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/Readout/ReadoutLayer.cs)|Implements independent readout layer consisting of trained readout units.|
 
@@ -157,4 +182,4 @@ Each settings class can be instantiated from scratch or from an xml element. [RC
 </br>
 Each settings class also implements the GetXml method so it can be instantiated from scratch and then export the initialization xml element using the GetXml method. Using xml constructors is generally preferable because the initialization xml can be edited without the need to modify your own source code.
 </br>
-RCNet has also implemented helper component [StateMachineDesigner](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/StateMachineDesigner.cs) for easy setup of simple ESN and LSM StateMachine configurations from code (see examples in demo application).
+RCNet has also implemented helper component [StateMachineDesigner](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/StateMachineDesigner.cs) for easy setup of simple ESN and LSM StateMachine configurations from the code (see examples in demo application).

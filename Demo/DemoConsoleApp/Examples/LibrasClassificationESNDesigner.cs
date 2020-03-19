@@ -74,7 +74,7 @@ namespace Demo.DemoConsoleApp.Examples
             //Create designer instance
             StateMachineDesigner smd = new StateMachineDesigner(inputCfg, readoutCfg);
             //Create pure ESN fashioned StateMachine configuration
-            StateMachineSettings stateMachineCfg = smd.CreatePureESNCfg(100, 0.25d, 0, 0.2d, 0, 0, 0, PredictorsProvider.PredictorID.FiringFadingSum, PredictorsProvider.PredictorID.ActivationFadingSum);
+            StateMachineSettings stateMachineCfg = smd.CreatePureESNCfg(100, 0.2d, 0, 0.1d, 0, 0, 0, PredictorsProvider.PredictorID.FiringCount);
             //Display StateMachine xml configuration
             string xmlConfig = stateMachineCfg.GetXml(true).ToString();
             _log.Write("StateMachine configuration xml:");

@@ -34,6 +34,26 @@
     </xs:restriction>
   </xs:simpleType>
 
+  <!-- Enumeration of the output of the MWStat transformer -->
+  <xs:simpleType name="MWStatTransformerOutputType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Sum"/>
+      <xs:enumeration value="NegSum"/>
+      <xs:enumeration value="PosSum"/>
+      <xs:enumeration value="SumOfSquares"/>
+      <xs:enumeration value="Min"/>
+      <xs:enumeration value="Max"/>
+      <xs:enumeration value="Mid"/>
+      <xs:enumeration value="Span"/>
+      <xs:enumeration value="ArithAvg"/>
+      <xs:enumeration value="MeanSquare"/>
+      <xs:enumeration value="RootMeanSquare"/>
+      <xs:enumeration value="Variance"/>
+      <xs:enumeration value="StdDev"/>
+      <xs:enumeration value="SpanDev"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <!-- Enumeration of patterned data organization -->
   <xs:simpleType name="VariablesSchemaType">
     <xs:restriction base="xs:string">
@@ -50,20 +70,13 @@
     </xs:restriction>
   </xs:simpleType>
 
-  <!-- Enumeration of synaptic target scope -->
-  <xs:simpleType name="SynapticTargetScopeType">
+  <!-- Enumeration of synapse's role -->
+  <xs:simpleType name="SynapseRoleType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="All"/>
+      <xs:enumeration value="Input"/>
       <xs:enumeration value="Excitatory"/>
       <xs:enumeration value="Inhibitory"/>
-    </xs:restriction>
-  </xs:simpleType>
-
-  <!-- Enumeration of neuron's role -->
-  <xs:simpleType name="NeuronRoleType">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="Excitatory"/>
-      <xs:enumeration value="Inhibitory"/>
+      <xs:enumeration value="Indifferent"/>
     </xs:restriction>
   </xs:simpleType>
 
@@ -84,19 +97,6 @@
     </xs:restriction>
   </xs:simpleType>
 
-  <!-- Enumeration of methods of analog input value realtime coding -->
-  <xs:simpleType name="AnalogCodingMethodType">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="Actual"/>
-      <xs:enumeration value="Difference"/>
-      <xs:enumeration value="LinearStep"/>
-      <xs:enumeration value="Power"/>
-      <xs:enumeration value="FoldedPower"/>
-      <xs:enumeration value="MovingAverage"/>
-      <xs:enumeration value="Morlet"/>
-    </xs:restriction>
-  </xs:simpleType>
-
   <!-- Enumeration of moving weighted average weights type -->
   <xs:simpleType name="MWAvgWeightsType">
     <xs:restriction base="xs:string">
@@ -105,7 +105,6 @@
       <xs:enumeration value="Constant"/>
     </xs:restriction>
   </xs:simpleType>
-
 
   <!-- Enumeration of available predictors -->
   <xs:simpleType name="PredictorIDType">
@@ -468,6 +467,139 @@
     </xs:attribute>
   </xs:complexType>
 
+  <!-- ________________________________________INPUT TRANSFORMERS TYPES_____________________________________________ -->
+
+  <!-- Single field transformer base configuration element -->
+  <xs:complexType name="SingleFieldTransformerBaseType">
+    <xs:attribute type="xs:string" name="fieldName" use="required"/>
+  </xs:complexType>
+
+  <!-- Two fields transformer base configuration element -->
+  <xs:complexType name="TwoFieldsTransformerBaseType">
+    <xs:attribute type="xs:string" name="xFieldName" use="required"/>
+    <xs:attribute type="xs:string" name="yFieldName" use="required"/>
+  </xs:complexType>
+
+  <!-- Difference transformer configuration element -->
+  <xs:complexType name="DiffTransformerType">
+    <xs:complexContent>
+      <xs:extension base="SingleFieldTransformerBaseType">
+        <xs:attribute type="UIntGT0Type" name="interval" use="optional" default="1">
+          <xs:annotation>
+            <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <!-- Const division transformer configuration element -->
+  <xs:complexType name="CDivTransformerType">
+    <xs:complexContent>
+      <xs:extension base="SingleFieldTransformerBaseType">
+        <xs:attribute type="xs:double" name="c" use="optional" default="1">
+          <xs:annotation>
+            <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <!-- Log transformer configuration element -->
+  <xs:complexType name="LogTransformerType">
+    <xs:complexContent>
+      <xs:extension base="SingleFieldTransformerBaseType">
+        <xs:attribute type="UDoubleGT0Type" name="base" use="optional" default="2.7182818284590451">
+          <xs:annotation>
+            <xs:documentation xml:lang="en">Default value is (e) 2.7182818284590451</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <!-- Exp transformer configuration element -->
+  <xs:complexType name="ExpTransformerType">
+    <xs:complexContent>
+      <xs:extension base="SingleFieldTransformerBaseType">
+        <xs:attribute type="UDoubleGT0Type" name="base" use="optional" default="2.7182818284590451">
+          <xs:annotation>
+            <xs:documentation xml:lang="en">Default value is (e) 2.7182818284590451</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <!-- Power transformer configuration element -->
+  <xs:complexType name="PowerTransformerType">
+    <xs:complexContent>
+      <xs:extension base="SingleFieldTransformerBaseType">
+        <xs:attribute type="UDoubleGT0Type" name="exponent" use="optional" default="0.5">
+          <xs:annotation>
+            <xs:documentation xml:lang="en">Default value is 0.5</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="xs:boolean" name="keepSign" use="optional" default="true">
+          <xs:annotation>
+            <xs:documentation xml:lang="en">Default value is true</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <!-- Yeo–Johnson transformer configuration element -->
+  <xs:complexType name="YeoJohnsonTransformerType">
+    <xs:complexContent>
+      <xs:extension base="SingleFieldTransformerBaseType">
+        <xs:attribute type="xs:double" name="lambda" use="required"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <!-- MWStat transformer configuration element -->
+  <xs:complexType name="MWStatTransformerType">
+    <xs:complexContent>
+      <xs:extension base="SingleFieldTransformerBaseType">
+        <xs:attribute type="UIntGT1Type" name="window" use="required"/>
+        <xs:attribute type="MWStatTransformerOutputType" name="output" use="required"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <!-- Mul transformer configuration element -->
+  <xs:complexType name="MulTransformerType">
+    <xs:complexContent>
+      <xs:extension base="TwoFieldsTransformerBaseType"/>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <!-- Div transformer configuration element -->
+  <xs:complexType name="DivTransformerType">
+    <xs:complexContent>
+      <xs:extension base="TwoFieldsTransformerBaseType"/>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <!-- Linear transformer configuration element -->
+  <xs:complexType name="LinearTransformerType">
+    <xs:complexContent>
+      <xs:extension base="TwoFieldsTransformerBaseType">
+        <xs:attribute type="xs:double" name="a" use="optional" default="1">
+          <xs:annotation>
+            <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="xs:double" name="b" use="optional" default="1">
+          <xs:annotation>
+            <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
 
   <!-- ________________________________________SPIKING ACTIVATION TYPES_____________________________________________ -->
 
@@ -491,7 +623,7 @@
       </xs:element>
       <xs:element type="URandomValueType" name="firingThresholdV" minOccurs="0" maxOccurs="1">
         <xs:annotation>
-          <xs:documentation xml:lang="en">Typical value is 20</xs:documentation>
+          <xs:documentation xml:lang="en">Typical value is 7.5</xs:documentation>
         </xs:annotation>
       </xs:element>
     </xs:sequence>
@@ -675,7 +807,7 @@
     <xs:sequence minOccurs="0" maxOccurs="1">
       <xs:element type="URandomValueType" name="recoveryTimeScale" minOccurs="0" maxOccurs="1">
         <xs:annotation>
-          <xs:documentation xml:lang="en">Typical value is 0.02</xs:documentation>
+          <xs:documentation xml:lang="en">Typical value is 0.2</xs:documentation>
         </xs:annotation>
       </xs:element>
       <xs:element type="URandomValueType" name="recoverySensitivity" minOccurs="0" maxOccurs="1">
@@ -695,12 +827,12 @@
       </xs:element>
       <xs:element type="RandomValueType" name="resetV" minOccurs="0" maxOccurs="1">
         <xs:annotation>
-          <xs:documentation xml:lang="en">Typical value is -65</xs:documentation>
+          <xs:documentation xml:lang="en">Typical value is -68</xs:documentation>
         </xs:annotation>
       </xs:element>
       <xs:element type="RandomValueType" name="firingThresholdV" minOccurs="0" maxOccurs="1">
         <xs:annotation>
-          <xs:documentation xml:lang="en">Typical value is 30</xs:documentation>
+          <xs:documentation xml:lang="en">Typical value is -64</xs:documentation>
         </xs:annotation>
       </xs:element>
     </xs:sequence>
@@ -723,7 +855,6 @@
 
   <!-- Activation AutoIzhikevichIF configuration element -->
   <xs:complexType name="ActivationAutoIzhikevichIFType">
-    <xs:attribute type="NeuronRoleType" name="role" use="required"/>
     <xs:attribute type="xs:unsignedInt" name="refractoryPeriods" use="optional" default="1">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
@@ -1046,8 +1177,155 @@
 
   <!-- ________________________________________SYNAPSE TYPES_________________________________________________ -->
 
-  <!-- Synapse - Plasticity - excitatory to excitatory dynamics - configuration -->
-  <xs:complexType name="SynapseDynamicsEEType">
+  <!-- Synapse - Plasticity CONSTANT dynamics -->
+
+  <!-- Synapse - Plasticity constant dynamics- input spiking to hidden spiking - configuration -->
+  <xs:complexType name="SynapseConstantDynamicsSTInputType">
+    <xs:attribute type="UDoubleLE1Type" name="efficacy" use="optional" default="1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <!-- Synapse - Plasticity constant dynamics- excitatory spiking to hidden spiking - configuration -->
+  <xs:complexType name="SynapseConstantDynamicsSTExcitatoryType">
+    <xs:attribute type="UDoubleLE1Type" name="efficacy" use="optional" default="1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <!-- Synapse - Plasticity constant dynamics- inhibitory spiking to hidden spiking - configuration -->
+  <xs:complexType name="SynapseConstantDynamicsSTInhibitoryType">
+    <xs:attribute type="UDoubleLE1Type" name="efficacy" use="optional" default="1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <!-- Synapse - Plasticity constant dynamics- input spiking to hidden analog - configuration -->
+  <xs:complexType name="SynapseConstantDynamicsATInputType">
+    <xs:attribute type="UDoubleLE1Type" name="efficacy" use="optional" default="1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <!-- Synapse - Plasticity constant dynamics- indifferent spiking to hidden analog - configuration -->
+  <xs:complexType name="SynapseConstantDynamicsATIndifferentType">
+    <xs:attribute type="UDoubleLE1Type" name="efficacy" use="optional" default="1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <!-- Synapse - Plasticity LINEAR dynamics -->
+
+  <!-- Synapse - Plasticity linear dynamics- input spiking to hidden spiking - configuration -->
+  <xs:complexType name="SynapseLinearDynamicsSTInputType">
+    <xs:attribute type="UDoubleLE1Type" name="alpha" use="optional" default="0.007">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.007 (the alpha argument in the linear expression efficacy = alpha * (spike - beta))</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleLE1Type" name="beta" use="optional" default="0.739">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.739 (the beta argument in the linear expression efficacy = alpha * (spike - beta))</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleLE1Type" name="initialEfficacy" use="optional" default="0.75">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.75</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <!-- Synapse - Plasticity linear dynamics- excitatory spiking to hidden spiking - configuration -->
+  <xs:complexType name="SynapseLinearDynamicsSTExcitatoryType">
+    <xs:attribute type="UDoubleLE1Type" name="alpha" use="optional" default="0.007">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.007 (the alpha argument in the linear expression efficacy = alpha * (spike - beta))</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleLE1Type" name="beta" use="optional" default="0.739">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.739 (the beta argument in the linear expression efficacy = alpha * (spike - beta))</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleLE1Type" name="initialEfficacy" use="optional" default="0.75">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.75</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <!-- Synapse - Plasticity linear dynamics- inhibitory spiking to hidden spiking - configuration -->
+  <xs:complexType name="SynapseLinearDynamicsSTInhibitoryType">
+    <xs:attribute type="UDoubleLE1Type" name="alpha" use="optional" default="0.007">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.007 (the alpha argument in the linear expression efficacy = alpha * (spike - beta))</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleLE1Type" name="beta" use="optional" default="0.739">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.739 (the beta argument in the linear expression efficacy = alpha * (spike - beta))</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleLE1Type" name="initialEfficacy" use="optional" default="0.75">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.75</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <!-- Synapse - Plasticity linear dynamics- input spiking to hidden analog - configuration -->
+  <xs:complexType name="SynapseLinearDynamicsATInputType">
+    <xs:attribute type="UDoubleLE1Type" name="alpha" use="optional" default="0.007">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.007 (the alpha argument in the linear expression efficacy = alpha * (spike - beta))</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleLE1Type" name="beta" use="optional" default="0.739">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.739 (the beta argument in the linear expression efficacy = alpha * (spike - beta))</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleLE1Type" name="initialEfficacy" use="optional" default="0.75">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.75</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <!-- Synapse - Plasticity linear dynamics- indifferent spiking to hidden analog - configuration -->
+  <xs:complexType name="SynapseLinearDynamicsATIndifferentType">
+    <xs:attribute type="UDoubleLE1Type" name="alpha" use="optional" default="0.007">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.007 (the alpha argument in the linear expression efficacy = alpha * (spike - beta))</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleLE1Type" name="beta" use="optional" default="0.739">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.739 (the beta argument in the linear expression efficacy = alpha * (spike - beta))</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleLE1Type" name="initialEfficacy" use="optional" default="0.75">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.75</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+
+  <!-- Synapse - Plasticity NONLINEAR dynamics -->
+
+  <!-- Synapse - Plasticity nonlinear dynamics- input spiking to hidden spiking - configuration -->
+  <xs:complexType name="SynapseNonlinearDynamicsSTInputType">
     <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="optional" default="0.5">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is 0.5 (expreses average probability of neurotransmitter release)</xs:documentation>
@@ -1063,39 +1341,29 @@
         <xs:documentation xml:lang="en">Default value is 50 ms</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute type="xs:boolean" name="apply" use="optional" default="true">
+  </xs:complexType>
+
+  <!-- Synapse - Plasticity nonlinear dynamics- excitatory spiking to hidden spiking - configuration -->
+  <xs:complexType name="SynapseNonlinearDynamicsSTExcitatoryType">
+    <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="optional" default="0.5">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is true</xs:documentation>
+        <xs:documentation xml:lang="en">Default value is 0.5 (expreses average probability of neurotransmitter release)</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name="tauDepression" use="optional" default="1100">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 1100 ms</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name="tauFacilitation" use="optional" default="50">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 50 ms</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Synapse - Plasticity - excitatory to inhibitory dynamics - configuration -->
-  <xs:complexType name="SynapseDynamicsEIType">
-    <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="optional" default="0.05">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.05 (expreses average probability of neurotransmitter release)</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="UDoubleType" name="tauDepression" use="optional" default="125">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 125 ms</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="UDoubleType" name="tauFacilitation" use="optional" default="1200">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1200 ms</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="xs:boolean" name="apply" use="optional" default="true">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is true</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-  </xs:complexType>
-
-  <!-- Synapse - Plasticity - inhibitory to excitatory dynamics - configuration -->
-  <xs:complexType name="SynapseDynamicsIEType">
+  <!-- Synapse - Plasticity nonlinear dynamics- inhibitory spiking to hidden spiking - configuration -->
+  <xs:complexType name="SynapseNonlinearDynamicsSTInhibitoryType">
     <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="optional" default="0.25">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is 0.25 (expreses average probability of neurotransmitter release)</xs:documentation>
@@ -1111,94 +1379,268 @@
         <xs:documentation xml:lang="en">Default value is 20 ms</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute type="xs:boolean" name="apply" use="optional" default="true">
+  </xs:complexType>
+
+  <!-- Synapse - Plasticity nonlinear dynamics- input spiking to hidden analog - configuration -->
+  <xs:complexType name="SynapseNonlinearDynamicsATInputType">
+    <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="optional" default="0.5">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is true</xs:documentation>
+        <xs:documentation xml:lang="en">Default value is 0.5 (expreses average probability of neurotransmitter release)</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name="tauDepression" use="optional" default="1100">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 1100 ms</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name="tauFacilitation" use="optional" default="50">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 50 ms</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Synapse - Plasticity - inhibitory to inhibitory dynamics - configuration -->
-  <xs:complexType name="SynapseDynamicsIIType">
-    <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="optional" default="0.32">
+  <!-- Synapse - Plasticity nonlinear dynamics- indifferent spiking to hidden analog - configuration -->
+  <xs:complexType name="SynapseNonlinearDynamicsATIndifferentType">
+    <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="optional" default="0.5">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.32 (expreses average probability of neurotransmitter release)</xs:documentation>
+        <xs:documentation xml:lang="en">Default value is 0.5 (expreses average probability of neurotransmitter release)</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute type="UDoubleType" name="tauDepression" use="optional" default="144">
+    <xs:attribute type="UDoubleType" name="tauDepression" use="optional" default="1100">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 144 ms</xs:documentation>
+        <xs:documentation xml:lang="en">Default value is 1100 ms</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute type="UDoubleType" name="tauFacilitation" use="optional" default="60">
+    <xs:attribute type="UDoubleType" name="tauFacilitation" use="optional" default="50">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 60 ms</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="xs:boolean" name="apply" use="optional" default="true">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is true</xs:documentation>
+        <xs:documentation xml:lang="en">Default value is 50 ms</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Synapse - Plasticity - configuration -->
-  <xs:complexType name="SynapsePlasticityType">
+  <!-- Synapse - Plasticity - input spiking to hidden spiking - configuration -->
+  <xs:complexType name="SynapsePlasticitySTInputType">
+    <xs:choice minOccurs="1" maxOccurs="1">
+      <xs:element type="SynapseConstantDynamicsSTInputType" name="constantDynamics" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="SynapseLinearDynamicsSTInputType" name="linearDynamics" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="SynapseNonlinearDynamicsSTInputType" name="nonlinearDynamics" minOccurs="1" maxOccurs="1"/>
+    </xs:choice>
+  </xs:complexType>
+
+  <!-- Synapse - Plasticity - excitatory spiking to hidden spiking - configuration -->
+  <xs:complexType name="SynapsePlasticitySTExcitatoryType">
+    <xs:choice minOccurs="1" maxOccurs="1">
+      <xs:element type="SynapseConstantDynamicsSTExcitatoryType" name="constantDynamics" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="SynapseLinearDynamicsSTExcitatoryType" name="linearDynamics" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="SynapseNonlinearDynamicsSTExcitatoryType" name="nonlinearDynamics" minOccurs="1" maxOccurs="1"/>
+    </xs:choice>
+  </xs:complexType>
+
+  <!-- Synapse - Plasticity - inhibitory spiking to hidden spiking - configuration -->
+  <xs:complexType name="SynapsePlasticitySTInhibitoryType">
+    <xs:choice minOccurs="1" maxOccurs="1">
+      <xs:element type="SynapseConstantDynamicsSTInhibitoryType" name="constantDynamics" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="SynapseLinearDynamicsSTInhibitoryType" name="linearDynamics" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="SynapseNonlinearDynamicsSTInhibitoryType" name="nonlinearDynamics" minOccurs="1" maxOccurs="1"/>
+    </xs:choice>
+  </xs:complexType>
+
+  <!-- Synapse - Plasticity - input spiking to hidden analog - configuration -->
+  <xs:complexType name="SynapsePlasticityATInputType">
+    <xs:choice minOccurs="1" maxOccurs="1">
+      <xs:element type="SynapseConstantDynamicsATInputType" name="constantDynamics" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="SynapseLinearDynamicsATInputType" name="linearDynamics" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="SynapseNonlinearDynamicsATInputType" name="nonlinearDynamics" minOccurs="1" maxOccurs="1"/>
+    </xs:choice>
+  </xs:complexType>
+
+  <!-- Synapse - Plasticity - indifferent spiking to hidden analog - configuration -->
+  <xs:complexType name="SynapsePlasticityATIndifferentType">
+    <xs:choice minOccurs="1" maxOccurs="1">
+      <xs:element type="SynapseConstantDynamicsATIndifferentType" name="constantDynamics" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="SynapseLinearDynamicsATIndifferentType" name="linearDynamics" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="SynapseNonlinearDynamicsATIndifferentType" name="nonlinearDynamics" minOccurs="1" maxOccurs="1"/>
+    </xs:choice>
+  </xs:complexType>
+
+  <!-- Synapse - analog source - configuration -->
+  <xs:complexType name="SynapseAnalogSourceType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="SynapseDynamicsEEType" name="dynamicsEE" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="SynapseDynamicsEIType" name="dynamicsEI" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="SynapseDynamicsIEType" name="dynamicsIE" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="SynapseDynamicsIIType" name="dynamicsII" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="URandomValueType" name="weight" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
   </xs:complexType>
-  
-  <!-- Synapse - Internal weights - configuration -->
-  <xs:complexType name="SynapseInternalWeightsType">
+
+  <!-- Synapse - spiking source - input spiking to hidden spiking - configuration -->
+  <xs:complexType name="SynapseSpikingSourceSTInputType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="URandomValueType" name="weightAA" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="URandomValueType" name="weightAS" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="URandomValueType" name="weightSA" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="URandomValueType" name="weightSS" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="URandomValueType" name="weight" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="SynapsePlasticitySTInputType" name="plasticity" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
-    <xs:attribute type="UDoubleGT0NAOptionType" name="analogScopeSpectralRadius" use="optional" default="0.9999">
+  </xs:complexType>
+
+  <!-- Synapse - spiking source - excitatory spiking to hidden spiking - configuration -->
+  <xs:complexType name="SynapseSpikingSourceSTExcitatoryType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="URandomValueType" name="weight" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="SynapsePlasticitySTExcitatoryType" name="plasticity" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Synapse - spiking source - inhibitory spiking to hidden spiking - configuration -->
+  <xs:complexType name="SynapseSpikingSourceSTInhibitoryType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="URandomValueType" name="weight" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="SynapsePlasticitySTInhibitoryType" name="plasticity" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Synapse - spiking source - input spiking to hidden analog - configuration -->
+  <xs:complexType name="SynapseSpikingSourceATInputType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="URandomValueType" name="weight" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="SynapsePlasticityATInputType" name="plasticity" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Synapse - spiking source - invariant spiking to hidden analog - configuration -->
+  <xs:complexType name="SynapseSpikingSourceATIndifferentType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="URandomValueType" name="weight" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="SynapsePlasticityATIndifferentType" name="plasticity" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Synapse - spiking target - input - configuration -->
+  <xs:complexType name="SynapseSTInputType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="SynapseAnalogSourceType" name="analogSource" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="SynapseSpikingSourceSTInputType" name="spikingSource" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
+    <xs:attribute type="SynapticDelayMethodType" name="delayMethod" use="optional" default="Random">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is Random</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:unsignedInt" name="maxDelay" use="optional" default="0">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0. No delay.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <!-- Synapse - spiking target - excitatory - configuration -->
+  <xs:complexType name="SynapseSTExcitatoryType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="SynapseAnalogSourceType" name="analogSource" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="SynapseSpikingSourceSTExcitatoryType" name="spikingSource" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
+    <xs:attribute type="SynapticDelayMethodType" name="delayMethod" use="optional" default="Random">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is Random</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:unsignedInt" name="maxDelay" use="optional" default="0">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0. No delay.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleGT0Type" name="relShare" use="optional" default="4">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 4</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <!-- Synapse - spiking target - inhibitory - configuration -->
+  <xs:complexType name="SynapseSTInhibitoryType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="SynapseAnalogSourceType" name="analogSource" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="SynapseSpikingSourceSTInhibitoryType" name="spikingSource" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
+    <xs:attribute type="SynapticDelayMethodType" name="delayMethod" use="optional" default="Random">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is Random</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:unsignedInt" name="maxDelay" use="optional" default="0">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0. No delay.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleGT0Type" name="relShare" use="optional" default="1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <!-- Synapse - analog target - input - configuration -->
+  <xs:complexType name="SynapseATInputType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="SynapseAnalogSourceType" name="analogSource" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="SynapseSpikingSourceATInputType" name="spikingSource" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
+    <xs:attribute type="SynapticDelayMethodType" name="delayMethod" use="optional" default="Random">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is Random</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:unsignedInt" name="maxDelay" use="optional" default="0">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0. No delay.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <!-- Synapse - analog target - indifferent - configuration -->
+  <xs:complexType name="SynapseATIndifferentType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="SynapseAnalogSourceType" name="analogSource" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="SynapseSpikingSourceATIndifferentType" name="spikingSource" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
+    <xs:attribute type="SynapticDelayMethodType" name="delayMethod" use="optional" default="Random">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is Random</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:unsignedInt" name="maxDelay" use="optional" default="0">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0. No delay.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <!-- Synapse - spiking target - configuration -->
+  <xs:complexType name="SynapseSTType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="SynapseSTInputType" name="input" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="SynapseSTExcitatoryType" name="excitatory" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="SynapseSTInhibitoryType" name="inhibitory" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Synapse - analog target - configuration -->
+  <xs:complexType name="SynapseATType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="SynapseATInputType" name="input" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="SynapseATIndifferentType" name="indifferent" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
+    <xs:attribute type="UDoubleGT0NAOptionType" name="spectralRadius" use="optional" default="0.9999">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is 0.9999. Use NA to disable spectral radius application.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute type="UDoubleGT0NAOptionType" name="spikingScopeSpectralRadius" use="optional" default="NA">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.9999. Use NA to disable spectral radius application.</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
   </xs:complexType>
-  
+
   <!-- Synapse - configuration -->
   <xs:complexType name="SynapseType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="SynapsePlasticityType" name="plasticity" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="SynapseInternalWeightsType" name="internalWeights" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="SynapseSTType" name="spikingTarget" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="SynapseATType" name="analogTarget" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
-    <xs:attribute type="SynapticDelayMethodType" name="inputDelayMethod" use="optional" default="Random">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is Random</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="xs:unsignedInt" name="inputMaxDelay" use="optional" default="0">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0. No delay.</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="SynapticDelayMethodType" name="internalDelayMethod" use="optional" default="Random">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is Random</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="xs:unsignedInt" name="internalMaxDelay" use="optional" default="0">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0. No delay.</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
   </xs:complexType>
+
   
   <!-- ________________________________________NEURAL POOL TYPES_________________________________________________ -->
 
@@ -1316,29 +1758,8 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Connection distribution - custom - configuration -->
-  <xs:complexType name="ConnDistrCustomType">
-    <xs:attribute type="UDoubleType" name="relShareEE" use="required"/>
-    <xs:attribute type="UDoubleType" name="relShareEI" use="required"/>
-    <xs:attribute type="UDoubleType" name="relShareIE" use="required"/>
-    <xs:attribute type="UDoubleType" name="relShareII" use="required"/>
-  </xs:complexType>
-
-  <!-- Connection distribution - flat - configuration -->
-  <xs:complexType name="ConnDistrFlatType">
-  </xs:complexType>
-
-  <!-- Connection probabilities - lsm - configuration -->
-  <xs:complexType name="ConnDistrLSMType">
-  </xs:complexType>
-  
   <!-- Connection distribution - random schema - configuration -->
   <xs:complexType name="PoolInterconnectionRandomSchemaType">
-    <xs:choice minOccurs="1" maxOccurs="1">
-      <xs:element type="ConnDistrCustomType" name="distributionCustom" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="ConnDistrFlatType" name="distributionFlat" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="ConnDistrLSMType" name="distributionLSM" minOccurs="1" maxOccurs="1"/>
-    </xs:choice>
     <xs:attribute type="UDoubleLE1Type" name="density" use="optional" default="0.1">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is 0.1</xs:documentation>
@@ -1405,6 +1826,17 @@
     </xs:sequence>
   </xs:complexType>
 
+  <!-- HomogenousExcitability - configuration -->
+  <xs:complexType name="HomogenousExcitabilityType">
+    <xs:attribute type="UDoubleGT0Type" name="inputStrength" use="required"/>
+    <xs:attribute type="UDoubleGT0Type" name="excitatoryStrength" use="required"/>
+    <xs:attribute type="UDoubleLE1Type" name="inhibitoryRatio" use="optional" default="0.25">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.25</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
 
   <!-- Pool - spiking neuron group - configuration -->
   <xs:complexType name="PoolSpikingNeuronGroupType">
@@ -1417,11 +1849,11 @@
         <xs:element type="ActivationIzhikevichIFType" name="activationIzhikevichIF" minOccurs="1" maxOccurs="1"/>
         <xs:element type="ActivationAutoIzhikevichIFType" name="activationAutoIzhikevichIF" minOccurs="1" maxOccurs="1"/>
       </xs:choice>
+      <xs:element type="HomogenousExcitabilityType" name="homogenousExcitability" minOccurs="1" maxOccurs="1"/>
       <xs:element type="RandomValueType" name="bias" minOccurs="0" maxOccurs="1"/>
       <xs:element type="PredictorsType" name="predictors" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:string" name="name" use="required" />
-    <xs:attribute type="NeuronRoleType" name="role" use="required"/>
     <xs:attribute type="UDoubleType" name="relShare" use="required"/>
     <xs:attribute type="UDoubleType" name="readoutDensity" use="optional" default="1">
       <xs:annotation>
@@ -1431,7 +1863,7 @@
   </xs:complexType>
 
   <!-- Pool - analog neuron group - retainment - configuration -->
-  <xs:complexType name="PoolAnalogNeuronGroupRetainmentType">
+  <xs:complexType name="RetainmentType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="URandomValueType" name="strength" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
@@ -1452,11 +1884,10 @@
         <xs:element type="ActivationTanHType" name="activationTanH" minOccurs="1" maxOccurs="1"/>
       </xs:choice>
       <xs:element type="RandomValueType" name="bias" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="PoolAnalogNeuronGroupRetainmentType" name="retainment" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="RetainmentType" name="retainment" minOccurs="0" maxOccurs="1"/>
       <xs:element type="PredictorsType" name="predictors" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:string" name="name" use="required" />
-    <xs:attribute type="NeuronRoleType" name="role" use="required"/>
     <xs:attribute type="UDoubleType" name="relShare" use="required"/>
     <xs:attribute type="UDoubleLE1Type" name="firingThreshold" use="optional" default="0.00125">
       <xs:annotation>
@@ -1513,15 +1944,10 @@
 
   <!-- Reservoir structure - pool to pool connection - configuration -->
   <xs:complexType name="ResStructInterPoolConnectionType">
-    <xs:choice minOccurs="1" maxOccurs="1">
-      <xs:element type="ConnDistrCustomType" name="distributionCustom" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="ConnDistrFlatType" name="distributionFlat" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="ConnDistrLSMType" name="distributionLSM" minOccurs="1" maxOccurs="1"/>
-    </xs:choice>
-    <xs:attribute type="xs:string" name="sourcePool" use="required"/>
-    <xs:attribute type="UDoubleLE1Type" name="sourceConnDensity" use="required"/>
     <xs:attribute type="xs:string" name="targetPool" use="required"/>
     <xs:attribute type="UDoubleLE1Type" name="targetConnDensity" use="required"/>
+    <xs:attribute type="xs:string" name="sourcePool" use="required"/>
+    <xs:attribute type="UDoubleLE1Type" name="sourceConnDensity" use="required"/>
     <xs:attribute type="xs:boolean" name="constantNumOfConnections" use="optional" default="false">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is false</xs:documentation>
@@ -1657,8 +2083,37 @@
     </xs:sequence>
   </xs:complexType>
 
-  <!-- NeuralPreprocessor - internal input field -configuration -->
-  <xs:complexType name="NPInternalInpFieldType">
+  <!-- NeuralPreprocessor - transformed input field -configuration -->
+  <xs:complexType name="NPTransformedInpFieldType">
+    <xs:choice minOccurs="1" maxOccurs="1">
+      <xs:element type="DiffTransformerType" name="diff" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="CDivTransformerType" name="cdiv" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="LogTransformerType" name="log" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="ExpTransformerType" name="exp" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="PowerTransformerType" name="power" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="YeoJohnsonTransformerType" name="yeoJohnson" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="MWStatTransformerType" name="stat" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="MulTransformerType" name="mul" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="DivTransformerType" name="div" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="LinearTransformerType" name="linear" minOccurs="1" maxOccurs="1"/>
+    </xs:choice>
+    <xs:attribute type="xs:string" name="name" use="required"/>
+    <xs:attribute type="xs:boolean" name="routeToReadout" use="optional" default="true">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is true</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <!-- NeuralPreprocessor - transformed input fields -configuration -->
+  <xs:complexType name="NPTransformedInpFieldsType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="NPTransformedInpFieldType" name="field" minOccurs="1" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- NeuralPreprocessor - generated input field -configuration -->
+  <xs:complexType name="NPGeneratedInpFieldType">
     <xs:choice minOccurs="1" maxOccurs="1">
       <xs:element type="PulseGeneratorType" name="pulse" minOccurs="1" maxOccurs="1"/>
       <xs:element type="RandomValueType" name="random" minOccurs="1" maxOccurs="1"/>
@@ -1673,19 +2128,20 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- NeuralPreprocessor - internal input fields -configuration -->
-  <xs:complexType name="NPInternalInpFieldsType">
+  <!-- NeuralPreprocessor - generated input fields -configuration -->
+  <xs:complexType name="NPGeneratedInpFieldsType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="NPInternalInpFieldType" name="field" minOccurs="1" maxOccurs="unbounded"/>
+      <xs:element type="NPGeneratedInpFieldType" name="field" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
 
-  <!-- NeuralPreprocessor - input fields- configuration -->
+  <!-- NeuralPreprocessor - transformed fields- configuration -->
   <xs:complexType name="NPInpFieldsType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="NPExternalInpFieldsType" name="externalFields" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="NPInternalInpFieldsType" name="internalFields" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="NPTransformedInpFieldsType" name="transformedFields" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="NPGeneratedInpFieldsType" name="generatedFields" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
   </xs:complexType>
   
@@ -1707,59 +2163,22 @@
     </xs:sequence>
   </xs:complexType>
 
-  <!-- Input synapse types-->
-  <xs:complexType name="NPResInstanceInputUnitConnectionSpikingTargetType">
-    <xs:sequence minOccurs="0" maxOccurs="1">
-      <xs:element type="URandomValueType" name="weight" minOccurs="0" maxOccurs="1"/>
-    </xs:sequence>
-    <xs:attribute type="SynapticTargetScopeType" name="scope" use="optional" default="Excitatory">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is Excitatory (connect only excitatory neurons)</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="UDoubleLE1Type" name="density" use="optional" default="1">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-  </xs:complexType>
-
-  <xs:complexType name="NPResInstanceInputUnitConnectionAnalogTargetType">
-    <xs:sequence minOccurs="0" maxOccurs="1">
-      <xs:element type="URandomValueType" name="weight" minOccurs="0" maxOccurs="1"/>
-    </xs:sequence>
-    <xs:attribute type="SynapticTargetScopeType" name="scope" use="optional" default="All">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is All (inhibitory and excitatory neurons)</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="UDoubleLE1Type" name="density" use="optional" default="1">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-  </xs:complexType>
-
   <!-- NeuralPreprocessor - reservoir instance - input unit - connection - configuration -->
   <xs:complexType name="NPResInstanceInputUnitConnectionType">
-    <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="NPResInstanceInputUnitConnectionSpikingTargetType" name="spikingTarget" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="NPResInstanceInputUnitConnectionAnalogTargetType" name="analogTarget" minOccurs="0" maxOccurs="1"/>
-    </xs:sequence>
     <xs:attribute type="xs:string" name="poolName" use="required"/>
-    <xs:attribute type="AnalogCodingMethodType" name="coding" use="optional" default="Actual">
+    <xs:attribute type="UDoubleLE1Type" name="spikingTargetDensity" use="optional" default="1">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is Actual</xs:documentation>
+        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute type="xs:boolean" name="oppositeAmplitude" use="optional" default="false">
+    <xs:attribute type="UDoubleLE1Type" name="analogTargetDensity" use="optional" default="1">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is false</xs:documentation>
+        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute type="SignalingRestrictionType" name="signalingRestriction" use="optional" default="AnalogOnly">
+    <xs:attribute type="SignalingRestrictionType" name="signalingRestriction" use="optional" default="NoRestriction">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is AnalogOnly</xs:documentation>
+        <xs:documentation xml:lang="en">Default value is NoRestriction</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -1781,31 +2200,6 @@
     <xs:attribute type="UIntGE1LE32Type" name="spikeTrainLength" use="optional" default="8">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is 8</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="UIntGE1LE1024Type" name="differenceDistance" use="optional" default="1">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="UIntGT1Type" name="numOfLinearSteps" use="optional" default="16">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 16</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="UDoubleGT0Type" name="powerExponent" use="optional" default="0.5">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.5</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="UDoubleGT0Type" name="foldedPowerExponent" use="optional" default="0.5">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.5</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="UIntGE1LE1024Type" name="movingAverageLength" use="optional" default="5">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 5</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>

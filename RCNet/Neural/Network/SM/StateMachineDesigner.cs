@@ -207,11 +207,10 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// Builds name of neuron group
         /// </summary>
-        /// <param name="role">Role of the neurons inside the group</param>
         /// <param name="activationCfg">Activation function configuration</param>
-        private string GetNeuronGroupName(NeuronCommon.NeuronRole role, RCNetBaseSettings activationCfg)
+        private string GetNeuronGroupName(RCNetBaseSettings activationCfg)
         {
-            return "Grp-" + role.ToString().Substring(0, 3) + "-" + GetActivationName(activationCfg);
+            return "Grp-" + GetActivationName(activationCfg);
         }
 
         /// <summary>
@@ -247,12 +246,10 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// Creates configuration of group of analog neurons having specified analog activation.
         /// </summary>
-        /// <param name="role">Role of the neurons within the group (Excitatory/Inhibitory)</param>
         /// <param name="activationCfg">Activation function configuration</param>
         /// <param name="maxAbsBias">Maximum absolute value of the bias (0 means bias is not required)</param>
         /// <param name="maxRetainmentStrength">Maximum retainment strength (0 means retainment property is not required)</param>
-        private AnalogNeuronGroupSettings CreateAnalogGroup(NeuronCommon.NeuronRole role,
-                                                            RCNetBaseSettings activationCfg,
+        private AnalogNeuronGroupSettings CreateAnalogGroup(RCNetBaseSettings activationCfg,
                                                             double maxAbsBias = 0d,
                                                             double maxRetainmentStrength = 0d
                                                             )
@@ -261,17 +258,17 @@ namespace RCNet.Neural.Network.SM
             RandomValueSettings biasCfg = maxAbsBias == 0 ? null : new RandomValueSettings(-maxAbsBias, maxAbsBias);
             //Retainment configuration
             const double RetainmentDensity = 1d;
-            AnalogRetainmentSettings retainmentCfg = maxRetainmentStrength == 0 ? null : new AnalogRetainmentSettings(RetainmentDensity, new URandomValueSettings(0, maxRetainmentStrength));
+            RetainmentSettings retainmentCfg = maxRetainmentStrength == 0 ? null : new RetainmentSettings(RetainmentDensity, new URandomValueSettings(0, maxRetainmentStrength));
             //Create neuron group configuration
-            AnalogNeuronGroupSettings groupCfg = new AnalogNeuronGroupSettings(GetNeuronGroupName(role, activationCfg),
-                                                                               role,
+            AnalogNeuronGroupSettings groupCfg = new AnalogNeuronGroupSettings(GetNeuronGroupName(activationCfg),
                                                                                1d,
                                                                                activationCfg,
                                                                                AnalogNeuronGroupSettings.DefaultFiringThreshold,
                                                                                AnalogNeuronGroupSettings.DefaultSignalingRestriction,
-                                                                               AnalogNeuronGroupSettings.DefaultReadoutDensity,
                                                                                biasCfg,
-                                                                               retainmentCfg
+                                                                               retainmentCfg,
+                                                                               null,
+                                                                               AnalogNeuronGroupSettings.DefaultReadoutDensity
                                                                                );
             return groupCfg;
         }
@@ -279,25 +276,21 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// Creates configuration of group of spiking neurons having specified spiking activation.
         /// </summary>
-        /// <param name="role">Role of the neurons within the group (Excitatory/Inhibitory)</param>
         /// <param name="activationCfg">Activation function configuration</param>
         /// <param name="steadyBias">Constant bias (0 means bias is not required)</param>
-        private SpikingNeuronGroupSettings CreateSpikingGroup(NeuronCommon.NeuronRole role,
-                                                              RCNetBaseSettings activationCfg,
-                                                              double steadyBias = 0d
-                                                              )
+        private SpikingNeuronGroupSettings CreateSpikingGroup(RCNetBaseSettings activationCfg, HomogenousExcitabilitySettings heCfg, double steadyBias = 0d)
         {
             //Bias configuration
-            //RandomValueSettings biasCfg = maxAbsBias == 0 ? null : new RandomValueSettings(-maxAbsBias, maxAbsBias);
             RandomValueSettings biasCfg = steadyBias == 0 ? null : new RandomValueSettings(steadyBias, steadyBias);
             //Create neuron group configuration
-            SpikingNeuronGroupSettings groupCfg = new SpikingNeuronGroupSettings(GetNeuronGroupName(role, activationCfg),
-                                                                               role,
-                                                                               role == NeuronCommon.NeuronRole.Excitatory ? 4d :1d,
-                                                                               activationCfg,
-                                                                               SpikingNeuronGroupSettings.DefaultReadoutDensity,
-                                                                               biasCfg
-                                                                               );
+            SpikingNeuronGroupSettings groupCfg = new SpikingNeuronGroupSettings(GetNeuronGroupName(activationCfg),
+                                                                                 1d,
+                                                                                 activationCfg,
+                                                                                 heCfg,
+                                                                                 biasCfg,
+                                                                                 null,
+                                                                                 SpikingNeuronGroupSettings.DefaultReadoutDensity
+                                                                                 );
             return groupCfg;
         }
 
@@ -312,7 +305,7 @@ namespace RCNet.Neural.Network.SM
         /// <param name="maxInternalDelay">Maximum delay of internal synapse</param>
         /// <param name="maxAbsBias">Maximum absolute value of the bias (0 means bias is not required)</param>
         /// <param name="maxRetainmentStrength">Maximum retainment strength (0 means retainment property is not required)</param>
-        /// <param name="allowedPredictor">Allowed predictor</param>
+        /// <param name="allowedPredictor">Allowed predictor(s)</param>
         public StateMachineSettings CreatePureESNCfg(int totalSize,
                                                      double inputConnectionDensity,
                                                      int maxInputDelay,
@@ -323,17 +316,16 @@ namespace RCNet.Neural.Network.SM
                                                      params PredictorsProvider.PredictorID[] allowedPredictor
                                                      )
         {
-            const double MaxInputWeightSum = 2d;
+            const double MaxInputWeightSum = 2.75d;
             //Default ESN activation
             RCNetBaseSettings aFnCfg = new TanHSettings();
-            //Two neuron groups (Excitatory/Inhibitory)
-            AnalogNeuronGroupSettings excGrp = CreateAnalogGroup(NeuronCommon.NeuronRole.Excitatory, aFnCfg, maxAbsBias, maxRetainmentStrength);
-            AnalogNeuronGroupSettings inhGrp = CreateAnalogGroup(NeuronCommon.NeuronRole.Inhibitory, aFnCfg, maxAbsBias, maxRetainmentStrength);
+            //One neuron group
+            AnalogNeuronGroupSettings grp = CreateAnalogGroup(aFnCfg, maxAbsBias, maxRetainmentStrength);
             //Simple analog pool
             PoolSettings poolCfg = new PoolSettings(GetPoolName(ActivationContent.Analog, 0),
                                                     new ProportionsSettings(totalSize, 1, 1),
-                                                    new NeuronGroupsSettings(excGrp, inhGrp),
-                                                    new InterconnSettings(new RandomSchemaSettings(new ConnDistrFlatSettings(), interconnectionDensity))
+                                                    new NeuronGroupsSettings(grp),
+                                                    new InterconnSettings(new RandomSchemaSettings(interconnectionDensity))
                                                     );
             //Simple reservoir structure
             ReservoirStructureSettings resStructCfg = new ReservoirStructureSettings(GetResStructName(ActivationContent.Analog, 0),
@@ -345,21 +337,18 @@ namespace RCNet.Neural.Network.SM
             foreach (ExternalFieldSettings fieldCfg in InputCfg.FieldsCfg.ExternalFieldsCfg.FieldCfgCollection)
             {
                 InputUnitConnSettings inputUnitConnCfg = new InputUnitConnSettings(poolCfg.Name,
-                                                                                   InputUnit.AnalogCodingMethod.Actual,
-                                                                                   false,
-                                                                                   NeuronCommon.NeuronSignalingRestrictionType.AnalogOnly,
-                                                                                   null,
-                                                                                   new AnalogTargetSettings(Synapse.SynapticTargetScope.All,
-                                                                                                            inputConnectionDensity,
-                                                                                                            new URandomValueSettings(0d, maxInpSynWeight)
-                                                                                                            )
+                                                                                   0,
+                                                                                   inputConnectionDensity,
+                                                                                   NeuronCommon.NeuronSignalingRestrictionType.AnalogOnly
                                                                                    );
                 inputUnits.Add(new InputUnitSettings(fieldCfg.Name, new InputUnitConnsSettings(inputUnitConnCfg)));
             }
             //Synapse general configuration
-            SynapseSettings synapseCfg = new SynapseSettings(Synapse.SynapticDelayMethod.Random, maxInputDelay,
-                                                             Synapse.SynapticDelayMethod.Random, maxInternalDelay
-                                                             );
+            AnalogSourceSettings asc = new AnalogSourceSettings(new URandomValueSettings(0, maxInpSynWeight));
+            SynapseATInputSettings synapseATInputSettings = new SynapseATInputSettings(Synapse.SynapticDelayMethod.Random, maxInputDelay, asc, null);
+            SynapseATIndifferentSettings synapseATIndifferentSettings = new SynapseATIndifferentSettings(Synapse.SynapticDelayMethod.Random, maxInternalDelay);
+            SynapseATSettings synapseATCfg = new SynapseATSettings(SynapseATSettings.DefaultSpectralRadiusNum, synapseATInputSettings, synapseATIndifferentSettings);
+            SynapseSettings synapseCfg = new SynapseSettings(null, synapseATCfg);
 
             //Initially set all switches to false - all available predictors are forbidden
             bool[] predictorSwitches = new bool[PredictorsProvider.NumOfPredictors];
@@ -390,26 +379,24 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// Creates StateMachine configuration following pure LSM design
         /// </summary>
-        /// <param name="totalSize">Total number of hidden neurons</param>
-        /// <param name="inputSpikeTrainLength">Length of the spike-train coding analog input (precision of coding). If zero, spike-train coding is disabled</param>
+        /// <param name="proportionsCfg">LSM pool proportions</param>
+        /// <param name="inputSpikeTrainLength">Spike-train length (0 means no spike-train coding)</param>
+        /// <param name="aFnCfg">Spiking activation function configuration</param>
+        /// <param name="hes">Homogenous excitability configuration</param>
         /// <param name="inputConnectionDensity">Density of the input field connections to hidden neurons</param>
-        /// <param name="inputWeightsAvgStrength">Average strength of input synapses</param>
         /// <param name="maxInputDelay">Maximum delay of input synapse</param>
         /// <param name="interconnectionDensity">Density of the hidden neurons interconnection</param>
-        /// <param name="internalWeightsAvgStrength">Average strength of internal synapses</param>
         /// <param name="maxInternalDelay">Maximum delay of internal synapse</param>
-        /// <param name="aFnCfg">Spiking activation function configuration</param>
         /// <param name="steadyBias">Constant bias (0 means bias is not required)</param>
-        /// <param name="allowedPredictor">Allowed predictor</param>
-        public StateMachineSettings CreatePureLSMCfg(int totalSize,
+        /// <param name="allowedPredictor">Allowed predictor(s)</param>
+        public StateMachineSettings CreatePureLSMCfg(ProportionsSettings proportionsCfg,
                                                      int inputSpikeTrainLength,
+                                                     RCNetBaseSettings aFnCfg,
+                                                     HomogenousExcitabilitySettings hes,
                                                      double inputConnectionDensity,
-                                                     double inputWeightsAvgStrength,
                                                      int maxInputDelay,
                                                      double interconnectionDensity,
-                                                     double internalWeightsAvgStrength,
                                                      int maxInternalDelay,
-                                                     RCNetBaseSettings aFnCfg,
                                                      double steadyBias,
                                                      params PredictorsProvider.PredictorID[] allowedPredictor
                                                      )
@@ -419,14 +406,13 @@ namespace RCNet.Neural.Network.SM
             {
                 throw new ArgumentException("Specified activation must be spiking.", "aFnCfg");
             }
-            //Two neuron groups (Excitatory/Inhibitory)
-            SpikingNeuronGroupSettings excGrp = CreateSpikingGroup(NeuronCommon.NeuronRole.Excitatory, aFnCfg, steadyBias);
-            SpikingNeuronGroupSettings inhGrp = CreateSpikingGroup(NeuronCommon.NeuronRole.Inhibitory, aFnCfg, steadyBias);
+            //One neuron group
+            SpikingNeuronGroupSettings grp = CreateSpikingGroup(aFnCfg, hes, steadyBias);
             //Simple spiking pool
             PoolSettings poolCfg = new PoolSettings(GetPoolName(ActivationContent.Spiking, 0),
-                                                    new ProportionsSettings(totalSize, 1, 1),
-                                                    new NeuronGroupsSettings(excGrp, inhGrp),
-                                                    new InterconnSettings(new RandomSchemaSettings(new ConnDistrLSMSettings(), interconnectionDensity))
+                                                    proportionsCfg,
+                                                    new NeuronGroupsSettings(grp),
+                                                    new InterconnSettings(new RandomSchemaSettings(interconnectionDensity, 0d, false, false))
                                                     );
             //Simple reservoir structure
             ReservoirStructureSettings resStructCfg = new ReservoirStructureSettings(GetResStructName(ActivationContent.Spiking, 0),
@@ -434,46 +420,21 @@ namespace RCNet.Neural.Network.SM
                                                                                      );
             //Input units and connections configuration
             List<InputUnitSettings> inputUnits = new List<InputUnitSettings>(InputCfg.FieldsCfg.ExternalFieldsCfg.FieldCfgCollection.Count);
-            URandomValueSettings inputWeightCfg = new URandomValueSettings(0d, 2d * inputWeightsAvgStrength);
             foreach (ExternalFieldSettings fieldCfg in InputCfg.FieldsCfg.ExternalFieldsCfg.FieldCfgCollection)
             {
-                if (inputSpikeTrainLength > 0)
-                {
-                    InputUnitConnSettings inputUnitConnCfg = new InputUnitConnSettings(poolCfg.Name,
-                                                                                       InputUnit.AnalogCodingMethod.Actual,
-                                                                                       false,
-                                                                                       NeuronCommon.NeuronSignalingRestrictionType.SpikingOnly,
-                                                                                       new SpikingTargetSettings(Synapse.SynapticTargetScope.Excitatory,
-                                                                                                                 inputConnectionDensity,
-                                                                                                                 inputWeightCfg
-                                                                                                                 ),
-                                                                                       null
-                                                                                       );
-                    inputUnits.Add(new InputUnitSettings(fieldCfg.Name, new InputUnitConnsSettings(inputUnitConnCfg), inputSpikeTrainLength));
-                }
-                else
-                {
-                    InputUnitConnSettings inputUnitConnCfg = new InputUnitConnSettings(poolCfg.Name,
-                                                                                       InputUnit.AnalogCodingMethod.Actual,
-                                                                                       false,
-                                                                                       NeuronCommon.NeuronSignalingRestrictionType.AnalogOnly,
-                                                                                       new SpikingTargetSettings(Synapse.SynapticTargetScope.Excitatory,
-                                                                                                                 inputConnectionDensity,
-                                                                                                                 inputWeightCfg
-                                                                                                                 ),
-                                                                                       null
-                                                                                       );
-                    inputUnits.Add(new InputUnitSettings(fieldCfg.Name, new InputUnitConnsSettings(inputUnitConnCfg)));
-                }
+                InputUnitConnSettings inputUnitConnCfg = new InputUnitConnSettings(poolCfg.Name,
+                                                                                   inputConnectionDensity,
+                                                                                   0,
+                                                                                   inputSpikeTrainLength > 0 ? NeuronCommon.NeuronSignalingRestrictionType.SpikingOnly : NeuronCommon.NeuronSignalingRestrictionType.AnalogOnly
+                                                                                   );
+                inputUnits.Add(new InputUnitSettings(fieldCfg.Name, new InputUnitConnsSettings(inputUnitConnCfg), inputSpikeTrainLength > 0 ? inputSpikeTrainLength : 1));
             }
             //Synapse general configuration
-            InternalWeightSSSettings internalWeightSSCfg = new InternalWeightSSSettings(0, 2d * internalWeightsAvgStrength);
-            InternalWeightsSettings internalWeightCfg = new InternalWeightsSettings(0.9999d, -1d, internalWeightSSCfg);
-            SynapseSettings synapseCfg = new SynapseSettings(Synapse.SynapticDelayMethod.Random, maxInputDelay,
-                                                             Synapse.SynapticDelayMethod.Random, maxInternalDelay,
-                                                             null,
-                                                             internalWeightCfg
-                                                             );
+            SynapseSTInputSettings synapseSTInputSettings = new SynapseSTInputSettings(Synapse.SynapticDelayMethod.Random, maxInputDelay);
+            SynapseSTExcitatorySettings synapseSTExcitatorySettings = new SynapseSTExcitatorySettings(Synapse.SynapticDelayMethod.Random, maxInternalDelay);
+            SynapseSTInhibitorySettings synapseSTInhibitorySettings = new SynapseSTInhibitorySettings(Synapse.SynapticDelayMethod.Random, maxInternalDelay);
+            SynapseSTSettings synapseSTCfg = new SynapseSTSettings(synapseSTInputSettings, synapseSTExcitatorySettings, synapseSTInhibitorySettings);
+            SynapseSettings synapseCfg = new SynapseSettings(synapseSTCfg, null);
 
             //Initially set all switches to false - all available predictors are forbidden
             bool[] predictorSwitches = new bool[PredictorsProvider.NumOfPredictors];

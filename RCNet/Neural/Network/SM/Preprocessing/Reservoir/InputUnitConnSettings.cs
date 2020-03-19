@@ -23,14 +23,15 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// Name of the associated xsd type
         /// </summary>
         public const string XsdTypeName = "NPResInstanceInputUnitConnectionType";
+        //Default values
         /// <summary>
-        /// Default analog coding method
+        /// Default spiking target density
         /// </summary>
-        public const InputUnit.AnalogCodingMethod DefaultAnalogCoding = InputUnit.AnalogCodingMethod.Actual;
+        public const double DefaultSpikingTargetDensity = 1d;
         /// <summary>
-        /// Default value of parameter specifying if to opposite amplitude of the input
+        /// Default analog target density
         /// </summary>
-        public const bool DefaultOppositeAmplitude = false;
+        public const double DefaultAnalogTargetDensity = 1d;
         /// <summary>
         /// Default value of signaling restriction of associated input neuron
         /// </summary>
@@ -42,54 +43,38 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         public string PoolName { get; }
 
         /// <summary>
-        /// Analog coding method to be used
+        /// Spiking target density
         /// </summary>
-        public InputUnit.AnalogCodingMethod AnalogCoding { get; }
+        public double SpikingTargetDensity { get; }
 
         /// <summary>
-        /// Specifies if to opposite amplitude of the input
+        /// Analog target density
         /// </summary>
-        public bool OppositeAmplitude { get; }
+        public double AnalogTargetDensity { get; }
 
         /// <summary>
         /// Signaling restriction of associated input neuron
         /// </summary>
         public NeuronCommon.NeuronSignalingRestrictionType SignalingRestriction { get; }
 
-        /// <summary>
-        /// Spiking target settings
-        /// </summary>
-        public SpikingTargetSettings SpikingTargetCfg { get; }
-
-        /// <summary>
-        /// Analog target settings
-        /// </summary>
-        public AnalogTargetSettings AnalogTargetCfg { get; }
-
         //Constructors
         /// <summary>
         /// Creates an itialized instance.
         /// </summary>
         /// <param name="poolName">Name of target pool</param>
-        /// <param name="analogCoding">Analog coding method to be used</param>
-        /// <param name="oppositeAmplitude">Specifies if to opposite amplitude of the input</param>
+        /// <param name="spikingTargetDensity">Spiking target density</param>
+        /// <param name="analogTargetDensity">Analog target density</param>
         /// <param name="signalingRestriction">Signaling restriction of associated input neuron</param>
-        /// <param name="spikingTargetCfg">Spiking target settings</param>
-        /// <param name="analogTargetCfg">Analog target settings</param>
         public InputUnitConnSettings(string poolName,
-                                     InputUnit.AnalogCodingMethod analogCoding = DefaultAnalogCoding,
-                                     bool oppositeAmplitude = DefaultOppositeAmplitude,
-                                     NeuronCommon.NeuronSignalingRestrictionType signalingRestriction = DefaultSignalingRestriction,
-                                     SpikingTargetSettings spikingTargetCfg = null,
-                                     AnalogTargetSettings analogTargetCfg = null
+                                     double spikingTargetDensity = DefaultSpikingTargetDensity,
+                                     double analogTargetDensity = DefaultAnalogTargetDensity,
+                                     NeuronCommon.NeuronSignalingRestrictionType signalingRestriction = DefaultSignalingRestriction
                                      )
         {
             PoolName = poolName;
-            AnalogCoding = analogCoding;
-            OppositeAmplitude = oppositeAmplitude;
+            SpikingTargetDensity = spikingTargetDensity;
+            AnalogTargetDensity = analogTargetDensity;
             SignalingRestriction = signalingRestriction;
-            SpikingTargetCfg = spikingTargetCfg == null ? new SpikingTargetSettings() : (SpikingTargetSettings)spikingTargetCfg.DeepClone();
-            AnalogTargetCfg = analogTargetCfg == null ? new AnalogTargetSettings() : (AnalogTargetSettings)analogTargetCfg.DeepClone();
             Check();
             return;
         }
@@ -99,8 +84,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// </summary>
         /// <param name="source">Source instance</param>
         public InputUnitConnSettings(InputUnitConnSettings source)
-            : this(source.PoolName, source.AnalogCoding, source.OppositeAmplitude,
-                  source.SignalingRestriction, source.SpikingTargetCfg, source.AnalogTargetCfg)
+            : this(source.PoolName, source.SpikingTargetDensity, source.AnalogTargetDensity, source.SignalingRestriction)
         {
             return;
         }
@@ -118,13 +102,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
             PoolName = settingsElem.Attribute("poolName").Value;
-            AnalogCoding = (InputUnit.AnalogCodingMethod)Enum.Parse(typeof(InputUnit.AnalogCodingMethod), settingsElem.Attribute("coding").Value, true);
-            OppositeAmplitude = bool.Parse(settingsElem.Attribute("oppositeAmplitude").Value);
+            SpikingTargetDensity = double.Parse(settingsElem.Attribute("spikingTargetDensity").Value, CultureInfo.InvariantCulture);
+            AnalogTargetDensity = double.Parse(settingsElem.Attribute("analogTargetDensity").Value, CultureInfo.InvariantCulture);
             SignalingRestriction = (NeuronCommon.NeuronSignalingRestrictionType)Enum.Parse(typeof(NeuronCommon.NeuronSignalingRestrictionType), settingsElem.Attribute("signalingRestriction").Value, true);
-            XElement spikingTargetElem = settingsElem.Descendants("spikingTarget").FirstOrDefault();
-            SpikingTargetCfg = spikingTargetElem == null ? new SpikingTargetSettings() : new SpikingTargetSettings(spikingTargetElem);
-            XElement analogTargetElem = settingsElem.Descendants("analogTarget").FirstOrDefault();
-            AnalogTargetCfg = analogTargetElem == null ? new AnalogTargetSettings() : new AnalogTargetSettings(analogTargetElem);
             Check();
             return;
         }
@@ -133,12 +113,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// <summary>
         /// Checks if settings are default
         /// </summary>
-        public bool IsDefaultAnalogCoding { get { return (AnalogCoding == DefaultAnalogCoding); } }
+        public bool IsDefaultSpikingTargetDensity { get { return (SpikingTargetDensity == DefaultSpikingTargetDensity); } }
 
         /// <summary>
         /// Checks if settings are default
         /// </summary>
-        public bool IsDefaultOppositeAmplitude { get { return (OppositeAmplitude == DefaultOppositeAmplitude); } }
+        public bool IsDefaultAnalogTargetDensity { get { return (AnalogTargetDensity == DefaultAnalogTargetDensity); } }
 
         /// <summary>
         /// Checks if settings are default
@@ -179,26 +159,20 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
-            XElement rootElem = new XElement(rootElemName, new XAttribute("poolName", PoolName));
-            if (!suppressDefaults || !IsDefaultAnalogCoding)
+            XElement rootElem = new XElement(rootElemName,
+                                             new XAttribute("poolName", PoolName)
+                                             );
+            if (!suppressDefaults || !IsDefaultSpikingTargetDensity)
             {
-                rootElem.Add(new XAttribute("coding", AnalogCoding.ToString()));
+                rootElem.Add(new XAttribute("spikingTargetDensity", SpikingTargetDensity.ToString(CultureInfo.InvariantCulture)));
             }
-            if (!suppressDefaults || !IsDefaultOppositeAmplitude)
+            if (!suppressDefaults || !IsDefaultAnalogTargetDensity)
             {
-                rootElem.Add(new XAttribute("oppositeAmplitude", OppositeAmplitude.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()));
+                rootElem.Add(new XAttribute("analogTargetDensity", AnalogTargetDensity.ToString(CultureInfo.InvariantCulture)));
             }
             if (!suppressDefaults || !IsDefaultSignalingRestriction)
             {
                 rootElem.Add(new XAttribute("signalingRestriction", SignalingRestriction.ToString()));
-            }
-            if (!suppressDefaults || !SpikingTargetCfg.ContainsOnlyDefaults)
-            {
-                rootElem.Add(SpikingTargetCfg.GetXml(suppressDefaults));
-            }
-            if (!suppressDefaults || !AnalogTargetCfg.ContainsOnlyDefaults)
-            {
-                rootElem.Add(AnalogTargetCfg.GetXml(suppressDefaults));
             }
             Validate(rootElem, XsdTypeName);
             return rootElem;

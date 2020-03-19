@@ -8,6 +8,17 @@ namespace RCNet.Extensions
     /// </summary>
     public static class DoubleExtensions
     {
+        //Constants
+        /// <summary>
+        /// Reasonable min non-negative value
+        /// </summary>
+        public const double ReasonableAbsMin = 1e-20;
+
+        /// <summary>
+        /// Reasonable max non-negative value
+        /// </summary>
+        public const double ReasonableAbsMax = 1e20;
+
         /// <summary>
         /// Checks if this is computable double value.
         /// </summary>
@@ -25,7 +36,7 @@ namespace RCNet.Extensions
         /// Bounds given value.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static double Bound(this double x, double min = -1.0E20, double max = 1.0E20)
+        public static double Bound(this double x, double min = -ReasonableAbsMax, double max = ReasonableAbsMax)
         {
             if(x < min)
             {

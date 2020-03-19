@@ -100,18 +100,18 @@ namespace RCNet.Neural.Activation
             {
                 AdExpIFSettings afs = (AdExpIFSettings)settings;
                 af = new AdExpIF(rand.NextDouble(afs.TimeScale),
-                                   rand.NextDouble(afs.Resistance),
-                                   rand.NextDouble(afs.RestV),
-                                   rand.NextDouble(afs.ResetV),
-                                   rand.NextDouble(afs.RheobaseV),
-                                   rand.NextDouble(afs.FiringThresholdV),
-                                   rand.NextDouble(afs.SharpnessDeltaT),
-                                   rand.NextDouble(afs.AdaptationVoltageCoupling),
-                                   rand.NextDouble(afs.AdaptationTimeConstant),
-                                   rand.NextDouble(afs.AdaptationSpikeTriggeredIncrement),
-                                   afs.SolverMethod,
-                                   afs.SolverCompSteps
-                                  );
+                                 rand.NextDouble(afs.Resistance),
+                                 rand.NextDouble(afs.RestV),
+                                 rand.NextDouble(afs.ResetV),
+                                 rand.NextDouble(afs.RheobaseV),
+                                 rand.NextDouble(afs.FiringThresholdV),
+                                 rand.NextDouble(afs.SharpnessDeltaT),
+                                 rand.NextDouble(afs.AdaptationVoltageCoupling),
+                                 rand.NextDouble(afs.AdaptationTimeConstant),
+                                 rand.NextDouble(afs.AdaptationSpikeTriggeredIncrement),
+                                 afs.SolverMethod,
+                                 afs.SolverCompSteps
+                                 );
             }
             else if (settingsType == typeof(BentIdentitySettings))
             {
@@ -126,16 +126,16 @@ namespace RCNet.Neural.Activation
             {
                 ExpIFSettings afs = (ExpIFSettings)settings;
                 af = new ExpIF(rand.NextDouble(afs.TimeScale),
-                                 rand.NextDouble(afs.Resistance),
-                                 rand.NextDouble(afs.RestV),
-                                 rand.NextDouble(afs.ResetV),
-                                 rand.NextDouble(afs.RheobaseV),
-                                 rand.NextDouble(afs.FiringThresholdV),
-                                 rand.NextDouble(afs.SharpnessDeltaT),
-                                 afs.RefractoryPeriods,
-                                 afs.SolverMethod,
-                                 afs.SolverCompSteps
-                                 );
+                               rand.NextDouble(afs.Resistance),
+                               rand.NextDouble(afs.RestV),
+                               rand.NextDouble(afs.ResetV),
+                               rand.NextDouble(afs.RheobaseV),
+                               rand.NextDouble(afs.FiringThresholdV),
+                               rand.NextDouble(afs.SharpnessDeltaT),
+                               afs.RefractoryPeriods,
+                               afs.SolverMethod,
+                               afs.SolverCompSteps
+                               );
             }
             else if (settingsType == typeof(GaussianSettings))
             {
@@ -169,47 +169,30 @@ namespace RCNet.Neural.Activation
             {
                 double randomValue = rand.NextRangedUniformDouble(0, 1);
                 AutoIzhikevichIFSettings afs = (AutoIzhikevichIFSettings)settings;
-                if (afs.Role == NeuronCommon.NeuronRole.Excitatory)
-                {
-                    //Excitatory ranges
-                    af = new IzhikevichIF(0.02,
-                                          0.2,
-                                          8 + (-6 * randomValue.Power(2)),
-                                          -70,
-                                          -65 + (15 * randomValue.Power(2)),
-                                          30,
-                                          afs.RefractoryPeriods,
-                                          afs.SolverMethod,
-                                          afs.SolverCompSteps
-                                          );
-                }
-                else
-                {
-                    //Inhibitory ranges
-                    af = new IzhikevichIF(0.02 + 0.08 * randomValue,
-                                          0.25 - 0.05 * randomValue,
-                                          2,
-                                          -70,
-                                          -65,
-                                          30,
-                                          afs.RefractoryPeriods,
-                                          afs.SolverMethod,
-                                          afs.SolverCompSteps
-                                          );
-                }
+                //Ranges
+                af = new IzhikevichIF(0.2d,
+                                      0.2d,
+                                      3d + (-1d * randomValue.Power(2)),
+                                      -70d,
+                                      -68d + (1.5d * randomValue.Power(2)),
+                                      -64d,
+                                      afs.RefractoryPeriods,
+                                      afs.SolverMethod,
+                                      afs.SolverCompSteps
+                                      );
             }
             else if (settingsType == typeof(LeakyIFSettings))
             {
                 LeakyIFSettings afs = (LeakyIFSettings)settings;
                 af = new LeakyIF(rand.NextDouble(afs.TimeScale),
-                                   rand.NextDouble(afs.Resistance),
-                                   rand.NextDouble(afs.RestV),
-                                   rand.NextDouble(afs.ResetV),
-                                   rand.NextDouble(afs.FiringThresholdV),
-                                   afs.RefractoryPeriods,
-                                   afs.SolverMethod,
-                                   afs.SolverCompSteps
-                                   );
+                                 rand.NextDouble(afs.Resistance),
+                                 rand.NextDouble(afs.RestV),
+                                 rand.NextDouble(afs.ResetV),
+                                 rand.NextDouble(afs.FiringThresholdV),
+                                 afs.RefractoryPeriods,
+                                 afs.SolverMethod,
+                                 afs.SolverCompSteps
+                                 );
             }
             else if (settingsType == typeof(LeakyReLUSettings))
             {
@@ -224,11 +207,11 @@ namespace RCNet.Neural.Activation
             {
                 SimpleIFSettings afs = (SimpleIFSettings)settings;
                 af = new SimpleIF(rand.NextDouble(afs.Resistance),
-                                    rand.NextDouble(afs.DecayRate),
-                                    rand.NextDouble(afs.ResetV),
-                                    rand.NextDouble(afs.FiringThresholdV),
-                                    afs.RefractoryPeriods
-                                    );
+                                  rand.NextDouble(afs.DecayRate),
+                                  rand.NextDouble(afs.ResetV),
+                                  rand.NextDouble(afs.FiringThresholdV),
+                                  afs.RefractoryPeriods
+                                  );
             }
             else if (settingsType == typeof(SincSettings))
             {

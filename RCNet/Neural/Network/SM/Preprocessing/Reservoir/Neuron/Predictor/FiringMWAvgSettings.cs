@@ -26,7 +26,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
         /// <param name="weights">Type of weighting</param>
         public FiringMWAvgSettings(int window = DefaultWindow,
                                             int leakage = DefaultLeakage,
-                                            NeuronCommon.NeuronPredictorMWAvgWeightsType weights = DefaultWeights
+                                            PredictorsProvider.PredictorMWAvgWeightsType weights = DefaultWeights
                                             )
             :base(window, leakage, weights)
         {

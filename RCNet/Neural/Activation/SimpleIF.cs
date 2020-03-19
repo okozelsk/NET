@@ -37,7 +37,7 @@ namespace RCNet.Neural.Activation
         private double _membraneV;
         private bool _inRefractory;
         private int _refractoryPeriod;
-        private double _initialMembranePotential;
+        private double _initialV;
 
         //Constructor
         /// <summary>
@@ -59,9 +59,9 @@ namespace RCNet.Neural.Activation
             _decayRate = decayRate;
             _restV = 0;
             _resetV = Math.Abs(resetV);
+            _initialV = _resetV;
             _firingThresholdV = Math.Abs(firingThresholdV);
             _refractoryPeriods = refractoryPeriods;
-            _initialMembranePotential = _restV;
             InternalStateRange = new Interval(_restV, _firingThresholdV);
             Reset();
             return;
@@ -99,7 +99,7 @@ namespace RCNet.Neural.Activation
         /// </summary>
         public void Reset()
         {
-            _membraneV = _initialMembranePotential;
+            _membraneV = _initialV;
             _inRefractory = false;
             _refractoryPeriod = 0;
             return;
@@ -111,7 +111,7 @@ namespace RCNet.Neural.Activation
         /// <param name="state">0 LE state LT 1, where 0 means rest potential and 1 means firing threshold</param>
         public void SetInitialInternalState(double state)
         {
-            _initialMembranePotential = InternalStateRange.Min + state * InternalStateRange.Span;
+            _initialV = InternalStateRange.Min + state * InternalStateRange.Span;
             Reset();
             return;
         }

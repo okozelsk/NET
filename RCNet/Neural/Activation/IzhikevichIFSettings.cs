@@ -30,7 +30,7 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Typical value of the parameter "a" in the original Izhikevich model
         /// </summary>
-        public const double TypicalRecoveryTimeScale = 0.02;
+        public const double TypicalRecoveryTimeScale = 0.2;
         /// <summary>
         /// Typical value of the parameter "b" in the original Izhikevich model
         /// </summary>
@@ -46,11 +46,11 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Typical value of the parameter "c" in the original Izhikevich model
         /// </summary>
-        public const double TypicalResetV = -65;
+        public const double TypicalResetV = -68;
         /// <summary>
         /// Typical value of the membrane firing treshold
         /// </summary>
-        public const double TypicalFiringThresholdV = 30;
+        public const double TypicalFiringThresholdV = -64;
 
         //Attribute properties
         /// <summary>

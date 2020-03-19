@@ -28,10 +28,6 @@ namespace RCNet.Neural.Activation
 
         //Attribute properties
         /// <summary>
-        /// Role of the neuron (excitatory or inhibitory)
-        /// </summary>
-        public NeuronCommon.NeuronRole Role { get; }
-        /// <summary>
         /// Number of after spike computation cycles while an input stimuli is ignored (ms)
         /// </summary>
         public int RefractoryPeriods { get; }
@@ -49,17 +45,14 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
-        /// <param name="role">Role of the neuron (excitatory or inhibitory)</param>
         /// <param name="refractoryPeriods">Number of after spike computation cycles while an input stimuli is ignored (ms)</param>
         /// <param name="solverMethod">ODE numerical solver method</param>
         /// <param name="solverCompSteps">ODE numerical solver computation steps of the time step</param>
-        public AutoIzhikevichIFSettings(NeuronCommon.NeuronRole role,
-                                        int refractoryPeriods = ActivationFactory.DefaultRefractoryPeriods,
+        public AutoIzhikevichIFSettings(int refractoryPeriods = ActivationFactory.DefaultRefractoryPeriods,
                                         ODENumSolver.Method solverMethod = ActivationFactory.DefaultSolverMethod,
                                         int solverCompSteps = ActivationFactory.DefaultSolverCompSteps
                                         )
         {
-            Role = role;
             RefractoryPeriods = refractoryPeriods;
             SolverMethod = solverMethod;
             SolverCompSteps = solverCompSteps;
@@ -73,7 +66,6 @@ namespace RCNet.Neural.Activation
         /// <param name="source">Source instance</param>
         public AutoIzhikevichIFSettings(AutoIzhikevichIFSettings source)
         {
-            Role = source.Role;
             RefractoryPeriods = source.RefractoryPeriods;
             SolverMethod = source.SolverMethod;
             SolverCompSteps = source.SolverCompSteps;
@@ -92,7 +84,6 @@ namespace RCNet.Neural.Activation
             //Validation
             XElement activationSettingsElem = Validate(elem, XsdTypeName);
             //Parsing
-            Role = (NeuronCommon.NeuronRole)Enum.Parse(typeof(NeuronCommon.NeuronRole), activationSettingsElem.Attribute("role").Value, true);
             RefractoryPeriods = int.Parse(activationSettingsElem.Attribute("refractoryPeriods").Value, CultureInfo.InvariantCulture);
             SolverMethod = (ODENumSolver.Method)Enum.Parse(typeof(ODENumSolver.Method), activationSettingsElem.Attribute("solverMethod").Value, true);
             SolverCompSteps = int.Parse(activationSettingsElem.Attribute("solverCompSteps").Value, CultureInfo.InvariantCulture);
@@ -119,7 +110,15 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Identifies settings containing only default values
         /// </summary>
-        public override bool ContainsOnlyDefaults { get { return false; } }
+        public override bool ContainsOnlyDefaults
+        {
+            get
+            {
+                return IsDefaultRefractoryPeriods &&
+                       IsDefaultSolverMethod &&
+                       IsDefaultSolverCompSteps;
+            }
+        }
 
         //Methods
         /// <summary>
@@ -127,10 +126,6 @@ namespace RCNet.Neural.Activation
         /// </summary>
         private void Check()
         {
-            if (Role != NeuronCommon.NeuronRole.Excitatory && Role != NeuronCommon.NeuronRole.Inhibitory)
-            {
-                throw new Exception($"Incorrect role {Role.ToString()}. Role must be Excitatory or Inhibitory.");
-            }
             if (RefractoryPeriods < 0)
             {
                 throw new Exception($"Invalid RefractoryPeriods {RefractoryPeriods.ToString(CultureInfo.InvariantCulture)}. RefractoryPeriods must be GE to 0.");
@@ -158,7 +153,7 @@ namespace RCNet.Neural.Activation
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
-            XElement rootElem = new XElement(rootElemName, new XAttribute("role", Role.ToString()));
+            XElement rootElem = new XElement(rootElemName);
             if (!suppressDefaults || !IsDefaultRefractoryPeriods)
             {
                 rootElem.Add(new XAttribute("refractoryPeriods", RefractoryPeriods.ToString(CultureInfo.InvariantCulture)));

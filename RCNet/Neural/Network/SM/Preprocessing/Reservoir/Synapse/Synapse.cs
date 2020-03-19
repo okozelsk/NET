@@ -18,26 +18,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
     [Serializable]
     public class Synapse
     {
-        //Enums
-        /// <summary>
-        /// Target scope of the synapse
-        /// </summary>
-        public enum SynapticTargetScope
-        {
-            /// <summary>
-            /// Both Excitatory and Inhibitory neurons
-            /// </summary>
-            All,
-            /// <summary>
-            /// Excitatory neurons only
-            /// </summary>
-            Excitatory,
-            /// <summary>
-            /// Inhibitory neurons only
-            /// </summary>
-            Inhibitory
-        }
-
         /// <summary>
         /// Method to decide synapse delay
         /// </summary>
@@ -53,26 +33,45 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
             Distance
         }
 
-        //Constants
-        private const double PlasticityParamGaussianCoeff = 0.25d;
-        private const double PlasticityParamMinGaussianCoeff = (1d - PlasticityParamGaussianCoeff);
-        private const double PlasticityParamMaxGaussianCoeff = (1d + PlasticityParamGaussianCoeff);
+        /// <summary>
+        /// Synapse role
+        /// </summary>
+        public enum SynRole
+        {
+            /// <summary>
+            /// Input synapse
+            /// </summary>
+            Input,
+            /// <summary>
+            /// Excitatory synapse
+            /// </summary>
+            Excitatory,
+            /// <summary>
+            /// Inhibitory synapse
+            /// </summary>
+            Inhibitory,
+            /// <summary>
+            /// Indifferent synapse
+            /// </summary>
+            Indifferent
+        }
+
+        //Static attributes
+        /// <summary>
+        /// Number of defined synapse roles
+        /// </summary>
+        public static readonly int NumOfRoles = Enum.GetValues(typeof(SynRole)).Length;
 
         //Attribute properties
         /// <summary>
-        /// Source neuron - signal emitter
+        /// Source neuron
         /// </summary>
         public INeuron SourceNeuron { get; }
 
         /// <summary>
-        /// Target neuron - signal receiver
+        /// Target neuron
         /// </summary>
         public INeuron TargetNeuron { get; }
-
-        /// <summary>
-        /// Weight of the synapse (the maximum achievable weight)
-        /// </summary>
-        public double Weight { get; private set; }
 
         /// <summary>
         /// Euclidean distance between SourceNeuron and TargetNeuron
@@ -80,7 +79,17 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         public double Distance { get; }
 
         /// <summary>
-        /// Signal delaying (in computation cycles)
+        /// Synapse role
+        /// </summary>
+        public SynRole Role { get; }
+
+        /// <summary>
+        /// Weight of the synapse (the maximum achievable weight)
+        /// </summary>
+        public double Weight { get; private set; }
+
+        /// <summary>
+        /// Signal traveling delay (in computation cycles)
         /// </summary>
         public int Delay { get; private set; }
 
@@ -96,16 +105,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
 
 
         //Attributes
+        private readonly IEfficacy _efficacyComputer;
         private readonly int _maxDelay;
         private SimpleQueue<Signal> _signalQueue;
-        private readonly double _tauFacilitation;
-        private readonly double _tauDepression;
-        private readonly double _restingEfficacy;
-        private double _facilitation;
-        private double _depression;
-        private readonly bool _applyPlasticity;
-
-
 
         //Constructor
         /// <summary>
@@ -113,72 +115,133 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         /// </summary>
         /// <param name="sourceNeuron">Source neuron</param>
         /// <param name="targetNeuron">Target neuron</param>
-        /// <param name="weight">Synapse initial weight</param>
-        /// <param name="delayMethod">Synaptic delay method to be used</param>
-        /// <param name="maxDelay">Maximum synaptic delay</param>
-        /// <param name="dynamicsCfg">Synapse's short-term plasticity dynamics configuration</param>
-        /// <param name="rand">Random object to be used to setup plasticity parameters</param>
+        /// <param name="role">Synapse role</param>
+        /// <param name="synapseCfg">Synapse general configuration</param>
+        /// <param name="rand">Random object</param>
         public Synapse(INeuron sourceNeuron,
                        INeuron targetNeuron,
-                       double weight,
-                       SynapticDelayMethod delayMethod,
-                       int maxDelay,
-                       DynamicsSettings dynamicsCfg,
+                       SynRole role,
+                       SynapseSettings synapseCfg,
                        Random rand
                        )
         {
             //Neurons to be connected
             SourceNeuron = sourceNeuron;
             TargetNeuron = targetNeuron;
+            //Synapse role
+            Role = role;
             //Euclidean distance
             Distance = EuclideanDistance.Compute(SourceNeuron.Location.ReservoirCoordinates, TargetNeuron.Location.ReservoirCoordinates);
-            //Signal delaying should be set later by SetupDelay method
-            _maxDelay = maxDelay;
-            _signalQueue = null;
-            Delay = 0;
-            DelayMethod = delayMethod;
-            //Plasticity
-            if(dynamicsCfg != null &&
-               dynamicsCfg.Apply &&
-               TargetNeuron.TypeOfActivation == ActivationType.Spiking &&
-               SourceNeuron.Role != NeuronCommon.NeuronRole.Input &&
-               (SourceNeuron.SignalingRestriction == NeuronCommon.NeuronSignalingRestrictionType.SpikingOnly ||
-                SourceNeuron.SignalingRestriction == NeuronCommon.NeuronSignalingRestrictionType.NoRestriction)
-               )
+            //The rest
+            _efficacyComputer = null;
+            if (TargetNeuron.TypeOfActivation == ActivationType.Spiking)
             {
-                _applyPlasticity = true;
-                _restingEfficacy = rand.NextFilterredGaussianDouble(dynamicsCfg.RestingEfficacy, Math.Sqrt(dynamicsCfg.RestingEfficacy / 2d), dynamicsCfg.RestingEfficacy * PlasticityParamMinGaussianCoeff, dynamicsCfg.RestingEfficacy * PlasticityParamMaxGaussianCoeff);
-                _tauFacilitation = rand.NextFilterredGaussianDouble(dynamicsCfg.TauFacilitation, Math.Sqrt(dynamicsCfg.TauFacilitation / 2d), dynamicsCfg.TauFacilitation * PlasticityParamMinGaussianCoeff, dynamicsCfg.TauFacilitation * PlasticityParamMaxGaussianCoeff);
-                _tauDepression = rand.NextFilterredGaussianDouble(dynamicsCfg.TauDepression, Math.Sqrt(dynamicsCfg.TauDepression / 2d), dynamicsCfg.TauDepression * PlasticityParamMinGaussianCoeff, dynamicsCfg.TauDepression * PlasticityParamMaxGaussianCoeff);
-            }
-            else
-            {
-                _applyPlasticity = false;
-                _restingEfficacy = 0d;
-                _tauFacilitation = 0d;
-                _tauDepression = 0d;
-            }
-
-            //Weight sign rules
-            if (SourceNeuron.Role == NeuronCommon.NeuronRole.Input)
-            {
-                if (TargetNeuron.TypeOfActivation == ActivationType.Analog)
+                //Spiking target
+                if(role == SynRole.Input)
                 {
-                    //No change of the weight sign
-                    Weight = weight;
+                    DelayMethod = synapseCfg.SpikingTargetCfg.InputSynCfg.DelayMethod;
+                    _maxDelay = synapseCfg.SpikingTargetCfg.InputSynCfg.MaxDelay;
+                    if(SourceNeuron.TypeOfActivation == ActivationType.Analog)
+                    {
+                        //Analog source
+                        Weight = rand.NextDouble(synapseCfg.SpikingTargetCfg.InputSynCfg.AnalogSourceCfg.WeightCfg);
+                    }
+                    else
+                    {
+                        //Spiking source
+                        Weight = rand.NextDouble(synapseCfg.SpikingTargetCfg.InputSynCfg.SpikingSourceCfg.WeightCfg);
+                        _efficacyComputer = PlasticityCommon.GetEfficacyComputer(SourceNeuron,
+                                                                                 synapseCfg.SpikingTargetCfg.InputSynCfg.SpikingSourceCfg.PlasticityCfg.DynamicsCfg
+                                                                                 );
+                    }
+                }
+                else if(role == SynRole.Excitatory)
+                {
+                    DelayMethod = synapseCfg.SpikingTargetCfg.ExcitatorySynCfg.DelayMethod;
+                    _maxDelay = synapseCfg.SpikingTargetCfg.ExcitatorySynCfg.MaxDelay;
+                    if (SourceNeuron.TypeOfActivation == ActivationType.Analog)
+                    {
+                        //Analog source
+                        Weight = rand.NextDouble(synapseCfg.SpikingTargetCfg.ExcitatorySynCfg.AnalogSourceCfg.WeightCfg);
+                    }
+                    else
+                    {
+                        //Spiking source
+                        Weight = rand.NextDouble(synapseCfg.SpikingTargetCfg.ExcitatorySynCfg.SpikingSourceCfg.WeightCfg);
+                        _efficacyComputer = PlasticityCommon.GetEfficacyComputer(SourceNeuron,
+                                                                                 synapseCfg.SpikingTargetCfg.ExcitatorySynCfg.SpikingSourceCfg.PlasticityCfg.DynamicsCfg
+                                                                                 );
+                    }
+                }
+                else if(role == SynRole.Inhibitory)
+                {
+                    DelayMethod = synapseCfg.SpikingTargetCfg.InhibitorySynCfg.DelayMethod;
+                    _maxDelay = synapseCfg.SpikingTargetCfg.InhibitorySynCfg.MaxDelay;
+                    if (SourceNeuron.TypeOfActivation == ActivationType.Analog)
+                    {
+                        //Analog source
+                        Weight = -rand.NextDouble(synapseCfg.SpikingTargetCfg.InhibitorySynCfg.AnalogSourceCfg.WeightCfg);
+                    }
+                    else
+                    {
+                        //Spiking source
+                        Weight = -rand.NextDouble(synapseCfg.SpikingTargetCfg.InhibitorySynCfg.SpikingSourceCfg.WeightCfg);
+                        _efficacyComputer = PlasticityCommon.GetEfficacyComputer(SourceNeuron,
+                                                                                 synapseCfg.SpikingTargetCfg.InhibitorySynCfg.SpikingSourceCfg.PlasticityCfg.DynamicsCfg
+                                                                                 );
+                    }
                 }
                 else
                 {
-                    //Target is spiking neuron
-                    //Weight must be always positive
-                    Weight = Math.Abs(weight);
+                    throw new ArgumentException($"Invalid synapse role {role.ToString()}.", "role");
                 }
             }
             else
             {
-                //Weight sign depends on source neuron role
-                Weight = Math.Abs(weight) * (SourceNeuron.Role == NeuronCommon.NeuronRole.Excitatory ? 1d : -1d);
+                //Analog target
+                if (role == SynRole.Input)
+                {
+                    DelayMethod = synapseCfg.AnalogTargetCfg.InputSynCfg.DelayMethod;
+                    _maxDelay = synapseCfg.AnalogTargetCfg.InputSynCfg.MaxDelay;
+                    if (SourceNeuron.TypeOfActivation == ActivationType.Analog)
+                    {
+                        //Analog source
+                        Weight = rand.NextDouble(synapseCfg.AnalogTargetCfg.InputSynCfg.AnalogSourceCfg.WeightCfg);
+                    }
+                    else
+                    {
+                        //Spiking source
+                        Weight = rand.NextSign() * rand.NextDouble(synapseCfg.AnalogTargetCfg.InputSynCfg.SpikingSourceCfg.WeightCfg);
+                        _efficacyComputer = PlasticityCommon.GetEfficacyComputer(SourceNeuron,
+                                                                                 synapseCfg.AnalogTargetCfg.InputSynCfg.SpikingSourceCfg.PlasticityCfg.DynamicsCfg
+                                                                                 );
+                    }
+                }
+                else if (role == SynRole.Indifferent)
+                {
+                    DelayMethod = synapseCfg.AnalogTargetCfg.IndifferentSynCfg.DelayMethod;
+                    _maxDelay = synapseCfg.AnalogTargetCfg.IndifferentSynCfg.MaxDelay;
+                    if (SourceNeuron.TypeOfActivation == ActivationType.Analog)
+                    {
+                        //Analog source
+                        Weight = rand.NextSign() * rand.NextDouble(synapseCfg.AnalogTargetCfg.IndifferentSynCfg.AnalogSourceCfg.WeightCfg);
+                    }
+                    else
+                    {
+                        //Spiking source
+                        Weight = rand.NextSign() * rand.NextDouble(synapseCfg.AnalogTargetCfg.IndifferentSynCfg.SpikingSourceCfg.WeightCfg);
+                        _efficacyComputer = PlasticityCommon.GetEfficacyComputer(SourceNeuron,
+                                                                                 synapseCfg.AnalogTargetCfg.IndifferentSynCfg.SpikingSourceCfg.PlasticityCfg.DynamicsCfg
+                                                                                 );
+                    }
+
+                }
+                else
+                {
+                    throw new ArgumentException($"Invalid synapse role {role.ToString()}.", "role");
+                }
             }
+
             //Efficacy statistics
             EfficacyStat = new BasicStat(false);
             Reset(true);
@@ -204,12 +267,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         {
             //Reset queue if it is instantiated
             _signalQueue?.Reset();
-            _facilitation = _applyPlasticity ? _restingEfficacy : 1d;
-            _depression = 1d;
+            _efficacyComputer?.Reset();
             if (statistics)
             {
                 EfficacyStat.Reset();
-                if (!_applyPlasticity)
+                if (_efficacyComputer == null)
                 {
                     //Efficacy will be always 1
                     EfficacyStat.AddSampleValue(1d);
@@ -252,44 +314,27 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         }
 
         /// <summary>
-        /// Computes synapse efficacy (short-term plasticity model).
-        /// </summary>
-        private double ComputeEfficacy()
-        {
-            if (SourceNeuron.AfterFirstSpike)
-            {
-                double sourceSpikeLeak = SourceNeuron.SpikeLeak;
-                //Facilitation model
-                double tmp = _facilitation * Math.Exp(-(sourceSpikeLeak / _tauFacilitation));
-                _facilitation = tmp + _restingEfficacy * (1d - tmp);
-                //Depression model
-                tmp = Math.Exp(-(sourceSpikeLeak / _tauDepression));
-                _depression = _depression * (1d - _facilitation) * tmp + 1d - tmp;
-            }
-            return _facilitation * _depression;
-        }
-
-        /// <summary>
         /// Returns signal to be delivered to target neuron.
         /// </summary>
         /// <param name="collectStatistics">Specifies whether to update internal statistics</param>
         public double GetSignal(bool collectStatistics)
         {
             //Weighted source neuron signal
-            double weightedSignal = SourceNeuron.GetSignal(TargetNeuron.TypeOfActivation) * Weight;
+            double signal = SourceNeuron.GetSignal(TargetNeuron.TypeOfActivation);
+            double efficacy = 1d;
             //Short-term plasticity
-            if (_applyPlasticity)
+            if (_efficacyComputer != null && signal > 0)
             {
                 //Compute synapse efficacy
-                double efficacy = ComputeEfficacy();
+                efficacy = _efficacyComputer.Compute();
                 //Update statistics if necessary
                 if (collectStatistics)
                 {
                     EfficacyStat.AddSampleValue(efficacy);
                 }
-                //Resulting weighted signal
-                weightedSignal *= efficacy;
             }
+            //Final weighted signal
+            double weightedSignal = signal * Weight * efficacy;
             //Delayed signal
             if (_signalQueue == null)
             {

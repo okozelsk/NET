@@ -25,9 +25,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron
         NeuronStatistics Statistics { get; }
 
         /// <summary>
-        /// Neuron's role within the reservoir (excitatory or inhibitory)
+        /// Neuron type (input or hidden)
         /// </summary>
-        NeuronCommon.NeuronRole Role { get; }
+        NeuronCommon.NeuronType Type { get; }
 
         /// <summary>
         /// Type of the activation function

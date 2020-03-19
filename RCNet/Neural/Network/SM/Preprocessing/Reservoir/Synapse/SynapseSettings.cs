@@ -24,80 +24,31 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         /// Name of the associated xsd type
         /// </summary>
         public const string XsdTypeName = "SynapseType";
-        //Default values
-        /// <summary>
-        /// Default input delay method
-        /// </summary>
-        const Synapse.SynapticDelayMethod DefaultInputDelayMethod = Synapse.SynapticDelayMethod.Random;
-        /// <summary>
-        /// Default input maximum delay
-        /// </summary>
-        const int DefaultInputMaxDelay = 0;
-        /// <summary>
-        /// Default internal delay method
-        /// </summary>
-        const Synapse.SynapticDelayMethod DefaultInternalDelayMethod = Synapse.SynapticDelayMethod.Random;
-        /// <summary>
-        /// Default internal maximum delay
-        /// </summary>
-        const int DefaultInternalMaxDelay = 0;
 
         //Attribute properties
         /// <summary>
-        /// Specifies how will be decided input synaptic delay
+        /// Configuration parameters of a synapse providing signal to hidden spiking neuron
         /// </summary>
-        public Synapse.SynapticDelayMethod InputDelayMethod { get; }
+        public SynapseSTSettings SpikingTargetCfg { get; }
 
         /// <summary>
-        /// Maximum delay of the input signal
+        /// Configuration parameters of a synapse providing signal to hidden analog neuron
         /// </summary>
-        public int InputMaxDelay { get; }
-
-        /// <summary>
-        /// Specifies how will be decided internal synaptic delay
-        /// </summary>
-        public Synapse.SynapticDelayMethod InternalDelayMethod { get; }
-
-        /// <summary>
-        /// Maximum delay of the internal signal
-        /// </summary>
-        public int InternalMaxDelay { get; }
-
-        /// <summary>
-        /// Synapse's plasticity settings
-        /// </summary>
-        public PlasticitySettings PlasticityCfg { get; }
-        
-        /// <summary>
-        /// Synapse's internal weights settings
-        /// </summary>
-        public InternalWeightsSettings InternalWeightsCfg { get; }
+        public SynapseATSettings AnalogTargetCfg { get; }
 
 
         //Constructors
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
-        /// <param name="inputDelayMethod">Specifies how will be decided input synaptic delay</param>
-        /// <param name="inputMaxDelay">Maximum delay of the input signal</param>
-        /// <param name="internalDelayMethod">Specifies how will be decided internal synaptic delay</param>
-        /// <param name="internalMaxDelay">Maximum delay of the internal signal</param>
-        /// <param name="plasticityCfg">Synapse's settings when targeting spiking neurons</param>
-        /// <param name="internalWeightsCfg">Synapse's settings when targeting analog neurons</param>
-        public SynapseSettings(Synapse.SynapticDelayMethod inputDelayMethod = DefaultInputDelayMethod,
-                               int inputMaxDelay = DefaultInputMaxDelay,
-                               Synapse.SynapticDelayMethod internalDelayMethod = DefaultInternalDelayMethod,
-                               int internalMaxDelay = DefaultInternalMaxDelay,
-                               PlasticitySettings plasticityCfg = null,
-                               InternalWeightsSettings internalWeightsCfg = null
+        /// <param name="spikingTargetCfg">Configuration parameters of a synapse providing signal to hidden spiking neuron</param>
+        /// <param name="analogTargetCfg">Configuration parameters of a synapse providing signal to hidden analog neuron</param>
+        public SynapseSettings(SynapseSTSettings spikingTargetCfg = null,
+                               SynapseATSettings analogTargetCfg = null
                                )
         {
-            InputDelayMethod = inputDelayMethod;
-            InputMaxDelay = inputMaxDelay;
-            InternalDelayMethod = internalDelayMethod;
-            InternalMaxDelay = internalMaxDelay;
-            PlasticityCfg = plasticityCfg == null ? new PlasticitySettings() : (PlasticitySettings)plasticityCfg.DeepClone();
-            InternalWeightsCfg = internalWeightsCfg == null ? new InternalWeightsSettings() : (InternalWeightsSettings)internalWeightsCfg.DeepClone();
+            SpikingTargetCfg = spikingTargetCfg == null ? new SynapseSTSettings() : (SynapseSTSettings)spikingTargetCfg.DeepClone();
+            AnalogTargetCfg = analogTargetCfg == null ? new SynapseATSettings() : (SynapseATSettings)analogTargetCfg.DeepClone();
             Check();
             return;
         }
@@ -107,8 +58,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         /// </summary>
         /// <param name="source">Source instance</param>
         public SynapseSettings(SynapseSettings source)
-            :this(source.InputDelayMethod, source.InputMaxDelay, source.InternalDelayMethod, source.InternalMaxDelay,
-                  source.PlasticityCfg, source.InternalWeightsCfg)
+            :this(source.SpikingTargetCfg, source.AnalogTargetCfg)
         {
             return;
         }
@@ -125,18 +75,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
             //Validation
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
-            //Delay
-            InputDelayMethod = (Synapse.SynapticDelayMethod)Enum.Parse(typeof(Synapse.SynapticDelayMethod), settingsElem.Attribute("inputDelayMethod").Value, true);
-            InputMaxDelay = int.Parse(settingsElem.Attribute("inputMaxDelay").Value, CultureInfo.InvariantCulture);
-            InternalDelayMethod = (Synapse.SynapticDelayMethod)Enum.Parse(typeof(Synapse.SynapticDelayMethod), settingsElem.Attribute("internalDelayMethod").Value, true);
-            InternalMaxDelay = int.Parse(settingsElem.Attribute("internalMaxDelay").Value, CultureInfo.InvariantCulture);
             XElement cfgElem;
             //Plasticity
-            cfgElem = settingsElem.Descendants("plasticity").FirstOrDefault();
-            PlasticityCfg = cfgElem == null ? new PlasticitySettings() : new PlasticitySettings(cfgElem);
-            //Internal weights
-            cfgElem = settingsElem.Descendants("internalWeights").FirstOrDefault();
-            InternalWeightsCfg = cfgElem == null ? new InternalWeightsSettings() : new InternalWeightsSettings(cfgElem);
+            cfgElem = settingsElem.Descendants("spikingTarget").FirstOrDefault();
+            SpikingTargetCfg = cfgElem == null ? new SynapseSTSettings() : new SynapseSTSettings(cfgElem);
+            cfgElem = settingsElem.Descendants("analogTarget").FirstOrDefault();
+            AnalogTargetCfg = cfgElem == null ? new SynapseATSettings() : new SynapseATSettings(cfgElem);
             Check();
             return;
         }
@@ -145,22 +89,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         /// <summary>
         /// Checks if settings are default
         /// </summary>
-        public bool IsDefaultInputDelayMethod { get { return (InputDelayMethod == DefaultInputDelayMethod); } }
+        public bool IsDefaultSpikingTargetCfg { get { return SpikingTargetCfg.ContainsOnlyDefaults; } }
 
         /// <summary>
         /// Checks if settings are default
         /// </summary>
-        public bool IsDefaultInputMaxDelay { get { return (InputMaxDelay == DefaultInputMaxDelay); } }
-
-        /// <summary>
-        /// Checks if settings are default
-        /// </summary>
-        public bool IsDefaultInternalDelayMethod { get { return (InternalDelayMethod == DefaultInternalDelayMethod); } }
-
-        /// <summary>
-        /// Checks if settings are default
-        /// </summary>
-        public bool IsDefaultInternalMaxDelay { get { return (InternalMaxDelay == DefaultInternalMaxDelay); } }
+        public bool IsDefaultAnalogTargetCfg { get { return AnalogTargetCfg.ContainsOnlyDefaults; } }
 
         /// <summary>
         /// Identifies settings containing only default values
@@ -169,12 +103,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         {
             get
             {
-                return IsDefaultInputDelayMethod &&
-                       IsDefaultInputMaxDelay &&
-                       IsDefaultInternalDelayMethod &&
-                       IsDefaultInternalMaxDelay &&
-                       PlasticityCfg.ContainsOnlyDefaults &&
-                       InternalWeightsCfg.ContainsOnlyDefaults;
+                return IsDefaultSpikingTargetCfg &&
+                       IsDefaultAnalogTargetCfg;
             }
         }
 
@@ -185,14 +115,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         /// </summary>
         private void Check()
         {
-            if (InputMaxDelay < 0)
-            {
-                throw new Exception($"Invalid InputMaxDelay {InputMaxDelay.ToString(CultureInfo.InvariantCulture)}. InputMaxDelay must be GE to 0.");
-            }
-            if (InternalMaxDelay < 0)
-            {
-                throw new Exception($"Invalid InternalMaxDelay {InternalMaxDelay.ToString(CultureInfo.InvariantCulture)}. InternalMaxDelay must be GE to 0.");
-            }
             return;
         }
 
@@ -213,29 +135,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             XElement rootElem = new XElement(rootElemName);
-            if (!suppressDefaults || !IsDefaultInputDelayMethod)
+            if (!suppressDefaults || !IsDefaultSpikingTargetCfg)
             {
-                rootElem.Add(new XAttribute("inputDelayMethod", InputDelayMethod.ToString()));
+                rootElem.Add(SpikingTargetCfg.GetXml("spikingTarget", suppressDefaults));
             }
-            if (!suppressDefaults || !IsDefaultInputMaxDelay)
+            if (!suppressDefaults || !IsDefaultAnalogTargetCfg)
             {
-                rootElem.Add(new XAttribute("inputMaxDelay", InputMaxDelay.ToString(CultureInfo.InvariantCulture)));
-            }
-            if (!suppressDefaults || !IsDefaultInternalDelayMethod)
-            {
-                rootElem.Add(new XAttribute("internalDelayMethod", InternalDelayMethod.ToString()));
-            }
-            if (!suppressDefaults || !IsDefaultInternalMaxDelay)
-            {
-                rootElem.Add(new XAttribute("internalMaxDelay", InternalMaxDelay.ToString(CultureInfo.InvariantCulture)));
-            }
-            if (!suppressDefaults || !PlasticityCfg.ContainsOnlyDefaults)
-            {
-                rootElem.Add(PlasticityCfg.GetXml("plasticity", suppressDefaults));
-            }
-            if (!suppressDefaults || !InternalWeightsCfg.ContainsOnlyDefaults)
-            {
-                rootElem.Add(InternalWeightsCfg.GetXml("internalWeights", suppressDefaults));
+                rootElem.Add(AnalogTargetCfg.GetXml("analogTarget", suppressDefaults));
             }
             Validate(rootElem, XsdTypeName);
             return rootElem;

@@ -53,6 +53,27 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
             FiringBinPattern
         }//PredictorID
 
+        /// <summary>
+        /// Type of weights used by moving weighted average neuron's predictors
+        /// </summary>
+        public enum PredictorMWAvgWeightsType
+        {
+            /// <summary>
+            /// Exponential weights.
+            /// </summary>
+            Exponential,
+            /// <summary>
+            /// Linear weigths.
+            /// </summary>
+            Linear,
+            /// <summary>
+            /// Constant weights.
+            /// </summary>
+            Constant
+        }//PredictorMWAvgWeightsType
+
+
+
         //Constants
         /// <summary>
         /// Maximum number of buffered bits
@@ -145,15 +166,15 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
             }
             switch(Cfg.ParamsCfg.ActivationMWAvgCfg.Weights)
             {
-                case NeuronCommon.NeuronPredictorMWAvgWeightsType.Exponential:
+                case PredictorMWAvgWeightsType.Exponential:
                     _activationMWAvgWeights = _expWeightsCache;
                     _activationMDW = new MovingDataWindow(Math.Min(Cfg.ParamsCfg.ActivationMWAvgCfg.Window, _expWeightsCache.Length));
                     break;
-                case NeuronCommon.NeuronPredictorMWAvgWeightsType.Linear:
+                case PredictorMWAvgWeightsType.Linear:
                     _activationMWAvgWeights = _linWeightsCache;
                     _activationMDW = new MovingDataWindow(Math.Min(Cfg.ParamsCfg.ActivationMWAvgCfg.Window, _linWeightsCache.Length));
                     break;
-                case NeuronCommon.NeuronPredictorMWAvgWeightsType.Constant:
+                case PredictorMWAvgWeightsType.Constant:
                     _activationMWAvgWeights = null;
                     _activationMDW = new MovingDataWindow(Cfg.ParamsCfg.ActivationMWAvgCfg.Window);
                     break;
@@ -162,15 +183,15 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
             }
             switch (Cfg.ParamsCfg.FiringMWAvgCfg.Weights)
             {
-                case NeuronCommon.NeuronPredictorMWAvgWeightsType.Exponential:
+                case PredictorMWAvgWeightsType.Exponential:
                     _firingMWAvgWeights = _expWeightsCache;
                     _firingMDW = new MovingDataWindow(Math.Min(Cfg.ParamsCfg.FiringMWAvgCfg.Window, _expWeightsCache.Length));
                     break;
-                case NeuronCommon.NeuronPredictorMWAvgWeightsType.Linear:
+                case PredictorMWAvgWeightsType.Linear:
                     _firingMWAvgWeights = _linWeightsCache;
                     _firingMDW = new MovingDataWindow(Math.Min(Cfg.ParamsCfg.FiringMWAvgCfg.Window, _linWeightsCache.Length));
                     break;
-                case NeuronCommon.NeuronPredictorMWAvgWeightsType.Constant:
+                case PredictorMWAvgWeightsType.Constant:
                     _firingMWAvgWeights = null;
                     _firingMDW = new MovingDataWindow(Cfg.ParamsCfg.FiringMWAvgCfg.Window);
                     break;

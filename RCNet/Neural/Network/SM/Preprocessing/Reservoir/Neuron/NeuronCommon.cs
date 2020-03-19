@@ -13,23 +13,19 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron
     {
         //Enums
         /// <summary>
-        /// Role of the neuron
+        /// Type of neuron
         /// </summary>
-        public enum NeuronRole
+        public enum NeuronType
         {
             /// <summary>
-            /// Outgoing synapse signal will have sign driven by input data value.
+            /// Input neuron
             /// </summary>
             Input,
             /// <summary>
-            /// Excitatory. Outgoing synapse signal will allways have (+) sign.
+            /// Hidden neuron
             /// </summary>
-            Excitatory,
-            /// <summary>
-            /// Inhibitory. Outgoing synapse signal will allways have (-) sign.
-            /// </summary>
-            Inhibitory
-        }
+            Hidden
+        }//NeuronType
 
         /// <summary>
         /// Output signaling restriction of the neuron
@@ -48,25 +44,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron
             /// Neuron can emitt only spiking signal.
             /// </summary>
             SpikingOnly
-        }
-
-        /// <summary>
-        /// Type of weights used by moving weighted average neuron's predictors
-        /// </summary>
-        public enum NeuronPredictorMWAvgWeightsType
-        {
-            /// <summary>
-            /// Exponential weights.
-            /// </summary>
-            Exponential,
-            /// <summary>
-            /// Linear weigths.
-            /// </summary>
-            Linear,
-            /// <summary>
-            /// Constant weights.
-            /// </summary>
-            Constant
         }
 
 

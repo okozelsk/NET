@@ -37,26 +37,32 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// Name of the neuron group
         /// </summary>
         public string Name { get; }
-        /// <summary>
-        /// Excitatory or Inhibitory role of the neurons
-        /// </summary>
-        public NeuronCommon.NeuronRole Role { get; }
+
         /// <summary>
         /// Specifies how big relative portion of pool's neurons is formed by this group of the neurons
         /// </summary>
         public double RelShare { get; }
+
         /// <summary>
         /// Common activation function settings of the groupped neurons
         /// </summary>
         public RCNetBaseSettings ActivationCfg { get; }
+
         /// <summary>
         /// Specifies what ratio of the neurons from this group can be used as a source of the readout predictors
         /// </summary>
         public double ReadoutDensity { get; }
+
+        /// <summary>
+        /// Configuration of the neuron's homogenous excitability
+        /// </summary>
+        public HomogenousExcitabilitySettings HomogenousExcitabilityCfg { get; }
+
         /// <summary>
         /// Each neuron within the group receives constant input bias. Value of the neuron's bias is driven by this random settings
         /// </summary>
         public RandomValueSettings BiasCfg { get; }
+
         /// <summary>
         /// Configuration of the predictors
         /// </summary>
@@ -74,28 +80,28 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// Creates an initialized instance
         /// </summary>
         /// <param name="name">Name of the neuron group</param>
-        /// <param name="role">Excitatory or Inhibitory role of the neurons</param>
         /// <param name="relShare">Specifies how big relative portion of pool's neurons is formed by this group of the neurons</param>
         /// <param name="activationCfg">Common activation function settings of the groupped neurons</param>
-        /// <param name="readoutDensity">Specifies what ratio of the neurons from this group can be used as a source of the readout predictors</param>
+        /// <param name="homogenousExcitabilityCfg">Configuration of the neuron's homogenous excitability</param>
         /// <param name="biasCfg">Each neuron within the group receives constant input bias. Value of the neuron's bias is driven by this random settings</param>
         /// <param name="predictorsCfg">Configuration of the predictors</param>
+        /// <param name="readoutDensity">Specifies what ratio of the neurons from this group can be used as a source of the readout predictors</param>
         public SpikingNeuronGroupSettings(string name,
-                                              NeuronCommon.NeuronRole role,
-                                              double relShare,
-                                              RCNetBaseSettings activationCfg,
-                                              double readoutDensity = DefaultReadoutDensity,
-                                              RandomValueSettings biasCfg = null,
-                                              PredictorsSettings predictorsCfg = null
-                                              )
+                                          double relShare,
+                                          RCNetBaseSettings activationCfg,
+                                          HomogenousExcitabilitySettings homogenousExcitabilityCfg,
+                                          RandomValueSettings biasCfg = null,
+                                          PredictorsSettings predictorsCfg = null,
+                                          double readoutDensity = DefaultReadoutDensity
+                                          )
         {
             Name = name;
-            Role = role;
             RelShare = relShare;
             ActivationCfg = activationCfg.DeepClone();
-            ReadoutDensity = readoutDensity;
+            HomogenousExcitabilityCfg = (HomogenousExcitabilitySettings)homogenousExcitabilityCfg.DeepClone();
             BiasCfg = biasCfg == null ? null : (RandomValueSettings)biasCfg.DeepClone();
             PredictorsCfg = predictorsCfg == null ? null : (PredictorsSettings)predictorsCfg.DeepClone();
+            ReadoutDensity = readoutDensity;
             Check();
             return;
         }
@@ -105,8 +111,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// </summary>
         /// <param name="source">Source instance</param>
         public SpikingNeuronGroupSettings(SpikingNeuronGroupSettings source)
-            :this(source.Name, source.Role, source.RelShare, source.ActivationCfg, source.ReadoutDensity, source.BiasCfg,
-                  source.PredictorsCfg)
+            :this(source.Name, source.RelShare, source.ActivationCfg, source.HomogenousExcitabilityCfg, source.BiasCfg,
+                  source.PredictorsCfg, source.ReadoutDensity)
         {
             return;
         }
@@ -122,12 +128,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
             //Parsing
             //Name
             Name = settingsElem.Attribute("name").Value;
-            //Role
-            Role = (NeuronCommon.NeuronRole)Enum.Parse(typeof(NeuronCommon.NeuronRole), settingsElem.Attribute("role").Value, true);
             //Relative share
             RelShare = double.Parse(settingsElem.Attribute("relShare").Value, CultureInfo.InvariantCulture);
             //Activation settings
             ActivationCfg = ActivationFactory.LoadSettings(settingsElem.Descendants().First());
+            //Homogenous excitability
+            HomogenousExcitabilityCfg = new HomogenousExcitabilitySettings(settingsElem.Descendants("homogenousExcitability").First());
             //Readout neurons density
             ReadoutDensity = double.Parse(settingsElem.Attribute("readoutDensity").Value, CultureInfo.InvariantCulture);
             //Bias
@@ -180,10 +186,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
             {
                 throw new Exception($"Name can not be empty.");
             }
-            if (Role != NeuronCommon.NeuronRole.Excitatory && Role != NeuronCommon.NeuronRole.Inhibitory)
-            {
-                throw new Exception($"Invalid Role {Role.ToString()}. Role must be Excitatory or Inhibitory.");
-            }
             Type activationType = ActivationCfg.GetType();
             if (activationType != typeof(SimpleIFSettings) &&
                 activationType != typeof(LeakyIFSettings) &&
@@ -218,11 +220,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
-            XElement rootElem = new XElement(rootElemName);
-            rootElem.Add(new XAttribute("name", Name));
-            rootElem.Add(new XAttribute("role", Role.ToString()));
-            rootElem.Add(new XAttribute("relShare", RelShare.ToString(CultureInfo.InvariantCulture)));
-            rootElem.Add(ActivationCfg.GetXml(suppressDefaults));
+            XElement rootElem = new XElement(rootElemName,
+                                             new XAttribute("name", Name),
+                                             new XAttribute("relShare", RelShare.ToString(CultureInfo.InvariantCulture)),
+                                             ActivationCfg.GetXml(suppressDefaults),
+                                             HomogenousExcitabilityCfg.GetXml(suppressDefaults)
+                                             );
             if(!suppressDefaults || !IsDefaultReadoutDensity)
             {
                 rootElem.Add(new XAttribute("readoutDensity", ReadoutDensity.ToString(CultureInfo.InvariantCulture)));

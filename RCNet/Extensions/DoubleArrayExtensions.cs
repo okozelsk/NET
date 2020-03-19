@@ -81,6 +81,20 @@ namespace RCNet.Extensions
             return min;
         }
 
+        /// <summary>
+        /// Returns summed values in the array
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double Sum(this double[] array)
+        {
+            double sum = 0d;
+            for (int i = 0; i < array.Length; i++)
+            {
+                sum += array[i];
+            }
+            return sum;
+        }
+
     }//DoubleArrayExtensions
 
 }//Namespace

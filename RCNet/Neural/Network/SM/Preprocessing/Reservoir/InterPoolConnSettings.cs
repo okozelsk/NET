@@ -34,9 +34,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
 
         //Attribute properties
         /// <summary>
-        /// Connection probabilities settings
+        /// Name of the target pool
         /// </summary>
-        public IConnDistrSettings ConnDistrCfg { get; }
+        public string TargetPoolName { get; }
+        /// <summary>
+        /// Determines how many neurons from the target pool will be connected to one neuron from source pool
+        /// </summary>
+        public double TargetConnectionDensity { get; }
         /// <summary>
         /// Name of the source pool
         /// </summary>
@@ -46,14 +50,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// </summary>
         public double SourceConnectionDensity { get; }
         /// <summary>
-        /// Name of the target pool
-        /// </summary>
-        public string TargetPoolName { get; }
-        /// <summary>
-        /// Determines how many neurons from the target pool will be connected to one neuron from source pool
-        /// </summary>
-        public double TargetConnectionDensity { get; }
-        /// <summary>
         /// Specifies whether to keep for each neuron from source pool constant number of synapses
         /// </summary>
         public bool ConstantNumOfConnections { get; }
@@ -62,25 +58,22 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
-        /// <param name="connDistrCfg">Connection probabilities settings</param>
-        /// <param name="sourcePoolName">Name of the source pool</param>
-        /// <param name="sourceConnectionDensity">Determines how many neurons from the source pool will be connected to neurons in target pool</param>
         /// <param name="targetPoolName">Name of the target pool</param>
         /// <param name="targetConnectionDensity">Determines how many neurons from the target pool will be connected to one neuron from source pool</param>
+        /// <param name="sourcePoolName">Name of the source pool</param>
+        /// <param name="sourceConnectionDensity">Determines how many neurons from the source pool will be connected to neurons in target pool</param>
         /// <param name="constantNumOfConnections">Specifies whether to keep for each neuron constant number of synapses</param>
-        public InterPoolConnSettings(IConnDistrSettings connDistrCfg,
+        public InterPoolConnSettings(string targetPoolName,
+                                     double targetConnectionDensity,
                                      string sourcePoolName,
                                      double sourceConnectionDensity,
-                                     string targetPoolName,
-                                     double targetConnectionDensity,
                                      bool constantNumOfConnections = DefaultConstantNumOfConnections
                                      )
         {
-            ConnDistrCfg = (IConnDistrSettings)connDistrCfg.DeepClone();
-            SourcePoolName = sourcePoolName;
-            SourceConnectionDensity = sourceConnectionDensity;
             TargetPoolName = targetPoolName;
             TargetConnectionDensity = targetConnectionDensity;
+            SourcePoolName = sourcePoolName;
+            SourceConnectionDensity = sourceConnectionDensity;
             ConstantNumOfConnections = constantNumOfConnections;
             Check();
             return;
@@ -91,8 +84,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// </summary>
         /// <param name="source">Source instance</param>
         public InterPoolConnSettings(InterPoolConnSettings source)
-            :this(source.ConnDistrCfg, source.SourcePoolName, source.SourceConnectionDensity, source.TargetPoolName,
-                  source.TargetConnectionDensity, source.ConstantNumOfConnections)
+            :this(source.TargetPoolName, source.TargetConnectionDensity,
+                  source.SourcePoolName, source.SourceConnectionDensity,
+                  source.ConstantNumOfConnections
+                 )
         {
             return;
         }
@@ -109,27 +104,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             //Validation
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
-            SourcePoolName = settingsElem.Attribute("sourcePool").Value;
-            SourceConnectionDensity = double.Parse(settingsElem.Attribute("sourceConnDensity").Value, CultureInfo.InvariantCulture);
             TargetPoolName = settingsElem.Attribute("targetPool").Value;
             TargetConnectionDensity = double.Parse(settingsElem.Attribute("targetConnDensity").Value, CultureInfo.InvariantCulture);
+            SourcePoolName = settingsElem.Attribute("sourcePool").Value;
+            SourceConnectionDensity = double.Parse(settingsElem.Attribute("sourceConnDensity").Value, CultureInfo.InvariantCulture);
             ConstantNumOfConnections = bool.Parse(settingsElem.Attribute("constantNumOfConnections").Value);
-            //Connection probabilities
-            XElement connDistrSettings = settingsElem.Descendants().First();
-            switch(connDistrSettings.Name.LocalName)
-            {
-                case "distributionCustom":
-                    ConnDistrCfg = new ConnDistrCustomSettings(connDistrSettings);
-                    break;
-                case "distributionLSM":
-                    ConnDistrCfg = new ConnDistrLSMSettings(connDistrSettings);
-                    break;
-                case "distributionFlat":
-                    ConnDistrCfg = new ConnDistrFlatSettings(connDistrSettings);
-                    break;
-                default:
-                    throw new Exception($"Unknown connection distribution {connDistrSettings.Name.LocalName}.");
-            }
             Check();
             return;
         }
@@ -158,14 +137,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// </summary>
         private void Check()
         {
-            if (SourcePoolName.Length == 0)
-            {
-                throw new Exception($"SourcePoolName can not be empty.");
-            }
-            if (SourceConnectionDensity < 0 || SourceConnectionDensity > 1)
-            {
-                throw new Exception($"Invalid SourceConnectionDensity {SourceConnectionDensity.ToString(CultureInfo.InvariantCulture)}. Density must be GE to 0 and LE to 1.");
-            }
             if (TargetPoolName.Length == 0)
             {
                 throw new Exception($"TargetPoolName can not be empty.");
@@ -173,6 +144,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             if (TargetConnectionDensity < 0 || TargetConnectionDensity > 1)
             {
                 throw new Exception($"Invalid TargetConnectionDensity {TargetConnectionDensity.ToString(CultureInfo.InvariantCulture)}. Density must be GE to 0 and LE to 1.");
+            }
+            if (SourcePoolName.Length == 0)
+            {
+                throw new Exception($"SourcePoolName can not be empty.");
+            }
+            if (SourceConnectionDensity < 0 || SourceConnectionDensity > 1)
+            {
+                throw new Exception($"Invalid SourceConnectionDensity {SourceConnectionDensity.ToString(CultureInfo.InvariantCulture)}. Density must be GE to 0 and LE to 1.");
             }
             if(SourcePoolName == TargetPoolName)
             {
@@ -198,16 +177,15 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             XElement rootElem = new XElement(rootElemName,
-                                             new XAttribute("sourcePool", SourcePoolName),
-                                             new XAttribute("sourceConnDensity", SourceConnectionDensity.ToString(CultureInfo.InvariantCulture)),
                                              new XAttribute("targetPool", TargetPoolName),
-                                             new XAttribute("targetConnDensity", TargetConnectionDensity.ToString(CultureInfo.InvariantCulture))
+                                             new XAttribute("targetConnDensity", TargetConnectionDensity.ToString(CultureInfo.InvariantCulture)),
+                                             new XAttribute("sourcePool", SourcePoolName),
+                                             new XAttribute("sourceConnDensity", SourceConnectionDensity.ToString(CultureInfo.InvariantCulture))
                                              );
             if (!suppressDefaults || !IsDefaultConstantNumOfConnections)
             {
                 rootElem.Add(new XAttribute("constantNumOfConnections", ConstantNumOfConnections.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()));
             }
-            rootElem.Add(ConnDistrCfg.GetXml(suppressDefaults));
             Validate(rootElem, XsdTypeName);
             return rootElem;
         }
@@ -223,6 +201,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         }
 
 
-    }//InterPoolConnectionSettings
+    }//InterPoolConnSettings
 
 }//Namespace

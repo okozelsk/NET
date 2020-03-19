@@ -121,6 +121,18 @@ namespace RCNet.Neural.Data.Filter
 
         //Methods
         /// <summary>
+        /// Resets filter to its initial state
+        /// </summary>
+        public override void Reset()
+        {
+            PositiveStat.Reset();
+            NegativeStat.Reset();
+            base.Reset();
+            _invalidated = true;
+            return;
+        }
+
+        /// <summary>
         /// Updates internal statistics
         /// </summary>
         /// <param name="sample">Feature sample value</param>

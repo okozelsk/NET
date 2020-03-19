@@ -38,15 +38,15 @@ namespace RCNet.Neural.Activation
         /// </summary>
         protected Interval _stateRange;
         /// <summary>
-        /// Membrane rest voltage
+        /// Membrane rest potential
         /// </summary>
         protected double _restV;
         /// <summary>
-        /// Membrane after reset voltage
+        /// Membrane after reset potential
         /// </summary>
         protected double _resetV;
         /// <summary>
-        /// Membrane firing voltage
+        /// Membrane firing potential
         /// </summary>
         protected double _firingThresholdV;
         /// <summary>
@@ -76,6 +76,10 @@ namespace RCNet.Neural.Activation
 
         //Operation attributes
         /// <summary>
+        /// Membrane initial potential
+        /// </summary>
+        protected double _initialV;
+        /// <summary>
         /// Evolving variables
         /// </summary>
         protected Vector _evolVars;
@@ -91,24 +95,20 @@ namespace RCNet.Neural.Activation
         /// Adjusted (modified) input stimuli
         /// </summary>
         protected double _stimuli;
-        /// <summary>
-        /// Initial membrane potential
-        /// </summary>
-        protected double _initialMembranePotential;
 
         /// <summary>
         /// Constructs an initialized instance
         /// </summary>
-        /// <param name="restV">Membrane rest voltage</param>
-        /// <param name="resetV">Membrane reset voltage</param>
+        /// <param name="restV">Membrane rest potential</param>
+        /// <param name="resetV">Membrane reset potential</param>
         /// <param name="firingThresholdV">Firing threshold</param>
         /// <param name="refractoryPeriods">Refractory periods</param>
         /// <param name="solvingMethod">ODE numerical solver method</param>
         /// <param name="stepTimeScale">Computation step time scale</param>
         /// <param name="subSteps">Computation sub-steps</param>
         /// <param name="numOfEvolvingVars">Number of evolving variables</param>
-        /// <param name="currentCoeff">Coefficient of the current</param>
-        /// <param name="potentialCoeff">Coefficient of the potential</param>
+        /// <param name="inputCurrentCoeff">Coefficient of the current</param>
+        /// <param name="membranePotentialCoeff">Coefficient of the membrane potential</param>
         protected ODESpikingMembrane(double restV,
                                      double resetV,
                                      double firingThresholdV,
@@ -117,12 +117,13 @@ namespace RCNet.Neural.Activation
                                      double stepTimeScale,
                                      int subSteps,
                                      int numOfEvolvingVars,
-                                     double currentCoeff = 1d,
-                                     double potentialCoeff = 1d
+                                     double inputCurrentCoeff = 1d,
+                                     double membranePotentialCoeff = 1d
                                      )
         {
             _restV = restV;
             _resetV = resetV;
+            _initialV = _resetV;
             _firingThresholdV = firingThresholdV;
             _refractoryPeriods = refractoryPeriods;
             _stateRange = new Interval(Math.Min(_resetV, _restV), _firingThresholdV);
@@ -130,12 +131,11 @@ namespace RCNet.Neural.Activation
             _solvingMethod = solvingMethod;
             _stepTimeScale = stepTimeScale;
             _subSteps = subSteps;
-            _initialMembranePotential = _resetV;
-            _evolVars[VarMembraneVIdx] = _initialMembranePotential;
+            _evolVars[VarMembraneVIdx] = _initialV;
             _inRefractory = false;
             _refractoryPeriod = 0;
-            _currentCoeff = currentCoeff;
-            _potentialCoeff = potentialCoeff;
+            _currentCoeff = inputCurrentCoeff;
+            _potentialCoeff = membranePotentialCoeff;
             return;
         }
 
@@ -176,7 +176,7 @@ namespace RCNet.Neural.Activation
         /// </summary>
         public virtual void Reset()
         {
-            _evolVars[VarMembraneVIdx] = _initialMembranePotential;
+            _evolVars[VarMembraneVIdx] = _initialV;
             _inRefractory = false;
             _refractoryPeriod = 0;
             return;
@@ -189,7 +189,7 @@ namespace RCNet.Neural.Activation
         /// <param name="state">0 LE state LT 1, where 0 means Min(reset, rest) potential and 1 means firing threshold</param>
         public void SetInitialInternalState(double state)
         {
-            _initialMembranePotential = _stateRange.Min + state * _stateRange.Span;
+            _initialV = _stateRange.Min + state * _stateRange.Span;
             Reset();
             return;
         }

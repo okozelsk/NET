@@ -58,10 +58,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
 
         //Attribute properties
         /// <summary>
-        /// Connection probabilities settings
-        /// </summary>
-        public IConnDistrSettings ConnDistrCfg { get; }
-        /// <summary>
         /// Density of interconnected neurons.
         /// Each pool neuron will be connected as a source neuron for Pool.Size * Density neurons.
         /// </summary>
@@ -92,15 +88,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
-        /// <param name="connDistrCfg">Connection probabilities settings</param>
         /// <param name="density">Density of interconnected neurons</param>
         /// <param name="avgDistance">Average distance of interconnected neurons</param>
         /// <param name="allowSelfConnection">Specifies whether to allow neurons to be self connected</param>
         /// <param name="constantNumOfConnections">Specifies whether to keep for each neuron constant number of synapses</param>
         /// <param name="replaceExistingConnections">Specifies whether connections of this schema will replace existing connections</param>
         /// <param name="repetitions">Number of applications of this schema</param>
-        public RandomSchemaSettings(IConnDistrSettings connDistrCfg,
-                                    double density = DefaultDensity,
+        public RandomSchemaSettings(double density = DefaultDensity,
                                     double avgDistance = DefaultAvgDistanceNum,
                                     bool allowSelfConnection = DefaultAllowSelfConnection,
                                     bool constantNumOfConnections = DefaultConstantNumOfConnections,
@@ -108,7 +102,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
                                     int repetitions = DefaultRepetitions
                                     )
         {
-            ConnDistrCfg = (IConnDistrSettings)connDistrCfg.DeepClone();
             Density = density;
             AvgDistance = avgDistance;
             AllowSelfConnection = allowSelfConnection;
@@ -124,7 +117,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
         /// </summary>
         /// <param name="source">Source instance</param>
         public RandomSchemaSettings(RandomSchemaSettings source)
-            :this(source.ConnDistrCfg, source.Density, source.AvgDistance, source.AllowSelfConnection,
+            :this(source.Density, source.AvgDistance, source.AllowSelfConnection,
                   source.ConstantNumOfConnections, source.ReplaceExistingConnections, source.Repetitions)
         {
             return;
@@ -154,22 +147,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
             ReplaceExistingConnections = bool.Parse(settingsElem.Attribute("replaceExistingConnections").Value);
             //Number of schema repetitions
             Repetitions = int.Parse(settingsElem.Attribute("repetitions").Value, CultureInfo.InvariantCulture);
-            //Connection probabilities
-            XElement connDistrSettings = settingsElem.Descendants().First();
-            switch(connDistrSettings.Name.LocalName)
-            {
-                case "distributionCustom":
-                    ConnDistrCfg = new ConnDistrCustomSettings(connDistrSettings);
-                    break;
-                case "distributionLSM":
-                    ConnDistrCfg = new ConnDistrLSMSettings(connDistrSettings);
-                    break;
-                case "distributionFlat":
-                    ConnDistrCfg = new ConnDistrFlatSettings(connDistrSettings);
-                    break;
-                default:
-                    throw new Exception($"Unknown connection distribution {connDistrSettings.Name.LocalName}.");
-            }
             Check();
             return;
         }
@@ -212,7 +189,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
         {
             get
             {
-                return false;
+                return IsDefaultDensity &&
+                       IsDefaultAvgDistance &&
+                       IsDefaultAllowSelfConnection &&
+                       IsDefaultConstantNumOfConnections &&
+                       IsDefaultReplaceExistingConnections &&
+                       IsDefaultRepetitions;
             }
         }
 
@@ -279,7 +261,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
             {
                 rootElem.Add(new XAttribute("repetitions", Repetitions.ToString(CultureInfo.InvariantCulture)));
             }
-            rootElem.Add(ConnDistrCfg.GetXml(suppressDefaults));
             Validate(rootElem, XsdTypeName);
             return rootElem;
         }

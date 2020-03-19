@@ -33,11 +33,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron
         public NeuronStatistics Statistics { get; }
 
         /// <summary>
-        /// Neuron's role within the reservoir (excitatory or inhibitory)
-        /// </summary>
-        public NeuronCommon.NeuronRole Role { get; }
-
-        /// <summary>
         /// Output signaling restriction
         /// </summary>
         public NeuronCommon.NeuronSignalingRestrictionType SignalingRestriction { get; }
@@ -102,7 +97,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron
         /// Creates an initialized instance
         /// </summary>
         /// <param name="location">Information about a neuron location within the neural preprocessor</param>
-        /// <param name="role">Neuron's role (Excitatory/Inhibitory).</param>
         /// <param name="activation">Instantiated activation function.</param>
         /// <param name="signalingRestriction">Output signaling restriction. Spiking activation causes output signal always restricted to SpikingOnly.</param>
         /// <param name="predictorsCfg">Configuration of neuron's predictors</param>
@@ -110,7 +104,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron
         /// <param name="analogFiringThreshold">A number between 0 and 1 (LT1). Every time the new activation value is higher than the previous activation value by at least the threshold, it is evaluated as a firing event. Ignored in case of spiking activation.</param>
         /// <param name="retainmentStrength">Strength of the analog neuron's retainment property. Ignored in case of spiking activation.</param>
         public HiddenNeuron(NeuronLocation location,
-                            NeuronCommon.NeuronRole role,
                             IActivationFunction activation,
                             NeuronCommon.NeuronSignalingRestrictionType signalingRestriction,
                             PredictorsSettings predictorsCfg,
@@ -121,11 +114,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron
         {
             Location = location;
             Statistics = new NeuronStatistics();
-            if (role == NeuronCommon.NeuronRole.Input)
-            {
-                throw new ArgumentException("Role of the hidden neuron can not be Input.", "role");
-            }
-            Role = role;
             Bias = bias;
             //Activation specific
             _activation = activation;
@@ -149,6 +137,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron
         }
 
         //Properties
+        /// <summary>
+        /// Neuron type
+        /// </summary>
+        public NeuronCommon.NeuronType Type { get { return NeuronCommon.NeuronType.Hidden; } }
+
         /// <summary>
         /// Type of the activation function
         /// </summary>

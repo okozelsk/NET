@@ -47,12 +47,13 @@ namespace Demo.DemoConsoleApp.Examples
         {
             //Create StateMachine configuration
             //Simplified input configuration
-            InputSettings inputCfg = StateMachineDesigner.CreateInputCfg(new FeedingPatternedSettings(true, true, RCNet.Neural.Data.InputPattern.VariablesSchema.Groupped),
+            InputSettings inputCfg = StateMachineDesigner.CreateInputCfg(new FeedingPatternedSettings(true, false, RCNet.Neural.Data.InputPattern.VariablesSchema.Groupped),
                                                                          new ExternalFieldSettings("coord_abcissa", new RealFeatureFilterSettings()),
                                                                          new ExternalFieldSettings("coord_ordinate", new RealFeatureFilterSettings())
                                                                          );
             //Simplified readout layer configuration
-            ReadoutLayerSettings readoutCfg = StateMachineDesigner.CreateClassificationReadoutCfg(StateMachineDesigner.CreateMultiLayerRegrNet(10, new LeakyReLUSettings(), 1, 5, 400),
+            //ReadoutLayerSettings readoutCfg = StateMachineDesigner.CreateClassificationReadoutCfg(StateMachineDesigner.CreateMultiLayerRegrNet(10, new LeakyReLUSettings(), 1, 5, 400),
+            ReadoutLayerSettings readoutCfg = StateMachineDesigner.CreateClassificationReadoutCfg(StateMachineDesigner.CreateSingleLayerRegrNet(new ElliotSettings(), 5, 400),
                                                                                                   0.0825d,
                                                                                                   "Hand movement",
                                                                                                   "curved swing",
@@ -74,17 +75,16 @@ namespace Demo.DemoConsoleApp.Examples
             //Create designer instance
             StateMachineDesigner smd = new StateMachineDesigner(inputCfg, readoutCfg);
             //Create pure LSM fashioned StateMachine configuration
-            StateMachineSettings stateMachineCfg = smd.CreatePureLSMCfg(100, //Total size
-                                                                        0, //Input spike-train length (0 means use analog instead of spike-train])
-                                                                        0.5d, //Input connection density
-                                                                        0.25d, //Input weights strength
-                                                                        5, //Input max delay
-                                                                        0.4d, //Interconnection density
-                                                                        0.25d, //Internal weights strength
-                                                                        0, //Internal synapses max delay
+            StateMachineSettings stateMachineCfg = smd.CreatePureLSMCfg(new ProportionsSettings(8, 5, 5), //Proportions (it also determines total size)
+                                                                        4, //Input spike-train length (0 means use analog instead of spike-train])
                                                                         new AdExpIFSettings(), //Activation
+                                                                        new HomogenousExcitabilitySettings(0.2, 0.2, 0.25),
+                                                                        0.1d, //Input connection density
+                                                                        0, //Input max delay
+                                                                        0.1d, //Interconnection density
+                                                                        0, //Internal synapses max delay
                                                                         0, //Steady bias
-                                                                        PredictorsProvider.PredictorID.FiringCount
+                                                                        PredictorsProvider.PredictorID.FiringFadingSum, PredictorsProvider.PredictorID.ActivationSquare
                                                                         );
 
             //Display StateMachine xml configuration

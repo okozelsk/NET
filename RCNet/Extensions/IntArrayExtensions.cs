@@ -78,6 +78,56 @@ namespace RCNet.Extensions
             return maxIndex;
         }
 
+        /// <summary>
+        /// Returns maximum value in the array
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int Max(this int[] array)
+        {
+            int max = int.MinValue;
+            for (int i = 0; i < array.Length; i++)
+            {
+                if (max < array[i])
+                {
+                    max = array[i];
+                }
+            }
+            return max;
+        }
+
+        /// <summary>
+        /// Returns minimum value in the array
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int Min(this int[] array)
+        {
+            int min = int.MaxValue;
+            for (int i = 0; i < array.Length; i++)
+            {
+                if (min > array[i])
+                {
+                    min = array[i];
+                }
+            }
+            return min;
+        }
+
+        /// <summary>
+        /// Returns summed values in the array
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int Sum(this int[] array)
+        {
+            int sum = 0;
+            for (int i = 0; i < array.Length; i++)
+            {
+                sum += array[i];
+            }
+            return sum;
+        }
+
+
+
     }//IntArrayExtensions
 
 }//Namespace

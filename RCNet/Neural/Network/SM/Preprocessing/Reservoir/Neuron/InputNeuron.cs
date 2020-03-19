@@ -17,7 +17,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron
     public class InputNeuron : INeuron
     {
         //Static attributes
-        private static readonly Interval _spikingTargetRange = new Interval(0, 1);
+        private static readonly Interval _spikingOutputRange = new Interval(0, 1);
 
         //Attribute properties
         /// <summary>
@@ -32,14 +32,27 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron
         public NeuronStatistics Statistics { get; }
 
         /// <summary>
-        /// Neuron's role within the reservoir (input, excitatory or inhibitory)
+        /// Neuron type
         /// </summary>
-        public NeuronCommon.NeuronRole Role { get { return NeuronCommon.NeuronRole.Input; } }
+        public NeuronCommon.NeuronType Type { get { return NeuronCommon.NeuronType.Input; } }
 
         /// <summary>
         /// Type of the activation function
         /// </summary>
-        public ActivationType TypeOfActivation { get { throw new NotImplementedException("TypeOfActivation is unsupported for InputNeuron"); } }
+        public ActivationType TypeOfActivation
+        {
+            get
+            {
+                if(SignalingRestriction == NeuronCommon.NeuronSignalingRestrictionType.SpikingOnly)
+                {
+                    return ActivationType.Spiking;
+                }
+                else
+                {
+                    return ActivationType.Analog;
+                }
+            }
+        }
 
         /// <summary>
         /// Output signaling restriction
@@ -151,7 +164,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron
             //Analog signal is exactly the same as stimulation
             _analogSignal = _tStimuli;
             //Spiking signal must be always between 0 and 1
-            _spikingSignal = _spikingTargetRange.Rescale(_tStimuli, _inputRange);
+            _spikingSignal = _spikingOutputRange.Rescale(_tStimuli, _inputRange);
             //Statistics
             if (collectStatistics)
             {

@@ -46,39 +46,43 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// Name of the neuron group
         /// </summary>
         public string Name { get; }
-        /// <summary>
-        /// Excitatory or Inhibitory role of the neurons
-        /// </summary>
-        public NeuronCommon.NeuronRole Role { get; }
+
         /// <summary>
         /// Specifies how big relative portion of pool's neurons is formed by this group of the neurons
         /// </summary>
         public double RelShare { get; }
+
         /// <summary>
         /// Common activation function settings of the groupped neurons
         /// </summary>
         public RCNetBaseSettings ActivationCfg { get; }
+
         /// <summary>
         /// A number between 0 and 1 (LT1). Every time the new normalized activation value is higher than the previous
         /// normalized activation value by at least the threshold, it is evaluated as a firing event.
         /// </summary>
         public double FiringThreshold { get; }
+
         /// <summary>
         /// Restriction of neuron's output signaling
         /// </summary>
         public NeuronCommon.NeuronSignalingRestrictionType SignalingRestriction { get; }
+
         /// <summary>
         /// Specifies what ratio of the neurons from this group can be used as a source of the readout predictors
         /// </summary>
         public double ReadoutDensity { get; }
+
         /// <summary>
         /// Each neuron within the group receives constant input bias. Value of the neuron's bias is driven by this random settings
         /// </summary>
         public RandomValueSettings BiasCfg { get; }
+
         /// <summary>
-        /// Neurons' retainment property settings
+        /// Neurons' retainment property configuration
         /// </summary>
-        public AnalogRetainmentSettings RetainmentCfg { get; }
+        public RetainmentSettings RetainmentCfg { get; }
+
         /// <summary>
         /// Configuration of the predictors
         /// </summary>
@@ -95,7 +99,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// Creates an initialized instance
         /// </summary>
         /// <param name="name">Name of the neuron group</param>
-        /// <param name="role">Excitatory or Inhibitory role of the neurons</param>
         /// <param name="relShare">Specifies how big relative portion of pool's neurons is formed by this group of the neurons</param>
         /// <param name="activationCfg">Common activation function settings of the groupped neurons</param>
         /// <param name="firingThreshold">
@@ -103,31 +106,29 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// normalized activation value by at least the threshold, it is evaluated as a firing event.
         /// </param>
         /// <param name="signalingRestriction">Specifies what type of signal will be supported</param>
-        /// <param name="readoutDensity">Specifies what ratio of the neurons from this group can be used as a source of the readout predictors</param>
         /// <param name="biasCfg">Each neuron within the group receives constant input bias. Value of the neuron's bias is driven by this random settings</param>
-        /// <param name="retainmentCfg">Neurons' retainment property settings</param>
+        /// <param name="retainmentCfg">Neurons' retainment property configuration</param>
         /// <param name="predictorsCfg">Configuration of the predictors</param>
+        /// <param name="readoutDensity">Specifies what ratio of the neurons from this group can be used as a source of the readout predictors</param>
         public AnalogNeuronGroupSettings(string name,
-                                             NeuronCommon.NeuronRole role,
-                                             double relShare,
-                                             RCNetBaseSettings activationCfg,
-                                             double firingThreshold = DefaultFiringThreshold,
-                                             NeuronCommon.NeuronSignalingRestrictionType signalingRestriction = DefaultSignalingRestriction,
-                                             double readoutDensity = DefaultReadoutDensity,
-                                             RandomValueSettings biasCfg = null,
-                                             AnalogRetainmentSettings retainmentCfg = null,
-                                             PredictorsSettings predictorsCfg = null
-                                             )
+                                         double relShare,
+                                         RCNetBaseSettings activationCfg,
+                                         double firingThreshold = DefaultFiringThreshold,
+                                         NeuronCommon.NeuronSignalingRestrictionType signalingRestriction = DefaultSignalingRestriction,
+                                         RandomValueSettings biasCfg = null,
+                                         RetainmentSettings retainmentCfg = null,
+                                         PredictorsSettings predictorsCfg = null,
+                                         double readoutDensity = DefaultReadoutDensity
+                                         )
         {
             Name = name;
-            Role = role;
             RelShare = relShare;
             ActivationCfg = activationCfg.DeepClone();
             FiringThreshold = firingThreshold;
             SignalingRestriction = signalingRestriction;
             ReadoutDensity = readoutDensity;
             BiasCfg = biasCfg == null ? null : (RandomValueSettings)biasCfg.DeepClone();
-            RetainmentCfg = retainmentCfg == null ? null : (AnalogRetainmentSettings)retainmentCfg.DeepClone();
+            RetainmentCfg = retainmentCfg == null ? null : (RetainmentSettings)retainmentCfg.DeepClone();
             PredictorsCfg = predictorsCfg == null ? null : (PredictorsSettings)predictorsCfg.DeepClone();
             Check();
             return;
@@ -138,8 +139,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// </summary>
         /// <param name="source">Source instance</param>
         public AnalogNeuronGroupSettings(AnalogNeuronGroupSettings source)
-            :this(source.Name, source.Role, source.RelShare, source.ActivationCfg, source.FiringThreshold, 
-                  source.SignalingRestriction, source.ReadoutDensity, source.BiasCfg, source.RetainmentCfg, source.PredictorsCfg)
+            :this(source.Name, source.RelShare, source.ActivationCfg, source.FiringThreshold, 
+                  source.SignalingRestriction, source.BiasCfg, source.RetainmentCfg, source.PredictorsCfg, source.ReadoutDensity)
         {
             return;
         }
@@ -155,8 +156,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
             //Parsing
             //Name
             Name = settingsElem.Attribute("name").Value;
-            //Role
-            Role = (NeuronCommon.NeuronRole)Enum.Parse(typeof(NeuronCommon.NeuronRole), settingsElem.Attribute("role").Value, true);
             //Relative share
             RelShare = double.Parse(settingsElem.Attribute("relShare").Value, CultureInfo.InvariantCulture);
             //Activation settings
@@ -172,7 +171,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
             BiasCfg = biasSettingsElem == null ? null : new RandomValueSettings(biasSettingsElem);
             //Retainment
             XElement retainmentSettingsElem = settingsElem.Descendants("retainment").FirstOrDefault();
-            RetainmentCfg = retainmentSettingsElem == null ? null : new AnalogRetainmentSettings(retainmentSettingsElem);
+            RetainmentCfg = retainmentSettingsElem == null ? null : new RetainmentSettings(retainmentSettingsElem);
             //Predictors
             XElement predictorsSettingsElem = settingsElem.Descendants("predictors").FirstOrDefault();
             if (predictorsSettingsElem != null)
@@ -225,10 +224,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
             {
                 throw new Exception($"Name can not be empty.");
             }
-            if (Role != NeuronCommon.NeuronRole.Excitatory && Role != NeuronCommon.NeuronRole.Inhibitory)
-            {
-                throw new Exception($"Invalid Role {Role.ToString()}. Role must be Excitatory or Inhibitory.");
-            }
             Type activationType = ActivationCfg.GetType();
             if (activationType != typeof(SQNLSettings) &&
                 activationType != typeof(ElliotSettings) &&
@@ -269,11 +264,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
-            XElement rootElem = new XElement(rootElemName);
-            rootElem.Add(new XAttribute("name", Name));
-            rootElem.Add(new XAttribute("role", Role.ToString()));
-            rootElem.Add(new XAttribute("relShare", RelShare.ToString(CultureInfo.InvariantCulture)));
-            rootElem.Add(ActivationCfg.GetXml(suppressDefaults));
+            XElement rootElem = new XElement(rootElemName,
+                                             new XAttribute("name", Name),
+                                             new XAttribute("relShare", RelShare.ToString(CultureInfo.InvariantCulture)),
+                                             ActivationCfg.GetXml(suppressDefaults)
+                                             );
             if (!suppressDefaults || !IsDefaultFiringThreshold)
             {
                 rootElem.Add(new XAttribute("firingThreshold", FiringThreshold.ToString(CultureInfo.InvariantCulture)));

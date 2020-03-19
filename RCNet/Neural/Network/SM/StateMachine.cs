@@ -169,7 +169,7 @@ namespace RCNet.Neural.Network.SM
                 {
                     //Expand list of predicting neurons to array of predictor and its origin
                     List<Tuple<int, int, PredictorsProvider.PredictorID>> predictorInfoCollection = new List<Tuple<int, int, PredictorsProvider.PredictorID>>();
-                    foreach (HiddenNeuron neuron in NP.PredictorNeuronCollection)
+                    foreach (HiddenNeuron neuron in NP.PredictingNeuronCollection)
                     {
                         for(int predictorID = 0; predictorID < PredictorsProvider.NumOfPredictors; predictorID++)
                         {
@@ -219,7 +219,7 @@ namespace RCNet.Neural.Network.SM
                             if (rums.AllowedInputFieldsCfg != null)
                             {
                                 //Initially disable all routed input fields
-                                for (int i = NP.PredictorNeuronCollection.Count; i < NP.TotalNumOfPredictors; i++)
+                                for (int i = NP.PredictingNeuronCollection.Count; i < NP.TotalNumOfPredictors; i++)
                                 {
                                     switches[i] = false;
                                 }
@@ -227,7 +227,7 @@ namespace RCNet.Neural.Network.SM
                                 //Enable enabled routed input fields
                                 foreach (AllowedInputFieldSettings aifs in rums.AllowedInputFieldsCfg.AllowedInputFieldCfgCollection)
                                 {
-                                    int routedFieldIdx = NP.PredictorNeuronCollection.Count + Array.IndexOf(routedFieldNames, aifs.Name);
+                                    int routedFieldIdx = NP.PredictingNeuronCollection.Count + Array.IndexOf(routedFieldNames, aifs.Name);
                                     switches[routedFieldIdx] = NP.PredictorGeneralSwitchCollection[routedFieldIdx];
                                 }
                             }
