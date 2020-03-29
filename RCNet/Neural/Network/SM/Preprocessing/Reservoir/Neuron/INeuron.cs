@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using RCNet.MathTools;
 using RCNet.Neural.Activation;
+using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron
 {
@@ -38,11 +39,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron
         /// Output signaling restriction
         /// </summary>
         NeuronCommon.NeuronSignalingRestrictionType SignalingRestriction { get; }
-        
-        /// <summary>
-        /// Constant bias
-        /// </summary>
-        double Bias { get; }
 
         /// <summary>
         /// Computation cycles gone from the last emitted spike or start (if no spike emitted before current computation cycle)
@@ -54,6 +50,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron
         /// </summary>
         bool AfterFirstSpike { get; }
 
+        /// <summary>
+        /// Number of provided predictors
+        /// </summary>
+        int NumOfEnabledPredictors { get; }
+        
         //Methods
         /// <summary>
         /// Resets neuron to its initial state
@@ -81,6 +82,23 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron
         /// <param name="targetActivationType">Specifies what type of the signal is required if possible</param>
         double GetSignal(ActivationType targetActivationType);
 
+        /// <summary>
+        /// Checks if given predictor is enabled
+        /// </summary>
+        /// <param name="predictorID">Identificator of the predictor</param>
+        bool IsPredictorEnabled(PredictorsProvider.PredictorID predictorID);
+
+        /// <summary>
+        /// Copies values of enabled predictors to a given buffer starting from specified position (idx)
+        /// </summary>
+        /// <param name="predictors">Buffer where to be copied enabled predictors</param>
+        /// <param name="idx">Starting position index</param>
+        int CopyPredictorsTo(double[] predictors, int idx);
+
+        /// <summary>
+        /// Returns array containing values of enabled predictors
+        /// </summary>
+        double[] GetPredictors();
 
     }//INeuron
 

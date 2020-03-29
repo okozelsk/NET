@@ -90,7 +90,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             //Parsing
             Detrend = bool.Parse(settingsElem.Attribute("detrend").Value);
             UnifyAmplitude = bool.Parse(settingsElem.Attribute("unifyAmplitude").Value);
-            XElement resamplingElem = settingsElem.Descendants("resampling").FirstOrDefault();
+            XElement resamplingElem = settingsElem.Elements("resampling").FirstOrDefault();
             if(resamplingElem != null)
             {
                 ResamplingCfg = new ResamplingSettings(resamplingElem);

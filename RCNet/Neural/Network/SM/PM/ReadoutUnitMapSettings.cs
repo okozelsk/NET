@@ -90,11 +90,11 @@ namespace RCNet.Neural.Network.SM.PM
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
             ReadoutUnitName = settingsElem.Attribute("readoutUnitName").Value;
-            XElement allowedPredictorsElem = settingsElem.Descendants("allowedPredictors").FirstOrDefault();
+            XElement allowedPredictorsElem = settingsElem.Elements("allowedPredictors").FirstOrDefault();
             AllowedPredictorsCfg = allowedPredictorsElem == null ? null : new AllowedPredictorsSettings(allowedPredictorsElem);
-            XElement allowedPoolsElem = settingsElem.Descendants("allowedPools").FirstOrDefault();
+            XElement allowedPoolsElem = settingsElem.Elements("allowedPools").FirstOrDefault();
             AllowedPoolsCfg = allowedPoolsElem == null ? null : new AllowedPoolsSettings(allowedPoolsElem);
-            XElement allowedInputFieldsElem = settingsElem.Descendants("allowedInputFields").FirstOrDefault();
+            XElement allowedInputFieldsElem = settingsElem.Elements("allowedInputFields").FirstOrDefault();
             AllowedInputFieldsCfg = allowedInputFieldsElem == null ? null : new AllowedInputFieldsSettings(allowedInputFieldsElem);
             Check();
             return;

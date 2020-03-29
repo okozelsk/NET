@@ -89,7 +89,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             //Parsing
             Name = settingsElem.Attribute("name").Value;
             RouteToReadout = bool.Parse(settingsElem.Attribute("routeToReadout").Value);
-            XElement transElem = settingsElem.Descendants().First();
+            XElement transElem = settingsElem.Elements().First();
             TransformerCfg = TransformerFactory.LoadSettings(transElem);
             Check();
             return;

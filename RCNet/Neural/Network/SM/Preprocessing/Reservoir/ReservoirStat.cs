@@ -75,6 +75,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             return;
         }
 
+        /// <summary>
+        /// Updates statistics
+        /// </summary>
+        /// <param name="neuron">Hidden neuron</param>
+        /// <param name="inputSynapses">Input synaapses</param>
+        /// <param name="internalSynapses">Internal synapses</param>
         public void Update(HiddenNeuron neuron, IList<Synapse> inputSynapses, IList<Synapse> internalSynapses)
         {
             Synapses.Update(inputSynapses);
@@ -520,6 +526,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                 return;
             }
 
+            /// <summary>
+            /// Updates anomalies
+            /// </summary>
+            /// <param name="neuron">Hidden neuron</param>
+            /// <param name="numOfResSynapses">Number of reservoir synapses</param>
             public void Update(HiddenNeuron neuron, int numOfResSynapses)
             {
                 if (numOfResSynapses == 0)

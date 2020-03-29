@@ -76,11 +76,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
 
         //Constants
         /// <summary>
-        /// Maximum number of buffered bits
-        /// </summary>
-        public const int MaxBinBufferSize = sizeof(ulong) * 8;
-        
-        /// <summary>
         /// Maximum number of exponential weights
         /// </summary>
         public const int MaxExpWeightsSize = 64;
@@ -92,33 +87,28 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
 
         //Static
         /// <summary>
-        /// Number of supported analog coding methods
+        /// Number of supported predictors
         /// </summary>
-        public static readonly int NumOfPredictors;
+        public static readonly int NumOfSupportedPredictors;
         private static readonly double[] _expWeightsCache;
         private static readonly double[] _linWeightsCache;
-        private static readonly ulong _highestBit;
 
         //Attribute properties
         /// <summary>
-        /// Configuration of the predictors
+        /// Number of enabled predictors
         /// </summary>
-        public PredictorsSettings Cfg { get; }
+        public int NumOfEnabledPredictors { get { return _cfg.NumOfEnabledPredictors; } }
+
 
         //Attributes
+        private readonly PredictorsSettings _cfg;
         private double _lastActivation;
         private double _activationFadingSum;
         private readonly MovingDataWindow _activationMDW;
         private readonly double[] _activationMWAvgWeights;
-        private int _activationMWAvgLeakage;
-        private ulong _spikesBuffer;
-        private int _bufferedHistLength;
-        private int _firingCount;
-        private readonly ulong _firingCountDecrementBit;
         private double _firingFadingSum;
-        private readonly MovingDataWindow _firingMDW;
+        private readonly Bitwise.Window _firingMDW;
         private readonly double[] _firingMWAvgWeights;
-        private int _firingMWAvgLeakage;
 
 
         /// <summary>
@@ -126,21 +116,16 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
         /// </summary>
         static PredictorsProvider()
         {
-            NumOfPredictors = typeof(PredictorID).GetEnumValues().Length;
-            _highestBit = 1ul;
-            for (int i = 0; i < MaxBinBufferSize; i++)
-            {
-                if (i > 0) _highestBit <<= 1;
-            }
+            NumOfSupportedPredictors = typeof(PredictorID).GetEnumValues().Length;
             _expWeightsCache = new double[MaxExpWeightsSize];
             for (int i = 0; i < MaxExpWeightsSize; i++)
             {
-                _expWeightsCache[i] = Math.Exp(-((MaxExpWeightsSize - 1) - i));
+                _expWeightsCache[i] = Math.Exp(-i);
             }
             _linWeightsCache = new double[MaxLinWeightsSize];
             for (int i = 0; i < MaxLinWeightsSize; i++)
             {
-                _linWeightsCache[i] = i + 1;
+                _linWeightsCache[i] = 1d / (i + 1);
             }
             return;
         }
@@ -148,61 +133,85 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
         /// <summary>
         /// Creates new initialized instance.
         /// </summary>
-        /// <param name="aggregatedCfg">Aggregated configuration to be used. Note that ParamsCfg member inside the aggregatedCfg must not be null.</param>
-        public PredictorsProvider(PredictorsSettings aggregatedCfg)
+        /// <param name="cfg">Configuration to be used. Note that ParamsCfg member inside the cfg must not be null.</param>
+        public PredictorsProvider(PredictorsSettings cfg)
         {
-            Cfg = aggregatedCfg;
-            if (Cfg.ParamsCfg.FiringCountCfg.Window == MaxBinBufferSize)
+            //Check
+            if(cfg.ParamsCfg == null)
             {
-                _firingCountDecrementBit = _highestBit;
+                throw new ArgumentException("Invalid configuration. ParamsCfg inside the configuration is null.", "cfg");
             }
-            else
+            //Store configuration
+            _cfg = cfg;
+            //Determine necessary size of the activation moving window and instantiate it
+            int activationMWSize = 0;
+            if(_cfg.IsEnabled(PredictorID.ActivationMWAvg))
             {
-                _firingCountDecrementBit = 1ul;
-                for (int i = 1; i < Cfg.ParamsCfg.FiringCountCfg.Window; i++)
+                switch (_cfg.ParamsCfg.ActivationMWAvgCfg.Weights)
                 {
-                    _firingCountDecrementBit <<= 1;
+                    case PredictorMWAvgWeightsType.Exponential:
+                        _activationMWAvgWeights = _expWeightsCache;
+                        activationMWSize = Math.Min(_cfg.ParamsCfg.ActivationMWAvgCfg.Window, _expWeightsCache.Length);
+                        break;
+                    case PredictorMWAvgWeightsType.Linear:
+                        _activationMWAvgWeights = _linWeightsCache;
+                        activationMWSize = Math.Min(_cfg.ParamsCfg.ActivationMWAvgCfg.Window, _linWeightsCache.Length);
+                        break;
+                    case PredictorMWAvgWeightsType.Constant:
+                        _activationMWAvgWeights = null;
+                        activationMWSize = _cfg.ParamsCfg.ActivationMWAvgCfg.Window;
+                        break;
+                    default:
+                        throw new Exception($"Unsupported weights type {_cfg.ParamsCfg.ActivationMWAvgCfg.Weights.ToString()}.");
                 }
             }
-            switch(Cfg.ParamsCfg.ActivationMWAvgCfg.Weights)
+            _activationMDW = activationMWSize == 0 ? null : new MovingDataWindow(activationMWSize);
+
+            //Determine necessary size of the firing moving window and instantiate it
+            int firingMWSize = 0;
+            if(_cfg.IsEnabled(PredictorID.FiringMWAvg))
             {
-                case PredictorMWAvgWeightsType.Exponential:
-                    _activationMWAvgWeights = _expWeightsCache;
-                    _activationMDW = new MovingDataWindow(Math.Min(Cfg.ParamsCfg.ActivationMWAvgCfg.Window, _expWeightsCache.Length));
-                    break;
-                case PredictorMWAvgWeightsType.Linear:
-                    _activationMWAvgWeights = _linWeightsCache;
-                    _activationMDW = new MovingDataWindow(Math.Min(Cfg.ParamsCfg.ActivationMWAvgCfg.Window, _linWeightsCache.Length));
-                    break;
-                case PredictorMWAvgWeightsType.Constant:
-                    _activationMWAvgWeights = null;
-                    _activationMDW = new MovingDataWindow(Cfg.ParamsCfg.ActivationMWAvgCfg.Window);
-                    break;
-                default:
-                    throw new Exception("Unsupported weights type.");
+                switch (_cfg.ParamsCfg.FiringMWAvgCfg.Weights)
+                {
+                    case PredictorMWAvgWeightsType.Exponential:
+                        _firingMWAvgWeights = _expWeightsCache;
+                        firingMWSize = Math.Min(_cfg.ParamsCfg.FiringMWAvgCfg.Window, _expWeightsCache.Length);
+                        break;
+                    case PredictorMWAvgWeightsType.Linear:
+                        _firingMWAvgWeights = _linWeightsCache;
+                        firingMWSize = Math.Min(_cfg.ParamsCfg.FiringMWAvgCfg.Window, _linWeightsCache.Length);
+                        break;
+                    case PredictorMWAvgWeightsType.Constant:
+                        _firingMWAvgWeights = null;
+                        firingMWSize = _cfg.ParamsCfg.FiringMWAvgCfg.Window;
+                        break;
+                    default:
+                        throw new Exception($"Unsupported weights type {_cfg.ParamsCfg.FiringMWAvgCfg.Weights.ToString()}.");
+                }
             }
-            switch (Cfg.ParamsCfg.FiringMWAvgCfg.Weights)
+            if (_cfg.IsEnabled(PredictorID.FiringBinPattern))
             {
-                case PredictorMWAvgWeightsType.Exponential:
-                    _firingMWAvgWeights = _expWeightsCache;
-                    _firingMDW = new MovingDataWindow(Math.Min(Cfg.ParamsCfg.FiringMWAvgCfg.Window, _expWeightsCache.Length));
-                    break;
-                case PredictorMWAvgWeightsType.Linear:
-                    _firingMWAvgWeights = _linWeightsCache;
-                    _firingMDW = new MovingDataWindow(Math.Min(Cfg.ParamsCfg.FiringMWAvgCfg.Window, _linWeightsCache.Length));
-                    break;
-                case PredictorMWAvgWeightsType.Constant:
-                    _firingMWAvgWeights = null;
-                    _firingMDW = new MovingDataWindow(Cfg.ParamsCfg.FiringMWAvgCfg.Window);
-                    break;
-                default:
-                    throw new Exception("Unsupported weights type.");
+                firingMWSize = Math.Max(firingMWSize, _cfg.ParamsCfg.FiringBinPatternCfg.Window);
             }
+            if(_cfg.IsEnabled(PredictorID.FiringCount))
+            {
+                firingMWSize = Math.Max(firingMWSize, _cfg.ParamsCfg.FiringCountCfg.Window);
+            }
+            _firingMDW = firingMWSize == 0 ? null : new Bitwise.Window(firingMWSize);
             Reset();
             return;
         }
 
         //Methods
+        /// <summary>
+        /// Checks if given predictor is enabled
+        /// </summary>
+        /// <param name="predictorID">Identificator of the predictor</param>
+        public bool IsPredictorEnabled(PredictorID predictorID)
+        {
+            return _cfg.IsEnabled(predictorID);
+        }
+
         /// <summary>
         /// Resets internal state to initial state
         /// </summary>
@@ -210,14 +219,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
         {
             _lastActivation = 0d;
             _activationFadingSum = 0d;
-            _activationMDW.Reset();
-            _activationMWAvgLeakage = 0;
-            _spikesBuffer = 0;
-            _bufferedHistLength = 0;
-            _firingCount = 0;
+            _activationMDW?.Reset();
             _firingFadingSum = 0d;
-            _firingMDW.Reset();
-            _firingMWAvgLeakage = 0;
+            _firingMDW?.Reset();
             return;
         }
 
@@ -225,73 +229,27 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
         /// Updates internal state
         /// </summary>
         /// <param name="activation">Current value of the activation</param>
+        /// <param name="normalizedActivation">Current value of the activation normalized between 0 and 1</param>
         /// <param name="spike">Is firing spike?</param>
-        public void Update(double activation, bool spike)
+        public void Update(double activation, double normalizedActivation, bool spike)
         {
-            //Update predictors
+            //Update
+            //Activation based
             _lastActivation = activation;
-            _activationFadingSum *= (1d - Cfg.ParamsCfg.ActivationFadingSumCfg.Strength);
-            _activationFadingSum += activation;
-            if (_activationMWAvgLeakage == Cfg.ParamsCfg.ActivationMWAvgCfg.Leakage)
+            _activationFadingSum *= (1d - _cfg.ParamsCfg.ActivationFadingSumCfg.Strength);
+            _activationFadingSum += (normalizedActivation);
+            if(_activationMDW != null)
             {
                 _activationMDW.AddSampleValue(activation);
-                _activationMWAvgLeakage = 0;
             }
-            else
+            //Firing based
+            _firingFadingSum *= (1d - _cfg.ParamsCfg.FiringFadingSumCfg.Strength);
+            if (spike) ++_firingFadingSum;
+            if(_firingMDW != null)
             {
-                ++_activationMWAvgLeakage;
-            }
-            _firingCount -= (_spikesBuffer & _firingCountDecrementBit) > 0ul ? 1 : 0;
-            _firingFadingSum *= (1d - Cfg.ParamsCfg.FiringFadingSumCfg.Strength);
-            if (_firingMWAvgLeakage == Cfg.ParamsCfg.FiringMWAvgCfg.Leakage)
-            {
-                _firingMDW.AddSampleValue(spike ? 1d : 0d);
-                _firingMWAvgLeakage = 0;
-            }
-            else
-            {
-                ++_firingMWAvgLeakage;
-            }
-            _spikesBuffer <<= 1;
-            if(spike)
-            {
-                _spikesBuffer |= 1ul;
-                ++_firingCount;
-                ++_firingFadingSum;
-            }
-            //Update buffer usage
-            if (_bufferedHistLength < MaxBinBufferSize)
-            {
-                ++_bufferedHistLength;
+                _firingMDW.AddNext(spike);
             }
             return;
-        }
-
-        /// <summary>
-        /// Returns last spikes as an integer number where bits are in order that the higher bit represents the more recent spike
-        /// </summary>
-        /// <returns>Last spikes history as an integer</returns>
-        private ulong GetFiringBinPattern(int histLength)
-        {
-            //Checks and corrections
-            if (_bufferedHistLength == 0 || histLength < 1)
-            {
-                return 0;
-            }
-            if(histLength > _bufferedHistLength)
-            {
-                histLength = _bufferedHistLength;
-            }
-            //Roll requested history
-            ulong result = 0;
-            ulong tmp = _spikesBuffer;
-            for (int i = 0; i < histLength; i++)
-            {
-                result <<= 1;
-                result += tmp & 1ul;
-                tmp >>= 1;
-            }
-            return result;
         }
 
         /// <summary>
@@ -303,44 +261,52 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
         public int CopyPredictorsTo(double[] predictors, int idx)
         {
             int count = 0;
-            if (Cfg.IsEnabled(PredictorID.Activation))
+            if (_cfg.IsEnabled(PredictorID.Activation))
             {
                 predictors[idx++] = _lastActivation;
                 ++count;
             }
-            if (Cfg.IsEnabled(PredictorID.ActivationSquare))
+            if (_cfg.IsEnabled(PredictorID.ActivationSquare))
             {
                 predictors[idx++] = _lastActivation.Power(2);
                 ++count;
             }
-            if (Cfg.IsEnabled(PredictorID.ActivationFadingSum))
+            if (_cfg.IsEnabled(PredictorID.ActivationFadingSum))
             {
                 predictors[idx++] = _activationFadingSum;
                 ++count;
             }
-            if (Cfg.IsEnabled(PredictorID.ActivationMWAvg))
+            if (_cfg.IsEnabled(PredictorID.ActivationMWAvg))
             {
-                predictors[idx++] = _activationMDW.NumOfSamples > 0 ? _activationMDW.GetWeightedAvg(_activationMWAvgWeights, false).Avg : 0d;
+                predictors[idx++] = _activationMDW.NumOfSamples > 0 ? _activationMDW.GetWeightedAvg(_activationMWAvgWeights, true).Avg : 0d;
                 ++count;
             }
-            if (Cfg.IsEnabled(PredictorID.FiringFadingSum))
+            if (_cfg.IsEnabled(PredictorID.FiringFadingSum))
             {
                 predictors[idx++] = _firingFadingSum;
                 ++count;
             }
-            if (Cfg.IsEnabled(PredictorID.FiringMWAvg))
+            if (_cfg.IsEnabled(PredictorID.FiringMWAvg))
             {
-                predictors[idx++] = _firingMDW.NumOfSamples > 0 ? _firingMDW.GetWeightedAvg(_firingMWAvgWeights, false).Avg : 0d;
+                double sum = 0;
+                for (int bitIdx = 0; bitIdx < _cfg.ParamsCfg.FiringMWAvgCfg.Window; bitIdx++)
+                {
+                    if(_firingMDW.GetBit(bitIdx) > 0)
+                    {
+                        sum += _firingMWAvgWeights == null ? 1d : _firingMWAvgWeights[bitIdx];
+                    }
+                }
+                predictors[idx++] = sum / _cfg.ParamsCfg.FiringMWAvgCfg.Window;
                 ++count;
             }
-            if (Cfg.IsEnabled(PredictorID.FiringCount))
+            if (_cfg.IsEnabled(PredictorID.FiringCount))
             {
-                predictors[idx++] = _firingCount;
+                predictors[idx++] = _firingMDW.GetNumOfSetBits(_cfg.ParamsCfg.FiringCountCfg.Window);
                 ++count;
             }
-            if (Cfg.IsEnabled(PredictorID.FiringBinPattern))
+            if (_cfg.IsEnabled(PredictorID.FiringBinPattern))
             {
-                predictors[idx++] = GetFiringBinPattern(Cfg.ParamsCfg.FiringBinPatternCfg.Window);
+                predictors[idx++] = _firingMDW.GetBits(_cfg.ParamsCfg.FiringBinPatternCfg.Window);
                 ++count;
             }
             return count;
@@ -352,11 +318,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
         /// <returns></returns>
         public double[] GetPredictors()
         {
-            if (Cfg.NumOfEnabledPredictors == 0)
+            if (_cfg.NumOfEnabledPredictors == 0)
             {
                 return null;
             }
-            double[] predictors = new double[Cfg.NumOfEnabledPredictors];
+            double[] predictors = new double[_cfg.NumOfEnabledPredictors];
             CopyPredictorsTo(predictors, 0);
             return predictors;
         }

@@ -125,7 +125,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
             //Parsing
             foreach(PredictorsProvider.PredictorID predictorID in typeof(PredictorsProvider.PredictorID).GetEnumValues())
             {
-                XElement predictorElem = settingsElem.Descendants(PredictorsSettings.GetXmlName(predictorID)).FirstOrDefault();
+                XElement predictorElem = settingsElem.Elements(PredictorsSettings.GetXmlName(predictorID)).FirstOrDefault();
                 if(predictorElem != null)
                 {
                     switch(predictorID)

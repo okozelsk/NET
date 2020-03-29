@@ -163,6 +163,42 @@ namespace Demo.DemoConsoleApp
         public void Run()
         {
 
+            Bitwise.Window bw = new Bitwise.Window(80);
+
+            for(int i = 0; i < 80; i++)
+            {
+                bw.AddNext(true);
+            }
+
+            bw.AddNext(true);
+            bw.AddNext(false);
+            bw.AddNext(false);
+            bw.AddNext(true);
+
+            int bit1 = bw.GetBit(0);
+            int bit2 = bw.GetBit(1);
+            int bit3 = bw.GetBit(2);
+            int bit4 = bw.GetBit(3);
+
+            int bitCount80 = bw.GetNumOfSetBits(80);
+            int bitCount79 = bw.GetNumOfSetBits(79);
+            int bitCount78 = bw.GetNumOfSetBits(78);
+            int bitCount77 = bw.GetNumOfSetBits(77);
+
+            double fadingStrength = 0.005;
+            double fadingSum80 = bw.GetFadingSum(fadingStrength, 80);
+            double fadingSum79 = bw.GetFadingSum(fadingStrength, 79);
+            double fadingSum5 = bw.GetFadingSum(fadingStrength, 5);
+            double fadingSum4 = bw.GetFadingSum(fadingStrength, 4);
+            double fadingSum3 = bw.GetFadingSum(fadingStrength, 3);
+            double fadingSum2 = bw.GetFadingSum(fadingStrength, 2);
+            double fadingSum1 = bw.GetFadingSum(fadingStrength, 1);
+
+            ulong bits66_4_true = bw.GetBits(66, 4, true);
+            ulong bits2_3_true = bw.GetBits(2, 3, true);
+            ulong bits2_3_false = bw.GetBits(2, 3, false);
+
+
             TestTransformers();
 
 

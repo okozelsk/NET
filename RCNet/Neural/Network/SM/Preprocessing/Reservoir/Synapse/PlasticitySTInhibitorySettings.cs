@@ -74,7 +74,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
             //Validation
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
-            XElement dynamicsCfgElem = settingsElem.Descendants().FirstOrDefault();
+            XElement dynamicsCfgElem = settingsElem.Elements().FirstOrDefault();
             if (dynamicsCfgElem == null)
             {
                 DynamicsCfg = new ConstantDynamicsSTInhibitorySettings();

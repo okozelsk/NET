@@ -112,7 +112,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             NumOfAttempts = int.Parse(settingsElem.Attribute("attempts").Value, CultureInfo.InvariantCulture);
             NumOfAttemptEpochs = int.Parse(settingsElem.Attribute("attemptEpochs").Value, CultureInfo.InvariantCulture);
             NoiseZeroMargin = double.Parse(settingsElem.Attribute("noiseZeroMargin").Value, CultureInfo.InvariantCulture);
-            XElement noiseSeekerSettingsElem = settingsElem.Descendants("noise").FirstOrDefault();
+            XElement noiseSeekerSettingsElem = settingsElem.Elements("noise").FirstOrDefault();
             if (noiseSeekerSettingsElem != null)
             {
                 NoiseSeekerCfg = new ParamSeekerSettings(noiseSeekerSettingsElem);

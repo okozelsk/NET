@@ -144,10 +144,10 @@ namespace RCNet.Neural.Network.SM.Readout
             Folds = readoutLayerSettingsElem.Attribute("folds").Value == DefaultFoldsString ? DefaultFoldsNum : int.Parse(readoutLayerSettingsElem.Attribute("folds").Value, CultureInfo.InvariantCulture);
             Repetitions = int.Parse(readoutLayerSettingsElem.Attribute("repetitions").Value, CultureInfo.InvariantCulture);
             //Default networks settings
-            XElement defaultNetworksElem = readoutLayerSettingsElem.Descendants("defaultNetworks").FirstOrDefault();
+            XElement defaultNetworksElem = readoutLayerSettingsElem.Elements("defaultNetworks").FirstOrDefault();
             DefaultNetworksCfg = defaultNetworksElem == null ? new DefaultNetworksSettings() : new DefaultNetworksSettings(defaultNetworksElem);
             //Readout units
-            XElement readoutUnitsElem = readoutLayerSettingsElem.Descendants("readoutUnits").First();
+            XElement readoutUnitsElem = readoutLayerSettingsElem.Elements("readoutUnits").First();
             ReadoutUnitsCfg = new ReadoutUnitsSettings(readoutUnitsElem);
             Check();
             return;

@@ -68,7 +68,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
             NumOfNeurons = int.Parse(settingsElem.Attribute("neurons").Value);
-            ActivationCfg = ActivationFactory.LoadSettings(settingsElem.Descendants().First());
+            ActivationCfg = ActivationFactory.LoadSettings(settingsElem.Elements().First());
             FeedForwardNetworkSettings.CheckAllowedActivation(ActivationCfg, out _);
             Check();
             return;

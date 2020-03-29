@@ -76,9 +76,9 @@ namespace RCNet.Neural.Network.SM.Readout
             //Validation
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
-            XElement classificationNetworksSettingsElem = settingsElem.Descendants("classification").FirstOrDefault();
+            XElement classificationNetworksSettingsElem = settingsElem.Elements("classification").FirstOrDefault();
             ClassificationNetworksCfg = classificationNetworksSettingsElem == null ? new ClassificationNetworksSettings() : new ClassificationNetworksSettings(classificationNetworksSettingsElem);
-            XElement forecastNetworksSettingsElem = settingsElem.Descendants("forecast").FirstOrDefault();
+            XElement forecastNetworksSettingsElem = settingsElem.Elements("forecast").FirstOrDefault();
             ForecastNetworksCfg = forecastNetworksSettingsElem == null ? new ForecastNetworksSettings() : new ForecastNetworksSettings(forecastNetworksSettingsElem);
             return;
         }

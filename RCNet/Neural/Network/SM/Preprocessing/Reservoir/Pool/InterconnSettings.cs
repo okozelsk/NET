@@ -86,7 +86,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
             SchemaCfgCollection = new List<IInterconnSchemaSettings>();
-            foreach (XElement schemaElem in settingsElem.Descendants())
+            foreach (XElement schemaElem in settingsElem.Elements())
             {
                 if (schemaElem.Name.LocalName == "randomSchema")
                 {

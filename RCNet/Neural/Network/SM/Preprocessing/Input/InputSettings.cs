@@ -69,9 +69,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             //Validation
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
-            XElement feedingElem = settingsElem.Descendants().First();
+            XElement feedingElem = settingsElem.Elements().First();
             FeedingCfg = feedingElem.Name.LocalName == "feedingContinuous" ? (IFeedingSettings) new FeedingContinuousSettings(feedingElem) : new FeedingPatternedSettings(feedingElem);
-            FieldsCfg = new FieldsSettings(settingsElem.Descendants("fields").First());
+            FieldsCfg = new FieldsSettings(settingsElem.Elements("fields").First());
             Check();
             return;
         }

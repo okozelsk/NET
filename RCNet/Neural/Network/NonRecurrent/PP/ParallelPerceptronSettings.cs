@@ -96,7 +96,7 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
             //Parsing
             Gates = int.Parse(settingsElem.Attribute("gates").Value, CultureInfo.InvariantCulture);
             Resolution = int.Parse(settingsElem.Attribute("resolution").Value, CultureInfo.InvariantCulture);
-            XElement pDeltaRuleTrainerElem = settingsElem.Descendants("pDeltaRuleTrainer").First();
+            XElement pDeltaRuleTrainerElem = settingsElem.Elements("pDeltaRuleTrainer").First();
             PDeltaRuleTrainerCfg = new PDeltaRuleTrainerSettings(pDeltaRuleTrainerElem);
             Check();
             return;

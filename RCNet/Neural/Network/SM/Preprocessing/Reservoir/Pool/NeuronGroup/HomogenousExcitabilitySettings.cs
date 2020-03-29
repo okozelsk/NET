@@ -28,6 +28,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         public const string XsdTypeName = "HomogenousExcitabilityType";
         //Default values
         /// <summary>
+        /// Default input strength
+        /// </summary>
+        public const double DefaultInputStrength = 0.5d;
+        /// <summary>
+        /// Default excitatory strength
+        /// </summary>
+        public const double DefaultExcitatoryStrength = 0.5d;
+        /// <summary>
         /// Default inhibitory ratio
         /// </summary>
         public const double DefaultInhibitoryRatio = 0.25d;
@@ -56,8 +64,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// <param name="inputStrength">Strength of sum of all input synapses</param>
         /// <param name="excitatoryStrength">Strength of sum of all excitatory synapses</param>
         /// <param name="inhibitoryRatio">Determines inhibitory strength (inhibitory strength = InhibitoryRatio * (excitatory strength + input strength))</param>
-        public HomogenousExcitabilitySettings(double inputStrength,
-                                              double excitatoryStrength,
+        public HomogenousExcitabilitySettings(double inputStrength = DefaultInputStrength,
+                                              double excitatoryStrength = DefaultExcitatoryStrength,
                                               double inhibitoryRatio = DefaultInhibitoryRatio
                                               )
         {
@@ -98,6 +106,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// <summary>
         /// Checks if settings are default
         /// </summary>
+        public bool IsDefaultInputStrength { get { return (InputStrength == DefaultInputStrength); } }
+        /// <summary>
+        /// Checks if settings are default
+        /// </summary>
+        public bool IsDefaultExcitatoryStrength { get { return (ExcitatoryStrength == DefaultExcitatoryStrength); } }
+        /// <summary>
+        /// Checks if settings are default
+        /// </summary>
         public bool IsDefaultInhibitoryRatio { get { return (InhibitoryRatio == DefaultInhibitoryRatio); } }
 
         /// <summary>
@@ -107,7 +123,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         {
             get
             {
-                return false;
+                return IsDefaultInputStrength &&
+                       IsDefaultExcitatoryStrength &&
+                       IsDefaultInhibitoryRatio;
             }
         }
 
@@ -148,11 +166,16 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
-            XElement rootElem = new XElement(rootElemName,
-                                             new XAttribute("inputStrength", InputStrength.ToString(CultureInfo.InvariantCulture)),
-                                             new XAttribute("excitatoryStrength", ExcitatoryStrength.ToString(CultureInfo.InvariantCulture))
-                                             );
-            if(!suppressDefaults || !IsDefaultInhibitoryRatio)
+            XElement rootElem = new XElement(rootElemName);
+            if (!suppressDefaults || !IsDefaultInputStrength)
+            {
+                rootElem.Add(new XAttribute("inputStrength", InputStrength.ToString(CultureInfo.InvariantCulture)));
+            }
+            if (!suppressDefaults || !IsDefaultExcitatoryStrength)
+            {
+                rootElem.Add(new XAttribute("excitatoryStrength", ExcitatoryStrength.ToString(CultureInfo.InvariantCulture)));
+            }
+            if (!suppressDefaults || !IsDefaultInhibitoryRatio)
             {
                 rootElem.Add(new XAttribute("inhibitoryRatio", InhibitoryRatio.ToString(CultureInfo.InvariantCulture)));
             }

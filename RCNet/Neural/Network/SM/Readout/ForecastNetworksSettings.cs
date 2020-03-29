@@ -100,7 +100,7 @@ namespace RCNet.Neural.Network.SM.Readout
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
             NetworkCfgCollection = new List<INonRecurrentNetworkSettings>();
-            foreach (XElement ffSettingsElem in settingsElem.Descendants("ff"))
+            foreach (XElement ffSettingsElem in settingsElem.Elements("ff"))
             {
                 NetworkCfgCollection.Add(new FeedForwardNetworkSettings(ffSettingsElem));
             }

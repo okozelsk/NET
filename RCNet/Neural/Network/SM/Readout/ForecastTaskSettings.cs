@@ -77,7 +77,7 @@ namespace RCNet.Neural.Network.SM.Readout
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
             //Filter
-            XElement filterSettingsElem = settingsElem.Descendants().First();
+            XElement filterSettingsElem = settingsElem.Elements().First();
             switch(filterSettingsElem.Name.LocalName)
             {
                 case "binFeature":
@@ -93,7 +93,7 @@ namespace RCNet.Neural.Network.SM.Readout
                     throw new Exception("Feature filter element not found.");
             }
             //Networks
-            XElement forecastNetworksSettingsElem = settingsElem.Descendants("networks").FirstOrDefault();
+            XElement forecastNetworksSettingsElem = settingsElem.Elements("networks").FirstOrDefault();
             NetworksCfg = forecastNetworksSettingsElem == null ? new ForecastNetworksSettings() : new ForecastNetworksSettings(forecastNetworksSettingsElem);
             return;
         }

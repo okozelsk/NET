@@ -159,7 +159,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
             //Relative share
             RelShare = double.Parse(settingsElem.Attribute("relShare").Value, CultureInfo.InvariantCulture);
             //Activation settings
-            ActivationCfg = ActivationFactory.LoadSettings(settingsElem.Descendants().First());
+            ActivationCfg = ActivationFactory.LoadSettings(settingsElem.Elements().First());
             //Firing threshold
             FiringThreshold = double.Parse(settingsElem.Attribute("firingThreshold").Value, CultureInfo.InvariantCulture);
             //Signaling restriction
@@ -167,13 +167,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
             //Readout neurons density
             ReadoutDensity = double.Parse(settingsElem.Attribute("readoutDensity").Value, CultureInfo.InvariantCulture);
             //Bias
-            XElement biasSettingsElem = settingsElem.Descendants("bias").FirstOrDefault();
+            XElement biasSettingsElem = settingsElem.Elements("bias").FirstOrDefault();
             BiasCfg = biasSettingsElem == null ? null : new RandomValueSettings(biasSettingsElem);
             //Retainment
-            XElement retainmentSettingsElem = settingsElem.Descendants("retainment").FirstOrDefault();
+            XElement retainmentSettingsElem = settingsElem.Elements("retainment").FirstOrDefault();
             RetainmentCfg = retainmentSettingsElem == null ? null : new RetainmentSettings(retainmentSettingsElem);
             //Predictors
-            XElement predictorsSettingsElem = settingsElem.Descendants("predictors").FirstOrDefault();
+            XElement predictorsSettingsElem = settingsElem.Elements("predictors").FirstOrDefault();
             if (predictorsSettingsElem != null)
             {
                 PredictorsCfg = new PredictorsSettings(predictorsSettingsElem);

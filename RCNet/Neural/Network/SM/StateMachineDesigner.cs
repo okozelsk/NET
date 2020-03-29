@@ -143,8 +143,13 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         /// <param name="netCfg">FF network configuration to be associated with readout units</param>
         /// <param name="testDataRatio">Specifies what part of available data to be used as test data</param>
+        /// <param name="repetitions">Number of repetitions of the folds regression</param>
         /// <param name="unitName">Readout unit name</param>
-        public static ReadoutLayerSettings CreateForecastReadoutCfg(FeedForwardNetworkSettings netCfg, double testDataRatio, params string[] unitName)
+        public static ReadoutLayerSettings CreateForecastReadoutCfg(FeedForwardNetworkSettings netCfg,
+                                                                    double testDataRatio,
+                                                                    int repetitions,
+                                                                    params string[] unitName
+                                                                    )
         {
             if (netCfg == null)
             {
@@ -158,7 +163,7 @@ namespace RCNet.Neural.Network.SM
             return new ReadoutLayerSettings(new ReadoutUnitsSettings(unitCfgCollection),
                                             testDataRatio,
                                             ReadoutLayerSettings.AutoFolds,
-                                            1,
+                                            repetitions,
                                             new DefaultNetworksSettings(null, new ForecastNetworksSettings(netCfg))
                                             );
         }
@@ -168,10 +173,12 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         /// <param name="netCfg">FF network configuration to be associated with readout units</param>
         /// <param name="testDataRatio">Specifies what part of available data to be used as test data</param>
+        /// <param name="repetitions">Number of repetitions of the folds regression</param>
         /// <param name="oneWinnerGroupName">Name of the "one winner" group encapsulating classification readout units</param>
         /// <param name="unitName">Readout unit name</param>
         public static ReadoutLayerSettings CreateClassificationReadoutCfg(FeedForwardNetworkSettings netCfg,
                                                                           double testDataRatio,
+                                                                          int repetitions,
                                                                           string oneWinnerGroupName,
                                                                           params string[] unitName
                                                                           )
@@ -188,7 +195,7 @@ namespace RCNet.Neural.Network.SM
             return new ReadoutLayerSettings(new ReadoutUnitsSettings(unitCfgCollection),
                                             testDataRatio,
                                             ReadoutLayerSettings.AutoFolds,
-                                            1,
+                                            repetitions,
                                             new DefaultNetworksSettings(new ClassificationNetworksSettings(netCfg), null)
                                             );
         }
@@ -277,6 +284,7 @@ namespace RCNet.Neural.Network.SM
         /// Creates configuration of group of spiking neurons having specified spiking activation.
         /// </summary>
         /// <param name="activationCfg">Activation function configuration</param>
+        /// <param name="heCfg">Configuration of the homogenous excitability</param>
         /// <param name="steadyBias">Constant bias (0 means bias is not required)</param>
         private SpikingNeuronGroupSettings CreateSpikingGroup(RCNetBaseSettings activationCfg, HomogenousExcitabilitySettings heCfg, double steadyBias = 0d)
         {
@@ -305,6 +313,7 @@ namespace RCNet.Neural.Network.SM
         /// <param name="maxInternalDelay">Maximum delay of internal synapse</param>
         /// <param name="maxAbsBias">Maximum absolute value of the bias (0 means bias is not required)</param>
         /// <param name="maxRetainmentStrength">Maximum retainment strength (0 means retainment property is not required)</param>
+        /// <param name="predictorsParamsCfg">Predictors parameters (use null for defaults)</param>
         /// <param name="allowedPredictor">Allowed predictor(s)</param>
         public StateMachineSettings CreatePureESNCfg(int totalSize,
                                                      double inputConnectionDensity,
@@ -313,6 +322,7 @@ namespace RCNet.Neural.Network.SM
                                                      int maxInternalDelay,
                                                      double maxAbsBias,
                                                      double maxRetainmentStrength,
+                                                     PredictorsParamsSettings predictorsParamsCfg,
                                                      params PredictorsProvider.PredictorID[] allowedPredictor
                                                      )
         {
@@ -339,9 +349,17 @@ namespace RCNet.Neural.Network.SM
                 InputUnitConnSettings inputUnitConnCfg = new InputUnitConnSettings(poolCfg.Name,
                                                                                    0,
                                                                                    inputConnectionDensity,
+                                                                                   InputUnitConnSettings.DefaultMeanSpikingSynapsesPerNeuron,
                                                                                    NeuronCommon.NeuronSignalingRestrictionType.AnalogOnly
                                                                                    );
-                inputUnits.Add(new InputUnitSettings(fieldCfg.Name, new InputUnitConnsSettings(inputUnitConnCfg)));
+                inputUnits.Add(new InputUnitSettings(fieldCfg.Name,
+                                                     new InputUnitConnsSettings(inputUnitConnCfg),
+                                                     InputUnitSettings.DefaultSpikeTrainLength,
+                                                     InputUnitSettings.DefaultAnalogFiringThreshold,
+                                                     false,
+                                                     false
+                                                     )
+                               );
             }
             //Synapse general configuration
             AnalogSourceSettings asc = new AnalogSourceSettings(new URandomValueSettings(0, maxInpSynWeight));
@@ -351,7 +369,7 @@ namespace RCNet.Neural.Network.SM
             SynapseSettings synapseCfg = new SynapseSettings(null, synapseATCfg);
 
             //Initially set all switches to false - all available predictors are forbidden
-            bool[] predictorSwitches = new bool[PredictorsProvider.NumOfPredictors];
+            bool[] predictorSwitches = new bool[PredictorsProvider.NumOfSupportedPredictors];
             predictorSwitches.Populate(false);
             //Enable specified predictors
             foreach(PredictorsProvider.PredictorID predictorID in allowedPredictor)
@@ -359,7 +377,7 @@ namespace RCNet.Neural.Network.SM
                 predictorSwitches[(int)predictorID] = true;
             }
             //Create predictors configuration using default params
-            PredictorsSettings predictorsCfg = new PredictorsSettings(predictorSwitches, null);
+            PredictorsSettings predictorsCfg = new PredictorsSettings(predictorSwitches, predictorsParamsCfg);
             //Create reservoir instance
             ReservoirInstanceSettings resInstCfg = new ReservoirInstanceSettings(GetResInstName(ResDesign.PureESN, 0),
                                                                                  resStructCfg.Name,
@@ -384,20 +402,24 @@ namespace RCNet.Neural.Network.SM
         /// <param name="aFnCfg">Spiking activation function configuration</param>
         /// <param name="hes">Homogenous excitability configuration</param>
         /// <param name="inputConnectionDensity">Density of the input field connections to hidden neurons</param>
+        /// <param name="meanSpikingSynapsesPerNeuron">Mean number of spiking synapses per target neuron</param>
         /// <param name="maxInputDelay">Maximum delay of input synapse</param>
         /// <param name="interconnectionDensity">Density of the hidden neurons interconnection</param>
         /// <param name="maxInternalDelay">Maximum delay of internal synapse</param>
         /// <param name="steadyBias">Constant bias (0 means bias is not required)</param>
+        /// <param name="predictorsParamsCfg">Predictors parameters (use null for defaults)</param>
         /// <param name="allowedPredictor">Allowed predictor(s)</param>
         public StateMachineSettings CreatePureLSMCfg(ProportionsSettings proportionsCfg,
                                                      int inputSpikeTrainLength,
                                                      RCNetBaseSettings aFnCfg,
                                                      HomogenousExcitabilitySettings hes,
                                                      double inputConnectionDensity,
+                                                     double meanSpikingSynapsesPerNeuron,
                                                      int maxInputDelay,
                                                      double interconnectionDensity,
                                                      int maxInternalDelay,
                                                      double steadyBias,
+                                                     PredictorsParamsSettings predictorsParamsCfg,
                                                      params PredictorsProvider.PredictorID[] allowedPredictor
                                                      )
         {
@@ -425,9 +447,16 @@ namespace RCNet.Neural.Network.SM
                 InputUnitConnSettings inputUnitConnCfg = new InputUnitConnSettings(poolCfg.Name,
                                                                                    inputConnectionDensity,
                                                                                    0,
+                                                                                   meanSpikingSynapsesPerNeuron,
                                                                                    inputSpikeTrainLength > 0 ? NeuronCommon.NeuronSignalingRestrictionType.SpikingOnly : NeuronCommon.NeuronSignalingRestrictionType.AnalogOnly
                                                                                    );
-                inputUnits.Add(new InputUnitSettings(fieldCfg.Name, new InputUnitConnsSettings(inputUnitConnCfg), inputSpikeTrainLength > 0 ? inputSpikeTrainLength : 1));
+                inputUnits.Add(new InputUnitSettings(fieldCfg.Name,
+                                                     new InputUnitConnsSettings(inputUnitConnCfg), inputSpikeTrainLength > 0 ? inputSpikeTrainLength : 1,
+                                                     InputUnitSettings.DefaultAnalogFiringThreshold,
+                                                     true,
+                                                     true
+                                                     )
+                               );
             }
             //Synapse general configuration
             SynapseSTInputSettings synapseSTInputSettings = new SynapseSTInputSettings(Synapse.SynapticDelayMethod.Random, maxInputDelay);
@@ -437,7 +466,7 @@ namespace RCNet.Neural.Network.SM
             SynapseSettings synapseCfg = new SynapseSettings(synapseSTCfg, null);
 
             //Initially set all switches to false - all available predictors are forbidden
-            bool[] predictorSwitches = new bool[PredictorsProvider.NumOfPredictors];
+            bool[] predictorSwitches = new bool[PredictorsProvider.NumOfSupportedPredictors];
             predictorSwitches.Populate(false);
             //Enable specified predictors
             foreach (PredictorsProvider.PredictorID predictorID in allowedPredictor)
@@ -445,7 +474,7 @@ namespace RCNet.Neural.Network.SM
                 predictorSwitches[(int)predictorID] = true;
             }
             //Create predictors configuration using default params
-            PredictorsSettings predictorsCfg = new PredictorsSettings(predictorSwitches, null);
+            PredictorsSettings predictorsCfg = new PredictorsSettings(predictorSwitches, predictorsParamsCfg);
             //Create reservoir instance
             ReservoirInstanceSettings resInstCfg = new ReservoirInstanceSettings(GetResInstName(ResDesign.PureLSM, 0),
                                                                                  resStructCfg.Name,

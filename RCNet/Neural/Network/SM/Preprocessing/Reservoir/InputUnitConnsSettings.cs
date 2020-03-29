@@ -86,7 +86,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
             ConnCfgCollection = new List<InputUnitConnSettings>();
-            foreach (XElement connElem in settingsElem.Descendants("connection"))
+            foreach (XElement connElem in settingsElem.Elements("connection"))
             {
                 ConnCfgCollection.Add(new InputUnitConnSettings(connElem));
             }

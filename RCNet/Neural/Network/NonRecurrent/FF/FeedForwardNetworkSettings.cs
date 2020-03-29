@@ -96,11 +96,11 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             //Validation
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
-            OutputActivationCfg = ActivationFactory.LoadSettings(settingsElem.Descendants().First());
+            OutputActivationCfg = ActivationFactory.LoadSettings(settingsElem.Elements().First());
             CheckAllowedActivation(OutputActivationCfg, out Interval outputRange);
             OutputRange = outputRange;
             //Hidden layers
-            XElement hiddenLayersElem = settingsElem.Descendants("hiddenLayers").FirstOrDefault();
+            XElement hiddenLayersElem = settingsElem.Elements("hiddenLayers").FirstOrDefault();
             if (hiddenLayersElem != null)
             {
                 HiddenLayersCfg = new HiddenLayersSettings(hiddenLayersElem);
@@ -111,7 +111,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             }
             //Trainer configuration
             TrainerCfg = null;
-            foreach(XElement candidate in settingsElem.Descendants())
+            foreach(XElement candidate in settingsElem.Elements())
             {
                 if(candidate.Name.LocalName == "qrdRegrTrainer")
                 {

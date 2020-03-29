@@ -158,6 +158,7 @@ namespace Demo.DemoConsoleApp.Examples
             InputUnitConnSettings inputUnitConnCfg = new InputUnitConnSettings(poolName,
                                                                                0,
                                                                                1,
+                                                                               InputUnitConnSettings.DefaultMeanSpikingSynapsesPerNeuron,
                                                                                NeuronCommon.NeuronSignalingRestrictionType.AnalogOnly
                                                                                );
             return inputUnitConnCfg;
@@ -229,13 +230,13 @@ namespace Demo.DemoConsoleApp.Examples
             //Predictors configuration
             //We use constructor accepting array of boolean switches
             //Initially we set all switches to false - all available predictors are forbidden
-            bool[] predictorSwitches = new bool[PredictorsProvider.NumOfPredictors];
+            bool[] predictorSwitches = new bool[PredictorsProvider.NumOfSupportedPredictors];
             predictorSwitches.Populate(false);
             //Now we enable Activation and ActivationMWAvg predictors
             predictorSwitches[(int)PredictorsProvider.PredictorID.Activation] = true;
             predictorSwitches[(int)PredictorsProvider.PredictorID.ActivationMWAvg] = true;
             //We configure activation moving average predictor to use constant weights and last 7 values without the leaks
-            ActivationMWAvgSettings activationMWAvgCfg = new ActivationMWAvgSettings(7, 0, PredictorsProvider.PredictorMWAvgWeightsType.Constant);
+            ActivationMWAvgSettings activationMWAvgCfg = new ActivationMWAvgSettings(7, PredictorsProvider.PredictorMWAvgWeightsType.Constant);
             //We create predictors parameters configuration including custom configuration of activation moving average predictor
             PredictorsParamsSettings predictorsParamsCfg = new PredictorsParamsSettings(activationMWAvgCfg);
             //Create predictors configuration using prepared boolean switches and predictors parameters

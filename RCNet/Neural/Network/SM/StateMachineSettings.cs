@@ -97,12 +97,12 @@ namespace RCNet.Neural.Network.SM
             //Parsing
             RandomizerSeek = int.Parse(settingsElem.Attribute("randomizerSeek").Value);
             //Neural preprocessor
-            XElement neuralPreprocessorElem = settingsElem.Descendants("neuralPreprocessor").FirstOrDefault();
+            XElement neuralPreprocessorElem = settingsElem.Elements("neuralPreprocessor").FirstOrDefault();
             NeuralPreprocessorCfg = neuralPreprocessorElem == null ? null : new NeuralPreprocessorSettings(neuralPreprocessorElem);
             //Readout layer
-            ReadoutLayerCfg = new ReadoutLayerSettings(settingsElem.Descendants("readoutLayer").First());
+            ReadoutLayerCfg = new ReadoutLayerSettings(settingsElem.Elements("readoutLayer").First());
             //Mapper
-            XElement mapperSettingsElem = settingsElem.Descendants("mapper").FirstOrDefault();
+            XElement mapperSettingsElem = settingsElem.Elements("mapper").FirstOrDefault();
             MapperCfg = mapperSettingsElem == null ? null : new MapperSettings(mapperSettingsElem);
             Check();
             return;

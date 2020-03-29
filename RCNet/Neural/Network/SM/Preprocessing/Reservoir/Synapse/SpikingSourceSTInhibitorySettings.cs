@@ -86,9 +86,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
             //Validation
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
-            XElement weightSettingsElem = settingsElem.Descendants("weight").FirstOrDefault();
+            XElement weightSettingsElem = settingsElem.Elements("weight").FirstOrDefault();
             WeightCfg = weightSettingsElem == null ? new URandomValueSettings(DefaultMinWeight, DefaultMaxWeight) : new URandomValueSettings(weightSettingsElem);
-            XElement plasticitySettingsElem = settingsElem.Descendants("plasticity").FirstOrDefault();
+            XElement plasticitySettingsElem = settingsElem.Elements("plasticity").FirstOrDefault();
             PlasticityCfg = plasticitySettingsElem == null ? new PlasticitySTInhibitorySettings() : new PlasticitySTInhibitorySettings(plasticitySettingsElem);
             Check();
             return;

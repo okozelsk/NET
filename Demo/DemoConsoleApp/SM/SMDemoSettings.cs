@@ -50,11 +50,11 @@ namespace Demo.DemoConsoleApp.SM
             XDocument xmlDoc = validator.LoadXDocFromFile(fileName);
             //Parsing
             //Data folder
-            XElement root = xmlDoc.Descendants("demo").First();
+            XElement root = xmlDoc.Elements("demo").First();
             DataFolder = root.Attribute("dataFolder").Value;
             //Demo cases definitions
             CaseCfgCollection = new List<CaseSettings>();
-            foreach (XElement demoCaseParamsElem in root.Descendants("case"))
+            foreach (XElement demoCaseParamsElem in root.Elements("case"))
             {
                 CaseCfgCollection.Add(new CaseSettings(demoCaseParamsElem, DataFolder));
             }
@@ -93,7 +93,7 @@ namespace Demo.DemoConsoleApp.SM
                 //Demo case name
                 Name = demoCaseElem.Attribute("name").Value;
                 //Samples
-                XElement samplesElem = demoCaseElem.Descendants("samples").First();
+                XElement samplesElem = demoCaseElem.Elements("samples").First();
                 //Full path to training csv file
                 TrainingDataFileName = dir + "\\" + samplesElem.Attribute("trainingData").Value;
                 //Verification data file
@@ -108,7 +108,7 @@ namespace Demo.DemoConsoleApp.SM
                     VerificationDataFileName = string.Empty;
                 }
                 //State Machine configuration
-                StateMachineCfg = new StateMachineSettings(demoCaseElem.Descendants("stateMachineCfg").First());
+                StateMachineCfg = new StateMachineSettings(demoCaseElem.Elements("stateMachineCfg").First());
                 return;
             }
 

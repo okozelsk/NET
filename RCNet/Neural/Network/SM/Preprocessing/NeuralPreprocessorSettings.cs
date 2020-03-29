@@ -97,9 +97,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             //Validation
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
-            InputCfg = new InputSettings(settingsElem.Descendants("input").First());
-            ReservoirStructuresCfg = new ReservoirStructuresSettings(settingsElem.Descendants("reservoirStructures").First());
-            ReservoirInstancesCfg = new ReservoirInstancesSettings(settingsElem.Descendants("reservoirInstances").First());
+            InputCfg = new InputSettings(settingsElem.Elements("input").First());
+            ReservoirStructuresCfg = new ReservoirStructuresSettings(settingsElem.Elements("reservoirStructures").First());
+            ReservoirInstancesCfg = new ReservoirInstancesSettings(settingsElem.Elements("reservoirInstances").First());
             PredictorsReductionRatio = double.Parse(settingsElem.Attribute("predictorsReductionRatio").Value, CultureInfo.InvariantCulture);
             Check();
             return;

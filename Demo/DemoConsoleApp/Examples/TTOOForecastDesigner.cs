@@ -47,13 +47,14 @@ namespace Demo.DemoConsoleApp.Examples
             //Simplified readout layer configuration
             ReadoutLayerSettings readoutCfg = StateMachineDesigner.CreateForecastReadoutCfg(StateMachineDesigner.CreateSingleLayerRegrNet(new IdentitySettings(), 2, 1000),
                                                                                             0.1d,
+                                                                                            1,
                                                                                             "High",
                                                                                             "Low"
                                                                                             );
             //Create designer instance
             StateMachineDesigner smd = new StateMachineDesigner(inputCfg, readoutCfg);
             //Create pure ESN fashioned StateMachine configuration
-            StateMachineSettings stateMachineCfg = smd.CreatePureESNCfg(250, 1, 0, 0.2d, 0, 0.1d, 0.75d, PredictorsProvider.PredictorID.Activation, PredictorsProvider.PredictorID.ActivationSquare);
+            StateMachineSettings stateMachineCfg = smd.CreatePureESNCfg(250, 1, 0, 0.2d, 0, 0.1d, 0.75d, null, PredictorsProvider.PredictorID.Activation, PredictorsProvider.PredictorID.ActivationSquare);
             //Display StateMachine xml configuration
             string xmlConfig = stateMachineCfg.GetXml(true).ToString();
             _log.Write("StateMachine configuration xml:");

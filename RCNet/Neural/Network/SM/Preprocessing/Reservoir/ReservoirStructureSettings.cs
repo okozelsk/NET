@@ -82,10 +82,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             //Parsing
             Name = reservoirSettingsElem.Attribute("name").Value;
             //Pool settings collection
-            PoolsCfg = new PoolsSettings(reservoirSettingsElem.Descendants("pools").First());
+            PoolsCfg = new PoolsSettings(reservoirSettingsElem.Elements("pools").First());
             //Inter pool connections
             InterPoolConnectionsCfg = null;
-            XElement interPoolConnectionsElem = reservoirSettingsElem.Descendants("interPoolConnections").FirstOrDefault();
+            XElement interPoolConnectionsElem = reservoirSettingsElem.Elements("interPoolConnections").FirstOrDefault();
             if (interPoolConnectionsElem != null)
             {
                 InterPoolConnectionsCfg = new InterPoolConnsSettings(interPoolConnectionsElem);

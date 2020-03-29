@@ -86,7 +86,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
             GroupCfgCollection = new List<INeuronGroupSettings>();
-            foreach (XElement schemaElem in settingsElem.Descendants())
+            foreach (XElement schemaElem in settingsElem.Elements())
             {
                 if (schemaElem.Name.LocalName == "analogGroup")
                 {

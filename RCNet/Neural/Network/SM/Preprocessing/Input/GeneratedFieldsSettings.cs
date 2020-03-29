@@ -86,7 +86,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
             FieldCfgCollection = new List<GeneratedFieldSettings>();
-            foreach (XElement fieldElem in settingsElem.Descendants("field"))
+            foreach (XElement fieldElem in settingsElem.Elements("field"))
             {
                 FieldCfgCollection.Add(new GeneratedFieldSettings(fieldElem));
             }

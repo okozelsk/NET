@@ -87,7 +87,7 @@ namespace RCNet.Neural.Network.SM.PM
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
             AllowedInputFieldCfgCollection = new List<AllowedInputFieldSettings>();
-            foreach (XElement fieldElem in settingsElem.Descendants("field"))
+            foreach (XElement fieldElem in settingsElem.Elements("field"))
             {
                 AllowedInputFieldCfgCollection.Add(new AllowedInputFieldSettings(fieldElem));
             }

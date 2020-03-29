@@ -55,6 +55,7 @@ namespace Demo.DemoConsoleApp.Examples
             //ReadoutLayerSettings readoutCfg = StateMachineDesigner.CreateClassificationReadoutCfg(StateMachineDesigner.CreateMultiLayerRegrNet(10, new LeakyReLUSettings(), 1, 5, 400),
             ReadoutLayerSettings readoutCfg = StateMachineDesigner.CreateClassificationReadoutCfg(StateMachineDesigner.CreateSingleLayerRegrNet(new ElliotSettings(), 5, 400),
                                                                                                   0.0825d,
+                                                                                                  1,
                                                                                                   "Hand movement",
                                                                                                   "curved swing",
                                                                                                   "horizontal swing",
@@ -78,13 +79,16 @@ namespace Demo.DemoConsoleApp.Examples
             StateMachineSettings stateMachineCfg = smd.CreatePureLSMCfg(new ProportionsSettings(8, 5, 5), //Proportions (it also determines total size)
                                                                         4, //Input spike-train length (0 means use analog instead of spike-train])
                                                                         new AdExpIFSettings(), //Activation
-                                                                        new HomogenousExcitabilitySettings(0.2, 0.2, 0.25),
-                                                                        0.1d, //Input connection density
-                                                                        0, //Input max delay
+                                                                        new HomogenousExcitabilitySettings(0.5, 0.5, 0.25),
+                                                                        0.2d, //Input connection density
+                                                                        2d, //Mean number of spiking synapses per target neuron
+                                                                        5, //Input max delay
                                                                         0.1d, //Interconnection density
                                                                         0, //Internal synapses max delay
                                                                         0, //Steady bias
-                                                                        PredictorsProvider.PredictorID.FiringFadingSum, PredictorsProvider.PredictorID.ActivationSquare
+                                                                        new PredictorsParamsSettings(new ActivationMWAvgSettings(64, PredictorsProvider.PredictorMWAvgWeightsType.Constant)),
+                                                                        PredictorsProvider.PredictorID.FiringFadingSum,
+                                                                        PredictorsProvider.PredictorID.ActivationMWAvg
                                                                         );
 
             //Display StateMachine xml configuration

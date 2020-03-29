@@ -91,7 +91,7 @@ namespace RCNet.Neural.Network.SM.Readout
             //Parsing
             OneWinnerGroupName = settingsElem.Attribute("oneWinnerGroupName").Value;
             //Networks
-            XElement classificationNetworksSettingsElem = settingsElem.Descendants("networks").FirstOrDefault();
+            XElement classificationNetworksSettingsElem = settingsElem.Elements("networks").FirstOrDefault();
             NetworksCfg = classificationNetworksSettingsElem == null ? new ClassificationNetworksSettings() : new ClassificationNetworksSettings(classificationNetworksSettingsElem);
             Check();
             return;

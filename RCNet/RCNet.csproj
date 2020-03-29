@@ -171,6 +171,8 @@
     <Compile Include="Neural\Network\SM\Preprocessing\Input\ResamplingSettings.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\Input\FeedingContinuousSettings.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\Reservoir\InputUnitConnSettings.cs" />
+    <Compile Include="Neural\Network\SM\Preprocessing\Reservoir\Neuron\SpikingInputNeuron.cs" />
+    <Compile Include="Neural\Network\SM\Preprocessing\Reservoir\Neuron\AnalogInputNeuron.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\Reservoir\Neuron\Predictor\IPredictorParamsSettings.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\Reservoir\Neuron\Predictor\FiringBinPatternSettings.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\Reservoir\Neuron\Predictor\FiringCountSettings.cs" />
@@ -302,7 +304,6 @@
     <Compile Include="Neural\Network\SM\Preprocessing\Reservoir\Neuron\Predictor\PredictorsSettings.cs" />
     <Compile Include="MathTools\Probability\RelShareSelector.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\Reservoir\InputUnitSettings.cs" />
-    <Compile Include="Neural\Network\SM\Preprocessing\Reservoir\Neuron\InputNeuron.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\Reservoir\Neuron\NeuronStatistics.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\Reservoir\ReservoirInstance.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\Reservoir\ReservoirStructureSettings.cs" />

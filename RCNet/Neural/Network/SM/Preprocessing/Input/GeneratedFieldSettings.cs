@@ -88,7 +88,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             //Parsing
             Name = settingsElem.Attribute("name").Value;
             RouteToReadout = bool.Parse(settingsElem.Attribute("routeToReadout").Value);
-            XElement genElem = settingsElem.Descendants().First();
+            XElement genElem = settingsElem.Elements().First();
             GeneratorCfg = GeneratorFactory.LoadSettings(genElem);
             Check();
             return;

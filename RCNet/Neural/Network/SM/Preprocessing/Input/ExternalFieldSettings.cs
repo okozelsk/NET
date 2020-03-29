@@ -86,7 +86,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             //Parsing
             Name = settingsElem.Attribute("name").Value;
             RouteToReadout = bool.Parse(settingsElem.Attribute("routeToReadout").Value);
-            FeatureFilterCfg = FeatureFilterFactory.LoadSettings(settingsElem.Descendants().First());
+            FeatureFilterCfg = FeatureFilterFactory.LoadSettings(settingsElem.Elements().First());
             Check();
             return;
         }

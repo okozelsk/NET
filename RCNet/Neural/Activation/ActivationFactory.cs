@@ -167,15 +167,15 @@ namespace RCNet.Neural.Activation
             }
             else if (settingsType == typeof(AutoIzhikevichIFSettings))
             {
-                double randomValue = rand.NextRangedUniformDouble(0, 1);
+                double randomValue = rand.NextDouble().Power(2);
                 AutoIzhikevichIFSettings afs = (AutoIzhikevichIFSettings)settings;
                 //Ranges
-                af = new IzhikevichIF(0.2d,
-                                      0.2d,
-                                      3d + (-1d * randomValue.Power(2)),
-                                      -70d,
-                                      -68d + (1.5d * randomValue.Power(2)),
-                                      -64d,
+                af = new IzhikevichIF(0.02,
+                                      0.2,
+                                      8 + (-6 * randomValue),
+                                      -70,
+                                      -65 + (15 * randomValue),
+                                      30,
                                       afs.RefractoryPeriods,
                                       afs.SolverMethod,
                                       afs.SolverCompSteps
@@ -245,7 +245,7 @@ namespace RCNet.Neural.Activation
             //Set random initial membrane potential for spiking activation
             if(!af.Stateless && af.TypeOfActivation == ActivationType.Spiking)
             {
-                af.SetInitialInternalState(rand.NextRangedUniformDouble(0.25, 1));
+                //af.SetInitialInternalState(rand.NextRangedUniformDouble(0.25, 1));
             }
             return af;
         }

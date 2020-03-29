@@ -62,7 +62,7 @@ namespace RCNet.Neural.Activation
                    1,
                    solverCompSteps,
                    2,
-                   50,
+                   100,
                    1
                   )
         {

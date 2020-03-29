@@ -22,13 +22,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
         /// Creates an initialized instance
         /// </summary>
         /// <param name="window">Window length</param>
-        /// <param name="leakage">Leakage</param>
         /// <param name="weights">Type of weighting</param>
         public ActivationMWAvgSettings(int window = DefaultWindow,
-                                       int leakage = DefaultLeakage,
                                        PredictorsProvider.PredictorMWAvgWeightsType weights = DefaultWeights
                                        )
-            :base(window, leakage, weights)
+            :base(window, weights)
         {
             return;
         }

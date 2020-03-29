@@ -37,25 +37,25 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
 
         //Constructors
         /// <summary>
-        /// Creates initialized instance as a result of neuron group, pool and reservoir instance predictors settings
+        /// Creates initialized instance as a result of neuron, pool and reservoir instance predictors settings
         /// </summary>
-        /// <param name="groupPredictorsSettings">Neuron group predictors settings</param>
-        /// <param name="poolPredictorsSettings">Pool predictors settings</param>
-        /// <param name="reservoirPredictorsSettings">Reservoir predictors settings</param>
-        public PredictorsSettings(PredictorsSettings groupPredictorsSettings,
-                                  PredictorsSettings poolPredictorsSettings,
-                                  PredictorsSettings reservoirPredictorsSettings
+        /// <param name="neuronPredictorsCfg">Neuron predictors settings</param>
+        /// <param name="poolPredictorsCfg">Pool predictors settings</param>
+        /// <param name="reservoirPredictorsCfg">Reservoir predictors settings</param>
+        public PredictorsSettings(PredictorsSettings neuronPredictorsCfg,
+                                  PredictorsSettings poolPredictorsCfg,
+                                  PredictorsSettings reservoirPredictorsCfg
                                   )
         {
-            EnablingSwitchCollection = new bool[PredictorsProvider.NumOfPredictors];
+            EnablingSwitchCollection = new bool[PredictorsProvider.NumOfSupportedPredictors];
             //Params
-            ParamsCfg = groupPredictorsSettings?.ParamsCfg != null ? (PredictorsParamsSettings)groupPredictorsSettings.ParamsCfg.DeepClone() : (poolPredictorsSettings?.ParamsCfg != null ? (PredictorsParamsSettings)poolPredictorsSettings.ParamsCfg.DeepClone() : (reservoirPredictorsSettings?.ParamsCfg != null ? (PredictorsParamsSettings)reservoirPredictorsSettings.ParamsCfg.DeepClone() : new PredictorsParamsSettings()));
+            ParamsCfg = neuronPredictorsCfg?.ParamsCfg != null ? (PredictorsParamsSettings)neuronPredictorsCfg.ParamsCfg.DeepClone() : (poolPredictorsCfg?.ParamsCfg != null ? (PredictorsParamsSettings)poolPredictorsCfg.ParamsCfg.DeepClone() : (reservoirPredictorsCfg?.ParamsCfg != null ? (PredictorsParamsSettings)reservoirPredictorsCfg.ParamsCfg.DeepClone() : new PredictorsParamsSettings()));
             //Enabling switches
             foreach(PredictorsProvider.PredictorID predictorID in typeof(PredictorsProvider.PredictorID).GetEnumValues())
             {
-                EnablingSwitchCollection[(int)predictorID] = ((groupPredictorsSettings == null ? true : groupPredictorsSettings.EnablingSwitchCollection[(int)predictorID]) &&
-                              (poolPredictorsSettings == null ? true : poolPredictorsSettings.EnablingSwitchCollection[(int)predictorID]) &&
-                              (reservoirPredictorsSettings == null ? true : reservoirPredictorsSettings.EnablingSwitchCollection[(int)predictorID])
+                EnablingSwitchCollection[(int)predictorID] = ((neuronPredictorsCfg == null ? true : neuronPredictorsCfg.EnablingSwitchCollection[(int)predictorID]) &&
+                              (poolPredictorsCfg == null ? true : poolPredictorsCfg.EnablingSwitchCollection[(int)predictorID]) &&
+                              (reservoirPredictorsCfg == null ? true : reservoirPredictorsCfg.EnablingSwitchCollection[(int)predictorID])
                               );
             }
             return;
@@ -68,7 +68,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
         /// <param name="paramsCfg">Parameters of the predictors</param>
         public PredictorsSettings(bool[] enablingSwitchCollection = null, PredictorsParamsSettings paramsCfg = null)
         {
-            EnablingSwitchCollection = new bool[PredictorsProvider.NumOfPredictors];
+            EnablingSwitchCollection = new bool[PredictorsProvider.NumOfSupportedPredictors];
             if(enablingSwitchCollection != null)
             {
                 enablingSwitchCollection.CopyTo(EnablingSwitchCollection, 0);
@@ -104,7 +104,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
                                   PredictorsParamsSettings paramsCfg = null
                                   )
         {
-            EnablingSwitchCollection = new bool[PredictorsProvider.NumOfPredictors];
+            EnablingSwitchCollection = new bool[PredictorsProvider.NumOfSupportedPredictors];
             EnablingSwitchCollection[(int)PredictorsProvider.PredictorID.Activation] = activation;
             EnablingSwitchCollection[(int)PredictorsProvider.PredictorID.ActivationSquare] = activationSquare;
             EnablingSwitchCollection[(int)PredictorsProvider.PredictorID.ActivationFadingSum] = activationFadingSum;
@@ -141,14 +141,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
             //Validation
             XElement predictorsElem = Validate(elem, XsdTypeName);
             //Parsing of enabling switches
-            EnablingSwitchCollection = new bool[PredictorsProvider.NumOfPredictors];
+            EnablingSwitchCollection = new bool[PredictorsProvider.NumOfSupportedPredictors];
             foreach (PredictorsProvider.PredictorID predictorID in typeof(PredictorsProvider.PredictorID).GetEnumValues())
             {
                 EnablingSwitchCollection[(int)predictorID] = bool.Parse(predictorsElem.Attribute(GetXmlName(predictorID)).Value);
             }
             //Parsing of params
             ParamsCfg = null;
-            XElement paramsElem = predictorsElem.Descendants("params").FirstOrDefault();
+            XElement paramsElem = predictorsElem.Elements("params").FirstOrDefault();
             if (paramsElem != null)
             {
                 ParamsCfg = new PredictorsParamsSettings(paramsElem);
@@ -180,7 +180,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
         {
             get
             {
-                return (NumOfEnabledPredictors == PredictorsProvider.NumOfPredictors && (ParamsCfg == null || ParamsCfg.ContainsOnlyDefaults));
+                return (NumOfEnabledPredictors == PredictorsProvider.NumOfSupportedPredictors && (ParamsCfg == null || ParamsCfg.ContainsOnlyDefaults));
             }
         }
 
@@ -196,6 +196,18 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
         }
 
         //Methods
+        /// <summary>
+        /// Disables activation based predictors
+        /// </summary>
+        public void DisableActivationPredictors()
+        {
+            EnablingSwitchCollection[(int)PredictorsProvider.PredictorID.Activation] = false;
+            EnablingSwitchCollection[(int)PredictorsProvider.PredictorID.ActivationSquare] = false;
+            EnablingSwitchCollection[(int)PredictorsProvider.PredictorID.ActivationFadingSum] = false;
+            EnablingSwitchCollection[(int)PredictorsProvider.PredictorID.ActivationMWAvg] = false;
+            return;
+        }
+
         /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>

@@ -75,7 +75,7 @@ namespace RCNet.Neural.Network.SM.Readout
             //Name
             Name = settingsElem.Attribute("name").Value;
             //Task
-            XElement taskSettingsElem = settingsElem.Descendants().First();
+            XElement taskSettingsElem = settingsElem.Elements().First();
             if (taskSettingsElem.Name.LocalName == "forecast")
             {
                 TaskCfg = new ForecastTaskSettings(taskSettingsElem);

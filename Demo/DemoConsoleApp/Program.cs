@@ -12,6 +12,7 @@ namespace Demo.DemoConsoleApp
         {
             //Research - this is not a part of the demo - it is a free playground
             //(new Research()).Run();
+
             while (true)
             {
                 //Main menu
@@ -33,8 +34,7 @@ namespace Demo.DemoConsoleApp
                         try
                         {
                             //Run the demo
-                            SMDemo demoEngine = new SMDemo(new ConsoleLog());
-                            demoEngine.RunDemo(@"SM\SMDemoSettings.xml");
+                            (new SMDemo(new ConsoleLog())).RunDemo(@"SM\SMDemoSettings.xml");
                         }
                         catch (Exception e)
                         {

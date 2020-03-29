@@ -87,7 +87,7 @@ namespace RCNet.Neural.Network.SM.PM
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
             MapCfgCollection = new List<ReadoutUnitMapSettings>();
-            foreach (XElement mapElem in settingsElem.Descendants("map"))
+            foreach (XElement mapElem in settingsElem.Elements("map"))
             {
                 MapCfgCollection.Add(new ReadoutUnitMapSettings(mapElem));
             }

@@ -86,7 +86,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
             InterPoolConnectionCfgCollection = new List<InterPoolConnSettings>();
-            foreach (XElement poolElem in settingsElem.Descendants("interPoolConnection"))
+            foreach (XElement poolElem in settingsElem.Elements("interPoolConnection"))
             {
                 InterPoolConnectionCfgCollection.Add(new InterPoolConnSettings(poolElem));
             }

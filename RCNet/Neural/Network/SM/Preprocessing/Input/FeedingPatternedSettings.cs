@@ -104,7 +104,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             Bidir = bool.Parse(settingsElem.Attribute("bidir").Value);
             RouteToReadout = bool.Parse(settingsElem.Attribute("routeToReadout").Value);
             VarSchema = (InputPattern.VariablesSchema)Enum.Parse(typeof(InputPattern.VariablesSchema), settingsElem.Attribute("variablesSchema").Value, true);
-            XElement uniElem = settingsElem.Descendants("unification").FirstOrDefault();
+            XElement uniElem = settingsElem.Elements("unification").FirstOrDefault();
             if(uniElem != null)
             {
                 UnificationCfg = new UnificationSettings(uniElem);

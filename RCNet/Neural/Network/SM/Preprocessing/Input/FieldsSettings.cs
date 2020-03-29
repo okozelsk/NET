@@ -80,10 +80,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             //Validation
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
-            ExternalFieldsCfg = new ExternalFieldsSettings(settingsElem.Descendants("externalFields").First());
-            XElement transformedFieldsElem = settingsElem.Descendants("transformedFields").FirstOrDefault();
+            ExternalFieldsCfg = new ExternalFieldsSettings(settingsElem.Elements("externalFields").First());
+            XElement transformedFieldsElem = settingsElem.Elements("transformedFields").FirstOrDefault();
             TransformedFieldsCfg = transformedFieldsElem == null ? null : new TransformedFieldsSettings(transformedFieldsElem);
-            XElement generatedFieldsElem = settingsElem.Descendants("generatedFields").FirstOrDefault();
+            XElement generatedFieldsElem = settingsElem.Elements("generatedFields").FirstOrDefault();
             GeneratedFieldsCfg = generatedFieldsElem == null ? null : new GeneratedFieldsSettings(generatedFieldsElem);
             Check();
             return;

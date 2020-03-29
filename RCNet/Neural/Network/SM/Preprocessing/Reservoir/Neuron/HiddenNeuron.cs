@@ -146,12 +146,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron
         /// Type of the activation function
         /// </summary>
         public ActivationType TypeOfActivation { get { return _activation.TypeOfActivation; } }
-        
-        /// <summary>
-        /// Configuration of neuron's predictors
-        /// </summary>
-        public PredictorsSettings PredictorsCfg { get {return _predictors?.Cfg; } }
 
+        /// <summary>
+        /// Number of provided predictors
+        /// </summary>
+        public int NumOfEnabledPredictors { get { return _predictors == null ? 0 : _predictors.NumOfEnabledPredictors; } }
 
         //Methods
         /// <summary>
@@ -205,11 +204,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron
             }
             ++SpikeLeak;
 
-            if(_activation.TypeOfActivation == ActivationType.Spiking)
+            double normalizedActivation;
+            if (_activation.TypeOfActivation == ActivationType.Spiking)
             {
                 //Spiking activation
                 _spikingSignal = _activation.Compute(_tStimuli);
                 _activationState = _activation.InternalState;
+                normalizedActivation = _outputRange.Rescale(_activation.InternalState, _activation.InternalStateRange);
                 _analogSignal = _spikingSignal;
             }
             else
@@ -218,12 +219,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron
                 double newState = _activation.Compute(_tStimuli);
                 _activationState = (_retainmentStrength * _activationState) + (1d - _retainmentStrength) * newState;
                 double prevAnalogSignal = _analogSignal;
-                _analogSignal = _outputRange.Rescale(_activationState, _activation.OutputRange);
+                normalizedActivation = _outputRange.Rescale(_activationState, _activation.OutputRange);
+                _analogSignal = normalizedActivation;
                 bool firingEvent = (_analogSignal - prevAnalogSignal) > _analogFiringThreshold;
                 _spikingSignal = firingEvent ? 1d : 0d;
             }
             //Update predictors
-            _predictors?.Update(_activationState, (_spikingSignal > 0));
+            _predictors?.Update(_activationState, normalizedActivation.Bound(0, 1), (_spikingSignal > 0));
             //Update statistics
             if (collectStatistics)
             {
@@ -254,11 +256,23 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron
         }
 
         /// <summary>
+        /// Checks if given predictor is enabled
+        /// </summary>
+        /// <param name="predictorID">Identificator of the predictor</param>
+        public bool IsPredictorEnabled(PredictorsProvider.PredictorID predictorID)
+        {
+            if(_predictors != null && _predictors.IsPredictorEnabled(predictorID))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
         /// Copies values of enabled predictors to a given buffer starting from specified position (idx)
         /// </summary>
         /// <param name="predictors">Buffer where to be copied enabled predictors</param>
         /// <param name="idx">Starting position index</param>
-        /// <returns></returns>
         public int CopyPredictorsTo(double[] predictors, int idx)
         {
             if (_predictors == null)
@@ -274,7 +288,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron
         /// <summary>
         /// Returns array containing values of enabled predictors
         /// </summary>
-        /// <returns></returns>
         public double[] GetPredictors()
         {
             return _predictors?.GetPredictors();

@@ -89,9 +89,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
         /// </summary>
         private void Check()
         {
-            if (Window < 1 || Window > 64)
+            if (Window < 1)
             {
-                throw new Exception($"Invalid Window {Window.ToString(CultureInfo.InvariantCulture)}. Window must be GE to 1 and LE to 64.");
+                throw new Exception($"Invalid Window {Window.ToString(CultureInfo.InvariantCulture)}. Window must be GE to 1.");
             }
             return;
         }

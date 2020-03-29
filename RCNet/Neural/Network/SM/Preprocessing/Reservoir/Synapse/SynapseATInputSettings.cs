@@ -104,9 +104,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
             //Parsing
             DelayMethod = (Synapse.SynapticDelayMethod)Enum.Parse(typeof(Synapse.SynapticDelayMethod), settingsElem.Attribute("delayMethod").Value, true);
             MaxDelay = int.Parse(settingsElem.Attribute("maxDelay").Value, CultureInfo.InvariantCulture);
-            XElement analogSourceElem = settingsElem.Descendants("analogSource").FirstOrDefault();
+            XElement analogSourceElem = settingsElem.Elements("analogSource").FirstOrDefault();
             AnalogSourceCfg = analogSourceElem == null ? new AnalogSourceSettings() : new AnalogSourceSettings(analogSourceElem);
-            XElement spikingSourceElem = settingsElem.Descendants("spikingSource").FirstOrDefault();
+            XElement spikingSourceElem = settingsElem.Elements("spikingSource").FirstOrDefault();
             SpikingSourceCfg = spikingSourceElem == null ? new SpikingSourceATInputSettings() : new SpikingSourceATInputSettings(spikingSourceElem);
             Check();
             return;

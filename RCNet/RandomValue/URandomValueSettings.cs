@@ -128,7 +128,7 @@ namespace RCNet.RandomValue
         /// </summary>
         public static URandomValueSettings LoadOrDefault(XElement rootElem, string descendant, double defaultMin, double defaultMax)
         {
-            XElement descendantElement = rootElem.Descendants(descendant).FirstOrDefault();
+            XElement descendantElement = rootElem.Elements(descendant).FirstOrDefault();
             if (descendantElement != null)
             {
                 return new URandomValueSettings(descendantElement);

@@ -104,7 +104,7 @@ namespace RCNet.Neural.Network.SM.Readout
             //Validation
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
-            foreach (XElement unitElem in settingsElem.Descendants("readoutUnit"))
+            foreach (XElement unitElem in settingsElem.Elements("readoutUnit"))
             {
                 ReadoutUnitCfgCollection.Add(new ReadoutUnitSettings(unitElem));
             }

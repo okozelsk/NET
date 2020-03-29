@@ -103,17 +103,17 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
             XElement poolSettingsElem = Validate(elem, XsdTypeName);
             //Parsing
             Name = poolSettingsElem.Attribute("name").Value;
-            ProportionsCfg = new ProportionsSettings(poolSettingsElem.Descendants("proportions").First());
-            NeuronGroupsCfg = new NeuronGroupsSettings(poolSettingsElem.Descendants("neuronGroups").First());
-            InterconnectionCfg = new InterconnSettings(poolSettingsElem.Descendants("interconnection").First());
+            ProportionsCfg = new ProportionsSettings(poolSettingsElem.Elements("proportions").First());
+            NeuronGroupsCfg = new NeuronGroupsSettings(poolSettingsElem.Elements("neuronGroups").First());
+            InterconnectionCfg = new InterconnSettings(poolSettingsElem.Elements("interconnection").First());
             //Predictors
-            XElement predictorsElem = poolSettingsElem.Descendants("predictors").FirstOrDefault();
+            XElement predictorsElem = poolSettingsElem.Elements("predictors").FirstOrDefault();
             if (predictorsElem != null)
             {
                 PredictorsCfg = new PredictorsSettings(predictorsElem);
             }
             //Coordinates
-            XElement coordinatesElem = poolSettingsElem.Descendants("coordinates").FirstOrDefault();
+            XElement coordinatesElem = poolSettingsElem.Elements("coordinates").FirstOrDefault();
             CoordinatesCfg = coordinatesElem == null ? new CoordinatesSettings() : new CoordinatesSettings(coordinatesElem);
             CheckAndComplete();
             return;

@@ -86,7 +86,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
             ReservoirInstanceCfgCollection = new List<ReservoirInstanceSettings>();
-            foreach (XElement reservoirInstanceElem in settingsElem.Descendants("reservoirInstance"))
+            foreach (XElement reservoirInstanceElem in settingsElem.Elements("reservoirInstance"))
             {
                 ReservoirInstanceCfgCollection.Add(new ReservoirInstanceSettings(reservoirInstanceElem));
             }

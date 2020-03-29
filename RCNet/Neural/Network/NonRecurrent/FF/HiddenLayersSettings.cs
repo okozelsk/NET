@@ -94,7 +94,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             //Validation
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
-            foreach (XElement layerElem in settingsElem.Descendants("layer"))
+            foreach (XElement layerElem in settingsElem.Elements("layer"))
             {
                 HiddenLayerCfgCollection.Add(new HiddenLayerSettings(layerElem));
             }

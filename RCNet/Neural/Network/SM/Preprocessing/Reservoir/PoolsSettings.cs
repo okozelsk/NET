@@ -87,7 +87,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
             PoolCfgCollection = new List<PoolSettings>();
-            foreach (XElement poolElem in settingsElem.Descendants("pool"))
+            foreach (XElement poolElem in settingsElem.Elements("pool"))
             {
                 PoolCfgCollection.Add(new PoolSettings(poolElem));
             }

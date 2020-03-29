@@ -644,7 +644,7 @@
       </xs:element>
       <xs:element type="URandomValueType" name="resistance" minOccurs="0" maxOccurs="1">
         <xs:annotation>
-          <xs:documentation xml:lang="en">Typical value is 10</xs:documentation>
+          <xs:documentation xml:lang="en">Typical value is 20</xs:documentation>
         </xs:annotation>
       </xs:element>
       <xs:element type="RandomValueType" name="restV" minOccurs="0" maxOccurs="1">
@@ -807,7 +807,7 @@
     <xs:sequence minOccurs="0" maxOccurs="1">
       <xs:element type="URandomValueType" name="recoveryTimeScale" minOccurs="0" maxOccurs="1">
         <xs:annotation>
-          <xs:documentation xml:lang="en">Typical value is 0.2</xs:documentation>
+          <xs:documentation xml:lang="en">Typical value is 0.02</xs:documentation>
         </xs:annotation>
       </xs:element>
       <xs:element type="URandomValueType" name="recoverySensitivity" minOccurs="0" maxOccurs="1">
@@ -827,12 +827,12 @@
       </xs:element>
       <xs:element type="RandomValueType" name="resetV" minOccurs="0" maxOccurs="1">
         <xs:annotation>
-          <xs:documentation xml:lang="en">Typical value is -68</xs:documentation>
+          <xs:documentation xml:lang="en">Typical value is -65</xs:documentation>
         </xs:annotation>
       </xs:element>
       <xs:element type="RandomValueType" name="firingThresholdV" minOccurs="0" maxOccurs="1">
         <xs:annotation>
-          <xs:documentation xml:lang="en">Typical value is -64</xs:documentation>
+          <xs:documentation xml:lang="en">Typical value is 30</xs:documentation>
         </xs:annotation>
       </xs:element>
     </xs:sequence>
@@ -1669,11 +1669,6 @@
         <xs:documentation xml:lang="en">Sliding window size (1..64 for Exp weights, 1..10240 for Lin weights and 1..N for Const weights). Default value is 64</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute type="xs:unsignedInt" name="leakage" use="optional" default="0">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Samples leakage. Default value is 0</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
     <xs:attribute type="MWAvgWeightsType" name="weights" use="optional" default="Exponential">
       <xs:annotation>
         <xs:documentation xml:lang="en">Sample weights. Default value is Exponential</xs:documentation>
@@ -1683,9 +1678,9 @@
 
   <!-- Predictor FiringCount - configuration -->
   <xs:complexType name="PredictorFiringCountType">
-    <xs:attribute type="UIntGE1LE64Type" name="window" use="optional" default="64">
+    <xs:attribute type="UIntGT0Type" name="window" use="optional" default="64">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Sliding window size (1..64). Default value is 64</xs:documentation>
+        <xs:documentation xml:lang="en">Sliding window size (1..10240). Default value is 64</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -1718,17 +1713,17 @@
     </xs:sequence>
     <xs:attribute type="xs:boolean" name="activation" use="optional" default="true">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Current activation state. Default value is true</xs:documentation>
+        <xs:documentation xml:lang="en">Current activation. Default value is true</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="xs:boolean" name="activationSquare" use="optional" default="true">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Squared current activation state. Default value is true</xs:documentation>
+        <xs:documentation xml:lang="en">Squared current activation. Default value is true</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="xs:boolean" name="activationFadingSum" use="optional" default="true">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Fading sum of activation states. Default value is true</xs:documentation>
+        <xs:documentation xml:lang="en">Fading sum of activations. Default value is true</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="xs:boolean" name="activationMWAvg" use="optional" default="true">
@@ -1753,7 +1748,7 @@
     </xs:attribute>
     <xs:attribute type="xs:boolean" name="firingBinPattern" use="optional" default="true">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Binary (0/1) firing sequence within the sliding window as an 32 bit unsigned int number. Default value is true</xs:documentation>
+        <xs:documentation xml:lang="en">Binary (0/1) recent firing sequence. Default value is true</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -1828,8 +1823,16 @@
 
   <!-- HomogenousExcitability - configuration -->
   <xs:complexType name="HomogenousExcitabilityType">
-    <xs:attribute type="UDoubleGT0Type" name="inputStrength" use="required"/>
-    <xs:attribute type="UDoubleGT0Type" name="excitatoryStrength" use="required"/>
+    <xs:attribute type="UDoubleGT0Type" name="inputStrength" use="optional" default="0.5">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.5</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleGT0Type" name="excitatoryStrength" use="optional" default="0.5">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 0.5</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
     <xs:attribute type="UDoubleLE1Type" name="inhibitoryRatio" use="optional" default="0.25">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is 0.25</xs:documentation>
@@ -1849,7 +1852,7 @@
         <xs:element type="ActivationIzhikevichIFType" name="activationIzhikevichIF" minOccurs="1" maxOccurs="1"/>
         <xs:element type="ActivationAutoIzhikevichIFType" name="activationAutoIzhikevichIF" minOccurs="1" maxOccurs="1"/>
       </xs:choice>
-      <xs:element type="HomogenousExcitabilityType" name="homogenousExcitability" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="HomogenousExcitabilityType" name="homogenousExcitability" minOccurs="0" maxOccurs="1"/>
       <xs:element type="RandomValueType" name="bias" minOccurs="0" maxOccurs="1"/>
       <xs:element type="PredictorsType" name="predictors" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
@@ -2176,6 +2179,11 @@
         <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
       </xs:annotation>
     </xs:attribute>
+    <xs:attribute type="UDoubleType" name="meanSpikingSynapsesPerNeuron" use="optional" default="1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
     <xs:attribute type="SignalingRestrictionType" name="signalingRestriction" use="optional" default="NoRestriction">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is NoRestriction</xs:documentation>
@@ -2195,11 +2203,27 @@
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="CoordinatesType" name="coordinates" minOccurs="0" maxOccurs="1"/>
       <xs:element type="NPResInstanceInputUnitConnectionsType" name="connections" minOccurs="1" maxOccurs="unbounded"/>
+      <xs:element type="PredictorsType" name="predictors" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:string" name="inputFieldName" use="required"/>
     <xs:attribute type="UIntGE1LE32Type" name="spikeTrainLength" use="optional" default="8">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is 8</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleLE1Type" name="analogFiringThreshold" use="optional" default="0.00125">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">A number between 0 and 1 (LT1). Every time the new normalized input value is higher than the previous normalized input value by at least the threshold, it is evaluated as a firing event. Default value is 0.00125.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="analogNeuronPredictors" use="optional" default="false">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is false. If true, analog input neuron is allowed to generate predictors.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="spikingNeuronPredictors" use="optional" default="false">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is false. If true, all spiking input neurons are allowed to generate predictors.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>

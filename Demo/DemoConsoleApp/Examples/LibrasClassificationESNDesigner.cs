@@ -54,6 +54,7 @@ namespace Demo.DemoConsoleApp.Examples
             //Simplified readout layer configuration
             ReadoutLayerSettings readoutCfg = StateMachineDesigner.CreateClassificationReadoutCfg(StateMachineDesigner.CreateSingleLayerRegrNet(new ElliotSettings(), 5, 400),
                                                                                                   0.0825d,
+                                                                                                  1,
                                                                                                   "Hand movement",
                                                                                                   "curved swing",
                                                                                                   "horizontal swing",
@@ -74,7 +75,7 @@ namespace Demo.DemoConsoleApp.Examples
             //Create designer instance
             StateMachineDesigner smd = new StateMachineDesigner(inputCfg, readoutCfg);
             //Create pure ESN fashioned StateMachine configuration
-            StateMachineSettings stateMachineCfg = smd.CreatePureESNCfg(100, 0.2d, 0, 0.1d, 0, 0, 0, PredictorsProvider.PredictorID.FiringCount);
+            StateMachineSettings stateMachineCfg = smd.CreatePureESNCfg(150, 0.25d, 5, 0.1d, 0, 0, 0, null, PredictorsProvider.PredictorID.FiringCount);
             //Display StateMachine xml configuration
             string xmlConfig = stateMachineCfg.GetXml(true).ToString();
             _log.Write("StateMachine configuration xml:");

@@ -88,7 +88,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
             NumOfAttemptEpochs = int.Parse(settingsElem.Attribute("attemptEpochs").Value, CultureInfo.InvariantCulture);
-            XElement lambdaSeekerSettingsElem = settingsElem.Descendants("lambda").FirstOrDefault();
+            XElement lambdaSeekerSettingsElem = settingsElem.Elements("lambda").FirstOrDefault();
             if (lambdaSeekerSettingsElem != null)
             {
                 LambdaSeekerCfg = new ParamSeekerSettings(lambdaSeekerSettingsElem);

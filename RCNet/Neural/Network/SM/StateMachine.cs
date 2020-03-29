@@ -171,9 +171,9 @@ namespace RCNet.Neural.Network.SM
                     List<Tuple<int, int, PredictorsProvider.PredictorID>> predictorInfoCollection = new List<Tuple<int, int, PredictorsProvider.PredictorID>>();
                     foreach (HiddenNeuron neuron in NP.PredictingNeuronCollection)
                     {
-                        for(int predictorID = 0; predictorID < PredictorsProvider.NumOfPredictors; predictorID++)
+                        for(int predictorID = 0; predictorID < PredictorsProvider.NumOfSupportedPredictors; predictorID++)
                         {
-                            if(neuron.PredictorsCfg.IsEnabled((PredictorsProvider.PredictorID)predictorID))
+                            if(neuron.IsPredictorEnabled((PredictorsProvider.PredictorID)predictorID))
                             {
                                 predictorInfoCollection.Add(new Tuple<int, int, PredictorsProvider.PredictorID>(neuron.Location.ReservoirID, neuron.Location.PoolID, (PredictorsProvider.PredictorID)predictorID));
                             }

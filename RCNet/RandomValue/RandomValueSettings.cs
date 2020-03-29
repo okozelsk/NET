@@ -142,7 +142,7 @@ namespace RCNet.RandomValue
         /// </summary>
         public static RandomValueSettings LoadOrDefault(XElement rootElem, string descendant, double defaultMin, double defaultMax, bool randomSign = false)
         {
-            XElement descendantElement = rootElem.Descendants(descendant).FirstOrDefault();
+            XElement descendantElement = rootElem.Elements(descendant).FirstOrDefault();
             if (descendantElement != null)
             {
                 return new RandomValueSettings(descendantElement);

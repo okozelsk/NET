@@ -84,11 +84,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
             //Validation
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
-            XElement inputSynElem = settingsElem.Descendants("input").FirstOrDefault();
+            XElement inputSynElem = settingsElem.Elements("input").FirstOrDefault();
             InputSynCfg = inputSynElem == null ? new SynapseSTInputSettings() : new SynapseSTInputSettings(inputSynElem);
-            XElement excitatorySynElem = settingsElem.Descendants("excitatory").FirstOrDefault();
+            XElement excitatorySynElem = settingsElem.Elements("excitatory").FirstOrDefault();
             ExcitatorySynCfg = excitatorySynElem == null ? new SynapseSTExcitatorySettings() : new SynapseSTExcitatorySettings(excitatorySynElem);
-            XElement inhibitorySynElem = settingsElem.Descendants("inhibitory").FirstOrDefault();
+            XElement inhibitorySynElem = settingsElem.Elements("inhibitory").FirstOrDefault();
             InhibitorySynCfg = inhibitorySynElem == null ? new SynapseSTInhibitorySettings() : new SynapseSTInhibitorySettings(inhibitorySynElem);
             Check();
             return;

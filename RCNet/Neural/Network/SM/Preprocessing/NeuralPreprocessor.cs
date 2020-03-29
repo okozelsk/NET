@@ -77,7 +77,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// <summary>
         /// All predicting neurons.
         /// </summary>
-        public List<HiddenNeuron> PredictingNeuronCollection { get; }
+        public List<INeuron> PredictingNeuronCollection { get; }
 
         /// <summary>
         /// Number of boot cycles
@@ -196,7 +196,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             BootCycles = 0;
             //Random generator used for reservoir structure initialization
             Random rand = (randomizerSeek < 0 ? new Random() : new Random(randomizerSeek));
-            PredictingNeuronCollection = new List<HiddenNeuron>();
+            PredictingNeuronCollection = new List<INeuron>();
             NumOfNeurons = 0;
             InputPatternFixedLengthConstraint = -1;
             TotalNumOfPredictors = -1;
@@ -582,8 +582,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                     throw new Exception($"Incorrect length of input pattern ({inputPattern.VariablesDataCollection[0].Length}). Length must be equal to {InputPatternFixedLengthConstraint}.");
                 }
             }
-            //Reset SM but keep statistics
-            Reset(false);
             //Apply filters
             InputPattern normalizedInputPattern = ApplyFiltersOnInputPattern(inputPattern);
             //Compute reservoir(s)
@@ -602,14 +600,16 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 }
                 foreach (InputPattern stepInputPattern in stepInputPatterns)
                 {
-                    for(int idx = 0; idx < stepInputPattern.VariablesDataCollection[0].Length; idx++)
+                    //Reset the reservoir but keep statistics
+                    reservoir.Reset(false);
+                    //Compute the reservoir
+                    for (int idx = 0; idx < stepInputPattern.VariablesDataCollection[0].Length; idx++)
                     {
                         double[] inputVector = stepInputPattern.GetDataAtTimePoint(idx);
                         for (int i = 0; i < reservoir.InputUnitCollection.Length; i++)
                         {
                             reservoirInput[i] = inputVector[reservoir.InputUnitCollection[i].InputFieldIdx];
                         }
-                        //Compute the reservoir
                         reservoir.Compute(reservoirInput, collectStatistics);
                     }
                     reservoir.CopyPredictorsTo(predictors, predictorsIdx);
@@ -744,7 +744,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             //Preprocessing overview
             preprocessingOverview = new PreprocessingOverview(CollectStatatistics(),
                                                               NumOfNeurons,
-                                                              NumOfSuppressedPredictors
+                                                              TotalNumOfPredictors,
+                                                              NumOfSuppressedPredictors,
+                                                              NumOfActivePredictors
                                                               );
             //Final informative event
             PreprocessingProgressChanged(inputVectors.Count, inputVectors.Count, preprocessingOverview);
@@ -786,7 +788,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             //Preprocessing overview
             preprocessingOverview = new PreprocessingOverview(CollectStatatistics(),
                                                               NumOfNeurons,
-                                                              NumOfSuppressedPredictors
+                                                              TotalNumOfPredictors,
+                                                              NumOfSuppressedPredictors,
+                                                              NumOfActivePredictors
                                                               );
             //Final informative event
             PreprocessingProgressChanged(patterns.Count, patterns.Count, preprocessingOverview);
@@ -866,9 +870,17 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             /// </summary>
             public int TotalNumOfNeurons { get; }
             /// <summary>
+            /// Number of predictors
+            /// </summary>
+            public int TotalNumOfPredictors { get; }
+            /// <summary>
             /// Number of suppressed predictors
             /// </summary>
             public int NumOfSuppressedPredictors { get; }
+            /// <summary>
+            /// Number of active predictors
+            /// </summary>
+            public int NumOfActivePredictors { get; }
 
             //Constructor
             /// <summary>
@@ -876,16 +888,21 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             /// </summary>
             /// <param name="reservoirStatCollection">Collection of statistics of NeuralPreprocessor's internal reservoirs</param>
             /// <param name="totalNumOfNeurons">Total number of NeuralPreprocessor's neurons</param>
-            /// <param name="totalNumOfInternalSynapses">Total number of NeuralPreprocessor's internal synapses</param>
+            /// <param name="totalNumOfPredictors">Number of NeuralPreprocessor's predictors</param>
             /// <param name="numOfSuppressedPredictors">Number of NeuralPreprocessor's suppressed predictors</param>
+            /// <param name="numOfActivePredictors">Number of NeuralPreprocessor's active predictors</param>
             public PreprocessingOverview(List<ReservoirStat> reservoirStatCollection,
                                          int totalNumOfNeurons,
-                                         int numOfSuppressedPredictors
+                                         int totalNumOfPredictors,
+                                         int numOfSuppressedPredictors,
+                                         int numOfActivePredictors
                                          )
             {
                 ReservoirStatCollection = reservoirStatCollection;
                 TotalNumOfNeurons = totalNumOfNeurons;
+                TotalNumOfPredictors = totalNumOfPredictors;
                 NumOfSuppressedPredictors = numOfSuppressedPredictors;
+                NumOfActivePredictors = numOfActivePredictors;
                 return;
             }
 
@@ -984,7 +1001,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                     }
                 }
                 sb.Append(Environment.NewLine);
-                sb.Append(leftMargin + $"Number of suppressed (unused) predictors: {NumOfSuppressedPredictors}" + Environment.NewLine);
+                sb.Append(leftMargin + $"Total number of predictors: {TotalNumOfPredictors}, suppressed (unused) predictors: {NumOfSuppressedPredictors}, used predictors: {NumOfActivePredictors}" + Environment.NewLine);
                 return sb.ToString();
             }
 

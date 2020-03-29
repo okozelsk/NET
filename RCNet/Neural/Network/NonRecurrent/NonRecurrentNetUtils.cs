@@ -82,7 +82,7 @@ namespace RCNet.Neural.Network.NonRecurrent
             List<INonRecurrentNetworkSettings> settingsCollection = new List<INonRecurrentNetworkSettings>();
             if (rootElem != null)
             {
-                foreach (XElement cfgElem in rootElem.Descendants())
+                foreach (XElement cfgElem in rootElem.Elements())
                 {
                     if (IsFFElem(cfgElem) || IsPPElem(cfgElem))
                     {

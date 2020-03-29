@@ -24,10 +24,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
         /// </summary>
         public const int DefaultWindow = 64;
         /// <summary>
-        /// Default value of leakage
-        /// </summary>
-        public const int DefaultLeakage = 0;
-        /// <summary>
         /// Default weights type
         /// </summary>
         public const PredictorsProvider.PredictorMWAvgWeightsType DefaultWeights = PredictorsProvider.PredictorMWAvgWeightsType.Exponential;
@@ -41,10 +37,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
         /// </summary>
         public int Window { get; }
         /// <summary>
-        /// Leakage
-        /// </summary>
-        public int Leakage { get; }
-        /// <summary>
         /// Type of weighting
         /// </summary>
         public PredictorsProvider.PredictorMWAvgWeightsType Weights { get; }
@@ -54,15 +46,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
         /// Creates an initialized instance
         /// </summary>
         /// <param name="window">Window length</param>
-        /// <param name="leakage">Leakage</param>
         /// <param name="weights">Type of weighting</param>
         public MWAvgPredictorSettings(int window = DefaultWindow,
-                                      int leakage = DefaultLeakage,
                                       PredictorsProvider.PredictorMWAvgWeightsType weights = DefaultWeights
                                       )
         {
             Window = window;
-            Leakage = leakage;
             Weights = weights;
             Check();
             return;
@@ -75,7 +64,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
         public MWAvgPredictorSettings(MWAvgPredictorSettings source)
         {
             Window = source.Window;
-            Leakage = source.Leakage;
             Weights = source.Weights;
             return;
         }
@@ -90,7 +78,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
             Window = int.Parse(settingsElem.Attribute("window").Value, CultureInfo.InvariantCulture);
-            Leakage = int.Parse(settingsElem.Attribute("leakage").Value, CultureInfo.InvariantCulture);
             Weights = (PredictorsProvider.PredictorMWAvgWeightsType)Enum.Parse(typeof(PredictorsProvider.PredictorMWAvgWeightsType), settingsElem.Attribute("weights").Value, true);
             Check();
             return;
@@ -105,17 +92,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
         /// <summary>
         /// Checks if settings are default
         /// </summary>
-        public bool IsDefaultLeakage { get { return (Leakage == DefaultLeakage); } }
-
-        /// <summary>
-        /// Checks if settings are default
-        /// </summary>
         public bool IsDefaultWeights { get { return (Weights == DefaultWeights); } }
 
         /// <summary>
         /// Identifies settings containing only default values
         /// </summary>
-        public override bool ContainsOnlyDefaults { get { return IsDefaultWindow && IsDefaultLeakage && IsDefaultWeights; } }
+        public override bool ContainsOnlyDefaults { get { return IsDefaultWindow && IsDefaultWeights; } }
 
         //Methods
         /// <summary>
@@ -125,19 +107,15 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
         {
             if (Window < 1 )
             {
-                throw new Exception($"Invalid Strength {Window.ToString(CultureInfo.InvariantCulture)}. Window must be GT 0.");
-            }
-            if (Leakage < 0)
-            {
-                throw new Exception($"Invalid Leakage {Leakage.ToString(CultureInfo.InvariantCulture)}. Leakage must be GE to 0.");
+                throw new Exception($"Invalid Window {Window.ToString(CultureInfo.InvariantCulture)}. Window must be GT 0.");
             }
             if(Weights == PredictorsProvider.PredictorMWAvgWeightsType.Exponential && Window > 64)
             {
-                throw new Exception($"Invalid Strength {Window.ToString(CultureInfo.InvariantCulture)}. Window must be LE to 64.");
+                throw new Exception($"Invalid Window {Window.ToString(CultureInfo.InvariantCulture)}. Window must be LE to 64.");
             }
             if (Weights == PredictorsProvider.PredictorMWAvgWeightsType.Linear && Window > 10240)
             {
-                throw new Exception($"Invalid Strength {Window.ToString(CultureInfo.InvariantCulture)}. Window must be LE to 10240.");
+                throw new Exception($"Invalid Window {Window.ToString(CultureInfo.InvariantCulture)}. Window must be LE to 10240.");
             }
             return;
         }
@@ -154,10 +132,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
             if (!suppressDefaults || !IsDefaultWindow)
             {
                 rootElem.Add(new XAttribute("window", Window.ToString(CultureInfo.InvariantCulture)));
-            }
-            if (!suppressDefaults || !IsDefaultLeakage)
-            {
-                rootElem.Add(new XAttribute("leakage", Leakage.ToString(CultureInfo.InvariantCulture)));
             }
             if (!suppressDefaults || !IsDefaultWeights)
             {

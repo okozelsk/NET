@@ -87,7 +87,7 @@ namespace RCNet.Neural.Network.SM.PM
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
             AllowedPoolCfgCollection = new List<AllowedPoolSettings>();
-            foreach (XElement poolElem in settingsElem.Descendants("pool"))
+            foreach (XElement poolElem in settingsElem.Elements("pool"))
             {
                 AllowedPoolCfgCollection.Add(new AllowedPoolSettings(poolElem));
             }

@@ -88,7 +88,7 @@ namespace RCNet.Neural.Network.SM.PM
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
             AllowedPredictorCfgCollection = new List<AllowedPredictorSettings>();
-            foreach (XElement predictorElem in settingsElem.Descendants("predictor"))
+            foreach (XElement predictorElem in settingsElem.Elements("predictor"))
             {
                 AllowedPredictorCfgCollection.Add(new AllowedPredictorSettings(predictorElem));
             }

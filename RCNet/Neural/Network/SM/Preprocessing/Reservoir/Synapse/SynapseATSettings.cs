@@ -100,9 +100,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
             //Parsing
             string attrValue = settingsElem.Attribute("spectralRadius").Value;
             SpectralRadius = attrValue == NASpectralRadiusCode ? NASpectralRadiusNum : double.Parse(attrValue, CultureInfo.InvariantCulture);
-            XElement inputSynElem = settingsElem.Descendants("input").FirstOrDefault();
+            XElement inputSynElem = settingsElem.Elements("input").FirstOrDefault();
             InputSynCfg = inputSynElem == null ? new SynapseATInputSettings() : new SynapseATInputSettings(inputSynElem);
-            XElement indifferentSynElem = settingsElem.Descendants("indifferent").FirstOrDefault();
+            XElement indifferentSynElem = settingsElem.Elements("indifferent").FirstOrDefault();
             IndifferentSynCfg = indifferentSynElem == null ? new SynapseATIndifferentSettings() : new SynapseATIndifferentSettings(indifferentSynElem);
             Check();
             return;

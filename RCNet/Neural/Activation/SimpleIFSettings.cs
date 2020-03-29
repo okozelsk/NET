@@ -31,7 +31,7 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Typical value of resistance
         /// </summary>
-        public const double TypicalResistance = 15;
+        public const double TypicalResistance = 20;
         /// <summary>
         /// Typical value of decay rate
         /// </summary>
@@ -43,7 +43,7 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Typical value of firing voltage
         /// </summary>
-        public const double TypicalFiringThresholdV = 7.5;
+        public const double TypicalFiringThresholdV = 20;
 
         //Attribute properties
         /// <summary>

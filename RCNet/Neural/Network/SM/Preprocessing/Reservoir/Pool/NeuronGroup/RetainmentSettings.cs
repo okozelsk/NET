@@ -71,7 +71,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
             //Density
             Density = double.Parse(settingsElem.Attribute("density").Value, CultureInfo.InvariantCulture);
             //Strength
-            StrengthCfg = new URandomValueSettings(settingsElem.Descendants("strength").First());
+            StrengthCfg = new URandomValueSettings(settingsElem.Elements("strength").First());
             Check();
             return;
         }

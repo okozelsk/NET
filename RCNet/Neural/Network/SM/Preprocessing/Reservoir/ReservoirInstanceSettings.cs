@@ -103,12 +103,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             Name = settingsElem.Attribute("name").Value;
             StructureCfgName = settingsElem.Attribute("reservoirStructure").Value;
             //Input units
-            InputUnitsCfg = new InputUnitsSettings(settingsElem.Descendants("inputUnits").First());
+            InputUnitsCfg = new InputUnitsSettings(settingsElem.Elements("inputUnits").First());
             //Synapse
-            XElement synapseElem = settingsElem.Descendants("synapse").FirstOrDefault();
+            XElement synapseElem = settingsElem.Elements("synapse").FirstOrDefault();
             SynapseCfg = synapseElem == null ? new SynapseSettings() : new SynapseSettings(synapseElem);
             //Predictors
-            XElement predictorsElem = settingsElem.Descendants("predictors").FirstOrDefault();
+            XElement predictorsElem = settingsElem.Elements("predictors").FirstOrDefault();
             if (predictorsElem != null)
             {
                 PredictorsCfg = new PredictorsSettings(predictorsElem);

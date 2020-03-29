@@ -33,6 +33,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// </summary>
         public const double DefaultAnalogTargetDensity = 1d;
         /// <summary>
+        /// Default mean spiking synapses per neuron
+        /// </summary>
+        public const double DefaultMeanSpikingSynapsesPerNeuron = 1d;
+        /// <summary>
         /// Default value of signaling restriction of associated input neuron
         /// </summary>
         public const NeuronCommon.NeuronSignalingRestrictionType DefaultSignalingRestriction = NeuronCommon.NeuronSignalingRestrictionType.AnalogOnly;
@@ -53,6 +57,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         public double AnalogTargetDensity { get; }
 
         /// <summary>
+        /// Mean spiking synapses per neuron
+        /// </summary>
+        public double MeanSpikingSynapsesPerNeuron { get; }
+
+        /// <summary>
         /// Signaling restriction of associated input neuron
         /// </summary>
         public NeuronCommon.NeuronSignalingRestrictionType SignalingRestriction { get; }
@@ -64,16 +73,19 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// <param name="poolName">Name of target pool</param>
         /// <param name="spikingTargetDensity">Spiking target density</param>
         /// <param name="analogTargetDensity">Analog target density</param>
+        /// <param name="meanSpikingSynapsesPerNeuron">Mean spiking synapses per neuron</param>
         /// <param name="signalingRestriction">Signaling restriction of associated input neuron</param>
         public InputUnitConnSettings(string poolName,
                                      double spikingTargetDensity = DefaultSpikingTargetDensity,
                                      double analogTargetDensity = DefaultAnalogTargetDensity,
+                                     double meanSpikingSynapsesPerNeuron = DefaultMeanSpikingSynapsesPerNeuron,
                                      NeuronCommon.NeuronSignalingRestrictionType signalingRestriction = DefaultSignalingRestriction
                                      )
         {
             PoolName = poolName;
             SpikingTargetDensity = spikingTargetDensity;
             AnalogTargetDensity = analogTargetDensity;
+            MeanSpikingSynapsesPerNeuron = meanSpikingSynapsesPerNeuron;
             SignalingRestriction = signalingRestriction;
             Check();
             return;
@@ -84,7 +96,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// </summary>
         /// <param name="source">Source instance</param>
         public InputUnitConnSettings(InputUnitConnSettings source)
-            : this(source.PoolName, source.SpikingTargetDensity, source.AnalogTargetDensity, source.SignalingRestriction)
+            : this(source.PoolName, source.SpikingTargetDensity, source.AnalogTargetDensity,
+                  source.MeanSpikingSynapsesPerNeuron, source.SignalingRestriction)
         {
             return;
         }
@@ -104,6 +117,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             PoolName = settingsElem.Attribute("poolName").Value;
             SpikingTargetDensity = double.Parse(settingsElem.Attribute("spikingTargetDensity").Value, CultureInfo.InvariantCulture);
             AnalogTargetDensity = double.Parse(settingsElem.Attribute("analogTargetDensity").Value, CultureInfo.InvariantCulture);
+            MeanSpikingSynapsesPerNeuron = double.Parse(settingsElem.Attribute("meanSpikingSynapsesPerNeuron").Value, CultureInfo.InvariantCulture);
             SignalingRestriction = (NeuronCommon.NeuronSignalingRestrictionType)Enum.Parse(typeof(NeuronCommon.NeuronSignalingRestrictionType), settingsElem.Attribute("signalingRestriction").Value, true);
             Check();
             return;
@@ -123,6 +137,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// <summary>
         /// Checks if settings are default
         /// </summary>
+        public bool IsDefaultMeanSpikingSynapsesPerNeuron { get { return (MeanSpikingSynapsesPerNeuron == DefaultMeanSpikingSynapsesPerNeuron); } }
+
+        /// <summary>
+        /// Checks if settings are default
+        /// </summary>
         public bool IsDefaultSignalingRestriction { get { return (SignalingRestriction == DefaultSignalingRestriction); } }
 
         /// <summary>
@@ -136,7 +155,19 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// </summary>
         private void Check()
         {
-            if(PoolName.Length == 0)
+            if (SpikingTargetDensity < 0 || SpikingTargetDensity > 1)
+            {
+                throw new Exception($"Invalid SpikingTargetDensity ({SpikingTargetDensity.ToString(CultureInfo.InvariantCulture)}). SpikingTargetDensity must be GE to 0 and LE to 1.");
+            }
+            if (AnalogTargetDensity < 0 || AnalogTargetDensity > 1)
+            {
+                throw new Exception($"Invalid AnalogTargetDensity ({AnalogTargetDensity.ToString(CultureInfo.InvariantCulture)}). AnalogTargetDensity must be GE to 0 and LE to 1.");
+            }
+            if (MeanSpikingSynapsesPerNeuron < 0)
+            {
+                throw new Exception($"Invalid MeanSpikingSynapsesPerNeuron ({MeanSpikingSynapsesPerNeuron.ToString(CultureInfo.InvariantCulture)}). MeanSpikingSynapsesPerNeuron must be GE to 0.");
+            }
+            if (PoolName.Length == 0)
             {
                 throw new Exception($"Pool name can not be empty.");
             }
@@ -169,6 +200,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             if (!suppressDefaults || !IsDefaultAnalogTargetDensity)
             {
                 rootElem.Add(new XAttribute("analogTargetDensity", AnalogTargetDensity.ToString(CultureInfo.InvariantCulture)));
+            }
+            if (!suppressDefaults || !IsDefaultMeanSpikingSynapsesPerNeuron)
+            {
+                rootElem.Add(new XAttribute("meanSpikingSynapsesPerNeuron", MeanSpikingSynapsesPerNeuron.ToString(CultureInfo.InvariantCulture)));
             }
             if (!suppressDefaults || !IsDefaultSignalingRestriction)
             {

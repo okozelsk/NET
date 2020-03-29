@@ -77,9 +77,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
             //Parsing
             XElement cfgElem;
             //Plasticity
-            cfgElem = settingsElem.Descendants("spikingTarget").FirstOrDefault();
+            cfgElem = settingsElem.Elements("spikingTarget").FirstOrDefault();
             SpikingTargetCfg = cfgElem == null ? new SynapseSTSettings() : new SynapseSTSettings(cfgElem);
-            cfgElem = settingsElem.Descendants("analogTarget").FirstOrDefault();
+            cfgElem = settingsElem.Elements("analogTarget").FirstOrDefault();
             AnalogTargetCfg = cfgElem == null ? new SynapseATSettings() : new SynapseATSettings(cfgElem);
             Check();
             return;

@@ -35,7 +35,7 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Typical value of resistance
         /// </summary>
-        public const double TypicalResistance = 10;
+        public const double TypicalResistance = 20;
         /// <summary>
         /// Typical value of resting voltage
         /// </summary>

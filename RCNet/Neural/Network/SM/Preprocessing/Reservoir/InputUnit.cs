@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 using RCNet.MathTools;
 using RCNet.Extensions;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron;
-
+using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor;
+using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
 {
@@ -23,12 +24,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// </summary>
         public const int SpikeTrainMaxLength = 32;
 
-        //Static attributes
-        /// <summary>
-        /// Commonly used 0,1 interval
-        /// </summary>
-        private static readonly Interval ZeroOneRange = new Interval(0d, 1d);
-
         //Attribute properties
         /// <summary>
         /// Index of the associated input field
@@ -36,18 +31,18 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         public int InputFieldIdx { get; }
 
         /// <summary>
-        /// InputNeuron providing analog value
+        /// Input neuron providing analog value
         /// </summary>
-        public InputNeuron AnalogInputNeuron { get; }
+        public AnalogInputNeuron AnalogInputNeuron { get; }
 
         /// <summary>
-        /// Collection of InputNeurons representing spike train of analog value
+        /// Collection of input neurons representing spike train of analog value
         /// </summary>
-        public InputNeuron[] SpikeTrainInputNeuronCollection { get; }
+        public SpikingInputNeuron[] SpikeTrainInputNeuronCollection { get; }
 
         //Attributes
         private readonly Interval _inputRange;
-        private readonly InputUnitSettings _settings;
+        private readonly InputUnitSettings _inputUnitCfg;
         private readonly double _precisionPiece;
         private readonly ulong _maxPrecisionBitMask;
 
@@ -59,29 +54,44 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// <param name="inputRange">Input data range</param>
         /// <param name="inputFieldIdx">Index of the associated input field</param>
         /// <param name="inputNeuronsStartIdx">Index of the first input neuron of this unit among all input neurons</param>
-        /// <param name="settings">Configuration parameters.</param>
-        public InputUnit(int reservoirID, Interval inputRange, int inputFieldIdx, int inputNeuronsStartIdx, InputUnitSettings settings)
+        /// <param name="inputUnitCfg">Configuration parameters.</param>
+        /// <param name="reservoirPredictorsCfg">Reservoir level configuration of predictors</param>
+        public InputUnit(int reservoirID,
+                         Interval inputRange,
+                         int inputFieldIdx,
+                         int inputNeuronsStartIdx,
+                         InputUnitSettings inputUnitCfg,
+                         PredictorsSettings reservoirPredictorsCfg
+                         )
         {
             _inputRange = inputRange.DeepClone();
-            _settings = (InputUnitSettings)settings.DeepClone();
-            _precisionPiece = _inputRange.Span / Math.Pow(2d, _settings.SpikeTrainLength);
-            _maxPrecisionBitMask = (uint)Math.Round(Math.Pow(2d, _settings.SpikeTrainLength) - 1d);
+            _inputUnitCfg = (InputUnitSettings)inputUnitCfg.DeepClone();
+            _precisionPiece = _inputRange.Span / Math.Pow(2d, _inputUnitCfg.SpikeTrainLength);
+            _maxPrecisionBitMask = (uint)Math.Round(Math.Pow(2d, _inputUnitCfg.SpikeTrainLength) - 1d);
             InputFieldIdx = inputFieldIdx;
-            AnalogInputNeuron = new InputNeuron(reservoirID,
-                                                _settings.CoordinatesCfg.GetCoordinates(),
-                                                inputNeuronsStartIdx++,
-                                                _inputRange,
-                                                NeuronCommon.NeuronSignalingRestrictionType.AnalogOnly
-                                                );
-            SpikeTrainInputNeuronCollection = new InputNeuron[_settings.SpikeTrainLength];
-            for (int i = 0; i < _settings.SpikeTrainLength; i++)
+            PredictorsSettings combinedPredictorsCfg = new PredictorsSettings(inputUnitCfg.PredictorsCfg, null, reservoirPredictorsCfg);
+            PredictorsSettings analogPredictorsCfg = (inputUnitCfg.AnalogNeuronPredictors && combinedPredictorsCfg.NumOfEnabledPredictors > 0) ? combinedPredictorsCfg : null;
+            PredictorsSettings spikingPredictorsCfg = (PredictorsSettings)combinedPredictorsCfg.DeepClone();
+            spikingPredictorsCfg.DisableActivationPredictors();
+            if(!inputUnitCfg.SpikingNeuronPredictors || spikingPredictorsCfg.NumOfEnabledPredictors == 0)
             {
-                SpikeTrainInputNeuronCollection[i] = new InputNeuron(reservoirID,
-                                                                     _settings.CoordinatesCfg.GetCoordinates(),
-                                                                     inputNeuronsStartIdx++,
-                                                                     ZeroOneRange,
-                                                                     NeuronCommon.NeuronSignalingRestrictionType.SpikingOnly
-                                                                     );
+                spikingPredictorsCfg = null;
+            }
+            AnalogInputNeuron = new AnalogInputNeuron(reservoirID,
+                                                      _inputUnitCfg.CoordinatesCfg.GetCoordinates(),
+                                                      inputNeuronsStartIdx++,
+                                                      _inputRange,
+                                                      analogPredictorsCfg,
+                                                      _inputUnitCfg.AnalogFiringThreshold
+                                                      );
+            SpikeTrainInputNeuronCollection = new SpikingInputNeuron[_inputUnitCfg.SpikeTrainLength];
+            for (int i = 0; i < _inputUnitCfg.SpikeTrainLength; i++)
+            {
+                SpikeTrainInputNeuronCollection[i] = new SpikingInputNeuron(reservoirID,
+                                                                            _inputUnitCfg.CoordinatesCfg.GetCoordinates(),
+                                                                            inputNeuronsStartIdx++,
+                                                                            spikingPredictorsCfg
+                                                                            );
             }
             return;
         }
@@ -90,7 +100,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// <summary>
         /// Total number of input neurons
         /// </summary>
-        public int NumOfInputNeurons { get { return (1 + _settings.SpikeTrainLength); } }
+        public int NumOfInputNeurons { get { return (1 + _inputUnitCfg.SpikeTrainLength); } }
 
         //Methods
         /// <summary>
@@ -125,10 +135,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         public void NewStimulation(double iStimuli)
         {
             AnalogInputNeuron.NewStimulation(iStimuli, 0d);
-            uint unchSpikeTrainBits = GetSpikeTrain(iStimuli);
+            uint spikeTrainBits = GetSpikeTrain(iStimuli);
             for (int i = 0; i < SpikeTrainInputNeuronCollection.Length; i++)
             {
-                double spikeVal = Bitwise.GetBit(unchSpikeTrainBits, i);
+                double spikeVal = Bitwise.GetBit(spikeTrainBits, i);
                 SpikeTrainInputNeuronCollection[i].NewStimulation(spikeVal, 0d);
             }
             return;
@@ -141,11 +151,35 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         public void ComputeSignal(bool collectStatistics)
         {
             AnalogInputNeuron.Recompute(collectStatistics);
-            foreach (InputNeuron neuron in SpikeTrainInputNeuronCollection)
+            foreach (SpikingInputNeuron neuron in SpikeTrainInputNeuronCollection)
             {
                 neuron.Recompute(collectStatistics);
             }
             return;
+        }
+
+        /// <summary>
+        /// Returns collection of input neurons having enabled at least one predictor
+        /// </summary>
+        /// <param name="numOfPredictors">Returned number of predictors</param>
+        public List<INeuron> GetPredictingNeurons(out int numOfPredictors)
+        {
+            numOfPredictors = 0;
+            List<INeuron> predictingNeurons = new List<INeuron>();
+            if(AnalogInputNeuron.NumOfEnabledPredictors > 0)
+            {
+                numOfPredictors += AnalogInputNeuron.NumOfEnabledPredictors;
+                predictingNeurons.Add(AnalogInputNeuron);
+            }
+            foreach (SpikingInputNeuron neuron in SpikeTrainInputNeuronCollection)
+            {
+                if (neuron.NumOfEnabledPredictors > 0)
+                {
+                    numOfPredictors += neuron.NumOfEnabledPredictors;
+                    predictingNeurons.Add(neuron);
+                }
+            }
+            return predictingNeurons;
         }
 
     }//InputUnit
