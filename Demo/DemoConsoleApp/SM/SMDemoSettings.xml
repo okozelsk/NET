@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <demo dataFolder=".\\Data" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="SMDemoSettings.xsd">
 
-
   <!--
     This demo case demonstrates successful use of the pure analog ESN reservoir for the fast and accurate classifications enabled by
     the new ability of the analog neurons to fire a spike.
@@ -660,7 +659,7 @@
     <stateMachineCfg randomizerSeek="0">
       <neuralPreprocessor>
         <input>
-          <feedingPatterned bidir="false" routeToReadout="false" variablesSchema="Groupped">
+          <feedingPatterned bidir="true" routeToReadout="false" variablesSchema="Groupped">
             <unification unifyAmplitude="false" detrend="false">
               <resampling uniformTimeScale="true" targetTimePoints="Auto"/>
             </unification>
@@ -680,7 +679,7 @@
           <reservoirStructure name="MainCfg">
             <pools>
               <pool name="PureESN">
-                <proportions dimX="150" dimY="1" dimZ="1"/>
+                <proportions dimX="6" dimY="5" dimZ="5"/>
                 <neuronGroups>
                   <analogGroup name="TanH-grp" relShare="1" firingThreshold="0.00125" readoutDensity="1" signalingRestriction="NoRestriction">
                     <activationTanH/>
@@ -732,7 +731,7 @@
         <defaultNetworks>
           <classification>
             <ff>
-              <activationTanH/>
+              <activationIdentity/>
               <resPropTrainer attempts="5" attemptEpochs="400"/>
             </ff>
           </classification>
@@ -787,6 +786,8 @@
       </readoutLayer>
     </stateMachineCfg>
   </case>
+
+
 
   <!--
     This demo case demonstrates how to instantiate two independent reservoirs. Configuration definies two ESN reservoir
@@ -1052,7 +1053,7 @@
     Used dataset is a pre-processed and re-structured/reshaped version of a very commonly used dataset featuring epileptic seizure detection.
     The dataset was converted from https://archive.ics.uci.edu/ml/datasets/Epileptic+Seizure+Recognition and contains 11500 EEG recordings
     each for 1 second. After conversion each EEG pattern corresponds to an epileptic seizure or not.
-    Achieved accuracy is 99.00%
+    Achieved accuracy is 99.1%
     Relevant paper: http://users.fs.cvut.cz/ivo.bukovsky/PROJEKT/Data/Realna/BIO/EEG/reference/PRE61907.pdf
   -->
   <case name="Classification task Recognition of the Epileptic Seizure Brain Activity (EEG):  Pure ESN reservoir (FiringFadingSum predictors), Multilayer Feed forward network as a classifier (Resilient trainer)">

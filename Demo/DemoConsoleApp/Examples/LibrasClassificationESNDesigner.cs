@@ -52,7 +52,7 @@ namespace Demo.DemoConsoleApp.Examples
                                                                          new ExternalFieldSettings("coord_ordinate", new RealFeatureFilterSettings())
                                                                          );
             //Simplified readout layer configuration
-            ReadoutLayerSettings readoutCfg = StateMachineDesigner.CreateClassificationReadoutCfg(StateMachineDesigner.CreateSingleLayerRegrNet(new ElliotSettings(), 5, 400),
+            ReadoutLayerSettings readoutCfg = StateMachineDesigner.CreateClassificationReadoutCfg(StateMachineDesigner.CreateSingleLayerRegrNet(new IdentitySettings(), 5, 400),
                                                                                                   0.0825d,
                                                                                                   1,
                                                                                                   "Hand movement",
