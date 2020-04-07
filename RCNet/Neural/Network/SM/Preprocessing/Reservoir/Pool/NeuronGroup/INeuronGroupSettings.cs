@@ -42,11 +42,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         NeuronCommon.NeuronSignalingRestrictionType SignalingRestriction { get; }
 
         /// <summary>
-        /// Specifies what ratio of the neurons from this group can be used as a source of the readout predictors
-        /// </summary>
-        double ReadoutDensity { get; }
-
-        /// <summary>
         /// Each neuron within the group receives constant input bias. Value of the neuron's bias is driven
         /// by this random settings.
         /// </summary>

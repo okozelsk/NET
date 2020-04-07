@@ -26,9 +26,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         public const string XsdTypeName = "NPResInstanceInputUnitType";
         //Default values
         /// <summary>
-        /// Default length of the spike-train representation of analog value
+        /// Default length of the spike-train representation of an analog value
         /// </summary>
-        public const int DefaultSpikeTrainLength = 8;
+        public const int DefaultSpikeTrainLength = 16;
         /// <summary>
         /// Default analog firing threshold
         /// </summary>
@@ -193,9 +193,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             {
                 throw new Exception($"Empty InputFieldName.");
             }
-            if (SpikeTrainLength < 1 || SpikeTrainLength > 32)
+            if (SpikeTrainLength < 2 || SpikeTrainLength > 128 || (SpikeTrainLength % 2) != 0)
             {
-                throw new Exception($"Invalid SpikeTrainLength {SpikeTrainLength.ToString(CultureInfo.InvariantCulture)}. SpikeTrainLength must be GE to 1 and LE to 32.");
+                throw new Exception($"Invalid SpikeTrainLength {SpikeTrainLength.ToString(CultureInfo.InvariantCulture)}. SpikeTrainLength must be even integer GE to 2 and LE to 128.");
             }
             if (AnalogFiringThreshold < 0 || AnalogFiringThreshold >= 1)
             {

@@ -32,6 +32,11 @@ namespace RCNet.Neural.Activation
         /// </summary>
         public const int DefaultSolverCompSteps = 2;
 
+        /// <summary>
+        /// Default duration of spiking neuron stimulation in ms.
+        /// </summary>
+        public const double DefaultStimuliDuration = 1;
+
 
         //Methods
         /// <summary>
@@ -110,7 +115,8 @@ namespace RCNet.Neural.Activation
                                  rand.NextDouble(afs.AdaptationTimeConstant),
                                  rand.NextDouble(afs.AdaptationSpikeTriggeredIncrement),
                                  afs.SolverMethod,
-                                 afs.SolverCompSteps
+                                 afs.SolverCompSteps,
+                                 afs.StimuliDuration
                                  );
             }
             else if (settingsType == typeof(BentIdentitySettings))
@@ -134,7 +140,8 @@ namespace RCNet.Neural.Activation
                                rand.NextDouble(afs.SharpnessDeltaT),
                                afs.RefractoryPeriods,
                                afs.SolverMethod,
-                               afs.SolverCompSteps
+                               afs.SolverCompSteps,
+                               afs.StimuliDuration
                                );
             }
             else if (settingsType == typeof(GaussianSettings))
@@ -161,7 +168,8 @@ namespace RCNet.Neural.Activation
                                       rand.NextDouble(afs.FiringThresholdV),
                                       afs.RefractoryPeriods,
                                       afs.SolverMethod,
-                                      afs.SolverCompSteps
+                                      afs.SolverCompSteps,
+                                      afs.StimuliDuration
                                       );
 
             }
@@ -178,7 +186,8 @@ namespace RCNet.Neural.Activation
                                       30,
                                       afs.RefractoryPeriods,
                                       afs.SolverMethod,
-                                      afs.SolverCompSteps
+                                      afs.SolverCompSteps,
+                                      afs.StimuliDuration
                                       );
             }
             else if (settingsType == typeof(LeakyIFSettings))
@@ -191,7 +200,8 @@ namespace RCNet.Neural.Activation
                                  rand.NextDouble(afs.FiringThresholdV),
                                  afs.RefractoryPeriods,
                                  afs.SolverMethod,
-                                 afs.SolverCompSteps
+                                 afs.SolverCompSteps,
+                                 afs.StimuliDuration
                                  );
             }
             else if (settingsType == typeof(LeakyReLUSettings))
@@ -242,11 +252,13 @@ namespace RCNet.Neural.Activation
             {
                 throw new ArgumentException($"Unsupported activation function settings: {settingsType.Name}");
             }
+            /*
             //Set random initial membrane potential for spiking activation
             if(!af.Stateless && af.TypeOfActivation == ActivationType.Spiking)
             {
-                //af.SetInitialInternalState(rand.NextRangedUniformDouble(0.25, 1));
+                af.SetInitialInternalState(rand.NextRangedUniformDouble(0.05, 0.95));
             }
+            */
             return af;
         }
 

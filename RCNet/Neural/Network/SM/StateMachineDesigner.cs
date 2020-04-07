@@ -274,8 +274,7 @@ namespace RCNet.Neural.Network.SM
                                                                                AnalogNeuronGroupSettings.DefaultSignalingRestriction,
                                                                                biasCfg,
                                                                                retainmentCfg,
-                                                                               null,
-                                                                               AnalogNeuronGroupSettings.DefaultReadoutDensity
+                                                                               null
                                                                                );
             return groupCfg;
         }
@@ -296,8 +295,7 @@ namespace RCNet.Neural.Network.SM
                                                                                  activationCfg,
                                                                                  heCfg,
                                                                                  biasCfg,
-                                                                                 null,
-                                                                                 SpikingNeuronGroupSettings.DefaultReadoutDensity
+                                                                                 null
                                                                                  );
             return groupCfg;
         }
@@ -349,7 +347,6 @@ namespace RCNet.Neural.Network.SM
                 InputUnitConnSettings inputUnitConnCfg = new InputUnitConnSettings(poolCfg.Name,
                                                                                    0,
                                                                                    inputConnectionDensity,
-                                                                                   InputUnitConnSettings.DefaultMeanSpikingSynapsesPerNeuron,
                                                                                    NeuronCommon.NeuronSignalingRestrictionType.AnalogOnly
                                                                                    );
                 inputUnits.Add(new InputUnitSettings(fieldCfg.Name,
@@ -402,7 +399,6 @@ namespace RCNet.Neural.Network.SM
         /// <param name="aFnCfg">Spiking activation function configuration</param>
         /// <param name="hes">Homogenous excitability configuration</param>
         /// <param name="inputConnectionDensity">Density of the input field connections to hidden neurons</param>
-        /// <param name="meanSpikingSynapsesPerNeuron">Mean number of spiking synapses per target neuron</param>
         /// <param name="maxInputDelay">Maximum delay of input synapse</param>
         /// <param name="interconnectionDensity">Density of the hidden neurons interconnection</param>
         /// <param name="maxInternalDelay">Maximum delay of internal synapse</param>
@@ -414,7 +410,6 @@ namespace RCNet.Neural.Network.SM
                                                      RCNetBaseSettings aFnCfg,
                                                      HomogenousExcitabilitySettings hes,
                                                      double inputConnectionDensity,
-                                                     double meanSpikingSynapsesPerNeuron,
                                                      int maxInputDelay,
                                                      double interconnectionDensity,
                                                      int maxInternalDelay,
@@ -447,7 +442,6 @@ namespace RCNet.Neural.Network.SM
                 InputUnitConnSettings inputUnitConnCfg = new InputUnitConnSettings(poolCfg.Name,
                                                                                    inputConnectionDensity,
                                                                                    0,
-                                                                                   meanSpikingSynapsesPerNeuron,
                                                                                    inputSpikeTrainLength > 0 ? NeuronCommon.NeuronSignalingRestrictionType.SpikingOnly : NeuronCommon.NeuronSignalingRestrictionType.AnalogOnly
                                                                                    );
                 inputUnits.Add(new InputUnitSettings(fieldCfg.Name,

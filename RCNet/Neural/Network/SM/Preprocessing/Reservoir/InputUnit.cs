@@ -13,7 +13,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
 {
     /// <summary>
     /// Provides input to be processed in the reservoir. Supports analog and spike-train codings.
-    /// Used spike-train coding method is from the "Sparse coding" family.
+    /// Used spike-train coding method is from the "population-temporal coding" family.
     /// </summary>
     [Serializable]
     public class InputUnit
@@ -22,7 +22,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// <summary>
         /// Maximum length of the spike-train (number of bits) representing input analog data
         /// </summary>
-        public const int SpikeTrainMaxLength = 32;
+        public const int SpikeTrainMaxLength = Bitwise.MaxBits * 2;
 
         //Attribute properties
         /// <summary>
@@ -43,6 +43,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         //Attributes
         private readonly Interval _inputRange;
         private readonly InputUnitSettings _inputUnitCfg;
+        private readonly int _halfTrainLength;
         private readonly double _precisionPiece;
         private readonly ulong _maxPrecisionBitMask;
 
@@ -66,8 +67,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         {
             _inputRange = inputRange.DeepClone();
             _inputUnitCfg = (InputUnitSettings)inputUnitCfg.DeepClone();
-            _precisionPiece = _inputRange.Span / Math.Pow(2d, _inputUnitCfg.SpikeTrainLength);
-            _maxPrecisionBitMask = (uint)Math.Round(Math.Pow(2d, _inputUnitCfg.SpikeTrainLength) - 1d);
             InputFieldIdx = inputFieldIdx;
             PredictorsSettings combinedPredictorsCfg = new PredictorsSettings(inputUnitCfg.PredictorsCfg, null, reservoirPredictorsCfg);
             PredictorsSettings analogPredictorsCfg = (inputUnitCfg.AnalogNeuronPredictors && combinedPredictorsCfg.NumOfEnabledPredictors > 0) ? combinedPredictorsCfg : null;
@@ -84,8 +83,15 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                                                       analogPredictorsCfg,
                                                       _inputUnitCfg.AnalogFiringThreshold
                                                       );
-            SpikeTrainInputNeuronCollection = new SpikingInputNeuron[_inputUnitCfg.SpikeTrainLength];
-            for (int i = 0; i < _inputUnitCfg.SpikeTrainLength; i++)
+            _halfTrainLength = _inputUnitCfg.SpikeTrainLength / 2;
+            _precisionPiece = (_inputRange.Span / 2d) / Math.Pow(2d, _halfTrainLength);
+            _maxPrecisionBitMask = 0ul;
+            for(int i = 0; i < _halfTrainLength; i++)
+            {
+                _maxPrecisionBitMask = Bitwise.SetBit(_maxPrecisionBitMask, i, true);
+            }
+            SpikeTrainInputNeuronCollection = new SpikingInputNeuron[_halfTrainLength * 2];
+            for (int i = 0; i < SpikeTrainInputNeuronCollection.Length; i++)
             {
                 SpikeTrainInputNeuronCollection[i] = new SpikingInputNeuron(reservoirID,
                                                                             _inputUnitCfg.CoordinatesCfg.GetCoordinates(),
@@ -100,17 +106,28 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// <summary>
         /// Total number of input neurons
         /// </summary>
-        public int NumOfInputNeurons { get { return (1 + _inputUnitCfg.SpikeTrainLength); } }
+        public int NumOfInputNeurons { get { return (1 + SpikeTrainInputNeuronCollection.Length); } }
 
         //Methods
         /// <summary>
         /// Transforms analog input to a binary sequence (spike-train)
         /// </summary>
         /// <param name="analogInput">Analog input value</param>
-        private uint GetSpikeTrain(double analogInput)
+        /// <param name="lowHalf">Indicates what half of the train to be occupied</param>
+        private ulong GetSpikeTrain(double analogInput, out bool lowHalf)
         {
-            double movedDataValue = Math.Max(0d, analogInput - _inputRange.Min);
-            uint pieces = (uint)Math.Min(Math.Floor(movedDataValue / _precisionPiece), (double)_maxPrecisionBitMask);
+            double halfValue;
+            if(analogInput < _inputRange.Mid)
+            {
+                halfValue = Math.Abs(analogInput);
+                lowHalf = true;
+            }
+            else
+            {
+                halfValue = Math.Abs(analogInput - _inputRange.Mid);
+                lowHalf = false;
+            }
+            ulong pieces = (ulong)Math.Min(Math.Floor(halfValue / _precisionPiece), (double)_maxPrecisionBitMask);
             return pieces;
         }
 
@@ -129,17 +146,122 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         }
 
         /// <summary>
+        /// Prepares set of combinations of indexes of input spiking neurons to be used to connect hidden neurons.
+        /// One combination per hidden neuron.
+        /// </summary>
+        /// <param name="numOfCombinations">Desired number of hidden neurons to be connected</param>
+        public List<int[]> GetSpikingInputCombinations(int numOfCombinations)
+        {
+            //Indexes of spiking input neurons coding analog values LT average. In order from highest to lowest spike.
+            int[] lowNeuronsIdxs = new int[_halfTrainLength];
+            lowNeuronsIdxs.Indices();
+            //Indexes of spiking input neurons coding analog values GE to average. In order from highest to lowest spike.
+            int[] highNeuronsIdxs = new int[_halfTrainLength];
+            for (int i = 0, idx = SpikeTrainInputNeuronCollection.Length - 1; idx >= _halfTrainLength; idx--, i++)
+            {
+                highNeuronsIdxs[i] = idx;
+            }
+            List<int[]> result = new List<int[]>(numOfCombinations);
+            for (int cmbLength = 1; cmbLength <= _halfTrainLength; cmbLength++)
+            {
+                foreach (int[] neuronIdxs in new List<int[]> { lowNeuronsIdxs, highNeuronsIdxs })
+                {
+                    int[] cmbIdxs = new int[cmbLength];
+                    for (int i = 0; i < cmbLength; i++)
+                    {
+                        cmbIdxs[i] = neuronIdxs[i];
+                    }
+                    result.Add(cmbIdxs);
+                    if (result.Count == numOfCombinations)
+                    {
+                        //Desired number of combinations is reached
+                        return result;
+                    }
+                }
+            }
+            //Maximum number of combinations is reached
+            return result;
+        }
+
+        /// <summary>
+        /// Prepares set of combinations of indexes of input spiking neurons to be used to connect hidden neurons.
+        /// One combination per hidden neuron.
+        /// </summary>
+        /// <param name="numOfCombinations">Desired number of hidden neurons to be connected</param>
+        public List<int[]> GetSpikingInputCombinations_ultra_short(int numOfCombinations)
+        {
+            //Indexes of spiking input neurons coding analog values LT average. In order from highest to lowest spike.
+            int[] lowNeuronsIdxs = new int[_halfTrainLength];
+            lowNeuronsIdxs.Indices();
+            //Indexes of spiking input neurons coding analog values GE to average. In order from highest to lowest spike.
+            int[] highNeuronsIdxs = new int[_halfTrainLength];
+            for (int i = 0, idx = SpikeTrainInputNeuronCollection.Length - 1; idx >= _halfTrainLength; idx--, i++)
+            {
+                highNeuronsIdxs[i] = idx;
+            }
+            return new List<int[]> { lowNeuronsIdxs, highNeuronsIdxs };
+        }
+
+        /// <summary>
+        /// Prepares set of combinations of indexes of input spiking neurons to be used to connect hidden neurons.
+        /// One combination per hidden neuron.
+        /// </summary>
+        /// <param name="numOfCombinations">Desired number of hidden neurons to be connected</param>
+        public List<int[]> GetSpikingInputCombinations_many(int numOfCombinations)
+        {
+            //Indexes of spiking input neurons coding analog values LT average. In order from highest to lowest spike.
+            int[] lowNeuronsIdxs = new int[_halfTrainLength];
+            lowNeuronsIdxs.Indices();
+            //Indexes of spiking input neurons coding analog values GE to average. In order from highest to lowest spike.
+            int[] highNeuronsIdxs = new int[_halfTrainLength];
+            for (int i = 0, idx = SpikeTrainInputNeuronCollection.Length - 1; idx >= _halfTrainLength; idx--, i++)
+            {
+                highNeuronsIdxs[i] = idx;
+            }
+            List<int[]> result = new List<int[]>(numOfCombinations);
+            for (int cmbLength = 1; cmbLength <= _halfTrainLength; cmbLength++)
+            {
+                for (int startIdx = 0; startIdx <= _halfTrainLength - cmbLength; startIdx++)
+                {
+                    foreach (int[] neuronIdxs in new List<int[]> { lowNeuronsIdxs, highNeuronsIdxs })
+                    {
+                        int[] cmbIdxs = new int[cmbLength];
+                        for (int i = 0; i < cmbLength; i++)
+                        {
+                            cmbIdxs[i] = neuronIdxs[startIdx + i];
+                        }
+                        result.Add(cmbIdxs);
+                        if (result.Count == numOfCombinations)
+                        {
+                            //Desired number of combinations is reached
+                            return result;
+                        }
+                    }
+                }
+            }
+            //Maximum number of combinations is reached
+            return result;
+        }
+
+        /// <summary>
         /// Forces input neurons to accept new incoming stimulation.
         /// </summary>
         /// <param name="iStimuli">External input analog signal</param>
         public void NewStimulation(double iStimuli)
         {
             AnalogInputNeuron.NewStimulation(iStimuli, 0d);
-            uint spikeTrainBits = GetSpikeTrain(iStimuli);
-            for (int i = 0; i < SpikeTrainInputNeuronCollection.Length; i++)
+            ulong spikeTrainBits = GetSpikeTrain(iStimuli, out bool lowHalf);
+            for (int i = 0; i < _halfTrainLength; i++)
             {
                 double spikeVal = Bitwise.GetBit(spikeTrainBits, i);
-                SpikeTrainInputNeuronCollection[i].NewStimulation(spikeVal, 0d);
+                if(lowHalf)
+                {
+                    SpikeTrainInputNeuronCollection[(_halfTrainLength - 1) - i].NewStimulation(spikeVal, 0d);
+                }
+                else
+                {
+                    SpikeTrainInputNeuronCollection[_halfTrainLength + i].NewStimulation(spikeVal, 0d);
+                }
             }
             return;
         }

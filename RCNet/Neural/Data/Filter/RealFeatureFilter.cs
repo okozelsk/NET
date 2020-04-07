@@ -17,26 +17,12 @@ namespace RCNet.Neural.Data.Filter
         /// <summary>
         /// Standard reserve is 10% of the sampled range
         /// </summary>
-        public const double RangeReserveCoeff = 1.1d;
-
-        //Attribute properties
-        /// <summary>
-        /// Positive samples statistics
-        /// </summary>
-        public BasicStat PositiveStat { get; }
-
-        /// <summary>
-        /// Negative samples statistics
-        /// </summary>
-        public BasicStat NegativeStat { get; }
+        public const double RangeReserveCoeff = 0.1d;
 
         //Attributes
         private readonly bool _standardize;
         private readonly bool _keepReserve;
-        private readonly bool _keepSign;
         private readonly Interval _range;
-        private readonly Interval _positiveRange;
-        private readonly Interval _negativeRange;
         private bool _invalidated;
 
         //Constructor
@@ -46,18 +32,12 @@ namespace RCNet.Neural.Data.Filter
         /// <param name="outputRange">Filter's output range</param>
         /// <param name="standardize">Apply data standardization</param>
         /// <param name="keepReserve">Keep range reserve for future unseen data</param>
-        /// <param name="keepSign">Original sign will be kept</param>
-        public RealFeatureFilter(Interval outputRange, bool standardize = true, bool keepReserve = true, bool keepSign = false)
+        public RealFeatureFilter(Interval outputRange, bool standardize = true, bool keepReserve = true)
             :base(FeatureType.Real, outputRange)
         {
-            PositiveStat = new BasicStat();
-            NegativeStat = new BasicStat();
             _standardize = standardize;
             _keepReserve = keepReserve;
-            _keepSign = keepSign;
             _range = new Interval();
-            _positiveRange = new Interval();
-            _negativeRange = new Interval();
             _invalidated = true;
             return;
         }
@@ -70,14 +50,9 @@ namespace RCNet.Neural.Data.Filter
         public RealFeatureFilter(Interval outputRange, RealFeatureFilterSettings settings)
             : base(FeatureType.Real, outputRange)
         {
-            PositiveStat = new BasicStat();
-            NegativeStat = new BasicStat();
             _standardize = settings.Standardize;
             _keepReserve = settings.KeepReserve;
-            _keepSign = settings.KeepSign;
             _range = new Interval();
-            _positiveRange = new Interval();
-            _negativeRange = new Interval();
             _invalidated = true;
             return;
         }
@@ -95,38 +70,12 @@ namespace RCNet.Neural.Data.Filter
             }
         }
 
-        /// <summary>
-        /// Feature positive range
-        /// </summary>
-        public Interval FeaturePositiveRange
-        {
-            get
-            {
-                RecomputeRange();
-                return _positiveRange;
-            }
-        }
-
-        /// <summary>
-        /// Feature negative range
-        /// </summary>
-        public Interval FeatureNegativeRange
-        {
-            get
-            {
-                RecomputeRange();
-                return _negativeRange;
-            }
-        }
-
         //Methods
         /// <summary>
         /// Resets filter to its initial state
         /// </summary>
         public override void Reset()
         {
-            PositiveStat.Reset();
-            NegativeStat.Reset();
             base.Reset();
             _invalidated = true;
             return;
@@ -139,14 +88,6 @@ namespace RCNet.Neural.Data.Filter
         public override void Update(double sample)
         {
             base.Update(sample);
-            if (sample > 0)
-            {
-                PositiveStat.AddSampleValue(sample);
-            }
-            else if (sample < 0)
-            {
-                NegativeStat.AddSampleValue(Math.Abs(sample));
-            }
             _invalidated = true;
             return;
         }
@@ -160,6 +101,8 @@ namespace RCNet.Neural.Data.Filter
             if (_standardize)
             {
                 double hi = Math.Max(Math.Abs((stat.Min - stat.ArithAvg) / stat.StdDev), Math.Abs((stat.Max - stat.ArithAvg) / stat.StdDev));
+                //Following ensures mean at the center of the normalization range but depending on the data
+                //it can lead to full utilization of only one half of the normalization interval.
                 min = -hi;
                 max = hi;
             }
@@ -170,8 +113,9 @@ namespace RCNet.Neural.Data.Filter
             }
             if (_keepReserve)
             {
-                min *= RangeReserveCoeff;
-                max *= RangeReserveCoeff;
+                double addSpan = ((max - min) / 2d) * RangeReserveCoeff;
+                min -= addSpan;
+                max += addSpan;
             }
             range.Set(min, max);
             return;
@@ -186,8 +130,6 @@ namespace RCNet.Neural.Data.Filter
             if(_invalidated)
             {
                 RecomputeRange(_range, Stat);
-                RecomputeRange(_positiveRange, PositiveStat);
-                RecomputeRange(_negativeRange, NegativeStat);
                 _invalidated = false;
             }
             return;
@@ -201,38 +143,12 @@ namespace RCNet.Neural.Data.Filter
         public override double ApplyFilter(double value)
         {
             RecomputeRange();
-            if (!_keepSign)
+            if (_standardize)
             {
-                if (_standardize)
-                {
-                    value -= Stat.ArithAvg;
-                    value /= Stat.StdDev;
-                }
-                return base.ApplyFilter(value);
+                value -= Stat.ArithAvg;
+                value /= Stat.StdDev;
             }
-            else
-            {
-                if (value == 0d)
-                {
-                    return OutputRange.Mid;
-                }
-                else if (value > 0d)
-                {
-                    //Positive
-                    value -= PositiveStat.ArithAvg;
-                    value /= PositiveStat.StdDev;
-                    return OutputRange.Mid + (OutputRange.Span / 2d) * ((value - _positiveRange.Min) / _positiveRange.Span);
-
-                }
-                else
-                {
-                    //Negative
-                    value = Math.Abs(value);
-                    value -= NegativeStat.ArithAvg;
-                    value /= NegativeStat.StdDev;
-                    return OutputRange.Mid - (OutputRange.Span / 2d) * ((value - _negativeRange.Min) / _negativeRange.Span);
-                }
-            }
+            return base.ApplyFilter(value);
         }
 
         /// <summary>
@@ -243,45 +159,13 @@ namespace RCNet.Neural.Data.Filter
         public override double ApplyReverse(double value)
         {
             RecomputeRange();
-            if (!_keepSign)
+            value = base.ApplyReverse(value);
+            if (_standardize)
             {
-                value = base.ApplyReverse(value);
-                if (_standardize)
-                {
-                    value *= Stat.StdDev;
-                    value += Stat.ArithAvg;
-                }
-                return value;
+                value *= Stat.StdDev;
+                value += Stat.ArithAvg;
             }
-            else
-            {
-                if (value == OutputRange.Mid)
-                {
-                    return 0d;
-                }
-                else if (value > OutputRange.Mid)
-                {
-                    //Positive
-                    value = _positiveRange.Min + _positiveRange.Span * ((value - OutputRange.Mid) / (OutputRange.Span / 2d));
-                    if (_standardize)
-                    {
-                        value *= PositiveStat.StdDev;
-                        value += PositiveStat.ArithAvg;
-                    }
-                    return value;
-                }
-                else
-                {
-                    //Negative
-                    value = _negativeRange.Min + _negativeRange.Span * ((Math.Abs(value) - OutputRange.Mid) / (OutputRange.Span / 2d));
-                    if (_standardize)
-                    {
-                        value *= NegativeStat.StdDev;
-                        value += NegativeStat.ArithAvg;
-                    }
-                    return -value;
-                }
-            }
+            return value;
         }
 
     }//RealFeatureFilter

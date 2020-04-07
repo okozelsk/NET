@@ -47,7 +47,7 @@ namespace Demo.DemoConsoleApp.Examples
             //We want to route input fields to readout layer together with other predictors
             const bool RouteToReadout = true;
             //All 3 input fields are real numbers and thus they should be standardly normalized and standardized.
-            RealFeatureFilterSettings realFeatureFilterCfg = new RealFeatureFilterSettings(true, true, false);
+            RealFeatureFilterSettings realFeatureFilterCfg = new RealFeatureFilterSettings(true, true);
             //Input fields collection
             ExternalFieldSettings extFieldHighCfg = new ExternalFieldSettings("High", realFeatureFilterCfg, RouteToReadout);
             ExternalFieldSettings extFieldLowCfg = new ExternalFieldSettings("Low", realFeatureFilterCfg, RouteToReadout);
@@ -85,8 +85,7 @@ namespace Demo.DemoConsoleApp.Examples
                                                                                AnalogNeuronGroupSettings.DefaultSignalingRestriction,
                                                                                biasCfg,
                                                                                retainmentCfg,
-                                                                               null,
-                                                                               AnalogNeuronGroupSettings.DefaultReadoutDensity
+                                                                               null
                                                                                );
             return groupCfg;
         }
@@ -158,7 +157,6 @@ namespace Demo.DemoConsoleApp.Examples
             InputUnitConnSettings inputUnitConnCfg = new InputUnitConnSettings(poolName,
                                                                                0,
                                                                                1,
-                                                                               InputUnitConnSettings.DefaultMeanSpikingSynapsesPerNeuron,
                                                                                NeuronCommon.NeuronSignalingRestrictionType.AnalogOnly
                                                                                );
             return inputUnitConnCfg;

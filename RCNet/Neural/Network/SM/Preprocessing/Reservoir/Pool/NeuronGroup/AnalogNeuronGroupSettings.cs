@@ -26,11 +26,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// Name of the associated xsd type
         /// </summary>
         public const string XsdTypeName = "PoolAnalogNeuronGroupType";
-        //Default values
-        /// <summary>
-        /// Default readout density
-        /// </summary>
-        public const double DefaultReadoutDensity = 1d;
         /// <summary>
         /// Every time the new normalized activation value is higher than the previous
         /// normalized activation value by at least the threshold, it is evaluated as a firing event
@@ -69,11 +64,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         public NeuronCommon.NeuronSignalingRestrictionType SignalingRestriction { get; }
 
         /// <summary>
-        /// Specifies what ratio of the neurons from this group can be used as a source of the readout predictors
-        /// </summary>
-        public double ReadoutDensity { get; }
-
-        /// <summary>
         /// Each neuron within the group receives constant input bias. Value of the neuron's bias is driven by this random settings
         /// </summary>
         public RandomValueSettings BiasCfg { get; }
@@ -109,7 +99,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// <param name="biasCfg">Each neuron within the group receives constant input bias. Value of the neuron's bias is driven by this random settings</param>
         /// <param name="retainmentCfg">Neurons' retainment property configuration</param>
         /// <param name="predictorsCfg">Configuration of the predictors</param>
-        /// <param name="readoutDensity">Specifies what ratio of the neurons from this group can be used as a source of the readout predictors</param>
         public AnalogNeuronGroupSettings(string name,
                                          double relShare,
                                          RCNetBaseSettings activationCfg,
@@ -117,8 +106,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
                                          NeuronCommon.NeuronSignalingRestrictionType signalingRestriction = DefaultSignalingRestriction,
                                          RandomValueSettings biasCfg = null,
                                          RetainmentSettings retainmentCfg = null,
-                                         PredictorsSettings predictorsCfg = null,
-                                         double readoutDensity = DefaultReadoutDensity
+                                         PredictorsSettings predictorsCfg = null
                                          )
         {
             Name = name;
@@ -126,7 +114,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
             ActivationCfg = activationCfg.DeepClone();
             FiringThreshold = firingThreshold;
             SignalingRestriction = signalingRestriction;
-            ReadoutDensity = readoutDensity;
             BiasCfg = biasCfg == null ? null : (RandomValueSettings)biasCfg.DeepClone();
             RetainmentCfg = retainmentCfg == null ? null : (RetainmentSettings)retainmentCfg.DeepClone();
             PredictorsCfg = predictorsCfg == null ? null : (PredictorsSettings)predictorsCfg.DeepClone();
@@ -140,7 +127,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// <param name="source">Source instance</param>
         public AnalogNeuronGroupSettings(AnalogNeuronGroupSettings source)
             :this(source.Name, source.RelShare, source.ActivationCfg, source.FiringThreshold, 
-                  source.SignalingRestriction, source.BiasCfg, source.RetainmentCfg, source.PredictorsCfg, source.ReadoutDensity)
+                  source.SignalingRestriction, source.BiasCfg, source.RetainmentCfg, source.PredictorsCfg)
         {
             return;
         }
@@ -164,8 +151,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
             FiringThreshold = double.Parse(settingsElem.Attribute("firingThreshold").Value, CultureInfo.InvariantCulture);
             //Signaling restriction
             SignalingRestriction = (NeuronCommon.NeuronSignalingRestrictionType)Enum.Parse(typeof(NeuronCommon.NeuronSignalingRestrictionType), settingsElem.Attribute("signalingRestriction").Value, true);
-            //Readout neurons density
-            ReadoutDensity = double.Parse(settingsElem.Attribute("readoutDensity").Value, CultureInfo.InvariantCulture);
             //Bias
             XElement biasSettingsElem = settingsElem.Elements("bias").FirstOrDefault();
             BiasCfg = biasSettingsElem == null ? null : new RandomValueSettings(biasSettingsElem);
@@ -187,11 +172,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// Type of the activation functions within the group (analog or spiking)
         /// </summary>
         public ActivationType Type { get { return ActivationType.Analog; } }
-
-        /// <summary>
-        /// Checks if settings are default
-        /// </summary>
-        public bool IsDefaultReadoutDensity { get { return (ReadoutDensity == DefaultReadoutDensity); } }
 
         /// <summary>
         /// Checks if settings are default
@@ -241,10 +221,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
             {
                 throw new Exception($"Invalid FiringThreshold {FiringThreshold.ToString(CultureInfo.InvariantCulture)}. FiringThreshold must be GE to 0 and LE to 1.");
             }
-            if (ReadoutDensity < 0)
-            {
-                throw new Exception($"Invalid ReadoutDensity {ReadoutDensity.ToString(CultureInfo.InvariantCulture)}. ReadoutDensity must be GE to 0.");
-            }
             return;
         }
 
@@ -276,10 +252,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
             if (!suppressDefaults || !IsDefaultSignalingRestriction)
             {
                 rootElem.Add(new XAttribute("signalingRestriction", SignalingRestriction.ToString()));
-            }
-            if (!suppressDefaults || !IsDefaultReadoutDensity)
-            {
-                rootElem.Add(new XAttribute("readoutDensity", ReadoutDensity.ToString(CultureInfo.InvariantCulture)));
             }
             if(BiasCfg != null)
             {

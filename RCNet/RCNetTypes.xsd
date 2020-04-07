@@ -158,6 +158,14 @@
     </xs:restriction>
   </xs:simpleType>
 
+  <!-- Unsigned integer GE 2 and LE 128-->
+  <xs:simpleType name="UIntGE2LE128Type">
+    <xs:restriction base="xs:unsignedInt">
+      <xs:minInclusive value="2" />
+      <xs:maxInclusive value="128" />
+    </xs:restriction>
+  </xs:simpleType>
+
   <!-- Unsigned integer GE 1 and LE 64-->
   <xs:simpleType name="UIntGE1LE64Type">
     <xs:restriction base="xs:unsignedInt">
@@ -678,6 +686,11 @@
         <xs:documentation xml:lang="en">Default value is 2</xs:documentation>
       </xs:annotation>
     </xs:attribute>
+    <xs:attribute type="UDoubleGT0Type" name="stimuliDuration" use="optional" default="1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 1 (ms)</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- Activation ExpIF configuration element -->
@@ -732,6 +745,11 @@
     <xs:attribute type="UIntGT0Type" name="solverCompSteps" use="optional" default="2">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is 2</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleGT0Type" name="stimuliDuration" use="optional" default="1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 1 (ms)</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -800,6 +818,11 @@
         <xs:documentation xml:lang="en">Default value is 2</xs:documentation>
       </xs:annotation>
     </xs:attribute>
+    <xs:attribute type="UDoubleGT0Type" name="stimuliDuration" use="optional" default="1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 1 (ms)</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- Activation IzhikevichIF configuration element -->
@@ -851,6 +874,11 @@
         <xs:documentation xml:lang="en">Default value is 2</xs:documentation>
       </xs:annotation>
     </xs:attribute>
+    <xs:attribute type="UDoubleGT0Type" name="stimuliDuration" use="optional" default="1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 1 (ms)</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- Activation AutoIzhikevichIF configuration element -->
@@ -868,6 +896,11 @@
     <xs:attribute type="UIntGT0Type" name="solverCompSteps" use="optional" default="2">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is 2</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleGT0Type" name="stimuliDuration" use="optional" default="1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 1 (ms)</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -1166,11 +1199,6 @@
     <xs:attribute type="xs:boolean" name="keepReserve" use="optional" default="true">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is true</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="xs:boolean" name="keepSign" use="optional" default="false">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is false</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -1858,11 +1886,6 @@
     </xs:sequence>
     <xs:attribute type="xs:string" name="name" use="required" />
     <xs:attribute type="UDoubleType" name="relShare" use="required"/>
-    <xs:attribute type="UDoubleType" name="readoutDensity" use="optional" default="1">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
   </xs:complexType>
 
   <!-- Pool - analog neuron group - retainment - configuration -->
@@ -1900,11 +1923,6 @@
     <xs:attribute type="SignalingRestrictionType" name="signalingRestriction" use="optional" default="NoRestriction">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is NoRestriction</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="UDoubleType" name="readoutDensity" use="optional" default="1">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -2179,11 +2197,6 @@
         <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute type="UDoubleType" name="meanSpikingSynapsesPerNeuron" use="optional" default="1">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
     <xs:attribute type="SignalingRestrictionType" name="signalingRestriction" use="optional" default="NoRestriction">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is NoRestriction</xs:documentation>
@@ -2206,9 +2219,9 @@
       <xs:element type="PredictorsType" name="predictors" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:string" name="inputFieldName" use="required"/>
-    <xs:attribute type="UIntGE1LE32Type" name="spikeTrainLength" use="optional" default="8">
+    <xs:attribute type="UIntGE2LE128Type" name="spikeTrainLength" use="optional" default="16">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 8</xs:documentation>
+        <xs:documentation xml:lang="en">Default value is 16</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UDoubleLE1Type" name="analogFiringThreshold" use="optional" default="0.00125">

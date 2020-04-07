@@ -47,6 +47,7 @@ namespace RCNet.Neural.Activation
         /// <param name="adaptationSpikeTriggeredIncrement">Spike triggered adaptation increment (pA)</param>
         /// <param name="solverMethod">ODE numerical solver method</param>
         /// <param name="solverCompSteps">ODE numerical solver computation steps of the time step</param>
+        /// <param name="stimuliDuration">Duration of the stimulation</param>
         public AdExpIF(double timeScale,
                        double resistance,
                        double restV,
@@ -58,14 +59,15 @@ namespace RCNet.Neural.Activation
                        double adaptationTimeConstant,
                        double adaptationSpikeTriggeredIncrement,
                        ODENumSolver.Method solverMethod,
-                       int solverCompSteps
+                       int solverCompSteps,
+                       double stimuliDuration
                        )
             : base(PhysUnit.ToBase(restV, PhysUnit.MetricPrefix.Milli),
                    PhysUnit.ToBase(resetV, PhysUnit.MetricPrefix.Milli),
                    PhysUnit.ToBase(firingThresholdV, PhysUnit.MetricPrefix.Milli),
                    0,
                    solverMethod,
-                   PhysUnit.ToBase(1, PhysUnit.MetricPrefix.Milli),
+                   PhysUnit.ToBase(stimuliDuration, PhysUnit.MetricPrefix.Milli),
                    solverCompSteps,
                    2,
                    PhysUnit.FromBase(1d, PhysUnit.MetricPrefix.Giga),

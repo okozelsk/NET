@@ -31,10 +31,6 @@ namespace RCNet.Neural.Data.Filter
         /// Default value of KeepReserve
         /// </summary>
         public const bool DefaultKeepReserve = true;
-        /// <summary>
-        /// Default value of KeepSign
-        /// </summary>
-        public const bool DefaultKeepSign = false;
 
         //Attribute properties
         /// <summary>
@@ -45,10 +41,6 @@ namespace RCNet.Neural.Data.Filter
         /// Keep range reserve?
         /// </summary>
         public bool KeepReserve { get; }
-        /// <summary>
-        /// Keep sign?
-        /// </summary>
-        public bool KeepSign { get; }
 
         //Constructors
         /// <summary>
@@ -56,15 +48,12 @@ namespace RCNet.Neural.Data.Filter
         /// </summary>
         /// <param name="standardize">Standardize?</param>
         /// <param name="keepReserve">Keep range reserve?</param>
-        /// <param name="keepSign">Keep original sign?</param>
         public RealFeatureFilterSettings(bool standardize = DefaultStandardize,
-                                         bool keepReserve = DefaultKeepReserve,
-                                         bool keepSign = DefaultKeepSign
+                                         bool keepReserve = DefaultKeepReserve
                                          )
         {
             Standardize = standardize;
             KeepReserve = keepReserve;
-            KeepSign = keepSign;
             return;
         }
 
@@ -73,10 +62,8 @@ namespace RCNet.Neural.Data.Filter
         /// </summary>
         /// <param name="source">Source instance</param>
         public RealFeatureFilterSettings(RealFeatureFilterSettings source)
+            :this(source.Standardize, source.KeepReserve)
         {
-            Standardize = source.Standardize;
-            KeepReserve = source.KeepReserve;
-            KeepSign = source.KeepSign;
             return;
         }
 
@@ -92,7 +79,6 @@ namespace RCNet.Neural.Data.Filter
             //Parsing
             Standardize = bool.Parse(settingsElem.Attribute("standardize").Value);
             KeepReserve = bool.Parse(settingsElem.Attribute("keepReserve").Value);
-            KeepSign = bool.Parse(settingsElem.Attribute("keepSign").Value);
             return;
         }
 
@@ -113,14 +99,9 @@ namespace RCNet.Neural.Data.Filter
         public bool IsDefaultKeepReserve { get { return (KeepReserve == DefaultKeepReserve); } }
 
         /// <summary>
-        /// Checks if settings are default
-        /// </summary>
-        public bool IsDefaultKeepSign { get { return (KeepSign == DefaultKeepSign); } }
-
-        /// <summary>
         /// Identifies settings containing only default values
         /// </summary>
-        public override bool ContainsOnlyDefaults { get { return IsDefaultStandardize && IsDefaultKeepReserve && IsDefaultKeepSign; } }
+        public override bool ContainsOnlyDefaults { get { return IsDefaultStandardize && IsDefaultKeepReserve; } }
 
         //Methods
         /// <summary>
@@ -148,11 +129,6 @@ namespace RCNet.Neural.Data.Filter
             {
                 rootElem.Add(new XAttribute("keepReserve", KeepReserve.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()));
             }
-            if (!suppressDefaults || !IsDefaultKeepSign)
-            {
-                rootElem.Add(new XAttribute("keepSign", KeepSign.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()));
-            }
-
             Validate(rootElem, XsdTypeName);
             return rootElem;
         }

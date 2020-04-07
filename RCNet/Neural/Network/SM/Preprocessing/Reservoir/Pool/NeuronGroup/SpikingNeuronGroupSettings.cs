@@ -26,11 +26,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// Name of the associated xsd type
         /// </summary>
         public const string XsdTypeName = "PoolSpikingNeuronGroupType";
-        //Default values
-        /// <summary>
-        /// Default readout density
-        /// </summary>
-        public const double DefaultReadoutDensity = 1d;
 
         //Attribute properties
         /// <summary>
@@ -47,11 +42,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// Common activation function settings of the groupped neurons
         /// </summary>
         public RCNetBaseSettings ActivationCfg { get; }
-
-        /// <summary>
-        /// Specifies what ratio of the neurons from this group can be used as a source of the readout predictors
-        /// </summary>
-        public double ReadoutDensity { get; }
 
         /// <summary>
         /// Configuration of the neuron's homogenous excitability
@@ -85,14 +75,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// <param name="homogenousExcitabilityCfg">Configuration of the neuron's homogenous excitability</param>
         /// <param name="biasCfg">Each neuron within the group receives constant input bias. Value of the neuron's bias is driven by this random settings</param>
         /// <param name="predictorsCfg">Configuration of the predictors</param>
-        /// <param name="readoutDensity">Specifies what ratio of the neurons from this group can be used as a source of the readout predictors</param>
         public SpikingNeuronGroupSettings(string name,
                                           double relShare,
                                           RCNetBaseSettings activationCfg,
                                           HomogenousExcitabilitySettings homogenousExcitabilityCfg = null,
                                           RandomValueSettings biasCfg = null,
-                                          PredictorsSettings predictorsCfg = null,
-                                          double readoutDensity = DefaultReadoutDensity
+                                          PredictorsSettings predictorsCfg = null
                                           )
         {
             Name = name;
@@ -101,7 +89,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
             HomogenousExcitabilityCfg = homogenousExcitabilityCfg == null ? new HomogenousExcitabilitySettings() : (HomogenousExcitabilitySettings)homogenousExcitabilityCfg.DeepClone();
             BiasCfg = biasCfg == null ? null : (RandomValueSettings)biasCfg.DeepClone();
             PredictorsCfg = predictorsCfg == null ? null : (PredictorsSettings)predictorsCfg.DeepClone();
-            ReadoutDensity = readoutDensity;
             Check();
             return;
         }
@@ -112,7 +99,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// <param name="source">Source instance</param>
         public SpikingNeuronGroupSettings(SpikingNeuronGroupSettings source)
             :this(source.Name, source.RelShare, source.ActivationCfg, source.HomogenousExcitabilityCfg, source.BiasCfg,
-                  source.PredictorsCfg, source.ReadoutDensity)
+                  source.PredictorsCfg)
         {
             return;
         }
@@ -133,9 +120,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
             //Activation settings
             ActivationCfg = ActivationFactory.LoadSettings(settingsElem.Elements().First());
             //Homogenous excitability
-            HomogenousExcitabilityCfg = new HomogenousExcitabilitySettings(settingsElem.Elements("homogenousExcitability").First());
-            //Readout neurons density
-            ReadoutDensity = double.Parse(settingsElem.Attribute("readoutDensity").Value, CultureInfo.InvariantCulture);
+            XElement homogenousExcitabilityElem = settingsElem.Elements("homogenousExcitability").FirstOrDefault();
+            HomogenousExcitabilityCfg = homogenousExcitabilityElem == null ? new HomogenousExcitabilitySettings() : new HomogenousExcitabilitySettings(homogenousExcitabilityElem);
             //Bias
             XElement biasSettingsElem = settingsElem.Elements("bias").FirstOrDefault();
             BiasCfg = biasSettingsElem == null ? null : new RandomValueSettings(biasSettingsElem);
@@ -159,11 +145,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// Restriction of neuron's output signaling
         /// </summary>
         public NeuronCommon.NeuronSignalingRestrictionType SignalingRestriction { get { return NeuronCommon.NeuronSignalingRestrictionType.SpikingOnly; } }
-
-        /// <summary>
-        /// Checks if settings are default
-        /// </summary>
-        public bool IsDefaultReadoutDensity { get { return (ReadoutDensity == DefaultReadoutDensity); } }
 
         /// <summary>
         /// Checks if settings are default
@@ -202,10 +183,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
             {
                 throw new Exception($"Not allowed Activation settings {activationType.ToString()}.");
             }
-            if (ReadoutDensity < 0)
-            {
-                throw new Exception($"Invalid ReadoutDensity {ReadoutDensity.ToString(CultureInfo.InvariantCulture)}. ReadoutDensity must be GE to 0.");
-            }
             return;
         }
 
@@ -230,10 +207,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
                                              new XAttribute("relShare", RelShare.ToString(CultureInfo.InvariantCulture)),
                                              ActivationCfg.GetXml(suppressDefaults)
                                              );
-            if(!suppressDefaults || !IsDefaultReadoutDensity)
-            {
-                rootElem.Add(new XAttribute("readoutDensity", ReadoutDensity.ToString(CultureInfo.InvariantCulture)));
-            }
             if (!suppressDefaults || !IsDefaultHomogenousExcitabilityCfg)
             {
                 rootElem.Add(HomogenousExcitabilityCfg.GetXml(suppressDefaults));

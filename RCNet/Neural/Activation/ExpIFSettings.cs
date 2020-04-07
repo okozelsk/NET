@@ -97,6 +97,10 @@ namespace RCNet.Neural.Activation
         /// ODE numerical solver computation steps of the time step 
         /// </summary>
         public int SolverCompSteps { get; }
+        /// <summary>
+        /// Duration of the stimulation
+        /// </summary>
+        public double StimuliDuration { get; }
 
 
         //Constructors
@@ -113,6 +117,7 @@ namespace RCNet.Neural.Activation
         /// <param name="refractoryPeriods">Number of after spike computation cycles while an input stimuli is ignored (ms)</param>
         /// <param name="solverMethod">ODE numerical solver method</param>
         /// <param name="solverCompSteps">ODE numerical solver computation steps of the time step</param>
+        /// <param name="stimuliDuration">Duration of the stimulation</param>
         public ExpIFSettings(URandomValueSettings timeScale = null,
                              URandomValueSettings resistance = null,
                              RandomValueSettings restV = null,
@@ -122,7 +127,8 @@ namespace RCNet.Neural.Activation
                              URandomValueSettings sharpnessDeltaT = null,
                              int refractoryPeriods = ActivationFactory.DefaultRefractoryPeriods,
                              ODENumSolver.Method solverMethod = ActivationFactory.DefaultSolverMethod,
-                             int solverCompSteps = ActivationFactory.DefaultSolverCompSteps
+                             int solverCompSteps = ActivationFactory.DefaultSolverCompSteps,
+                             double stimuliDuration = ActivationFactory.DefaultStimuliDuration
                              )
         {
             TimeScale = URandomValueSettings.CloneOrDefault(timeScale, TypicalTimeScale);
@@ -135,6 +141,7 @@ namespace RCNet.Neural.Activation
             RefractoryPeriods = refractoryPeriods;
             SolverMethod = solverMethod;
             SolverCompSteps = solverCompSteps;
+            StimuliDuration = stimuliDuration;
             Check();
             return;
         }
@@ -155,6 +162,7 @@ namespace RCNet.Neural.Activation
             RefractoryPeriods = source.RefractoryPeriods;
             SolverMethod = source.SolverMethod;
             SolverCompSteps = source.SolverCompSteps;
+            StimuliDuration = source.StimuliDuration;
             return;
         }
 
@@ -180,6 +188,7 @@ namespace RCNet.Neural.Activation
             RefractoryPeriods = int.Parse(activationSettingsElem.Attribute("refractoryPeriods").Value, CultureInfo.InvariantCulture);
             SolverMethod = (ODENumSolver.Method)Enum.Parse(typeof(ODENumSolver.Method), activationSettingsElem.Attribute("solverMethod").Value, true);
             SolverCompSteps = int.Parse(activationSettingsElem.Attribute("solverCompSteps").Value, CultureInfo.InvariantCulture);
+            StimuliDuration = double.Parse(activationSettingsElem.Attribute("stimuliDuration").Value, CultureInfo.InvariantCulture);
             Check();
             return;
         }
@@ -236,6 +245,11 @@ namespace RCNet.Neural.Activation
         public bool IsDefaultSolverCompSteps { get { return (SolverCompSteps == ActivationFactory.DefaultSolverCompSteps); } }
 
         /// <summary>
+        /// Checks if settings are default
+        /// </summary>
+        public bool IsDefaultStimuliDuration { get { return (StimuliDuration == ActivationFactory.DefaultStimuliDuration); } }
+
+        /// <summary>
         /// Identifies settings containing only default values
         /// </summary>
         public override bool ContainsOnlyDefaults
@@ -251,7 +265,8 @@ namespace RCNet.Neural.Activation
                        IsDefaultSharpnessDeltaT &&
                        IsDefaultRefractoryPeriods &&
                        IsDefaultSolverMethod &&
-                       IsDefaultSolverCompSteps;
+                       IsDefaultSolverCompSteps &&
+                       IsDefaultStimuliDuration;
             }
         }
 
@@ -268,6 +283,10 @@ namespace RCNet.Neural.Activation
             if (SolverCompSteps < 1)
             {
                 throw new Exception($"Invalid SolverCompSteps {SolverCompSteps.ToString(CultureInfo.InvariantCulture)}. SolverCompSteps must be GE to 1.");
+            }
+            if (StimuliDuration <= 0)
+            {
+                throw new Exception($"Invalid StimuliDuration {StimuliDuration.ToString(CultureInfo.InvariantCulture)}. StimuliDuration must be GT 0.");
             }
             return;
         }
@@ -300,6 +319,10 @@ namespace RCNet.Neural.Activation
             if (!suppressDefaults || !IsDefaultSolverCompSteps)
             {
                 rootElem.Add(new XAttribute("solverCompSteps", SolverCompSteps.ToString(CultureInfo.InvariantCulture)));
+            }
+            if (!suppressDefaults || !IsDefaultStimuliDuration)
+            {
+                rootElem.Add(new XAttribute("stimuliDuration", StimuliDuration.ToString(CultureInfo.InvariantCulture)));
             }
             if (!suppressDefaults || !IsDefaultTimeScale)
             {

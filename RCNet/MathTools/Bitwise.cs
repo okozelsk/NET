@@ -13,12 +13,12 @@ namespace RCNet.MathTools
         /// <summary>
         /// Maximum number of bits within largest integer variable type
         /// </summary>
-        private const int MaxBits = sizeof(ulong) * 8;
+        public const int MaxBits = sizeof(ulong) * 8;
 
         /// <summary>
         /// Zero based index of the highest allowed bit
         /// </summary>
-        private const int BitMaxIndex = sizeof(ulong) * 8 - 1;
+        public const int BitMaxIndex = sizeof(ulong) * 8 - 1;
 
         //Attributes
         /// <summary>

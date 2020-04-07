@@ -186,11 +186,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                         }
                     }
                     //Readout
-                    if(ngs.ReadoutDensity > 0 && predictorsCfg.NumOfEnabledPredictors > 0)
+                    if(predictorsCfg.NumOfEnabledPredictors > 0)
                     {
-                        int numOfReadoutneurons = (int)Math.Round(ngs.ReadoutDensity * ngs.Count);
                         rand.Shuffle(grpNCP);
-                        for (int i = 0; i < numOfReadoutneurons; i++)
+                        for (int i = 0; i < ngs.Count; i++)
                         {
                             grpNCP[i].PredictorsCfg = predictorsCfg;
                         }
@@ -461,7 +460,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             for (int nIdx = 0; nIdx < _reservoirNeuronCollection.Length; nIdx++)
             {
                 //Adjust input total strength of hidden neuron having analog activation
-                if (_reservoirNeuronCollection[nIdx].TypeOfActivation == ActivationType.Spiking)
+                if (_reservoirNeuronCollection[nIdx].TypeOfActivation == ActivationType.Analog)
                 {
                     //Adjust input synapses
                     if (_neuronInputConnectionsCollection[nIdx].Values.Count > 1)
@@ -571,23 +570,17 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                         else
                         {
                             //Spiking synapses
-                            int[] plannedNumOfSynapses = new int[targetNeurons.Count];
-                            for (int i = 0; i < plannedNumOfSynapses.Length; i++)
-                            {
-                                plannedNumOfSynapses[i] = (int)Math.Round(rand.NextExponentialDouble(inputConnCfg.MeanSpikingSynapsesPerNeuron).Bound(1d, Math.Max(1d, inputUnit.SpikeTrainInputNeuronCollection.Length)), 0);
-                            }
-                            int[] inputNeuronsIndices = new int[inputUnit.SpikeTrainInputNeuronCollection.Length];
-                            inputNeuronsIndices.Indices();
+                            List<int[]> plannedConnCmbIdxs = inputUnit.GetSpikingInputCombinations(targetNeurons.Count);
                             bool[] inputNeuronUsageChecker = new bool[inputUnit.SpikeTrainInputNeuronCollection.Length];
                             inputNeuronUsageChecker.Populate(false);
+                            int cmbIdx = 0;
                             for (int nIdx = 0; nIdx < targetNeurons.Count; nIdx++)
                             {
-                                rand.Shuffle(inputNeuronsIndices);
-                                for (int i = 0; i < plannedNumOfSynapses[nIdx]; i++)
+                                for (int i = 0; i < plannedConnCmbIdxs[cmbIdx].Length; i++)
                                 {
                                     //Create synapse
-                                    inputNeuronUsageChecker[inputNeuronsIndices[i]] = true;
-                                    Synapse synapse = new Synapse(inputUnit.SpikeTrainInputNeuronCollection[inputNeuronsIndices[i]],
+                                    inputNeuronUsageChecker[plannedConnCmbIdxs[cmbIdx][i]] = true;
+                                    Synapse synapse = new Synapse(inputUnit.SpikeTrainInputNeuronCollection[plannedConnCmbIdxs[cmbIdx][i]],
                                                                   targetNeurons[nIdx],
                                                                   Synapse.SynRole.Input,
                                                                   InstanceCfg.SynapseCfg,
@@ -596,6 +589,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                                     _inputDistancesStat.AddSampleValue(synapse.Distance);
                                     SetInterconnection(_neuronInputConnectionsCollection, synapse);
                                 }//for i
+                                //Increment combination index
+                                if(++cmbIdx == plannedConnCmbIdxs.Count)
+                                {
+                                    //Restart from the beginning
+                                    cmbIdx = 0;
+                                }
                             }//for nIdx
                             for (int i = 0; i < inputUnit.SpikeTrainInputNeuronCollection.Length; i++)
                             {

@@ -39,6 +39,7 @@ namespace RCNet.Neural.Activation
         /// <param name="refractoryPeriods">Number of after spike computation cycles while an input stimuli is ignored (ms)</param>
         /// <param name="solverMethod">ODE numerical solver method</param>
         /// <param name="solverCompSteps">ODE numerical solver computation steps of the time step</param>
+        /// <param name="stimuliDuration">Duration of the stimulation</param>
         public ExpIF(double timeScale,
                      double resistance,
                      double restV,
@@ -48,14 +49,15 @@ namespace RCNet.Neural.Activation
                      double sharpnessDeltaT,
                      int refractoryPeriods,
                      ODENumSolver.Method solverMethod,
-                     int solverCompSteps
+                     int solverCompSteps,
+                     double stimuliDuration
                      )
             : base(restV,
                    resetV,
                    firingThresholdV,
                    refractoryPeriods,
                    solverMethod,
-                   1,
+                   stimuliDuration,
                    solverCompSteps,
                    1,
                    10,
