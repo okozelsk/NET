@@ -9,6 +9,7 @@ using RCNet.Neural.Data;
 using RCNet.Neural.Network.NonRecurrent;
 using RCNet.Neural.Network.SM;
 using RCNet.Neural.Network.SM.Preprocessing;
+using RCNet.Neural.Network.SM.Preprocessing.Input;
 
 namespace Demo.DemoConsoleApp.Examples
 {
@@ -116,11 +117,11 @@ namespace Demo.DemoConsoleApp.Examples
             CsvDataHolder trainingCsvData = new CsvDataHolder(trainingDataFileName);
             //Convert csv data to VectorBundle useable for StateMachine training
             VectorBundle trainingData;
-            if (stateMachine.Config.NeuralPreprocessorCfg.InputCfg.FeedingCfg.FeedingType == NeuralPreprocessor.InputFeedingType.Continuous)
+            if (stateMachine.Config.NeuralPreprocessorCfg.InputEncoderCfg.FeedingCfg.FeedingType == InputEncoder.InputFeedingType.Continuous)
             {
                 //Continuous feeding data format
                 trainingData = VectorBundle.Load(trainingCsvData,
-                                                 stateMachine.Config.NeuralPreprocessorCfg.InputCfg.FieldsCfg.ExternalFieldsCfg.GetFieldNames(),
+                                                 stateMachine.Config.NeuralPreprocessorCfg.InputEncoderCfg.FieldsCfg.ExternalFieldsCfg.GetFieldNames(),
                                                  stateMachine.Config.ReadoutLayerCfg.OutputFieldNameCollection,
                                                  out predictionInputVector
                                                  );
@@ -166,7 +167,7 @@ namespace Demo.DemoConsoleApp.Examples
             CsvDataHolder verificationCsvData = new CsvDataHolder(verificationDataFileName);
             //Convert csv data to VectorBundle useable for StateMachine verification
             VectorBundle verificationData;
-            if (stateMachine.Config.NeuralPreprocessorCfg.InputCfg.FeedingCfg.FeedingType == NeuralPreprocessor.InputFeedingType.Continuous)
+            if (stateMachine.Config.NeuralPreprocessorCfg.InputEncoderCfg.FeedingCfg.FeedingType == InputEncoder.InputFeedingType.Continuous)
             {
                 //Continuous input feeding
                 //Last known input values from training (predictionInputVector) must be pushed into the reservoirs to keep time series continuity
@@ -174,7 +175,7 @@ namespace Demo.DemoConsoleApp.Examples
                 double[] tmp = stateMachine.Compute(omittedInputVector);
                 //Load verification data and get new predictionInputVector for final prediction
                 verificationData = VectorBundle.Load(verificationCsvData,
-                                                     stateMachine.Config.NeuralPreprocessorCfg.InputCfg.FieldsCfg.ExternalFieldsCfg.GetFieldNames(),
+                                                     stateMachine.Config.NeuralPreprocessorCfg.InputEncoderCfg.FieldsCfg.ExternalFieldsCfg.GetFieldNames(),
                                                      stateMachine.Config.ReadoutLayerCfg.OutputFieldNameCollection,
                                                      out predictionInputVector
                                                      );

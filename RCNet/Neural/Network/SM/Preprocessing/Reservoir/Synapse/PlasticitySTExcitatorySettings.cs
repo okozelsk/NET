@@ -9,7 +9,6 @@ using System.Xml.XPath;
 using RCNet.Extensions;
 using RCNet.XmlTools;
 using RCNet.RandomValue;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
 {

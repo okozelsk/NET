@@ -8,9 +8,9 @@ using RCNet.Extensions;
 using RCNet.MathTools;
 using RCNet.Neural.Activation;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor;
+using RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor;
 
-namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron
+namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
 {
     /// <summary>
     /// Reservoir's hidden neuron
@@ -51,6 +51,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron
         /// Specifies, if neuron has already emitted spike before current computation cycle
         /// </summary>
         public bool AfterFirstSpike { get; private set; }
+
+        /// <summary>
+        /// Specifies, if neuron can receive only input stimuli
+        /// </summary>
+        public bool Prime { get; }
 
         //Attributes
         /// <summary>
@@ -94,43 +99,72 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron
 
         //Constructor
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance of hidden neuron having spiking activation
         /// </summary>
         /// <param name="location">Information about a neuron location within the neural preprocessor</param>
-        /// <param name="activation">Instantiated activation function.</param>
-        /// <param name="signalingRestriction">Output signaling restriction. Spiking activation causes output signal always restricted to SpikingOnly.</param>
-        /// <param name="predictorsCfg">Configuration of neuron's predictors</param>
+        /// <param name="spikingActivation">Instantiated activation function.</param>
+        /// <param name="prime">Specifies, if neuron can receive only input stimuli.</param>
         /// <param name="bias">Constant bias to be applied.</param>
-        /// <param name="analogFiringThreshold">A number between 0 and 1 (LT1). Every time the new activation value is higher than the previous activation value by at least the threshold, it is evaluated as a firing event. Ignored in case of spiking activation.</param>
-        /// <param name="retainmentStrength">Strength of the analog neuron's retainment property. Ignored in case of spiking activation.</param>
+        /// <param name="predictorsCfg">Configuration of neuron's predictors</param>
         public HiddenNeuron(NeuronLocation location,
-                            IActivationFunction activation,
-                            NeuronCommon.NeuronSignalingRestrictionType signalingRestriction,
-                            PredictorsSettings predictorsCfg,
-                            double bias = 0,
-                            double analogFiringThreshold = AnalogNeuronGroupSettings.DefaultFiringThreshold,
-                            double retainmentStrength = 0
+                            IActivationFunction spikingActivation,
+                            bool prime,
+                            double bias,
+                            PredictorsSettings predictorsCfg
                             )
         {
             Location = location;
             Statistics = new NeuronStatistics();
+            Prime = prime;
             Bias = bias;
-            //Activation specific
-            _activation = activation;
-            if (activation.TypeOfActivation == ActivationType.Spiking)
+            //Activation check
+            if (spikingActivation.TypeOfActivation == ActivationType.Analog)
             {
                 //Spiking
-                SignalingRestriction = NeuronCommon.NeuronSignalingRestrictionType.SpikingOnly;
-                _analogFiringThreshold = 0;
-                _retainmentStrength = 0;
+                throw new Exception("Called wrong type of hidden neuron's constructor for spiking activation.");
             }
-            else
+            _activation = spikingActivation;
+            SignalingRestriction = NeuronCommon.NeuronSignalingRestrictionType.SpikingOnly;
+            _analogFiringThreshold = 0;
+            _retainmentStrength = 0;
+            _predictors = predictorsCfg != null ? new PredictorsProvider(predictorsCfg) : null;
+            Reset(false);
+            return;
+        }
+
+        //Constructor
+        /// <summary>
+        /// Creates an initialized instance of hidden neuron having analog activation
+        /// </summary>
+        /// <param name="location">Information about a neuron location within the neural preprocessor</param>
+        /// <param name="analogActivation">Instantiated activation function.</param>
+        /// <param name="bias">Constant bias to be applied.</param>
+        /// <param name="firingThreshold">A number between 0 and 1 (LT1). Every time the new activation value is higher than the previous activation value by at least the threshold, it is evaluated as a firing event.</param>
+        /// <param name="retainmentStrength">Strength of the analog neuron's retainment property.</param>
+        /// <param name="signalingRestriction">Output signaling restriction.</param>
+        /// <param name="predictorsCfg">Configuration of neuron's predictors</param>
+        public HiddenNeuron(NeuronLocation location,
+                            IActivationFunction analogActivation,
+                            double bias,
+                            double firingThreshold,
+                            double retainmentStrength,
+                            NeuronCommon.NeuronSignalingRestrictionType signalingRestriction,
+                            PredictorsSettings predictorsCfg
+                            )
+        {
+            Location = location;
+            Statistics = new NeuronStatistics();
+            Prime = false;
+            Bias = bias;
+            //Activation check
+            if (analogActivation.TypeOfActivation == ActivationType.Spiking)
             {
-                //Analog
-                SignalingRestriction = signalingRestriction;
-                _analogFiringThreshold = analogFiringThreshold;
-                _retainmentStrength = retainmentStrength;
+                throw new Exception("Called wrong type of hidden neuron's constructor for analog activation.");
             }
+            _activation = analogActivation;
+            SignalingRestriction = signalingRestriction;
+            _analogFiringThreshold = firingThreshold;
+            _retainmentStrength = retainmentStrength;
             _predictors = predictorsCfg != null ? new PredictorsProvider(predictorsCfg) : null;
             Reset(false);
             return;
@@ -237,7 +271,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron
         /// <summary>
         /// Neuron returns previously computed signal of required type (if possible).
         /// Type of finally returned signal depends on specified targetActivationType and signaling restriction of the neuron.
-        /// Signal is always within the range [0,1]
+        /// Signal is always within the range 0...1
         /// </summary>
         /// <param name="targetActivationType">Specifies what type of the signal is preferred.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -5,7 +5,7 @@ using System.Globalization;
 using System.Xml.Linq;
 using RCNet.Extensions;
 using RCNet.RandomValue;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron;
+using RCNet.Neural.Network.SM.Preprocessing.Neuron;
 using RCNet.MathTools.Differential;
 
 namespace RCNet.Neural.Activation

@@ -8,7 +8,6 @@ using System.Xml.Linq;
 using System.Reflection;
 using RCNet.Extensions;
 using RCNet.RandomValue;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron;
 using RCNet.XmlTools;
 using RCNet.MathTools.Differential;
 

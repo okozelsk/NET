@@ -10,8 +10,8 @@ using RCNet.Extensions;
 using RCNet.XmlTools;
 using RCNet.RandomValue;
 using RCNet.Neural.Activation;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor;
+using RCNet.Neural.Network.SM.Preprocessing.Neuron;
+using RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
 {
@@ -26,6 +26,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// Name of the associated xsd type
         /// </summary>
         public const string XsdTypeName = "PoolSpikingNeuronGroupType";
+        //Default values
+        /// <summary>
+        /// Default ratio of the prime neurons receiving only input stimuli
+        /// </summary>
+        public const double DefaultPrimeRatio = 0.5d;
 
         //Attribute properties
         /// <summary>
@@ -42,6 +47,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// Common activation function settings of the groupped neurons
         /// </summary>
         public RCNetBaseSettings ActivationCfg { get; }
+
+        /// <summary>
+        /// Ratio of the prime neurons receiving only input stimuli
+        /// </summary>
+        public double PrimeRatio { get; }
 
         /// <summary>
         /// Configuration of the neuron's homogenous excitability
@@ -72,12 +82,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// <param name="name">Name of the neuron group</param>
         /// <param name="relShare">Specifies how big relative portion of pool's neurons is formed by this group of the neurons</param>
         /// <param name="activationCfg">Common activation function settings of the groupped neurons</param>
+        /// <param name="primeRatio">Ratio of the prime neurons receiving only input stimuli</param>
         /// <param name="homogenousExcitabilityCfg">Configuration of the neuron's homogenous excitability</param>
         /// <param name="biasCfg">Each neuron within the group receives constant input bias. Value of the neuron's bias is driven by this random settings</param>
         /// <param name="predictorsCfg">Configuration of the predictors</param>
         public SpikingNeuronGroupSettings(string name,
                                           double relShare,
                                           RCNetBaseSettings activationCfg,
+                                          double primeRatio = DefaultPrimeRatio,
                                           HomogenousExcitabilitySettings homogenousExcitabilityCfg = null,
                                           RandomValueSettings biasCfg = null,
                                           PredictorsSettings predictorsCfg = null
@@ -86,6 +98,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
             Name = name;
             RelShare = relShare;
             ActivationCfg = activationCfg.DeepClone();
+            PrimeRatio = primeRatio;
             HomogenousExcitabilityCfg = homogenousExcitabilityCfg == null ? new HomogenousExcitabilitySettings() : (HomogenousExcitabilitySettings)homogenousExcitabilityCfg.DeepClone();
             BiasCfg = biasCfg == null ? null : (RandomValueSettings)biasCfg.DeepClone();
             PredictorsCfg = predictorsCfg == null ? null : (PredictorsSettings)predictorsCfg.DeepClone();
@@ -98,8 +111,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// </summary>
         /// <param name="source">Source instance</param>
         public SpikingNeuronGroupSettings(SpikingNeuronGroupSettings source)
-            :this(source.Name, source.RelShare, source.ActivationCfg, source.HomogenousExcitabilityCfg, source.BiasCfg,
-                  source.PredictorsCfg)
+            :this(source.Name, source.RelShare, source.ActivationCfg, source.PrimeRatio, source.HomogenousExcitabilityCfg,
+                  source.BiasCfg, source.PredictorsCfg)
         {
             return;
         }
@@ -117,6 +130,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
             Name = settingsElem.Attribute("name").Value;
             //Relative share
             RelShare = double.Parse(settingsElem.Attribute("relShare").Value, CultureInfo.InvariantCulture);
+            //Prime neurons ratio
+            PrimeRatio = double.Parse(settingsElem.Attribute("primeRatio").Value, CultureInfo.InvariantCulture);
             //Activation settings
             ActivationCfg = ActivationFactory.LoadSettings(settingsElem.Elements().First());
             //Homogenous excitability
@@ -149,6 +164,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// <summary>
         /// Checks if settings are default
         /// </summary>
+        public bool IsDefaultPrimeRatio { get { return PrimeRatio == DefaultPrimeRatio; } }
+
+        /// Checks if settings are default
+        /// </summary>
         public bool IsDefaultHomogenousExcitabilityCfg { get { return HomogenousExcitabilityCfg.ContainsOnlyDefaults; } }
 
         /// <summary>
@@ -171,6 +190,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
             if (Name.Length == 0)
             {
                 throw new Exception($"Name can not be empty.");
+            }
+            if(PrimeRatio < 0d || PrimeRatio > 1d)
+            {
+                throw new Exception($"Invalid PrimeRatio {PrimeRatio.ToString(CultureInfo.InvariantCulture)}. PrimeRatio must be GE to 0 and LE to 1.");
             }
             Type activationType = ActivationCfg.GetType();
             if (activationType != typeof(SimpleIFSettings) &&
@@ -207,6 +230,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
                                              new XAttribute("relShare", RelShare.ToString(CultureInfo.InvariantCulture)),
                                              ActivationCfg.GetXml(suppressDefaults)
                                              );
+
+            if (!suppressDefaults || !IsDefaultPrimeRatio)
+            {
+                rootElem.Add(new XAttribute("primeRatio", PrimeRatio.ToString(CultureInfo.InvariantCulture)));
+            }
             if (!suppressDefaults || !IsDefaultHomogenousExcitabilityCfg)
             {
                 rootElem.Add(HomogenousExcitabilityCfg.GetXml(suppressDefaults));

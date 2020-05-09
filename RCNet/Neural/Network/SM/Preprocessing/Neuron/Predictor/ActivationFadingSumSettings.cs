@@ -6,38 +6,38 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
-namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
+namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
 {
     /// <summary>
-    /// Firing count predictor settings
+    /// Fading sum of the activation state
     /// </summary>
     [Serializable]
-    public class FiringCountSettings : RCNetBaseSettings, IPredictorParamsSettings
+    public class ActivationFadingSumSettings : RCNetBaseSettings, IPredictorParamsSettings
     {
         //Constants
         /// <summary>
         /// Name of the associated xsd type
         /// </summary>
-        public const string XsdTypeName = "PredictorFiringCountType";
+        public const string XsdTypeName = "PredictorActivationFadingSumType";
         /// <summary>
-        /// Default value of window length
+        /// Default value of strength of fading
         /// </summary>
-        public const int DefaultWindow = 64;
+        public const double DefaultStrength = 0.1;
 
         //Attribute properties
         /// <summary>
-        /// Window length
+        /// Strength of fading
         /// </summary>
-        public int Window { get; }
+        public double Strength { get; }
 
         //Constructors
         /// <summary>
-        /// Creates initialized instance
+        /// Creates initialized instance using default values
         /// </summary>
-        /// <param name="window">Strength of fading</param>
-        public FiringCountSettings(int window = DefaultWindow)
+        /// <param name="strength">Strength of fading</param>
+        public ActivationFadingSumSettings(double strength = DefaultStrength)
         {
-            Window = window;
+            Strength = strength;
             Check();
             return;
         }
@@ -46,9 +46,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
         /// Copy constructor
         /// </summary>
         /// <param name="source">Source instance</param>
-        public FiringCountSettings(FiringCountSettings source)
+        public ActivationFadingSumSettings(ActivationFadingSumSettings source)
         {
-            Window = source.Window;
+            Strength = source.Strength;
             return;
         }
 
@@ -56,31 +56,31 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
         /// Creates initialized instance using xml element
         /// </summary>
         /// <param name="elem">Xml element containing settings</param>
-        public FiringCountSettings(XElement elem)
+        public ActivationFadingSumSettings(XElement elem)
         {
             //Validation
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
-            Window = int.Parse(settingsElem.Attribute("window").Value, CultureInfo.InvariantCulture);
+            Strength = double.Parse(settingsElem.Attribute("strength").Value, CultureInfo.InvariantCulture);
             Check();
             return;
         }
 
         //Properties
         /// <summary>
-        /// Predictor's ID
+        /// ID of the predictor
         /// </summary>
-        public PredictorsProvider.PredictorID ID { get { return PredictorsProvider.PredictorID.FiringCount; } }
+        public PredictorsProvider.PredictorID ID { get { return PredictorsProvider.PredictorID.ActivationFadingSum; } }
 
         /// <summary>
         /// Checks if settings are default
         /// </summary>
-        public bool IsDefaultWindow { get { return (Window == DefaultWindow); } }
+        public bool IsDefaultStrength { get { return (Strength == DefaultStrength); } }
 
         /// <summary>
         /// Identifies settings containing only default values
         /// </summary>
-        public override bool ContainsOnlyDefaults { get { return IsDefaultWindow; } }
+        public override bool ContainsOnlyDefaults { get { return IsDefaultStrength; } }
 
 
         //Methods
@@ -89,9 +89,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
         /// </summary>
         private void Check()
         {
-            if (Window < 1)
+            if (Strength < 0 || Strength >= 1)
             {
-                throw new Exception($"Invalid Window {Window.ToString(CultureInfo.InvariantCulture)}. Window must be GE to 1.");
+                throw new Exception($"Invalid Strength {Strength.ToString(CultureInfo.InvariantCulture)}. Strength must be GE to 0 and LT 1.");
             }
             return;
         }
@@ -101,7 +101,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
         /// </summary>
         public override RCNetBaseSettings DeepClone()
         {
-            return new FiringCountSettings(this);
+            return new ActivationFadingSumSettings(this);
         }
 
         /// <summary>
@@ -113,9 +113,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             XElement rootElem = new XElement(rootElemName);
-            if (!suppressDefaults || !IsDefaultWindow)
+            if (!suppressDefaults || !IsDefaultStrength)
             {
-                rootElem.Add(new XAttribute("window", Window.ToString(CultureInfo.InvariantCulture)));
+                rootElem.Add(new XAttribute("strength", Strength.ToString(CultureInfo.InvariantCulture)));
             }
             Validate(rootElem, XsdTypeName);
             return rootElem;
@@ -131,6 +131,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
             return GetXml(PredictorsSettings.GetXmlName(ID), suppressDefaults);
         }
 
-    }//PredictorFiringCountSettings
+    }//PredictorActivationFadingSumSettings
 
 }//Namespace

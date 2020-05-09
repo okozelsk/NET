@@ -10,8 +10,6 @@ using RCNet.Extensions;
 using RCNet.XmlTools;
 using RCNet.RandomValue;
 using RCNet.Neural.Activation;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
 {
@@ -135,13 +133,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// </summary>
         private void Check()
         {
-            if (InputStrength <= 0)
+            if (InputStrength < 0)
             {
-                throw new Exception($"Invalid InputStrength {InputStrength.ToString(CultureInfo.InvariantCulture)}. InputStrength must be GT 0.");
+                throw new Exception($"Invalid InputStrength {InputStrength.ToString(CultureInfo.InvariantCulture)}. InputStrength must be GE to 0.");
             }
-            if (ExcitatoryStrength <= 0)
+            if (ExcitatoryStrength < 0)
             {
-                throw new Exception($"Invalid ExcitatoryStrength {ExcitatoryStrength.ToString(CultureInfo.InvariantCulture)}. ExcitatoryStrength must be GT 0.");
+                throw new Exception($"Invalid ExcitatoryStrength {ExcitatoryStrength.ToString(CultureInfo.InvariantCulture)}. ExcitatoryStrength must be GE to 0.");
             }
             if (InhibitoryRatio < 0 || InhibitoryRatio > 1)
             {

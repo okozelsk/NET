@@ -1,6 +1,425 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <demo dataFolder=".\\Data" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="SMDemoSettings.xsd">
 
+  <!--
+    This demo case demonstrates successful use of the pure analog ESN reservoir for the fast and accurate classifications enabled by
+    the new ability of the analog neurons to fire a spike.
+    Following straightforward configuration of the StateMachine exhibits 100% accuracy, slightly better than the best algorithm
+    called BOSS, referenced at the dataset's home site:
+    "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
+    https://timeseriesclassification.com/description.php?Dataset=BirdChicken.
+    MPEG-7 CE Shape-1 Part B is a database of binary images developed for testing MPEG-7 shape descriptors, and is available free online. 
+    It is used for testing contour/image and skeleton-based descriptors. Classes of images vary broadly, and include classes that are
+    similar in shape to one another. There are 20 instances of each class, and 60 classes in total.
+    We have extracted the outlines of these images and mapped them into 1-D series of distances to the centre. 
+    Bird/Chicken is the problem of distinguishing between an outline of a bird and a chicken.
+  -->
+  <case name="Classification task BirdChicken: Simple pure ESN reservoir generating FiringFadingSum predictors, one Identity neuron as a classifier (Ridge regression trainer)">
+    <samples trainingData="BirdChicken_train.csv" verificationData="BirdChicken_verify.csv"/>
+    <stateMachineCfg randomizerSeek="0">
+      <neuralPreprocessor>
+        <inputEncoder>
+          <feedingPatterned bidir="false" routeToReadout="false">
+            <unification unifyAmplitude="false" detrend="false">
+              <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
+            </unification>
+          </feedingPatterned>
+          <fields>
+            <externalFields>
+              <field name="DistanceFromCenter">
+                <realFeature standardize="true" keepReserve="true"/>
+              </field>
+            </externalFields>
+            <predictors activation="false"
+                        activationSquare="false"
+                        activationFadingSum="false"
+                        activationMWAvg="false"
+                        firingFadingSum="false"
+                        firingMWAvg="false"
+                        firingCount="false"
+                        firingBinPattern="false">
+            </predictors>
+          </fields>
+        </inputEncoder>
+        <reservoirStructures>
+          <reservoirStructure name="MainCfg">
+            <pools>
+              <pool name="PureESN">
+                <proportions dimX="6" dimY="6" dimZ="5"/>
+                <neuronGroups>
+                  <analogGroup name="TanH-grp" firingThreshold="0.0025" relShare="1" signalingRestriction="NoRestriction">
+                    <activationTanH/>
+                  </analogGroup>
+                </neuronGroups>
+                <interconnection>
+                  <randomSchema density="0.1" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false"/>
+                </interconnection>
+              </pool>
+            </pools>
+          </reservoirStructure>
+        </reservoirStructures>
+        <reservoirInstances>
+          <reservoirInstance name="Main" reservoirStructure="MainCfg">
+            <inputConnections>
+              <connection inputFieldName="DistanceFromCenter" poolName="PureESN"/>
+            </inputConnections>
+            <predictors activation="false"
+                        activationSquare="false"
+                        activationFadingSum="false"
+                        activationMWAvg="false"
+                        firingFadingSum="true"
+                        firingMWAvg="false"
+                        firingCount="false"
+                        firingBinPattern="false">
+            </predictors>
+          </reservoirInstance>
+        </reservoirInstances>
+      </neuralPreprocessor>
+      <readoutLayer testDataRatio="0.1" folds="Auto" repetitions="1">
+        <defaultNetworks/>
+        <readoutUnits>
+          <readoutUnit name="Chicken1Bird0">
+            <classification>
+              <networks>
+                <ff>
+                  <activationTanH/>
+                  <resPropTrainer attempts="5" attemptEpochs="200"/>
+                </ff>
+              </networks>
+            </classification>
+          </readoutUnit>
+        </readoutUnits>
+      </readoutLayer>
+      <mapper>
+        <map readoutUnitName="Chicken1Bird0">
+          <allowedPredictors>
+            <predictor name="FiringFadingSum"/>
+          </allowedPredictors>
+        </map>
+      </mapper>
+    </stateMachineCfg>
+  </case>
+
+
+
+  <!--
+    The best algorithm called COTE, referenced at the dataset's home site, exhibits accuracy 81.4%.
+    It is much better than the results of StateMachine (69%). This is a good case for finding other ways to improve StateMachine :-)
+    "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
+    https://timeseriesclassification.com/description.php?Dataset=CricketX.
+    The series Cricket X, Y and Z are accelerometer data (in three dimensions) taken from actors performing cricket gestures.
+    The twelve classes are different umpire signals: Cancel Call, Dead Ball, Four, Last Hour Leg Bye, No Ball, One Short, Out,
+    Penalty Runs, Six, TV Replay, and Wide. They mounted two accelerometers orthogonal to each other, thus acceleration is measured
+    in 3D space. The accelerometers are housed in a small wrist watch sized enclosure worn in the form of a wrist band.
+    Taken together the data is a multivariate time series classificatin problem, but the serise are not alligned so in its current
+    format cannot be used s such Segmentation of intentional gestures for sports video annotation, Online Context Recognition in Multisensor Systems using Dynamic Time Warping.
+    The data are multi-dimensional, but they are not aligned, so it is not possible.
+  -->
+  <case name="Classification task CricketX: pure ESN reservoir generating FiringFadingSum predictors, one Identity neuron as a classifier (Resilient trainer)">
+    <samples trainingData="CricketX_train.csv" verificationData="CricketX_verify.csv"/>
+    <stateMachineCfg randomizerSeek="0">
+      <neuralPreprocessor predictorsReductionRatio="0">
+        <inputEncoder>
+          <feedingPatterned bidir="false" routeToReadout="false" variablesSchema="Sequential">
+            <unification unifyAmplitude="false" detrend="false">
+              <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
+            </unification>
+          </feedingPatterned>
+          <fields>
+            <externalFields>
+              <field name="Accel" routeToReadout="true">
+                <realFeature />
+                <spikingCoding populationSize="20"/>
+              </field>
+            </externalFields>
+            <predictors activation="false"
+                        activationSquare="false"
+                        activationFadingSum="false"
+                        activationMWAvg="false"
+                        firingFadingSum="true"
+                        firingMWAvg="false"
+                        firingCount="false"
+                        firingBinPattern="false">
+            </predictors>
+          </fields>
+        </inputEncoder>
+        <reservoirStructures>
+          <reservoirStructure name="MainCfg">
+            <pools>
+              <pool name="PoolMain">
+                <proportions dimX="200" dimY="1" dimZ="1"/>
+                <neuronGroups>
+                  <spikingGroup name="grp1" relShare="1" primeRatio="0.5">
+                    <activationAdExpIF solverCompSteps="2" solverMethod="Euler" stimuliDuration="1"/>
+                    <homogenousExcitability inputStrength="0.5" excitatoryStrength="0.5" inhibitoryRatio="0.25"/>
+                  </spikingGroup>
+                </neuronGroups>
+                <interconnection>
+                  <randomSchema density="0.2" avgDistance="NA" allowSelfConnection="false"/>
+                </interconnection>
+              </pool>
+            </pools>
+          </reservoirStructure>
+        </reservoirStructures>
+        <reservoirInstances>
+          <reservoirInstance name="Main" reservoirStructure="MainCfg">
+            <inputConnections>
+              <connection inputFieldName="Accel" poolName="PoolMain" spikingTargetDensity="1" signalingRestriction="NoRestriction"/>
+            </inputConnections>
+            <synapse>
+              <spikingTarget>
+                <input maxDelay="0">
+                  <spikingSource>
+                    <weight min="0" max="1"/>
+                    <plasticity>
+                      <constantDynamics/>
+                    </plasticity>
+                  </spikingSource>
+                </input>
+                <excitatory maxDelay="0">
+                  <spikingSource>
+                    <plasticity>
+                      <constantDynamics/>
+                    </plasticity>
+                  </spikingSource>
+                </excitatory>
+                <inhibitory maxDelay="0">
+                  <spikingSource>
+                    <plasticity>
+                      <constantDynamics/>
+                    </plasticity>
+                  </spikingSource>
+                </inhibitory>
+              </spikingTarget>
+            </synapse>
+            <predictors activation="false"
+                        activationSquare="false"
+                        activationFadingSum="false"
+                        activationMWAvg="false"
+                        firingFadingSum="true"
+                        firingMWAvg="false"
+                        firingCount="false"
+                        firingBinPattern="false">
+              <params>
+                <activationMWAvg window="300" weights="Constant"/>
+                <firingFadingSum strength="0.005"/>
+                <firingCount window="300"/>
+                <firingBinPattern window="1"/>
+              </params>
+            </predictors>
+          </reservoirInstance>
+        </reservoirInstances>
+      </neuralPreprocessor>
+      <readoutLayer testDataRatio="0.1" folds="Auto" repetitions="1">
+        <defaultNetworks>
+          <classification>
+            <ff>
+              <activationElliot/>
+              <resPropTrainer attempts="5" attemptEpochs="1000"/>
+            </ff>
+          </classification>
+        </defaultNetworks>
+        <readoutUnits>
+          <readoutUnit name="Cancel Call">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="Dead Ball">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="Four">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="Last Hour">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="Leg Bye">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="No Ball">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="One Short">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="Out">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="Penalty Runs">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="Six">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="TV Replay">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="Wide">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+        </readoutUnits>
+      </readoutLayer>
+    </stateMachineCfg>
+  </case>
+
+
+
+  <!--
+    The best algorithm called COTE, referenced at the dataset's home site, exhibits accuracy 81.4%.
+    It is much better than the results of StateMachine (69%). This is a good case for finding other ways to improve StateMachine :-)
+    "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
+    https://timeseriesclassification.com/description.php?Dataset=CricketX.
+    The series Cricket X, Y and Z are accelerometer data (in three dimensions) taken from actors performing cricket gestures.
+    The twelve classes are different umpire signals: Cancel Call, Dead Ball, Four, Last Hour Leg Bye, No Ball, One Short, Out,
+    Penalty Runs, Six, TV Replay, and Wide. They mounted two accelerometers orthogonal to each other, thus acceleration is measured
+    in 3D space. The accelerometers are housed in a small wrist watch sized enclosure worn in the form of a wrist band.
+    Taken together the data is a multivariate time series classificatin problem, but the serise are not alligned so in its current
+    format cannot be used s such Segmentation of intentional gestures for sports video annotation, Online Context Recognition in Multisensor Systems using Dynamic Time Warping.
+    The data are multi-dimensional, but they are not aligned, so it is not possible.
+  -->
+  <case name="Classification task CricketX: pure ESN reservoir generating FiringFadingSum predictors, one Identity neuron as a classifier (Resilient trainer)">
+    <samples trainingData="CricketX_train.csv" verificationData="CricketX_verify.csv"/>
+    <stateMachineCfg randomizerSeek="0">
+      <neuralPreprocessor predictorsReductionRatio="0">
+        <inputEncoder>
+          <feedingPatterned bidir="false" routeToReadout="false" variablesSchema="Sequential">
+            <unification unifyAmplitude="false" detrend="false">
+              <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
+            </unification>
+          </feedingPatterned>
+          <fields>
+            <externalFields>
+              <field name="Accel" routeToReadout="true">
+                <realFeature />
+                <spikingCoding populationSize="32"/>
+              </field>
+            </externalFields>
+            <predictors activation="false"
+                        activationSquare="false"
+                        activationFadingSum="false"
+                        activationMWAvg="false"
+                        firingFadingSum="true"
+                        firingMWAvg="false"
+                        firingCount="false"
+                        firingBinPattern="false">
+            </predictors>
+          </fields>
+        </inputEncoder>
+        <reservoirStructures>
+          <reservoirStructure name="MainCfg">
+            <pools>
+              <pool name="PoolMain">
+                <proportions dimX="100" dimY="1" dimZ="1"/>
+                <neuronGroups>
+                  <spikingGroup name="grp1" relShare="1">
+                    <activationAdExpIF solverCompSteps="2" solverMethod="Euler" stimuliDuration="1"/>
+                    <homogenousExcitability inputStrength="0.5" excitatoryStrength="0.5" inhibitoryRatio="0.25"/>
+                  </spikingGroup>
+                </neuronGroups>
+                <interconnection>
+                  <randomSchema density="0.1" avgDistance="NA" allowSelfConnection="false"/>
+                </interconnection>
+              </pool>
+            </pools>
+          </reservoirStructure>
+        </reservoirStructures>
+        <reservoirInstances>
+          <reservoirInstance name="Main" reservoirStructure="MainCfg">
+            <inputConnections>
+              <connection inputFieldName="Accel" poolName="PoolMain"  spikingTargetDensity="0.25" signalingRestriction="NoRestriction"/>
+            </inputConnections>
+            <synapse>
+              <spikingTarget>
+                <input maxDelay="0">
+                  <spikingSource>
+                    <plasticity>
+                      <constantDynamics/>
+                    </plasticity>
+                  </spikingSource>
+                </input>
+                <excitatory maxDelay="0">
+                  <spikingSource>
+                    <plasticity>
+                      <constantDynamics/>
+                    </plasticity>
+                  </spikingSource>
+                </excitatory>
+                <inhibitory maxDelay="0">
+                  <spikingSource>
+                    <plasticity>
+                      <constantDynamics/>
+                    </plasticity>
+                  </spikingSource>
+                </inhibitory>
+              </spikingTarget>
+            </synapse>
+            <predictors activation="false"
+                        activationSquare="false"
+                        activationFadingSum="false"
+                        activationMWAvg="false"
+                        firingFadingSum="true"
+                        firingMWAvg="false"
+                        firingCount="false"
+                        firingBinPattern="false">
+              <params>
+                <activationMWAvg window="300" weights="Constant"/>
+                <firingFadingSum strength="0.005"/>
+                <firingCount window="300"/>
+                <firingBinPattern window="1"/>
+              </params>
+            </predictors>
+          </reservoirInstance>
+        </reservoirInstances>
+      </neuralPreprocessor>
+      <readoutLayer testDataRatio="0.1" folds="Auto" repetitions="1">
+        <defaultNetworks>
+          <classification>
+            <ff>
+              <activationElliot/>
+              <resPropTrainer attempts="5" attemptEpochs="1000"/>
+            </ff>
+          </classification>
+        </defaultNetworks>
+        <readoutUnits>
+          <readoutUnit name="Cancel Call">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="Dead Ball">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="Four">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="Last Hour">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="Leg Bye">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="No Ball">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="One Short">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="Out">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="Penalty Runs">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="Six">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="TV Replay">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="Wide">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+        </readoutUnits>
+      </readoutLayer>
+    </stateMachineCfg>
+  </case>
 
 
   <!--
@@ -20,7 +439,7 @@
     <samples trainingData="BirdChicken_train.csv" verificationData="BirdChicken_verify.csv"/>
     <stateMachineCfg randomizerSeek="0">
       <neuralPreprocessor>
-        <input>
+        <inputEncoder>
           <feedingPatterned bidir="false">
             <unification unifyAmplitude="false" detrend="false">
               <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
@@ -32,8 +451,17 @@
                 <realFeature standardize="true" keepReserve="true"/>
               </field>
             </externalFields>
+            <predictors activation="false"
+                        activationSquare="false"
+                        activationFadingSum="false"
+                        activationMWAvg="false"
+                        firingFadingSum="false"
+                        firingMWAvg="false"
+                        firingCount="false"
+                        firingBinPattern="false">
+            </predictors>
           </fields>
-        </input>
+        </inputEncoder>
         <reservoirStructures>
           <reservoirStructure name="MainCfg">
             <pools>
@@ -53,13 +481,9 @@
         </reservoirStructures>
         <reservoirInstances>
           <reservoirInstance name="Main" reservoirStructure="MainCfg">
-            <inputUnits>
-              <inputUnit inputFieldName="DistanceFromCenter">
-                <connections>
-                  <connection poolName="PureESN"/>
-                </connections>
-              </inputUnit>
-            </inputUnits>
+            <inputConnections>
+              <connection inputFieldName="DistanceFromCenter" poolName="PureESN"/>
+            </inputConnections>
             <predictors activation="false"
                         activationSquare="false"
                         activationFadingSum="false"
@@ -110,7 +534,7 @@
     <samples trainingData="BeetleFly_train.csv" verificationData="BeetleFly_verify.csv"/>
     <stateMachineCfg randomizerSeek="0">
       <neuralPreprocessor>
-        <input>
+        <inputEncoder>
           <feedingPatterned bidir="false">
             <unification unifyAmplitude="false" detrend="false">
               <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
@@ -122,8 +546,17 @@
                 <realFeature standardize="true" keepReserve="true"/>
               </field>
             </externalFields>
+            <predictors activation="false"
+                        activationSquare="false"
+                        activationFadingSum="false"
+                        activationMWAvg="false"
+                        firingFadingSum="false"
+                        firingMWAvg="false"
+                        firingCount="false"
+                        firingBinPattern="false">
+            </predictors>
           </fields>
-        </input>
+        </inputEncoder>
         <reservoirStructures>
           <reservoirStructure name="MainCfg">
             <pools>
@@ -143,13 +576,9 @@
         </reservoirStructures>
         <reservoirInstances>
           <reservoirInstance name="Main" reservoirStructure="MainCfg">
-            <inputUnits>
-              <inputUnit inputFieldName="DistanceFromCenter">
-                <connections>
-                  <connection poolName="PureESN"/>
-                </connections>
-              </inputUnit>
-            </inputUnits>
+            <inputConnections>
+              <connection inputFieldName="DistanceFromCenter" poolName="PureESN"/>
+            </inputConnections>
             <predictors activation="false"
                         activationSquare="false"
                         activationFadingSum="false"
@@ -208,7 +637,7 @@
     <samples trainingData="ProximalPhalanxOutlineAgeGroup_train.csv" verificationData="ProximalPhalanxOutlineAgeGroup_verify.csv"/>
     <stateMachineCfg randomizerSeek="0">
       <neuralPreprocessor>
-        <input>
+        <inputEncoder>
           <feedingPatterned bidir="false" routeToReadout="false">
             <unification unifyAmplitude="false" detrend="false">
               <resampling/>
@@ -223,10 +652,21 @@
             <transformedFields>
               <field name="diffOutline1">
                 <diff fieldName="Outline" interval="1"/>
+                <realFeature/>
+                <spikingCoding populationSize="16"/>
               </field>
             </transformedFields>
+            <predictors activation="false"
+                        activationSquare="false"
+                        activationFadingSum="false"
+                        activationMWAvg="false"
+                        firingFadingSum="false"
+                        firingMWAvg="false"
+                        firingCount="false"
+                        firingBinPattern="false">
+            </predictors>
           </fields>
-        </input>
+        </inputEncoder>
         <reservoirStructures>
           <reservoirStructure name="MainCfg">
             <pools>
@@ -257,18 +697,10 @@
         </reservoirStructures>
         <reservoirInstances>
           <reservoirInstance name="Main" reservoirStructure="MainCfg">
-            <inputUnits>
-              <inputUnit inputFieldName="Outline">
-                <connections>
-                  <connection analogTargetDensity="0.2" poolName="PureESN-A" signalingRestriction="AnalogOnly"/>
-                </connections>
-              </inputUnit>
-              <inputUnit inputFieldName="diffOutline1">
-                <connections>
-                  <connection analogTargetDensity="0.2" poolName="PureESN-B" signalingRestriction="AnalogOnly"/>
-                </connections>
-              </inputUnit>
-            </inputUnits>
+            <inputConnections>
+              <connection inputFieldName="Outline" analogTargetDensity="0.2" poolName="PureESN-A" signalingRestriction="AnalogOnly"/>
+              <connection inputFieldName="diffOutline1" analogTargetDensity="0.2" poolName="PureESN-B" signalingRestriction="AnalogOnly"/>
+            </inputConnections>
             <synapse>
               <analogTarget>
                 <input maxDelay="0">
@@ -397,7 +829,7 @@
     <samples trainingData="ProximalPhalanxOutlineAgeGroup_train.csv" verificationData="ProximalPhalanxOutlineAgeGroup_verify.csv"/>
     <stateMachineCfg randomizerSeek="0">
       <neuralPreprocessor>
-        <input>
+        <inputEncoder>
           <feedingPatterned bidir="false" routeToReadout="false">
             <unification unifyAmplitude="false" detrend="false">
               <resampling targetTimePoints="Auto"/>
@@ -409,8 +841,17 @@
                 <realFeature/>
               </field>
             </externalFields>
+            <predictors activation="false"
+                        activationSquare="false"
+                        activationFadingSum="false"
+                        activationMWAvg="false"
+                        firingFadingSum="true"
+                        firingMWAvg="false"
+                        firingCount="false"
+                        firingBinPattern="false">
+            </predictors>
           </fields>
-        </input>
+        </inputEncoder>
         <reservoirStructures>
           <reservoirStructure name="MainCfg">
             <pools>
@@ -428,7 +869,7 @@
               <pool name="LSM">
                 <proportions dimX="5" dimY="5" dimZ="2"/>
                 <neuronGroups>
-                  <spikingGroup name="AdExpIF-grp" relShare="1">
+                  <spikingGroup name="AdExpIF-grp" relShare="1" primeRatio="0">
                     <activationAdExpIF/>
                     <homogenousExcitability inputStrength="0.5" excitatoryStrength="0.5" inhibitoryRatio="0.25"/>
                   </spikingGroup>
@@ -454,13 +895,9 @@
         </reservoirStructures>
         <reservoirInstances>
           <reservoirInstance name="Main" reservoirStructure="MainCfg">
-            <inputUnits>
-              <inputUnit inputFieldName="Outline" analogNeuronPredictors="false">
-                <connections>
-                  <connection analogTargetDensity="0.25" poolName="ESN" signalingRestriction="AnalogOnly"/>
-                </connections>
-              </inputUnit>
-            </inputUnits>
+            <inputConnections>
+              <connection inputFieldName="Outline" analogTargetDensity="0.25" poolName="ESN" signalingRestriction="AnalogOnly"/>
+            </inputConnections>
             <synapse>
               <spikingTarget>
                 <excitatory maxDelay="0">
@@ -556,7 +993,7 @@
     <samples trainingData="Worms_train.csv" verificationData="Worms_verify.csv"/>
     <stateMachineCfg randomizerSeek="0">
       <neuralPreprocessor>
-        <input>
+        <inputEncoder>
           <feedingPatterned bidir="false" routeToReadout="false">
             <unification unifyAmplitude="false" detrend="false">
               <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="180"/>
@@ -573,8 +1010,17 @@
                 <yeoJohnson fieldName="Eigenworm1" lambda="0.5"/>
               </field>
             </transformedFields>
+            <predictors activation="false"
+                        activationSquare="false"
+                        activationFadingSum="false"
+                        activationMWAvg="false"
+                        firingFadingSum="false"
+                        firingMWAvg="false"
+                        firingCount="false"
+                        firingBinPattern="false">
+            </predictors>
           </fields>
-        </input>
+        </inputEncoder>
         <reservoirStructures>
           <reservoirStructure name="MainCfg">
             <pools>
@@ -594,13 +1040,9 @@
         </reservoirStructures>
         <reservoirInstances>
           <reservoirInstance name="Main" reservoirStructure="MainCfg">
-            <inputUnits>
-              <inputUnit inputFieldName="TransEigenworm1">
-                <connections>
-                  <connection analogTargetDensity="0.3333" poolName="PureESN"/>
-                </connections>
-              </inputUnit>
-            </inputUnits>
+            <inputConnections>
+              <connection inputFieldName="TransEigenworm1" analogTargetDensity="0.3333" poolName="PureESN"/>
+            </inputConnections>
             <synapse>
               <analogTarget>
                 <input maxDelay="0">
@@ -677,7 +1119,7 @@
     <samples trainingData="LibrasMovement_train.csv" verificationData="LibrasMovement_verify.csv"/>
     <stateMachineCfg randomizerSeek="0">
       <neuralPreprocessor>
-        <input>
+        <inputEncoder>
           <feedingPatterned bidir="true" routeToReadout="false" variablesSchema="Groupped">
             <unification unifyAmplitude="false" detrend="false">
               <resampling uniformTimeScale="true" targetTimePoints="Auto"/>
@@ -692,8 +1134,17 @@
                 <realFeature/>
               </field>
             </externalFields>
+            <predictors activation="false"
+                        activationSquare="false"
+                        activationFadingSum="false"
+                        activationMWAvg="false"
+                        firingFadingSum="false"
+                        firingMWAvg="false"
+                        firingCount="false"
+                        firingBinPattern="false">
+            </predictors>
           </fields>
-        </input>
+        </inputEncoder>
         <reservoirStructures>
           <reservoirStructure name="MainCfg">
             <pools>
@@ -713,18 +1164,10 @@
         </reservoirStructures>
         <reservoirInstances>
           <reservoirInstance name="Main" reservoirStructure="MainCfg">
-            <inputUnits>
-              <inputUnit inputFieldName="coord_abcissa">
-                <connections>
-                  <connection poolName="PureESN" analogTargetDensity="0.25" spikingTargetDensity="0"/>
-                </connections>
-              </inputUnit>
-              <inputUnit inputFieldName="coord_ordinate">
-                <connections>
-                  <connection poolName="PureESN" analogTargetDensity="0.25" spikingTargetDensity="0"/>
-                </connections>
-              </inputUnit>
-            </inputUnits>
+            <inputConnections>
+              <connection inputFieldName="coord_abcissa" poolName="PureESN" analogTargetDensity="0.25" spikingTargetDensity="0"/>
+              <connection inputFieldName="coord_ordinate" poolName="PureESN" analogTargetDensity="0.25" spikingTargetDensity="0"/>
+            </inputConnections>
             <synapse>
               <analogTarget>
                 <input maxDelay="5"/>
@@ -819,7 +1262,7 @@
     <samples trainingData="MackeyGlass_train.csv" verificationData="MackeyGlass_verify.csv"/>
     <stateMachineCfg randomizerSeek="0">
       <neuralPreprocessor predictorsReductionRatio="0">
-        <input>
+        <inputEncoder>
           <feedingContinuous bootCycles="Auto" routeToReadout="true"/>
           <fields>
             <externalFields>
@@ -827,8 +1270,17 @@
                 <realFeature standardize="true" keepReserve="false"/>
               </field>
             </externalFields>
+            <predictors activation="false"
+                        activationSquare="false"
+                        activationFadingSum="false"
+                        activationMWAvg="false"
+                        firingFadingSum="false"
+                        firingMWAvg="false"
+                        firingCount="false"
+                        firingBinPattern="false">
+            </predictors>
           </fields>
-        </input>
+        </inputEncoder>
         <reservoirStructures>
           <reservoirStructure name="ESNCfg #1">
             <pools>
@@ -891,13 +1343,9 @@
         </reservoirStructures>
         <reservoirInstances>
           <reservoirInstance name="ESN reservoir #1" reservoirStructure="ESNCfg #1">
-            <inputUnits>
-              <inputUnit inputFieldName="Value">
-                <connections>
-                  <connection poolName="Logistic chain pool"/>
-                </connections>
-              </inputUnit>
-            </inputUnits>
+            <inputConnections>
+              <connection inputFieldName="Value" poolName="Logistic chain pool"/>
+            </inputConnections>
             <predictors activation="true"
                         activationSquare="true"
                         activationFadingSum="true"
@@ -909,13 +1357,9 @@
             </predictors>
           </reservoirInstance>
           <reservoirInstance name="ESN reservoir #2" reservoirStructure="ESNCfg #2">
-            <inputUnits>
-              <inputUnit inputFieldName="Value">
-                <connections>
-                  <connection poolName="Logistic random pool"/>
-                </connections>
-              </inputUnit>
-            </inputUnits>
+            <inputConnections>
+              <connection inputFieldName="Value" poolName="Logistic random pool"/>
+            </inputConnections>
             <predictors activation="true"
                         activationSquare="true"
                         activationFadingSum="true"
@@ -960,7 +1404,7 @@
     <samples trainingData="TTOO.csv"/>
     <stateMachineCfg randomizerSeek="0">
       <neuralPreprocessor>
-        <input>
+        <inputEncoder>
           <feedingContinuous bootCycles="Auto" routeToReadout="true"/>
           <fields>
             <externalFields>
@@ -974,8 +1418,17 @@
                 <realFeature standardize="true" keepReserve="false"/>
               </field>
             </externalFields>
+            <predictors activation="false"
+                        activationSquare="false"
+                        activationFadingSum="false"
+                        activationMWAvg="false"
+                        firingFadingSum="false"
+                        firingMWAvg="false"
+                        firingCount="false"
+                        firingBinPattern="false">
+            </predictors>
           </fields>
-        </input>
+        </inputEncoder>
         <reservoirStructures>
           <reservoirStructure name="MainCfg">
             <pools>
@@ -998,23 +1451,11 @@
         </reservoirStructures>
         <reservoirInstances>
           <reservoirInstance name="Main" reservoirStructure="MainCfg">
-            <inputUnits>
-              <inputUnit inputFieldName="High">
-                <connections>
-                  <connection poolName="Logistic pool"/>
-                </connections>
-              </inputUnit>
-              <inputUnit inputFieldName="Low">
-                <connections>
-                  <connection poolName="Logistic pool"/>
-                </connections>
-              </inputUnit>
-              <inputUnit inputFieldName="Adj Close">
-                <connections>
-                  <connection poolName="Logistic pool"/>
-                </connections>
-              </inputUnit>
-            </inputUnits>
+            <inputConnections>
+              <connection inputFieldName="High" poolName="Logistic pool"/>
+              <connection inputFieldName="Low" poolName="Logistic pool"/>
+              <connection inputFieldName="Adj Close" poolName="Logistic pool"/>
+            </inputConnections>
             <synapse>
               <analogTarget spectralRadius="0.9999">
                 <input>
@@ -1079,7 +1520,7 @@
     <samples trainingData="EpilepticSeizureActivity_train.csv" verificationData="EpilepticSeizureActivity_verify.csv"/>
     <stateMachineCfg randomizerSeek="0">
       <neuralPreprocessor>
-        <input>
+        <inputEncoder>
           <feedingPatterned bidir="true" routeToReadout="false">
             <unification unifyAmplitude="false" detrend="false">
               <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
@@ -1091,8 +1532,17 @@
                 <realFeature standardize="true" keepReserve="false"/>
               </field>
             </externalFields>
+            <predictors activation="false"
+                        activationSquare="false"
+                        activationFadingSum="false"
+                        activationMWAvg="false"
+                        firingFadingSum="false"
+                        firingMWAvg="false"
+                        firingCount="false"
+                        firingBinPattern="false">
+            </predictors>
           </fields>
-        </input>
+        </inputEncoder>
         <reservoirStructures>
           <reservoirStructure name="MainCfg">
             <pools>
@@ -1113,13 +1563,9 @@
         </reservoirStructures>
         <reservoirInstances>
           <reservoirInstance name="Main" reservoirStructure="MainCfg">
-            <inputUnits>
-              <inputUnit inputFieldName="EEG">
-                <connections>
-                  <connection poolName="PureESN"/>
-                </connections>
-              </inputUnit>
-            </inputUnits>
+            <inputConnections>
+              <connection inputFieldName="EEG" poolName="PureESN"/>
+            </inputConnections>
             <synapse>
               <analogTarget>
                 <input delayMethod="Random" maxDelay="89"/>
@@ -1183,13 +1629,12 @@
     Taken together the data is a multivariate time series classificatin problem, but the serise are not alligned so in its current
     format cannot be used s such Segmentation of intentional gestures for sports video annotation, Online Context Recognition in Multisensor Systems using Dynamic Time Warping.
     The data are multi-dimensional, but they are not aligned, so it is not possible.
-    Cricket X contains acceleration data only for dimension X: 150 datapoints for left hand and 150 datapoints for right hand.
   -->
   <case name="Classification task CricketX: pure ESN reservoir generating FiringFadingSum predictors, one Identity neuron as a classifier (Resilient trainer)">
     <samples trainingData="CricketX_train.csv" verificationData="CricketX_verify.csv"/>
     <stateMachineCfg randomizerSeek="0">
       <neuralPreprocessor predictorsReductionRatio="0">
-        <input>
+        <inputEncoder>
           <feedingPatterned bidir="true" routeToReadout="false" variablesSchema="Sequential">
             <unification unifyAmplitude="false" detrend="false">
               <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
@@ -1201,8 +1646,17 @@
                 <realFeature />
               </field>
             </externalFields>
+            <predictors activation="false"
+                        activationSquare="false"
+                        activationFadingSum="false"
+                        activationMWAvg="false"
+                        firingFadingSum="false"
+                        firingMWAvg="false"
+                        firingCount="false"
+                        firingBinPattern="false">
+            </predictors>
           </fields>
-        </input>
+        </inputEncoder>
         <reservoirStructures>
           <reservoirStructure name="MainCfg">
             <pools>
@@ -1223,13 +1677,9 @@
         </reservoirStructures>
         <reservoirInstances>
           <reservoirInstance name="Main" reservoirStructure="MainCfg">
-            <inputUnits>
-              <inputUnit inputFieldName="Accel">
-                <connections>
-                  <connection poolName="PoolMain" analogTargetDensity="0.25" signalingRestriction="NoRestriction"/>
-                </connections>
-              </inputUnit>
-            </inputUnits>
+            <inputConnections>
+              <connection inputFieldName="Accel" poolName="PoolMain" analogTargetDensity="0.25" signalingRestriction="NoRestriction"/>
+            </inputConnections>
             <synapse>
               <analogTarget spectralRadius="0.9999">
                 <input maxDelay="50">
@@ -1321,13 +1771,12 @@
     Taken together the data is a multivariate time series classificatin problem, but the serise are not alligned so in its current
     format cannot be used s such Segmentation of intentional gestures for sports video annotation, Online Context Recognition in Multisensor Systems using Dynamic Time Warping.
     The data are multi-dimensional, but they are not aligned, so it is not possible.
-    Cricket X contains acceleration data only for dimension X: 150 datapoints for left hand and 150 datapoints for right hand.
   -->
   <case name="Classification task CricketX: pure ESN reservoir generating FiringFadingSum predictors, one Identity neuron as a classifier (Resilient trainer)">
     <samples trainingData="CricketX_train.csv" verificationData="CricketX_verify.csv"/>
     <stateMachineCfg randomizerSeek="0">
       <neuralPreprocessor predictorsReductionRatio="0">
-        <input>
+        <inputEncoder>
           <feedingPatterned bidir="false" routeToReadout="false" variablesSchema="Sequential">
             <unification unifyAmplitude="false" detrend="false">
               <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
@@ -1337,10 +1786,20 @@
             <externalFields>
               <field name="Accel" routeToReadout="true">
                 <realFeature />
+                <spikingCoding populationSize="40"/>
               </field>
             </externalFields>
+            <predictors activation="false"
+                        activationSquare="false"
+                        activationFadingSum="false"
+                        activationMWAvg="false"
+                        firingFadingSum="true"
+                        firingMWAvg="false"
+                        firingCount="false"
+                        firingBinPattern="false">
+            </predictors>
           </fields>
-        </input>
+        </inputEncoder>
         <reservoirStructures>
           <reservoirStructure name="MainCfg">
             <pools>
@@ -1361,13 +1820,9 @@
         </reservoirStructures>
         <reservoirInstances>
           <reservoirInstance name="Main" reservoirStructure="MainCfg">
-            <inputUnits>
-              <inputUnit inputFieldName="Accel" spikeTrainLength="40" spikingNeuronPredictors="true">
-                <connections>
-                  <connection poolName="PoolMain"  spikingTargetDensity="1" signalingRestriction="NoRestriction"/>
-                </connections>
-              </inputUnit>
-            </inputUnits>
+            <inputConnections>
+              <connection inputFieldName="Accel" poolName="PoolMain"  spikingTargetDensity="1" signalingRestriction="NoRestriction"/>
+            </inputConnections>
             <synapse>
               <spikingTarget>
                 <input maxDelay="0">

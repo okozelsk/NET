@@ -1851,12 +1851,12 @@
 
   <!-- HomogenousExcitability - configuration -->
   <xs:complexType name="HomogenousExcitabilityType">
-    <xs:attribute type="UDoubleGT0Type" name="inputStrength" use="optional" default="0.5">
+    <xs:attribute type="UDoubleType" name="inputStrength" use="optional" default="0.5">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is 0.5</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute type="UDoubleGT0Type" name="excitatoryStrength" use="optional" default="0.5">
+    <xs:attribute type="UDoubleType" name="excitatoryStrength" use="optional" default="0.5">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is 0.5</xs:documentation>
       </xs:annotation>
@@ -1886,6 +1886,11 @@
     </xs:sequence>
     <xs:attribute type="xs:string" name="name" use="required" />
     <xs:attribute type="UDoubleType" name="relShare" use="required"/>
+    <xs:attribute type="UDoubleLE1Type" name="primeRatio" use="optional" default="0.5">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Ratio of hidden neurons receiving input synapses only. Default value is 0.5.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- Pool - analog neuron group - retainment - configuration -->
@@ -2082,13 +2087,29 @@
     </xs:attribute>
   </xs:complexType>
 
+  <!-- NeuralPreprocessor - input spiking coding -configuration -->
+  <xs:complexType name="NPInputSpikingCodingType">
+    <xs:attribute type="UIntGE2LE128Type" name="populationSize" use="optional" default="16">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 16</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+
   <!-- NeuralPreprocessor - external input field -configuration -->
   <xs:complexType name="NPExternalInpFieldType">
-    <xs:choice minOccurs="1" maxOccurs="1">
-      <xs:element type="BinFeatureFilterType" name="binFeature" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="EnumFeatureFilterType" name="enumFeature" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="RealFeatureFilterType" name="realFeature" minOccurs="0" maxOccurs="1"/>
-    </xs:choice>
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:choice minOccurs="1" maxOccurs="1">
+        <xs:element type="BinFeatureFilterType" name="binFeature" minOccurs="0" maxOccurs="1"/>
+        <xs:element type="EnumFeatureFilterType" name="enumFeature" minOccurs="0" maxOccurs="1"/>
+        <xs:sequence minOccurs="0" maxOccurs="1">
+          <xs:element type="RealFeatureFilterType" name="realFeature" minOccurs="1" maxOccurs="1"/>
+          <xs:element type="NPInputSpikingCodingType" name="spikingCoding" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+      </xs:choice>
+      <xs:element type="PredictorsType" name="predictors" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
     <xs:attribute type="xs:string" name="name" use="required"/>
     <xs:attribute type="xs:boolean" name="routeToReadout" use="optional" default="true">
       <xs:annotation>
@@ -2106,18 +2127,23 @@
 
   <!-- NeuralPreprocessor - transformed input field -configuration -->
   <xs:complexType name="NPTransformedInpFieldType">
-    <xs:choice minOccurs="1" maxOccurs="1">
-      <xs:element type="DiffTransformerType" name="diff" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="CDivTransformerType" name="cdiv" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="LogTransformerType" name="log" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="ExpTransformerType" name="exp" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="PowerTransformerType" name="power" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="YeoJohnsonTransformerType" name="yeoJohnson" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="MWStatTransformerType" name="stat" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="MulTransformerType" name="mul" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="DivTransformerType" name="div" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="LinearTransformerType" name="linear" minOccurs="1" maxOccurs="1"/>
-    </xs:choice>
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:choice minOccurs="1" maxOccurs="1">
+        <xs:element type="DiffTransformerType" name="diff" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="CDivTransformerType" name="cdiv" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="LogTransformerType" name="log" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="ExpTransformerType" name="exp" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="PowerTransformerType" name="power" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="YeoJohnsonTransformerType" name="yeoJohnson" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="MWStatTransformerType" name="stat" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="MulTransformerType" name="mul" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="DivTransformerType" name="div" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="LinearTransformerType" name="linear" minOccurs="1" maxOccurs="1"/>
+      </xs:choice>
+      <xs:element type="RealFeatureFilterType" name="realFeature" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="NPInputSpikingCodingType" name="spikingCoding" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="PredictorsType" name="predictors" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
     <xs:attribute type="xs:string" name="name" use="required"/>
     <xs:attribute type="xs:boolean" name="routeToReadout" use="optional" default="true">
       <xs:annotation>
@@ -2135,12 +2161,17 @@
 
   <!-- NeuralPreprocessor - generated input field -configuration -->
   <xs:complexType name="NPGeneratedInpFieldType">
-    <xs:choice minOccurs="1" maxOccurs="1">
-      <xs:element type="PulseGeneratorType" name="pulse" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="RandomValueType" name="random" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="SinusoidalGeneratorType" name="sinusoidal" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="MackeyGlassGeneratorType" name="mackeyGlass" minOccurs="1" maxOccurs="1"/>
-    </xs:choice>
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:choice minOccurs="1" maxOccurs="1">
+        <xs:element type="PulseGeneratorType" name="pulse" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="RandomValueType" name="random" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="SinusoidalGeneratorType" name="sinusoidal" minOccurs="1" maxOccurs="1"/>
+        <xs:element type="MackeyGlassGeneratorType" name="mackeyGlass" minOccurs="1" maxOccurs="1"/>
+      </xs:choice>
+      <xs:element type="RealFeatureFilterType" name="realFeature" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="NPInputSpikingCodingType" name="spikingCoding" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="PredictorsType" name="predictors" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
     <xs:attribute type="xs:string" name="name" use="required"/>
     <xs:attribute type="xs:boolean" name="routeToReadout" use="optional" default="false">
       <xs:annotation>
@@ -2163,17 +2194,19 @@
       <xs:element type="NPExternalInpFieldsType" name="externalFields" minOccurs="1" maxOccurs="1"/>
       <xs:element type="NPTransformedInpFieldsType" name="transformedFields" minOccurs="0" maxOccurs="1"/>
       <xs:element type="NPGeneratedInpFieldsType" name="generatedFields" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="PredictorsType" name="predictors" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
   </xs:complexType>
   
-  <!-- NeuralPreprocessor - input -configuration -->
-  <xs:complexType name="NPInputType">
+  <!-- NeuralPreprocessor - input encoder -configuration -->
+  <xs:complexType name="NPInputEncoderType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:choice minOccurs="1" maxOccurs="1">
         <xs:element type="NPInpFeedingContinuousType" name="feedingContinuous" minOccurs="1" maxOccurs="1"/>
         <xs:element type="NPInpFeedingPatternedType" name="feedingPatterned" minOccurs="1" maxOccurs="1"/>
       </xs:choice>
       <xs:element type="NPInpFieldsType" name="fields" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="CoordinatesType" name="coordinates" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
   </xs:complexType>
 
@@ -2184,8 +2217,9 @@
     </xs:sequence>
   </xs:complexType>
 
-  <!-- NeuralPreprocessor - reservoir instance - input unit - connection - configuration -->
-  <xs:complexType name="NPResInstanceInputUnitConnectionType">
+  <!-- NeuralPreprocessor - reservoir instance - input connection - configuration -->
+  <xs:complexType name="NPResInstanceInputConnectionType">
+    <xs:attribute type="xs:string" name="inputFieldName" use="required"/>
     <xs:attribute type="xs:string" name="poolName" use="required"/>
     <xs:attribute type="UDoubleLE1Type" name="spikingTargetDensity" use="optional" default="1">
       <xs:annotation>
@@ -2204,59 +2238,17 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- NeuralPreprocessor - reservoir instance - input unit - connections - configuration -->
-  <xs:complexType name="NPResInstanceInputUnitConnectionsType">
+  <!-- NeuralPreprocessor - reservoir instance - input connections - configuration -->
+  <xs:complexType name="NPResInstanceInputConnectionsType">
     <xs:sequence minOccurs="1" maxOccurs="unbounded">
-      <xs:element type="NPResInstanceInputUnitConnectionType" name="connection" minOccurs="1" maxOccurs="unbounded"/>
+      <xs:element type="NPResInstanceInputConnectionType" name="connection" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
-  <!-- NeuralPreprocessor - reservoir instance - input unit - configuration -->
-  <xs:complexType name="NPResInstanceInputUnitType">
-    <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="CoordinatesType" name="coordinates" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="NPResInstanceInputUnitConnectionsType" name="connections" minOccurs="1" maxOccurs="unbounded"/>
-      <xs:element type="PredictorsType" name="predictors" minOccurs="0" maxOccurs="1"/>
-    </xs:sequence>
-    <xs:attribute type="xs:string" name="inputFieldName" use="required"/>
-    <xs:attribute type="UIntGE2LE128Type" name="spikeTrainLength" use="optional" default="16">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 16</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="UDoubleLE1Type" name="analogFiringThreshold" use="optional" default="0.00125">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">A number between 0 and 1 (LT1). Every time the new normalized input value is higher than the previous normalized input value by at least the threshold, it is evaluated as a firing event. Default value is 0.00125.</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="xs:boolean" name="analogNeuronPredictors" use="optional" default="false">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is false. If true, analog input neuron is allowed to generate predictors.</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="xs:boolean" name="spikingNeuronPredictors" use="optional" default="false">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is false. If true, all spiking input neurons are allowed to generate predictors.</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-  </xs:complexType>
-
-  <!-- NeuralPreprocessor - reservoir instance - input units - configuration -->
-  <xs:complexType name="NPResInstanceInputUnitsType">
-    <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="NPResInstanceInputUnitType" name="inputUnit" minOccurs="1" maxOccurs="unbounded"/>
-    </xs:sequence>
-  </xs:complexType>
-  
   <!-- NeuralPreprocessor - reservoir instance - configuration -->
   <xs:complexType name="NPResInstanceType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="NPResInstanceInputUnitsType" name="inputUnits" minOccurs="1" maxOccurs="1">
-        <xs:unique name="resinst_unique_input_unit">
-          <xs:selector xpath=".//inputUnit"/>
-          <xs:field xpath="@inputFieldName"/>
-        </xs:unique>
-      </xs:element>
+      <xs:element type="NPResInstanceInputConnectionsType" name="inputConnections" minOccurs="1" maxOccurs="1"/>
       <xs:element type="SynapseType" name="synapse" minOccurs="0" maxOccurs="1"/>
       <xs:element type="PredictorsType" name="predictors" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
@@ -2274,7 +2266,7 @@
   <!-- NeuralPreprocessor configuration -->
   <xs:complexType name="NPType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="NPInputType" name="input" minOccurs="1" maxOccurs="1">
+      <xs:element type="NPInputEncoderType" name="inputEncoder" minOccurs="1" maxOccurs="1">
         <xs:unique name="np_unique_input_field_name">
           <xs:selector xpath=".//field"/>
           <xs:field xpath="@name"/>

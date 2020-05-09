@@ -99,7 +99,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// Type of input feeding
         /// </summary>
-        public NeuralPreprocessor.InputFeedingType FeedingType { get { return NeuralPreprocessor.InputFeedingType.Continuous; } }
+        public InputEncoder.InputFeedingType FeedingType { get { return InputEncoder.InputFeedingType.Continuous; } }
 
         /// <summary>
         /// Checks if settings are default

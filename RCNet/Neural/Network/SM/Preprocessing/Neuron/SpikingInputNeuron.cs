@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 using RCNet.Extensions;
 using RCNet.MathTools;
 using RCNet.Neural.Activation;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor;
+using RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup;
 
-namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron
+namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
 {
     /// <summary>
     /// Spiking input neuron is the special type of a neuron without accosiated activation function. Its purpose is only to mediate
@@ -39,17 +39,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
-        /// <param name="reservoirID">Reservoir ID</param>
-        /// <param name="inputEntryPoint">Input entry point coordinates within the 3D space</param>
-        /// <param name="flatIdx">Index of this neuron among all input neurons.</param>
+        /// <param name="location">Neuron's location</param>
         /// <param name="predictorsCfg">Configuration of neuron's predictors</param>
-        public SpikingInputNeuron(int reservoirID,
-                                  int[] inputEntryPoint,
-                                  int flatIdx,
-                                  PredictorsSettings predictorsCfg
-                                  )
+        public SpikingInputNeuron(NeuronLocation location, PredictorsSettings predictorsCfg)
         {
-            Location = new NeuronLocation(reservoirID, flatIdx, - 1, flatIdx, 0, inputEntryPoint[0], inputEntryPoint[1], inputEntryPoint[2]);
+            Location = location;
             Statistics = new NeuronStatistics();
             _predictors = predictorsCfg != null ? new PredictorsProvider(predictorsCfg) : null;
             Reset(false);

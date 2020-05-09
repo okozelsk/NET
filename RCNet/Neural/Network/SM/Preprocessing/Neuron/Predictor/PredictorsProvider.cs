@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using RCNet.Extensions;
 using RCNet.MathTools;
 
-namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
+namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
 {
     /// <summary>
     /// Class provides computed predictors of the hidden neuron

@@ -147,14 +147,14 @@ namespace RCNet.Neural.Network.SM
                     //Input fields
                     if(map.AllowedInputFieldsCfg != null)
                     {
-                        string[] routedFieldNames = NeuralPreprocessorCfg.InputCfg.GetRoutedFieldNames().ToArray();
+                        string[] routedFieldNames = NeuralPreprocessorCfg.InputEncoderCfg.GetRoutedFieldNames().ToArray();
                         foreach (AllowedInputFieldSettings aifs in map.AllowedInputFieldsCfg.AllowedInputFieldCfgCollection)
                         {
                             if(Array.IndexOf(routedFieldNames, aifs.Name) == -1)
                             {
                                 throw new Exception($"Specified input field {aifs.Name} to be allowed for readout unit {map.ReadoutUnitName} is not among fields routed to readout layer.");
                             }
-                            NeuralPreprocessorCfg.InputCfg.FieldsCfg.GetFieldID(aifs.Name, true);
+                            NeuralPreprocessorCfg.InputEncoderCfg.FieldsCfg.GetFieldID(aifs.Name, true);
                         }
                     }
                 }

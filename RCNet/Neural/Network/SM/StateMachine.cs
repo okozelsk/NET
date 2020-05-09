@@ -11,11 +11,11 @@ using RCNet.MathTools;
 using RCNet.Neural.Data;
 using RCNet.Neural.Network.NonRecurrent;
 using RCNet.Neural.Network.SM.Preprocessing;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron;
+using RCNet.Neural.Network.SM.Preprocessing.Neuron;
+using RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor;
 using RCNet.Neural.Network.SM.Readout;
 using RCNet.Neural.Network.SM.PM;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor;
 
 namespace RCNet.Neural.Network.SM
 {
@@ -145,7 +145,7 @@ namespace RCNet.Neural.Network.SM
         public void Reset()
         {
             //Neural preprocessor reset
-            NP?.Reset(true);
+            NP?.Reset();
             //ReadoutLayer reset
             RL.Reset();
             return;
@@ -164,71 +164,97 @@ namespace RCNet.Neural.Network.SM
             else
             {
                 //Create empty instance of the mapper
-                PredictorsMapper mapper = new PredictorsMapper(NP.PredictorGeneralSwitchCollection);
+                PredictorsMapper mapper = new PredictorsMapper(NP.OutputFeatureGeneralSwitchCollection);
                 if (Config.MapperCfg != null)
                 {
                     //Expand list of predicting neurons to array of predictor and its origin
-                    List<Tuple<int, int, PredictorsProvider.PredictorID>> predictorInfoCollection = new List<Tuple<int, int, PredictorsProvider.PredictorID>>();
-                    foreach (HiddenNeuron neuron in NP.PredictingNeuronCollection)
+                    List<Tuple<int, int, int, PredictorsProvider.PredictorID>> predictorInfoCollection = new List<Tuple<int, int, int, PredictorsProvider.PredictorID>>();
+                    //Input encoder's neurons and Reservoirs' predicting neurons
+                    foreach (INeuron neuron in NP.PredictingNeuronCollection)
                     {
                         for(int predictorID = 0; predictorID < PredictorsProvider.NumOfSupportedPredictors; predictorID++)
                         {
                             if(neuron.IsPredictorEnabled((PredictorsProvider.PredictorID)predictorID))
                             {
-                                predictorInfoCollection.Add(new Tuple<int, int, PredictorsProvider.PredictorID>(neuron.Location.ReservoirID, neuron.Location.PoolID, (PredictorsProvider.PredictorID)predictorID));
+                                predictorInfoCollection.Add(new Tuple<int, int, int, PredictorsProvider.PredictorID>(neuron.Location.ReservoirID, neuron.Location.PoolID, neuron.Location.PoolGroupID, (PredictorsProvider.PredictorID)predictorID));
                             }
                         }
                     }
                     //Iterate all readout units
                     foreach (string readoutUnitName in Config.ReadoutLayerCfg.OutputFieldNameCollection)
                     {
-                        bool[] switches = new bool[NP.TotalNumOfPredictors];
+                        bool[] switches = new bool[NP.TotalNumOfOutputFeatures];
                         //Initially allow all valid predictors
-                        NP.PredictorGeneralSwitchCollection.CopyTo(switches, 0);
+                        NP.OutputFeatureGeneralSwitchCollection.CopyTo(switches, 0);
                         //Exists specific mapping?
                         ReadoutUnitMapSettings rums = Config.MapperCfg.GetMapCfg(readoutUnitName, false);
                         if (rums != null)
                         {
-                            //Neuron predictors
-                            if (rums.AllowedPoolsCfg != null || rums.AllowedPredictorsCfg != null)
+                            //Allowed predictor types
+                            if (rums.AllowedPredictorsCfg != null)
                             {
                                 for (int i = 0; i < predictorInfoCollection.Count; i++)
                                 {
-                                    if(switches[i] && rums.AllowedPoolsCfg != null)
+                                    //Disable not allowed predictor
+                                    if (switches[i] && !rums.AllowedPredictorsCfg.IsAllowed(predictorInfoCollection[i].Item4))
+                                    {
+                                        switches[i] = false;
+                                    }
+                                }
+                            }
+                            //Allowed pools
+                            if(rums.AllowedPoolsCfg != null)
+                            {
+                                for (int i = 0; i < NP.NumOfReservoirsOutputFeatures; i++)
+                                {
+                                    if (switches[i])
                                     {
                                         //Disable not allowed origin
                                         string reservoirInstanceName = Config.NeuralPreprocessorCfg.ReservoirInstancesCfg.ReservoirInstanceCfgCollection[predictorInfoCollection[i].Item1].Name;
                                         ReservoirStructureSettings rss = Config.NeuralPreprocessorCfg.ReservoirStructuresCfg.GetReservoirStructureCfg(Config.NeuralPreprocessorCfg.ReservoirInstancesCfg.ReservoirInstanceCfgCollection[predictorInfoCollection[i].Item1].StructureCfgName);
                                         string poolName = rss.PoolsCfg.PoolCfgCollection[predictorInfoCollection[i].Item2].Name;
-                                        if(!rums.AllowedPoolsCfg.IsAllowed(reservoirInstanceName, poolName))
-                                        {
-                                            switches[i] = false;
-                                        }
-                                    }
-                                    if (switches[i] && rums.AllowedPredictorsCfg != null)
-                                    {
-                                        //Disable not allowed predictor
-                                        if(!rums.AllowedPredictorsCfg.IsAllowed(predictorInfoCollection[i].Item3))
+                                        if (!rums.AllowedPoolsCfg.IsAllowed(reservoirInstanceName, poolName))
                                         {
                                             switches[i] = false;
                                         }
                                     }
                                 }
                             }
-                            //Routed input fields
+                            //Routed input fields' predictors and  values
                             if (rums.AllowedInputFieldsCfg != null)
                             {
-                                //Initially disable all routed input fields
-                                for (int i = NP.PredictingNeuronCollection.Count; i < NP.TotalNumOfPredictors; i++)
+                                string[] fieldNames = Config.NeuralPreprocessorCfg.InputEncoderCfg.FieldsCfg.GetNames().ToArray();
+                                //Allowed input fields' predictors
+                                for (int i = NP.NumOfReservoirsOutputFeatures; i < predictorInfoCollection.Count; i++)
                                 {
-                                    switches[i] = false;
+                                    if (switches[i])
+                                    {
+                                        string fieldName = fieldNames[predictorInfoCollection[i].Item3];
+                                        if(!rums.AllowedInputFieldsCfg.IsAllowed(fieldName))
+                                        {
+                                            switches[i] = false;
+                                        }
+                                    }
+
                                 }
-                                string[] routedFieldNames = Config.NeuralPreprocessorCfg.InputCfg.GetRoutedFieldNames().ToArray();
-                                //Enable enabled routed input fields
-                                foreach (AllowedInputFieldSettings aifs in rums.AllowedInputFieldsCfg.AllowedInputFieldCfgCollection)
+                                //Allowed routed input fields' values
+                                int totalNumOfFieldsValues = NP.TotalNumOfOutputFeatures - predictorInfoCollection.Count;
+                                if (totalNumOfFieldsValues > 0)
                                 {
-                                    int routedFieldIdx = NP.PredictingNeuronCollection.Count + Array.IndexOf(routedFieldNames, aifs.Name);
-                                    switches[routedFieldIdx] = NP.PredictorGeneralSwitchCollection[routedFieldIdx];
+                                    string[] routedFieldsNames = Config.NeuralPreprocessorCfg.InputEncoderCfg.GetRoutedFieldNames().ToArray();
+                                    int valuesPerField = totalNumOfFieldsValues / routedFieldsNames.Length;
+                                    int fieldNum = 0;
+                                    foreach (string fieldName in routedFieldsNames)
+                                    {
+                                        if (!rums.AllowedInputFieldsCfg.IsAllowed(fieldName))
+                                        {
+                                            for (int i = 0; i < valuesPerField; i++)
+                                            {
+                                                switches[predictorInfoCollection.Count + fieldNum * valuesPerField + i] = false;
+                                            }
+                                        }
+                                        ++fieldNum;
+                                    }
                                 }
                             }
                         }

@@ -12,11 +12,11 @@ using RCNet.Neural.Network.NonRecurrent.FF;
 using RCNet.Neural.Network.SM.Preprocessing.Input;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Space3D;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor;
+using RCNet.Neural.Network.SM.Preprocessing.Neuron;
+using RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor;
 using RCNet.Neural.Network.SM.Preprocessing;
 using RCNet.Neural.Network.SM.Readout;
 using RCNet.Neural.Network.SM;
@@ -40,7 +40,7 @@ namespace Demo.DemoConsoleApp.Examples
         /// <summary>
         /// Creates input part of the neural preprocessor's configuration.
         /// </summary>
-        private InputSettings CreateInputCfg()
+        private InputEncoderSettings CreateInputCfg()
         {
             //Definition of input external fields
             //In this example we will use three of available input fields: "High" price, "Low" price and "Adj Close" price.
@@ -57,8 +57,10 @@ namespace Demo.DemoConsoleApp.Examples
             //We use FeedingContinuousSettings.AutoBootCyclesNum so necessary number of boot cycles will be automatically determined
             //based on neural preprocessor structure
             FeedingContinuousSettings feedingContinuousCfg = new FeedingContinuousSettings(FeedingContinuousSettings.AutoBootCyclesNum, RouteToReadout);
+            //We don't want use predictors going from input spiking neurons
+            PredictorsSettings predictorsCfg = new PredictorsSettings(false, false, false, false, false, false, false, false);
             //Create and return input configuration
-            return new InputSettings(feedingContinuousCfg, new FieldsSettings(externalFieldsCfg));
+            return new InputEncoderSettings(feedingContinuousCfg, new FieldsSettings(externalFieldsCfg, null, null, predictorsCfg));
         }
 
         /// <summary>
@@ -151,45 +153,16 @@ namespace Demo.DemoConsoleApp.Examples
         /// Creates configuration of input connection (from input unit to target pool)
         /// </summary>
         /// <param name="poolName">Target pool name</param>
-        private InputUnitConnSettings CreateInputUnitConnCfg(string poolName)
+        private InputConnSettings CreateInputConnCfg(string inputFieldName, string poolName)
         {
             //Create connection configuration
-            InputUnitConnSettings inputUnitConnCfg = new InputUnitConnSettings(poolName,
-                                                                               0,
-                                                                               1,
-                                                                               NeuronCommon.NeuronSignalingRestrictionType.AnalogOnly
-                                                                               );
-            return inputUnitConnCfg;
-        }
-
-        /// <summary>
-        /// Creates input unit configuration associated with given input field
-        /// (version of input connections to single pool)
-        /// </summary>
-        /// <param name="inpFieldName">Input field name</param>
-        /// <param name="poolName">Target pool name</param>
-        private InputUnitSettings CreateInputUnitCfg(string inpFieldName, string poolName)
-        {
-            return new InputUnitSettings(inpFieldName,
-                                         new InputUnitConnsSettings(CreateInputUnitConnCfg(poolName))
-                                         );
-        }
-
-
-        /// <summary>
-        /// Creates input unit configuration associated with given input field
-        /// (version of input connections to both pools)
-        /// </summary>
-        /// <param name="inpFieldName">Input field name</param>
-        /// <param name="pool1Name">First target pool name</param>
-        /// <param name="pool2Name">Second target pool name</param>
-        private InputUnitSettings CreateInputUnitCfg(string inpFieldName, string pool1Name, string pool2Name)
-        {
-            return new InputUnitSettings(inpFieldName,
-                                         new InputUnitConnsSettings(CreateInputUnitConnCfg(pool1Name),
-                                                                    CreateInputUnitConnCfg(pool2Name)
-                                                                    )
-                                         );
+            InputConnSettings inputConnCfg = new InputConnSettings(inputFieldName,
+                                                                   poolName,
+                                                                   0,
+                                                                   1,
+                                                                   NeuronCommon.NeuronSignalingRestrictionType.AnalogOnly
+                                                                   );
+            return inputConnCfg;
         }
 
         /// <summary>
@@ -211,14 +184,14 @@ namespace Demo.DemoConsoleApp.Examples
         {
             //Maximum weight of input connection
             const double ConnMaxWeight = 0.6d;
-            //Create input units (and connections) configurations for each input field
-            //We use InputUnit.AnalogCodingMethod.Actual so synapses will transmit unchanged (not transformed) input values
+            //Create input connections configurations for each input field
             //We connect High input field to Pool1
-            InputUnitSettings inpUnitHighCfg = CreateInputUnitCfg("High", pool1Name);
+            InputConnSettings inpConnHighCfg = CreateInputConnCfg("High", pool1Name);
             //We connect Low input field to Pool2
-            InputUnitSettings inpUnitLowCfg = CreateInputUnitCfg("Low", pool2Name);
+            InputConnSettings inpConnLowCfg = CreateInputConnCfg("Low", pool2Name);
             //We connect Adj Close input field to both pools
-            InputUnitSettings inpUnitAdjCloseCfg = CreateInputUnitCfg("Adj Close", pool1Name, pool2Name);
+            InputConnSettings inpConnAdjCloseP1Cfg = CreateInputConnCfg("Adj Close", pool1Name);
+            InputConnSettings inpConnAdjCloseP2Cfg = CreateInputConnCfg("Adj Close", pool2Name);
             //Synapse general configuration
             AnalogSourceSettings asc = new AnalogSourceSettings(new URandomValueSettings(0, ConnMaxWeight));
             SynapseATInputSettings synapseATInputSettings = new SynapseATInputSettings(Synapse.SynapticDelayMethod.Random, inputMaxDelay, asc, null);
@@ -242,7 +215,7 @@ namespace Demo.DemoConsoleApp.Examples
             //Create reservoir instance configuration
             ReservoirInstanceSettings resInstCfg = new ReservoirInstanceSettings(instName,
                                                                                  structName,
-                                                                                 new InputUnitsSettings(inpUnitHighCfg, inpUnitLowCfg, inpUnitAdjCloseCfg),
+                                                                                 new InputConnsSettings(inpConnHighCfg, inpConnLowCfg, inpConnAdjCloseP1Cfg, inpConnAdjCloseP2Cfg),
                                                                                  synapseCfg,
                                                                                  predictorsCfg
                                                                                  );
@@ -259,7 +232,7 @@ namespace Demo.DemoConsoleApp.Examples
         NeuralPreprocessorSettings CreatePreprocessorCfg(string resInstName, string resStructName, string pool1Name, string pool2Name)
         {
             //Create input configuration
-            InputSettings inputCfg = CreateInputCfg();
+            InputEncoderSettings inputCfg = CreateInputCfg();
             //Create reservoir structure configuration
             ReservoirStructureSettings resStructCfg = CreateResStructCfg(resStructName, pool1Name, pool2Name);
             //Create reservoir instance configuration

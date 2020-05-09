@@ -12,11 +12,11 @@ using RCNet.Neural.Network.NonRecurrent.FF;
 using RCNet.Neural.Network.SM.Preprocessing.Input;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron;
+using RCNet.Neural.Network.SM.Preprocessing.Neuron;
+using RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Space3D;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor;
 using RCNet.Neural.Network.SM.Preprocessing;
 using RCNet.Neural.Network.SM.Readout;
 using RCNet.Neural.Network.SM;
@@ -47,7 +47,8 @@ namespace Demo.DemoConsoleApp.Examples
         {
             //Create StateMachine configuration
             //Simplified input configuration
-            InputSettings inputCfg = StateMachineDesigner.CreateInputCfg(new FeedingPatternedSettings(true, false, RCNet.Neural.Data.InputPattern.VariablesSchema.Groupped),
+            InputEncoderSettings inputCfg = StateMachineDesigner.CreateInputCfg(new FeedingPatternedSettings(true, false, RCNet.Neural.Data.InputPattern.VariablesSchema.Groupped),
+                                                                         new PredictorsSettings(false, false, false, false, true, false, true, false),
                                                                          new ExternalFieldSettings("coord_abcissa", new RealFeatureFilterSettings()),
                                                                          new ExternalFieldSettings("coord_ordinate", new RealFeatureFilterSettings())
                                                                          );
@@ -79,7 +80,7 @@ namespace Demo.DemoConsoleApp.Examples
                                                                         32, //Input spike-train length (0 means use analog instead of spike-train])
                                                                         new AdExpIFSettings(), //Activation
                                                                         new HomogenousExcitabilitySettings(0.5, 0.5, 0.25),
-                                                                        0.5d, //Input connection density
+                                                                        1d, //Input connection density
                                                                         0, //Input max delay
                                                                         0.1d, //Interconnection density
                                                                         0, //Internal synapses max delay

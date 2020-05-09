@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
-namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
+namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
 {
     /// <summary>
     /// Activation state moving weighted average predictor settings

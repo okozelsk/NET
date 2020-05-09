@@ -7,22 +7,21 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using RCNet.Extensions;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS;
+using RCNet.Neural.Network.SM.Preprocessing.Neuron;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
 {
     /// <summary>
-    /// Configuration of an input unit connection
+    /// Configuration of an input connection
     /// </summary>
     [Serializable]
-    public class InputUnitConnSettings : RCNetBaseSettings
+    public class InputConnSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
         /// Name of the associated xsd type
         /// </summary>
-        public const string XsdTypeName = "NPResInstanceInputUnitConnectionType";
+        public const string XsdTypeName = "NPResInstanceInputConnectionType";
         //Default values
         /// <summary>
         /// Default spiking target density
@@ -36,6 +35,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// Default value of signaling restriction of associated input neuron
         /// </summary>
         public const NeuronCommon.NeuronSignalingRestrictionType DefaultSignalingRestriction = NeuronCommon.NeuronSignalingRestrictionType.AnalogOnly;
+
+        /// <summary>
+        /// Name of the input field
+        /// </summary>
+        public string InputFieldName { get; }
 
         /// <summary>
         /// Name of target pool
@@ -61,16 +65,19 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// <summary>
         /// Creates an itialized instance.
         /// </summary>
+        /// <param name="inputFieldName">Name of the input field</param>
         /// <param name="poolName">Name of target pool</param>
         /// <param name="spikingTargetDensity">Spiking target density</param>
         /// <param name="analogTargetDensity">Analog target density</param>
         /// <param name="signalingRestriction">Signaling restriction of associated input neuron</param>
-        public InputUnitConnSettings(string poolName,
-                                     double spikingTargetDensity = DefaultSpikingTargetDensity,
-                                     double analogTargetDensity = DefaultAnalogTargetDensity,
-                                     NeuronCommon.NeuronSignalingRestrictionType signalingRestriction = DefaultSignalingRestriction
-                                     )
+        public InputConnSettings(string inputFieldName,
+                                 string poolName,
+                                 double spikingTargetDensity = DefaultSpikingTargetDensity,
+                                 double analogTargetDensity = DefaultAnalogTargetDensity,
+                                 NeuronCommon.NeuronSignalingRestrictionType signalingRestriction = DefaultSignalingRestriction
+                                 )
         {
+            InputFieldName = inputFieldName;
             PoolName = poolName;
             SpikingTargetDensity = spikingTargetDensity;
             AnalogTargetDensity = analogTargetDensity;
@@ -83,8 +90,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// The deep copy constructor.
         /// </summary>
         /// <param name="source">Source instance</param>
-        public InputUnitConnSettings(InputUnitConnSettings source)
-            : this(source.PoolName, source.SpikingTargetDensity, source.AnalogTargetDensity, source.SignalingRestriction)
+        public InputConnSettings(InputConnSettings source)
+            : this(source.InputFieldName, source.PoolName, source.SpikingTargetDensity, source.AnalogTargetDensity, source.SignalingRestriction)
         {
             return;
         }
@@ -96,11 +103,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// Xml data containing the settings.
         /// Content of xml element is always validated against the xml schema.
         /// </param>
-        public InputUnitConnSettings(XElement elem)
+        public InputConnSettings(XElement elem)
         {
             //Validation
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
+            InputFieldName = settingsElem.Attribute("inputFieldName").Value;
             PoolName = settingsElem.Attribute("poolName").Value;
             SpikingTargetDensity = double.Parse(settingsElem.Attribute("spikingTargetDensity").Value, CultureInfo.InvariantCulture);
             AnalogTargetDensity = double.Parse(settingsElem.Attribute("analogTargetDensity").Value, CultureInfo.InvariantCulture);
@@ -136,6 +144,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// </summary>
         private void Check()
         {
+            if (InputFieldName.Length == 0)
+            {
+                throw new Exception($"Input field name can not be empty.");
+            }
+            if (PoolName.Length == 0)
+            {
+                throw new Exception($"Pool name can not be empty.");
+            }
             if (SpikingTargetDensity < 0 || SpikingTargetDensity > 1)
             {
                 throw new Exception($"Invalid SpikingTargetDensity ({SpikingTargetDensity.ToString(CultureInfo.InvariantCulture)}). SpikingTargetDensity must be GE to 0 and LE to 1.");
@@ -143,10 +159,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             if (AnalogTargetDensity < 0 || AnalogTargetDensity > 1)
             {
                 throw new Exception($"Invalid AnalogTargetDensity ({AnalogTargetDensity.ToString(CultureInfo.InvariantCulture)}). AnalogTargetDensity must be GE to 0 and LE to 1.");
-            }
-            if (PoolName.Length == 0)
-            {
-                throw new Exception($"Pool name can not be empty.");
             }
             return;
         }
@@ -156,7 +168,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// </summary>
         public override RCNetBaseSettings DeepClone()
         {
-            return new InputUnitConnSettings(this);
+            return new InputConnSettings(this);
         }
 
         /// <summary>
@@ -168,6 +180,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             XElement rootElem = new XElement(rootElemName,
+                                             new XAttribute("inputFieldName", InputFieldName),
                                              new XAttribute("poolName", PoolName)
                                              );
             if (!suppressDefaults || !IsDefaultSpikingTargetDensity)
@@ -196,7 +209,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             return GetXml("connection", suppressDefaults);
         }
 
-    }//InputUnitConnSettings
+    }//InputConnSettings
 
 }//Namespace
 

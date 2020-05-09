@@ -10,7 +10,7 @@ using RCNet.Extensions;
 using RCNet.XmlTools;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Space3D;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor;
+using RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
 {

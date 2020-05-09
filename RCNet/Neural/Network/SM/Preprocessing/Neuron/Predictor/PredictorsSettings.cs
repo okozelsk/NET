@@ -10,7 +10,7 @@ using RCNet.XmlTools;
 using RCNet.RandomValue;
 using RCNet.Neural.Activation;
 
-namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
+namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
 {
     /// <summary>
     /// Configuration of the availble predictors
@@ -37,25 +37,26 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
 
         //Constructors
         /// <summary>
-        /// Creates initialized instance as a result of neuron, pool and reservoir instance predictors settings
+        /// Creates initialized instance as a result of L1, L2 and L3 predictors settings.
+        /// (L1 overrides L2 overiddes L3)
         /// </summary>
-        /// <param name="neuronPredictorsCfg">Neuron predictors settings</param>
-        /// <param name="poolPredictorsCfg">Pool predictors settings</param>
-        /// <param name="reservoirPredictorsCfg">Reservoir predictors settings</param>
-        public PredictorsSettings(PredictorsSettings neuronPredictorsCfg,
-                                  PredictorsSettings poolPredictorsCfg,
-                                  PredictorsSettings reservoirPredictorsCfg
+        /// <param name="level1PredictorsCfg">Level1 (lowest level) predictors settings</param>
+        /// <param name="level2PredictorsCfg">Level2 predictors settings</param>
+        /// <param name="level3PredictorsCfg">Level3 (highest level) predictors settings</param>
+        public PredictorsSettings(PredictorsSettings level1PredictorsCfg,
+                                  PredictorsSettings level2PredictorsCfg,
+                                  PredictorsSettings level3PredictorsCfg
                                   )
         {
             EnablingSwitchCollection = new bool[PredictorsProvider.NumOfSupportedPredictors];
             //Params
-            ParamsCfg = neuronPredictorsCfg?.ParamsCfg != null ? (PredictorsParamsSettings)neuronPredictorsCfg.ParamsCfg.DeepClone() : (poolPredictorsCfg?.ParamsCfg != null ? (PredictorsParamsSettings)poolPredictorsCfg.ParamsCfg.DeepClone() : (reservoirPredictorsCfg?.ParamsCfg != null ? (PredictorsParamsSettings)reservoirPredictorsCfg.ParamsCfg.DeepClone() : new PredictorsParamsSettings()));
+            ParamsCfg = level1PredictorsCfg?.ParamsCfg != null ? (PredictorsParamsSettings)level1PredictorsCfg.ParamsCfg.DeepClone() : (level2PredictorsCfg?.ParamsCfg != null ? (PredictorsParamsSettings)level2PredictorsCfg.ParamsCfg.DeepClone() : (level3PredictorsCfg?.ParamsCfg != null ? (PredictorsParamsSettings)level3PredictorsCfg.ParamsCfg.DeepClone() : new PredictorsParamsSettings()));
             //Enabling switches
             foreach(PredictorsProvider.PredictorID predictorID in typeof(PredictorsProvider.PredictorID).GetEnumValues())
             {
-                EnablingSwitchCollection[(int)predictorID] = ((neuronPredictorsCfg == null ? true : neuronPredictorsCfg.EnablingSwitchCollection[(int)predictorID]) &&
-                              (poolPredictorsCfg == null ? true : poolPredictorsCfg.EnablingSwitchCollection[(int)predictorID]) &&
-                              (reservoirPredictorsCfg == null ? true : reservoirPredictorsCfg.EnablingSwitchCollection[(int)predictorID])
+                EnablingSwitchCollection[(int)predictorID] = ((level1PredictorsCfg == null ? true : level1PredictorsCfg.EnablingSwitchCollection[(int)predictorID]) &&
+                              (level2PredictorsCfg == null ? true : level2PredictorsCfg.EnablingSwitchCollection[(int)predictorID]) &&
+                              (level3PredictorsCfg == null ? true : level3PredictorsCfg.EnablingSwitchCollection[(int)predictorID])
                               );
             }
             return;
@@ -195,6 +196,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
             return name.Substring(0, 1).ToLowerInvariant() + name.Substring(1);
         }
 
+        /// <summary>
+        /// Creates instance having all predictors disabled
+        /// </summary>
+        public static PredictorsSettings CreateDisabledInstance()
+        {
+            return new PredictorsSettings(false, false, false, false, false, false, false, false);
+        }
+
         //Methods
         /// <summary>
         /// Disables activation based predictors
@@ -205,6 +214,28 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
             EnablingSwitchCollection[(int)PredictorsProvider.PredictorID.ActivationSquare] = false;
             EnablingSwitchCollection[(int)PredictorsProvider.PredictorID.ActivationFadingSum] = false;
             EnablingSwitchCollection[(int)PredictorsProvider.PredictorID.ActivationMWAvg] = false;
+            return;
+        }
+
+        /// <summary>
+        /// Disables firing based predictors
+        /// </summary>
+        public void DisableFiringPredictors()
+        {
+            EnablingSwitchCollection[(int)PredictorsProvider.PredictorID.FiringMWAvg] = false;
+            EnablingSwitchCollection[(int)PredictorsProvider.PredictorID.FiringFadingSum] = false;
+            EnablingSwitchCollection[(int)PredictorsProvider.PredictorID.FiringCount] = false;
+            EnablingSwitchCollection[(int)PredictorsProvider.PredictorID.FiringBinPattern] = false;
+            return;
+        }
+
+        /// <summary>
+        /// Disables all predictors
+        /// </summary>
+        public void DisableAllPredictors()
+        {
+            DisableActivationPredictors();
+            DisableFiringPredictors();
             return;
         }
 

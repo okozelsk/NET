@@ -6,53 +6,38 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
-namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
+namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
 {
     /// <summary>
-    /// Moving weighted average predictor settings
+    /// Firing count predictor settings
     /// </summary>
     [Serializable]
-    public abstract class MWAvgPredictorSettings : RCNetBaseSettings
+    public class FiringCountSettings : RCNetBaseSettings, IPredictorParamsSettings
     {
         //Constants
         /// <summary>
         /// Name of the associated xsd type
         /// </summary>
-        public const string XsdTypeName = "PredictorMWAvgType";
+        public const string XsdTypeName = "PredictorFiringCountType";
         /// <summary>
         /// Default value of window length
         /// </summary>
         public const int DefaultWindow = 64;
-        /// <summary>
-        /// Default weights type
-        /// </summary>
-        public const PredictorsProvider.PredictorMWAvgWeightsType DefaultWeights = PredictorsProvider.PredictorMWAvgWeightsType.Exponential;
 
         //Attribute properties
-        /// <summary>
-        /// Strength of fading
-        /// </summary>
         /// <summary>
         /// Window length
         /// </summary>
         public int Window { get; }
-        /// <summary>
-        /// Type of weighting
-        /// </summary>
-        public PredictorsProvider.PredictorMWAvgWeightsType Weights { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates initialized instance
         /// </summary>
-        /// <param name="window">Window length</param>
-        /// <param name="weights">Type of weighting</param>
-        public MWAvgPredictorSettings(int window = DefaultWindow,
-                                      PredictorsProvider.PredictorMWAvgWeightsType weights = DefaultWeights
-                                      )
+        /// <param name="window">Strength of fading</param>
+        public FiringCountSettings(int window = DefaultWindow)
         {
             Window = window;
-            Weights = weights;
             Check();
             return;
         }
@@ -61,10 +46,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
         /// Copy constructor
         /// </summary>
         /// <param name="source">Source instance</param>
-        public MWAvgPredictorSettings(MWAvgPredictorSettings source)
+        public FiringCountSettings(FiringCountSettings source)
         {
             Window = source.Window;
-            Weights = source.Weights;
             return;
         }
 
@@ -72,32 +56,32 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
         /// Creates initialized instance using xml element
         /// </summary>
         /// <param name="elem">Xml element containing settings</param>
-        public MWAvgPredictorSettings(XElement elem)
+        public FiringCountSettings(XElement elem)
         {
             //Validation
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
             Window = int.Parse(settingsElem.Attribute("window").Value, CultureInfo.InvariantCulture);
-            Weights = (PredictorsProvider.PredictorMWAvgWeightsType)Enum.Parse(typeof(PredictorsProvider.PredictorMWAvgWeightsType), settingsElem.Attribute("weights").Value, true);
             Check();
             return;
         }
 
         //Properties
         /// <summary>
+        /// Predictor's ID
+        /// </summary>
+        public PredictorsProvider.PredictorID ID { get { return PredictorsProvider.PredictorID.FiringCount; } }
+
+        /// <summary>
         /// Checks if settings are default
         /// </summary>
         public bool IsDefaultWindow { get { return (Window == DefaultWindow); } }
 
         /// <summary>
-        /// Checks if settings are default
-        /// </summary>
-        public bool IsDefaultWeights { get { return (Weights == DefaultWeights); } }
-
-        /// <summary>
         /// Identifies settings containing only default values
         /// </summary>
-        public override bool ContainsOnlyDefaults { get { return IsDefaultWindow && IsDefaultWeights; } }
+        public override bool ContainsOnlyDefaults { get { return IsDefaultWindow; } }
+
 
         //Methods
         /// <summary>
@@ -105,19 +89,19 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
         /// </summary>
         private void Check()
         {
-            if (Window < 1 )
+            if (Window < 1)
             {
-                throw new Exception($"Invalid Window {Window.ToString(CultureInfo.InvariantCulture)}. Window must be GT 0.");
-            }
-            if(Weights == PredictorsProvider.PredictorMWAvgWeightsType.Exponential && Window > 64)
-            {
-                throw new Exception($"Invalid Window {Window.ToString(CultureInfo.InvariantCulture)}. Window must be LE to 64.");
-            }
-            if (Weights == PredictorsProvider.PredictorMWAvgWeightsType.Linear && Window > 10240)
-            {
-                throw new Exception($"Invalid Window {Window.ToString(CultureInfo.InvariantCulture)}. Window must be LE to 10240.");
+                throw new Exception($"Invalid Window {Window.ToString(CultureInfo.InvariantCulture)}. Window must be GE to 1.");
             }
             return;
+        }
+
+        /// <summary>
+        /// Creates the deep copy instance of this instance
+        /// </summary>
+        public override RCNetBaseSettings DeepClone()
+        {
+            return new FiringCountSettings(this);
         }
 
         /// <summary>
@@ -133,14 +117,20 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
             {
                 rootElem.Add(new XAttribute("window", Window.ToString(CultureInfo.InvariantCulture)));
             }
-            if (!suppressDefaults || !IsDefaultWeights)
-            {
-                rootElem.Add(new XAttribute("weights", Weights.ToString()));
-            }
             Validate(rootElem, XsdTypeName);
             return rootElem;
         }
 
-    }//PredictorMWAvgSettings
+        /// <summary>
+        /// Generates default named xml element containing the settings.
+        /// </summary>
+        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <returns>XElement containing the settings</returns>
+        public override XElement GetXml(bool suppressDefaults)
+        {
+            return GetXml(PredictorsSettings.GetXmlName(ID), suppressDefaults);
+        }
+
+    }//PredictorFiringCountSettings
 
 }//Namespace

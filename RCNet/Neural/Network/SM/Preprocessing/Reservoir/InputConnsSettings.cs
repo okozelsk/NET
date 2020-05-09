@@ -11,41 +11,56 @@ using RCNet.MathTools.Probability;
 using RCNet.XmlTools;
 using RCNet.RandomValue;
 
-namespace RCNet.Neural.Network.SM.Preprocessing.Input
+namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
 {
     /// <summary>
-    /// Contains configuration of the preprocessor input
+    /// Collection of input connection settings
     /// </summary>
     [Serializable]
-    public class InputSettings : RCNetBaseSettings
+    public class InputConnsSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
         /// Name of the associated xsd type
         /// </summary>
-        public const string XsdTypeName = "NPInputType";
+        public const string XsdTypeName = "NPResInstanceInputConnectionsType";
 
         //Attribute properties
         /// <summary>
-        /// Input feeding settings
+        /// Collection of connection settings
         /// </summary>
-        public IFeedingSettings FeedingCfg { get; }
-
-        /// <summary>
-        /// Input fields settings
-        /// </summary>
-        public FieldsSettings FieldsCfg { get; }
+        public List<InputConnSettings> ConnCfgCollection { get; }
 
         //Constructors
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
-        /// <param name="feedingCfg">Input feeding settings</param>
-        /// <param name="fieldsCfg">Input fields settings</param>
-        public InputSettings(IFeedingSettings feedingCfg, FieldsSettings fieldsCfg)
+        private InputConnsSettings()
         {
-            FeedingCfg = (IFeedingSettings)feedingCfg.DeepClone();
-            FieldsCfg = (FieldsSettings)fieldsCfg.DeepClone();
+            ConnCfgCollection = new List<InputConnSettings>();
+            return;
+        }
+
+        /// <summary>
+        /// Creates an initialized instance
+        /// </summary>
+        /// <param name="connCfgCollection">Connection settings collection</param>
+        public InputConnsSettings(IEnumerable<InputConnSettings> connCfgCollection)
+            : this()
+        {
+            AddConnections(connCfgCollection);
+            Check();
+            return;
+        }
+
+        /// <summary>
+        /// Creates an initialized instance
+        /// </summary>
+        /// <param name="connCfgCollection">Connection settings collection</param>
+        public InputConnsSettings(params InputConnSettings[] connCfgCollection)
+            : this()
+        {
+            AddConnections(connCfgCollection);
             Check();
             return;
         }
@@ -54,9 +69,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// The deep copy constructor
         /// </summary>
         /// <param name="source">Source instance</param>
-        public InputSettings(InputSettings source)
-            :this(source.FeedingCfg, source.FieldsCfg)
+        public InputConnsSettings(InputConnsSettings source)
+            : this()
         {
+            AddConnections(source.ConnCfgCollection);
             return;
         }
 
@@ -64,14 +80,16 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// Creates the instance and initialize it from given xml element.
         /// </summary>
         /// <param name="elem">Xml data containing settings.</param>
-        public InputSettings(XElement elem)
+        public InputConnsSettings(XElement elem)
         {
             //Validation
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
-            XElement feedingElem = settingsElem.Elements().First();
-            FeedingCfg = feedingElem.Name.LocalName == "feedingContinuous" ? (IFeedingSettings) new FeedingContinuousSettings(feedingElem) : new FeedingPatternedSettings(feedingElem);
-            FieldsCfg = new FieldsSettings(settingsElem.Elements("fields").First());
+            ConnCfgCollection = new List<InputConnSettings>();
+            foreach (XElement connElem in settingsElem.Elements("connection"))
+            {
+                ConnCfgCollection.Add(new InputConnSettings(connElem));
+            }
             Check();
             return;
         }
@@ -88,36 +106,24 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// </summary>
         private void Check()
         {
+            if (ConnCfgCollection.Count == 0)
+            {
+                throw new Exception($"At least one connection configuration must be specified.");
+            }
             return;
         }
 
         /// <summary>
-        /// Returns collection of input field names to be routed to readout layer as the predictors
+        /// Adds cloned connection settings from given collection into the internal collection
         /// </summary>
-        public List<string> GetRoutedFieldNames()
+        /// <param name="connCfgCollection">Connection settings collection</param>
+        private void AddConnections(IEnumerable<InputConnSettings> connCfgCollection)
         {
-            List<string> names = new List<string>();
-            if(FeedingCfg.RouteToReadout)
+            foreach (InputConnSettings connCfg in connCfgCollection)
             {
-                foreach(ExternalFieldSettings fieldCfg in FieldsCfg.ExternalFieldsCfg.FieldCfgCollection)
-                {
-                    if(fieldCfg.RouteToReadout)
-                    {
-                        names.Add(fieldCfg.Name);
-                    }
-                }
-                if (FieldsCfg.GeneratedFieldsCfg != null)
-                {
-                    foreach (GeneratedFieldSettings fieldCfg in FieldsCfg.GeneratedFieldsCfg.FieldCfgCollection)
-                    {
-                        if (fieldCfg.RouteToReadout)
-                        {
-                            names.Add(fieldCfg.Name);
-                        }
-                    }
-                }
+                ConnCfgCollection.Add((InputConnSettings)connCfg.DeepClone());
             }
-            return names;
+            return;
         }
 
         /// <summary>
@@ -125,7 +131,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// </summary>
         public override RCNetBaseSettings DeepClone()
         {
-            return new InputSettings(this);
+            return new InputConnsSettings(this);
         }
 
         /// <summary>
@@ -136,10 +142,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
-            XElement rootElem = new XElement(rootElemName,
-                                             FeedingCfg.GetXml(suppressDefaults),
-                                             FieldsCfg.GetXml(suppressDefaults)
-                                             );
+            XElement rootElem = new XElement(rootElemName);
+            foreach (InputConnSettings connCfg in ConnCfgCollection)
+            {
+                rootElem.Add(connCfg.GetXml(suppressDefaults));
+            }
             Validate(rootElem, XsdTypeName);
             return rootElem;
         }
@@ -151,9 +158,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(bool suppressDefaults)
         {
-            return GetXml("input", suppressDefaults);
+            return GetXml("inputConnections", suppressDefaults);
         }
 
-    }//InputSettings
+    }//InputConnsSettings
 
 }//Namespace

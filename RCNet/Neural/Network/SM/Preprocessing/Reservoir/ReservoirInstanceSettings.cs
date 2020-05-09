@@ -10,7 +10,7 @@ using RCNet.Extensions;
 using RCNet.XmlTools;
 using RCNet.RandomValue;
 using RCNet.Neural.Network.SM.Preprocessing.Input;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor;
+using RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
@@ -39,9 +39,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         public string StructureCfgName { get; }
 
         /// <summary>
-        /// Collection of input unit settings
+        /// Collection of input connections settings
         /// </summary>
-        public InputUnitsSettings InputUnitsCfg { get; }
+        public InputConnsSettings InputConnsCfg { get; }
 
         /// <summary>
         /// Synapse configuration
@@ -59,19 +59,19 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// </summary>
         /// <param name="name">Name of the reservoir structure settings</param>
         /// <param name="structureCfgName">Name of the reservoir structure settings</param>
-        /// <param name="inputUnitsCfg">Collection of input unit settings</param>
+        /// <param name="inputConnsCfg">Collection of input connections settings</param>
         /// <param name="synapseCfg">Synapse configuration</param>
         /// <param name="predictorsCfg">Configuration of the predictors</param>
         public ReservoirInstanceSettings(string name,
                                          string structureCfgName,
-                                         InputUnitsSettings inputUnitsCfg,
+                                         InputConnsSettings inputConnsCfg,
                                          SynapseSettings synapseCfg = null,
                                          PredictorsSettings predictorsCfg = null
                                          )
         {
             Name = name;
             StructureCfgName = structureCfgName;
-            InputUnitsCfg = (InputUnitsSettings)inputUnitsCfg.DeepClone();
+            InputConnsCfg = (InputConnsSettings)inputConnsCfg.DeepClone();
             SynapseCfg = synapseCfg == null ? null : (SynapseSettings)synapseCfg.DeepClone();
             PredictorsCfg = predictorsCfg == null ? null : (PredictorsSettings)predictorsCfg.DeepClone();
             Check();
@@ -83,7 +83,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// </summary>
         /// <param name="source">Source instance</param>
         public ReservoirInstanceSettings(ReservoirInstanceSettings source)
-            :this(source.Name, source.StructureCfgName, source.InputUnitsCfg, source.SynapseCfg, source.PredictorsCfg)
+            :this(source.Name, source.StructureCfgName, source.InputConnsCfg, source.SynapseCfg, source.PredictorsCfg)
         {
             return;
         }
@@ -102,8 +102,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             //Parsing
             Name = settingsElem.Attribute("name").Value;
             StructureCfgName = settingsElem.Attribute("reservoirStructure").Value;
-            //Input units
-            InputUnitsCfg = new InputUnitsSettings(settingsElem.Elements("inputUnits").First());
+            //Input connections
+            InputConnsCfg = new InputConnsSettings(settingsElem.Elements("inputConnections").First());
             //Synapse
             XElement synapseElem = settingsElem.Elements("synapse").FirstOrDefault();
             SynapseCfg = synapseElem == null ? new SynapseSettings() : new SynapseSettings(synapseElem);
@@ -152,19 +152,16 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// </summary>
         /// <param name="inputCfg">Preprocessor's input configuration</param>
         /// <param name="reservoirStructureCfg">Reservoir structure configuration</param>
-        public void CheckConsistency(InputSettings inputCfg, ReservoirStructureSettings reservoirStructureCfg)
+        public void CheckConsistency(InputEncoderSettings inputCfg, ReservoirStructureSettings reservoirStructureCfg)
         {
             if (StructureCfgName != reservoirStructureCfg.Name)
             {
                 throw new Exception($"Name of the reservoir structure configuration {StructureCfgName} is not equal to name of given reservoir structure configuration name {reservoirStructureCfg.Name}.");
             }
-            foreach (InputUnitSettings inputUnitCfg in InputUnitsCfg.InputUnitCfgCollection)
+            foreach (InputConnSettings inputConnCfg in InputConnsCfg.ConnCfgCollection)
             {
-                inputCfg.FieldsCfg.GetFieldID(inputUnitCfg.InputFieldName, true);
-                foreach (InputUnitConnSettings connCfg in inputUnitCfg.ConnsCfg.ConnCfgCollection)
-                {
-                    reservoirStructureCfg.PoolsCfg.GetPoolID(connCfg.PoolName);
-                }
+                inputCfg.FieldsCfg.GetFieldID(inputConnCfg.InputFieldName, true);
+                reservoirStructureCfg.PoolsCfg.GetPoolID(inputConnCfg.PoolName);
             }
             return;
         }
@@ -188,7 +185,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             XElement rootElem = new XElement(rootElemName,
                                              new XAttribute("name", Name),
                                              new XAttribute("reservoirStructure", StructureCfgName),
-                                             InputUnitsCfg.GetXml(suppressDefaults));
+                                             InputConnsCfg.GetXml(suppressDefaults));
 
             if (SynapseCfg != null && !SynapseCfg.ContainsOnlyDefaults)
             {

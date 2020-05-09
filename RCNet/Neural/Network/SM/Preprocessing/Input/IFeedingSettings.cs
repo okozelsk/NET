@@ -20,7 +20,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// Type of input feeding
         /// </summary>
-        NeuralPreprocessor.InputFeedingType FeedingType { get; }
+        InputEncoder.InputFeedingType FeedingType { get; }
 
         /// <summary>
         /// Creates the deep copy instance of this instance

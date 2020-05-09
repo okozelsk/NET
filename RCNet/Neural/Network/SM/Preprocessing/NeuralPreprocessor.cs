@@ -12,36 +12,20 @@ using RCNet.Neural.Data;
 using RCNet.Neural.Data.Generators;
 using RCNet.Neural.Data.Filter;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron;
+using RCNet.Neural.Network.SM.Preprocessing.Neuron;
 using RCNet.Neural.Network.SM.Preprocessing.Input;
 using RCNet.Neural.Data.Transformers;
 
 namespace RCNet.Neural.Network.SM.Preprocessing
 {
     /// <summary>
-    /// Implements the neural data preprocessor, one of the main components of the State Machine.
+    /// Implements the neural preprocessor of input data
     /// </summary>
     [Serializable]
     public class NeuralPreprocessor
     {
         //Constants
         private const double MinPredictorValueDifference = 1e-6;
-
-        //Enums
-        /// <summary>
-        /// Input feeding variants
-        /// </summary>
-        public enum InputFeedingType
-        {
-            /// <summary>
-            /// Continuous feeding
-            /// </summary>
-            Continuous,
-            /// <summary>
-            /// Patterned feeding
-            /// </summary>
-            Patterned
-        }
 
         //Static attributes
         /// <summary>
@@ -70,160 +54,109 @@ namespace RCNet.Neural.Network.SM.Preprocessing
 
         //Attribute properties
         /// <summary>
-        /// Collection of reservoir instances.
-        /// </summary>
-        public List<ReservoirInstance> ReservoirCollection { get; }
-
-        /// <summary>
-        /// All predicting neurons.
-        /// </summary>
-        public List<INeuron> PredictingNeuronCollection { get; }
-
-        /// <summary>
         /// Number of boot cycles
         /// </summary>
         public int BootCycles { get; }
 
         /// <summary>
-        /// Number of neurons
+        /// Collection of reservoir instances.
         /// </summary>
-        public int NumOfNeurons { get; }
+        public List<ReservoirInstance> ReservoirCollection { get; }
 
         /// <summary>
-        /// -1 (no constraint) for continuous feeding or patterned feeding without routing input to readout.
-        /// Required constant length of the input pattern for patterned feeding with routing input to readout.
+        /// All predicting neurons (input + hidden).
         /// </summary>
-        public int InputPatternFixedLengthConstraint { get; private set; }
+        public List<INeuron> PredictingNeuronCollection { get; }
+        
+        /// <summary>
+        /// Number of hidden neurons in all reservoirs
+        /// </summary>
+        public int TotalNumOfHiddenNeurons { get; }
 
         /// <summary>
-        /// Total number of predictors
+        /// Number of output features going from all reservoirs
         /// </summary>
-        public int TotalNumOfPredictors { get; private set; }
+        public int NumOfReservoirsOutputFeatures { get; private set; }
 
         /// <summary>
-        /// Number of active predictors
+        /// Total number of output features (neural predictors + routed input)
         /// </summary>
-        public int NumOfActivePredictors { get; private set; }
+        public int TotalNumOfOutputFeatures { get; private set; }
 
         /// <summary>
         /// Collection of switches generally enabling/disabling predictors
         /// </summary>
-        public bool[] PredictorGeneralSwitchCollection { get; private set; }
+        public bool[] OutputFeatureGeneralSwitchCollection { get; private set; }
+
+        /// <summary>
+        /// Number of active output features (predictors + routed input)
+        /// </summary>
+        public int NumOfActiveOutputFeatures { get; private set; }
 
 
         //Attributes
         /// <summary>
         /// Settings used for instance creation.
         /// </summary>
-        private readonly NeuralPreprocessorSettings _settings;
+        private readonly NeuralPreprocessorSettings _preprocessorCfg;
 
         /// <summary>
-        /// Collection of the internal input transformers associated with the transformed input fields
+        /// Input encoder instance
         /// </summary>
-        private readonly List<ITransformer> _internalInputTransformerCollection;
-
-        /// <summary>
-        /// Collection of the internal input generators associated with the generated input fields
-        /// </summary>
-        private readonly List<IGenerator> _internalInputGeneratorCollection;
-
-        /// <summary>
-        /// Collection of input feature filters
-        /// </summary>
-        private readonly BaseFeatureFilter[] _featureFilterCollection;
+        private readonly InputEncoder _inputEncoder;
 
         //Constructor
         /// <summary>
-        /// Constructs an initialized instance
+        /// Creates an initialized instance
         /// </summary>
-        /// <param name="settings">Neural Preprocessor's configuration</param>
+        /// <param name="preprocessorCfg">Neural Preprocessor's configuration</param>
         /// <param name="randomizerSeek">
         /// A value greater than or equal to 0 will always ensure the same initialization of the internal
         /// random number generator and therefore the same network structure, which is good for tuning
         /// network parameters. A value less than 0 causes a fully random initialization when creating a network instance.
         /// </param>
-        public NeuralPreprocessor(NeuralPreprocessorSettings settings, int randomizerSeek)
+        public NeuralPreprocessor(NeuralPreprocessorSettings preprocessorCfg, int randomizerSeek)
         {
-            _settings = (NeuralPreprocessorSettings)settings.DeepClone();
+            _preprocessorCfg = (NeuralPreprocessorSettings)preprocessorCfg.DeepClone();
+            PredictingNeuronCollection = new List<INeuron>();
+            TotalNumOfHiddenNeurons = 0;
+            NumOfReservoirsOutputFeatures = 0;
+            TotalNumOfOutputFeatures = -1;
+            NumOfActiveOutputFeatures = 0;
+            OutputFeatureGeneralSwitchCollection = null;
             ///////////////////////////////////////////////////////////////////////////////////
-            //Input
-            //Internal input transformers
-            _internalInputTransformerCollection = new List<ITransformer>();
-            if (_settings.InputCfg.FieldsCfg.TransformedFieldsCfg != null)
-            {
-                List<string> names = _settings.InputCfg.FieldsCfg.GetNames();
-                foreach (TransformedFieldSettings fieldCfg in _settings.InputCfg.FieldsCfg.TransformedFieldsCfg.FieldCfgCollection)
-                {
-                    _internalInputTransformerCollection.Add(TransformerFactory.Create(names, fieldCfg.TransformerCfg));
-                }
-            }
-            //Internal input generators
-            _internalInputGeneratorCollection = new List<IGenerator>();
-            if (_settings.InputCfg.FieldsCfg.GeneratedFieldsCfg != null)
-            {
-                foreach (GeneratedFieldSettings fieldCfg in _settings.InputCfg.FieldsCfg.GeneratedFieldsCfg.FieldCfgCollection)
-                {
-                    _internalInputGeneratorCollection.Add(GeneratorFactory.Create(fieldCfg.GeneratorCfg));
-                }
-            }
-            ///////////////////////////////////////////////////////////////////////////////////
-            //Feature filters
-            _featureFilterCollection = new BaseFeatureFilter[_settings.InputCfg.FieldsCfg.TotalNumOfFields];
-            int featureIdx = 0;
-            //External fields filters
-            foreach (ExternalFieldSettings externalFieldCfg in _settings.InputCfg.FieldsCfg.ExternalFieldsCfg.FieldCfgCollection)
-            {
-                _featureFilterCollection[featureIdx++] = FeatureFilterFactory.Create(_dataRange, externalFieldCfg.FeatureFilterCfg);
-            }
-            //Transformed fields filters
-            if (_settings.InputCfg.FieldsCfg.TransformedFieldsCfg != null)
-            {
-                foreach (TransformedFieldSettings transformedFieldCfg in _settings.InputCfg.FieldsCfg.TransformedFieldsCfg.FieldCfgCollection)
-                {
-                    _featureFilterCollection[featureIdx++] = new RealFeatureFilter(_dataRange);
-                }
-            }
-            //Generated fields filters
-            if (_settings.InputCfg.FieldsCfg.GeneratedFieldsCfg != null)
-            {
-                foreach (GeneratedFieldSettings generatedFieldCfg in _settings.InputCfg.FieldsCfg.GeneratedFieldsCfg.FieldCfgCollection)
-                {
-                    _featureFilterCollection[featureIdx++] = new RealFeatureFilter(_dataRange);
-                }
-            }
+            //Input encoder
+            _inputEncoder = new InputEncoder(_preprocessorCfg.InputEncoderCfg);
             ///////////////////////////////////////////////////////////////////////////////////
             //Reservoir instance(s)
             BootCycles = 0;
             //Random generator used for reservoir structure initialization
             Random rand = (randomizerSeek < 0 ? new Random() : new Random(randomizerSeek));
-            PredictingNeuronCollection = new List<INeuron>();
-            NumOfNeurons = 0;
-            InputPatternFixedLengthConstraint = -1;
-            TotalNumOfPredictors = -1;
-            NumOfActivePredictors = 0;
-            PredictorGeneralSwitchCollection = null;
-            ReservoirCollection = new List<ReservoirInstance>(_settings.ReservoirInstancesCfg.ReservoirInstanceCfgCollection.Count);
+            ReservoirCollection = new List<ReservoirInstance>(_preprocessorCfg.ReservoirInstancesCfg.ReservoirInstanceCfgCollection.Count);
             int reservoirInstanceID = 0;
             int biggestInterconnectedArea = 0;
-            foreach(ReservoirInstanceSettings reservoirInstanceCfg in _settings.ReservoirInstancesCfg.ReservoirInstanceCfgCollection)
+            foreach(ReservoirInstanceSettings reservoirInstanceCfg in _preprocessorCfg.ReservoirInstancesCfg.ReservoirInstanceCfgCollection)
             {
-                ReservoirStructureSettings structCfg = _settings.ReservoirStructuresCfg.GetReservoirStructureCfg(reservoirInstanceCfg.StructureCfgName);
+                ReservoirStructureSettings structCfg = _preprocessorCfg.ReservoirStructuresCfg.GetReservoirStructureCfg(reservoirInstanceCfg.StructureCfgName);
                 ReservoirInstance reservoir = new ReservoirInstance(reservoirInstanceID++,
-                                                                    _settings.InputCfg,
                                                                     structCfg,
                                                                     reservoirInstanceCfg,
+                                                                    _inputEncoder,
                                                                     _dataRange,
                                                                     rand
                                                                     );
                 ReservoirCollection.Add(reservoir);
                 PredictingNeuronCollection.AddRange(reservoir.PredictingNeuronCollection);
-                NumOfNeurons += reservoir.Size;
+                TotalNumOfHiddenNeurons += reservoir.Size;
                 biggestInterconnectedArea = Math.Max(biggestInterconnectedArea, structCfg.LargestInterconnectedAreaSize);
             }
-            if (_settings.InputCfg.FeedingCfg.FeedingType == InputFeedingType.Continuous)
+            //Add predicting neurons from input encoder
+            PredictingNeuronCollection.AddRange(_inputEncoder.PredictingNeuronCollection);
+            //Boot cycles setup
+            if (_preprocessorCfg.InputEncoderCfg.FeedingCfg.FeedingType == InputEncoder.InputFeedingType.Continuous)
             {
-                FeedingContinuousSettings feedCfg = (FeedingContinuousSettings)settings.InputCfg.FeedingCfg;
-                BootCycles = feedCfg.BootCycles == FeedingContinuousSettings.AutoBootCyclesNum ? biggestInterconnectedArea : feedCfg.BootCycles;
+                FeedingContinuousSettings feedingCfg = (FeedingContinuousSettings)preprocessorCfg.InputEncoderCfg.FeedingCfg;
+                BootCycles = feedingCfg.BootCycles == FeedingContinuousSettings.AutoBootCyclesNum ? biggestInterconnectedArea : feedingCfg.BootCycles;
             }
             else
             {
@@ -234,568 +167,171 @@ namespace RCNet.Neural.Network.SM.Preprocessing
 
         //Properties
         /// <summary>
-        /// Number of suppressed predictors (exhibits no meaningfully different values)
+        /// Number of suppressed output features (exhibits no meaningfully different values or reduced by parameter)
         /// </summary>
-        public int NumOfSuppressedPredictors { get { return TotalNumOfPredictors - NumOfActivePredictors; } }
+        public int NumOfSuppressedOutputFeatures { get { return TotalNumOfOutputFeatures - NumOfActiveOutputFeatures; } }
 
         //Methods
-        private void InitTotalNumOfPredictors(int externalInputPatternLength = -1)
+        private void InitializeOutput()
         {
-            TotalNumOfPredictors = 0;
-            //Input fields as the predictors
-            int numOfInpFieldInstances = _settings.InputCfg.FeedingCfg.FeedingType == InputFeedingType.Patterned ? externalInputPatternLength : 1;
-            if (_settings.InputCfg.FeedingCfg.RouteToReadout)
-            {
-                InputPatternFixedLengthConstraint = externalInputPatternLength;
-                foreach (ExternalFieldSettings fieldCfg in _settings.InputCfg.FieldsCfg.ExternalFieldsCfg.FieldCfgCollection)
-                {
-                    if (fieldCfg.RouteToReadout) TotalNumOfPredictors += numOfInpFieldInstances;
-                }
-                if (_settings.InputCfg.FieldsCfg.TransformedFieldsCfg != null)
-                {
-                    foreach (TransformedFieldSettings fieldCfg in _settings.InputCfg.FieldsCfg.TransformedFieldsCfg.FieldCfgCollection)
-                    {
-                        if (fieldCfg.RouteToReadout) TotalNumOfPredictors += numOfInpFieldInstances;
-                    }
-                }
-                if (_settings.InputCfg.FieldsCfg.GeneratedFieldsCfg != null)
-                {
-                    foreach (GeneratedFieldSettings fieldCfg in _settings.InputCfg.FieldsCfg.GeneratedFieldsCfg.FieldCfgCollection)
-                    {
-                        if (fieldCfg.RouteToReadout) TotalNumOfPredictors += numOfInpFieldInstances;
-                    }
-                }
-            }
+            TotalNumOfOutputFeatures = 0;
             //All reservoirs' predictors
             foreach (ReservoirInstance reservoir in ReservoirCollection)
             {
-                bool bidir = _settings.InputCfg.FeedingCfg.FeedingType == InputFeedingType.Patterned && ((FeedingPatternedSettings)_settings.InputCfg.FeedingCfg).Bidir;
-                TotalNumOfPredictors += (bidir ? 2 : 1) * reservoir.NumOfPredictors;
+                bool bidir = _preprocessorCfg.InputEncoderCfg.FeedingCfg.FeedingType == InputEncoder.InputFeedingType.Patterned && ((FeedingPatternedSettings)_preprocessorCfg.InputEncoderCfg.FeedingCfg).Bidir;
+                TotalNumOfOutputFeatures += (bidir ? 2 : 1) * reservoir.NumOfPredictors;
             }
+            //Reservoirs' output features
+            NumOfReservoirsOutputFeatures = TotalNumOfOutputFeatures;
+            //Input neurons' predictors
+            TotalNumOfOutputFeatures += _inputEncoder.NumOfPredictors;
+            //Input fields values as the predictors
+            TotalNumOfOutputFeatures += _inputEncoder.NumOfRoutedFieldValues;
             return;
         }
 
         /// <summary>
-        /// Function checks given predictors and set general enabling/disabling switches of predictors
+        /// Output features comparer (sorts desc by value span)
+        /// </summary>
+        /// <param name="f1">Feature 1</param>
+        /// <param name="f2">Feature 2</param>
+        /// <returns></returns>
+        public static int CompareOutputFeature(Tuple<int, double, BasicStat> f1, Tuple<int, double, BasicStat> f2)
+        {
+            if(f1.Item3.Span > f2.Item3.Span)
+            {
+                return -1;
+            }
+            else if(f1.Item3.Span < f2.Item3.Span)
+            {
+                return 1;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+
+        /// <summary>
+        /// Function checks given output features and sets general enabling/disabling switches
         /// </summary>
         /// <param name="predictorsCollection">Collection of regression predictors</param>
-        private void InitPredictorsGeneralSwitches(List<double[]> predictorsCollection)
+        private void InitOutputFeaturesGeneralSwitches(List<double[]> predictorsCollection)
         {
-            //Allocate general predictor switches
-            PredictorGeneralSwitchCollection = new bool[TotalNumOfPredictors];
+            //Allocate general switches
+            OutputFeatureGeneralSwitchCollection = new bool[TotalNumOfOutputFeatures];
             //Init general predictor switches to false
-            PredictorGeneralSwitchCollection.Populate(false);
+            OutputFeatureGeneralSwitchCollection.Populate(false);
             //Compute statistics
-            List<Tuple<int, double, BasicStat>> predictorStatCollection = new List<Tuple<int, double, BasicStat>>(TotalNumOfPredictors);
-            RescalledRange[] rescalledRangeCollection = new RescalledRange[TotalNumOfPredictors];
-            BasicStat[] basicStatCollection = new BasicStat[TotalNumOfPredictors];
-            for (int i = 0; i < TotalNumOfPredictors; i++)
+            List<Tuple<int, double, BasicStat>> featureStatCollection = new List<Tuple<int, double, BasicStat>>(TotalNumOfOutputFeatures);
+            for (int i = 0; i < TotalNumOfOutputFeatures; i++)
             {
                 RescalledRange rescalledRange = new RescalledRange(predictorsCollection.Count);
-                BasicStat basicStat = new BasicStat();
+                BasicStat stat = new BasicStat();
                 for (int row = 0; row < predictorsCollection.Count; row++)
                 {
                     rescalledRange.AddValue(predictorsCollection[row][i]);
-                    basicStat.AddSampleValue(predictorsCollection[row][i]);
+                    stat.AddSampleValue(predictorsCollection[row][i]);
                 }
-                predictorStatCollection.Add(new Tuple<int, double, BasicStat>(i, rescalledRange.Compute(), basicStat));
+                featureStatCollection.Add(new Tuple<int, double, BasicStat>(i, rescalledRange.Compute(), stat));
             }
-            //Create sorted statistics
-            List<Tuple<int, double, BasicStat>> sortedPredictorStatCollection = new List<Tuple<int, double, BasicStat>>(predictorStatCollection.OrderByDescending(k => k.Item2));
-            int reductionCount = (int)(Math.Round(TotalNumOfPredictors * _settings.PredictorsReductionRatio));
-            int firstInvalidOrderIndex = TotalNumOfPredictors - reductionCount;
+            //Sort statistics
+            featureStatCollection.Sort(CompareOutputFeature);
+            int reductionCount = (int)(Math.Round(TotalNumOfOutputFeatures * _preprocessorCfg.PredictorsReductionRatio));
+            int firstInvalidOrderIndex = TotalNumOfOutputFeatures - reductionCount;
             //Enable valid predictors
-            NumOfActivePredictors = 0;
-            for (int i = 0; i < TotalNumOfPredictors; i++)
+            NumOfActiveOutputFeatures = 0;
+            for (int i = 0; i < TotalNumOfOutputFeatures; i++)
             {
-                if(sortedPredictorStatCollection[i].Item3.Span > MinPredictorValueDifference && i < firstInvalidOrderIndex)
+                if(featureStatCollection[i].Item3.Span > MinPredictorValueDifference && i < firstInvalidOrderIndex)
                 {
                     //Enable predictor
-                    PredictorGeneralSwitchCollection[sortedPredictorStatCollection[i].Item1] = true;
-                    ++NumOfActivePredictors;
+                    OutputFeatureGeneralSwitchCollection[featureStatCollection[i].Item1] = true;
+                    ++NumOfActiveOutputFeatures;
                 }
             }
             return;
         }
 
         /// <summary>
-        /// Sets Neural Preprocessor internal state to initial state
+        /// Sets neural preprocessor's internal state to its initial state
         /// </summary>
-        /// <param name="resetStatistics">Specifies whether to reset internal statistics</param>
-        public void Reset(bool resetStatistics)
+        public void Reset()
         {
-            //Reset transformers
-            foreach (ITransformer transformer in _internalInputTransformerCollection)
-            {
-                transformer.Reset();
-            }
-            //Reset generators
-            foreach (IGenerator generator in _internalInputGeneratorCollection)
-            {
-                generator.Reset();
-            }
+            //Reset input encoder
+            _inputEncoder.Reset();
             //Reset reservoirs
             foreach(ReservoirInstance reservoir in ReservoirCollection)
+            {
+                reservoir.Reset(true);
+            }
+            //Reset predictors metrics
+            TotalNumOfOutputFeatures = 0;
+            NumOfActiveOutputFeatures = 0;
+            OutputFeatureGeneralSwitchCollection = null;
+            return;
+        }
+
+        /// <summary>
+        /// Sets reservoirs to initial state
+        /// </summary>
+        /// <param name="resetStatistics">Specifies whether to reset internal statistics</param>
+        private void ResetReservoirs(bool resetStatistics)
+        {
+            //Reset reservoirs
+            foreach (ReservoirInstance reservoir in ReservoirCollection)
             {
                 reservoir.Reset(resetStatistics);
             }
             return;
         }
 
-        private void ResetFeatureFilters()
-        {
-            foreach(BaseFeatureFilter filter in _featureFilterCollection)
-            {
-                filter.Reset();
-            }
-            return;
-        }
-
         /// <summary>
-        /// Adds inputs from internal transformers and generators to be used in reservoirs.
+        /// Pushes external input vector into the input encoder, computes reservoirs and returns output features
         /// </summary>
-        /// <param name="externalInputVector">External input vector</param>
-        private double[] AddInternalInputs(double[] externalInputVector)
+        /// <param name="inputVector">External input values</param>
+        /// <param name="collectStatistics">Indicates whether to update internal statistics</param>
+        private double[] PushExtInputVector(double[] inputVector, bool collectStatistics)
         {
-            if(_settings.InputCfg.FieldsCfg.TotalNumOfFields == externalInputVector.Length)
+            if(_preprocessorCfg.InputEncoderCfg.FeedingCfg.FeedingType == InputEncoder.InputFeedingType.Patterned)
             {
-                //Defined no internal fields
-                return externalInputVector;
+                ResetReservoirs(false);
             }
-            double[] inputVector = new double[_settings.InputCfg.FieldsCfg.TotalNumOfFields];
-            inputVector.Populate(double.NaN);
-            //Original external data
-            externalInputVector.CopyTo(inputVector, 0);
-            int index = externalInputVector.Length;
-            //Transformed fields
-            foreach(ITransformer transformer in _internalInputTransformerCollection)
+            _inputEncoder.StoreNewData(inputVector);
+            while (_inputEncoder.NumOfRemainingInputs > 0)
             {
-                inputVector[index++] = transformer.Next(inputVector);
-            }
-            //Generated fields
-            foreach (IGenerator generator in _internalInputGeneratorCollection)
-            {
-                inputVector[index++] = generator.Next();
-            }
-            return inputVector;
-        }
-
-        private List<double[]> AddInternalInputs(List<double[]> inputVectors)
-        {
-            List<double[]> outputVectors = new List<double[]>(inputVectors.Count);
-            for(int i = 0; i < inputVectors.Count; i++)
-            {
-                outputVectors.Add(AddInternalInputs(inputVectors[i]));
-            }
-            return outputVectors;
-        }
-
-        /// <summary>
-        /// Adds inputs from internal transformers and generators to be used in reservoirs.
-        /// </summary>
-        /// <param name="inputPattern">External input pattern</param>
-        private InputPattern AddInternalInputs(InputPattern inputPattern)
-        {
-            int inputPatternTimePoints = inputPattern.VariablesDataCollection[0].Length;
-            //Convert to rich vectors
-            List<double[]> richVectors = new List<double[]>(inputPatternTimePoints);
-            for(int timePointIndex = 0; timePointIndex < inputPatternTimePoints; timePointIndex++)
-            {
-                double[] externalInputVector = inputPattern.GetDataAtTimePoint(timePointIndex);
-                double[] richVector = AddInternalInputs(externalInputVector);
-                richVectors.Add(richVector);
-            }
-            //Convert back to pattern
-            InputPattern outputPattern = new InputPattern(_settings.InputCfg.FieldsCfg.TotalNumOfFields);
-            for(int varIdx = 0; varIdx < _settings.InputCfg.FieldsCfg.TotalNumOfFields; varIdx++)
-            {
-                double[] varData = new double[inputPatternTimePoints];
-                for (int timePointIndex = 0; timePointIndex < inputPatternTimePoints; timePointIndex++)
+                _inputEncoder.EncodeNextInputData(collectStatistics);
+                //Compute reservoir(s)
+                foreach (ReservoirInstance reservoir in ReservoirCollection)
                 {
-                    varData[timePointIndex] = richVectors[timePointIndex][varIdx];
+                    reservoir.Compute(collectStatistics);
                 }
-                outputPattern.VariablesDataCollection.Add(varData);
             }
-            return outputPattern;
-        }
-
-        private List<InputPattern> AddInternalInputs(List<InputPattern> inputPatterns)
-        {
-            List<InputPattern> outputPatterns = new List<InputPattern>(inputPatterns.Count);
-            for (int i = 0; i < inputPatterns.Count; i++)
-            {
-                outputPatterns.Add(AddInternalInputs(inputPatterns[i]));
-            }
-            return outputPatterns;
-        }
-
-        /// <summary>
-        /// Updates collection of preprocessor's feature filters
-        /// </summary>
-        /// <param name="inputVectorCollection">Collection of input vectors</param>
-        private void UpdateFeatureFilters(List<double[]> inputVectorCollection)
-        {
-            Parallel.For(0, _featureFilterCollection.Length, i =>
-            {
-                //Update filter
-                foreach (double[] vector in inputVectorCollection)
-                {
-                    _featureFilterCollection[i].Update(vector[i]);
-                }
-            });
-            return;
-        }
-
-        /// <summary>
-        /// Updates collection of preprocessor's feature filters
-        /// </summary>
-        /// <param name="inputPatternCollection">Collection of input patterns</param>
-        private void UpdateFeatureFilters(List<InputPattern> inputPatternCollection)
-        {
-            Parallel.For(0, _settings.InputCfg.FieldsCfg.TotalNumOfFields, varIdx =>
-            {
-                foreach (InputPattern pattern in inputPatternCollection)
-                {
-                    for(int i = 0; i < pattern.VariablesDataCollection[varIdx].Length; i++)
-                    {
-                        _featureFilterCollection[varIdx].Update(pattern.VariablesDataCollection[varIdx][i]);
-                    }
-                }
-            });
-            return;
-        }
-
-        /// <summary>
-        /// Applies filters on vector of features
-        /// </summary>
-        /// <param name="vector">Input vector</param>
-        private double[] ApplyFiltersOnInputVector(double[] vector)
-        {
-            double[] resultVector = new double[vector.Length];
-            for (int i = 0; i < vector.Length; i++)
-            {
-                resultVector[i] = _featureFilterCollection[i].ApplyFilter(vector[i]);
-            }
-            return resultVector;
-        }
-
-        /// <summary>
-        /// Applies feature filters on pattern
-        /// </summary>
-        /// <param name="pattern">Input pattern</param>
-        private InputPattern ApplyFiltersOnInputPattern(InputPattern pattern)
-        {
-            InputPattern resultPattern = new InputPattern(pattern.VariablesDataCollection.Count);
-            int varIdx = 0;
-            foreach (double[] vector in pattern.VariablesDataCollection)
-            {
-                double[] resultVector = new double[vector.Length];
-                for(int i = 0; i < vector.Length; i++)
-                {
-                    resultVector[i] = _featureFilterCollection[varIdx].ApplyFilter(vector[i]);
-                }
-                resultPattern.VariablesDataCollection.Add(resultVector);
-                ++varIdx;
-            }
-            return resultPattern;
-        }
-
-        /// <summary>
-        /// Pushes input vector into the reservoirs and returns the predictors
-        /// </summary>
-        /// <param name="inputVector">Input values</param>
-        /// <param name="collectStatistics">
-        /// The parameter indicates whether to update internal statistics
-        /// </param>
-        private double[] PushInputVector(double[] inputVector, bool collectStatistics)
-        {
-            double[] normalizedInputVector = ApplyFiltersOnInputVector(inputVector);
-            double[] predictors = new double[TotalNumOfPredictors];
-            int predictorsIdx = 0;
-            //Compute reservoir(s)
+            //Collect all output features
+            double[] outputFeatures = new double[TotalNumOfOutputFeatures];
+            int featuresIdx = 0;
             foreach (ReservoirInstance reservoir in ReservoirCollection)
             {
-                double[] reservoirInput = new double[reservoir.InputUnitCollection.Length];
-                for (int i = 0; i < reservoir.InputUnitCollection.Length; i++)
-                {
-                    reservoirInput[i] = normalizedInputVector[reservoir.InputUnitCollection[i].InputFieldIdx];
-                }
-                //Compute reservoir
-                reservoir.Compute(reservoirInput, collectStatistics);
-                reservoir.CopyPredictorsTo(predictors, predictorsIdx);
-                predictorsIdx += reservoir.NumOfPredictors;
+                reservoir.CopyPredictorsTo(outputFeatures, featuresIdx);
+                featuresIdx += reservoir.NumOfPredictors;
             }
-            if (_settings.InputCfg.FeedingCfg.RouteToReadout)
-            {
-                int fieldIdx = 0;
-                foreach (ExternalFieldSettings fieldCfg in _settings.InputCfg.FieldsCfg.ExternalFieldsCfg.FieldCfgCollection)
-                {
-                    if (fieldCfg.RouteToReadout)
-                    {
-                        //Route original values
-                        predictors[predictorsIdx++] = inputVector[fieldIdx];
-                    }
-                    ++fieldIdx;
-                }
-                if (_settings.InputCfg.FieldsCfg.TransformedFieldsCfg != null)
-                {
-                    foreach (TransformedFieldSettings fieldCfg in _settings.InputCfg.FieldsCfg.TransformedFieldsCfg.FieldCfgCollection)
-                    {
-                        if (fieldCfg.RouteToReadout)
-                        {
-                            predictors[predictorsIdx++] = normalizedInputVector[fieldIdx];
-                        }
-                        ++fieldIdx;
-                    }
-                }
-                if (_settings.InputCfg.FieldsCfg.GeneratedFieldsCfg != null)
-                {
-                    foreach (GeneratedFieldSettings fieldCfg in _settings.InputCfg.FieldsCfg.GeneratedFieldsCfg.FieldCfgCollection)
-                    {
-                        if (fieldCfg.RouteToReadout)
-                        {
-                            predictors[predictorsIdx++] = normalizedInputVector[fieldIdx];
-                        }
-                        ++fieldIdx;
-                    }
-                }
-            }
-            return predictors;
+            _inputEncoder.CopyPredictorsTo(outputFeatures, featuresIdx);
+            featuresIdx += _inputEncoder.NumOfPredictors;
+            _inputEncoder.CopyRoutedInputDataTo(outputFeatures, featuresIdx);
+            return outputFeatures;
         }
 
         /// <summary>
-        /// Pushes input pattern into the reservoirs and returns the predictors
-        /// </summary>
-        /// <param name="inputPattern">Input pattern</param>
-        /// <param name="collectStatistics">
-        /// The parameter indicates whether to update internal statistics
-        /// </param>
-        private double[] PushInputPattern(InputPattern inputPattern, bool collectStatistics)
-        {
-            double[] predictors = new double[TotalNumOfPredictors];
-            int predictorsIdx = 0;
-            //Check pattern length costraint
-            if(InputPatternFixedLengthConstraint != -1)
-            {
-                if(inputPattern.VariablesDataCollection[0].Length != InputPatternFixedLengthConstraint)
-                {
-                    throw new Exception($"Incorrect length of input pattern ({inputPattern.VariablesDataCollection[0].Length}). Length must be equal to {InputPatternFixedLengthConstraint}.");
-                }
-            }
-            //Apply filters
-            InputPattern normalizedInputPattern = ApplyFiltersOnInputPattern(inputPattern);
-            //Compute reservoir(s)
-            foreach (ReservoirInstance reservoir in ReservoirCollection)
-            {
-                double[] reservoirInput = new double[reservoir.InstanceCfg.InputUnitsCfg.InputUnitCfgCollection.Count];
-                List<InputPattern> stepInputPatterns = new List<InputPattern>() { normalizedInputPattern };
-                if(((FeedingPatternedSettings)_settings.InputCfg.FeedingCfg).Bidir)
-                {
-                    InputPattern reversedInputPattern = new InputPattern(normalizedInputPattern.VariablesDataCollection.Count);
-                    foreach(double[] data in normalizedInputPattern.VariablesDataCollection)
-                    {
-                        reversedInputPattern.VariablesDataCollection.Add(data.Reverse().ToArray());
-                    }
-                    stepInputPatterns.Add(reversedInputPattern);
-                }
-                foreach (InputPattern stepInputPattern in stepInputPatterns)
-                {
-                    //Reset the reservoir but keep statistics
-                    reservoir.Reset(false);
-                    //Compute the reservoir
-                    for (int idx = 0; idx < stepInputPattern.VariablesDataCollection[0].Length; idx++)
-                    {
-                        double[] inputVector = stepInputPattern.GetDataAtTimePoint(idx);
-                        for (int i = 0; i < reservoir.InputUnitCollection.Length; i++)
-                        {
-                            reservoirInput[i] = inputVector[reservoir.InputUnitCollection[i].InputFieldIdx];
-                        }
-                        reservoir.Compute(reservoirInput, collectStatistics);
-                    }
-                    reservoir.CopyPredictorsTo(predictors, predictorsIdx);
-                    predictorsIdx += reservoir.NumOfPredictors;
-                }
-            }
-
-            //Route input fields as the predictors
-            if (_settings.InputCfg.FeedingCfg.RouteToReadout)
-            {
-                int fieldIdx = 0;
-                foreach (ExternalFieldSettings fieldCfg in _settings.InputCfg.FieldsCfg.ExternalFieldsCfg.FieldCfgCollection)
-                {
-                    if (fieldCfg.RouteToReadout)
-                    {
-                        //Route to readout
-                        for(int i = 0; i < inputPattern.VariablesDataCollection[fieldIdx].Length; i++)
-                        {
-                            predictors[predictorsIdx++] = inputPattern.VariablesDataCollection[fieldIdx][i];
-                        }
-                    }
-                    ++fieldIdx;
-                }
-                if (_settings.InputCfg.FieldsCfg.TransformedFieldsCfg != null)
-                {
-                    foreach (TransformedFieldSettings fieldCfg in _settings.InputCfg.FieldsCfg.TransformedFieldsCfg.FieldCfgCollection)
-                    {
-                        if (fieldCfg.RouteToReadout)
-                        {
-                            //Route to readout
-                            for (int i = 0; i < normalizedInputPattern.VariablesDataCollection[fieldIdx].Length; i++)
-                            {
-                                predictors[predictorsIdx++] = normalizedInputPattern.VariablesDataCollection[fieldIdx][i];
-                            }
-                        }
-                        ++fieldIdx;
-                    }
-                }
-                if (_settings.InputCfg.FieldsCfg.GeneratedFieldsCfg != null)
-                {
-                    foreach (GeneratedFieldSettings fieldCfg in _settings.InputCfg.FieldsCfg.GeneratedFieldsCfg.FieldCfgCollection)
-                    {
-                        if (fieldCfg.RouteToReadout)
-                        {
-                            //Route to readout
-                            for (int i = 0; i < normalizedInputPattern.VariablesDataCollection[fieldIdx].Length; i++)
-                            {
-                                predictors[predictorsIdx++] = normalizedInputPattern.VariablesDataCollection[fieldIdx][i];
-                            }
-                        }
-                        ++fieldIdx;
-                    }
-                }
-            }
-            return predictors;
-        }
-
-        /// <summary>
-        /// Pushes input vector into the reservoirs and returns the predictors
+        /// Pushes input data into the preprocessor and returns output features (predictors)
         /// </summary>
         /// <param name="input">Input values in natural form</param>
         public double[] Preprocess(double[] input)
         {
-            //Check readyness
-            if (_featureFilterCollection == null)
+            if(OutputFeatureGeneralSwitchCollection == null)
             {
-                throw new Exception("Preprocessor was not initialized by the sample data bundle (feature filters are not instantiated yet).");
+                throw new Exception("Preprocessor is not initialized. Call InitializeAndPreprocessBundle method first.");
             }
-            if(_settings.InputCfg.FeedingCfg.FeedingType == InputFeedingType.Continuous)
-            {
-                //Push input vector into the preprocessor and return result
-                return PushInputVector(AddInternalInputs(input), false);
-            }
-            else
-            {
-                FeedingPatternedSettings feedingCfg = (FeedingPatternedSettings)_settings.InputCfg.FeedingCfg;
-                InputPattern inputPattern = new InputPattern(input,
-                                                             _settings.InputCfg.FieldsCfg.ExternalFieldsCfg.FieldCfgCollection.Count,
-                                                             feedingCfg.VarSchema,
-                                                             feedingCfg.UnificationCfg.Detrend,
-                                                             feedingCfg.UnificationCfg.UnifyAmplitude,
-                                                             feedingCfg.UnificationCfg.ResamplingCfg.SignalBeginThreshold,
-                                                             feedingCfg.UnificationCfg.ResamplingCfg.SignalEndThreshold,
-                                                             feedingCfg.UnificationCfg.ResamplingCfg.UniformTimeScale,
-                                                             feedingCfg.UnificationCfg.ResamplingCfg.TargetTimePoints
-                                                             );
-
-                //Push input pattern into the preprocessor and return result
-                return PushInputPattern(AddInternalInputs(inputPattern), false);
-            }
-        }
-
-
-        /// <summary>
-        /// Continuous feeding version
-        /// </summary>
-        private VectorBundle PreprocessVectorBundle(VectorBundle inputVectorBundle, out PreprocessingOverview preprocessingOverview)
-        {
-            //Reset preprocessor
-            Reset(true);
-            ResetFeatureFilters();
-            //Initialize total number of predictors
-            InitTotalNumOfPredictors();
-            //Add internal inputs
-            List<double[]> inputVectors = AddInternalInputs(inputVectorBundle.InputVectorCollection);
-            //Initialize feature filters
-            UpdateFeatureFilters(inputVectors);
-            //Allocate output bundle
-            VectorBundle outputBundle = new VectorBundle(inputVectors.Count - BootCycles);
-            //Collect predictors
-            for (int dataSetIdx = 0; dataSetIdx < inputVectors.Count; dataSetIdx++)
-            {
-                bool afterBoot = (dataSetIdx >= BootCycles);
-                //Push input data into the network
-                double[] predictors = PushInputVector(inputVectors[dataSetIdx], afterBoot);
-                //Is boot sequence passed? Collect predictors?
-                if (afterBoot)
-                {
-                    //YES
-                    //Predictors
-                    outputBundle.InputVectorCollection.Add(predictors);
-                    //Desired outputs
-                    outputBundle.OutputVectorCollection.Add(inputVectorBundle.OutputVectorCollection[dataSetIdx]);
-                }
-                //Raise informative event
-                PreprocessingProgressChanged(inputVectors.Count, dataSetIdx + 1, null);
-            }
-
-            //Predictor switches
-            InitPredictorsGeneralSwitches(outputBundle.InputVectorCollection);
-
-            //Preprocessing overview
-            preprocessingOverview = new PreprocessingOverview(CollectStatatistics(),
-                                                              NumOfNeurons,
-                                                              TotalNumOfPredictors,
-                                                              NumOfSuppressedPredictors,
-                                                              NumOfActivePredictors
-                                                              );
-            //Final informative event
-            PreprocessingProgressChanged(inputVectors.Count, inputVectors.Count, preprocessingOverview);
-            //Return
-            return outputBundle;
-        }
-
-        /// <summary>
-        /// Patterned feeding version
-        /// </summary>
-        private VectorBundle PreprocessPatternBundle(List<InputPattern> inputPatterns, List<double[]> outputs, out PreprocessingOverview preprocessingOverview)
-        {
-            //Reset preprocessor
-            Reset(true);
-            ResetFeatureFilters();
-            //Initialize total number of predictors
-            InitTotalNumOfPredictors(inputPatterns[0].VariablesDataCollection[0].Length);
-            //Add internal inputs
-            List<InputPattern> patterns = AddInternalInputs(inputPatterns);
-            //Initialize feature filters
-            UpdateFeatureFilters(patterns);
-            //Allocate output bundle
-            VectorBundle outputBundle = new VectorBundle(patterns.Count);
-            //Collection
-            for (int dataSetIdx = 0; dataSetIdx < patterns.Count; dataSetIdx++)
-            {
-                //Push input data into the network
-                double[] predictors = PushInputPattern(patterns[dataSetIdx], true);
-                outputBundle.InputVectorCollection.Add(predictors);
-                //Add desired outputs
-                outputBundle.OutputVectorCollection.Add(outputs[dataSetIdx]);
-                //Raise informative event
-                PreprocessingProgressChanged(patterns.Count, dataSetIdx + 1, null);
-            }
-
-            //Predictor switches
-            InitPredictorsGeneralSwitches(outputBundle.InputVectorCollection);
-
-            //Preprocessing overview
-            preprocessingOverview = new PreprocessingOverview(CollectStatatistics(),
-                                                              NumOfNeurons,
-                                                              TotalNumOfPredictors,
-                                                              NumOfSuppressedPredictors,
-                                                              NumOfActivePredictors
-                                                              );
-            //Final informative event
-            PreprocessingProgressChanged(patterns.Count, patterns.Count, preprocessingOverview);
-            //Return
-            return outputBundle;
+            return PushExtInputVector(input, false);
         }
 
         /// <summary>
@@ -808,33 +344,45 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// <param name="preprocessingOverview">Reservoir(s) statistics and other important information as a result of the preprocessing phase.</param>
         public VectorBundle InitializeAndPreprocessBundle(VectorBundle inputBundle, out PreprocessingOverview preprocessingOverview)
         {
+            //Reset reservoirs
+            ResetReservoirs(true);
+            //Reset input encoder and initialize its feature filters
+            _inputEncoder.Initialize(inputBundle);
+            //Initialize output
+            InitializeOutput();
+            //Allocate output bundle
+            VectorBundle outputBundle = new VectorBundle(inputBundle.InputVectorCollection.Count);
             //Process data
-            if (_settings.InputCfg.FeedingCfg.FeedingType == InputFeedingType.Continuous)
+            //Collect predictors
+            for (int dataSetIdx = 0; dataSetIdx < inputBundle.InputVectorCollection.Count; dataSetIdx++)
             {
-                //Simply use inputBundle
-                return PreprocessVectorBundle(inputBundle, out preprocessingOverview);
-            }
-            else
-            {
-                //Convert input vectors to InputPatterns
-                List<InputPattern> patterns = new List<InputPattern>(inputBundle.InputVectorCollection.Count);
-                foreach(double[] vector in inputBundle.InputVectorCollection)
+                bool readyToCollect = dataSetIdx >= BootCycles || _preprocessorCfg.InputEncoderCfg.FeedingCfg.FeedingType == InputEncoder.InputFeedingType.Patterned;
+                //Push input data into the network
+                double[] outputFeatures = PushExtInputVector(inputBundle.InputVectorCollection[dataSetIdx], readyToCollect);
+                //Collect output features?
+                if (readyToCollect)
                 {
-                    FeedingPatternedSettings feedingCfg = (FeedingPatternedSettings)_settings.InputCfg.FeedingCfg;
-                    InputPattern inputPattern = new InputPattern(vector,
-                                                                 _settings.InputCfg.FieldsCfg.ExternalFieldsCfg.FieldCfgCollection.Count,
-                                                                 feedingCfg.VarSchema,
-                                                                 feedingCfg.UnificationCfg.Detrend,
-                                                                 feedingCfg.UnificationCfg.UnifyAmplitude,
-                                                                 feedingCfg.UnificationCfg.ResamplingCfg.SignalBeginThreshold,
-                                                                 feedingCfg.UnificationCfg.ResamplingCfg.SignalEndThreshold,
-                                                                 feedingCfg.UnificationCfg.ResamplingCfg.UniformTimeScale,
-                                                                 feedingCfg.UnificationCfg.ResamplingCfg.TargetTimePoints
-                                                                 );
-                    patterns.Add(inputPattern);
+                    //Predictors
+                    outputBundle.InputVectorCollection.Add(outputFeatures);
+                    //Desired outputs
+                    outputBundle.OutputVectorCollection.Add(inputBundle.OutputVectorCollection[dataSetIdx]);
                 }
-                return PreprocessPatternBundle(patterns, inputBundle.OutputVectorCollection, out preprocessingOverview);
+                //Raise informative event
+                PreprocessingProgressChanged(inputBundle.InputVectorCollection.Count, dataSetIdx + 1, null);
             }
+            //Initialize output features switches
+            InitOutputFeaturesGeneralSwitches(outputBundle.InputVectorCollection);
+            //Buld preprocessing overview
+            preprocessingOverview = new PreprocessingOverview(CollectStatatistics(),
+                                                              TotalNumOfHiddenNeurons,
+                                                              TotalNumOfOutputFeatures,
+                                                              NumOfSuppressedOutputFeatures,
+                                                              NumOfActiveOutputFeatures
+                                                              );
+            //Raise final informative event
+            PreprocessingProgressChanged(inputBundle.InputVectorCollection.Count, inputBundle.InputVectorCollection.Count, preprocessingOverview);
+            //Return output
+            return outputBundle;
         }
 
         /// <summary>

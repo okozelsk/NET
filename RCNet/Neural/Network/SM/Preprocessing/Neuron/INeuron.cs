@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using RCNet.MathTools;
 using RCNet.Neural.Activation;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor;
+using RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor;
 
-namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron
+namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
 {
     /// <summary>
     /// Neuron is the basic unit of a neural network.

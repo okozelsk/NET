@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using RCNet.Extensions;
 
-namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron
+namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
 {
     /// <summary>
     /// Information about a neuron location within the neural preprocessor
@@ -71,6 +71,32 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron
             ReservoirCoordinates[2] = z;
             return;
         }
+
+        /// <summary>
+        /// Copy constructor
+        /// </summary>
+        /// <param name="source">Source instance.</param>
+        public NeuronLocation(NeuronLocation source)
+            :this(source.ReservoirID,
+                  source.ReservoirFlatIdx,
+                  source.PoolID,
+                  source.PoolFlatIdx,
+                  source.PoolGroupID,
+                  source.ReservoirCoordinates[0],
+                  source.ReservoirCoordinates[1],
+                  source.ReservoirCoordinates[2])
+        {
+            return;
+        }
+
+        /// <summary>
+        /// Creates deep copy of this instance
+        /// </summary>
+        public NeuronLocation DeepClone()
+        {
+            return new NeuronLocation(this);
+        }
+
     }//NeuronPlacement
 
 }//Namespace

@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 using RCNet.Extensions;
 using RCNet.MathTools;
 using RCNet.Neural.Activation;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor;
+using RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup;
 
-namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron
+namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
 {
     /// <summary>
     /// Analog input neuron is the special type of a neuron without accosiated activation function. Its purpose is only to mediate
@@ -45,21 +45,17 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
-        /// <param name="reservoirID">Reservoir ID</param>
-        /// <param name="inputEntryPoint">Input entry point coordinates within the 3D space</param>
-        /// <param name="flatIdx">Index of this neuron among all input neurons.</param>
+        /// <param name="location">Neuron's location</param>
         /// <param name="inputRange">Range of input value</param>
         /// <param name="predictorsCfg">Configuration of neuron's predictors</param>
         /// <param name="analogFiringThreshold">A number between 0 and 1 (LT1). Every time the new activation value is higher than the previous activation value by at least the threshold, it is evaluated as a firing event. Ignored in case of spiking activation.</param>
-        public AnalogInputNeuron(int reservoirID,
-                                 int[] inputEntryPoint,
-                                 int flatIdx,
+        public AnalogInputNeuron(NeuronLocation location,
                                  Interval inputRange,
                                  PredictorsSettings predictorsCfg,
                                  double analogFiringThreshold = AnalogNeuronGroupSettings.DefaultFiringThreshold
                                  )
         {
-            Location = new NeuronLocation(reservoirID, flatIdx, - 1, flatIdx, 0, inputEntryPoint[0], inputEntryPoint[1], inputEntryPoint[2]);
+            Location = location;
             _inputRange = inputRange.DeepClone();
             Statistics = new NeuronStatistics();
             _predictors = predictorsCfg != null ? new PredictorsProvider(predictorsCfg) : null;

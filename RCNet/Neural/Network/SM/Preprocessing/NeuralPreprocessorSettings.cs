@@ -34,9 +34,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing
 
         //Attribute properties
         /// <summary>
-        /// Configuration of the preprocessor input
+        /// Configuration of the preprocessor's input encoder
         /// </summary>
-        public InputSettings InputCfg { get; }
+        public InputEncoderSettings InputEncoderCfg { get; }
 
         /// <summary>
         /// Configuration of reservoir structures
@@ -57,17 +57,17 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
-        /// <param name="inputCfg">Configuration of the preprocessor input</param>
+        /// <param name="inputEncoderCfg">Configuration of the preprocessor's input encoder</param>
         /// <param name="reservoirStructuresCfg">Configuration of reservoir structures</param>
         /// <param name="reservoirInstancesCfg">Configuration of reservoir instances</param>
         /// <param name="predictorsReductionRatio">Specifies how many predictors having smallest rescalled range to be disabled</param>
-        public NeuralPreprocessorSettings(InputSettings inputCfg,
+        public NeuralPreprocessorSettings(InputEncoderSettings inputEncoderCfg,
                                           ReservoirStructuresSettings reservoirStructuresCfg,
                                           ReservoirInstancesSettings reservoirInstancesCfg,
                                           double predictorsReductionRatio = DefaultPredictorsReductionRatio
                                           )
         {
-            InputCfg = (InputSettings)inputCfg.DeepClone();
+            InputEncoderCfg = (InputEncoderSettings)inputEncoderCfg.DeepClone();
             ReservoirStructuresCfg = (ReservoirStructuresSettings)reservoirStructuresCfg.DeepClone();
             ReservoirInstancesCfg = (ReservoirInstancesSettings)reservoirInstancesCfg.DeepClone();
             PredictorsReductionRatio = predictorsReductionRatio;
@@ -80,7 +80,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// </summary>
         /// <param name="source">Source instance</param>
         public NeuralPreprocessorSettings(NeuralPreprocessorSettings source)
-            : this(source.InputCfg, source.ReservoirStructuresCfg, source.ReservoirInstancesCfg, source.PredictorsReductionRatio)
+            : this(source.InputEncoderCfg, source.ReservoirStructuresCfg, source.ReservoirInstancesCfg, source.PredictorsReductionRatio)
         {
             return;
         }
@@ -97,7 +97,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             //Validation
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
-            InputCfg = new InputSettings(settingsElem.Elements("input").First());
+            InputEncoderCfg = new InputEncoderSettings(settingsElem.Elements("inputEncoder").First());
             ReservoirStructuresCfg = new ReservoirStructuresSettings(settingsElem.Elements("reservoirStructures").First());
             ReservoirInstancesCfg = new ReservoirInstancesSettings(settingsElem.Elements("reservoirInstances").First());
             PredictorsReductionRatio = double.Parse(settingsElem.Attribute("predictorsReductionRatio").Value, CultureInfo.InvariantCulture);
@@ -129,7 +129,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             //Reservoir instances consistency
             foreach(ReservoirInstanceSettings resInstCfg in ReservoirInstancesCfg.ReservoirInstanceCfgCollection)
             {
-                resInstCfg.CheckConsistency(InputCfg, ReservoirStructuresCfg.GetReservoirStructureCfg(resInstCfg.StructureCfgName));
+                resInstCfg.CheckConsistency(InputEncoderCfg, ReservoirStructuresCfg.GetReservoirStructureCfg(resInstCfg.StructureCfgName));
             }
             return;
         }
@@ -151,7 +151,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             XElement rootElem = new XElement(rootElemName,
-                                             InputCfg.GetXml(suppressDefaults),
+                                             InputEncoderCfg.GetXml(suppressDefaults),
                                              ReservoirStructuresCfg.GetXml(suppressDefaults),
                                              ReservoirInstancesCfg.GetXml(suppressDefaults)
                                              );

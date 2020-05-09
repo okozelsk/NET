@@ -12,7 +12,7 @@ namespace Demo.DemoConsoleApp
         {
             //Research - this is not a part of the demo - it is a free playground
             //(new Research()).Run();
-            
+
             while (true)
             {
                 //Main menu

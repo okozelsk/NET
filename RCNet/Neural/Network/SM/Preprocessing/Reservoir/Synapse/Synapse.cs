@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using RCNet.Extensions;
 using RCNet.MathTools;
-using RCNet.Neural.Activation;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron;
 using RCNet.Queue;
+using RCNet.Neural.Activation;
+using RCNet.Neural.Network.SM.Preprocessing.Neuron;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
 {

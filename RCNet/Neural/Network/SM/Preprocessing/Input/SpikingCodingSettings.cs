@@ -2,86 +2,92 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using RCNet.Extensions;
 
-namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
+namespace RCNet.Neural.Network.SM.Preprocessing.Input
 {
     /// <summary>
-    /// Fading sum of the firing predictor settings
+    /// Settings of input pattern resampling
     /// </summary>
     [Serializable]
-    public class FiringFadingSumSettings : RCNetBaseSettings, IPredictorParamsSettings
+    public class SpikingCodingSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
         /// Name of the associated xsd type
         /// </summary>
-        public const string XsdTypeName = "PredictorFiringFadingSumType";
+        public const string XsdTypeName = "NPInputSpikingCodingType";
+        //Default values
         /// <summary>
-        /// Default value of strength of fading
+        /// Default value of parameter specifying size of coding spiking neurons population
         /// </summary>
-        public const double DefaultStrength = 0.005;
+        public const int DefaultPopulationSize = 16;
 
         //Attribute properties
         /// <summary>
-        /// Strength of fading
+        /// Size of coding spiking neurons population
         /// </summary>
-        public double Strength { get; }
+        public int PopulationSize { get; }
 
         //Constructors
         /// <summary>
-        /// Creates initialized instance
+        /// Creates an itialized instance.
         /// </summary>
-        /// <param name="strength">Strength of fading</param>
-        public FiringFadingSumSettings(double strength = DefaultStrength)
+        /// <param name="populationSize">Size of coding spiking neurons population</param>
+        public SpikingCodingSettings(int populationSize = DefaultPopulationSize)
         {
-            Strength = strength;
+            PopulationSize = populationSize;
             Check();
             return;
         }
 
         /// <summary>
-        /// Copy constructor
+        /// The deep copy constructor.
         /// </summary>
         /// <param name="source">Source instance</param>
-        public FiringFadingSumSettings(FiringFadingSumSettings source)
+        public SpikingCodingSettings(SpikingCodingSettings source)
+            : this(source.PopulationSize)
         {
-            Strength = source.Strength;
             return;
         }
 
         /// <summary>
-        /// Creates initialized instance using xml element
+        /// Creates an initialized instance from the given xml element.
         /// </summary>
-        /// <param name="elem">Xml element containing settings</param>
-        public FiringFadingSumSettings(XElement elem)
+        /// <param name="elem">
+        /// Xml data containing the settings.
+        /// Content of xml element is always validated against the xml schema.
+        /// </param>
+        public SpikingCodingSettings(XElement elem)
         {
             //Validation
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
-            Strength = double.Parse(settingsElem.Attribute("strength").Value, CultureInfo.InvariantCulture);
+            PopulationSize = int.Parse(settingsElem.Attribute("populationSize").Value, CultureInfo.InvariantCulture);
             Check();
             return;
         }
 
         //Properties
         /// <summary>
-        /// ID of the predictor
-        /// </summary>
-        public PredictorsProvider.PredictorID ID { get { return PredictorsProvider.PredictorID.FiringFadingSum; } }
-
-        /// <summary>
         /// Checks if settings are default
         /// </summary>
-        public bool IsDefaultStrength { get { return (Strength == DefaultStrength); } }
+        public bool IsDefaultPopulationSize { get { return (PopulationSize == DefaultPopulationSize); } }
 
         /// <summary>
         /// Identifies settings containing only default values
         /// </summary>
-        public override bool ContainsOnlyDefaults { get { return IsDefaultStrength; } }
-
+        public override bool ContainsOnlyDefaults
+        {
+            get
+            {
+                return IsDefaultPopulationSize;
+            }
+        }
 
         //Methods
         /// <summary>
@@ -89,9 +95,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
         /// </summary>
         private void Check()
         {
-            if (Strength < 0 || Strength >= 1)
+            if (PopulationSize < 2 || PopulationSize > 128 || (PopulationSize % 2) != 0)
             {
-                throw new Exception($"Invalid Strength {Strength.ToString(CultureInfo.InvariantCulture)}. Strength must be GE to 0 and LT 1.");
+                throw new Exception($"Invalid PopulationSize {PopulationSize.ToString(CultureInfo.InvariantCulture)}. PopulationSize must be even integer GE to 2 and LE to 128.");
             }
             return;
         }
@@ -101,7 +107,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
         /// </summary>
         public override RCNetBaseSettings DeepClone()
         {
-            return new FiringFadingSumSettings(this);
+            return new SpikingCodingSettings(this);
         }
 
         /// <summary>
@@ -113,9 +119,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             XElement rootElem = new XElement(rootElemName);
-            if (!suppressDefaults || !IsDefaultStrength)
+            if (!suppressDefaults || !IsDefaultPopulationSize)
             {
-                rootElem.Add(new XAttribute("strength", Strength.ToString(CultureInfo.InvariantCulture)));
+                rootElem.Add(new XAttribute("populationSize", PopulationSize.ToString(CultureInfo.InvariantCulture)));
             }
             Validate(rootElem, XsdTypeName);
             return rootElem;
@@ -128,9 +134,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(bool suppressDefaults)
         {
-            return GetXml(PredictorsSettings.GetXmlName(ID), suppressDefaults);
+            return GetXml("spikingCoding", suppressDefaults);
         }
 
-    }//PredictorFiringFadingSumSettings
+    }//SpikingCodingSettings
 
 }//Namespace
+

@@ -12,6 +12,7 @@ using RCNet.Neural.Data.Filter;
 using RCNet.Neural.Data.Generators;
 using RCNet.RandomValue;
 using RCNet.Neural.Data.Transformers;
+using RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Input
 {
@@ -48,6 +49,21 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// </summary>
         public bool RouteToReadout { get; }
 
+        /// <summary>
+        /// Configuration of real feature filter
+        /// </summary>
+        public RealFeatureFilterSettings FeatureFilterCfg { get; }
+
+        /// <summary>
+        /// Configuration of spiking coding neurons
+        /// </summary>
+        public SpikingCodingSettings SpikingCodingCfg { get; }
+
+        /// <summary>
+        /// Predictors settings
+        /// </summary>
+        public PredictorsSettings PredictorsCfg { get; }
+
 
         //Constructors
         /// <summary>
@@ -56,14 +72,23 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <param name="name">Transformed field name</param>
         /// <param name="transformerCfg">Configuration of associated transformer</param>
         /// <param name="routeToReadout">Specifies if to route transformed field to readout layer together with other predictors</param>
+        /// <param name="featureFilterCfg">Configuration of real feature filter</param>
+        /// <param name="spikingCodingCfg">Configuration of spiking coding neurons</param>
+        /// <param name="predictorsCfg">Predictors settings</param>
         public TransformedFieldSettings(string name,
                                         RCNetBaseSettings transformerCfg,
-                                        bool routeToReadout = DefaultRouteToReadout
+                                        bool routeToReadout = DefaultRouteToReadout,
+                                        RealFeatureFilterSettings featureFilterCfg = null,
+                                        SpikingCodingSettings spikingCodingCfg = null,
+                                        PredictorsSettings predictorsCfg = null
                                         )
         {
             Name = name;
             TransformerCfg = transformerCfg.DeepClone();
             RouteToReadout = routeToReadout;
+            FeatureFilterCfg = featureFilterCfg == null ? null : (RealFeatureFilterSettings)featureFilterCfg.DeepClone();
+            SpikingCodingCfg = spikingCodingCfg == null ? null : (SpikingCodingSettings)spikingCodingCfg.DeepClone();
+            PredictorsCfg = predictorsCfg == null ? null : (PredictorsSettings)predictorsCfg.DeepClone();
             Check();
             return;
         }
@@ -73,7 +98,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// </summary>
         /// <param name="source">Source instance</param>
         public TransformedFieldSettings(TransformedFieldSettings source)
-            :this(source.Name, source.TransformerCfg, source.RouteToReadout)
+            :this(source.Name, source.TransformerCfg, source.RouteToReadout, source.FeatureFilterCfg, source.SpikingCodingCfg, source.PredictorsCfg)
         {
             return;
         }
@@ -91,6 +116,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             RouteToReadout = bool.Parse(settingsElem.Attribute("routeToReadout").Value);
             XElement transElem = settingsElem.Elements().First();
             TransformerCfg = TransformerFactory.LoadSettings(transElem);
+            XElement realFeatureFilterElem = settingsElem.Elements("realFeatureFilter").FirstOrDefault();
+            FeatureFilterCfg = realFeatureFilterElem == null ? new RealFeatureFilterSettings() : new RealFeatureFilterSettings(realFeatureFilterElem);
+            XElement spikingCodingElem = settingsElem.Elements("spikingCoding").FirstOrDefault();
+            SpikingCodingCfg = spikingCodingElem == null ? new SpikingCodingSettings() : new SpikingCodingSettings(spikingCodingElem);
+            XElement predictorsElem = settingsElem.Elements("predictors").FirstOrDefault();
+            PredictorsCfg = predictorsElem == null ? null : new PredictorsSettings(predictorsElem);
             Check();
             return;
         }
@@ -156,6 +187,18 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             if (!suppressDefaults || !IsDefaultRouteToReadout)
             {
                 rootElem.Add(new XAttribute("routeToReadout", RouteToReadout.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()));
+            }
+            if(!suppressDefaults || !FeatureFilterCfg.ContainsOnlyDefaults)
+            {
+                rootElem.Add(FeatureFilterCfg.GetXml(suppressDefaults));
+            }
+            if (!suppressDefaults || !SpikingCodingCfg.ContainsOnlyDefaults)
+            {
+                rootElem.Add(SpikingCodingCfg.GetXml(suppressDefaults));
+            }
+            if (PredictorsCfg != null && (!PredictorsCfg.ContainsOnlyDefaults || !suppressDefaults))
+            {
+                rootElem.Add(PredictorsCfg.GetXml(suppressDefaults));
             }
             Validate(rootElem, XsdTypeName);
             return rootElem;

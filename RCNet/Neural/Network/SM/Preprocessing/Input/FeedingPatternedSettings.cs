@@ -121,7 +121,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// Type of input feeding
         /// </summary>
-        public NeuralPreprocessor.InputFeedingType FeedingType { get { return NeuralPreprocessor.InputFeedingType.Patterned; } }
+        public InputEncoder.InputFeedingType FeedingType { get { return InputEncoder.InputFeedingType.Patterned; } }
 
         /// <summary>
         /// Checks if settings are default

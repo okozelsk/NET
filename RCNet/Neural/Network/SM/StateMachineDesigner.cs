@@ -12,11 +12,11 @@ using RCNet.Neural.Network.NonRecurrent.FF;
 using RCNet.Neural.Network.SM.Preprocessing.Input;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron;
+using RCNet.Neural.Network.SM.Preprocessing.Neuron;
+using RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Space3D;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Neuron.Predictor;
 using RCNet.Neural.Network.SM.Preprocessing;
 using RCNet.Neural.Network.SM.Readout;
 using RCNet.Neural.Network.SM;
@@ -69,7 +69,7 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// Input configuration
         /// </summary>
-        public InputSettings InputCfg { get; }
+        public InputEncoderSettings InputCfg { get; }
         
         /// <summary>
         /// Readout configuration
@@ -84,7 +84,7 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// Instantiates an uninitialized instance
         /// </summary>
-        public StateMachineDesigner(InputSettings inputCfg, ReadoutLayerSettings readoutCfg)
+        public StateMachineDesigner(InputEncoderSettings inputCfg, ReadoutLayerSettings readoutCfg)
         {
             InputCfg = inputCfg ?? throw new ArgumentNullException("inputCfg");
             ReadoutCfg = readoutCfg ?? throw new ArgumentNullException("readoutCfg");
@@ -92,20 +92,60 @@ namespace RCNet.Neural.Network.SM
             return;
         }
 
-
         //Static methods
         /// <summary>
-        /// Builds input configuration
+        /// Creates simplified configuration of the InputEncoder.
+        /// All input fields are considered as the real values.
         /// </summary>
         /// <param name="feedingCfg">Input feeding configuration</param>
-        /// <param name="externalFieldCfg">External input field configuration</param>
-        public static InputSettings CreateInputCfg(IFeedingSettings feedingCfg, params ExternalFieldSettings[] externalFieldCfg)
+        /// <param name="extFieldNameCollection">Names of the external input fields</param>
+        /// <param name="routeToReadout">Specifies if to route input values to readout</param>
+        /// <param name="spikingPopulationLength">Size of the population of spiking neurons coding real value</param>
+        /// <param name="predictorsCfg">Configuration of predictors related to input coding spiking population of input neurons</param>
+        public static InputEncoderSettings CreateInputCfg(IFeedingSettings feedingCfg,
+                                                          IEnumerable<string> extFieldNameCollection,
+                                                          bool routeToReadout = true,
+                                                          int spikingPopulationLength = SpikingCodingSettings.DefaultPopulationSize,
+                                                          PredictorsSettings predictorsCfg = null
+                                                          )
         {
             if (feedingCfg == null)
             {
                 throw new ArgumentNullException("feedingCfg");
             }
-            return new InputSettings(feedingCfg, new FieldsSettings(new ExternalFieldsSettings(externalFieldCfg)));
+            List<ExternalFieldSettings> extFieldCollection = new List<ExternalFieldSettings>();
+            foreach(string name in extFieldNameCollection)
+            {
+                extFieldCollection.Add(new ExternalFieldSettings(name, new RealFeatureFilterSettings(), routeToReadout, new SpikingCodingSettings(spikingPopulationLength), null));
+            }
+            ExternalFieldsSettings extFieldsCfg = new ExternalFieldsSettings(extFieldCollection);
+            if(predictorsCfg == null)
+            {
+                predictorsCfg = PredictorsSettings.CreateDisabledInstance();
+            }
+            FieldsSettings fieldsCfg = new FieldsSettings(extFieldsCfg, null, null, predictorsCfg);
+            return new InputEncoderSettings(feedingCfg, fieldsCfg);
+        }
+
+        /// <summary>
+        /// Creates configuration of the InputEncoder.
+        /// Contains only external input fields.
+        /// </summary>
+        /// <param name="feedingCfg">Input feeding configuration</param>
+        /// <param name="predictorsCfg">Configuration of predictors of spiking input neurons</param>
+        /// <param name="externalFieldCfg">External input field configuration</param>
+        public static InputEncoderSettings CreateInputCfg(IFeedingSettings feedingCfg, PredictorsSettings predictorsCfg, params ExternalFieldSettings[] externalFieldCfg)
+        {
+            if (feedingCfg == null)
+            {
+                throw new ArgumentNullException("feedingCfg");
+            }
+            if(predictorsCfg == null)
+            {
+                //All predictors disabled
+                predictorsCfg = PredictorsSettings.CreateDisabledInstance();
+            }
+            return new InputEncoderSettings(feedingCfg, new FieldsSettings(new ExternalFieldsSettings(externalFieldCfg), null, null, predictorsCfg));
         }
 
         /// <summary>
@@ -283,9 +323,10 @@ namespace RCNet.Neural.Network.SM
         /// Creates configuration of group of spiking neurons having specified spiking activation.
         /// </summary>
         /// <param name="activationCfg">Activation function configuration</param>
+        /// <param name="primeRatio">Ratio of the prime neurons receiving only input stimuli</param>
         /// <param name="heCfg">Configuration of the homogenous excitability</param>
         /// <param name="steadyBias">Constant bias (0 means bias is not required)</param>
-        private SpikingNeuronGroupSettings CreateSpikingGroup(RCNetBaseSettings activationCfg, HomogenousExcitabilitySettings heCfg, double steadyBias = 0d)
+        private SpikingNeuronGroupSettings CreateSpikingGroup(RCNetBaseSettings activationCfg, double primeRatio, HomogenousExcitabilitySettings heCfg, double steadyBias = 0d)
         {
             //Bias configuration
             RandomValueSettings biasCfg = steadyBias == 0 ? null : new RandomValueSettings(steadyBias, steadyBias);
@@ -293,6 +334,7 @@ namespace RCNet.Neural.Network.SM
             SpikingNeuronGroupSettings groupCfg = new SpikingNeuronGroupSettings(GetNeuronGroupName(activationCfg),
                                                                                  1d,
                                                                                  activationCfg,
+                                                                                 primeRatio,
                                                                                  heCfg,
                                                                                  biasCfg,
                                                                                  null
@@ -339,24 +381,18 @@ namespace RCNet.Neural.Network.SM
             ReservoirStructureSettings resStructCfg = new ReservoirStructureSettings(GetResStructName(ActivationContent.Analog, 0),
                                                                                      new PoolsSettings(poolCfg)
                                                                                      );
-            //Input units and connections configuration
-            List<InputUnitSettings> inputUnits = new List<InputUnitSettings>(InputCfg.FieldsCfg.ExternalFieldsCfg.FieldCfgCollection.Count);
+            //Input connections configuration
+            List<InputConnSettings> inputConns = new List<InputConnSettings>(InputCfg.FieldsCfg.ExternalFieldsCfg.FieldCfgCollection.Count);
             double maxInpSynWeight = MaxInputWeightSum / InputCfg.FieldsCfg.ExternalFieldsCfg.FieldCfgCollection.Count;
             foreach (ExternalFieldSettings fieldCfg in InputCfg.FieldsCfg.ExternalFieldsCfg.FieldCfgCollection)
             {
-                InputUnitConnSettings inputUnitConnCfg = new InputUnitConnSettings(poolCfg.Name,
-                                                                                   0,
-                                                                                   inputConnectionDensity,
-                                                                                   NeuronCommon.NeuronSignalingRestrictionType.AnalogOnly
-                                                                                   );
-                inputUnits.Add(new InputUnitSettings(fieldCfg.Name,
-                                                     new InputUnitConnsSettings(inputUnitConnCfg),
-                                                     InputUnitSettings.DefaultSpikeTrainLength,
-                                                     InputUnitSettings.DefaultAnalogFiringThreshold,
-                                                     false,
-                                                     false
-                                                     )
-                               );
+                InputConnSettings inputConnCfg = new InputConnSettings(fieldCfg.Name,
+                                                                       poolCfg.Name,
+                                                                       0,
+                                                                       inputConnectionDensity,
+                                                                       NeuronCommon.NeuronSignalingRestrictionType.AnalogOnly
+                                                                       );
+                inputConns.Add(inputConnCfg);
             }
             //Synapse general configuration
             AnalogSourceSettings asc = new AnalogSourceSettings(new URandomValueSettings(0, maxInpSynWeight));
@@ -378,7 +414,7 @@ namespace RCNet.Neural.Network.SM
             //Create reservoir instance
             ReservoirInstanceSettings resInstCfg = new ReservoirInstanceSettings(GetResInstName(ResDesign.PureESN, 0),
                                                                                  resStructCfg.Name,
-                                                                                 new InputUnitsSettings(inputUnits),
+                                                                                 new InputConnsSettings(inputConns),
                                                                                  synapseCfg,
                                                                                  predictorsCfg
                                                                                  );
@@ -424,7 +460,7 @@ namespace RCNet.Neural.Network.SM
                 throw new ArgumentException("Specified activation must be spiking.", "aFnCfg");
             }
             //One neuron group
-            SpikingNeuronGroupSettings grp = CreateSpikingGroup(aFnCfg, hes, steadyBias);
+            SpikingNeuronGroupSettings grp = CreateSpikingGroup(aFnCfg, SpikingNeuronGroupSettings.DefaultPrimeRatio, hes, steadyBias);
             //Simple spiking pool
             PoolSettings poolCfg = new PoolSettings(GetPoolName(ActivationContent.Spiking, 0),
                                                     proportionsCfg,
@@ -435,22 +471,17 @@ namespace RCNet.Neural.Network.SM
             ReservoirStructureSettings resStructCfg = new ReservoirStructureSettings(GetResStructName(ActivationContent.Spiking, 0),
                                                                                      new PoolsSettings(poolCfg)
                                                                                      );
-            //Input units and connections configuration
-            List<InputUnitSettings> inputUnits = new List<InputUnitSettings>(InputCfg.FieldsCfg.ExternalFieldsCfg.FieldCfgCollection.Count);
+            //Input connections configuration
+            List<InputConnSettings> inputConns = new List<InputConnSettings>(InputCfg.FieldsCfg.ExternalFieldsCfg.FieldCfgCollection.Count);
             foreach (ExternalFieldSettings fieldCfg in InputCfg.FieldsCfg.ExternalFieldsCfg.FieldCfgCollection)
             {
-                InputUnitConnSettings inputUnitConnCfg = new InputUnitConnSettings(poolCfg.Name,
-                                                                                   inputConnectionDensity,
-                                                                                   0,
-                                                                                   inputSpikeTrainLength > 0 ? NeuronCommon.NeuronSignalingRestrictionType.SpikingOnly : NeuronCommon.NeuronSignalingRestrictionType.AnalogOnly
-                                                                                   );
-                inputUnits.Add(new InputUnitSettings(fieldCfg.Name,
-                                                     new InputUnitConnsSettings(inputUnitConnCfg), inputSpikeTrainLength > 0 ? inputSpikeTrainLength : 1,
-                                                     InputUnitSettings.DefaultAnalogFiringThreshold,
-                                                     true,
-                                                     true
-                                                     )
-                               );
+                InputConnSettings inputConnCfg = new InputConnSettings(fieldCfg.Name,
+                                                                       poolCfg.Name,
+                                                                       inputConnectionDensity,
+                                                                       0,
+                                                                       inputSpikeTrainLength > 0 ? NeuronCommon.NeuronSignalingRestrictionType.SpikingOnly : NeuronCommon.NeuronSignalingRestrictionType.AnalogOnly
+                                                                       );
+                inputConns.Add(inputConnCfg);
             }
             //Synapse general configuration
             SynapseSTInputSettings synapseSTInputSettings = new SynapseSTInputSettings(Synapse.SynapticDelayMethod.Random, maxInputDelay);
@@ -472,7 +503,7 @@ namespace RCNet.Neural.Network.SM
             //Create reservoir instance
             ReservoirInstanceSettings resInstCfg = new ReservoirInstanceSettings(GetResInstName(ResDesign.PureLSM, 0),
                                                                                  resStructCfg.Name,
-                                                                                 new InputUnitsSettings(inputUnits),
+                                                                                 new InputConnsSettings(inputConns),
                                                                                  synapseCfg,
                                                                                  predictorsCfg
                                                                                  );
