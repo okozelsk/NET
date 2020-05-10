@@ -56,7 +56,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// Configuration of spiking coding neurons
         /// </summary>
-        public SpikingCodingSettings SpikingCodingCfg { get; }
+        public SpikeCodeSettings SpikingCodingCfg { get; }
 
         /// <summary>
         /// Predictors settings
@@ -78,7 +78,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
                                       RCNetBaseSettings generatorCfg,
                                       bool routeToReadout = DefaultRouteToReadout,
                                       RealFeatureFilterSettings featureFilterCfg = null,
-                                      SpikingCodingSettings spikingCodingCfg = null,
+                                      SpikeCodeSettings spikingCodingCfg = null,
                                       PredictorsSettings predictorsCfg = null
                                       )
         {
@@ -86,7 +86,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             GeneratorCfg = generatorCfg.DeepClone();
             RouteToReadout = routeToReadout;
             FeatureFilterCfg = featureFilterCfg == null ? null : (RealFeatureFilterSettings)featureFilterCfg.DeepClone();
-            SpikingCodingCfg = spikingCodingCfg == null ? null : (SpikingCodingSettings)spikingCodingCfg.DeepClone();
+            SpikingCodingCfg = spikingCodingCfg == null ? null : (SpikeCodeSettings)spikingCodingCfg.DeepClone();
             PredictorsCfg = predictorsCfg == null ? null : (PredictorsSettings)predictorsCfg.DeepClone();
             Check();
             return;
@@ -118,7 +118,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             XElement realFeatureFilterElem = settingsElem.Elements("realFeatureFilter").FirstOrDefault();
             FeatureFilterCfg = realFeatureFilterElem == null ? new RealFeatureFilterSettings() : new RealFeatureFilterSettings(realFeatureFilterElem);
             XElement spikingCodingElem = settingsElem.Elements("spikingCoding").FirstOrDefault();
-            SpikingCodingCfg = spikingCodingElem == null ? new SpikingCodingSettings() : new SpikingCodingSettings(spikingCodingElem);
+            SpikingCodingCfg = spikingCodingElem == null ? new SpikeCodeSettings() : new SpikeCodeSettings(spikingCodingElem);
             XElement predictorsElem = settingsElem.Elements("predictors").FirstOrDefault();
             PredictorsCfg = predictorsElem == null ? null : new PredictorsSettings(predictorsElem);
             Check();

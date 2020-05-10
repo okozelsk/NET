@@ -100,12 +100,12 @@ namespace RCNet.Neural.Network.SM
         /// <param name="feedingCfg">Input feeding configuration</param>
         /// <param name="extFieldNameCollection">Names of the external input fields</param>
         /// <param name="routeToReadout">Specifies if to route input values to readout</param>
-        /// <param name="spikingPopulationLength">Size of the population of spiking neurons coding real value</param>
+        /// <param name="spikeCodeCfg">Configuration of the spike code</param>
         /// <param name="predictorsCfg">Configuration of predictors related to input coding spiking population of input neurons</param>
         public static InputEncoderSettings CreateInputCfg(IFeedingSettings feedingCfg,
                                                           IEnumerable<string> extFieldNameCollection,
                                                           bool routeToReadout = true,
-                                                          int spikingPopulationLength = SpikingCodingSettings.DefaultPopulationSize,
+                                                          SpikeCodeSettings spikeCodeCfg = null,
                                                           PredictorsSettings predictorsCfg = null
                                                           )
         {
@@ -113,16 +113,20 @@ namespace RCNet.Neural.Network.SM
             {
                 throw new ArgumentNullException("feedingCfg");
             }
-            List<ExternalFieldSettings> extFieldCollection = new List<ExternalFieldSettings>();
-            foreach(string name in extFieldNameCollection)
+            if (spikeCodeCfg == null)
             {
-                extFieldCollection.Add(new ExternalFieldSettings(name, new RealFeatureFilterSettings(), routeToReadout, new SpikingCodingSettings(spikingPopulationLength), null));
+                spikeCodeCfg = new SpikeCodeSettings();
             }
-            ExternalFieldsSettings extFieldsCfg = new ExternalFieldsSettings(extFieldCollection);
-            if(predictorsCfg == null)
+            if (predictorsCfg == null)
             {
                 predictorsCfg = PredictorsSettings.CreateDisabledInstance();
             }
+            List<ExternalFieldSettings> extFieldCollection = new List<ExternalFieldSettings>();
+            foreach(string name in extFieldNameCollection)
+            {
+                extFieldCollection.Add(new ExternalFieldSettings(name, new RealFeatureFilterSettings(), routeToReadout, spikeCodeCfg, null));
+            }
+            ExternalFieldsSettings extFieldsCfg = new ExternalFieldsSettings(extFieldCollection);
             FieldsSettings fieldsCfg = new FieldsSettings(extFieldsCfg, null, null, predictorsCfg);
             return new InputEncoderSettings(feedingCfg, fieldsCfg);
         }
@@ -431,9 +435,9 @@ namespace RCNet.Neural.Network.SM
         /// Creates StateMachine configuration following pure LSM design
         /// </summary>
         /// <param name="proportionsCfg">LSM pool proportions</param>
-        /// <param name="inputSpikeTrainLength">Spike-train length (0 means no spike-train coding)</param>
         /// <param name="aFnCfg">Spiking activation function configuration</param>
         /// <param name="hes">Homogenous excitability configuration</param>
+        /// <param name="primeRatio">Ratio of the prime neurons (receiving only input)</param>
         /// <param name="inputConnectionDensity">Density of the input field connections to hidden neurons</param>
         /// <param name="maxInputDelay">Maximum delay of input synapse</param>
         /// <param name="interconnectionDensity">Density of the hidden neurons interconnection</param>
@@ -442,9 +446,9 @@ namespace RCNet.Neural.Network.SM
         /// <param name="predictorsParamsCfg">Predictors parameters (use null for defaults)</param>
         /// <param name="allowedPredictor">Allowed predictor(s)</param>
         public StateMachineSettings CreatePureLSMCfg(ProportionsSettings proportionsCfg,
-                                                     int inputSpikeTrainLength,
                                                      RCNetBaseSettings aFnCfg,
                                                      HomogenousExcitabilitySettings hes,
+                                                     double primeRatio,
                                                      double inputConnectionDensity,
                                                      int maxInputDelay,
                                                      double interconnectionDensity,
@@ -460,7 +464,7 @@ namespace RCNet.Neural.Network.SM
                 throw new ArgumentException("Specified activation must be spiking.", "aFnCfg");
             }
             //One neuron group
-            SpikingNeuronGroupSettings grp = CreateSpikingGroup(aFnCfg, SpikingNeuronGroupSettings.DefaultPrimeRatio, hes, steadyBias);
+            SpikingNeuronGroupSettings grp = CreateSpikingGroup(aFnCfg, primeRatio, hes, steadyBias);
             //Simple spiking pool
             PoolSettings poolCfg = new PoolSettings(GetPoolName(ActivationContent.Spiking, 0),
                                                     proportionsCfg,
@@ -479,7 +483,7 @@ namespace RCNet.Neural.Network.SM
                                                                        poolCfg.Name,
                                                                        inputConnectionDensity,
                                                                        0,
-                                                                       inputSpikeTrainLength > 0 ? NeuronCommon.NeuronSignalingRestrictionType.SpikingOnly : NeuronCommon.NeuronSignalingRestrictionType.AnalogOnly
+                                                                       NeuronCommon.NeuronSignalingRestrictionType.SpikingOnly
                                                                        );
                 inputConns.Add(inputConnCfg);
             }

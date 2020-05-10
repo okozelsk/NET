@@ -166,6 +166,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// </summary>
         public bool IsDefaultPrimeRatio { get { return PrimeRatio == DefaultPrimeRatio; } }
 
+        /// <summary>
         /// Checks if settings are default
         /// </summary>
         public bool IsDefaultHomogenousExcitabilityCfg { get { return HomogenousExcitabilityCfg.ContainsOnlyDefaults; } }

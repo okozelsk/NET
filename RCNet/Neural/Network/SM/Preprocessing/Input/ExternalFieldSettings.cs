@@ -49,7 +49,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// Configuration of spiking coding neurons
         /// </summary>
-        public SpikingCodingSettings SpikingCodingCfg { get; }
+        public SpikeCodeSettings SpikeCodeCfg { get; }
 
         /// <summary>
         /// Predictors settings
@@ -63,22 +63,22 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <param name="name">Input field name</param>
         /// <param name="featureFilterCfg">Configuration of feature filter associated with the input field</param>
         /// <param name="routeToReadout">Specifies if to route input field to readout layer together with other predictors</param>
-        /// <param name="spikingCodingCfg">Configuration of spiking coding neurons</param>
+        /// <param name="spikeCodeCfg">Configuration of spike code</param>
         /// <param name="predictorsCfg">Predictors settings</param>
         public ExternalFieldSettings(string name,
                                      IFeatureFilterSettings featureFilterCfg,
                                      bool routeToReadout = DefaultRouteToReadout,
-                                     SpikingCodingSettings spikingCodingCfg = null,
+                                     SpikeCodeSettings spikeCodeCfg = null,
                                      PredictorsSettings predictorsCfg = null
                                      )
         {
             Name = name;
             FeatureFilterCfg = (IFeatureFilterSettings)featureFilterCfg.DeepClone();
             RouteToReadout = routeToReadout;
-            SpikingCodingCfg = (SpikingCodingSettings)spikingCodingCfg?.DeepClone();
-            if (featureFilterCfg.Type == BaseFeatureFilter.FeatureType.Real && spikingCodingCfg == null)
+            SpikeCodeCfg = (SpikeCodeSettings)spikeCodeCfg?.DeepClone();
+            if (featureFilterCfg.Type == BaseFeatureFilter.FeatureType.Real && spikeCodeCfg == null)
             {
-                SpikingCodingCfg = new SpikingCodingSettings();
+                SpikeCodeCfg = new SpikeCodeSettings();
             }
             PredictorsCfg = predictorsCfg == null ? null : (PredictorsSettings)predictorsCfg.DeepClone();
             Check();
@@ -90,7 +90,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// </summary>
         /// <param name="source">Source instance</param>
         public ExternalFieldSettings(ExternalFieldSettings source)
-            :this(source.Name, source.FeatureFilterCfg, source.RouteToReadout, source.SpikingCodingCfg, source.PredictorsCfg)
+            :this(source.Name, source.FeatureFilterCfg, source.RouteToReadout, source.SpikeCodeCfg, source.PredictorsCfg)
         {
             return;
         }
@@ -107,8 +107,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             Name = settingsElem.Attribute("name").Value;
             RouteToReadout = bool.Parse(settingsElem.Attribute("routeToReadout").Value);
             FeatureFilterCfg = FeatureFilterFactory.LoadSettings(settingsElem.Elements().First());
-            XElement spikingCodingElem = settingsElem.Elements("spikingCoding").FirstOrDefault();
-            SpikingCodingCfg = spikingCodingElem == null ? null : new SpikingCodingSettings(spikingCodingElem);
+            XElement spikingCodingElem = settingsElem.Elements("spikeCode").FirstOrDefault();
+            SpikeCodeCfg = spikingCodingElem == null ? null : new SpikeCodeSettings(spikingCodingElem);
             XElement predictorsElem = settingsElem.Elements("predictors").FirstOrDefault();
             PredictorsCfg = predictorsElem == null ? null : new PredictorsSettings(predictorsElem);
             Check();
@@ -136,7 +136,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             {
                 throw new Exception($"Name can not be empty.");
             }
-            if (FeatureFilterCfg.Type != BaseFeatureFilter.FeatureType.Real && SpikingCodingCfg != null)
+            if (FeatureFilterCfg.Type != BaseFeatureFilter.FeatureType.Real && SpikeCodeCfg != null)
             {
                 throw new Exception("Spiking coding configuration is relevant for real-feature only.");
             }
@@ -167,9 +167,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             {
                 rootElem.Add(new XAttribute("routeToReadout", RouteToReadout.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()));
             }
-            if (SpikingCodingCfg != null && (!SpikingCodingCfg.ContainsOnlyDefaults || !suppressDefaults))
+            if (SpikeCodeCfg != null && (!SpikeCodeCfg.ContainsOnlyDefaults || !suppressDefaults))
             {
-                rootElem.Add(SpikingCodingCfg.GetXml(suppressDefaults));
+                rootElem.Add(SpikeCodeCfg.GetXml(suppressDefaults));
             }
             if (PredictorsCfg != null && (!PredictorsCfg.ContainsOnlyDefaults || !suppressDefaults))
             {

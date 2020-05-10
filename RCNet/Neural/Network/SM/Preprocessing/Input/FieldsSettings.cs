@@ -54,7 +54,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// </summary>
         /// <param name="externalFieldsCfg">External input fields settings</param>
         /// <param name="transformedFieldsCfg">Transformed input fields settings</param>
-        /// <param name="generatedFieldsCfg">generated input fields settings</param>
+        /// <param name="generatedFieldsCfg">Generated input fields settings</param>
+        /// <param name="predictorsCfg">Predictors configuration</param>
         public FieldsSettings(ExternalFieldsSettings externalFieldsCfg,
                               TransformedFieldsSettings transformedFieldsCfg = null,
                               GeneratedFieldsSettings generatedFieldsCfg = null,

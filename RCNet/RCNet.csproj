@@ -159,7 +159,8 @@
     <Compile Include="Neural\Network\SM\PM\AllowedPoolsSettings.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\Input\InputEncoder.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\Input\InputField.cs" />
-    <Compile Include="Neural\Network\SM\Preprocessing\Input\SpikingCodingSettings.cs" />
+    <Compile Include="Neural\Network\SM\Preprocessing\Input\SpikeCode.cs" />
+    <Compile Include="Neural\Network\SM\Preprocessing\Input\SpikeCodeSettings.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\Input\TransformedFieldsSettings.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\Input\TransformedFieldSettings.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\Input\InputEncoderSettings.cs" />

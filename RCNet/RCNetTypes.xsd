@@ -2087,15 +2087,29 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- NeuralPreprocessor - input spiking coding -configuration -->
-  <xs:complexType name="NPInputSpikingCodingType">
-    <xs:attribute type="UIntGE2LE128Type" name="populationSize" use="optional" default="16">
+  <!-- NeuralPreprocessor - input spike code - configuration -->
+  <xs:complexType name="NPInputSpikeCodeType">
+    <xs:attribute type="UIntGE1LE64Type" name="componentHalfCodeLength" use="optional" default="8">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 16</xs:documentation>
+        <xs:documentation xml:lang="en">Default value is 8</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleGT1Type" name="boundariesSlicer" use="optional" default="2.7182818284590451">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is (e) 2.7182818284590451</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="useDeviation" use="optional" default="true">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">If to use strength of the deviation from middle value as a component of the spike code. Default value is true</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="useDifference" use="optional" default="false">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">If to use strength of the deviation from previous value as a component of the spike code. Default value is false</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
-
 
   <!-- NeuralPreprocessor - external input field -configuration -->
   <xs:complexType name="NPExternalInpFieldType">
@@ -2105,7 +2119,7 @@
         <xs:element type="EnumFeatureFilterType" name="enumFeature" minOccurs="0" maxOccurs="1"/>
         <xs:sequence minOccurs="0" maxOccurs="1">
           <xs:element type="RealFeatureFilterType" name="realFeature" minOccurs="1" maxOccurs="1"/>
-          <xs:element type="NPInputSpikingCodingType" name="spikingCoding" minOccurs="0" maxOccurs="1"/>
+          <xs:element type="NPInputSpikeCodeType" name="spikeCode" minOccurs="0" maxOccurs="1"/>
         </xs:sequence>
       </xs:choice>
       <xs:element type="PredictorsType" name="predictors" minOccurs="0" maxOccurs="1"/>
@@ -2141,7 +2155,7 @@
         <xs:element type="LinearTransformerType" name="linear" minOccurs="1" maxOccurs="1"/>
       </xs:choice>
       <xs:element type="RealFeatureFilterType" name="realFeature" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="NPInputSpikingCodingType" name="spikingCoding" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="NPInputSpikeCodeType" name="spikeCode" minOccurs="0" maxOccurs="1"/>
       <xs:element type="PredictorsType" name="predictors" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:string" name="name" use="required"/>
@@ -2169,7 +2183,7 @@
         <xs:element type="MackeyGlassGeneratorType" name="mackeyGlass" minOccurs="1" maxOccurs="1"/>
       </xs:choice>
       <xs:element type="RealFeatureFilterType" name="realFeature" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="NPInputSpikingCodingType" name="spikingCoding" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="NPInputSpikeCodeType" name="spikeCode" minOccurs="0" maxOccurs="1"/>
       <xs:element type="PredictorsType" name="predictors" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:string" name="name" use="required"/>

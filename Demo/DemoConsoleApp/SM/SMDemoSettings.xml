@@ -28,13 +28,14 @@
             <externalFields>
               <field name="DistanceFromCenter">
                 <realFeature standardize="true" keepReserve="true"/>
+                <spikeCode componentHalfCodeLength="16" useDeviation="true" useDifference="true"/>
               </field>
             </externalFields>
             <predictors activation="false"
                         activationSquare="false"
                         activationFadingSum="false"
                         activationMWAvg="false"
-                        firingFadingSum="false"
+                        firingFadingSum="true"
                         firingMWAvg="false"
                         firingCount="false"
                         firingBinPattern="false">
@@ -129,7 +130,7 @@
             <externalFields>
               <field name="Accel" routeToReadout="true">
                 <realFeature />
-                <spikingCoding populationSize="20"/>
+                <spikeCode componentHalfCodeLength="10" useDeviation="true" useDifference="false"/>
               </field>
             </externalFields>
             <predictors activation="false"
@@ -290,7 +291,7 @@
             <externalFields>
               <field name="Accel" routeToReadout="true">
                 <realFeature />
-                <spikingCoding populationSize="32"/>
+                <spikeCode componentHalfCodeLength="16" useDeviation="true" useDifference="false"/>
               </field>
             </externalFields>
             <predictors activation="false"
@@ -653,7 +654,7 @@
               <field name="diffOutline1">
                 <diff fieldName="Outline" interval="1"/>
                 <realFeature/>
-                <spikingCoding populationSize="16"/>
+                <spikeCode componentHalfCodeLength="8" useDeviation="true" useDifference="false"/>
               </field>
             </transformedFields>
             <predictors activation="false"
@@ -1786,7 +1787,7 @@
             <externalFields>
               <field name="Accel" routeToReadout="true">
                 <realFeature />
-                <spikingCoding populationSize="40"/>
+                <spikeCode componentHalfCodeLength="20" useDeviation="true" useDifference="false"/>
               </field>
             </externalFields>
             <predictors activation="false"

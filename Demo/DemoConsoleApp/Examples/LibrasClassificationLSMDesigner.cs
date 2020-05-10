@@ -49,8 +49,8 @@ namespace Demo.DemoConsoleApp.Examples
             //Simplified input configuration
             InputEncoderSettings inputCfg = StateMachineDesigner.CreateInputCfg(new FeedingPatternedSettings(true, false, RCNet.Neural.Data.InputPattern.VariablesSchema.Groupped),
                                                                          new PredictorsSettings(false, false, false, false, true, false, true, false),
-                                                                         new ExternalFieldSettings("coord_abcissa", new RealFeatureFilterSettings()),
-                                                                         new ExternalFieldSettings("coord_ordinate", new RealFeatureFilterSettings())
+                                                                         new ExternalFieldSettings("coord_abcissa", new RealFeatureFilterSettings(), true, new SpikeCodeSettings(4, Math.E, true, true)),
+                                                                         new ExternalFieldSettings("coord_ordinate", new RealFeatureFilterSettings(), true, new SpikeCodeSettings(4, Math.E, true, true))
                                                                          );
             //Simplified readout layer configuration
             ReadoutLayerSettings readoutCfg = StateMachineDesigner.CreateClassificationReadoutCfg(StateMachineDesigner.CreateSingleLayerRegrNet(new ElliotSettings(), 5, 400),
@@ -77,9 +77,9 @@ namespace Demo.DemoConsoleApp.Examples
             StateMachineDesigner smd = new StateMachineDesigner(inputCfg, readoutCfg);
             //Create pure LSM fashioned StateMachine configuration
             StateMachineSettings stateMachineCfg = smd.CreatePureLSMCfg(new ProportionsSettings(6, 5, 5), //Proportions (it also determines total size)
-                                                                        32, //Input spike-train length (0 means use analog instead of spike-train])
                                                                         new AdExpIFSettings(), //Activation
                                                                         new HomogenousExcitabilitySettings(0.5, 0.5, 0.25),
+                                                                        0.5, //Prime neurons ratio
                                                                         1d, //Input connection density
                                                                         0, //Input max delay
                                                                         0.1d, //Interconnection density

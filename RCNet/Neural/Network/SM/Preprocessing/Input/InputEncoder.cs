@@ -130,7 +130,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
                                           coordinates,
                                           _dataRange,
                                           fieldCfg.FeatureFilterCfg,
-                                          fieldCfg.SpikingCodingCfg,
+                                          fieldCfg.SpikeCodeCfg,
                                           (fieldCfg.RouteToReadout && _encoderCfg.FeedingCfg.RouteToReadout),
                                           inputNeuronStartIdx,
                                           predictorsCfg
