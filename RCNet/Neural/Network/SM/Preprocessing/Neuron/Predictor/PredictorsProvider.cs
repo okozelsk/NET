@@ -253,6 +253,47 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         }
 
         /// <summary>
+        /// Returns identifiers of enabled predictors in the same order as in the methods CopyPredictorsTo and GetPredictors
+        /// </summary>
+        public List<PredictorID> GetEnabledIDs()
+        {
+            List<PredictorID> result = new List<PredictorID>(NumOfEnabledPredictors);
+            if (_cfg.IsEnabled(PredictorID.Activation))
+            {
+                result.Add(PredictorID.Activation);
+            }
+            if (_cfg.IsEnabled(PredictorID.ActivationSquare))
+            {
+                result.Add(PredictorID.ActivationSquare);
+            }
+            if (_cfg.IsEnabled(PredictorID.ActivationFadingSum))
+            {
+                result.Add(PredictorID.ActivationFadingSum);
+            }
+            if (_cfg.IsEnabled(PredictorID.ActivationMWAvg))
+            {
+                result.Add(PredictorID.ActivationMWAvg);
+            }
+            if (_cfg.IsEnabled(PredictorID.FiringFadingSum))
+            {
+                result.Add(PredictorID.FiringFadingSum);
+            }
+            if (_cfg.IsEnabled(PredictorID.FiringMWAvg))
+            {
+                result.Add(PredictorID.FiringMWAvg);
+            }
+            if (_cfg.IsEnabled(PredictorID.FiringCount))
+            {
+                result.Add(PredictorID.FiringCount);
+            }
+            if (_cfg.IsEnabled(PredictorID.FiringBinPattern))
+            {
+                result.Add(PredictorID.FiringBinPattern);
+            }
+            return result;
+        }
+
+        /// <summary>
         /// Copies values of enabled predictors to a given buffer starting from specified position (idx)
         /// </summary>
         /// <param name="predictors">Buffer where to be copied enabled predictors</param>

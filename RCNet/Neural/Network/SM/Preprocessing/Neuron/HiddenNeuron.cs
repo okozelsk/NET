@@ -327,6 +327,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
             return _predictors?.GetPredictors();
         }
 
+        /// <summary>
+        /// Returns identifiers of enabled predictors in the same order as in the methods CopyPredictorsTo and GetPredictors
+        /// </summary>
+        public List<PredictorsProvider.PredictorID> GetEnabledPredictorsIDs()
+        {
+            return _predictors?.GetEnabledIDs();
+        }
+
 
     }//HiddenNeuron
 

@@ -137,9 +137,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
             {
                 throw new Exception($"Invalid InputStrength {InputStrength.ToString(CultureInfo.InvariantCulture)}. InputStrength must be GE to 0.");
             }
-            if (ExcitatoryStrength < 0)
+            if (ExcitatoryStrength <= InputStrength)
             {
-                throw new Exception($"Invalid ExcitatoryStrength {ExcitatoryStrength.ToString(CultureInfo.InvariantCulture)}. ExcitatoryStrength must be GE to 0.");
+                throw new Exception($"Invalid total ExcitatoryStrength {ExcitatoryStrength.ToString(CultureInfo.InvariantCulture)}. ExcitatoryStrength must be GT InputStrength.");
             }
             if (InhibitoryRatio < 0 || InhibitoryRatio > 1)
             {

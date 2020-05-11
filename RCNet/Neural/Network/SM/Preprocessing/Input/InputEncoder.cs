@@ -108,6 +108,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// </summary>
         private int _numOfProcessedInputs;
 
+        /// <summary>
+        /// Indicates reverse mode of input data processing
+        /// </summary>
+        private bool _reverseMode;
+
         //Constructor
         /// <summary>
         /// Creates an initialized instance
@@ -196,6 +201,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             NumOfRoutedFieldValues = 0;
             _inputData = new List<double[]>();
             _numOfProcessedInputs = 0;
+            _reverseMode = false;
             return;
         }
 
@@ -224,6 +230,42 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         }
 
         /// <summary>
+        /// Returns collection of predictor descriptor objects related to predictors from input neurons
+        /// </summary>
+        public List<PredictorDescriptor> GetNeuralPredictorsDescriptors()
+        {
+            List<PredictorDescriptor> result = new List<PredictorDescriptor>(NumOfPredictors);
+            foreach(INeuron neuron in PredictingNeuronCollection)
+            {
+                if (neuron.NumOfEnabledPredictors > 0)
+                {
+                    foreach(PredictorsProvider.PredictorID id in neuron.GetEnabledPredictorsIDs())
+                    {
+                        result.Add(new PredictorDescriptor(neuron.Location.PoolGroupID, neuron.Location.ReservoirID, neuron.Location.PoolID, (int)id));
+                    }
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Returns collection of predictor descriptor objects related to exact input values instances routed to readout
+        /// </summary>
+        public List<PredictorDescriptor> GetInputValuesPredictorsDescriptors()
+        {
+            List<PredictorDescriptor> result = new List<PredictorDescriptor>(NumOfPredictors);
+            int numOfFieldValInstances = _fixedExtVectorLength == -1 ? 1 : _fixedExtVectorLength;
+            foreach (InputField field in RoutedFieldCollection)
+            {
+                for(int i = 0; i < numOfFieldValInstances; i++)
+                {
+                    result.Add(new PredictorDescriptor(field.Idx, ReservoirID, PoolID, PredictorDescriptor.InputFieldValue));
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
         /// Resets internal input buffer
         /// </summary>
         private void ResetInputProcessing()
@@ -231,6 +273,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             //Reset input data buffer
             _inputData.Clear();
             _numOfProcessedInputs = 0;
+            _reverseMode = false;
             return;
         }
 
@@ -534,17 +577,41 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         }
 
         /// <summary>
+        /// Changes order of input data and resets counter of processed inputs
+        /// </summary>
+        public void SetReverseMode()
+        {
+            //Checks
+            if (_reverseMode)
+            {
+                throw new Exception("Can't set reverse mode. Input encoder is already in reverse mode.");
+            }
+            if (_encoderCfg.FeedingCfg.FeedingType != InputFeedingType.Patterned)
+            {
+                throw new Exception("Illegal call to set reverse mode. Reverse mode is relevant only for patterned feeding regime.");
+            }
+            //Reset fields to initial state
+            ResetFields(false);
+            //Reverse
+            _inputData.Reverse();
+            _numOfProcessedInputs = 0;
+            _reverseMode = true;
+            return;
+        }
+
+        /// <summary>
         /// Copies all input encoder's predictors to a given buffer starting from the specified position
         /// </summary>
         /// <param name="buffer">Target buffer</param>
         /// <param name="fromOffset">Starting zero based position in the target buffer</param>
-        public void CopyPredictorsTo(double[] buffer, int fromOffset)
+        public int CopyPredictorsTo(double[] buffer, int fromOffset)
         {
+            int offset = fromOffset;
             foreach (INeuron neuron in PredictingNeuronCollection)
             {
-                fromOffset += neuron.CopyPredictorsTo(buffer, fromOffset);
+                offset += neuron.CopyPredictorsTo(buffer, offset);
             }
-            return;
+            return offset - fromOffset;
         }
 
         /// <summary>
@@ -553,15 +620,18 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <param name="buffer">Target buffer</param>
         /// <param name="fromOffset">Starting zero based position in the target buffer</param>
         /// <returns>Number of copied values</returns>
-        public void CopyRoutedInputDataTo(double[] buffer, int fromOffset)
+        public int CopyRoutedInputDataTo(double[] buffer, int fromOffset)
         {
+            int count = 0;
             foreach (InputField field in RoutedFieldCollection)
             {
                 for (int i = 0; i < _inputData.Count; i++)
                 {
                     buffer[fromOffset++] = _inputData[i][field.Idx];
+                    ++count;
                 }
             }
+            return count;
         }
 
     }//InputEncoder

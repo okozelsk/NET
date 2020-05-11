@@ -152,7 +152,7 @@
                 <neuronGroups>
                   <spikingGroup name="grp1" relShare="1" primeRatio="0.5">
                     <activationAdExpIF solverCompSteps="2" solverMethod="Euler" stimuliDuration="1"/>
-                    <homogenousExcitability inputStrength="0.5" excitatoryStrength="0.5" inhibitoryRatio="0.25"/>
+                    <homogenousExcitability inputStrength="0.5" excitatoryStrength="0.75" inhibitoryRatio="0.25"/>
                   </spikingGroup>
                 </neuronGroups>
                 <interconnection>
@@ -313,7 +313,7 @@
                 <neuronGroups>
                   <spikingGroup name="grp1" relShare="1">
                     <activationAdExpIF solverCompSteps="2" solverMethod="Euler" stimuliDuration="1"/>
-                    <homogenousExcitability inputStrength="0.5" excitatoryStrength="0.5" inhibitoryRatio="0.25"/>
+                    <homogenousExcitability inputStrength="0.5" excitatoryStrength="0.75" inhibitoryRatio="0.25"/>
                   </spikingGroup>
                 </neuronGroups>
                 <interconnection>
@@ -872,7 +872,7 @@
                 <neuronGroups>
                   <spikingGroup name="AdExpIF-grp" relShare="1" primeRatio="0">
                     <activationAdExpIF/>
-                    <homogenousExcitability inputStrength="0.5" excitatoryStrength="0.5" inhibitoryRatio="0.25"/>
+                    <homogenousExcitability inputStrength="0.5" excitatoryStrength="0.75" inhibitoryRatio="0.25"/>
                   </spikingGroup>
                 </neuronGroups>
                 <interconnection>
@@ -1809,7 +1809,7 @@
                 <neuronGroups>
                   <spikingGroup name="grp1" relShare="1">
                     <activationAdExpIF solverCompSteps="2" solverMethod="Euler"/>
-                    <homogenousExcitability inputStrength="0.5" excitatoryStrength="0.000000005" inhibitoryRatio="0.00000000025"/>
+                    <homogenousExcitability inputStrength="0.5" excitatoryStrength="0.75" inhibitoryRatio="0.25"/>
                   </spikingGroup>
                 </neuronGroups>
                 <interconnection>

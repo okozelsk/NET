@@ -188,6 +188,7 @@
     <Compile Include="Neural\Network\SM\Preprocessing\Neuron\Predictor\FiringMWAvgSettings.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\Neuron\Predictor\IPredictorParamsSettings.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\Neuron\Predictor\MWAvgPredictorSettings.cs" />
+    <Compile Include="Neural\Network\SM\Preprocessing\Neuron\Predictor\PredictorDescriptor.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\Neuron\Predictor\PredictorsParamsSettings.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\Neuron\Predictor\PredictorsProvider.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\Neuron\Predictor\PredictorsSettings.cs" />

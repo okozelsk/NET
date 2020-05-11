@@ -7,14 +7,11 @@ using System.Text;
 using RCNet.Extensions;
 using RCNet.MathTools;
 using RCNet.MathTools.Hurst;
-using RCNet.RandomValue;
 using RCNet.Neural.Data;
-using RCNet.Neural.Data.Generators;
-using RCNet.Neural.Data.Filter;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir;
 using RCNet.Neural.Network.SM.Preprocessing.Neuron;
+using RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor;
 using RCNet.Neural.Network.SM.Preprocessing.Input;
-using RCNet.Neural.Data.Transformers;
 
 namespace RCNet.Neural.Network.SM.Preprocessing
 {
@@ -54,9 +51,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing
 
         //Attribute properties
         /// <summary>
-        /// Number of boot cycles
+        /// Input encoder instance
         /// </summary>
-        public int BootCycles { get; }
+        public InputEncoder InputEncoder { get; }
 
         /// <summary>
         /// Collection of reservoir instances.
@@ -64,24 +61,19 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         public List<ReservoirInstance> ReservoirCollection { get; }
 
         /// <summary>
-        /// All predicting neurons (input + hidden).
+        /// Number of boot cycles
         /// </summary>
-        public List<INeuron> PredictingNeuronCollection { get; }
-        
+        public int BootCycles { get; }
+
         /// <summary>
         /// Number of hidden neurons in all reservoirs
         /// </summary>
         public int TotalNumOfHiddenNeurons { get; }
 
         /// <summary>
-        /// Number of output features going from all reservoirs
+        /// Descriptors of all output features in the same order as returns Preprocess method (neural predictors + routed input values)
         /// </summary>
-        public int NumOfReservoirsOutputFeatures { get; private set; }
-
-        /// <summary>
-        /// Total number of output features (neural predictors + routed input)
-        /// </summary>
-        public int TotalNumOfOutputFeatures { get; private set; }
+        public List<PredictorDescriptor> OutputFeatureDescriptorCollection { get; private set; }
 
         /// <summary>
         /// Collection of switches generally enabling/disabling predictors
@@ -100,11 +92,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// </summary>
         private readonly NeuralPreprocessorSettings _preprocessorCfg;
 
-        /// <summary>
-        /// Input encoder instance
-        /// </summary>
-        private readonly InputEncoder _inputEncoder;
-
         //Constructor
         /// <summary>
         /// Creates an initialized instance
@@ -118,21 +105,19 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         public NeuralPreprocessor(NeuralPreprocessorSettings preprocessorCfg, int randomizerSeek)
         {
             _preprocessorCfg = (NeuralPreprocessorSettings)preprocessorCfg.DeepClone();
-            PredictingNeuronCollection = new List<INeuron>();
             TotalNumOfHiddenNeurons = 0;
-            NumOfReservoirsOutputFeatures = 0;
-            TotalNumOfOutputFeatures = -1;
-            NumOfActiveOutputFeatures = 0;
-            OutputFeatureGeneralSwitchCollection = null;
             ///////////////////////////////////////////////////////////////////////////////////
             //Input encoder
-            _inputEncoder = new InputEncoder(_preprocessorCfg.InputEncoderCfg);
+            InputEncoder = new InputEncoder(_preprocessorCfg.InputEncoderCfg);
+            List<PredictorDescriptor> inputEncoderNeuralPredictorDescCollection = InputEncoder.GetNeuralPredictorsDescriptors();
+            List<PredictorDescriptor> inputEncoderFieldsPredictorDescCollection = InputEncoder.GetInputValuesPredictorsDescriptors();
             ///////////////////////////////////////////////////////////////////////////////////
             //Reservoir instance(s)
             BootCycles = 0;
             //Random generator used for reservoir structure initialization
             Random rand = (randomizerSeek < 0 ? new Random() : new Random(randomizerSeek));
             ReservoirCollection = new List<ReservoirInstance>(_preprocessorCfg.ReservoirInstancesCfg.ReservoirInstanceCfgCollection.Count);
+            List<PredictorDescriptor> reservoirsPredictorDescriptorCollection = new List<PredictorDescriptor>();
             int reservoirInstanceID = 0;
             int biggestInterconnectedArea = 0;
             foreach(ReservoirInstanceSettings reservoirInstanceCfg in _preprocessorCfg.ReservoirInstancesCfg.ReservoirInstanceCfgCollection)
@@ -141,17 +126,15 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 ReservoirInstance reservoir = new ReservoirInstance(reservoirInstanceID++,
                                                                     structCfg,
                                                                     reservoirInstanceCfg,
-                                                                    _inputEncoder,
+                                                                    InputEncoder,
                                                                     _dataRange,
                                                                     rand
                                                                     );
                 ReservoirCollection.Add(reservoir);
-                PredictingNeuronCollection.AddRange(reservoir.PredictingNeuronCollection);
                 TotalNumOfHiddenNeurons += reservoir.Size;
                 biggestInterconnectedArea = Math.Max(biggestInterconnectedArea, structCfg.LargestInterconnectedAreaSize);
+                reservoirsPredictorDescriptorCollection.AddRange(reservoir.GetNeuralPredictorsDescriptors());
             }
-            //Add predicting neurons from input encoder
-            PredictingNeuronCollection.AddRange(_inputEncoder.PredictingNeuronCollection);
             //Boot cycles setup
             if (_preprocessorCfg.InputEncoderCfg.FeedingCfg.FeedingType == InputEncoder.InputFeedingType.Continuous)
             {
@@ -162,40 +145,36 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             {
                 BootCycles = 0;
             }
+            //Output features
+            OutputFeatureGeneralSwitchCollection = null;
+            NumOfActiveOutputFeatures = 0;
+            OutputFeatureDescriptorCollection = new List<PredictorDescriptor>();
+            OutputFeatureDescriptorCollection.AddRange(inputEncoderFieldsPredictorDescCollection);
+            for (int i = 0; i < (Bidir ? 2 : 1); i++)
+            {
+                OutputFeatureDescriptorCollection.AddRange(inputEncoderNeuralPredictorDescCollection);
+                OutputFeatureDescriptorCollection.AddRange(reservoirsPredictorDescriptorCollection);
+            }
             return;
         }
 
         //Properties
         /// <summary>
-        /// Number of suppressed output features (exhibits no meaningfully different values or reduced by parameter)
+        /// Indicates bidirectional input processing
         /// </summary>
-        public int NumOfSuppressedOutputFeatures { get { return TotalNumOfOutputFeatures - NumOfActiveOutputFeatures; } }
+        private bool Bidir { get { return _preprocessorCfg.InputEncoderCfg.FeedingCfg.FeedingType == InputEncoder.InputFeedingType.Patterned && ((FeedingPatternedSettings)_preprocessorCfg.InputEncoderCfg.FeedingCfg).Bidir; } }
+
+        /// <summary>
+        /// Number of suppressed output features (exhibits no meaningfully different values or directly reduced by setup parameters)
+        /// </summary>
+        public int NumOfSuppressedOutputFeatures { get { return OutputFeatureDescriptorCollection.Count - NumOfActiveOutputFeatures; } }
 
         //Methods
-        private void InitializeOutput()
-        {
-            TotalNumOfOutputFeatures = 0;
-            //All reservoirs' predictors
-            foreach (ReservoirInstance reservoir in ReservoirCollection)
-            {
-                bool bidir = _preprocessorCfg.InputEncoderCfg.FeedingCfg.FeedingType == InputEncoder.InputFeedingType.Patterned && ((FeedingPatternedSettings)_preprocessorCfg.InputEncoderCfg.FeedingCfg).Bidir;
-                TotalNumOfOutputFeatures += (bidir ? 2 : 1) * reservoir.NumOfPredictors;
-            }
-            //Reservoirs' output features
-            NumOfReservoirsOutputFeatures = TotalNumOfOutputFeatures;
-            //Input neurons' predictors
-            TotalNumOfOutputFeatures += _inputEncoder.NumOfPredictors;
-            //Input fields values as the predictors
-            TotalNumOfOutputFeatures += _inputEncoder.NumOfRoutedFieldValues;
-            return;
-        }
-
         /// <summary>
         /// Output features comparer (sorts desc by value span)
         /// </summary>
         /// <param name="f1">Feature 1</param>
         /// <param name="f2">Feature 2</param>
-        /// <returns></returns>
         public static int CompareOutputFeature(Tuple<int, double, BasicStat> f1, Tuple<int, double, BasicStat> f2)
         {
             if(f1.Item3.Span > f2.Item3.Span)
@@ -219,12 +198,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         private void InitOutputFeaturesGeneralSwitches(List<double[]> predictorsCollection)
         {
             //Allocate general switches
-            OutputFeatureGeneralSwitchCollection = new bool[TotalNumOfOutputFeatures];
+            OutputFeatureGeneralSwitchCollection = new bool[OutputFeatureDescriptorCollection.Count];
             //Init general predictor switches to false
             OutputFeatureGeneralSwitchCollection.Populate(false);
             //Compute statistics
-            List<Tuple<int, double, BasicStat>> featureStatCollection = new List<Tuple<int, double, BasicStat>>(TotalNumOfOutputFeatures);
-            for (int i = 0; i < TotalNumOfOutputFeatures; i++)
+            List<Tuple<int, double, BasicStat>> featureStatCollection = new List<Tuple<int, double, BasicStat>>(OutputFeatureDescriptorCollection.Count);
+            for (int i = 0; i < OutputFeatureDescriptorCollection.Count; i++)
             {
                 RescalledRange rescalledRange = new RescalledRange(predictorsCollection.Count);
                 BasicStat stat = new BasicStat();
@@ -237,13 +216,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             }
             //Sort statistics
             featureStatCollection.Sort(CompareOutputFeature);
-            int reductionCount = (int)(Math.Round(TotalNumOfOutputFeatures * _preprocessorCfg.PredictorsReductionRatio));
-            int firstInvalidOrderIndex = TotalNumOfOutputFeatures - reductionCount;
+            int reductionCount = (int)(Math.Round(OutputFeatureDescriptorCollection.Count * _preprocessorCfg.PredictorsReductionRatio));
+            int firstRejectedIndex = OutputFeatureDescriptorCollection.Count - reductionCount;
             //Enable valid predictors
             NumOfActiveOutputFeatures = 0;
-            for (int i = 0; i < TotalNumOfOutputFeatures; i++)
+            for (int i = 0; i < OutputFeatureDescriptorCollection.Count; i++)
             {
-                if(featureStatCollection[i].Item3.Span > MinPredictorValueDifference && i < firstInvalidOrderIndex)
+                if(featureStatCollection[i].Item3.Span > MinPredictorValueDifference && i < firstRejectedIndex)
                 {
                     //Enable predictor
                     OutputFeatureGeneralSwitchCollection[featureStatCollection[i].Item1] = true;
@@ -259,14 +238,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         public void Reset()
         {
             //Reset input encoder
-            _inputEncoder.Reset();
+            InputEncoder.Reset();
             //Reset reservoirs
             foreach(ReservoirInstance reservoir in ReservoirCollection)
             {
                 reservoir.Reset(true);
             }
             //Reset predictors metrics
-            TotalNumOfOutputFeatures = 0;
             NumOfActiveOutputFeatures = 0;
             OutputFeatureGeneralSwitchCollection = null;
             return;
@@ -287,37 +265,70 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         }
 
         /// <summary>
-        /// Pushes external input vector into the input encoder, computes reservoirs and returns output features
+        /// Precesses all pending input data prepared by InputEncoder
         /// </summary>
-        /// <param name="inputVector">External input values</param>
         /// <param name="collectStatistics">Indicates whether to update internal statistics</param>
-        private double[] PushExtInputVector(double[] inputVector, bool collectStatistics)
+        private void ProcessInputEncoderPendingData(bool collectStatistics)
         {
-            if(_preprocessorCfg.InputEncoderCfg.FeedingCfg.FeedingType == InputEncoder.InputFeedingType.Patterned)
+            while (InputEncoder.NumOfRemainingInputs > 0)
             {
-                ResetReservoirs(false);
-            }
-            _inputEncoder.StoreNewData(inputVector);
-            while (_inputEncoder.NumOfRemainingInputs > 0)
-            {
-                _inputEncoder.EncodeNextInputData(collectStatistics);
+                InputEncoder.EncodeNextInputData(collectStatistics);
                 //Compute reservoir(s)
                 foreach (ReservoirInstance reservoir in ReservoirCollection)
                 {
                     reservoir.Compute(collectStatistics);
                 }
             }
-            //Collect all output features
-            double[] outputFeatures = new double[TotalNumOfOutputFeatures];
-            int featuresIdx = 0;
+            return;
+        }
+
+        private int CopyReservoirsPredictorsTo(double[] buffer, int fromOffset)
+        {
+            int offset = fromOffset;
             foreach (ReservoirInstance reservoir in ReservoirCollection)
             {
-                reservoir.CopyPredictorsTo(outputFeatures, featuresIdx);
-                featuresIdx += reservoir.NumOfPredictors;
+                offset += reservoir.CopyPredictorsTo(buffer, offset);
             }
-            _inputEncoder.CopyPredictorsTo(outputFeatures, featuresIdx);
-            featuresIdx += _inputEncoder.NumOfPredictors;
-            _inputEncoder.CopyRoutedInputDataTo(outputFeatures, featuresIdx);
+            return offset - fromOffset;
+        }
+
+        /// <summary>
+        /// Pushes external input vector into the input encoder, computes reservoirs and returns output features
+        /// </summary>
+        /// <param name="inputVector">External input values</param>
+        /// <param name="collectStatistics">Indicates whether to update internal statistics</param>
+        private double[] PushExtInputVector(double[] inputVector, bool collectStatistics)
+        {
+            //Reset reservoirs in case of patterned feeding
+            if (_preprocessorCfg.InputEncoderCfg.FeedingCfg.FeedingType == InputEncoder.InputFeedingType.Patterned)
+            {
+                ResetReservoirs(false);
+            }
+            //Output features buffer allocation and index
+            double[] outputFeatures = new double[OutputFeatureDescriptorCollection.Count];
+            int outputFeaturesIdx = 0;
+            //Put new data into the InputEncoder
+            InputEncoder.StoreNewData(inputVector);
+            //Collect routed input data
+            outputFeaturesIdx += InputEncoder.CopyRoutedInputDataTo(outputFeatures, outputFeaturesIdx);
+            //Process input data in reservoirs
+            ProcessInputEncoderPendingData(collectStatistics);
+            //Collect input neural predictors
+            outputFeaturesIdx += InputEncoder.CopyPredictorsTo(outputFeatures, outputFeaturesIdx);
+            //Collect reservoirs' neural predictors
+            outputFeaturesIdx += CopyReservoirsPredictorsTo(outputFeatures, outputFeaturesIdx);
+            //Bidirectional input processing?
+            if(Bidir)
+            {
+                //Set reverse mode
+                InputEncoder.SetReverseMode();
+                //Process input data in reservoirs
+                ProcessInputEncoderPendingData(collectStatistics);
+                //Collect input neural predictors
+                outputFeaturesIdx += InputEncoder.CopyPredictorsTo(outputFeatures, outputFeaturesIdx);
+                //Collect reservoirs' neural predictors - the last features
+                CopyReservoirsPredictorsTo(outputFeatures, outputFeaturesIdx);
+            }
             return outputFeatures;
         }
 
@@ -347,9 +358,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             //Reset reservoirs
             ResetReservoirs(true);
             //Reset input encoder and initialize its feature filters
-            _inputEncoder.Initialize(inputBundle);
-            //Initialize output
-            InitializeOutput();
+            InputEncoder.Initialize(inputBundle);
             //Allocate output bundle
             VectorBundle outputBundle = new VectorBundle(inputBundle.InputVectorCollection.Count);
             //Process data
@@ -375,7 +384,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             //Buld preprocessing overview
             preprocessingOverview = new PreprocessingOverview(CollectStatatistics(),
                                                               TotalNumOfHiddenNeurons,
-                                                              TotalNumOfOutputFeatures,
+                                                              OutputFeatureDescriptorCollection.Count,
                                                               NumOfSuppressedOutputFeatures,
                                                               NumOfActiveOutputFeatures
                                                               );

@@ -100,6 +100,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
         /// </summary>
         double[] GetPredictors();
 
+        /// <summary>
+        /// Returns identifiers of enabled predictors in the same order as in the methods CopyPredictorsTo and GetPredictors
+        /// </summary>
+        List<PredictorsProvider.PredictorID> GetEnabledPredictorsIDs();
+
     }//INeuron
 
 }//Namespace

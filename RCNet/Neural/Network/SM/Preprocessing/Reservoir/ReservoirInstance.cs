@@ -338,6 +338,25 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
 
         //Methods
         /// <summary>
+        /// Returns collection of predictor descriptor objects related to predictors from hidden neurons
+        /// </summary>
+        public List<PredictorDescriptor> GetNeuralPredictorsDescriptors()
+        {
+            List<PredictorDescriptor> result = new List<PredictorDescriptor>(NumOfPredictors);
+            foreach (INeuron neuron in PredictingNeuronCollection)
+            {
+                if (neuron.NumOfEnabledPredictors > 0)
+                {
+                    foreach (PredictorsProvider.PredictorID id in neuron.GetEnabledPredictorsIDs())
+                    {
+                        result.Add(new PredictorDescriptor(neuron.Location.PoolGroupID, neuron.Location.ReservoirID, neuron.Location.PoolID, (int)id));
+                    }
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
         /// Scales weights of synapses targeting analog neurons to achieve requiered spectral radius
         /// </summary>
         private void ApplySpectralRadius(double spectralRadius)
@@ -380,35 +399,17 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// </summary>
         private void ApplyHomogenousExcitability()
         {
-            List<HiddenNeuron> spikingPrimeNeurons = new List<HiddenNeuron>(from neuron in _reservoirNeuronCollection where neuron.TypeOfActivation == ActivationType.Spiking && neuron.Prime select neuron);
-            List<HiddenNeuron> spikingNonPrimeNeurons = new List<HiddenNeuron>(from neuron in _reservoirNeuronCollection where neuron.TypeOfActivation == ActivationType.Spiking && !neuron.Prime select neuron);
-            //Input excitability
-            foreach (HiddenNeuron neuron in spikingPrimeNeurons)
+            List<HiddenNeuron> spikingNeurons = new List<HiddenNeuron>(from neuron in _reservoirNeuronCollection where neuron.TypeOfActivation == ActivationType.Spiking select neuron);
+            foreach (HiddenNeuron neuron in spikingNeurons)
             {
                 HomogenousExcitabilitySettings homogenousExcitabilityCfg = ((SpikingNeuronGroupSettings)StructureCfg.PoolsCfg.PoolCfgCollection[neuron.Location.PoolID].NeuronGroupsCfg.GroupCfgCollection[neuron.Location.PoolGroupID]).HomogenousExcitabilityCfg;
-                double sumOfInputWeights = 0d;
+                double sumOfInputWeights = 0d, sumOfExcitatoryWeights = 0d, sumOfInhibitoryWeights = 0d;
                 //Scan input synapses
                 foreach (Synapse synapse in _neuronInputConnectionsCollection[neuron.Location.ReservoirFlatIdx].Values)
                 {
                     sumOfInputWeights += Math.Abs(synapse.Weight);
                 }
-                //Rescale input synapses
-                if (sumOfInputWeights > 0)
-                {
-                    double factor = homogenousExcitabilityCfg.InputStrength / sumOfInputWeights;
-                    foreach (Synapse synapse in _neuronInputConnectionsCollection[neuron.Location.ReservoirFlatIdx].Values)
-                    {
-                        synapse.Rescale(factor);
-                    }
-                }
-            }
-
-            //Excitatory/Inhibitory excitability
-            foreach (HiddenNeuron neuron in spikingNonPrimeNeurons)
-            {
-                HomogenousExcitabilitySettings homogenousExcitabilityCfg = ((SpikingNeuronGroupSettings)StructureCfg.PoolsCfg.PoolCfgCollection[neuron.Location.PoolID].NeuronGroupsCfg.GroupCfgCollection[neuron.Location.PoolGroupID]).HomogenousExcitabilityCfg;
-                double sumOfExcitatoryWeights = 0d, sumOfInhibitoryWeights = 0d;
-                //Scan synapses
+                //Scan Excitatory and Inhibitory synapses
                 foreach (Synapse synapse in _neuronNeuronConnectionsCollection[neuron.Location.ReservoirFlatIdx].Values)
                 {
                     if (synapse.Role == Synapse.SynRole.Excitatory)
@@ -421,25 +422,44 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                     }
                 }
                 //Check consistency
-                if (sumOfExcitatoryWeights == 0)
+                if ((sumOfInputWeights + sumOfExcitatoryWeights) == 0)
                 {
                     throw new Exception("Can't set homogenous excitability. Hidden neuron has no excitatory synapse.");
                 }
-                //Rescale excitatory and inhibitory synapses
-                double eFactor = homogenousExcitabilityCfg.ExcitatoryStrength / sumOfExcitatoryWeights;
-                double iFactor = sumOfInhibitoryWeights == 0 ? 1d : (homogenousExcitabilityCfg.InhibitoryRatio * homogenousExcitabilityCfg.ExcitatoryStrength) / sumOfInhibitoryWeights;
-                double eWCheckSum = 0, iWCheckSum = 0;
-                foreach (Synapse synapse in _neuronNeuronConnectionsCollection[neuron.Location.ReservoirFlatIdx].Values)
+                //Rescale input synapses
+                if (sumOfInputWeights > 0)
                 {
-                    if(synapse.Role == Synapse.SynRole.Excitatory)
+                    double targetStrength = sumOfExcitatoryWeights == 0d ? homogenousExcitabilityCfg.ExcitatoryStrength : homogenousExcitabilityCfg.InputStrength;
+                    double factor = targetStrength / sumOfInputWeights;
+                    foreach (Synapse synapse in _neuronInputConnectionsCollection[neuron.Location.ReservoirFlatIdx].Values)
                     {
-                        synapse.Rescale(eFactor);
-                        eWCheckSum += synapse.Weight;
+                        synapse.Rescale(factor);
                     }
-                    else
+                }
+                //Rescale excitatory synapses
+                if(sumOfExcitatoryWeights > 0)
+                {
+                    double targetStrength = sumOfInputWeights == 0d ? homogenousExcitabilityCfg.ExcitatoryStrength : (homogenousExcitabilityCfg.ExcitatoryStrength - homogenousExcitabilityCfg.InputStrength);
+                    double factor = targetStrength / sumOfExcitatoryWeights;
+                    foreach (Synapse synapse in _neuronNeuronConnectionsCollection[neuron.Location.ReservoirFlatIdx].Values)
                     {
-                        synapse.Rescale(iFactor);
-                        iWCheckSum += synapse.Weight;
+                        if (synapse.Role == Synapse.SynRole.Excitatory)
+                        {
+                            synapse.Rescale(factor);
+                        }
+                    }
+                }
+                //Rescale inhibitory synapses
+                if (sumOfInhibitoryWeights > 0)
+                {
+                    double targetStrength = homogenousExcitabilityCfg.InhibitoryRatio * homogenousExcitabilityCfg.ExcitatoryStrength;
+                    double factor = targetStrength / sumOfInhibitoryWeights;
+                    foreach (Synapse synapse in _neuronNeuronConnectionsCollection[neuron.Location.ReservoirFlatIdx].Values)
+                    {
+                        if (synapse.Role == Synapse.SynRole.Inhibitory)
+                        {
+                            synapse.Rescale(factor);
+                        }
                     }
                 }
             }
@@ -516,7 +536,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             //Spiking target scope
             targetNeuronsByActivation[(int)ActivationType.Spiking] = new List<HiddenNeuron>(from neuron in _poolNeuronCollection[targetPoolID]
                                                                                             where (neuron.TypeOfActivation == ActivationType.Spiking &&
-                                                                                                    neuron.Prime &&
                                                                                                     inputConnCfg.SpikingTargetDensity > 0)
                                                                                             select neuron
                                                                                             );
@@ -568,6 +587,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                         int cmbIdx = 0;
                         for (int nIdx = 0; nIdx < targetNeurons.Count; nIdx++)
                         {
+                            //Connect planned connection combination to neuron
                             for (int i = 0; i < plannedConnCmbIdxs[cmbIdx].Length; i++)
                             {
                                 //Create synapse
@@ -903,13 +923,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// </summary>
         /// <param name="buffer">Target buffer</param>
         /// <param name="fromOffset">Starting zero based position in the target buffer</param>
-        public void CopyPredictorsTo(double[] buffer, int fromOffset)
+        public int CopyPredictorsTo(double[] buffer, int fromOffset)
         {
+            int offset = fromOffset;
             foreach(INeuron neuron in PredictingNeuronCollection)
             {
-                fromOffset += neuron.CopyPredictorsTo(buffer, fromOffset);
+                offset += neuron.CopyPredictorsTo(buffer, offset);
             }
-            return;
+            return offset - fromOffset;
         }
 
         /// <summary>
