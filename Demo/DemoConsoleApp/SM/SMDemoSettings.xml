@@ -28,7 +28,7 @@
             <externalFields>
               <field name="DistanceFromCenter">
                 <realFeature standardize="true" keepReserve="true"/>
-                <spikeCode componentHalfCodeLength="16" useDeviation="true" useDifference="true"/>
+                <spikeCode componentHalfCodeLength="64" lowestThreshold="1e-6" useDeviation="true" useDifference="true"/>
               </field>
             </externalFields>
             <predictors activation="false"
@@ -150,7 +150,7 @@
               <pool name="PoolMain">
                 <proportions dimX="200" dimY="1" dimZ="1"/>
                 <neuronGroups>
-                  <spikingGroup name="grp1" relShare="1" primeRatio="0.5">
+                  <spikingGroup name="grp1" relShare="1" primeRatio="0.25">
                     <activationAdExpIF solverCompSteps="2" solverMethod="Euler" stimuliDuration="1"/>
                     <homogenousExcitability inputStrength="0.5" excitatoryStrength="0.75" inhibitoryRatio="0.25"/>
                   </spikingGroup>
@@ -311,7 +311,7 @@
               <pool name="PoolMain">
                 <proportions dimX="100" dimY="1" dimZ="1"/>
                 <neuronGroups>
-                  <spikingGroup name="grp1" relShare="1">
+                  <spikingGroup name="grp1" relShare="1" primeRatio="0">
                     <activationAdExpIF solverCompSteps="2" solverMethod="Euler" stimuliDuration="1"/>
                     <homogenousExcitability inputStrength="0.5" excitatoryStrength="0.75" inhibitoryRatio="0.25"/>
                   </spikingGroup>

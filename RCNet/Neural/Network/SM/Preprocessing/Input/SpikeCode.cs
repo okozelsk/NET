@@ -20,6 +20,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         private double _prevValue;
 
         //Attribute properties
+        /// <summary>
+        /// Binary spike-code representing encoded analog value
+        /// </summary>
         public byte[] Code { get; }
 
         //Constructor
@@ -30,7 +33,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         public SpikeCode(SpikeCodeSettings spikeCodeCfg)
         {
             _spikeCodeCfg = (SpikeCodeSettings)spikeCodeCfg.DeepClone();
-            _componentComputer = new ComponentCodeComputer(_spikeCodeCfg.ComponentHalfCodeLength, _spikeCodeCfg.BoundariesSlicer);
+            _componentComputer = new ComponentCodeComputer(_spikeCodeCfg.ComponentHalfCodeLength, _spikeCodeCfg.LowestThreshold);
             int codeLength = 0;
             if(_spikeCodeCfg.UseDeviation)
             {
@@ -46,6 +49,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         }
 
         //Methods
+        /// <summary>
+        /// Resets component to its initial state
+        /// </summary>
         public void Reset()
         {
             _prevValue = double.NaN;
@@ -53,9 +59,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             return;
         }
         /// <summary>
-        /// Encodes given value
+        /// Encodes given analog value
         /// </summary>
-        /// <param name="value">Value to be encoded</param>
+        /// <param name="value">Analog value to be encoded</param>
         public void Encode(double value)
         {
             value.Bound(-1d, 1d);
@@ -80,24 +86,25 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         {
 
             //Attributes
-            private readonly double[] _boundaries;
+            private readonly double[] _thresholdCollection;
 
             //Constructor
             /// <summary>
             /// Creates an initialized instance
             /// </summary>
-            /// <param name="halfCodeLength"></param>
-            /// <param name="boundariesSlicer"></param>
-            public ComponentCodeComputer(int halfCodeLength, double boundariesSlicer)
+            /// <param name="halfCodeLength">Length of the half of component code</param>
+            /// <param name="lowestThreshold">Firing threshold of the most sensitive input neuron</param>
+            public ComponentCodeComputer(int halfCodeLength, double lowestThreshold)
             {
-                _boundaries = new double[halfCodeLength];
-                double hiBoundary = 1d;
-                for(int i = 0; i < _boundaries.Length - 1; i++)
+                double exponent = halfCodeLength > 1 ? Math.Pow(1d / lowestThreshold, 1d / (halfCodeLength - 1d)) : 0d;
+                _thresholdCollection = new double[halfCodeLength];
+                double threshold = 1d;
+                for(int i = 0; i < _thresholdCollection.Length - 1; i++)
                 {
-                    hiBoundary /= boundariesSlicer;
-                    _boundaries[i] = hiBoundary;
+                    threshold /= exponent;
+                    _thresholdCollection[i] = threshold;
                 }
-                _boundaries[_boundaries.Length - 1] = 0;
+                _thresholdCollection[_thresholdCollection.Length - 1] = 0;
                 return;
             }
 
@@ -105,7 +112,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             /// <summary>
             /// Total length of the bin code
             /// </summary>
-            public int CodeLength { get { return 2 * _boundaries.Length; } }
+            public int CodeLength { get { return 2 * _thresholdCollection.Length; } }
 
             //Methods
             /// <summary>
@@ -123,12 +130,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
                 {
                     int halfIdx = value < 0 ? 0 : 1;
                     value = Math.Abs(value);
-                    for(int i = 0; i < _boundaries.Length; i++)
+                    for(int i = 0; i < _thresholdCollection.Length; i++)
                     {
-                        if(value > _boundaries[i])
+                        if(value > _thresholdCollection[i])
                         {
-                            buffer[fromIdx + halfIdx * _boundaries.Length + i] = (byte)1;
-                            break;
+                            buffer[fromIdx + halfIdx * _thresholdCollection.Length + i] = (byte)1;
                         }
                     }
                 }

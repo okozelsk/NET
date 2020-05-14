@@ -27,9 +27,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// </summary>
         public const int DefaultComponentHalfCodeLength = 8;
         /// <summary>
-        /// Default value of parameter specifying exponential slicer
+        /// Default value of parameter specifying firing threshold of the most sensitive input neuron
         /// </summary>
-        public const double DefaultBoundariesSlicer = 2.7182818284590451d;
+        public const double DefaultLowestThreshold = 1e-5;
         /// <summary>
         /// Default value of parameter specifying if to use strength of the deviation from middle value as a component of the spike code
         /// </summary>
@@ -47,9 +47,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         public int ComponentHalfCodeLength { get; }
 
         /// <summary>
-        /// Exponential slicer
+        /// Firing threshold of the most sensitive input neuron
         /// </summary>
-        public double BoundariesSlicer { get; }
+        public double LowestThreshold { get; }
 
         /// <summary>
         /// Specifies if to use strength of the deviation from middle value as a component of the spike code
@@ -67,17 +67,17 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// Creates an itialized instance.
         /// </summary>
         /// <param name="componentHalfCodeLength">Length of the half of component code</param>
-        /// <param name="boundariesSlicer">Exponential slicer</param>
+        /// <param name="lowestThreshold">Firing threshold of the most sensitive input neuron</param>
         /// <param name="useDeviation">Specifies if to use strength of the deviation from middle value as a component of the spike code</param>
         /// <param name="useDifference">Specifies if to use strength of the deviation from previous value as a component of the spike code</param>
         public SpikeCodeSettings(int componentHalfCodeLength = DefaultComponentHalfCodeLength,
-                                 double boundariesSlicer = DefaultBoundariesSlicer,
+                                 double lowestThreshold = DefaultLowestThreshold,
                                  bool useDeviation = DefaultUseDeviation,
                                  bool useDifference = DefaultUseDifference
                                  )
         {
             ComponentHalfCodeLength = componentHalfCodeLength;
-            BoundariesSlicer = boundariesSlicer;
+            LowestThreshold = lowestThreshold;
             UseDeviation = useDeviation;
             UseDifference = useDifference;
             Check();
@@ -89,7 +89,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// </summary>
         /// <param name="source">Source instance</param>
         public SpikeCodeSettings(SpikeCodeSettings source)
-            : this(source.ComponentHalfCodeLength, source.BoundariesSlicer, source.UseDeviation, source.UseDifference)
+            : this(source.ComponentHalfCodeLength, source.LowestThreshold, source.UseDeviation, source.UseDifference)
         {
             return;
         }
@@ -107,7 +107,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
             ComponentHalfCodeLength = int.Parse(settingsElem.Attribute("componentHalfCodeLength").Value, CultureInfo.InvariantCulture);
-            BoundariesSlicer = double.Parse(settingsElem.Attribute("boundariesSlicer").Value, CultureInfo.InvariantCulture);
+            LowestThreshold = double.Parse(settingsElem.Attribute("lowestThreshold").Value, CultureInfo.InvariantCulture);
             UseDeviation = bool.Parse(settingsElem.Attribute("useDeviation").Value);
             UseDifference = bool.Parse(settingsElem.Attribute("useDifference").Value);
             Check();
@@ -123,7 +123,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// Checks if settings are default
         /// </summary>
-        public bool IsDefaultBoundariesSlicer { get { return (BoundariesSlicer == DefaultBoundariesSlicer); } }
+        public bool IsDefaultLowestThreshold { get { return (LowestThreshold == DefaultLowestThreshold); } }
 
         /// <summary>
         /// Checks if settings are default
@@ -143,7 +143,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             get
             {
                 return IsDefaultComponentHalfCodeLength &&
-                       IsDefaultBoundariesSlicer &&
+                       IsDefaultLowestThreshold &&
                        IsDefaultUseDeviation &&
                        IsDefaultUseDifference;
             }
@@ -159,9 +159,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             {
                 throw new Exception($"Invalid ComponentHalfCodeLength {ComponentHalfCodeLength.ToString(CultureInfo.InvariantCulture)}. ComponentHalfCodeLength must be GE to 1 and LE to 64.");
             }
-            if (BoundariesSlicer <= 1)
+            if (LowestThreshold <= 0 || LowestThreshold >= 1d)
             {
-                throw new Exception($"Invalid BoundariesSlicer {BoundariesSlicer.ToString(CultureInfo.InvariantCulture)}. BoundariesSlicer must be GT 1.");
+                throw new Exception($"Invalid LowestThreshold {LowestThreshold.ToString(CultureInfo.InvariantCulture)}. LowestThreshold must be GT 0 and LT 1.");
             }
             if(!UseDeviation && !UseDifference)
             {
@@ -191,9 +191,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             {
                 rootElem.Add(new XAttribute("componentHalfCodeLength", ComponentHalfCodeLength.ToString(CultureInfo.InvariantCulture)));
             }
-            if (!suppressDefaults || !IsDefaultBoundariesSlicer)
+            if (!suppressDefaults || !IsDefaultLowestThreshold)
             {
-                rootElem.Add(new XAttribute("boundariesSlicer", BoundariesSlicer.ToString(CultureInfo.InvariantCulture)));
+                rootElem.Add(new XAttribute("lowestThreshold", LowestThreshold.ToString(CultureInfo.InvariantCulture)));
             }
             if (!suppressDefaults || !IsDefaultUseDeviation)
             {

@@ -2094,9 +2094,9 @@
         <xs:documentation xml:lang="en">Default value is 8</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute type="UDoubleGT1Type" name="boundariesSlicer" use="optional" default="2.7182818284590451">
+    <xs:attribute type="UDoubleGT0LT1Type" name="lowestThreshold" use="optional" default="1e-5">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is (e) 2.7182818284590451</xs:documentation>
+        <xs:documentation xml:lang="en">Firing threshold of the most sensitive input neuron. Default value is 1e-5</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="xs:boolean" name="useDeviation" use="optional" default="true">
