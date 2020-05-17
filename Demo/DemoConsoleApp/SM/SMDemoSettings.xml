@@ -28,14 +28,14 @@
             <externalFields>
               <field name="DistanceFromCenter">
                 <realFeature standardize="true" keepReserve="true"/>
-                <spikeCode componentHalfCodeLength="64" lowestThreshold="1e-6" useDeviation="true" useDifference="true"/>
+                <spikeCode componentHalfCodeLength="16" lowestThreshold="1e-3" useDeviation="true" useDifference="false"/>
               </field>
             </externalFields>
             <predictors activation="false"
                         activationSquare="false"
                         activationFadingSum="false"
                         activationMWAvg="false"
-                        firingFadingSum="true"
+                        firingFadingSum="false"
                         firingMWAvg="false"
                         firingCount="false"
                         firingBinPattern="false">
@@ -130,7 +130,7 @@
             <externalFields>
               <field name="Accel" routeToReadout="true">
                 <realFeature />
-                <spikeCode componentHalfCodeLength="10" useDeviation="true" useDifference="false"/>
+                <spikeCode componentHalfCodeLength="16" lowestThreshold="1e-6" useDeviation="true" useDifference="true"/>
               </field>
             </externalFields>
             <predictors activation="false"
@@ -150,7 +150,7 @@
               <pool name="PoolMain">
                 <proportions dimX="200" dimY="1" dimZ="1"/>
                 <neuronGroups>
-                  <spikingGroup name="grp1" relShare="1" primeRatio="0.25">
+                  <spikingGroup name="grp1" relShare="1">
                     <activationAdExpIF solverCompSteps="2" solverMethod="Euler" stimuliDuration="1"/>
                     <homogenousExcitability inputStrength="0.5" excitatoryStrength="0.75" inhibitoryRatio="0.25"/>
                   </spikingGroup>
@@ -173,21 +173,21 @@
                   <spikingSource>
                     <weight min="0" max="1"/>
                     <plasticity>
-                      <constantDynamics/>
+                      <linearDynamics/>
                     </plasticity>
                   </spikingSource>
                 </input>
                 <excitatory maxDelay="0">
                   <spikingSource>
                     <plasticity>
-                      <constantDynamics/>
+                      <linearDynamics/>
                     </plasticity>
                   </spikingSource>
                 </excitatory>
                 <inhibitory maxDelay="0">
                   <spikingSource>
                     <plasticity>
-                      <constantDynamics/>
+                      <linearDynamics/>
                     </plasticity>
                   </spikingSource>
                 </inhibitory>
@@ -261,167 +261,6 @@
       </readoutLayer>
     </stateMachineCfg>
   </case>
-
-
-
-  <!--
-    The best algorithm called COTE, referenced at the dataset's home site, exhibits accuracy 81.4%.
-    It is much better than the results of StateMachine (69%). This is a good case for finding other ways to improve StateMachine :-)
-    "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
-    https://timeseriesclassification.com/description.php?Dataset=CricketX.
-    The series Cricket X, Y and Z are accelerometer data (in three dimensions) taken from actors performing cricket gestures.
-    The twelve classes are different umpire signals: Cancel Call, Dead Ball, Four, Last Hour Leg Bye, No Ball, One Short, Out,
-    Penalty Runs, Six, TV Replay, and Wide. They mounted two accelerometers orthogonal to each other, thus acceleration is measured
-    in 3D space. The accelerometers are housed in a small wrist watch sized enclosure worn in the form of a wrist band.
-    Taken together the data is a multivariate time series classificatin problem, but the serise are not alligned so in its current
-    format cannot be used s such Segmentation of intentional gestures for sports video annotation, Online Context Recognition in Multisensor Systems using Dynamic Time Warping.
-    The data are multi-dimensional, but they are not aligned, so it is not possible.
-  -->
-  <case name="Classification task CricketX: pure ESN reservoir generating FiringFadingSum predictors, one Identity neuron as a classifier (Resilient trainer)">
-    <samples trainingData="CricketX_train.csv" verificationData="CricketX_verify.csv"/>
-    <stateMachineCfg randomizerSeek="0">
-      <neuralPreprocessor predictorsReductionRatio="0">
-        <inputEncoder>
-          <feedingPatterned bidir="false" routeToReadout="false" variablesSchema="Sequential">
-            <unification unifyAmplitude="false" detrend="false">
-              <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
-            </unification>
-          </feedingPatterned>
-          <fields>
-            <externalFields>
-              <field name="Accel" routeToReadout="true">
-                <realFeature />
-                <spikeCode componentHalfCodeLength="16" useDeviation="true" useDifference="false"/>
-              </field>
-            </externalFields>
-            <predictors activation="false"
-                        activationSquare="false"
-                        activationFadingSum="false"
-                        activationMWAvg="false"
-                        firingFadingSum="true"
-                        firingMWAvg="false"
-                        firingCount="false"
-                        firingBinPattern="false">
-            </predictors>
-          </fields>
-        </inputEncoder>
-        <reservoirStructures>
-          <reservoirStructure name="MainCfg">
-            <pools>
-              <pool name="PoolMain">
-                <proportions dimX="100" dimY="1" dimZ="1"/>
-                <neuronGroups>
-                  <spikingGroup name="grp1" relShare="1" primeRatio="0">
-                    <activationAdExpIF solverCompSteps="2" solverMethod="Euler" stimuliDuration="1"/>
-                    <homogenousExcitability inputStrength="0.5" excitatoryStrength="0.75" inhibitoryRatio="0.25"/>
-                  </spikingGroup>
-                </neuronGroups>
-                <interconnection>
-                  <randomSchema density="0.1" avgDistance="NA" allowSelfConnection="false"/>
-                </interconnection>
-              </pool>
-            </pools>
-          </reservoirStructure>
-        </reservoirStructures>
-        <reservoirInstances>
-          <reservoirInstance name="Main" reservoirStructure="MainCfg">
-            <inputConnections>
-              <connection inputFieldName="Accel" poolName="PoolMain"  spikingTargetDensity="0.25" signalingRestriction="NoRestriction"/>
-            </inputConnections>
-            <synapse>
-              <spikingTarget>
-                <input maxDelay="0">
-                  <spikingSource>
-                    <plasticity>
-                      <constantDynamics/>
-                    </plasticity>
-                  </spikingSource>
-                </input>
-                <excitatory maxDelay="0">
-                  <spikingSource>
-                    <plasticity>
-                      <constantDynamics/>
-                    </plasticity>
-                  </spikingSource>
-                </excitatory>
-                <inhibitory maxDelay="0">
-                  <spikingSource>
-                    <plasticity>
-                      <constantDynamics/>
-                    </plasticity>
-                  </spikingSource>
-                </inhibitory>
-              </spikingTarget>
-            </synapse>
-            <predictors activation="false"
-                        activationSquare="false"
-                        activationFadingSum="false"
-                        activationMWAvg="false"
-                        firingFadingSum="true"
-                        firingMWAvg="false"
-                        firingCount="false"
-                        firingBinPattern="false">
-              <params>
-                <activationMWAvg window="300" weights="Constant"/>
-                <firingFadingSum strength="0.005"/>
-                <firingCount window="300"/>
-                <firingBinPattern window="1"/>
-              </params>
-            </predictors>
-          </reservoirInstance>
-        </reservoirInstances>
-      </neuralPreprocessor>
-      <readoutLayer testDataRatio="0.1" folds="Auto" repetitions="1">
-        <defaultNetworks>
-          <classification>
-            <ff>
-              <activationElliot/>
-              <resPropTrainer attempts="5" attemptEpochs="1000"/>
-            </ff>
-          </classification>
-        </defaultNetworks>
-        <readoutUnits>
-          <readoutUnit name="Cancel Call">
-            <classification oneWinnerGroupName="Gesture"/>
-          </readoutUnit>
-          <readoutUnit name="Dead Ball">
-            <classification oneWinnerGroupName="Gesture"/>
-          </readoutUnit>
-          <readoutUnit name="Four">
-            <classification oneWinnerGroupName="Gesture"/>
-          </readoutUnit>
-          <readoutUnit name="Last Hour">
-            <classification oneWinnerGroupName="Gesture"/>
-          </readoutUnit>
-          <readoutUnit name="Leg Bye">
-            <classification oneWinnerGroupName="Gesture"/>
-          </readoutUnit>
-          <readoutUnit name="No Ball">
-            <classification oneWinnerGroupName="Gesture"/>
-          </readoutUnit>
-          <readoutUnit name="One Short">
-            <classification oneWinnerGroupName="Gesture"/>
-          </readoutUnit>
-          <readoutUnit name="Out">
-            <classification oneWinnerGroupName="Gesture"/>
-          </readoutUnit>
-          <readoutUnit name="Penalty Runs">
-            <classification oneWinnerGroupName="Gesture"/>
-          </readoutUnit>
-          <readoutUnit name="Six">
-            <classification oneWinnerGroupName="Gesture"/>
-          </readoutUnit>
-          <readoutUnit name="TV Replay">
-            <classification oneWinnerGroupName="Gesture"/>
-          </readoutUnit>
-          <readoutUnit name="Wide">
-            <classification oneWinnerGroupName="Gesture"/>
-          </readoutUnit>
-        </readoutUnits>
-      </readoutLayer>
-    </stateMachineCfg>
-  </case>
-
 
   <!--
     This demo case demonstrates successful use of the pure analog ESN reservoir for the fast and accurate classifications enabled by
@@ -870,7 +709,7 @@
               <pool name="LSM">
                 <proportions dimX="5" dimY="5" dimZ="2"/>
                 <neuronGroups>
-                  <spikingGroup name="AdExpIF-grp" relShare="1" primeRatio="0">
+                  <spikingGroup name="AdExpIF-grp" relShare="1">
                     <activationAdExpIF/>
                     <homogenousExcitability inputStrength="0.5" excitatoryStrength="0.75" inhibitoryRatio="0.25"/>
                   </spikingGroup>

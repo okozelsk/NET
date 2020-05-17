@@ -1886,11 +1886,6 @@
     </xs:sequence>
     <xs:attribute type="xs:string" name="name" use="required" />
     <xs:attribute type="UDoubleType" name="relShare" use="required"/>
-    <xs:attribute type="UDoubleLE1Type" name="primeRatio" use="optional" default="0.5">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Ratio of hidden neurons receiving input synapses only. Default value is 0.5.</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
   </xs:complexType>
 
   <!-- Pool - analog neuron group - retainment - configuration -->

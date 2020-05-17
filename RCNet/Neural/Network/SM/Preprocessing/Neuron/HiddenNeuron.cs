@@ -52,11 +52,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
         /// </summary>
         public bool AfterFirstSpike { get; private set; }
 
-        /// <summary>
-        /// Specifies, if neuron can receive only input stimuli
-        /// </summary>
-        public bool Prime { get; }
-
         //Attributes
         /// <summary>
         /// Neuron's activation function
@@ -103,19 +98,16 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
         /// </summary>
         /// <param name="location">Information about a neuron location within the neural preprocessor</param>
         /// <param name="spikingActivation">Instantiated activation function.</param>
-        /// <param name="prime">Specifies, if neuron can receive only input stimuli.</param>
         /// <param name="bias">Constant bias to be applied.</param>
         /// <param name="predictorsCfg">Configuration of neuron's predictors</param>
         public HiddenNeuron(NeuronLocation location,
                             IActivationFunction spikingActivation,
-                            bool prime,
                             double bias,
                             PredictorsSettings predictorsCfg
                             )
         {
             Location = location;
             Statistics = new NeuronStatistics();
-            Prime = prime;
             Bias = bias;
             //Activation check
             if (spikingActivation.TypeOfActivation == ActivationType.Analog)
@@ -154,7 +146,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
         {
             Location = location;
             Statistics = new NeuronStatistics();
-            Prime = false;
             Bias = bias;
             //Activation check
             if (analogActivation.TypeOfActivation == ActivationType.Spiking)

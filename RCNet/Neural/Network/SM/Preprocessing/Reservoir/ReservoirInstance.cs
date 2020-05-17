@@ -132,7 +132,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                 {
                     NeuronCreationParams[] grpNCP = new NeuronCreationParams[ngs.Count];
                     PredictorsSettings predictorsCfg = new PredictorsSettings(ngs.PredictorsCfg, poolSettings.PredictorsCfg, InstanceCfg.PredictorsCfg);
-                    int numOfPrimeNeurons = ngs.Type == ActivationType.Spiking ? (int)Math.Round(((SpikingNeuronGroupSettings)ngs).PrimeRatio * ngs.Count, 0) : 0;
                     //Group neuron params
                     for (int i = 0; i < ngs.Count; i++)
                     {
@@ -140,7 +139,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                         {
                             SignalingRestriction = ngs.SignalingRestriction,
                             Activation = ActivationFactory.Create(ngs.ActivationCfg, rand),
-                            Prime = (i < numOfPrimeNeurons),
                             Bias = ngs.BiasCfg == null ? 0 : rand.NextDouble(ngs.BiasCfg),
                             GroupID = groupID,
                             AnalogFiringThreshold = ngs.Type == ActivationType.Spiking ? -1 : ((AnalogNeuronGroupSettings)ngs).FiringThreshold,
@@ -208,7 +206,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                                 //Use constructor for hidden neuron having spiking activation
                                 poolNeurons[neuronPoolFlatIdx] = new HiddenNeuron(location,
                                                                                   neuronParamCollection[neuronPoolFlatIdx].Activation,
-                                                                                  neuronParamCollection[neuronPoolFlatIdx].Prime,
                                                                                   neuronParamCollection[neuronPoolFlatIdx].Bias,
                                                                                   neuronParamCollection[neuronPoolFlatIdx].PredictorsCfg
                                                                                   );
@@ -745,7 +742,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
 
             for (int repetition = 1; repetition <= schemaCfg.Repetitions; repetition++)
             {
-                foreach (HiddenNeuron targetNeuron in (from neuron in _poolNeuronCollection[poolID] where !neuron.Prime select neuron))
+                foreach (HiddenNeuron targetNeuron in _poolNeuronCollection[poolID])
                 {
                     //Determine connection counts
                     int intendedNumOfSynapses = (int)(Math.Round(((double)poolSettings.ProportionsCfg.Size) * schemaCfg.Density));
@@ -772,11 +769,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             RelShareSelector<Synapse.SynRole> spikingRoleSelector = new RelShareSelector<Synapse.SynRole>();
             spikingRoleSelector.Add(InstanceCfg.SynapseCfg.SpikingTargetCfg.ExcitatorySynCfg.RelShare, Synapse.SynRole.Excitatory);
             spikingRoleSelector.Add(InstanceCfg.SynapseCfg.SpikingTargetCfg.InhibitorySynCfg.RelShare, Synapse.SynRole.Inhibitory);
-            List<HiddenNeuron> chainableNeurons = new List<HiddenNeuron>(from neuron in _poolNeuronCollection[poolID] where !neuron.Prime select neuron);
+            List<HiddenNeuron> chainNeurons = new List<HiddenNeuron>(_poolNeuronCollection[poolID]);
 
             for (int repetition = 1; repetition <= schemaCfg.Repetitions; repetition++)
             {
-                int chainLength = (int)Math.Round(schemaCfg.Ratio * chainableNeurons.Count);
+                int chainLength = (int)Math.Round(schemaCfg.Ratio * chainNeurons.Count);
                 if(chainLength < 2)
                 {
                     //Nothing to do
@@ -784,7 +781,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                 }
                 //////////////////////////////////////////////////////////////////////////////////////
                 //Collect neurons to be chained
-                List<HiddenNeuron> chainNeuronCollection = new List<HiddenNeuron>(chainableNeurons);
+                List<HiddenNeuron> chainNeuronCollection = new List<HiddenNeuron>(chainNeurons);
                 rand.Shuffle(chainNeuronCollection);
                 if(chainLength < chainNeuronCollection.Count)
                 {
@@ -827,7 +824,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             PoolSettings targetPoolSettings = StructureCfg.PoolsCfg.PoolCfgCollection[targetPoolID];
             int sourcePoolID = StructureCfg.PoolsCfg.GetPoolID(cfg.SourcePoolName);
             PoolSettings sourcePoolSettings = StructureCfg.PoolsCfg.PoolCfgCollection[sourcePoolID];
-            List<HiddenNeuron> targetNeurons = new List<HiddenNeuron>(from neuron in _poolNeuronCollection[targetPoolID] where !neuron.Prime select neuron);
+            List<HiddenNeuron> targetNeurons = new List<HiddenNeuron>(_poolNeuronCollection[targetPoolID]);
             int numOfTargetNeurons = (int)Math.Round(((double)targetNeurons.Count) * cfg.TargetConnectionDensity);
             rand.Shuffle(targetNeurons);
             List<HiddenNeuron> sourceNeurons = new List<HiddenNeuron>(_poolNeuronCollection[sourcePoolID]);
@@ -959,7 +956,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         {
             public NeuronCommon.NeuronSignalingRestrictionType SignalingRestriction { get; set; }
             public IActivationFunction Activation { get; set; }
-            public bool Prime { get; set; }
             public double Bias { get; set; }
             public int GroupID { get; set; }
             public double AnalogFiringThreshold { get; set; }

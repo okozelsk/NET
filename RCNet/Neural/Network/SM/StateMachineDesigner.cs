@@ -327,10 +327,9 @@ namespace RCNet.Neural.Network.SM
         /// Creates configuration of group of spiking neurons having specified spiking activation.
         /// </summary>
         /// <param name="activationCfg">Activation function configuration</param>
-        /// <param name="primeRatio">Ratio of the prime neurons receiving only input stimuli</param>
         /// <param name="heCfg">Configuration of the homogenous excitability</param>
         /// <param name="steadyBias">Constant bias (0 means bias is not required)</param>
-        private SpikingNeuronGroupSettings CreateSpikingGroup(RCNetBaseSettings activationCfg, double primeRatio, HomogenousExcitabilitySettings heCfg, double steadyBias = 0d)
+        private SpikingNeuronGroupSettings CreateSpikingGroup(RCNetBaseSettings activationCfg, HomogenousExcitabilitySettings heCfg, double steadyBias = 0d)
         {
             //Bias configuration
             RandomValueSettings biasCfg = steadyBias == 0 ? null : new RandomValueSettings(steadyBias, steadyBias);
@@ -338,7 +337,6 @@ namespace RCNet.Neural.Network.SM
             SpikingNeuronGroupSettings groupCfg = new SpikingNeuronGroupSettings(GetNeuronGroupName(activationCfg),
                                                                                  1d,
                                                                                  activationCfg,
-                                                                                 primeRatio,
                                                                                  heCfg,
                                                                                  biasCfg,
                                                                                  null
@@ -437,7 +435,6 @@ namespace RCNet.Neural.Network.SM
         /// <param name="proportionsCfg">LSM pool proportions</param>
         /// <param name="aFnCfg">Spiking activation function configuration</param>
         /// <param name="hes">Homogenous excitability configuration</param>
-        /// <param name="primeRatio">Ratio of the prime neurons (receiving only input)</param>
         /// <param name="inputConnectionDensity">Density of the input field connections to hidden neurons</param>
         /// <param name="maxInputDelay">Maximum delay of input synapse</param>
         /// <param name="interconnectionDensity">Density of the hidden neurons interconnection</param>
@@ -448,7 +445,6 @@ namespace RCNet.Neural.Network.SM
         public StateMachineSettings CreatePureLSMCfg(ProportionsSettings proportionsCfg,
                                                      RCNetBaseSettings aFnCfg,
                                                      HomogenousExcitabilitySettings hes,
-                                                     double primeRatio,
                                                      double inputConnectionDensity,
                                                      int maxInputDelay,
                                                      double interconnectionDensity,
@@ -464,7 +460,7 @@ namespace RCNet.Neural.Network.SM
                 throw new ArgumentException("Specified activation must be spiking.", "aFnCfg");
             }
             //One neuron group
-            SpikingNeuronGroupSettings grp = CreateSpikingGroup(aFnCfg, primeRatio, hes, steadyBias);
+            SpikingNeuronGroupSettings grp = CreateSpikingGroup(aFnCfg, hes, steadyBias);
             //Simple spiking pool
             PoolSettings poolCfg = new PoolSettings(GetPoolName(ActivationContent.Spiking, 0),
                                                     proportionsCfg,
