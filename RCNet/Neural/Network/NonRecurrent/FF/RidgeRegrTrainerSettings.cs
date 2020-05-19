@@ -110,7 +110,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         /// <summary>
         /// Checks if settings are default
         /// </summary>
-        public bool IsDefaultLambdaSeeker { get { return (LambdaSeekerCfg.Min == DefaultMinLambda && LambdaSeekerCfg.Max == DefaultMaxLambda && LambdaSeekerCfg.NumOfSteps == DefaultSteps); } }
+        public bool IsDefaultLambdaSeeker { get { return (LambdaSeekerCfg.Min == DefaultMinLambda && LambdaSeekerCfg.Max == DefaultMaxLambda && LambdaSeekerCfg.NumOfSubIntervals == DefaultSteps); } }
 
         /// <summary>
         /// Identifies settings containing only default values

@@ -109,7 +109,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             ///////////////////////////////////////////////////////////////////////////////////
             //Input encoder
             InputEncoder = new InputEncoder(_preprocessorCfg.InputEncoderCfg);
-            List<PredictorDescriptor> inputEncoderNeuralPredictorDescCollection = InputEncoder.GetNeuralPredictorsDescriptors();
             List<PredictorDescriptor> inputEncoderFieldsPredictorDescCollection = InputEncoder.GetInputValuesPredictorsDescriptors();
             ///////////////////////////////////////////////////////////////////////////////////
             //Reservoir instance(s)
@@ -152,7 +151,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             OutputFeatureDescriptorCollection.AddRange(inputEncoderFieldsPredictorDescCollection);
             for (int i = 0; i < (Bidir ? 2 : 1); i++)
             {
-                OutputFeatureDescriptorCollection.AddRange(inputEncoderNeuralPredictorDescCollection);
                 OutputFeatureDescriptorCollection.AddRange(reservoirsPredictorDescriptorCollection);
             }
             return;
@@ -313,8 +311,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             outputFeaturesIdx += InputEncoder.CopyRoutedInputDataTo(outputFeatures, outputFeaturesIdx);
             //Process input data in reservoirs
             ProcessInputEncoderPendingData(collectStatistics);
-            //Collect input neural predictors
-            outputFeaturesIdx += InputEncoder.CopyPredictorsTo(outputFeatures, outputFeaturesIdx);
             //Collect reservoirs' neural predictors
             outputFeaturesIdx += CopyReservoirsPredictorsTo(outputFeatures, outputFeaturesIdx);
             //Bidirectional input processing?
@@ -324,8 +320,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 InputEncoder.SetReverseMode();
                 //Process input data in reservoirs
                 ProcessInputEncoderPendingData(collectStatistics);
-                //Collect input neural predictors
-                outputFeaturesIdx += InputEncoder.CopyPredictorsTo(outputFeatures, outputFeaturesIdx);
                 //Collect reservoirs' neural predictors - the last features
                 CopyReservoirsPredictorsTo(outputFeatures, outputFeaturesIdx);
             }

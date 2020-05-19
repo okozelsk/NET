@@ -421,11 +421,15 @@
     <xs:attribute type="UDoubleGT0Type" name="max" use="required"/>
   </xs:complexType>
 
-  <!-- Parameter value seeker - configuration -->
+  <!-- Parameter value seeker configuration element -->
   <xs:complexType name="ParamSeekerType">
     <xs:attribute type="xs:double" name="min" use="required"/>
     <xs:attribute type="xs:double" name="max" use="required"/>
-    <xs:attribute type="UIntGT1Type" name="steps" use="required"/>
+    <xs:attribute type="UIntGT0AutoOptionType" name="subIntervals" use="optional" default="Auto">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is Auto</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- ________________________________________SIGNAL GENERATORS TYPES_____________________________________________ -->
@@ -2117,7 +2121,6 @@
           <xs:element type="NPInputSpikeCodeType" name="spikeCode" minOccurs="0" maxOccurs="1"/>
         </xs:sequence>
       </xs:choice>
-      <xs:element type="PredictorsType" name="predictors" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:string" name="name" use="required"/>
     <xs:attribute type="xs:boolean" name="routeToReadout" use="optional" default="true">
@@ -2151,7 +2154,6 @@
       </xs:choice>
       <xs:element type="RealFeatureFilterType" name="realFeature" minOccurs="0" maxOccurs="1"/>
       <xs:element type="NPInputSpikeCodeType" name="spikeCode" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="PredictorsType" name="predictors" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:string" name="name" use="required"/>
     <xs:attribute type="xs:boolean" name="routeToReadout" use="optional" default="true">
@@ -2179,7 +2181,6 @@
       </xs:choice>
       <xs:element type="RealFeatureFilterType" name="realFeature" minOccurs="0" maxOccurs="1"/>
       <xs:element type="NPInputSpikeCodeType" name="spikeCode" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="PredictorsType" name="predictors" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:string" name="name" use="required"/>
     <xs:attribute type="xs:boolean" name="routeToReadout" use="optional" default="false">
@@ -2203,7 +2204,6 @@
       <xs:element type="NPExternalInpFieldsType" name="externalFields" minOccurs="1" maxOccurs="1"/>
       <xs:element type="NPTransformedInpFieldsType" name="transformedFields" minOccurs="0" maxOccurs="1"/>
       <xs:element type="NPGeneratedInpFieldsType" name="generatedFields" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="PredictorsType" name="predictors" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
   </xs:complexType>
   

@@ -57,10 +57,8 @@ namespace Demo.DemoConsoleApp.Examples
             //We use FeedingContinuousSettings.AutoBootCyclesNum so necessary number of boot cycles will be automatically determined
             //based on neural preprocessor structure
             FeedingContinuousSettings feedingContinuousCfg = new FeedingContinuousSettings(FeedingContinuousSettings.AutoBootCyclesNum, RouteToReadout);
-            //We don't want use predictors going from input spiking neurons
-            PredictorsSettings predictorsCfg = new PredictorsSettings(false, false, false, false, false, false, false, false);
             //Create and return input configuration
-            return new InputEncoderSettings(feedingContinuousCfg, new FieldsSettings(externalFieldsCfg, null, null, predictorsCfg));
+            return new InputEncoderSettings(feedingContinuousCfg, new FieldsSettings(externalFieldsCfg));
         }
 
         /// <summary>

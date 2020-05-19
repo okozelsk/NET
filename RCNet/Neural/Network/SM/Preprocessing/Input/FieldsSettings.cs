@@ -43,11 +43,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// </summary>
         public GeneratedFieldsSettings GeneratedFieldsCfg { get; }
 
-        /// <summary>
-        /// Predictors settings
-        /// </summary>
-        public PredictorsSettings PredictorsCfg { get; }
-
         //Constructors
         /// <summary>
         /// Creates an initialized instance
@@ -55,17 +50,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <param name="externalFieldsCfg">External input fields settings</param>
         /// <param name="transformedFieldsCfg">Transformed input fields settings</param>
         /// <param name="generatedFieldsCfg">Generated input fields settings</param>
-        /// <param name="predictorsCfg">Predictors configuration</param>
         public FieldsSettings(ExternalFieldsSettings externalFieldsCfg,
                               TransformedFieldsSettings transformedFieldsCfg = null,
-                              GeneratedFieldsSettings generatedFieldsCfg = null,
-                              PredictorsSettings predictorsCfg = null
+                              GeneratedFieldsSettings generatedFieldsCfg = null
                               )
         {
             ExternalFieldsCfg = (ExternalFieldsSettings)externalFieldsCfg.DeepClone();
             TransformedFieldsCfg = transformedFieldsCfg == null ? null : (TransformedFieldsSettings)transformedFieldsCfg.DeepClone();
             GeneratedFieldsCfg = generatedFieldsCfg == null ? null : (GeneratedFieldsSettings)generatedFieldsCfg.DeepClone();
-            PredictorsCfg = predictorsCfg == null ? null : (PredictorsSettings)predictorsCfg.DeepClone();
             Check();
             return;
         }
@@ -75,7 +67,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// </summary>
         /// <param name="source">Source instance</param>
         public FieldsSettings(FieldsSettings source)
-            :this(source.ExternalFieldsCfg, source.TransformedFieldsCfg, source.GeneratedFieldsCfg, source.PredictorsCfg)
+            :this(source.ExternalFieldsCfg, source.TransformedFieldsCfg, source.GeneratedFieldsCfg)
         {
             return;
         }
@@ -94,8 +86,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             TransformedFieldsCfg = transformedFieldsElem == null ? null : new TransformedFieldsSettings(transformedFieldsElem);
             XElement generatedFieldsElem = settingsElem.Elements("generatedFields").FirstOrDefault();
             GeneratedFieldsCfg = generatedFieldsElem == null ? null : new GeneratedFieldsSettings(generatedFieldsElem);
-            XElement predictorsElem = settingsElem.Elements("predictors").FirstOrDefault();
-            PredictorsCfg = predictorsElem == null ? null : new PredictorsSettings(predictorsElem);
             Check();
             return;
         }
@@ -289,10 +279,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             if (GeneratedFieldsCfg != null)
             {
                 rootElem.Add(GeneratedFieldsCfg.GetXml(suppressDefaults));
-            }
-            if (PredictorsCfg != null && (!PredictorsCfg.ContainsOnlyDefaults || !suppressDefaults))
-            {
-                rootElem.Add(PredictorsCfg.GetXml(suppressDefaults));
             }
             Validate(rootElem, XsdTypeName);
             return rootElem;

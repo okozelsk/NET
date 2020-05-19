@@ -21,6 +21,18 @@ namespace RCNet.MathTools.PS
         /// Name of the associated xsd type
         /// </summary>
         public const string XsdTypeName = "ParamSeekerType";
+        /// <summary>
+        /// Automatic number of sub-intervals (code)
+        /// </summary>
+        public const string AutoSubIntervalsCode = "Auto";
+        /// <summary>
+        /// Automatic number of sub-intervals (num)
+        /// </summary>
+        public const int AutoSubIntervalsNum = -1;
+        /// <summary>
+        /// Default value of parameter specifying number of sub-intervals
+        /// </summary>
+        public const int DefaultNumOfSubIntervals = AutoSubIntervalsNum;
 
         //Attribute properties
         /// <summary>
@@ -32,9 +44,9 @@ namespace RCNet.MathTools.PS
         /// </summary>
         public double Max { get; }
         /// <summary>
-        /// Number of steps dividing searched interval
+        /// Number of subintervals to use to process currently focused interval
         /// </summary>
-        public int NumOfSteps { get; }
+        public int NumOfSubIntervals { get; }
 
         //Constructors
         /// <summary>
@@ -42,12 +54,12 @@ namespace RCNet.MathTools.PS
         /// </summary>
         /// <param name="min">Min value of the parameter to be considered</param>
         /// <param name="max">Max value of the parameter to be considered</param>
-        /// <param name="numOfSteps">Number of steps dividing the searched interval</param>
-        public ParamSeekerSettings(double min, double max, int numOfSteps)
+        /// <param name="numOfSubIntervals">Number of subintervals to use to process currently focused interval</param>
+        public ParamSeekerSettings(double min, double max, int numOfSubIntervals = DefaultNumOfSubIntervals)
         {
             Min = min;
             Max = max;
-            NumOfSteps = numOfSteps;
+            NumOfSubIntervals = numOfSubIntervals;
             Check();
             return;
         }
@@ -57,10 +69,8 @@ namespace RCNet.MathTools.PS
         /// </summary>
         /// <param name="source">Source instance</param>
         public ParamSeekerSettings(ParamSeekerSettings source)
+            :this(source.Min, source.Max, source.NumOfSubIntervals)
         {
-            Min = source.Min;
-            Max = source.Max;
-            NumOfSteps = source.NumOfSteps;
             return;
         }
 
@@ -75,12 +85,18 @@ namespace RCNet.MathTools.PS
             //Parsing
             Min = double.Parse(settingsElem.Attribute("min").Value, CultureInfo.InvariantCulture);
             Max = double.Parse(settingsElem.Attribute("max").Value, CultureInfo.InvariantCulture);
-            NumOfSteps = int.Parse(settingsElem.Attribute("steps").Value, CultureInfo.InvariantCulture);
+            string subIntervals = settingsElem.Attribute("subIntervals").Value;
+            NumOfSubIntervals = subIntervals == AutoSubIntervalsCode ? AutoSubIntervalsNum : int.Parse(subIntervals, CultureInfo.InvariantCulture);
             Check();
             return;
         }
 
         //Properties
+        /// <summary>
+        /// Checks if settings are default
+        /// </summary>
+        public bool IsDefaultNumOfSubIntervals { get { return (NumOfSubIntervals == DefaultNumOfSubIntervals); } }
+
         /// <summary>
         /// Identifies settings containing only default values
         /// </summary>
@@ -96,9 +112,16 @@ namespace RCNet.MathTools.PS
             {
                 throw new Exception($"Incorrect min ({Min.ToString(CultureInfo.InvariantCulture)}) and/or max ({Max.ToString(CultureInfo.InvariantCulture)}) values. Max must be GE to min and both values must be GE 0.");
             }
-            if (NumOfSteps < 2)
+            if (NumOfSubIntervals != AutoSubIntervalsNum)
             {
-                throw new Exception($"Incorrect numOfSteps ({NumOfSteps.ToString(CultureInfo.InvariantCulture)}). Value must be GE to 2.");
+                if (NumOfSubIntervals < 1)
+                {
+                    throw new Exception($"Incorrect numOfSteps ({NumOfSubIntervals.ToString(CultureInfo.InvariantCulture)}). Value must be GE to 1.");
+                }
+                if (Min == Max && NumOfSubIntervals != 1)
+                {
+                    throw new Exception($"Incorrect numOfSteps ({NumOfSubIntervals.ToString(CultureInfo.InvariantCulture)}). Value must be 1 when Min=Max.");
+                }
             }
             return;
         }
@@ -119,10 +142,15 @@ namespace RCNet.MathTools.PS
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
-            return Validate(new XElement(rootElemName, new XAttribute("min", Min.ToString(CultureInfo.InvariantCulture)),
-                                                       new XAttribute("max", Max.ToString(CultureInfo.InvariantCulture)),
-                                                       new XAttribute("steps", NumOfSteps.ToString(CultureInfo.InvariantCulture))),
-                                                       XsdTypeName);
+            XElement rootElem = new XElement(rootElemName, new XAttribute("min", Min.ToString(CultureInfo.InvariantCulture)),
+                                                           new XAttribute("max", Max.ToString(CultureInfo.InvariantCulture))
+                                             );
+            if (!suppressDefaults || !IsDefaultNumOfSubIntervals)
+            {
+                rootElem.Add(new XAttribute("subIntervals", NumOfSubIntervals == AutoSubIntervalsNum ? AutoSubIntervalsCode : NumOfSubIntervals.ToString(CultureInfo.InvariantCulture)));
+            }
+            Validate(rootElem, XsdTypeName);
+            return rootElem;
         }
 
     }//ParamSeekerSettings

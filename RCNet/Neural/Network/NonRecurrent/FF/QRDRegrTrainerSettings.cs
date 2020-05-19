@@ -134,7 +134,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         /// <summary>
         /// Checks if settings are default
         /// </summary>
-        public bool IsDefaultNoiseSeeker { get { return (NoiseSeekerCfg.Min == DefaultMinNoise && NoiseSeekerCfg.Max == DefaultMaxNoise && NoiseSeekerCfg.NumOfSteps == DefaultSteps); } }
+        public bool IsDefaultNoiseSeeker { get { return (NoiseSeekerCfg.Min == DefaultMinNoise && NoiseSeekerCfg.Max == DefaultMaxNoise && NoiseSeekerCfg.NumOfSubIntervals == DefaultSteps); } }
 
         /// <summary>
         /// Identifies settings containing only default values

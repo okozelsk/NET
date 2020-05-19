@@ -4,6 +4,93 @@
   <!--
     This demo case demonstrates successful use of the pure analog ESN reservoir for the fast and accurate classifications enabled by
     the new ability of the analog neurons to fire a spike.
+    Following straightforward configuration of the StateMachine exhibits 90.00% accuracy, slightly worse the best algorithm
+    called BOSS, referenced at the dataset's home site:
+    "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
+    https://timeseriesclassification.com/description.php?Dataset=BeetleFly.
+    MPEG-7 CE Shape-1 Part B is a database of binary images developed for testing MPEG-7 shape descriptors, and is available free online. 
+    It is used for testing contour/image and skeleton-based descriptors. Classes of images vary broadly, and include classes that are
+    similar in shape to one another. There are 20 instances of each class, and 60 classes in total.
+    We have extracted the outlines of these images and mapped them into 1-D series of distances to the centre. 
+    Beetle/Fly is the problem of distinguishing between an outline of a beetle and a fly.
+  -->
+  <case name="Classification task BeetleFly: Simple pure ESN reservoir generating FiringFadingSum predictors, one Identity neuron as a classifier (Ridge regression trainer)">
+    <samples trainingData="BeetleFly_train.csv" verificationData="BeetleFly_verify.csv"/>
+    <stateMachineCfg randomizerSeek="0">
+      <neuralPreprocessor predictorsReductionRatio="0.1">
+        <inputEncoder>
+          <feedingPatterned bidir="false">
+            <unification unifyAmplitude="false" detrend="false">
+              <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
+            </unification>
+          </feedingPatterned>
+          <fields>
+            <externalFields>
+              <field name="DistanceFromCenter">
+                <realFeature standardize="true" keepReserve="true"/>
+              </field>
+            </externalFields>
+          </fields>
+        </inputEncoder>
+        <reservoirStructures>
+          <reservoirStructure name="MainCfg">
+            <pools>
+              <pool name="PureESN">
+                <proportions dimX="6" dimY="6" dimZ="5"/>
+                <neuronGroups>
+                  <analogGroup name="TanH-grp" relShare="1" firingThreshold="0.00125" signalingRestriction="NoRestriction">
+                    <activationTanH/>
+                  </analogGroup>
+                </neuronGroups>
+                <interconnection>
+                  <randomSchema density="0.15" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false"/>
+                </interconnection>
+              </pool>
+            </pools>
+          </reservoirStructure>
+        </reservoirStructures>
+        <reservoirInstances>
+          <reservoirInstance name="Main" reservoirStructure="MainCfg">
+            <inputConnections>
+              <connection inputFieldName="DistanceFromCenter" poolName="PureESN"/>
+            </inputConnections>
+            <predictors activation="false"
+                        activationSquare="false"
+                        activationFadingSum="false"
+                        activationMWAvg="false"
+                        firingFadingSum="true"
+                        firingMWAvg="false"
+                        firingCount="false"
+                        firingBinPattern="false">
+            </predictors>
+          </reservoirInstance>
+        </reservoirInstances>
+      </neuralPreprocessor>
+      <readoutLayer testDataRatio="0.1" folds="Auto">
+        <defaultNetworks/>
+        <readoutUnits>
+          <readoutUnit name="Beetle1Fly0">
+            <classification>
+              <networks>
+                <ff>
+                  <activationIdentity/>
+                  <ridgeRegrTrainer attemptEpochs="1000">
+                    <lambda min="0" max="1" subIntervals="Auto"/>
+                  </ridgeRegrTrainer>
+                </ff>
+              </networks>
+            </classification>
+          </readoutUnit>
+        </readoutUnits>
+      </readoutLayer>
+    </stateMachineCfg>
+  </case>
+
+
+
+  <!--
+    This demo case demonstrates successful use of the pure analog ESN reservoir for the fast and accurate classifications enabled by
+    the new ability of the analog neurons to fire a spike.
     Following straightforward configuration of the StateMachine exhibits 100% accuracy, slightly better than the best algorithm
     called BOSS, referenced at the dataset's home site:
     "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
@@ -31,15 +118,6 @@
                 <spikeCode componentHalfCodeLength="16" lowestThreshold="1e-3" useDeviation="true" useDifference="false"/>
               </field>
             </externalFields>
-            <predictors activation="false"
-                        activationSquare="false"
-                        activationFadingSum="false"
-                        activationMWAvg="false"
-                        firingFadingSum="false"
-                        firingMWAvg="false"
-                        firingCount="false"
-                        firingBinPattern="false">
-            </predictors>
           </fields>
         </inputEncoder>
         <reservoirStructures>
@@ -48,12 +126,12 @@
               <pool name="PureESN">
                 <proportions dimX="6" dimY="6" dimZ="5"/>
                 <neuronGroups>
-                  <analogGroup name="TanH-grp" firingThreshold="0.0025" relShare="1" signalingRestriction="NoRestriction">
+                  <analogGroup name="TanH-grp" firingThreshold="0.00125" relShare="1" signalingRestriction="NoRestriction">
                     <activationTanH/>
                   </analogGroup>
                 </neuronGroups>
                 <interconnection>
-                  <randomSchema density="0.1" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false"/>
+                  <randomSchema density="0.2" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false"/>
                 </interconnection>
               </pool>
             </pools>
@@ -133,15 +211,6 @@
                 <spikeCode componentHalfCodeLength="16" lowestThreshold="1e-6" useDeviation="true" useDifference="true"/>
               </field>
             </externalFields>
-            <predictors activation="false"
-                        activationSquare="false"
-                        activationFadingSum="false"
-                        activationMWAvg="false"
-                        firingFadingSum="true"
-                        firingMWAvg="false"
-                        firingCount="false"
-                        firingBinPattern="false">
-            </predictors>
           </fields>
         </inputEncoder>
         <reservoirStructures>
@@ -278,7 +347,7 @@
   <case name="Classification task BirdChicken: Simple pure ESN reservoir generating FiringFadingSum predictors, one Identity neuron as a classifier (Ridge regression trainer)">
     <samples trainingData="BirdChicken_train.csv" verificationData="BirdChicken_verify.csv"/>
     <stateMachineCfg randomizerSeek="0">
-      <neuralPreprocessor>
+      <neuralPreprocessor predictorsReductionRatio="0.1">
         <inputEncoder>
           <feedingPatterned bidir="false">
             <unification unifyAmplitude="false" detrend="false">
@@ -291,15 +360,6 @@
                 <realFeature standardize="true" keepReserve="true"/>
               </field>
             </externalFields>
-            <predictors activation="false"
-                        activationSquare="false"
-                        activationFadingSum="false"
-                        activationMWAvg="false"
-                        firingFadingSum="false"
-                        firingMWAvg="false"
-                        firingCount="false"
-                        firingBinPattern="false">
-            </predictors>
           </fields>
         </inputEncoder>
         <reservoirStructures>
@@ -308,12 +368,12 @@
               <pool name="PureESN">
                 <proportions dimX="6" dimY="6" dimZ="5"/>
                 <neuronGroups>
-                  <analogGroup name="TanH-grp" relShare="1" signalingRestriction="NoRestriction">
+                  <analogGroup name="TanH-grp" firingThreshold="0.00125" relShare="1" signalingRestriction="NoRestriction">
                     <activationTanH/>
                   </analogGroup>
                 </neuronGroups>
                 <interconnection>
-                  <randomSchema density="0.2" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false"/>
+                  <randomSchema density="0.15" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false"/>
                 </interconnection>
               </pool>
             </pools>
@@ -345,7 +405,7 @@
                 <ff>
                   <activationIdentity/>
                   <ridgeRegrTrainer attemptEpochs="1">
-                    <lambda min="0.1" max="0.1" steps="2"/>
+                    <lambda min="0.1" max="0.1"/>
                   </ridgeRegrTrainer>
                 </ff>
               </networks>
@@ -386,15 +446,6 @@
                 <realFeature standardize="true" keepReserve="true"/>
               </field>
             </externalFields>
-            <predictors activation="false"
-                        activationSquare="false"
-                        activationFadingSum="false"
-                        activationMWAvg="false"
-                        firingFadingSum="false"
-                        firingMWAvg="false"
-                        firingCount="false"
-                        firingBinPattern="false">
-            </predictors>
           </fields>
         </inputEncoder>
         <reservoirStructures>
@@ -440,7 +491,7 @@
                 <ff>
                   <activationIdentity/>
                   <ridgeRegrTrainer attemptEpochs="1">
-                    <lambda min="0.1" max="0.1" steps="2"/>
+                    <lambda min="0.1" max="0.1"/>
                   </ridgeRegrTrainer>
                 </ff>
               </networks>
@@ -496,15 +547,6 @@
                 <spikeCode componentHalfCodeLength="8" useDeviation="true" useDifference="false"/>
               </field>
             </transformedFields>
-            <predictors activation="false"
-                        activationSquare="false"
-                        activationFadingSum="false"
-                        activationMWAvg="false"
-                        firingFadingSum="false"
-                        firingMWAvg="false"
-                        firingCount="false"
-                        firingBinPattern="false">
-            </predictors>
           </fields>
         </inputEncoder>
         <reservoirStructures>
@@ -681,15 +723,6 @@
                 <realFeature/>
               </field>
             </externalFields>
-            <predictors activation="false"
-                        activationSquare="false"
-                        activationFadingSum="false"
-                        activationMWAvg="false"
-                        firingFadingSum="true"
-                        firingMWAvg="false"
-                        firingCount="false"
-                        firingBinPattern="false">
-            </predictors>
           </fields>
         </inputEncoder>
         <reservoirStructures>
@@ -850,15 +883,6 @@
                 <yeoJohnson fieldName="Eigenworm1" lambda="0.5"/>
               </field>
             </transformedFields>
-            <predictors activation="false"
-                        activationSquare="false"
-                        activationFadingSum="false"
-                        activationMWAvg="false"
-                        firingFadingSum="false"
-                        firingMWAvg="false"
-                        firingCount="false"
-                        firingBinPattern="false">
-            </predictors>
           </fields>
         </inputEncoder>
         <reservoirStructures>
@@ -974,15 +998,6 @@
                 <realFeature/>
               </field>
             </externalFields>
-            <predictors activation="false"
-                        activationSquare="false"
-                        activationFadingSum="false"
-                        activationMWAvg="false"
-                        firingFadingSum="false"
-                        firingMWAvg="false"
-                        firingCount="false"
-                        firingBinPattern="false">
-            </predictors>
           </fields>
         </inputEncoder>
         <reservoirStructures>
@@ -1110,15 +1125,6 @@
                 <realFeature standardize="true" keepReserve="false"/>
               </field>
             </externalFields>
-            <predictors activation="false"
-                        activationSquare="false"
-                        activationFadingSum="false"
-                        activationMWAvg="false"
-                        firingFadingSum="false"
-                        firingMWAvg="false"
-                        firingCount="false"
-                        firingBinPattern="false">
-            </predictors>
           </fields>
         </inputEncoder>
         <reservoirStructures>
@@ -1222,7 +1228,7 @@
                 <ff>
                   <activationIdentity/>
                   <qrdRegrTrainer attempts="1" attemptEpochs="1">
-                    <noise min="0" max="0" steps="2"/>
+                    <noise min="0" max="0" subIntervals="1"/>
                   </qrdRegrTrainer>
                 </ff>
               </networks>
@@ -1258,15 +1264,6 @@
                 <realFeature standardize="true" keepReserve="false"/>
               </field>
             </externalFields>
-            <predictors activation="false"
-                        activationSquare="false"
-                        activationFadingSum="false"
-                        activationMWAvg="false"
-                        firingFadingSum="false"
-                        firingMWAvg="false"
-                        firingCount="false"
-                        firingBinPattern="false">
-            </predictors>
           </fields>
         </inputEncoder>
         <reservoirStructures>
@@ -1372,15 +1369,6 @@
                 <realFeature standardize="true" keepReserve="false"/>
               </field>
             </externalFields>
-            <predictors activation="false"
-                        activationSquare="false"
-                        activationFadingSum="false"
-                        activationMWAvg="false"
-                        firingFadingSum="false"
-                        firingMWAvg="false"
-                        firingCount="false"
-                        firingBinPattern="false">
-            </predictors>
           </fields>
         </inputEncoder>
         <reservoirStructures>
@@ -1486,15 +1474,6 @@
                 <realFeature />
               </field>
             </externalFields>
-            <predictors activation="false"
-                        activationSquare="false"
-                        activationFadingSum="false"
-                        activationMWAvg="false"
-                        firingFadingSum="false"
-                        firingMWAvg="false"
-                        firingCount="false"
-                        firingBinPattern="false">
-            </predictors>
           </fields>
         </inputEncoder>
         <reservoirStructures>
@@ -1629,15 +1608,6 @@
                 <spikeCode componentHalfCodeLength="20" useDeviation="true" useDifference="false"/>
               </field>
             </externalFields>
-            <predictors activation="false"
-                        activationSquare="false"
-                        activationFadingSum="false"
-                        activationMWAvg="false"
-                        firingFadingSum="true"
-                        firingMWAvg="false"
-                        firingCount="false"
-                        firingBinPattern="false">
-            </predictors>
           </fields>
         </inputEncoder>
         <reservoirStructures>

@@ -48,10 +48,9 @@ namespace Demo.DemoConsoleApp.Examples
             //Create StateMachine configuration
             //Simplified input configuration
             InputEncoderSettings inputCfg = StateMachineDesigner.CreateInputCfg(new FeedingPatternedSettings(true, false, RCNet.Neural.Data.InputPattern.VariablesSchema.Groupped),
-                                                                         null,
-                                                                         new ExternalFieldSettings("coord_abcissa", new RealFeatureFilterSettings()),
-                                                                         new ExternalFieldSettings("coord_ordinate", new RealFeatureFilterSettings())
-                                                                         );
+                                                                                new ExternalFieldSettings("coord_abcissa", new RealFeatureFilterSettings()),
+                                                                                new ExternalFieldSettings("coord_ordinate", new RealFeatureFilterSettings())
+                                                                                );
             //Simplified readout layer configuration
             ReadoutLayerSettings readoutCfg = StateMachineDesigner.CreateClassificationReadoutCfg(StateMachineDesigner.CreateSingleLayerRegrNet(new IdentitySettings(), 5, 400),
                                                                                                   0.0825d,
@@ -76,7 +75,16 @@ namespace Demo.DemoConsoleApp.Examples
             //Create designer instance
             StateMachineDesigner smd = new StateMachineDesigner(inputCfg, readoutCfg);
             //Create pure ESN fashioned StateMachine configuration
-            StateMachineSettings stateMachineCfg = smd.CreatePureESNCfg(150, 0.25d, 5, 0.1d, 0, 0, 0, null, PredictorsProvider.PredictorID.FiringCount);
+            StateMachineSettings stateMachineCfg = smd.CreatePureESNCfg(150,
+                                                                        0.25d,
+                                                                        5,
+                                                                        0.1d,
+                                                                        0,
+                                                                        0,
+                                                                        0,
+                                                                        null,
+                                                                        PredictorsProvider.PredictorID.FiringCount
+                                                                        );
             //Display StateMachine xml configuration
             string xmlConfig = stateMachineCfg.GetXml(true).ToString();
             _log.Write("StateMachine configuration xml:");

@@ -8,15 +8,21 @@ using RCNet.MathTools;
 namespace RCNet.MathTools.PS
 {
     /// <summary>
-    /// The class implements an result driven iterative search for the optimal value of a given parameter
+    /// Implements result driven iterative search for the optimal value of a given parameter
     /// </summary>
     [Serializable]
     public class ParamSeeker
     {
+        //Constants
+        /// <summary>
+        /// Default number of inner points dividing focused interval (relevant for nonzero span interval)
+        /// </summary>
+        public const int DefaultNumOfIntervalInnerPoints = 1;
+
         //Attributes
-        private readonly ParamSeekerSettings _settings;
-        private readonly ValueError[] _plannedValues;
-        private int _planIdx;
+        private readonly int _numOfIntervalInnerPoints;
+        private readonly TestCase[] _testCaseCollection;
+        private int _currentTestCaseIdx;
 
         //Constructor
         /// <summary>
@@ -25,9 +31,33 @@ namespace RCNet.MathTools.PS
         /// <param name="settings">Configuration parameters</param>
         public ParamSeeker(ParamSeekerSettings settings)
         {
-            _settings = (ParamSeekerSettings)settings.DeepClone();
-            _plannedValues = new ValueError[_settings.NumOfSteps + 1];
-            Replan(_settings.Min, double.NaN, _settings.Max, double.NaN);
+            if(settings.NumOfSubIntervals == ParamSeekerSettings.AutoSubIntervalsNum)
+            {
+                if(settings.Min == settings.Max)
+                {
+                    _numOfIntervalInnerPoints = 0;
+                    _testCaseCollection = new TestCase[1];
+                    _testCaseCollection[0] = new TestCase() { ParamValue = settings.Min, Error = double.NaN };
+                    _currentTestCaseIdx = 0;
+                    return;
+                }
+                else
+                {
+                    _numOfIntervalInnerPoints = DefaultNumOfIntervalInnerPoints;
+                    _testCaseCollection = new TestCase[2 + _numOfIntervalInnerPoints];
+                }
+
+            }
+            else
+            {
+                _numOfIntervalInnerPoints = settings.NumOfSubIntervals;
+                _testCaseCollection = new TestCase[2 + _numOfIntervalInnerPoints];
+            }
+            for(int i = 0; i < _testCaseCollection.Length; i++)
+            {
+                _testCaseCollection[i] = new TestCase() { ParamValue = double.NaN, Error = double.NaN };
+            }
+            Replan(settings.Min, double.NaN, settings.Max, double.NaN);
             return;
         }
 
@@ -40,13 +70,13 @@ namespace RCNet.MathTools.PS
         {
             get
             {
-                return _plannedValues[_planIdx].Value;
+                return _testCaseCollection[_currentTestCaseIdx].Pending ? _testCaseCollection[_currentTestCaseIdx].ParamValue : double.NaN;
             }
         }
 
         //Methods
         /// <summary>
-        /// Plans set of values to be tested.
+        /// Initializes plan of values to be tested.
         /// </summary>
         /// <param name="min">Min value</param>
         /// <param name="minErr">Error corresponding to min value</param>
@@ -54,25 +84,19 @@ namespace RCNet.MathTools.PS
         /// <param name="maxErr">Error corresponding to max value</param>
         private void Replan(double min, double minErr, double max, double maxErr)
         {
-            double stepSize = (max - min) / _settings.NumOfSteps;
-            double value = min;
-            _planIdx = 0;
-            for(int i = 0; i <= _settings.NumOfSteps; i++)
+            double stepSize = (max - min) / (_numOfIntervalInnerPoints + 1);
+            //Focused interval boundaries
+            _testCaseCollection[0].ParamValue = min;
+            _testCaseCollection[0].Error = minErr;
+            _testCaseCollection[_testCaseCollection.Length - 1].ParamValue = max;
+            _testCaseCollection[_testCaseCollection.Length - 1].Error = maxErr;
+            double paramValue = min + stepSize;
+            for(int i = 1; i < _testCaseCollection.Length - 1; i++)
             {
-                _plannedValues[i] = new ValueError { Value = value, Error = double.NaN };
-                if(i == 0 && !double.IsNaN(minErr))
-                {
-                    //Error is already known
-                    _plannedValues[i].Error = minErr;
-                    _planIdx = 1;
-                }
-                else if(i == _settings.NumOfSteps && !double.IsNaN(maxErr))
-                {
-                    //Error is already known
-                    _plannedValues[i].Error = maxErr;
-                }
-                value += stepSize;
+                _testCaseCollection[i] = new TestCase { ParamValue = paramValue, Error = double.NaN };
+                paramValue += stepSize;
             }
+            _currentTestCaseIdx = _testCaseCollection[0].Done ? 1 : 0;
             return;
         }
 
@@ -82,54 +106,62 @@ namespace RCNet.MathTools.PS
         /// <param name="error">Result error of the last tested value</param>
         public void ProcessError(double error)
         {
-            //Store _plannedValues[_planIdx].Value resulting error  
-            _plannedValues[_planIdx].Error = error;
-            //Move to next
-            ++_planIdx;
-            if(_planIdx == _plannedValues.Length || (_planIdx == (_plannedValues.Length - 1) && !double.IsNaN(_plannedValues[_planIdx].Error)))
+            _testCaseCollection[_currentTestCaseIdx].Error = error;
+            if (_testCaseCollection.Length > 1)
             {
-                //We have evaluated all planed values
-                //Find index of value with the smallest associated error
-                int bestIdx = 0;
-                for(int i = 1; i < _plannedValues.Length; i++)
+                //Move to next test case
+                ++_currentTestCaseIdx;
+                if (_currentTestCaseIdx == _testCaseCollection.Length || _testCaseCollection[_currentTestCaseIdx].Done)
                 {
-                    if(_plannedValues[i].Error < _plannedValues[bestIdx].Error)
+                    //We have evaluated all planed values
+                    //Find index of param value having the smallest associated error
+                    int bestIdx = 0;
+                    for (int i = 1; i < _testCaseCollection.Length; i++)
                     {
-                        bestIdx = i;
+                        if (_testCaseCollection[i].Error < _testCaseCollection[bestIdx].Error)
+                        {
+                            bestIdx = i;
+                        }
                     }
+                    //Narrow the searched interval
+                    //Determine first (min value) and last (max value) indexes to be used as the new interval edges
+                    int firstIdx = bestIdx > 0 ? bestIdx - 1 : bestIdx;
+                    int lastIdx = bestIdx < _testCaseCollection.Length - 1 ? bestIdx + 1 : bestIdx;
+                    if (firstIdx == 0 && lastIdx == _testCaseCollection.Length - 1)
+                    {
+                        //Avoid repeating the same cycle
+                        if (_testCaseCollection[firstIdx].Error < _testCaseCollection[lastIdx].Error)
+                        {
+                            lastIdx = bestIdx;
+                        }
+                        else
+                        {
+                            firstIdx = bestIdx;
+                        }
+                    }
+                    Replan(_testCaseCollection[firstIdx].ParamValue,
+                           _testCaseCollection[firstIdx].Error,
+                           _testCaseCollection[lastIdx].ParamValue,
+                           _testCaseCollection[lastIdx].Error
+                           );
                 }
-                //Narrow the searched interval
-                //Determine first (min value) and last (max value) indexes to be used as the edge
-                int firstIdx = bestIdx > 0 ? bestIdx - 1 : bestIdx;
-                int lastIdx = bestIdx < _plannedValues.Length - 1 ? bestIdx + 1 : bestIdx;
-                if(firstIdx == 0 && lastIdx == _plannedValues.Length - 1)
-                {
-                    //Avoid repeating the same cycle
-                    if(_plannedValues[firstIdx].Error < _plannedValues[lastIdx].Error)
-                    {
-                        lastIdx = bestIdx;
-                    }
-                    else
-                    {
-                        firstIdx = bestIdx;
-                    }
-                }
-                Replan(_plannedValues[firstIdx].Value,
-                       _plannedValues[firstIdx].Error,
-                       _plannedValues[lastIdx].Value,
-                       _plannedValues[lastIdx].Error
-                       );
             }
             return;
         }
 
         //Inner classes
         [Serializable]
-        private class ValueError
+        private class TestCase
         {
-            public double Value { get; set; }
+            //Attribute properties
+            public double ParamValue { get; set; }
             public double Error { get; set; }
-        }
+            
+            //Properties
+            public bool Pending { get { return (double.IsNaN(Error)); } }
+            public bool Done { get { return !Pending; } }
+
+        }//TestCase
 
     }//ParamSeeker
 }//Namespace

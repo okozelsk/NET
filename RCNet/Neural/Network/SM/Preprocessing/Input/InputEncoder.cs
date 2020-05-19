@@ -57,16 +57,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         public List<InputField> Fields { get; }
 
         /// <summary>
-        /// Neurons providing predictors
-        /// </summary>
-        public List<INeuron> PredictingNeuronCollection { get; }
-
-        /// <summary>
-        /// Number of predictors
-        /// </summary>
-        public int NumOfPredictors { get; }
-
-        /// <summary>
         /// Fields to be routed to readout
         /// </summary>
         public List<InputField> RoutedFieldCollection { get; }
@@ -129,7 +119,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             //External fields
             foreach (ExternalFieldSettings fieldCfg in _encoderCfg.FieldsCfg.ExternalFieldsCfg.FieldCfgCollection)
             {
-                PredictorsSettings predictorsCfg = new PredictorsSettings(fieldCfg.PredictorsCfg, null, _encoderCfg.FieldsCfg.PredictorsCfg);
                 Fields.Add(new InputField(fieldCfg.Name,
                                           fieldIdx++,
                                           coordinates,
@@ -137,8 +126,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
                                           fieldCfg.FeatureFilterCfg,
                                           fieldCfg.SpikeCodeCfg,
                                           (fieldCfg.RouteToReadout && _encoderCfg.FeedingCfg.RouteToReadout),
-                                          inputNeuronStartIdx,
-                                          predictorsCfg
+                                          inputNeuronStartIdx
                                           ));
                 inputNeuronStartIdx += Fields[fieldIdx - 1].NumOfInputNeurons;
             }
@@ -150,7 +138,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
                 foreach (TransformedFieldSettings fieldCfg in _encoderCfg.FieldsCfg.TransformedFieldsCfg.FieldCfgCollection)
                 {
                     _internalInputTransformerCollection.Add(TransformerFactory.Create(names, fieldCfg.TransformerCfg));
-                    PredictorsSettings predictorsCfg = new PredictorsSettings(fieldCfg.PredictorsCfg, null, _encoderCfg.FieldsCfg.PredictorsCfg);
                     Fields.Add(new InputField(fieldCfg.Name,
                                               fieldIdx++,
                                               coordinates,
@@ -158,8 +145,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
                                               fieldCfg.FeatureFilterCfg,
                                               fieldCfg.SpikingCodingCfg,
                                               (fieldCfg.RouteToReadout && _encoderCfg.FeedingCfg.RouteToReadout),
-                                              inputNeuronStartIdx,
-                                              predictorsCfg
+                                              inputNeuronStartIdx
                                               ));
                     inputNeuronStartIdx += Fields[fieldIdx - 1].NumOfInputNeurons;
                 }
@@ -171,7 +157,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
                 foreach (GeneratedFieldSettings fieldCfg in _encoderCfg.FieldsCfg.GeneratedFieldsCfg.FieldCfgCollection)
                 {
                     _internalInputGeneratorCollection.Add(GeneratorFactory.Create(fieldCfg.GeneratorCfg));
-                    PredictorsSettings predictorsCfg = new PredictorsSettings(fieldCfg.PredictorsCfg, null, _encoderCfg.FieldsCfg.PredictorsCfg);
                     Fields.Add(new InputField(fieldCfg.Name,
                                               fieldIdx++,
                                               coordinates,
@@ -179,19 +164,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
                                               fieldCfg.FeatureFilterCfg,
                                               fieldCfg.SpikingCodingCfg,
                                               (fieldCfg.RouteToReadout && _encoderCfg.FeedingCfg.RouteToReadout),
-                                              inputNeuronStartIdx,
-                                              predictorsCfg
+                                              inputNeuronStartIdx
                                               ));
                     inputNeuronStartIdx += Fields[fieldIdx - 1].NumOfInputNeurons;
                 }
             }
-            PredictingNeuronCollection = new List<INeuron>(inputNeuronStartIdx);
             RoutedFieldCollection = new List<InputField>(Fields.Count);
-            NumOfPredictors = 0;
             foreach (InputField field in Fields)
             {
-                PredictingNeuronCollection.AddRange(field.GetPredictingNeurons(out int numOfPredictors));
-                NumOfPredictors += numOfPredictors;
                 if(field.RouteToReadout)
                 {
                     RoutedFieldCollection.Add(field);
@@ -227,42 +207,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
                 }
             }
             return null;
-        }
-
-        /// <summary>
-        /// Returns collection of predictor descriptor objects related to predictors from input neurons
-        /// </summary>
-        public List<PredictorDescriptor> GetNeuralPredictorsDescriptors()
-        {
-            List<PredictorDescriptor> result = new List<PredictorDescriptor>(NumOfPredictors);
-            foreach(INeuron neuron in PredictingNeuronCollection)
-            {
-                if (neuron.NumOfEnabledPredictors > 0)
-                {
-                    foreach(PredictorsProvider.PredictorID id in neuron.GetEnabledPredictorsIDs())
-                    {
-                        result.Add(new PredictorDescriptor(neuron.Location.PoolGroupID, neuron.Location.ReservoirID, neuron.Location.PoolID, (int)id));
-                    }
-                }
-            }
-            return result;
-        }
-
-        /// <summary>
-        /// Returns collection of predictor descriptor objects related to exact input values instances routed to readout
-        /// </summary>
-        public List<PredictorDescriptor> GetInputValuesPredictorsDescriptors()
-        {
-            List<PredictorDescriptor> result = new List<PredictorDescriptor>(NumOfPredictors);
-            int numOfFieldValInstances = _fixedExtVectorLength == -1 ? 1 : _fixedExtVectorLength;
-            foreach (InputField field in RoutedFieldCollection)
-            {
-                for(int i = 0; i < numOfFieldValInstances; i++)
-                {
-                    result.Add(new PredictorDescriptor(field.Idx, ReservoirID, PoolID, PredictorDescriptor.InputFieldValue));
-                }
-            }
-            return result;
         }
 
         /// <summary>
@@ -600,18 +544,20 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         }
 
         /// <summary>
-        /// Copies all input encoder's predictors to a given buffer starting from the specified position
+        /// Returns collection of predictor descriptor objects related to exact input values instances routed to readout
         /// </summary>
-        /// <param name="buffer">Target buffer</param>
-        /// <param name="fromOffset">Starting zero based position in the target buffer</param>
-        public int CopyPredictorsTo(double[] buffer, int fromOffset)
+        public List<PredictorDescriptor> GetInputValuesPredictorsDescriptors()
         {
-            int offset = fromOffset;
-            foreach (INeuron neuron in PredictingNeuronCollection)
+            List<PredictorDescriptor> result = new List<PredictorDescriptor>();
+            int numOfFieldValInstances = _fixedExtVectorLength == -1 ? 1 : _fixedExtVectorLength;
+            foreach (InputField field in RoutedFieldCollection)
             {
-                offset += neuron.CopyPredictorsTo(buffer, offset);
+                for (int i = 0; i < numOfFieldValInstances; i++)
+                {
+                    result.Add(new PredictorDescriptor(field.Idx, ReservoirID, PoolID, PredictorDescriptor.InputFieldValue));
+                }
             }
-            return offset - fromOffset;
+            return result;
         }
 
         /// <summary>

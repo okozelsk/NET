@@ -62,7 +62,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <param name="spikeCodeCfg">Configuration of the input spike code</param>
         /// <param name="routeToReadout">Specifies if to route values as the additional predictors to readout</param>
         /// <param name="inputNeuronsStartIdx">Index of the first input neuron of this unit among all input neurons</param>
-        /// <param name="predictorsCfg">Configuration of predictors</param>
         public InputField(string name,
                           int idx,
                           int[] coordinates,
@@ -70,8 +69,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
                           IFeatureFilterSettings featureFilterCfg,
                           SpikeCodeSettings spikeCodeCfg,
                           bool routeToReadout,
-                          int inputNeuronsStartIdx,
-                          PredictorsSettings predictorsCfg
+                          int inputNeuronsStartIdx
                           )
         {
             Name = name;
@@ -103,9 +101,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             SpikingNeuronCollection = new SpikingInputNeuron[populationSize];
             for (int i = 0; i < SpikingNeuronCollection.Length; i++)
             {
-                SpikingNeuronCollection[i] = new SpikingInputNeuron(new NeuronLocation(InputEncoder.ReservoirID, inputNeuronsStartIdx, InputEncoder.PoolID, inputNeuronsStartIdx, idx, coordinates[0], coordinates[1], coordinates[2]),
-                                                                    predictorsCfg
-                                                                    );
+                SpikingNeuronCollection[i] = new SpikingInputNeuron(new NeuronLocation(InputEncoder.ReservoirID, inputNeuronsStartIdx, InputEncoder.PoolID, inputNeuronsStartIdx, idx, coordinates[0], coordinates[1], coordinates[2]), null);
                 ++inputNeuronsStartIdx;
             }
             return;
@@ -219,30 +215,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             }
             //Maximum number of combinations is reached
             return result;
-        }
-
-        /// <summary>
-        /// Returns collection of input neurons having enabled at least one predictor
-        /// </summary>
-        /// <param name="numOfPredictors">Returned number of predictors</param>
-        public List<INeuron> GetPredictingNeurons(out int numOfPredictors)
-        {
-            numOfPredictors = 0;
-            List<INeuron> predictingNeurons = new List<INeuron>();
-            if (AnalogNeuron.NumOfEnabledPredictors > 0)
-            {
-                numOfPredictors += AnalogNeuron.NumOfEnabledPredictors;
-                predictingNeurons.Add(AnalogNeuron);
-            }
-            foreach (SpikingInputNeuron neuron in SpikingNeuronCollection)
-            {
-                if (neuron.NumOfEnabledPredictors > 0)
-                {
-                    numOfPredictors += neuron.NumOfEnabledPredictors;
-                    predictingNeurons.Add(neuron);
-                }
-            }
-            return predictingNeurons;
         }
 
     }//InputField

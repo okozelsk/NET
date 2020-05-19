@@ -48,9 +48,8 @@ namespace Demo.DemoConsoleApp.Examples
             //Create StateMachine configuration
             //Simplified input configuration
             InputEncoderSettings inputCfg = StateMachineDesigner.CreateInputCfg(new FeedingPatternedSettings(false, false, RCNet.Neural.Data.InputPattern.VariablesSchema.Groupped),
-                                                                                new PredictorsSettings(false, false, false, false, false, false, false, false),
-                                                                                new ExternalFieldSettings("coord_abcissa", new RealFeatureFilterSettings(), true, new SpikeCodeSettings(16, 1e-5, true, true)),
-                                                                                new ExternalFieldSettings("coord_ordinate", new RealFeatureFilterSettings(), true, new SpikeCodeSettings(16, 1e-5, true, true))
+                                                                                new ExternalFieldSettings("coord_abcissa", new RealFeatureFilterSettings(), true, new SpikeCodeSettings(16, 1e-3, true, true)),
+                                                                                new ExternalFieldSettings("coord_ordinate", new RealFeatureFilterSettings(), true, new SpikeCodeSettings(16, 1e-3, true, true))
                                                                                 );
             //Simplified readout layer configuration
             ReadoutLayerSettings readoutCfg = StateMachineDesigner.CreateClassificationReadoutCfg(StateMachineDesigner.CreateSingleLayerRegrNet(new ElliotSettings(), 5, 400),
@@ -85,8 +84,7 @@ namespace Demo.DemoConsoleApp.Examples
                                                                         0, //Internal synapses max delay
                                                                         0, //Steady bias
                                                                         new PredictorsParamsSettings(new FiringCountSettings(45)),
-                                                                        PredictorsProvider.PredictorID.FiringCount,
-                                                                        PredictorsProvider.PredictorID.FiringFadingSum
+                                                                        PredictorsProvider.PredictorID.FiringCount
                                                                         );
 
             //Display StateMachine xml configuration

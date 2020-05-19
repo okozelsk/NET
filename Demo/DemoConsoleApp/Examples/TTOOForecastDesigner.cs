@@ -40,11 +40,10 @@ namespace Demo.DemoConsoleApp.Examples
             //Create StateMachine configuration
             //Simplified input configuration
             InputEncoderSettings inputCfg = StateMachineDesigner.CreateInputCfg(new FeedingContinuousSettings(FeedingContinuousSettings.AutoBootCyclesNum, true),
-                                                                         new PredictorsSettings(false, false, false, false, false, false, false, false),
-                                                                         new ExternalFieldSettings("High", new RealFeatureFilterSettings()),
-                                                                         new ExternalFieldSettings("Low", new RealFeatureFilterSettings()),
-                                                                         new ExternalFieldSettings("Adj Close", new RealFeatureFilterSettings())
-                                                                         );
+                                                                                new ExternalFieldSettings("High", new RealFeatureFilterSettings()),
+                                                                                new ExternalFieldSettings("Low", new RealFeatureFilterSettings()),
+                                                                                new ExternalFieldSettings("Adj Close", new RealFeatureFilterSettings())
+                                                                                );
             //Simplified readout layer configuration
             ReadoutLayerSettings readoutCfg = StateMachineDesigner.CreateForecastReadoutCfg(StateMachineDesigner.CreateSingleLayerRegrNet(new IdentitySettings(), 2, 1000),
                                                                                             0.1d,

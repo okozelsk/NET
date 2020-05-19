@@ -101,12 +101,10 @@ namespace RCNet.Neural.Network.SM
         /// <param name="extFieldNameCollection">Names of the external input fields</param>
         /// <param name="routeToReadout">Specifies if to route input values to readout</param>
         /// <param name="spikeCodeCfg">Configuration of the spike code</param>
-        /// <param name="predictorsCfg">Configuration of predictors related to input coding spiking population of input neurons</param>
         public static InputEncoderSettings CreateInputCfg(IFeedingSettings feedingCfg,
                                                           IEnumerable<string> extFieldNameCollection,
                                                           bool routeToReadout = true,
-                                                          SpikeCodeSettings spikeCodeCfg = null,
-                                                          PredictorsSettings predictorsCfg = null
+                                                          SpikeCodeSettings spikeCodeCfg = null
                                                           )
         {
             if (feedingCfg == null)
@@ -117,17 +115,13 @@ namespace RCNet.Neural.Network.SM
             {
                 spikeCodeCfg = new SpikeCodeSettings();
             }
-            if (predictorsCfg == null)
-            {
-                predictorsCfg = PredictorsSettings.CreateDisabledInstance();
-            }
             List<ExternalFieldSettings> extFieldCollection = new List<ExternalFieldSettings>();
             foreach(string name in extFieldNameCollection)
             {
-                extFieldCollection.Add(new ExternalFieldSettings(name, new RealFeatureFilterSettings(), routeToReadout, spikeCodeCfg, null));
+                extFieldCollection.Add(new ExternalFieldSettings(name, new RealFeatureFilterSettings(), routeToReadout, spikeCodeCfg));
             }
             ExternalFieldsSettings extFieldsCfg = new ExternalFieldsSettings(extFieldCollection);
-            FieldsSettings fieldsCfg = new FieldsSettings(extFieldsCfg, null, null, predictorsCfg);
+            FieldsSettings fieldsCfg = new FieldsSettings(extFieldsCfg, null, null);
             return new InputEncoderSettings(feedingCfg, fieldsCfg);
         }
 
@@ -136,20 +130,16 @@ namespace RCNet.Neural.Network.SM
         /// Contains only external input fields.
         /// </summary>
         /// <param name="feedingCfg">Input feeding configuration</param>
-        /// <param name="predictorsCfg">Configuration of predictors of spiking input neurons</param>
         /// <param name="externalFieldCfg">External input field configuration</param>
-        public static InputEncoderSettings CreateInputCfg(IFeedingSettings feedingCfg, PredictorsSettings predictorsCfg, params ExternalFieldSettings[] externalFieldCfg)
+        public static InputEncoderSettings CreateInputCfg(IFeedingSettings feedingCfg,
+                                                          params ExternalFieldSettings[] externalFieldCfg
+                                                          )
         {
             if (feedingCfg == null)
             {
                 throw new ArgumentNullException("feedingCfg");
             }
-            if(predictorsCfg == null)
-            {
-                //All predictors disabled
-                predictorsCfg = PredictorsSettings.CreateDisabledInstance();
-            }
-            return new InputEncoderSettings(feedingCfg, new FieldsSettings(new ExternalFieldsSettings(externalFieldCfg), null, null, predictorsCfg));
+            return new InputEncoderSettings(feedingCfg, new FieldsSettings(new ExternalFieldsSettings(externalFieldCfg)));
         }
 
         /// <summary>
