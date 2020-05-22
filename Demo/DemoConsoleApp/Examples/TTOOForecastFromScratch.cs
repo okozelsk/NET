@@ -34,7 +34,7 @@ namespace Demo.DemoConsoleApp.Examples
     ///   train and serialize StateMachine (writes in Examples sub-folder),
     ///   load serialized StateMachine and forecast next values
     /// </summary>
-    public class TTOOForecastFromScratch : BaseExample
+    public class TTOOForecastFromScratch : ExampleBase
     {
         //Methods
         /// <summary>

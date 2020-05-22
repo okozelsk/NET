@@ -15,7 +15,7 @@ namespace RCNet.Neural.Data.Filter
         /// <summary>
         /// Feature type
         /// </summary>
-        BaseFeatureFilter.FeatureType Type { get; }
+        FeatureFilterBase.FeatureType Type { get; }
 
         /// <summary>
         /// Creates the deep copy instance of this instance

@@ -38,7 +38,7 @@ namespace Demo.DemoConsoleApp.Examples
     /// Each instance represents 45 points on a bi-dimensional space, which can be plotted in an ordered way (from 1 through
     /// 45 as the X co-ordinate) in order to draw the path of the movement.
     /// </summary>
-    public class LibrasClassificationLSMDesigner : BaseExample
+    public class LibrasClassificationLSMDesigner : ExampleBase
     {
         /// <summary>
         /// Runs the example code.

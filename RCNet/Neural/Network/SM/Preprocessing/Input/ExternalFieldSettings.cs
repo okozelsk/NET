@@ -69,7 +69,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             FeatureFilterCfg = (IFeatureFilterSettings)featureFilterCfg.DeepClone();
             RouteToReadout = routeToReadout;
             SpikeCodeCfg = (SpikeCodeSettings)spikeCodeCfg?.DeepClone();
-            if (featureFilterCfg.Type == BaseFeatureFilter.FeatureType.Real && spikeCodeCfg == null)
+            if (featureFilterCfg.Type == FeatureFilterBase.FeatureType.Real && spikeCodeCfg == null)
             {
                 SpikeCodeCfg = new SpikeCodeSettings();
             }
@@ -126,7 +126,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             {
                 throw new Exception($"Name can not be empty.");
             }
-            if (FeatureFilterCfg.Type != BaseFeatureFilter.FeatureType.Real && SpikeCodeCfg != null)
+            if (FeatureFilterCfg.Type != FeatureFilterBase.FeatureType.Real && SpikeCodeCfg != null)
             {
                 throw new Exception("Spiking coding configuration is relevant for real-feature only.");
             }

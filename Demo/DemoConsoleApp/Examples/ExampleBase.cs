@@ -16,13 +16,13 @@ namespace Demo.DemoConsoleApp.Examples
     /// <summary>
     /// Base class of the implemented examples
     /// </summary>
-    public class BaseExample
+    public class ExampleBase
     {
         //Attributes
         protected readonly IOutputLog _log;
 
         //Constructor
-        protected BaseExample()
+        protected ExampleBase()
         {
             _log = new ConsoleLog();
             return;
@@ -201,6 +201,6 @@ namespace Demo.DemoConsoleApp.Examples
         }
 
 
-    }//BaseExample
+    }//ExampleBase
 
 }//Namespace

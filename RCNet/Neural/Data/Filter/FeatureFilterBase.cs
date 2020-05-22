@@ -11,7 +11,7 @@ namespace RCNet.Neural.Data.Filter
     /// Base class of feature filters
     /// </summary>
     [Serializable]
-    public abstract class BaseFeatureFilter
+    public abstract class FeatureFilterBase
     {
         //Enumerations
         /// <summary>
@@ -56,7 +56,7 @@ namespace RCNet.Neural.Data.Filter
         /// </summary>
         /// <param name="featureType">Feature type</param>
         /// <param name="outputRange">Filter's output range</param>
-        protected BaseFeatureFilter(FeatureType featureType, Interval outputRange)
+        protected FeatureFilterBase(FeatureType featureType, Interval outputRange)
         {
             Type = featureType;
             Stat = new BasicStat();
@@ -113,6 +113,6 @@ namespace RCNet.Neural.Data.Filter
         }
 
 
-    }//BaseFeatureFilter
+    }//FeatureFilterBase
 
 }//Namespace

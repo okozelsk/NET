@@ -47,7 +47,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         public SpikingInputNeuron[] SpikingNeuronCollection { get; }
 
         //Attributes
-        private readonly BaseFeatureFilter _featureFilter;
+        private readonly FeatureFilterBase _featureFilter;
         private readonly SpikeCode _realSpikeCode;
 
         //Constructor
@@ -87,14 +87,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             int populationSize = -1;
             switch(_featureFilter.Type)
             {
-                case BaseFeatureFilter.FeatureType.Real:
+                case FeatureFilterBase.FeatureType.Real:
                     _realSpikeCode = new SpikeCode(spikeCodeCfg);
                     populationSize = _realSpikeCode.Code.Length;
                     break;
-                case BaseFeatureFilter.FeatureType.Binary:
+                case FeatureFilterBase.FeatureType.Binary:
                     populationSize = 1;
                     break;
-                case BaseFeatureFilter.FeatureType.Enum:
+                case FeatureFilterBase.FeatureType.Enum:
                     populationSize = ((EnumFeatureFilterSettings)featureFilterCfg).NumOfElements;
                     break;
             }
@@ -161,7 +161,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             //Spiking neurons
             switch (_featureFilter.Type)
             {
-                case BaseFeatureFilter.FeatureType.Real:
+                case FeatureFilterBase.FeatureType.Real:
                     {
                         _realSpikeCode.Encode(iStimuli);
                         for(int i = 0; i < SpikingNeuronCollection.Length; i++)
@@ -172,14 +172,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
                     }
                     break;
 
-                case BaseFeatureFilter.FeatureType.Binary:
+                case FeatureFilterBase.FeatureType.Binary:
                     {
                         SpikingNeuronCollection[0].NewStimulation(value, 0d);
                         SpikingNeuronCollection[0].Recompute(collectStatistics);
                     }
                     break;
 
-                case BaseFeatureFilter.FeatureType.Enum:
+                case FeatureFilterBase.FeatureType.Enum:
                     {
                         int neuronIdx = ((int)Math.Round(value, 0)) - 1;
                         for (int i = 0; i < SpikingNeuronCollection.Length; i++)

@@ -12,7 +12,7 @@ namespace RCNet.Neural.Data.Filter
     /// Implements enumeration feature filter
     /// </summary>
     [Serializable]
-    public class EnumFeatureFilter : BaseFeatureFilter
+    public class EnumFeatureFilter : FeatureFilterBase
     {
         //Attribute properties
         /// <summary>

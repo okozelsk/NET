@@ -30,7 +30,7 @@ namespace Demo.DemoConsoleApp.Examples
     /// The last recorded prices are from 2018/03/02 so StateMachine is predicting next High and Low prices for the following
     /// business day 2018/03/05 (where real prices were High = 6.58$ and Low=5.99$).
     /// </summary>
-    public class TTOOForecastDesigner : BaseExample
+    public class TTOOForecastDesigner : ExampleBase
     {
         /// <summary>
         /// Runs the example code.

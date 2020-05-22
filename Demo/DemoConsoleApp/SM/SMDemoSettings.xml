@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <demo dataFolder=".\\Data" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="SMDemoSettings.xsd">
 
+
   <!--
     Experimental.
     Time series contains real share prices of TTOO title from https://finance.yahoo.com/quote/TTOO/history?p=TTOO.
@@ -17,15 +18,12 @@
             <externalFields>
               <field name="High" routeToReadout="true">
                 <realFeature standardize="true" keepReserve="true"/>
-                <spikeCode componentHalfCodeLength="15" signalComponent="true" deltaComponent="true"/>
               </field>
               <field name="Low" routeToReadout="true">
                 <realFeature standardize="true" keepReserve="true"/>
-                <spikeCode componentHalfCodeLength="15" signalComponent="true" deltaComponent="true"/>
               </field>
               <field name="Adj Close" routeToReadout="true">
                 <realFeature standardize="true" keepReserve="true"/>
-                <spikeCode componentHalfCodeLength="15" signalComponent="true" deltaComponent="true"/>
               </field>
             </externalFields>
           </fields>
@@ -87,11 +85,11 @@
           <reservoirInstance name="Main" reservoirStructure="MainCfg">
             <inputConnections>
               <connection inputFieldName="High" poolName="Logistic pool"/>
-              <connection inputFieldName="High" poolName="Spiking pool"/>
+              <connection inputFieldName="High" poolName="Spiking pool" signalingRestriction="AnalogOnly"/>
               <connection inputFieldName="Low" poolName="Logistic pool"/>
-              <connection inputFieldName="Low" poolName="Spiking pool"/>
+              <connection inputFieldName="Low" poolName="Spiking pool" signalingRestriction="AnalogOnly"/>
               <connection inputFieldName="Adj Close" poolName="Logistic pool"/>
-              <connection inputFieldName="Adj Close" poolName="Spiking pool"/>
+              <connection inputFieldName="Adj Close" poolName="Spiking pool" signalingRestriction="AnalogOnly"/>
             </inputConnections>
             <synapse>
               <spikingTarget>

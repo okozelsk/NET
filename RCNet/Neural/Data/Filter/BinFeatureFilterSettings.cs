@@ -56,7 +56,7 @@ namespace RCNet.Neural.Data.Filter
         /// <summary>
         /// Feature type
         /// </summary>
-        public BaseFeatureFilter.FeatureType Type { get { return BaseFeatureFilter.FeatureType.Binary; } }
+        public FeatureFilterBase.FeatureType Type { get { return FeatureFilterBase.FeatureType.Binary; } }
 
         /// <summary>
         /// Identifies settings containing only default values

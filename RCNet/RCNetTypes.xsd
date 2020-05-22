@@ -1358,95 +1358,95 @@
 
   <!-- Synapse - Plasticity nonlinear dynamics- input spiking to hidden spiking - configuration -->
   <xs:complexType name="SynapseNonlinearDynamicsSTInputType">
-    <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="optional" default="0.5">
+    <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="optional" default="0.99">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.5 (expreses average probability of neurotransmitter release)</xs:documentation>
+        <xs:documentation xml:lang="en">Default value is 0.99</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute type="UDoubleType" name="tauDepression" use="optional" default="1100">
+    <xs:attribute type="UDoubleType" name="tauDepression" use="optional" default="3">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1100 ms</xs:documentation>
+        <xs:documentation xml:lang="en">Default value is 3 ms</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute type="UDoubleType" name="tauFacilitation" use="optional" default="50">
+    <xs:attribute type="UDoubleType" name="tauFacilitation" use="optional" default="1">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 50 ms</xs:documentation>
+        <xs:documentation xml:lang="en">Default value is 1 ms</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
 
   <!-- Synapse - Plasticity nonlinear dynamics- excitatory spiking to hidden spiking - configuration -->
   <xs:complexType name="SynapseNonlinearDynamicsSTExcitatoryType">
-    <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="optional" default="0.5">
+    <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="optional" default="0.99">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.5 (expreses average probability of neurotransmitter release)</xs:documentation>
+        <xs:documentation xml:lang="en">Default value is 0.99</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute type="UDoubleType" name="tauDepression" use="optional" default="1100">
+    <xs:attribute type="UDoubleType" name="tauDepression" use="optional" default="3">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1100 ms</xs:documentation>
+        <xs:documentation xml:lang="en">Default value is 3 ms</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute type="UDoubleType" name="tauFacilitation" use="optional" default="50">
+    <xs:attribute type="UDoubleType" name="tauFacilitation" use="optional" default="1">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 50 ms</xs:documentation>
+        <xs:documentation xml:lang="en">Default value is 1 ms</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
 
   <!-- Synapse - Plasticity nonlinear dynamics- inhibitory spiking to hidden spiking - configuration -->
   <xs:complexType name="SynapseNonlinearDynamicsSTInhibitoryType">
-    <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="optional" default="0.25">
+    <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="optional" default="0.99">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.25 (expreses average probability of neurotransmitter release)</xs:documentation>
+        <xs:documentation xml:lang="en">Default value is 0.99</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute type="UDoubleType" name="tauDepression" use="optional" default="700">
+    <xs:attribute type="UDoubleType" name="tauDepression" use="optional" default="3">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 700 ms</xs:documentation>
+        <xs:documentation xml:lang="en">Default value is 3 ms</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute type="UDoubleType" name="tauFacilitation" use="optional" default="20">
+    <xs:attribute type="UDoubleType" name="tauFacilitation" use="optional" default="1">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 20 ms</xs:documentation>
+        <xs:documentation xml:lang="en">Default value is 1 ms</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
 
   <!-- Synapse - Plasticity nonlinear dynamics- input spiking to hidden analog - configuration -->
   <xs:complexType name="SynapseNonlinearDynamicsATInputType">
-    <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="optional" default="0.5">
+    <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="optional" default="0.99">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.5 (expreses average probability of neurotransmitter release)</xs:documentation>
+        <xs:documentation xml:lang="en">Default value is 0.99</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute type="UDoubleType" name="tauDepression" use="optional" default="1100">
+    <xs:attribute type="UDoubleType" name="tauDepression" use="optional" default="3">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1100 ms</xs:documentation>
+        <xs:documentation xml:lang="en">Default value is 3 ms</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute type="UDoubleType" name="tauFacilitation" use="optional" default="50">
+    <xs:attribute type="UDoubleType" name="tauFacilitation" use="optional" default="1">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 50 ms</xs:documentation>
+        <xs:documentation xml:lang="en">Default value is 1 ms</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
 
   <!-- Synapse - Plasticity nonlinear dynamics- indifferent spiking to hidden analog - configuration -->
   <xs:complexType name="SynapseNonlinearDynamicsATIndifferentType">
-    <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="optional" default="0.5">
+    <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="optional" default="0.99">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.5 (expreses average probability of neurotransmitter release)</xs:documentation>
+        <xs:documentation xml:lang="en">Default value is 0.99</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute type="UDoubleType" name="tauDepression" use="optional" default="1100">
+    <xs:attribute type="UDoubleType" name="tauDepression" use="optional" default="3">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1100 ms</xs:documentation>
+        <xs:documentation xml:lang="en">Default value is 3 ms</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute type="UDoubleType" name="tauFacilitation" use="optional" default="50">
+    <xs:attribute type="UDoubleType" name="tauFacilitation" use="optional" default="1">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 50 ms</xs:documentation>
+        <xs:documentation xml:lang="en">Default value is 1 ms</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>

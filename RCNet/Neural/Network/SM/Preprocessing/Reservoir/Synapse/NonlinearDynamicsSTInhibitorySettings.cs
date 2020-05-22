@@ -23,15 +23,15 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         /// <summary>
         /// Default resting efficacy
         /// </summary>
-        public const double DefaultRestingEfficacy = 0.25d;
+        public const double DefaultRestingEfficacy = 0.99d;
         /// <summary>
         /// Default tau depression
         /// </summary>
-        public const double DefaultTauDepression = 700d;
+        public const double DefaultTauDepression = 3d;
         /// <summary>
         /// Default tau facilitation
         /// </summary>
-        public const double DefaultTauFacilitation = 20d;
+        public const double DefaultTauFacilitation = 1d;
 
 
         //Constructors

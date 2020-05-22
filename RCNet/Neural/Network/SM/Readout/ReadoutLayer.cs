@@ -56,11 +56,11 @@ namespace RCNet.Neural.Network.SM.Readout
         /// <summary>
         /// Collection of feature filters of input predictors
         /// </summary>
-        private BaseFeatureFilter[] _predictorFeatureFilterCollection;
+        private FeatureFilterBase[] _predictorFeatureFilterCollection;
         /// <summary>
         /// Collection of feature filters of output values
         /// </summary>
-        private BaseFeatureFilter[] _outputFeatureFilterCollection;
+        private FeatureFilterBase[] _outputFeatureFilterCollection;
         /// <summary>
         /// Mapping of specific predictors to readout units
         /// </summary>
@@ -156,7 +156,7 @@ namespace RCNet.Neural.Network.SM.Readout
             _predictorsMapper = predictorsMapper ?? new PredictorsMapper(numOfPredictors);
             //Allocation and preparation of feature filters
             //Predictors
-            _predictorFeatureFilterCollection = new BaseFeatureFilter[numOfPredictors];
+            _predictorFeatureFilterCollection = new FeatureFilterBase[numOfPredictors];
             Parallel.For(0, _predictorFeatureFilterCollection.Length, nrmIdx =>
             {
                 _predictorFeatureFilterCollection[nrmIdx] = new RealFeatureFilter(DataRange, true, true);
@@ -167,7 +167,7 @@ namespace RCNet.Neural.Network.SM.Readout
                 }
             });
             //Output values
-            _outputFeatureFilterCollection = new BaseFeatureFilter[numOfOutputs];
+            _outputFeatureFilterCollection = new FeatureFilterBase[numOfOutputs];
             Parallel.For(0, _outputFeatureFilterCollection.Length, nrmIdx =>
             {
                 _outputFeatureFilterCollection[nrmIdx] = FeatureFilterFactory.Create(DataRange, Settings.ReadoutUnitsCfg.ReadoutUnitCfgCollection[nrmIdx].TaskCfg.FeatureFilterCfg);
@@ -240,7 +240,7 @@ namespace RCNet.Neural.Network.SM.Readout
                                                                                            Settings.TestDataRatio,
                                                                                            Settings.Folds,
                                                                                            Settings.Repetitions,
-                                                                                           new BaseFeatureFilter[] {_outputFeatureFilterCollection [unitIdx]}
+                                                                                           new FeatureFilterBase[] {_outputFeatureFilterCollection [unitIdx]}
                                                                                            )
                                                                   );
             }//unitIdx

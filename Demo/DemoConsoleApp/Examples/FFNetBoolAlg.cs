@@ -18,7 +18,7 @@ namespace Demo.DemoConsoleApp.Examples
     /// This "Hello world" example shows how to use implemented FF network as the independent component.
     /// It trains the multilayer Feed Forward network to solve AND, OR and XOR.
     /// </summary>
-    public class FFNetBoolAlg : BaseExample
+    public class FFNetBoolAlg : ExampleBase
     {
         /// <summary>
         /// Creates training data.

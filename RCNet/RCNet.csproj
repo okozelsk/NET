@@ -284,7 +284,7 @@
     <Compile Include="Neural\Data\Filter\RealFeatureFilter.cs" />
     <Compile Include="Neural\Data\Filter\EnumFeatureFilter.cs" />
     <Compile Include="Neural\Data\Filter\BinFeatureFilter.cs" />
-    <Compile Include="Neural\Data\Filter\BaseFeatureFilter.cs" />
+    <Compile Include="Neural\Data\Filter\FeatureFilterBase.cs" />
     <Compile Include="Neural\Data\Generators\PulseGenerator.cs" />
     <Compile Include="Neural\Data\Generators\MackeyGlassGenerator.cs" />
     <Compile Include="Neural\Data\Generators\SinusoidalGenerator.cs" />

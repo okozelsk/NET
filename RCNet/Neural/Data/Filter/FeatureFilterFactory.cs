@@ -38,15 +38,15 @@ namespace RCNet.Neural.Data.Filter
         /// </summary>
         /// <param name="outputRange">Output range of feature filter</param>
         /// <param name="settings">Settings of feature filter</param>
-        public static BaseFeatureFilter Create(Interval outputRange, IFeatureFilterSettings settings)
+        public static FeatureFilterBase Create(Interval outputRange, IFeatureFilterSettings settings)
         {
             switch(settings.Type)
             {
-                case BaseFeatureFilter.FeatureType.Binary:
+                case FeatureFilterBase.FeatureType.Binary:
                     return new BinFeatureFilter(outputRange, (BinFeatureFilterSettings)settings);
-                case BaseFeatureFilter.FeatureType.Enum:
+                case FeatureFilterBase.FeatureType.Enum:
                     return new EnumFeatureFilter(outputRange, (EnumFeatureFilterSettings)settings);
-                case BaseFeatureFilter.FeatureType.Real:
+                case FeatureFilterBase.FeatureType.Real:
                     return new RealFeatureFilter(outputRange, (RealFeatureFilterSettings)settings);
                 default:
                     throw new ArgumentException($"Unexpected feature type {settings.Type}", "settings");
@@ -61,11 +61,11 @@ namespace RCNet.Neural.Data.Filter
         {
             switch (settings.Type)
             {
-                case BaseFeatureFilter.FeatureType.Binary:
+                case FeatureFilterBase.FeatureType.Binary:
                     return new BinFeatureFilterSettings((BinFeatureFilterSettings)settings);
-                case BaseFeatureFilter.FeatureType.Enum:
+                case FeatureFilterBase.FeatureType.Enum:
                     return new EnumFeatureFilterSettings((EnumFeatureFilterSettings)settings);
-                case BaseFeatureFilter.FeatureType.Real:
+                case FeatureFilterBase.FeatureType.Real:
                     return new RealFeatureFilterSettings((RealFeatureFilterSettings)settings);
                 default:
                     throw new ArgumentException($"Unexpected feature type {settings.Type}", "settings");

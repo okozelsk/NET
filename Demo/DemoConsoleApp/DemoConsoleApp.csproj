@@ -83,7 +83,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Examples\BaseExample.cs" />
+    <Compile Include="Examples\ExampleBase.cs" />
     <Compile Include="Examples\FFNetBoolAlg.cs" />
     <Compile Include="Examples\LibrasClassificationLSMDesigner.cs" />
     <Compile Include="Examples\LibrasClassificationESNDesigner.cs" />

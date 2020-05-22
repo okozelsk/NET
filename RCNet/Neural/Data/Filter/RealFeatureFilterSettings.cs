@@ -86,7 +86,7 @@ namespace RCNet.Neural.Data.Filter
         /// <summary>
         /// Feature type
         /// </summary>
-        public BaseFeatureFilter.FeatureType Type { get { return BaseFeatureFilter.FeatureType.Real; } }
+        public FeatureFilterBase.FeatureType Type { get { return FeatureFilterBase.FeatureType.Real; } }
 
         /// <summary>
         /// Checks if settings are default

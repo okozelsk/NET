@@ -101,7 +101,7 @@ namespace RCNet.Neural.Network.NonRecurrent
                                            double testDataRatio,
                                            int numOfFolds,
                                            int repetitions,
-                                           BaseFeatureFilter[] outputFeatureFilterCollection
+                                           FeatureFilterBase[] outputFeatureFilterCollection
                                            )
         {
             //Test fold size
