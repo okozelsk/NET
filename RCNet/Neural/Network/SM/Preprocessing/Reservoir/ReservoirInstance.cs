@@ -335,6 +335,19 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
 
         //Methods
         /// <summary>
+        /// Estimates necessary number of cycles to make reservoir's state and predictors useable
+        /// </summary>
+        public int GetDefaultBootCycles()
+        {
+            int bootCycles = StructureCfg.LargestInterconnectedAreaSize;
+            foreach(HiddenNeuron neuron in _reservoirNeuronCollection)
+            {
+                bootCycles = Math.Max(bootCycles, neuron.RequiredHistLength);
+            }
+            return bootCycles;
+        }
+
+        /// <summary>
         /// Returns collection of predictor descriptor objects related to predictors from hidden neurons
         /// </summary>
         public List<PredictorDescriptor> GetNeuralPredictorsDescriptors()

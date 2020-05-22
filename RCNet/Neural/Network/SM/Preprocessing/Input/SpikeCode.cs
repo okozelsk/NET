@@ -35,11 +35,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             _spikeCodeCfg = (SpikeCodeSettings)spikeCodeCfg.DeepClone();
             _componentComputer = new ComponentCodeComputer(_spikeCodeCfg.ComponentHalfCodeLength, _spikeCodeCfg.LowestThreshold);
             int codeLength = 0;
-            if(_spikeCodeCfg.UseDeviation)
+            if(_spikeCodeCfg.SignalComponent)
             {
                 codeLength += _componentComputer.CodeLength;
             }
-            if (_spikeCodeCfg.UseDifference)
+            if (_spikeCodeCfg.DeltaComponent)
             {
                 codeLength += _componentComputer.CodeLength;
             }
@@ -66,12 +66,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         {
             value.Bound(-1d, 1d);
             int fromIdx = 0;
-            if(_spikeCodeCfg.UseDeviation)
+            if(_spikeCodeCfg.SignalComponent)
             {
                 _componentComputer.Encode(value, Code, fromIdx);
                 fromIdx += _componentComputer.CodeLength;
             }
-            if (_spikeCodeCfg.UseDifference)
+            if (_spikeCodeCfg.DeltaComponent)
             {
                 double diffValue = double.IsNaN(_prevValue) ? value : ((value - _prevValue) / 2d);
                 _componentComputer.Encode(diffValue, Code, fromIdx);

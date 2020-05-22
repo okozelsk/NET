@@ -116,7 +116,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             Random rand = (randomizerSeek < 0 ? new Random() : new Random(randomizerSeek));
             ReservoirCollection = new List<ReservoirInstance>(_preprocessorCfg.ReservoirInstancesCfg.ReservoirInstanceCfgCollection.Count);
             int reservoirInstanceID = 0;
-            int biggestInterconnectedArea = 0;
+            int defaultBootCycles = 0;
             foreach(ReservoirInstanceSettings reservoirInstanceCfg in _preprocessorCfg.ReservoirInstancesCfg.ReservoirInstanceCfgCollection)
             {
                 ReservoirStructureSettings structCfg = _preprocessorCfg.ReservoirStructuresCfg.GetReservoirStructureCfg(reservoirInstanceCfg.StructureCfgName);
@@ -129,13 +129,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                                                                     );
                 ReservoirCollection.Add(reservoir);
                 TotalNumOfHiddenNeurons += reservoir.Size;
-                biggestInterconnectedArea = Math.Max(biggestInterconnectedArea, structCfg.LargestInterconnectedAreaSize);
+                defaultBootCycles = Math.Max(defaultBootCycles, reservoir.GetDefaultBootCycles());
             }
             //Boot cycles setup
             if (_preprocessorCfg.InputEncoderCfg.FeedingCfg.FeedingType == InputEncoder.InputFeedingType.Continuous)
             {
                 FeedingContinuousSettings feedingCfg = (FeedingContinuousSettings)preprocessorCfg.InputEncoderCfg.FeedingCfg;
-                BootCycles = feedingCfg.BootCycles == FeedingContinuousSettings.AutoBootCyclesNum ? biggestInterconnectedArea : feedingCfg.BootCycles;
+                BootCycles = feedingCfg.BootCycles == FeedingContinuousSettings.AutoBootCyclesNum ? defaultBootCycles : feedingCfg.BootCycles;
             }
             else
             {
@@ -364,6 +364,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// <param name="preprocessingOverview">Reservoir(s) statistics and other important information as a result of the preprocessing phase.</param>
         public VectorBundle InitializeAndPreprocessBundle(VectorBundle inputBundle, out PreprocessingOverview preprocessingOverview)
         {
+            //Check amount of input data
+            if (BootCycles > 0 && inputBundle.InputVectorCollection.Count <= BootCycles)
+            {
+                throw new Exception($"Insufficient number of input data instances. The number of instances must be greater than the number of boot cycles ({BootCycles.ToString(CultureInfo.InvariantCulture)}).");
+            }
             //Reset reservoirs
             ResetReservoirs(true);
             //Reset input encoder and initialize its feature filters

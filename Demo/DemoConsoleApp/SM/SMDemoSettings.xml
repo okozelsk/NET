@@ -2,6 +2,166 @@
 <demo dataFolder=".\\Data" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="SMDemoSettings.xsd">
 
   <!--
+    Experimental.
+    Time series contains real share prices of TTOO title from https://finance.yahoo.com/quote/TTOO/history?p=TTOO.
+    The last recorded prices are from 2018/03/02 so StateMachine is predicting next High, Low and Close prices for the following
+    business day 2018/03/05 (where real prices were High=6.58$, Low=5.99$ and Close=6.15$).
+  -->
+  <case name="Forecast task High and Low share prices of TTOO (T2 Biosystems, Inc.): Experimental reservoir (ESN), one Identity neuron as a forecaster (Resilient trainer)">
+    <samples trainingData="TTOO_train.csv" verificationData="TTOO_verify.csv"/>
+    <stateMachineCfg randomizerSeek="0">
+      <neuralPreprocessor>
+        <inputEncoder>
+          <feedingContinuous bootCycles="Auto" routeToReadout="false"/>
+          <fields>
+            <externalFields>
+              <field name="High" routeToReadout="true">
+                <realFeature standardize="true" keepReserve="true"/>
+                <spikeCode componentHalfCodeLength="15" signalComponent="true" deltaComponent="true"/>
+              </field>
+              <field name="Low" routeToReadout="true">
+                <realFeature standardize="true" keepReserve="true"/>
+                <spikeCode componentHalfCodeLength="15" signalComponent="true" deltaComponent="true"/>
+              </field>
+              <field name="Adj Close" routeToReadout="true">
+                <realFeature standardize="true" keepReserve="true"/>
+                <spikeCode componentHalfCodeLength="15" signalComponent="true" deltaComponent="true"/>
+              </field>
+            </externalFields>
+          </fields>
+        </inputEncoder>
+        <reservoirStructures>
+          <reservoirStructure name="MainCfg">
+            <pools>
+              <pool name="Logistic pool">
+                <proportions dimX="180" dimY="1" dimZ="1"/>
+                <neuronGroups>
+                  <analogGroup name="a-grp" relShare="1" firingThreshold="0.00125" signalingRestriction="NoRestriction">
+                    <activationTanH/>
+                  </analogGroup>
+                </neuronGroups>
+                <interconnection>
+                  <randomSchema density="0.1"/>
+                </interconnection>
+                <predictors activation="true"
+                            activationSquare="true"
+                            activationFadingSum="false"
+                            activationMWAvg="false"
+                            firingFadingSum="false"
+                            firingMWAvg="false"
+                            firingCount="false"
+                            firingBinPattern="false">
+                </predictors>
+              </pool>
+              <pool name="Spiking pool">
+                <proportions dimX="180" dimY="1" dimZ="1"/>
+                <neuronGroups>
+                  <spikingGroup name="s-grp" relShare="1">
+                    <activationLeakyIF refractoryPeriods="0"/>
+                    <homogenousExcitability excitatoryStrength="0.8" inputRatio="0.5" inhibitoryRatio="0.1"/>
+                  </spikingGroup>
+                </neuronGroups>
+                <interconnection>
+                  <randomSchema density="0.1" allowSelfConnection="false"/>
+                </interconnection>
+                <predictors activation="false"
+                            activationSquare="false"
+                            activationFadingSum="false"
+                            activationMWAvg="false"
+                            firingFadingSum="false"
+                            firingMWAvg="false"
+                            firingCount="true"
+                            firingBinPattern="false">
+                  <params>
+                    <firingCount window="100"/>
+                  </params>
+                </predictors>
+              </pool>
+            </pools>
+            <interPoolConnections>
+              <interPoolConnection targetPool="Spiking pool" targetConnDensity="1" sourcePool="Logistic pool" sourceConnDensity="0.1"/>
+            </interPoolConnections>
+          </reservoirStructure>
+        </reservoirStructures>
+        <reservoirInstances>
+          <reservoirInstance name="Main" reservoirStructure="MainCfg">
+            <inputConnections>
+              <connection inputFieldName="High" poolName="Logistic pool"/>
+              <connection inputFieldName="High" poolName="Spiking pool"/>
+              <connection inputFieldName="Low" poolName="Logistic pool"/>
+              <connection inputFieldName="Low" poolName="Spiking pool"/>
+              <connection inputFieldName="Adj Close" poolName="Logistic pool"/>
+              <connection inputFieldName="Adj Close" poolName="Spiking pool"/>
+            </inputConnections>
+            <synapse>
+              <spikingTarget>
+                <input maxDelay="0">
+                  <spikingSource>
+                    <plasticity>
+                      <constantDynamics/>
+                    </plasticity>
+                  </spikingSource>
+                </input>
+                <excitatory maxDelay="0">
+                  <spikingSource>
+                    <plasticity>
+                      <constantDynamics/>
+                    </plasticity>
+                  </spikingSource>
+                </excitatory>
+                <inhibitory maxDelay="0">
+                  <spikingSource>
+                    <plasticity>
+                      <constantDynamics/>
+                    </plasticity>
+                  </spikingSource>
+                </inhibitory>
+              </spikingTarget>
+              <analogTarget spectralRadius="0.9999">
+                <input maxDelay="0">
+                  <analogSource>
+                    <weight min="0" max="2"/>
+                  </analogSource>
+                </input>
+              </analogTarget>
+            </synapse>
+          </reservoirInstance>
+        </reservoirInstances>
+      </neuralPreprocessor>
+      <readoutLayer testDataRatio="0.1" folds="Auto">
+        <defaultNetworks>
+          <forecast>
+            <ff>
+              <activationIdentity/>
+              <resPropTrainer attempts="3" attemptEpochs="500"/>
+            </ff>
+          </forecast>
+        </defaultNetworks>
+        <readoutUnits>
+          <readoutUnit name="High">
+            <forecast>
+              <realFeature standardize="true" keepReserve="true"/>
+            </forecast>
+          </readoutUnit>
+          <readoutUnit name="Low">
+            <forecast>
+              <realFeature standardize="true" keepReserve="true"/>
+            </forecast>
+          </readoutUnit>
+          <readoutUnit name="Adj Close">
+            <forecast>
+              <realFeature standardize="true" keepReserve="true"/>
+            </forecast>
+          </readoutUnit>
+        </readoutUnits>
+      </readoutLayer>
+    </stateMachineCfg>
+  </case>
+
+
+
+
+  <!--
     This demo case demonstrates successful use of the pure analog ESN reservoir for the fast and accurate classifications enabled by
     the new ability of the analog neurons to fire a spike.
     Following configuration of the StateMachine leads to 87.8% accuracy, slightly worse than the best algorithm
@@ -37,7 +197,7 @@
             <externalFields>
               <field name="Outline">
                 <realFeature/>
-                <spikeCode componentHalfCodeLength="15" lowestThreshold="1e-2" useDeviation="true" useDifference="false"/>
+                <spikeCode componentHalfCodeLength="15" lowestThreshold="1e-2" signalComponent="true" deltaComponent="false"/>
               </field>
             </externalFields>
           </fields>
@@ -189,7 +349,7 @@
               <field name="diffOutline1">
                 <diff fieldName="Outline" interval="1"/>
                 <realFeature/>
-                <spikeCode componentHalfCodeLength="8" useDeviation="true" useDifference="false"/>
+                <spikeCode componentHalfCodeLength="8" signalComponent="true" deltaComponent="false"/>
               </field>
             </transformedFields>
           </fields>
@@ -304,7 +464,7 @@
             <externalFields>
               <field name="Accel" routeToReadout="true">
                 <realFeature />
-                <spikeCode componentHalfCodeLength="16" lowestThreshold="1e-6" useDeviation="true" useDifference="true"/>
+                <spikeCode componentHalfCodeLength="16" lowestThreshold="1e-6" signalComponent="true" deltaComponent="true"/>
               </field>
             </externalFields>
           </fields>
@@ -454,7 +614,7 @@
             <externalFields>
               <field name="DistanceFromCenter">
                 <realFeature standardize="true" keepReserve="true"/>
-                <spikeCode componentHalfCodeLength="15" lowestThreshold="1e-2" useDeviation="true" useDifference="false"/>
+                <spikeCode componentHalfCodeLength="15" lowestThreshold="1e-2" signalComponent="true" deltaComponent="false"/>
               </field>
             </externalFields>
           </fields>
@@ -566,7 +726,7 @@
             <externalFields>
               <field name="DistanceFromCenter">
                 <realFeature standardize="true" keepReserve="true"/>
-                <spikeCode componentHalfCodeLength="16" lowestThreshold="1e-3" useDeviation="true" useDifference="false"/>
+                <spikeCode componentHalfCodeLength="16" lowestThreshold="1e-3" signalComponent="true" deltaComponent="false"/>
               </field>
             </externalFields>
           </fields>
@@ -675,7 +835,7 @@
               <field name="diffOutline1">
                 <diff fieldName="Outline" interval="1"/>
                 <realFeature/>
-                <spikeCode componentHalfCodeLength="8" useDeviation="true" useDifference="false"/>
+                <spikeCode componentHalfCodeLength="8" signalComponent="true" deltaComponent="false"/>
               </field>
             </transformedFields>
           </fields>
@@ -1736,7 +1896,7 @@
             <externalFields>
               <field name="Accel">
                 <realFeature />
-                <spikeCode componentHalfCodeLength="20" useDeviation="true" useDifference="true"/>
+                <spikeCode componentHalfCodeLength="20" signalComponent="true" deltaComponent="true"/>
               </field>
             </externalFields>
           </fields>

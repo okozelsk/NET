@@ -31,13 +31,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// </summary>
         public const double DefaultLowestThreshold = 1e-5;
         /// <summary>
-        /// Default value of parameter specifying if to use strength of the deviation from middle value as a component of the spike code
+        /// Default value of parameter specifying if to use strength of the current analog signal as a component of the spike code
         /// </summary>
-        public const bool DefaultUseDeviation = true;
+        public const bool DefaultSignalComponent = true;
         /// <summary>
-        /// Default value of parameter specifying if to use strength of the deviation from previous value as a component of the spike code
+        /// Default value of parameter specifying if to use difference of the current analog signal and previous analog signal as a component of the spike code
         /// </summary>
-        public const bool DefaultUseDifference = false;
+        public const bool DefaultDeltaComponent = false;
 
 
         //Attribute properties
@@ -52,14 +52,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         public double LowestThreshold { get; }
 
         /// <summary>
-        /// Specifies if to use strength of the deviation from middle value as a component of the spike code
+        /// Specifies if to use strength of the current analog signal as a component of the spike code
         /// </summary>
-        public bool UseDeviation { get; }
+        public bool SignalComponent { get; }
 
         /// <summary>
-        /// Specifies if to use strength of the deviation from previous value as a component of the spike code
+        /// Specifies if to use difference of the current analog signal and previous analog signal as a component of the spike code
         /// </summary>
-        public bool UseDifference { get; }
+        public bool DeltaComponent { get; }
 
 
         //Constructors
@@ -68,18 +68,18 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// </summary>
         /// <param name="componentHalfCodeLength">Length of the half of component code</param>
         /// <param name="lowestThreshold">Firing threshold of the most sensitive input neuron</param>
-        /// <param name="useDeviation">Specifies if to use strength of the deviation from middle value as a component of the spike code</param>
-        /// <param name="useDifference">Specifies if to use strength of the deviation from previous value as a component of the spike code</param>
+        /// <param name="signalComponent">Specifies if to use strength of the current analog signal as a component of the spike code</param>
+        /// <param name="deltaComponent">Specifies if to use difference of the current analog signal and previous analog signal as a component of the spike code</param>
         public SpikeCodeSettings(int componentHalfCodeLength = DefaultComponentHalfCodeLength,
                                  double lowestThreshold = DefaultLowestThreshold,
-                                 bool useDeviation = DefaultUseDeviation,
-                                 bool useDifference = DefaultUseDifference
+                                 bool signalComponent = DefaultSignalComponent,
+                                 bool deltaComponent = DefaultDeltaComponent
                                  )
         {
             ComponentHalfCodeLength = componentHalfCodeLength;
             LowestThreshold = lowestThreshold;
-            UseDeviation = useDeviation;
-            UseDifference = useDifference;
+            SignalComponent = signalComponent;
+            DeltaComponent = deltaComponent;
             Check();
             return;
         }
@@ -89,7 +89,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// </summary>
         /// <param name="source">Source instance</param>
         public SpikeCodeSettings(SpikeCodeSettings source)
-            : this(source.ComponentHalfCodeLength, source.LowestThreshold, source.UseDeviation, source.UseDifference)
+            : this(source.ComponentHalfCodeLength, source.LowestThreshold, source.SignalComponent, source.DeltaComponent)
         {
             return;
         }
@@ -108,8 +108,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             //Parsing
             ComponentHalfCodeLength = int.Parse(settingsElem.Attribute("componentHalfCodeLength").Value, CultureInfo.InvariantCulture);
             LowestThreshold = double.Parse(settingsElem.Attribute("lowestThreshold").Value, CultureInfo.InvariantCulture);
-            UseDeviation = bool.Parse(settingsElem.Attribute("useDeviation").Value);
-            UseDifference = bool.Parse(settingsElem.Attribute("useDifference").Value);
+            SignalComponent = bool.Parse(settingsElem.Attribute("signalComponent").Value);
+            DeltaComponent = bool.Parse(settingsElem.Attribute("deltaComponent").Value);
             Check();
             return;
         }
@@ -128,12 +128,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// Checks if settings are default
         /// </summary>
-        public bool IsDefaultUseDeviation { get { return (UseDeviation == DefaultUseDeviation); } }
+        public bool IsDefaultUseDeviation { get { return (SignalComponent == DefaultSignalComponent); } }
 
         /// <summary>
         /// Checks if settings are default
         /// </summary>
-        public bool IsDefaultUseDifference { get { return (UseDifference == DefaultUseDifference); } }
+        public bool IsDefaultUseDifference { get { return (DeltaComponent == DefaultDeltaComponent); } }
 
         /// <summary>
         /// Identifies settings containing only default values
@@ -163,7 +163,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             {
                 throw new Exception($"Invalid LowestThreshold {LowestThreshold.ToString(CultureInfo.InvariantCulture)}. LowestThreshold must be GT 0 and LT 1.");
             }
-            if(!UseDeviation && !UseDifference)
+            if(!SignalComponent && !DeltaComponent)
             {
                 throw new Exception($"At least one component of the spike code has to be used.");
             }
@@ -197,11 +197,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             }
             if (!suppressDefaults || !IsDefaultUseDeviation)
             {
-                rootElem.Add(new XAttribute("useDeviation", UseDeviation.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()));
+                rootElem.Add(new XAttribute("signalComponent", SignalComponent.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()));
             }
             if (!suppressDefaults || !IsDefaultUseDifference)
             {
-                rootElem.Add(new XAttribute("useDifference", UseDifference.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()));
+                rootElem.Add(new XAttribute("deltaComponent", DeltaComponent.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()));
             }
             Validate(rootElem, XsdTypeName);
             return rootElem;

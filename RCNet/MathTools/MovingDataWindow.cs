@@ -37,6 +37,11 @@ namespace RCNet.MathTools
         
         //Properties
         /// <summary>
+        /// Internal capacity
+        /// </summary>
+        public int Capacity { get { return _dataWindow.Capacity; } }
+
+        /// <summary>
         /// Indicates the full data in the window
         /// </summary>
         public bool Full { get { return _dataWindow.Full; } }

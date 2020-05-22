@@ -173,6 +173,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
         public ActivationType TypeOfActivation { get { return _activation.TypeOfActivation; } }
 
         /// <summary>
+        /// Number of computation cycles necessary to make neuron and its predictors fully operating
+        /// </summary>
+        public int RequiredHistLength { get { return _predictors == null ? 1 : _predictors.RequiredHistLength; } }
+        
+        /// <summary>
         /// Number of provided predictors
         /// </summary>
         public int NumOfEnabledPredictors { get { return _predictors == null ? 0 : _predictors.NumOfEnabledPredictors; } }

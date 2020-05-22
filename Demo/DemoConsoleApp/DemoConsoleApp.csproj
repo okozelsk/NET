@@ -154,6 +154,12 @@
     <None Include="Data\ProximalPhalanxOutlineAgeGroup_verify.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="Data\TTOO_train.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Data\TTOO_verify.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Data\Worms_train.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

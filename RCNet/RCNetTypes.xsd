@@ -1860,7 +1860,7 @@
         <xs:documentation xml:lang="en">Default value is 0.75</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute type="UDoubleGT0LT1Type" name="inputRatio" use="optional" default="0.75">
+    <xs:attribute type="UDoubleLE1Type" name="inputRatio" use="optional" default="0.75">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is 0.75</xs:documentation>
       </xs:annotation>
@@ -2095,17 +2095,17 @@
     </xs:attribute>
     <xs:attribute type="UDoubleGT0LT1Type" name="lowestThreshold" use="optional" default="1e-5">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Firing threshold of the most sensitive input neuron. Default value is 1e-5</xs:documentation>
+        <xs:documentation xml:lang="en">Firing threshold of the most sensitive spike. Default value is 1e-5</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute type="xs:boolean" name="useDeviation" use="optional" default="true">
+    <xs:attribute type="xs:boolean" name="signalComponent" use="optional" default="true">
       <xs:annotation>
-        <xs:documentation xml:lang="en">If to use strength of the deviation from middle value as a component of the spike code. Default value is true</xs:documentation>
+        <xs:documentation xml:lang="en">If to use strength of the current analog signal as a component of the spike code. Default value is true</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute type="xs:boolean" name="useDifference" use="optional" default="false">
+    <xs:attribute type="xs:boolean" name="deltaComponent" use="optional" default="false">
       <xs:annotation>
-        <xs:documentation xml:lang="en">If to use strength of the deviation from previous value as a component of the spike code. Default value is false</xs:documentation>
+        <xs:documentation xml:lang="en">If to use difference of the current analog signal and previous analog signal as a component of the spike code. Default value is false</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>

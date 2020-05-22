@@ -202,6 +202,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
             return;
         }
 
+        //Properties
+        /// <summary>
+        /// Necessary number of updates to make enabled hist-based predictors ready
+        /// </summary>
+        public int RequiredHistLength { get { return Math.Max(_activationMDW == null ? 1 : _activationMDW.Capacity, _firingMDW == null ? 1 : _firingMDW.Capacity); } }
+
         //Methods
         /// <summary>
         /// Checks if given predictor is enabled
