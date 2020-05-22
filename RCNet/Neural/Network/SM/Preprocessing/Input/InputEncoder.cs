@@ -430,7 +430,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
                 if(RoutedFieldCollection.Count > 0)
                 {
                     _fixedExtVectorLength = inputBundle.InputVectorCollection[0].Length;
-                    NumOfRoutedFieldValues = RoutedFieldCollection.Count * _fixedExtVectorLength;
+                    NumOfRoutedFieldValues = (RoutedFieldCollection.Count * (_fixedExtVectorLength / Fields.Count));
                 }
                 //Convert input vectors to InputPatterns
                 List<InputPattern> patterns = new List<InputPattern>(inputBundle.InputVectorCollection.Count);
@@ -549,7 +549,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         public List<PredictorDescriptor> GetInputValuesPredictorsDescriptors()
         {
             List<PredictorDescriptor> result = new List<PredictorDescriptor>();
-            int numOfFieldValInstances = _fixedExtVectorLength == -1 ? 1 : _fixedExtVectorLength;
+            int numOfFieldValInstances = _fixedExtVectorLength == -1 ? 1 : (_fixedExtVectorLength / Fields.Count);
             foreach (InputField field in RoutedFieldCollection)
             {
                 for (int i = 0; i < numOfFieldValInstances; i++)

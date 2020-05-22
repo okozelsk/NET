@@ -229,11 +229,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             }
             //Sort statistics
             featureStatCollection.Sort(CompareOutputFeature);
+            //Enable predictors
             int reductionCount = (int)(Math.Round(OutputFeatureDescriptorCollection.Count * _preprocessorCfg.PredictorsReductionRatio));
-            int firstRejectedIndex = OutputFeatureDescriptorCollection.Count - reductionCount;
-            //Enable valid predictors
+            int firstRejectedIndex = featureStatCollection.Count - reductionCount;
             NumOfActiveOutputFeatures = 0;
-            for (int i = 0; i < OutputFeatureDescriptorCollection.Count; i++)
+            for (int i = 0; i < featureStatCollection.Count; i++)
             {
                 if(featureStatCollection[i].Item3.Span > MinPredictorValueDifference && i < firstRejectedIndex)
                 {
