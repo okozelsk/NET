@@ -424,20 +424,20 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                     throw new Exception("Can't set homogenous excitability. Hidden neuron has no excitatory synapse.");
                 }
                 //Rescale input synapses
+                double targetSumOfInputWeights = homogenousExcitabilityCfg.ExcitatoryStrength * homogenousExcitabilityCfg.InputRatio;
                 if (sumOfInputWeights > 0)
                 {
-                    double targetStrength = sumOfExcitatoryWeights == 0d ? homogenousExcitabilityCfg.ExcitatoryStrength : homogenousExcitabilityCfg.InputStrength;
-                    double factor = targetStrength / sumOfInputWeights;
+                    double factor = targetSumOfInputWeights / sumOfInputWeights;
                     foreach (Synapse synapse in _neuronInputConnectionsCollection[neuron.Location.ReservoirFlatIdx].Values)
                     {
                         synapse.Rescale(factor);
                     }
                 }
                 //Rescale excitatory synapses
-                if(sumOfExcitatoryWeights > 0)
+                double targetSumOfExcitatoryWeights = sumOfInputWeights == 0 ? homogenousExcitabilityCfg.ExcitatoryStrength : homogenousExcitabilityCfg.ExcitatoryStrength - targetSumOfInputWeights;
+                if (sumOfExcitatoryWeights > 0)
                 {
-                    double targetStrength = sumOfInputWeights == 0d ? homogenousExcitabilityCfg.ExcitatoryStrength : (homogenousExcitabilityCfg.ExcitatoryStrength - homogenousExcitabilityCfg.InputStrength);
-                    double factor = targetStrength / sumOfExcitatoryWeights;
+                    double factor = targetSumOfExcitatoryWeights / sumOfExcitatoryWeights;
                     foreach (Synapse synapse in _neuronNeuronConnectionsCollection[neuron.Location.ReservoirFlatIdx].Values)
                     {
                         if (synapse.Role == Synapse.SynRole.Excitatory)
@@ -447,10 +447,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                     }
                 }
                 //Rescale inhibitory synapses
+                double targetSumOfInhibitoryWeights = homogenousExcitabilityCfg.ExcitatoryStrength * homogenousExcitabilityCfg.InhibitoryRatio;
                 if (sumOfInhibitoryWeights > 0)
                 {
-                    double targetStrength = homogenousExcitabilityCfg.InhibitoryRatio * homogenousExcitabilityCfg.ExcitatoryStrength;
-                    double factor = targetStrength / sumOfInhibitoryWeights;
+                    double factor = targetSumOfInhibitoryWeights / sumOfInhibitoryWeights;
                     foreach (Synapse synapse in _neuronNeuronConnectionsCollection[neuron.Location.ReservoirFlatIdx].Values)
                     {
                         if (synapse.Role == Synapse.SynRole.Inhibitory)
@@ -464,7 +464,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         }
 
         /// <summary>
-        /// Function adjusts weights of input synapses to analog neurons to ensute theirs sum does not exceed Max
+        /// Function adjusts weights of input synapses to analog neurons to ensure theirs sum does not exceed Max
         /// </summary>
         private void AdjustAnalogInputStrength()
         {

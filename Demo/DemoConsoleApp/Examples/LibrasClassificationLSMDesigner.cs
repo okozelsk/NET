@@ -47,9 +47,9 @@ namespace Demo.DemoConsoleApp.Examples
         {
             //Create StateMachine configuration
             //Simplified input configuration
-            InputEncoderSettings inputCfg = StateMachineDesigner.CreateInputCfg(new FeedingPatternedSettings(false, false, RCNet.Neural.Data.InputPattern.VariablesSchema.Groupped),
-                                                                                new ExternalFieldSettings("coord_abcissa", new RealFeatureFilterSettings(), true, new SpikeCodeSettings(16, 1e-3, true, true)),
-                                                                                new ExternalFieldSettings("coord_ordinate", new RealFeatureFilterSettings(), true, new SpikeCodeSettings(16, 1e-3, true, true))
+            InputEncoderSettings inputCfg = StateMachineDesigner.CreateInputCfg(new FeedingPatternedSettings(true, false, RCNet.Neural.Data.InputPattern.VariablesSchema.Groupped),
+                                                                                new ExternalFieldSettings("coord_abcissa", new RealFeatureFilterSettings(), true, new SpikeCodeSettings(15, 1e-2, true, true)),
+                                                                                new ExternalFieldSettings("coord_ordinate", new RealFeatureFilterSettings(), true, new SpikeCodeSettings(15, 1e-2, true, true))
                                                                                 );
             //Simplified readout layer configuration
             ReadoutLayerSettings readoutCfg = StateMachineDesigner.CreateClassificationReadoutCfg(StateMachineDesigner.CreateSingleLayerRegrNet(new ElliotSettings(), 5, 400),
@@ -75,12 +75,12 @@ namespace Demo.DemoConsoleApp.Examples
             //Create designer instance
             StateMachineDesigner smd = new StateMachineDesigner(inputCfg, readoutCfg);
             //Create pure LSM fashioned StateMachine configuration
-            StateMachineSettings stateMachineCfg = smd.CreatePureLSMCfg(new ProportionsSettings(6, 5, 5), //Proportions (it also determines total size)
+            StateMachineSettings stateMachineCfg = smd.CreatePureLSMCfg(new ProportionsSettings(6, 6, 5), //Proportions (it also determines total size)
                                                                         new AdExpIFSettings(), //Activation
-                                                                        new HomogenousExcitabilitySettings(0.5, 0.75, 0.25),
+                                                                        new HomogenousExcitabilitySettings(0.75, 0.67, 0.25),
                                                                         1d, //Input connection density
                                                                         0, //Input max delay
-                                                                        0.1d, //Interconnection density
+                                                                        0.2d, //Interconnection density
                                                                         0, //Internal synapses max delay
                                                                         0, //Steady bias
                                                                         new PredictorsParamsSettings(new FiringCountSettings(45)),

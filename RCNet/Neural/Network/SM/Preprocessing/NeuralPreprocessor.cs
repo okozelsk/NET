@@ -109,14 +109,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             ///////////////////////////////////////////////////////////////////////////////////
             //Input encoder
             InputEncoder = new InputEncoder(_preprocessorCfg.InputEncoderCfg);
-            List<PredictorDescriptor> inputEncoderFieldsPredictorDescCollection = InputEncoder.GetInputValuesPredictorsDescriptors();
             ///////////////////////////////////////////////////////////////////////////////////
             //Reservoir instance(s)
             BootCycles = 0;
             //Random generator used for reservoir structure initialization
             Random rand = (randomizerSeek < 0 ? new Random() : new Random(randomizerSeek));
             ReservoirCollection = new List<ReservoirInstance>(_preprocessorCfg.ReservoirInstancesCfg.ReservoirInstanceCfgCollection.Count);
-            List<PredictorDescriptor> reservoirsPredictorDescriptorCollection = new List<PredictorDescriptor>();
             int reservoirInstanceID = 0;
             int biggestInterconnectedArea = 0;
             foreach(ReservoirInstanceSettings reservoirInstanceCfg in _preprocessorCfg.ReservoirInstancesCfg.ReservoirInstanceCfgCollection)
@@ -132,7 +130,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 ReservoirCollection.Add(reservoir);
                 TotalNumOfHiddenNeurons += reservoir.Size;
                 biggestInterconnectedArea = Math.Max(biggestInterconnectedArea, structCfg.LargestInterconnectedAreaSize);
-                reservoirsPredictorDescriptorCollection.AddRange(reservoir.GetNeuralPredictorsDescriptors());
             }
             //Boot cycles setup
             if (_preprocessorCfg.InputEncoderCfg.FeedingCfg.FeedingType == InputEncoder.InputFeedingType.Continuous)
@@ -145,14 +142,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 BootCycles = 0;
             }
             //Output features
+            OutputFeatureDescriptorCollection = null;
             OutputFeatureGeneralSwitchCollection = null;
             NumOfActiveOutputFeatures = 0;
-            OutputFeatureDescriptorCollection = new List<PredictorDescriptor>();
-            OutputFeatureDescriptorCollection.AddRange(inputEncoderFieldsPredictorDescCollection);
-            for (int i = 0; i < (Bidir ? 2 : 1); i++)
-            {
-                OutputFeatureDescriptorCollection.AddRange(reservoirsPredictorDescriptorCollection);
-            }
             return;
         }
 
@@ -187,6 +179,29 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             {
                 return 0;
             }
+        }
+
+        /// <summary>
+        /// Initializes collection of descriptors of output features
+        /// </summary>
+        private void InitOutputFeaturesDescriptors()
+        {
+            //Routed input values
+            List<PredictorDescriptor> inputEncoderFieldsPredictorDescCollection = InputEncoder.GetInputValuesPredictorsDescriptors();
+            //Hidden neurons predictors
+            List<PredictorDescriptor> reservoirsPredictorDescriptorCollection = new List<PredictorDescriptor>();
+            foreach (ReservoirInstance reservoir in ReservoirCollection)
+            {
+                reservoirsPredictorDescriptorCollection.AddRange(reservoir.GetNeuralPredictorsDescriptors());
+            }
+            //Final output featuires collection
+            OutputFeatureDescriptorCollection = new List<PredictorDescriptor>();
+            OutputFeatureDescriptorCollection.AddRange(inputEncoderFieldsPredictorDescCollection);
+            for (int i = 0; i < (Bidir ? 2 : 1); i++)
+            {
+                OutputFeatureDescriptorCollection.AddRange(reservoirsPredictorDescriptorCollection);
+            }
+            return;
         }
 
         /// <summary>
@@ -353,6 +368,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             ResetReservoirs(true);
             //Reset input encoder and initialize its feature filters
             InputEncoder.Initialize(inputBundle);
+            //Initialize output features descriptors
+            InitOutputFeaturesDescriptors();
             //Allocate output bundle
             VectorBundle outputBundle = new VectorBundle(inputBundle.InputVectorCollection.Count);
             //Process data

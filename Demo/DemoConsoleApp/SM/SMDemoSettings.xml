@@ -4,30 +4,40 @@
   <!--
     This demo case demonstrates successful use of the pure analog ESN reservoir for the fast and accurate classifications enabled by
     the new ability of the analog neurons to fire a spike.
-    Following straightforward configuration of the StateMachine exhibits 90.00% accuracy, slightly worse the best algorithm
-    called BOSS, referenced at the dataset's home site:
+    Following configuration of the StateMachine leads to 87.8% accuracy, slightly worse than the best algorithm
+    called ST, referenced at the dataset's home site:
     "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
-    https://timeseriesclassification.com/description.php?Dataset=BeetleFly.
-    MPEG-7 CE Shape-1 Part B is a database of binary images developed for testing MPEG-7 shape descriptors, and is available free online. 
-    It is used for testing contour/image and skeleton-based descriptors. Classes of images vary broadly, and include classes that are
-    similar in shape to one another. There are 20 instances of each class, and 60 classes in total.
-    We have extracted the outlines of these images and mapped them into 1-D series of distances to the centre. 
-    Beetle/Fly is the problem of distinguishing between an outline of a beetle and a fly.
+    https://timeseriesclassification.com/description.php?Dataset=ProximalPhalanxOutlineAgeGroup.
+    This series of 11 classification problems were created as part of Luke Davis's PhD titled "Predictive Modelling of Bone Ageing".
+    They are all derived from the same images, extracted from Cao et al. "Digital hand atlas and web-based bone age assessment: system design and implementation".
+    They are designed to test the efficacy of hand and bone outline detection and whether these outlines could be helpful in bone
+    age prediction. Algorithms to automatically extract the hand outlines and then the outlines of three bones of the middle finger
+    (proximal, middle and distal phalanges) were applied to over 1300 images, and three human evaluators labelled the output
+    of the image outlining as correct or incorrect. This generated three classification problems: DistalPhalanxOutlineCorrect; MiddlePhalanxOutlineCorrect; and ProximalPhalanxOutlineCorrect.
+    The next stage of the project was to use the outlines to predict information about the subjects age.
+    The three problems {DistalPhalanxOutlineAgeGroup, MiddlePhalanxOutlineAgeGroup and ProximalPhalanxOutlineAgeGroup} involve using
+    the outline of one of the phalanges to predict whether the subject is one of three age groups: 0-6 years old, 7-12 years old
+    and 13-19 years old. Note that these problems are aligned by subject, and hence can be treated as a multi dimensional
+    TSC problem. Problem Phalanges contains the concatenation of all three problems. Bone age estimation is usually performed by
+    an expert with an algorithm called Tanner-Whitehouse. This involves scoring each bone into one of seven categories based on
+    the stage of development. The final three bone image classification problems, DistalPhalanxTW, MiddlePhalanxTW and ProximalPhalanxTW},
+    involve predicting the Tanner-Whitehouse score (as labelled by a human expert) from the outline.
   -->
-  <case name="Classification task BeetleFly: Simple pure ESN reservoir generating FiringFadingSum predictors, one Identity neuron as a classifier (Ridge regression trainer)">
-    <samples trainingData="BeetleFly_train.csv" verificationData="BeetleFly_verify.csv"/>
+  <case name="Classification task ProximalPhalanxOutlineAgeGroup: Simple pure LSM reservoir generating FiringFadingSum predictors, one TanH neuron as a classifier (Resilient trainer)">
+    <samples trainingData="ProximalPhalanxOutlineAgeGroup_train.csv" verificationData="ProximalPhalanxOutlineAgeGroup_verify.csv"/>
     <stateMachineCfg randomizerSeek="0">
-      <neuralPreprocessor predictorsReductionRatio="0.1">
+      <neuralPreprocessor>
         <inputEncoder>
-          <feedingPatterned bidir="false">
+          <feedingPatterned bidir="false" routeToReadout="true">
             <unification unifyAmplitude="false" detrend="false">
-              <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
+              <resampling/>
             </unification>
           </feedingPatterned>
           <fields>
             <externalFields>
-              <field name="DistanceFromCenter">
-                <realFeature standardize="true" keepReserve="true"/>
+              <field name="Outline">
+                <realFeature/>
+                <spikeCode componentHalfCodeLength="15" lowestThreshold="1e-2" useDeviation="true" useDifference="false"/>
               </field>
             </externalFields>
           </fields>
@@ -35,15 +45,27 @@
         <reservoirStructures>
           <reservoirStructure name="MainCfg">
             <pools>
-              <pool name="PureESN">
-                <proportions dimX="6" dimY="6" dimZ="5"/>
+              <pool name="Pool1">
+                <proportions dimX="120" dimY="1" dimZ="1"/>
                 <neuronGroups>
-                  <analogGroup name="TanH-grp" relShare="1" firingThreshold="0.00125" signalingRestriction="NoRestriction">
+                  <spikingGroup name="Spiking-grp" relShare="1">
+                    <activationAdExpIF/>
+                    <homogenousExcitability excitatoryStrength="0.75" inputRatio="0.67" inhibitoryRatio="0.25"/>
+                  </spikingGroup>
+                </neuronGroups>
+                <interconnection>
+                  <randomSchema density="0.1" allowSelfConnection="false"/>
+                </interconnection>
+              </pool>
+              <pool name="Pool2">
+                <proportions dimX="120" dimY="1" dimZ="1"/>
+                <neuronGroups>
+                  <analogGroup name="Analog-grp" relShare="1" firingThreshold="0.00125">
                     <activationTanH/>
                   </analogGroup>
                 </neuronGroups>
                 <interconnection>
-                  <randomSchema density="0.15" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false"/>
+                  <randomSchema density="0.1" allowSelfConnection="true"/>
                 </interconnection>
               </pool>
             </pools>
@@ -52,8 +74,42 @@
         <reservoirInstances>
           <reservoirInstance name="Main" reservoirStructure="MainCfg">
             <inputConnections>
-              <connection inputFieldName="DistanceFromCenter" poolName="PureESN"/>
+              <connection inputFieldName="Outline" poolName="Pool1" spikingTargetDensity="1"/>
+              <connection inputFieldName="Outline" poolName="Pool2" analogTargetDensity="0.2"/>
             </inputConnections>
+            <synapse>
+              <spikingTarget>
+                <input maxDelay="0">
+                  <spikingSource>
+                    <plasticity>
+                      <linearDynamics/>
+                    </plasticity>
+                  </spikingSource>
+                </input>
+                <excitatory maxDelay="0">
+                  <spikingSource>
+                    <plasticity>
+                      <linearDynamics/>
+                    </plasticity>
+                  </spikingSource>
+                </excitatory>
+                <inhibitory maxDelay="0">
+                  <spikingSource>
+                    <plasticity>
+                      <linearDynamics/>
+                    </plasticity>
+                  </spikingSource>
+                </inhibitory>
+              </spikingTarget>
+              <analogTarget>
+                <input maxDelay="0">
+                  <analogSource>
+                    <weight min="0" max="1"/>
+                  </analogSource>
+                </input>
+                <indifferent maxDelay="0"/>
+              </analogTarget>
+            </synapse>
             <predictors activation="false"
                         activationSquare="false"
                         activationFadingSum="false"
@@ -66,72 +122,101 @@
           </reservoirInstance>
         </reservoirInstances>
       </neuralPreprocessor>
-      <readoutLayer testDataRatio="0.1" folds="Auto">
-        <defaultNetworks/>
+      <readoutLayer testDataRatio="0.25" folds="Auto" repetitions="1">
+        <defaultNetworks>
+          <classification>
+            <ff>
+              <activationElliot/>
+              <resPropTrainer attempts="3" attemptEpochs="1000"/>
+            </ff>
+          </classification>
+        </defaultNetworks>
         <readoutUnits>
-          <readoutUnit name="Beetle1Fly0">
-            <classification>
-              <networks>
-                <ff>
-                  <activationIdentity/>
-                  <ridgeRegrTrainer attemptEpochs="1000">
-                    <lambda min="0" max="1" subIntervals="Auto"/>
-                  </ridgeRegrTrainer>
-                </ff>
-              </networks>
-            </classification>
+          <readoutUnit name="0-6 years">
+            <classification oneWinnerGroupName="AgeGroup"/>
+          </readoutUnit>
+          <readoutUnit name="7-12 years">
+            <classification oneWinnerGroupName="AgeGroup"/>
+          </readoutUnit>
+          <readoutUnit name="13-19 years">
+            <classification oneWinnerGroupName="AgeGroup"/>
           </readoutUnit>
         </readoutUnits>
       </readoutLayer>
     </stateMachineCfg>
   </case>
-
 
 
   <!--
     This demo case demonstrates successful use of the pure analog ESN reservoir for the fast and accurate classifications enabled by
     the new ability of the analog neurons to fire a spike.
-    Following straightforward configuration of the StateMachine exhibits 100% accuracy, slightly better than the best algorithm
-    called BOSS, referenced at the dataset's home site:
+    Following configuration of the StateMachine leads to 87.8% accuracy, slightly worse than the best algorithm
+    called ST, referenced at the dataset's home site:
     "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
-    https://timeseriesclassification.com/description.php?Dataset=BirdChicken.
-    MPEG-7 CE Shape-1 Part B is a database of binary images developed for testing MPEG-7 shape descriptors, and is available free online. 
-    It is used for testing contour/image and skeleton-based descriptors. Classes of images vary broadly, and include classes that are
-    similar in shape to one another. There are 20 instances of each class, and 60 classes in total.
-    We have extracted the outlines of these images and mapped them into 1-D series of distances to the centre. 
-    Bird/Chicken is the problem of distinguishing between an outline of a bird and a chicken.
+    https://timeseriesclassification.com/description.php?Dataset=ProximalPhalanxOutlineAgeGroup.
+    This series of 11 classification problems were created as part of Luke Davis's PhD titled "Predictive Modelling of Bone Ageing".
+    They are all derived from the same images, extracted from Cao et al. "Digital hand atlas and web-based bone age assessment: system design and implementation".
+    They are designed to test the efficacy of hand and bone outline detection and whether these outlines could be helpful in bone
+    age prediction. Algorithms to automatically extract the hand outlines and then the outlines of three bones of the middle finger
+    (proximal, middle and distal phalanges) were applied to over 1300 images, and three human evaluators labelled the output
+    of the image outlining as correct or incorrect. This generated three classification problems: DistalPhalanxOutlineCorrect; MiddlePhalanxOutlineCorrect; and ProximalPhalanxOutlineCorrect.
+    The next stage of the project was to use the outlines to predict information about the subjects age.
+    The three problems {DistalPhalanxOutlineAgeGroup, MiddlePhalanxOutlineAgeGroup and ProximalPhalanxOutlineAgeGroup} involve using
+    the outline of one of the phalanges to predict whether the subject is one of three age groups: 0-6 years old, 7-12 years old
+    and 13-19 years old. Note that these problems are aligned by subject, and hence can be treated as a multi dimensional
+    TSC problem. Problem Phalanges contains the concatenation of all three problems. Bone age estimation is usually performed by
+    an expert with an algorithm called Tanner-Whitehouse. This involves scoring each bone into one of seven categories based on
+    the stage of development. The final three bone image classification problems, DistalPhalanxTW, MiddlePhalanxTW and ProximalPhalanxTW},
+    involve predicting the Tanner-Whitehouse score (as labelled by a human expert) from the outline.
   -->
-  <case name="Classification task BirdChicken: Simple pure ESN reservoir generating FiringFadingSum predictors, one Identity neuron as a classifier (Ridge regression trainer)">
-    <samples trainingData="BirdChicken_train.csv" verificationData="BirdChicken_verify.csv"/>
+  <case name="Classification task ProximalPhalanxOutlineAgeGroup: Simple pure ESN reservoir generating FiringFadingSum and FiringCount predictors, one Elliot neuron as a classifier (Resilient trainer)">
+    <samples trainingData="ProximalPhalanxOutlineAgeGroup_train.csv" verificationData="ProximalPhalanxOutlineAgeGroup_verify.csv"/>
     <stateMachineCfg randomizerSeek="0">
       <neuralPreprocessor>
         <inputEncoder>
-          <feedingPatterned bidir="false" routeToReadout="false">
+          <feedingPatterned bidir="true" routeToReadout="false">
             <unification unifyAmplitude="false" detrend="false">
-              <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
+              <resampling/>
             </unification>
           </feedingPatterned>
           <fields>
             <externalFields>
-              <field name="DistanceFromCenter">
-                <realFeature standardize="true" keepReserve="true"/>
-                <spikeCode componentHalfCodeLength="16" lowestThreshold="1e-3" useDeviation="true" useDifference="false"/>
+              <field name="Outline">
+                <realFeature/>
               </field>
             </externalFields>
+            <transformedFields>
+              <field name="diffOutline1">
+                <diff fieldName="Outline" interval="1"/>
+                <realFeature/>
+                <spikeCode componentHalfCodeLength="8" useDeviation="true" useDifference="false"/>
+              </field>
+            </transformedFields>
           </fields>
         </inputEncoder>
         <reservoirStructures>
           <reservoirStructure name="MainCfg">
             <pools>
-              <pool name="PureESN">
-                <proportions dimX="6" dimY="6" dimZ="5"/>
+              <pool name="PureESN-A">
+                <proportions dimX="150" dimY="1" dimZ="1"/>
                 <neuronGroups>
-                  <analogGroup name="TanH-grp" firingThreshold="0.00125" relShare="1" signalingRestriction="NoRestriction">
+                  <analogGroup name="TanH-grp" relShare="1" firingThreshold="0.00125">
                     <activationTanH/>
                   </analogGroup>
                 </neuronGroups>
                 <interconnection>
-                  <randomSchema density="0.2" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false"/>
+                  <randomSchema density="0.2" allowSelfConnection="false"/>
+                </interconnection>
+              </pool>
+              <pool name="PureESN-B">
+                <proportions dimX="150" dimY="1" dimZ="1"/>
+                <neuronGroups>
+                  <analogGroup name="TanH-grp" relShare="1" firingThreshold="0.00125">
+                    <activationTanH/>
+                  </analogGroup>
+                </neuronGroups>
+                <interconnection>
+                  <randomSchema density="0.2" allowSelfConnection="false"/>
                 </interconnection>
               </pool>
             </pools>
@@ -140,47 +225,58 @@
         <reservoirInstances>
           <reservoirInstance name="Main" reservoirStructure="MainCfg">
             <inputConnections>
-              <connection inputFieldName="DistanceFromCenter" poolName="PureESN"/>
+              <connection inputFieldName="Outline" analogTargetDensity="0.2" poolName="PureESN-A" signalingRestriction="AnalogOnly"/>
+              <connection inputFieldName="diffOutline1" analogTargetDensity="0.2" poolName="PureESN-B" signalingRestriction="AnalogOnly"/>
             </inputConnections>
+            <synapse>
+              <analogTarget>
+                <input maxDelay="0">
+                  <analogSource>
+                    <weight min="0" max="1"/>
+                  </analogSource>
+                </input>
+                <indifferent maxDelay="0"/>
+              </analogTarget>
+            </synapse>
             <predictors activation="false"
                         activationSquare="false"
                         activationFadingSum="false"
                         activationMWAvg="false"
                         firingFadingSum="true"
                         firingMWAvg="false"
-                        firingCount="false"
+                        firingCount="true"
                         firingBinPattern="false">
             </predictors>
           </reservoirInstance>
         </reservoirInstances>
       </neuralPreprocessor>
-      <readoutLayer testDataRatio="0.1" folds="Auto" repetitions="1">
-        <defaultNetworks/>
+      <readoutLayer testDataRatio="0.25" folds="Auto" repetitions="1">
+        <defaultNetworks>
+          <classification>
+            <ff>
+              <activationElliot/>
+              <resPropTrainer attempts="3" attemptEpochs="1000"/>
+            </ff>
+          </classification>
+        </defaultNetworks>
         <readoutUnits>
-          <readoutUnit name="Chicken1Bird0">
-            <classification>
-              <networks>
-                <ff>
-                  <activationTanH/>
-                  <resPropTrainer attempts="5" attemptEpochs="200"/>
-                </ff>
-              </networks>
-            </classification>
+          <readoutUnit name="0-6 years">
+            <classification oneWinnerGroupName="AgeGroup"/>
+          </readoutUnit>
+          <readoutUnit name="7-12 years">
+            <classification oneWinnerGroupName="AgeGroup"/>
+          </readoutUnit>
+          <readoutUnit name="13-19 years">
+            <classification oneWinnerGroupName="AgeGroup"/>
           </readoutUnit>
         </readoutUnits>
       </readoutLayer>
-      <mapper>
-        <map readoutUnitName="Chicken1Bird0">
-          <allowedPredictors>
-            <predictor name="FiringFadingSum"/>
-          </allowedPredictors>
-        </map>
-      </mapper>
     </stateMachineCfg>
   </case>
 
 
-
+  
+  
   <!--
     The best algorithm called COTE, referenced at the dataset's home site, exhibits accuracy 81.4%.
     It is much better than the results of StateMachine (69%). This is a good case for finding other ways to improve StateMachine :-)
@@ -221,7 +317,7 @@
                 <neuronGroups>
                   <spikingGroup name="grp1" relShare="1">
                     <activationAdExpIF solverCompSteps="2" solverMethod="Euler" stimuliDuration="1"/>
-                    <homogenousExcitability inputStrength="0.5" excitatoryStrength="0.75" inhibitoryRatio="0.25"/>
+                    <homogenousExcitability excitatoryStrength="0.75" inputRatio="0.67" inhibitoryRatio="0.25"/>
                   </spikingGroup>
                 </neuronGroups>
                 <interconnection>
@@ -331,23 +427,23 @@
     </stateMachineCfg>
   </case>
 
+
   <!--
-    This demo case demonstrates successful use of the pure analog ESN reservoir for the fast and accurate classifications enabled by
-    the new ability of the analog neurons to fire a spike.
-    Following straightforward configuration of the StateMachine exhibits 100% accuracy, slightly better than the best algorithm
+    This demo case demonstrates successful use of a simple LSM reservoir consisting of LeakyIF neurons for the accurate classifications.
+    Following straightforward configuration of the StateMachine exhibits 90.00% accuracy, slightly worse than the best algorithm
     called BOSS, referenced at the dataset's home site:
     "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
-    https://timeseriesclassification.com/description.php?Dataset=BirdChicken.
+    https://timeseriesclassification.com/description.php?Dataset=BeetleFly.
     MPEG-7 CE Shape-1 Part B is a database of binary images developed for testing MPEG-7 shape descriptors, and is available free online. 
     It is used for testing contour/image and skeleton-based descriptors. Classes of images vary broadly, and include classes that are
     similar in shape to one another. There are 20 instances of each class, and 60 classes in total.
     We have extracted the outlines of these images and mapped them into 1-D series of distances to the centre. 
-    Bird/Chicken is the problem of distinguishing between an outline of a bird and a chicken.
+    Beetle/Fly is the problem of distinguishing between an outline of a beetle and a fly.
   -->
-  <case name="Classification task BirdChicken: Simple pure ESN reservoir generating FiringFadingSum predictors, one Identity neuron as a classifier (Ridge regression trainer)">
-    <samples trainingData="BirdChicken_train.csv" verificationData="BirdChicken_verify.csv"/>
+  <case name="Classification task BeetleFly: Simple pure LSM reservoir generating FiringFadingSum predictors, one TanH neuron as a classifier (Resilient trainer)">
+    <samples trainingData="BeetleFly_train.csv" verificationData="BeetleFly_verify.csv"/>
     <stateMachineCfg randomizerSeek="0">
-      <neuralPreprocessor predictorsReductionRatio="0.1">
+      <neuralPreprocessor predictorsReductionRatio="0">
         <inputEncoder>
           <feedingPatterned bidir="false">
             <unification unifyAmplitude="false" detrend="false">
@@ -358,6 +454,7 @@
             <externalFields>
               <field name="DistanceFromCenter">
                 <realFeature standardize="true" keepReserve="true"/>
+                <spikeCode componentHalfCodeLength="15" lowestThreshold="1e-2" useDeviation="true" useDifference="false"/>
               </field>
             </externalFields>
           </fields>
@@ -365,15 +462,16 @@
         <reservoirStructures>
           <reservoirStructure name="MainCfg">
             <pools>
-              <pool name="PureESN">
+              <pool name="PureLSM">
                 <proportions dimX="6" dimY="6" dimZ="5"/>
                 <neuronGroups>
-                  <analogGroup name="TanH-grp" firingThreshold="0.00125" relShare="1" signalingRestriction="NoRestriction">
-                    <activationTanH/>
-                  </analogGroup>
+                  <spikingGroup name="Spiking-grp" relShare="1">
+                    <activationLeakyIF refractoryPeriods="0"/>
+                    <homogenousExcitability excitatoryStrength="0.7" inputRatio="0.8" inhibitoryRatio="0.1"/>
+                  </spikingGroup>
                 </neuronGroups>
                 <interconnection>
-                  <randomSchema density="0.15" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false"/>
+                  <randomSchema density="0.2" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false"/>
                 </interconnection>
               </pool>
             </pools>
@@ -382,8 +480,33 @@
         <reservoirInstances>
           <reservoirInstance name="Main" reservoirStructure="MainCfg">
             <inputConnections>
-              <connection inputFieldName="DistanceFromCenter" poolName="PureESN"/>
+              <connection inputFieldName="DistanceFromCenter" poolName="PureLSM" spikingTargetDensity="1"/>
             </inputConnections>
+            <synapse>
+              <spikingTarget>
+                <input maxDelay="0">
+                  <spikingSource>
+                    <plasticity>
+                      <linearDynamics/>
+                    </plasticity>
+                  </spikingSource>
+                </input>
+                <excitatory maxDelay="0">
+                  <spikingSource>
+                    <plasticity>
+                      <linearDynamics/>
+                    </plasticity>
+                  </spikingSource>
+                </excitatory>
+                <inhibitory maxDelay="0">
+                  <spikingSource>
+                    <plasticity>
+                      <linearDynamics/>
+                    </plasticity>
+                  </spikingSource>
+                </inhibitory>
+              </spikingTarget>
+            </synapse>
             <predictors activation="false"
                         activationSquare="false"
                         activationFadingSum="false"
@@ -399,14 +522,12 @@
       <readoutLayer testDataRatio="0.1" folds="Auto">
         <defaultNetworks/>
         <readoutUnits>
-          <readoutUnit name="Chicken1Bird0">
+          <readoutUnit name="Beetle1Fly0">
             <classification>
               <networks>
                 <ff>
-                  <activationIdentity/>
-                  <ridgeRegrTrainer attemptEpochs="1">
-                    <lambda min="0.1" max="0.1"/>
-                  </ridgeRegrTrainer>
+                  <activationTanH/>
+                  <resPropTrainer attempts="5" attemptEpochs="200"/>
                 </ff>
               </networks>
             </classification>
@@ -417,25 +538,26 @@
   </case>
 
 
+
   <!--
     This demo case demonstrates successful use of the pure analog ESN reservoir for the fast and accurate classifications enabled by
     the new ability of the analog neurons to fire a spike.
-    Following straightforward configuration of the StateMachine exhibits 90.00% accuracy, slightly worse the best algorithm
+    Following straightforward configuration of the StateMachine exhibits 100% accuracy, slightly better than the best algorithm
     called BOSS, referenced at the dataset's home site:
     "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
-    https://timeseriesclassification.com/description.php?Dataset=BeetleFly.
+    https://timeseriesclassification.com/description.php?Dataset=BirdChicken.
     MPEG-7 CE Shape-1 Part B is a database of binary images developed for testing MPEG-7 shape descriptors, and is available free online. 
     It is used for testing contour/image and skeleton-based descriptors. Classes of images vary broadly, and include classes that are
     similar in shape to one another. There are 20 instances of each class, and 60 classes in total.
     We have extracted the outlines of these images and mapped them into 1-D series of distances to the centre. 
-    Beetle/Fly is the problem of distinguishing between an outline of a beetle and a fly.
+    Bird/Chicken is the problem of distinguishing between an outline of a bird and a chicken.
   -->
-  <case name="Classification task BeetleFly: Simple pure ESN reservoir generating FiringFadingSum predictors, one Identity neuron as a classifier (Ridge regression trainer)">
-    <samples trainingData="BeetleFly_train.csv" verificationData="BeetleFly_verify.csv"/>
+  <case name="Classification task BirdChicken: Simple pure ESN reservoir generating FiringFadingSum predictors, one TanH neuron as a classifier (Resilient trainer)">
+    <samples trainingData="BirdChicken_train.csv" verificationData="BirdChicken_verify.csv"/>
     <stateMachineCfg randomizerSeek="0">
       <neuralPreprocessor>
         <inputEncoder>
-          <feedingPatterned bidir="false">
+          <feedingPatterned bidir="false" routeToReadout="false">
             <unification unifyAmplitude="false" detrend="false">
               <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
             </unification>
@@ -444,6 +566,7 @@
             <externalFields>
               <field name="DistanceFromCenter">
                 <realFeature standardize="true" keepReserve="true"/>
+                <spikeCode componentHalfCodeLength="16" lowestThreshold="1e-3" useDeviation="true" useDifference="false"/>
               </field>
             </externalFields>
           </fields>
@@ -454,7 +577,7 @@
               <pool name="PureESN">
                 <proportions dimX="6" dimY="6" dimZ="5"/>
                 <neuronGroups>
-                  <analogGroup name="TanH-grp" relShare="1" firingThreshold="0.0015" signalingRestriction="NoRestriction">
+                  <analogGroup name="TanH-grp" firingThreshold="0.00125" relShare="1" signalingRestriction="NoRestriction">
                     <activationTanH/>
                   </analogGroup>
                 </neuronGroups>
@@ -482,25 +605,33 @@
           </reservoirInstance>
         </reservoirInstances>
       </neuralPreprocessor>
-      <readoutLayer testDataRatio="0.1" folds="Auto">
+      <readoutLayer testDataRatio="0.1" folds="Auto" repetitions="1">
         <defaultNetworks/>
         <readoutUnits>
-          <readoutUnit name="Beetle1Fly0">
+          <readoutUnit name="Chicken1Bird0">
             <classification>
               <networks>
                 <ff>
-                  <activationIdentity/>
-                  <ridgeRegrTrainer attemptEpochs="1">
-                    <lambda min="0.1" max="0.1"/>
-                  </ridgeRegrTrainer>
+                  <activationTanH/>
+                  <resPropTrainer attempts="5" attemptEpochs="200"/>
                 </ff>
               </networks>
             </classification>
           </readoutUnit>
         </readoutUnits>
       </readoutLayer>
+      <mapper>
+        <map readoutUnitName="Chicken1Bird0">
+          <allowedPredictors>
+            <predictor name="FiringFadingSum"/>
+          </allowedPredictors>
+        </map>
+      </mapper>
     </stateMachineCfg>
   </case>
+
+
+
 
   <!--
     This demo case demonstrates successful use of the pure analog ESN reservoir for the fast and accurate classifications enabled by
@@ -744,7 +875,7 @@
                 <neuronGroups>
                   <spikingGroup name="AdExpIF-grp" relShare="1">
                     <activationAdExpIF/>
-                    <homogenousExcitability inputStrength="0.5" excitatoryStrength="0.75" inhibitoryRatio="0.25"/>
+                    <homogenousExcitability excitatoryStrength="0.75" inputRatio="0.67" inhibitoryRatio="0.25"/>
                   </spikingGroup>
                 </neuronGroups>
                 <interconnection>
@@ -1603,9 +1734,9 @@
           </feedingPatterned>
           <fields>
             <externalFields>
-              <field name="Accel" routeToReadout="true">
+              <field name="Accel">
                 <realFeature />
-                <spikeCode componentHalfCodeLength="20" useDeviation="true" useDifference="false"/>
+                <spikeCode componentHalfCodeLength="20" useDeviation="true" useDifference="true"/>
               </field>
             </externalFields>
           </fields>
@@ -1618,7 +1749,7 @@
                 <neuronGroups>
                   <spikingGroup name="grp1" relShare="1">
                     <activationAdExpIF solverCompSteps="2" solverMethod="Euler"/>
-                    <homogenousExcitability inputStrength="0.5" excitatoryStrength="0.75" inhibitoryRatio="0.25"/>
+                    <homogenousExcitability excitatoryStrength="0.75" inputRatio="0.67" inhibitoryRatio="0.25"/>
                   </spikingGroup>
                 </neuronGroups>
                 <interconnection>

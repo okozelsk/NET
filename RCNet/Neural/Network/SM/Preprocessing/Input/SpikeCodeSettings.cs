@@ -25,7 +25,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// Default value of parameter specifying length of the half of component code
         /// </summary>
-        public const int DefaultComponentHalfCodeLength = 8;
+        public const int DefaultComponentHalfCodeLength = 16;
         /// <summary>
         /// Default value of parameter specifying firing threshold of the most sensitive input neuron
         /// </summary>
@@ -155,9 +155,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// </summary>
         private void Check()
         {
-            if (ComponentHalfCodeLength < 1 || ComponentHalfCodeLength > 64)
+            if (ComponentHalfCodeLength < 1 || ComponentHalfCodeLength > 1024)
             {
-                throw new Exception($"Invalid ComponentHalfCodeLength {ComponentHalfCodeLength.ToString(CultureInfo.InvariantCulture)}. ComponentHalfCodeLength must be GE to 1 and LE to 64.");
+                throw new Exception($"Invalid ComponentHalfCodeLength {ComponentHalfCodeLength.ToString(CultureInfo.InvariantCulture)}. ComponentHalfCodeLength must be GE to 1 and LE to 1024.");
             }
             if (LowestThreshold <= 0 || LowestThreshold >= 1d)
             {

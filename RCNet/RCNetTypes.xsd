@@ -1855,14 +1855,14 @@
 
   <!-- HomogenousExcitability - configuration -->
   <xs:complexType name="HomogenousExcitabilityType">
-    <xs:attribute type="UDoubleType" name="inputStrength" use="optional" default="0.5">
+    <xs:attribute type="UDoubleGT0Type" name="excitatoryStrength" use="optional" default="0.75">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.5</xs:documentation>
+        <xs:documentation xml:lang="en">Default value is 0.75</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute type="UDoubleType" name="excitatoryStrength" use="optional" default="0.5">
+    <xs:attribute type="UDoubleGT0LT1Type" name="inputRatio" use="optional" default="0.75">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.5</xs:documentation>
+        <xs:documentation xml:lang="en">Default value is 0.75</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UDoubleLE1Type" name="inhibitoryRatio" use="optional" default="0.25">
@@ -2088,9 +2088,9 @@
 
   <!-- NeuralPreprocessor - input spike code - configuration -->
   <xs:complexType name="NPInputSpikeCodeType">
-    <xs:attribute type="UIntGE1LE64Type" name="componentHalfCodeLength" use="optional" default="8">
+    <xs:attribute type="UIntGE1LE1024Type" name="componentHalfCodeLength" use="optional" default="16">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 8</xs:documentation>
+        <xs:documentation xml:lang="en">Default value is 16</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UDoubleGT0LT1Type" name="lowestThreshold" use="optional" default="1e-5">
