@@ -151,21 +151,21 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
 
         //Methods
         /// <summary>
-        /// Checks validity
+        /// Checks consistency
         /// </summary>
-        private void Check()
+        protected override void Check()
         {
             if (ComponentHalfCodeLength < 1 || ComponentHalfCodeLength > 1024)
             {
-                throw new Exception($"Invalid ComponentHalfCodeLength {ComponentHalfCodeLength.ToString(CultureInfo.InvariantCulture)}. ComponentHalfCodeLength must be GE to 1 and LE to 1024.");
+                throw new ArgumentException($"Invalid ComponentHalfCodeLength {ComponentHalfCodeLength.ToString(CultureInfo.InvariantCulture)}. ComponentHalfCodeLength must be GE to 1 and LE to 1024.", "ComponentHalfCodeLength");
             }
             if (LowestThreshold <= 0 || LowestThreshold >= 1d)
             {
-                throw new Exception($"Invalid LowestThreshold {LowestThreshold.ToString(CultureInfo.InvariantCulture)}. LowestThreshold must be GT 0 and LT 1.");
+                throw new ArgumentException($"Invalid LowestThreshold {LowestThreshold.ToString(CultureInfo.InvariantCulture)}. LowestThreshold must be GT 0 and LT 1.", "LowestThreshold");
             }
             if(!SignalComponent && !DeltaComponent)
             {
-                throw new Exception($"At least one component of the spike code has to be used.");
+                throw new ArgumentException($"At least one component of the spike code has to be used.", "SignalComponent/DeltaComponent");
             }
             return;
         }

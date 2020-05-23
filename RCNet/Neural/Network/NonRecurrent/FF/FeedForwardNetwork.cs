@@ -122,7 +122,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             }
             else
             {
-                throw new Exception("Can´t add new layer. Network structure is finalized.");
+                throw new InvalidOperationException($"Can´t add new layer. Network structure is finalized.");
             }
             return;
         }
@@ -135,7 +135,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         {
             if (Finalized)
             {
-                throw new Exception("Network structure has been already finalized.");
+                throw new InvalidOperationException($"Network structure has been already finalized.");
             }
             //Add output layer
             LayerCollection.Add(new Layer(NumOfOutputValues, outputActivation));
@@ -197,7 +197,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         {
             if(!Finalized)
             {
-                throw new Exception("Can´t randomize weights. Network structure is not finalized.");
+                throw new InvalidOperationException($"Can´t randomize weights. Network structure is not finalized.");
             }
             if (_isAllowedNguyenWidrowRandomization)
             {

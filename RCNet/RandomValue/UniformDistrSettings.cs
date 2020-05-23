@@ -65,7 +65,10 @@ namespace RCNet.RandomValue
 
 
         //Methods
-        private void Check()
+        /// <summary>
+        /// Checks consistency
+        /// </summary>
+        protected override void Check()
         {
             return;
         }

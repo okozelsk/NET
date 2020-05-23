@@ -76,11 +76,14 @@ namespace RCNet.RandomValue
 
 
         //Methods
-        private void Check()
+        /// <summary>
+        /// Checks consistency
+        /// </summary>
+        protected override void Check()
         {
             if (Mean == 0)
             {
-                throw new Exception($"Incorrect Mean ({Mean.ToString(CultureInfo.InvariantCulture)}) value. Mean must not be EQ to 0.");
+                throw new ArgumentException($"Incorrect Mean ({Mean.ToString(CultureInfo.InvariantCulture)}) value. Mean must not be EQ to 0.", "Mean");
             }
             return;
         }

@@ -52,7 +52,7 @@ namespace RCNet.Neural.Activation
         public SQNLSettings(XElement elem)
         {
             //Validation
-            XElement activationSettingsElem = Validate(elem, XsdTypeName);
+            XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
             return;
         }
@@ -64,6 +64,14 @@ namespace RCNet.Neural.Activation
         public override bool ContainsOnlyDefaults { get { return true; } }
 
         //Methods
+        /// <summary>
+        /// Checks consistency
+        /// </summary>
+        protected override void Check()
+        {
+            return;
+        }
+
         /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>

@@ -174,41 +174,41 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
 
         //Methods
         /// <summary>
-        /// Checks validity
+        /// Checks consistency
         /// </summary>
-        private void Check()
+        protected override void Check()
         {
             if (NumOfAttempts < 1)
             {
-                throw new Exception($"Invalid NumOfAttempts {NumOfAttempts.ToString(CultureInfo.InvariantCulture)}. NumOfAttempts must be GE to 1.");
+                throw new ArgumentException($"Invalid NumOfAttempts {NumOfAttempts.ToString(CultureInfo.InvariantCulture)}. NumOfAttempts must be GE to 1.", "NumOfAttempts");
             }
             if (NumOfAttemptEpochs < 1)
             {
-                throw new Exception($"Invalid NumOfAttemptEpochs {NumOfAttemptEpochs.ToString(CultureInfo.InvariantCulture)}. NumOfAttemptEpochs must be GE to 1.");
+                throw new ArgumentException($"Invalid NumOfAttemptEpochs {NumOfAttemptEpochs.ToString(CultureInfo.InvariantCulture)}. NumOfAttemptEpochs must be GE to 1.", "NumOfAttemptEpochs");
             }
             if (IniLR < 0 || IniLR >= 1)
             {
-                throw new Exception($"Invalid IniLR {IniLR.ToString(CultureInfo.InvariantCulture)}. IniLR must be GE to 0 and LT 1.");
+                throw new ArgumentException($"Invalid IniLR {IniLR.ToString(CultureInfo.InvariantCulture)}. IniLR must be GE to 0 and LT 1.", "IniLR");
             }
             if (IncLR <= 1)
             {
-                throw new Exception($"Invalid IncLR {IncLR.ToString(CultureInfo.InvariantCulture)}. IncLR must be GT 1.");
+                throw new ArgumentException($"Invalid IncLR {IncLR.ToString(CultureInfo.InvariantCulture)}. IncLR must be GT 1.", "IncLR");
             }
             if (DecLR < 0 || DecLR >= 1)
             {
-                throw new Exception($"Invalid DecLR {DecLR.ToString(CultureInfo.InvariantCulture)}. DecLR must be GE to 0 and LT 1.");
+                throw new ArgumentException($"Invalid DecLR {DecLR.ToString(CultureInfo.InvariantCulture)}. DecLR must be GE to 0 and LT 1.", "DecLR");
             }
             if (MinLR < 0 || MinLR >= 1)
             {
-                throw new Exception($"Invalid MinLR {MinLR.ToString(CultureInfo.InvariantCulture)}. MinLR must be GE to 0 and LT 1.");
+                throw new ArgumentException($"Invalid MinLR {MinLR.ToString(CultureInfo.InvariantCulture)}. MinLR must be GE to 0 and LT 1.", "MinLR");
             }
             if (MaxLR < 0 || MaxLR >= 1)
             {
-                throw new Exception($"Invalid MaxLR {MaxLR.ToString(CultureInfo.InvariantCulture)}. MaxLR must be GE to 0 and LT 1.");
+                throw new ArgumentException($"Invalid MaxLR {MaxLR.ToString(CultureInfo.InvariantCulture)}. MaxLR must be GE to 0 and LT 1.", "MaxLR");
             }
             if (MaxLR <= MinLR)
             {
-                throw new Exception($"Invalid MinLR or MaxLR. MaxLR must be GT MinLR.");
+                throw new ArgumentException($"Invalid MinLR or MaxLR. MaxLR must be GT MinLR.", "MaxLR/MinLR");
             }
             return;
         }

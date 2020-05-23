@@ -246,7 +246,7 @@ namespace RCNet.Neural.Network.SM
         {
             if (!RL.Trained)
             {
-                throw new Exception("Readout layer is not trained.");
+                throw new InvalidOperationException($"Readout layer is not trained.");
             }
             if (NP == null)
             {
@@ -268,7 +268,7 @@ namespace RCNet.Neural.Network.SM
         {
             if (!RL.Trained)
             {
-                throw new Exception("Readout layer is not trained.");
+                throw new InvalidOperationException($"Readout layer is not trained.");
             }
             if (NP == null)
             {

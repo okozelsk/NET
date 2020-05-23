@@ -170,13 +170,13 @@ namespace RCNet.Neural.Activation
 
         //Methods
         /// <summary>
-        /// Checks validity
+        /// Checks consistency
         /// </summary>
-        private void Check()
+        protected override void Check()
         {
             if (RefractoryPeriods < 0)
             {
-                throw new Exception($"Invalid RefractoryPeriods {RefractoryPeriods.ToString(CultureInfo.InvariantCulture)}. RefractoryPeriods must be GE to 0.");
+                throw new ArgumentException($"Invalid RefractoryPeriods {RefractoryPeriods.ToString(CultureInfo.InvariantCulture)}. RefractoryPeriods must be GE to 0.", "RefractoryPeriods");
             }
             return;
         }

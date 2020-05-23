@@ -164,13 +164,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
 
         //Methods
         /// <summary>
-        /// Checks validity
+        /// Checks consistency
         /// </summary>
-        private void Check()
+        protected override void Check()
         {
             if (Name.Length == 0)
             {
-                throw new Exception($"Name can not be empty.");
+                throw new ArgumentException($"Name can not be empty.", "Name");
             }
             Type activationType = ActivationCfg.GetType();
             if (activationType != typeof(SimpleIFSettings) &&
@@ -181,7 +181,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
                 activationType != typeof(AutoIzhikevichIFSettings)
                 )
             {
-                throw new Exception($"Not allowed Activation settings {activationType.ToString()}.");
+                throw new ArgumentException($"Not allowed activation type {activationType.Name}.", "ActivationCfg");
             }
             return;
         }

@@ -93,11 +93,14 @@ namespace RCNet.RandomValue
 
 
         //Methods
-        private void Check()
+        /// <summary>
+        /// Checks consistency
+        /// </summary>
+        protected override void Check()
         {
             if (StdDev <= 0)
             {
-                throw new Exception($"Incorrect StdDev ({StdDev.ToString(CultureInfo.InvariantCulture)}) value. StdDev must be GT 0.");
+                throw new ArgumentException($"Incorrect StdDev ({StdDev.ToString(CultureInfo.InvariantCulture)}) value. StdDev must be GT 0.", "StdDev");
             }
             return;
         }

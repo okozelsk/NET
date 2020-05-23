@@ -40,7 +40,7 @@ namespace RCNet.Neural.Activation
                 case "SPIKING":
                     return ActivationType.Spiking;
                 default:
-                    throw new Exception($"Unknown activation type code {code}.");
+                    throw new InvalidOperationException($"Unknown activation type code {code}.");
             }
         }
 

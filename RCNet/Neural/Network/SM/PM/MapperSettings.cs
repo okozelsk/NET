@@ -103,13 +103,13 @@ namespace RCNet.Neural.Network.SM.PM
 
         //Methods
         /// <summary>
-        /// Checks validity
+        /// Checks consistency
         /// </summary>
-        private void Check()
+        protected override void Check()
         {
             if (MapCfgCollection.Count == 0)
             {
-                throw new Exception($"At least one readout unit map configuration must be specified.");
+                throw new ArgumentException($"At least one readout unit map configuration must be specified.", "MapCfgCollection");
             }
             //Uniqueness of readout unit name
             string[] names = new string[MapCfgCollection.Count];
@@ -118,7 +118,7 @@ namespace RCNet.Neural.Network.SM.PM
             {
                 if (names.Contains(MapCfgCollection[i].ReadoutUnitName))
                 {
-                    throw new Exception($"Readout unit name {MapCfgCollection[i].ReadoutUnitName} is not unique.");
+                    throw new ArgumentException($"Readout unit name {MapCfgCollection[i].ReadoutUnitName} is not unique.", "MapCfgCollection");
                 }
                 names[i] = MapCfgCollection[i].ReadoutUnitName;
             }
@@ -154,7 +154,7 @@ namespace RCNet.Neural.Network.SM.PM
             }
             if (ex)
             {
-                throw new Exception($"Readout unit name {readoutUnitName} not found.");
+                throw new InvalidOperationException($"Readout unit name {readoutUnitName} not found.");
             }
             else
             {

@@ -121,13 +121,13 @@ namespace RCNet.Neural.Network.SM
 
         //Methods
         /// <summary>
-        /// Checks validity and integrity
+        /// Checks consistency
         /// </summary>
-        private void Check()
+        protected override void Check()
         {
-            if(MapperCfg != null && NeuralPreprocessorCfg == null)
+            if (MapperCfg != null && NeuralPreprocessorCfg == null)
             {
-                throw new Exception($"Mapper can not be specified when neural preprocessor is not defined.");
+                throw new ArgumentException($"Mapper can not be specified when neural preprocessor is not defined.", "MapperCfg");
             }
             if(MapperCfg != null)
             {
@@ -152,7 +152,7 @@ namespace RCNet.Neural.Network.SM
                         {
                             if(Array.IndexOf(routedFieldNames, aifs.Name) == -1)
                             {
-                                throw new Exception($"Specified input field {aifs.Name} to be allowed for readout unit {map.ReadoutUnitName} is not among fields routed to readout layer.");
+                                throw new ArgumentException($"Specified input field {aifs.Name} to be allowed for readout unit {map.ReadoutUnitName} is not among fields routed to readout layer.", "MapperCfg");
                             }
                             NeuralPreprocessorCfg.InputEncoderCfg.FieldsCfg.GetFieldID(aifs.Name, true);
                         }

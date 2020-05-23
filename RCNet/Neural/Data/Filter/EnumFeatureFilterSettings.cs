@@ -78,13 +78,13 @@ namespace RCNet.Neural.Data.Filter
 
         //Methods
         /// <summary>
-        /// Checks validity
+        /// Checks consistency
         /// </summary>
-        private void Check()
+        protected override void Check()
         {
             if (NumOfElements < 2)
             {
-                throw new Exception($"Invalid NumOfElements {NumOfElements.ToString(CultureInfo.InvariantCulture)}. NumOfElements must be GE to 2.");
+                throw new ArgumentException($"Invalid NumOfElements {NumOfElements.ToString(CultureInfo.InvariantCulture)}. NumOfElements must be GE to 2.", "NumOfElements");
             }
             return;
         }

@@ -104,23 +104,23 @@ namespace RCNet.MathTools.PS
 
         //Methods
         /// <summary>
-        /// Checks validity
+        /// Checks consistency
         /// </summary>
-        private void Check()
+        protected override void Check()
         {
             if (Max < Min || Min < 0 || Max < 0)
             {
-                throw new Exception($"Incorrect min ({Min.ToString(CultureInfo.InvariantCulture)}) and/or max ({Max.ToString(CultureInfo.InvariantCulture)}) values. Max must be GE to min and both values must be GE 0.");
+                throw new ArgumentException($"Incorrect min ({Min.ToString(CultureInfo.InvariantCulture)}) and/or max ({Max.ToString(CultureInfo.InvariantCulture)}) values. Max must be GE to min and both values must be GE 0.", "Min/Max");
             }
             if (NumOfSubIntervals != AutoSubIntervalsNum)
             {
                 if (NumOfSubIntervals < 1)
                 {
-                    throw new Exception($"Incorrect numOfSteps ({NumOfSubIntervals.ToString(CultureInfo.InvariantCulture)}). Value must be GE to 1.");
+                    throw new ArgumentException($"Incorrect NumOfSubIntervals ({NumOfSubIntervals.ToString(CultureInfo.InvariantCulture)}). Value must be GE to 1.", "NumOfSubIntervals");
                 }
                 if (Min == Max && NumOfSubIntervals != 1)
                 {
-                    throw new Exception($"Incorrect numOfSteps ({NumOfSubIntervals.ToString(CultureInfo.InvariantCulture)}). Value must be 1 when Min=Max.");
+                    throw new ArgumentException($"Incorrect NumOfSubIntervals ({NumOfSubIntervals.ToString(CultureInfo.InvariantCulture)}). Value must be 1 when Min=Max.", "NumOfSubIntervals");
                 }
             }
             return;

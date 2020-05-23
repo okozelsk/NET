@@ -137,7 +137,7 @@ namespace RCNet.MathTools
             }
             else
             {
-                throw new Exception("Can't remove sample value because there is no samples.");
+                throw new InvalidOperationException($"Can't remove sample value because there is no samples.");
             }
             return Compute();
         }

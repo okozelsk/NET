@@ -78,11 +78,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         /// <summary>
         /// Checks validity
         /// </summary>
-        private void Check()
+        protected override void Check()
         {
             if (Efficacy < 0 || Efficacy > 1)
             {
-                throw new Exception($"Invalid constant efficacy {Efficacy.ToString(CultureInfo.InvariantCulture)}. Efficacy must be GE to 0 and LE to 1.");
+                throw new ArgumentException($"Invalid constant efficacy {Efficacy.ToString(CultureInfo.InvariantCulture)}. Efficacy must be GE to 0 and LE to 1.", "Efficacy");
             }
             return;
         }

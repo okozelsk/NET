@@ -182,7 +182,7 @@ namespace RCNet.Queue
             }
             else
             {
-                throw new Exception("Queue is empty.");
+                throw new InvalidOperationException($"Queue is empty.");
             }
         }
 

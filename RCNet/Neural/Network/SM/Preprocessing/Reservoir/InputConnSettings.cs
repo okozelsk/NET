@@ -140,25 +140,25 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
 
         //Methods
         /// <summary>
-        /// Checks validity
+        /// Checks consistency
         /// </summary>
-        private void Check()
+        protected override void Check()
         {
             if (InputFieldName.Length == 0)
             {
-                throw new Exception($"Input field name can not be empty.");
+                throw new ArgumentException($"Input field name can not be empty.", "InputFieldName");
             }
             if (PoolName.Length == 0)
             {
-                throw new Exception($"Pool name can not be empty.");
+                throw new ArgumentException($"Pool name can not be empty.", "PoolName");
             }
             if (SpikingTargetDensity < 0 || SpikingTargetDensity > 1)
             {
-                throw new Exception($"Invalid SpikingTargetDensity ({SpikingTargetDensity.ToString(CultureInfo.InvariantCulture)}). SpikingTargetDensity must be GE to 0 and LE to 1.");
+                throw new ArgumentException($"Invalid SpikingTargetDensity ({SpikingTargetDensity.ToString(CultureInfo.InvariantCulture)}). SpikingTargetDensity must be GE to 0 and LE to 1.", "SpikingTargetDensity");
             }
             if (AnalogTargetDensity < 0 || AnalogTargetDensity > 1)
             {
-                throw new Exception($"Invalid AnalogTargetDensity ({AnalogTargetDensity.ToString(CultureInfo.InvariantCulture)}). AnalogTargetDensity must be GE to 0 and LE to 1.");
+                throw new ArgumentException($"Invalid AnalogTargetDensity ({AnalogTargetDensity.ToString(CultureInfo.InvariantCulture)}). AnalogTargetDensity must be GE to 0 and LE to 1.", "AnalogTargetDensity");
             }
             return;
         }

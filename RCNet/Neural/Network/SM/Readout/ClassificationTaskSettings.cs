@@ -38,7 +38,7 @@ namespace RCNet.Neural.Network.SM.Readout
         /// <summary>
         /// Shared instance of BinFeatureFilterSettings
         /// </summary>
-        private static IFeatureFilterSettings _sharedBinFeatureFilterCfg = new BinFeatureFilterSettings();
+        private static readonly IFeatureFilterSettings _sharedBinFeatureFilterCfg = new BinFeatureFilterSettings();
 
         //Attribute properties
         /// <summary>
@@ -131,13 +131,13 @@ namespace RCNet.Neural.Network.SM.Readout
 
         //Methods
         /// <summary>
-        /// Checks validity
+        /// Checks consistency
         /// </summary>
-        private void Check()
+        protected override void Check()
         {
-            if(OneWinnerGroupName.Length == 0)
+            if (OneWinnerGroupName.Length == 0)
             {
-                throw new Exception($"Name of the one winner group can not be empty.");
+                throw new ArgumentException($"Name of the one winner group can not be empty.", "OneWinnerGroupName");
             }
             return;
         }

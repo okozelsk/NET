@@ -191,45 +191,45 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
 
         //Methods
         /// <summary>
-        /// Checks validity
+        /// Checks consistency
         /// </summary>
-        private void Check()
+        protected override void Check()
         {
             if (NumOfAttempts < 1)
             {
-                throw new Exception($"Invalid NumOfAttempts {NumOfAttempts.ToString(CultureInfo.InvariantCulture)}. NumOfAttempts must be GE to 1.");
+                throw new ArgumentException($"Invalid NumOfAttempts {NumOfAttempts.ToString(CultureInfo.InvariantCulture)}. NumOfAttempts must be GE to 1.", "NumOfAttempts");
             }
             if (NumOfAttemptEpochs < 1)
             {
-                throw new Exception($"Invalid NumOfAttemptEpochs {NumOfAttemptEpochs.ToString(CultureInfo.InvariantCulture)}. NumOfAttemptEpochs must be GE to 1.");
+                throw new ArgumentException($"Invalid NumOfAttemptEpochs {NumOfAttemptEpochs.ToString(CultureInfo.InvariantCulture)}. NumOfAttemptEpochs must be GE to 1.", "NumOfAttemptEpochs");
             }
             if (ZeroTolerance < 0 || ZeroTolerance >= 1)
             {
-                throw new Exception($"Invalid ZeroTolerance {ZeroTolerance.ToString(CultureInfo.InvariantCulture)}. ZeroTolerance must be GE to 0 and LT 1.");
+                throw new ArgumentException($"Invalid ZeroTolerance {ZeroTolerance.ToString(CultureInfo.InvariantCulture)}. ZeroTolerance must be GE to 0 and LT 1.", "ZeroTolerance");
             }
             if (PositiveEta <= 1)
             {
-                throw new Exception($"Invalid PositiveEta {PositiveEta.ToString(CultureInfo.InvariantCulture)}. PositiveEta must be GT 1.");
+                throw new ArgumentException($"Invalid PositiveEta {PositiveEta.ToString(CultureInfo.InvariantCulture)}. PositiveEta must be GT 1.", "PositiveEta");
             }
             if (NegativeEta < 0 || NegativeEta >= 1)
             {
-                throw new Exception($"Invalid NegativeEta {NegativeEta.ToString(CultureInfo.InvariantCulture)}. NegativeEta must be GE to 0 and LT 1.");
+                throw new ArgumentException($"Invalid NegativeEta {NegativeEta.ToString(CultureInfo.InvariantCulture)}. NegativeEta must be GE to 0 and LT 1.", "NegativeEta");
             }
             if (IniDelta < 0)
             {
-                throw new Exception($"Invalid IniDelta {IniDelta.ToString(CultureInfo.InvariantCulture)}. IniDelta must be GE to 0.");
+                throw new ArgumentException($"Invalid IniDelta {IniDelta.ToString(CultureInfo.InvariantCulture)}. IniDelta must be GE to 0.", "IniDelta");
             }
             if (MinDelta < 0)
             {
-                throw new Exception($"Invalid MinDelta {MinDelta.ToString(CultureInfo.InvariantCulture)}. MinDelta must be GE to 0.");
+                throw new ArgumentException($"Invalid MinDelta {MinDelta.ToString(CultureInfo.InvariantCulture)}. MinDelta must be GE to 0.", "MinDelta");
             }
             if (MaxDelta < 0)
             {
-                throw new Exception($"Invalid MinDelta {MaxDelta.ToString(CultureInfo.InvariantCulture)}. MaxDelta must be GE to 0.");
+                throw new ArgumentException($"Invalid MinDelta {MaxDelta.ToString(CultureInfo.InvariantCulture)}. MaxDelta must be GE to 0.", "MaxDelta");
             }
             if(MaxDelta <= MinDelta)
             {
-                throw new Exception($"Invalid MinDelta or MaxDelta. MaxDelta must be GT MinDelta.");
+                throw new ArgumentException($"Invalid MinDelta or MaxDelta. MaxDelta must be GT MinDelta.", "MaxDelta/MinDelta");
             }
             return;
         }

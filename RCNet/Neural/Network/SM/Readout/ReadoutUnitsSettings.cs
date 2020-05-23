@@ -62,7 +62,7 @@ namespace RCNet.Neural.Network.SM.Readout
             {
                 ReadoutUnitCfgCollection.Add((ReadoutUnitSettings)rucfg.DeepClone());
             }
-            CheckAndComplete();
+            Check();
             return;
         }
 
@@ -77,7 +77,7 @@ namespace RCNet.Neural.Network.SM.Readout
             {
                 ReadoutUnitCfgCollection.Add((ReadoutUnitSettings)rucfg.DeepClone());
             }
-            CheckAndComplete();
+            Check();
             return;
         }
 
@@ -108,7 +108,7 @@ namespace RCNet.Neural.Network.SM.Readout
             {
                 ReadoutUnitCfgCollection.Add(new ReadoutUnitSettings(unitElem));
             }
-            CheckAndComplete();
+            Check();
             return;
         }
 
@@ -120,13 +120,13 @@ namespace RCNet.Neural.Network.SM.Readout
 
         //Methods
         /// <summary>
-        /// Checks validity
+        /// Checks consistency
         /// </summary>
-        private void CheckAndComplete()
+        protected override void Check()
         {
-            if(ReadoutUnitCfgCollection.Count == 0)
+            if (ReadoutUnitCfgCollection.Count == 0)
             {
-                throw new Exception($"Collection of readout units settings can not be empty.");
+                throw new ArgumentException($"Collection of readout units settings can not be empty.", "ReadoutUnitCfgCollection");
             }
             //Uniqueness of readout units names
             string[] names = new string[ReadoutUnitCfgCollection.Count];
@@ -135,7 +135,7 @@ namespace RCNet.Neural.Network.SM.Readout
             {
                 if (names.Contains(ReadoutUnitCfgCollection[i].Name))
                 {
-                    throw new Exception($"Readout unit name {ReadoutUnitCfgCollection[i].Name} is not unique.");
+                    throw new ArgumentException($"Readout unit name {ReadoutUnitCfgCollection[i].Name} is not unique.", "ReadoutUnitCfgCollection");
                 }
                 names[i] = ReadoutUnitCfgCollection[i].Name;
             }
@@ -181,7 +181,7 @@ namespace RCNet.Neural.Network.SM.Readout
                     return i;
                 }
             }
-            throw new Exception($"Readout unit name {readoutUnitName} not found.");
+            throw new InvalidOperationException($"Readout unit name {readoutUnitName} not found.");
         }
 
         /// <summary>

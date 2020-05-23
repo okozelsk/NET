@@ -111,9 +111,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
 
         //Methods
         /// <summary>
-        /// Checks validity
+        /// Checks consistency
         /// </summary>
-        private void Check()
+        protected override void Check()
         {
             List<string> names = new List<string>(TotalNumOfFields);
             int index = 0;
@@ -128,13 +128,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
                 {
                     if(names.IndexOf(transformedFieldCfg.Name) != -1)
                     {
-                        throw new Exception($"Field name {transformedFieldCfg.Name} is not unique.");
+                        throw new ArgumentException($"Field name {transformedFieldCfg.Name} is not unique.", "TransformedFieldsCfg");
                     }
                     foreach(string name in TransformerFactory.GetAssociatedNames(transformedFieldCfg.TransformerCfg))
                     {
                         if (names.IndexOf(name) == -1)
                         {
-                            throw new Exception($"Inconsistent input field name {name} as an input for transformed field. Field {name} is used before its definition or does not exist.");
+                            throw new ArgumentException($"Inconsistent input field name {name} as an input for transformed field. Field {name} is used before its definition or does not exist.", "TransformedFieldsCfg");
                         }
                     }
                     names.Add(transformedFieldCfg.Name);
@@ -147,7 +147,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
                 {
                     if (names.IndexOf(generatedFieldCfg.Name) != -1)
                     {
-                        throw new Exception($"Field name {generatedFieldCfg.Name} is not unique.");
+                        throw new ArgumentException($"Field name {generatedFieldCfg.Name} is not unique.", "GeneratedFieldsCfg");
                     }
                     names.Add(generatedFieldCfg.Name);
                     ++index;
@@ -223,7 +223,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             }
             if (ex)
             {
-                throw new Exception($"Field name {fieldName} not found.");
+                throw new InvalidOperationException($"Field name {fieldName} not found.");
             }
             else
             {
@@ -250,7 +250,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
                     return GeneratedFieldsCfg.FieldCfgCollection[index];
                 }
             }
-            throw new Exception($"Field name {fieldName} not found.");
+            throw new InvalidOperationException($"Field name {fieldName} not found.");
         }
 
         /// <summary>

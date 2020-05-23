@@ -85,13 +85,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
 
         //Methods
         /// <summary>
-        /// Checks validity
+        /// Checks consistency
         /// </summary>
-        private void Check()
+        protected override void Check()
         {
             if (Strength < 0 || Strength >= 1)
             {
-                throw new Exception($"Invalid Strength {Strength.ToString(CultureInfo.InvariantCulture)}. Strength must be GE to 0 and LT 1.");
+                throw new ArgumentException($"Invalid Strength {Strength.ToString(CultureInfo.InvariantCulture)}. Strength must be GE to 0 and LT 1.", "Strength");
             }
             return;
         }

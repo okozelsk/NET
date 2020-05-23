@@ -125,17 +125,17 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
 
         //Methods
         /// <summary>
-        /// Checks validity
+        /// Checks consistency
         /// </summary>
-        private void Check()
+        protected override void Check()
         {
             if (Gates < 1)
             {
-                throw new Exception($"Invalid Gates {Gates.ToString(CultureInfo.InvariantCulture)}. Gates must be GE to 1.");
+                throw new ArgumentException($"Invalid Gates {Gates.ToString(CultureInfo.InvariantCulture)}. Gates must be GE to 1.", "Gates");
             }
             if (Resolution < 2 || Resolution > Gates * 2)
             {
-                throw new Exception($"Invalid Resolution {Resolution.ToString(CultureInfo.InvariantCulture)}. Resolution must be GE 2 and LE to (2 * Gates).");
+                throw new ArgumentException($"Invalid Resolution {Resolution.ToString(CultureInfo.InvariantCulture)}. Resolution must be GE 2 and LE to (2 * Gates).", "Resolution");
             }
             return;
         }

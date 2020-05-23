@@ -96,19 +96,19 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         /// <summary>
         /// Checks validity
         /// </summary>
-        private void Check()
+        protected override void Check()
         {
             if (Alpha < 0 || Alpha > 1)
             {
-                throw new Exception($"Invalid alpha {Alpha.ToString(CultureInfo.InvariantCulture)}. Alpha must be GE to 0 and LE to 1.");
+                throw new ArgumentException($"Invalid alpha {Alpha.ToString(CultureInfo.InvariantCulture)}. Alpha must be GE to 0 and LE to 1.", "Alpha");
             }
             if (Beta < 0 || Beta > 1)
             {
-                throw new Exception($"Invalid beta {Beta.ToString(CultureInfo.InvariantCulture)}. Beta must be GE to 0 and LE to 1.");
+                throw new ArgumentException($"Invalid beta {Beta.ToString(CultureInfo.InvariantCulture)}. Beta must be GE to 0 and LE to 1.", "Beta");
             }
             if (InitialEfficacy < 0 || InitialEfficacy > 1)
             {
-                throw new Exception($"Invalid InitialEfficacy {InitialEfficacy.ToString(CultureInfo.InvariantCulture)}. InitialEfficacy must be GE to 0 and LE to 1.");
+                throw new ArgumentException($"Invalid InitialEfficacy {InitialEfficacy.ToString(CultureInfo.InvariantCulture)}. InitialEfficacy must be GE to 0 and LE to 1.", "InitialEfficacy");
             }
             return;
         }

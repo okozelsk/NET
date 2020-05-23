@@ -92,17 +92,17 @@ namespace RCNet.Neural.Data.Transformers
 
         //Methods
         /// <summary>
-        /// Checks validity
+        /// Checks consistency
         /// </summary>
-        private void Check()
+        protected override void Check()
         {
             if (InputFieldName.Length == 0)
             {
-                throw new Exception($"Name of the input field must be specified.");
+                throw new ArgumentException($"Name of the input field must be specified.", "InputFieldName");
             }
             if(Base <= 0d)
             {
-                throw new Exception($"Invalid base {Base.ToString(CultureInfo.InvariantCulture)}. Base must be GT 0.");
+                throw new ArgumentException($"Invalid base {Base.ToString(CultureInfo.InvariantCulture)}. Base must be GT 0.", "Base");
             }
             return;
         }

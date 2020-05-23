@@ -82,17 +82,17 @@ namespace RCNet.Neural.Data.Transformers
 
         //Methods
         /// <summary>
-        /// Checks validity
+        /// Checks consistency
         /// </summary>
-        private void Check()
+        protected override void Check()
         {
             if (XInputFieldName.Length == 0)
             {
-                throw new Exception($"Name of the input field X must be specified.");
+                throw new ArgumentException($"Name of the input field X must be specified.", "XInputFieldName");
             }
             if (YInputFieldName.Length == 0)
             {
-                throw new Exception($"Name of the input field Y must be specified.");
+                throw new ArgumentException($"Name of the input field Y must be specified.", "YInputFieldName");
             }
             return;
         }

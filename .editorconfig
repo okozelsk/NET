@@ -1,0 +1,7 @@
+﻿[*.{cs,vb}]
+
+# IDE0060: Odebrat nepoužívaný parametr
+dotnet_code_quality_unused_parameters = all:silent
+
+# IDE0059: Nepotřebné přiřazení hodnoty
+csharp_style_unused_value_assignment_preference = discard_variable:silent

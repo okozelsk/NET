@@ -133,29 +133,29 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
 
         //Methods
         /// <summary>
-        /// Checks validity
+        /// Checks consistency
         /// </summary>
-        private void Check()
+        protected override void Check()
         {
             if (TargetPoolName.Length == 0)
             {
-                throw new Exception($"TargetPoolName can not be empty.");
+                throw new ArgumentException($"TargetPoolName can not be empty.", "TargetPoolName");
             }
             if (TargetConnectionDensity < 0 || TargetConnectionDensity > 1)
             {
-                throw new Exception($"Invalid TargetConnectionDensity {TargetConnectionDensity.ToString(CultureInfo.InvariantCulture)}. Density must be GE to 0 and LE to 1.");
+                throw new ArgumentException($"Invalid TargetConnectionDensity {TargetConnectionDensity.ToString(CultureInfo.InvariantCulture)}. Density must be GE to 0 and LE to 1.", "TargetConnectionDensity");
             }
             if (SourcePoolName.Length == 0)
             {
-                throw new Exception($"SourcePoolName can not be empty.");
+                throw new ArgumentException($"SourcePoolName can not be empty.", "SourcePoolName");
             }
             if (SourceConnectionDensity < 0 || SourceConnectionDensity > 1)
             {
-                throw new Exception($"Invalid SourceConnectionDensity {SourceConnectionDensity.ToString(CultureInfo.InvariantCulture)}. Density must be GE to 0 and LE to 1.");
+                throw new ArgumentException($"Invalid SourceConnectionDensity {SourceConnectionDensity.ToString(CultureInfo.InvariantCulture)}. Density must be GE to 0 and LE to 1.", "SourceConnectionDensity");
             }
             if(SourcePoolName == TargetPoolName)
             {
-                throw new Exception($"SourcePoolName and TargetPoolName can not be the same.");
+                throw new ArgumentException($"SourcePoolName and TargetPoolName can not be the same.", "SourcePoolName");
             }
             return;
         }

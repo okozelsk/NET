@@ -118,17 +118,17 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
 
         //Methods
         /// <summary>
-        /// Checks validity
+        /// Checks consistency
         /// </summary>
-        private void Check()
+        protected override void Check()
         {
             if (Name.Length == 0)
             {
-                throw new Exception($"Name can not be empty.");
+                throw new ArgumentException($"Name can not be empty.", "Name");
             }
             if (FeatureFilterCfg.Type != FeatureFilterBase.FeatureType.Real && SpikeCodeCfg != null)
             {
-                throw new Exception("Spiking coding configuration is relevant for real-feature only.");
+                throw new ArgumentException("Spiking coding configuration is relevant for real-feature only.", "SpikeCodeCfg");
             }
             return;
         }

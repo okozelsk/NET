@@ -129,13 +129,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
 
         //Methods
         /// <summary>
-        /// Checks validity
+        /// Checks consistency
         /// </summary>
-        private void Check()
+        protected override void Check()
         {
             if (Name.Length == 0)
             {
-                throw new Exception($"Name can not be empty.");
+                throw new ArgumentException($"Name can not be empty.", "Name");
             }
             Type transType = TransformerCfg.GetType();
             if(transType != typeof(DiffTransformerSettings) &&
@@ -149,7 +149,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
                transType != typeof(DivTransformerSettings) &&
                transType != typeof(LinearTransformerSettings))
             {
-                throw new Exception($"Unsupported transformer configuration {transType.ToString()}.");
+                throw new ArgumentException($"Unsupported transformer configuration {transType.Name}.", "TransformerCfg");
             }
             return;
         }

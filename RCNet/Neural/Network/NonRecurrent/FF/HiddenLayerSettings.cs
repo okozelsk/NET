@@ -42,7 +42,6 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         {
             NumOfNeurons = numOfNeurons;
             ActivationCfg = ActivationFactory.DeepCloneActivationSettings(activationCfg);
-            FeedForwardNetworkSettings.CheckAllowedActivation(ActivationCfg, out _);
             Check();
             return;
         }
@@ -69,7 +68,6 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             //Parsing
             NumOfNeurons = int.Parse(settingsElem.Attribute("neurons").Value);
             ActivationCfg = ActivationFactory.LoadSettings(settingsElem.Elements().First());
-            FeedForwardNetworkSettings.CheckAllowedActivation(ActivationCfg, out _);
             Check();
             return;
         }
@@ -82,13 +80,17 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
 
         //Methods
         /// <summary>
-        /// Checks validity
+        /// Checks consistency
         /// </summary>
-        private void Check()
+        protected override void Check()
         {
             if (NumOfNeurons < 1)
             {
-                throw new Exception($"Invalid NumOfNeurons {NumOfNeurons.ToString(CultureInfo.InvariantCulture)}. NumOfNeurons must be GT 0.");
+                throw new ArgumentException($"Invalid NumOfNeurons {NumOfNeurons.ToString(CultureInfo.InvariantCulture)}. NumOfNeurons must be GT 0.", "NumOfNeurons");
+            }
+            if (!FeedForwardNetworkSettings.IsAllowedActivation(ActivationCfg, out _))
+            {
+                throw new ArgumentException($"Specified ActivationCfg can't be used in the hidden layer of a FF network. Activation function has to be stateless and has to support derivative calculation.", "ActivationCfg");
             }
             return;
         }

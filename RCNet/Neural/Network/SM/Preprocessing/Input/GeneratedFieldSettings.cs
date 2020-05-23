@@ -128,13 +128,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
 
         //Methods
         /// <summary>
-        /// Checks validity
+        /// Checks consistency
         /// </summary>
-        private void Check()
+        protected override void Check()
         {
             if (Name.Length == 0)
             {
-                throw new Exception($"Name can not be empty.");
+                throw new ArgumentException($"Name can not be empty.", "Name");
             }
             Type genType = GeneratorCfg.GetType();
             if(genType != typeof(PulseGeneratorSettings) &&
@@ -142,7 +142,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
                genType != typeof(SinusoidalGeneratorSettings) &&
                genType != typeof(MackeyGlassGeneratorSettings))
             {
-                throw new Exception($"Unsupported generator configuration {genType.ToString()}.");
+                throw new ArgumentException($"Unsupported generator configuration {genType}.", "GeneratorCfg");
             }
             return;
         }

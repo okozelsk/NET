@@ -44,7 +44,7 @@ namespace Demo.DemoConsoleApp.SM
             //Display progress
             if (numOfProcessedInputs % 10 == 0 || numOfProcessedInputs == totalNumOfInputs || totalNumOfInputs == 1)
             {
-                _log.Write($"    Computing verification data {totalNumOfInputs.ToString()}/{numOfProcessedInputs.ToString()}", true);
+                _log.Write($"    Computing verification data {totalNumOfInputs}/{numOfProcessedInputs}", true);
             }
             return;
         }
@@ -65,7 +65,7 @@ namespace Demo.DemoConsoleApp.SM
                 //Display progress
                 if (numOfProcessedInputs % 10 == 0 || numOfProcessedInputs == totalNumOfInputs || totalNumOfInputs == 1)
                 {
-                    _log.Write($"    Neural preprocessing and collection of State Machine predictors {totalNumOfInputs.ToString()}/{numOfProcessedInputs.ToString()}", true);
+                    _log.Write($"    Neural preprocessing and collection of State Machine predictors {totalNumOfInputs}/{numOfProcessedInputs}", true);
                 }
             }
             else
@@ -130,7 +130,7 @@ namespace Demo.DemoConsoleApp.SM
                 //Check NeuralPreprocessor is not bypassed
                 if (stateMachine.NP == null)
                 {
-                    throw new Exception("Incorrect file format. When NeuralPreprocessor is bypassed, only patterned data are allowed.");
+                    throw new InvalidOperationException($"Incorrect file format. When NeuralPreprocessor is bypassed, only patterned data are allowed.");
                 }
                 trainingData = VectorBundle.Load(trainingCsvData,
                                                  demoCaseParams.StateMachineCfg.NeuralPreprocessorCfg.InputEncoderCfg.FieldsCfg.ExternalFieldsCfg.GetFieldNames(),

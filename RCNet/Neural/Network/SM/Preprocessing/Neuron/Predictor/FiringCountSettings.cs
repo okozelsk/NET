@@ -85,13 +85,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
 
         //Methods
         /// <summary>
-        /// Checks validity
+        /// Checks consistency
         /// </summary>
-        private void Check()
+        protected override void Check()
         {
             if (Window < 1)
             {
-                throw new Exception($"Invalid Window {Window.ToString(CultureInfo.InvariantCulture)}. Window must be GE to 1.");
+                throw new ArgumentException($"Invalid Window {Window.ToString(CultureInfo.InvariantCulture)}. Window must be GE to 1.", "Window");
             }
             return;
         }

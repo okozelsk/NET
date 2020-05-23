@@ -113,7 +113,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
             if (spikingActivation.TypeOfActivation == ActivationType.Analog)
             {
                 //Spiking
-                throw new Exception("Called wrong type of hidden neuron's constructor for spiking activation.");
+                throw new InvalidOperationException($"Called wrong type of hidden neuron constructor for spiking activation.");
             }
             _activation = spikingActivation;
             SignalingRestriction = NeuronCommon.NeuronSignalingRestrictionType.SpikingOnly;
@@ -150,7 +150,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
             //Activation check
             if (analogActivation.TypeOfActivation == ActivationType.Spiking)
             {
-                throw new Exception("Called wrong type of hidden neuron's constructor for analog activation.");
+                throw new InvalidOperationException($"Called wrong type of hidden neuron constructor for analog activation.");
             }
             _activation = analogActivation;
             SignalingRestriction = signalingRestriction;

@@ -114,13 +114,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
 
         //Methods
         /// <summary>
-        /// Checks validity
+        /// Checks consistency
         /// </summary>
-        private void Check()
+        protected override void Check()
         {
             if (SchemaCfgCollection.Count == 0)
             {
-                throw new Exception($"At least one interconnection schema must be specified.");
+                throw new ArgumentException($"At least one interconnection schema must be specified.", "SchemaCfgCollection");
             }
             return;
         }

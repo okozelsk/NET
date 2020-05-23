@@ -103,13 +103,13 @@ namespace RCNet.Neural.Network.SM.PM
 
         //Methods
         /// <summary>
-        /// Checks validity
+        /// Checks consistency
         /// </summary>
-        private void Check()
+        protected override void Check()
         {
             if (AllowedInputFieldCfgCollection.Count == 0)
             {
-                throw new Exception($"At least one allowed input field configuration must be specified.");
+                throw new ArgumentException($"At least one allowed input field configuration must be specified.", "AllowedInputFieldCfgCollection");
             }
             //Uniqueness of field name
             string[] names = new string[AllowedInputFieldCfgCollection.Count];
@@ -118,7 +118,7 @@ namespace RCNet.Neural.Network.SM.PM
             {
                 if (names.Contains(AllowedInputFieldCfgCollection[i].Name))
                 {
-                    throw new Exception($"Input field name {AllowedInputFieldCfgCollection[i].Name} is not unique.");
+                    throw new ArgumentException($"Input field name {AllowedInputFieldCfgCollection[i].Name} is not unique.", "AllowedInputFieldCfgCollection");
                 }
                 names[i] = AllowedInputFieldCfgCollection[i].Name;
             }

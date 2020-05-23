@@ -58,7 +58,7 @@ namespace RCNet.MathTools.Probability
         {
             if(_probElements != null)
             {
-                throw new Exception("Selector was already finalized and can not be modified.");
+                throw new InvalidOperationException($"Selector was finalized and can not be modified.");
             }
             if (relShare > 0d)
             {
@@ -102,7 +102,7 @@ namespace RCNet.MathTools.Probability
                     return element.Item2;
                 }
             }
-            throw new Exception("Can't select item.");
+            throw new InvalidOperationException($"Can't select item.");
         }
 
         /// <summary>

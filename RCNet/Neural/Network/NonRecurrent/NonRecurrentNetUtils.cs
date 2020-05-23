@@ -68,7 +68,7 @@ namespace RCNet.Neural.Network.NonRecurrent
             }
             else
             {
-                throw new Exception($"Unsupported cfgElem name: {cfgElem.Name.ToString()}");
+                throw new InvalidOperationException($"Unsupported cfgElem name: {cfgElem.Name}");
             }
         }
 
@@ -122,7 +122,7 @@ namespace RCNet.Neural.Network.NonRecurrent
                 }
                 else if (netCfg.TrainerCfg.GetType() == typeof(RidgeRegrTrainerSettings))
                 {
-                    trainer = new RidgeRegrTrainer(ffn, trainingInputVectors, trainingOutputVectors, (RidgeRegrTrainerSettings)netCfg.TrainerCfg, rand);
+                    trainer = new RidgeRegrTrainer(ffn, trainingInputVectors, trainingOutputVectors, (RidgeRegrTrainerSettings)netCfg.TrainerCfg);
                 }
                 else if (netCfg.TrainerCfg.GetType() == typeof(ElasticRegrTrainerSettings))
                 {
@@ -143,7 +143,7 @@ namespace RCNet.Neural.Network.NonRecurrent
                 //Check output
                 if(trainingOutputVectors[0].Length != 1)
                 {
-                    throw new Exception("Can't create ParallelPerceptron. Only single output value is allowed.");
+                    throw new InvalidOperationException($"Can't create ParallelPerceptron. Only single output value is allowed.");
                 }
                 ParallelPerceptronSettings netCfg = (ParallelPerceptronSettings)settings;
                 ParallelPerceptron ppn = new ParallelPerceptron(trainingInputVectors[0].Length, netCfg);
@@ -152,7 +152,7 @@ namespace RCNet.Neural.Network.NonRecurrent
             }
             else
             {
-                throw new Exception("Unknown network settings");
+                throw new InvalidOperationException($"Unknown network settings");
             }
             net.RandomizeWeights(rand);
             return;

@@ -45,16 +45,15 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         public string InfoMessage { get; private set; }
 
         //Attributes
-        private RidgeRegrTrainerSettings _settings;
-        private FeedForwardNetwork _net;
+        private readonly RidgeRegrTrainerSettings _settings;
+        private readonly FeedForwardNetwork _net;
         private readonly List<double[]> _inputVectorCollection;
         private readonly List<double[]> _outputVectorCollection;
-        private readonly Random _rand;
         private readonly Matrix _XT;
         private readonly Matrix _XTdotX;
         private readonly Vector[] _XTdotY;
-        private List<Vector> _outputSingleColVectorCollection;
-        private ParamSeeker _lambdaSeeker;
+        private readonly List<Vector> _outputSingleColVectorCollection;
+        private readonly ParamSeeker _lambdaSeeker;
         private double _currLambda;
 
         //Constructor
@@ -65,28 +64,26 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         /// <param name="inputVectorCollection">Predictors (input)</param>
         /// <param name="outputVectorCollection">Ideal outputs (the same number of rows as number of inputs)</param>
         /// <param name="settings">Optional startup parameters of the trainer</param>
-        /// <param name="rand">Random object to be used</param>
         public RidgeRegrTrainer(FeedForwardNetwork net,
                                 List<double[]> inputVectorCollection,
                                 List<double[]> outputVectorCollection,
-                                RidgeRegrTrainerSettings settings,
-                                Random rand
+                                RidgeRegrTrainerSettings settings
                                 )
         {
             //Check network readyness
             if (!net.Finalized)
             {
-                throw new Exception("Can´t create trainer. Network structure was not finalized.");
+                throw new InvalidOperationException($"Can´t create trainer. Network structure was not finalized.");
             }
             //Check network conditions
             if (net.LayerCollection.Count != 1 || !(net.LayerCollection[0].Activation is Identity))
             {
-                throw new Exception("Can´t create trainer. Network structure is not complient (single layer having Identity activation).");
+                throw new InvalidOperationException($"Can´t create trainer. Network structure is not complient (single layer having Identity activation).");
             }
             //Check samples conditions
             if(inputVectorCollection.Count == 0)
             {
-                throw new Exception("Can´t create trainer. Missing training samples.");
+                throw new InvalidOperationException($"Can´t create trainer. Missing training samples.");
             }
             //Collections
             _inputVectorCollection = new List<double[]>(inputVectorCollection);
@@ -98,7 +95,6 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             Attempt = 1;
             AttemptEpoch = 0;
             _net = net;
-            _rand = rand;
             _outputSingleColVectorCollection = new List<Vector>(_net.NumOfOutputValues);
             for (int outputIdx = 0; outputIdx < _net.NumOfOutputValues; outputIdx++)
             {
@@ -170,7 +166,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             ++AttemptEpoch;
             InfoMessage = $"lambda={_currLambda.ToString(CultureInfo.InvariantCulture)}";
             //Inverse _XTdotX matrix
-            Matrix I = null;
+            Matrix I;
             if (_currLambda > 0)
             {
                 Matrix B = new Matrix(_XTdotX);

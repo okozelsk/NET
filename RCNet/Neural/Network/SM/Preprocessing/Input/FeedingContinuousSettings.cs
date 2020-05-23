@@ -118,13 +118,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
 
         //Methods
         /// <summary>
-        /// Checks validity
+        /// Checks consistency
         /// </summary>
-        private void Check()
+        protected override void Check()
         {
             if (BootCycles != AutoBootCyclesNum && BootCycles <= 0)
             {
-                throw new Exception($"Invalid BootCycles {BootCycles.ToString(CultureInfo.InvariantCulture)}. BootCycles must be equal to {AutoBootCyclesNum.ToString(CultureInfo.InvariantCulture)} for automatic boot cycles or GT 0.");
+                throw new ArgumentException($"Invalid BootCycles {BootCycles.ToString(CultureInfo.InvariantCulture)}. BootCycles must be equal to {AutoBootCyclesNum.ToString(CultureInfo.InvariantCulture)} for automatic boot cycles or GT 0.", "BootCycles");
             }
             return;
         }

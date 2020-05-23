@@ -95,17 +95,17 @@ namespace RCNet.Neural.Data.Transformers
 
         //Methods
         /// <summary>
-        /// Checks validity
+        /// Checks consistency
         /// </summary>
-        private void Check()
+        protected override void Check()
         {
             if (InputFieldName.Length == 0)
             {
-                throw new Exception($"Name of the input field must be specified.");
+                throw new ArgumentException($"Name of the input field must be specified.", "InputFieldName");
             }
             if (Interval < 1)
             {
-                throw new Exception($"Invalid difference interval {Interval.ToString(CultureInfo.InvariantCulture)}. Interval must be GE to 1.");
+                throw new ArgumentException($"Invalid difference interval {Interval.ToString(CultureInfo.InvariantCulture)}. Interval must be GE to 1.", "Interval");
             }
             return;
         }

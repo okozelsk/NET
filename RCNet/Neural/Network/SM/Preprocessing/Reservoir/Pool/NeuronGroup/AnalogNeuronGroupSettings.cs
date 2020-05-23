@@ -196,13 +196,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
 
         //Methods
         /// <summary>
-        /// Checks validity
+        /// Checks consistency
         /// </summary>
-        private void Check()
+        protected override void Check()
         {
             if (Name.Length == 0)
             {
-                throw new Exception($"Name can not be empty.");
+                throw new ArgumentException($"Name can not be empty.", "Name");
             }
             Type activationType = ActivationCfg.GetType();
             if (activationType != typeof(SQNLSettings) &&
@@ -215,11 +215,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
                 activationType != typeof(TanHSettings)
                 )
             {
-                throw new Exception($"Not allowed Activation settings {activationType.ToString()}.");
+                throw new ArgumentException($"Not allowed Activation settings {activationType.Name}.", "ActivationCfg");
             }
             if (FiringThreshold < 0 || FiringThreshold > 1)
             {
-                throw new Exception($"Invalid FiringThreshold {FiringThreshold.ToString(CultureInfo.InvariantCulture)}. FiringThreshold must be GE to 0 and LE to 1.");
+                throw new ArgumentException($"Invalid FiringThreshold {FiringThreshold.ToString(CultureInfo.InvariantCulture)}. FiringThreshold must be GE to 0 and LE to 1.", "FiringThreshold");
             }
             return;
         }

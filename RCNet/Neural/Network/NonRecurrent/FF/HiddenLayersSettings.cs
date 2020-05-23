@@ -109,6 +109,14 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
 
         //Methods
         /// <summary>
+        /// Checks consistency
+        /// </summary>
+        protected override void Check()
+        {
+            return;
+        }
+
+        /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>
         public override RCNetBaseSettings DeepClone()

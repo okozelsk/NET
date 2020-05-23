@@ -102,13 +102,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
 
         //Methods
         /// <summary>
-        /// Checks validity
+        /// Checks consistency
         /// </summary>
-        private void Check()
+        protected override void Check()
         {
             if (FieldCfgCollection.Count == 0)
             {
-                throw new Exception($"At least one internal field configuration must be specified.");
+                throw new ArgumentException($"At least one internal field configuration must be specified.", "FieldCfgCollection");
             }
             //Uniqueness of field names
             string[] names = new string[FieldCfgCollection.Count];
@@ -117,7 +117,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             {
                 if(names.Contains(FieldCfgCollection[i].Name))
                 {
-                    throw new Exception($"Field name {FieldCfgCollection[i].Name} is not unique.");
+                    throw new ArgumentException($"Field name {FieldCfgCollection[i].Name} is not unique.", "FieldCfgCollection");
                 }
                 names[i] = FieldCfgCollection[i].Name;
             }
@@ -153,7 +153,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             }
             if (ex)
             {
-                throw new Exception($"Field name {fieldName} not found.");
+                throw new InvalidOperationException($"Field name {fieldName} not found.");
             }
             else
             {

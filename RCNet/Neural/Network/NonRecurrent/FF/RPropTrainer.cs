@@ -39,15 +39,15 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         public string InfoMessage { get; private set; }
 
         //Attributes
-        private RPropTrainerSettings _settings;
-        private FeedForwardNetwork _net;
-        private List<double[]> _inputVectorCollection;
+        private readonly RPropTrainerSettings _settings;
+        private readonly FeedForwardNetwork _net;
+        private readonly List<double[]> _inputVectorCollection;
         private readonly List<double[]> _outputVectorCollection;
         private readonly Random _rand;
-        private double[] _weigthsGradsAcc;
-        private double[] _weigthsPrevGradsAcc;
-        private double[] _weigthsPrevDeltas;
-        private double[] _weigthsPrevChanges;
+        private readonly double[] _weigthsGradsAcc;
+        private readonly double[] _weigthsPrevGradsAcc;
+        private readonly double[] _weigthsPrevDeltas;
+        private readonly double[] _weigthsPrevChanges;
         private double _prevMSE;
         private readonly GradientWorkerData[] _gradientWorkerDataCollection;
 
@@ -69,7 +69,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         {
             if (!net.Finalized)
             {
-                throw new Exception("Can´t create trainer. Network structure was not finalized.");
+                throw new InvalidOperationException($"Can´t create trainer. Network structure was not finalized.");
             }
             _settings = settings;
             MaxAttempt = _settings.NumOfAttempts;

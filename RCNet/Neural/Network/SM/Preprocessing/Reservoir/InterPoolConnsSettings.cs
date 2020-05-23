@@ -102,13 +102,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
 
         //Methods
         /// <summary>
-        /// Checks validity
+        /// Checks consistency
         /// </summary>
-        private void Check()
+        protected override void Check()
         {
             if (InterPoolConnectionCfgCollection.Count == 0)
             {
-                throw new Exception($"At least one inter-pool connection configuration must be specified.");
+                throw new ArgumentException($"At least one inter-pool connection configuration must be specified.", "InterPoolConnectionCfgCollection");
             }
             return;
         }

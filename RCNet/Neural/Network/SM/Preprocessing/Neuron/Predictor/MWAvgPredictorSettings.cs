@@ -103,19 +103,19 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         /// <summary>
         /// Checks validity
         /// </summary>
-        private void Check()
+        protected override void Check()
         {
             if (Window < 1 )
             {
-                throw new Exception($"Invalid Window {Window.ToString(CultureInfo.InvariantCulture)}. Window must be GT 0.");
+                throw new ArgumentException($"Invalid Window {Window.ToString(CultureInfo.InvariantCulture)}. Window must be GT 0.", "Window");
             }
             if(Weights == PredictorsProvider.PredictorMWAvgWeightsType.Exponential && Window > 64)
             {
-                throw new Exception($"Invalid Window {Window.ToString(CultureInfo.InvariantCulture)}. Window must be LE to 64.");
+                throw new ArgumentException($"Invalid Window {Window.ToString(CultureInfo.InvariantCulture)}. Window must be LE to 64.", "Window");
             }
             if (Weights == PredictorsProvider.PredictorMWAvgWeightsType.Linear && Window > 10240)
             {
-                throw new Exception($"Invalid Window {Window.ToString(CultureInfo.InvariantCulture)}. Window must be LE to 10240.");
+                throw new ArgumentException($"Invalid Window {Window.ToString(CultureInfo.InvariantCulture)}. Window must be LE to 10240.", "Window");
             }
             return;
         }

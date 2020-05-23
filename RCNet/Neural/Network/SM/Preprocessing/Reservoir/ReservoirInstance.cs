@@ -98,13 +98,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// <param name="structureCfg">Reservoir structure configuration</param>
         /// <param name="instanceCfg">Reservoir instance configuration</param>
         /// <param name="inputEncoder">Input encoder</param>
-        /// <param name="inputRange">Range of input values</param>
         /// <param name="rand">Random object to be used for random part of the initialization</param>
         public ReservoirInstance(int instanceID,
                                  ReservoirStructureSettings structureCfg,
                                  ReservoirInstanceSettings instanceCfg,
                                  InputEncoder inputEncoder,
-                                 Interval inputRange,
                                  Random rand
                                  )
         {
@@ -268,7 +266,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                     }
                     else
                     {
-                        throw new Exception("Unsupported interconnection schema");
+                        throw new InvalidOperationException($"Unsupported interconnection schema {connSchema.GetType().Name}.");
                     }
                 }
             }
@@ -389,7 +387,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                 double largestEigenValue = Math.Abs(wMatrix.EstimateLargestEigenValue(out double[] eigenVector));
                 if (largestEigenValue == 0)
                 {
-                    throw new Exception("ApplySpectralRadius: Invalid analog weights. Largest eigenvalue is 0.");
+                    throw new InvalidOperationException($"Can't apply SpectralRadius. Invalid analog weights, largest eigenvalue is 0.");
                 }
                 double scale = spectralRadius / largestEigenValue;
                 //Scale weights of synapses targeting analog neurons
@@ -434,7 +432,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                 //Check consistency
                 if ((sumOfInputWeights + sumOfExcitatoryWeights) == 0)
                 {
-                    throw new Exception("Can't set homogenous excitability. Hidden neuron has no excitatory synapse.");
+                    throw new InvalidOperationException($"Can't set homogenous excitability. Hidden neuron has no excitatory synapse.");
                 }
                 //Rescale input synapses
                 double targetSumOfInputWeights = homogenousExcitabilityCfg.ExcitatoryStrength * homogenousExcitabilityCfg.InputRatio;
@@ -834,7 +832,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             connCountFluctuationSelector.Add(2, 0);
             connCountFluctuationSelector.Add(1, 1);
             int targetPoolID = StructureCfg.PoolsCfg.GetPoolID(cfg.TargetPoolName);
-            PoolSettings targetPoolSettings = StructureCfg.PoolsCfg.PoolCfgCollection[targetPoolID];
             int sourcePoolID = StructureCfg.PoolsCfg.GetPoolID(cfg.SourcePoolName);
             PoolSettings sourcePoolSettings = StructureCfg.PoolsCfg.PoolCfgCollection[sourcePoolID];
             List<HiddenNeuron> targetNeurons = new List<HiddenNeuron>(_poolNeuronCollection[targetPoolID]);

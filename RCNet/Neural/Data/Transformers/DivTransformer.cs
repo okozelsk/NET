@@ -52,11 +52,11 @@ namespace RCNet.Neural.Data.Transformers
         {
             if(double.IsNaN(data[_xFieldIdx]))
             {
-                throw new Exception($"Invalid data value at input field index {_xFieldIdx} (NaN).");
+                throw new InvalidOperationException($"Invalid data value at input field index {_xFieldIdx} (NaN).");
             }
             if (double.IsNaN(data[_yFieldIdx]))
             {
-                throw new Exception($"Invalid data value at input field index {_yFieldIdx} (NaN).");
+                throw new InvalidOperationException($"Invalid data value at input field index {_yFieldIdx} (NaN).");
             }
             double denominator = data[_yFieldIdx].Bound();
             if(Math.Abs(denominator) < DoubleExtensions.ReasonableAbsMin)

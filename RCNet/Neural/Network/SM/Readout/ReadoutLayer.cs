@@ -146,11 +146,11 @@ namespace RCNet.Neural.Network.SM.Readout
             int numOfOutputs = dataBundle.OutputVectorCollection[0].Length;
             if (numOfPredictors == 0)
             {
-                throw new Exception("Number of predictors must be greater tham 0.");
+                throw new InvalidOperationException($"Number of predictors must be greater tham 0.");
             }
             if (numOfOutputs != Settings.ReadoutUnitsCfg.ReadoutUnitCfgCollection.Count)
             {
-                throw new Exception("Incorrect length of output vectors.");
+                throw new InvalidOperationException($"Incorrect length of output vectors.");
             }
             //Predictors mapper (specified or default)
             _predictorsMapper = predictorsMapper ?? new PredictorsMapper(numOfPredictors);
@@ -277,7 +277,7 @@ namespace RCNet.Neural.Network.SM.Readout
             //Check
             if (predictors.Length != _predictorFeatureFilterCollection.Length)
             {
-                throw new Exception("Incorrect length of predictors vector.");
+                throw new InvalidOperationException($"Incorrect length of predictors vector.");
             }
             double[] nrmPredictors = new double[predictors.Length];
             for (int i = 0; i < predictors.Length; i++)
@@ -327,7 +327,7 @@ namespace RCNet.Neural.Network.SM.Readout
             //Check readyness
             if (!Trained)
             {
-                throw new Exception("Readout layer is not trained. Build function has to be called before Compute function can be used.");
+                throw new InvalidOperationException($"Readout layer is not trained. Build function has to be called before Compute function can be used.");
             }
             double[] nrmPredictors = NormalizePredictors(predictors);
             double[] outputVector = ComputeInternal(nrmPredictors, out unitsAllSubResults);

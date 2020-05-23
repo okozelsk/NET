@@ -24,7 +24,7 @@ namespace RCNet.Extensions
                 {
                     if (throwEx)
                     {
-                        throw new Exception(exText);
+                        throw new InvalidOperationException(exText);
                     }
                     else
                     {
@@ -51,7 +51,7 @@ namespace RCNet.Extensions
                 {
                     if (throwEx)
                     {
-                        throw new Exception(exText);
+                        throw new InvalidOperationException(exText);
                     }
                     else
                     {
@@ -78,7 +78,7 @@ namespace RCNet.Extensions
                 {
                     if (throwEx)
                     {
-                        throw new Exception(exText);
+                        throw new InvalidOperationException(exText);
                     }
                     else
                     {
@@ -103,7 +103,7 @@ namespace RCNet.Extensions
             {
                 if (throwEx)
                 {
-                    throw new Exception(exText);
+                    throw new InvalidOperationException(exText);
                 }
                 else
                 {

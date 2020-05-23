@@ -61,7 +61,7 @@ namespace RCNet.MathTools
             reqNumOfSamples = reqNumOfSamples == -1 ? 1 : reqNumOfSamples;
             if (NumOfSamples < reqNumOfSamples)
             {
-                throw new Exception($"Insufficient number of samples ({reqNumOfSamples}/{NumOfSamples}).");
+                throw new InvalidOperationException($"Insufficient number of samples ({reqNumOfSamples}/{NumOfSamples}).");
             }
             return;
         }

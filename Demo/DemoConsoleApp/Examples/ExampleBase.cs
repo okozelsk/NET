@@ -40,7 +40,7 @@ namespace Demo.DemoConsoleApp.Examples
             //Display progress
             if (numOfProcessedInputs % 10 == 0 || numOfProcessedInputs == totalNumOfInputs || totalNumOfInputs == 1)
             {
-                _log.Write($"    Computing verification data {totalNumOfInputs.ToString()}/{numOfProcessedInputs.ToString()}", true);
+                _log.Write($"    Computing verification data {totalNumOfInputs}/{numOfProcessedInputs}", true);
             }
             return;
         }
@@ -61,7 +61,7 @@ namespace Demo.DemoConsoleApp.Examples
                 //Display progress
                 if (numOfProcessedInputs % 10 == 0 || numOfProcessedInputs == totalNumOfInputs || totalNumOfInputs == 1)
                 {
-                    _log.Write($"    Neural preprocessing and collection of State Machine predictors {totalNumOfInputs.ToString()}/{numOfProcessedInputs.ToString()}", true);
+                    _log.Write($"    Neural preprocessing and collection of State Machine predictors {totalNumOfInputs}/{numOfProcessedInputs}", true);
                 }
             }
             else
@@ -109,7 +109,7 @@ namespace Demo.DemoConsoleApp.Examples
             //Check NeuralPreprocessor is configured
             if(stateMachine.Config.NeuralPreprocessorCfg == null)
             {
-                throw new Exception("TrainStateMachine: Neural preprocessor has to be configured.");
+                throw new InvalidOperationException($"Can't train StateMachine. Neural preprocessor has to be configured.");
             }
             //Register to RegressionEpochDone event
             stateMachine.RL.RegressionEpochDone += OnRegressionEpochDone;
@@ -161,7 +161,7 @@ namespace Demo.DemoConsoleApp.Examples
             //Check NeuralPreprocessor is configured
             if (stateMachine.Config.NeuralPreprocessorCfg == null)
             {
-                throw new Exception("TrainStateMachine: Neural preprocessor has to be configured.");
+                throw new InvalidOperationException($"Can't train StateMachine. Neural preprocessor has to be configured.");
             }
             //Load csv data
             CsvDataHolder verificationCsvData = new CsvDataHolder(verificationDataFileName);

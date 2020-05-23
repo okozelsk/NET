@@ -76,7 +76,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
             InterconnectionCfg = (InterconnSettings)interconnectionCfg.DeepClone();
             PredictorsCfg = predictorsCfg == null ? null : (PredictorsSettings)predictorsCfg.DeepClone();
             CoordinatesCfg = coordinatesCfg == null ? new CoordinatesSettings() : (CoordinatesSettings)coordinatesCfg.DeepClone();
-            CheckAndComplete();
+            Check();
             return;
         }
 
@@ -115,7 +115,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
             //Coordinates
             XElement coordinatesElem = poolSettingsElem.Elements("coordinates").FirstOrDefault();
             CoordinatesCfg = coordinatesElem == null ? new CoordinatesSettings() : new CoordinatesSettings(coordinatesElem);
-            CheckAndComplete();
+            Check();
             return;
         }
 
@@ -134,13 +134,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
 
         //Methods
         /// <summary>
-        /// Checks validity and completes object
+        /// Checks consistency
         /// </summary>
-        private void CheckAndComplete()
+        protected override void Check()
         {
             if (Name.Length == 0)
             {
-                throw new Exception($"Name can not be empty.");
+                throw new ArgumentException($"Name can not be empty.", "Name");
             }
             NeuronGroupsCfg.SetGrpNeuronsSubCounts(ProportionsCfg.Size);
             return;

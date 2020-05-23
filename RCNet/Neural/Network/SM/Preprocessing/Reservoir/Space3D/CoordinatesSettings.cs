@@ -121,6 +121,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Space3D
 
         //Methods
         /// <summary>
+        /// Checks consistency
+        /// </summary>
+        protected override void Check()
+        {
+            return;
+        }
+
+        /// <summary>
         /// Returns x,y,z coordinates in the array
         /// </summary>
         public int[] GetCoordinates()

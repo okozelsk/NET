@@ -42,7 +42,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
             }
             else if (dynamicsCfg.Application != PlasticityCommon.DynApplication.ATInput)
             {
-                throw new Exception($"Dynamics application must be ATInput.");
+                throw new InvalidOperationException($"Dynamics application must be ATInput.");
             }
             else
             {
@@ -92,7 +92,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
                         DynamicsCfg = new NonlinearDynamicsATInputSettings(dynamicsCfgElem);
                         break;
                     default:
-                        throw new Exception($"Unexpected element name {dynamicsCfgElem.Name.LocalName}.");
+                        throw new InvalidOperationException($"Unexpected element name {dynamicsCfgElem.Name.LocalName}.");
                 }
             }
             return;
@@ -112,6 +112,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         }
 
         //Methods
+        /// <summary>
+        /// Checks consistency
+        /// </summary>
+        protected override void Check()
+        {
+            return;
+        }
+
         /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>

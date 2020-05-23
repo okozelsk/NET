@@ -7,6 +7,7 @@ using RCNet.Extensions;
 using RCNet.RandomValue;
 using RCNet.Neural.Network.SM.Preprocessing.Neuron;
 using RCNet.MathTools.Differential;
+using RCNet.MathTools;
 
 namespace RCNet.Neural.Activation
 {
@@ -88,8 +89,24 @@ namespace RCNet.Neural.Activation
                 case "activationTanH":
                     return new TanHSettings(settingsElem);
                 default:
-                    throw new ArgumentException($"Unsupported activation function settings: {settingsElem.Name}");
+                    throw new ArgumentException($"Unsupported activation function settings: {settingsElem.Name}", "settingsElem");
             }
+        }
+
+        /// <summary>
+        /// Collects basic information about activation function corresponding to given configuration
+        /// </summary>
+        /// <param name="activationSettings">Activation function settings</param>
+        /// <param name="stateless">Indicates whether the activation function is stateless</param>
+        /// <param name="supportsDerivative">Indicates whether the activation function supports derivative</param>
+        /// <returns>Output range of the activation function</returns>
+        public static Interval GetInfo(RCNetBaseSettings activationSettings, out bool stateless, out bool supportsDerivative)
+        {
+            IActivationFunction af = Create(activationSettings, new Random());
+            Interval outputRange = af.OutputRange.DeepClone();
+            stateless = af.Stateless;
+            supportsDerivative = af.SupportsDerivative;
+            return outputRange;
         }
 
         /// <summary>

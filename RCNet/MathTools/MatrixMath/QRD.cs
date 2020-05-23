@@ -14,9 +14,9 @@ namespace RCNet.MathTools.MatrixMath
     public class QRD
     {
         //Attributes
-        private int _numOfRows;
+        private readonly int _numOfRows;
         private readonly int _numOfCols;
-        private double[][] _QRData;
+        private readonly double[][] _QRData;
         private readonly double[] _RDiagData;
 
         //Constructor
@@ -71,7 +71,7 @@ namespace RCNet.MathTools.MatrixMath
             }//k
             if (!FullRank)
             {
-                throw new Exception("Matrix is rank deficient.");
+                throw new InvalidOperationException($"Matrix is rank deficient.");
             }
             return;
         }
@@ -208,7 +208,7 @@ namespace RCNet.MathTools.MatrixMath
         {
             if (B.NumOfRows != _numOfRows)
             {
-                throw new Exception("Different number of rows.");
+                throw new InvalidOperationException($"Different number of rows in Matrix B.");
             }
 
             // Copy right hand side

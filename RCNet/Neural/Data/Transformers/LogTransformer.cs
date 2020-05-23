@@ -51,7 +51,7 @@ namespace RCNet.Neural.Data.Transformers
         {
             if(double.IsNaN(data[_fieldIdx]))
             {
-                throw new Exception($"Invalid data value at input field index {_fieldIdx} (NaN).");
+                throw new InvalidOperationException($"Invalid data value at input field index {_fieldIdx} (NaN).");
             }
             double arg = Math.Abs(data[_fieldIdx]).Bound();
             if(arg < DoubleExtensions.ReasonableAbsMin)

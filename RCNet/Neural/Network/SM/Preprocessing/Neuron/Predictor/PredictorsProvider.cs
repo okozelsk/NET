@@ -162,7 +162,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
                         activationMWSize = _cfg.ParamsCfg.ActivationMWAvgCfg.Window;
                         break;
                     default:
-                        throw new Exception($"Unsupported weights type {_cfg.ParamsCfg.ActivationMWAvgCfg.Weights.ToString()}.");
+                        throw new InvalidOperationException($"Unsupported weights type {_cfg.ParamsCfg.ActivationMWAvgCfg.Weights}.");
                 }
             }
             _activationMDW = activationMWSize == 0 ? null : new MovingDataWindow(activationMWSize);
@@ -186,7 +186,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
                         firingMWSize = _cfg.ParamsCfg.FiringMWAvgCfg.Window;
                         break;
                     default:
-                        throw new Exception($"Unsupported weights type {_cfg.ParamsCfg.FiringMWAvgCfg.Weights.ToString()}.");
+                        throw new InvalidOperationException($"Unsupported weights type {_cfg.ParamsCfg.FiringMWAvgCfg.Weights}.");
                 }
             }
             if (_cfg.IsEnabled(PredictorID.FiringBinPattern))

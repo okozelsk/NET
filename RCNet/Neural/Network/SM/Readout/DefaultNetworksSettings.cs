@@ -99,6 +99,14 @@ namespace RCNet.Neural.Network.SM.Readout
 
         //Methods
         /// <summary>
+        /// Checks consistency
+        /// </summary>
+        protected override void Check()
+        {
+            return;
+        }
+
+        /// <summary>
         /// Returns task dependent collection of networks settings
         /// </summary>
         /// <param name="task">Task type</param>

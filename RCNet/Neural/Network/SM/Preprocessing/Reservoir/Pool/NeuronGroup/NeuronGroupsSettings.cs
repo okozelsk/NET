@@ -114,13 +114,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
 
         //Methods
         /// <summary>
-        /// Checks validity
+        /// Checks consistency
         /// </summary>
-        private void Check()
+        protected override void Check()
         {
             if (GroupCfgCollection.Count == 0)
             {
-                throw new Exception($"At least one group must be specified.");
+                throw new ArgumentException($"At least one group must be specified.", "GroupCfgCollection");
             }
             return;
         }
@@ -170,7 +170,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
                 distributedCount += sign;
                 if (subCounts[index] < 0)
                 {
-                    throw new Exception("Can't set proper neuron counts for the neuron groups.");
+                    throw new InvalidOperationException($"Can't set proper neuron counts for the neuron groups.");
                 }
             }
             //Set sub-counts

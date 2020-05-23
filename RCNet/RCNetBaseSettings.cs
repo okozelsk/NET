@@ -54,7 +54,7 @@ namespace RCNet
         /// <summary>
         /// Identifies settings containing only default values
         /// </summary>
-        public virtual bool ContainsOnlyDefaults { get { return false; } }
+        public abstract bool ContainsOnlyDefaults { get; }
 
         //Static methods
         /// <summary>
@@ -69,6 +69,7 @@ namespace RCNet
                 return XmlSchema.Read(schemaStream, null);
             }
         }
+        
         /// <summary>
         /// Validates and completes given xml element against specified xsd type defined in RCNetTypes.xsd
         /// </summary>
@@ -97,6 +98,11 @@ namespace RCNet
         /// Creates the deep copy instance of this instance
         /// </summary>
         public abstract RCNetBaseSettings DeepClone();
+
+        /// <summary>
+        /// Checks consistency
+        /// </summary>
+        protected abstract void Check();
 
         /// <summary>
         /// Generates xml element containing the settings.

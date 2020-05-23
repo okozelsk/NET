@@ -102,13 +102,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
 
         //Methods
         /// <summary>
-        /// Checks validity
+        /// Checks consistency
         /// </summary>
-        private void Check()
+        protected override void Check()
         {
             if (ConnCfgCollection.Count == 0)
             {
-                throw new Exception($"At least one connection configuration must be specified.");
+                throw new ArgumentException($"At least one connection configuration must be specified.", "ConnCfgCollection");
             }
             return;
         }

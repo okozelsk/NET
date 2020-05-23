@@ -86,8 +86,15 @@ namespace RCNet.Neural.Activation
         /// </summary>
         public override bool ContainsOnlyDefaults { get { return IsDefaultSlope; } }
 
-
         //Methods
+        /// <summary>
+        /// Checks consistency
+        /// </summary>
+        protected override void Check()
+        {
+            return;
+        }
+
         /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>

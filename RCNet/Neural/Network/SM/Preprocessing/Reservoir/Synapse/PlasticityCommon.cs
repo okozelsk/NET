@@ -71,7 +71,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
                 case DynType.Linear: return new LinearEfficacy(sourceNeuron, (LinearDynamicsSettings)dynamicsCfg);
                 case DynType.Nonlinear: return new NonlinearEfficacy(sourceNeuron, (NonlinearDynamicsSettings)dynamicsCfg);
                 default:
-                    throw new Exception($"Unsupported dynamics configuration {dynamicsCfg.GetType().Name}.");
+                    throw new InvalidOperationException($"Unsupported dynamics configuration {dynamicsCfg.GetType().Name}.");
             }
         }
 

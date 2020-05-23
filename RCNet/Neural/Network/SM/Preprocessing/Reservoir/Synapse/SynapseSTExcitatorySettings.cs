@@ -169,17 +169,17 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
 
         //Methods
         /// <summary>
-        /// Checks validity
+        /// Checks consistency
         /// </summary>
-        private void Check()
+        protected override void Check()
         {
             if (MaxDelay < 0)
             {
-                throw new Exception($"Invalid MaxDelay {MaxDelay.ToString(CultureInfo.InvariantCulture)}. MaxDelay must be GE to 0.");
+                throw new ArgumentException($"Invalid MaxDelay {MaxDelay.ToString(CultureInfo.InvariantCulture)}. MaxDelay must be GE to 0.", "MaxDelay");
             }
             if (RelShare <= 0)
             {
-                throw new Exception($"Invalid RelShare {RelShare.ToString(CultureInfo.InvariantCulture)}. RelShare must be GT 0.");
+                throw new ArgumentException($"Invalid RelShare {RelShare.ToString(CultureInfo.InvariantCulture)}. RelShare must be GT 0.", "RelShare");
             }
             return;
         }

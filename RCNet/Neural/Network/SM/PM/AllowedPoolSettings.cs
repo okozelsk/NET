@@ -94,17 +94,17 @@ namespace RCNet.Neural.Network.SM.PM
 
         //Methods
         /// <summary>
-        /// Checks validity
+        /// Checks consistency
         /// </summary>
-        private void Check()
+        protected override void Check()
         {
             if (ReservoirInstanceName.Length == 0)
             {
-                throw new Exception($"ReservoirInstanceName can not be empty.");
+                throw new ArgumentException($"ReservoirInstanceName can not be empty.", "ReservoirInstanceName");
             }
             if (PoolName.Length == 0)
             {
-                throw new Exception($"PoolName can not be empty.");
+                throw new ArgumentException($"PoolName can not be empty.", "PoolName");
             }
             return;
         }

@@ -158,21 +158,21 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
 
         //Methods
         /// <summary>
-        /// Checks validity
+        /// Checks consistency
         /// </summary>
-        private void Check()
+        protected override void Check()
         {
             if (SignalBeginThreshold < 0)
             {
-                throw new Exception($"Invalid SignalBeginThreshold {SignalBeginThreshold.ToString(CultureInfo.InvariantCulture)}. SignalBeginThreshold must be GE to 0.");
+                throw new ArgumentException($"Invalid SignalBeginThreshold {SignalBeginThreshold.ToString(CultureInfo.InvariantCulture)}. SignalBeginThreshold must be GE to 0.", "SignalBeginThreshold");
             }
             if (SignalEndThreshold < 0)
             {
-                throw new Exception($"Invalid SignalEndThreshold {SignalEndThreshold.ToString(CultureInfo.InvariantCulture)}. SignalEndThreshold must be GE to 0.");
+                throw new ArgumentException($"Invalid SignalEndThreshold {SignalEndThreshold.ToString(CultureInfo.InvariantCulture)}. SignalEndThreshold must be GE to 0.", "SignalEndThreshold");
             }
             if (TargetTimePoints != AutoTargetTimePointsNum && TargetTimePoints <= 0)
             {
-                throw new Exception($"Invalid TargetTimePoints {TargetTimePoints.ToString(CultureInfo.InvariantCulture)}. TargetTimePoints must be equal to {AutoTargetTimePointsNum.ToString(CultureInfo.InvariantCulture)} for automatic target time points or GT 0.");
+                throw new ArgumentException($"Invalid TargetTimePoints {TargetTimePoints.ToString(CultureInfo.InvariantCulture)}. TargetTimePoints must be equal to {AutoTargetTimePointsNum.ToString(CultureInfo.InvariantCulture)} for automatic target time points or GT 0.", "TargetTimePoints");
             }
             return;
         }

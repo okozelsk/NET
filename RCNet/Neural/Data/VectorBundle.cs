@@ -241,11 +241,11 @@ namespace RCNet.Neural.Data
                 int bundleBin1Count = Math.Max(1, refBinDistr.NumOf[1] / numOfBundles);
                 if (bundleBin0Count * numOfBundles > bin0SampleIdxs.Length)
                 {
-                    throw new Exception("Insufficient bin 0 samples");
+                    throw new InvalidOperationException($"Insufficient bin 0 samples");
                 }
                 if (bundleBin1Count * numOfBundles > bin1SampleIdxs.Length)
                 {
-                    throw new Exception("Insufficient bin 1 samples");
+                    throw new InvalidOperationException($"Insufficient bin 1 samples");
                 }
                 //Bundles creation
                 bin0SamplesPos = 0;

@@ -126,13 +126,13 @@ namespace RCNet.Neural.Data.Generators
 
         //Methods
         /// <summary>
-        /// Checks validity
+        /// Checks consistency
         /// </summary>
-        private void Check()
+        protected override void Check()
         {
             if (Tau < 2 || Tau > 18)
             {
-                throw new Exception($"Invalid Tau {Tau.ToString(CultureInfo.InvariantCulture)}. Tau must be GE to 2 and LE to 18.");
+                throw new ArgumentException($"Invalid Tau {Tau.ToString(CultureInfo.InvariantCulture)}. Tau must be GE to 2 and LE to 18.", "Tau");
             }
             return;
         }

@@ -155,17 +155,17 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
 
         //Methods
         /// <summary>
-        /// Checks validity
+        /// Checks consistency
         /// </summary>
-        private void Check()
+        protected override void Check()
         {
             if (Ratio < 0 || Ratio > 1)
             {
-                throw new Exception($"Invalid Ratio {Ratio.ToString(CultureInfo.InvariantCulture)}. Ratio must be GE to 0 and LE to 1.");
+                throw new ArgumentException($"Invalid Ratio {Ratio.ToString(CultureInfo.InvariantCulture)}. Ratio must be GE to 0 and LE to 1.", "Ratio");
             }
             if (Repetitions < 1)
             {
-                throw new Exception($"Invalid Repetitions {Repetitions.ToString(CultureInfo.InvariantCulture)}. Repetitions must be GT 0.");
+                throw new ArgumentException($"Invalid Repetitions {Repetitions.ToString(CultureInfo.InvariantCulture)}. Repetitions must be GT 0.", "Repetitions");
             }
             return;
         }

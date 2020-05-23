@@ -99,11 +99,14 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Research.cs" />
+    <Compile Include="Playground.cs" />
     <Compile Include="SM\SMDemo.cs" />
     <Compile Include="TimeSeriesGenerator.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\.editorconfig">
+      <Link>.editorconfig</Link>
+    </None>
     <None Include="App.config" />
     <EmbeddedResource Include="SM\SMDemoSettings.xsd">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

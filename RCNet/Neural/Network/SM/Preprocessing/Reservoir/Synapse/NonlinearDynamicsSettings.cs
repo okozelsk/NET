@@ -97,19 +97,19 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         /// <summary>
         /// Checks validity
         /// </summary>
-        private void Check()
+        protected override void Check()
         {
             if (RestingEfficacy < 0 || RestingEfficacy > 1)
             {
-                throw new Exception($"Invalid RestingEfficacy {RestingEfficacy.ToString(CultureInfo.InvariantCulture)}. RestingEfficacy must be GE to 0 and LE to 1.");
+                throw new ArgumentException($"Invalid RestingEfficacy {RestingEfficacy.ToString(CultureInfo.InvariantCulture)}. RestingEfficacy must be GE to 0 and LE to 1.", "RestingEfficacy");
             }
             if (TauDepression < 0)
             {
-                throw new Exception($"Invalid TauDepression {TauDepression.ToString(CultureInfo.InvariantCulture)}. TauDepression must be GE to 0.");
+                throw new ArgumentException($"Invalid TauDepression {TauDepression.ToString(CultureInfo.InvariantCulture)}. TauDepression must be GE to 0.", "TauDepression");
             }
             if (TauFacilitation < 0)
             {
-                throw new Exception($"Invalid TauFacilitation {TauFacilitation.ToString(CultureInfo.InvariantCulture)}. TauFacilitation must be GE to 0.");
+                throw new ArgumentException($"Invalid TauFacilitation {TauFacilitation.ToString(CultureInfo.InvariantCulture)}. TauFacilitation must be GE to 0.", "TauFacilitation");
             }
             return;
         }

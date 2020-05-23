@@ -10,9 +10,6 @@ namespace Demo.DemoConsoleApp
     {
         static void Main()
         {
-            //Research - this is not a part of the demo - it is a free playground
-            //(new Research()).Run();
-
             while (true)
             {
                 //Main menu
@@ -24,6 +21,7 @@ namespace Demo.DemoConsoleApp
                 Console.WriteLine("  4. TTOO share prices forecast (State Machine ESN setup using StateMachineDesigner)");
                 Console.WriteLine("  5. Libras Movement classification (State Machine ESN setup using StateMachineDesigner)");
                 Console.WriteLine("  6. Libras Movement classification (State Machine LSM setup using StateMachineDesigner)");
+                Console.WriteLine("  9. Playground");
                 Console.WriteLine("  0. Exit");
                 Console.WriteLine();
                 Console.WriteLine("  Press the digit...");
@@ -38,12 +36,7 @@ namespace Demo.DemoConsoleApp
                         }
                         catch (Exception e)
                         {
-                            Console.WriteLine();
-                            while (e != null)
-                            {
-                                Console.WriteLine(e.Message);
-                                e = e.InnerException;
-                            }
+                            ReportException(e);
                         }
                         break;
 
@@ -54,12 +47,7 @@ namespace Demo.DemoConsoleApp
                         }
                         catch (Exception e)
                         {
-                            Console.WriteLine();
-                            while (e != null)
-                            {
-                                Console.WriteLine(e.Message);
-                                e = e.InnerException;
-                            }
+                            ReportException(e);
                         }
                         break;
 
@@ -70,12 +58,7 @@ namespace Demo.DemoConsoleApp
                         }
                         catch (Exception e)
                         {
-                            Console.WriteLine();
-                            while (e != null)
-                            {
-                                Console.WriteLine(e.Message);
-                                e = e.InnerException;
-                            }
+                            ReportException(e);
                         }
                         break;
 
@@ -86,12 +69,7 @@ namespace Demo.DemoConsoleApp
                         }
                         catch (Exception e)
                         {
-                            Console.WriteLine();
-                            while (e != null)
-                            {
-                                Console.WriteLine(e.Message);
-                                e = e.InnerException;
-                            }
+                            ReportException(e);
                         }
                         break;
 
@@ -102,12 +80,7 @@ namespace Demo.DemoConsoleApp
                         }
                         catch (Exception e)
                         {
-                            Console.WriteLine();
-                            while (e != null)
-                            {
-                                Console.WriteLine(e.Message);
-                                e = e.InnerException;
-                            }
+                            ReportException(e);
                         }
                         break;
 
@@ -118,12 +91,18 @@ namespace Demo.DemoConsoleApp
                         }
                         catch (Exception e)
                         {
-                            Console.WriteLine();
-                            while (e != null)
-                            {
-                                Console.WriteLine(e.Message);
-                                e = e.InnerException;
-                            }
+                            ReportException(e);
+                        }
+                        break;
+
+                    case '9':
+                        try
+                        {
+                            (new Playground()).Run();
+                        }
+                        catch (Exception e)
+                        {
+                            ReportException(e);
                         }
                         break;
 
@@ -141,6 +120,24 @@ namespace Demo.DemoConsoleApp
             }//Menu loop
 
         }//Main
+
+        /// <summary>
+        /// Displays exception content
+        /// </summary>
+        /// <param name="e">Exception to be displayed</param>
+        private static void ReportException(Exception e)
+        {
+            Console.WriteLine();
+            Console.WriteLine("--------------------------------------------------------------");
+            while (e != null)
+            {
+                Console.WriteLine(e.Message);
+                Console.WriteLine(e.StackTrace);
+                e = e.InnerException;
+                Console.WriteLine("--------------------------------------------------------------");
+            }
+            return;
+        }
 
     }//Program
 

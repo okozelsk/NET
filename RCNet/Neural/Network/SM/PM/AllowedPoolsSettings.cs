@@ -103,13 +103,13 @@ namespace RCNet.Neural.Network.SM.PM
 
         //Methods
         /// <summary>
-        /// Checks validity
+        /// Checks consistency
         /// </summary>
-        private void Check()
+        protected override void Check()
         {
             if (AllowedPoolCfgCollection.Count == 0)
             {
-                throw new Exception($"At least one allowed pool configuration must be specified.");
+                throw new ArgumentException($"At least one allowed pool configuration must be specified.", "AllowedPoolCfgCollection");
             }
             //Uniqueness of pool references
             string[] names = new string[AllowedPoolCfgCollection.Count];
@@ -119,7 +119,7 @@ namespace RCNet.Neural.Network.SM.PM
                 string refName = AllowedPoolCfgCollection[i].ReservoirInstanceName + "." + AllowedPoolCfgCollection[i].PoolName;
                 if (names.Contains(refName))
                 {
-                    throw new Exception($"Pool reference {refName} is not unique.");
+                    throw new ArgumentException($"Pool reference {refName} is not unique.", "AllowedPoolCfgCollection");
                 }
                 names[i] = refName;
             }

@@ -41,13 +41,13 @@ namespace Demo.DemoConsoleApp
     /// <summary>
     /// This class is a free "playground", the place where it is possible to test new concepts or somewhat else
     /// </summary>
-    class Research
+    class Playground
     {
         //Attributes
         private readonly Random _rand;
 
         //Constructor
-        public Research()
+        public Playground()
         {
             _rand = new Random();
             return;
@@ -56,14 +56,13 @@ namespace Demo.DemoConsoleApp
         //Methods
         private void TestActivation(IActivationFunction af, int simLength, double constCurrent, int from, int count)
         {
-            Random rand = new Random();
             for (int i = 1; i <= simLength; i++)
             {
                 double signal;
                 double input;
                 if (i >= from && i < from + count)
                 {
-                    input = double.IsNaN(constCurrent) ? rand.NextDouble() : constCurrent;
+                    input = double.IsNaN(constCurrent) ? _rand.NextDouble() : constCurrent;
                 }
                 else
                 {
@@ -81,17 +80,16 @@ namespace Demo.DemoConsoleApp
         {
             double[] inputValues = new double[1];
             inputValues[0] = double.MinValue;
-            Console.WriteLine($"{transformer.GetType().Name} Input {inputValues[0].ToString()} Output {transformer.Next(inputValues)}");
+            Console.WriteLine($"{transformer.GetType().Name} Input {inputValues[0]} Output {transformer.Next(inputValues)}");
             for (double input = -5d; input <= 5d; input += 0.1d)
             {
                 input = Math.Round(input, 1);
                 inputValues[0] = input;
-                Console.WriteLine($"{transformer.GetType().Name} Input {input.ToString()} Output {transformer.Next(inputValues)}");
+                Console.WriteLine($"{transformer.GetType().Name} Input {input} Output {transformer.Next(inputValues)}");
             }
             inputValues[0] = double.MaxValue;
-            Console.WriteLine($"{transformer.GetType().Name} Input {inputValues[0].ToString()} Output {transformer.Next(inputValues)}");
+            Console.WriteLine($"{transformer.GetType().Name} Input {inputValues[0]} Output {transformer.Next(inputValues)}");
             Console.ReadLine();
-
             return;
         }
 
@@ -100,7 +98,7 @@ namespace Demo.DemoConsoleApp
             double[] inputValues = new double[2];
             inputValues[0] = double.MinValue;
             inputValues[1] = double.MinValue;
-            Console.WriteLine($"{transformer.GetType().Name} Inputs [{inputValues[0].ToString()}, {inputValues[1].ToString()}] Output {transformer.Next(inputValues)}");
+            Console.WriteLine($"{transformer.GetType().Name} Inputs [{inputValues[0]}, {inputValues[1]}] Output {transformer.Next(inputValues)}");
             
             for (double input1 = -5d; input1 <= 5d; input1 += 0.5d)
             {
@@ -110,14 +108,13 @@ namespace Demo.DemoConsoleApp
                     input2 = Math.Round(input2, 1);
                     inputValues[0] = input1;
                     inputValues[1] = input2;
-                    Console.WriteLine($"{transformer.GetType().Name} Inputs [{inputValues[0].ToString()}, {inputValues[1].ToString()}] Output {transformer.Next(inputValues)}");
+                    Console.WriteLine($"{transformer.GetType().Name} Inputs [{inputValues[0]}, {inputValues[1]}] Output {transformer.Next(inputValues)}");
                 }
             }
             inputValues[0] = double.MaxValue;
             inputValues[1] = double.MaxValue;
-            Console.WriteLine($"{transformer.GetType().Name} Inputs [{inputValues[0].ToString()}, {inputValues[1].ToString()}] Output {transformer.Next(inputValues)}");
+            Console.WriteLine($"{transformer.GetType().Name} Inputs [{inputValues[0]}, {inputValues[1]}] Output {transformer.Next(inputValues)}");
             Console.ReadLine();
-
             return;
         }
 
@@ -156,59 +153,22 @@ namespace Demo.DemoConsoleApp
             //Linear transformer
             transformer = new LinearTransformer(twoFieldsList, new LinearTransformerSettings(twoFieldsList[0], twoFieldsList[1], 0.03, 0.2));
             TestTwoFieldsTransformer(transformer);
-
             return;
         }
 
+        /// <summary>
+        /// Playground's entry point
+        /// </summary>
         public void Run()
         {
-
-            Bitwise.Window bw = new Bitwise.Window(80);
-
-            for(int i = 0; i < 80; i++)
-            {
-                bw.AddNext(true);
-            }
-
-            bw.AddNext(true);
-            bw.AddNext(false);
-            bw.AddNext(false);
-            bw.AddNext(true);
-
-            int bit1 = bw.GetBit(0);
-            int bit2 = bw.GetBit(1);
-            int bit3 = bw.GetBit(2);
-            int bit4 = bw.GetBit(3);
-
-            int bitCount80 = bw.GetNumOfSetBits(80);
-            int bitCount79 = bw.GetNumOfSetBits(79);
-            int bitCount78 = bw.GetNumOfSetBits(78);
-            int bitCount77 = bw.GetNumOfSetBits(77);
-
-            double fadingStrength = 0.005;
-            double fadingSum80 = bw.GetFadingSum(fadingStrength, 80);
-            double fadingSum79 = bw.GetFadingSum(fadingStrength, 79);
-            double fadingSum5 = bw.GetFadingSum(fadingStrength, 5);
-            double fadingSum4 = bw.GetFadingSum(fadingStrength, 4);
-            double fadingSum3 = bw.GetFadingSum(fadingStrength, 3);
-            double fadingSum2 = bw.GetFadingSum(fadingStrength, 2);
-            double fadingSum1 = bw.GetFadingSum(fadingStrength, 1);
-
-            ulong bits66_4_true = bw.GetBits(66, 4, true);
-            ulong bits2_3_true = bw.GetBits(2, 3, true);
-            ulong bits2_3_false = bw.GetBits(2, 3, false);
-
-
+            //TODO - place your code here
+            /*
+            TestActivation(ActivationFactory.Create(new SimpleIFSettings(), _rand), 200, 0.25, 50, 100);
             TestTransformers();
-
-
-            RCNetBaseSettings settings = new LeakyIFSettings();
-            IActivationFunction af = ActivationFactory.Create(settings, new Random(0));
-            TestActivation(af, 800, 0.1, 10, 600);
+            */
             return;
         }
 
 
-
-    }//Research
+    }//Playground
 }

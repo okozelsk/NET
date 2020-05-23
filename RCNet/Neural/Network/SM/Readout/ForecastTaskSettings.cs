@@ -90,7 +90,7 @@ namespace RCNet.Neural.Network.SM.Readout
                     FeatureFilterCfg = new RealFeatureFilterSettings(filterSettingsElem);
                     break;
                 default:
-                    throw new Exception("Feature filter element not found.");
+                    throw new InvalidOperationException($"Feature filter element not found.");
             }
             //Networks
             XElement forecastNetworksSettingsElem = settingsElem.Elements("networks").FirstOrDefault();
@@ -122,6 +122,14 @@ namespace RCNet.Neural.Network.SM.Readout
 
 
         //Methods
+        /// <summary>
+        /// Checks consistency
+        /// </summary>
+        protected override void Check()
+        {
+            return;
+        }
+
         /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>

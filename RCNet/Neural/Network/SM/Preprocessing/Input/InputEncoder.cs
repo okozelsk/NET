@@ -401,7 +401,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             //Check vector length
             if (_fixedExtVectorLength != -1 && extInputVectorLength != _fixedExtVectorLength)
             {
-                throw new Exception("Number of the time-points in every input pattern has to be constant because input data is routed to the readout.");
+                throw new InvalidOperationException($"Number of the time-points in every input pattern has to be constant because input data is routed to the readout.");
             }
             return;
         }
@@ -528,11 +528,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             //Checks
             if (_reverseMode)
             {
-                throw new Exception("Can't set reverse mode. Input encoder is already in reverse mode.");
+                throw new InvalidOperationException($"Can't set reverse mode. Input encoder is already in reverse mode.");
             }
             if (_encoderCfg.FeedingCfg.FeedingType != InputFeedingType.Patterned)
             {
-                throw new Exception("Illegal call to set reverse mode. Reverse mode is relevant only for patterned feeding regime.");
+                throw new InvalidOperationException($"Illegal call to set reverse mode. Reverse mode is relevant only for patterned feeding regime.");
             }
             //Reset fields to initial state
             ResetFields(false);

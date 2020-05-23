@@ -415,7 +415,7 @@ namespace RCNet.MathTools.MatrixMath
             int colsB = B.NumOfCols;
             if (colsA != colsB || rowsA != rowsB)
             {
-                throw new Exception("Dimensions of A must equal to dimensions of B");
+                throw new InvalidOperationException($"Dimensions of A must equal to dimensions of B");
             }
             double[][] resultData = new double[rowsA][];
             var rangePartitioner = Partitioner.Create(0, rowsA);
@@ -458,7 +458,7 @@ namespace RCNet.MathTools.MatrixMath
             int colsB = B.NumOfCols;
             if (NumOfCols != colsB || NumOfRows != rowsB)
             {
-                throw new Exception("Dimensions of B must equal to dimensions of this matrix");
+                throw new InvalidOperationException($"Dimensions of B must equal to dimensions of this matrix");
             }
             var rangePartitioner = Partitioner.Create(0, rowsB);
             Parallel.ForEach(rangePartitioner, range =>
@@ -489,7 +489,7 @@ namespace RCNet.MathTools.MatrixMath
             int colsA = A.NumOfCols;
             if(rowsA != colsA)
             {
-                throw new Exception("Matrix A must be a square matrix (rows dimension = columns dimension)");
+                throw new InvalidOperationException($"Matrix A must be a square matrix (rows dimension = columns dimension)");
             }
             double[][] resultData = new double[rowsA][];
             var rangePartitioner = Partitioner.Create(0, rowsA);
@@ -512,7 +512,7 @@ namespace RCNet.MathTools.MatrixMath
         {
             if (!IsSquared)
             {
-                throw new Exception("Matrix must be a square matrix (rows dimension = columns dimension)");
+                throw new InvalidOperationException($"Matrix must be a square matrix (rows dimension = columns dimension)");
             }
             var rangePartitioner = Partitioner.Create(0, NumOfRows);
             Parallel.ForEach(rangePartitioner, range =>
@@ -539,7 +539,7 @@ namespace RCNet.MathTools.MatrixMath
             int colsB = B.NumOfCols;
             if (colsA != colsB || rowsA != rowsB)
             {
-                throw new Exception("Dimensions of A must equal to dimensions of B");
+                throw new InvalidOperationException($"Dimensions of A must equal to dimensions of B");
             }
             double[][] resultData = new double[rowsA][];
             var rangePartitioner = Partitioner.Create(0, rowsA);
@@ -582,7 +582,7 @@ namespace RCNet.MathTools.MatrixMath
             int colsB = B.NumOfCols;
             if (NumOfCols != colsB || NumOfRows != rowsB)
             {
-                throw new Exception("Dimensions of B must equal to dimensions of this matrix");
+                throw new InvalidOperationException($"Dimensions of B must equal to dimensions of this matrix");
             }
             var rangePartitioner = Partitioner.Create(0, rowsB);
             Parallel.ForEach(rangePartitioner, range =>
@@ -616,7 +616,7 @@ namespace RCNet.MathTools.MatrixMath
             int colsB = B.NumOfCols;
             if (colsA != rowsB)
             {
-                throw new Exception("Number of columns of A must be equal to number of rows of B");
+                throw new InvalidOperationException($"Number of columns of A must be equal to number of rows of B");
             }
             Matrix R = new Matrix(rowsA, colsB);
             for (int i = 0; i < rowsA; i++)
@@ -646,7 +646,7 @@ namespace RCNet.MathTools.MatrixMath
             int colsB = B.NumOfCols;
             if (colsA != rowsB)
             {
-                throw new Exception("Number of columns of A must be equal to number of rows of B");
+                throw new InvalidOperationException($"Number of columns of A must be equal to number of rows of B");
             }
             var rangePartitioner = Partitioner.Create(0, rowsA);
             double[][] resultData = new double[rowsA][];
@@ -696,7 +696,7 @@ namespace RCNet.MathTools.MatrixMath
             int colsA = A.NumOfCols;
             if (colsA != v.Length)
             {
-                throw new Exception("Number of columns of A must be equal to length of vector v");
+                throw new InvalidOperationException($"Number of columns of A must be equal to length of vector v");
             }
             double[] resultData = new double[rowsA];
             double[] vData = v.Data;
@@ -731,7 +731,7 @@ namespace RCNet.MathTools.MatrixMath
             int colsA = A.NumOfCols;
             if (colsA != v.Length)
             {
-                throw new Exception("Number of columns of A must be equal to length of vector v");
+                throw new InvalidOperationException($"Number of columns of A must be equal to length of vector v");
             }
             double[] resultData = new double[rowsA];
             resultData.Populate(0);
@@ -765,7 +765,7 @@ namespace RCNet.MathTools.MatrixMath
         {
             if (NumOfCols != v.Length)
             {
-                throw new Exception("Number of columns of the matrix must be equal to length of vector V");
+                throw new InvalidOperationException($"Number of columns of the matrix must be equal to length of vector V");
             }
             int rows = NumOfRows;
             double[] resultData = new double[rows];
@@ -936,7 +936,7 @@ namespace RCNet.MathTools.MatrixMath
         {
             if (!IsSquared)
             {
-                throw new Exception("Matrix must be squared.");
+                throw new InvalidOperationException($"Matrix must be squared.");
             }
             //Dimension to be used within the function
             int size = NumOfRows;
@@ -975,7 +975,7 @@ namespace RCNet.MathTools.MatrixMath
                     if (Math.Abs(dictMatrix._data[pivotRow][pivotCol]) < minPivotValue)
                     {
                         //Failed
-                        throw new Exception($"Absolute value of the diagonal Pivot at row {pivotRow} is too small. Pivot = {dictMatrix._data[pivotRow][pivotCol]}.");
+                        throw new InvalidOperationException($"Absolute value of the diagonal Pivot at row {pivotRow} is too small. Pivot = {dictMatrix._data[pivotRow][pivotCol]}.");
                     }
                 }
                 else
@@ -1004,7 +1004,7 @@ namespace RCNet.MathTools.MatrixMath
                     if (selectedPivotValue == 0)
                     {
                         //Pivot was not selected
-                        throw new Exception($"Can't select Pivot in step {n + 1}. No matrix element has enaugh absolute value >= {minPivotValue}.");
+                        throw new InvalidOperationException($"Can't select Pivot in step {n + 1}. No matrix element has enaugh absolute value >= {minPivotValue}.");
                     }
                     //Remove row from available pivot rows
                     availableDictPivotRows.RemoveAt(selectedPivotRowListIdx);
@@ -1102,7 +1102,7 @@ namespace RCNet.MathTools.MatrixMath
             //Firstly check squared matrix
             if (!IsSquared)
             {
-                throw new Exception("Matrix must be squared.");
+                throw new InvalidOperationException($"Matrix must be squared.");
             }
             //Local variables
             //Iteration initialization

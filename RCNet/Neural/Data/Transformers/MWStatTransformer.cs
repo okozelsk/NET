@@ -97,7 +97,7 @@ namespace RCNet.Neural.Data.Transformers
             _fieldIdx = availableFieldNames.IndexOf(_settings.InputFieldName);
             if(_fieldIdx == -1)
             {
-                throw new Exception($"Input field name {_settings.InputFieldName} not found among given available fields.");
+                throw new InvalidOperationException($"Input field name {_settings.InputFieldName} not found among given available fields.");
             }
             _lastValues = new SimpleQueue<double>(_settings.Window);
             return;
@@ -121,7 +121,7 @@ namespace RCNet.Neural.Data.Transformers
         {
             if(double.IsNaN(data[_fieldIdx]))
             {
-                throw new Exception($"Invalid data value at input field index {_fieldIdx} (NaN).");
+                throw new InvalidOperationException($"Invalid data value at input field index {_fieldIdx} (NaN).");
             }
             _lastValues.Enqueue(data[_fieldIdx], true);
             BasicStat stat = new BasicStat();

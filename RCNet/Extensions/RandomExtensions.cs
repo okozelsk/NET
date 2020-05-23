@@ -350,7 +350,7 @@ namespace RCNet.Extensions
                     }
                     else
                     {
-                        throw new Exception($"Configuration of Gaussian distribution is missing");
+                        throw new InvalidOperationException($"Configuration of Gaussian distribution is missing");
                     }
                     break;
                 case RandomCommon.DistributionType.Exponential:
@@ -361,7 +361,7 @@ namespace RCNet.Extensions
                     }
                     else
                     {
-                        throw new Exception($"Configuration of Exponential distribution is missing");
+                        throw new InvalidOperationException($"Configuration of Exponential distribution is missing");
                     }
                     break;
                 case RandomCommon.DistributionType.Gamma:
@@ -372,11 +372,11 @@ namespace RCNet.Extensions
                     }
                     else
                     {
-                        throw new Exception($"Configuration of Gamma distribution is missing");
+                        throw new InvalidOperationException($"Configuration of Gamma distribution is missing");
                     }
                     break;
                 default:
-                    throw new Exception($"Unknown distribution type {settings.DistrType}.");
+                    throw new InvalidOperationException($"Unknown distribution type {settings.DistrType}.");
             }
             if (settings.RandomSign)
             {
@@ -402,23 +402,23 @@ namespace RCNet.Extensions
                 case RandomCommon.DistributionType.Gaussian:
                     if (settings.DistrCfg != null)
                     {
-                        GaussianDistrSettings gaussianCfg = settings.DistrCfg as GaussianDistrSettings;
+                        UGaussianDistrSettings gaussianCfg = settings.DistrCfg as UGaussianDistrSettings;
                         value = rand.NextFilterredGaussianDouble(gaussianCfg.Mean, gaussianCfg.StdDev, settings.Min, settings.Max);
                     }
                     else
                     {
-                        throw new Exception($"Configuration of Gaussian distribution is missing");
+                        throw new InvalidOperationException($"Configuration of Gaussian distribution is missing");
                     }
                     break;
                 case RandomCommon.DistributionType.Exponential:
                     if (settings.DistrCfg != null)
                     {
-                        ExponentialDistrSettings exponentialCfg = settings.DistrCfg as ExponentialDistrSettings;
+                        UExponentialDistrSettings exponentialCfg = settings.DistrCfg as UExponentialDistrSettings;
                         value = rand.NextFilterredExponentialDouble(exponentialCfg.Mean, settings.Min, settings.Max);
                     }
                     else
                     {
-                        throw new Exception($"Configuration of Exponential distribution is missing");
+                        throw new InvalidOperationException($"Configuration of Exponential distribution is missing");
                     }
                     break;
                 case RandomCommon.DistributionType.Gamma:
@@ -429,11 +429,11 @@ namespace RCNet.Extensions
                     }
                     else
                     {
-                        throw new Exception($"Configuration of Gamma distribution is missing");
+                        throw new InvalidOperationException($"Configuration of Gamma distribution is missing");
                     }
                     break;
                 default:
-                    throw new Exception($"Unknown distribution type {settings.DistrType}.");
+                    throw new InvalidOperationException($"Unknown distribution type {settings.DistrType}.");
             }
             return value;
         }

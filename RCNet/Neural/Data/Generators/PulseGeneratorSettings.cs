@@ -94,13 +94,13 @@ namespace RCNet.Neural.Data.Generators
 
         //Methods
         /// <summary>
-        /// Checks validity
+        /// Checks consistency
         /// </summary>
-        private void Check()
+        protected override void Check()
         {
             if (AvgPeriod < 1)
             {
-                throw new Exception($"Invalid AvgPeriod {AvgPeriod.ToString(CultureInfo.InvariantCulture)}. AvgPeriod must be GE to 1.");
+                throw new ArgumentException($"Invalid AvgPeriod {AvgPeriod.ToString(CultureInfo.InvariantCulture)}. AvgPeriod must be GE to 1.", "AvgPeriod");
             }
             return;
         }

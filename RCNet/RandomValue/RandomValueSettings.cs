@@ -186,11 +186,14 @@ namespace RCNet.RandomValue
         }
 
         //Methods
-        private void Check()
+        /// <summary>
+        /// Checks consistency
+        /// </summary>
+        protected override void Check()
         {
-            if(Max < Min)
+            if (Max < Min)
             {
-                throw new Exception($"Incorrect min ({Min.ToString(CultureInfo.InvariantCulture)}) and max ({Max.ToString(CultureInfo.InvariantCulture)}) values. Max must be GE to min.");
+                throw new ArgumentException($"Incorrect Min ({Min.ToString(CultureInfo.InvariantCulture)}) and Max ({Max.ToString(CultureInfo.InvariantCulture)}) values. Max must be GE to Min.", "Max/Min");
             }
             return;
         }

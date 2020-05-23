@@ -91,17 +91,17 @@ namespace RCNet.Neural.Data.Transformers
 
         //Methods
         /// <summary>
-        /// Checks validity
+        /// Checks consistency
         /// </summary>
-        private void Check()
+        protected override void Check()
         {
             if (InputFieldName.Length == 0)
             {
-                throw new Exception($"Name of the input field must be specified.");
+                throw new ArgumentException($"Name of the input field must be specified.", "InputFieldName");
             }
             if (Window < 1)
             {
-                throw new Exception($"Invalid window size {Window.ToString(CultureInfo.InvariantCulture)}. Window size must be GE to 2.");
+                throw new ArgumentException($"Invalid window size {Window.ToString(CultureInfo.InvariantCulture)}. Window size must be GE to 2.", "Window");
             }
             return;
         }

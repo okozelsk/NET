@@ -182,21 +182,21 @@ namespace RCNet.Neural.Network.SM.Readout
 
         //Methods
         /// <summary>
-        /// Checks validity and completes the instance
+        /// Checks consistency
         /// </summary>
-        private void Check()
+        protected override void Check()
         {
-            if(TestDataRatio <= 0 || TestDataRatio > MaxTestDataRatio)
+            if (TestDataRatio <= 0 || TestDataRatio > MaxTestDataRatio)
             {
-                throw new Exception($"Invalid TestDataRatio {TestDataRatio.ToString(CultureInfo.InvariantCulture)}. TestDataRatio must be GT 0 and GE {MaxTestDataRatio.ToString(CultureInfo.InvariantCulture)}.");
+                throw new ArgumentException($"Invalid TestDataRatio {TestDataRatio.ToString(CultureInfo.InvariantCulture)}. TestDataRatio must be GT 0 and GE {MaxTestDataRatio.ToString(CultureInfo.InvariantCulture)}.", "TestDataRatio");
             }
             if (Folds < 0)
             {
-                throw new Exception($"Invalid Folds {Folds.ToString(CultureInfo.InvariantCulture)}. Folds must be GE to 0 (0 means Auto folds).");
+                throw new ArgumentException($"Invalid Folds {Folds.ToString(CultureInfo.InvariantCulture)}. Folds must be GE to 0 (0 means Auto folds).", "Folds");
             }
             if (Repetitions < 1)
             {
-                throw new Exception($"Invalid Repetitions {Repetitions.ToString(CultureInfo.InvariantCulture)}. Repetitions must be GE to 1.");
+                throw new ArgumentException($"Invalid Repetitions {Repetitions.ToString(CultureInfo.InvariantCulture)}. Repetitions must be GE to 1.", "Repetitions");
             }
             foreach (ReadoutUnitSettings rus in ReadoutUnitsCfg.ReadoutUnitCfgCollection)
             {
@@ -204,7 +204,7 @@ namespace RCNet.Neural.Network.SM.Readout
                 {
                     if (DefaultNetworksCfg.GetTaskNetworksCfgs(rus.TaskCfg.Type).Count == 0)
                     {
-                        throw new Exception($"Readout unit {rus.Name} has not associated network(s) settings.");
+                        throw new ArgumentException($"Readout unit {rus.Name} has not associated network(s) settings.", "ReadoutUnitsCfg");
                     }
                 }
             }

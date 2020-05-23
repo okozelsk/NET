@@ -76,7 +76,7 @@ namespace RCNet.RandomValue
                 case "gammaDistr":
                     return new GammaDistrSettings(elem);
                 default:
-                    throw new Exception($"Unexpected element {elem.Name.LocalName}");
+                    throw new InvalidOperationException($"Unexpected element {elem.Name.LocalName}");
             }
         }
 
@@ -98,7 +98,7 @@ namespace RCNet.RandomValue
                 case "gammaDistr":
                     return new GammaDistrSettings(elem);
                 default:
-                    throw new Exception($"Unexpected element {elem.Name.LocalName}");
+                    throw new InvalidOperationException($"Unexpected element {elem.Name.LocalName}");
             }
         }
 

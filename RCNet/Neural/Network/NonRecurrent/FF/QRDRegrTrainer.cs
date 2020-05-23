@@ -76,17 +76,17 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             //Check network readyness
             if (!net.Finalized)
             {
-                throw new Exception("Can´t create trainer. Network structure was not finalized.");
+                throw new InvalidOperationException($"Can´t create trainer. Network structure was not finalized.");
             }
             //Check network conditions
             if (net.LayerCollection.Count != 1 || !(net.LayerCollection[0].Activation is Identity))
             {
-                throw new Exception("Can´t create trainer. Network structure is not complient (single layer having Identity activation).");
+                throw new InvalidOperationException($"Can´t create trainer. Network structure is not complient (single layer having Identity activation).");
             }
             //Check samples conditions
             if(inputVectorCollection.Count < inputVectorCollection[0].Length + 1)
             {
-                throw new Exception($"Can´t create trainer. Insufficient number of training samples {inputVectorCollection.Count}. Minimum is {(inputVectorCollection[0].Length + 1)}.");
+                throw new InvalidOperationException($"Can´t create trainer. Insufficient number of training samples {inputVectorCollection.Count}. Minimum is {(inputVectorCollection[0].Length + 1)}.");
             }
             //Parameters
             _settings = settings;

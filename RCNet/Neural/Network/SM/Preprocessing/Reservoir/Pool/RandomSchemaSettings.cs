@@ -201,21 +201,21 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
 
         //Methods
         /// <summary>
-        /// Checks validity
+        /// Checks consistency
         /// </summary>
-        private void Check()
+        protected override void Check()
         {
             if (Density < 0 || Density > 1)
             {
-                throw new Exception($"Invalid Density {Density.ToString(CultureInfo.InvariantCulture)}. Density must be GE to 0 and LE to 1.");
+                throw new ArgumentException($"Invalid Density {Density.ToString(CultureInfo.InvariantCulture)}. Density must be GE to 0 and LE to 1.", "Density");
             }
             if (AvgDistance < 0)
             {
-                throw new Exception($"Invalid AvgDistance {AvgDistance.ToString(CultureInfo.InvariantCulture)}. AvgDistance must be GE to 0.");
+                throw new ArgumentException($"Invalid AvgDistance {AvgDistance.ToString(CultureInfo.InvariantCulture)}. AvgDistance must be GE to 0.", "AvgDistance");
             }
             if (Repetitions < 1)
             {
-                throw new Exception($"Invalid Repetitions {Repetitions.ToString(CultureInfo.InvariantCulture)}. Repetitions must be GT 0.");
+                throw new ArgumentException($"Invalid Repetitions {Repetitions.ToString(CultureInfo.InvariantCulture)}. Repetitions must be GT 0.", "Repetitions");
             }
             return;
         }

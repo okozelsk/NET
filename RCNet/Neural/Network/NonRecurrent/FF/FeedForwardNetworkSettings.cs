@@ -55,18 +55,10 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
                                           )
         {
             OutputActivationCfg = ActivationFactory.DeepCloneActivationSettings(outputActivationCfg);
-            CheckAllowedActivation(OutputActivationCfg, out Interval outputRange);
-            OutputRange = outputRange;
+            OutputRange = ActivationFactory.GetInfo(OutputActivationCfg, out _, out _);
             HiddenLayersCfg = hiddenLayersCfg == null ? new HiddenLayersSettings() : (HiddenLayersSettings)hiddenLayersCfg.DeepClone();
-            if(trainerCfg.GetType() != typeof(QRDRegrTrainerSettings) &&
-               trainerCfg.GetType() != typeof(RidgeRegrTrainerSettings) &&
-               trainerCfg.GetType() != typeof(ElasticRegrTrainerSettings) &&
-               trainerCfg.GetType() != typeof(RPropTrainerSettings)
-               )
-            {
-                throw new Exception("Unsupported trainer settings.");
-            }
             TrainerCfg = trainerCfg.DeepClone();
+            Check();
             return;
         }
 
@@ -97,8 +89,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
             OutputActivationCfg = ActivationFactory.LoadSettings(settingsElem.Elements().First());
-            CheckAllowedActivation(OutputActivationCfg, out Interval outputRange);
-            OutputRange = outputRange;
+            OutputRange = ActivationFactory.GetInfo(OutputActivationCfg, out _, out _);
             //Hidden layers
             XElement hiddenLayersElem = settingsElem.Elements("hiddenLayers").FirstOrDefault();
             if (hiddenLayersElem != null)
@@ -134,10 +125,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
                     break;
                 }
             }
-            if(TrainerCfg == null)
-            {
-                throw new Exception("Trainer settings not found.");
-            }
+            Check();
             return;
         }
 
@@ -155,30 +143,46 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         /// <param name="outputRange">Returned range of the activation function</param>
         public static bool IsAllowedActivation(RCNetBaseSettings activationSettings, out Interval outputRange)
         {
-            IActivationFunction af = ActivationFactory.Create(activationSettings, new Random());
-            outputRange = af.OutputRange.DeepClone();
-            if (!af.Stateless || !af.SupportsDerivative)
+            outputRange = ActivationFactory.GetInfo(activationSettings, out bool stateless, out bool supportsDerivative);
+            if (!stateless || !supportsDerivative)
             {
                 return false;
             }
             return true;
         }
 
+        //Methods
         /// <summary>
-        /// Fuction checks if specified activation can be used in FF network 
+        /// Checks consistency
         /// </summary>
-        /// <param name="activationSettings">Activation settings</param>
-        /// <param name="outputRange">Returned range of the activation function</param>
-        public static void CheckAllowedActivation(RCNetBaseSettings activationSettings, out Interval outputRange)
+        protected override void Check()
         {
-            if(!IsAllowedActivation(activationSettings, out outputRange))
+            if (!IsAllowedActivation(OutputActivationCfg, out _))
             {
-                throw new ApplicationException($"Activation can't be used in FF network. Activation function has to be stateless and has to support derivative calculation.");
+                throw new ArgumentException($"Specified OutputActivationCfg can't be used in FF network. Activation function has to be stateless and has to support derivative calculation.", "OutputActivationCfg");
+            }
+            if (TrainerCfg == null)
+            {
+                throw new ArgumentNullException("TrainerCfg", "TrainerCfg can not be null.");
+            }
+            Type trainerType = TrainerCfg.GetType();
+            if (trainerType != typeof(QRDRegrTrainerSettings) &&
+                trainerType != typeof(RidgeRegrTrainerSettings) &&
+                trainerType != typeof(ElasticRegrTrainerSettings) &&
+                trainerType != typeof(RPropTrainerSettings)
+                )
+            {
+                throw new ArgumentException($"Unsupported TrainerCfg {trainerType.Name}.", "TrainerCfg");
+            }
+            if((HiddenLayersCfg.HiddenLayerCfgCollection.Count > 0 || OutputActivationCfg.GetType() != typeof(IdentitySettings)) &&
+               trainerType != typeof(RPropTrainerSettings)
+               )
+            {
+                throw new ArgumentException($"Improper type of trainer {trainerType.Name}. For FF having other than Identity output activation or containing hidden layers can be used only Resilient back propagation trainer.", "TrainerCfg");
             }
             return;
         }
 
-        //Methods
         /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>

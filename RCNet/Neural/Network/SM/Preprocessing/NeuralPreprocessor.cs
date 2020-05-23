@@ -24,12 +24,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         //Constants
         private const double MinPredictorValueDifference = 1e-6;
 
-        //Static attributes
-        /// <summary>
-        /// Input data will be normalized by feature filters to this range before the usage in the reservoirs
-        /// </summary>
-        private static readonly Interval _dataRange = new Interval(-1, 1);
-
         //Delegates
         /// <summary>
         /// Delegate of PreprocessingProgressChanged event handler.
@@ -124,7 +118,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                                                                     structCfg,
                                                                     reservoirInstanceCfg,
                                                                     InputEncoder,
-                                                                    _dataRange,
                                                                     rand
                                                                     );
                 ReservoirCollection.Add(reservoir);
@@ -349,7 +342,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         {
             if(OutputFeatureGeneralSwitchCollection == null)
             {
-                throw new Exception("Preprocessor is not initialized. Call InitializeAndPreprocessBundle method first.");
+                throw new InvalidOperationException($"Preprocessor is not initialized. Call InitializeAndPreprocessBundle method first.");
             }
             return PushExtInputVector(input, false);
         }
@@ -367,7 +360,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             //Check amount of input data
             if (BootCycles > 0 && inputBundle.InputVectorCollection.Count <= BootCycles)
             {
-                throw new Exception($"Insufficient number of input data instances. The number of instances must be greater than the number of boot cycles ({BootCycles.ToString(CultureInfo.InvariantCulture)}).");
+                throw new InvalidOperationException($"Insufficient number of input data instances. The number of instances must be greater than the number of boot cycles ({BootCycles.ToString(CultureInfo.InvariantCulture)}).");
             }
             //Reset reservoirs
             ResetReservoirs(true);
@@ -506,7 +499,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 sb.Append(leftMargin + $"Synapses" + Environment.NewLine);
                 foreach (ReservoirStat.SynapseStat synapseStat in srs.SynapseRole)
                 {
-                    sb.Append(leftMargin + $"    {synapseStat.Role.ToString()}: {((double)synapseStat.Count / (double)srs.Count).ToString(CultureInfo.InvariantCulture)} ({synapseStat.Count.ToString()})" + Environment.NewLine);
+                    sb.Append(leftMargin + $"    {synapseStat.Role}: {((double)synapseStat.Count / (double)srs.Count).ToString(CultureInfo.InvariantCulture)} ({synapseStat.Count})" + Environment.NewLine);
                     if (synapseStat.Count > 0)
                     {
                         sb.Append(leftMargin + $"       Distance: {StatLine(synapseStat.Distance)}" + Environment.NewLine);

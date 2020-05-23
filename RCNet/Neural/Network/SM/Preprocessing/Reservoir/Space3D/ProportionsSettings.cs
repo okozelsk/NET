@@ -100,21 +100,21 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Space3D
 
         //Methods
         /// <summary>
-        /// Checks validity
+        /// Checks consistency
         /// </summary>
-        private void Check()
+        protected override void Check()
         {
             if (DimX < 1)
             {
-                throw new Exception($"Invalid DimX {DimX.ToString(CultureInfo.InvariantCulture)}. DimX must be GE to 1.");
+                throw new ArgumentException($"Invalid DimX {DimX.ToString(CultureInfo.InvariantCulture)}. DimX must be GE to 1.", "DimX");
             }
             if (DimY < 1)
             {
-                throw new Exception($"Invalid DimY {DimY.ToString(CultureInfo.InvariantCulture)}. DimY must be GE to 1.");
+                throw new ArgumentException($"Invalid DimY {DimY.ToString(CultureInfo.InvariantCulture)}. DimY must be GE to 1.", "DimY");
             }
             if (DimZ < 1)
             {
-                throw new Exception($"Invalid DimZ {DimZ.ToString(CultureInfo.InvariantCulture)}. DimZ must be GE to 1.");
+                throw new ArgumentException($"Invalid DimZ {DimZ.ToString(CultureInfo.InvariantCulture)}. DimZ must be GE to 1.", "DimZ");
             }
             return;
         }

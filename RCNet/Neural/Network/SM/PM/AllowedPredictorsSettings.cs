@@ -104,13 +104,13 @@ namespace RCNet.Neural.Network.SM.PM
 
         //Methods
         /// <summary>
-        /// Checks validity
+        /// Checks consistency
         /// </summary>
-        private void Check()
+        protected override void Check()
         {
             if (AllowedPredictorCfgCollection.Count == 0)
             {
-                throw new Exception($"At least one allowed predictor configuration must be specified.");
+                throw new ArgumentException($"At least one allowed predictor configuration must be specified.", "AllowedPredictorCfgCollection");
             }
             //Uniqueness of predictor ID
             string[] names = new string[AllowedPredictorCfgCollection.Count];
@@ -119,7 +119,7 @@ namespace RCNet.Neural.Network.SM.PM
             {
                 if (names.Contains(AllowedPredictorCfgCollection[i].PredictorID.ToString()))
                 {
-                    throw new Exception($"Predictor {AllowedPredictorCfgCollection[i].PredictorID.ToString()} is not unique.");
+                    throw new ArgumentException($"Predictor {AllowedPredictorCfgCollection[i].PredictorID} is not unique.", "AllowedPredictorCfgCollection");
                 }
                 names[i] = AllowedPredictorCfgCollection[i].PredictorID.ToString();
             }

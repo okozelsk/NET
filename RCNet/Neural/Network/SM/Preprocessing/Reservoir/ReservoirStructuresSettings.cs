@@ -103,13 +103,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
 
         //Methods
         /// <summary>
-        /// Checks validity
+        /// Checks consistency
         /// </summary>
-        private void Check()
+        protected override void Check()
         {
             if (ReservoirStructureCfgCollection.Count == 0)
             {
-                throw new Exception($"At least one reservoir structure configuration must be specified.");
+                throw new ArgumentException($"At least one reservoir structure configuration must be specified.", "ReservoirStructureCfgCollection");
             }
             //Uniqueness
             string[] names = new string[ReservoirStructureCfgCollection.Count];
@@ -118,7 +118,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             {
                 if (names.Contains(ReservoirStructureCfgCollection[i].Name))
                 {
-                    throw new Exception($"Reservoir structure name {ReservoirStructureCfgCollection[i].Name} is not unique.");
+                    throw new ArgumentException($"Reservoir structure name {ReservoirStructureCfgCollection[i].Name} is not unique.", "ReservoirStructureCfgCollection");
                 }
                 names[i] = ReservoirStructureCfgCollection[i].Name;
             }
@@ -151,7 +151,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                     return i;
                 }
             }
-            throw new Exception($"Reservoir structure name {reservoirStructureName} not found.");
+            throw new InvalidOperationException($"Reservoir structure name {reservoirStructureName} not found.");
         }
 
         /// <summary>

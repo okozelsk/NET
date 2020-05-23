@@ -80,7 +80,7 @@ namespace RCNet.XmlTools
         /// </summary>
         private void XmlValidationCallback(object sender, ValidationEventArgs args)
         {
-            throw new Exception($"Validation error: {args.Message}");
+            throw new InvalidOperationException($"Validation error: {args.Message}");
         }
 
     }//DocValidator

@@ -97,7 +97,7 @@ namespace RCNet.Neural.Network.NonRecurrent
             //Check num of output values is 1
             if (trainingBundle.OutputVectorCollection[0].Length != 1)
             {
-                throw new Exception("Only single output value is allowed.");
+                throw new InvalidOperationException($"Only single output value is allowed.");
             }
             _trainingBundle = trainingBundle;
             _testingBundle = testingBundle;

@@ -115,13 +115,13 @@ namespace RCNet.Neural.Network.SM.PM
 
         //Methods
         /// <summary>
-        /// Checks validity
+        /// Checks consistency
         /// </summary>
-        private void Check()
+        protected override void Check()
         {
             if (ReadoutUnitName.Length == 0)
             {
-                throw new Exception($"Readout unit name can not be empty.");
+                throw new ArgumentException($"Readout unit name can not be empty.", "ReadoutUnitName");
             }
             return;
         }

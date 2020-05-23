@@ -131,17 +131,17 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
 
         //Methods
         /// <summary>
-        /// Checks validity
+        /// Checks consistency
         /// </summary>
-        private void Check()
+        protected override void Check()
         {
             if (Name.Length == 0)
             {
-                throw new Exception($"Name can not be empty.");
+                throw new ArgumentException($"Name can not be empty.", "Name");
             }
             if (StructureCfgName.Length == 0)
             {
-                throw new Exception($"Name of the reservoir structure configuration can not be empty.");
+                throw new ArgumentException($"Name of the reservoir structure configuration can not be empty.", "StructureCfgName");
             }
             return;
         }
@@ -156,7 +156,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         {
             if (StructureCfgName != reservoirStructureCfg.Name)
             {
-                throw new Exception($"Name of the reservoir structure configuration {StructureCfgName} is not equal to name of given reservoir structure configuration name {reservoirStructureCfg.Name}.");
+                throw new InvalidOperationException($"Name of the reservoir structure configuration {StructureCfgName} is not equal to name of given reservoir structure configuration name {reservoirStructureCfg.Name}.");
             }
             foreach (InputConnSettings inputConnCfg in InputConnsCfg.ConnCfgCollection)
             {

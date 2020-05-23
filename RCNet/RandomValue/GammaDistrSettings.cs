@@ -84,15 +84,18 @@ namespace RCNet.RandomValue
 
 
         //Methods
-        private void Check()
+        /// <summary>
+        /// Checks consistency
+        /// </summary>
+        protected override void Check()
         {
             if (Alpha <= 0)
             {
-                throw new Exception($"Incorrect Alpha ({Alpha.ToString(CultureInfo.InvariantCulture)}) value. Alpha must be GT 0.");
+                throw new ArgumentException($"Incorrect Alpha ({Alpha.ToString(CultureInfo.InvariantCulture)}) value. Alpha must be GT 0.", "Alpha");
             }
             if (Beta <= 0)
             {
-                throw new Exception($"Incorrect Beta ({Beta.ToString(CultureInfo.InvariantCulture)}) value. Beta must be GT 0.");
+                throw new ArgumentException($"Incorrect Beta ({Beta.ToString(CultureInfo.InvariantCulture)}) value. Beta must be GT 0.", "Beta");
             }
             return;
         }
