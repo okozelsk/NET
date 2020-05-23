@@ -1,20 +1,19 @@
-﻿using System;
-using System.Linq;
-using System.Collections.Generic;
-using System.Collections.Concurrent;
-using System.Threading.Tasks;
+﻿using RCNet.Extensions;
 using RCNet.MathTools;
 using RCNet.MathTools.MatrixMath;
-using RCNet.Extensions;
-using RCNet.RandomValue;
+using RCNet.MathTools.Probability;
 using RCNet.Neural.Activation;
 using RCNet.Neural.Network.SM.Preprocessing.Input;
 using RCNet.Neural.Network.SM.Preprocessing.Neuron;
 using RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup;
-using RCNet.MathTools.Probability;
+using RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS;
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
 {
@@ -34,17 +33,17 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// Reservoir's structure configuration
         /// </summary>
         public ReservoirStructureSettings StructureCfg { get; }
-        
+
         /// <summary>
         /// Reservoir's instance configuration
         /// </summary>
         public ReservoirInstanceSettings InstanceCfg { get; }
-        
+
         /// <summary>
         /// Neurons providing predictors
         /// </summary>
         public List<INeuron> PredictingNeuronCollection { get; }
-        
+
         /// <summary>
         /// Number of reservoir's predictors
         /// </summary>
@@ -165,7 +164,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                         }
                     }
                     //Readout
-                    if(predictorsCfg.NumOfEnabledPredictors > 0)
+                    if (predictorsCfg.NumOfEnabledPredictors > 0)
                     {
                         for (int i = 0; i < ngs.Count; i++)
                         {
@@ -244,7 +243,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
 
             //-----------------------------------------------------------------------------
             //Input connections
-            foreach(InputConnSettings inputConnCfg in InstanceCfg.InputConnsCfg.ConnCfgCollection)
+            foreach (InputConnSettings inputConnCfg in InstanceCfg.InputConnsCfg.ConnCfgCollection)
             {
                 ConnectInput(inputEncoder, inputConnCfg, rand);
             }
@@ -254,7 +253,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             for (int poolID = 0; poolID < _poolNeuronCollection.Count; poolID++)
             {
                 //Apply defined schemas
-                foreach(object connSchema in StructureCfg.PoolsCfg.PoolCfgCollection[poolID].InterconnectionCfg.SchemaCfgCollection)
+                foreach (object connSchema in StructureCfg.PoolsCfg.PoolCfgCollection[poolID].InterconnectionCfg.SchemaCfgCollection)
                 {
                     if (connSchema.GetType() == typeof(RandomSchemaSettings))
                     {
@@ -304,7 +303,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             //-----------------------------------------------------------------------------
             //Weights adjustment
             //Analog neurons
-            if(_numOfAnalogNeurons > 0)
+            if (_numOfAnalogNeurons > 0)
             {
                 //Analog input
                 AdjustAnalogInputStrength();
@@ -338,7 +337,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         public int GetDefaultBootCycles()
         {
             int bootCycles = StructureCfg.LargestInterconnectedAreaSize;
-            foreach(HiddenNeuron neuron in _reservoirNeuronCollection)
+            foreach (HiddenNeuron neuron in _reservoirNeuronCollection)
             {
                 bootCycles = Math.Max(bootCycles, neuron.RequiredHistLength);
             }
@@ -518,7 +517,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                 catch
                 {
                     //Connection already exists
-                    if(replace)
+                    if (replace)
                     {
                         connectionsCollection[synapse.TargetNeuron.Location.ReservoirFlatIdx][synapse.SourceNeuron.Location.ReservoirFlatIdx] = synapse;
                         return true;
@@ -552,7 +551,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                                                                                            where (neuron.TypeOfActivation == ActivationType.Analog && inputConnCfg.AnalogTargetDensity > 0)
                                                                                            select neuron
                                                                                            );
-                
+
             //Loop through target activation scope
             for (int activationType = 0; activationType < targetNeuronsByActivation.Length; activationType++)
             {
@@ -569,7 +568,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                 }
                 if (targetNeurons.Count > 0)
                 {
-                    if (inputConnCfg.SignalingRestriction == NeuronCommon.NeuronSignalingRestrictionType.AnalogOnly || 
+                    if (inputConnCfg.SignalingRestriction == NeuronCommon.NeuronSignalingRestrictionType.AnalogOnly ||
                         (activationType == (int)ActivationType.Analog && inputConnCfg.SignalingRestriction == NeuronCommon.NeuronSignalingRestrictionType.NoRestriction))
                     {
                         //Analog synapses
@@ -610,7 +609,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                                 SetInterconnection(_neuronInputConnectionsCollection, synapse);
                             }//for i
                             //Increment combination index
-                            if(++cmbIdx == plannedConnCmbIdxs.Count)
+                            if (++cmbIdx == plannedConnCmbIdxs.Count)
                             {
                                 //Restart from the beginning
                                 cmbIdx = 0;
@@ -649,8 +648,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// <param name="avgDistance">Average distance to be achieved</param>
         /// <param name="numOfSynapses">Number of source neurons to be connected</param>
         /// <param name="rand">Random object</param>
-        /// <param name="allowSelfConnection">Specifies if to allow target neuron to be connected by itself</param>
-        /// <param name="replace">Specifies if to replace existing connections</param>
+        /// <param name="allowSelfConnection">Specifies whether to allow target neuron to be connected by itself</param>
+        /// <param name="replace">Specifies whether to replace existing connections</param>
         private void ConnectNeuron(HiddenNeuron targetNeuron,
                                    List<HiddenNeuron> sourceNeurons,
                                    RelShareSelector<Synapse.SynRole> roleSelector,
@@ -688,7 +687,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                         //Override role to ensure at least one synapse having unused role
                         foreach (Synapse.SynRole elemRole in roleSelector.Elements)
                         {
-                            if(counts[(int)elemRole] == 0)
+                            if (counts[(int)elemRole] == 0)
                             {
                                 role = elemRole;
                                 break;
@@ -785,7 +784,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             for (int repetition = 1; repetition <= schemaCfg.Repetitions; repetition++)
             {
                 int chainLength = (int)Math.Round(schemaCfg.Ratio * chainNeurons.Count);
-                if(chainLength < 2)
+                if (chainLength < 2)
                 {
                     //Nothing to do
                     return;
@@ -794,7 +793,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                 //Collect neurons to be chained
                 List<HiddenNeuron> chainNeuronCollection = new List<HiddenNeuron>(chainNeurons);
                 rand.Shuffle(chainNeuronCollection);
-                if(chainLength < chainNeuronCollection.Count)
+                if (chainLength < chainNeuronCollection.Count)
                 {
                     //Cut the list according to chainLength
                     chainNeuronCollection.RemoveRange(chainLength, chainNeuronCollection.Count - chainLength);
@@ -802,17 +801,17 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                 //////////////////////////////////////////////////////////////////////////////////////
                 //Create connection pairs
                 List<Tuple<HiddenNeuron, HiddenNeuron>> connPairs = new List<Tuple<HiddenNeuron, HiddenNeuron>>(chainNeuronCollection.Count * 2);
-                for(int i = 0; i < chainNeuronCollection.Count - 1; i++)
+                for (int i = 0; i < chainNeuronCollection.Count - 1; i++)
                 {
                     connPairs.Add(new Tuple<HiddenNeuron, HiddenNeuron>(chainNeuronCollection[i], chainNeuronCollection[i + 1]));
                 }
-                if(schemaCfg.Circle)
+                if (schemaCfg.Circle)
                 {
                     connPairs.Add(new Tuple<HiddenNeuron, HiddenNeuron>(chainNeuronCollection[chainNeuronCollection.Count - 1], chainNeuronCollection[0]));
                 }
                 //////////////////////////////////////////////////////////////////////////////////////
                 //Connect connection pairs
-                foreach(Tuple<HiddenNeuron, HiddenNeuron> connPair in connPairs)
+                foreach (Tuple<HiddenNeuron, HiddenNeuron> connPair in connPairs)
                 {
                     //Establish connection
                     ConnectNeuron(connPair.Item2, new List<HiddenNeuron>() { connPair.Item1 }, spikingRoleSelector, -1, 1, rand, false, schemaCfg.ReplaceExistingConnections);
@@ -933,7 +932,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         public int CopyPredictorsTo(double[] buffer, int fromOffset)
         {
             int offset = fromOffset;
-            foreach(INeuron neuron in PredictingNeuronCollection)
+            foreach (INeuron neuron in PredictingNeuronCollection)
             {
                 offset += neuron.CopyPredictorsTo(buffer, offset);
             }

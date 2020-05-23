@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RCNet.Extensions;
+﻿using RCNet.Extensions;
+using System;
 
 namespace RCNet.MathTools.VectorMath
 {
@@ -13,7 +9,7 @@ namespace RCNet.MathTools.VectorMath
     [Serializable]
     public class Vector
     {
-        private double[] _data;
+        private readonly double[] _data;
 
         /// <summary>
         /// Creates an initialized instance
@@ -29,7 +25,7 @@ namespace RCNet.MathTools.VectorMath
         /// Creates an initialized instance
         /// </summary>
         /// <param name="data">Source data</param>
-        /// <param name="copy">Specifies if to create copy of the data or adopt given instance</param>
+        /// <param name="copy">Specifies whether to create copy of the data or adopt given instance</param>
         public Vector(double[] data, bool copy = true)
         {
             _data = copy ? (double[])data.Clone() : data;
@@ -52,7 +48,7 @@ namespace RCNet.MathTools.VectorMath
         /// Vector length
         /// </summary>
         public int Length { get { return _data.Length; } }
-        
+
         /// <summary>
         /// Vector data
         /// </summary>
@@ -99,7 +95,7 @@ namespace RCNet.MathTools.VectorMath
         public static Vector operator +(Vector v1, Vector v2)
         {
             Vector result = v1.Clone();
-            for(int i = 0; i < v2._data.Length; i++)
+            for (int i = 0; i < v2._data.Length; i++)
             {
                 result._data[i] += v2._data[i];
             }

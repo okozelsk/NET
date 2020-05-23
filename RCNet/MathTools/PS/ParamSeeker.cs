@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RCNet.MathTools;
 
 namespace RCNet.MathTools.PS
 {
@@ -31,9 +26,9 @@ namespace RCNet.MathTools.PS
         /// <param name="settings">Configuration parameters</param>
         public ParamSeeker(ParamSeekerSettings settings)
         {
-            if(settings.NumOfSubIntervals == ParamSeekerSettings.AutoSubIntervalsNum)
+            if (settings.NumOfSubIntervals == ParamSeekerSettings.AutoSubIntervalsNum)
             {
-                if(settings.Min == settings.Max)
+                if (settings.Min == settings.Max)
                 {
                     _numOfIntervalInnerPoints = 0;
                     _testCaseCollection = new TestCase[1];
@@ -53,7 +48,7 @@ namespace RCNet.MathTools.PS
                 _numOfIntervalInnerPoints = settings.NumOfSubIntervals;
                 _testCaseCollection = new TestCase[2 + _numOfIntervalInnerPoints];
             }
-            for(int i = 0; i < _testCaseCollection.Length; i++)
+            for (int i = 0; i < _testCaseCollection.Length; i++)
             {
                 _testCaseCollection[i] = new TestCase() { ParamValue = double.NaN, Error = double.NaN };
             }
@@ -91,7 +86,7 @@ namespace RCNet.MathTools.PS
             _testCaseCollection[_testCaseCollection.Length - 1].ParamValue = max;
             _testCaseCollection[_testCaseCollection.Length - 1].Error = maxErr;
             double paramValue = min + stepSize;
-            for(int i = 1; i < _testCaseCollection.Length - 1; i++)
+            for (int i = 1; i < _testCaseCollection.Length - 1; i++)
             {
                 _testCaseCollection[i] = new TestCase { ParamValue = paramValue, Error = double.NaN };
                 paramValue += stepSize;
@@ -156,7 +151,7 @@ namespace RCNet.MathTools.PS
             //Attribute properties
             public double ParamValue { get; set; }
             public double Error { get; set; }
-            
+
             //Properties
             public bool Pending { get { return (double.IsNaN(Error)); } }
             public bool Done { get { return !Pending; } }

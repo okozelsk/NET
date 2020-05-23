@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Globalization;
-using System.Xml.Linq;
-using System.Reflection;
-using RCNet.Extensions;
-using RCNet.XmlTools;
-using RCNet.RandomValue;
+﻿using RCNet.Neural.Network.SM.PM;
 using RCNet.Neural.Network.SM.Preprocessing;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir;
 using RCNet.Neural.Network.SM.Readout;
-using RCNet.Neural.Network.SM.PM;
+using System;
+using System.Globalization;
+using System.Linq;
+using System.Xml.Linq;
 
 namespace RCNet.Neural.Network.SM
 {
@@ -36,12 +31,12 @@ namespace RCNet.Neural.Network.SM
         /// Configuration of the neural preprocessor
         /// </summary>
         public NeuralPreprocessorSettings NeuralPreprocessorCfg { get; }
-        
+
         /// <summary>
         /// Configuration of the readout layer
         /// </summary>
         public ReadoutLayerSettings ReadoutLayerCfg { get; }
-        
+
         /// <summary>
         /// Configuration of mapper of predictors to readout units
         /// </summary>
@@ -81,15 +76,15 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         /// <param name="source">Source instance</param>
         public StateMachineSettings(StateMachineSettings source)
-            :this(source.NeuralPreprocessorCfg, source.ReadoutLayerCfg, source.MapperCfg, source.RandomizerSeek)
+            : this(source.NeuralPreprocessorCfg, source.ReadoutLayerCfg, source.MapperCfg, source.RandomizerSeek)
         {
             return;
         }
 
         /// <summary>
-        /// Creates the instance and initializes it from given xml element.
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml data containing settings</param>
+        /// <param name="elem">Xml element containing the initialization settings</param>
         public StateMachineSettings(XElement elem)
         {
             //Validation
@@ -129,9 +124,9 @@ namespace RCNet.Neural.Network.SM
             {
                 throw new ArgumentException($"Mapper can not be specified when neural preprocessor is not defined.", "MapperCfg");
             }
-            if(MapperCfg != null)
+            if (MapperCfg != null)
             {
-                foreach(ReadoutUnitMapSettings map in MapperCfg.MapCfgCollection)
+                foreach (ReadoutUnitMapSettings map in MapperCfg.MapCfgCollection)
                 {
                     ReadoutUnitSettings rus = ReadoutLayerCfg.ReadoutUnitsCfg.GetReadoutunitCfg(map.ReadoutUnitName);
                     //Pools
@@ -145,12 +140,12 @@ namespace RCNet.Neural.Network.SM
                         }
                     }
                     //Input fields
-                    if(map.AllowedInputFieldsCfg != null)
+                    if (map.AllowedInputFieldsCfg != null)
                     {
                         string[] routedFieldNames = NeuralPreprocessorCfg.InputEncoderCfg.GetRoutedFieldNames().ToArray();
                         foreach (AllowedInputFieldSettings aifs in map.AllowedInputFieldsCfg.AllowedInputFieldCfgCollection)
                         {
-                            if(Array.IndexOf(routedFieldNames, aifs.Name) == -1)
+                            if (Array.IndexOf(routedFieldNames, aifs.Name) == -1)
                             {
                                 throw new ArgumentException($"Specified input field {aifs.Name} to be allowed for readout unit {map.ReadoutUnitName} is not among fields routed to readout layer.", "MapperCfg");
                             }
@@ -174,12 +169,12 @@ namespace RCNet.Neural.Network.SM
         /// Generates xml element containing the settings.
         /// </summary>
         /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             XElement rootElem = new XElement(rootElemName);
-            if(!suppressDefaults || !IsDefaultRandomizerSeek)
+            if (!suppressDefaults || !IsDefaultRandomizerSeek)
             {
                 rootElem.Add(new XAttribute("randomizerSeek", RandomizerSeek.ToString(CultureInfo.InvariantCulture)));
             }
@@ -188,7 +183,7 @@ namespace RCNet.Neural.Network.SM
                 rootElem.Add(NeuralPreprocessorCfg.GetXml(suppressDefaults));
             }
             rootElem.Add(ReadoutLayerCfg.GetXml(suppressDefaults));
-            if(MapperCfg != null)
+            if (MapperCfg != null)
             {
                 rootElem.Add(MapperCfg.GetXml(suppressDefaults));
             }
@@ -199,7 +194,7 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// Generates default named xml element containing the settings.
         /// </summary>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(bool suppressDefaults)
         {

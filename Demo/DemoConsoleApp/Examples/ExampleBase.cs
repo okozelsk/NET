@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Demo.DemoConsoleApp.Log;
+﻿using Demo.DemoConsoleApp.Log;
 using RCNet.CsvTools;
 using RCNet.Neural.Data;
 using RCNet.Neural.Network.NonRecurrent;
 using RCNet.Neural.Network.SM;
 using RCNet.Neural.Network.SM.Preprocessing;
 using RCNet.Neural.Network.SM.Preprocessing.Input;
+using System;
 
 namespace Demo.DemoConsoleApp.Examples
 {
@@ -107,7 +103,7 @@ namespace Demo.DemoConsoleApp.Examples
         protected void TrainStateMachine(StateMachine stateMachine, string trainingDataFileName, out double[] predictionInputVector)
         {
             //Check NeuralPreprocessor is configured
-            if(stateMachine.Config.NeuralPreprocessorCfg == null)
+            if (stateMachine.Config.NeuralPreprocessorCfg == null)
             {
                 throw new InvalidOperationException($"Can't train StateMachine. Neural preprocessor has to be configured.");
             }

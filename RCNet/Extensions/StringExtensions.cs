@@ -11,10 +11,10 @@ namespace RCNet.Extensions
         /// <summary>
         /// Parses double value. Function tries parsing with the InvariantCulture and if fails, tries the CurrentCulture.
         /// If fails both of them function throws an exception or returns the double.NaN value.
-        /// The behaviour depends on given arguments.
+        /// The behavior depends on given arguments.
         /// </summary>
         /// <param name="x">String</param>
-        /// <param name="throwEx">Specifies if to throw exception when parsing fails</param>
+        /// <param name="throwEx">Specifies whether to throw exception when parsing fails</param>
         /// <param name="exText">Exception text</param>
         public static double ParseDouble(this string x, bool throwEx, string exText = "")
         {
@@ -38,10 +38,10 @@ namespace RCNet.Extensions
         /// <summary>
         /// Parses DateTime value. Function tries parsing with the InvariantCulture and if fails, tries the CurrentCulture.
         /// If fails both of them function throws an exception or returns the DateTime.MinValue.
-        /// The behaviour depends on given arguments.
+        /// The behavior depends on given arguments.
         /// </summary>
         /// <param name="x">String</param>
-        /// <param name="throwEx">Specifies if to throw exception when parsing fails</param>
+        /// <param name="throwEx">Specifies whether to throw exception when parsing fails</param>
         /// <param name="exText">Exception text</param>
         public static DateTime ParseDateTime(this string x, bool throwEx, string exText = "")
         {
@@ -65,10 +65,10 @@ namespace RCNet.Extensions
         /// <summary>
         /// Parses int value. Function tries parsing with the InvariantCulture and if fails, tries the CurrentCulture.
         /// If fails both of them function throws an exception or returns the int.MinValue.
-        /// The behaviour depends on given arguments.
+        /// The behavior depends on given arguments.
         /// </summary>
         /// <param name="x">String</param>
-        /// <param name="throwEx">Specifies if to throw exception when parsing fails</param>
+        /// <param name="throwEx">Specifies whether to throw exception when parsing fails</param>
         /// <param name="exText">Exception text</param>
         public static int ParseInt(this string x, bool throwEx, string exText = "")
         {
@@ -92,10 +92,10 @@ namespace RCNet.Extensions
         /// <summary>
         /// Parses bool value. Function tries parsing with the InvariantCulture and if fails, tries the CurrentCulture.
         /// If fails both of them function throws an exception or returns false.
-        /// The behaviour depends on given arguments.
+        /// The behavior depends on given arguments.
         /// </summary>
         /// <param name="x">String</param>
-        /// <param name="throwEx">Specifies if to throw exception when parsing fails</param>
+        /// <param name="throwEx">Specifies whether to throw exception when parsing fails</param>
         /// <param name="exText">Exception text</param>
         public static bool ParseBool(this string x, bool throwEx, string exText = "")
         {

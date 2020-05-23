@@ -1,18 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RCNet.Extensions;
+﻿using RCNet.Extensions;
 using RCNet.MathTools;
-using RCNet.Queue;
 using RCNet.Neural.Activation;
 using RCNet.Neural.Network.SM.Preprocessing.Neuron;
+using RCNet.Queue;
+using System;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
 {
     /// <summary>
-    /// Class covers the behaviour of synapse.
+    /// Class covers the behavior of synapse.
     /// Supports signal delay and short-term plasticity.
     /// </summary>
     [Serializable]
@@ -137,11 +133,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
             if (TargetNeuron.TypeOfActivation == ActivationType.Spiking)
             {
                 //Spiking target
-                if(role == SynRole.Input)
+                if (role == SynRole.Input)
                 {
                     DelayMethod = synapseCfg.SpikingTargetCfg.InputSynCfg.DelayMethod;
                     _maxDelay = synapseCfg.SpikingTargetCfg.InputSynCfg.MaxDelay;
-                    if(SourceNeuron.TypeOfActivation == ActivationType.Analog)
+                    if (SourceNeuron.TypeOfActivation == ActivationType.Analog)
                     {
                         //Analog source
                         Weight = rand.NextDouble(synapseCfg.SpikingTargetCfg.InputSynCfg.AnalogSourceCfg.WeightCfg);
@@ -155,7 +151,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
                                                                                  );
                     }
                 }
-                else if(role == SynRole.Excitatory)
+                else if (role == SynRole.Excitatory)
                 {
                     DelayMethod = synapseCfg.SpikingTargetCfg.ExcitatorySynCfg.DelayMethod;
                     _maxDelay = synapseCfg.SpikingTargetCfg.ExcitatorySynCfg.MaxDelay;
@@ -173,7 +169,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
                                                                                  );
                     }
                 }
-                else if(role == SynRole.Inhibitory)
+                else if (role == SynRole.Inhibitory)
                 {
                     DelayMethod = synapseCfg.SpikingTargetCfg.InhibitorySynCfg.DelayMethod;
                     _maxDelay = synapseCfg.SpikingTargetCfg.InhibitorySynCfg.MaxDelay;
@@ -193,7 +189,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
                 }
                 else
                 {
-                    throw new ArgumentException($"Invalid synapse role {role.ToString()}.", "role");
+                    throw new ArgumentException($"Invalid synapse role {role}.", "role");
                 }
             }
             else
@@ -238,7 +234,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
                 }
                 else
                 {
-                    throw new ArgumentException($"Invalid synapse role {role.ToString()}.", "role");
+                    throw new ArgumentException($"Invalid synapse role {role}.", "role");
                 }
             }
 

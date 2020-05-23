@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
-using RCNet.MathTools;
 
 namespace RCNet.Extensions
 {
@@ -12,7 +10,7 @@ namespace RCNet.Extensions
     {
         //Methods
         /// <summary>
-        /// Fills array with the indexes 0...(Array.Length - 1)
+        /// Fills given array with the indexes 0...(Array.Length - 1)
         /// </summary>
         /// <param name="array"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -26,7 +24,7 @@ namespace RCNet.Extensions
         }
 
         /// <summary>
-        /// Fills array with randomly shuffled indexes 0...(ArrayLength - 1)
+        /// Fills given array with randomly shuffled indexes 0...(ArrayLength - 1)
         /// </summary>
         /// <param name="rand">Random generator to be used</param>
         /// <param name="array"></param>
@@ -39,7 +37,7 @@ namespace RCNet.Extensions
         }
 
         /// <summary>
-        /// Returns index of min value within given int array
+        /// Returns index of the min value within an int array
         /// </summary>
         /// <param name="array"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -49,7 +47,7 @@ namespace RCNet.Extensions
             int minIndex = 0;
             for (int i = 1; i < array.Length; i++)
             {
-                if(array[i] < minValue)
+                if (array[i] < minValue)
                 {
                     minValue = array[i];
                     minIndex = i;
@@ -59,7 +57,7 @@ namespace RCNet.Extensions
         }
 
         /// <summary>
-        /// Returns index of max value within given int array
+        /// Returns index of the max value within an int array
         /// </summary>
         /// <param name="array"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -79,7 +77,7 @@ namespace RCNet.Extensions
         }
 
         /// <summary>
-        /// Returns maximum value in the array
+        /// Returns the max value within an array
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int Max(this int[] array)
@@ -96,7 +94,7 @@ namespace RCNet.Extensions
         }
 
         /// <summary>
-        /// Returns minimum value in the array
+        /// Returns the min value within an array
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int Min(this int[] array)
@@ -113,7 +111,7 @@ namespace RCNet.Extensions
         }
 
         /// <summary>
-        /// Returns summed values in the array
+        /// Returns sum of values within an array
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int Sum(this int[] array)

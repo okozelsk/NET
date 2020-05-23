@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
 
 namespace RCNet.RandomValue
@@ -68,7 +64,7 @@ namespace RCNet.RandomValue
         /// <summary>
         /// Creates an instance and initializes it from given xml element.
         /// </summary>
-        /// <param name="elem"> Xml data containing settings.</param>
+        /// <param name="elem"> Xml element containing the initialization settings.</param>
         public GaussianDistrSettings(XElement elem)
         {
             //Validation
@@ -117,12 +113,12 @@ namespace RCNet.RandomValue
         /// Generates xml element containing the settings.
         /// </summary>
         /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             XElement rootElem = new XElement(rootElemName);
-            if(!suppressDefaults || Mean != DefaultMeanValue)
+            if (!suppressDefaults || Mean != DefaultMeanValue)
             {
                 rootElem.Add(new XAttribute("mean", Mean.ToString(CultureInfo.InvariantCulture)));
             }
@@ -137,7 +133,7 @@ namespace RCNet.RandomValue
         /// <summary>
         /// Generates default named xml element containing the settings.
         /// </summary>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(bool suppressDefaults)
         {

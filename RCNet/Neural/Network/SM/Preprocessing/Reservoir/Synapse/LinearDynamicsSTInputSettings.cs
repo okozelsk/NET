@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using System.Globalization;
 using System.Xml.Linq;
 
@@ -42,7 +39,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         /// <param name="beta">Beta argument in the linear expression efficacy = alpha * (spike - beta)</param>
         /// <param name="initialEfficacy">Synapse initial efficacy</param>
         public LinearDynamicsSTInputSettings(double alpha = DefaultAlpha, double beta = DefaultBeta, double initialEfficacy = DefaultInitialEfficacy)
-            :base(alpha, beta, initialEfficacy)
+            : base(alpha, beta, initialEfficacy)
         {
             return;
         }
@@ -52,17 +49,17 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         /// </summary>
         /// <param name="source">Source instance</param>
         public LinearDynamicsSTInputSettings(LinearDynamicsSTInputSettings source)
-            :base(source)
+            : base(source)
         {
             return;
         }
 
         /// <summary>
-        /// Creates the instance and initialize it from given xml element.
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml data containing settings</param>
+        /// <param name="elem">Xml element containing the initialization settings</param>
         public LinearDynamicsSTInputSettings(XElement elem)
-            :base(elem, XsdTypeName)
+            : base(elem, XsdTypeName)
         {
             return;
         }
@@ -121,7 +118,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         /// Generates xml element containing the settings.
         /// </summary>
         /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
@@ -145,7 +142,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         /// <summary>
         /// Generates default named xml element containing the settings.
         /// </summary>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(bool suppressDefaults)
         {

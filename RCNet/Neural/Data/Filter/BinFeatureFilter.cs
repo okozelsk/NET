@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RCNet.Extensions;
+﻿using RCNet.Extensions;
 using RCNet.MathTools;
+using System;
 
 namespace RCNet.Neural.Data.Filter
 {
@@ -16,14 +12,14 @@ namespace RCNet.Neural.Data.Filter
     {
         //Static members
         private static readonly Interval _range = new Interval(0d, 1d);
-        
+
         //Constructor
         /// <summary>
         /// Instantiates an initialized instance
         /// </summary>
         /// <param name="outputRange">Filter's output range</param>
         public BinFeatureFilter(Interval outputRange)
-            :base(FeatureType.Binary, outputRange)
+            : base(FeatureType.Binary, outputRange)
         {
             return;
         }
@@ -62,7 +58,7 @@ namespace RCNet.Neural.Data.Filter
         /// <param name="sample">Feature sample value</param>
         public override void Update(double sample)
         {
-            if(sample != _range.Min && sample != _range.Max)
+            if (sample != _range.Min && sample != _range.Max)
             {
                 throw new ArgumentException($"Sample value {sample} is not allowed. Sample value must be {_range.Min} or {_range.Max}.", "sample");
             }

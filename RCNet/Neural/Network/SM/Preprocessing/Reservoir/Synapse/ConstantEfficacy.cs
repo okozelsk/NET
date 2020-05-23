@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
+﻿namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
 {
     /// <summary>
     /// Implements constant efficacy computer
@@ -13,7 +7,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
     {
         //Attributes
         private readonly ConstantDynamicsSettings _dynamicsCfg;
-        
+
         //Constructor
         /// <summary>
         /// Creates an initialized instance

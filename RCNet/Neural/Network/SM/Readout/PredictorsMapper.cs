@@ -1,9 +1,6 @@
-﻿using System;
+﻿using RCNet.Extensions;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RCNet.Extensions;
 
 namespace RCNet.Neural.Network.SM.Readout
 {
@@ -201,6 +198,6 @@ namespace RCNet.Neural.Network.SM.Readout
             }
 
         }//ReadoutUnitMap
-    
+
     }//PredictorsMapper
 }//Namespace

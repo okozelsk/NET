@@ -1,25 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.IO;
-using RCNet.RandomValue;
-using RCNet.Extensions;
+﻿using RCNet.Neural.Activation;
 using RCNet.Neural.Data.Filter;
-using RCNet.Neural.Activation;
-using RCNet.Neural.Network.NonRecurrent.FF;
-using RCNet.Neural.Network.SM.Preprocessing.Input;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool;
-using RCNet.Neural.Network.SM.Preprocessing.Neuron;
-using RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Space3D;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS;
-using RCNet.Neural.Network.SM.Preprocessing;
-using RCNet.Neural.Network.SM.Readout;
 using RCNet.Neural.Network.SM;
+using RCNet.Neural.Network.SM.Preprocessing.Input;
+using RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor;
+using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup;
+using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Space3D;
+using RCNet.Neural.Network.SM.Readout;
+using System;
 
 namespace Demo.DemoConsoleApp.Examples
 {

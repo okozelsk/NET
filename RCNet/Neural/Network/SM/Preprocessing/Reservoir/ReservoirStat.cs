@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RCNet.MathTools;
+﻿using RCNet.MathTools;
 using RCNet.Neural.Network.SM.Preprocessing.Neuron;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS;
+using System;
+using System.Collections.Generic;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
 {
@@ -66,7 +63,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             TotalNumOfNeurons = numOfNeurons;
             TotalNumOfPredictors = numOfPredictors;
             Pools = new List<PoolStat>();
-            foreach(PoolSettings poolCfg in structCfg.PoolsCfg.PoolCfgCollection)
+            foreach (PoolSettings poolCfg in structCfg.PoolsCfg.PoolCfgCollection)
             {
                 Pools.Add(new PoolStat(poolCfg));
             }

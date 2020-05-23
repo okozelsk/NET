@@ -1,12 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 using System.Globalization;
-using System.Reflection;
-using RCNet.XmlTools;
+using System.Xml.Linq;
 
 namespace RCNet.Neural.Network.NonRecurrent.FF
 {
@@ -98,7 +92,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
                                     double positiveEta = DefaultPositiveEta,
                                     double negativeEta = DefaultNegativeEta,
                                     double iniDelta = DefaultIniDelta,
-                                    double minDelta= DefaultMinDelta,
+                                    double minDelta = DefaultMinDelta,
                                     double maxDelta = DefaultMaxDelta
                                     )
         {
@@ -132,8 +126,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         }
 
         /// <summary>
-        /// Creates the instance and initializes it from given xml element.
-        /// Content of xml element is always validated against the xml schema.
+        /// Creates an initialized instance.
         /// </summary>
         /// <param name="elem">Xml data containing resilient propagation trainer settings</param>
         public RPropTrainerSettings(XElement elem)
@@ -227,7 +220,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             {
                 throw new ArgumentException($"Invalid MinDelta {MaxDelta.ToString(CultureInfo.InvariantCulture)}. MaxDelta must be GE to 0.", "MaxDelta");
             }
-            if(MaxDelta <= MinDelta)
+            if (MaxDelta <= MinDelta)
             {
                 throw new ArgumentException($"Invalid MinDelta or MaxDelta. MaxDelta must be GT MinDelta.", "MaxDelta/MinDelta");
             }
@@ -246,7 +239,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         /// Generates xml element containing the settings.
         /// </summary>
         /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
@@ -283,7 +276,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         /// <summary>
         /// Generates default named xml element containing the settings.
         /// </summary>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(bool suppressDefaults)
         {

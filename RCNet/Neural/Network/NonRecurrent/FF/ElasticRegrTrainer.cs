@@ -1,14 +1,10 @@
-﻿using System;
+﻿using RCNet.Extensions;
+using RCNet.Neural.Activation;
+using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
-using RCNet.Extensions;
-using RCNet.Neural.Activation;
-using RCNet.MathTools.MatrixMath;
-using RCNet.MathTools.VectorMath;
-using RCNet.MathTools.PS;
 using System.Threading.Tasks;
-using System.Collections.Concurrent;
-using RCNet.MathTools;
 
 namespace RCNet.Neural.Network.NonRecurrent.FF
 {
@@ -123,7 +119,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         private double ComputeLinOutput(int dataRowIdx, double[] weights)
         {
             double output = weights[0];
-            for(int i = 0; i < _net.NumOfInputValues; i++)
+            for (int i = 0; i < _net.NumOfInputValues; i++)
             {
                 output += weights[i + 1] * _inputVectorCollection[dataRowIdx][i];
             }
@@ -132,13 +128,13 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
 
         private double SoftThreshold(double x)
         {
-            if(_gamma < Math.Abs(x))
+            if (_gamma < Math.Abs(x))
             {
-                if(x > 0)
+                if (x > 0)
                 {
                     return x - _gamma;
                 }
-                else if(x < 0)
+                else if (x < 0)
                 {
                     return x + _gamma;
                 }
@@ -191,7 +187,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
                     }
                 });
                 //New bias finalization
-                for(int i = 0; i < _parallelRanges.Count; i++)
+                for (int i = 0; i < _parallelRanges.Count; i++)
                 {
                     newBias += parallelSubResults1[i];
                 }
@@ -199,7 +195,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
                 weights[0] = newBias;
                 //Update computed outputs if bias has changed
                 double biasDifference = newBias - oldBias;
-                if(biasDifference != 0)
+                if (biasDifference != 0)
                 {
                     Parallel.For(0, _parallelRanges.Count, rangeIdx =>
                     {
@@ -210,7 +206,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
                     });
                 }
                 //Optimization
-                for(int inputValueIdx = 0; inputValueIdx < _net.NumOfInputValues; inputValueIdx++)
+                for (int inputValueIdx = 0; inputValueIdx < _net.NumOfInputValues; inputValueIdx++)
                 {
                     //Fit and denominator computation
                     double oldWeight = weights[1 + inputValueIdx];
@@ -239,7 +235,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
                     denominator /= _outputVectorCollection.Count;
                     denominator += _settings.Lambda * (1d - _settings.Alpha);
                     double newWeight = 0;
-                    if(denominator != 0)
+                    if (denominator != 0)
                     {
                         newWeight = SoftThreshold(fit) / denominator;
                     }
@@ -247,7 +243,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
                     weights[1 + inputValueIdx] = newWeight;
                     //Update computed values
                     double weightsDiff = newWeight - oldWeight;
-                    if(weightsDiff != 0)
+                    if (weightsDiff != 0)
                     {
                         Parallel.For(0, _parallelRanges.Count, rangeIdx =>
                         {

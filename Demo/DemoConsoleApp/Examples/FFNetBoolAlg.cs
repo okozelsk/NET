@@ -1,15 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.IO;
-using RCNet.RandomValue;
-using RCNet.Extensions;
-using RCNet.Neural.Data.Filter;
-using RCNet.Neural.Activation;
-using RCNet.Neural.Network.NonRecurrent.FF;
+﻿using RCNet.Neural.Activation;
 using RCNet.Neural.Data;
+using RCNet.Neural.Network.NonRecurrent.FF;
+using System;
 using System.Globalization;
 
 namespace Demo.DemoConsoleApp.Examples
@@ -27,7 +19,7 @@ namespace Demo.DemoConsoleApp.Examples
         private VectorBundle CreateTrainingData()
         {
             VectorBundle trainingData = new VectorBundle();
-            trainingData.AddPair(new double[] { 0, 0 }, new double[] { 0, 0, 0});
+            trainingData.AddPair(new double[] { 0, 0 }, new double[] { 0, 0, 0 });
             trainingData.AddPair(new double[] { 0, 1 }, new double[] { 0, 1, 1 });
             trainingData.AddPair(new double[] { 1, 0 }, new double[] { 0, 1, 1 });
             trainingData.AddPair(new double[] { 1, 1 }, new double[] { 1, 1, 0 });
@@ -66,7 +58,7 @@ namespace Demo.DemoConsoleApp.Examples
             //Training loop
             while (trainer.Iteration() && trainer.MSE > 1e-6)
             {
-                _log.Write($"  Attempt {trainer.Attempt} / Epoch {trainer.AttemptEpoch.ToString().PadRight(3)} Mean Squared Error = {Math.Round(trainer.MSE, 8).ToString(CultureInfo.InvariantCulture)}", false);
+                _log.Write($"  Attempt {trainer.Attempt} / Epoch {trainer.AttemptEpoch,3} Mean Squared Error = {Math.Round(trainer.MSE, 8).ToString(CultureInfo.InvariantCulture)}", false);
             }
             _log.Write(string.Empty);
 

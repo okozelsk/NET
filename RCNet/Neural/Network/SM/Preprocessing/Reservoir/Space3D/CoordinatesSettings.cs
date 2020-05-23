@@ -1,13 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
-using RCNet.Extensions;
-using RCNet.XmlTools;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Space3D
 {
@@ -74,7 +67,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Space3D
         /// </summary>
         /// <param name="source">Source instance</param>
         public CoordinatesSettings(CoordinatesSettings source)
-            :this(source.X, source.Y, source.Z)
+            : this(source.X, source.Y, source.Z)
         {
             return;
         }
@@ -82,10 +75,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Space3D
         /// <summary>
         /// Creates an initialized instance from the given xml element.
         /// </summary>
-        /// <param name="elem">
-        /// Xml data containing the settings.
-        /// Content of xml element is always validated against the xml schema.
-        /// </param>
+        /// <param name="elem">Xml element containing the initialization settings</param>
         public CoordinatesSettings(XElement elem)
         {
             //Validation
@@ -147,7 +137,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Space3D
         /// Generates xml element containing the settings.
         /// </summary>
         /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
@@ -171,7 +161,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Space3D
         /// <summary>
         /// Generates default named xml element containing the settings.
         /// </summary>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(bool suppressDefaults)
         {

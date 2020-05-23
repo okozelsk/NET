@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RCNet.Extensions;
-using RCNet.Neural.Activation;
+﻿using RCNet.Extensions;
 using RCNet.Neural.Network.SM.Preprocessing.Neuron;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS

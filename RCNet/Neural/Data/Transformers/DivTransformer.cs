@@ -1,11 +1,6 @@
-﻿using System;
+﻿using RCNet.Extensions;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RCNet.Extensions;
-using RCNet.RandomValue;
-using RCNet.Queue;
 
 namespace RCNet.Neural.Data.Transformers
 {
@@ -50,7 +45,7 @@ namespace RCNet.Neural.Data.Transformers
         /// <param name="data">Collection of natural values of the already known input fields</param>
         public double Next(double[] data)
         {
-            if(double.IsNaN(data[_xFieldIdx]))
+            if (double.IsNaN(data[_xFieldIdx]))
             {
                 throw new InvalidOperationException($"Invalid data value at input field index {_xFieldIdx} (NaN).");
             }
@@ -59,7 +54,7 @@ namespace RCNet.Neural.Data.Transformers
                 throw new InvalidOperationException($"Invalid data value at input field index {_yFieldIdx} (NaN).");
             }
             double denominator = data[_yFieldIdx].Bound();
-            if(Math.Abs(denominator) < DoubleExtensions.ReasonableAbsMin)
+            if (Math.Abs(denominator) < DoubleExtensions.ReasonableAbsMin)
             {
                 denominator = denominator < 0 ? -1d * DoubleExtensions.ReasonableAbsMin : DoubleExtensions.ReasonableAbsMin;
             }

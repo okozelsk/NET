@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
+﻿using RCNet.MathTools;
+using System;
 using System.Globalization;
+using System.Linq;
 using System.Xml.Linq;
-using System.IO;
-using RCNet.XmlTools;
-using RCNet.MathTools;
 
 namespace RCNet.Neural.Network.NonRecurrent.PP
 {
@@ -82,13 +78,9 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
         }
 
         /// <summary>
-        /// Creates the instance and initialize it from given xml element.
-        /// This is the preferred way to instantiate settings.
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">
-        /// Xml data containing settings.
-        /// Content of xml element is always validated against the xml schema.
-        /// </param>
+        /// <param name="elem">Xml element containing the initialization settings</param>
         public ParallelPerceptronSettings(XElement elem)
         {
             //Validation
@@ -152,7 +144,7 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
         /// Generates xml element containing the settings.
         /// </summary>
         /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
@@ -173,7 +165,7 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
         /// <summary>
         /// Generates default named xml element containing the settings.
         /// </summary>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(bool suppressDefaults)
         {

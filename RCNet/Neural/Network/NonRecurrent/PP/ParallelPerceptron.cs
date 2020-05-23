@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RCNet.Extensions;
+﻿using RCNet.Extensions;
 using RCNet.MathTools;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace RCNet.Neural.Network.NonRecurrent.PP
 {
@@ -67,7 +65,7 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
                 throw new ArgumentException($"Invalid number of input values {numOfInputs}", "numOfInputs");
             }
             Gates = gates;
-            if(Gates < 1)
+            if (Gates < 1)
             {
                 throw new ArgumentException($"Invalid number of gates {gates}", "gates");
             }
@@ -88,7 +86,7 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
         /// <param name="numOfInputs">Number of input values</param>
         /// <param name="settings">Configuration parameters</param>
         public ParallelPerceptron(int numOfInputs, ParallelPerceptronSettings settings)
-            :this(numOfInputs, settings.Gates, settings.Resolution)
+            : this(numOfInputs, settings.Gates, settings.Resolution)
         {
             return;
         }
@@ -119,13 +117,13 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
             //Bias
             sum = _flatWeights[weightsStartFlatIdx + NumOfInputValues] * BiasValue;
             //Inputs
-            for(int i = 0, wIdx = weightsStartFlatIdx; i < input.Length; i++, wIdx++)
+            for (int i = 0, wIdx = weightsStartFlatIdx; i < input.Length; i++, wIdx++)
             {
                 sum += _flatWeights[wIdx] * input[i];
             }
             return sum >= 0 ? 1 : -1;
         }
-        
+
         private double[] ComputeResult(double sum)
         {
             double[] output = new double[1];
@@ -163,12 +161,12 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
         /// Computes network output values
         /// </summary>
         /// <param name="input">Input values to be passed into the network</param>
-        /// <param name="gateSums">Sums computed by treshold gates. Array must be allocated to NumOfGates size</param>
+        /// <param name="gateSums">Array of sums computed by treshold gates. Array must be allocated to NumOfGates size</param>
         /// <returns>Computed output values</returns>
         public double[] Compute(double[] input, double[] gateSums)
         {
             double sum = 0;
-            for(int i = 0; i < Gates; i++)
+            for (int i = 0; i < Gates; i++)
             {
                 sum += ComputeGate(i, input, out gateSums[i]);
             }

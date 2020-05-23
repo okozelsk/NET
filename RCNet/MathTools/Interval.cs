@@ -35,7 +35,7 @@ namespace RCNet.MathTools
 
         //Attributes
         //Locker to ensure thread safe behaviour
-        private Object _lock = new Object();
+        private readonly Object _lock = new Object();
         private readonly bool _threadSafe;
         //Initialization indicator
         private bool _initialized;
@@ -47,7 +47,7 @@ namespace RCNet.MathTools
         /// <summary>
         /// Construct an interval
         /// </summary>
-        /// <param name="threadSafe">Specifies if to create thread safe instance</param>
+        /// <param name="threadSafe">Specifies whether to create thread safe instance</param>
         public Interval(bool threadSafe = false)
         {
             _threadSafe = threadSafe;
@@ -60,9 +60,9 @@ namespace RCNet.MathTools
         /// </summary>
         /// <param name="min">Left value</param>
         /// <param name="max">Right value</param>
-        /// <param name="threadSafe">Specifies if to create thread safe instance</param>
+        /// <param name="threadSafe">Specifies whether to create thread safe instance</param>
         public Interval(double min, double max, bool threadSafe = false)
-            :this(threadSafe)
+            : this(threadSafe)
         {
             Set(min, max);
             return;
@@ -72,7 +72,7 @@ namespace RCNet.MathTools
         /// Constructs an interval
         /// </summary>
         /// <param name="values">Collection of the values from which are determined interval's min and max borders</param>
-        /// <param name="threadSafe">Specifies if to create thread safe instance</param>
+        /// <param name="threadSafe">Specifies whether to create thread safe instance</param>
         public Interval(IEnumerable<double> values, bool threadSafe = false)
             : this(threadSafe)
         {
@@ -87,7 +87,7 @@ namespace RCNet.MathTools
         /// Constructs an interval as a copy of source instance
         /// </summary>
         /// <param name="source">Source instance</param>
-        /// <param name="threadSafe">Specifies if to create thread safe instance</param>
+        /// <param name="threadSafe">Specifies whether to create thread safe instance</param>
         public Interval(Interval source, bool threadSafe = false)
             : this(threadSafe)
         {
@@ -103,7 +103,7 @@ namespace RCNet.MathTools
         {
             get
             {
-                if(_threadSafe)
+                if (_threadSafe)
                 {
                     lock (_lock)
                     {
@@ -234,7 +234,7 @@ namespace RCNet.MathTools
         /// </summary>
         public void Reset()
         {
-            if(_threadSafe)
+            if (_threadSafe)
             {
                 lock (_lock)
                 {
@@ -311,7 +311,7 @@ namespace RCNet.MathTools
         /// <param name="border2">The second border value</param>
         public void Set(double border1, double border2)
         {
-            if(_threadSafe)
+            if (_threadSafe)
             {
                 lock (_lock)
                 {
@@ -339,7 +339,7 @@ namespace RCNet.MathTools
         /// <param name="sampleValue">Sample value</param>
         public void Adjust(double sampleValue)
         {
-            if(_threadSafe)
+            if (_threadSafe)
             {
                 lock (_lock)
                 {
@@ -473,7 +473,7 @@ namespace RCNet.MathTools
         /// <param name="intervalType">Type of interval to be considered</param>
         public bool BelongsTo(double value, IntervalType intervalType = IntervalType.LeftClosedRightClosed)
         {
-            if(_threadSafe)
+            if (_threadSafe)
             {
                 lock (_lock)
                 {
@@ -511,7 +511,7 @@ namespace RCNet.MathTools
         /// <param name="valueRange">Input value range</param>
         public double Rescale(double value, Interval valueRange)
         {
-            if(_threadSafe)
+            if (_threadSafe)
             {
                 lock (_lock)
                 {

@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RCNet.Neural.Data.Filter;
-
-namespace RCNet.Neural.Data.Transformers
+﻿namespace RCNet.Neural.Data.Transformers
 {
     /// <summary>
     /// Common interface for input data transformers.

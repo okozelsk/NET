@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RCNet.Extensions;
-using RCNet.MathTools;
+﻿using RCNet.Extensions;
+using System;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Input
 {
@@ -35,7 +30,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             _spikeCodeCfg = (SpikeCodeSettings)spikeCodeCfg.DeepClone();
             _componentComputer = new ComponentCodeComputer(_spikeCodeCfg.ComponentHalfCodeLength, _spikeCodeCfg.LowestThreshold);
             int codeLength = 0;
-            if(_spikeCodeCfg.SignalComponent)
+            if (_spikeCodeCfg.SignalComponent)
             {
                 codeLength += _componentComputer.CodeLength;
             }
@@ -66,7 +61,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         {
             value.Bound(-1d, 1d);
             int fromIdx = 0;
-            if(_spikeCodeCfg.SignalComponent)
+            if (_spikeCodeCfg.SignalComponent)
             {
                 _componentComputer.Encode(value, Code, fromIdx);
                 fromIdx += _componentComputer.CodeLength;
@@ -99,7 +94,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
                 double exponent = halfCodeLength > 1 ? Math.Pow(1d / lowestThreshold, 1d / (halfCodeLength - 1d)) : 0d;
                 _thresholdCollection = new double[halfCodeLength];
                 double threshold = 1d;
-                for(int i = 0; i < _thresholdCollection.Length - 1; i++)
+                for (int i = 0; i < _thresholdCollection.Length - 1; i++)
                 {
                     threshold /= exponent;
                     _thresholdCollection[i] = threshold;
@@ -130,9 +125,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
                 {
                     int halfIdx = value < 0 ? 0 : 1;
                     value = Math.Abs(value);
-                    for(int i = 0; i < _thresholdCollection.Length; i++)
+                    for (int i = 0; i < _thresholdCollection.Length; i++)
                     {
-                        if(value > _thresholdCollection[i])
+                        if (value > _thresholdCollection[i])
                         {
                             buffer[fromIdx + halfIdx * _thresholdCollection.Length + i] = (byte)1;
                         }

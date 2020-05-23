@@ -1,15 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using System.Globalization;
 using System.Xml.Linq;
-using System.IO;
-using RCNet.Extensions;
-using RCNet.MathTools.Probability;
-using RCNet.XmlTools;
-using RCNet.RandomValue;
-using System.Xml.XPath;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
 {
@@ -57,15 +48,15 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         /// </summary>
         /// <param name="source">Source instance</param>
         public NonlinearDynamicsSettings(NonlinearDynamicsSettings source)
-            :this(source.RestingEfficacy, source.TauDepression, source.TauFacilitation)
+            : this(source.RestingEfficacy, source.TauDepression, source.TauFacilitation)
         {
             return;
         }
 
         /// <summary>
-        /// Creates the instance and initialize it from given xml element.
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml data containing settings</param>
+        /// <param name="elem">Xml element containing the initialization settings</param>
         /// <param name="xsdTypeName">Name of the associated type defined in xsd</param>
         public NonlinearDynamicsSettings(XElement elem, string xsdTypeName)
         {

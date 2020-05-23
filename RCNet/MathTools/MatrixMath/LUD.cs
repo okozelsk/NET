@@ -1,7 +1,6 @@
-﻿using System;
-using System.Threading.Tasks;
-using RCNet.Extensions;
+﻿using RCNet.Extensions;
 using RCNet.MathTools.VectorMath;
+using System;
 
 namespace RCNet.MathTools.MatrixMath
 {
@@ -30,7 +29,7 @@ namespace RCNet.MathTools.MatrixMath
             _size = A.NumOfRows;
             //LU data
             _lu = new double[_size][];
-            for(int i = 0; i < _size; i++)
+            for (int i = 0; i < _size; i++)
             {
                 _lu[i] = new double[_size];
                 _lu[i].Populate(0);

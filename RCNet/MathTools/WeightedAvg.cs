@@ -45,7 +45,7 @@ namespace RCNet.MathTools
             Adopt(source);
             return;
         }
-        
+
         //Properties
         /// <summary>
         /// Indicates the readyness
@@ -129,7 +129,7 @@ namespace RCNet.MathTools
                 SumOfValues -= value * weight;
                 SumOfWeights -= weight;
                 --NumOfSamples;
-                if(NumOfSamples == 0)
+                if (NumOfSamples == 0)
                 {
                     SumOfValues = 0;
                     SumOfWeights = 0;
@@ -144,7 +144,7 @@ namespace RCNet.MathTools
 
         /// <summary>
         /// Function computes weighted average for next hypothetical sample value.
-        /// Function does not change instance, it is a simulation only.
+        /// Function does not change the instance, it is a simulation only.
         /// </summary>
         /// <param name="simValue">Next hypothetical sample value</param>
         /// <param name="simWeight">Next hypothetical sample value weight</param>

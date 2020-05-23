@@ -1,6 +1,6 @@
-﻿using System;
-using RCNet.Extensions;
+﻿using RCNet.Extensions;
 using RCNet.MathTools;
+using System;
 
 namespace RCNet.Neural.Activation
 {
@@ -38,7 +38,7 @@ namespace RCNet.Neural.Activation
         public override double Compute(double x)
         {
             x = x.Bound();
-            return (x==0 ? 1d : Math.Sin(x) / x).Bound(_outputRange.Min, _outputRange.Max);
+            return (x == 0 ? 1d : Math.Sin(x) / x).Bound(_outputRange.Min, _outputRange.Max);
         }
 
         /// <summary>

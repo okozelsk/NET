@@ -1,16 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using System.Globalization;
 using System.Xml.Linq;
-using System.Xml.XPath;
-using System.IO;
-using RCNet.Extensions;
-using RCNet.MathTools.Probability;
-using RCNet.XmlTools;
-using RCNet.RandomValue;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
 {
@@ -72,11 +62,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
         /// </summary>
         public bool AllowSelfConnection { get; }
         /// <summary>
-        /// Specifies whether to keep for each neuron constant number of synapses
+        /// Specifies whether to keep constant number of synapses per target neuron
         /// </summary>
         public bool ConstantNumOfConnections { get; }
         /// <summary>
-        /// Specifies whether connections of this schema will replace existing connections
+        /// Specifies whether the connections of this schema will replace existing connections
         /// </summary>
         public bool ReplaceExistingConnections { get; }
         /// <summary>
@@ -91,8 +81,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
         /// <param name="density">Density of interconnected neurons</param>
         /// <param name="avgDistance">Average distance of interconnected neurons</param>
         /// <param name="allowSelfConnection">Specifies whether to allow neurons to be self connected</param>
-        /// <param name="constantNumOfConnections">Specifies whether to keep for each neuron constant number of synapses</param>
-        /// <param name="replaceExistingConnections">Specifies whether connections of this schema will replace existing connections</param>
+        /// <param name="constantNumOfConnections">Specifies whether to keep constant number of synapses per target neuron</param>
+        /// <param name="replaceExistingConnections">Specifies whether the connections of this schema will replace existing connections</param>
         /// <param name="repetitions">Number of applications of this schema</param>
         public RandomSchemaSettings(double density = DefaultDensity,
                                     double avgDistance = DefaultAvgDistanceNum,
@@ -117,19 +107,16 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
         /// </summary>
         /// <param name="source">Source instance</param>
         public RandomSchemaSettings(RandomSchemaSettings source)
-            :this(source.Density, source.AvgDistance, source.AllowSelfConnection,
+            : this(source.Density, source.AvgDistance, source.AllowSelfConnection,
                   source.ConstantNumOfConnections, source.ReplaceExistingConnections, source.Repetitions)
         {
             return;
         }
 
         /// <summary>
-        /// Creates the instance and initialize it from given xml element.
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">
-        /// Xml data containing settings.
-        /// Content of xml element is always validated against the xml schema.
-        /// </param>
+        /// <param name="elem">Xml element containing the initialization settings</param>
         public RandomSchemaSettings(XElement elem)
         {
             //Validation
@@ -232,7 +219,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
         /// Generates xml element containing the settings.
         /// </summary>
         /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
@@ -268,7 +255,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
         /// <summary>
         /// Generates default named xml element containing the settings.
         /// </summary>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(bool suppressDefaults)
         {

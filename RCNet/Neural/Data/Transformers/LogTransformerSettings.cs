@@ -1,12 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 using System.Globalization;
-using System.Reflection;
-using RCNet.XmlTools;
+using System.Xml.Linq;
 
 namespace RCNet.Neural.Data.Transformers
 {
@@ -57,16 +51,15 @@ namespace RCNet.Neural.Data.Transformers
         /// </summary>
         /// <param name="source">Source instance</param>
         public LogTransformerSettings(LogTransformerSettings source)
-            :this(source.InputFieldName, source.Base)
+            : this(source.InputFieldName, source.Base)
         {
             return;
         }
 
         /// <summary>
-        /// Creates the instance and initializes it from given xml element.
-        /// Content of xml element is always validated against the xml schema.
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml data containing settings</param>
+        /// <param name="elem">Xml element containing the initialization settings</param>
         public LogTransformerSettings(XElement elem)
         {
             //Validation
@@ -100,7 +93,7 @@ namespace RCNet.Neural.Data.Transformers
             {
                 throw new ArgumentException($"Name of the input field must be specified.", "InputFieldName");
             }
-            if(Base <= 0d)
+            if (Base <= 0d)
             {
                 throw new ArgumentException($"Invalid base {Base.ToString(CultureInfo.InvariantCulture)}. Base must be GT 0.", "Base");
             }
@@ -119,14 +112,14 @@ namespace RCNet.Neural.Data.Transformers
         /// Generates xml element containing the settings.
         /// </summary>
         /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             XElement rootElem = new XElement(rootElemName,
                                              new XAttribute("fieldName", InputFieldName)
                                              );
-            if(!suppressDefaults || !IsDefaultBase)
+            if (!suppressDefaults || !IsDefaultBase)
             {
                 rootElem.Add(new XAttribute("base", Base.ToString(CultureInfo.InvariantCulture)));
             }
@@ -137,7 +130,7 @@ namespace RCNet.Neural.Data.Transformers
         /// <summary>
         /// Generates default named xml element containing the settings.
         /// </summary>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(bool suppressDefaults)
         {

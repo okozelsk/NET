@@ -1,9 +1,6 @@
-﻿using System;
+﻿using RCNet.MathTools;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RCNet.MathTools;
 
 namespace RCNet.Neural.Network.NonRecurrent
 {
@@ -17,12 +14,12 @@ namespace RCNet.Neural.Network.NonRecurrent
         /// Number of network's input values
         /// </summary>
         int NumOfInputValues { get; }
-        
+
         /// <summary>
         /// Number of network's output values
         /// </summary>
         int NumOfOutputValues { get; }
-        
+
         /// <summary>
         /// Total number of network's weights
         /// </summary>
@@ -41,7 +38,7 @@ namespace RCNet.Neural.Network.NonRecurrent
         /// <param name="input">Input values to be passed into the network</param>
         /// <returns>Computed output values</returns>
         double[] Compute(double[] input);
-        
+
         /// <summary>
         /// Function goes through collection (batch) of the network inputs and for each of them computes the output.
         /// Computed output is then compared with a corresponding ideal output.

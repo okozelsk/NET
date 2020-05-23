@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Xml.Linq;
-using System.Globalization;
-using System.Reflection;
-using System.IO;
-using RCNet;
-using RCNet.XmlTools;
+﻿using RCNet;
 using RCNet.Neural.Network.SM;
+using RCNet.XmlTools;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Xml.Linq;
 
 namespace Demo.DemoConsoleApp.SM
 {

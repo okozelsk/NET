@@ -1,10 +1,6 @@
 ﻿using RCNet.MathTools;
-using RCNet.MathTools.Probability;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RCNet.Neural.Network.NonRecurrent
 {
@@ -63,7 +59,7 @@ namespace RCNet.Neural.Network.NonRecurrent
             ClusterName = source.ClusterName;
             BinBorder = source.BinBorder;
             Members = new List<TrainedNetwork>(source.Members.Count);
-            foreach(TrainedNetwork tn in source.Members)
+            foreach (TrainedNetwork tn in source.Members)
             {
                 Members.Add(tn.DeepClone());
             }

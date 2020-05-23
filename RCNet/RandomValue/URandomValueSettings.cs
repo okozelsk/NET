@@ -1,13 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Globalization;
+using System.Linq;
 using System.Xml.Linq;
-using System.Reflection;
-using RCNet.Extensions;
-using RCNet.XmlTools;
 
 namespace RCNet.RandomValue
 {
@@ -39,7 +33,7 @@ namespace RCNet.RandomValue
         /// Max random value
         /// </summary>
         public double Max { get; }
-        
+
         /// <summary>
         /// Distribution parameters
         /// </summary>
@@ -60,7 +54,7 @@ namespace RCNet.RandomValue
             Min = min;
             Max = max;
             DistrCfg = distrCfg;
-            if(DistrCfg == null)
+            if (DistrCfg == null)
             {
                 DistrCfg = new UniformDistrSettings();
             }
@@ -153,7 +147,7 @@ namespace RCNet.RandomValue
         /// </summary>
         public static URandomValueSettings CloneOrDefault(URandomValueSettings source, double defaultMin, double defaultMax)
         {
-            if(source == null)
+            if (source == null)
             {
                 return new URandomValueSettings(defaultMin, defaultMax);
             }
@@ -196,7 +190,7 @@ namespace RCNet.RandomValue
         /// Generates xml element containing the settings.
         /// </summary>
         /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {

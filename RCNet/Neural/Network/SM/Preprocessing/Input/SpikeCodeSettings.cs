@@ -1,12 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
-using RCNet.Extensions;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Input
 {
@@ -52,12 +46,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         public double LowestThreshold { get; }
 
         /// <summary>
-        /// Specifies if to use strength of the current analog signal as a component of the spike code
+        /// Specifies whether to use strength of the current analog signal as a component of the spike code
         /// </summary>
         public bool SignalComponent { get; }
 
         /// <summary>
-        /// Specifies if to use difference of the current analog signal and previous analog signal as a component of the spike code
+        /// Specifies whether to use difference of the current analog signal and previous analog signal as a component of the spike code
         /// </summary>
         public bool DeltaComponent { get; }
 
@@ -68,8 +62,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// </summary>
         /// <param name="componentHalfCodeLength">Length of the half of component code</param>
         /// <param name="lowestThreshold">Firing threshold of the most sensitive input neuron</param>
-        /// <param name="signalComponent">Specifies if to use strength of the current analog signal as a component of the spike code</param>
-        /// <param name="deltaComponent">Specifies if to use difference of the current analog signal and previous analog signal as a component of the spike code</param>
+        /// <param name="signalComponent">Specifies whether to use strength of the current analog signal as a component of the spike code</param>
+        /// <param name="deltaComponent">Specifies whether to use difference of the current analog signal and previous analog signal as a component of the spike code</param>
         public SpikeCodeSettings(int componentHalfCodeLength = DefaultComponentHalfCodeLength,
                                  double lowestThreshold = DefaultLowestThreshold,
                                  bool signalComponent = DefaultSignalComponent,
@@ -97,10 +91,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// Creates an initialized instance from the given xml element.
         /// </summary>
-        /// <param name="elem">
-        /// Xml data containing the settings.
-        /// Content of xml element is always validated against the xml schema.
-        /// </param>
+        /// <param name="elem">Xml element containing the initialization settings</param>
         public SpikeCodeSettings(XElement elem)
         {
             //Validation
@@ -163,7 +154,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             {
                 throw new ArgumentException($"Invalid LowestThreshold {LowestThreshold.ToString(CultureInfo.InvariantCulture)}. LowestThreshold must be GT 0 and LT 1.", "LowestThreshold");
             }
-            if(!SignalComponent && !DeltaComponent)
+            if (!SignalComponent && !DeltaComponent)
             {
                 throw new ArgumentException($"At least one component of the spike code has to be used.", "SignalComponent/DeltaComponent");
             }
@@ -182,7 +173,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// Generates xml element containing the settings.
         /// </summary>
         /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
@@ -210,7 +201,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// Generates default named xml element containing the settings.
         /// </summary>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(bool suppressDefaults)
         {

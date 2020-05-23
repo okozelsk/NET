@@ -1,9 +1,4 @@
-﻿using RCNet.MathTools.Differential;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
 
 namespace RCNet.Neural.Activation
 {
@@ -33,7 +28,7 @@ namespace RCNet.Neural.Activation
         /// <param name="code">Activation type code</param>
         public static ActivationType ParseActivationType(string code)
         {
-            switch(code.ToUpper())
+            switch (code.ToUpper())
             {
                 case "ANALOG":
                     return ActivationType.Analog;

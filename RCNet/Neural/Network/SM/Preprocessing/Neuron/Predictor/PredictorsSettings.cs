@@ -1,14 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using RCNet.Extensions;
+using System;
 using System.Linq;
-using System.Reflection;
-using System.Globalization;
 using System.Xml.Linq;
-using System.IO;
-using RCNet.Extensions;
-using RCNet.XmlTools;
-using RCNet.RandomValue;
-using RCNet.Neural.Activation;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
 {
@@ -52,7 +45,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
             //Params
             ParamsCfg = level1PredictorsCfg?.ParamsCfg != null ? (PredictorsParamsSettings)level1PredictorsCfg.ParamsCfg.DeepClone() : (level2PredictorsCfg?.ParamsCfg != null ? (PredictorsParamsSettings)level2PredictorsCfg.ParamsCfg.DeepClone() : (level3PredictorsCfg?.ParamsCfg != null ? (PredictorsParamsSettings)level3PredictorsCfg.ParamsCfg.DeepClone() : new PredictorsParamsSettings()));
             //Enabling switches
-            foreach(PredictorsProvider.PredictorID predictorID in typeof(PredictorsProvider.PredictorID).GetEnumValues())
+            foreach (PredictorsProvider.PredictorID predictorID in typeof(PredictorsProvider.PredictorID).GetEnumValues())
             {
                 EnablingSwitchCollection[(int)predictorID] = ((level1PredictorsCfg == null ? true : level1PredictorsCfg.EnablingSwitchCollection[(int)predictorID]) &&
                               (level2PredictorsCfg == null ? true : level2PredictorsCfg.EnablingSwitchCollection[(int)predictorID]) &&
@@ -70,7 +63,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         public PredictorsSettings(bool[] enablingSwitchCollection = null, PredictorsParamsSettings paramsCfg = null)
         {
             EnablingSwitchCollection = new bool[PredictorsProvider.NumOfSupportedPredictors];
-            if(enablingSwitchCollection != null)
+            if (enablingSwitchCollection != null)
             {
                 enablingSwitchCollection.CopyTo(EnablingSwitchCollection, 0);
             }
@@ -131,12 +124,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         }
 
         /// <summary>
-        /// Creates the instance and initialize it from given xml element.
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">
-        /// Xml element containing the settings.
-        /// Content of xml element is always validated against the xml schema.
-        /// </param>
+        /// <param name="elem">Xml element containing the initialization settings</param>
         public PredictorsSettings(XElement elem)
         {
             //Validation
@@ -268,19 +258,19 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         /// Generates xml element containing the settings.
         /// </summary>
         /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             XElement rootElem = new XElement(rootElemName);
-            foreach(PredictorsProvider.PredictorID predictorID in typeof(PredictorsProvider.PredictorID).GetEnumValues())
+            foreach (PredictorsProvider.PredictorID predictorID in typeof(PredictorsProvider.PredictorID).GetEnumValues())
             {
                 if (!suppressDefaults || !EnablingSwitchCollection[(int)predictorID])
                 {
                     rootElem.Add(new XAttribute(GetXmlName(predictorID), EnablingSwitchCollection[(int)predictorID].ToString().ToLowerInvariant()));
                 }
             }
-            if(ParamsCfg != null)
+            if (ParamsCfg != null)
             {
                 if (!suppressDefaults || !ParamsCfg.ContainsOnlyDefaults)
                 {
@@ -294,7 +284,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         /// <summary>
         /// Generates default named xml element containing the settings.
         /// </summary>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(bool suppressDefaults)
         {

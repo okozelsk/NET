@@ -1,9 +1,6 @@
-﻿using System;
+﻿using RCNet.Extensions;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RCNet.Extensions;
 
 namespace RCNet.MathTools
 {
@@ -53,7 +50,7 @@ namespace RCNet.MathTools
         /// <param name="valueIdx">Index of the binary field within the vector</param>
         /// <param name="binBorder">Binary 0/1 border. Double value LT this border is considered 0 and GE 1</param>
         public BinDistribution(IEnumerable<double[]> vectorCollection, int valueIdx, double binBorder)
-            :this(binBorder)
+            : this(binBorder)
         {
             Update(vectorCollection, valueIdx);
             return;
@@ -131,7 +128,7 @@ namespace RCNet.MathTools
         /// <param name="valueIdx">Index of the binary field within the vector</param>
         public void Update(IEnumerable<double[]> vectorCollection, int valueIdx)
         {
-            foreach(double[] vector in vectorCollection)
+            foreach (double[] vector in vectorCollection)
             {
                 UpdateCounts(vector[valueIdx]);
             }

@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RCNet.Extensions;
+﻿using RCNet.Extensions;
+using System;
 
 namespace RCNet.Neural.Data.Generators
 {
@@ -84,7 +80,7 @@ namespace RCNet.Neural.Data.Generators
             double maxPeriod = 1d + 2d * (_avgPeriod - 1d);
             double spanPeriod = maxPeriod - minPeriod;
             int timeIncrement;
-            switch(_mode)
+            switch (_mode)
             {
                 case TimingMode.Constant:
                     timeIncrement = (_t == 0) ? 1 : (int)Math.Round(_avgPeriod);
@@ -102,7 +98,7 @@ namespace RCNet.Neural.Data.Generators
                     timeIncrement = 0;
                     break;
             }
-            if(timeIncrement <= 0)
+            if (timeIncrement <= 0)
             {
                 timeIncrement = 1;
             }
@@ -127,7 +123,7 @@ namespace RCNet.Neural.Data.Generators
         public double Next()
         {
             ++_t;
-            if(_t == _nextPulseTime)
+            if (_t == _nextPulseTime)
             {
                 ScheduleNextPulse();
                 return _signal;

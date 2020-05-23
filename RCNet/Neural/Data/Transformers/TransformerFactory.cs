@@ -1,9 +1,5 @@
-﻿using RCNet.MathTools;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
 
 namespace RCNet.Neural.Data.Transformers
@@ -19,7 +15,7 @@ namespace RCNet.Neural.Data.Transformers
         /// <param name="elem">Element containing settings</param>
         public static RCNetBaseSettings LoadSettings(XElement elem)
         {
-            switch(elem.Name.LocalName)
+            switch (elem.Name.LocalName)
             {
                 case "diff": return new DiffTransformerSettings(elem);
                 case "cdiv": return new CDivTransformerSettings(elem);
@@ -102,7 +98,7 @@ namespace RCNet.Neural.Data.Transformers
         public static ITransformer Create(List<string> fieldNames, RCNetBaseSettings settings)
         {
             Type cfgType = settings.GetType();
-            if(cfgType == typeof(DiffTransformerSettings))
+            if (cfgType == typeof(DiffTransformerSettings))
             {
                 return new DiffTransformer(fieldNames, (DiffTransformerSettings)settings);
             }

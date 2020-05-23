@@ -1,21 +1,18 @@
-﻿using System;
+﻿using RCNet.MathTools;
+using RCNet.Neural.Data;
+using RCNet.Neural.Network.NonRecurrent;
+using RCNet.Neural.Network.SM.PM;
+using RCNet.Neural.Network.SM.Preprocessing;
+using RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor;
+using RCNet.Neural.Network.SM.Preprocessing.Reservoir;
+using RCNet.Neural.Network.SM.Readout;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Xml.Linq;
-using RCNet.Extensions;
-using RCNet.MathTools;
-using RCNet.Neural.Data;
-using RCNet.Neural.Network.NonRecurrent;
-using RCNet.Neural.Network.SM.Preprocessing;
-using RCNet.Neural.Network.SM.Preprocessing.Neuron;
-using RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor;
-using RCNet.Neural.Network.SM.Readout;
-using RCNet.Neural.Network.SM.PM;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir;
 
 namespace RCNet.Neural.Network.SM
 {
@@ -193,7 +190,7 @@ namespace RCNet.Neural.Network.SM
                                 }
                             }
                             //Allowed reservoirs' origin
-                            if(unitMap.AllowedPoolsCfg != null)
+                            if (unitMap.AllowedPoolsCfg != null)
                             {
                                 for (int i = 0; i < NP.OutputFeatureDescriptorCollection.Count; i++)
                                 {
@@ -220,7 +217,7 @@ namespace RCNet.Neural.Network.SM
                                     if (switches[i] && NP.OutputFeatureDescriptorCollection[i].IsInputFieldRelated)
                                     {
                                         string fieldName = fieldNames[NP.OutputFeatureDescriptorCollection[i].InputFieldID];
-                                        if(!unitMap.AllowedInputFieldsCfg.IsAllowed(fieldName))
+                                        if (!unitMap.AllowedInputFieldsCfg.IsAllowed(fieldName))
                                         {
                                             switches[i] = false;
                                         }
@@ -411,7 +408,7 @@ namespace RCNet.Neural.Network.SM
                 ReadoutLayerConfig = (ReadoutLayerSettings)readoutLayerConfig.DeepClone();
                 ComputationResultBundle = new ResultBundle();
                 ReadoutUnitStatCollection = new List<ReadoutUnitStat>(ReadoutLayerConfig.ReadoutUnitsCfg.ReadoutUnitCfgCollection.Count);
-                for(int i = 0; i < ReadoutLayerConfig.ReadoutUnitsCfg.ReadoutUnitCfgCollection.Count; i++)
+                for (int i = 0; i < ReadoutLayerConfig.ReadoutUnitsCfg.ReadoutUnitCfgCollection.Count; i++)
                 {
                     ReadoutUnitStatCollection.Add(new ReadoutUnitStat(i, ReadoutLayerConfig.ReadoutUnitsCfg.ReadoutUnitCfgCollection[i]));
                 }

@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RCNet.MathTools;
-using RCNet.Neural.Network.NonRecurrent;
+﻿using RCNet.Neural.Network.NonRecurrent;
+using System;
 
 namespace RCNet.Neural.Network.SM.Readout
 {

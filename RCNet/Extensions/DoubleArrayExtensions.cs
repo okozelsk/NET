@@ -1,7 +1,5 @@
-﻿using System;
+﻿using RCNet.MathTools;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
-using RCNet.MathTools;
 
 namespace RCNet.Extensions
 {
@@ -35,7 +33,7 @@ namespace RCNet.Extensions
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Rescale(this double[] array, Interval newRange = null)
         {
-            if(newRange == null)
+            if (newRange == null)
             {
                 newRange = new Interval(0d, 1d);
             }
@@ -48,7 +46,7 @@ namespace RCNet.Extensions
         }
 
         /// <summary>
-        /// Returns maximum value in the array
+        /// Returns the max value within an array
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double Max(this double[] array)
@@ -56,7 +54,7 @@ namespace RCNet.Extensions
             double max = double.MinValue;
             for (int i = 0; i < array.Length; i++)
             {
-                if(max < array[i])
+                if (max < array[i])
                 {
                     max = array[i];
                 }
@@ -65,7 +63,7 @@ namespace RCNet.Extensions
         }
 
         /// <summary>
-        /// Returns minimum value in the array
+        /// Returns the min value within an array
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double Min(this double[] array)
@@ -82,7 +80,7 @@ namespace RCNet.Extensions
         }
 
         /// <summary>
-        /// Returns summed values in the array
+        /// Returns sum of values within an array
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double Sum(this double[] array)

@@ -1,18 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RCNet.MathTools;
-using RCNet.Extensions;
+﻿using RCNet.MathTools;
 using RCNet.Neural.Data.Filter;
 using RCNet.Neural.Network.SM.Preprocessing.Neuron;
-using RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor;
+using System;
+using System.Collections.Generic;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Input
 {
     /// <summary>
-    /// Provides input field data to be processed in the reservoirs. Supports analog and spike codings.
+    /// Provides input data to be processed in the reservoirs. Supports analog and spike codings.
     /// Used spike coding method is from the "population temporal coding" family.
     /// </summary>
     [Serializable]
@@ -25,14 +20,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// Input field name
         /// </summary>
         public string Name { get; }
-        
+
         /// <summary>
         /// Input field index among all input fields
         /// </summary>
         public int Idx { get; }
 
         /// <summary>
-        /// Specifies if to route values as the additional predictors to readout
+        /// Specifies whether to route values as the additional predictors to readout
         /// </summary>
         public bool RouteToReadout { get; }
 
@@ -60,7 +55,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <param name="dataWorkingRange">Input data range</param>
         /// <param name="featureFilterCfg">Feature filter configuration</param>
         /// <param name="spikeCodeCfg">Configuration of the input spike code</param>
-        /// <param name="routeToReadout">Specifies if to route values as the additional predictors to readout</param>
+        /// <param name="routeToReadout">Specifies whether to route values as the additional predictors to readout</param>
         /// <param name="inputNeuronsStartIdx">Index of the first input neuron of this unit among all input neurons</param>
         public InputField(string name,
                           int idx,
@@ -85,7 +80,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             //Spiking neurons
             _realSpikeCode = null;
             int populationSize = -1;
-            switch(_featureFilter.Type)
+            switch (_featureFilter.Type)
             {
                 case FeatureFilterBase.FeatureType.Real:
                     _realSpikeCode = new SpikeCode(spikeCodeCfg);
@@ -164,7 +159,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
                 case FeatureFilterBase.FeatureType.Real:
                     {
                         _realSpikeCode.Encode(iStimuli);
-                        for(int i = 0; i < SpikingNeuronCollection.Length; i++)
+                        for (int i = 0; i < SpikingNeuronCollection.Length; i++)
                         {
                             SpikingNeuronCollection[i].NewStimulation(_realSpikeCode.Code[i], 0d);
                             SpikingNeuronCollection[i].Recompute(collectStatistics);

@@ -1,6 +1,6 @@
-﻿using System;
+﻿using RCNet.Extensions;
 using RCNet.MathTools;
-using RCNet.Extensions;
+using System;
 
 namespace RCNet.Neural.Activation
 {

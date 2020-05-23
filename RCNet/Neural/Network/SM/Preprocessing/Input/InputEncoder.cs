@@ -3,7 +3,6 @@ using RCNet.MathTools;
 using RCNet.Neural.Data;
 using RCNet.Neural.Data.Generators;
 using RCNet.Neural.Data.Transformers;
-using RCNet.Neural.Network.SM.Preprocessing.Neuron;
 using RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor;
 using System;
 using System.Collections.Generic;
@@ -22,7 +21,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// ID of the input encoder's reservoir
         /// </summary>
         public const int ReservoirID = -1;
-        
+
         /// <summary>
         /// ID of the input encoder's pool
         /// </summary>
@@ -87,7 +86,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// -1 (no constraint) for continuous feeding or patterned feeding without routing input to readout.
         /// </summary>
         private int _fixedExtVectorLength;
-        
+
         /// <summary>
         /// Data to be processed
         /// </summary>
@@ -172,7 +171,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             RoutedFieldCollection = new List<InputField>(Fields.Count);
             foreach (InputField field in Fields)
             {
-                if(field.RouteToReadout)
+                if (field.RouteToReadout)
                 {
                     RoutedFieldCollection.Add(field);
                 }
@@ -199,9 +198,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <returns>Null if not found, InputField instance if found</returns>
         public InputField GetInputField(string name)
         {
-            foreach(InputField field in Fields)
+            foreach (InputField field in Fields)
             {
-                if(field.Name == name)
+                if (field.Name == name)
                 {
                     return field;
                 }
@@ -250,7 +249,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// </summary>
         private void ResetFeatureFilters()
         {
-            foreach(InputField field in Fields)
+            foreach (InputField field in Fields)
             {
                 field.ResetFilter();
             }
@@ -427,7 +426,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             else
             {
                 //Input length constraint and number of routed fields' values
-                if(RoutedFieldCollection.Count > 0)
+                if (RoutedFieldCollection.Count > 0)
                 {
                     _fixedExtVectorLength = inputBundle.InputVectorCollection[0].Length;
                     NumOfRoutedFieldValues = (RoutedFieldCollection.Count * (_fixedExtVectorLength / Fields.Count));
@@ -508,9 +507,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <returns>True if there are were still unprocessed input data</returns>
         public bool EncodeNextInputData(bool collectStatistics)
         {
-            if(_numOfProcessedInputs < _inputData.Count)
+            if (_numOfProcessedInputs < _inputData.Count)
             {
-                for(int i = 0; i < Fields.Count; i++)
+                for (int i = 0; i < Fields.Count; i++)
                 {
                     Fields[i].SetNewData(_inputData[_numOfProcessedInputs][i], collectStatistics);
                 }

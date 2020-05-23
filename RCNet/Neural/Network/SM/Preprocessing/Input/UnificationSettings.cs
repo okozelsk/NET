@@ -1,12 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
-using RCNet.Extensions;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Input
 {
@@ -33,12 +28,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
 
         //Attribute properties
         /// <summary>
-        /// Specifies if to detrend input pattern data
+        /// Specifies whether to detrend input pattern data
         /// </summary>
         public bool Detrend { get; }
 
         /// <summary>
-        /// Specifies if to unify amplitude of input pattern data
+        /// Specifies whether to unify amplitude of input pattern data
         /// </summary>
         public bool UnifyAmplitude { get; }
 
@@ -51,8 +46,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// Creates an itialized instance.
         /// </summary>
-        /// <param name="detrend">Specifies if to detrend input pattern data</param>
-        /// <param name="unifyAmplitude">Specifies if to unify amplitude of input pattern data</param>
+        /// <param name="detrend">Specifies whether to detrend input pattern data</param>
+        /// <param name="unifyAmplitude">Specifies whether to unify amplitude of input pattern data</param>
         /// <param name="resamplingCfg">Settings of input pattern resampling</param>
         public UnificationSettings(bool detrend = DefaultDetrend,
                                    bool unifyAmplitude = DefaultUnifyAmplitude,
@@ -79,10 +74,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// Creates an initialized instance from the given xml element.
         /// </summary>
-        /// <param name="elem">
-        /// Xml data containing the settings.
-        /// Content of xml element is always validated against the xml schema.
-        /// </param>
+        /// <param name="elem">Xml element containing the initialization settings</param>
         public UnificationSettings(XElement elem)
         {
             //Validation
@@ -91,7 +83,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             Detrend = bool.Parse(settingsElem.Attribute("detrend").Value);
             UnifyAmplitude = bool.Parse(settingsElem.Attribute("unifyAmplitude").Value);
             XElement resamplingElem = settingsElem.Elements("resampling").FirstOrDefault();
-            if(resamplingElem != null)
+            if (resamplingElem != null)
             {
                 ResamplingCfg = new ResamplingSettings(resamplingElem);
             }
@@ -148,7 +140,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// Generates xml element containing the settings.
         /// </summary>
         /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
@@ -172,7 +164,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// Generates default named xml element containing the settings.
         /// </summary>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(bool suppressDefaults)
         {

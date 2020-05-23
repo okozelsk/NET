@@ -1,18 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Globalization;
 using System.Xml.Linq;
-using System.Reflection;
-using System.IO;
-using RCNet.Extensions;
-using RCNet.Neural.Network.NonRecurrent.FF;
-using RCNet.Neural.Network.NonRecurrent.PP;
-using RCNet.XmlTools;
-using RCNet.MathTools;
-using RCNet.Neural.Data.Filter;
-using RCNet.Neural.Network.NonRecurrent;
-using RCNet.Neural.Activation;
 
 namespace RCNet.Neural.Network.SM.Readout
 {
@@ -33,7 +21,7 @@ namespace RCNet.Neural.Network.SM.Readout
         /// Output field name
         /// </summary>
         public string Name { get; }
-        
+
         /// <summary>
         /// Readout unit's Forecast or Classification task settings
         /// </summary>
@@ -58,13 +46,13 @@ namespace RCNet.Neural.Network.SM.Readout
         /// </summary>
         /// <param name="source">Source instance</param>
         public ReadoutUnitSettings(ReadoutUnitSettings source)
-            :this(source.Name, source.TaskCfg)
+            : this(source.Name, source.TaskCfg)
         {
             return;
         }
 
         /// <summary>
-        /// Creates the instance and initializes it from given xml element.
+        /// Creates an initialized instance.
         /// </summary>
         /// <param name="elem">Xml data containing the settings.</param>
         public ReadoutUnitSettings(XElement elem)
@@ -119,7 +107,7 @@ namespace RCNet.Neural.Network.SM.Readout
         /// Generates xml element containing the settings.
         /// </summary>
         /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
@@ -133,7 +121,7 @@ namespace RCNet.Neural.Network.SM.Readout
         /// <summary>
         /// Generates default named xml element containing the settings.
         /// </summary>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(bool suppressDefaults)
         {

@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using RCNet.Extensions;
+using System;
 using System.Threading.Tasks;
-using RCNet.Extensions;
 
 namespace RCNet.MathTools.MatrixMath
 {
@@ -68,7 +65,7 @@ namespace RCNet.MathTools.MatrixMath
         {
             double[][] matrixData = matrix.Data;
             _dimension = matrix.NumOfCols;
-            if(_dimension != matrix.NumOfRows)
+            if (_dimension != matrix.NumOfRows)
             {
                 throw new ArgumentException("Matrix is not squared.", "matrix");
             }
@@ -159,7 +156,7 @@ namespace RCNet.MathTools.MatrixMath
             get
             {
                 double max = Math.Abs(_realEigenvalues[0]);
-                for(int i = 1; i < _realEigenvalues.Length; i++)
+                for (int i = 1; i < _realEigenvalues.Length; i++)
                 {
                     max = Math.Max(max, Math.Abs(_realEigenvalues[i]));
                 }
@@ -230,7 +227,7 @@ namespace RCNet.MathTools.MatrixMath
                 double h = 0.0;
                 for (int k = 0; k < i; k++)
                 {
-                    scale = scale + Math.Abs(_realEigenvalues[k]);
+                    scale += Math.Abs(_realEigenvalues[k]);
                 }
                 if (scale == 0.0)
                 {
@@ -258,7 +255,7 @@ namespace RCNet.MathTools.MatrixMath
                         g = -g;
                     }
                     _imaginaryEigenvalues[i] = scale * g;
-                    h = h - f * g;
+                    h -= f * g;
                     _realEigenvalues[i - 1] = f - g;
                     for (int j = 0; j < i; j++)
                     {
@@ -387,7 +384,7 @@ namespace RCNet.MathTools.MatrixMath
                     int iter = 0;
                     do
                     {
-                        iter = iter + 1; // (Could check iteration count here.)
+                        ++iter; // (Could check iteration count here.)
 
                         // Compute implicit shift
 
@@ -406,7 +403,7 @@ namespace RCNet.MathTools.MatrixMath
                         {
                             _realEigenvalues[i] -= h;
                         }
-                        f = f + h;
+                        f += h;
 
                         // Implicit QL transformation.
 
@@ -496,7 +493,7 @@ namespace RCNet.MathTools.MatrixMath
                 double scale = 0.0;
                 for (int i = m; i <= high; i++)
                 {
-                    scale = scale + Math.Abs(_hessenbergForm[i][m - 1]);
+                    scale += Math.Abs(_hessenbergForm[i][m - 1]);
                 }
                 if (scale != 0.0)
                 {
@@ -513,7 +510,7 @@ namespace RCNet.MathTools.MatrixMath
                     {
                         g = -g;
                     }
-                    lh = lh - _ort[m] * g;
+                    lh -= _ort[m] * g;
                     _ort[m] = _ort[m] - g;
 
                     // Apply Householder similarity transformation
@@ -526,7 +523,7 @@ namespace RCNet.MathTools.MatrixMath
                         {
                             f += _ort[i] * _hessenbergForm[i][j];
                         }
-                        f = f / lh;
+                        f /= lh;
                         for (int i = m; i <= high; i++)
                         {
                             _hessenbergForm[i][j] -= f * _ort[i];
@@ -540,7 +537,7 @@ namespace RCNet.MathTools.MatrixMath
                         {
                             f += _ort[j] * _hessenbergForm[i][j];
                         }
-                        f = f / lh;
+                        f /= lh;
                         for (int j = m; j <= high; j++)
                         {
                             _hessenbergForm[i][j] -= f * _ort[j];
@@ -634,7 +631,7 @@ namespace RCNet.MathTools.MatrixMath
                 }
                 for (int j = Math.Max(i - 1, 0); j < nn; j++)
                 {
-                    norm = norm + Math.Abs(_hessenbergForm[i][j]);
+                    norm += Math.Abs(_hessenbergForm[i][j]);
                 }
             }
 
@@ -708,8 +705,8 @@ namespace RCNet.MathTools.MatrixMath
                         p = x / s;
                         q = z / s;
                         r = Math.Sqrt(p * p + q * q);
-                        p = p / r;
-                        q = q / r;
+                        p /= r;
+                        q /= r;
 
                         // Row modification
 
@@ -747,7 +744,7 @@ namespace RCNet.MathTools.MatrixMath
                         _imaginaryEigenvalues[n - 1] = z;
                         _imaginaryEigenvalues[n] = -z;
                     }
-                    n = n - 2;
+                    n -= 2;
                     iter = 0;
 
                     // No convergence yet
@@ -802,7 +799,7 @@ namespace RCNet.MathTools.MatrixMath
                         }
                     }
 
-                    iter = iter + 1; // (Could check iteration count here.)
+                    ++iter; // (Could check iteration count here.)
 
                     // Look for two consecutive small sub-diagonal elements
 
@@ -816,9 +813,9 @@ namespace RCNet.MathTools.MatrixMath
                         q = _hessenbergForm[m + 1][m + 1] - z - r - s;
                         r = _hessenbergForm[m + 2][m + 1];
                         s = Math.Abs(p) + Math.Abs(q) + Math.Abs(r);
-                        p = p / s;
-                        q = q / s;
-                        r = r / s;
+                        p /= s;
+                        q /= s;
+                        r /= s;
                         if (m == l)
                         {
                             break;
@@ -854,9 +851,9 @@ namespace RCNet.MathTools.MatrixMath
                             x = Math.Abs(p) + Math.Abs(q) + Math.Abs(r);
                             if (x != 0.0)
                             {
-                                p = p / x;
-                                q = q / x;
-                                r = r / x;
+                                p /= x;
+                                q /= x;
+                                r /= x;
                             }
                         }
                         if (x == 0.0)
@@ -878,12 +875,12 @@ namespace RCNet.MathTools.MatrixMath
                             {
                                 _hessenbergForm[k][k - 1] = -_hessenbergForm[k][k - 1];
                             }
-                            p = p + s;
+                            p += s;
                             x = p / s;
                             y = q / s;
                             z = r / s;
-                            q = q / p;
-                            r = r / p;
+                            q /= p;
+                            r /= p;
 
                             // Row modification
 
@@ -892,7 +889,7 @@ namespace RCNet.MathTools.MatrixMath
                                 p = _hessenbergForm[k][j] + q * _hessenbergForm[k + 1][j];
                                 if (notlast)
                                 {
-                                    p = p + r * _hessenbergForm[k + 2][j];
+                                    p += r * _hessenbergForm[k + 2][j];
                                     _hessenbergForm[k + 2][j] = _hessenbergForm[k + 2][j] - p * z;
                                 }
                                 _hessenbergForm[k][j] = _hessenbergForm[k][j] - p * x;
@@ -906,7 +903,7 @@ namespace RCNet.MathTools.MatrixMath
                                 p = x * _hessenbergForm[i][k] + y * _hessenbergForm[i][k + 1];
                                 if (notlast)
                                 {
-                                    p = p + z * _hessenbergForm[i][k + 2];
+                                    p += z * _hessenbergForm[i][k + 2];
                                     _hessenbergForm[i][k + 2] = _hessenbergForm[i][k + 2] - p * r;
                                 }
                                 _hessenbergForm[i][k] = _hessenbergForm[i][k] - p;
@@ -920,7 +917,7 @@ namespace RCNet.MathTools.MatrixMath
                                 p = x * _eigenvectors[i][k] + y * _eigenvectors[i][k + 1];
                                 if (notlast)
                                 {
-                                    p = p + z * _eigenvectors[i][k + 2];
+                                    p += z * _eigenvectors[i][k + 2];
                                     _eigenvectors[i][k + 2] = _eigenvectors[i][k + 2] - p * r;
                                 }
                                 _eigenvectors[i][k] = _eigenvectors[i][k] - p;
@@ -955,7 +952,7 @@ namespace RCNet.MathTools.MatrixMath
                         r = 0.0;
                         for (int j = l; j <= n; j++)
                         {
-                            r = r + _hessenbergForm[i][j] * _hessenbergForm[j][n];
+                            r += _hessenbergForm[i][j] * _hessenbergForm[j][n];
                         }
                         if (_imaginaryEigenvalues[i] < 0.0)
                         {
@@ -1036,8 +1033,8 @@ namespace RCNet.MathTools.MatrixMath
                         sa = 0.0;
                         for (int j = l; j <= n; j++)
                         {
-                            ra = ra + _hessenbergForm[i][j] * _hessenbergForm[j][n - 1];
-                            sa = sa + _hessenbergForm[i][j] * _hessenbergForm[j][n];
+                            ra += _hessenbergForm[i][j] * _hessenbergForm[j][n - 1];
+                            sa += _hessenbergForm[i][j] * _hessenbergForm[j][n];
                         }
                         w = _hessenbergForm[i][i] - p;
 
@@ -1132,7 +1129,7 @@ namespace RCNet.MathTools.MatrixMath
                     z = 0.0;
                     for (int k = low; k <= Math.Min(j, high); k++)
                     {
-                        z = z + _eigenvectors[i][k] * _hessenbergForm[k][j];
+                        z += _eigenvectors[i][k] * _hessenbergForm[k][j];
                     }
                     _eigenvectors[i][j] = z;
                 }

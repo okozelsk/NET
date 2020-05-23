@@ -1,9 +1,7 @@
-﻿using System;
+﻿using RCNet.Extensions;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using RCNet.Extensions;
 
 namespace RCNet.Neural.Network.NonRecurrent.PP
 {
@@ -40,9 +38,9 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
         public string InfoMessage { get; private set; }
 
         //Attributes
-        private PDeltaRuleTrainerSettings _settings;
-        private ParallelPerceptron _net;
-        private List<double[]> _inputVectorCollection;
+        private readonly PDeltaRuleTrainerSettings _settings;
+        private readonly ParallelPerceptron _net;
+        private readonly List<double[]> _inputVectorCollection;
         private readonly List<double[]> _outputVectorCollection;
         private readonly Random _rand;
         private readonly double _acceptableError;
@@ -54,7 +52,7 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
         private double _learningRate;
         private double[] _prevWeights;
         private double _prevMSE;
-        private List<WorkerRange> _workerRangeCollection;
+        private readonly List<WorkerRange> _workerRangeCollection;
 
         //Constructor
         /// <summary>
@@ -133,7 +131,7 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
                 }
                 else if (_prevMSE < MSE)
                 {
-                    if(_learningRate > _settings.MinLR)
+                    if (_learningRate > _settings.MinLR)
                     {
                         applyWeights = false;
                     }
@@ -142,7 +140,7 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
                     _learningRate = Math.Max(_settings.MinLR, _learningRate);
                 }
             }
-            if(applyWeights)
+            if (applyWeights)
             {
                 //Store MSE
                 _prevMSE = MSE;
@@ -192,10 +190,10 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
         /// </summary>
         public bool Iteration()
         {
-            if(AttemptEpoch == MaxAttemptEpoch)
+            if (AttemptEpoch == MaxAttemptEpoch)
             {
                 //Max epoch reached, try new attempt
-                if(!NextAttempt())
+                if (!NextAttempt())
                 {
                     //Next attempt is not available
                     return false;
@@ -278,8 +276,8 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
             public double[] WeightChangeAcc { get; set; }
             public double M { get; set; }
 
-        //Constructor
-        public WorkerRange(int fromRow, int toRow, int numOfWeights)
+            //Constructor
+            public WorkerRange(int fromRow, int toRow, int numOfWeights)
             {
                 FromRow = fromRow;
                 ToRow = toRow;

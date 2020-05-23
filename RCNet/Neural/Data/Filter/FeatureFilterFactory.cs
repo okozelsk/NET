@@ -1,9 +1,5 @@
 ﻿using RCNet.MathTools;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
 
 namespace RCNet.Neural.Data.Filter
@@ -20,7 +16,7 @@ namespace RCNet.Neural.Data.Filter
         /// <returns></returns>
         public static IFeatureFilterSettings LoadSettings(XElement elem)
         {
-            switch(elem.Name.LocalName)
+            switch (elem.Name.LocalName)
             {
                 case "binFeature":
                     return new BinFeatureFilterSettings(elem);
@@ -40,7 +36,7 @@ namespace RCNet.Neural.Data.Filter
         /// <param name="settings">Settings of feature filter</param>
         public static FeatureFilterBase Create(Interval outputRange, IFeatureFilterSettings settings)
         {
-            switch(settings.Type)
+            switch (settings.Type)
             {
                 case FeatureFilterBase.FeatureType.Binary:
                     return new BinFeatureFilter(outputRange, (BinFeatureFilterSettings)settings);

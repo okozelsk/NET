@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
+﻿using RCNet.Neural.Activation;
+using System;
 using System.Globalization;
+using System.Linq;
 using System.Xml.Linq;
-using System.IO;
-using RCNet.XmlTools;
-using RCNet.Neural.Activation;
-using RCNet.MathTools;
 
 namespace RCNet.Neural.Network.NonRecurrent.FF
 {
@@ -107,7 +102,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         /// Generates xml element containing the settings.
         /// </summary>
         /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
@@ -119,7 +114,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         /// <summary>
         /// Generates default named xml element containing the settings.
         /// </summary>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(bool suppressDefaults)
         {

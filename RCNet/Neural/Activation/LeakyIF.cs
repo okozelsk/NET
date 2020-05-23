@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RCNet.Extensions;
-using RCNet.MathTools;
-using RCNet.MathTools.Differential;
+﻿using RCNet.MathTools.Differential;
 using RCNet.MathTools.VectorMath;
+using System;
 
 namespace RCNet.Neural.Activation
 {

@@ -1,8 +1,8 @@
-﻿using System;
+﻿using RCNet.Extensions;
+using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
-using RCNet.Extensions;
+using System.Threading.Tasks;
 
 namespace RCNet.Neural.Network.NonRecurrent.FF
 {

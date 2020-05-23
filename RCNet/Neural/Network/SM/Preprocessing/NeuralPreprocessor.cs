@@ -1,17 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Globalization;
-using System.Text;
-using RCNet.Extensions;
+﻿using RCNet.Extensions;
 using RCNet.MathTools;
 using RCNet.MathTools.Hurst;
 using RCNet.Neural.Data;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir;
-using RCNet.Neural.Network.SM.Preprocessing.Neuron;
-using RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor;
 using RCNet.Neural.Network.SM.Preprocessing.Input;
+using RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor;
+using RCNet.Neural.Network.SM.Preprocessing.Reservoir;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Text;
 
 namespace RCNet.Neural.Network.SM.Preprocessing
 {
@@ -65,7 +62,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         public int TotalNumOfHiddenNeurons { get; }
 
         /// <summary>
-        /// Descriptors of all output features in the same order as returns Preprocess method (neural predictors + routed input values)
+        /// Descriptors of all output features in the same order as returns Preprocess method
         /// </summary>
         public List<PredictorDescriptor> OutputFeatureDescriptorCollection { get; private set; }
 
@@ -111,7 +108,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             ReservoirCollection = new List<ReservoirInstance>(_preprocessorCfg.ReservoirInstancesCfg.ReservoirInstanceCfgCollection.Count);
             int reservoirInstanceID = 0;
             int defaultBootCycles = 0;
-            foreach(ReservoirInstanceSettings reservoirInstanceCfg in _preprocessorCfg.ReservoirInstancesCfg.ReservoirInstanceCfgCollection)
+            foreach (ReservoirInstanceSettings reservoirInstanceCfg in _preprocessorCfg.ReservoirInstancesCfg.ReservoirInstanceCfgCollection)
             {
                 ReservoirStructureSettings structCfg = _preprocessorCfg.ReservoirStructuresCfg.GetReservoirStructureCfg(reservoirInstanceCfg.StructureCfgName);
                 ReservoirInstance reservoir = new ReservoirInstance(reservoirInstanceID++,
@@ -160,11 +157,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// <param name="f2">Feature 2</param>
         public static int CompareOutputFeature(Tuple<int, double, BasicStat> f1, Tuple<int, double, BasicStat> f2)
         {
-            if(f1.Item3.Span > f2.Item3.Span)
+            if (f1.Item3.Span > f2.Item3.Span)
             {
                 return -1;
             }
-            else if(f1.Item3.Span < f2.Item3.Span)
+            else if (f1.Item3.Span < f2.Item3.Span)
             {
                 return 1;
             }
@@ -228,7 +225,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             NumOfActiveOutputFeatures = 0;
             for (int i = 0; i < featureStatCollection.Count; i++)
             {
-                if(featureStatCollection[i].Item3.Span > MinPredictorValueDifference && i < firstRejectedIndex)
+                if (featureStatCollection[i].Item3.Span > MinPredictorValueDifference && i < firstRejectedIndex)
                 {
                     //Enable predictor
                     OutputFeatureGeneralSwitchCollection[featureStatCollection[i].Item1] = true;
@@ -246,7 +243,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             //Reset input encoder
             InputEncoder.Reset();
             //Reset reservoirs
-            foreach(ReservoirInstance reservoir in ReservoirCollection)
+            foreach (ReservoirInstance reservoir in ReservoirCollection)
             {
                 reservoir.Reset(true);
             }
@@ -322,7 +319,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             //Collect reservoirs' neural predictors
             outputFeaturesIdx += CopyReservoirsPredictorsTo(outputFeatures, outputFeaturesIdx);
             //Bidirectional input processing?
-            if(Bidir)
+            if (Bidir)
             {
                 //Set reverse mode
                 InputEncoder.SetReverseMode();
@@ -340,7 +337,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// <param name="input">Input values in natural form</param>
         public double[] Preprocess(double[] input)
         {
-            if(OutputFeatureGeneralSwitchCollection == null)
+            if (OutputFeatureGeneralSwitchCollection == null)
             {
                 throw new InvalidOperationException($"Preprocessor is not initialized. Call InitializeAndPreprocessBundle method first.");
             }

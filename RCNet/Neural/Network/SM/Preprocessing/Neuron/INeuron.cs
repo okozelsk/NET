@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RCNet.MathTools;
-using RCNet.Neural.Activation;
+﻿using RCNet.Neural.Activation;
 using RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor;
+using System.Collections.Generic;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
 {
@@ -54,7 +49,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
         /// Number of provided predictors
         /// </summary>
         int NumOfEnabledPredictors { get; }
-        
+
         //Methods
         /// <summary>
         /// Resets neuron to its initial state
@@ -101,7 +96,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
         double[] GetPredictors();
 
         /// <summary>
-        /// Returns identifiers of enabled predictors in the same order as in the methods CopyPredictorsTo and GetPredictors
+        /// Returns identifiers of enabled predictors in the same order as is used in the methods CopyPredictorsTo and GetPredictors
         /// </summary>
         List<PredictorsProvider.PredictorID> GetEnabledPredictorsIDs();
 

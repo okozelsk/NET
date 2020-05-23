@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RCNet.Extensions;
+﻿using RCNet.Extensions;
+using System;
 
 namespace RCNet.MathTools.MatrixMath
 {
@@ -491,7 +487,7 @@ namespace RCNet.MathTools.MatrixMath
                                 }
                             }
                             e[p - 2] = f;
-                            iter = iter + 1;
+                            ++iter;
                         }
                         break;
 

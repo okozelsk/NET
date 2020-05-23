@@ -1,15 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using RCNet.MathTools.Differential;
+using RCNet.RandomValue;
+using System;
 using System.Globalization;
 using System.Xml.Linq;
-using System.Reflection;
-using RCNet.Extensions;
-using RCNet.RandomValue;
-using RCNet.XmlTools;
-using RCNet.MathTools.Differential;
 
 namespace RCNet.Neural.Activation
 {
@@ -197,10 +190,7 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Creates an instance and initializes it from given xml element.
         /// </summary>
-        /// <param name="elem">
-        /// Xml data containing AdExpIF activation settings.
-        /// Content of xml element is always validated against the xml schema.
-        /// </param>
+        /// <param name="elem">Xml element containing the initialization settings</param>
         public AdExpIFSettings(XElement elem)
         {
             //Validation
@@ -290,7 +280,7 @@ namespace RCNet.Neural.Activation
         public bool IsDefaultStimuliDuration { get { return (StimuliDuration == ActivationFactory.DefaultStimuliDuration); } }
 
 
-        
+
         /// <summary>
         /// Identifies settings containing only default values
         /// </summary>
@@ -328,7 +318,7 @@ namespace RCNet.Neural.Activation
             {
                 throw new ArgumentException($"Invalid StimuliDuration {StimuliDuration.ToString(CultureInfo.InvariantCulture)}. StimuliDuration must be GT 0.", "StimuliDuration");
             }
-            
+
             return;
         }
 
@@ -344,12 +334,12 @@ namespace RCNet.Neural.Activation
         /// Generates xml element containing the settings.
         /// </summary>
         /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             XElement rootElem = new XElement(rootElemName);
-            if(!suppressDefaults || !IsDefaultSolverMethod)
+            if (!suppressDefaults || !IsDefaultSolverMethod)
             {
                 rootElem.Add(new XAttribute("solverMethod", SolverMethod.ToString()));
             }
@@ -409,7 +399,7 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Generates default named xml element containing the settings.
         /// </summary>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(bool suppressDefaults)
         {

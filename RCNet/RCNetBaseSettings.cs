@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Globalization;
-using System.Xml.Linq;
-using System.Reflection;
-using System.Xml.Schema;
 using System.IO;
+using System.Reflection;
 using System.Xml;
-using System.Text;
+using System.Xml.Linq;
+using System.Xml.Schema;
 
 namespace RCNet
 {
@@ -69,7 +65,7 @@ namespace RCNet
                 return XmlSchema.Read(schemaStream, null);
             }
         }
-        
+
         /// <summary>
         /// Validates and completes given xml element against specified xsd type defined in RCNetTypes.xsd
         /// </summary>
@@ -108,7 +104,7 @@ namespace RCNet
         /// Generates xml element containing the settings.
         /// </summary>
         /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public virtual XElement GetXml(string rootElemName, bool suppressDefaults)
         {
@@ -118,7 +114,7 @@ namespace RCNet
         /// <summary>
         /// Generates default named xml element containing the settings.
         /// </summary>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public virtual XElement GetXml(bool suppressDefaults)
         {

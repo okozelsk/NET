@@ -1,17 +1,8 @@
-﻿using System;
+﻿using RCNet.Neural.Data.Transformers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Globalization;
 using System.Xml.Linq;
-using System.Xml.XPath;
-using System.IO;
-using RCNet.Extensions;
-using RCNet.MathTools.Probability;
-using RCNet.XmlTools;
-using RCNet.RandomValue;
-using RCNet.Neural.Data.Transformers;
-using RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Input
 {
@@ -67,15 +58,15 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// </summary>
         /// <param name="source">Source instance</param>
         public FieldsSettings(FieldsSettings source)
-            :this(source.ExternalFieldsCfg, source.TransformedFieldsCfg, source.GeneratedFieldsCfg)
+            : this(source.ExternalFieldsCfg, source.TransformedFieldsCfg, source.GeneratedFieldsCfg)
         {
             return;
         }
 
         /// <summary>
-        /// Creates the instance and initialize it from given xml element.
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml data containing settings.</param>
+        /// <param name="elem">Xml element containing the initialization settings.</param>
         public FieldsSettings(XElement elem)
         {
             //Validation
@@ -126,11 +117,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             {
                 foreach (TransformedFieldSettings transformedFieldCfg in TransformedFieldsCfg.FieldCfgCollection)
                 {
-                    if(names.IndexOf(transformedFieldCfg.Name) != -1)
+                    if (names.IndexOf(transformedFieldCfg.Name) != -1)
                     {
                         throw new ArgumentException($"Field name {transformedFieldCfg.Name} is not unique.", "TransformedFieldsCfg");
                     }
-                    foreach(string name in TransformerFactory.GetAssociatedNames(transformedFieldCfg.TransformerCfg))
+                    foreach (string name in TransformerFactory.GetAssociatedNames(transformedFieldCfg.TransformerCfg))
                     {
                         if (names.IndexOf(name) == -1)
                         {
@@ -162,11 +153,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         public List<string> GetNames()
         {
             List<string> names = new List<string>(TotalNumOfFields);
-            foreach(ExternalFieldSettings externalFieldCfg in ExternalFieldsCfg.FieldCfgCollection)
+            foreach (ExternalFieldSettings externalFieldCfg in ExternalFieldsCfg.FieldCfgCollection)
             {
                 names.Add(externalFieldCfg.Name);
             }
-            if(TransformedFieldsCfg != null)
+            if (TransformedFieldsCfg != null)
             {
                 foreach (TransformedFieldSettings transformedFieldCfg in TransformedFieldsCfg.FieldCfgCollection)
                 {
@@ -187,13 +178,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// Returns the zero-based index of the field among concated external and generated fields or -1 if name was not found.
         /// </summary>
         /// <param name="fieldName">Name of the field</param>
-        /// <param name="ex">Specifies if to throw exception when not found</param>
+        /// <param name="ex">Specifies whether to throw exception when not found</param>
         public int GetFieldID(string fieldName, bool ex = true)
         {
             int index = 0;
             foreach (ExternalFieldSettings externalFieldCfg in ExternalFieldsCfg.FieldCfgCollection)
             {
-                if(fieldName == externalFieldCfg.Name)
+                if (fieldName == externalFieldCfg.Name)
                 {
                     return index;
                 }
@@ -265,7 +256,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// Generates xml element containing the settings.
         /// </summary>
         /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
@@ -287,7 +278,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// Generates default named xml element containing the settings.
         /// </summary>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(bool suppressDefaults)
         {

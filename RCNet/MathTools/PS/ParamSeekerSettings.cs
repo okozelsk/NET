@@ -1,12 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 using System.Globalization;
-using System.Reflection;
-using RCNet.XmlTools;
+using System.Xml.Linq;
 
 namespace RCNet.MathTools.PS
 {
@@ -69,13 +63,13 @@ namespace RCNet.MathTools.PS
         /// </summary>
         /// <param name="source">Source instance</param>
         public ParamSeekerSettings(ParamSeekerSettings source)
-            :this(source.Min, source.Max, source.NumOfSubIntervals)
+            : this(source.Min, source.Max, source.NumOfSubIntervals)
         {
             return;
         }
 
         /// <summary>
-        /// Creates the instance and initializes it from given xml element.
+        /// Creates an initialized instance.
         /// </summary>
         /// <param name="elem">Xml data containing the settings</param>
         public ParamSeekerSettings(XElement elem)
@@ -138,7 +132,7 @@ namespace RCNet.MathTools.PS
         /// Generates xml element containing the settings.
         /// </summary>
         /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {

@@ -1,7 +1,6 @@
-﻿using System;
+﻿using RCNet.RandomValue;
+using System;
 using System.Collections.Generic;
-using System.Globalization;
-using RCNet.RandomValue;
 
 namespace RCNet.Extensions
 {
@@ -219,7 +218,7 @@ namespace RCNet.Extensions
         public static double NextGammaDouble(this Random rand, double alpha, double beta)
         {
             //Checks
-            if(alpha <= 0)
+            if (alpha <= 0)
             {
                 throw new ArgumentException("Alpha parameter must be GT 0.", "alpha");
             }
@@ -228,7 +227,7 @@ namespace RCNet.Extensions
                 throw new ArgumentException("Beta parameter must be GT 0.", "beta");
             }
             //Computation
-            if(alpha > 1d)
+            if (alpha > 1d)
             {
                 /* 
                  * R.C.H. Cheng, "The generation of Gamma variables with non-integral shape parameters"
@@ -252,10 +251,10 @@ namespace RCNet.Extensions
                             return x * beta;
                         }
                     }
-                 }
+                }
 
             }
-            else if(alpha == 1d)
+            else if (alpha == 1d)
             {
                 //Exponential distribution
                 return -Math.Log(1d - rand.NextDouble()) * beta;
@@ -343,7 +342,7 @@ namespace RCNet.Extensions
                     value = rand.NextRangedUniformDouble(settings.Min, settings.Max);
                     break;
                 case RandomCommon.DistributionType.Gaussian:
-                    if(settings.DistrCfg != null)
+                    if (settings.DistrCfg != null)
                     {
                         GaussianDistrSettings gaussianCfg = settings.DistrCfg as GaussianDistrSettings;
                         value = rand.NextFilterredGaussianDouble(gaussianCfg.Mean, gaussianCfg.StdDev, settings.Min, settings.Max);
@@ -439,14 +438,14 @@ namespace RCNet.Extensions
         }
 
         /// <summary>
-        /// Fills array by random values following the Uniform distribution.
+        /// Fills given array with random values following the Uniform distribution.
         /// </summary>
         /// <param name="rand"></param>
-        /// <param name="array">The array to be filled</param>
+        /// <param name="array">Array to be filled</param>
         /// <param name="min">Min value</param>
         /// <param name="max">Max value</param>
-        /// <param name="randomSign">Specifies if to randomize sign</param>
-        /// <param name="count">Specifies how many elements of the array to be filled</param>
+        /// <param name="randomSign">Specifies whether to randomize sign</param>
+        /// <param name="count">Specifies how many elements of Array to be filled</param>
         public static void FillUniform(this Random rand, double[] array, double min, double max, bool randomSign, int count = -1)
         {
             if (count < 0) count = array.Length;
@@ -458,12 +457,12 @@ namespace RCNet.Extensions
         }
 
         /// <summary>
-        /// Fills array with random doubles.
+        /// Fills given array with random doubles.
         /// </summary>
         /// <param name="rand"></param>
-        /// <param name="array">The array to be filled</param>
+        /// <param name="array">Array to be filled</param>
         /// <param name="settings">Encapsulated settings</param>
-        /// <param name="count">Specifies how many elements of the array to be filled</param>
+        /// <param name="count">Specifies how many elements of Array to be filled</param>
         public static void Fill(this Random rand, double[] array, RandomValueSettings settings, int count = -1)
         {
             if (count < 0) count = array.Length;
@@ -475,12 +474,12 @@ namespace RCNet.Extensions
         }
 
         /// <summary>
-        /// Fills array with random unsigned doubles.
+        /// Fills given array with random unsigned doubles.
         /// </summary>
         /// <param name="rand"></param>
-        /// <param name="array">The array to be filled</param>
+        /// <param name="array">Array to be filled</param>
         /// <param name="settings">Encapsulated settings</param>
-        /// <param name="count">Specifies how many elements of the array to be filled</param>
+        /// <param name="count">Specifies how many elements of Array to be filled</param>
         public static void Fill(this Random rand, double[] array, URandomValueSettings settings, int count = -1)
         {
             if (count < 0) count = array.Length;

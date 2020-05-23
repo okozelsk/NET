@@ -2,9 +2,6 @@
 using RCNet.MathTools;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RCNet.Neural.Data
 {
@@ -47,7 +44,7 @@ namespace RCNet.Neural.Data
         public InputPattern(InputPattern source)
         {
             VariablesDataCollection = new List<double[]>(source.VariablesDataCollection.Count);
-            foreach(double[] vector in source.VariablesDataCollection)
+            foreach (double[] vector in source.VariablesDataCollection)
             {
                 VariablesDataCollection.Add((double[])vector.Clone());
             }
@@ -71,8 +68,8 @@ namespace RCNet.Neural.Data
         /// <param name="inputData">1D array containing the pattern input data</param>
         /// <param name="numOfVariables">Number of pattern variables</param>
         /// <param name="variablesSchema">Schema of variables organization in the 1D input pattern</param>
-        /// <param name="detrend">Specifies if to remove trend from the variables' data</param>
-        /// <param name="unifyAmplitudes">Specifies if to unify amplitude of variable's data over the time dimension</param>
+        /// <param name="detrend">Specifies whether to remove trend from the variables' data</param>
+        /// <param name="unifyAmplitudes">Specifies whether to unify amplitude of variable's data over the time dimension</param>
         /// <param name="signalBeginThreshold">If specified (GT 0), signal begin will be decided at timepoint Tx where (abs(s(Tx) - s(T0)) / s(max) - s(min)) >= given threshold (x in order 0..last)</param>
         /// <param name="signalEndThreshold">If specified (GT 0), signal end will be decided at timepoint Tx where (abs(s(Tx) - s(T last)) / s(max) - s(min)) >= given threshold (x in order last..0)</param>
         /// <param name="uniformTimeScale">If false then each variable will have its own time dimension</param>
@@ -92,7 +89,7 @@ namespace RCNet.Neural.Data
             List<double[]> patternRawData = PatternDataFromArray(inputData, 0, inputData.Length, numOfVariables, variablesSchema);
             int rawTimePoints = patternRawData[0].Length;
             //Remove trend?
-            if(detrend)
+            if (detrend)
             {
                 //Trend removal -> convert data to differences
                 for (int varIdx = 0; varIdx < numOfVariables; varIdx++)
@@ -118,12 +115,12 @@ namespace RCNet.Neural.Data
                 for (int varIdx = 0; varIdx < numOfVariables; varIdx++)
                 {
                     signalBeginIdxs[varIdx] = DetectSignalBegin(patternRawData[varIdx], signalBeginThreshold);
-                    if(minSignalBeginIdx == -1 || minSignalBeginIdx > signalBeginIdxs[varIdx])
+                    if (minSignalBeginIdx == -1 || minSignalBeginIdx > signalBeginIdxs[varIdx])
                     {
                         minSignalBeginIdx = signalBeginIdxs[varIdx];
                     }
                 }
-                if(uniformTimeScale)
+                if (uniformTimeScale)
                 {
                     signalBeginIdxs.Populate(minSignalBeginIdx);
                 }
@@ -148,7 +145,7 @@ namespace RCNet.Neural.Data
             //Correct begin/end indexes
             for (int varIdx = 0; varIdx < numOfVariables; varIdx++)
             {
-                if(signalEndIdxs[varIdx] <= signalBeginIdxs[varIdx])
+                if (signalEndIdxs[varIdx] <= signalBeginIdxs[varIdx])
                 {
                     signalBeginIdxs[varIdx] = 0;
                     signalEndIdxs[varIdx] = rawTimePoints - 1;
@@ -183,7 +180,7 @@ namespace RCNet.Neural.Data
             }
 
             //Unify amplitudes
-            if(unifyAmplitudes)
+            if (unifyAmplitudes)
             {
                 UnifyAmplitudes();
             }
@@ -261,7 +258,7 @@ namespace RCNet.Neural.Data
                 double[] downsampledData = new double[targetLength];
                 for (int downsampledDataIdx = 0; downsampledDataIdx < targetLength; downsampledDataIdx++)
                 {
-                    if(downsampledDataIdx == 0)
+                    if (downsampledDataIdx == 0)
                     {
                         //Select the last value in the group 
                         downsampledData[downsampledDataIdx] = varData[downsampledDataIdx * downsamplingPoints + (downsamplingPoints - 1)];
@@ -349,7 +346,7 @@ namespace RCNet.Neural.Data
         public double[] GetDataAtTimePoint(int timePointIndex)
         {
             double[] data = new double[VariablesDataCollection.Count];
-            for(int i = 0; i < VariablesDataCollection.Count; i++)
+            for (int i = 0; i < VariablesDataCollection.Count; i++)
             {
                 data[i] = VariablesDataCollection[i][timePointIndex];
             }
@@ -374,7 +371,7 @@ namespace RCNet.Neural.Data
             //Pattern data
             int timePoints = dataLength / numOfVariables;
             List<double[]> patternData = new List<double[]>(numOfVariables);
-            for(int i = 0; i < numOfVariables; i++)
+            for (int i = 0; i < numOfVariables; i++)
             {
                 patternData.Add(new double[timePoints]);
             }

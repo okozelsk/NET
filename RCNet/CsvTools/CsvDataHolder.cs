@@ -1,10 +1,7 @@
-﻿using System;
+﻿using RCNet.Extensions;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RCNet.Extensions;
 
 namespace RCNet.CsvTools
 {
@@ -51,14 +48,14 @@ namespace RCNet.CsvTools
         /// Loads data and instantiates an initialized instance.
         /// </summary>
         /// <param name="streamReader">Data stream reader</param>
-        /// <param name="header">Specifies if first row contains column names</param>
+        /// <param name="header">Specifies whether first row contains column names</param>
         /// <param name="delimiter">Data items delimiter. If AutoDetectDelimiter is specified than delimiter will be recognized automatically.</param>
         public CsvDataHolder(StreamReader streamReader, bool header, char delimiter = AutoDetectDelimiter)
         {
             DataRowCollection = new List<DelimitedStringValues>();
             DataDelimiter = delimiter;
             AppendFromStream(streamReader);
-            if(header && DataRowCollection.Count > 0)
+            if (header && DataRowCollection.Count > 0)
             {
                 ColNameCollection = DataRowCollection[0];
                 DataRowCollection.RemoveAt(0);
@@ -88,7 +85,7 @@ namespace RCNet.CsvTools
         /// Loads data and instantiates an initialized instance.
         /// </summary>
         /// <param name="fileName">Data file</param>
-        /// <param name="header">Specifies if first row contains column names</param>
+        /// <param name="header">Specifies whether first row contains column names</param>
         /// <param name="delimiter">Data items delimiter. If AutoDetectDelimiter is specified than delimiter will be recognized automatically.</param>
         public CsvDataHolder(string fileName, bool header, char delimiter = AutoDetectDelimiter)
             : this(new StreamReader(new FileStream(fileName, FileMode.Open)), header, delimiter)
@@ -114,10 +111,10 @@ namespace RCNet.CsvTools
         /// <param name="dsv">String values</param>
         private bool ContainsDataItems(DelimitedStringValues dsv)
         {
-            foreach(string item in dsv.StringValueCollection)
+            foreach (string item in dsv.StringValueCollection)
             {
                 //Numerical
-                if(!double.IsNaN(item.ParseDouble(false)))
+                if (!double.IsNaN(item.ParseDouble(false)))
                 {
                     return true;
                 }
@@ -174,7 +171,7 @@ namespace RCNet.CsvTools
         /// Appends data rows from given stream reader
         /// </summary>
         /// <param name="streamReader">Data stream reader</param>
-        /// <param name="maxRows">Maximum rows to be loaded. If GT 0 is specified than loading stops when maxRows is reached.</param>
+        /// <param name="maxRows">Maximum rows to be loaded. If GT 0 is specified then loading stops when maxRows is reached.</param>
         /// <returns>Number of loaded rows</returns>
         public int AppendFromStream(StreamReader streamReader, int maxRows = 0)
         {
@@ -226,7 +223,7 @@ namespace RCNet.CsvTools
         /// <param name="streamWriter">Target stream</param>
         public void WriteToStream(StreamWriter streamWriter)
         {
-            if(ColNameCollection.NumOfStringValues > 0)
+            if (ColNameCollection.NumOfStringValues > 0)
             {
                 streamWriter.WriteLine(ColNameCollection.ToString());
             }
@@ -243,7 +240,7 @@ namespace RCNet.CsvTools
         /// <param name="fileName">Target file name</param>
         public void Save(string fileName)
         {
-            using (StreamWriter streamWriter = new StreamWriter(new FileStream(fileName,FileMode.Create)))
+            using (StreamWriter streamWriter = new StreamWriter(new FileStream(fileName, FileMode.Create)))
             {
                 WriteToStream(streamWriter);
             }

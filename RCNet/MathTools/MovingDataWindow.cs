@@ -1,7 +1,5 @@
-﻿using RCNet.Extensions;
-using RCNet.Queue;
+﻿using RCNet.Queue;
 using System;
-using System.Collections.Generic;
 
 namespace RCNet.MathTools
 {
@@ -34,7 +32,7 @@ namespace RCNet.MathTools
             _dataWindow = source._dataWindow.ShallowClone();
             return;
         }
-        
+
         //Properties
         /// <summary>
         /// Internal capacity

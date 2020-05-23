@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using RCNet.Extensions;
 
 namespace RCNet.MathTools.MatrixMath
 {
@@ -32,7 +31,7 @@ namespace RCNet.MathTools.MatrixMath
             _numOfCols = source.NumOfCols;
             _RDiagData = new double[_numOfCols];
             //Main loop
-            for(int k = 0; k < _numOfCols; k++)
+            for (int k = 0; k < _numOfCols; k++)
             {
                 //Compute 2-norm of k-th column
                 double norm = 0d;
@@ -99,7 +98,7 @@ namespace RCNet.MathTools.MatrixMath
                              resultData[row][col] = 0d;
                          }
                      }//col
-                });//row
+                 });//row
                 return result;
             }//get
         }//H

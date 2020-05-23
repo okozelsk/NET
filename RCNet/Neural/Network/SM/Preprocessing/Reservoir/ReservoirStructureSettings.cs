@@ -1,15 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool;
+using System;
 using System.Linq;
-using System.Reflection;
-using System.Globalization;
 using System.Xml.Linq;
-using System.IO;
-using System.Xml.XPath;
-using RCNet.Extensions;
-using RCNet.XmlTools;
-using RCNet.RandomValue;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
 {
@@ -63,18 +55,15 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// </summary>
         /// <param name="source">Source instance</param>
         public ReservoirStructureSettings(ReservoirStructureSettings source)
-            :this(source.Name, source.PoolsCfg, source.InterPoolConnectionsCfg)
+            : this(source.Name, source.PoolsCfg, source.InterPoolConnectionsCfg)
         {
             return;
         }
 
         /// <summary>
-        /// Creates the instance and initialize it from given xml element.
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">
-        /// Xml data containing reservoir settings.
-        /// Content of xml element is always validated against the xml schema.
-        /// </param>
+        /// <param name="elem">Xml element containing the initialization settings</param>
         public ReservoirStructureSettings(XElement elem)
         {
             //Validation
@@ -168,7 +157,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// Generates xml element containing the settings.
         /// </summary>
         /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
@@ -186,7 +175,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// <summary>
         /// Generates default named xml element containing the settings.
         /// </summary>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(bool suppressDefaults)
         {

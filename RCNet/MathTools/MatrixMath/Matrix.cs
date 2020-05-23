@@ -1,9 +1,9 @@
-﻿using System;
+﻿using RCNet.Extensions;
+using RCNet.MathTools.VectorMath;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using RCNet.Extensions;
-using RCNet.MathTools.VectorMath;
 
 namespace RCNet.MathTools.MatrixMath
 {
@@ -48,7 +48,7 @@ namespace RCNet.MathTools.MatrixMath
         /// </summary>
         /// <param name="sourceMatrix"></param>
         public Matrix(Matrix sourceMatrix)
-            :this(sourceMatrix._data)
+            : this(sourceMatrix._data)
         {
             return;
         }
@@ -57,7 +57,7 @@ namespace RCNet.MathTools.MatrixMath
         /// Instantiates matrix based on dimensions of given array of arrays and copies the data into the new matrix.
         /// </summary>
         /// <param name="data">Matrix data</param>
-        /// <param name="copy">Specifies if to create copy of the data or adopt given instance</param>
+        /// <param name="copy">Specifies whether to create copy of the data or adopt given instance</param>
         public Matrix(double[][] data, bool copy = true)
         {
             _data = copy ? data.Clone2D() : data;
@@ -92,11 +92,11 @@ namespace RCNet.MathTools.MatrixMath
         {
             get
             {
-                for(int i = 0; i < NumOfRows; i++)
+                for (int i = 0; i < NumOfRows; i++)
                 {
-                    for(int j = 0; j < NumOfCols; j++)
+                    for (int j = 0; j < NumOfCols; j++)
                     {
-                        if(_data[i][j] != 0)
+                        if (_data[i][j] != 0)
                         {
                             return false;
                         }
@@ -234,7 +234,7 @@ namespace RCNet.MathTools.MatrixMath
         /// <param name="value">Value</param>
         public void SetCol(int col, double value = 0)
         {
-            for(int i = 0; i < _data.Length; i++)
+            for (int i = 0; i < _data.Length; i++)
             {
                 _data[i][col] = value;
             }
@@ -387,11 +387,11 @@ namespace RCNet.MathTools.MatrixMath
             {
                 return false;
             }
-            for(int i = 0; i < NumOfRows; i++)
+            for (int i = 0; i < NumOfRows; i++)
             {
-                for(int j = 0; j < NumOfCols; j++)
+                for (int j = 0; j < NumOfCols; j++)
                 {
-                    if(_data[i][j] != cmpMatrix._data[i][j])
+                    if (_data[i][j] != cmpMatrix._data[i][j])
                     {
                         return false;
                     }
@@ -487,7 +487,7 @@ namespace RCNet.MathTools.MatrixMath
         {
             int rowsA = A.NumOfRows;
             int colsA = A.NumOfCols;
-            if(rowsA != colsA)
+            if (rowsA != colsA)
             {
                 throw new InvalidOperationException($"Matrix A must be a square matrix (rows dimension = columns dimension)");
             }
@@ -704,7 +704,7 @@ namespace RCNet.MathTools.MatrixMath
             var rangePartitioner = Partitioner.Create(0, rowsA);
             Parallel.ForEach(rangePartitioner, range =>
             {
-                for(int i = range.Item1; i < range.Item2; i++)
+                for (int i = range.Item1; i < range.Item2; i++)
                 {
                     double[] dataRowA = A._data[i];
                     double sum = 0;
@@ -862,7 +862,7 @@ namespace RCNet.MathTools.MatrixMath
             var rangePartitioner = Partitioner.Create(0, rowsR);
             Parallel.ForEach(rangePartitioner, range =>
             {
-                for(int i = range.Item1; i < range.Item2; i++)
+                for (int i = range.Item1; i < range.Item2; i++)
                 {
                     double[] rowData = new double[colsR];
                     for (int j = 0; j < colsR; j++)
@@ -886,7 +886,7 @@ namespace RCNet.MathTools.MatrixMath
             var rangePartitioner = Partitioner.Create(0, rowsR);
             Parallel.ForEach(rangePartitioner, range =>
             {
-                for(int i = range.Item1; i < range.Item2; i++)
+                for (int i = range.Item1; i < range.Item2; i++)
                 {
                     double[] rowData = new double[colsR];
                     for (int j = 0; j < colsR; j++)
@@ -908,7 +908,7 @@ namespace RCNet.MathTools.MatrixMath
             int rowsR = NumOfCols;
             int colsR = NumOfRows;
             double[][] dataR = new double[rowsR][];
-            for(int i = 0; i < rowsR; i++)
+            for (int i = 0; i < rowsR; i++)
             {
                 dataR[i] = new double[colsR];
                 for (int j = 0; j < colsR; j++)
@@ -1066,7 +1066,7 @@ namespace RCNet.MathTools.MatrixMath
                 dictMatrix._data[pivotRow][pivotCol] = 1d / pivot;
             }
             //Result finalization
-            if(!dictChanged)
+            if (!dictChanged)
             {
                 //No transpositionings so use directly IM as the result
                 return dictMatrix;

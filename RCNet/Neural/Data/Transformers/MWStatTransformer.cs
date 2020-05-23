@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RCNet.Extensions;
-using RCNet.RandomValue;
+﻿using RCNet.MathTools;
 using RCNet.Queue;
-using RCNet.MathTools;
+using System;
+using System.Collections.Generic;
 
 namespace RCNet.Neural.Data.Transformers
 {
@@ -95,7 +90,7 @@ namespace RCNet.Neural.Data.Transformers
         {
             _settings = (MWStatTransformerSettings)settings.DeepClone();
             _fieldIdx = availableFieldNames.IndexOf(_settings.InputFieldName);
-            if(_fieldIdx == -1)
+            if (_fieldIdx == -1)
             {
                 throw new InvalidOperationException($"Input field name {_settings.InputFieldName} not found among given available fields.");
             }
@@ -119,17 +114,17 @@ namespace RCNet.Neural.Data.Transformers
         /// <param name="data">Collection of natural values of the already known input fields</param>
         public double Next(double[] data)
         {
-            if(double.IsNaN(data[_fieldIdx]))
+            if (double.IsNaN(data[_fieldIdx]))
             {
                 throw new InvalidOperationException($"Invalid data value at input field index {_fieldIdx} (NaN).");
             }
             _lastValues.Enqueue(data[_fieldIdx], true);
             BasicStat stat = new BasicStat();
-            for(int i = 0; i < _lastValues.Count; i++)
+            for (int i = 0; i < _lastValues.Count; i++)
             {
                 stat.AddSampleValue(_lastValues.GetElementAt(i, true));
             }
-            switch(_settings.Output)
+            switch (_settings.Output)
             {
                 case OutputValue.Sum: return stat.Sum;
                 case OutputValue.NegSum: return stat.NegSum;

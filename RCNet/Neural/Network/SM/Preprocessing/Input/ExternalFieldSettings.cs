@@ -1,15 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using RCNet.Neural.Data.Filter;
+using System;
 using System.Globalization;
+using System.Linq;
 using System.Xml.Linq;
-using System.Reflection;
-using System.IO;
-using RCNet.Extensions;
-using RCNet.XmlTools;
-using RCNet.MathTools;
-using RCNet.Neural.Data.Filter;
-using RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Input
 {
@@ -42,7 +35,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         public IFeatureFilterSettings FeatureFilterCfg { get; }
 
         /// <summary>
-        /// Specifies if to route input field to readout layer together with other predictors
+        /// Specifies whether to route input field to readout layer together with other predictors
         /// </summary>
         public bool RouteToReadout { get; }
 
@@ -57,7 +50,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// </summary>
         /// <param name="name">Input field name</param>
         /// <param name="featureFilterCfg">Configuration of feature filter associated with the input field</param>
-        /// <param name="routeToReadout">Specifies if to route input field to readout layer together with other predictors</param>
+        /// <param name="routeToReadout">Specifies whether to route input field to readout layer together with other predictors</param>
         /// <param name="spikeCodeCfg">Configuration of spike code</param>
         public ExternalFieldSettings(string name,
                                      IFeatureFilterSettings featureFilterCfg,
@@ -82,13 +75,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// </summary>
         /// <param name="source">Source instance</param>
         public ExternalFieldSettings(ExternalFieldSettings source)
-            :this(source.Name, source.FeatureFilterCfg, source.RouteToReadout, source.SpikeCodeCfg)
+            : this(source.Name, source.FeatureFilterCfg, source.RouteToReadout, source.SpikeCodeCfg)
         {
             return;
         }
 
         /// <summary>
-        /// Creates the instance and initializes it from given xml element.
+        /// Creates an initialized instance.
         /// </summary>
         /// <param name="elem">Xml data containing the settings.</param>
         public ExternalFieldSettings(XElement elem)
@@ -145,7 +138,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// Generates xml element containing the settings.
         /// </summary>
         /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
@@ -168,7 +161,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// Generates default named xml element containing the settings.
         /// </summary>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(bool suppressDefaults)
         {

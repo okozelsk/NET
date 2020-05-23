@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RCNet.MathTools;
-using RCNet.Extensions;
-using RCNet.Neural.Network.NonRecurrent.FF;
-using RCNet.Neural.Network.NonRecurrent.PP;
+﻿using RCNet.MathTools;
 using RCNet.Neural.Data;
+using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Text;
 
 namespace RCNet.Neural.Network.NonRecurrent
 {
@@ -20,15 +15,12 @@ namespace RCNet.Neural.Network.NonRecurrent
     {
         //Delegates
         /// <summary>
-        /// This is the control function of the regression process and is called
-        /// after the completion of each regression training epoch.
-        /// The goal of the regression process is to train a network
-        /// that will give good results both on the training data and the test data.
-        /// RegressionControlInArgs object passed to the callback function contains the best error statistics so far
-        /// and the latest statistics. The primary purpose of this function is to decide whether the latest statistics
-        /// are better than the best statistics so far.
-        /// The function can also tell the regression process that it does not make any sense to continue the regression.
-        /// It can terminate the current regression attempt or whole regression process.
+        /// This is the control function of the regression process and it is called after the completion of each regression training epoch.
+        /// The goal of the regression process is to train a network that will give good results both on the training data and the test data.
+        /// BuildingState object contains the best error statistics so far and the latest statistics. The primary purpose of this function is
+        /// to decide whether the latest statistics are better than the best statistics so far.
+        /// Function can also tell the regression process that it does not make any sense to continue the regression. It can
+        /// terminate the current regression attempt or whole regression process.
         /// </summary>
         /// <param name="buildingState">Contains all the necessary information to control the regression.</param>
         /// <returns>Instructions for the regression process.</returns>
@@ -122,7 +114,7 @@ namespace RCNet.Neural.Network.NonRecurrent
         /// <param name="currentBest">For now the best network</param>
         public static bool IsBetter(bool binaryOutput, TrainedNetwork candidate, TrainedNetwork currentBest)
         {
-            if(binaryOutput)
+            if (binaryOutput)
             {
                 if (candidate.CombinedBinaryError < currentBest.CombinedBinaryError)
                 {

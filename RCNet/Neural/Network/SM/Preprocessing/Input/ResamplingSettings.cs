@@ -1,12 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
-using RCNet.Extensions;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Input
 {
@@ -59,7 +53,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         public double SignalEndThreshold { get; }
 
         /// <summary>
-        /// Specifies if to keep the same time scale over all input patterns
+        /// Specifies whether to keep the same time scale over all input patterns
         /// </summary>
         public bool UniformTimeScale { get; }
 
@@ -74,7 +68,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// </summary>
         /// <param name="signalBeginThreshold">Threshold of signal begin detection</param>
         /// <param name="signalEndThreshold">Threshold of signal end detection</param>
-        /// <param name="uniformTimeScale">Specifies if to keep the same time scale over all input patterns</param>
+        /// <param name="uniformTimeScale">Specifies whether to keep the same time scale over all input patterns</param>
         /// <param name="targetTimePoints">Number of time-points of the resampled pattern (resampled pattern length)</param>
         public ResamplingSettings(double signalBeginThreshold = DefaultSignalBeginThreshold,
                                   double signalEndThreshold = DefaultSignalEndThreshold,
@@ -103,10 +97,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// Creates an initialized instance from the given xml element.
         /// </summary>
-        /// <param name="elem">
-        /// Xml data containing the settings.
-        /// Content of xml element is always validated against the xml schema.
-        /// </param>
+        /// <param name="elem">Xml element containing the initialization settings</param>
         public ResamplingSettings(XElement elem)
         {
             //Validation
@@ -189,7 +180,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// Generates xml element containing the settings.
         /// </summary>
         /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
@@ -218,7 +209,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// Generates default named xml element containing the settings.
         /// </summary>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(bool suppressDefaults)
         {

@@ -1,25 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.IO;
-using RCNet.RandomValue;
-using RCNet.Extensions;
-using RCNet.Neural.Data.Filter;
+﻿using RCNet.Extensions;
 using RCNet.Neural.Activation;
+using RCNet.Neural.Data.Filter;
 using RCNet.Neural.Network.NonRecurrent.FF;
+using RCNet.Neural.Network.SM.Preprocessing;
 using RCNet.Neural.Network.SM.Preprocessing.Input;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool;
 using RCNet.Neural.Network.SM.Preprocessing.Neuron;
 using RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Space3D;
+using RCNet.Neural.Network.SM.Preprocessing.Reservoir;
+using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup;
+using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Space3D;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS;
-using RCNet.Neural.Network.SM.Preprocessing;
 using RCNet.Neural.Network.SM.Readout;
-using RCNet.Neural.Network.SM;
+using RCNet.RandomValue;
+using System;
+using System.Collections.Generic;
 
 namespace RCNet.Neural.Network.SM
 {
@@ -64,13 +59,13 @@ namespace RCNet.Neural.Network.SM
             Mixed
         }//ActivationContent
 
-        
+
         //Attribute properties
         /// <summary>
         /// Input configuration
         /// </summary>
         public InputEncoderSettings InputCfg { get; }
-        
+
         /// <summary>
         /// Readout configuration
         /// </summary>
@@ -99,7 +94,7 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         /// <param name="feedingCfg">Input feeding configuration</param>
         /// <param name="extFieldNameCollection">Names of the external input fields</param>
-        /// <param name="routeToReadout">Specifies if to route input values to readout</param>
+        /// <param name="routeToReadout">Specifies whether to route input values to readout</param>
         /// <param name="spikeCodeCfg">Configuration of the spike code</param>
         public static InputEncoderSettings CreateInputCfg(IFeedingSettings feedingCfg,
                                                           IEnumerable<string> extFieldNameCollection,
@@ -116,7 +111,7 @@ namespace RCNet.Neural.Network.SM
                 spikeCodeCfg = new SpikeCodeSettings();
             }
             List<ExternalFieldSettings> extFieldCollection = new List<ExternalFieldSettings>();
-            foreach(string name in extFieldNameCollection)
+            foreach (string name in extFieldNameCollection)
             {
                 extFieldCollection.Add(new ExternalFieldSettings(name, new RealFeatureFilterSettings(), routeToReadout, spikeCodeCfg));
             }
@@ -164,7 +159,7 @@ namespace RCNet.Neural.Network.SM
         public static FeedForwardNetworkSettings CreateMultiLayerRegrNet(int hiddenLayerSize, RCNetBaseSettings hiddenLayerAFnCfg, int numOfHiddenLayers, int numOfAttempts, int numOfEpochs)
         {
             List<HiddenLayerSettings> hiddenLayerCollection = new List<HiddenLayerSettings>(numOfHiddenLayers);
-            for(int i = 0; i < numOfHiddenLayers; i++)
+            for (int i = 0; i < numOfHiddenLayers; i++)
             {
                 hiddenLayerCollection.Add(new HiddenLayerSettings(hiddenLayerSize, hiddenLayerAFnCfg));
             }
@@ -271,7 +266,7 @@ namespace RCNet.Neural.Network.SM
         /// <param name="resStructIdx">Zero based index of the reservoir structure</param>
         private string GetResStructName(ActivationContent activationContent, int resStructIdx)
         {
-            return "ResStruct-"+ activationContent.ToString() + "-Cfg" + (resStructIdx + 1).ToString();
+            return "ResStruct-" + activationContent.ToString() + "-Cfg" + (resStructIdx + 1).ToString();
         }
 
         /// <summary>
@@ -397,7 +392,7 @@ namespace RCNet.Neural.Network.SM
             bool[] predictorSwitches = new bool[PredictorsProvider.NumOfSupportedPredictors];
             predictorSwitches.Populate(false);
             //Enable specified predictors
-            foreach(PredictorsProvider.PredictorID predictorID in allowedPredictor)
+            foreach (PredictorsProvider.PredictorID predictorID in allowedPredictor)
             {
                 predictorSwitches[(int)predictorID] = true;
             }
@@ -445,7 +440,7 @@ namespace RCNet.Neural.Network.SM
                                                      )
         {
             //Activation check
-            if(ActivationFactory.Create(aFnCfg, new Random()).TypeOfActivation != ActivationType.Spiking)
+            if (ActivationFactory.Create(aFnCfg, new Random()).TypeOfActivation != ActivationType.Spiking)
             {
                 throw new ArgumentException("Specified activation must be spiking.", "aFnCfg");
             }

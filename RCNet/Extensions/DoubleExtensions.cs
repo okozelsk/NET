@@ -20,7 +20,7 @@ namespace RCNet.Extensions
         public const double ReasonableAbsMax = 1e20;
 
         /// <summary>
-        /// Checks if this is computable double value.
+        /// Checks if this is a computable double value.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsValid(this double x)
@@ -38,11 +38,11 @@ namespace RCNet.Extensions
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double Bound(this double x, double min = -ReasonableAbsMax, double max = ReasonableAbsMax)
         {
-            if(x < min)
+            if (x < min)
             {
                 return min;
             }
-            if(x > max)
+            if (x > max)
             {
                 return max;
             }

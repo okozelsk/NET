@@ -1,18 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Globalization;
-using System.Xml.Linq;
-using System.Reflection;
-using System.IO;
-using RCNet.Extensions;
-using RCNet.XmlTools;
-using RCNet.MathTools;
-using RCNet.Neural.Data.Filter;
-using RCNet.Neural.Data.Generators;
-using RCNet.RandomValue;
+﻿using RCNet.Neural.Data.Filter;
 using RCNet.Neural.Data.Transformers;
-using RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor;
+using System;
+using System.Globalization;
+using System.Linq;
+using System.Xml.Linq;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Input
 {
@@ -45,7 +36,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         public RCNetBaseSettings TransformerCfg { get; }
 
         /// <summary>
-        /// Specifies if to route transformed field to readout layer together with other predictors
+        /// Specifies whether to route transformed field to readout layer together with other predictors
         /// </summary>
         public bool RouteToReadout { get; }
 
@@ -66,7 +57,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// </summary>
         /// <param name="name">Transformed field name</param>
         /// <param name="transformerCfg">Configuration of associated transformer</param>
-        /// <param name="routeToReadout">Specifies if to route transformed field to readout layer together with other predictors</param>
+        /// <param name="routeToReadout">Specifies whether to route transformed field to readout layer together with other predictors</param>
         /// <param name="featureFilterCfg">Configuration of real feature filter</param>
         /// <param name="spikingCodingCfg">Configuration of spiking coding neurons</param>
         public TransformedFieldSettings(string name,
@@ -90,13 +81,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// </summary>
         /// <param name="source">Source instance</param>
         public TransformedFieldSettings(TransformedFieldSettings source)
-            :this(source.Name, source.TransformerCfg, source.RouteToReadout, source.FeatureFilterCfg, source.SpikingCodingCfg)
+            : this(source.Name, source.TransformerCfg, source.RouteToReadout, source.FeatureFilterCfg, source.SpikingCodingCfg)
         {
             return;
         }
 
         /// <summary>
-        /// Creates the instance and initializes it from given xml element.
+        /// Creates an initialized instance.
         /// </summary>
         /// <param name="elem">Xml data containing the settings.</param>
         public TransformedFieldSettings(XElement elem)
@@ -138,7 +129,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
                 throw new ArgumentException($"Name can not be empty.", "Name");
             }
             Type transType = TransformerCfg.GetType();
-            if(transType != typeof(DiffTransformerSettings) &&
+            if (transType != typeof(DiffTransformerSettings) &&
                transType != typeof(CDivTransformerSettings) &&
                transType != typeof(LogTransformerSettings) &&
                transType != typeof(ExpTransformerSettings) &&
@@ -166,7 +157,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// Generates xml element containing the settings.
         /// </summary>
         /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
@@ -178,7 +169,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             {
                 rootElem.Add(new XAttribute("routeToReadout", RouteToReadout.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()));
             }
-            if(!suppressDefaults || !FeatureFilterCfg.ContainsOnlyDefaults)
+            if (!suppressDefaults || !FeatureFilterCfg.ContainsOnlyDefaults)
             {
                 rootElem.Add(FeatureFilterCfg.GetXml(suppressDefaults));
             }
@@ -193,7 +184,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// Generates default named xml element containing the settings.
         /// </summary>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(bool suppressDefaults)
         {

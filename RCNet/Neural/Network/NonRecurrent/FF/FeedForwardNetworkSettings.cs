@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Globalization;
-using System.Xml.Linq;
-using System.IO;
-using RCNet.XmlTools;
+﻿using RCNet.MathTools;
 using RCNet.Neural.Activation;
-using RCNet.MathTools;
+using System;
+using System.Linq;
+using System.Xml.Linq;
 
 namespace RCNet.Neural.Network.NonRecurrent.FF
 {
@@ -76,13 +71,9 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         }
 
         /// <summary>
-        /// Creates the instance and initialize it from given xml element.
-        /// This is the preferred way to instantiate settings.
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">
-        /// Xml data containing settings.
-        /// Content of xml element is always validated against the xml schema.
-        /// </param>
+        /// <param name="elem">Xml element containing the initialization settings</param>
         public FeedForwardNetworkSettings(XElement elem)
         {
             //Validation
@@ -102,9 +93,9 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             }
             //Trainer configuration
             TrainerCfg = null;
-            foreach(XElement candidate in settingsElem.Elements())
+            foreach (XElement candidate in settingsElem.Elements())
             {
-                if(candidate.Name.LocalName == "qrdRegrTrainer")
+                if (candidate.Name.LocalName == "qrdRegrTrainer")
                 {
                     TrainerCfg = new QRDRegrTrainerSettings(candidate);
                     break;
@@ -174,7 +165,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             {
                 throw new ArgumentException($"Unsupported TrainerCfg {trainerType.Name}.", "TrainerCfg");
             }
-            if((HiddenLayersCfg.HiddenLayerCfgCollection.Count > 0 || OutputActivationCfg.GetType() != typeof(IdentitySettings)) &&
+            if ((HiddenLayersCfg.HiddenLayerCfgCollection.Count > 0 || OutputActivationCfg.GetType() != typeof(IdentitySettings)) &&
                trainerType != typeof(RPropTrainerSettings)
                )
             {
@@ -195,7 +186,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         /// Generates xml element containing the settings.
         /// </summary>
         /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
@@ -213,7 +204,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         /// <summary>
         /// Generates default named xml element containing the settings.
         /// </summary>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(bool suppressDefaults)
         {

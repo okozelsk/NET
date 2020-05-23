@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace RCNet.Neural.Data.Generators
+﻿namespace RCNet.Neural.Data.Generators
 {
     /// <summary>
     /// Common interface for signal generators

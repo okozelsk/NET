@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RCNet.Extensions;
+﻿using RCNet.Extensions;
 using RCNet.MathTools;
+using System;
 
 namespace RCNet.Neural.Data.Filter
 {
@@ -32,7 +28,7 @@ namespace RCNet.Neural.Data.Filter
         /// <param name="outputRange">Filter's output range</param>
         /// <param name="numOfElements">Number of enumeration elements</param>
         public EnumFeatureFilter(Interval outputRange, int numOfElements)
-            :base(FeatureType.Enum, outputRange)
+            : base(FeatureType.Enum, outputRange)
         {
             NumOfElements = numOfElements;
             FeatureRange = new Interval(0.5d, NumOfElements + 0.5d);
@@ -68,7 +64,7 @@ namespace RCNet.Neural.Data.Filter
         /// <param name="sample">Feature sample value</param>
         public override void Update(double sample)
         {
-            if(sample < 1d || sample > NumOfElements || Math.Ceiling(sample) != sample)
+            if (sample < 1d || sample > NumOfElements || Math.Ceiling(sample) != sample)
             {
                 throw new ArgumentException($"Sample value {sample} is not allowed. Sample value must be an integer value from 1..{NumOfElements}.", "sample");
             }

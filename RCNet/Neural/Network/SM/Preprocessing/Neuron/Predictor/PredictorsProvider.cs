@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RCNet.Extensions;
+﻿using RCNet.Extensions;
 using RCNet.MathTools;
+using System;
+using System.Collections.Generic;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
 {
@@ -79,11 +76,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         /// Maximum number of exponential weights
         /// </summary>
         public const int MaxExpWeightsSize = 64;
-        
+
         /// <summary>
         /// Maximum number of linear weights
         /// </summary>
-        public const int MaxLinWeightsSize = 10*1024;
+        public const int MaxLinWeightsSize = 10 * 1024;
 
         //Static
         /// <summary>
@@ -137,7 +134,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         public PredictorsProvider(PredictorsSettings cfg)
         {
             //Check
-            if(cfg.ParamsCfg == null)
+            if (cfg.ParamsCfg == null)
             {
                 throw new ArgumentException("Invalid configuration. ParamsCfg inside the configuration is null.", "cfg");
             }
@@ -145,7 +142,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
             _cfg = cfg;
             //Determine necessary size of the activation moving window and instantiate it
             int activationMWSize = 0;
-            if(_cfg.IsEnabled(PredictorID.ActivationMWAvg))
+            if (_cfg.IsEnabled(PredictorID.ActivationMWAvg))
             {
                 switch (_cfg.ParamsCfg.ActivationMWAvgCfg.Weights)
                 {
@@ -169,7 +166,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
 
             //Determine necessary size of the firing moving window and instantiate it
             int firingMWSize = 0;
-            if(_cfg.IsEnabled(PredictorID.FiringMWAvg))
+            if (_cfg.IsEnabled(PredictorID.FiringMWAvg))
             {
                 switch (_cfg.ParamsCfg.FiringMWAvgCfg.Weights)
                 {
@@ -193,7 +190,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
             {
                 firingMWSize = Math.Max(firingMWSize, _cfg.ParamsCfg.FiringBinPatternCfg.Window);
             }
-            if(_cfg.IsEnabled(PredictorID.FiringCount))
+            if (_cfg.IsEnabled(PredictorID.FiringCount))
             {
                 firingMWSize = Math.Max(firingMWSize, _cfg.ParamsCfg.FiringCountCfg.Window);
             }
@@ -244,14 +241,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
             _lastActivation = activation;
             _activationFadingSum *= (1d - _cfg.ParamsCfg.ActivationFadingSumCfg.Strength);
             _activationFadingSum += (normalizedActivation);
-            if(_activationMDW != null)
+            if (_activationMDW != null)
             {
                 _activationMDW.AddSampleValue(activation);
             }
             //Firing based
             _firingFadingSum *= (1d - _cfg.ParamsCfg.FiringFadingSumCfg.Strength);
             if (spike) ++_firingFadingSum;
-            if(_firingMDW != null)
+            if (_firingMDW != null)
             {
                 _firingMDW.AddNext(spike);
             }
@@ -259,7 +256,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         }
 
         /// <summary>
-        /// Returns identifiers of enabled predictors in the same order as in the methods CopyPredictorsTo and GetPredictors
+        /// Returns identifiers of enabled predictors in the same order as is used in the methods CopyPredictorsTo and GetPredictors
         /// </summary>
         public List<PredictorID> GetEnabledIDs()
         {
@@ -338,7 +335,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
                 double sum = 0;
                 for (int bitIdx = 0; bitIdx < _cfg.ParamsCfg.FiringMWAvgCfg.Window; bitIdx++)
                 {
-                    if(_firingMDW.GetBit(bitIdx) > 0)
+                    if (_firingMDW.GetBit(bitIdx) > 0)
                     {
                         sum += _firingMWAvgWeights == null ? 1d : _firingMWAvgWeights[bitIdx];
                     }

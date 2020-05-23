@@ -1,13 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Globalization;
+using System.Linq;
 using System.Xml.Linq;
-using System.Reflection;
-using RCNet.Extensions;
-using RCNet.XmlTools;
 
 namespace RCNet.RandomValue
 {
@@ -43,12 +37,12 @@ namespace RCNet.RandomValue
         /// Max random value
         /// </summary>
         public double Max { get; }
-        
+
         /// <summary>
         /// Specifies whether to randomize value sign
         /// </summary>
         public bool RandomSign { get; }
-        
+
         /// <summary>
         /// Distribution parameters
         /// </summary>
@@ -72,7 +66,7 @@ namespace RCNet.RandomValue
             Max = max;
             RandomSign = randomSign;
             DistrCfg = distrCfg;
-            if(DistrCfg == null)
+            if (DistrCfg == null)
             {
                 DistrCfg = new UniformDistrSettings();
             }
@@ -167,7 +161,7 @@ namespace RCNet.RandomValue
         /// </summary>
         public static RandomValueSettings CloneOrDefault(RandomValueSettings source, double defaultMin, double defaultMax, bool randomSign = false)
         {
-            if(source == null)
+            if (source == null)
             {
                 return new RandomValueSettings(defaultMin, defaultMax, randomSign);
             }
@@ -197,7 +191,7 @@ namespace RCNet.RandomValue
             }
             return;
         }
-        
+
         /// <summary>
         /// Creates the deep copy instance of this instance
         /// </summary>
@@ -210,13 +204,13 @@ namespace RCNet.RandomValue
         /// Generates xml element containing the settings.
         /// </summary>
         /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             XElement rootElem = new XElement(rootElemName, new XAttribute("min", Min.ToString(CultureInfo.InvariantCulture)),
                                                            new XAttribute("max", Max.ToString(CultureInfo.InvariantCulture)));
-            if(!suppressDefaults || RandomSign != DefaultRandomSignValue)
+            if (!suppressDefaults || RandomSign != DefaultRandomSignValue)
             {
                 rootElem.Add(new XAttribute("randomSign", RandomSign.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()));
             }

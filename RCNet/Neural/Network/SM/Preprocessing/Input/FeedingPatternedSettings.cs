@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using RCNet.Neural.Data;
+using System;
 using System.Globalization;
 using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
-using RCNet.Extensions;
-using RCNet.Neural.Data;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Input
 {
@@ -38,12 +33,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
 
         //Attribute properties
         /// <summary>
-        /// Specifies if to preprocess time series pattern in both time directions (doubles predictors)
+        /// Specifies whether to preprocess time series pattern in both time directions (doubles predictors)
         /// </summary>
         public bool Bidir { get; }
 
         /// <summary>
-        /// Specifies if to route input fields to readout layer together with other predictors
+        /// Specifies whether to route input fields to readout layer together with other predictors
         /// </summary>
         public bool RouteToReadout { get; }
 
@@ -61,8 +56,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// Creates an itialized instance.
         /// </summary>
-        /// <param name="bidir">Specifies if to preprocess time series pattern in both time directions (doubles predictors)</param>
-        /// <param name="routeToReadout">Specifies if to route input fields to readout layer together with other predictors</param>
+        /// <param name="bidir">Specifies whether to preprocess time series pattern in both time directions (doubles predictors)</param>
+        /// <param name="routeToReadout">Specifies whether to route input fields to readout layer together with other predictors</param>
         /// <param name="varSchema">Specifies variables organization in the pattern</param>
         /// <param name="unificationCfg">Configuration of an input pattern unification</param>
         public FeedingPatternedSettings(bool bidir = DefaultBidir,
@@ -92,10 +87,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// Creates an initialized instance from the given xml element.
         /// </summary>
-        /// <param name="elem">
-        /// Xml data containing the settings.
-        /// Content of xml element is always validated against the xml schema.
-        /// </param>
+        /// <param name="elem">Xml element containing the initialization settings</param>
         public FeedingPatternedSettings(XElement elem)
         {
             //Validation
@@ -105,7 +97,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             RouteToReadout = bool.Parse(settingsElem.Attribute("routeToReadout").Value);
             VarSchema = (InputPattern.VariablesSchema)Enum.Parse(typeof(InputPattern.VariablesSchema), settingsElem.Attribute("variablesSchema").Value, true);
             XElement uniElem = settingsElem.Elements("unification").FirstOrDefault();
-            if(uniElem != null)
+            if (uniElem != null)
             {
                 UnificationCfg = new UnificationSettings(uniElem);
             }
@@ -173,7 +165,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// Generates xml element containing the settings.
         /// </summary>
         /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
@@ -201,7 +193,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// Generates default named xml element containing the settings.
         /// </summary>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(bool suppressDefaults)
         {

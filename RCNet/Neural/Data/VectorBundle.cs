@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using RCNet.MathTools;
+﻿using RCNet.CsvTools;
 using RCNet.Extensions;
-using RCNet.CsvTools;
+using RCNet.MathTools;
+using System;
+using System.Collections.Generic;
 
 namespace RCNet.Neural.Data
 {
@@ -18,7 +17,7 @@ namespace RCNet.Neural.Data
         /// Collection of input vectors
         /// </summary>
         public List<double[]> InputVectorCollection { get; }
-        
+
         /// <summary>
         /// Collection of output vectors (desired values)
         /// </summary>

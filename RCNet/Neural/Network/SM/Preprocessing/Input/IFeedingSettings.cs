@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
+﻿using System.Xml.Linq;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Input
 {
@@ -13,7 +8,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
     public interface IFeedingSettings
     {
         /// <summary>
-        /// Specifies if to route input fields to readout layer together with other predictors
+        /// Specifies whether to route input fields to readout layer together with other predictors
         /// </summary>
         bool RouteToReadout { get; }
 
@@ -30,7 +25,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// Generates default named xml element containing the settings.
         /// </summary>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         XElement GetXml(bool suppressDefaults);
 

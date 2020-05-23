@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RCNet.Neural.Network.SM.Preprocessing.Neuron;
+﻿using RCNet.Neural.Network.SM.Preprocessing.Neuron;
+using System;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
 {
@@ -65,7 +61,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         /// <param name="dynamicsCfg">Dynamics configuration</param>
         public static IEfficacy GetEfficacyComputer(INeuron sourceNeuron, IDynamicsSettings dynamicsCfg)
         {
-            switch(dynamicsCfg.Type)
+            switch (dynamicsCfg.Type)
             {
                 case DynType.Constant: return new ConstantEfficacy((ConstantDynamicsSettings)dynamicsCfg);
                 case DynType.Linear: return new LinearEfficacy(sourceNeuron, (LinearDynamicsSettings)dynamicsCfg);

@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.IO;
-using System.Globalization;
+﻿using RCNet.Neural.Data.Generators;
 using RCNet.RandomValue;
-using RCNet.Neural.Data.Generators;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 
 namespace Demo.DemoConsoleApp
 {

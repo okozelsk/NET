@@ -1,15 +1,14 @@
-﻿using System;
+﻿using RCNet.Extensions;
+using RCNet.MathTools;
+using RCNet.Neural.Data;
+using RCNet.Neural.Data.Filter;
+using RCNet.Neural.Network.NonRecurrent;
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Globalization;
-using RCNet.MathTools;
-using RCNet.Neural.Activation;
-using RCNet.Neural.Data;
-using RCNet.Extensions;
-using RCNet.Neural.Data.Filter;
-using RCNet.Neural.Network.NonRecurrent;
 
 namespace RCNet.Neural.Network.SM.Readout
 {
@@ -44,7 +43,7 @@ namespace RCNet.Neural.Network.SM.Readout
 
         //Attribute properties
         /// <summary>
-        /// Indicates if the readout layer is trained
+        /// Indicates whether the readout layer is trained
         /// </summary>
         public bool Trained { get; private set; }
         /// <summary>
@@ -240,11 +239,11 @@ namespace RCNet.Neural.Network.SM.Readout
                                                                                            Settings.TestDataRatio,
                                                                                            Settings.Folds,
                                                                                            Settings.Repetitions,
-                                                                                           new FeatureFilterBase[] {_outputFeatureFilterCollection [unitIdx]}
+                                                                                           new FeatureFilterBase[] { _outputFeatureFilterCollection[unitIdx] }
                                                                                            )
                                                                   );
             }//unitIdx
-            
+
             //Readout layer is trained and ready
             Trained = true;
             return new RegressionOverview(ReadoutUnitErrStatCollection);
@@ -308,7 +307,7 @@ namespace RCNet.Neural.Network.SM.Readout
         {
             unitsAllSubResults = new List<double[]>(Settings.ReadoutUnitsCfg.ReadoutUnitCfgCollection.Count);
             double[] outputVector = new double[_readoutUnitCollection.Length];
-            for(int unitIdx = 0; unitIdx < _readoutUnitCollection.Length; unitIdx++)
+            for (int unitIdx = 0; unitIdx < _readoutUnitCollection.Length; unitIdx++)
             {
                 double[] readoutUnitInputVector = _predictorsMapper.CreateVector(Settings.ReadoutUnitsCfg.ReadoutUnitCfgCollection[unitIdx].Name, predictors);
                 outputVector[unitIdx] = _readoutUnitCollection[unitIdx].NetworkCluster.Compute(readoutUnitInputVector, out double[] memberOutputCollection);
@@ -350,7 +349,7 @@ namespace RCNet.Neural.Network.SM.Readout
             membersIndexes = (from member in Settings.ReadoutUnitsCfg.OneWinnerGroupCollection[oneWinnerGroupName].Members select Settings.ReadoutUnitsCfg.GetReadoutUnitID(member.Name)).ToArray();
             //Compute members' weighted predictions
             membersWeightedDataVector = new double[membersIndexes.Length];
-            for(int i = 0; i < membersIndexes.Length; i++)
+            for (int i = 0; i < membersIndexes.Length; i++)
             {
                 membersWeightedDataVector[i] = dataVector[membersIndexes[i]];
             }
@@ -407,7 +406,7 @@ namespace RCNet.Neural.Network.SM.Readout
                 //Alone units
                 DataVector = dataVector;
                 ReadoutUnitDataCollection = new Dictionary<string, ReadoutUnitData>();
-                for(int i = 0; i < rl.Settings.ReadoutUnitsCfg.ReadoutUnitCfgCollection.Count; i++)
+                for (int i = 0; i < rl.Settings.ReadoutUnitsCfg.ReadoutUnitCfgCollection.Count; i++)
                 {
                     ReadoutUnitSettings rus = rl.Settings.ReadoutUnitsCfg.ReadoutUnitCfgCollection[i];
                     ReadoutUnitDataCollection.Add(rus.Name, new ReadoutUnitData() { Name = rus.Name, Index = i, Task = rus.TaskCfg.Type, DataValue = DataVector[i] });

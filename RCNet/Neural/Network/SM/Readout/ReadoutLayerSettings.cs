@@ -1,18 +1,9 @@
-﻿using System;
+﻿using RCNet.Neural.Network.NonRecurrent;
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Globalization;
+using System.Linq;
 using System.Xml.Linq;
-using System.Reflection;
-using System.IO;
-using RCNet.Extensions;
-using RCNet.Neural.Network.NonRecurrent.FF;
-using RCNet.Neural.Network.NonRecurrent.PP;
-using RCNet.XmlTools;
-using RCNet.MathTools;
-using RCNet.Neural.Data.Filter;
-using RCNet.Neural.Network.NonRecurrent;
-using RCNet.Neural.Activation;
 
 namespace RCNet.Neural.Network.SM.Readout
 {
@@ -105,7 +96,7 @@ namespace RCNet.Neural.Network.SM.Readout
             Folds = folds;
             Repetitions = repetitions;
             ReadoutUnitsCfg = (ReadoutUnitsSettings)readoutUnitsCfg.DeepClone();
-            if(defaultNetworksCfg == null)
+            if (defaultNetworksCfg == null)
             {
                 DefaultNetworksCfg = new DefaultNetworksSettings();
             }
@@ -122,19 +113,16 @@ namespace RCNet.Neural.Network.SM.Readout
         /// </summary>
         /// <param name="source">Source instance</param>
         public ReadoutLayerSettings(ReadoutLayerSettings source)
-            :this(source.ReadoutUnitsCfg, source.TestDataRatio, source.Folds, source.Repetitions, source.DefaultNetworksCfg)
+            : this(source.ReadoutUnitsCfg, source.TestDataRatio, source.Folds, source.Repetitions, source.DefaultNetworksCfg)
         {
             return;
         }
 
         /// <summary>
-        /// Creates the instance and initializes it from given xml element.
+        /// Creates an initialized instance.
         /// This is the preferred way to instantiate ReadoutLayer settings.
         /// </summary>
-        /// <param name="elem">
-        /// Xml data containing ReadoutLayer settings.
-        /// Content of xml element is always validated against the xml schema.
-        /// </param>
+        /// <param name="elem">Xml element containing the initialization settings</param>
         public ReadoutLayerSettings(XElement elem)
         {
             //Validation
@@ -218,7 +206,7 @@ namespace RCNet.Neural.Network.SM.Readout
         /// <returns></returns>
         public List<INonRecurrentNetworkSettings> GetReadoutUnitNetworksCollection(int readoutUnitIndex)
         {
-            if(ReadoutUnitsCfg.ReadoutUnitCfgCollection[readoutUnitIndex].TaskCfg.NetworkCfgCollection.Count > 0)
+            if (ReadoutUnitsCfg.ReadoutUnitCfgCollection[readoutUnitIndex].TaskCfg.NetworkCfgCollection.Count > 0)
             {
                 return ReadoutUnitsCfg.ReadoutUnitCfgCollection[readoutUnitIndex].TaskCfg.NetworkCfgCollection;
             }
@@ -240,13 +228,13 @@ namespace RCNet.Neural.Network.SM.Readout
         /// Generates xml element containing the settings.
         /// </summary>
         /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             XElement rootElem = new XElement(rootElemName);
             rootElem.Add(new XAttribute("testDataRatio", TestDataRatio.ToString(CultureInfo.InvariantCulture)));
-            if(!suppressDefaults || !IsDefaultFolds)
+            if (!suppressDefaults || !IsDefaultFolds)
             {
                 rootElem.Add(new XAttribute("folds", Folds == DefaultFoldsNum ? DefaultFoldsString : Folds.ToString(CultureInfo.InvariantCulture)));
             }
@@ -254,7 +242,7 @@ namespace RCNet.Neural.Network.SM.Readout
             {
                 rootElem.Add(new XAttribute("repetitions", Repetitions.ToString(CultureInfo.InvariantCulture)));
             }
-            if(!DefaultNetworksCfg.ContainsOnlyDefaults)
+            if (!DefaultNetworksCfg.ContainsOnlyDefaults)
             {
                 rootElem.Add(DefaultNetworksCfg.GetXml(suppressDefaults));
             }
@@ -266,7 +254,7 @@ namespace RCNet.Neural.Network.SM.Readout
         /// <summary>
         /// Generates default named xml element containing the settings.
         /// </summary>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(bool suppressDefaults)
         {

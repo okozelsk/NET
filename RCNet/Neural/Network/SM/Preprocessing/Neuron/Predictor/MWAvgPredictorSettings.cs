@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
@@ -105,11 +101,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         /// </summary>
         protected override void Check()
         {
-            if (Window < 1 )
+            if (Window < 1)
             {
                 throw new ArgumentException($"Invalid Window {Window.ToString(CultureInfo.InvariantCulture)}. Window must be GT 0.", "Window");
             }
-            if(Weights == PredictorsProvider.PredictorMWAvgWeightsType.Exponential && Window > 64)
+            if (Weights == PredictorsProvider.PredictorMWAvgWeightsType.Exponential && Window > 64)
             {
                 throw new ArgumentException($"Invalid Window {Window.ToString(CultureInfo.InvariantCulture)}. Window must be LE to 64.", "Window");
             }
@@ -124,7 +120,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         /// Generates xml element containing the settings.
         /// </summary>
         /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {

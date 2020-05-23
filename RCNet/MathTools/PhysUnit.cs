@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RCNet.MathTools
 {
@@ -200,7 +196,7 @@ namespace RCNet.MathTools
         /// <param name="prefix">Metric prefix corresponding to specified quantity</param>
         public static double ToBase(double quantity, MetricPrefix prefix)
         {
-            switch(prefix)
+            switch (prefix)
             {
                 case MetricPrefix.None: return quantity;
                 case MetricPrefix.Atto: return quantity * 1e-18;

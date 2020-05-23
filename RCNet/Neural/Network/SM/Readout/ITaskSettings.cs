@@ -1,10 +1,6 @@
 ﻿using RCNet.Neural.Data.Filter;
 using RCNet.Neural.Network.NonRecurrent;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
 
 namespace RCNet.Neural.Network.SM.Readout
@@ -38,7 +34,7 @@ namespace RCNet.Neural.Network.SM.Readout
         /// <summary>
         /// Generates default named xml element containing the settings.
         /// </summary>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         XElement GetXml(bool suppressDefaults);
 

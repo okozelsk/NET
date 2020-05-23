@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace RCNet.MathTools.Hurst
@@ -17,7 +16,7 @@ namespace RCNet.MathTools.Hurst
         /// The smallest interval length of RescalledRange
         /// </summary>
         public const int MinSubIntervalLength = 2;
-        
+
         //Attributes
         private readonly List<double> _valueCollection;
         private readonly List<int> _subIntervalLengthCollection;
@@ -32,7 +31,7 @@ namespace RCNet.MathTools.Hurst
         {
             _valueCollection = timeSeries.ToList();
             //Check time series length
-            if(_valueCollection.Count < MinSubIntervalLength + 1)
+            if (_valueCollection.Count < MinSubIntervalLength + 1)
             {
                 throw new ArgumentException($"Time series is too short. Minimal length is {MinSubIntervalLength + 1}", "timeSeries");
             }
@@ -50,7 +49,7 @@ namespace RCNet.MathTools.Hurst
                 }
             }
             _avgCollection = new List<WeightedAvg>(_subIntervalLengthCollection.Count);
-            for(int i = 0; i < _subIntervalLengthCollection.Count; i++)
+            for (int i = 0; i < _subIntervalLengthCollection.Count; i++)
             {
                 _avgCollection.Add(new WeightedAvg());
             }
@@ -102,12 +101,12 @@ namespace RCNet.MathTools.Hurst
         public LinearFit Compute()
         {
             LinearFit linFit = new LinearFit();
-            for(int i = 0; i < _avgCollection.Count; i++)
+            for (int i = 0; i < _avgCollection.Count; i++)
             {
                 double x = Math.Log(_subIntervalLengthCollection[i]);
                 double avg = _avgCollection[i].Avg;
                 double y = 0;
-                if(avg != 0)
+                if (avg != 0)
                 {
                     y = Math.Log(avg);
                 }

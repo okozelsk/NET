@@ -1,8 +1,6 @@
-﻿using System;
+﻿using RCNet.Extensions;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using RCNet.Extensions;
 
 namespace RCNet.MathTools
 {
@@ -13,7 +11,7 @@ namespace RCNet.MathTools
     public class LinearFit
     {
         //Attributes
-        private List<Point2D> _pointCollection;
+        private readonly List<Point2D> _pointCollection;
         private double _sumOfX;
         private double _sumOfSquaredX;
         private double _sumOfY;
@@ -147,7 +145,7 @@ namespace RCNet.MathTools
         /// Computes the Y value for given X value
         /// </summary>
         /// <param name="x">X value</param>
-        public double ComputeY (double x)
+        public double ComputeY(double x)
         {
             ComputeRegression();
             return _a * x + _b;

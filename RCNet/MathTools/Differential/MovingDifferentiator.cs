@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RCNet.Extensions;
+﻿using RCNet.Extensions;
+using System;
 
 namespace RCNet.MathTools.Differential
 {
@@ -18,7 +14,7 @@ namespace RCNet.MathTools.Differential
         /// Range of the differential data
         /// </summary>
         public static readonly Interval DiffDataRange = new Interval(-1d, 1d);
-        
+
         //Constants
         /// <summary>
         /// Minimum allowed depth
@@ -44,7 +40,7 @@ namespace RCNet.MathTools.Differential
 
         //Constructor
         /// <summary>
-        /// 
+        /// Creates an initialized instance
         /// </summary>
         /// <param name="inputDataRange">Range of input data</param>
         /// <param name="depth">Differentiator depth</param>
@@ -53,7 +49,7 @@ namespace RCNet.MathTools.Differential
             InputDataRange = inputDataRange.DeepClone();
             Depth = Math.Max(Math.Min(MaxDepth, depth), MinDepth);
             _diffDataCollection = new double[Depth][];
-            for(int i = 0; i < Depth; i++)
+            for (int i = 0; i < Depth; i++)
             {
                 _diffDataCollection[i] = new double[2];
             }
@@ -86,7 +82,7 @@ namespace RCNet.MathTools.Differential
             //Differences
             for (int i = 1; i < Depth; i++)
             {
-                if(!double.IsNaN(_diffDataCollection[i - 1][0]))
+                if (!double.IsNaN(_diffDataCollection[i - 1][0]))
                 {
                     _diffDataCollection[i].ShiftLeft(double.NaN);
                     _diffDataCollection[i][1] = (_diffDataCollection[i - 1][1] - _diffDataCollection[i - 1][0]) / InputDataRange.Span;
@@ -105,7 +101,7 @@ namespace RCNet.MathTools.Differential
         /// <param name="depth">Depth</param>
         public double GetDifferenceAt(int depth)
         {
-            if(!double.IsNaN(_diffDataCollection[depth][1]))
+            if (!double.IsNaN(_diffDataCollection[depth][1]))
             {
                 return _diffDataCollection[depth][1];
             }

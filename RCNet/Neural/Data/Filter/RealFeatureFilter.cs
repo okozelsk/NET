@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RCNet.MathTools;
+﻿using RCNet.MathTools;
+using System;
 
 namespace RCNet.Neural.Data.Filter
 {
@@ -33,7 +29,7 @@ namespace RCNet.Neural.Data.Filter
         /// <param name="standardize">Apply data standardization</param>
         /// <param name="keepReserve">Keep range reserve for future unseen data</param>
         public RealFeatureFilter(Interval outputRange, bool standardize = true, bool keepReserve = true)
-            :base(FeatureType.Real, outputRange)
+            : base(FeatureType.Real, outputRange)
         {
             _standardize = standardize;
             _keepReserve = keepReserve;
@@ -127,7 +123,7 @@ namespace RCNet.Neural.Data.Filter
         /// </summary>
         private void RecomputeRange()
         {
-            if(_invalidated)
+            if (_invalidated)
             {
                 RecomputeRange(_range, Stat);
                 _invalidated = false;

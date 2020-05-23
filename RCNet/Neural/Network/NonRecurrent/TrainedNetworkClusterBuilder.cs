@@ -5,8 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RCNet.Neural.Network.NonRecurrent
 {
@@ -176,7 +174,7 @@ namespace RCNet.Neural.Network.NonRecurrent
                         }//sampleIdx
                     }//netCfgIdx
                 }//foldIdx
-                if(cycle < repetitions - 1)
+                if (cycle < repetitions - 1)
                 {
                     //Reshuffle data
                     dataBundle.Shuffle(_rand);

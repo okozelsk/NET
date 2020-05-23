@@ -1,16 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using System.Globalization;
 using System.Xml.Linq;
-using System.Xml.XPath;
-using System.IO;
-using RCNet.Extensions;
-using RCNet.MathTools.Probability;
-using RCNet.XmlTools;
-using RCNet.RandomValue;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
 {
@@ -38,7 +28,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// </summary>
         public string TargetPoolName { get; }
         /// <summary>
-        /// Determines how many neurons from the target pool will be connected to one neuron from source pool
+        /// Determines how many neurons in the target pool will get connected to neurons from source pool
         /// </summary>
         public double TargetConnectionDensity { get; }
         /// <summary>
@@ -46,7 +36,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// </summary>
         public string SourcePoolName { get; }
         /// <summary>
-        /// Determines how many neurons from the source pool will be connected to neurons in target pool
+        /// Determines how many neurons from the source pool will be connected to one neuron from target pool
         /// </summary>
         public double SourceConnectionDensity { get; }
         /// <summary>
@@ -59,10 +49,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// Creates an initialized instance
         /// </summary>
         /// <param name="targetPoolName">Name of the target pool</param>
-        /// <param name="targetConnectionDensity">Determines how many neurons from the target pool will be connected to one neuron from source pool</param>
+        /// <param name="targetConnectionDensity">Determines how many neurons in the target pool will get connected to neurons from source pool</param>
         /// <param name="sourcePoolName">Name of the source pool</param>
-        /// <param name="sourceConnectionDensity">Determines how many neurons from the source pool will be connected to neurons in target pool</param>
-        /// <param name="constantNumOfConnections">Specifies whether to keep for each neuron constant number of synapses</param>
+        /// <param name="sourceConnectionDensity">Determines how many neurons from the source pool will be connected to one neuron from target pool</param>
+        /// <param name="constantNumOfConnections">Specifies whether to keep constant number of synapses per target neuron</param>
         public InterPoolConnSettings(string targetPoolName,
                                      double targetConnectionDensity,
                                      string sourcePoolName,
@@ -84,7 +74,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// </summary>
         /// <param name="source">Source instance</param>
         public InterPoolConnSettings(InterPoolConnSettings source)
-            :this(source.TargetPoolName, source.TargetConnectionDensity,
+            : this(source.TargetPoolName, source.TargetConnectionDensity,
                   source.SourcePoolName, source.SourceConnectionDensity,
                   source.ConstantNumOfConnections
                  )
@@ -93,12 +83,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         }
 
         /// <summary>
-        /// Creates the instance and initialize it from given xml element.
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">
-        /// Xml data containing settings.
-        /// Content of xml element is always validated against the xml schema.
-        /// </param>
+        /// <param name="elem">Xml element containing the initialization settings</param>
         public InterPoolConnSettings(XElement elem)
         {
             //Validation
@@ -153,7 +140,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             {
                 throw new ArgumentException($"Invalid SourceConnectionDensity {SourceConnectionDensity.ToString(CultureInfo.InvariantCulture)}. Density must be GE to 0 and LE to 1.", "SourceConnectionDensity");
             }
-            if(SourcePoolName == TargetPoolName)
+            if (SourcePoolName == TargetPoolName)
             {
                 throw new ArgumentException($"SourcePoolName and TargetPoolName can not be the same.", "SourcePoolName");
             }
@@ -172,7 +159,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// Generates xml element containing the settings.
         /// </summary>
         /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
@@ -193,7 +180,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// <summary>
         /// Generates default named xml element containing the settings.
         /// </summary>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(bool suppressDefaults)
         {

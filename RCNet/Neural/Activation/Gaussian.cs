@@ -1,6 +1,6 @@
-﻿using System;
-using RCNet.Extensions;
+﻿using RCNet.Extensions;
 using RCNet.MathTools;
+using System;
 
 namespace RCNet.Neural.Activation
 {
@@ -50,7 +50,7 @@ namespace RCNet.Neural.Activation
         {
             c = c.Bound();
             x = x.Bound();
-            return -2*x*c;
+            return -2 * x * c;
         }
 
     }//Gaussian

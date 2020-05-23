@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
 
 namespace RCNet.Queue
 {
@@ -65,7 +64,7 @@ namespace RCNet.Queue
         public void Resize(int newCapacity, bool forceShrink = false)
         {
             Reset();
-            if(forceShrink || newCapacity > _queueBuffer.Length)
+            if (forceShrink || newCapacity > _queueBuffer.Length)
             {
                 _queueBuffer = new T[newCapacity];
             }
@@ -88,7 +87,6 @@ namespace RCNet.Queue
         /// <param name="logicalPos">Logical position 0..(Count-1)</param>
         /// <param name="latestFirst">Specifies logical order (latest..oldest or vice versa)</param>
         /// <returns>Non-negative index</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private int GetElementIndex(int logicalPos, bool latestFirst = false)
         {
             if (logicalPos < 0 || logicalPos >= Count)
@@ -139,7 +137,7 @@ namespace RCNet.Queue
         /// Adds element into the queue
         /// </summary>
         /// <param name="elem">Element to be added</param>
-        /// <param name="autoDequeue">Specifies if to atomatically dequeue when queue is full</param>
+        /// <param name="autoDequeue">Specifies whether to atomatically dequeue when queue is full</param>
         /// <returns>True if success, False if queue is full</returns>
         public bool Enqueue(T elem, bool autoDequeue = false)
         {

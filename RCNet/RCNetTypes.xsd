@@ -2071,7 +2071,7 @@
     </xs:sequence>
     <xs:attribute type="xs:boolean" name="bidir" use="optional" default="false">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Specifies if to preprocess time series pattern in both time directions (doubles predictors). Default value is false</xs:documentation>
+        <xs:documentation xml:lang="en">Specifies whether to preprocess time series pattern in both time directions (doubles predictors). Default value is false</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="xs:boolean" name="routeToReadout" use="optional" default="false">

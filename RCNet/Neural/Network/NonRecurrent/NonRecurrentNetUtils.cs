@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
-using RCNet.Neural.Network.NonRecurrent.FF;
+﻿using RCNet.Neural.Network.NonRecurrent.FF;
 using RCNet.Neural.Network.NonRecurrent.PP;
+using System;
+using System.Collections.Generic;
+using System.Xml.Linq;
 
 namespace RCNet.Neural.Network.NonRecurrent
 {
@@ -58,11 +55,11 @@ namespace RCNet.Neural.Network.NonRecurrent
         /// <param name="cfgElem">XML element containing settings</param>
         public static INonRecurrentNetworkSettings InstantiateSettings(XElement cfgElem)
         {
-            if(IsFFElem(cfgElem))
+            if (IsFFElem(cfgElem))
             {
                 return new FeedForwardNetworkSettings(cfgElem);
             }
-            else if(IsPPElem(cfgElem))
+            else if (IsPPElem(cfgElem))
             {
                 return new ParallelPerceptronSettings(cfgElem);
             }
@@ -141,7 +138,7 @@ namespace RCNet.Neural.Network.NonRecurrent
             {
                 //Parallel perceptron network
                 //Check output
-                if(trainingOutputVectors[0].Length != 1)
+                if (trainingOutputVectors[0].Length != 1)
                 {
                     throw new InvalidOperationException($"Can't create ParallelPerceptron. Only single output value is allowed.");
                 }

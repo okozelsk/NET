@@ -63,7 +63,7 @@ namespace Demo.DemoConsoleApp.Log
         /// Writes a message to the system console
         /// </summary>
         /// <param name="message">Message to be written to console</param>
-        /// <param name="replaceLastMessage">Specifies if to replace text of the previous message.</param>
+        /// <param name="replaceLastMessage">Specifies whether to replace text of the previous message.</param>
         public void Write(string message, bool replaceLastMessage = false)
         {
             if (replaceLastMessage)

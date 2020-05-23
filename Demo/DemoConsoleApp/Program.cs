@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using Demo.DemoConsoleApp.Examples;
+﻿using Demo.DemoConsoleApp.Examples;
 using Demo.DemoConsoleApp.Log;
 using Demo.DemoConsoleApp.SM;
+using System;
 
 namespace Demo.DemoConsoleApp
 {

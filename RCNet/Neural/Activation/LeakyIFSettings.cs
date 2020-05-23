@@ -1,16 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using RCNet.MathTools.Differential;
+using RCNet.RandomValue;
+using System;
 using System.Globalization;
 using System.Xml.Linq;
-using System.Reflection;
-using RCNet.Extensions;
-using RCNet.MathTools;
-using RCNet.XmlTools;
-using RCNet.MathTools.Differential;
-using RCNet.RandomValue;
 
 namespace RCNet.Neural.Activation
 {
@@ -146,10 +138,7 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Creates an instance and initializes it from given xml element.
         /// </summary>
-        /// <param name="elem">
-        /// Xml data containing LeakyIF activation settings.
-        /// Content of xml element is always validated against the xml schema.
-        /// </param>
+        /// <param name="elem">Xml element containing the initialization settings</param>
         public LeakyIFSettings(XElement elem)
         {
             //Validation
@@ -266,7 +255,7 @@ namespace RCNet.Neural.Activation
         /// Generates xml element containing the settings.
         /// </summary>
         /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
@@ -315,7 +304,7 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Generates default named xml element containing the settings.
         /// </summary>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(bool suppressDefaults)
         {

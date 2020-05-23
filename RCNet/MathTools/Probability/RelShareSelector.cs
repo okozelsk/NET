@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RCNet.MathTools.Probability
 {
@@ -42,7 +39,7 @@ namespace RCNet.MathTools.Probability
         /// </summary>
         /// <param name="sourceOrigElements"></param>
         public RelShareSelector(List<Tuple<double, T>> sourceOrigElements)
-            :this()
+            : this()
         {
             _origElements.AddRange(sourceOrigElements);
             return;
@@ -56,7 +53,7 @@ namespace RCNet.MathTools.Probability
         /// <param name="element">Element</param>
         public void Add(double relShare, T element)
         {
-            if(_probElements != null)
+            if (_probElements != null)
             {
                 throw new InvalidOperationException($"Selector was finalized and can not be modified.");
             }
@@ -97,7 +94,7 @@ namespace RCNet.MathTools.Probability
             double p = _rand.NextDouble();
             foreach (Tuple<double, T> element in _probElements)
             {
-                if(p < element.Item1)
+                if (p < element.Item1)
                 {
                     return element.Item2;
                 }
@@ -116,9 +113,9 @@ namespace RCNet.MathTools.Probability
             {
                 return false;
             }
-            for(int i = 0; i < _origElements.Count; i++)
+            for (int i = 0; i < _origElements.Count; i++)
             {
-                if(_origElements[i].Item1 != cmpObj._origElements[i].Item1 ||
+                if (_origElements[i].Item1 != cmpObj._origElements[i].Item1 ||
                    !Equals(_origElements[i].Item2, cmpObj._origElements[i].Item2)
                     )
                 {

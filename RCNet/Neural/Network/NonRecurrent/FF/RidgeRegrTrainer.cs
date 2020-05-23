@@ -1,11 +1,10 @@
-﻿using System;
+﻿using RCNet.MathTools.MatrixMath;
+using RCNet.MathTools.PS;
+using RCNet.MathTools.VectorMath;
+using RCNet.Neural.Activation;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
-using RCNet.Extensions;
-using RCNet.Neural.Activation;
-using RCNet.MathTools.MatrixMath;
-using RCNet.MathTools.VectorMath;
-using RCNet.MathTools.PS;
 
 namespace RCNet.Neural.Network.NonRecurrent.FF
 {
@@ -81,7 +80,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
                 throw new InvalidOperationException($"Can´t create trainer. Network structure is not complient (single layer having Identity activation).");
             }
             //Check samples conditions
-            if(inputVectorCollection.Count == 0)
+            if (inputVectorCollection.Count == 0)
             {
                 throw new InvalidOperationException($"Can´t create trainer. Missing training samples.");
             }

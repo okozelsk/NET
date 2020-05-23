@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
-using RCNet.RandomValue;
-using RCNet.Neural.Activation;
+﻿using RCNet.Neural.Activation;
 using RCNet.Neural.Network.SM.Preprocessing.Neuron;
 using RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor;
+using RCNet.RandomValue;
+using System.Xml.Linq;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
 {
@@ -46,7 +41,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// by this random settings.
         /// </summary>
         RandomValueSettings BiasCfg { get; }
-        
+
         /// <summary>
         /// Configuration of the predictors
         /// </summary>
@@ -66,7 +61,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// <summary>
         /// Generates default named xml element containing the settings.
         /// </summary>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         XElement GetXml(bool suppressDefaults);
 

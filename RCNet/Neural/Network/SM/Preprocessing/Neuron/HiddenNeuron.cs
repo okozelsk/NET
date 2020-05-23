@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using RCNet.Extensions;
+﻿using RCNet.Extensions;
 using RCNet.MathTools;
 using RCNet.Neural.Activation;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup;
 using RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor;
+using System;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
 {
@@ -176,7 +172,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
         /// Number of computation cycles necessary to make neuron and its predictors fully operating
         /// </summary>
         public int RequiredHistLength { get { return _predictors == null ? 1 : _predictors.RequiredHistLength; } }
-        
+
         /// <summary>
         /// Number of provided predictors
         /// </summary>
@@ -291,7 +287,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
         /// <param name="predictorID">Identificator of the predictor</param>
         public bool IsPredictorEnabled(PredictorsProvider.PredictorID predictorID)
         {
-            if(_predictors != null && _predictors.IsPredictorEnabled(predictorID))
+            if (_predictors != null && _predictors.IsPredictorEnabled(predictorID))
             {
                 return true;
             }
@@ -324,7 +320,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
         }
 
         /// <summary>
-        /// Returns identifiers of enabled predictors in the same order as in the methods CopyPredictorsTo and GetPredictors
+        /// Returns identifiers of enabled predictors in the same order as is used in the methods CopyPredictorsTo and GetPredictors
         /// </summary>
         public List<PredictorsProvider.PredictorID> GetEnabledPredictorsIDs()
         {

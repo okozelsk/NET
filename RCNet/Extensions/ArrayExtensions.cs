@@ -1,5 +1,4 @@
-﻿using System;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace RCNet.Extensions
@@ -45,12 +44,12 @@ namespace RCNet.Extensions
         /// Compares the values in this array with the values in the given array.
         /// Uses Equals method co compare items.
         /// </summary>
-        /// <param name="cmpArray">Array to compare with</param>
+        /// <param name="cmpArray">Array of values to be compared</param>
         /// <param name="array"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool ContainsEqualValues<T>(this T[] array, T[] cmpArray)
         {
-            if((array == null && cmpArray != null) ||
+            if ((array == null && cmpArray != null) ||
                (array != null && cmpArray == null)
                )
             {
@@ -60,7 +59,7 @@ namespace RCNet.Extensions
             if (array.Length != cmpArray.Length) return false;
             for (int i = 0; i < array.Length; i++)
             {
-                if(!array[i].Equals(cmpArray[i]))return false;
+                if (!array[i].Equals(cmpArray[i])) return false;
             }
             return true;
         }
@@ -70,7 +69,7 @@ namespace RCNet.Extensions
         /// Uses Equals method co compare items.
         /// </summary>
         /// <param name="startIdx">Start position in this array</param>
-        /// <param name="cmpArray">Array to compare with</param>
+        /// <param name="cmpArray">Array of values to be compared</param>
         /// <param name="array"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsEqualSequence<T>(this T[] array, int startIdx, T[] cmpArray)

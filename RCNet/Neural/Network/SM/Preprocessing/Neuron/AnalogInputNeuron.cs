@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RCNet.Extensions;
+﻿using RCNet.Extensions;
 using RCNet.MathTools;
 using RCNet.Neural.Activation;
 using RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup;
+using System;
+using System.Collections.Generic;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
 {
@@ -193,7 +190,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
         }
 
         /// <summary>
-        /// Returns identifiers of enabled predictors in the same order as in the methods CopyPredictorsTo and GetPredictors
+        /// Returns identifiers of enabled predictors in the same order as is used in the methods CopyPredictorsTo and GetPredictors
         /// </summary>
         public List<PredictorsProvider.PredictorID> GetEnabledPredictorsIDs()
         {

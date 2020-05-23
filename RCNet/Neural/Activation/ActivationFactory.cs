@@ -1,13 +1,8 @@
-﻿using System;
-using System.Linq;
-using System.Reflection;
-using System.Globalization;
-using System.Xml.Linq;
-using RCNet.Extensions;
-using RCNet.RandomValue;
-using RCNet.Neural.Network.SM.Preprocessing.Neuron;
-using RCNet.MathTools.Differential;
+﻿using RCNet.Extensions;
 using RCNet.MathTools;
+using RCNet.MathTools.Differential;
+using System;
+using System.Xml.Linq;
 
 namespace RCNet.Neural.Activation
 {

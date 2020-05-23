@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RCNet.Extensions;
-using RCNet.MathTools;
-using RCNet.MathTools.Differential;
+﻿using RCNet.MathTools.Differential;
 using RCNet.MathTools.VectorMath;
+using System;
 
 namespace RCNet.Neural.Activation
 {
@@ -93,7 +87,7 @@ namespace RCNet.Neural.Activation
             Vector dvdt = new Vector(1);
             //Ensure numerical stability
             double exponent = Math.Min((v[VarMembraneVIdx] - _rheobaseV) / _sharpnessDeltaT, 20);
-            dvdt[VarMembraneVIdx] = (- (v[VarMembraneVIdx] - _restV)
+            dvdt[VarMembraneVIdx] = (-(v[VarMembraneVIdx] - _restV)
                                   + _sharpnessDeltaT * Math.Exp(exponent)
                                   + _resistance * _stimuli
                                   ) / _timeScale;

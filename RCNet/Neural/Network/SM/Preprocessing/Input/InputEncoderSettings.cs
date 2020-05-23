@@ -1,16 +1,8 @@
-﻿using System;
+﻿using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Space3D;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Globalization;
 using System.Xml.Linq;
-using System.Xml.XPath;
-using System.IO;
-using RCNet.Extensions;
-using RCNet.MathTools.Probability;
-using RCNet.XmlTools;
-using RCNet.RandomValue;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Space3D;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Input
 {
@@ -63,22 +55,22 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// </summary>
         /// <param name="source">Source instance</param>
         public InputEncoderSettings(InputEncoderSettings source)
-            :this(source.FeedingCfg, source.FieldsCfg, source.CoordinatesCfg)
+            : this(source.FeedingCfg, source.FieldsCfg, source.CoordinatesCfg)
         {
             return;
         }
 
         /// <summary>
-        /// Creates the instance and initialize it from given xml element.
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml data containing settings.</param>
+        /// <param name="elem">Xml element containing the initialization settings.</param>
         public InputEncoderSettings(XElement elem)
         {
             //Validation
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
             XElement feedingElem = settingsElem.Elements().First();
-            FeedingCfg = feedingElem.Name.LocalName == "feedingContinuous" ? (IFeedingSettings) new FeedingContinuousSettings(feedingElem) : new FeedingPatternedSettings(feedingElem);
+            FeedingCfg = feedingElem.Name.LocalName == "feedingContinuous" ? (IFeedingSettings)new FeedingContinuousSettings(feedingElem) : new FeedingPatternedSettings(feedingElem);
             FieldsCfg = new FieldsSettings(settingsElem.Elements("fields").First());
             XElement coordinatesElem = settingsElem.Elements("coordinates").FirstOrDefault();
             CoordinatesCfg = coordinatesElem == null ? new CoordinatesSettings() : new CoordinatesSettings(coordinatesElem);
@@ -107,11 +99,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         public List<string> GetRoutedFieldNames()
         {
             List<string> names = new List<string>();
-            if(FeedingCfg.RouteToReadout)
+            if (FeedingCfg.RouteToReadout)
             {
-                foreach(ExternalFieldSettings fieldCfg in FieldsCfg.ExternalFieldsCfg.FieldCfgCollection)
+                foreach (ExternalFieldSettings fieldCfg in FieldsCfg.ExternalFieldsCfg.FieldCfgCollection)
                 {
-                    if(fieldCfg.RouteToReadout)
+                    if (fieldCfg.RouteToReadout)
                     {
                         names.Add(fieldCfg.Name);
                     }
@@ -142,7 +134,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// Generates xml element containing the settings.
         /// </summary>
         /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
@@ -150,7 +142,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
                                              FeedingCfg.GetXml(suppressDefaults),
                                              FieldsCfg.GetXml(suppressDefaults)
                                              );
-            if(!suppressDefaults || !CoordinatesCfg.ContainsOnlyDefaults)
+            if (!suppressDefaults || !CoordinatesCfg.ContainsOnlyDefaults)
             {
                 rootElem.Add(CoordinatesCfg.GetXml(suppressDefaults));
             }
@@ -161,7 +153,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// Generates default named xml element containing the settings.
         /// </summary>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(bool suppressDefaults)
         {

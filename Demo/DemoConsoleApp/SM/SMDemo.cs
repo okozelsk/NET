@@ -1,20 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Globalization;
-using System.Diagnostics;
-using System.Threading;
-using Demo.DemoConsoleApp.Log;
-using RCNet;
-using RCNet.Extensions;
-using RCNet.MathTools;
-using RCNet.Neural;
+﻿using Demo.DemoConsoleApp.Log;
+using RCNet.CsvTools;
 using RCNet.Neural.Data;
+using RCNet.Neural.Network.NonRecurrent;
 using RCNet.Neural.Network.SM;
 using RCNet.Neural.Network.SM.Preprocessing;
-using RCNet.Neural.Network.SM.Readout;
-using RCNet.Neural.Network.NonRecurrent;
-using RCNet.CsvTools;
+using System;
+using System.Diagnostics;
 
 namespace Demo.DemoConsoleApp.SM
 {

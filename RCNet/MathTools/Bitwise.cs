@@ -11,7 +11,7 @@ namespace RCNet.MathTools
     {
         //Constants
         /// <summary>
-        /// Maximum number of bits within largest integer variable type
+        /// Maximum number of bits within the largest integer variable type
         /// </summary>
         public const int MaxBits = sizeof(ulong) * 8;
 
@@ -69,7 +69,7 @@ namespace RCNet.MathTools
         /// <param name="bit">Bit value to be set (true=1, false=0)</param>
         public static ulong SetBit(ulong number, int bitIndex, bool bit)
         {
-            if(bit)
+            if (bit)
             {
                 return number | _bitValuesCache[bitIndex];
             }
@@ -91,7 +91,7 @@ namespace RCNet.MathTools
 
         //Inner classes
         /// <summary>
-        /// Implements efficient bits buffer working as a moving window
+        /// Implements an efficient buffer of bits. Works as a moving window
         /// </summary>
         [Serializable]
         public class Window
@@ -124,9 +124,9 @@ namespace RCNet.MathTools
             public Window(int capacity)
             {
                 //Check
-                if(capacity <= 0)
+                if (capacity <= 0)
                 {
-                    throw new ArgumentException($"Invalid capacity {capacity.ToString()}. Capacity has to be GT 0.", "capacity");
+                    throw new ArgumentException($"Invalid capacity {capacity}. Capacity has to be GT 0.", "capacity");
                 }
                 Capacity = capacity;
                 int numOfSegments = Capacity / MaxBits + ((Capacity % MaxBits) > 0 ? 1 : 0);
@@ -158,7 +158,7 @@ namespace RCNet.MathTools
             /// <summary>
             /// Adds next bit value into the window content
             /// </summary>
-            /// <param name="bit">Specifies if the bit to be added is set or not</param>
+            /// <param name="bit">Specifies whether the bit to be added is set or not</param>
             public void AddNext(bool bit)
             {
                 int lowestBitVal = bit ? 1 : 0;
@@ -185,7 +185,7 @@ namespace RCNet.MathTools
                         _segBitCounter[i] += lowestBitVal;
                     }
                 }
-                if(BufferedHistLength < Capacity)
+                if (BufferedHistLength < Capacity)
                 {
                     ++BufferedHistLength;
                 }
@@ -198,11 +198,11 @@ namespace RCNet.MathTools
             /// <param name="recentHistLength">Length of the recent history (-1 means the whole available history)</param>
             public int GetNumOfSetBits(int recentHistLength = -1)
             {
-                if(recentHistLength > Capacity || recentHistLength < -1)
+                if (recentHistLength > Capacity || recentHistLength < -1)
                 {
                     throw new ArgumentException($"Invalid buffPartSize {recentHistLength}.", "buffPartSize");
                 }
-                else if(recentHistLength == 0)
+                else if (recentHistLength == 0)
                 {
                     return 0;
                 }
@@ -215,11 +215,11 @@ namespace RCNet.MathTools
                     int numOfSegments = recentHistLength / MaxBits + ((recentHistLength % MaxBits) > 0 ? 1 : 0);
                     int lastSegHighestBitIndex = (recentHistLength - ((numOfSegments - 1) * MaxBits)) - 1;
                     int counter = 0;
-                    for(int i = 0; i < numOfSegments - 1; i++)
+                    for (int i = 0; i < numOfSegments - 1; i++)
                     {
                         counter += _segBitCounter[i];
                     }
-                    for(int i = 0; i <= lastSegHighestBitIndex; i++)
+                    for (int i = 0; i <= lastSegHighestBitIndex; i++)
                     {
                         counter += Bitwise.GetBit(_buffSegments[numOfSegments - 1], i);
                     }
@@ -250,7 +250,7 @@ namespace RCNet.MathTools
             /// <param name="recentHistLength">Length of the recent history (-1 means the whole available history)</param>
             public double GetFadingSum(double fadingStrength, int recentHistLength = -1)
             {
-                if(fadingStrength < 0d || fadingStrength >= 1d)
+                if (fadingStrength < 0d || fadingStrength >= 1d)
                 {
                     throw new ArgumentException($"Invalid fadingStrength {fadingStrength.ToString(CultureInfo.InvariantCulture)}.", "fadingStrength");
                 }
@@ -268,7 +268,7 @@ namespace RCNet.MathTools
                 }
                 double fadingCoeff = 1d - fadingStrength;
                 double fadingSum = 0;
-                for(int index = recentHistLength - 1; index >= 0; index--)
+                for (int index = recentHistLength - 1; index >= 0; index--)
                 {
                     fadingSum *= fadingCoeff;
                     fadingSum += GetBit(index);
@@ -281,7 +281,7 @@ namespace RCNet.MathTools
             /// </summary>
             /// <param name="index">Zero based index within the window (0 is the recent bit)</param>
             /// <param name="length">Sequence length (1-64)</param>
-            /// <param name="reverseOrder">Specifies if to reverse order of the sequence bits</param>
+            /// <param name="reverseOrder">Specifies whether to reverse order of the sequence bits</param>
             public ulong GetBits(int index, int length, bool reverseOrder = true)
             {
                 if ((index + 1) > Capacity || index < 0)
@@ -293,9 +293,9 @@ namespace RCNet.MathTools
                     throw new ArgumentException($"Invalid length {length}.", "length");
                 }
                 ulong sequence = 0ul;
-                if(reverseOrder)
+                if (reverseOrder)
                 {
-                    for(int i = index - (length -1); i <= index; i++)
+                    for (int i = index - (length - 1); i <= index; i++)
                     {
                         sequence <<= 1;
                         sequence += (ulong)GetBit(i);
@@ -316,7 +316,7 @@ namespace RCNet.MathTools
             /// Returns the sequence of recent bits.
             /// </summary>
             /// <param name="length">Sequence length (1-64 and LE to capacity)</param>
-            /// <param name="reverseOrder">Specifies if to reverse order of the sequence bits</param>
+            /// <param name="reverseOrder">Specifies whether to reverse order of the sequence bits</param>
             public ulong GetBits(int length, bool reverseOrder = true)
             {
                 if (length > MaxBits || length > Capacity || length < 1)

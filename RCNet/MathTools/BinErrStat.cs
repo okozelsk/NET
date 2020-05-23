@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RCNet.MathTools
 {
@@ -48,7 +45,7 @@ namespace RCNet.MathTools
         /// <param name="computedVectorCollection">Collection of computed vectors</param>
         /// <param name="idealVectorCollection">Collection of ideal vectors</param>
         public BinErrStat(double binBorder, IEnumerable<double[]> computedVectorCollection, IEnumerable<double[]> idealVectorCollection)
-            :this(binBorder)
+            : this(binBorder)
         {
             Update(computedVectorCollection, idealVectorCollection);
             return;

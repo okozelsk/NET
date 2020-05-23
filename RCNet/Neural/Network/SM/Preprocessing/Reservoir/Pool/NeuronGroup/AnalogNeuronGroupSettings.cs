@@ -1,17 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Globalization;
-using System.Xml.Linq;
-using System.Xml.XPath;
-using System.IO;
-using RCNet.Extensions;
-using RCNet.XmlTools;
-using RCNet.RandomValue;
-using RCNet.Neural.Activation;
+﻿using RCNet.Neural.Activation;
 using RCNet.Neural.Network.SM.Preprocessing.Neuron;
 using RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor;
+using RCNet.RandomValue;
+using System;
+using System.Globalization;
+using System.Linq;
+using System.Xml.Linq;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
 {
@@ -77,7 +71,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// Configuration of the predictors
         /// </summary>
         public PredictorsSettings PredictorsCfg { get; }
-        
+
         /// <summary>
         /// Additional helper computed field.
         /// Specifies exact number of neurons of the group within the current context.
@@ -126,16 +120,16 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// </summary>
         /// <param name="source">Source instance</param>
         public AnalogNeuronGroupSettings(AnalogNeuronGroupSettings source)
-            :this(source.Name, source.RelShare, source.ActivationCfg, source.FiringThreshold, 
+            : this(source.Name, source.RelShare, source.ActivationCfg, source.FiringThreshold,
                   source.SignalingRestriction, source.BiasCfg, source.RetainmentCfg, source.PredictorsCfg)
         {
             return;
         }
 
         /// <summary>
-        /// Creates the instance and initialize it from given xml element.
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml data containing settings.</param>
+        /// <param name="elem">Xml element containing the initialization settings.</param>
         public AnalogNeuronGroupSettings(XElement elem)
         {
             //Validation
@@ -236,7 +230,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// Generates xml element containing the settings.
         /// </summary>
         /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
@@ -253,11 +247,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
             {
                 rootElem.Add(new XAttribute("signalingRestriction", SignalingRestriction.ToString()));
             }
-            if(BiasCfg != null)
+            if (BiasCfg != null)
             {
                 rootElem.Add(BiasCfg.GetXml("bias", suppressDefaults));
             }
-            if(RetainmentCfg != null)
+            if (RetainmentCfg != null)
             {
                 rootElem.Add(RetainmentCfg.GetXml(suppressDefaults));
             }
@@ -272,7 +266,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// <summary>
         /// Generates default named xml element containing the settings.
         /// </summary>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(bool suppressDefaults)
         {

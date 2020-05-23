@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
@@ -66,7 +62,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         /// </summary>
         /// <param name="predictorParamsSettings">Predictor specific parameters settings</param>
         public PredictorsParamsSettings(params IPredictorParamsSettings[] predictorParamsSettings)
-            :this()
+            : this()
         {
 
             foreach (IPredictorParamsSettings settings in predictorParamsSettings)
@@ -118,17 +114,17 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         /// </summary>
         /// <param name="elem">Xml element containing settings</param>
         public PredictorsParamsSettings(XElement elem)
-            :this()
+            : this()
         {
             //Validation
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
-            foreach(PredictorsProvider.PredictorID predictorID in typeof(PredictorsProvider.PredictorID).GetEnumValues())
+            foreach (PredictorsProvider.PredictorID predictorID in typeof(PredictorsProvider.PredictorID).GetEnumValues())
             {
                 XElement predictorElem = settingsElem.Elements(PredictorsSettings.GetXmlName(predictorID)).FirstOrDefault();
-                if(predictorElem != null)
+                if (predictorElem != null)
                 {
-                    switch(predictorID)
+                    switch (predictorID)
                     {
                         case PredictorsProvider.PredictorID.ActivationFadingSum:
                             ActivationFadingSumCfg = new ActivationFadingSumSettings(predictorElem);
@@ -194,7 +190,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         /// Generates xml element containing the settings.
         /// </summary>
         /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
@@ -230,7 +226,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         /// <summary>
         /// Generates default named xml element containing the settings.
         /// </summary>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(bool suppressDefaults)
         {

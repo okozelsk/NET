@@ -1,6 +1,5 @@
-﻿using System;
-using RCNet.Extensions;
-using RCNet.MathTools;
+﻿using RCNet.MathTools;
+using System;
 
 namespace RCNet.Neural.Activation
 {
@@ -37,15 +36,15 @@ namespace RCNet.Neural.Activation
         /// <param name="x">Activation input</param>
         public override double Compute(double x)
         {
-            if(x > 2d)
+            if (x > 2d)
             {
                 return 1d;
             }
-            else if(x >= 0)
+            else if (x >= 0)
             {
                 return x - (x * x) / 4d;
             }
-            else if(x >= -2d)
+            else if (x >= -2d)
             {
                 return x + (x * x) / 4d;
             }
@@ -64,7 +63,7 @@ namespace RCNet.Neural.Activation
         public override double ComputeDerivative(double c, double x = double.NaN)
         {
             //Faster than 1d + Math.Abs(x/2d);
-            return x < 0? 1d - x/2d : 1d + x/2d;
+            return x < 0 ? 1d - x / 2d : 1d + x / 2d;
         }
 
     }//SQNL

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace RCNet.Neural.Network.NonRecurrent
+﻿namespace RCNet.Neural.Network.NonRecurrent
 {
     /// <summary>
     /// Common interface of non-recurrent trainers

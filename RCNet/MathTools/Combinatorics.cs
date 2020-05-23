@@ -25,7 +25,7 @@ namespace RCNet.MathTools
             }
             //Computation
             double result = 1d;
-            for(uint i = k, j = 0; i >= 1; i--, j++)
+            for (uint i = k, j = 0; i >= 1; i--, j++)
             {
                 result *= (double)(n - j) / (double)(i);
 

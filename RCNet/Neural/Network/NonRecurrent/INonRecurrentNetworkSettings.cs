@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using RCNet.MathTools;
 using System.Xml.Linq;
-using RCNet.MathTools;
 
 namespace RCNet.Neural.Network.NonRecurrent
 {
@@ -27,7 +22,7 @@ namespace RCNet.Neural.Network.NonRecurrent
         /// <summary>
         /// Generates default named xml element containing the settings.
         /// </summary>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         XElement GetXml(bool suppressDefaults);
 

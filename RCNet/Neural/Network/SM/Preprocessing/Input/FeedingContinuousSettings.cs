@@ -1,12 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
-using RCNet.Extensions;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Input
 {
@@ -45,7 +39,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         public int BootCycles { get; }
 
         /// <summary>
-        /// Specifies if to route input fields to readout layer together with other predictors
+        /// Specifies whether to route input fields to readout layer together with other predictors
         /// </summary>
         public bool RouteToReadout { get; }
 
@@ -55,7 +49,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// Creates an itialized instance.
         /// </summary>
         /// <param name="bootCycles">Number of boot cycles</param>
-        /// <param name="routeToReadout">Specifies if to route input fields to readout layer together with other predictors</param>
+        /// <param name="routeToReadout">Specifies whether to route input fields to readout layer together with other predictors</param>
         public FeedingContinuousSettings(int bootCycles = DefaultBootCycles,
                                               bool routeToReadout = DefaultRouteToReadout
                                               )
@@ -79,10 +73,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// Creates an initialized instance from the given xml element.
         /// </summary>
-        /// <param name="elem">
-        /// Xml data containing the settings.
-        /// Content of xml element is always validated against the xml schema.
-        /// </param>
+        /// <param name="elem">Xml element containing the initialization settings</param>
         public FeedingContinuousSettings(XElement elem)
         {
             //Validation
@@ -141,7 +132,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// Generates xml element containing the settings.
         /// </summary>
         /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
@@ -161,7 +152,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// Generates default named xml element containing the settings.
         /// </summary>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(bool suppressDefaults)
         {

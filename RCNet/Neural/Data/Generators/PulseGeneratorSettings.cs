@@ -1,12 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 using System.Globalization;
-using System.Reflection;
-using RCNet.XmlTools;
+using System.Xml.Linq;
 
 namespace RCNet.Neural.Data.Generators
 {
@@ -70,10 +64,9 @@ namespace RCNet.Neural.Data.Generators
         }
 
         /// <summary>
-        /// Creates the instance and initializes it from given xml element.
-        /// Content of xml element is always validated against the xml schema.
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml data containing settings</param>
+        /// <param name="elem">Xml element containing the initialization settings</param>
         public PulseGeneratorSettings(XElement elem)
         {
             //Validation
@@ -117,7 +110,7 @@ namespace RCNet.Neural.Data.Generators
         /// Generates xml element containing the settings.
         /// </summary>
         /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
@@ -130,7 +123,7 @@ namespace RCNet.Neural.Data.Generators
         /// <summary>
         /// Generates default named xml element containing the settings.
         /// </summary>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(bool suppressDefaults)
         {

@@ -1,9 +1,6 @@
-﻿using System;
+﻿using RCNet.MathTools.VectorMath;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RCNet.MathTools.VectorMath;
 
 namespace RCNet.MathTools.Differential
 {
@@ -58,7 +55,7 @@ namespace RCNet.MathTools.Differential
             Vector estimV = v0.Clone();
             for (int step = 0; step < subSteps; step++)
             {
-                switch(method)
+                switch (method)
                 {
                     case Method.Euler:
                         estimV = EulerSubStep(eqs, currT, estimV, h);
@@ -117,7 +114,7 @@ namespace RCNet.MathTools.Differential
             Vector k2 = h * eqs(t0 + h / 2, v0 + k1 / 2);
             Vector k3 = h * eqs(t0 + h / 2, v0 + k2 / 2);
             Vector k4 = h * eqs(t0 + h, v0 + k3);
-            return v0 + (k1 + 2*k2 + 2*k3 + k4) / 6d;
+            return v0 + (k1 + 2 * k2 + 2 * k3 + k4) / 6d;
         }
 
         //Inner classes
@@ -135,7 +132,7 @@ namespace RCNet.MathTools.Differential
             /// Estimated value(s)
             /// </summary>
             public Vector V { get; }
-            
+
             /// <summary>
             /// Instantiates an initialized instance
             /// </summary>

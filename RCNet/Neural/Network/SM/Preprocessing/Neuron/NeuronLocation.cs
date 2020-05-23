@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RCNet.Extensions;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
 {
@@ -77,7 +72,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
         /// </summary>
         /// <param name="source">Source instance.</param>
         public NeuronLocation(NeuronLocation source)
-            :this(source.ReservoirID,
+            : this(source.ReservoirID,
                   source.ReservoirFlatIdx,
                   source.PoolID,
                   source.PoolFlatIdx,

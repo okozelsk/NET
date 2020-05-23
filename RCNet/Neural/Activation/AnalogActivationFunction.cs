@@ -1,5 +1,5 @@
-﻿using System;
-using RCNet.MathTools;
+﻿using RCNet.MathTools;
+using System;
 
 namespace RCNet.Neural.Activation
 {
@@ -55,7 +55,7 @@ namespace RCNet.Neural.Activation
         /// Resets function to its initial state.
         /// Does nothing in case of analog activation function.
         /// </summary>
-        public void Reset(){ return; }
+        public void Reset() { return; }
 
         /// <summary>
         /// Sets initial state of the activation function (applicable for !stateless only)

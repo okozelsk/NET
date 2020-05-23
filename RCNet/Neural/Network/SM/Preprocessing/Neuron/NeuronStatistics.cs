@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RCNet.MathTools;
+﻿using RCNet.MathTools;
+using System;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
 {

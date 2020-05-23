@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Xml.Linq;
-using System.Threading.Tasks;
-using RCNet.Extensions;
-using RCNet.Neural.Activation;
+﻿using RCNet.Extensions;
 using RCNet.MathTools;
+using RCNet.Neural.Activation;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace RCNet.Neural.Network.NonRecurrent.FF
 {
@@ -79,7 +78,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         /// <param name="numOfOutputValues">Number of network's output values</param>
         /// <param name="settings">Configuration parameters</param>
         public FeedForwardNetwork(int numOfInputValues, int numOfOutputValues, FeedForwardNetworkSettings settings)
-            :this(numOfInputValues, numOfOutputValues)
+            : this(numOfInputValues, numOfOutputValues)
         {
             Random rand = new Random(1);
             //Initialize FF network
@@ -150,14 +149,14 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
                 neuronsFlatStartIdx += layer.NumOfLayerNeurons;
                 weightsFlatStartIdx += layer.NumOfLayerNeurons * layer.NumOfInputNodes + layer.NumOfLayerNeurons;
                 numOfInputNodes = layer.NumOfLayerNeurons;
-                if(layer.Activation.GetType() != typeof(Elliot) &&
+                if (layer.Activation.GetType() != typeof(Elliot) &&
                    layer.Activation.GetType() != typeof(TanH)
                    )
                 {
                     _isAllowedNguyenWidrowRandomization = false;
                 }
             }
-            if(LayerCollection.Count < 2)
+            if (LayerCollection.Count < 2)
             {
                 _isAllowedNguyenWidrowRandomization = false;
             }
@@ -177,7 +176,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
                 int weightFlatIndex = layer.WeightsStartFlatIdx;
                 int biasFlatIndex = layer.BiasesStartFlatIdx;
                 double b = 0.35d * Math.Pow(layer.NumOfLayerNeurons, (1d / layer.NumOfInputNodes));
-                for(int layerNeuronIdx = 0; layerNeuronIdx < layer.NumOfLayerNeurons; layerNeuronIdx++, biasFlatIndex++)
+                for (int layerNeuronIdx = 0; layerNeuronIdx < layer.NumOfLayerNeurons; layerNeuronIdx++, biasFlatIndex++)
                 {
                     for (int inputNodeIdx = 0; inputNodeIdx < layer.NumOfInputNodes; inputNodeIdx++, weightFlatIndex++)
                     {
@@ -195,7 +194,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         /// <param name="rand">Random generator to be used</param>
         public void RandomizeWeights(Random rand)
         {
-            if(!Finalized)
+            if (!Finalized)
             {
                 throw new InvalidOperationException($"Can´t randomize weights. Network structure is not finalized.");
             }

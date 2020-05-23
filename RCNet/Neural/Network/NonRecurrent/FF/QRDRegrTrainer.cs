@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using RCNet.Extensions;
-using RCNet.Neural.Activation;
+﻿using RCNet.Extensions;
 using RCNet.MathTools.MatrixMath;
 using RCNet.MathTools.PS;
+using RCNet.Neural.Activation;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
 
 namespace RCNet.Neural.Network.NonRecurrent.FF
 {
@@ -84,7 +84,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
                 throw new InvalidOperationException($"Can´t create trainer. Network structure is not complient (single layer having Identity activation).");
             }
             //Check samples conditions
-            if(inputVectorCollection.Count < inputVectorCollection[0].Length + 1)
+            if (inputVectorCollection.Count < inputVectorCollection[0].Length + 1)
             {
                 throw new InvalidOperationException($"Can´t create trainer. Insufficient number of training samples {inputVectorCollection.Count}. Minimum is {(inputVectorCollection[0].Length + 1)}.");
             }
@@ -126,7 +126,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             for (int row = 0; row < _inputVectorCollection.Count; row++)
             {
                 //Predictors
-                for(int col = 0; col < _net.NumOfInputValues; col++)
+                for (int col = 0; col < _net.NumOfInputValues; col++)
                 {
                     double predictor = _inputVectorCollection[row][col];
                     predictors.Data[row][col] = predictor * (1d + _rand.NextRangedUniformDouble(noise * _settings.NoiseZeroMargin, noise) * _rand.NextSign());

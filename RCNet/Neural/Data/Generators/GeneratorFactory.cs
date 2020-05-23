@@ -1,10 +1,5 @@
-﻿using RCNet.MathTools;
-using RCNet.RandomValue;
+﻿using RCNet.RandomValue;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
 
 namespace RCNet.Neural.Data.Generators
@@ -20,7 +15,7 @@ namespace RCNet.Neural.Data.Generators
         /// <param name="elem">Element containing settings</param>
         public static RCNetBaseSettings LoadSettings(XElement elem)
         {
-            switch(elem.Name.LocalName)
+            switch (elem.Name.LocalName)
             {
                 case "pulse": return new PulseGeneratorSettings(elem);
                 case "random": return new RandomValueSettings(elem);
@@ -38,7 +33,7 @@ namespace RCNet.Neural.Data.Generators
         public static IGenerator Create(RCNetBaseSettings settings)
         {
             Type cfgType = settings.GetType();
-            if(cfgType == typeof(PulseGeneratorSettings))
+            if (cfgType == typeof(PulseGeneratorSettings))
             {
                 return new PulseGenerator((PulseGeneratorSettings)settings);
             }

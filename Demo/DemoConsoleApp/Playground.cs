@@ -1,40 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Globalization;
-using System.Xml.Linq;
-using Demo.DemoConsoleApp.Log;
-using RCNet;
-using RCNet.Neural.Activation;
-using RCNet.Extensions;
-using RCNet.MathTools;
-using RCNet.MathTools.MatrixMath;
-using RCNet.MathTools.Differential;
-using RCNet.MathTools.VectorMath;
-using RCNet.MathTools.PS;
-using RCNet.RandomValue;
-using RCNet.Queue;
-using RCNet.CsvTools;
-using RCNet.Neural.Data;
+﻿using RCNet.Neural.Activation;
 using RCNet.Neural.Data.Transformers;
-using RCNet.Neural.Data.Generators;
-using RCNet.Neural.Data.Filter;
-using RCNet.Neural.Network.NonRecurrent.FF;
-using RCNet.Neural.Network.NonRecurrent.PP;
-using RCNet.Neural.Network.NonRecurrent;
-using RCNet.Neural.Network.SM;
-using RCNet.Neural.Network.SM.Preprocessing;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Space3D;
-using RCNet.Neural.Network.SM.Preprocessing.Neuron;
-using RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup;
-using RCNet.Neural.Network.SM.Readout;
-using RCNet.Neural.Network.SM.Preprocessing.Input;
+using System;
+using System.Collections.Generic;
 
 namespace Demo.DemoConsoleApp
 {
@@ -99,7 +66,7 @@ namespace Demo.DemoConsoleApp
             inputValues[0] = double.MinValue;
             inputValues[1] = double.MinValue;
             Console.WriteLine($"{transformer.GetType().Name} Inputs [{inputValues[0]}, {inputValues[1]}] Output {transformer.Next(inputValues)}");
-            
+
             for (double input1 = -5d; input1 <= 5d; input1 += 0.5d)
             {
                 input1 = Math.Round(input1, 1);

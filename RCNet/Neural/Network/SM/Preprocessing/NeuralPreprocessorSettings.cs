@@ -1,17 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Globalization;
-using System.Xml.Linq;
-using System.Reflection;
-using RCNet.Extensions;
-using RCNet.XmlTools;
-using RCNet.RandomValue;
-using RCNet.Neural.Data;
-using RCNet.Neural.Data.Filter;
-using RCNet.Neural.Data.Generators;
-using RCNet.Neural.Network.SM.Preprocessing.Input;
+﻿using RCNet.Neural.Network.SM.Preprocessing.Input;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir;
+using System;
+using System.Globalization;
+using System.Linq;
+using System.Xml.Linq;
 
 namespace RCNet.Neural.Network.SM.Preprocessing
 {
@@ -88,10 +80,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// <summary>
         /// Creates an initialized instance from the given xml element.
         /// </summary>
-        /// <param name="elem">
-        /// Xml data containing the settings.
-        /// Content of xml element is always validated against the xml schema.
-        /// </param>
+        /// <param name="elem">Xml element containing the initialization settings</param>
         public NeuralPreprocessorSettings(XElement elem)
         {
             //Validation
@@ -127,7 +116,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 throw new ArgumentException($"Invalid PredictorsReductionRatio {PredictorsReductionRatio.ToString(CultureInfo.InvariantCulture)}. PredictorsReductionRatio must be GE to 0 and LT 1.", "PredictorsReductionRatio");
             }
             //Reservoir instances consistency
-            foreach(ReservoirInstanceSettings resInstCfg in ReservoirInstancesCfg.ReservoirInstanceCfgCollection)
+            foreach (ReservoirInstanceSettings resInstCfg in ReservoirInstancesCfg.ReservoirInstanceCfgCollection)
             {
                 resInstCfg.CheckConsistency(InputEncoderCfg, ReservoirStructuresCfg.GetReservoirStructureCfg(resInstCfg.StructureCfgName));
             }
@@ -146,7 +135,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// Generates xml element containing the settings.
         /// </summary>
         /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
@@ -166,7 +155,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// <summary>
         /// Generates default named xml element containing the settings.
         /// </summary>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(bool suppressDefaults)
         {

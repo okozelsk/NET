@@ -1,6 +1,6 @@
-﻿using System;
+﻿using RCNet.Extensions;
 using RCNet.MathTools;
-using RCNet.Extensions;
+using System;
 
 namespace RCNet.Neural.Activation
 {
@@ -13,7 +13,7 @@ namespace RCNet.Neural.Activation
         //Constants
         //Attributes
         private readonly Interval _outputRange;
-        
+
         //Attribute properties
         /// <summary>
         /// The Alpha

@@ -1,18 +1,7 @@
-﻿using System;
+﻿using RCNet.Neural.Network.NonRecurrent;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Globalization;
 using System.Xml.Linq;
-using System.Xml.XPath;
-using System.IO;
-using RCNet.Extensions;
-using RCNet.MathTools.Probability;
-using RCNet.XmlTools;
-using RCNet.RandomValue;
-using RCNet.Neural.Network.NonRecurrent;
-using RCNet.Neural.Network.NonRecurrent.FF;
-using RCNet.Neural.Network.NonRecurrent.PP;
 
 
 namespace RCNet.Neural.Network.SM.Readout
@@ -80,7 +69,7 @@ namespace RCNet.Neural.Network.SM.Readout
         public ClassificationNetworksSettings(ClassificationNetworksSettings source)
             : this()
         {
-            foreach(INonRecurrentNetworkSettings netCfg in source.NetworkCfgCollection)
+            foreach (INonRecurrentNetworkSettings netCfg in source.NetworkCfgCollection)
             {
                 NetworkCfgCollection.Add((INonRecurrentNetworkSettings)netCfg.DeepClone());
             }
@@ -88,12 +77,9 @@ namespace RCNet.Neural.Network.SM.Readout
         }
 
         /// <summary>
-        /// Creates the instance and initialize it from given xml element.
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">
-        /// Xml data containing settings.
-        /// Content of xml element is always validated against the xml schema.
-        /// </param>
+        /// <param name="elem">Xml element containing the initialization settings</param>
         public ClassificationNetworksSettings(XElement elem)
         {
             //Validation
@@ -131,12 +117,12 @@ namespace RCNet.Neural.Network.SM.Readout
         /// Generates xml element containing the settings.
         /// </summary>
         /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             XElement rootElem = new XElement(rootElemName);
-            foreach(INonRecurrentNetworkSettings netCfg in NetworkCfgCollection)
+            foreach (INonRecurrentNetworkSettings netCfg in NetworkCfgCollection)
             {
                 rootElem.Add(netCfg.GetXml(suppressDefaults));
             }

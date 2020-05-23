@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
@@ -26,7 +21,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         public FiringMWAvgSettings(int window = DefaultWindow,
                                             PredictorsProvider.PredictorMWAvgWeightsType weights = DefaultWeights
                                             )
-            :base(window, weights)
+            : base(window, weights)
         {
             return;
         }
@@ -36,7 +31,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         /// </summary>
         /// <param name="source">Source instance</param>
         public FiringMWAvgSettings(FiringMWAvgSettings source)
-            :base(source)
+            : base(source)
         {
             return;
         }
@@ -46,7 +41,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         /// </summary>
         /// <param name="elem">Xml element containing settings</param>
         public FiringMWAvgSettings(XElement elem)
-            :base(elem)
+            : base(elem)
         {
             return;
         }
@@ -77,7 +72,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         /// <summary>
         /// Generates default named xml element containing the settings.
         /// </summary>
-        /// <param name="suppressDefaults">Specifies if to ommit optional nodes having set default values</param>
+        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(bool suppressDefaults)
         {
