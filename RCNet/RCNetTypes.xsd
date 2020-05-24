@@ -2296,7 +2296,12 @@
     </xs:sequence>
     <xs:attribute type="UDoubleLT1Type" name="predictorsReductionRatio" use="optional" default="0">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Specifies how many predictors having smallest rescalled range to be disabled. Default value is 0.</xs:documentation>
+        <xs:documentation xml:lang="en">Determines how many predictors having smallest value-span to be disabled. Default value is 0.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleGT0Type" name="predictorValueMinSpan" use="optional" default="1e-6">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Specifies minimum acceptable predictor's value-span. Default value is 1e-6.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>

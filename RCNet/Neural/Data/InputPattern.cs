@@ -2,6 +2,7 @@
 using RCNet.MathTools;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace RCNet.Neural.Data
 {
@@ -198,7 +199,7 @@ namespace RCNet.Neural.Data
                 {
                     if (Math.Abs(varData[i] - varData[0]) / varDataInterval.Span >= thresholdOfSignalDetection)
                     {
-                        return i - 1; ;
+                        return i - 1;
                     }
                 }
             }
@@ -241,7 +242,7 @@ namespace RCNet.Neural.Data
                     }
                 }
             }
-            //Fill remaining data points by the last value
+            //Fill remaining data points with the last value
             while (upsampledDataIdx < targetLength)
             {
                 upsampledData[upsampledDataIdx++] = varData[signalEndIdx];
@@ -262,7 +263,6 @@ namespace RCNet.Neural.Data
                     {
                         //Select the last value in the group 
                         downsampledData[downsampledDataIdx] = varData[downsampledDataIdx * downsamplingPoints + (downsamplingPoints - 1)];
-
                     }
                     else
                     {
@@ -375,14 +375,14 @@ namespace RCNet.Neural.Data
             {
                 patternData.Add(new double[timePoints]);
             }
-            for (int timeIdx = 0; timeIdx < timePoints; timeIdx++)
+            Parallel.For(0, timePoints, timeIdx =>
             {
                 for (int i = 0; i < numOfVariables; i++)
                 {
                     double varValue = varDataOrganization == VariablesSchema.Groupped ? inputData[dataStartIndex + timeIdx * numOfVariables + i] : inputData[dataStartIndex + i * timePoints + timeIdx];
                     patternData[i][timeIdx] = varValue;
                 }
-            }//timeIdx
+            });//timeIdx
             return patternData;
         }
 
@@ -391,7 +391,7 @@ namespace RCNet.Neural.Data
         /// </summary>
         public void UnifyAmplitudes()
         {
-            foreach (double[] timeData in VariablesDataCollection)
+            Parallel.ForEach(VariablesDataCollection, timeData =>
             {
                 Interval dataRange = new Interval(timeData);
                 if (dataRange.Max > dataRange.Min)
@@ -401,7 +401,7 @@ namespace RCNet.Neural.Data
                         timeData[i] = (timeData[i] - dataRange.Min) / (dataRange.Span);
                     }
                 }
-            }
+            });
             return;
         }
 

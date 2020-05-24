@@ -106,7 +106,7 @@ namespace Demo.DemoConsoleApp.SM
                     VerificationDataFileName = string.Empty;
                 }
                 //State Machine configuration
-                StateMachineCfg = new StateMachineSettings(demoCaseElem.Elements("stateMachineCfg").First());
+                StateMachineCfg = new StateMachineSettings(demoCaseElem.Elements("stateMachine").First());
                 return;
             }
 

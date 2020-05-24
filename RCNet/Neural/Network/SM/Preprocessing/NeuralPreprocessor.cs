@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace RCNet.Neural.Network.SM.Preprocessing
 {
@@ -18,9 +19,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing
     [Serializable]
     public class NeuralPreprocessor
     {
-        //Constants
-        private const double MinPredictorValueDifference = 1e-6;
-
         //Delegates
         /// <summary>
         /// Delegate of PreprocessingProgressChanged event handler.
@@ -155,13 +153,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// </summary>
         /// <param name="f1">Feature 1</param>
         /// <param name="f2">Feature 2</param>
-        public static int CompareOutputFeature(Tuple<int, double, BasicStat> f1, Tuple<int, double, BasicStat> f2)
+        public static int CompareOutputFeature(Tuple<int, double> f1, Tuple<int, double> f2)
         {
-            if (f1.Item3.Span > f2.Item3.Span)
+            if (f1.Item2 > f2.Item2)
             {
                 return -1;
             }
-            else if (f1.Item3.Span < f2.Item3.Span)
+            else if (f1.Item2 < f2.Item2)
             {
                 return 1;
             }
@@ -204,31 +202,30 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             OutputFeatureGeneralSwitchCollection = new bool[OutputFeatureDescriptorCollection.Count];
             //Init general predictor switches to false
             OutputFeatureGeneralSwitchCollection.Populate(false);
-            //Compute statistics
-            List<Tuple<int, double, BasicStat>> featureStatCollection = new List<Tuple<int, double, BasicStat>>(OutputFeatureDescriptorCollection.Count);
-            for (int i = 0; i < OutputFeatureDescriptorCollection.Count; i++)
+            //Compute statistics on predictors
+            Tuple<int, double>[] predictorValueSpanCollection = new Tuple<int, double>[OutputFeatureDescriptorCollection.Count];
+            Parallel.For(0, OutputFeatureDescriptorCollection.Count, i =>
             {
-                RescalledRange rescalledRange = new RescalledRange(predictorsCollection.Count);
                 BasicStat stat = new BasicStat();
                 for (int row = 0; row < predictorsCollection.Count; row++)
                 {
-                    rescalledRange.AddValue(predictorsCollection[row][i]);
                     stat.AddSampleValue(predictorsCollection[row][i]);
                 }
-                featureStatCollection.Add(new Tuple<int, double, BasicStat>(i, rescalledRange.Compute(), stat));
-            }
-            //Sort statistics
-            featureStatCollection.Sort(CompareOutputFeature);
+                //Use predictor's value span as a differentiator
+                predictorValueSpanCollection[i] = new Tuple<int, double>(i, stat.Span);
+            });
+            //Sort collected predictor differentiators
+            Array.Sort(predictorValueSpanCollection, CompareOutputFeature);
             //Enable predictors
-            int reductionCount = (int)(Math.Round(OutputFeatureDescriptorCollection.Count * _preprocessorCfg.PredictorsReductionRatio));
-            int firstRejectedIndex = featureStatCollection.Count - reductionCount;
+            int numOfPredictorsToBeRejected = (int)(Math.Round(OutputFeatureDescriptorCollection.Count * _preprocessorCfg.PredictorsReductionRatio));
+            int firstIndexToBeRejected = predictorValueSpanCollection.Length - numOfPredictorsToBeRejected;
             NumOfActiveOutputFeatures = 0;
-            for (int i = 0; i < featureStatCollection.Count; i++)
+            for (int i = 0; i < predictorValueSpanCollection.Length; i++)
             {
-                if (featureStatCollection[i].Item3.Span > MinPredictorValueDifference && i < firstRejectedIndex)
+                if (predictorValueSpanCollection[i].Item2 > _preprocessorCfg.PredictorValueMinSpan && i < firstIndexToBeRejected)
                 {
                     //Enable predictor
-                    OutputFeatureGeneralSwitchCollection[featureStatCollection[i].Item1] = true;
+                    OutputFeatureGeneralSwitchCollection[predictorValueSpanCollection[i].Item1] = true;
                     ++NumOfActiveOutputFeatures;
                 }
             }

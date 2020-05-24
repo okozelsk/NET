@@ -90,10 +90,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// Data to be processed
         /// </summary>
-        private readonly List<double[]> _inputData;
+        private readonly List<double[]> _inputDataQueue;
 
         /// <summary>
-        /// Number of already processed inputs from _inputData
+        /// Number of already processed inputs from _inputDataQueue
         /// </summary>
         private int _numOfProcessedInputs;
 
@@ -178,9 +178,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             }
             _fixedExtVectorLength = -1;
             NumOfRoutedFieldValues = 0;
-            _inputData = new List<double[]>();
-            _numOfProcessedInputs = 0;
-            _reverseMode = false;
+            //Input processing queue
+            _inputDataQueue = new List<double[]>();
+            ResetInputProcessingQueue();
             return;
         }
 
@@ -188,7 +188,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// Number of remaining stored inputs to be processed
         /// </summary>
-        public int NumOfRemainingInputs { get { return _inputData.Count - _numOfProcessedInputs; } }
+        public int NumOfRemainingInputs { get { return _inputDataQueue.Count - _numOfProcessedInputs; } }
 
         //Methods
         /// <summary>
@@ -211,20 +211,19 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// Resets internal input buffer
         /// </summary>
-        private void ResetInputProcessing()
+        private void ResetInputProcessingQueue()
         {
             //Reset input data buffer
-            _inputData.Clear();
+            _inputDataQueue.Clear();
             _numOfProcessedInputs = 0;
             _reverseMode = false;
             return;
         }
 
         /// <summary>
-        /// Sets input encoder's fields internal state to initial state after feature filters initialization
+        /// Resets internal transformers and generators to initial state
         /// </summary>
-        /// <param name="resetStatistics">Specifies whether to reset internal statistics</param>
-        private void ResetFields(bool resetStatistics)
+        private void ResetTransformersAndGenerators()
         {
             //Reset transformers
             foreach (ITransformer transformer in _internalInputTransformerCollection)
@@ -236,7 +235,16 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             {
                 generator.Reset();
             }
-            //Reset fields
+            return;
+        }
+
+        /// <summary>
+        /// Resets all input neurons to initial state
+        /// </summary>
+        /// <param name="resetStatistics">Specifies whether to reset internal statistics</param>
+        private void ResetInputNeurons(bool resetStatistics)
+        {
+            //Reset input neurons in all input fields
             foreach (InputField field in Fields)
             {
                 field.ResetNeurons(resetStatistics);
@@ -261,8 +269,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// </summary>
         public void Reset()
         {
-            ResetInputProcessing();
-            ResetFields(true);
+            ResetInputProcessingQueue();
+            ResetTransformersAndGenerators();
+            ResetInputNeurons(true);
             ResetFeatureFilters();
             _fixedExtVectorLength = -1;
             NumOfRoutedFieldValues = 0;
@@ -313,46 +322,23 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         }
 
         /// <summary>
-        /// Adds inputs from internal transformers and generators.
+        /// Adds internal inputs (transformers and generators) and converts pattern to series of vectors.
         /// </summary>
         /// <param name="inputPattern">External input pattern</param>
-        private InputPattern AddInternalInputs(InputPattern inputPattern)
+        private List<double[]> CompleteInputPattern(InputPattern inputPattern)
         {
+            //Reset transformers and generators
+            ResetTransformersAndGenerators();
+            //Convert pattern to completed vectors having added internal inputs from transformers and generators
             int inputPatternTimePoints = inputPattern.VariablesDataCollection[0].Length;
-            //Convert to rich vectors
-            List<double[]> richVectors = new List<double[]>(inputPatternTimePoints);
+            List<double[]> completedVectors = new List<double[]>(inputPatternTimePoints);
             for (int timePointIndex = 0; timePointIndex < inputPatternTimePoints; timePointIndex++)
             {
                 double[] externalInputVector = inputPattern.GetDataAtTimePoint(timePointIndex);
-                double[] richVector = AddInternalInputs(externalInputVector);
-                richVectors.Add(richVector);
+                double[] completedVector = AddInternalInputs(externalInputVector);
+                completedVectors.Add(completedVector);
             }
-            //Convert back to pattern
-            InputPattern outputPattern = new InputPattern(_encoderCfg.FieldsCfg.TotalNumOfFields);
-            for (int varIdx = 0; varIdx < _encoderCfg.FieldsCfg.TotalNumOfFields; varIdx++)
-            {
-                double[] varData = new double[inputPatternTimePoints];
-                for (int timePointIndex = 0; timePointIndex < inputPatternTimePoints; timePointIndex++)
-                {
-                    varData[timePointIndex] = richVectors[timePointIndex][varIdx];
-                }
-                outputPattern.VariablesDataCollection.Add(varData);
-            }
-            return outputPattern;
-        }
-
-        /// <summary>
-        /// Adds inputs from internal transformers and generators.
-        /// </summary>
-        /// <param name="inputPatterns">Collection of external input patterns</param>
-        private List<InputPattern> AddInternalInputs(List<InputPattern> inputPatterns)
-        {
-            List<InputPattern> outputPatterns = new List<InputPattern>(inputPatterns.Count);
-            for (int i = 0; i < inputPatterns.Count; i++)
-            {
-                outputPatterns.Add(AddInternalInputs(inputPatterns[i]));
-            }
-            return outputPatterns;
+            return completedVectors;
         }
 
         /// <summary>
@@ -373,29 +359,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         }
 
         /// <summary>
-        /// Updates collection of preprocessor's feature filters
-        /// </summary>
-        /// <param name="inputPatternCollection">Collection of input patterns</param>
-        private void UpdateFeatureFilters(List<InputPattern> inputPatternCollection)
-        {
-            Parallel.For(0, _encoderCfg.FieldsCfg.TotalNumOfFields, varIdx =>
-            {
-                foreach (InputPattern pattern in inputPatternCollection)
-                {
-                    for (int i = 0; i < pattern.VariablesDataCollection[varIdx].Length; i++)
-                    {
-                        Fields[varIdx].UpdateFilter(pattern.VariablesDataCollection[varIdx][i]);
-                    }
-                }
-            });
-            return;
-        }
-
-        /// <summary>
         /// Validates input vector's length
         /// </summary>
         /// <param name="extInputVectorLength">Input vector's length</param>
-        private void CheckExtInputVectorLength(int extInputVectorLength)
+        private void ValidateExtInputVectorLength(int extInputVectorLength)
         {
             //Check vector length
             if (_fixedExtVectorLength != -1 && extInputVectorLength != _fixedExtVectorLength)
@@ -432,12 +399,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
                     NumOfRoutedFieldValues = (RoutedFieldCollection.Count * (_fixedExtVectorLength / Fields.Count));
                 }
                 //Convert input vectors to InputPatterns
-                List<InputPattern> patterns = new List<InputPattern>(inputBundle.InputVectorCollection.Count);
+                List<List<double[]>> inputPatterns = new List<List<double[]>>(inputBundle.InputVectorCollection.Count);
                 foreach (double[] vector in inputBundle.InputVectorCollection)
                 {
                     //Check length of the external input vector
-                    CheckExtInputVectorLength(vector.Length);
-                    //Convert vector to pattern
+                    ValidateExtInputVectorLength(vector.Length);
+                    //Convert external vector to pattern
                     FeedingPatternedSettings feedingCfg = (FeedingPatternedSettings)_encoderCfg.FeedingCfg;
                     InputPattern inputPattern = new InputPattern(vector,
                                                                  _encoderCfg.FieldsCfg.ExternalFieldsCfg.FieldCfgCollection.Count,
@@ -449,10 +416,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
                                                                  feedingCfg.UnificationCfg.ResamplingCfg.UniformTimeScale,
                                                                  feedingCfg.UnificationCfg.ResamplingCfg.TargetTimePoints
                                                                  );
-                    patterns.Add(inputPattern);
+                    List<double[]> inputPatternVectors = CompleteInputPattern(inputPattern);
+                    inputPatterns.Add(inputPatternVectors);
+                    UpdateFeatureFilters(inputPatternVectors);
                 }
-                //Add internal inputs and initialize feature filters
-                UpdateFeatureFilters(AddInternalInputs(patterns));
             }
             return;
         }
@@ -464,20 +431,20 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         public void StoreNewData(double[] inputVector)
         {
             //Reset input data
-            ResetInputProcessing();
+            ResetInputProcessingQueue();
             //Store new data
             if (_encoderCfg.FeedingCfg.FeedingType == InputFeedingType.Continuous)
             {
-                //Add new vector
-                _inputData.Add(AddInternalInputs(inputVector));
+                //Add single vector into the processing queue
+                _inputDataQueue.Add(AddInternalInputs(inputVector));
             }
             else
             {
-                //Reset fields to initial state
-                ResetFields(false);
                 //Check length of the external input vector
-                CheckExtInputVectorLength(inputVector.Length);
-                //Add new pattern vectors
+                ValidateExtInputVectorLength(inputVector.Length);
+                //Reset input neurons to initial state
+                ResetInputNeurons(false);
+                //Prepare input pattern
                 FeedingPatternedSettings feedingCfg = (FeedingPatternedSettings)_encoderCfg.FeedingCfg;
                 InputPattern inputPattern = new InputPattern(inputVector,
                                                              _encoderCfg.FieldsCfg.ExternalFieldsCfg.FieldCfgCollection.Count,
@@ -489,13 +456,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
                                                              feedingCfg.UnificationCfg.ResamplingCfg.UniformTimeScale,
                                                              feedingCfg.UnificationCfg.ResamplingCfg.TargetTimePoints
                                                              );
-                InputPattern completedPattern = AddInternalInputs(inputPattern);
-                int inputPatternTimePoints = completedPattern.VariablesDataCollection[0].Length;
-                //Convert to vectors
-                for (int timePointIndex = 0; timePointIndex < inputPatternTimePoints; timePointIndex++)
-                {
-                    _inputData.Add(completedPattern.GetDataAtTimePoint(timePointIndex));
-                }
+                _inputDataQueue.AddRange(CompleteInputPattern(inputPattern));
             }
             return;
         }
@@ -507,11 +468,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <returns>True if there are were still unprocessed input data</returns>
         public bool EncodeNextInputData(bool collectStatistics)
         {
-            if (_numOfProcessedInputs < _inputData.Count)
+            if (_numOfProcessedInputs < _inputDataQueue.Count)
             {
                 for (int i = 0; i < Fields.Count; i++)
                 {
-                    Fields[i].SetNewData(_inputData[_numOfProcessedInputs][i], collectStatistics);
+                    Fields[i].SetNewData(_inputDataQueue[_numOfProcessedInputs][i], collectStatistics);
                 }
                 ++_numOfProcessedInputs;
                 return true;
@@ -533,10 +494,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             {
                 throw new InvalidOperationException($"Illegal call to set reverse mode. Reverse mode is relevant only for patterned feeding regime.");
             }
-            //Reset fields to initial state
-            ResetFields(false);
-            //Reverse
-            _inputData.Reverse();
+            //Reset input neurons to initial state
+            ResetInputNeurons(false);
+            //Reverse processing queue
+            _inputDataQueue.Reverse();
             _numOfProcessedInputs = 0;
             _reverseMode = true;
             return;
@@ -570,9 +531,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             int count = 0;
             foreach (InputField field in RoutedFieldCollection)
             {
-                for (int i = 0; i < _inputData.Count; i++)
+                for (int i = 0; i < _inputDataQueue.Count; i++)
                 {
-                    buffer[fromOffset++] = _inputData[i][field.Idx];
+                    buffer[fromOffset++] = _inputDataQueue[i][field.Idx];
                     ++count;
                 }
             }

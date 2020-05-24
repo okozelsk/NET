@@ -20,9 +20,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         public const string XsdTypeName = "NPType";
         //Default values
         /// <summary>
-        /// Default value of parameter specifying how many predictors having smallest rescalled range to be disabled
+        /// Default value of parameter determining how many predictors having smallest value-span to be disabled
         /// </summary>
         public const double DefaultPredictorsReductionRatio = 0d;
+        /// <summary>
+        /// Default value of parameter specifying minimum acceptable predictor's value-span
+        /// </summary>
+        public const double DefaultPredictorValueMinSpan = 1e-6d;
 
         //Attribute properties
         /// <summary>
@@ -41,9 +45,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         public ReservoirInstancesSettings ReservoirInstancesCfg { get; }
 
         /// <summary>
-        /// Specifies how many predictors having smallest rescalled range to be disabled
+        /// Determines how many predictors having smallest value-span to be disabled
         /// </summary>
         public double PredictorsReductionRatio { get; }
+
+        /// <summary>
+        /// Specifies minimum acceptable predictor's value-span
+        /// </summary>
+        public double PredictorValueMinSpan { get; }
 
         //Constructors
         /// <summary>
@@ -52,17 +61,20 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// <param name="inputEncoderCfg">Configuration of the preprocessor's input encoder</param>
         /// <param name="reservoirStructuresCfg">Configuration of reservoir structures</param>
         /// <param name="reservoirInstancesCfg">Configuration of reservoir instances</param>
-        /// <param name="predictorsReductionRatio">Specifies how many predictors having smallest rescalled range to be disabled</param>
+        /// <param name="predictorsReductionRatio">Determines how many predictors having smallest value-span to be disabled</param>
+        /// <param name="predictorValueMinSpan">Specifies minimum acceptable predictor's value-span</param>
         public NeuralPreprocessorSettings(InputEncoderSettings inputEncoderCfg,
                                           ReservoirStructuresSettings reservoirStructuresCfg,
                                           ReservoirInstancesSettings reservoirInstancesCfg,
-                                          double predictorsReductionRatio = DefaultPredictorsReductionRatio
+                                          double predictorsReductionRatio = DefaultPredictorsReductionRatio,
+                                          double predictorValueMinSpan = DefaultPredictorValueMinSpan
                                           )
         {
             InputEncoderCfg = (InputEncoderSettings)inputEncoderCfg.DeepClone();
             ReservoirStructuresCfg = (ReservoirStructuresSettings)reservoirStructuresCfg.DeepClone();
             ReservoirInstancesCfg = (ReservoirInstancesSettings)reservoirInstancesCfg.DeepClone();
             PredictorsReductionRatio = predictorsReductionRatio;
+            PredictorValueMinSpan = predictorValueMinSpan;
             Check();
             return;
         }
@@ -72,7 +84,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// </summary>
         /// <param name="source">Source instance</param>
         public NeuralPreprocessorSettings(NeuralPreprocessorSettings source)
-            : this(source.InputEncoderCfg, source.ReservoirStructuresCfg, source.ReservoirInstancesCfg, source.PredictorsReductionRatio)
+            : this(source.InputEncoderCfg, source.ReservoirStructuresCfg, source.ReservoirInstancesCfg,
+                   source.PredictorsReductionRatio, source.PredictorValueMinSpan)
         {
             return;
         }
@@ -90,6 +103,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             ReservoirStructuresCfg = new ReservoirStructuresSettings(settingsElem.Elements("reservoirStructures").First());
             ReservoirInstancesCfg = new ReservoirInstancesSettings(settingsElem.Elements("reservoirInstances").First());
             PredictorsReductionRatio = double.Parse(settingsElem.Attribute("predictorsReductionRatio").Value, CultureInfo.InvariantCulture);
+            PredictorValueMinSpan = double.Parse(settingsElem.Attribute("predictorValueMinSpan").Value, CultureInfo.InvariantCulture);
             Check();
             return;
         }
@@ -99,6 +113,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// Checks if settings are default
         /// </summary>
         public bool IsDefaultPredictorsReductionRatio { get { return (PredictorsReductionRatio == DefaultPredictorsReductionRatio); } }
+
+        /// <summary>
+        /// Checks if settings are default
+        /// </summary>
+        public bool IsDefaultPredictorValueMinSpan { get { return (PredictorValueMinSpan == DefaultPredictorValueMinSpan); } }
 
         /// <summary>
         /// Identifies settings containing only default values
@@ -114,6 +133,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             if (PredictorsReductionRatio < 0 || PredictorsReductionRatio >= 1)
             {
                 throw new ArgumentException($"Invalid PredictorsReductionRatio {PredictorsReductionRatio.ToString(CultureInfo.InvariantCulture)}. PredictorsReductionRatio must be GE to 0 and LT 1.", "PredictorsReductionRatio");
+            }
+            if (PredictorValueMinSpan <= 0)
+            {
+                throw new ArgumentException($"Invalid PredictorValueMinSpan {PredictorValueMinSpan.ToString(CultureInfo.InvariantCulture)}. PredictorValueMinSpan must be GT 0.", "PredictorValueMinSpan");
             }
             //Reservoir instances consistency
             foreach (ReservoirInstanceSettings resInstCfg in ReservoirInstancesCfg.ReservoirInstanceCfgCollection)
@@ -147,6 +170,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             if (!suppressDefaults || !IsDefaultPredictorsReductionRatio)
             {
                 rootElem.Add(new XAttribute("predictorsReductionRatio", PredictorsReductionRatio.ToString(CultureInfo.InvariantCulture)));
+            }
+            if (!suppressDefaults || !IsDefaultPredictorValueMinSpan)
+            {
+                rootElem.Add(new XAttribute("predictorValueMinSpan", PredictorValueMinSpan.ToString(CultureInfo.InvariantCulture)));
             }
             Validate(rootElem, XsdTypeName);
             return rootElem;

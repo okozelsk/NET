@@ -10,7 +10,7 @@
   -->
   <case name="Forecast task High and Low share prices of TTOO (T2 Biosystems, Inc.): Experimental reservoir (ESN), one Identity neuron as a forecaster (Resilient trainer)">
     <samples trainingData="TTOO_train.csv" verificationData="TTOO_verify.csv"/>
-    <stateMachineCfg randomizerSeek="0">
+    <stateMachine randomizerSeek="0">
       <neuralPreprocessor>
         <inputEncoder>
           <feedingContinuous bootCycles="Auto" routeToReadout="false"/>
@@ -153,7 +153,7 @@
           </readoutUnit>
         </readoutUnits>
       </readoutLayer>
-    </stateMachineCfg>
+    </stateMachine>
   </case>
 
 
@@ -183,7 +183,7 @@
   -->
   <case name="Classification task ProximalPhalanxOutlineAgeGroup: Simple pure LSM reservoir generating FiringFadingSum predictors, one TanH neuron as a classifier (Resilient trainer)">
     <samples trainingData="ProximalPhalanxOutlineAgeGroup_train.csv" verificationData="ProximalPhalanxOutlineAgeGroup_verify.csv"/>
-    <stateMachineCfg randomizerSeek="0">
+    <stateMachine randomizerSeek="0">
       <neuralPreprocessor>
         <inputEncoder>
           <feedingPatterned bidir="false" routeToReadout="true">
@@ -301,7 +301,7 @@
           </readoutUnit>
         </readoutUnits>
       </readoutLayer>
-    </stateMachineCfg>
+    </stateMachine>
   </case>
 
 
@@ -329,7 +329,7 @@
   -->
   <case name="Classification task ProximalPhalanxOutlineAgeGroup: Simple pure ESN reservoir generating FiringFadingSum and FiringCount predictors, one Elliot neuron as a classifier (Resilient trainer)">
     <samples trainingData="ProximalPhalanxOutlineAgeGroup_train.csv" verificationData="ProximalPhalanxOutlineAgeGroup_verify.csv"/>
-    <stateMachineCfg randomizerSeek="0">
+    <stateMachine randomizerSeek="0">
       <neuralPreprocessor>
         <inputEncoder>
           <feedingPatterned bidir="true" routeToReadout="false">
@@ -429,7 +429,7 @@
           </readoutUnit>
         </readoutUnits>
       </readoutLayer>
-    </stateMachineCfg>
+    </stateMachine>
   </case>
 
 
@@ -450,7 +450,7 @@
   -->
   <case name="Classification task CricketX: pure ESN reservoir generating FiringFadingSum predictors, one Identity neuron as a classifier (Resilient trainer)">
     <samples trainingData="CricketX_train.csv" verificationData="CricketX_verify.csv"/>
-    <stateMachineCfg randomizerSeek="0">
+    <stateMachine randomizerSeek="0">
       <neuralPreprocessor predictorsReductionRatio="0">
         <inputEncoder>
           <feedingPatterned bidir="false" routeToReadout="false" variablesSchema="Sequential">
@@ -582,7 +582,7 @@
           </readoutUnit>
         </readoutUnits>
       </readoutLayer>
-    </stateMachineCfg>
+    </stateMachine>
   </case>
 
 
@@ -600,7 +600,7 @@
   -->
   <case name="Classification task BeetleFly: Simple pure LSM reservoir generating FiringFadingSum predictors, one TanH neuron as a classifier (Resilient trainer)">
     <samples trainingData="BeetleFly_train.csv" verificationData="BeetleFly_verify.csv"/>
-    <stateMachineCfg randomizerSeek="0">
+    <stateMachine randomizerSeek="0">
       <neuralPreprocessor predictorsReductionRatio="0">
         <inputEncoder>
           <feedingPatterned bidir="false">
@@ -692,7 +692,7 @@
           </readoutUnit>
         </readoutUnits>
       </readoutLayer>
-    </stateMachineCfg>
+    </stateMachine>
   </case>
 
 
@@ -712,7 +712,7 @@
   -->
   <case name="Classification task BirdChicken: Simple pure ESN reservoir generating FiringFadingSum predictors, one TanH neuron as a classifier (Resilient trainer)">
     <samples trainingData="BirdChicken_train.csv" verificationData="BirdChicken_verify.csv"/>
-    <stateMachineCfg randomizerSeek="0">
+    <stateMachine randomizerSeek="0">
       <neuralPreprocessor>
         <inputEncoder>
           <feedingPatterned bidir="false" routeToReadout="false">
@@ -785,7 +785,7 @@
           </allowedPredictors>
         </map>
       </mapper>
-    </stateMachineCfg>
+    </stateMachine>
   </case>
 
 
@@ -815,7 +815,7 @@
   -->
   <case name="Classification task ProximalPhalanxOutlineAgeGroup: Simple pure ESN reservoir generating FiringFadingSum and FiringCount predictors, one Elliot neuron as a classifier (Resilient trainer)">
     <samples trainingData="ProximalPhalanxOutlineAgeGroup_train.csv" verificationData="ProximalPhalanxOutlineAgeGroup_verify.csv"/>
-    <stateMachineCfg randomizerSeek="0">
+    <stateMachine randomizerSeek="0">
       <neuralPreprocessor>
         <inputEncoder>
           <feedingPatterned bidir="false" routeToReadout="false">
@@ -915,7 +915,7 @@
           </readoutUnit>
         </readoutUnits>
       </readoutLayer>
-    </stateMachineCfg>
+    </stateMachine>
   </case>
 
 
@@ -943,7 +943,7 @@
   -->
   <case name="Classification task ProximalPhalanxOutlineAgeGroup: No preprocesing, Multilayer Feed forward network as a classifier (Resilient trainer)">
     <samples trainingData="ProximalPhalanxOutlineAgeGroup_train.csv" verificationData="ProximalPhalanxOutlineAgeGroup_verify.csv"/>
-    <stateMachineCfg randomizerSeek="0">
+    <stateMachine randomizerSeek="0">
       <readoutLayer testDataRatio="0.25" folds="Auto">
         <defaultNetworks>
           <classification>
@@ -970,7 +970,7 @@
           </readoutUnit>
         </readoutUnits>
       </readoutLayer>
-    </stateMachineCfg>
+    </stateMachine>
   </case>
 
 
@@ -998,7 +998,7 @@
   -->
   <case name="Classification task ProximalPhalanxOutlineAgeGroup: Mixed reservoir generating FiringFadingSum and Activation predictors, MLP as a classifier (Resilient trainer)">
     <samples trainingData="ProximalPhalanxOutlineAgeGroup_train.csv" verificationData="ProximalPhalanxOutlineAgeGroup_verify.csv"/>
-    <stateMachineCfg randomizerSeek="0">
+    <stateMachine randomizerSeek="0">
       <neuralPreprocessor>
         <inputEncoder>
           <feedingPatterned bidir="false" routeToReadout="false">
@@ -1119,7 +1119,7 @@
           </readoutUnit>
         </readoutUnits>
       </readoutLayer>
-    </stateMachineCfg>
+    </stateMachine>
   </case>
 
 
@@ -1153,7 +1153,7 @@
   -->
   <case name="Classification task Worms: Simple pure ESN reservoir generating FiringFadingSum predictors, one Elliot neuron as a classifier (Resilient trainer)">
     <samples trainingData="Worms_train.csv" verificationData="Worms_verify.csv"/>
-    <stateMachineCfg randomizerSeek="0">
+    <stateMachine randomizerSeek="0">
       <neuralPreprocessor>
         <inputEncoder>
           <feedingPatterned bidir="false" routeToReadout="false">
@@ -1247,7 +1247,7 @@
           </readoutUnit>
         </readoutUnits>
       </readoutLayer>
-    </stateMachineCfg>
+    </stateMachine>
   </case>
 
 
@@ -1270,7 +1270,7 @@
   -->
   <case name="Classification task Libras Movement: Simple pure ESN reservoir generating FiringFadingSum predictors, one TanH neuron as a classifier (FF-Resilient trainer)">
     <samples trainingData="LibrasMovement_train.csv" verificationData="LibrasMovement_verify.csv"/>
-    <stateMachineCfg randomizerSeek="0">
+    <stateMachine randomizerSeek="0">
       <neuralPreprocessor>
         <inputEncoder>
           <feedingPatterned bidir="true" routeToReadout="false" variablesSchema="Groupped">
@@ -1390,7 +1390,7 @@
           </readoutUnit>
         </readoutUnits>
       </readoutLayer>
-    </stateMachineCfg>
+    </stateMachine>
   </case>
 
 
@@ -1404,7 +1404,7 @@
   -->
   <case name="Forecast task Mackey Glass chaotic time series: Two independent ESN reservoirs, one Identity neuron as a forecaster, QRD regression trainer">
     <samples trainingData="MackeyGlass_train.csv" verificationData="MackeyGlass_verify.csv"/>
-    <stateMachineCfg randomizerSeek="0">
+    <stateMachine randomizerSeek="0">
       <neuralPreprocessor predictorsReductionRatio="0">
         <inputEncoder>
           <feedingContinuous bootCycles="Auto" routeToReadout="true"/>
@@ -1525,7 +1525,7 @@
           </readoutUnit>
         </readoutUnits>
       </readoutLayer>
-    </stateMachineCfg>
+    </stateMachine>
   </case>
 
   <!--
@@ -1537,7 +1537,7 @@
   -->
   <case name="Forecast task High and Low share prices of TTOO (T2 Biosystems, Inc.): Small analog reservoir (ESN), one Identity neuron as a forecaster (Elastic trainer)">
     <samples trainingData="TTOO.csv"/>
-    <stateMachineCfg randomizerSeek="0">
+    <stateMachine randomizerSeek="0">
       <neuralPreprocessor>
         <inputEncoder>
           <feedingContinuous bootCycles="Auto" routeToReadout="true"/>
@@ -1630,7 +1630,7 @@
           </readoutUnit>
         </readoutUnits>
       </readoutLayer>
-    </stateMachineCfg>
+    </stateMachine>
   </case>
 
 
@@ -1644,7 +1644,7 @@
   -->
   <case name="Classification task Recognition of the Epileptic Seizure Brain Activity (EEG):  Pure ESN reservoir (FiringFadingSum predictors), Multilayer Feed forward network as a classifier (Resilient trainer)">
     <samples trainingData="EpilepticSeizureActivity_train.csv" verificationData="EpilepticSeizureActivity_verify.csv"/>
-    <stateMachineCfg randomizerSeek="0">
+    <stateMachine randomizerSeek="0">
       <neuralPreprocessor>
         <inputEncoder>
           <feedingPatterned bidir="true" routeToReadout="false">
@@ -1731,7 +1731,7 @@
           </readoutUnit>
         </readoutUnits>
       </readoutLayer>
-    </stateMachineCfg>
+    </stateMachine>
   </case>
 
   <!--
@@ -1749,7 +1749,7 @@
   -->
   <case name="Classification task CricketX: pure ESN reservoir generating FiringFadingSum predictors, one Identity neuron as a classifier (Resilient trainer)">
     <samples trainingData="CricketX_train.csv" verificationData="CricketX_verify.csv"/>
-    <stateMachineCfg randomizerSeek="0">
+    <stateMachine randomizerSeek="0">
       <neuralPreprocessor predictorsReductionRatio="0">
         <inputEncoder>
           <feedingPatterned bidir="true" routeToReadout="false" variablesSchema="Sequential">
@@ -1863,7 +1863,7 @@
           </readoutUnit>
         </readoutUnits>
       </readoutLayer>
-    </stateMachineCfg>
+    </stateMachine>
   </case>
 
 
@@ -1882,7 +1882,7 @@
   -->
   <case name="Classification task CricketX: pure ESN reservoir generating FiringFadingSum predictors, one Identity neuron as a classifier (Resilient trainer)">
     <samples trainingData="CricketX_train.csv" verificationData="CricketX_verify.csv"/>
-    <stateMachineCfg randomizerSeek="0">
+    <stateMachine randomizerSeek="0">
       <neuralPreprocessor predictorsReductionRatio="0">
         <inputEncoder>
           <feedingPatterned bidir="false" routeToReadout="false" variablesSchema="Sequential">
@@ -2012,7 +2012,7 @@
           </readoutUnit>
         </readoutUnits>
       </readoutLayer>
-    </stateMachineCfg>
+    </stateMachine>
   </case>
 
 
