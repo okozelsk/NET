@@ -19,7 +19,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         public const string XsdTypeName = "NPInpFeedingPatternedType";
         //Default values
         /// <summary>
-        /// Default value of parameter specifying if to preprocess time series pattern in both time directions (doubles predictors)
+        /// Default value of parameter specifying how many times to collect predictors during pattern data preprocessing
+        /// </summary>
+        public const int DefaultSlices = 1;
+        /// <summary>
+        /// Default value of parameter specifying if to preprocess time series pattern in both time directions (doubles predictors in total)
         /// </summary>
         public const bool DefaultBidir = false;
         /// <summary>
@@ -33,7 +37,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
 
         //Attribute properties
         /// <summary>
-        /// Specifies whether to preprocess time series pattern in both time directions (doubles predictors)
+        /// Specifies how many times to collect predictors during pattern data preprocessing
+        /// </summary>
+        public int Slices { get; }
+
+        /// <summary>
+        /// Specifies whether to preprocess time series pattern in both time directions (doubles predictors in total)
         /// </summary>
         public bool Bidir { get; }
 
@@ -56,16 +65,19 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// Creates an itialized instance.
         /// </summary>
-        /// <param name="bidir">Specifies whether to preprocess time series pattern in both time directions (doubles predictors)</param>
+        /// <param name="slices">Specifies how many times to collect predictors during pattern data preprocessing</param>
+        /// <param name="bidir">Specifies whether to preprocess time series pattern in both time directions (doubles predictors in total)</param>
         /// <param name="routeToReadout">Specifies whether to route input fields to readout layer together with other predictors</param>
         /// <param name="varSchema">Specifies variables organization in the pattern</param>
         /// <param name="unificationCfg">Configuration of an input pattern unification</param>
-        public FeedingPatternedSettings(bool bidir = DefaultBidir,
+        public FeedingPatternedSettings(int slices = DefaultSlices,
+                                        bool bidir = DefaultBidir,
                                         bool routeToReadout = DefaultRouteToReadout,
                                         InputPattern.VariablesSchema varSchema = DefaultVarSchema,
                                         UnificationSettings unificationCfg = null
                                         )
         {
+            Slices = slices;
             Bidir = bidir;
             RouteToReadout = routeToReadout;
             VarSchema = varSchema;
@@ -79,7 +91,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// </summary>
         /// <param name="source">Source instance</param>
         public FeedingPatternedSettings(FeedingPatternedSettings source)
-            : this(source.Bidir, source.RouteToReadout, source.VarSchema, source.UnificationCfg)
+            : this(source.Slices, source.Bidir, source.RouteToReadout, source.VarSchema, source.UnificationCfg)
         {
             return;
         }
@@ -93,6 +105,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             //Validation
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
+            Slices = int.Parse(settingsElem.Attribute("slices").Value, CultureInfo.InvariantCulture);
             Bidir = bool.Parse(settingsElem.Attribute("bidir").Value);
             RouteToReadout = bool.Parse(settingsElem.Attribute("routeToReadout").Value);
             VarSchema = (InputPattern.VariablesSchema)Enum.Parse(typeof(InputPattern.VariablesSchema), settingsElem.Attribute("variablesSchema").Value, true);
@@ -118,6 +131,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// Checks if settings are default
         /// </summary>
+        public bool IsDefaultSlices { get { return (Slices == DefaultSlices); } }
+
+        /// <summary>
+        /// Checks if settings are default
+        /// </summary>
         public bool IsDefaultBidir { get { return (Bidir == DefaultBidir); } }
 
         /// <summary>
@@ -137,7 +155,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         {
             get
             {
-                return IsDefaultBidir &&
+                return IsDefaultSlices &&
+                       IsDefaultBidir &&
                        IsDefaultRouteToReadout &&
                        IsDefaultVarSchema &&
                        UnificationCfg.ContainsOnlyDefaults;
@@ -150,6 +169,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// </summary>
         protected override void Check()
         {
+            if (Slices <= 0)
+            {
+                throw new ArgumentException($"Invalid Slices {Slices.ToString(CultureInfo.InvariantCulture)}. Slices must be GT 0.", "Slices");
+            }
+            if(UnificationCfg.ResamplingCfg.TargetTimePoints != ResamplingSettings.AutoTargetTimePointsNum && Slices > UnificationCfg.ResamplingCfg.TargetTimePoints)
+            {
+                throw new ArgumentException($"Invalid Slices {Slices.ToString(CultureInfo.InvariantCulture)}. Slices must be LE to pattern timepoints ({UnificationCfg.ResamplingCfg.TargetTimePoints}).", "Slices");
+            }
             return;
         }
 
@@ -170,6 +197,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             XElement rootElem = new XElement(rootElemName);
+            if (!suppressDefaults || !IsDefaultSlices)
+            {
+                rootElem.Add(new XAttribute("slices", Slices.ToString(CultureInfo.InvariantCulture)));
+            }
             if (!suppressDefaults || !IsDefaultBidir)
             {
                 rootElem.Add(new XAttribute("bidir", Bidir.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()));

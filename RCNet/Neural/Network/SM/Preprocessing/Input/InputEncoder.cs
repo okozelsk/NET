@@ -18,6 +18,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
     {
         //Constants
         /// <summary>
+        /// Identifies patterned input feeding allowing variable length of patterns
+        /// </summary>
+        public const int VariableTimePointsPerInput = -1;
+        /// <summary>
         /// ID of the input encoder's reservoir
         /// </summary>
         public const int ReservoirID = -1;
@@ -185,6 +189,28 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         }
 
         //Properties
+        /// <summary>
+        /// Number of time-points within one input data
+        /// </summary>
+        public int TimepointsPerInput
+        {
+            get
+            {
+                if(_encoderCfg.FeedingCfg.FeedingType == InputFeedingType.Continuous)
+                {
+                    return 1;
+                }
+                else if(_fixedExtVectorLength == -1)
+                {
+                    return VariableTimePointsPerInput;
+                }
+                else
+                {
+                    return _fixedExtVectorLength / Fields.Count;
+                }
+            }
+        }
+        
         /// <summary>
         /// Number of remaining stored inputs to be processed
         /// </summary>
@@ -382,6 +408,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             Reset();
             if (_encoderCfg.FeedingCfg.FeedingType == InputFeedingType.Continuous)
             {
+                //Continuous feeding
                 //Add internal inputs and initialize feature filters
                 UpdateFeatureFilters(AddInternalInputs(inputBundle.InputVectorCollection));
                 //Number of routed fields' values
@@ -392,11 +419,16 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             }
             else
             {
-                //Input length constraint and number of routed fields' values
-                if (RoutedFieldCollection.Count > 0)
+                //Patterned feeding
+                //Input pattern length constraint and number of routed fields' values
+                int slices = ((FeedingPatternedSettings)_encoderCfg.FeedingCfg).Slices;
+                if (RoutedFieldCollection.Count > 0 || slices > 1)
                 {
                     _fixedExtVectorLength = inputBundle.InputVectorCollection[0].Length;
-                    NumOfRoutedFieldValues = (RoutedFieldCollection.Count * (_fixedExtVectorLength / Fields.Count));
+                    if (RoutedFieldCollection.Count > 0)
+                    {
+                        NumOfRoutedFieldValues = (RoutedFieldCollection.Count * (_fixedExtVectorLength / Fields.Count));
+                    }
                 }
                 //Convert input vectors to InputPatterns
                 List<List<double[]>> inputPatterns = new List<List<double[]>>(inputBundle.InputVectorCollection.Count);
@@ -508,11 +540,16 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// </summary>
         public List<PredictorDescriptor> GetInputValuesPredictorsDescriptors()
         {
-            List<PredictorDescriptor> result = new List<PredictorDescriptor>();
-            int numOfFieldValInstances = _fixedExtVectorLength == -1 ? 1 : (_fixedExtVectorLength / Fields.Count);
+            //Check call relevancy
+            if(TimepointsPerInput == VariableTimePointsPerInput)
+            {
+                throw new InvalidOperationException("Wrong function call. Number of time-points per input is variable.");
+            }
+            //Build descriptors
+            List<PredictorDescriptor> result = new List<PredictorDescriptor>(RoutedFieldCollection.Count * TimepointsPerInput);
             foreach (InputField field in RoutedFieldCollection)
             {
-                for (int i = 0; i < numOfFieldValInstances; i++)
+                for (int i = 0; i < TimepointsPerInput; i++)
                 {
                     result.Add(new PredictorDescriptor(field.Idx, ReservoirID, PoolID, PredictorDescriptor.InputFieldValue));
                 }

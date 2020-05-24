@@ -347,7 +347,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// <summary>
         /// Returns collection of predictor descriptor objects related to predictors from hidden neurons
         /// </summary>
-        public List<PredictorDescriptor> GetNeuralPredictorsDescriptors()
+        public List<PredictorDescriptor> GetPredictorsDescriptors()
         {
             List<PredictorDescriptor> result = new List<PredictorDescriptor>(NumOfPredictors);
             foreach (INeuron neuron in PredictingNeuronCollection)

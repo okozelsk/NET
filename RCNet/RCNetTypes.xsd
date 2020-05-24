@@ -2069,9 +2069,14 @@
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="NPUnificationType" name="unification" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
+    <xs:attribute type="UIntGT0Type" name="slices" use="optional" default="1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Specifies how many times to collect predictors during pattern data preprocessing. Default value is 1</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
     <xs:attribute type="xs:boolean" name="bidir" use="optional" default="false">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Specifies whether to preprocess time series pattern in both time directions (doubles predictors). Default value is false</xs:documentation>
+        <xs:documentation xml:lang="en">Specifies whether to preprocess time series pattern in both time directions (doubles predictors in total). Default value is false</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="xs:boolean" name="routeToReadout" use="optional" default="false">

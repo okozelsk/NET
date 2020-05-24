@@ -186,7 +186,7 @@
     <stateMachine randomizerSeek="0">
       <neuralPreprocessor>
         <inputEncoder>
-          <feedingPatterned bidir="false" routeToReadout="true">
+          <feedingPatterned slices="1" bidir="false" routeToReadout="true">
             <unification unifyAmplitude="false" detrend="false">
               <resampling/>
             </unification>
@@ -332,7 +332,7 @@
     <stateMachine randomizerSeek="0">
       <neuralPreprocessor>
         <inputEncoder>
-          <feedingPatterned bidir="true" routeToReadout="false">
+          <feedingPatterned slices="1" bidir="true" routeToReadout="false">
             <unification unifyAmplitude="false" detrend="false">
               <resampling/>
             </unification>
@@ -453,7 +453,7 @@
     <stateMachine randomizerSeek="0">
       <neuralPreprocessor predictorsReductionRatio="0">
         <inputEncoder>
-          <feedingPatterned bidir="false" routeToReadout="false" variablesSchema="Sequential">
+          <feedingPatterned slices="1" bidir="false" routeToReadout="false" variablesSchema="Sequential">
             <unification unifyAmplitude="false" detrend="false">
               <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
             </unification>
@@ -603,7 +603,7 @@
     <stateMachine randomizerSeek="0">
       <neuralPreprocessor predictorsReductionRatio="0">
         <inputEncoder>
-          <feedingPatterned bidir="false">
+          <feedingPatterned slices="1" bidir="false">
             <unification unifyAmplitude="false" detrend="false">
               <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
             </unification>
@@ -715,7 +715,7 @@
     <stateMachine randomizerSeek="0">
       <neuralPreprocessor>
         <inputEncoder>
-          <feedingPatterned bidir="false" routeToReadout="false">
+          <feedingPatterned slices="1" bidir="false" routeToReadout="false">
             <unification unifyAmplitude="false" detrend="false">
               <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
             </unification>
@@ -818,7 +818,7 @@
     <stateMachine randomizerSeek="0">
       <neuralPreprocessor>
         <inputEncoder>
-          <feedingPatterned bidir="false" routeToReadout="false">
+          <feedingPatterned slices="1" bidir="false" routeToReadout="false">
             <unification unifyAmplitude="false" detrend="false">
               <resampling/>
             </unification>
@@ -1001,7 +1001,7 @@
     <stateMachine randomizerSeek="0">
       <neuralPreprocessor>
         <inputEncoder>
-          <feedingPatterned bidir="false" routeToReadout="false">
+          <feedingPatterned slices="1" bidir="false" routeToReadout="false">
             <unification unifyAmplitude="false" detrend="false">
               <resampling targetTimePoints="Auto"/>
             </unification>
@@ -1156,7 +1156,7 @@
     <stateMachine randomizerSeek="0">
       <neuralPreprocessor>
         <inputEncoder>
-          <feedingPatterned bidir="false" routeToReadout="false">
+          <feedingPatterned slices="1" bidir="false" routeToReadout="false">
             <unification unifyAmplitude="false" detrend="false">
               <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="180"/>
             </unification>
@@ -1273,7 +1273,7 @@
     <stateMachine randomizerSeek="0">
       <neuralPreprocessor>
         <inputEncoder>
-          <feedingPatterned bidir="true" routeToReadout="false" variablesSchema="Groupped">
+          <feedingPatterned slices="1" bidir="true" routeToReadout="false" variablesSchema="Groupped">
             <unification unifyAmplitude="false" detrend="false">
               <resampling uniformTimeScale="true" targetTimePoints="Auto"/>
             </unification>
@@ -1647,7 +1647,7 @@
     <stateMachine randomizerSeek="0">
       <neuralPreprocessor>
         <inputEncoder>
-          <feedingPatterned bidir="true" routeToReadout="false">
+          <feedingPatterned slices="1" bidir="true" routeToReadout="false">
             <unification unifyAmplitude="false" detrend="false">
               <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
             </unification>
@@ -1752,7 +1752,7 @@
     <stateMachine randomizerSeek="0">
       <neuralPreprocessor predictorsReductionRatio="0">
         <inputEncoder>
-          <feedingPatterned bidir="true" routeToReadout="false" variablesSchema="Sequential">
+          <feedingPatterned slices="1" bidir="true" routeToReadout="false" variablesSchema="Sequential">
             <unification unifyAmplitude="false" detrend="false">
               <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
             </unification>
@@ -1885,7 +1885,7 @@
     <stateMachine randomizerSeek="0">
       <neuralPreprocessor predictorsReductionRatio="0">
         <inputEncoder>
-          <feedingPatterned bidir="false" routeToReadout="false" variablesSchema="Sequential">
+          <feedingPatterned slices="1" bidir="false" routeToReadout="false" variablesSchema="Sequential">
             <unification unifyAmplitude="false" detrend="false">
               <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
             </unification>
