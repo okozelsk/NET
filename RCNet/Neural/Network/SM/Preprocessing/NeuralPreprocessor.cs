@@ -205,18 +205,18 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                     }
                 }
                 //Predictors time-point slices plan
-                if (_inputEncoder.TimepointsPerInput != InputEncoder.VariableTimePointsPerInput)
+                if (_inputEncoder.NumOfTimePoints != InputEncoder.VariableNumOfTimePoints)
                 {
                     //Check correctness
-                    if(patternedCfg.Slices > _inputEncoder.TimepointsPerInput)
+                    if(patternedCfg.Slices > _inputEncoder.NumOfTimePoints)
                     {
-                        throw new InvalidOperationException("Number of input pattern's time points is less than requested number of slices of predictors.");
+                        throw new InvalidOperationException("Resulting number of input pattern's time points is less than requested number of slices of predictors.");
                     }
                     //Build plan
                     _predictorsTimePointSlicesPlan = new List<int>(patternedCfg.Slices);
-                    double avgDistance = (double)_inputEncoder.TimepointsPerInput / (double)patternedCfg.Slices;
+                    double avgDistance = (double)_inputEncoder.NumOfTimePoints / (double)patternedCfg.Slices;
                     //The first phase - naive distribution of time-points
-                    double countDown = _inputEncoder.TimepointsPerInput;
+                    double countDown = _inputEncoder.NumOfTimePoints;
                     int lastTimePoint = -1;
                     while ((int)Math.Round(countDown, 0) >= 1 && _predictorsTimePointSlicesPlan.Count < patternedCfg.Slices)
                     {

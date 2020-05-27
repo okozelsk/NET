@@ -2,597 +2,8 @@
 <demo dataFolder=".\\Data" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="SMDemoSettings.xsd">
 
   <!--
-    This demo case demonstrates successful use of the pure analog ESN reservoir for the fast and accurate classifications enabled by
-    the new ability of the analog neurons to fire a spike.
-    Following configuration of the StateMachine leads to 87.8% accuracy, slightly worse than the best algorithm
-    called ST, referenced at the dataset's home site:
-    "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
-    https://timeseriesclassification.com/description.php?Dataset=ProximalPhalanxOutlineAgeGroup.
-    This series of 11 classification problems were created as part of Luke Davis's PhD titled "Predictive Modelling of Bone Ageing".
-    They are all derived from the same images, extracted from Cao et al. "Digital hand atlas and web-based bone age assessment: system design and implementation".
-    They are designed to test the efficacy of hand and bone outline detection and whether these outlines could be helpful in bone
-    age prediction. Algorithms to automatically extract the hand outlines and then the outlines of three bones of the middle finger
-    (proximal, middle and distal phalanges) were applied to over 1300 images, and three human evaluators labelled the output
-    of the image outlining as correct or incorrect. This generated three classification problems: DistalPhalanxOutlineCorrect; MiddlePhalanxOutlineCorrect; and ProximalPhalanxOutlineCorrect.
-    The next stage of the project was to use the outlines to predict information about the subjects age.
-    The three problems {DistalPhalanxOutlineAgeGroup, MiddlePhalanxOutlineAgeGroup and ProximalPhalanxOutlineAgeGroup} involve using
-    the outline of one of the phalanges to predict whether the subject is one of three age groups: 0-6 years old, 7-12 years old
-    and 13-19 years old. Note that these problems are aligned by subject, and hence can be treated as a multi dimensional
-    TSC problem. Problem Phalanges contains the concatenation of all three problems. Bone age estimation is usually performed by
-    an expert with an algorithm called Tanner-Whitehouse. This involves scoring each bone into one of seven categories based on
-    the stage of development. The final three bone image classification problems, DistalPhalanxTW, MiddlePhalanxTW and ProximalPhalanxTW},
-    involve predicting the Tanner-Whitehouse score (as labelled by a human expert) from the outline.
-  -->
-  <case name="Classification task ProximalPhalanxOutlineAgeGroup: Simple pure LSM reservoir generating FiringFadingSum predictors, one TanH neuron as a classifier (Resilient trainer)">
-    <samples trainingData="ProximalPhalanxOutlineAgeGroup_train.csv" verificationData="ProximalPhalanxOutlineAgeGroup_verify.csv"/>
-    <stateMachine randomizerSeek="0">
-      <neuralPreprocessor>
-        <inputEncoder>
-          <feedingPatterned slices="1" bidir="false" routeToReadout="true">
-            <unification unifyAmplitude="false" detrend="true">
-              <resampling/>
-            </unification>
-          </feedingPatterned>
-          <fields>
-            <externalFields>
-              <field name="Outline">
-                <realFeature/>
-                <spikeCode componentHalfCodeLength="15" lowestThreshold="1e-2" signalComponent="true" deltaComponent="false"/>
-              </field>
-            </externalFields>
-          </fields>
-        </inputEncoder>
-        <reservoirStructures>
-          <reservoirStructure name="MainCfg">
-            <pools>
-              <pool name="Pool1">
-                <proportions dimX="120" dimY="1" dimZ="1"/>
-                <neuronGroups>
-                  <spikingGroup name="Spiking-grp" relShare="1">
-                    <activationAdExpIF/>
-                    <homogenousExcitability excitatoryStrength="0.75" inputRatio="0.67" inhibitoryRatio="0.25"/>
-                  </spikingGroup>
-                </neuronGroups>
-                <interconnection>
-                  <randomSchema density="0.1" allowSelfConnection="false"/>
-                </interconnection>
-              </pool>
-              <pool name="Pool2">
-                <proportions dimX="120" dimY="1" dimZ="1"/>
-                <neuronGroups>
-                  <analogGroup name="Analog-grp" relShare="1" firingThreshold="0.00125">
-                    <activationTanH/>
-                  </analogGroup>
-                </neuronGroups>
-                <interconnection>
-                  <randomSchema density="0.1" allowSelfConnection="true"/>
-                </interconnection>
-              </pool>
-            </pools>
-          </reservoirStructure>
-        </reservoirStructures>
-        <reservoirInstances>
-          <reservoirInstance name="Main" reservoirStructure="MainCfg">
-            <inputConnections>
-              <connection inputFieldName="Outline" poolName="Pool1" spikingTargetDensity="1"/>
-              <connection inputFieldName="Outline" poolName="Pool2" analogTargetDensity="0.2"/>
-            </inputConnections>
-            <synapse>
-              <spikingTarget>
-                <input maxDelay="0">
-                  <spikingSource>
-                    <plasticity>
-                      <linearDynamics/>
-                    </plasticity>
-                  </spikingSource>
-                </input>
-                <excitatory maxDelay="0">
-                  <spikingSource>
-                    <plasticity>
-                      <linearDynamics/>
-                    </plasticity>
-                  </spikingSource>
-                </excitatory>
-                <inhibitory maxDelay="0">
-                  <spikingSource>
-                    <plasticity>
-                      <linearDynamics/>
-                    </plasticity>
-                  </spikingSource>
-                </inhibitory>
-              </spikingTarget>
-              <analogTarget>
-                <input maxDelay="0">
-                  <analogSource>
-                    <weight min="0" max="1"/>
-                  </analogSource>
-                </input>
-                <indifferent maxDelay="0"/>
-              </analogTarget>
-            </synapse>
-            <predictors activation="false"
-                        activationSquare="false"
-                        activationFadingSum="false"
-                        activationMWAvg="false"
-                        firingFadingSum="true"
-                        firingMWAvg="false"
-                        firingCount="false"
-                        firingBinPattern="false">
-            </predictors>
-          </reservoirInstance>
-        </reservoirInstances>
-      </neuralPreprocessor>
-      <readoutLayer testDataRatio="0.25" folds="Auto" repetitions="1">
-        <defaultNetworks>
-          <classification>
-            <ff>
-              <activationElliot/>
-              <resPropTrainer attempts="3" attemptEpochs="1000"/>
-            </ff>
-          </classification>
-        </defaultNetworks>
-        <readoutUnits>
-          <readoutUnit name="0-6 years">
-            <classification oneWinnerGroupName="AgeGroup"/>
-          </readoutUnit>
-          <readoutUnit name="7-12 years">
-            <classification oneWinnerGroupName="AgeGroup"/>
-          </readoutUnit>
-          <readoutUnit name="13-19 years">
-            <classification oneWinnerGroupName="AgeGroup"/>
-          </readoutUnit>
-        </readoutUnits>
-      </readoutLayer>
-      <mapper>
-        <map readoutUnitName="0-6 years">
-          <allowedPredictors>
-            <predictor name="Activation"/>
-          </allowedPredictors>
-          <allowedInputFields>
-            <field name="Outline"/>
-          </allowedInputFields>
-        </map>
-      </mapper>
-    </stateMachine>
-  </case>
-
-
-  <!--
-    Experimental.
-    Time series contains real share prices of TTOO title from https://finance.yahoo.com/quote/TTOO/history?p=TTOO.
-    The last recorded prices are from 2018/03/02 so StateMachine is predicting next High, Low and Close prices for the following
-    business day 2018/03/05 (where real prices were High=6.58$, Low=5.99$ and Close=6.15$).
-  -->
-  <case name="Forecast task High and Low share prices of TTOO (T2 Biosystems, Inc.): Experimental reservoir (ESN), one Identity neuron as a forecaster (Resilient trainer)">
-    <samples trainingData="TTOO_train.csv" verificationData="TTOO_verify.csv"/>
-    <stateMachine randomizerSeek="0">
-      <neuralPreprocessor>
-        <inputEncoder>
-          <feedingContinuous bootCycles="Auto" routeToReadout="false"/>
-          <fields>
-            <externalFields>
-              <field name="High" routeToReadout="true">
-                <realFeature standardize="true" keepReserve="true"/>
-              </field>
-              <field name="Low" routeToReadout="true">
-                <realFeature standardize="true" keepReserve="true"/>
-              </field>
-              <field name="Adj Close" routeToReadout="true">
-                <realFeature standardize="true" keepReserve="true"/>
-              </field>
-            </externalFields>
-          </fields>
-        </inputEncoder>
-        <reservoirStructures>
-          <reservoirStructure name="MainCfg">
-            <pools>
-              <pool name="Logistic pool">
-                <proportions dimX="180" dimY="1" dimZ="1"/>
-                <neuronGroups>
-                  <analogGroup name="a-grp" relShare="1" firingThreshold="0.00125" signalingRestriction="NoRestriction">
-                    <activationTanH/>
-                  </analogGroup>
-                </neuronGroups>
-                <interconnection>
-                  <randomSchema density="0.1"/>
-                </interconnection>
-                <predictors activation="true"
-                            activationSquare="true"
-                            activationFadingSum="false"
-                            activationMWAvg="false"
-                            firingFadingSum="false"
-                            firingMWAvg="false"
-                            firingCount="false"
-                            firingBinPattern="false">
-                </predictors>
-              </pool>
-              <pool name="Spiking pool">
-                <proportions dimX="180" dimY="1" dimZ="1"/>
-                <neuronGroups>
-                  <spikingGroup name="s-grp" relShare="1">
-                    <activationLeakyIF refractoryPeriods="0"/>
-                    <homogenousExcitability excitatoryStrength="0.8" inputRatio="0.5" inhibitoryRatio="0.1"/>
-                  </spikingGroup>
-                </neuronGroups>
-                <interconnection>
-                  <randomSchema density="0.1" allowSelfConnection="false"/>
-                </interconnection>
-                <predictors activation="false"
-                            activationSquare="false"
-                            activationFadingSum="false"
-                            activationMWAvg="false"
-                            firingFadingSum="false"
-                            firingMWAvg="false"
-                            firingCount="true"
-                            firingBinPattern="false">
-                  <params>
-                    <firingCount window="100"/>
-                  </params>
-                </predictors>
-              </pool>
-            </pools>
-            <interPoolConnections>
-              <interPoolConnection targetPool="Spiking pool" targetConnDensity="1" sourcePool="Logistic pool" sourceConnDensity="0.1"/>
-            </interPoolConnections>
-          </reservoirStructure>
-        </reservoirStructures>
-        <reservoirInstances>
-          <reservoirInstance name="Main" reservoirStructure="MainCfg">
-            <inputConnections>
-              <connection inputFieldName="High" poolName="Logistic pool"/>
-              <connection inputFieldName="High" poolName="Spiking pool" signalingRestriction="AnalogOnly"/>
-              <connection inputFieldName="Low" poolName="Logistic pool"/>
-              <connection inputFieldName="Low" poolName="Spiking pool" signalingRestriction="AnalogOnly"/>
-              <connection inputFieldName="Adj Close" poolName="Logistic pool"/>
-              <connection inputFieldName="Adj Close" poolName="Spiking pool" signalingRestriction="AnalogOnly"/>
-            </inputConnections>
-            <synapse>
-              <spikingTarget>
-                <input maxDelay="0">
-                  <spikingSource>
-                    <plasticity>
-                      <constantDynamics/>
-                    </plasticity>
-                  </spikingSource>
-                </input>
-                <excitatory maxDelay="0">
-                  <spikingSource>
-                    <plasticity>
-                      <constantDynamics/>
-                    </plasticity>
-                  </spikingSource>
-                </excitatory>
-                <inhibitory maxDelay="0">
-                  <spikingSource>
-                    <plasticity>
-                      <constantDynamics/>
-                    </plasticity>
-                  </spikingSource>
-                </inhibitory>
-              </spikingTarget>
-              <analogTarget spectralRadius="0.9999">
-                <input maxDelay="0">
-                  <analogSource>
-                    <weight min="0" max="2"/>
-                  </analogSource>
-                </input>
-              </analogTarget>
-            </synapse>
-          </reservoirInstance>
-        </reservoirInstances>
-      </neuralPreprocessor>
-      <readoutLayer testDataRatio="0.1" folds="Auto">
-        <defaultNetworks>
-          <forecast>
-            <ff>
-              <activationIdentity/>
-              <resPropTrainer attempts="3" attemptEpochs="500"/>
-            </ff>
-          </forecast>
-        </defaultNetworks>
-        <readoutUnits>
-          <readoutUnit name="High">
-            <forecast>
-              <realFeature standardize="true" keepReserve="true"/>
-            </forecast>
-          </readoutUnit>
-          <readoutUnit name="Low">
-            <forecast>
-              <realFeature standardize="true" keepReserve="true"/>
-            </forecast>
-          </readoutUnit>
-          <readoutUnit name="Adj Close">
-            <forecast>
-              <realFeature standardize="true" keepReserve="true"/>
-            </forecast>
-          </readoutUnit>
-        </readoutUnits>
-      </readoutLayer>
-    </stateMachine>
-  </case>
-
-
-
-
-  <!--
-    This demo case demonstrates successful use of the pure analog ESN reservoir for the fast and accurate classifications enabled by
-    the new ability of the analog neurons to fire a spike.
-    Following configuration of the StateMachine leads to 87.8% accuracy, slightly worse than the best algorithm
-    called ST, referenced at the dataset's home site:
-    "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
-    https://timeseriesclassification.com/description.php?Dataset=ProximalPhalanxOutlineAgeGroup.
-    This series of 11 classification problems were created as part of Luke Davis's PhD titled "Predictive Modelling of Bone Ageing".
-    They are all derived from the same images, extracted from Cao et al. "Digital hand atlas and web-based bone age assessment: system design and implementation".
-    They are designed to test the efficacy of hand and bone outline detection and whether these outlines could be helpful in bone
-    age prediction. Algorithms to automatically extract the hand outlines and then the outlines of three bones of the middle finger
-    (proximal, middle and distal phalanges) were applied to over 1300 images, and three human evaluators labelled the output
-    of the image outlining as correct or incorrect. This generated three classification problems: DistalPhalanxOutlineCorrect; MiddlePhalanxOutlineCorrect; and ProximalPhalanxOutlineCorrect.
-    The next stage of the project was to use the outlines to predict information about the subjects age.
-    The three problems {DistalPhalanxOutlineAgeGroup, MiddlePhalanxOutlineAgeGroup and ProximalPhalanxOutlineAgeGroup} involve using
-    the outline of one of the phalanges to predict whether the subject is one of three age groups: 0-6 years old, 7-12 years old
-    and 13-19 years old. Note that these problems are aligned by subject, and hence can be treated as a multi dimensional
-    TSC problem. Problem Phalanges contains the concatenation of all three problems. Bone age estimation is usually performed by
-    an expert with an algorithm called Tanner-Whitehouse. This involves scoring each bone into one of seven categories based on
-    the stage of development. The final three bone image classification problems, DistalPhalanxTW, MiddlePhalanxTW and ProximalPhalanxTW},
-    involve predicting the Tanner-Whitehouse score (as labelled by a human expert) from the outline.
-  -->
-  <case name="Classification task ProximalPhalanxOutlineAgeGroup: Simple pure LSM reservoir generating FiringFadingSum predictors, one TanH neuron as a classifier (Resilient trainer)">
-    <samples trainingData="ProximalPhalanxOutlineAgeGroup_train.csv" verificationData="ProximalPhalanxOutlineAgeGroup_verify.csv"/>
-    <stateMachine randomizerSeek="0">
-      <neuralPreprocessor>
-        <inputEncoder>
-          <feedingPatterned slices="1" bidir="false" routeToReadout="true">
-            <unification unifyAmplitude="false" detrend="false">
-              <resampling/>
-            </unification>
-          </feedingPatterned>
-          <fields>
-            <externalFields>
-              <field name="Outline">
-                <realFeature/>
-                <spikeCode componentHalfCodeLength="15" lowestThreshold="1e-2" signalComponent="true" deltaComponent="false"/>
-              </field>
-            </externalFields>
-          </fields>
-        </inputEncoder>
-        <reservoirStructures>
-          <reservoirStructure name="MainCfg">
-            <pools>
-              <pool name="Pool1">
-                <proportions dimX="120" dimY="1" dimZ="1"/>
-                <neuronGroups>
-                  <spikingGroup name="Spiking-grp" relShare="1">
-                    <activationAdExpIF/>
-                    <homogenousExcitability excitatoryStrength="0.75" inputRatio="0.67" inhibitoryRatio="0.25"/>
-                  </spikingGroup>
-                </neuronGroups>
-                <interconnection>
-                  <randomSchema density="0.1" allowSelfConnection="false"/>
-                </interconnection>
-              </pool>
-              <pool name="Pool2">
-                <proportions dimX="120" dimY="1" dimZ="1"/>
-                <neuronGroups>
-                  <analogGroup name="Analog-grp" relShare="1" firingThreshold="0.00125">
-                    <activationTanH/>
-                  </analogGroup>
-                </neuronGroups>
-                <interconnection>
-                  <randomSchema density="0.1" allowSelfConnection="true"/>
-                </interconnection>
-              </pool>
-            </pools>
-          </reservoirStructure>
-        </reservoirStructures>
-        <reservoirInstances>
-          <reservoirInstance name="Main" reservoirStructure="MainCfg">
-            <inputConnections>
-              <connection inputFieldName="Outline" poolName="Pool1" spikingTargetDensity="1"/>
-              <connection inputFieldName="Outline" poolName="Pool2" analogTargetDensity="0.2"/>
-            </inputConnections>
-            <synapse>
-              <spikingTarget>
-                <input maxDelay="0">
-                  <spikingSource>
-                    <plasticity>
-                      <linearDynamics/>
-                    </plasticity>
-                  </spikingSource>
-                </input>
-                <excitatory maxDelay="0">
-                  <spikingSource>
-                    <plasticity>
-                      <linearDynamics/>
-                    </plasticity>
-                  </spikingSource>
-                </excitatory>
-                <inhibitory maxDelay="0">
-                  <spikingSource>
-                    <plasticity>
-                      <linearDynamics/>
-                    </plasticity>
-                  </spikingSource>
-                </inhibitory>
-              </spikingTarget>
-              <analogTarget>
-                <input maxDelay="0">
-                  <analogSource>
-                    <weight min="0" max="1"/>
-                  </analogSource>
-                </input>
-                <indifferent maxDelay="0"/>
-              </analogTarget>
-            </synapse>
-            <predictors activation="false"
-                        activationSquare="false"
-                        activationFadingSum="false"
-                        activationMWAvg="false"
-                        firingFadingSum="true"
-                        firingMWAvg="false"
-                        firingCount="false"
-                        firingBinPattern="false">
-            </predictors>
-          </reservoirInstance>
-        </reservoirInstances>
-      </neuralPreprocessor>
-      <readoutLayer testDataRatio="0.25" folds="Auto" repetitions="1">
-        <defaultNetworks>
-          <classification>
-            <ff>
-              <activationElliot/>
-              <resPropTrainer attempts="3" attemptEpochs="1000"/>
-            </ff>
-          </classification>
-        </defaultNetworks>
-        <readoutUnits>
-          <readoutUnit name="0-6 years">
-            <classification oneWinnerGroupName="AgeGroup"/>
-          </readoutUnit>
-          <readoutUnit name="7-12 years">
-            <classification oneWinnerGroupName="AgeGroup"/>
-          </readoutUnit>
-          <readoutUnit name="13-19 years">
-            <classification oneWinnerGroupName="AgeGroup"/>
-          </readoutUnit>
-        </readoutUnits>
-      </readoutLayer>
-    </stateMachine>
-  </case>
-
-
-  <!--
-    This demo case demonstrates successful use of the pure analog ESN reservoir for the fast and accurate classifications enabled by
-    the new ability of the analog neurons to fire a spike.
-    Following configuration of the StateMachine leads to 87.8% accuracy, slightly worse than the best algorithm
-    called ST, referenced at the dataset's home site:
-    "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
-    https://timeseriesclassification.com/description.php?Dataset=ProximalPhalanxOutlineAgeGroup.
-    This series of 11 classification problems were created as part of Luke Davis's PhD titled "Predictive Modelling of Bone Ageing".
-    They are all derived from the same images, extracted from Cao et al. "Digital hand atlas and web-based bone age assessment: system design and implementation".
-    They are designed to test the efficacy of hand and bone outline detection and whether these outlines could be helpful in bone
-    age prediction. Algorithms to automatically extract the hand outlines and then the outlines of three bones of the middle finger
-    (proximal, middle and distal phalanges) were applied to over 1300 images, and three human evaluators labelled the output
-    of the image outlining as correct or incorrect. This generated three classification problems: DistalPhalanxOutlineCorrect; MiddlePhalanxOutlineCorrect; and ProximalPhalanxOutlineCorrect.
-    The next stage of the project was to use the outlines to predict information about the subjects age.
-    The three problems {DistalPhalanxOutlineAgeGroup, MiddlePhalanxOutlineAgeGroup and ProximalPhalanxOutlineAgeGroup} involve using
-    the outline of one of the phalanges to predict whether the subject is one of three age groups: 0-6 years old, 7-12 years old
-    and 13-19 years old. Note that these problems are aligned by subject, and hence can be treated as a multi dimensional
-    TSC problem. Problem Phalanges contains the concatenation of all three problems. Bone age estimation is usually performed by
-    an expert with an algorithm called Tanner-Whitehouse. This involves scoring each bone into one of seven categories based on
-    the stage of development. The final three bone image classification problems, DistalPhalanxTW, MiddlePhalanxTW and ProximalPhalanxTW},
-    involve predicting the Tanner-Whitehouse score (as labelled by a human expert) from the outline.
-  -->
-  <case name="Classification task ProximalPhalanxOutlineAgeGroup: Simple pure ESN reservoir generating FiringFadingSum and FiringCount predictors, one Elliot neuron as a classifier (Resilient trainer)">
-    <samples trainingData="ProximalPhalanxOutlineAgeGroup_train.csv" verificationData="ProximalPhalanxOutlineAgeGroup_verify.csv"/>
-    <stateMachine randomizerSeek="0">
-      <neuralPreprocessor>
-        <inputEncoder>
-          <feedingPatterned slices="1" bidir="true" routeToReadout="false">
-            <unification unifyAmplitude="false" detrend="false">
-              <resampling/>
-            </unification>
-          </feedingPatterned>
-          <fields>
-            <externalFields>
-              <field name="Outline">
-                <realFeature/>
-              </field>
-            </externalFields>
-            <transformedFields>
-              <field name="diffOutline1">
-                <diff fieldName="Outline" interval="1"/>
-                <realFeature/>
-                <spikeCode componentHalfCodeLength="8" signalComponent="true" deltaComponent="false"/>
-              </field>
-            </transformedFields>
-          </fields>
-        </inputEncoder>
-        <reservoirStructures>
-          <reservoirStructure name="MainCfg">
-            <pools>
-              <pool name="PureESN-A">
-                <proportions dimX="150" dimY="1" dimZ="1"/>
-                <neuronGroups>
-                  <analogGroup name="TanH-grp" relShare="1" firingThreshold="0.00125">
-                    <activationTanH/>
-                  </analogGroup>
-                </neuronGroups>
-                <interconnection>
-                  <randomSchema density="0.2" allowSelfConnection="false"/>
-                </interconnection>
-              </pool>
-              <pool name="PureESN-B">
-                <proportions dimX="150" dimY="1" dimZ="1"/>
-                <neuronGroups>
-                  <analogGroup name="TanH-grp" relShare="1" firingThreshold="0.00125">
-                    <activationTanH/>
-                  </analogGroup>
-                </neuronGroups>
-                <interconnection>
-                  <randomSchema density="0.2" allowSelfConnection="false"/>
-                </interconnection>
-              </pool>
-            </pools>
-          </reservoirStructure>
-        </reservoirStructures>
-        <reservoirInstances>
-          <reservoirInstance name="Main" reservoirStructure="MainCfg">
-            <inputConnections>
-              <connection inputFieldName="Outline" analogTargetDensity="0.2" poolName="PureESN-A" signalingRestriction="AnalogOnly"/>
-              <connection inputFieldName="diffOutline1" analogTargetDensity="0.2" poolName="PureESN-B" signalingRestriction="AnalogOnly"/>
-            </inputConnections>
-            <synapse>
-              <analogTarget>
-                <input maxDelay="0">
-                  <analogSource>
-                    <weight min="0" max="1"/>
-                  </analogSource>
-                </input>
-                <indifferent maxDelay="0"/>
-              </analogTarget>
-            </synapse>
-            <predictors activation="false"
-                        activationSquare="false"
-                        activationFadingSum="false"
-                        activationMWAvg="false"
-                        firingFadingSum="true"
-                        firingMWAvg="false"
-                        firingCount="true"
-                        firingBinPattern="false">
-            </predictors>
-          </reservoirInstance>
-        </reservoirInstances>
-      </neuralPreprocessor>
-      <readoutLayer testDataRatio="0.25" folds="Auto" repetitions="1">
-        <defaultNetworks>
-          <classification>
-            <ff>
-              <activationElliot/>
-              <resPropTrainer attempts="3" attemptEpochs="1000"/>
-            </ff>
-          </classification>
-        </defaultNetworks>
-        <readoutUnits>
-          <readoutUnit name="0-6 years">
-            <classification oneWinnerGroupName="AgeGroup"/>
-          </readoutUnit>
-          <readoutUnit name="7-12 years">
-            <classification oneWinnerGroupName="AgeGroup"/>
-          </readoutUnit>
-          <readoutUnit name="13-19 years">
-            <classification oneWinnerGroupName="AgeGroup"/>
-          </readoutUnit>
-        </readoutUnits>
-      </readoutLayer>
-    </stateMachine>
-  </case>
-
-
-  
-  
-  <!--
-    The best algorithm called COTE, referenced at the dataset's home site, exhibits accuracy 81.4%.
-    It is much better than the results of StateMachine (69%). This is a good case for finding other ways to improve StateMachine :-)
+    Here StateMachine achieves 70% accuracy. It is much worse than the best accuracy 81.4% achieved by the algorithm
+    called COTE referenced at the dataset's home site:
     "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
     https://timeseriesclassification.com/description.php?Dataset=CricketX.
     The series Cricket X, Y and Z are accelerometer data (in three dimensions) taken from actors performing cricket gestures.
@@ -608,16 +19,15 @@
     <stateMachine randomizerSeek="0">
       <neuralPreprocessor predictorsReductionRatio="0">
         <inputEncoder>
-          <feedingPatterned slices="1" bidir="false" routeToReadout="false" variablesSchema="Sequential">
+          <feedingPatterned slices="1" bidir="true" routeToReadout="false" variablesSchema="Sequential">
             <unification unifyAmplitude="false" detrend="false">
               <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
             </unification>
           </feedingPatterned>
           <fields>
             <externalFields>
-              <field name="Accel" routeToReadout="true">
+              <field name="Accel">
                 <realFeature />
-                <spikeCode componentHalfCodeLength="16" lowestThreshold="1e-6" signalComponent="true" deltaComponent="true"/>
               </field>
             </externalFields>
           </fields>
@@ -626,15 +36,15 @@
           <reservoirStructure name="MainCfg">
             <pools>
               <pool name="PoolMain">
-                <proportions dimX="200" dimY="1" dimZ="1"/>
+                <proportions dimX="400" dimY="1" dimZ="1"/>
                 <neuronGroups>
-                  <spikingGroup name="grp1" relShare="1">
-                    <activationAdExpIF solverCompSteps="2" solverMethod="Euler" stimuliDuration="1"/>
-                    <homogenousExcitability excitatoryStrength="0.75" inputRatio="0.67" inhibitoryRatio="0.25"/>
-                  </spikingGroup>
+                  <analogGroup name="TanH-grp" relShare="1" firingThreshold="0.00125">
+                    <activationTanH/>
+                  </analogGroup>
                 </neuronGroups>
                 <interconnection>
-                  <randomSchema density="0.2" avgDistance="NA" allowSelfConnection="false"/>
+                  <randomSchema density="0.1" avgDistance="NA" allowSelfConnection="true"/>
+                  <chainSchema/>
                 </interconnection>
               </pool>
             </pools>
@@ -643,33 +53,17 @@
         <reservoirInstances>
           <reservoirInstance name="Main" reservoirStructure="MainCfg">
             <inputConnections>
-              <connection inputFieldName="Accel" poolName="PoolMain" spikingTargetDensity="1" signalingRestriction="NoRestriction"/>
+              <connection inputFieldName="Accel" poolName="PoolMain" analogTargetDensity="0.25" signalingRestriction="NoRestriction"/>
             </inputConnections>
             <synapse>
-              <spikingTarget>
-                <input maxDelay="0">
-                  <spikingSource>
-                    <weight min="0" max="1"/>
-                    <plasticity>
-                      <linearDynamics/>
-                    </plasticity>
-                  </spikingSource>
+              <analogTarget spectralRadius="0.9999">
+                <input maxDelay="50">
+                  <analogSource>
+                    <weight min="0" max="1.5"/>
+                  </analogSource>
                 </input>
-                <excitatory maxDelay="0">
-                  <spikingSource>
-                    <plasticity>
-                      <linearDynamics/>
-                    </plasticity>
-                  </spikingSource>
-                </excitatory>
-                <inhibitory maxDelay="0">
-                  <spikingSource>
-                    <plasticity>
-                      <linearDynamics/>
-                    </plasticity>
-                  </spikingSource>
-                </inhibitory>
-              </spikingTarget>
+                <indifferent maxDelay="0"/>
+              </analogTarget>
             </synapse>
             <predictors activation="false"
                         activationSquare="false"
@@ -680,10 +74,7 @@
                         firingCount="false"
                         firingBinPattern="false">
               <params>
-                <activationMWAvg window="300" weights="Constant"/>
                 <firingFadingSum strength="0.005"/>
-                <firingCount window="300"/>
-                <firingBinPattern window="1"/>
               </params>
             </predictors>
           </reservoirInstance>
@@ -693,7 +84,7 @@
         <defaultNetworks>
           <classification>
             <ff>
-              <activationElliot/>
+              <activationIdentity/>
               <resPropTrainer attempts="5" attemptEpochs="1000"/>
             </ff>
           </classification>
@@ -740,6 +131,278 @@
     </stateMachine>
   </case>
 
+  <!--
+    This demo case demonstrates successful use of the pure analog ESN reservoir for the fast and accurate classifications enabled by
+    the new ability of the analog neurons to fire a spike.
+    The dataset is from https://archive.ics.uci.edu/ml/datasets/Libras+Movement and contains 15 classes of 24 instances each, where
+    each class references to a hand movement type in LIBRAS. The hand movement is represented as a bidimensional curve performed
+    by the hand in a period of time. The curves were obtained from videos of hand movements, with the Libras performance from 4 
+    different people, during 2 sessions. Each video corresponds to only one hand movement and has about 7 seconds.    
+    Each video corresponds to a function F in a functions space which is the continual version of the input dataset.
+    In the video pre-processing, a time normalization is carried out selecting 45 frames from each video, in according 
+    to an uniform distribution. In each frame, the centroid pixels of the segmented objects (the hand) are found, which 
+    compose the discrete version of the curve F with 45 points. All curves are normalized in the unitary space.
+    Each curve F is mapped in a representation with 90 features, with representing the coordinates of movement.
+    Each instance represents 45 points on a bi-dimensional space, which can be plotted in an ordered way (from 1 through
+    45 as the X co-ordinate) in order to draw the path of the movement.
+    For this demo purposes was selected 4x15 instances as the verification set.
+  -->
+  <case name="Classification task Libras Movement: Simple pure ESN reservoir generating FiringCount predictors, one Identity neuron as a classifier (Resilient trainer)">
+    <samples trainingData="LibrasMovement_train.csv" verificationData="LibrasMovement_verify.csv"/>
+    <stateMachine randomizerSeek="0">
+      <neuralPreprocessor>
+        <inputEncoder>
+          <feedingPatterned slices="1" bidir="true" routeToReadout="false" variablesSchema="Groupped">
+            <unification unifyAmplitude="false" detrend="false">
+              <resampling uniformTimeScale="true" targetTimePoints="Auto"/>
+            </unification>
+          </feedingPatterned>
+          <fields>
+            <externalFields>
+              <field name="coord_abcissa">
+                <realFeature/>
+              </field>
+              <field name="coord_ordinate">
+                <realFeature/>
+              </field>
+            </externalFields>
+          </fields>
+        </inputEncoder>
+        <reservoirStructures>
+          <reservoirStructure name="MainCfg">
+            <pools>
+              <pool name="PureESN">
+                <proportions dimX="120" dimY="1" dimZ="1"/>
+                <neuronGroups>
+                  <analogGroup name="TanH-grp" relShare="1" firingThreshold="0.00125" signalingRestriction="NoRestriction">
+                    <activationTanH/>
+                  </analogGroup>
+                </neuronGroups>
+                <interconnection>
+                  <randomSchema density="0.1" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false"/>
+                </interconnection>
+              </pool>
+            </pools>
+          </reservoirStructure>
+        </reservoirStructures>
+        <reservoirInstances>
+          <reservoirInstance name="Main" reservoirStructure="MainCfg">
+            <inputConnections>
+              <connection inputFieldName="coord_abcissa" poolName="PureESN" analogTargetDensity="0.25" spikingTargetDensity="0"/>
+              <connection inputFieldName="coord_ordinate" poolName="PureESN" analogTargetDensity="0.25" spikingTargetDensity="0"/>
+            </inputConnections>
+            <synapse>
+              <analogTarget>
+                <input maxDelay="5">
+                  <analogSource>
+                    <weight min="0" max="1.5"/>
+                  </analogSource>
+                </input>
+                <indifferent maxDelay="0"/>
+              </analogTarget>
+            </synapse>
+            <predictors activation="false"
+                        activationSquare="false"
+                        activationFadingSum="false"
+                        activationMWAvg="false"
+                        firingFadingSum="false"
+                        firingMWAvg="false"
+                        firingCount="true"
+                        firingBinPattern="false">
+              <params>
+                <firingCount window="45"/>
+              </params>
+            </predictors>
+          </reservoirInstance>
+        </reservoirInstances>
+      </neuralPreprocessor>
+      <readoutLayer testDataRatio="0.0825" folds="Auto">
+        <defaultNetworks>
+          <classification>
+            <ff>
+              <activationIdentity/>
+              <resPropTrainer attempts="5" attemptEpochs="400"/>
+            </ff>
+          </classification>
+        </defaultNetworks>
+        <readoutUnits>
+          <readoutUnit name="curved swing">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="horizontal swing">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="vertical swing">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="anti-clockwise arc">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="clockwise arc">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="circle">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="horizontal straight-line">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="vertical straight-line">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="horizontal zigzag">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="vertical zigzag">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="horizontal wavy">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="vertical wavy">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="face-up curve">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="face-down curve">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="tremble">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+        </readoutUnits>
+      </readoutLayer>
+    </stateMachine>
+  </case>
+
+
+
+  <!--
+    This demo case demonstrates successful use of the pure analog ESN reservoir for the fast and accurate classifications enabled by
+    the new ability of the analog neurons to fire a spike, input resampling and transformation. 
+    Following straightforward configuration of the StateMachine exhibits 83.12% accuracy, clearly better than the best algorithm
+    called BOSS (73.49%), referenced at the dataset's home site:
+    "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
+    https://timeseriesclassification.com/description.php?Dataset=Worms.
+    Caenorhabditis elegans is a roundworm commonly used as a model organism in the study of genetics.
+    The movement of these worms is known to be a useful indicator for understanding behavioural genetics.
+    Brown et al. - "A dictionary of behavioral motifs reveals clusters of genes affecting Caenorhabditis elegans locomotion"
+    describe a system for recording the motion of worms on an agar plate and measuring a range of human-defined features.
+    It has been shown that the space of shapes Caenorhabditis elegans adopts on an agar plate can be represented by combinations of four
+    base shapes, or eigenworms. Once the worm outline is extracted, each frame of worm motion can be captured by four scalars
+    representing the amplitudes along each dimension when the shape is projected onto the four eigenworms. The data relates to 258 traces
+    of worms converted into four "eigenworm" series. The eigenworm data are lengths from 17984 to 100674
+    (sampled at 30 Hz, so from 10 minutes to 1 hour) and in four dimensions (eigwnworm 1 to 4).
+    There are five classes: N2,goa-1,unc-1,unc-38 and unc-63. N2 is wildtype (i.e. normal) the other 4 are mutant strains.
+    These datasets are the first dimension only (first eigenworm) The problems are series of first eigenworm1 averaged down
+    so that all series are lengths 900 (the single hour long series is discarded). This smoothing is likely to discard discriminatory
+    information. The Yemini features obtains nearly 100% accuracy, although we have not independently verified this.
+    We address the problem of classifying individual worms as wild-type or mutant based on the time series of the first eigenworm,
+    down-sampled to second-long intervals. We have 257 cases, which we split 70%/30% into a train and test set.
+    Each series has 900 observations, and each worm is classified as either wild-type (the N2 reference strain - 109 cases) or one of
+    four mutant types: goa-1 (44 cases); unc-1 (35 cases); unc-38 (45 cases) and unc-63 (25 cases). The data were extracted from the 
+    C. elegans behavioural database {wormWeb}. The formatted classification problems are available from the website associated with this
+    paper {tscWeb}.
+  -->
+  <case name="Classification task Worms: Simple pure ESN reservoir generating FiringFadingSum predictors, one Elliot neuron as a classifier (Resilient trainer)">
+    <samples trainingData="Worms_train.csv" verificationData="Worms_verify.csv"/>
+    <stateMachine randomizerSeek="0">
+      <neuralPreprocessor>
+        <inputEncoder>
+          <feedingPatterned slices="1" bidir="false" routeToReadout="false">
+            <unification unifyAmplitude="false" detrend="false">
+              <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="180"/>
+            </unification>
+          </feedingPatterned>
+          <fields>
+            <externalFields>
+              <field name="Eigenworm1">
+                <realFeature/>
+              </field>
+            </externalFields>
+            <transformedFields>
+              <field name="TransEigenworm1">
+                <yeoJohnson fieldName="Eigenworm1" lambda="0.5"/>
+              </field>
+            </transformedFields>
+          </fields>
+        </inputEncoder>
+        <reservoirStructures>
+          <reservoirStructure name="MainCfg">
+            <pools>
+              <pool name="PureESN">
+                <proportions dimX="7" dimY="7" dimZ="7"/>
+                <neuronGroups>
+                  <analogGroup name="TanH-grp" relShare="1" firingThreshold="0.00125" signalingRestriction="NoRestriction">
+                    <activationTanH/>
+                  </analogGroup>
+                </neuronGroups>
+                <interconnection>
+                  <randomSchema density="0.1" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false"/>
+                </interconnection>
+              </pool>
+            </pools>
+          </reservoirStructure>
+        </reservoirStructures>
+        <reservoirInstances>
+          <reservoirInstance name="Main" reservoirStructure="MainCfg">
+            <inputConnections>
+              <connection inputFieldName="TransEigenworm1" analogTargetDensity="0.25" poolName="PureESN"/>
+            </inputConnections>
+            <synapse>
+              <analogTarget>
+                <input maxDelay="0">
+                  <analogSource>
+                    <weight min="0" max="2"/>
+                  </analogSource>
+                </input>
+              </analogTarget>
+            </synapse>
+            <predictors activation="false"
+                        activationSquare="false"
+                        activationFadingSum="false"
+                        activationMWAvg="false"
+                        firingFadingSum="true"
+                        firingMWAvg="false"
+                        firingCount="false"
+                        firingBinPattern="false">
+              <params>
+                <firingFadingSum strength="0.0025"/>
+              </params>
+            </predictors>
+          </reservoirInstance>
+        </reservoirInstances>
+      </neuralPreprocessor>
+      <readoutLayer testDataRatio="0.1" folds="Auto">
+        <defaultNetworks>
+          <classification>
+            <ff>
+              <activationElliot/>
+              <resPropTrainer attempts="5" attemptEpochs="1500"/>
+            </ff>
+          </classification>
+        </defaultNetworks>
+        <readoutUnits>
+          <readoutUnit name="Wild-N2">
+            <classification oneWinnerGroupName="WormDNA"/>
+          </readoutUnit>
+          <readoutUnit name="Mutant-goa1">
+            <classification oneWinnerGroupName="WormDNA"/>
+          </readoutUnit>
+          <readoutUnit name="Mutant-unc1">
+            <classification oneWinnerGroupName="WormDNA"/>
+          </readoutUnit>
+          <readoutUnit name="Mutant-unc38">
+            <classification oneWinnerGroupName="WormDNA"/>
+          </readoutUnit>
+          <readoutUnit name="Mutant-unc63">
+            <classification oneWinnerGroupName="WormDNA"/>
+          </readoutUnit>
+        </readoutUnits>
+      </readoutLayer>
+    </stateMachine>
+  </case>
 
   <!--
     This demo case demonstrates successful use of a simple LSM reservoir consisting of LeakyIF neurons for the accurate classifications.
@@ -758,7 +421,7 @@
     <stateMachine randomizerSeek="0">
       <neuralPreprocessor predictorsReductionRatio="0">
         <inputEncoder>
-          <feedingPatterned slices="1" bidir="false">
+          <feedingPatterned slices="1" bidir="false" routeToReadout="false">
             <unification unifyAmplitude="false" detrend="false">
               <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
             </unification>
@@ -850,8 +513,6 @@
     </stateMachine>
   </case>
 
-
-
   <!--
     This demo case demonstrates successful use of the pure analog ESN reservoir for the fast and accurate classifications enabled by
     the new ability of the analog neurons to fire a spike.
@@ -879,7 +540,6 @@
             <externalFields>
               <field name="DistanceFromCenter">
                 <realFeature standardize="true" keepReserve="true"/>
-                <spikeCode componentHalfCodeLength="16" lowestThreshold="1e-3" signalComponent="true" deltaComponent="false"/>
               </field>
             </externalFields>
           </fields>
@@ -933,18 +593,8 @@
           </readoutUnit>
         </readoutUnits>
       </readoutLayer>
-      <mapper>
-        <map readoutUnitName="Chicken1Bird0">
-          <allowedPredictors>
-            <predictor name="FiringFadingSum"/>
-          </allowedPredictors>
-        </map>
-      </mapper>
     </stateMachine>
   </case>
-
-
-
 
   <!--
     This demo case demonstrates successful use of the pure analog ESN reservoir for the fast and accurate classifications enabled by
@@ -968,13 +618,13 @@
     the stage of development. The final three bone image classification problems, DistalPhalanxTW, MiddlePhalanxTW and ProximalPhalanxTW},
     involve predicting the Tanner-Whitehouse score (as labelled by a human expert) from the outline.
   -->
-  <case name="Classification task ProximalPhalanxOutlineAgeGroup: Simple pure ESN reservoir generating FiringFadingSum and FiringCount predictors, one Elliot neuron as a classifier (Resilient trainer)">
+  <case name="Classification task ProximalPhalanxOutlineAgeGroup: Small pure ESN reservoir generating Activation, ActivationSquare and FiringFadingSum predictors, one Elliot neuron as a classifier (Resilient trainer)">
     <samples trainingData="ProximalPhalanxOutlineAgeGroup_train.csv" verificationData="ProximalPhalanxOutlineAgeGroup_verify.csv"/>
     <stateMachine randomizerSeek="0">
       <neuralPreprocessor>
         <inputEncoder>
           <feedingPatterned slices="1" bidir="false" routeToReadout="false">
-            <unification unifyAmplitude="false" detrend="false">
+            <unification unifyAmplitude="false" detrend="true">
               <resampling/>
             </unification>
           </feedingPatterned>
@@ -984,38 +634,20 @@
                 <realFeature/>
               </field>
             </externalFields>
-            <transformedFields>
-              <field name="diffOutline1">
-                <diff fieldName="Outline" interval="1"/>
-                <realFeature/>
-                <spikeCode componentHalfCodeLength="8" signalComponent="true" deltaComponent="false"/>
-              </field>
-            </transformedFields>
           </fields>
         </inputEncoder>
         <reservoirStructures>
           <reservoirStructure name="MainCfg">
             <pools>
-              <pool name="PureESN-A">
-                <proportions dimX="150" dimY="1" dimZ="1"/>
+              <pool name="Pool1">
+                <proportions dimX="80" dimY="1" dimZ="1"/>
                 <neuronGroups>
-                  <analogGroup name="TanH-grp" relShare="1" firingThreshold="0.00125">
+                  <analogGroup name="Analog-grp" relShare="1" firingThreshold="0.00125">
                     <activationTanH/>
                   </analogGroup>
                 </neuronGroups>
                 <interconnection>
-                  <randomSchema density="0.2" allowSelfConnection="false"/>
-                </interconnection>
-              </pool>
-              <pool name="PureESN-B">
-                <proportions dimX="150" dimY="1" dimZ="1"/>
-                <neuronGroups>
-                  <analogGroup name="TanH-grp" relShare="1" firingThreshold="0.00125">
-                    <activationTanH/>
-                  </analogGroup>
-                </neuronGroups>
-                <interconnection>
-                  <randomSchema density="0.2" allowSelfConnection="false"/>
+                  <randomSchema density="0.1" allowSelfConnection="true"/>
                 </interconnection>
               </pool>
             </pools>
@@ -1024,26 +656,25 @@
         <reservoirInstances>
           <reservoirInstance name="Main" reservoirStructure="MainCfg">
             <inputConnections>
-              <connection inputFieldName="Outline" analogTargetDensity="0.2" poolName="PureESN-A" signalingRestriction="AnalogOnly"/>
-              <connection inputFieldName="diffOutline1" analogTargetDensity="0.2" poolName="PureESN-B" signalingRestriction="AnalogOnly"/>
+              <connection inputFieldName="Outline" poolName="Pool1" analogTargetDensity="0.2"/>
             </inputConnections>
             <synapse>
               <analogTarget>
                 <input maxDelay="0">
                   <analogSource>
-                    <weight min="0.25" max="1.75"/>
+                    <weight min="0" max="1"/>
                   </analogSource>
                 </input>
-                <indifferent maxDelay="0"/>
+                <indifferent maxDelay="1"/>
               </analogTarget>
             </synapse>
-            <predictors activation="false"
-                        activationSquare="false"
+            <predictors activation="true"
+                        activationSquare="true"
                         activationFadingSum="false"
                         activationMWAvg="false"
                         firingFadingSum="true"
                         firingMWAvg="false"
-                        firingCount="true"
+                        firingCount="false"
                         firingBinPattern="false">
             </predictors>
           </reservoirInstance>
@@ -1072,8 +703,6 @@
       </readoutLayer>
     </stateMachine>
   </case>
-
-
 
   <!--
     This demo case demonstrates bypassing of neural preprocessor.
@@ -1122,426 +751,6 @@
           </readoutUnit>
           <readoutUnit name="13-19 years">
             <classification oneWinnerGroupName="AgeGroup"/>
-          </readoutUnit>
-        </readoutUnits>
-      </readoutLayer>
-    </stateMachine>
-  </case>
-
-
-
-  <!--
-    This demo case demonstrates successful use of mixed analog and spiking neurons.
-    Following configuration of the StateMachine exhibits 88.29% accuracy, slightly better than the best algorithm
-    called ST, referenced at the dataset's home site:
-    "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
-    https://timeseriesclassification.com/description.php?Dataset=ProximalPhalanxOutlineAgeGroup.
-    This series of 11 classification problems were created as part of Luke Davis's PhD titled "Predictive Modelling of Bone Ageing".
-    They are all derived from the same images, extracted from Cao et al. "Digital hand atlas and web-based bone age assessment: system design and implementation".
-    They are designed to test the efficacy of hand and bone outline detection and whether these outlines could be helpful in bone
-    age prediction. Algorithms to automatically extract the hand outlines and then the outlines of three bones of the middle finger
-    (proximal, middle and distal phalanges) were applied to over 1300 images, and three human evaluators labelled the output
-    of the image outlining as correct or incorrect. This generated three classification problems: DistalPhalanxOutlineCorrect; MiddlePhalanxOutlineCorrect; and ProximalPhalanxOutlineCorrect.
-    The next stage of the project was to use the outlines to predict information about the subjects age.
-    The three problems {DistalPhalanxOutlineAgeGroup, MiddlePhalanxOutlineAgeGroup and ProximalPhalanxOutlineAgeGroup} involve using
-    the outline of one of the phalanges to predict whether the subject is one of three age groups: 0-6 years old, 7-12 years old
-    and 13-19 years old. Note that these problems are aligned by subject, and hence can be treated as a multi dimensional
-    TSC problem. Problem Phalanges contains the concatenation of all three problems. Bone age estimation is usually performed by
-    an expert with an algorithm called Tanner-Whitehouse. This involves scoring each bone into one of seven categories based on
-    the stage of development. The final three bone image classification problems, DistalPhalanxTW, MiddlePhalanxTW and ProximalPhalanxTW},
-    involve predicting the Tanner-Whitehouse score (as labelled by a human expert) from the outline.
-  -->
-  <case name="Classification task ProximalPhalanxOutlineAgeGroup: Mixed reservoir generating FiringFadingSum and Activation predictors, MLP as a classifier (Resilient trainer)">
-    <samples trainingData="ProximalPhalanxOutlineAgeGroup_train.csv" verificationData="ProximalPhalanxOutlineAgeGroup_verify.csv"/>
-    <stateMachine randomizerSeek="0">
-      <neuralPreprocessor>
-        <inputEncoder>
-          <feedingPatterned slices="1" bidir="false" routeToReadout="false">
-            <unification unifyAmplitude="false" detrend="false">
-              <resampling targetTimePoints="Auto"/>
-            </unification>
-          </feedingPatterned>
-          <fields>
-            <externalFields>
-              <field name="Outline">
-                <realFeature/>
-              </field>
-            </externalFields>
-          </fields>
-        </inputEncoder>
-        <reservoirStructures>
-          <reservoirStructure name="MainCfg">
-            <pools>
-              <pool name="ESN">
-                <proportions dimX="5" dimY="5" dimZ="5"/>
-                <neuronGroups>
-                  <analogGroup name="TanH-grp" relShare="1" firingThreshold="0.00125">
-                    <activationTanH/>
-                  </analogGroup>
-                </neuronGroups>
-                <interconnection>
-                  <randomSchema density="0.1"/>
-                </interconnection>
-              </pool>
-              <pool name="LSM">
-                <proportions dimX="5" dimY="5" dimZ="2"/>
-                <neuronGroups>
-                  <spikingGroup name="AdExpIF-grp" relShare="1">
-                    <activationAdExpIF/>
-                    <homogenousExcitability excitatoryStrength="0.75" inputRatio="0.67" inhibitoryRatio="0.25"/>
-                  </spikingGroup>
-                </neuronGroups>
-                <interconnection>
-                  <randomSchema density="0.1" allowSelfConnection="false"/>
-                </interconnection>
-                <predictors activation="false"
-                            activationSquare="false"
-                            activationFadingSum="false"
-                            activationMWAvg="false"
-                            firingFadingSum="true"
-                            firingMWAvg="true"
-                            firingCount="true"
-                            firingBinPattern="true">
-                </predictors>
-              </pool>
-            </pools>
-            <interPoolConnections>
-              <interPoolConnection targetPool="LSM" targetConnDensity="1" sourcePool="ESN" sourceConnDensity="0.1"/>
-            </interPoolConnections>
-          </reservoirStructure>
-        </reservoirStructures>
-        <reservoirInstances>
-          <reservoirInstance name="Main" reservoirStructure="MainCfg">
-            <inputConnections>
-              <connection inputFieldName="Outline" analogTargetDensity="0.25" poolName="ESN" signalingRestriction="AnalogOnly"/>
-            </inputConnections>
-            <synapse>
-              <spikingTarget>
-                <excitatory maxDelay="0">
-                  <spikingSource>
-                    <plasticity>
-                      <constantDynamics/>
-                    </plasticity>
-                  </spikingSource>
-                </excitatory>
-                <inhibitory maxDelay="0">
-                  <spikingSource>
-                    <plasticity>
-                      <constantDynamics/>
-                    </plasticity>
-                  </spikingSource>
-                </inhibitory>
-              </spikingTarget>
-              <analogTarget>
-                <input maxDelay="0">
-                  <analogSource>
-                    <weight min="0" max="1"/>
-                  </analogSource>
-                </input>
-                <indifferent maxDelay="0"/>
-              </analogTarget>
-            </synapse>
-            <predictors activation="true"
-                        activationSquare="false"
-                        activationFadingSum="false"
-                        activationMWAvg="false"
-                        firingFadingSum="true"
-                        firingMWAvg="false"
-                        firingCount="false"
-                        firingBinPattern="false">
-            </predictors>
-          </reservoirInstance>
-        </reservoirInstances>
-      </neuralPreprocessor>
-      <readoutLayer testDataRatio="0.25" folds="Auto" repetitions="1">
-        <defaultNetworks>
-          <classification>
-            <ff>
-              <activationElliot/>
-              <resPropTrainer attempts="3" attemptEpochs="500"/>
-            </ff>
-          </classification>
-        </defaultNetworks>
-        <readoutUnits>
-          <readoutUnit name="0-6 years">
-            <classification oneWinnerGroupName="AgeGroup"/>
-          </readoutUnit>
-          <readoutUnit name="7-12 years">
-            <classification oneWinnerGroupName="AgeGroup"/>
-          </readoutUnit>
-          <readoutUnit name="13-19 years">
-            <classification oneWinnerGroupName="AgeGroup"/>
-          </readoutUnit>
-        </readoutUnits>
-      </readoutLayer>
-    </stateMachine>
-  </case>
-
-
-
-  <!--
-    This demo case demonstrates successful use of the pure analog ESN reservoir for the fast and accurate classifications enabled by
-    the new ability of the analog neurons to fire a spike, input resampling and transformation. 
-    Following straightforward configuration of the StateMachine exhibits 80.52% accuracy, clearly better than the best algorithm
-    called BOSS, referenced at the dataset's home site:
-    "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
-    https://timeseriesclassification.com/description.php?Dataset=Worms.
-    Caenorhabditis elegans is a roundworm commonly used as a model organism in the study of genetics.
-    The movement of these worms is known to be a useful indicator for understanding behavioural genetics.
-    Brown et al. - "A dictionary of behavioral motifs reveals clusters of genes affecting Caenorhabditis elegans locomotion"
-    describe a system for recording the motion of worms on an agar plate and measuring a range of human-defined features.
-    It has been shown that the space of shapes Caenorhabditis elegans adopts on an agar plate can be represented by combinations of four
-    base shapes, or eigenworms. Once the worm outline is extracted, each frame of worm motion can be captured by four scalars
-    representing the amplitudes along each dimension when the shape is projected onto the four eigenworms. The data relates to 258 traces
-    of worms converted into four "eigenworm" series. The eigenworm data are lengths from 17984 to 100674
-    (sampled at 30 Hz, so from 10 minutes to 1 hour) and in four dimensions (eigwnworm 1 to 4).
-    There are five classes: N2,goa-1,unc-1,unc-38 and unc-63. N2 is wildtype (i.e. normal) the other 4 are mutant strains.
-    These datasets are the first dimension only (first eigenworm) The problems are series of first eigenworm1 averaged down
-    so that all series are lengths 900 (the single hour long series is discarded). This smoothing is likely to discard discriminatory
-    information. The Yemini features obtains nearly 100% accuracy, although we have not independently verified this.
-    We address the problem of classifying individual worms as wild-type or mutant based on the time series of the first eigenworm,
-    down-sampled to second-long intervals. We have 257 cases, which we split 70%/30% into a train and test set.
-    Each series has 900 observations, and each worm is classified as either wild-type (the N2 reference strain - 109 cases) or one of
-    four mutant types: goa-1 (44 cases); unc-1 (35 cases); unc-38 (45 cases) and unc-63 (25 cases). The data were extracted from the 
-    C. elegans behavioural database {wormWeb}. The formatted classification problems are available from the website associated with this
-    paper {tscWeb}.
-  -->
-  <case name="Classification task Worms: Simple pure ESN reservoir generating FiringFadingSum predictors, one Elliot neuron as a classifier (Resilient trainer)">
-    <samples trainingData="Worms_train.csv" verificationData="Worms_verify.csv"/>
-    <stateMachine randomizerSeek="0">
-      <neuralPreprocessor>
-        <inputEncoder>
-          <feedingPatterned slices="1" bidir="false" routeToReadout="false">
-            <unification unifyAmplitude="false" detrend="false">
-              <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="180"/>
-            </unification>
-          </feedingPatterned>
-          <fields>
-            <externalFields>
-              <field name="Eigenworm1">
-                <realFeature/>
-              </field>
-            </externalFields>
-            <transformedFields>
-              <field name="TransEigenworm1">
-                <yeoJohnson fieldName="Eigenworm1" lambda="0.5"/>
-              </field>
-            </transformedFields>
-          </fields>
-        </inputEncoder>
-        <reservoirStructures>
-          <reservoirStructure name="MainCfg">
-            <pools>
-              <pool name="PureESN">
-                <proportions dimX="7" dimY="7" dimZ="7"/>
-                <neuronGroups>
-                  <analogGroup name="TanH-grp" relShare="1" firingThreshold="0.00125" signalingRestriction="NoRestriction">
-                    <activationTanH/>
-                  </analogGroup>
-                </neuronGroups>
-                <interconnection>
-                  <randomSchema density="0.1" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false"/>
-                </interconnection>
-              </pool>
-            </pools>
-          </reservoirStructure>
-        </reservoirStructures>
-        <reservoirInstances>
-          <reservoirInstance name="Main" reservoirStructure="MainCfg">
-            <inputConnections>
-              <connection inputFieldName="TransEigenworm1" analogTargetDensity="0.3333" poolName="PureESN"/>
-            </inputConnections>
-            <synapse>
-              <analogTarget>
-                <input maxDelay="0">
-                  <analogSource>
-                    <weight min="0" max="2.5"/>
-                  </analogSource>
-                </input>
-              </analogTarget>
-            </synapse>
-            <predictors activation="false"
-                        activationSquare="false"
-                        activationFadingSum="false"
-                        activationMWAvg="false"
-                        firingFadingSum="true"
-                        firingMWAvg="false"
-                        firingCount="false"
-                        firingBinPattern="false">
-              <params>
-                <firingFadingSum strength="0.002"/>
-              </params>
-            </predictors>
-          </reservoirInstance>
-        </reservoirInstances>
-      </neuralPreprocessor>
-      <readoutLayer testDataRatio="0.1" folds="Auto">
-        <defaultNetworks>
-          <classification>
-            <ff>
-              <activationElliot/>
-              <resPropTrainer attempts="5" attemptEpochs="1500"/>
-            </ff>
-          </classification>
-        </defaultNetworks>
-        <readoutUnits>
-          <readoutUnit name="Wild-N2">
-            <classification oneWinnerGroupName="WormDNA"/>
-          </readoutUnit>
-          <readoutUnit name="Mutant-goa1">
-            <classification oneWinnerGroupName="WormDNA"/>
-          </readoutUnit>
-          <readoutUnit name="Mutant-unc1">
-            <classification oneWinnerGroupName="WormDNA"/>
-          </readoutUnit>
-          <readoutUnit name="Mutant-unc38">
-            <classification oneWinnerGroupName="WormDNA"/>
-          </readoutUnit>
-          <readoutUnit name="Mutant-unc63">
-            <classification oneWinnerGroupName="WormDNA"/>
-          </readoutUnit>
-        </readoutUnits>
-      </readoutLayer>
-    </stateMachine>
-  </case>
-
-
-
-  <!--
-    This demo case demonstrates successful use of the pure analog ESN reservoir for the fast and accurate classifications enabled by
-    the new ability of the analog neurons to fire a spike.
-    The dataset is from https://archive.ics.uci.edu/ml/datasets/Libras+Movement and contains 15 classes of 24 instances each, where
-    each class references to a hand movement type in LIBRAS. The hand movement is represented as a bidimensional curve performed
-    by the hand in a period of time. The curves were obtained from videos of hand movements, with the Libras performance from 4 
-    different people, during 2 sessions. Each video corresponds to only one hand movement and has about 7 seconds.    
-    Each video corresponds to a function F in a functions space which is the continual version of the input dataset.
-    In the video pre-processing, a time normalization is carried out selecting 45 frames from each video, in according 
-    to an uniform distribution. In each frame, the centroid pixels of the segmented objects (the hand) are found, which 
-    compose the discrete version of the curve F with 45 points. All curves are normalized in the unitary space.
-    Each curve F is mapped in a representation with 90 features, with representing the coordinates of movement.
-    Each instance represents 45 points on a bi-dimensional space, which can be plotted in an ordered way (from 1 through
-    45 as the X co-ordinate) in order to draw the path of the movement.
-    For this demo purposes was selected 4x15 instances as the verification set.
-  -->
-  <case name="Classification task Libras Movement: Simple pure ESN reservoir generating FiringFadingSum predictors, one TanH neuron as a classifier (FF-Resilient trainer)">
-    <samples trainingData="LibrasMovement_train.csv" verificationData="LibrasMovement_verify.csv"/>
-    <stateMachine randomizerSeek="0">
-      <neuralPreprocessor>
-        <inputEncoder>
-          <feedingPatterned slices="1" bidir="true" routeToReadout="false" variablesSchema="Groupped">
-            <unification unifyAmplitude="false" detrend="false">
-              <resampling uniformTimeScale="true" targetTimePoints="Auto"/>
-            </unification>
-          </feedingPatterned>
-          <fields>
-            <externalFields>
-              <field name="coord_abcissa">
-                <realFeature/>
-              </field>
-              <field name="coord_ordinate">
-                <realFeature/>
-              </field>
-            </externalFields>
-          </fields>
-        </inputEncoder>
-        <reservoirStructures>
-          <reservoirStructure name="MainCfg">
-            <pools>
-              <pool name="PureESN">
-                <proportions dimX="6" dimY="5" dimZ="5"/>
-                <neuronGroups>
-                  <analogGroup name="TanH-grp" relShare="1" firingThreshold="0.00125" signalingRestriction="NoRestriction">
-                    <activationTanH/>
-                  </analogGroup>
-                </neuronGroups>
-                <interconnection>
-                  <randomSchema density="0.1" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false"/>
-                </interconnection>
-              </pool>
-            </pools>
-          </reservoirStructure>
-        </reservoirStructures>
-        <reservoirInstances>
-          <reservoirInstance name="Main" reservoirStructure="MainCfg">
-            <inputConnections>
-              <connection inputFieldName="coord_abcissa" poolName="PureESN" analogTargetDensity="0.25" spikingTargetDensity="0"/>
-              <connection inputFieldName="coord_ordinate" poolName="PureESN" analogTargetDensity="0.25" spikingTargetDensity="0"/>
-            </inputConnections>
-            <synapse>
-              <analogTarget>
-                <input maxDelay="5"/>
-                <indifferent maxDelay="0"/>
-              </analogTarget>
-            </synapse>
-            <predictors activation="false"
-                        activationSquare="false"
-                        activationFadingSum="false"
-                        activationMWAvg="false"
-                        firingFadingSum="true"
-                        firingMWAvg="false"
-                        firingCount="false"
-                        firingBinPattern="false">
-              <params>
-                <firingFadingSum strength="0"/>
-              </params>
-            </predictors>
-          </reservoirInstance>
-        </reservoirInstances>
-      </neuralPreprocessor>
-      <readoutLayer testDataRatio="0.0825" folds="Auto">
-        <defaultNetworks>
-          <classification>
-            <ff>
-              <activationIdentity/>
-              <resPropTrainer attempts="5" attemptEpochs="400"/>
-            </ff>
-          </classification>
-        </defaultNetworks>
-        <readoutUnits>
-          <readoutUnit name="curved swing">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="horizontal swing">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="vertical swing">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="anti-clockwise arc">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="clockwise arc">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="circle">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="horizontal straight-line">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="vertical straight-line">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="horizontal zigzag">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="vertical zigzag">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="horizontal wavy">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="vertical wavy">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="face-up curve">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="face-down curve">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="tremble">
-            <classification oneWinnerGroupName="Hand movement type"/>
           </readoutUnit>
         </readoutUnits>
       </readoutLayer>
@@ -1797,7 +1006,7 @@
     Achieved accuracy is 99.1%
     Relevant paper: http://users.fs.cvut.cz/ivo.bukovsky/PROJEKT/Data/Realna/BIO/EEG/reference/PRE61907.pdf
   -->
-  <case name="Classification task Recognition of the Epileptic Seizure Brain Activity (EEG):  Pure ESN reservoir (FiringFadingSum predictors), Multilayer Feed forward network as a classifier (Resilient trainer)">
+  <case name="Classification task Recognition of the Epileptic Seizure Brain Activity (EEG):  Pure ESN reservoir generating FiringFadingSum predictors, Multilayer FF network as a classifier (Resilient trainer)">
     <samples trainingData="EpilepticSeizureActivity_train.csv" verificationData="EpilepticSeizureActivity_verify.csv"/>
     <stateMachine randomizerSeek="0">
       <neuralPreprocessor>
@@ -1852,12 +1061,7 @@
                         firingCount="false"
                         firingBinPattern="false">
               <params>
-                <activationFadingSum/>
-                <activationMWAvg weights="Constant" window="178"/>
                 <firingFadingSum strength="0.005"/>
-                <firingMWAvg weights="Constant" window="178"/>
-                <firingCount/>
-                <firingBinPattern/>
               </params>
             </predictors>
           </reservoirInstance>
@@ -1888,288 +1092,6 @@
       </readoutLayer>
     </stateMachine>
   </case>
-
-  <!--
-    The best algorithm called COTE, referenced at the dataset's home site, exhibits accuracy 81.4%.
-    It is much better than the results of StateMachine (69%). This is a good case for finding other ways to improve StateMachine :-)
-    "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
-    https://timeseriesclassification.com/description.php?Dataset=CricketX.
-    The series Cricket X, Y and Z are accelerometer data (in three dimensions) taken from actors performing cricket gestures.
-    The twelve classes are different umpire signals: Cancel Call, Dead Ball, Four, Last Hour Leg Bye, No Ball, One Short, Out,
-    Penalty Runs, Six, TV Replay, and Wide. They mounted two accelerometers orthogonal to each other, thus acceleration is measured
-    in 3D space. The accelerometers are housed in a small wrist watch sized enclosure worn in the form of a wrist band.
-    Taken together the data is a multivariate time series classificatin problem, but the serise are not alligned so in its current
-    format cannot be used s such Segmentation of intentional gestures for sports video annotation, Online Context Recognition in Multisensor Systems using Dynamic Time Warping.
-    The data are multi-dimensional, but they are not aligned, so it is not possible.
-  -->
-  <case name="Classification task CricketX: pure ESN reservoir generating FiringFadingSum predictors, one Identity neuron as a classifier (Resilient trainer)">
-    <samples trainingData="CricketX_train.csv" verificationData="CricketX_verify.csv"/>
-    <stateMachine randomizerSeek="0">
-      <neuralPreprocessor predictorsReductionRatio="0">
-        <inputEncoder>
-          <feedingPatterned slices="1" bidir="true" routeToReadout="false" variablesSchema="Sequential">
-            <unification unifyAmplitude="false" detrend="false">
-              <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
-            </unification>
-          </feedingPatterned>
-          <fields>
-            <externalFields>
-              <field name="Accel" routeToReadout="true">
-                <realFeature />
-              </field>
-            </externalFields>
-          </fields>
-        </inputEncoder>
-        <reservoirStructures>
-          <reservoirStructure name="MainCfg">
-            <pools>
-              <pool name="PoolMain">
-                <proportions dimX="400" dimY="1" dimZ="1"/>
-                <neuronGroups>
-                  <analogGroup name="TanH-grp" relShare="1" firingThreshold="0.00125">
-                    <activationTanH/>
-                  </analogGroup>
-                </neuronGroups>
-                <interconnection>
-                  <randomSchema density="0.1" avgDistance="NA" allowSelfConnection="true"/>
-                  <chainSchema/>
-                </interconnection>
-              </pool>
-            </pools>
-          </reservoirStructure>
-        </reservoirStructures>
-        <reservoirInstances>
-          <reservoirInstance name="Main" reservoirStructure="MainCfg">
-            <inputConnections>
-              <connection inputFieldName="Accel" poolName="PoolMain" analogTargetDensity="0.25" signalingRestriction="NoRestriction"/>
-            </inputConnections>
-            <synapse>
-              <analogTarget spectralRadius="0.9999">
-                <input maxDelay="50">
-                  <analogSource>
-                    <weight min="0" max="1.5"/>
-                  </analogSource>
-                </input>
-                <indifferent maxDelay="0"/>
-              </analogTarget>
-            </synapse>
-            <predictors activation="false"
-                        activationSquare="false"
-                        activationFadingSum="false"
-                        activationMWAvg="false"
-                        firingFadingSum="true"
-                        firingMWAvg="false"
-                        firingCount="false"
-                        firingBinPattern="false">
-              <params>
-                <activationMWAvg window="300" weights="Constant"/>
-                <firingFadingSum strength="0.005"/>
-                <firingCount window="300"/>
-              </params>
-            </predictors>
-          </reservoirInstance>
-        </reservoirInstances>
-      </neuralPreprocessor>
-      <readoutLayer testDataRatio="0.1" folds="Auto" repetitions="1">
-        <defaultNetworks>
-          <classification>
-            <ff>
-              <activationIdentity/>
-              <resPropTrainer attempts="5" attemptEpochs="1000"/>
-            </ff>
-          </classification>
-        </defaultNetworks>
-        <readoutUnits>
-          <readoutUnit name="Cancel Call">
-            <classification oneWinnerGroupName="Gesture"/>
-          </readoutUnit>
-          <readoutUnit name="Dead Ball">
-            <classification oneWinnerGroupName="Gesture"/>
-          </readoutUnit>
-          <readoutUnit name="Four">
-            <classification oneWinnerGroupName="Gesture"/>
-          </readoutUnit>
-          <readoutUnit name="Last Hour">
-            <classification oneWinnerGroupName="Gesture"/>
-          </readoutUnit>
-          <readoutUnit name="Leg Bye">
-            <classification oneWinnerGroupName="Gesture"/>
-          </readoutUnit>
-          <readoutUnit name="No Ball">
-            <classification oneWinnerGroupName="Gesture"/>
-          </readoutUnit>
-          <readoutUnit name="One Short">
-            <classification oneWinnerGroupName="Gesture"/>
-          </readoutUnit>
-          <readoutUnit name="Out">
-            <classification oneWinnerGroupName="Gesture"/>
-          </readoutUnit>
-          <readoutUnit name="Penalty Runs">
-            <classification oneWinnerGroupName="Gesture"/>
-          </readoutUnit>
-          <readoutUnit name="Six">
-            <classification oneWinnerGroupName="Gesture"/>
-          </readoutUnit>
-          <readoutUnit name="TV Replay">
-            <classification oneWinnerGroupName="Gesture"/>
-          </readoutUnit>
-          <readoutUnit name="Wide">
-            <classification oneWinnerGroupName="Gesture"/>
-          </readoutUnit>
-        </readoutUnits>
-      </readoutLayer>
-    </stateMachine>
-  </case>
-
-
-  <!--
-    The best algorithm called COTE, referenced at the dataset's home site, exhibits accuracy 81.4%.
-    It is much better than the results of StateMachine (69%). This is a good case for finding other ways to improve StateMachine :-)
-    "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
-    https://timeseriesclassification.com/description.php?Dataset=CricketX.
-    The series Cricket X, Y and Z are accelerometer data (in three dimensions) taken from actors performing cricket gestures.
-    The twelve classes are different umpire signals: Cancel Call, Dead Ball, Four, Last Hour Leg Bye, No Ball, One Short, Out,
-    Penalty Runs, Six, TV Replay, and Wide. They mounted two accelerometers orthogonal to each other, thus acceleration is measured
-    in 3D space. The accelerometers are housed in a small wrist watch sized enclosure worn in the form of a wrist band.
-    Taken together the data is a multivariate time series classificatin problem, but the serise are not alligned so in its current
-    format cannot be used s such Segmentation of intentional gestures for sports video annotation, Online Context Recognition in Multisensor Systems using Dynamic Time Warping.
-    The data are multi-dimensional, but they are not aligned, so it is not possible.
-  -->
-  <case name="Classification task CricketX: pure ESN reservoir generating FiringFadingSum predictors, one Identity neuron as a classifier (Resilient trainer)">
-    <samples trainingData="CricketX_train.csv" verificationData="CricketX_verify.csv"/>
-    <stateMachine randomizerSeek="0">
-      <neuralPreprocessor predictorsReductionRatio="0">
-        <inputEncoder>
-          <feedingPatterned slices="1" bidir="false" routeToReadout="false" variablesSchema="Sequential">
-            <unification unifyAmplitude="false" detrend="false">
-              <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
-            </unification>
-          </feedingPatterned>
-          <fields>
-            <externalFields>
-              <field name="Accel">
-                <realFeature />
-                <spikeCode componentHalfCodeLength="20" signalComponent="true" deltaComponent="true"/>
-              </field>
-            </externalFields>
-          </fields>
-        </inputEncoder>
-        <reservoirStructures>
-          <reservoirStructure name="MainCfg">
-            <pools>
-              <pool name="PoolMain">
-                <proportions dimX="100" dimY="1" dimZ="1"/>
-                <neuronGroups>
-                  <spikingGroup name="grp1" relShare="1">
-                    <activationAdExpIF solverCompSteps="2" solverMethod="Euler"/>
-                    <homogenousExcitability excitatoryStrength="0.75" inputRatio="0.67" inhibitoryRatio="0.25"/>
-                  </spikingGroup>
-                </neuronGroups>
-                <interconnection>
-                  <randomSchema density="0.1" avgDistance="NA" allowSelfConnection="false"/>
-                </interconnection>
-              </pool>
-            </pools>
-          </reservoirStructure>
-        </reservoirStructures>
-        <reservoirInstances>
-          <reservoirInstance name="Main" reservoirStructure="MainCfg">
-            <inputConnections>
-              <connection inputFieldName="Accel" poolName="PoolMain"  spikingTargetDensity="1" signalingRestriction="NoRestriction"/>
-            </inputConnections>
-            <synapse>
-              <spikingTarget>
-                <input maxDelay="0">
-                  <spikingSource>
-                    <plasticity>
-                      <constantDynamics/>
-                    </plasticity>
-                  </spikingSource>
-                </input>
-                <excitatory maxDelay="0">
-                  <spikingSource>
-                    <plasticity>
-                      <constantDynamics/>
-                    </plasticity>
-                  </spikingSource>
-                </excitatory>
-                <inhibitory maxDelay="0">
-                  <spikingSource>
-                    <plasticity>
-                      <constantDynamics/>
-                    </plasticity>
-                  </spikingSource>
-                </inhibitory>
-              </spikingTarget>
-            </synapse>
-            <predictors activation="false"
-                        activationSquare="false"
-                        activationFadingSum="false"
-                        activationMWAvg="false"
-                        firingFadingSum="true"
-                        firingMWAvg="false"
-                        firingCount="false"
-                        firingBinPattern="false">
-              <params>
-                <activationMWAvg window="300" weights="Constant"/>
-                <firingFadingSum strength="0.005"/>
-                <firingCount window="300"/>
-              </params>
-            </predictors>
-          </reservoirInstance>
-        </reservoirInstances>
-      </neuralPreprocessor>
-      <readoutLayer testDataRatio="0.1" folds="Auto" repetitions="1">
-        <defaultNetworks>
-          <classification>
-            <ff>
-              <activationElliot/>
-              <resPropTrainer attempts="5" attemptEpochs="1000"/>
-            </ff>
-          </classification>
-        </defaultNetworks>
-        <readoutUnits>
-          <readoutUnit name="Cancel Call">
-            <classification oneWinnerGroupName="Gesture"/>
-          </readoutUnit>
-          <readoutUnit name="Dead Ball">
-            <classification oneWinnerGroupName="Gesture"/>
-          </readoutUnit>
-          <readoutUnit name="Four">
-            <classification oneWinnerGroupName="Gesture"/>
-          </readoutUnit>
-          <readoutUnit name="Last Hour">
-            <classification oneWinnerGroupName="Gesture"/>
-          </readoutUnit>
-          <readoutUnit name="Leg Bye">
-            <classification oneWinnerGroupName="Gesture"/>
-          </readoutUnit>
-          <readoutUnit name="No Ball">
-            <classification oneWinnerGroupName="Gesture"/>
-          </readoutUnit>
-          <readoutUnit name="One Short">
-            <classification oneWinnerGroupName="Gesture"/>
-          </readoutUnit>
-          <readoutUnit name="Out">
-            <classification oneWinnerGroupName="Gesture"/>
-          </readoutUnit>
-          <readoutUnit name="Penalty Runs">
-            <classification oneWinnerGroupName="Gesture"/>
-          </readoutUnit>
-          <readoutUnit name="Six">
-            <classification oneWinnerGroupName="Gesture"/>
-          </readoutUnit>
-          <readoutUnit name="TV Replay">
-            <classification oneWinnerGroupName="Gesture"/>
-          </readoutUnit>
-          <readoutUnit name="Wide">
-            <classification oneWinnerGroupName="Gesture"/>
-          </readoutUnit>
-        </readoutUnits>
-      </readoutLayer>
-    </stateMachine>
-  </case>
-
 
 
 

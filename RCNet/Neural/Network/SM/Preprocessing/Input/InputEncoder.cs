@@ -18,9 +18,15 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
     {
         //Constants
         /// <summary>
-        /// Identifies patterned input feeding allowing variable length of patterns
+        /// Identifies variable number of time-points per one instance of processed external input vector
         /// </summary>
-        public const int VariableTimePointsPerInput = -1;
+        public const int VariableNumOfTimePoints = -1;
+
+        /// <summary>
+        /// Identifies variable length of external input vector
+        /// </summary>
+        private const int VariableExtVectorLength = -1;
+
         /// <summary>
         /// ID of the input encoder's reservoir
         /// </summary>
@@ -65,6 +71,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         public List<InputField> RoutedFieldCollection { get; }
 
         /// <summary>
+        /// Number of fixed time-points of one instance of processed external input vector
+        /// or VariableNumOfTimePoints (-1)
+        /// </summary>
+        public int NumOfTimePoints { get; private set; }
+
+        /// <summary>
         /// Number of input field values routed to readout
         /// </summary>
         public int NumOfRoutedFieldValues { get; private set; }
@@ -74,33 +86,26 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// Configuration
         /// </summary>
         private readonly InputEncoderSettings _encoderCfg;
-
         /// <summary>
         /// Collection of the internal input transformers associated with the transformed input fields
         /// </summary>
         private readonly List<ITransformer> _internalInputTransformerCollection;
-
         /// <summary>
         /// Collection of the internal input generators associated with the generated input fields
         /// </summary>
         private readonly List<IGenerator> _internalInputGeneratorCollection;
-
         /// <summary>
-        /// Required constant length of the external input vector for patterned feeding with routing input to readout.
-        /// -1 (no constraint) for continuous feeding or patterned feeding without routing input to readout.
+        /// Required constant length of the external input vector or VariableExtVectorLength (no constraint)
         /// </summary>
         private int _fixedExtVectorLength;
-
         /// <summary>
         /// Data to be processed
         /// </summary>
         private readonly List<double[]> _inputDataQueue;
-
         /// <summary>
         /// Number of already processed inputs from _inputDataQueue
         /// </summary>
         private int _numOfProcessedInputs;
-
         /// <summary>
         /// Indicates reverse mode of input data processing
         /// </summary>
@@ -180,7 +185,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
                     RoutedFieldCollection.Add(field);
                 }
             }
-            _fixedExtVectorLength = -1;
+            _fixedExtVectorLength = VariableExtVectorLength;
+            NumOfTimePoints = VariableNumOfTimePoints;
             NumOfRoutedFieldValues = 0;
             //Input processing queue
             _inputDataQueue = new List<double[]>();
@@ -190,29 +196,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
 
         //Properties
         /// <summary>
-        /// Number of time-points within one input data
-        /// </summary>
-        public int TimepointsPerInput
-        {
-            get
-            {
-                if(_encoderCfg.FeedingCfg.FeedingType == InputFeedingType.Continuous)
-                {
-                    return 1;
-                }
-                else if(_fixedExtVectorLength == -1)
-                {
-                    return VariableTimePointsPerInput;
-                }
-                else
-                {
-                    return _fixedExtVectorLength / Fields.Count;
-                }
-            }
-        }
-        
-        /// <summary>
-        /// Number of remaining stored inputs to be processed
+        /// Number of remaining stored inputs (remaining parts of external input vector) to be processed
         /// </summary>
         public int NumOfRemainingInputs { get { return _inputDataQueue.Count - _numOfProcessedInputs; } }
 
@@ -299,7 +283,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             ResetTransformersAndGenerators();
             ResetInputNeurons(true);
             ResetFeatureFilters();
-            _fixedExtVectorLength = -1;
+            _fixedExtVectorLength = VariableExtVectorLength;
+            NumOfTimePoints = VariableNumOfTimePoints;
             NumOfRoutedFieldValues = 0;
             return;
         }
@@ -391,9 +376,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         private void ValidateExtInputVectorLength(int extInputVectorLength)
         {
             //Check vector length
-            if (_fixedExtVectorLength != -1 && extInputVectorLength != _fixedExtVectorLength)
+            if (_fixedExtVectorLength != VariableExtVectorLength && extInputVectorLength != _fixedExtVectorLength)
             {
-                throw new InvalidOperationException($"Number of the time-points in every input pattern has to be constant because input data is routed to the readout.");
+                throw new InvalidOperationException($"Number of the time-points in every input data has to be constant ({_fixedExtVectorLength}).");
             }
             return;
         }
@@ -409,26 +394,24 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             if (_encoderCfg.FeedingCfg.FeedingType == InputFeedingType.Continuous)
             {
                 //Continuous feeding
+                //Fixed lengths
+                _fixedExtVectorLength = inputBundle.InputVectorCollection[0].Length;
+                NumOfTimePoints = 1;
                 //Add internal inputs and initialize feature filters
                 UpdateFeatureFilters(AddInternalInputs(inputBundle.InputVectorCollection));
-                //Number of routed fields' values
-                if (RoutedFieldCollection.Count > 0)
-                {
-                    NumOfRoutedFieldValues = RoutedFieldCollection.Count;
-                }
             }
             else
             {
                 //Patterned feeding
-                //Input pattern length constraint and number of routed fields' values
-                int slices = ((FeedingPatternedSettings)_encoderCfg.FeedingCfg).Slices;
-                if (RoutedFieldCollection.Count > 0 || slices > 1)
+                FeedingPatternedSettings feedingPatternedCfg = (FeedingPatternedSettings)_encoderCfg.FeedingCfg;
+                //Input pattern length constraint and number of time-points
+                NumOfTimePoints = feedingPatternedCfg.UnificationCfg.ResamplingCfg.TargetTimePoints != ResamplingSettings.AutoTargetTimePointsNum ? feedingPatternedCfg.UnificationCfg.ResamplingCfg.TargetTimePoints : VariableNumOfTimePoints;
+                if(NumOfTimePoints == VariableNumOfTimePoints && (RoutedFieldCollection.Count > 0 || feedingPatternedCfg.Slices > 1))
                 {
+                    //because no resampling, length of external input vector must be fixed to keep consistent data
                     _fixedExtVectorLength = inputBundle.InputVectorCollection[0].Length;
-                    if (RoutedFieldCollection.Count > 0)
-                    {
-                        NumOfRoutedFieldValues = (RoutedFieldCollection.Count * (_fixedExtVectorLength / Fields.Count));
-                    }
+                    //Number of time-points must be also fixed
+                    NumOfTimePoints = _fixedExtVectorLength / Fields.Count;
                 }
                 //Convert input vectors to InputPatterns
                 List<List<double[]>> inputPatterns = new List<List<double[]>>(inputBundle.InputVectorCollection.Count);
@@ -452,6 +435,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
                     inputPatterns.Add(inputPatternVectors);
                     UpdateFeatureFilters(inputPatternVectors);
                 }
+            }
+            //Number of routed input values
+            if (RoutedFieldCollection.Count > 0)
+            {
+                NumOfRoutedFieldValues = RoutedFieldCollection.Count * NumOfTimePoints;
             }
             return;
         }
@@ -541,15 +529,15 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         public List<PredictorDescriptor> GetInputValuesPredictorsDescriptors()
         {
             //Check call relevancy
-            if(TimepointsPerInput == VariableTimePointsPerInput)
+            if(NumOfTimePoints == VariableNumOfTimePoints)
             {
                 throw new InvalidOperationException("Wrong function call. Number of time-points per input is variable.");
             }
             //Build descriptors
-            List<PredictorDescriptor> result = new List<PredictorDescriptor>(RoutedFieldCollection.Count * TimepointsPerInput);
+            List<PredictorDescriptor> result = new List<PredictorDescriptor>(RoutedFieldCollection.Count * NumOfTimePoints);
             foreach (InputField field in RoutedFieldCollection)
             {
-                for (int i = 0; i < TimepointsPerInput; i++)
+                for (int i = 0; i < NumOfTimePoints; i++)
                 {
                     result.Add(new PredictorDescriptor(field.Idx, ReservoirID, PoolID, PredictorDescriptor.InputFieldValue));
                 }
