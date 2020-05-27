@@ -5,15 +5,10 @@
            xmlns="RCNetTypes"
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
            >
-  <!-- Xml is a standard way to parameterize RCNet components and this xsd document contains definition of all necessary xml structures.
-       It is impossible to define all constraints becouse of some limitations of xsd, thus conformity with the schema does not mean
-       that xml is fully consistent and will be accepted by the parameterized component.
-  -->
+  <!-- Xml is a standard way to initialize RCNet components and this xsd contains definition of all necessary types -->
 
-  <!-- ________________________________________LOW LEVEL TYPES_________________________________________________ -->
-  <!-- SIMPLE TYPES -->
-  <!-- ENUMERATION TYPES -->
-
+  <!-- Simple types -->
+  <!-- Enumerations -->
   <!-- Enumeration of random distribution -->
   <xs:simpleType name="RandomDistributionType">
     <xs:restriction base="xs:string">
@@ -150,7 +145,7 @@
     </xs:restriction>
   </xs:simpleType>
 
-  <!-- NUMERIC TYPES -->
+  <!-- Numeric types -->
   <!-- Nonzero unsigned integer -->
   <xs:simpleType name="UIntGT0Type">
     <xs:restriction base="xs:unsignedInt">
@@ -311,14 +306,9 @@
     </xs:restriction>
   </xs:simpleType>
 
-  <!-- COMPLEX TYPES -->
-  <!-- Alone name element -->
-  <xs:complexType name="AloneNameType">
-    <xs:attribute type="xs:string" name="name" use="required"/>
-  </xs:complexType>
-
-
-  <!-- Coordinates - configuration -->
+  <!-- Complex types -->
+  <!-- 3D space -->
+  <!-- Coordinates -->
   <xs:complexType name="CoordinatesType">
     <xs:attribute type="xs:int" name="x" use="optional" default="0">
       <xs:annotation>
@@ -337,18 +327,20 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Proportions - configuration -->
+  <!-- Proportions -->
   <xs:complexType name="ProportionsType">
     <xs:attribute type="UIntGT0Type" name="dimX" use="required" />
     <xs:attribute type="UIntGT0Type" name="dimY" use="required" />
     <xs:attribute type="UIntGT0Type" name="dimZ" use="required" />
   </xs:complexType>
 
-  <!-- Uniform distribution configuration element -->
+
+  <!-- Random -->
+  <!-- Uniform distribution -->
   <xs:complexType name="UniformDistrType">
   </xs:complexType>
 
-  <!-- Gaussian distribution configuration element -->
+  <!-- Gaussian distribution -->
   <xs:complexType name="GaussianDistrType">
     <xs:attribute type="xs:double" name="mean" use="optional" default="0">
       <xs:annotation>
@@ -362,18 +354,18 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Exponential distribution configuration element -->
+  <!-- Exponential distribution -->
   <xs:complexType name="ExponentialDistrType">
     <xs:attribute type="DoubleNotEq0Type" name="mean" use="required"/>
   </xs:complexType>
 
-  <!-- Gamma distribution configuration element -->
+  <!-- Gamma distribution -->
   <xs:complexType name="GammaDistrType">
     <xs:attribute type="UDoubleGT0Type" name="alpha" use="required"/>
     <xs:attribute type="UDoubleGT0Type" name="beta" use="required"/>
   </xs:complexType>
 
-  <!-- Random value element -->
+  <!-- Random value -->
   <xs:complexType name="RandomValueType">
     <xs:choice minOccurs="0" maxOccurs="1">
       <xs:element type="UniformDistrType" name="uniformDistr" minOccurs="1" maxOccurs="1"/>
@@ -390,7 +382,7 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Unsigned gaussian distribution configuration element -->
+  <!-- Unsigned gaussian distribution -->
   <xs:complexType name="UGaussianDistrType">
     <xs:attribute type="UDoubleGT0Type" name="mean" use="optional" default="0.5">
       <xs:annotation>
@@ -404,12 +396,12 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Unsigned Exponential distribution configuration element -->
+  <!-- Unsigned Exponential distribution -->
   <xs:complexType name="UExponentialDistrType">
     <xs:attribute type="UDoubleGT0Type" name="mean" use="required"/>
   </xs:complexType>
 
-  <!-- Unsigned random value element -->
+  <!-- Unsigned random value -->
   <xs:complexType name="URandomValueType">
     <xs:choice minOccurs="0" maxOccurs="1">
       <xs:element type="UniformDistrType" name="uniformDistr" minOccurs="1" maxOccurs="1"/>
@@ -421,7 +413,7 @@
     <xs:attribute type="UDoubleGT0Type" name="max" use="required"/>
   </xs:complexType>
 
-  <!-- Parameter value seeker configuration element -->
+  <!-- Parameter value seeker -->
   <xs:complexType name="ParamSeekerType">
     <xs:attribute type="xs:double" name="min" use="required"/>
     <xs:attribute type="xs:double" name="max" use="required"/>
@@ -432,16 +424,15 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- ________________________________________SIGNAL GENERATORS TYPES_____________________________________________ -->
-
-  <!-- Pulse generator configuration element -->
+  <!-- Input generators -->
+  <!-- Pulse generator -->
   <xs:complexType name="PulseGeneratorType">
     <xs:attribute type="xs:double" name="signal" use="required"/>
     <xs:attribute type="UDoubleGE1Type" name="avgPeriod" use="required"/>
     <xs:attribute type="PulseGeneratorModeType" name="mode" use="required"/>
   </xs:complexType>
 
-  <!-- Sinusoidal generator configuration element -->
+  <!-- Sinusoidal generator -->
   <xs:complexType name="SinusoidalGeneratorType">
     <xs:attribute type="xs:double" name="phase" use="optional" default="0">
       <xs:annotation>
@@ -460,7 +451,7 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Mackey Glass generator configuration element -->
+  <!-- Mackey Glass generator -->
   <xs:complexType name="MackeyGlassGeneratorType">
     <xs:attribute type="UIntGE2LE18Type" name="tau" use="optional" default="18">
       <xs:annotation>
@@ -479,9 +470,8 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- ________________________________________INPUT TRANSFORMERS TYPES_____________________________________________ -->
-
-  <!-- Single field transformer base configuration element -->
+  <!-- Input transformers -->
+  <!-- Single field transformer base -->
   <xs:complexType name="SingleFieldTransformerBaseType">
     <xs:attribute type="xs:string" name="fieldName" use="required"/>
   </xs:complexType>
@@ -492,7 +482,7 @@
     <xs:attribute type="xs:string" name="yFieldName" use="required"/>
   </xs:complexType>
 
-  <!-- Difference transformer configuration element -->
+  <!-- Difference transformer -->
   <xs:complexType name="DiffTransformerType">
     <xs:complexContent>
       <xs:extension base="SingleFieldTransformerBaseType">
@@ -505,7 +495,7 @@
     </xs:complexContent>
   </xs:complexType>
 
-  <!-- Const division transformer configuration element -->
+  <!-- Const division transformer -->
   <xs:complexType name="CDivTransformerType">
     <xs:complexContent>
       <xs:extension base="SingleFieldTransformerBaseType">
@@ -518,7 +508,7 @@
     </xs:complexContent>
   </xs:complexType>
 
-  <!-- Log transformer configuration element -->
+  <!-- Log transformer -->
   <xs:complexType name="LogTransformerType">
     <xs:complexContent>
       <xs:extension base="SingleFieldTransformerBaseType">
@@ -531,7 +521,7 @@
     </xs:complexContent>
   </xs:complexType>
 
-  <!-- Exp transformer configuration element -->
+  <!-- Exp transformer -->
   <xs:complexType name="ExpTransformerType">
     <xs:complexContent>
       <xs:extension base="SingleFieldTransformerBaseType">
@@ -544,7 +534,7 @@
     </xs:complexContent>
   </xs:complexType>
 
-  <!-- Power transformer configuration element -->
+  <!-- Power transformer -->
   <xs:complexType name="PowerTransformerType">
     <xs:complexContent>
       <xs:extension base="SingleFieldTransformerBaseType">
@@ -562,7 +552,7 @@
     </xs:complexContent>
   </xs:complexType>
 
-  <!-- Yeo–Johnson transformer configuration element -->
+  <!-- Yeo–Johnson transformer -->
   <xs:complexType name="YeoJohnsonTransformerType">
     <xs:complexContent>
       <xs:extension base="SingleFieldTransformerBaseType">
@@ -571,7 +561,7 @@
     </xs:complexContent>
   </xs:complexType>
 
-  <!-- MWStat transformer configuration element -->
+  <!-- MWStat transformer -->
   <xs:complexType name="MWStatTransformerType">
     <xs:complexContent>
       <xs:extension base="SingleFieldTransformerBaseType">
@@ -581,21 +571,21 @@
     </xs:complexContent>
   </xs:complexType>
 
-  <!-- Mul transformer configuration element -->
+  <!-- Mul transformer -->
   <xs:complexType name="MulTransformerType">
     <xs:complexContent>
       <xs:extension base="TwoFieldsTransformerBaseType"/>
     </xs:complexContent>
   </xs:complexType>
 
-  <!-- Div transformer configuration element -->
+  <!-- Div transformer -->
   <xs:complexType name="DivTransformerType">
     <xs:complexContent>
       <xs:extension base="TwoFieldsTransformerBaseType"/>
     </xs:complexContent>
   </xs:complexType>
 
-  <!-- Linear transformer configuration element -->
+  <!-- Linear transformer -->
   <xs:complexType name="LinearTransformerType">
     <xs:complexContent>
       <xs:extension base="TwoFieldsTransformerBaseType">
@@ -613,9 +603,8 @@
     </xs:complexContent>
   </xs:complexType>
 
-  <!-- ________________________________________SPIKING ACTIVATION TYPES_____________________________________________ -->
-
-  <!-- Activation SimpleIF configuration element -->
+  <!-- Spiking activations -->
+  <!-- Activation SimpleIF -->
   <xs:complexType name="ActivationSimpleIFType">
     <xs:sequence minOccurs="0" maxOccurs="1">
       <xs:element type="URandomValueType" name="resistance" minOccurs="0" maxOccurs="1">
@@ -646,7 +635,7 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Activation LeakyIF configuration element -->
+  <!-- Activation LeakyIF -->
   <xs:complexType name="ActivationLeakyIFType">
     <xs:sequence minOccurs="0" maxOccurs="1">
       <xs:element type="URandomValueType" name="timeScale" minOccurs="0" maxOccurs="1">
@@ -697,7 +686,7 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Activation ExpIF configuration element -->
+  <!-- Activation ExpIF -->
   <xs:complexType name="ActivationExpIFType">
     <xs:sequence minOccurs="0" maxOccurs="1">
       <xs:element type="URandomValueType" name="timeScale" minOccurs="0" maxOccurs="1">
@@ -758,7 +747,7 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Activation AdExpIF configuration element -->
+  <!-- Activation AdExpIF -->
   <xs:complexType name="ActivationAdExpIFType">
     <xs:sequence minOccurs="0" maxOccurs="1">
       <xs:element type="URandomValueType" name="timeScale" minOccurs="0" maxOccurs="1">
@@ -829,7 +818,7 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Activation IzhikevichIF configuration element -->
+  <!-- Activation IzhikevichIF -->
   <xs:complexType name="ActivationIzhikevichIFType">
     <xs:sequence minOccurs="0" maxOccurs="1">
       <xs:element type="URandomValueType" name="recoveryTimeScale" minOccurs="0" maxOccurs="1">
@@ -885,7 +874,7 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Activation AutoIzhikevichIF configuration element -->
+  <!-- Activation AutoIzhikevichIF -->
   <xs:complexType name="ActivationAutoIzhikevichIFType">
     <xs:attribute type="xs:unsignedInt" name="refractoryPeriods" use="optional" default="1">
       <xs:annotation>
@@ -909,17 +898,16 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- ________________________________________ANALOG ACTIVATION TYPES_____________________________________________ -->
-
-  <!-- Activation SQNL configuration element -->
+  <!-- Analog activations -->
+  <!-- Activation SQNL -->
   <xs:complexType name="ActivationSQNLType">
   </xs:complexType>
 
-  <!-- Activation BentIdentity configuration element -->
+  <!-- Activation BentIdentity -->
   <xs:complexType name="ActivationBentIdentityType">
   </xs:complexType>
 
-  <!-- Activation Elliot configuration element -->
+  <!-- Activation Elliot -->
   <xs:complexType name="ActivationElliotType">
     <xs:sequence minOccurs="0" maxOccurs="1">
       <xs:element type="URandomValueType" name="slope" minOccurs="0" maxOccurs="1">
@@ -930,15 +918,15 @@
     </xs:sequence>
   </xs:complexType>
 
-  <!-- Activation Gaussian configuration element -->
+  <!-- Activation Gaussian -->
   <xs:complexType name="ActivationGaussianType">
   </xs:complexType>
 
-  <!-- Activation Identity configuration element -->
+  <!-- Activation Identity -->
   <xs:complexType name="ActivationIdentityType">
   </xs:complexType>
 
-  <!-- Activation ISRU configuration element -->
+  <!-- Activation ISRU -->
   <xs:complexType name="ActivationISRUType">
     <xs:sequence minOccurs="0" maxOccurs="1">
       <xs:element type="URandomValueType" name="alpha" minOccurs="0" maxOccurs="1">
@@ -949,7 +937,7 @@
     </xs:sequence>
   </xs:complexType>
 
-  <!-- Activation LeakyReLU configuration element -->
+  <!-- Activation LeakyReLU -->
   <xs:complexType name="ActivationLeakyReLUType">
     <xs:sequence minOccurs="0" maxOccurs="1">
       <xs:element type="URandomValueType" name="negSlope" minOccurs="0" maxOccurs="1">
@@ -960,19 +948,19 @@
     </xs:sequence>
   </xs:complexType>
 
-  <!-- Activation Sigmoid configuration element -->
+  <!-- Activation Sigmoid -->
   <xs:complexType name="ActivationSigmoidType">
   </xs:complexType>
 
-  <!-- Activation Sinc configuration element -->
+  <!-- Activation Sinc -->
   <xs:complexType name="ActivationSincType">
   </xs:complexType>
 
-  <!-- Activation Sinusoid configuration element -->
+  <!-- Activation Sinusoid -->
   <xs:complexType name="ActivationSinusoidType">
   </xs:complexType>
 
-  <!-- Activation SoftExponential configuration element -->
+  <!-- Activation SoftExponential -->
   <xs:complexType name="ActivationSoftExponentialType">
     <xs:sequence minOccurs="0" maxOccurs="1">
       <xs:element type="URandomValueType" name="alpha" minOccurs="0" maxOccurs="1">
@@ -983,18 +971,17 @@
     </xs:sequence>
   </xs:complexType>
 
-  <!-- Activation SoftPlus configuration element -->
+  <!-- Activation SoftPlus -->
   <xs:complexType name="ActivationSoftPlusType">
   </xs:complexType>
 
-  <!-- Activation TanH configuration element -->
+  <!-- Activation TanH -->
   <xs:complexType name="ActivationTanHType">
   </xs:complexType>
 
 
-  <!-- ________________________________________FF NETWORK TYPES_________________________________________________ -->
-
-  <!-- FF network - hidden layer - configuration -->
+  <!-- Nonrecurrent networks -->
+  <!-- Hidden layer -->
   <xs:complexType name="FFNetHiddenLayerType">
     <xs:choice minOccurs="1" maxOccurs="1">
       <xs:element type="ActivationSQNLType" name="activationSQNL" minOccurs="1" maxOccurs="1"/>
@@ -1014,14 +1001,15 @@
     <xs:attribute type="UIntGT0Type" name="neurons" use="required"/>
   </xs:complexType>
 
-  <!-- FF network - hidden layers - configuration -->
+  <!-- Hidden layers -->
   <xs:complexType name="FFNetHiddenLayersType">
     <xs:sequence minOccurs="0" maxOccurs="1">
       <xs:element type="FFNetHiddenLayerType" name="layer" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
-  <!-- FF network - QRD regression trainer - configuration -->
+  <!-- Feed forward network trainers -->
+  <!-- QRD regression trainer -->
   <xs:complexType name="FFNetQRDRegrTrainerType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="ParamSeekerType" name="noise" minOccurs="0" maxOccurs="1">
@@ -1039,7 +1027,7 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- FF network - ridge regression trainer - configuration -->
+  <!-- Ridge regression trainer -->
   <xs:complexType name="FFNetRidgeRegrTrainerType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="ParamSeekerType" name="lambda" minOccurs="0" maxOccurs="1">
@@ -1051,7 +1039,7 @@
     <xs:attribute type="UIntGT0Type" name="attemptEpochs" use="required"/>
   </xs:complexType>
 
-  <!-- FF network - elastic net linear regression trainer - configuration -->
+  <!-- Elastic net trainer -->
   <xs:complexType name="FFNetElasticRegrTrainerType">
     <xs:attribute type="UIntGT0Type" name="attemptEpochs" use="required"/>
     <xs:attribute type="UDoubleType" name="lambda" use="optional" default="1e-6">
@@ -1066,7 +1054,7 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- FF network - resilient propagation trainer - configuration -->
+  <!-- Resilient back propagation trainer -->
   <xs:complexType name="FFNetRPropTrainerType">
     <xs:attribute type="UIntGT0Type" name="attempts" use="required"/>
     <xs:attribute type="UIntGT0Type" name="attemptEpochs" use="required"/>
@@ -1102,7 +1090,7 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- FF network configuration -->
+  <!-- Feed forward network -->
   <xs:complexType name="FFNetType">
     <xs:sequence minOccurs="0" maxOccurs="1">
       <xs:sequence minOccurs="1" maxOccurs="1">
@@ -1132,10 +1120,7 @@
     </xs:sequence>
   </xs:complexType>
 
-
-  <!-- ________________________________________PP NETWORK TYPES_________________________________________________ -->
-
-  <!-- Parallel Perceptron - p-delta rule trainer - configuration -->
+  <!-- P-Delta rule trainer -->
   <xs:complexType name="PPNetPDeltaRuleTrainerType">
     <xs:attribute type="UIntGT0Type" name="attempts" use="required"/>
     <xs:attribute type="UIntGT0Type" name="attemptEpochs" use="required"/>
@@ -1166,6 +1151,7 @@
     </xs:attribute>
   </xs:complexType>
 
+  <!-- Parellel perceptron -->
   <xs:complexType name="PPNetType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="PPNetPDeltaRuleTrainerType" name="pDeltaRuleTrainer" minOccurs="1" maxOccurs="1"/>
@@ -1182,18 +1168,17 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- ________________________________________FEATURE FILTERS TYPES_____________________________________________ -->
-
-  <!-- Binary feature filter configuration element -->
+  <!-- Feature filters -->
+  <!-- Binary feature filter -->
   <xs:complexType name="BinFeatureFilterType">
   </xs:complexType>
 
-  <!-- Standard enumeration feature filter configuration element -->
+  <!-- Enumeration feature filter -->
   <xs:complexType name="EnumFeatureFilterType">
     <xs:attribute type="UIntGT0Type" name="numOfElements" use="required"/>
   </xs:complexType>
 
-  <!-- Real number feature filter configuration element -->
+  <!-- Real number feature filter -->
   <xs:complexType name="RealFeatureFilterType">
     <xs:attribute type="xs:boolean" name="standardize" use="optional" default="true">
       <xs:annotation>
@@ -1207,11 +1192,9 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- ________________________________________SYNAPSE TYPES_________________________________________________ -->
-
-  <!-- Synapse - Plasticity CONSTANT dynamics -->
-
-  <!-- Synapse - Plasticity constant dynamics- input spiking to hidden spiking - configuration -->
+  <!-- Plasticity of synapses transmitting spiking signal -->
+  <!-- Constant dynamics -->
+  <!-- Input to hidden spiking -->
   <xs:complexType name="SynapseConstantDynamicsSTInputType">
     <xs:attribute type="UDoubleLE1Type" name="efficacy" use="optional" default="1">
       <xs:annotation>
@@ -1220,7 +1203,7 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Synapse - Plasticity constant dynamics- excitatory spiking to hidden spiking - configuration -->
+  <!-- Excitatory to hidden spiking -->
   <xs:complexType name="SynapseConstantDynamicsSTExcitatoryType">
     <xs:attribute type="UDoubleLE1Type" name="efficacy" use="optional" default="1">
       <xs:annotation>
@@ -1229,7 +1212,7 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Synapse - Plasticity constant dynamics- inhibitory spiking to hidden spiking - configuration -->
+  <!-- Inhibitory to hidden spiking -->
   <xs:complexType name="SynapseConstantDynamicsSTInhibitoryType">
     <xs:attribute type="UDoubleLE1Type" name="efficacy" use="optional" default="1">
       <xs:annotation>
@@ -1238,7 +1221,7 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Synapse - Plasticity constant dynamics- input spiking to hidden analog - configuration -->
+  <!-- Input to hidden analog -->
   <xs:complexType name="SynapseConstantDynamicsATInputType">
     <xs:attribute type="UDoubleLE1Type" name="efficacy" use="optional" default="1">
       <xs:annotation>
@@ -1247,7 +1230,7 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Synapse - Plasticity constant dynamics- indifferent spiking to hidden analog - configuration -->
+  <!-- Indifferent to hidden analog -->
   <xs:complexType name="SynapseConstantDynamicsATIndifferentType">
     <xs:attribute type="UDoubleLE1Type" name="efficacy" use="optional" default="1">
       <xs:annotation>
@@ -1256,9 +1239,8 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Synapse - Plasticity LINEAR dynamics -->
-
-  <!-- Synapse - Plasticity linear dynamics- input spiking to hidden spiking - configuration -->
+  <!-- Linear dynamics -->
+  <!-- Input to hidden spiking -->
   <xs:complexType name="SynapseLinearDynamicsSTInputType">
     <xs:attribute type="UDoubleLE1Type" name="alpha" use="optional" default="0.007">
       <xs:annotation>
@@ -1277,7 +1259,7 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Synapse - Plasticity linear dynamics- excitatory spiking to hidden spiking - configuration -->
+  <!-- Excitatory to hidden spiking -->
   <xs:complexType name="SynapseLinearDynamicsSTExcitatoryType">
     <xs:attribute type="UDoubleLE1Type" name="alpha" use="optional" default="0.007">
       <xs:annotation>
@@ -1296,7 +1278,7 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Synapse - Plasticity linear dynamics- inhibitory spiking to hidden spiking - configuration -->
+  <!-- Inhibitory to hidden spiking -->
   <xs:complexType name="SynapseLinearDynamicsSTInhibitoryType">
     <xs:attribute type="UDoubleLE1Type" name="alpha" use="optional" default="0.007">
       <xs:annotation>
@@ -1315,7 +1297,7 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Synapse - Plasticity linear dynamics- input spiking to hidden analog - configuration -->
+  <!-- Input to hidden analog -->
   <xs:complexType name="SynapseLinearDynamicsATInputType">
     <xs:attribute type="UDoubleLE1Type" name="alpha" use="optional" default="0.007">
       <xs:annotation>
@@ -1334,7 +1316,7 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Synapse - Plasticity linear dynamics- indifferent spiking to hidden analog - configuration -->
+  <!-- Indifferent to hidden analog -->
   <xs:complexType name="SynapseLinearDynamicsATIndifferentType">
     <xs:attribute type="UDoubleLE1Type" name="alpha" use="optional" default="0.007">
       <xs:annotation>
@@ -1354,9 +1336,8 @@
   </xs:complexType>
 
 
-  <!-- Synapse - Plasticity NONLINEAR dynamics -->
-
-  <!-- Synapse - Plasticity nonlinear dynamics- input spiking to hidden spiking - configuration -->
+  <!-- Nonlinear dynamics -->
+  <!-- Input to hidden spiking -->
   <xs:complexType name="SynapseNonlinearDynamicsSTInputType">
     <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="optional" default="0.99">
       <xs:annotation>
@@ -1375,7 +1356,7 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Synapse - Plasticity nonlinear dynamics- excitatory spiking to hidden spiking - configuration -->
+  <!-- Excitatory to hidden spiking -->
   <xs:complexType name="SynapseNonlinearDynamicsSTExcitatoryType">
     <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="optional" default="0.99">
       <xs:annotation>
@@ -1394,7 +1375,7 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Synapse - Plasticity nonlinear dynamics- inhibitory spiking to hidden spiking - configuration -->
+  <!-- Inhibitory to hidden spiking -->
   <xs:complexType name="SynapseNonlinearDynamicsSTInhibitoryType">
     <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="optional" default="0.99">
       <xs:annotation>
@@ -1413,7 +1394,7 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Synapse - Plasticity nonlinear dynamics- input spiking to hidden analog - configuration -->
+  <!-- Input to hidden analog -->
   <xs:complexType name="SynapseNonlinearDynamicsATInputType">
     <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="optional" default="0.99">
       <xs:annotation>
@@ -1432,7 +1413,7 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Synapse - Plasticity nonlinear dynamics- indifferent spiking to hidden analog - configuration -->
+  <!-- Indifferent to hidden analog -->
   <xs:complexType name="SynapseNonlinearDynamicsATIndifferentType">
     <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="optional" default="0.99">
       <xs:annotation>
@@ -1451,7 +1432,8 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Synapse - Plasticity - input spiking to hidden spiking - configuration -->
+  <!-- Synapse plasticity choices -->
+  <!-- Input to hidden spiking choices -->
   <xs:complexType name="SynapsePlasticitySTInputType">
     <xs:choice minOccurs="1" maxOccurs="1">
       <xs:element type="SynapseConstantDynamicsSTInputType" name="constantDynamics" minOccurs="1" maxOccurs="1"/>
@@ -1460,7 +1442,7 @@
     </xs:choice>
   </xs:complexType>
 
-  <!-- Synapse - Plasticity - excitatory spiking to hidden spiking - configuration -->
+  <!-- Excitatory to hidden spiking choices -->
   <xs:complexType name="SynapsePlasticitySTExcitatoryType">
     <xs:choice minOccurs="1" maxOccurs="1">
       <xs:element type="SynapseConstantDynamicsSTExcitatoryType" name="constantDynamics" minOccurs="1" maxOccurs="1"/>
@@ -1469,7 +1451,7 @@
     </xs:choice>
   </xs:complexType>
 
-  <!-- Synapse - Plasticity - inhibitory spiking to hidden spiking - configuration -->
+  <!-- Inhibitory to hidden spiking choices -->
   <xs:complexType name="SynapsePlasticitySTInhibitoryType">
     <xs:choice minOccurs="1" maxOccurs="1">
       <xs:element type="SynapseConstantDynamicsSTInhibitoryType" name="constantDynamics" minOccurs="1" maxOccurs="1"/>
@@ -1478,7 +1460,7 @@
     </xs:choice>
   </xs:complexType>
 
-  <!-- Synapse - Plasticity - input spiking to hidden analog - configuration -->
+  <!-- Input to hidden analog choices -->
   <xs:complexType name="SynapsePlasticityATInputType">
     <xs:choice minOccurs="1" maxOccurs="1">
       <xs:element type="SynapseConstantDynamicsATInputType" name="constantDynamics" minOccurs="1" maxOccurs="1"/>
@@ -1487,7 +1469,7 @@
     </xs:choice>
   </xs:complexType>
 
-  <!-- Synapse - Plasticity - indifferent spiking to hidden analog - configuration -->
+  <!-- Indifferent to hidden analog choices -->
   <xs:complexType name="SynapsePlasticityATIndifferentType">
     <xs:choice minOccurs="1" maxOccurs="1">
       <xs:element type="SynapseConstantDynamicsATIndifferentType" name="constantDynamics" minOccurs="1" maxOccurs="1"/>
@@ -1496,14 +1478,16 @@
     </xs:choice>
   </xs:complexType>
 
-  <!-- Synapse - analog source - configuration -->
+  <!-- Synapse configuration -->
+  <!-- Analog source -->
   <xs:complexType name="SynapseAnalogSourceType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="URandomValueType" name="weight" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
   </xs:complexType>
 
-  <!-- Synapse - spiking source - input spiking to hidden spiking - configuration -->
+  <!-- Spiking source -->
+  <!-- Input to hidden spiking -->
   <xs:complexType name="SynapseSpikingSourceSTInputType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="URandomValueType" name="weight" minOccurs="0" maxOccurs="1"/>
@@ -1511,7 +1495,7 @@
     </xs:sequence>
   </xs:complexType>
 
-  <!-- Synapse - spiking source - excitatory spiking to hidden spiking - configuration -->
+  <!-- Excitatory to hidden spiking -->
   <xs:complexType name="SynapseSpikingSourceSTExcitatoryType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="URandomValueType" name="weight" minOccurs="0" maxOccurs="1"/>
@@ -1519,7 +1503,7 @@
     </xs:sequence>
   </xs:complexType>
 
-  <!-- Synapse - spiking source - inhibitory spiking to hidden spiking - configuration -->
+  <!-- Inhibitory to hidden spiking -->
   <xs:complexType name="SynapseSpikingSourceSTInhibitoryType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="URandomValueType" name="weight" minOccurs="0" maxOccurs="1"/>
@@ -1527,7 +1511,7 @@
     </xs:sequence>
   </xs:complexType>
 
-  <!-- Synapse - spiking source - input spiking to hidden analog - configuration -->
+  <!-- Input to hidden analog -->
   <xs:complexType name="SynapseSpikingSourceATInputType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="URandomValueType" name="weight" minOccurs="0" maxOccurs="1"/>
@@ -1535,7 +1519,7 @@
     </xs:sequence>
   </xs:complexType>
 
-  <!-- Synapse - spiking source - invariant spiking to hidden analog - configuration -->
+  <!-- Indifferent to hidden analog -->
   <xs:complexType name="SynapseSpikingSourceATIndifferentType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="URandomValueType" name="weight" minOccurs="0" maxOccurs="1"/>
@@ -1543,7 +1527,8 @@
     </xs:sequence>
   </xs:complexType>
 
-  <!-- Synapse - spiking target - input - configuration -->
+  <!-- Spiking target -->
+  <!-- Input -->
   <xs:complexType name="SynapseSTInputType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="SynapseAnalogSourceType" name="analogSource" minOccurs="0" maxOccurs="1"/>
@@ -1561,7 +1546,7 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Synapse - spiking target - excitatory - configuration -->
+  <!-- Excitatory -->
   <xs:complexType name="SynapseSTExcitatoryType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="SynapseAnalogSourceType" name="analogSource" minOccurs="0" maxOccurs="1"/>
@@ -1584,7 +1569,7 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Synapse - spiking target - inhibitory - configuration -->
+  <!-- Inhibitory -->
   <xs:complexType name="SynapseSTInhibitoryType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="SynapseAnalogSourceType" name="analogSource" minOccurs="0" maxOccurs="1"/>
@@ -1607,7 +1592,8 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Synapse - analog target - input - configuration -->
+  <!-- Analog target -->
+  <!-- Input -->
   <xs:complexType name="SynapseATInputType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="SynapseAnalogSourceType" name="analogSource" minOccurs="0" maxOccurs="1"/>
@@ -1625,7 +1611,7 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Synapse - analog target - indifferent - configuration -->
+  <!-- Indifferent -->
   <xs:complexType name="SynapseATIndifferentType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="SynapseAnalogSourceType" name="analogSource" minOccurs="0" maxOccurs="1"/>
@@ -1643,7 +1629,7 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Synapse - spiking target - configuration -->
+  <!-- Spiking target configuration -->
   <xs:complexType name="SynapseSTType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="SynapseSTInputType" name="input" minOccurs="0" maxOccurs="1"/>
@@ -1652,7 +1638,7 @@
     </xs:sequence>
   </xs:complexType>
 
-  <!-- Synapse - analog target - configuration -->
+  <!-- Analog target configuration -->
   <xs:complexType name="SynapseATType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="SynapseATInputType" name="input" minOccurs="0" maxOccurs="1"/>
@@ -1665,7 +1651,7 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Synapse - configuration -->
+  <!-- Synapse configuration -->
   <xs:complexType name="SynapseType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="SynapseSTType" name="spikingTarget" minOccurs="0" maxOccurs="1"/>
@@ -1673,10 +1659,9 @@
     </xs:sequence>
   </xs:complexType>
 
-  
-  <!-- ________________________________________NEURAL POOL TYPES_________________________________________________ -->
 
-  <!-- Predictor ActivationFadingSum - configuration -->
+  <!-- Predictor parameters -->
+  <!-- Activation fading sum -->
   <xs:complexType name="PredictorActivationFadingSumType">
     <xs:attribute type="UDoubleLT1Type" name="strength" use="optional" default="0.1">
       <xs:annotation>
@@ -1685,7 +1670,7 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Predictor FiringFadingSum - configuration -->
+  <!-- Firing fading sum -->
   <xs:complexType name="PredictorFiringFadingSumType">
     <xs:attribute type="UDoubleLT1Type" name="strength" use="optional" default="0.005">
       <xs:annotation>
@@ -1694,7 +1679,7 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Predictor MWAvg - configuration -->
+  <!-- Moving weighted average -->
   <xs:complexType name="PredictorMWAvgType">
     <xs:attribute type="UIntGT0Type" name="window" use="optional" default="64">
       <xs:annotation>
@@ -1708,7 +1693,7 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Predictor FiringCount - configuration -->
+  <!-- Firing count -->
   <xs:complexType name="PredictorFiringCountType">
     <xs:attribute type="UIntGT0Type" name="window" use="optional" default="64">
       <xs:annotation>
@@ -1717,7 +1702,7 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Predictor FiringBinPattern - configuration -->
+  <!-- Firing binary pattern -->
   <xs:complexType name="PredictorFiringBinPatternType">
     <xs:attribute type="UIntGE1LE32Type" name="window" use="optional" default="32">
       <xs:annotation>
@@ -1726,7 +1711,7 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Predictors params - configuration -->
+  <!-- Predictors parameterization choices -->
   <xs:complexType name="PredictorsParamsType">
     <xs:choice minOccurs="0" maxOccurs="6">
       <xs:element type="PredictorActivationFadingSumType" name="activationFadingSum" minOccurs="1" maxOccurs="1"/>
@@ -1738,7 +1723,7 @@
     </xs:choice>
   </xs:complexType>
 
-  <!-- Predictors - configuration -->
+  <!-- Predictors configuration -->
   <xs:complexType name="PredictorsType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="PredictorsParamsType" name="params" minOccurs="0" maxOccurs="1"/>
@@ -1750,7 +1735,7 @@
     </xs:attribute>
     <xs:attribute type="xs:boolean" name="activationSquare" use="optional" default="true">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Squared current activation. Default value is true</xs:documentation>
+        <xs:documentation xml:lang="en">Current squared activation. Default value is true</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="xs:boolean" name="activationFadingSum" use="optional" default="true">
@@ -1785,7 +1770,8 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Connection distribution - random schema - configuration -->
+  <!-- Pool interconnection schemas -->
+  <!-- Random schema -->
   <xs:complexType name="PoolInterconnectionRandomSchemaType">
     <xs:attribute type="UDoubleLE1Type" name="density" use="optional" default="0.1">
       <xs:annotation>
@@ -1819,7 +1805,7 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Pool - interconnection - chain schema - configuration -->
+  <!-- Chain schema -->
   <xs:complexType name="PoolInterconnectionChainSchemaType">
     <xs:attribute type="UDoubleLE1Type" name="ratio" use="optional" default="1">
       <xs:annotation>
@@ -1843,7 +1829,7 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Pool - interconnection - configuration -->
+  <!-- Pool interconnection configuration -->
   <xs:complexType name="PoolInterconnectionType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:choice minOccurs="1" maxOccurs="unbounded">
@@ -1853,7 +1839,7 @@
     </xs:sequence>
   </xs:complexType>
 
-  <!-- HomogenousExcitability - configuration -->
+  <!-- Homogenous excitability configuration -->
   <xs:complexType name="HomogenousExcitabilityType">
     <xs:attribute type="UDoubleGT0Type" name="excitatoryStrength" use="optional" default="0.75">
       <xs:annotation>
@@ -1873,7 +1859,7 @@
   </xs:complexType>
 
 
-  <!-- Pool - spiking neuron group - configuration -->
+  <!-- Spiking neuron group configuration -->
   <xs:complexType name="PoolSpikingNeuronGroupType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:choice minOccurs="1" maxOccurs="1">
@@ -1892,7 +1878,8 @@
     <xs:attribute type="UDoubleType" name="relShare" use="required"/>
   </xs:complexType>
 
-  <!-- Pool - analog neuron group - retainment - configuration -->
+  <!-- Analog neuron group -->
+  <!-- Retainment configuration -->
   <xs:complexType name="RetainmentType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="URandomValueType" name="strength" minOccurs="1" maxOccurs="1"/>
@@ -1900,7 +1887,7 @@
     <xs:attribute type="UDoubleLE1Type" name="density" use="required"/>
   </xs:complexType>
 
-  <!-- Pool - analog neuron group - configuration -->
+  <!-- Analog neuron group configuration -->
   <xs:complexType name="PoolAnalogNeuronGroupType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:choice minOccurs="1" maxOccurs="1">
@@ -1931,7 +1918,7 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Pool - neuron groups - configuration -->
+  <!-- Neuron groups choice-->
   <xs:complexType name="PoolNeuronGroupsType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:choice minOccurs="1" maxOccurs="unbounded">
@@ -1958,16 +1945,16 @@
     <xs:attribute type="xs:string" name="name" use="required" />
   </xs:complexType>
 
-  <!-- ________________________________________RESERVOIR STRUCTURE TYPES_________________________________________________ -->
 
-  <!-- Reservoir structure - pools - configuration -->
+  <!-- Reservoir structure -->
+  <!-- Pools -->
   <xs:complexType name="ResStructPoolsType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="PoolType" name="pool" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
-  <!-- Reservoir structure - pool to pool connection - configuration -->
+  <!-- Inter-pool connection -->
   <xs:complexType name="ResStructInterPoolConnectionType">
     <xs:attribute type="xs:string" name="targetPool" use="required"/>
     <xs:attribute type="UDoubleLE1Type" name="targetConnDensity" use="required"/>
@@ -1980,7 +1967,7 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Reservoir structure - inter pool connections - configuration -->
+  <!-- Inter-pool connections -->
   <xs:complexType name="ResStructInterPoolConnectionsType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="ResStructInterPoolConnectionType" name="interPoolConnection" minOccurs="0" maxOccurs="unbounded"/>
@@ -2007,8 +1994,9 @@
     <xs:attribute type="xs:string" name="name" use="required" />
   </xs:complexType>
 
-  <!-- ________________________________________NEURAL PREPROCESSOR TYPES_________________________________________________ -->
-  <!-- NeuralPreprocessor - continuous input feeding -configuration -->
+  <!-- Neural preprocessor -->
+  <!-- Input -->
+  <!-- Continuous input feeding configuration -->
   <xs:complexType name="NPInpFeedingContinuousType">
     <xs:attribute type="UIntGT0AutoOptionType" name="bootCycles" use="optional" default="Auto">
       <xs:annotation>
@@ -2022,7 +2010,8 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- NeuralPreprocessor - patterned input feeding - resampling - configuration -->
+  <!-- Patterned input feeding -->
+  <!-- Resampling -->
   <xs:complexType name="NPResamplingType">
     <xs:attribute type="UDoubleLT1Type" name="signalBeginThreshold" use="optional" default="0">
       <xs:annotation>
@@ -2046,7 +2035,7 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- NeuralPreprocessor - patterned input feeding - unification - configuration -->
+  <!-- Unification -->
   <xs:complexType name="NPUnificationType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="NPResamplingType" name="resampling" minOccurs="0" maxOccurs="1"/>
@@ -2063,8 +2052,7 @@
     </xs:attribute>
   </xs:complexType>
 
-
-  <!-- NeuralPreprocessor - patterned input feeding -configuration -->
+  <!-- Patterned input feeding configuration -->
   <xs:complexType name="NPInpFeedingPatternedType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="NPUnificationType" name="unification" minOccurs="0" maxOccurs="1"/>
@@ -2091,7 +2079,7 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- NeuralPreprocessor - input spike code - configuration -->
+  <!-- Input spike code configuration -->
   <xs:complexType name="NPInputSpikeCodeType">
     <xs:attribute type="UIntGE1LE1024Type" name="componentHalfCodeLength" use="optional" default="16">
       <xs:annotation>
@@ -2115,7 +2103,7 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- NeuralPreprocessor - external input field -configuration -->
+  <!-- External input field -->
   <xs:complexType name="NPExternalInpFieldType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:choice minOccurs="1" maxOccurs="1">
@@ -2135,14 +2123,14 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- NeuralPreprocessor - external input fields -configuration -->
+  <!-- External input fields -->
   <xs:complexType name="NPExternalInpFieldsType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="NPExternalInpFieldType" name="field" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
-  <!-- NeuralPreprocessor - transformed input field -configuration -->
+  <!-- Transformed input field -->
   <xs:complexType name="NPTransformedInpFieldType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:choice minOccurs="1" maxOccurs="1">
@@ -2168,14 +2156,14 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- NeuralPreprocessor - transformed input fields -configuration -->
+  <!-- Transformed input fields -->
   <xs:complexType name="NPTransformedInpFieldsType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="NPTransformedInpFieldType" name="field" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
-  <!-- NeuralPreprocessor - generated input field -configuration -->
+  <!-- Generated input field -->
   <xs:complexType name="NPGeneratedInpFieldType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:choice minOccurs="1" maxOccurs="1">
@@ -2195,15 +2183,14 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- NeuralPreprocessor - generated input fields -configuration -->
+  <!-- Generated input fields -->
   <xs:complexType name="NPGeneratedInpFieldsType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="NPGeneratedInpFieldType" name="field" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
-
-  <!-- NeuralPreprocessor - transformed fields- configuration -->
+  <!-- Input fields -->
   <xs:complexType name="NPInpFieldsType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="NPExternalInpFieldsType" name="externalFields" minOccurs="1" maxOccurs="1"/>
@@ -2212,26 +2199,32 @@
     </xs:sequence>
   </xs:complexType>
   
-  <!-- NeuralPreprocessor - input encoder -configuration -->
+  <!-- Input encoder configuration -->
   <xs:complexType name="NPInputEncoderType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:choice minOccurs="1" maxOccurs="1">
         <xs:element type="NPInpFeedingContinuousType" name="feedingContinuous" minOccurs="1" maxOccurs="1"/>
         <xs:element type="NPInpFeedingPatternedType" name="feedingPatterned" minOccurs="1" maxOccurs="1"/>
       </xs:choice>
-      <xs:element type="NPInpFieldsType" name="fields" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="NPInpFieldsType" name="fields" minOccurs="1" maxOccurs="1">
+        <xs:unique name="np_unique_input_field_name">
+          <xs:selector xpath=".//field"/>
+          <xs:field xpath="@name"/>
+        </xs:unique>
+      </xs:element>
       <xs:element type="CoordinatesType" name="coordinates" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
   </xs:complexType>
 
-  <!-- NeuralPreprocessor - reservoir structures -->
+  <!-- Reservoir structures -->
   <xs:complexType name="NPResStructsType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="ResStructType" name="reservoirStructure" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
-  <!-- NeuralPreprocessor - reservoir instance - input connection - configuration -->
+  <!-- Reservoir instance -->
+  <!-- Input connection -->
   <xs:complexType name="NPResInstanceInputConnectionType">
     <xs:attribute type="xs:string" name="inputFieldName" use="required"/>
     <xs:attribute type="xs:string" name="poolName" use="required"/>
@@ -2252,40 +2245,41 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- NeuralPreprocessor - reservoir instance - input connections - configuration -->
+  <!-- Input connections -->
   <xs:complexType name="NPResInstanceInputConnectionsType">
     <xs:sequence minOccurs="1" maxOccurs="unbounded">
       <xs:element type="NPResInstanceInputConnectionType" name="connection" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
-  <!-- NeuralPreprocessor - reservoir instance - configuration -->
+  <!-- Reservoir instance configuration -->
   <xs:complexType name="NPResInstanceType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="NPResInstanceInputConnectionsType" name="inputConnections" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="NPResInstanceInputConnectionsType" name="inputConnections" minOccurs="1" maxOccurs="1">
+        <xs:unique name="np_unique_resinst_conn">
+          <xs:selector xpath="./connection"/>
+          <xs:field xpath="@inputFieldName"/>
+          <xs:field xpath="@poolName"/>
+        </xs:unique>
+      </xs:element>
       <xs:element type="SynapseType" name="synapse" minOccurs="0" maxOccurs="1"/>
       <xs:element type="PredictorsType" name="predictors" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:string" name="name" use="required" />
-    <xs:attribute type="xs:string" name="reservoirStructure" use="required" />
+    <xs:attribute type="xs:string" name="reservoirStructure" use="required"/>
   </xs:complexType>
 
-  <!-- NeuralPreprocessor - reservoir instances -->
+  <!-- Reservoir instances -->
   <xs:complexType name="NPResInstancesType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="NPResInstanceType" name="reservoirInstance" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
-  <!-- NeuralPreprocessor configuration -->
+  <!-- Neural preprocessor configuration -->
   <xs:complexType name="NPType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="NPInputEncoderType" name="inputEncoder" minOccurs="1" maxOccurs="1">
-        <xs:unique name="np_unique_input_field_name">
-          <xs:selector xpath=".//field"/>
-          <xs:field xpath="@name"/>
-        </xs:unique>
-      </xs:element>
+      <xs:element type="NPInputEncoderType" name="inputEncoder" minOccurs="1" maxOccurs="1"/>
       <xs:element type="NPResStructsType" name="reservoirStructures" minOccurs="1" maxOccurs="1">
         <xs:unique name="np_unique_resstruct_name">
           <xs:selector xpath="./reservoirStructure"/>
@@ -2311,9 +2305,9 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- ________________________________________READOUT LAYER TYPES_________________________________________________ -->
-
-  <!-- Readout unit classification networks configuration -->
+  <!-- Readout layer -->
+  <!-- Readout unit -->
+  <!-- Classification networks -->
   <xs:complexType name="ROutLayerUnitClassificationNetworksType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:choice minOccurs="1" maxOccurs="unbounded">
@@ -2323,14 +2317,14 @@
     </xs:sequence>
   </xs:complexType>
 
-  <!-- Readout unit forecast networks configuration -->
+  <!-- Forecast networks -->
   <xs:complexType name="ROutLayerUnitForecastNetworksType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="FFNetType" name="ff" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
-  <!-- Readout unit default networks configuration -->
+  <!-- Default networks -->
   <xs:complexType name="ROutLayerUnitDefaultNetworksType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="ROutLayerUnitClassificationNetworksType" name="classification" minOccurs="0" maxOccurs="1"/>
@@ -2338,7 +2332,7 @@
     </xs:sequence>
   </xs:complexType>
 
-  <!-- Readout unit forecast task configuration -->
+  <!-- Forecast task configuration -->
   <xs:complexType name="ROutLayerUnitForecastTaskType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:choice minOccurs="1" maxOccurs="1">
@@ -2350,7 +2344,7 @@
     </xs:sequence>
   </xs:complexType>
 
-  <!-- Readout unit classification task configuration -->
+  <!-- Classification task configuration -->
   <xs:complexType name="ROutLayerUnitClassificationTaskType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="ROutLayerUnitClassificationNetworksType" name="networks" minOccurs="0" maxOccurs="1"/>
@@ -2373,7 +2367,7 @@
     <xs:attribute type="xs:string" name="name" use="required"/>
   </xs:complexType>
 
-  <!-- Readout units configuration -->
+  <!-- Readout units -->
   <xs:complexType name="ROutLayerUnitsType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="ROutLayerUnitType" name="readoutUnit" minOccurs="1" maxOccurs="unbounded"/>
@@ -2412,77 +2406,84 @@
   </xs:complexType>
 
 
-  <!-- ________________________________________STATE MACHINE TYPES_________________________________________________ -->
-  <!-- StateMachine - Mapper - Allowed predictor - configuration -->
+  <!-- State machine -->
+  <!-- Mapper -->
+  <!-- Allowed predictor -->
   <xs:complexType name="SMMapperAllowedPredictorType">
     <xs:attribute type="PredictorIDType" name="name" use="required"/>
   </xs:complexType>
 
-  <!-- StateMachine - Mapper - Allowed predictors - configuration -->
+  <!-- Allowed predictors -->
   <xs:complexType name="SMMapperAllowedPredictorsType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="SMMapperAllowedPredictorType" name="predictor" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
-  <!-- StateMachine - Mapper - Allowed pool - configuration -->
+  <!-- Allowed pool -->
   <xs:complexType name="SMMapperAllowedPoolType">
     <xs:attribute type="xs:string" name="reservoirInstanceName" use="required"/>
     <xs:attribute type="xs:string" name="poolName" use="required"/>
   </xs:complexType>
   
-  <!-- StateMachine - Mapper - Allowed pools - configuration -->
+  <!-- Allowed pools -->
   <xs:complexType name="SMMapperAllowedPoolsType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="SMMapperAllowedPoolType" name="pool" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
-  <!-- StateMachine - Mapper - Allowed input field - configuration -->
+  <!-- Allowed input field -->
   <xs:complexType name="SMMapperAllowedInputFieldType">
     <xs:attribute type="xs:string" name="name" use="required"/>
   </xs:complexType>
 
-  <!-- StateMachine - Mapper - Allowed input fields - configuration -->
+  <!-- Allowed input fields -->
   <xs:complexType name="SMMapperAllowedInputFieldsType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="SMMapperAllowedInputFieldType" name="field" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
-  <!-- StateMachine - Mapper - Readout unit map - configuration -->
+  <!-- Readout unit map configuration -->
   <xs:complexType name="SMMapperReadoutUnitMapType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="SMMapperAllowedPredictorsType" name="allowedPredictors" minOccurs="0" maxOccurs="unbounded"/>
-      <xs:element type="SMMapperAllowedPoolsType" name="allowedPools" minOccurs="0" maxOccurs="unbounded"/>
-      <xs:element type="SMMapperAllowedInputFieldsType" name="allowedInputFields" minOccurs="0" maxOccurs="unbounded"/>
-    </xs:sequence>
-    <xs:attribute type="xs:string" name="readoutUnitName" use="required"/>
-  </xs:complexType>
-
-  <!-- StateMachine - Mapper - configuration -->
-  <xs:complexType name="SMMapperType">
-    <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="SMMapperReadoutUnitMapType" name="map" minOccurs="1" maxOccurs="unbounded">
-        <xs:unique name="smm_unique_allowed_resinst_pool">
-          <xs:selector xpath="./allowedPools/pool"/>
+      <xs:element type="SMMapperAllowedPredictorsType" name="allowedPredictors" minOccurs="0" maxOccurs="unbounded">
+        <xs:unique name="smm_unique_unit_allowed_predictor">
+          <xs:selector xpath="./predictor"/>
+          <xs:field xpath="@name"/>
+        </xs:unique>
+      </xs:element>
+      <xs:element type="SMMapperAllowedPoolsType" name="allowedPools" minOccurs="0" maxOccurs="unbounded">
+        <xs:unique name="smm_unique_unit_allowed_pool">
+          <xs:selector xpath="./pool"/>
           <xs:field xpath="@reservoirInstanceName"/>
           <xs:field xpath="@poolName"/>
         </xs:unique>
-        <xs:unique name="smm_unique_allowed_input_field">
-          <xs:selector xpath="./allowedInputFields/field"/>
+      </xs:element>
+      <xs:element type="SMMapperAllowedInputFieldsType" name="allowedInputFields" minOccurs="0" maxOccurs="unbounded">
+        <xs:unique name="smm_unique_unit_allowed_input_field">
+          <xs:selector xpath="./field"/>
           <xs:field xpath="@name"/>
         </xs:unique>
       </xs:element>
     </xs:sequence>
+    <xs:attribute type="xs:string" name="readoutUnitName" use="required"/>
   </xs:complexType>
 
-  <!-- StateMachine configuration -->
+  <!-- Mapper configuration -->
+  <xs:complexType name="SMMapperType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="SMMapperReadoutUnitMapType" name="map" minOccurs="1" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- State machine configuration -->
   <xs:complexType name="SMType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="NPType" name="neuralPreprocessor" minOccurs="0" maxOccurs="1">
         <xs:key name="np_input_field">
-          <xs:selector xpath="./input/*/field"/>
+          <xs:selector xpath="./inputEncoder/fields/*/field"/>
           <xs:field xpath="@name"/>
         </xs:key>
         <xs:key name="np_rescfg_name">
@@ -2490,12 +2491,8 @@
           <xs:field xpath="@name"/>
         </xs:key>
         <xs:keyref name="iconn_existing_input_field" refer="np_input_field">
-          <xs:selector xpath="./reservoirInstances/reservoirInstance/inputConnections/inputConnection" />
-          <xs:field xpath="@fieldName" />
-        </xs:keyref>
-        <xs:keyref name="iunit_existing_input_field" refer="np_input_field">
-          <xs:selector xpath="./reservoirInstances/reservoirInstance/inputUnits/inputUnit" />
-          <xs:field xpath="@fieldName" />
+          <xs:selector xpath="./reservoirInstances/reservoirInstance/inputConnections/connection" />
+          <xs:field xpath="@inputFieldName" />
         </xs:keyref>
         <xs:keyref name="resinst_existing_rescfg" refer="np_rescfg_name">
           <xs:selector xpath="./reservoirInstances/reservoirInstance" />
@@ -2504,7 +2501,7 @@
       </xs:element>
       <xs:element type="ROutLayerType" name="readoutLayer" minOccurs="1" maxOccurs="1"/>
       <xs:element type="SMMapperType" name="mapper" minOccurs="0" maxOccurs="1">
-        <xs:unique name="unique_readout_unit_name">
+        <xs:unique name="smm_unique_readout_unit_name">
           <xs:selector xpath="./map"/>
           <xs:field xpath="@readoutUnitName"/>
         </xs:unique>

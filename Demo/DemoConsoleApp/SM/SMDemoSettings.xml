@@ -1,6 +1,161 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <demo dataFolder=".\\Data" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="SMDemoSettings.xsd">
 
+  <!--
+    This demo case demonstrates successful use of the pure analog ESN reservoir for the fast and accurate classifications enabled by
+    the new ability of the analog neurons to fire a spike.
+    Following configuration of the StateMachine leads to 87.8% accuracy, slightly worse than the best algorithm
+    called ST, referenced at the dataset's home site:
+    "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
+    https://timeseriesclassification.com/description.php?Dataset=ProximalPhalanxOutlineAgeGroup.
+    This series of 11 classification problems were created as part of Luke Davis's PhD titled "Predictive Modelling of Bone Ageing".
+    They are all derived from the same images, extracted from Cao et al. "Digital hand atlas and web-based bone age assessment: system design and implementation".
+    They are designed to test the efficacy of hand and bone outline detection and whether these outlines could be helpful in bone
+    age prediction. Algorithms to automatically extract the hand outlines and then the outlines of three bones of the middle finger
+    (proximal, middle and distal phalanges) were applied to over 1300 images, and three human evaluators labelled the output
+    of the image outlining as correct or incorrect. This generated three classification problems: DistalPhalanxOutlineCorrect; MiddlePhalanxOutlineCorrect; and ProximalPhalanxOutlineCorrect.
+    The next stage of the project was to use the outlines to predict information about the subjects age.
+    The three problems {DistalPhalanxOutlineAgeGroup, MiddlePhalanxOutlineAgeGroup and ProximalPhalanxOutlineAgeGroup} involve using
+    the outline of one of the phalanges to predict whether the subject is one of three age groups: 0-6 years old, 7-12 years old
+    and 13-19 years old. Note that these problems are aligned by subject, and hence can be treated as a multi dimensional
+    TSC problem. Problem Phalanges contains the concatenation of all three problems. Bone age estimation is usually performed by
+    an expert with an algorithm called Tanner-Whitehouse. This involves scoring each bone into one of seven categories based on
+    the stage of development. The final three bone image classification problems, DistalPhalanxTW, MiddlePhalanxTW and ProximalPhalanxTW},
+    involve predicting the Tanner-Whitehouse score (as labelled by a human expert) from the outline.
+  -->
+  <case name="Classification task ProximalPhalanxOutlineAgeGroup: Simple pure LSM reservoir generating FiringFadingSum predictors, one TanH neuron as a classifier (Resilient trainer)">
+    <samples trainingData="ProximalPhalanxOutlineAgeGroup_train.csv" verificationData="ProximalPhalanxOutlineAgeGroup_verify.csv"/>
+    <stateMachine randomizerSeek="0">
+      <neuralPreprocessor>
+        <inputEncoder>
+          <feedingPatterned slices="1" bidir="false" routeToReadout="true">
+            <unification unifyAmplitude="false" detrend="true">
+              <resampling/>
+            </unification>
+          </feedingPatterned>
+          <fields>
+            <externalFields>
+              <field name="Outline">
+                <realFeature/>
+                <spikeCode componentHalfCodeLength="15" lowestThreshold="1e-2" signalComponent="true" deltaComponent="false"/>
+              </field>
+            </externalFields>
+          </fields>
+        </inputEncoder>
+        <reservoirStructures>
+          <reservoirStructure name="MainCfg">
+            <pools>
+              <pool name="Pool1">
+                <proportions dimX="120" dimY="1" dimZ="1"/>
+                <neuronGroups>
+                  <spikingGroup name="Spiking-grp" relShare="1">
+                    <activationAdExpIF/>
+                    <homogenousExcitability excitatoryStrength="0.75" inputRatio="0.67" inhibitoryRatio="0.25"/>
+                  </spikingGroup>
+                </neuronGroups>
+                <interconnection>
+                  <randomSchema density="0.1" allowSelfConnection="false"/>
+                </interconnection>
+              </pool>
+              <pool name="Pool2">
+                <proportions dimX="120" dimY="1" dimZ="1"/>
+                <neuronGroups>
+                  <analogGroup name="Analog-grp" relShare="1" firingThreshold="0.00125">
+                    <activationTanH/>
+                  </analogGroup>
+                </neuronGroups>
+                <interconnection>
+                  <randomSchema density="0.1" allowSelfConnection="true"/>
+                </interconnection>
+              </pool>
+            </pools>
+          </reservoirStructure>
+        </reservoirStructures>
+        <reservoirInstances>
+          <reservoirInstance name="Main" reservoirStructure="MainCfg">
+            <inputConnections>
+              <connection inputFieldName="Outline" poolName="Pool1" spikingTargetDensity="1"/>
+              <connection inputFieldName="Outline" poolName="Pool2" analogTargetDensity="0.2"/>
+            </inputConnections>
+            <synapse>
+              <spikingTarget>
+                <input maxDelay="0">
+                  <spikingSource>
+                    <plasticity>
+                      <linearDynamics/>
+                    </plasticity>
+                  </spikingSource>
+                </input>
+                <excitatory maxDelay="0">
+                  <spikingSource>
+                    <plasticity>
+                      <linearDynamics/>
+                    </plasticity>
+                  </spikingSource>
+                </excitatory>
+                <inhibitory maxDelay="0">
+                  <spikingSource>
+                    <plasticity>
+                      <linearDynamics/>
+                    </plasticity>
+                  </spikingSource>
+                </inhibitory>
+              </spikingTarget>
+              <analogTarget>
+                <input maxDelay="0">
+                  <analogSource>
+                    <weight min="0" max="1"/>
+                  </analogSource>
+                </input>
+                <indifferent maxDelay="0"/>
+              </analogTarget>
+            </synapse>
+            <predictors activation="false"
+                        activationSquare="false"
+                        activationFadingSum="false"
+                        activationMWAvg="false"
+                        firingFadingSum="true"
+                        firingMWAvg="false"
+                        firingCount="false"
+                        firingBinPattern="false">
+            </predictors>
+          </reservoirInstance>
+        </reservoirInstances>
+      </neuralPreprocessor>
+      <readoutLayer testDataRatio="0.25" folds="Auto" repetitions="1">
+        <defaultNetworks>
+          <classification>
+            <ff>
+              <activationElliot/>
+              <resPropTrainer attempts="3" attemptEpochs="1000"/>
+            </ff>
+          </classification>
+        </defaultNetworks>
+        <readoutUnits>
+          <readoutUnit name="0-6 years">
+            <classification oneWinnerGroupName="AgeGroup"/>
+          </readoutUnit>
+          <readoutUnit name="7-12 years">
+            <classification oneWinnerGroupName="AgeGroup"/>
+          </readoutUnit>
+          <readoutUnit name="13-19 years">
+            <classification oneWinnerGroupName="AgeGroup"/>
+          </readoutUnit>
+        </readoutUnits>
+      </readoutLayer>
+      <mapper>
+        <map readoutUnitName="0-6 years">
+          <allowedPredictors>
+            <predictor name="Activation"/>
+          </allowedPredictors>
+          <allowedInputFields>
+            <field name="Outline"/>
+          </allowedInputFields>
+        </map>
+      </mapper>
+    </stateMachine>
+  </case>
+
 
   <!--
     Experimental.

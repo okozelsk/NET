@@ -333,8 +333,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         {
             double[] predictors = new double[_totalNumOfReservoirsPredictors / (Bidir ? 2 : 1)];
             int predictorsIdx = 0;
-            int timePointArrayIdx = 0;
+            int predictorsTimePointSlicesPlanIdx = 0;
             int computationStep = 1;
+            //Reset reservoirs in case of patterned feeding
+            if (_preprocessorCfg.InputEncoderCfg.FeedingCfg.FeedingType == InputEncoder.InputFeedingType.Patterned)
+            {
+                ResetReservoirs(false);
+            }
+            //Loop pending data
             while (_inputEncoder.NumOfRemainingInputs > 0)
             {
                 _inputEncoder.EncodeNextInputData(collectStatistics);
@@ -343,30 +349,19 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                 {
                     reservoir.Compute(collectStatistics);
                 }
-                if (_predictorsTimePointSlicesPlan != null && computationStep == _predictorsTimePointSlicesPlan[timePointArrayIdx])
+                if ((_predictorsTimePointSlicesPlan != null && computationStep == _predictorsTimePointSlicesPlan[predictorsTimePointSlicesPlanIdx]) ||
+                    (_predictorsTimePointSlicesPlan == null && _inputEncoder.NumOfRemainingInputs == 0))
                 {
-                    //Collect predictors
-                    predictorsIdx += CopyReservoirsPredictorsTo(predictors, predictorsIdx);
-                    ++timePointArrayIdx;
+                    //Collect predictors from reservoirs
+                    foreach (ReservoirInstance reservoir in ReservoirCollection)
+                    {
+                        predictorsIdx += reservoir.CopyPredictorsTo(predictors, predictorsIdx);
+                    }
+                    ++predictorsTimePointSlicesPlanIdx;
                 }
                 ++computationStep;
             }
-            if(_predictorsTimePointSlicesPlan == null)
-            {
-                //Collect predictors
-                predictorsIdx += CopyReservoirsPredictorsTo(predictors, predictorsIdx);
-            }
             return predictors;
-        }
-
-        private int CopyReservoirsPredictorsTo(double[] buffer, int fromOffset)
-        {
-            int offset = fromOffset;
-            foreach (ReservoirInstance reservoir in ReservoirCollection)
-            {
-                offset += reservoir.CopyPredictorsTo(buffer, offset);
-            }
-            return offset - fromOffset;
         }
 
         /// <summary>
@@ -376,11 +371,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// <param name="collectStatistics">Indicates whether to update internal statistics</param>
         private double[] PushExtInputVector(double[] inputVector, bool collectStatistics)
         {
-            //Reset reservoirs in case of patterned feeding
-            if (_preprocessorCfg.InputEncoderCfg.FeedingCfg.FeedingType == InputEncoder.InputFeedingType.Patterned)
-            {
-                ResetReservoirs(false);
-            }
             //Output features buffer allocation and index
             double[] outputFeatures = new double[OutputFeatureDescriptorCollection.Count];
             int outputFeaturesIdx = 0;
@@ -474,11 +464,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         }
 
         /// <summary>
-        /// Collects the key statistics of each reservoir instance.
-        /// It is very important to follow these statistics and adjust parameters of the reservoirs so that the neurons
-        /// exhibit proper dynamics.
+        /// Collects key statistics of each reservoir instance.
+        /// It is very important to follow these statistics to make sure the reservoirs exhibit proper behavior.
         /// </summary>
-        /// <returns>Collection of key statistics for each reservoir instance</returns>
         public List<ReservoirStat> CollectStatatistics()
         {
             List<ReservoirStat> stats = new List<ReservoirStat>();
