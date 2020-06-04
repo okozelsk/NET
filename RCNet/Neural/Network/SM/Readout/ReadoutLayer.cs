@@ -227,6 +227,7 @@ namespace RCNet.Neural.Network.SM.Readout
                 VectorBundle readoutUnitDataBundle = new VectorBundle(readoutUnitInputVectorCollection, idealValueCollection);
                 TrainedNetworkClusterBuilder readoutUnitBuilder = new TrainedNetworkClusterBuilder(Settings.ReadoutUnitsCfg.ReadoutUnitCfgCollection[unitIdx].Name,
                                                                                                    Settings.GetReadoutUnitNetworksCollection(unitIdx),
+                                                                                                   DataRange,
                                                                                                    Settings.ReadoutUnitsCfg.ReadoutUnitCfgCollection[unitIdx].TaskCfg.Type == ReadoutUnit.TaskType.Classification ? BinBorder : double.NaN,
                                                                                                    rand,
                                                                                                    controller

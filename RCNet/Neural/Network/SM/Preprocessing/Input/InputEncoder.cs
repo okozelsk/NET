@@ -429,7 +429,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
                                                                  feedingCfg.UnificationCfg.ResamplingCfg.SignalBeginThreshold,
                                                                  feedingCfg.UnificationCfg.ResamplingCfg.SignalEndThreshold,
                                                                  feedingCfg.UnificationCfg.ResamplingCfg.UniformTimeScale,
-                                                                 feedingCfg.UnificationCfg.ResamplingCfg.TargetTimePoints
+                                                                 NumOfTimePoints == VariableNumOfTimePoints ? ResamplingSettings.AutoTargetTimePointsNum : NumOfTimePoints
                                                                  );
                     List<double[]> inputPatternVectors = CompleteInputPattern(inputPattern);
                     inputPatterns.Add(inputPatternVectors);
@@ -474,7 +474,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
                                                              feedingCfg.UnificationCfg.ResamplingCfg.SignalBeginThreshold,
                                                              feedingCfg.UnificationCfg.ResamplingCfg.SignalEndThreshold,
                                                              feedingCfg.UnificationCfg.ResamplingCfg.UniformTimeScale,
-                                                             feedingCfg.UnificationCfg.ResamplingCfg.TargetTimePoints
+                                                             NumOfTimePoints == VariableNumOfTimePoints ? ResamplingSettings.AutoTargetTimePointsNum : NumOfTimePoints
                                                              );
                 _inputDataQueue.AddRange(CompleteInputPattern(inputPattern));
             }
@@ -482,10 +482,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         }
 
         /// <summary>
-        /// Initializes input fields by next stored input data if available
+        /// Initializes input fields by next stored piece of input data if available
         /// </summary>
         /// <param name="collectStatistics">Specifies whether to update internal statistics of associated input neurons</param>
-        /// <returns>True if there are were still unprocessed input data</returns>
         public bool EncodeNextInputData(bool collectStatistics)
         {
             if (_numOfProcessedInputs < _inputDataQueue.Count)

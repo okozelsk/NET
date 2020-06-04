@@ -1,4 +1,5 @@
 ﻿using RCNet.Extensions;
+using RCNet.MathTools;
 using RCNet.Neural.Data;
 using RCNet.Neural.Data.Filter;
 using System;
@@ -15,9 +16,6 @@ namespace RCNet.Neural.Network.NonRecurrent
     public class TrainedNetworkClusterBuilder
     {
         //Constants
-        //Constants
-        private const double MinExpectedAccuracy = 1e-6d;
-        private const double MaxExpectedAccuracy = 1d - 1e-6d;
         /// <summary>
         /// Maximum part of available samples useable for test purposes
         /// </summary>
@@ -48,6 +46,7 @@ namespace RCNet.Neural.Network.NonRecurrent
         private readonly double _binBorder;
         private readonly Random _rand;
         private readonly TrainedNetworkBuilder.RegressionControllerDelegate _controller;
+        private readonly Interval _dataRange;
 
         //Constructor
         /// <summary>
@@ -55,11 +54,13 @@ namespace RCNet.Neural.Network.NonRecurrent
         /// </summary>
         /// <param name="clusterName">Name of the cluster</param>
         /// <param name="networkSettingsCollection">Collection of network configurations (FeedForwardNetworkSettings or ParallelPerceptronSettings objects)</param>
+        /// <param name="dataRange">Range of input and output data</param>
         /// <param name="binBorder">If specified, it indicates that the network ideal output is binary and specifies numeric border where GE network output is decided as a 1 and LT output as a 0.</param>
         /// <param name="rand">Random generator to be used (optional)</param>
         /// <param name="controller">Regression controller (optional)</param>
         public TrainedNetworkClusterBuilder(string clusterName,
                                             List<INonRecurrentNetworkSettings> networkSettingsCollection,
+                                            Interval dataRange,
                                             double binBorder = double.NaN,
                                             Random rand = null,
                                             TrainedNetworkBuilder.RegressionControllerDelegate controller = null
@@ -67,6 +68,7 @@ namespace RCNet.Neural.Network.NonRecurrent
         {
             _clusterName = clusterName;
             _networkSettingsCollection = networkSettingsCollection;
+            _dataRange = dataRange;
             _binBorder = binBorder;
             _rand = rand ?? new Random(0);
             _controller = controller;
@@ -120,7 +122,7 @@ namespace RCNet.Neural.Network.NonRecurrent
             }
             //Cluster of trained networks
             int numOfMembers = numOfFolds * _networkSettingsCollection.Count * repetitions;
-            TrainedNetworkCluster cluster = new TrainedNetworkCluster(_clusterName, numOfMembers, _binBorder);
+            TrainedNetworkCluster cluster = new TrainedNetworkCluster(_clusterName, numOfMembers, _dataRange, _binBorder);
             for (int cycle = 0; cycle < repetitions; cycle++)
             {
                 //Data split to folds
@@ -156,19 +158,20 @@ namespace RCNet.Neural.Network.NonRecurrent
                         netBuilder.RegressionEpochDone += OnRegressionEpochDone;
                         //Build trained network. Trained network becomes to be the cluster member
                         cluster.Members.Add(netBuilder.Build());
-                        cluster.Weights.Add(1d);
+                        //Set member's weight proportionally to train/test number of samples ratio
+                        cluster.Weights.Add((double)subBundleCollection[foldIdx].InputVectorCollection.Count / (double)trainingData.InputVectorCollection.Count);
                         //Update cluster error statistics (pesimistic approach)
                         for (int sampleIdx = 0; sampleIdx < subBundleCollection[foldIdx].OutputVectorCollection.Count; sampleIdx++)
                         {
                             double[] nrmComputedValues = cluster.Members.Last().Network.Compute(subBundleCollection[foldIdx].InputVectorCollection[sampleIdx]);
                             for (int i = 0; i < nrmComputedValues.Length; i++)
                             {
-                                double natComputedValue = outputFeatureFilterCollection[i].ApplyReverse(nrmComputedValues[i]);
-                                double natIdealValue = outputFeatureFilterCollection[i].ApplyReverse(subBundleCollection[foldIdx].OutputVectorCollection[sampleIdx][i]);
+                                double naturalComputedValue = outputFeatureFilterCollection[i].ApplyReverse(nrmComputedValues[i]);
+                                double naturalIdealValue = outputFeatureFilterCollection[i].ApplyReverse(subBundleCollection[foldIdx].OutputVectorCollection[sampleIdx][i]);
                                 cluster.ErrorStats.Update(nrmComputedValues[i],
                                                           subBundleCollection[foldIdx].OutputVectorCollection[sampleIdx][i],
-                                                          natComputedValue,
-                                                          natIdealValue
+                                                          naturalComputedValue,
+                                                          naturalIdealValue
                                                           );
                             }//i
                         }//sampleIdx
@@ -180,26 +183,9 @@ namespace RCNet.Neural.Network.NonRecurrent
                     dataBundle.Shuffle(_rand);
                 }
             }
-
-            //Setup of cluster members weights
-            for (int i = 0; i < cluster.Members.Count; i++)
-            {
-                double accuracyScore;
-                if (BinaryOutput)
-                {
-                    accuracyScore = (cluster.Members[i].ExpectedBinaryAccuracy * cluster.Members[i].ExpectedPrecisionAccuracy).Bound(MinExpectedAccuracy, MaxExpectedAccuracy);
-                }
-                else
-                {
-                    accuracyScore = cluster.Members[i].ExpectedPrecisionAccuracy.Bound(MinExpectedAccuracy, MaxExpectedAccuracy);
-                }
-                cluster.Weights[i] = Math.Log(accuracyScore / (1d - accuracyScore));
-            }
-
             //Return built cluster
             return cluster;
         }
-
 
     }//TrainedNetworkClusterBuilder
 

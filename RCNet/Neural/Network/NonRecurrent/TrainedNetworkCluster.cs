@@ -1,4 +1,6 @@
-﻿using RCNet.MathTools;
+﻿using RCNet.Extensions;
+using RCNet.MathTools;
+using RCNet.MathTools.Probability;
 using System;
 using System.Collections.Generic;
 
@@ -16,6 +18,10 @@ namespace RCNet.Neural.Network.NonRecurrent
         /// Name of the cluster
         /// </summary>
         public string ClusterName { get; }
+        /// <summary>
+        /// Range of input and output data
+        /// </summary>
+        public Interval DataRange { get; }
         /// <summary>
         /// If specified, it indicates that the whole network output is binary and specifies numeric border where GE network output is decided as a 1 and LT output as a 0.
         /// </summary>
@@ -38,12 +44,18 @@ namespace RCNet.Neural.Network.NonRecurrent
         /// Creates an uninitialized instance
         /// </summary>
         /// <param name="clusterName">Name of the cluster</param>
-        /// <param name="numOfMembers">Number of trained networks in the cluster</param>
+        /// <param name="numOfMembers">Expected number of trained networks in the cluster</param>
+        /// <param name="dataRange">Range of input and output data</param>
         /// <param name="binBorder">If specified, it indicates that the whole network output is binary and specifies numeric border where GE network output is decided as a 1 and LT output as a 0.</param>
-        public TrainedNetworkCluster(string clusterName, int numOfMembers, double binBorder = double.NaN)
+        public TrainedNetworkCluster(string clusterName,
+                                     int numOfMembers,
+                                     Interval dataRange,
+                                     double binBorder = double.NaN
+                                     )
         {
             ClusterName = clusterName;
             BinBorder = binBorder;
+            DataRange = dataRange.DeepClone();
             Members = new List<TrainedNetwork>(numOfMembers);
             Weights = new List<double>(numOfMembers);
             ErrorStats = new ClusterErrStatistics(ClusterName, numOfMembers, BinBorder);
@@ -82,25 +94,44 @@ namespace RCNet.Neural.Network.NonRecurrent
         /// <param name="memberOutputCollection">Collection of outputs of cluster member networks</param>
         public double Compute(double[] predictors, out double[] memberOutputCollection)
         {
-            WeightedAvg weightedResult = new WeightedAvg();
             //Init member output collection
             memberOutputCollection = new double[Members.Count];
-            //Loop cluster members
-            int clusterMemberIdx = 0;
-            foreach (TrainedNetwork clusterMember in Members)
+            if (!BinaryOutput)
             {
-                //Compute member
-                double computedValue = clusterMember.Network.Compute(predictors)[0];
-                //Store sub-results
-                memberOutputCollection[clusterMemberIdx] = computedValue;
-                //Add sub-result to weighted average
-                weightedResult.AddSampleValue(computedValue, Weights[clusterMemberIdx]);
-                ++clusterMemberIdx;
+                //Result is exact value
+                WeightedAvg weightedResult = new WeightedAvg();
+                //Loop cluster members
+                int clusterMemberIdx = 0;
+                foreach (TrainedNetwork clusterMember in Members)
+                {
+                    //Compute member
+                    double computedValue = clusterMember.Network.Compute(predictors)[0];
+                    //Store sub-results
+                    memberOutputCollection[clusterMemberIdx] = computedValue;
+                    //Add sub-result to weighted average
+                    weightedResult.AddSampleValue(computedValue, Weights[clusterMemberIdx]);
+                    ++clusterMemberIdx;
+                }
+                //Return weighted average result
+                return weightedResult.Avg;
             }
-            //Return weighted average result
-            return weightedResult.Avg;
+            else
+            {
+                //Result is a probability -> use probability mixer
+                double[] probabilities = new double[Members.Count];
+                double[] weights = new double[Members.Count];
+                for (int i = 0; i < Members.Count; i++)
+                {
+                    memberOutputCollection[i] = Members[i].Network.Compute(predictors)[0];
+                    probabilities[i] = PMixer.ProbabilityRange.Rescale(memberOutputCollection[i], DataRange);
+                    weights[i] = Weights[i];
+                }
+                //Scale weights to ensure their sum is equal to 1
+                weights.Scale(1d / weights.Sum());
+                //Return resulting mixed probability rescalled back to members' result range
+                return DataRange.Rescale(PMixer.MixP(probabilities, weights), PMixer.ProbabilityRange);
+            }
         }
-
 
         /// <summary>
         /// Creates the deep copy of this instance

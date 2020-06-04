@@ -9,6 +9,11 @@ namespace RCNet.MathTools.Probability
     /// </summary>
     public static class PMixer
     {
+        /// <summary>
+        /// Probability interval
+        /// </summary>
+        public static Interval ProbabilityRange = new Interval(0d, 1d);
+
         //Constants
         //Operating bounds
         private const double MinP = 1e-6;
@@ -42,18 +47,27 @@ namespace RCNet.MathTools.Probability
         /// Mixes given weighted probabilities to the resulting probability (between 0 and 1).
         /// </summary>
         /// <param name="probabilities">Probabilities (between 0 and 1)</param>
-        /// <param name="weights">Weights corresponding to probabilities</param>
-        public static double MixP(IEnumerable<double> probabilities, IEnumerable<double> weights = null)
+        /// <param name="weights">Weights corresponding to probabilities. When not specified, flat weights will be used.</param>
+        public static double MixP(double[] probabilities, double[] weights = null)
         {
-            IEnumerator<double> wEnum = weights?.GetEnumerator();
-            //Compute stretched weighted sum
-            double sum = 0;
-            foreach (double p in probabilities)
+            if(probabilities == null)
             {
-                wEnum?.MoveNext();
-                sum += (wEnum == null ? 1d : wEnum.Current) * Stretch(p);
+                throw new ArgumentNullException("probabilities");
             }
-            //Return squashed weighted sum
+            if(weights == null)
+            {
+                //Weights are not specified
+                //Prepare flat weights having sum equal to 1
+                weights = new double[probabilities.Length];
+                weights.Populate(1d / probabilities.Length);
+            }
+            //Compute sum of stretched weighted probabilities
+            double sum = 0;
+            for(int i = 0; i < probabilities.Length; i++)
+            {
+                sum += weights[i] * Stretch(probabilities[i]);
+            }
+            //Return resulting probability (squashed previously stretched weighted probabilities)
             return Squash(sum);
         }
 

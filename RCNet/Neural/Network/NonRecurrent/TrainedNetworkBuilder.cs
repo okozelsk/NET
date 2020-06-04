@@ -107,11 +107,12 @@ namespace RCNet.Neural.Network.NonRecurrent
 
         //Static methods
         /// <summary>
-        /// Default implementation of an evaluation if the tested network is better than currently the best network
+        /// This is a default implementation of an evaluation whether the "candidate" network
+        /// achieved a better result than the best network so far
         /// </summary>
         /// <param name="binaryOutput">Indicates the whole network output is binary</param>
         /// <param name="candidate">Network to be evaluated</param>
-        /// <param name="currentBest">For now the best network</param>
+        /// <param name="currentBest">The best network so far</param>
         public static bool IsBetter(bool binaryOutput, TrainedNetwork candidate, TrainedNetwork currentBest)
         {
             if (binaryOutput)
