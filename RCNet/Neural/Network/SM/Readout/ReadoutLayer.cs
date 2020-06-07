@@ -344,7 +344,9 @@ namespace RCNet.Neural.Network.SM.Readout
         /// <param name="dataVector">Vector of values corresponding to layer's readout units</param>
         /// <param name="membersIndexes">Returned indexes of readout units belonging to specified "one winner" group</param>
         /// <param name="membersWeightedDataVector">Returned weighted probabilities of specified "one winner" group member units (in the same order as returned indexes)</param>
-        public int DecideOneWinner(string oneWinnerGroupName, double[] dataVector, out int[] membersIndexes, out double[] membersWeightedDataVector)
+        /// <param name="memberWinningIndex">Returned index of winning member within the "one winner" group</param>
+        /// <returns>Winning readout unit index within the readout layer</returns>
+        public int DecideOneWinner(string oneWinnerGroupName, double[] dataVector, out int[] membersIndexes, out double[] membersWeightedDataVector, out int memberWinningIndex)
         {
             //Obtain group members indexes
             membersIndexes = (from member in Settings.ReadoutUnitsCfg.OneWinnerGroupCollection[oneWinnerGroupName].Members select Settings.ReadoutUnitsCfg.GetReadoutUnitID(member.Name)).ToArray();
@@ -355,25 +357,24 @@ namespace RCNet.Neural.Network.SM.Readout
                 membersWeightedDataVector[i] = dataVector[membersIndexes[i]];
             }
             //Find the highest probability unit
-            int maxPIdx = -1;
+            memberWinningIndex = -1;
             for (int i = 0; i < membersWeightedDataVector.Length; i++)
             {
-                if (maxPIdx == -1 || membersWeightedDataVector[i] > dataVector[maxPIdx])
+                if (memberWinningIndex == -1 || membersWeightedDataVector[i] > dataVector[memberWinningIndex])
                 {
-                    maxPIdx = i;
+                    memberWinningIndex = i;
                 }
             }
-            return membersIndexes[maxPIdx];
+            return membersIndexes[memberWinningIndex];
         }
 
         /// <summary>
         /// Computes readout layer and returns rich output data
         /// </summary>
         /// <param name="predictors">The predictors</param>
-        /// <param name="unitsAllSubResults">All sub-predictions</param>
-        public ReadoutData ComputeReadoutData(double[] predictors, out List<double[]> unitsAllSubResults)
+        public ReadoutData ComputeReadoutData(double[] predictors)
         {
-            return new ReadoutData(Compute(predictors, out unitsAllSubResults), this);
+            return new ReadoutData(Compute(predictors, out List<double[]> unitsAllSubResults), unitsAllSubResults, this);
         }
 
         //Inner classes
@@ -401,8 +402,9 @@ namespace RCNet.Neural.Network.SM.Readout
             /// Creates an initialized instance
             /// </summary>
             /// <param name="dataVector">Vector of values corresponding to readout units</param>
+            /// <param name="unitsAllSubResults">All sub-predictions</param>
             /// <param name="rl">Readout layer object</param>
-            public ReadoutData(double[] dataVector, ReadoutLayer rl)
+            public ReadoutData(double[] dataVector, List<double[]> unitsAllSubResults, ReadoutLayer rl)
             {
                 //Alone units
                 DataVector = dataVector;
@@ -410,21 +412,27 @@ namespace RCNet.Neural.Network.SM.Readout
                 for (int i = 0; i < rl.Settings.ReadoutUnitsCfg.ReadoutUnitCfgCollection.Count; i++)
                 {
                     ReadoutUnitSettings rus = rl.Settings.ReadoutUnitsCfg.ReadoutUnitCfgCollection[i];
-                    ReadoutUnitDataCollection.Add(rus.Name, new ReadoutUnitData() { Name = rus.Name, Index = i, Task = rus.TaskCfg.Type, DataValue = DataVector[i] });
+                    ReadoutUnitDataCollection.Add(rus.Name, new ReadoutUnitData() { Name = rus.Name,
+                                                                                    Index = i,
+                                                                                    Task = rus.TaskCfg.Type,
+                                                                                    SubPredictions = unitsAllSubResults[i],
+                                                                                    DataValue = DataVector[i]
+                                                                                   });
                 }
                 //One Winner groups
                 OneWinnerDataCollection = new Dictionary<string, OneWinnerGroupData>();
                 foreach (string oneWinnerGroupName in rl.Settings.ReadoutUnitsCfg.OneWinnerGroupCollection.Keys)
                 {
                     //There is One Winner group
-                    int winningUnitIndex = rl.DecideOneWinner(oneWinnerGroupName, dataVector, out int[] membersIndexes, out double[] membersWeightedDataVector);
+                    int winningUnitIndex = rl.DecideOneWinner(oneWinnerGroupName, dataVector, out int[] membersIndexes, out double[] membersWeightedDataVector, out int memberWinningIndex);
                     OneWinnerDataCollection.Add(oneWinnerGroupName, new OneWinnerGroupData()
                     {
                         GroupName = oneWinnerGroupName,
                         WinningReadoutUnitName = rl.Settings.ReadoutUnitsCfg.ReadoutUnitCfgCollection[winningUnitIndex].Name,
                         WinningReadoutUnitIndex = winningUnitIndex,
-                        MemberReadoutUnitsIndexes = membersIndexes,
-                        MemberReadoutUnitsProbabilities = membersWeightedDataVector
+                        MemberWinningIndex = memberWinningIndex,
+                        MemberReadoutUnitIndexes = membersIndexes,
+                        MemberProbabilities = membersWeightedDataVector
                     });
                 }
                 return;
@@ -450,9 +458,14 @@ namespace RCNet.Neural.Network.SM.Readout
                 /// </summary>
                 public ReadoutUnit.TaskType Task { get; set; }
                 /// <summary>
+                /// All involved sub-predictions
+                /// </summary>
+                public double[] SubPredictions { get; set; }
+                /// <summary>
                 /// Data value
                 /// </summary>
                 public double DataValue { get; set; }
+
             }//ReadoutUnitData
 
             /// <summary>
@@ -474,13 +487,17 @@ namespace RCNet.Neural.Network.SM.Readout
                 /// </summary>
                 public int WinningReadoutUnitIndex { get; set; }
                 /// <summary>
-                /// Indexes of group member readout units
+                /// Zero-based index of the winning member within the group
                 /// </summary>
-                public int[] MemberReadoutUnitsIndexes { get; set; }
+                public int MemberWinningIndex { get; set; }
+                /// <summary>
+                /// Indexes of readout units belonging into the group
+                /// </summary>
+                public int[] MemberReadoutUnitIndexes { get; set; }
                 /// <summary>
                 /// Computed probabilities by group member readout units (in the same order as MemberReadoutUnitsIndexes)
                 /// </summary>
-                public double[] MemberReadoutUnitsProbabilities { get; set; }
+                public double[] MemberProbabilities { get; set; }
             }//OneWinnerGroupData
 
         }//ReadoutData

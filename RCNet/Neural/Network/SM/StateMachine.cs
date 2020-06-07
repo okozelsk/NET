@@ -270,12 +270,12 @@ namespace RCNet.Neural.Network.SM
             if (NP == null)
             {
                 //Neural preprocessor is bypassed
-                return RL.ComputeReadoutData(inputVector, out _);
+                return RL.ComputeReadoutData(inputVector);
             }
             else
             {
                 //Compute and return output
-                return RL.ComputeReadoutData(NP.Preprocess(inputVector), out _);
+                return RL.ComputeReadoutData(NP.Preprocess(inputVector));
             }
         }
 
@@ -330,7 +330,7 @@ namespace RCNet.Neural.Network.SM
                     //Neural preprocessing
                     predictors = NP.Preprocess(vectorBundle.InputVectorCollection[sampleIdx]);
                 }
-                ReadoutLayer.ReadoutData readoutData = RL.ComputeReadoutData(predictors, out List<double[]> unitsAllSubResults);
+                ReadoutLayer.ReadoutData readoutData = RL.ComputeReadoutData(predictors);
                 verificationResults.Update(predictors, readoutData, vectorBundle.OutputVectorCollection[sampleIdx]);
                 VerificationProgressChanged(vectorBundle.InputVectorCollection.Count, sampleIdx + 1);
             }
@@ -412,10 +412,16 @@ namespace RCNet.Neural.Network.SM
                 {
                     ReadoutUnitStatCollection.Add(new ReadoutUnitStat(i, ReadoutLayerConfig.ReadoutUnitsCfg.ReadoutUnitCfgCollection[i]));
                 }
-                OneWinnerGroupStatCollection = new List<OneWinnerGroupStat>();
+                OneWinnerGroupStatCollection = new List<OneWinnerGroupStat>(ReadoutLayerConfig.ReadoutUnitsCfg.OneWinnerGroupCollection.Keys.Count);
                 foreach (string groupName in ReadoutLayerConfig.ReadoutUnitsCfg.OneWinnerGroupCollection.Keys)
                 {
-                    OneWinnerGroupStatCollection.Add(new OneWinnerGroupStat(groupName, ReadoutLayerConfig.ReadoutUnitsCfg.OneWinnerGroupCollection[groupName].Members));
+                    ReadoutUnitsSettings.OneWinnerGroup owg = ReadoutLayerConfig.ReadoutUnitsCfg.OneWinnerGroupCollection[groupName];
+                    int[] unitIndexes = new int[owg.Members.Count];
+                    for (int i = 0; i < owg.Members.Count; i++)
+                    {
+                        unitIndexes[i] = ReadoutLayerConfig.ReadoutUnitsCfg.GetReadoutUnitID(owg.Members[i].Name);
+                    }
+                    OneWinnerGroupStatCollection.Add(new OneWinnerGroupStat(groupName, unitIndexes, ReadoutLayerConfig.ReadoutUnitsCfg.OneWinnerGroupCollection[groupName].Members));
                 }
                 return;
             }
@@ -492,21 +498,23 @@ namespace RCNet.Neural.Network.SM
                 foreach (OneWinnerGroupStat grStat in OneWinnerGroupStatCollection)
                 {
                     sb.Append(leftMargin + $"One winner group [{grStat.Name}]" + Environment.NewLine);
-                    foreach (string className in grStat.ClassErrorStatCollection.Keys)
+                    foreach (OneWinnerGroupStat.MemberErrorStat memberErrStat in grStat.MemberErrorStatCollection)
                     {
-                        BasicStat errorStat = grStat.ClassErrorStatCollection[className];
-                        sb.Append(leftMargin + $"  Class {className}" + Environment.NewLine);
-                        sb.Append(leftMargin + $"    Number of samples: {errorStat.NumOfSamples}" + Environment.NewLine);
-                        sb.Append(leftMargin + $"     Number of errors: {errorStat.Sum.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
-                        sb.Append(leftMargin + $"           Error rate: {errorStat.ArithAvg.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
-                        sb.Append(leftMargin + $"             Accuracy: {(1 - errorStat.ArithAvg).ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                        sb.Append(leftMargin + $"  Class [{memberErrStat.UnitCfg.Name}]" + Environment.NewLine);
+                        sb.Append(leftMargin + $"    Analytics" + Environment.NewLine);
+                        sb.Append(leftMargin + $"      {memberErrStat.NumOfCorrectBellowBorderSelections.ToString(CultureInfo.InvariantCulture)}x correctly selected as a winner but predicted probability is bellow-border." + Environment.NewLine);
+                        sb.Append(leftMargin + $"      {memberErrStat.NumOfOverbeatedAboveBorderCorrectClassifications.ToString(CultureInfo.InvariantCulture)}x correct above-border probability overbeated by another unit." + Environment.NewLine);
+                        sb.Append(leftMargin + $"    Totals" + Environment.NewLine);
+                        sb.Append(leftMargin + $"      Number of samples: {memberErrStat.ErrStat.NumOfSamples}" + Environment.NewLine);
+                        sb.Append(leftMargin + $"       Number of errors: {memberErrStat.ErrStat.Sum.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                        sb.Append(leftMargin + $"             Error rate: {memberErrStat.ErrStat.ArithAvg.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
+                        sb.Append(leftMargin + $"               Accuracy: {(1 - memberErrStat.ErrStat.ArithAvg).ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
                     }
                     sb.Append(leftMargin + $"  Group total" + Environment.NewLine);
                     sb.Append(leftMargin + $"    Number of samples: {grStat.GroupErrorStat.NumOfSamples}" + Environment.NewLine);
                     sb.Append(leftMargin + $"     Number of errors: {grStat.GroupErrorStat.Sum.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
                     sb.Append(leftMargin + $"           Error rate: {grStat.GroupErrorStat.ArithAvg.ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
                     sb.Append(leftMargin + $"             Accuracy: {(1 - grStat.GroupErrorStat.ArithAvg).ToString(CultureInfo.InvariantCulture)}" + Environment.NewLine);
-
                     sb.Append(Environment.NewLine);
                 }
 
@@ -595,24 +603,26 @@ namespace RCNet.Neural.Network.SM
                 /// </summary>
                 public BasicStat GroupErrorStat { get; }
                 /// <summary>
-                /// Collection of group sub-class error statistics
+                /// Collection of group member error statistics
                 /// </summary>
-                public Dictionary<string, BasicStat> ClassErrorStatCollection { get; }
+                public List<MemberErrorStat> MemberErrorStatCollection { get; }
 
                 //Constructor
                 /// <summary>
                 /// Creates an unitialized instance
                 /// </summary>
                 /// <param name="groupName">One-winner group name</param>
-                /// <param name="members">One-winner group members</param>
-                public OneWinnerGroupStat(string groupName, List<ReadoutUnitSettings> members)
+                /// <param name="unitIndexes">Indexes of involved readout units</param>
+                /// <param name="unitCfgCollection">Configurations of involved readout units</param>
+                public OneWinnerGroupStat(string groupName, int[] unitIndexes, List<ReadoutUnitSettings> unitCfgCollection)
                 {
                     Name = groupName;
                     GroupErrorStat = new BasicStat();
-                    ClassErrorStatCollection = new Dictionary<string, BasicStat>();
-                    foreach (ReadoutUnitSettings rus in members)
+                    MemberErrorStatCollection = new List<MemberErrorStat>();
+                    int memberIndex = 0;
+                    foreach (ReadoutUnitSettings rus in unitCfgCollection)
                     {
-                        ClassErrorStatCollection.Add(rus.Name, new BasicStat());
+                        MemberErrorStatCollection.Add(new MemberErrorStat(rus, unitIndexes[memberIndex], memberIndex++));
                     }
                     return;
                 }
@@ -625,22 +635,116 @@ namespace RCNet.Neural.Network.SM
                 /// <param name="idealValues">Ideal values</param>
                 public void Update(ReadoutLayer.ReadoutData readoutData, double[] idealValues)
                 {
-                    int winningUnitIndex = readoutData.OneWinnerDataCollection[Name].WinningReadoutUnitIndex;
-                    int maxIdealValueIdx = -1;
-                    string maxIdealValueName = string.Empty;
-                    foreach (ReadoutLayer.ReadoutData.ReadoutUnitData unitData in readoutData.ReadoutUnitDataCollection.Values)
+                    //Determine correct member
+                    int memberCorrectIndex = 0;
+                    double idealMaxP = -1;
+                    int[] memberReadoutUnitIndexes = readoutData.OneWinnerDataCollection[Name].MemberReadoutUnitIndexes;
+                    for (int i = 0; i < memberReadoutUnitIndexes.Length; i++)
                     {
-                        if (maxIdealValueIdx == -1 || idealValues[unitData.Index] > idealValues[maxIdealValueIdx])
+                        if(idealValues[memberReadoutUnitIndexes[i]] > idealMaxP)
                         {
-                            maxIdealValueIdx = unitData.Index;
-                            maxIdealValueName = unitData.Name;
+                            memberCorrectIndex = i;
+                            idealMaxP = idealValues[memberReadoutUnitIndexes[i]];
                         }
                     }
-                    double err = (winningUnitIndex == maxIdealValueIdx ? 0d : 1d);
+
+                    //Group error
+                    double err = (readoutData.OneWinnerDataCollection[Name].MemberWinningIndex == memberCorrectIndex ? 0d : 1d);
                     GroupErrorStat.AddSampleValue(err);
-                    ClassErrorStatCollection[maxIdealValueName].AddSampleValue(err);
+
+                    //Member errors
+                    MemberErrorStatCollection[memberCorrectIndex].Update(readoutData.OneWinnerDataCollection[Name].MemberProbabilities,
+                                                                         readoutData.OneWinnerDataCollection[Name].MemberWinningIndex
+                                                                         );
                     return;
                 }
+
+                //Inner classes
+                /// <summary>
+                /// One-winner group member's error statistics
+                /// </summary>
+                [Serializable]
+                public class MemberErrorStat
+                {
+                    //Attribute properties
+                    /// <summary>
+                    /// Readout unit configuration
+                    /// </summary>
+                    public ReadoutUnitSettings UnitCfg { get; }
+
+                    /// <summary>
+                    /// Index within the readout layer
+                    /// </summary>
+                    public int UnitIndex { get; }
+
+                    /// <summary>
+                    /// Index within the One winner group
+                    /// </summary>
+                    public int MemberIndex { get; }
+
+                    /// <summary>
+                    /// Error statistics
+                    /// </summary>
+                    public BasicStat ErrStat { get; }
+
+                    /// <summary>
+                    /// Number of correct bellow-border OWG selections
+                    /// </summary>
+                    public int NumOfCorrectBellowBorderSelections;
+
+                    /// <summary>
+                    /// Number of overbeated above-border correct classifications
+                    /// </summary>
+                    public int NumOfOverbeatedAboveBorderCorrectClassifications;
+
+                    //Constructors
+                    /// <summary>
+                    /// Creates an initialized instance
+                    /// </summary>
+                    /// <param name="unitCfg">Readout unit configuration</param>
+                    /// <param name="unitIndex">Index within the readout layer</param>
+                    /// <param name="memberIndex">Index within the One winner group</param>
+                    public MemberErrorStat(ReadoutUnitSettings unitCfg, int unitIndex, int memberIndex)
+                    {
+                        UnitCfg = (ReadoutUnitSettings)unitCfg.DeepClone();
+                        UnitIndex = unitIndex;
+                        MemberIndex = memberIndex;
+                        ErrStat = new BasicStat();
+                        NumOfCorrectBellowBorderSelections = 0;
+                        NumOfOverbeatedAboveBorderCorrectClassifications = 0;
+                        return;
+                    }
+
+                    //Methods
+                    /// <summary>
+                    /// Updates error statistics
+                    /// </summary>
+                    /// <param name="memberProbabilities"></param>
+                    /// <param name="memberWinningIndex"></param>
+                    public void Update(double[] memberProbabilities, int memberWinningIndex)
+                    {
+                        //Error stat
+                        double err = (MemberIndex == memberWinningIndex ? 0d : 1d);
+                        ErrStat.AddSampleValue(err);
+                        //Counters
+                        if (MemberIndex == memberWinningIndex)
+                        {
+                            if(memberProbabilities[MemberIndex] < 0.5d)
+                            {
+                                ++NumOfCorrectBellowBorderSelections;
+                            }
+                        }
+                        else
+                        {
+                            if (memberProbabilities[MemberIndex] >= 0.5d)
+                            {
+                                ++NumOfOverbeatedAboveBorderCorrectClassifications;
+                            }
+                        }
+                        return;
+                    }
+
+                }//MemberErrorStat
 
             }//OneWinnerGroupStat
 

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <demo dataFolder=".\\Data" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="SMDemoSettings.xsd">
 
-
   <!--
     Here StateMachine achieves 71% accuracy. It is clearly worse than the best accuracy 81.4% achieved by the algorithm
     called COTE referenced at the dataset's home site:
@@ -997,6 +996,95 @@
       </readoutLayer>
     </stateMachine>
   </case>
+
+  <!--
+    This demo case demonstrates successful use of the pure analog ESN reservoir for the fast and accurate classifications enabled by
+    the new ability of the analog neurons to fire a spike.
+    Following straightforward configuration of the StateMachine achieves 90.1% accuracy, a little bit better (practically the same) than
+    the best algorithm called BOSS, referenced at the dataset's home site:
+    "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
+    https://timeseriesclassification.com/description.php?Dataset=Yoga.
+    The dataset was obtained by capturing two actors transiting between yoga poses in front of a green screen. The problem is to
+    discriminate between one actor (male) and another (female). Each image was converted to a one dimensional series by finding the
+    outline and measuring the distance of the outline to the centre.
+  -->
+  <case name="Classification task Yoga: Simple pure ESN reservoir generating FiringCount predictors, multilayer FF network as a classifier (Resilient trainer)">
+    <samples trainingData="Yoga_train.csv" verificationData="Yoga_verify.csv"/>
+    <stateMachine>
+      <neuralPreprocessor>
+        <inputEncoder>
+          <feedingPatterned slices="2" bidir="true" routeToReadout="true"/>
+          <fields>
+            <externalFields>
+              <field name="DistanceFromCenter">
+                <realFeature/>
+              </field>
+            </externalFields>
+          </fields>
+        </inputEncoder>
+        <reservoirStructures>
+          <reservoirStructure name="MainCfg">
+            <pools>
+              <pool name="PureESN">
+                <proportions dimX="213" dimY="1" dimZ="1"/>
+                <neuronGroups>
+                  <analogGroup name="TanH-grp" relShare="1">
+                    <activationTanH/>
+                  </analogGroup>
+                </neuronGroups>
+                <interconnection>
+                  <randomSchema/>
+                </interconnection>
+              </pool>
+            </pools>
+          </reservoirStructure>
+        </reservoirStructures>
+        <reservoirInstances>
+          <reservoirInstance name="Main" reservoirStructure="MainCfg">
+            <inputConnections>
+              <connection inputFieldName="DistanceFromCenter" poolName="PureESN"/>
+            </inputConnections>
+            <predictors activation="false"
+                        activationSquare="false"
+                        activationFadingSum="false"
+                        activationMWAvg="false"
+                        firingFadingSum="false"
+                        firingMWAvg="false"
+                        firingCount="true"
+                        firingBinPattern="false">
+              <params>
+                <firingCount window="426"/>
+              </params>
+            </predictors>
+          </reservoirInstance>
+        </reservoirInstances>
+      </neuralPreprocessor>
+      <readoutLayer testDataRatio="0.1" folds="Auto" repetitions="1">
+        <defaultNetworks/>
+        <readoutUnits>
+          <readoutUnit name="Female1Male0">
+            <classification>
+              <networks>
+                <ff>
+                  <activationIdentity/>
+                  <hiddenLayers>
+                    <layer neurons="10">
+                      <activationLeakyReLU/>
+                    </layer>
+                    <layer neurons="10">
+                      <activationLeakyReLU/>
+                    </layer>
+                  </hiddenLayers>
+                  <resPropTrainer attempts="5" attemptEpochs="1000"/>
+                </ff>
+              </networks>
+            </classification>
+          </readoutUnit>
+        </readoutUnits>
+      </readoutLayer>
+    </stateMachine>
+  </case>
+
 
 
 

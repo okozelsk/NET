@@ -345,11 +345,11 @@ namespace RCNet.Neural.Network.NonRecurrent
             /// <param name="numOfFoldNetworks">Total number of the fold networks</param>
             /// <param name="regrAttemptNumber">Current regression attempt number</param>
             /// <param name="regrMaxAttempts">Maximum number of regression attempts</param>
-            /// <param name="epoch">Current epoch number</param>
-            /// <param name="maxEpochs">Maximum nuber of epochs</param>
-            /// <param name="currNetwork">Contains current network and related important error statistics.</param>
-            /// <param name="bestNetwork">Contains the best network for now and related important error statistics.</param>
-            /// <param name="lastImprovementEpoch">Specifies when was lastly found an improvement.</param>
+            /// <param name="epoch">Current epoch number within the current regression attempt</param>
+            /// <param name="maxEpochs">Maximum number of epochs</param>
+            /// <param name="currNetwork">Current network and related important error statistics.</param>
+            /// <param name="bestNetwork">The best network for now and related important error statistics.</param>
+            /// <param name="lastImprovementEpoch">Specifies when was lastly found an improvement (bestNetwork=currNetwork).</param>
             public BuildingState(string networkName,
                                  double binBorder,
                                  int foldNum,
@@ -398,16 +398,16 @@ namespace RCNet.Neural.Network.NonRecurrent
                 //Build progress text message
                 StringBuilder progressText = new StringBuilder();
                 progressText.Append(new string(' ', margin));
-                progressText.Append("Building ");
+                progressText.Append("Unit [");
                 progressText.Append(NetworkName);
-                progressText.Append(" Fold/Net/Attempt/Epoch: ");
+                progressText.Append("] Fold/Net/Attempt/Epoch: ");
                 progressText.Append(FoldNum.ToString().PadLeft(NumOfFolds.ToString().Length, '0') + "/");
                 progressText.Append(FoldNetworkNum.ToString().PadLeft(NumOfFoldNetworks.ToString().Length, '0') + "/");
                 progressText.Append(RegrAttemptNumber.ToString().PadLeft(RegrMaxAttempts.ToString().Length, '0') + "/");
                 progressText.Append(Epoch.ToString().PadLeft(MaxEpochs.ToString().Length, '0'));
-                progressText.Append(", DSet-Sizes: (");
-                progressText.Append(CurrNetwork.TrainingErrorStat.NumOfSamples.ToString() + ", ");
-                progressText.Append(CurrNetwork.TestingErrorStat.NumOfSamples.ToString() + ")");
+                progressText.Append(", Samples: ");
+                progressText.Append(CurrNetwork.TrainingErrorStat.NumOfSamples.ToString() + "/");
+                progressText.Append(CurrNetwork.TestingErrorStat.NumOfSamples.ToString());
                 progressText.Append(", Best-Train: ");
                 progressText.Append(BestNetwork.TrainingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture));
                 if (BinaryOutput)
@@ -440,7 +440,10 @@ namespace RCNet.Neural.Network.NonRecurrent
                     progressText.Append("/" + CurrNetwork.TestingBinErrorStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture));
                     progressText.Append("/" + CurrNetwork.TestingBinErrorStat.BinValErrStat[1].Sum.ToString(CultureInfo.InvariantCulture));
                 }
-                progressText.Append($" [{BestNetwork.TrainerInfoMessage}]");
+                if (BestNetwork.TrainerInfoMessage.Length > 0)
+                {
+                    progressText.Append($" [{BestNetwork.TrainerInfoMessage}]");
+                }
                 return progressText.ToString();
             }
 
