@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <demo dataFolder=".\\Data" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="SMDemoSettings.xsd">
 
+
   <!--
     Here StateMachine achieves 71% accuracy. It is clearly worse than the best accuracy 81.4% achieved by the algorithm
     called COTE referenced at the dataset's home site:
