@@ -34,7 +34,7 @@ site and State Machine usually achieves very similar results to the best classif
 The "Hello World" example shows how to learn Feed Forward Network component to solve boolean algebra.
 
 ### Code examples (3. menu choice)
-Example shows how to setup State Machine from scratch.
+Example shows how to painfully setup State Machine from the scratch.
 
 ### Code examples (4, ... menu choices)
 Several examples show how to simply setup State Machine using State Machine Designer component.
