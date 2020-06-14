@@ -1,8 +1,8 @@
-﻿using RCNet.Neural.Activation;
+﻿using System;
+using System.Globalization;
+using RCNet.Neural.Activation;
 using RCNet.Neural.Data;
 using RCNet.Neural.Network.NonRecurrent.FF;
-using System;
-using System.Globalization;
 
 namespace Demo.DemoConsoleApp.Examples
 {

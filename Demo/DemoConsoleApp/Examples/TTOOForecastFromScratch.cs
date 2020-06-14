@@ -1,4 +1,6 @@
-﻿using RCNet.Extensions;
+﻿using System;
+using System.IO;
+using RCNet.Extensions;
 using RCNet.Neural.Activation;
 using RCNet.Neural.Data.Filter;
 using RCNet.Neural.Network.NonRecurrent.FF;
@@ -14,8 +16,6 @@ using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Space3D;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS;
 using RCNet.Neural.Network.SM.Readout;
 using RCNet.RandomValue;
-using System;
-using System.IO;
 
 namespace Demo.DemoConsoleApp.Examples
 {

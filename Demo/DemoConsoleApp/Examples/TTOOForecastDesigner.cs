@@ -1,10 +1,10 @@
-﻿using RCNet.Neural.Activation;
+﻿using System;
+using RCNet.Neural.Activation;
 using RCNet.Neural.Data.Filter;
 using RCNet.Neural.Network.SM;
 using RCNet.Neural.Network.SM.Preprocessing.Input;
 using RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor;
 using RCNet.Neural.Network.SM.Readout;
-using System;
 
 namespace Demo.DemoConsoleApp.Examples
 {

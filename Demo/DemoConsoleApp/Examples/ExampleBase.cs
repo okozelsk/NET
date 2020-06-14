@@ -1,11 +1,11 @@
-﻿using Demo.DemoConsoleApp.Log;
+﻿using System;
+using Demo.DemoConsoleApp.Log;
 using RCNet.CsvTools;
 using RCNet.Neural.Data;
 using RCNet.Neural.Network.NonRecurrent;
 using RCNet.Neural.Network.SM;
 using RCNet.Neural.Network.SM.Preprocessing;
 using RCNet.Neural.Network.SM.Preprocessing.Input;
-using System;
 
 namespace Demo.DemoConsoleApp.Examples
 {
