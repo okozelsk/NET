@@ -52,9 +52,9 @@ namespace Demo.DemoConsoleApp.Examples
             //Definition of the continuous input feeding
             //We use FeedingContinuousSettings.AutoBootCyclesNum so necessary number of boot cycles will be automatically determined
             //based on neural preprocessor structure
-            FeedingContinuousSettings feedingContinuousCfg = new FeedingContinuousSettings(FeedingContinuousSettings.AutoBootCyclesNum, RouteToReadout);
+            FeedingContinuousSettings feedingContinuousCfg = new FeedingContinuousSettings(FeedingContinuousSettings.AutoBootCyclesNum);
             //Create and return input configuration
-            return new InputEncoderSettings(feedingContinuousCfg, new FieldsSettings(externalFieldsCfg));
+            return new InputEncoderSettings(feedingContinuousCfg, new VaryingFieldsSettings(externalFieldsCfg, null, null, RouteToReadout));
         }
 
         /// <summary>

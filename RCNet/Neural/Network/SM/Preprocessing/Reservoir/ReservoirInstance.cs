@@ -356,7 +356,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                 {
                     foreach (PredictorsProvider.PredictorID id in neuron.GetEnabledPredictorsIDs())
                     {
-                        result.Add(new PredictorDescriptor(neuron.Location.PoolGroupID, neuron.Location.ReservoirID, neuron.Location.PoolID, (int)id));
+                        result.Add(new PredictorDescriptor(neuron.Location.ReservoirID, neuron.Location.PoolID, id));
                     }
                 }
             }
@@ -535,7 +535,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// <param name="rand">Random object to be used</param>
         private void ConnectInput(InputEncoder inputEncoder, InputConnSettings inputConnCfg, Random rand)
         {
-            InputField inputField = inputEncoder.GetInputField(inputConnCfg.InputFieldName);
+            InputField inputField = inputEncoder.GetVaryingInputField(inputConnCfg.InputFieldName);
             //Target pool index
             int targetPoolID = StructureCfg.PoolsCfg.GetPoolID(inputConnCfg.PoolName);
             //Select available target neurons according to connection's target scope configuration

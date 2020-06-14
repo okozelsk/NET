@@ -1,22 +1,28 @@
 ﻿using RCNet.Neural.Data.Transformers;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Xml.Linq;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Input
 {
     /// <summary>
-    /// Contains configuration of external and generated input fields
+    /// Contains configuration of external and generated varying input fields
     /// </summary>
     [Serializable]
-    public class FieldsSettings : RCNetBaseSettings
+    public class VaryingFieldsSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
         /// Name of the associated xsd type
         /// </summary>
-        public const string XsdTypeName = "NPInpFieldsType";
+        public const string XsdTypeName = "NPVaryingInpFieldsType";
+        //Default values
+        /// <summary>
+        /// Default value of parameter specifying if to route input fields to readout layer together with other predictors 
+        /// </summary>
+        public const bool DefaultRouteToReadout = false;
 
         //Attribute properties
         /// <summary>
@@ -34,6 +40,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// </summary>
         public GeneratedFieldsSettings GeneratedFieldsCfg { get; }
 
+        /// <summary>
+        /// Specifies whether to route input fields to readout layer together with other predictors
+        /// </summary>
+        public bool RouteToReadout { get; }
+
         //Constructors
         /// <summary>
         /// Creates an initialized instance
@@ -41,14 +52,17 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <param name="externalFieldsCfg">External input fields settings</param>
         /// <param name="transformedFieldsCfg">Transformed input fields settings</param>
         /// <param name="generatedFieldsCfg">Generated input fields settings</param>
-        public FieldsSettings(ExternalFieldsSettings externalFieldsCfg,
-                              TransformedFieldsSettings transformedFieldsCfg = null,
-                              GeneratedFieldsSettings generatedFieldsCfg = null
-                              )
+        /// <param name="routeToReadout">Specifies whether to route input fields to readout layer together with other predictors</param>
+        public VaryingFieldsSettings(ExternalFieldsSettings externalFieldsCfg,
+                                         TransformedFieldsSettings transformedFieldsCfg = null,
+                                         GeneratedFieldsSettings generatedFieldsCfg = null,
+                                         bool routeToReadout = DefaultRouteToReadout
+                                         )
         {
             ExternalFieldsCfg = (ExternalFieldsSettings)externalFieldsCfg.DeepClone();
             TransformedFieldsCfg = transformedFieldsCfg == null ? null : (TransformedFieldsSettings)transformedFieldsCfg.DeepClone();
             GeneratedFieldsCfg = generatedFieldsCfg == null ? null : (GeneratedFieldsSettings)generatedFieldsCfg.DeepClone();
+            RouteToReadout = routeToReadout;
             Check();
             return;
         }
@@ -57,8 +71,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// The deep copy constructor
         /// </summary>
         /// <param name="source">Source instance</param>
-        public FieldsSettings(FieldsSettings source)
-            : this(source.ExternalFieldsCfg, source.TransformedFieldsCfg, source.GeneratedFieldsCfg)
+        public VaryingFieldsSettings(VaryingFieldsSettings source)
+            : this(source.ExternalFieldsCfg, source.TransformedFieldsCfg, source.GeneratedFieldsCfg, source.RouteToReadout)
         {
             return;
         }
@@ -67,7 +81,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// Creates an initialized instance.
         /// </summary>
         /// <param name="elem">Xml element containing the initialization settings.</param>
-        public FieldsSettings(XElement elem)
+        public VaryingFieldsSettings(XElement elem)
         {
             //Validation
             XElement settingsElem = Validate(elem, XsdTypeName);
@@ -77,6 +91,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             TransformedFieldsCfg = transformedFieldsElem == null ? null : new TransformedFieldsSettings(transformedFieldsElem);
             XElement generatedFieldsElem = settingsElem.Elements("generatedFields").FirstOrDefault();
             GeneratedFieldsCfg = generatedFieldsElem == null ? null : new GeneratedFieldsSettings(generatedFieldsElem);
+            RouteToReadout = bool.Parse(settingsElem.Attribute("routeToReadout").Value);
             Check();
             return;
         }
@@ -94,6 +109,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
                        (GeneratedFieldsCfg == null ? 0 : GeneratedFieldsCfg.FieldCfgCollection.Count);
             }
         }
+
+        /// <summary>
+        /// Checks if settings are default
+        /// </summary>
+        public bool IsDefaultRouteToReadout { get { return (RouteToReadout == DefaultRouteToReadout); } }
 
         /// <summary>
         /// Identifies settings containing only default values
@@ -249,7 +269,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// </summary>
         public override RCNetBaseSettings DeepClone()
         {
-            return new FieldsSettings(this);
+            return new VaryingFieldsSettings(this);
         }
 
         /// <summary>
@@ -271,6 +291,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             {
                 rootElem.Add(GeneratedFieldsCfg.GetXml(suppressDefaults));
             }
+            if (!suppressDefaults || !IsDefaultRouteToReadout)
+            {
+                rootElem.Add(new XAttribute("routeToReadout", RouteToReadout.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()));
+            }
             Validate(rootElem, XsdTypeName);
             return rootElem;
         }
@@ -282,9 +306,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(bool suppressDefaults)
         {
-            return GetXml("fields", suppressDefaults);
+            return GetXml("varyingFields", suppressDefaults);
         }
 
-    }//FieldsSettings
+    }//VaryingFieldsSettings
 
 }//Namespace

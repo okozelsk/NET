@@ -149,7 +149,6 @@ namespace RCNet.Neural.Network.SM
                             {
                                 throw new ArgumentException($"Specified input field {aifs.Name} to be allowed for readout unit {map.ReadoutUnitName} is not among fields routed to readout layer.", "MapperCfg");
                             }
-                            NeuralPreprocessorCfg.InputEncoderCfg.FieldsCfg.GetFieldID(aifs.Name, true);
                         }
                     }
                 }

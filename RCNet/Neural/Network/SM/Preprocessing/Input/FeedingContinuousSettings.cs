@@ -27,10 +27,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// Default value of parameter specifying number of boot-cycles
         /// </summary>
         public const int DefaultBootCycles = AutoBootCyclesNum;
-        /// <summary>
-        /// Default value of parameter specifying if to route input fields to readout layer together with other predictors 
-        /// </summary>
-        public const bool DefaultRouteToReadout = false;
 
         //Attribute properties
         /// <summary>
@@ -38,24 +34,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// </summary>
         public int BootCycles { get; }
 
-        /// <summary>
-        /// Specifies whether to route input fields to readout layer together with other predictors
-        /// </summary>
-        public bool RouteToReadout { get; }
-
-
         //Constructors
         /// <summary>
         /// Creates an itialized instance.
         /// </summary>
         /// <param name="bootCycles">Number of boot cycles</param>
-        /// <param name="routeToReadout">Specifies whether to route input fields to readout layer together with other predictors</param>
-        public FeedingContinuousSettings(int bootCycles = DefaultBootCycles,
-                                              bool routeToReadout = DefaultRouteToReadout
-                                              )
+        public FeedingContinuousSettings(int bootCycles = DefaultBootCycles)
         {
             BootCycles = bootCycles;
-            RouteToReadout = routeToReadout;
             Check();
             return;
         }
@@ -65,7 +51,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// </summary>
         /// <param name="source">Source instance</param>
         public FeedingContinuousSettings(FeedingContinuousSettings source)
-            : this(source.BootCycles, source.RouteToReadout)
+            : this(source.BootCycles)
         {
             return;
         }
@@ -81,7 +67,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             //Parsing
             string bootCycles = settingsElem.Attribute("bootCycles").Value;
             BootCycles = bootCycles == AutoBootCyclesCode ? AutoBootCyclesNum : int.Parse(bootCycles, CultureInfo.InvariantCulture);
-            RouteToReadout = bool.Parse(settingsElem.Attribute("routeToReadout").Value);
             Check();
             return;
         }
@@ -98,14 +83,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         public bool IsDefaultBootCycles { get { return (BootCycles == DefaultBootCycles); } }
 
         /// <summary>
-        /// Checks if settings are default
-        /// </summary>
-        public bool IsDefaultRouteToReadout { get { return (RouteToReadout == DefaultRouteToReadout); } }
-
-        /// <summary>
         /// Identifies settings containing only default values
         /// </summary>
-        public override bool ContainsOnlyDefaults { get { return IsDefaultBootCycles && IsDefaultRouteToReadout; } }
+        public override bool ContainsOnlyDefaults { get { return IsDefaultBootCycles; } }
 
         //Methods
         /// <summary>
@@ -140,10 +120,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             if (!suppressDefaults || !IsDefaultBootCycles)
             {
                 rootElem.Add(new XAttribute("bootCycles", BootCycles == AutoBootCyclesNum ? AutoBootCyclesCode : BootCycles.ToString(CultureInfo.InvariantCulture)));
-            }
-            if (!suppressDefaults || !IsDefaultRouteToReadout)
-            {
-                rootElem.Add(new XAttribute("routeToReadout", RouteToReadout.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()));
             }
             Validate(rootElem, XsdTypeName);
             return rootElem;

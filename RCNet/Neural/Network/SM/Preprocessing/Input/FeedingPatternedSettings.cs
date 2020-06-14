@@ -27,10 +27,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// </summary>
         public const bool DefaultBidir = false;
         /// <summary>
-        /// Default value of parameter specifying if to route input fields to readout layer together with other predictors 
-        /// </summary>
-        public const bool DefaultRouteToReadout = false;
-        /// <summary>
         /// Default value of parameter specifying variables organization in the pattern
         /// </summary>
         public const InputPattern.VariablesSchema DefaultVarSchema = InputPattern.VariablesSchema.Groupped;
@@ -47,11 +43,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         public bool Bidir { get; }
 
         /// <summary>
-        /// Specifies whether to route input fields to readout layer together with other predictors
-        /// </summary>
-        public bool RouteToReadout { get; }
-
-        /// <summary>
         /// Specifies variables organization in the pattern
         /// </summary>
         public InputPattern.VariablesSchema VarSchema { get; }
@@ -61,27 +52,32 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// </summary>
         public UnificationSettings UnificationCfg { get; }
 
+        /// <summary>
+        /// Steady external input fields settings
+        /// </summary>
+        public SteadyFieldsSettings SteadyFieldsCfg { get; }
+
         //Constructors
         /// <summary>
         /// Creates an itialized instance.
         /// </summary>
         /// <param name="slices">Specifies how many times to collect predictors during pattern data preprocessing</param>
         /// <param name="bidir">Specifies whether to preprocess time series pattern in both time directions (doubles predictors in total)</param>
-        /// <param name="routeToReadout">Specifies whether to route input fields to readout layer together with other predictors</param>
         /// <param name="varSchema">Specifies variables organization in the pattern</param>
         /// <param name="unificationCfg">Configuration of an input pattern unification</param>
+        /// <param name="steadyFieldsCfg">Steady external input fields settings</param>
         public FeedingPatternedSettings(int slices = DefaultSlices,
                                         bool bidir = DefaultBidir,
-                                        bool routeToReadout = DefaultRouteToReadout,
                                         InputPattern.VariablesSchema varSchema = DefaultVarSchema,
-                                        UnificationSettings unificationCfg = null
+                                        UnificationSettings unificationCfg = null,
+                                        SteadyFieldsSettings steadyFieldsCfg = null
                                         )
         {
             Slices = slices;
             Bidir = bidir;
-            RouteToReadout = routeToReadout;
             VarSchema = varSchema;
             UnificationCfg = unificationCfg == null ? new UnificationSettings() : (UnificationSettings)unificationCfg.DeepClone();
+            SteadyFieldsCfg = steadyFieldsCfg == null ? null : (SteadyFieldsSettings)steadyFieldsCfg.DeepClone();
             Check();
             return;
         }
@@ -91,7 +87,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// </summary>
         /// <param name="source">Source instance</param>
         public FeedingPatternedSettings(FeedingPatternedSettings source)
-            : this(source.Slices, source.Bidir, source.RouteToReadout, source.VarSchema, source.UnificationCfg)
+            : this(source.Slices, source.Bidir, source.VarSchema, source.UnificationCfg, source.SteadyFieldsCfg)
         {
             return;
         }
@@ -107,7 +103,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             //Parsing
             Slices = int.Parse(settingsElem.Attribute("slices").Value, CultureInfo.InvariantCulture);
             Bidir = bool.Parse(settingsElem.Attribute("bidir").Value);
-            RouteToReadout = bool.Parse(settingsElem.Attribute("routeToReadout").Value);
             VarSchema = (InputPattern.VariablesSchema)Enum.Parse(typeof(InputPattern.VariablesSchema), settingsElem.Attribute("variablesSchema").Value, true);
             XElement uniElem = settingsElem.Elements("unification").FirstOrDefault();
             if (uniElem != null)
@@ -117,6 +112,15 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             else
             {
                 UnificationCfg = new UnificationSettings();
+            }
+            XElement steadyFieldsElem = settingsElem.Elements("steadyFields").FirstOrDefault();
+            if(steadyFieldsElem != null)
+            {
+                SteadyFieldsCfg = new SteadyFieldsSettings(steadyFieldsElem);
+            }
+            else
+            {
+                SteadyFieldsCfg = null;
             }
             Check();
             return;
@@ -129,6 +133,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         public InputEncoder.InputFeedingType FeedingType { get { return InputEncoder.InputFeedingType.Patterned; } }
 
         /// <summary>
+        /// Number of steady external input fields
+        /// </summary>
+        public int NumOfSteadyFields { get { return SteadyFieldsCfg == null ? 0 : SteadyFieldsCfg.FieldCfgCollection.Count; } }
+
+        /// <summary>
         /// Checks if settings are default
         /// </summary>
         public bool IsDefaultSlices { get { return (Slices == DefaultSlices); } }
@@ -137,11 +146,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// Checks if settings are default
         /// </summary>
         public bool IsDefaultBidir { get { return (Bidir == DefaultBidir); } }
-
-        /// <summary>
-        /// Checks if settings are default
-        /// </summary>
-        public bool IsDefaultRouteToReadout { get { return (RouteToReadout == DefaultRouteToReadout); } }
 
         /// <summary>
         /// Checks if settings are default
@@ -157,9 +161,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             {
                 return IsDefaultSlices &&
                        IsDefaultBidir &&
-                       IsDefaultRouteToReadout &&
                        IsDefaultVarSchema &&
-                       UnificationCfg.ContainsOnlyDefaults;
+                       UnificationCfg.ContainsOnlyDefaults &&
+                       SteadyFieldsCfg == null;
             }
         }
 
@@ -205,10 +209,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             {
                 rootElem.Add(new XAttribute("bidir", Bidir.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()));
             }
-            if (!suppressDefaults || !IsDefaultRouteToReadout)
-            {
-                rootElem.Add(new XAttribute("routeToReadout", RouteToReadout.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()));
-            }
             if (!suppressDefaults || !IsDefaultVarSchema)
             {
                 rootElem.Add(new XAttribute("variablesSchema", VarSchema.ToString()));
@@ -216,6 +216,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             if (!suppressDefaults || !UnificationCfg.ContainsOnlyDefaults)
             {
                 rootElem.Add(UnificationCfg.GetXml(suppressDefaults));
+            }
+            if(SteadyFieldsCfg != null)
+            {
+                rootElem.Add(SteadyFieldsCfg.GetXml(suppressDefaults));
             }
             Validate(rootElem, XsdTypeName);
             return rootElem;

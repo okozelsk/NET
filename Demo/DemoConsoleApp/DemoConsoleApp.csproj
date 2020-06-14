@@ -112,18 +112,18 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <Content Include="Data\EpilepticSeizureActivity_train.csv">
+    <None Include="Data\EpilepticSeizureActivity_train.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\LibrasMovement_train.csv">
+    </None>
+    <None Include="Data\LibrasMovement_train.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\MackeyGlass_train.csv">
+    </None>
+    <None Include="Data\MackeyGlass_train.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\TTOO.csv">
+    </None>
+    <None Include="Data\TTOO.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    </None>
     <None Include="Data\BeetleFly_train.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -155,6 +155,12 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="Data\ProximalPhalanxOutlineAgeGroup_verify.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Data\SteadyMG_train.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Data\SteadyMG_verify.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="Data\TTOO_train.csv">

@@ -1,4 +1,5 @@
-﻿using RCNet.MathTools;
+﻿using RCNet.Extensions;
+using RCNet.MathTools;
 using RCNet.Neural.Data;
 using RCNet.Neural.Network.NonRecurrent;
 using RCNet.Neural.Network.SM.PM;
@@ -164,67 +165,37 @@ namespace RCNet.Neural.Network.SM
                 PredictorsMapper mapper = new PredictorsMapper(NP.OutputFeatureGeneralSwitchCollection);
                 if (Config.MapperCfg != null)
                 {
+                    //Routed input field names
+                    string[] routedInputFieldNames = Config.NeuralPreprocessorCfg.InputEncoderCfg.GetRoutedFieldNames().ToArray();
                     //Iterate all readout units
                     foreach (string readoutUnitName in Config.ReadoutLayerCfg.OutputFieldNameCollection)
                     {
                         bool[] switches = new bool[NP.OutputFeatureGeneralSwitchCollection.Length];
-                        //Initially allow all valid predictors
-                        NP.OutputFeatureGeneralSwitchCollection.CopyTo(switches, 0);
                         //Exists specific mapping?
                         ReadoutUnitMapSettings unitMap = Config.MapperCfg.GetMapCfg(readoutUnitName, false);
                         if (unitMap != null)
                         {
-                            //Allowed predictor types filter
-                            if (unitMap.AllowedPredictorsCfg != null)
+                            //Initially disable all predictors
+                            switches.Populate(false);
+                            for (int i = 0; i < NP.OutputFeatureDescriptorCollection.Count; i++)
                             {
-                                for (int i = 0; i < NP.OutputFeatureDescriptorCollection.Count; i++)
+                                if (!NP.OutputFeatureDescriptorCollection[i].IsInputValue)
                                 {
-                                    //Disable not allowed neural predictor types
-                                    if (!NP.OutputFeatureDescriptorCollection[i].IsInputFieldValue)
-                                    {
-                                        if (switches[i] && !unitMap.AllowedPredictorsCfg.IsAllowed((PredictorsProvider.PredictorID)NP.OutputFeatureDescriptorCollection[i].PredictorID))
-                                        {
-                                            switches[i] = false;
-                                        }
-                                    }
+                                    string reservoirInstanceName = Config.NeuralPreprocessorCfg.ReservoirInstancesCfg.ReservoirInstanceCfgCollection[NP.OutputFeatureDescriptorCollection[i].ReservoirID].Name;
+                                    ReservoirStructureSettings rss = Config.NeuralPreprocessorCfg.ReservoirStructuresCfg.GetReservoirStructureCfg(Config.NeuralPreprocessorCfg.ReservoirInstancesCfg.ReservoirInstanceCfgCollection[NP.OutputFeatureDescriptorCollection[i].ReservoirID].StructureCfgName);
+                                    string poolName = rss.PoolsCfg.PoolCfgCollection[NP.OutputFeatureDescriptorCollection[i].PoolID].Name;
+                                    switches[i] = unitMap.IsAllowedPredictor(reservoirInstanceName, poolName, (PredictorsProvider.PredictorID)NP.OutputFeatureDescriptorCollection[i].PredictorID);
+                                }
+                                else
+                                {
+                                    switches[i] = unitMap.IsAllowedInputField(NP.OutputFeatureDescriptorCollection[i].InputFieldName);
                                 }
                             }
-                            //Allowed reservoirs' origin
-                            if (unitMap.AllowedPoolsCfg != null)
-                            {
-                                for (int i = 0; i < NP.OutputFeatureDescriptorCollection.Count; i++)
-                                {
-                                    if (switches[i] && !NP.OutputFeatureDescriptorCollection[i].IsInputFieldRelated)
-                                    {
-                                        //Disable not allowed origin
-                                        string reservoirInstanceName = Config.NeuralPreprocessorCfg.ReservoirInstancesCfg.ReservoirInstanceCfgCollection[NP.OutputFeatureDescriptorCollection[i].ReservoirID].Name;
-                                        ReservoirStructureSettings rss = Config.NeuralPreprocessorCfg.ReservoirStructuresCfg.GetReservoirStructureCfg(Config.NeuralPreprocessorCfg.ReservoirInstancesCfg.ReservoirInstanceCfgCollection[NP.OutputFeatureDescriptorCollection[i].ReservoirID].StructureCfgName);
-                                        string poolName = rss.PoolsCfg.PoolCfgCollection[NP.OutputFeatureDescriptorCollection[i].PoolID].Name;
-                                        if (!unitMap.AllowedPoolsCfg.IsAllowed(reservoirInstanceName, poolName))
-                                        {
-                                            switches[i] = false;
-                                        }
-                                    }
-                                }
-                            }
-                            //Allowed input fields. Rejection of related predictors and exact values
-                            if (unitMap.AllowedInputFieldsCfg != null)
-                            {
-                                string[] fieldNames = Config.NeuralPreprocessorCfg.InputEncoderCfg.FieldsCfg.GetNames().ToArray();
-                                //Allowed input fields related predictors and values
-                                for (int i = 0; i < NP.OutputFeatureDescriptorCollection.Count; i++)
-                                {
-                                    if (switches[i] && NP.OutputFeatureDescriptorCollection[i].IsInputFieldRelated)
-                                    {
-                                        string fieldName = fieldNames[NP.OutputFeatureDescriptorCollection[i].InputFieldID];
-                                        if (!unitMap.AllowedInputFieldsCfg.IsAllowed(fieldName))
-                                        {
-                                            switches[i] = false;
-                                        }
-                                    }
-
-                                }
-                            }
+                        }
+                        else
+                        {
+                            //Allow all valid predictors
+                            NP.OutputFeatureGeneralSwitchCollection.CopyTo(switches, 0);
                         }
                         //Add mapping to mapper
                         mapper.Add(readoutUnitName, switches);

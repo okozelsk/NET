@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RCNet.Neural.Network.SM.Preprocessing.Input;
+using System;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
 {
@@ -10,28 +11,23 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
     {
         //Constants
         /// <summary>
-        /// Value indicating no association with concrete input field
-        /// </summary>
-        public const int NoInputFieldRelated = -1;
-
-        /// <summary>
-        /// Value indicating non standard predictor - exact value of input field
+        /// Value indicating non standard predictor - exact value of an input field
         /// </summary>
         public const int InputFieldValue = -1;
 
         //Attribute properties
         /// <summary>
-        /// Index of the associated input field. Value -1 means no relationship with concrete input field (hidden neuron origin).
+        /// Name of the associated input field. Empty string means no relationship with concrete input field (hidden neuron origin).
         /// </summary>
-        public int InputFieldID { get; }
+        public string InputFieldName { get; }
 
         /// <summary>
-        /// Associated reservoir index or InputEncoder.ReservoirID when predictor is associated with an input neuron of the InputEncoder.
+        /// Associated reservoir index or InputEncoder.ReservoirID when predictor is an input value.
         /// </summary>
         public int ReservoirID { get; }
 
         /// <summary>
-        /// Pool index within the reservoir or InputEncoder.PoolID when predictor is associated with an input neuron of the InputEncoder.
+        /// Pool index within the reservoir or InputEncoder.PoolID when predictor predictor is an input value.
         /// </summary>
         public int PoolID { get; }
 
@@ -40,37 +36,43 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         /// </summary>
         public int PredictorID { get; }
 
-        //Constructor
+        //Constructors
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
-        /// <param name="inputFieldID">Index of the associated input field. Value -1 means no relationship with concrete input field (hidden neuron origin).</param>
-        /// <param name="reservoirID">Associated reservoir index or InputEncoder.ReservoirID when predictor is associated with an input neuron of the InputEncoder.</param>
-        /// <param name="poolID">Pool index within the reservoir or InputEncoder.PoolID when predictor is associated with an input neuron of the InputEncoder.</param>
-        /// <param name="predictorID">PredictorsProvider.PredictorID or -1 when it is an input value to be used as a predictor.</param>
-        public PredictorDescriptor(int inputFieldID,
-                                   int reservoirID,
+        /// <param name="reservoirID">Associated reservoir index.</param>
+        /// <param name="poolID">Pool index within the reservoir.</param>
+        /// <param name="predictorID">ID of the predictor (PredictorsProvider.PredictorID).</param>
+        public PredictorDescriptor(int reservoirID,
                                    int poolID,
-                                   int predictorID
+                                   PredictorsProvider.PredictorID predictorID
                                    )
         {
-            InputFieldID = inputFieldID;
             ReservoirID = reservoirID;
             PoolID = poolID;
-            PredictorID = predictorID;
+            PredictorID = (int)predictorID;
+            InputFieldName = string.Empty;
+            return;
+        }
+
+        /// <summary>
+        /// Creates an initialized instance
+        /// </summary>
+        /// <param name="inputFieldName">Name of the associated input field.</param>
+        public PredictorDescriptor(string inputFieldName)
+        {
+            ReservoirID = InputEncoder.ReservoirID;
+            PoolID = InputEncoder.PoolID;
+            PredictorID = InputFieldValue;
+            InputFieldName = inputFieldName;
             return;
         }
 
         //Properties
         /// <summary>
-        /// Indicates predictor related to concrete input field
+        /// Indicates exact value of input field (not a hidden neuron's predictor)
         /// </summary>
-        public bool IsInputFieldRelated { get { return InputFieldID != NoInputFieldRelated; } }
-
-        /// <summary>
-        /// Indicates a non standard predictor - exact value of input field
-        /// </summary>
-        public bool IsInputFieldValue { get { return PredictorID == InputFieldValue; } }
+        public bool IsInputValue { get { return PredictorID == InputFieldValue; } }
 
     }//PredictorDescriptor
 

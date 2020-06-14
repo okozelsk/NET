@@ -157,6 +157,8 @@
     <Compile Include="Neural\Network\SM\PM\AllowedPoolSettings.cs" />
     <Compile Include="Neural\Network\SM\PM\AllowedInputFieldsSettings.cs" />
     <Compile Include="Neural\Network\SM\PM\AllowedPoolsSettings.cs" />
+    <Compile Include="Neural\Network\SM\Preprocessing\Input\SteadyFieldsSettings.cs" />
+    <Compile Include="Neural\Network\SM\Preprocessing\Input\SteadyFieldSettings.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\Input\InputEncoder.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\Input\InputField.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\Input\SpikeCode.cs" />
@@ -164,7 +166,7 @@
     <Compile Include="Neural\Network\SM\Preprocessing\Input\TransformedFieldsSettings.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\Input\TransformedFieldSettings.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\Input\InputEncoderSettings.cs" />
-    <Compile Include="Neural\Network\SM\Preprocessing\Input\FieldsSettings.cs" />
+    <Compile Include="Neural\Network\SM\Preprocessing\Input\VaryingFieldsSettings.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\Input\GeneratedFieldsSettings.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\Input\GeneratedFieldSettings.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\Input\FeedingPatternedSettings.cs" />

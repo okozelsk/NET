@@ -2003,11 +2003,6 @@
         <xs:documentation xml:lang="en">Default value is Auto</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute type="xs:boolean" name="routeToReadout" use="optional" default="false">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is false</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
   </xs:complexType>
 
   <!-- Patterned input feeding -->
@@ -2052,10 +2047,28 @@
     </xs:attribute>
   </xs:complexType>
 
+  <!-- Steady input field -->
+  <xs:complexType name="NPSteadyInpFieldType">
+    <xs:attribute type="xs:string" name="name" use="required"/>
+    <xs:attribute type="xs:boolean" name="routeToReadout" use="optional" default="true">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is true</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <!-- Steady input fields -->
+  <xs:complexType name="NPSteadyInpFieldsType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="NPSteadyInpFieldType" name="field" minOccurs="1" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
   <!-- Patterned input feeding configuration -->
   <xs:complexType name="NPInpFeedingPatternedType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="NPUnificationType" name="unification" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="NPSteadyInpFieldsType" name="steadyFields" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="UIntGT0Type" name="slices" use="optional" default="1">
       <xs:annotation>
@@ -2065,11 +2078,6 @@
     <xs:attribute type="xs:boolean" name="bidir" use="optional" default="false">
       <xs:annotation>
         <xs:documentation xml:lang="en">Specifies whether to preprocess time series pattern in both time directions (doubles predictors in total). Default value is false</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="xs:boolean" name="routeToReadout" use="optional" default="false">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is false. If true is specified, all patterns have to have the same length.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="VariablesSchemaType" name="variablesSchema" use="optional" default="Groupped">
@@ -2190,13 +2198,18 @@
     </xs:sequence>
   </xs:complexType>
 
-  <!-- Input fields -->
-  <xs:complexType name="NPInpFieldsType">
+  <!-- Varying input fields -->
+  <xs:complexType name="NPVaryingInpFieldsType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="NPExternalInpFieldsType" name="externalFields" minOccurs="1" maxOccurs="1"/>
       <xs:element type="NPTransformedInpFieldsType" name="transformedFields" minOccurs="0" maxOccurs="1"/>
       <xs:element type="NPGeneratedInpFieldsType" name="generatedFields" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
+    <xs:attribute type="xs:boolean" name="routeToReadout" use="optional" default="false">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is false</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
   
   <!-- Input encoder configuration -->
@@ -2206,8 +2219,8 @@
         <xs:element type="NPInpFeedingContinuousType" name="feedingContinuous" minOccurs="1" maxOccurs="1"/>
         <xs:element type="NPInpFeedingPatternedType" name="feedingPatterned" minOccurs="1" maxOccurs="1"/>
       </xs:choice>
-      <xs:element type="NPInpFieldsType" name="fields" minOccurs="1" maxOccurs="1">
-        <xs:unique name="np_unique_input_field_name">
+      <xs:element type="NPVaryingInpFieldsType" name="varyingFields" minOccurs="1" maxOccurs="1">
+        <xs:unique name="np_unique_varying_input_field_name">
           <xs:selector xpath=".//field"/>
           <xs:field xpath="@name"/>
         </xs:unique>
@@ -2279,7 +2292,12 @@
   <!-- Neural preprocessor configuration -->
   <xs:complexType name="NPType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="NPInputEncoderType" name="inputEncoder" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="NPInputEncoderType" name="inputEncoder" minOccurs="1" maxOccurs="1">
+        <xs:unique name="np_unique_input_field_name">
+          <xs:selector xpath=".//field"/>
+          <xs:field xpath="@name"/>
+        </xs:unique>
+      </xs:element>
       <xs:element type="NPResStructsType" name="reservoirStructures" minOccurs="1" maxOccurs="1">
         <xs:unique name="np_unique_resstruct_name">
           <xs:selector xpath="./reservoirStructure"/>
@@ -2482,15 +2500,15 @@
   <xs:complexType name="SMType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="NPType" name="neuralPreprocessor" minOccurs="0" maxOccurs="1">
-        <xs:key name="np_input_field">
-          <xs:selector xpath="./inputEncoder/fields/*/field"/>
+        <xs:key name="np_varying_input_field">
+          <xs:selector xpath="./inputEncoder/varyingFields/*/field"/>
           <xs:field xpath="@name"/>
         </xs:key>
         <xs:key name="np_rescfg_name">
           <xs:selector xpath="./reservoirStructures/reservoirStructure"/>
           <xs:field xpath="@name"/>
         </xs:key>
-        <xs:keyref name="iconn_existing_input_field" refer="np_input_field">
+        <xs:keyref name="iconn_existing_input_field" refer="np_varying_input_field">
           <xs:selector xpath="./reservoirInstances/reservoirInstance/inputConnections/connection" />
           <xs:field xpath="@inputFieldName" />
         </xs:keyref>

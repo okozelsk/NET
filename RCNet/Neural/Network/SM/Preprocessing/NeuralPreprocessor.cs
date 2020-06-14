@@ -173,10 +173,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// </summary>
         private void InitOutputFeaturesDescriptors()
         {
-            //Final output featuires collection
+            //Final output features collection
             OutputFeatureDescriptorCollection = new List<PredictorDescriptor>();
             //Routed input values
-            if(_inputEncoder.RoutedFieldCollection.Count > 0)
+            if(_inputEncoder.NumOfRoutedValues > 0)
             {
                 OutputFeatureDescriptorCollection.AddRange(_inputEncoder.GetInputValuesPredictorsDescriptors());
             }

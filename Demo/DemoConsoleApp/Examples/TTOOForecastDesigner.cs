@@ -24,7 +24,8 @@ namespace Demo.DemoConsoleApp.Examples
         {
             //Create StateMachine configuration
             //Simplified input configuration
-            InputEncoderSettings inputCfg = StateMachineDesigner.CreateInputCfg(new FeedingContinuousSettings(FeedingContinuousSettings.AutoBootCyclesNum, true),
+            InputEncoderSettings inputCfg = StateMachineDesigner.CreateInputCfg(new FeedingContinuousSettings(FeedingContinuousSettings.AutoBootCyclesNum),
+                                                                                true,
                                                                                 new ExternalFieldSettings("High", new RealFeatureFilterSettings()),
                                                                                 new ExternalFieldSettings("Low", new RealFeatureFilterSettings()),
                                                                                 new ExternalFieldSettings("Adj Close", new RealFeatureFilterSettings())

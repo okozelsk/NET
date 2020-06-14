@@ -6,38 +6,38 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Input
 {
     /// <summary>
-    /// Collection of external field settings
+    /// Collection of steady external field settings
     /// </summary>
     [Serializable]
-    public class ExternalFieldsSettings : RCNetBaseSettings
+    public class SteadyFieldsSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
         /// Name of the associated xsd type
         /// </summary>
-        public const string XsdTypeName = "NPExternalInpFieldsType";
+        public const string XsdTypeName = "NPSteadyInpFieldsType";
 
         //Attribute properties
         /// <summary>
-        /// Collection of external input field settings
+        /// Collection of steady external input field settings
         /// </summary>
-        public List<ExternalFieldSettings> FieldCfgCollection { get; }
+        public List<SteadyFieldSettings> FieldCfgCollection { get; }
 
         //Constructors
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
-        private ExternalFieldsSettings()
+        private SteadyFieldsSettings()
         {
-            FieldCfgCollection = new List<ExternalFieldSettings>();
+            FieldCfgCollection = new List<SteadyFieldSettings>();
             return;
         }
 
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
-        /// <param name="fieldCfgCollection">Collection of external input field settings</param>
-        public ExternalFieldsSettings(IEnumerable<ExternalFieldSettings> fieldCfgCollection)
+        /// <param name="fieldCfgCollection">Collection of steady external input field settings</param>
+        public SteadyFieldsSettings(IEnumerable<SteadyFieldSettings> fieldCfgCollection)
             : this()
         {
             AddFields(fieldCfgCollection);
@@ -48,8 +48,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
-        /// <param name="fieldCfgCollection">Collection of external input field settings</param>
-        public ExternalFieldsSettings(params ExternalFieldSettings[] fieldCfgCollection)
+        /// <param name="fieldCfgCollection">Collection of steady external input field settings</param>
+        public SteadyFieldsSettings(params SteadyFieldSettings[] fieldCfgCollection)
             : this()
         {
             AddFields(fieldCfgCollection);
@@ -61,7 +61,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// The deep copy constructor
         /// </summary>
         /// <param name="source">Source instance</param>
-        public ExternalFieldsSettings(ExternalFieldsSettings source)
+        public SteadyFieldsSettings(SteadyFieldsSettings source)
             : this()
         {
             AddFields(source.FieldCfgCollection);
@@ -72,15 +72,15 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// Creates an initialized instance.
         /// </summary>
         /// <param name="elem">Xml element containing the initialization settings.</param>
-        public ExternalFieldsSettings(XElement elem)
+        public SteadyFieldsSettings(XElement elem)
         {
             //Validation
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
-            FieldCfgCollection = new List<ExternalFieldSettings>();
+            FieldCfgCollection = new List<SteadyFieldSettings>();
             foreach (XElement fieldElem in settingsElem.Elements("field"))
             {
-                FieldCfgCollection.Add(new ExternalFieldSettings(fieldElem));
+                FieldCfgCollection.Add(new SteadyFieldSettings(fieldElem));
             }
             Check();
             return;
@@ -100,7 +100,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         {
             if (FieldCfgCollection.Count == 0)
             {
-                throw new ArgumentException($"At least one external field configuration must be specified.", "FieldCfgCollection");
+                throw new ArgumentException($"At least one steady external field configuration must be specified.", "FieldCfgCollection");
             }
             //Uniqueness of field names
             string[] names = new string[FieldCfgCollection.Count];
@@ -122,7 +122,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         public List<string> GetFieldNames()
         {
             List<string> names = new List<string>();
-            foreach (ExternalFieldSettings fieldCfg in FieldCfgCollection)
+            foreach (SteadyFieldSettings fieldCfg in FieldCfgCollection)
             {
                 names.Add(fieldCfg.Name);
             }
@@ -132,12 +132,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// Adds cloned settings from given collection into the internal collection
         /// </summary>
-        /// <param name="fieldCfgCollection">Collection of external input field settings</param>
-        private void AddFields(IEnumerable<ExternalFieldSettings> fieldCfgCollection)
+        /// <param name="fieldCfgCollection">Collection of steady external input field settings</param>
+        private void AddFields(IEnumerable<SteadyFieldSettings> fieldCfgCollection)
         {
-            foreach (ExternalFieldSettings fieldCfg in fieldCfgCollection)
+            foreach (SteadyFieldSettings fieldCfg in fieldCfgCollection)
             {
-                FieldCfgCollection.Add((ExternalFieldSettings)fieldCfg.DeepClone());
+                FieldCfgCollection.Add((SteadyFieldSettings)fieldCfg.DeepClone());
             }
             return;
         }
@@ -170,7 +170,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// Returns configuration of the given field
         /// </summary>
         /// <param name="fieldName">Field name</param>
-        public ExternalFieldSettings GetFieldCfg(string fieldName)
+        public SteadyFieldSettings GetFieldCfg(string fieldName)
         {
             return FieldCfgCollection[GetFieldID(fieldName)];
         }
@@ -180,7 +180,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// </summary>
         public override RCNetBaseSettings DeepClone()
         {
-            return new ExternalFieldsSettings(this);
+            return new SteadyFieldsSettings(this);
         }
 
         /// <summary>
@@ -192,7 +192,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             XElement rootElem = new XElement(rootElemName);
-            foreach (ExternalFieldSettings fieldCfg in FieldCfgCollection)
+            foreach (SteadyFieldSettings fieldCfg in FieldCfgCollection)
             {
                 rootElem.Add(fieldCfg.GetXml(suppressDefaults));
             }
@@ -207,9 +207,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(bool suppressDefaults)
         {
-            return GetXml("externalFields", suppressDefaults);
+            return GetXml("steadyFields", suppressDefaults);
         }
 
-    }//ExternalFieldsSettings
+    }//SteadyFieldsSettings
 
 }//Namespace

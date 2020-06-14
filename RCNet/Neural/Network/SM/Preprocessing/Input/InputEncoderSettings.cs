@@ -25,9 +25,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         public IFeedingSettings FeedingCfg { get; }
 
         /// <summary>
-        /// Input fields settings
+        /// Varying input fields settings
         /// </summary>
-        public FieldsSettings FieldsCfg { get; }
+        public VaryingFieldsSettings VaryingFieldsCfg { get; }
 
         /// <summary>
         /// Input placement in 3D space
@@ -39,12 +39,15 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// Creates an initialized instance
         /// </summary>
         /// <param name="feedingCfg">Input feeding settings</param>
-        /// <param name="fieldsCfg">Input fields settings</param>
+        /// <param name="varyingFieldsCfg">Varying input fields settings</param>
         /// <param name="coordinatesCfg">Input placement in 3D space</param>
-        public InputEncoderSettings(IFeedingSettings feedingCfg, FieldsSettings fieldsCfg, CoordinatesSettings coordinatesCfg = null)
+        public InputEncoderSettings(IFeedingSettings feedingCfg,
+                                    VaryingFieldsSettings varyingFieldsCfg,
+                                    CoordinatesSettings coordinatesCfg = null
+                                    )
         {
             FeedingCfg = (IFeedingSettings)feedingCfg.DeepClone();
-            FieldsCfg = (FieldsSettings)fieldsCfg.DeepClone();
+            VaryingFieldsCfg = (VaryingFieldsSettings)varyingFieldsCfg.DeepClone();
             CoordinatesCfg = coordinatesCfg == null ? new CoordinatesSettings() : (CoordinatesSettings)coordinatesCfg.DeepClone();
             Check();
             return;
@@ -55,7 +58,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// </summary>
         /// <param name="source">Source instance</param>
         public InputEncoderSettings(InputEncoderSettings source)
-            : this(source.FeedingCfg, source.FieldsCfg, source.CoordinatesCfg)
+            : this(source.FeedingCfg, source.VaryingFieldsCfg, source.CoordinatesCfg)
         {
             return;
         }
@@ -71,7 +74,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             //Parsing
             XElement feedingElem = settingsElem.Elements().First();
             FeedingCfg = feedingElem.Name.LocalName == "feedingContinuous" ? (IFeedingSettings)new FeedingContinuousSettings(feedingElem) : new FeedingPatternedSettings(feedingElem);
-            FieldsCfg = new FieldsSettings(settingsElem.Elements("fields").First());
+            VaryingFieldsCfg = new VaryingFieldsSettings(settingsElem.Elements("varyingFields").First());
             XElement coordinatesElem = settingsElem.Elements("coordinates").FirstOrDefault();
             CoordinatesCfg = coordinatesElem == null ? new CoordinatesSettings() : new CoordinatesSettings(coordinatesElem);
             Check();
@@ -90,6 +93,23 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// </summary>
         protected override void Check()
         {
+            //Uniqueness of all input field names
+            if(FeedingCfg.FeedingType == InputEncoder.InputFeedingType.Patterned)
+            {
+                FeedingPatternedSettings patternedCfg = (FeedingPatternedSettings)FeedingCfg;
+                if(patternedCfg.SteadyFieldsCfg != null)
+                {
+                    //There are steady fields defined
+                    foreach(SteadyFieldSettings sf in patternedCfg.SteadyFieldsCfg.FieldCfgCollection)
+                    {
+                        if (VaryingFieldsCfg.GetFieldID(sf.Name, false) != -1)
+                        {
+                            throw new InvalidOperationException($"Steady field name {sf.Name} found among varying fields.");
+                        }
+                    }
+                }
+            }
+
             return;
         }
 
@@ -99,18 +119,45 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         public List<string> GetRoutedFieldNames()
         {
             List<string> names = new List<string>();
-            if (FeedingCfg.RouteToReadout)
+            //Steady fields
+            if (FeedingCfg.FeedingType == InputEncoder.InputFeedingType.Patterned)
             {
-                foreach (ExternalFieldSettings fieldCfg in FieldsCfg.ExternalFieldsCfg.FieldCfgCollection)
+                FeedingPatternedSettings patternedCfg = (FeedingPatternedSettings)FeedingCfg;
+                if (patternedCfg.SteadyFieldsCfg != null)
+                {
+                    //There are steady fields defined
+                    foreach (SteadyFieldSettings sf in patternedCfg.SteadyFieldsCfg.FieldCfgCollection)
+                    {
+                        if (sf.RouteToReadout)
+                        {
+                            names.Add(sf.Name);
+                        }
+                    }
+                }
+            }
+            //Varying fields
+            if (VaryingFieldsCfg.RouteToReadout)
+            {
+                foreach (ExternalFieldSettings fieldCfg in VaryingFieldsCfg.ExternalFieldsCfg.FieldCfgCollection)
                 {
                     if (fieldCfg.RouteToReadout)
                     {
                         names.Add(fieldCfg.Name);
                     }
                 }
-                if (FieldsCfg.GeneratedFieldsCfg != null)
+                if (VaryingFieldsCfg.TransformedFieldsCfg != null)
                 {
-                    foreach (GeneratedFieldSettings fieldCfg in FieldsCfg.GeneratedFieldsCfg.FieldCfgCollection)
+                    foreach (TransformedFieldSettings fieldCfg in VaryingFieldsCfg.TransformedFieldsCfg.FieldCfgCollection)
+                    {
+                        if (fieldCfg.RouteToReadout)
+                        {
+                            names.Add(fieldCfg.Name);
+                        }
+                    }
+                }
+                if (VaryingFieldsCfg.GeneratedFieldsCfg != null)
+                {
+                    foreach (GeneratedFieldSettings fieldCfg in VaryingFieldsCfg.GeneratedFieldsCfg.FieldCfgCollection)
                     {
                         if (fieldCfg.RouteToReadout)
                         {
@@ -140,7 +187,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         {
             XElement rootElem = new XElement(rootElemName,
                                              FeedingCfg.GetXml(suppressDefaults),
-                                             FieldsCfg.GetXml(suppressDefaults)
+                                             VaryingFieldsCfg.GetXml(suppressDefaults)
                                              );
             if (!suppressDefaults || !CoordinatesCfg.ContainsOnlyDefaults)
             {

@@ -1,7 +1,10 @@
 ﻿using RCNet.Neural.Activation;
 using RCNet.Neural.Data.Transformers;
+using RCNet.Neural.Data.Generators;
 using System;
 using System.Collections.Generic;
+using RCNet.CsvTools;
+using System.Globalization;
 
 namespace Demo.DemoConsoleApp
 {
@@ -123,6 +126,52 @@ namespace Demo.DemoConsoleApp
             return;
         }
 
+        private void GenSteadyPatternedMGData(int minTau, int maxTau, int tauSamples, int patternLength, double verifyRatio, string path)
+        {
+            CsvDataHolder trainingData = new CsvDataHolder(DelimitedStringValues.DefaultDelimiter);
+            CsvDataHolder verificationData = new CsvDataHolder(DelimitedStringValues.DefaultDelimiter);
+            int verifyBorderIdx = (int)(tauSamples * verifyRatio);
+            for (int tau = minTau; tau <= maxTau; tau++)
+            {
+                MackeyGlassGenerator mgg = new MackeyGlassGenerator(new MackeyGlassGeneratorSettings(tau));
+                int neededDataLength = 1 + patternLength + (tauSamples - 1);
+                double[] mggData = new double[neededDataLength];
+                for(int i = 0; i < neededDataLength; i++)
+                {
+                    mggData[i] = mgg.Next();
+                }
+                for(int i = 0; i < tauSamples; i++)
+                {
+                    DelimitedStringValues patternData = new DelimitedStringValues();
+                    //Steady data
+                    patternData.AddValue(tau.ToString(CultureInfo.InvariantCulture));
+                    //Varying data
+                    for (int j = 0; j < patternLength; j++)
+                    {
+                        patternData.AddValue(mggData[i + j].ToString(CultureInfo.InvariantCulture));
+                    }
+                    //Desired data 1
+                    patternData.AddValue(mggData[i + patternLength].ToString(CultureInfo.InvariantCulture));
+                    //Desired data 2
+                    patternData.AddValue(mggData[i + patternLength].ToString(CultureInfo.InvariantCulture));
+                    //Add to a collections
+                    if (i < verifyBorderIdx)
+                    {
+                        trainingData.DataRowCollection.Add(patternData);
+                    }
+                    else
+                    {
+                        verificationData.DataRowCollection.Add(patternData);
+                    }
+                }
+            }
+            //Save files
+            trainingData.Save(path + "\\" + "SteadyMG_train.csv");
+            verificationData.Save(path + "\\" + "SteadyMG_verify.csv");
+
+            return;
+        }
+
         /// <summary>
         /// Playground's entry point
         /// </summary>
@@ -132,7 +181,10 @@ namespace Demo.DemoConsoleApp
             /*
             TestActivation(ActivationFactory.Create(new SimpleIFSettings(), _rand), 200, 0.25, 50, 100);
             TestTransformers();
+            GenSteadyPatternedMGData(10, 18, 200, 200, 0.5d, "C:\\Users\\Okozelsk\\Development\\DotNet\\Projects\\NET\\Demo\\DemoConsoleApp\\Data");
             */
+
+
             return;
         }
 

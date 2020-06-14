@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor;
+using System;
 using System.Linq;
 using System.Xml.Linq;
 
@@ -102,6 +103,42 @@ namespace RCNet.Neural.Network.SM.PM
 
 
         //Methods
+        private bool IsAllowedPredictorOrigin(string resName, string poolName)
+        {
+            if(AllowedPoolsCfg != null)
+            {
+                return AllowedPoolsCfg.IsAllowed(resName, poolName);
+            }
+            return false;
+        }
+
+        private bool IsAllowedPredictorID(PredictorsProvider.PredictorID predictorID)
+        {
+            if(AllowedPredictorsCfg != null)
+            {
+                return AllowedPredictorsCfg.IsAllowed(predictorID);
+            }
+            return false;
+        }
+
+        public bool IsAllowedPredictor(string resName, string poolName, PredictorsProvider.PredictorID predictorID)
+        {
+            if(IsAllowedPredictorOrigin(resName, poolName))
+            {
+                return IsAllowedPredictorID(predictorID);
+            }
+            return false;
+        }
+
+        public bool IsAllowedInputField(string inputFieldName)
+        {
+            if(AllowedInputFieldsCfg != null)
+            {
+                return AllowedInputFieldsCfg.IsAllowed(inputFieldName);
+            }
+            return false;
+        }
+
         /// <summary>
         /// Checks consistency
         /// </summary>

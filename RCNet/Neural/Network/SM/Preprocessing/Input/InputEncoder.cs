@@ -18,14 +18,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
     {
         //Constants
         /// <summary>
-        /// Identifies variable number of time-points per one instance of processed external input vector
+        /// Identifies variable number of time-points per one instance of processed input vector
         /// </summary>
         public const int VariableNumOfTimePoints = -1;
 
         /// <summary>
-        /// Identifies variable length of external input vector
+        /// Identifies variable length of external varying input data vector
         /// </summary>
-        private const int VariableExtVectorLength = -1;
+        private const int NonFixedVaryingDataVectorLength = -1;
 
         /// <summary>
         /// ID of the input encoder's reservoir
@@ -61,51 +61,72 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
 
         //Attribute properties
         /// <summary>
-        /// Collection of input fields
-        /// </summary>
-        public List<InputField> Fields { get; }
-
-        /// <summary>
-        /// Fields to be routed to readout
-        /// </summary>
-        public List<InputField> RoutedFieldCollection { get; }
-
-        /// <summary>
         /// Number of fixed time-points of one instance of processed external input vector
         /// or VariableNumOfTimePoints (-1)
         /// </summary>
         public int NumOfTimePoints { get; private set; }
 
         /// <summary>
-        /// Number of input field values routed to readout
+        /// Number of values routed to readout
         /// </summary>
-        public int NumOfRoutedFieldValues { get; private set; }
+        public int NumOfRoutedValues { get; private set; }
 
         //Attributes
         /// <summary>
         /// Configuration
         /// </summary>
         private readonly InputEncoderSettings _encoderCfg;
+        
         /// <summary>
         /// Collection of the internal input transformers associated with the transformed input fields
         /// </summary>
         private readonly List<ITransformer> _internalInputTransformerCollection;
+        
         /// <summary>
         /// Collection of the internal input generators associated with the generated input fields
         /// </summary>
         private readonly List<IGenerator> _internalInputGeneratorCollection;
+        
         /// <summary>
-        /// Required constant length of the external input vector or VariableExtVectorLength (no constraint)
+        /// Collection of varying input fields
         /// </summary>
-        private int _fixedExtVectorLength;
+        private readonly List<InputField> _varyingFields;
+        
         /// <summary>
-        /// Data to be processed
+        /// Number of steady fields (relevant only in case of patterned feeding)
+        /// </summary>
+        private readonly int _numOfSteadyFields;
+        
+        /// <summary>
+        /// Indexes of steady fields to be routed to the readout
+        /// </summary>
+        private readonly List<int> _routedSteadyFieldIndexCollection;
+        
+        /// <summary>
+        /// Varying fields to be routed to readout
+        /// </summary>
+        private readonly List<InputField> _routedVaryingFieldCollection;
+        
+        /// <summary>
+        /// Required constant length of the external varying data vector or VariableVaryingVectorLength (no constraint)
+        /// </summary>
+        private int _varyingDataVectorLength;
+        
+        /// <summary>
+        /// Steady data to be processed
+        /// </summary>
+        private double[] _steadyData;
+        
+        /// <summary>
+        /// Varying data to be processed
         /// </summary>
         private readonly List<double[]> _inputDataQueue;
+        
         /// <summary>
         /// Number of already processed inputs from _inputDataQueue
         /// </summary>
         private int _numOfProcessedInputs;
+        
         /// <summary>
         /// Indicates reverse mode of input data processing
         /// </summary>
@@ -119,75 +140,93 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         public InputEncoder(InputEncoderSettings inputEncoderCfg)
         {
             _encoderCfg = (InputEncoderSettings)inputEncoderCfg.DeepClone();
-            //Fields
-            Fields = new List<InputField>(_encoderCfg.FieldsCfg.TotalNumOfFields);
+            //Steady fields
+            _numOfSteadyFields = 0;
+            _routedSteadyFieldIndexCollection = new List<int>();
+            if (_encoderCfg.FeedingCfg.FeedingType == InputFeedingType.Patterned)
+            {
+                FeedingPatternedSettings fps = (FeedingPatternedSettings)_encoderCfg.FeedingCfg;
+                if (fps.SteadyFieldsCfg != null)
+                {
+                    _numOfSteadyFields = fps.SteadyFieldsCfg.FieldCfgCollection.Count;
+                    for(int i = 0; i < fps.SteadyFieldsCfg.FieldCfgCollection.Count; i++)
+                    {
+                        if(fps.SteadyFieldsCfg.FieldCfgCollection[i].RouteToReadout)
+                        {
+                            _routedSteadyFieldIndexCollection.Add(i);
+                        }
+                    }
+                }
+            }
+            //Varying fields
+            _varyingFields = new List<InputField>(_encoderCfg.VaryingFieldsCfg.TotalNumOfFields);
             int[] coordinates = _encoderCfg.CoordinatesCfg.GetCoordinates();
-            int fieldIdx = 0;
+            int fieldIdx = _numOfSteadyFields;
             int inputNeuronStartIdx = 0;
             //External fields
-            foreach (ExternalFieldSettings fieldCfg in _encoderCfg.FieldsCfg.ExternalFieldsCfg.FieldCfgCollection)
+            foreach (ExternalFieldSettings fieldCfg in _encoderCfg.VaryingFieldsCfg.ExternalFieldsCfg.FieldCfgCollection)
             {
-                Fields.Add(new InputField(fieldCfg.Name,
+                _varyingFields.Add(new InputField(fieldCfg.Name,
                                           fieldIdx++,
                                           coordinates,
                                           _dataRange,
                                           fieldCfg.FeatureFilterCfg,
                                           fieldCfg.SpikeCodeCfg,
-                                          (fieldCfg.RouteToReadout && _encoderCfg.FeedingCfg.RouteToReadout),
+                                          (fieldCfg.RouteToReadout && _encoderCfg.VaryingFieldsCfg.RouteToReadout),
                                           inputNeuronStartIdx
                                           ));
-                inputNeuronStartIdx += Fields[fieldIdx - 1].NumOfInputNeurons;
+                inputNeuronStartIdx += _varyingFields[(fieldIdx - _numOfSteadyFields) - 1].NumOfInputNeurons;
             }
             //Internal input transformers and fields
             _internalInputTransformerCollection = new List<ITransformer>();
-            if (_encoderCfg.FieldsCfg.TransformedFieldsCfg != null)
+            if (_encoderCfg.VaryingFieldsCfg.TransformedFieldsCfg != null)
             {
-                List<string> names = _encoderCfg.FieldsCfg.GetNames();
-                foreach (TransformedFieldSettings fieldCfg in _encoderCfg.FieldsCfg.TransformedFieldsCfg.FieldCfgCollection)
+                List<string> names = _encoderCfg.VaryingFieldsCfg.GetNames();
+                foreach (TransformedFieldSettings fieldCfg in _encoderCfg.VaryingFieldsCfg.TransformedFieldsCfg.FieldCfgCollection)
                 {
                     _internalInputTransformerCollection.Add(TransformerFactory.Create(names, fieldCfg.TransformerCfg));
-                    Fields.Add(new InputField(fieldCfg.Name,
+                    _varyingFields.Add(new InputField(fieldCfg.Name,
                                               fieldIdx++,
                                               coordinates,
                                               _dataRange,
                                               fieldCfg.FeatureFilterCfg,
                                               fieldCfg.SpikingCodingCfg,
-                                              (fieldCfg.RouteToReadout && _encoderCfg.FeedingCfg.RouteToReadout),
+                                              (fieldCfg.RouteToReadout && _encoderCfg.VaryingFieldsCfg.RouteToReadout),
                                               inputNeuronStartIdx
                                               ));
-                    inputNeuronStartIdx += Fields[fieldIdx - 1].NumOfInputNeurons;
+                    inputNeuronStartIdx += _varyingFields[(fieldIdx - _numOfSteadyFields) - 1].NumOfInputNeurons;
                 }
             }
             //Internal input generators and fields
             _internalInputGeneratorCollection = new List<IGenerator>();
-            if (_encoderCfg.FieldsCfg.GeneratedFieldsCfg != null)
+            if (_encoderCfg.VaryingFieldsCfg.GeneratedFieldsCfg != null)
             {
-                foreach (GeneratedFieldSettings fieldCfg in _encoderCfg.FieldsCfg.GeneratedFieldsCfg.FieldCfgCollection)
+                foreach (GeneratedFieldSettings fieldCfg in _encoderCfg.VaryingFieldsCfg.GeneratedFieldsCfg.FieldCfgCollection)
                 {
                     _internalInputGeneratorCollection.Add(GeneratorFactory.Create(fieldCfg.GeneratorCfg));
-                    Fields.Add(new InputField(fieldCfg.Name,
+                    _varyingFields.Add(new InputField(fieldCfg.Name,
                                               fieldIdx++,
                                               coordinates,
                                               _dataRange,
                                               fieldCfg.FeatureFilterCfg,
                                               fieldCfg.SpikingCodingCfg,
-                                              (fieldCfg.RouteToReadout && _encoderCfg.FeedingCfg.RouteToReadout),
+                                              (fieldCfg.RouteToReadout && _encoderCfg.VaryingFieldsCfg.RouteToReadout),
                                               inputNeuronStartIdx
                                               ));
-                    inputNeuronStartIdx += Fields[fieldIdx - 1].NumOfInputNeurons;
+                    inputNeuronStartIdx += _varyingFields[(fieldIdx - _numOfSteadyFields) - 1].NumOfInputNeurons;
                 }
             }
-            RoutedFieldCollection = new List<InputField>(Fields.Count);
-            foreach (InputField field in Fields)
+            _routedVaryingFieldCollection = new List<InputField>(_varyingFields.Count);
+            foreach (InputField field in _varyingFields)
             {
                 if (field.RouteToReadout)
                 {
-                    RoutedFieldCollection.Add(field);
+                    _routedVaryingFieldCollection.Add(field);
                 }
             }
-            _fixedExtVectorLength = VariableExtVectorLength;
+            _varyingDataVectorLength = NonFixedVaryingDataVectorLength;
             NumOfTimePoints = VariableNumOfTimePoints;
-            NumOfRoutedFieldValues = 0;
+            NumOfRoutedValues = 0;
             //Input processing queue
             _inputDataQueue = new List<double[]>();
             ResetInputProcessingQueue();
@@ -202,13 +241,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
 
         //Methods
         /// <summary>
-        /// Returns input field having given name
+        /// Returns varying input field having given name
         /// </summary>
         /// <param name="name">Input field name</param>
         /// <returns>Null if not found, InputField instance if found</returns>
-        public InputField GetInputField(string name)
+        public InputField GetVaryingInputField(string name)
         {
-            foreach (InputField field in Fields)
+            foreach (InputField field in _varyingFields)
             {
                 if (field.Name == name)
                 {
@@ -224,6 +263,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         private void ResetInputProcessingQueue()
         {
             //Reset input data buffer
+            _steadyData = null;
             _inputDataQueue.Clear();
             _numOfProcessedInputs = 0;
             _reverseMode = false;
@@ -255,7 +295,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         private void ResetInputNeurons(bool resetStatistics)
         {
             //Reset input neurons in all input fields
-            foreach (InputField field in Fields)
+            foreach (InputField field in _varyingFields)
             {
                 field.ResetNeurons(resetStatistics);
             }
@@ -267,7 +307,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// </summary>
         private void ResetFeatureFilters()
         {
-            foreach (InputField field in Fields)
+            foreach (InputField field in _varyingFields)
             {
                 field.ResetFilter();
             }
@@ -283,9 +323,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             ResetTransformersAndGenerators();
             ResetInputNeurons(true);
             ResetFeatureFilters();
-            _fixedExtVectorLength = VariableExtVectorLength;
+            _varyingDataVectorLength = NonFixedVaryingDataVectorLength;
             NumOfTimePoints = VariableNumOfTimePoints;
-            NumOfRoutedFieldValues = 0;
+            NumOfRoutedValues = 0;
             return;
         }
 
@@ -295,12 +335,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <param name="externalInputVector">External input vector</param>
         private double[] AddInternalInputs(double[] externalInputVector)
         {
-            if (_encoderCfg.FieldsCfg.TotalNumOfFields == externalInputVector.Length)
+            if (_encoderCfg.VaryingFieldsCfg.TotalNumOfFields == externalInputVector.Length)
             {
                 //Defined no internal fields
                 return externalInputVector;
             }
-            double[] inputVector = new double[_encoderCfg.FieldsCfg.TotalNumOfFields];
+            double[] inputVector = new double[_encoderCfg.VaryingFieldsCfg.TotalNumOfFields];
             inputVector.Populate(double.NaN);
             //Original external data
             externalInputVector.CopyTo(inputVector, 0);
@@ -358,12 +398,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <param name="inputVectorCollection">Collection of input vectors</param>
         private void UpdateFeatureFilters(List<double[]> inputVectorCollection)
         {
-            Parallel.For(0, Fields.Count, i =>
+            Parallel.For(0, _varyingFields.Count, i =>
             {
                 //Update filter
                 foreach (double[] vector in inputVectorCollection)
                 {
-                    Fields[i].UpdateFilter(vector[i]);
+                    _varyingFields[i].UpdateFilter(vector[i]);
                 }
             });
             return;
@@ -376,15 +416,49 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         private void ValidateExtInputVectorLength(int extInputVectorLength)
         {
             //Check vector length
-            if (_fixedExtVectorLength != VariableExtVectorLength && extInputVectorLength != _fixedExtVectorLength)
+            if (_varyingDataVectorLength != NonFixedVaryingDataVectorLength && extInputVectorLength != _varyingDataVectorLength)
             {
-                throw new InvalidOperationException($"Number of the time-points in every input data has to be constant ({_fixedExtVectorLength}).");
+                throw new InvalidOperationException($"Number of the time-points in every input data has to be constant ({_varyingDataVectorLength}).");
             }
             return;
         }
 
         /// <summary>
-        /// Initializes internal feature filters to operational state based on sample data
+        /// Splits external input vector to a steady part and varying part
+        /// </summary>
+        /// <param name="extInputVector">Input external data vector</param>
+        /// <param name="steadyVector">Output steady data vector</param>
+        /// <param name="varyingVector">Output varying data vector</param>
+        private void SplitSteadyAndVaryingInputData(double[] extInputVector, out double[] steadyVector, out double[] varyingVector)
+        {
+            //Separate steady and varying data
+            if (_numOfSteadyFields > 0)
+            {
+                //Steady data
+                steadyVector = new double[_numOfSteadyFields];
+                for (int i = 0; i < _numOfSteadyFields; i++)
+                {
+                    steadyVector[i] = extInputVector[i];
+                }
+                //Varying data
+                varyingVector = new double[extInputVector.Length - _numOfSteadyFields];
+                for (int i = 0; i < varyingVector.Length; i++)
+                {
+                    varyingVector[i] = extInputVector[_numOfSteadyFields + i];
+                }
+            }
+            else
+            {
+                //Steady data
+                steadyVector = null;
+                //Varying data
+                varyingVector = extInputVector;
+            }
+            return;
+        }
+
+        /// <summary>
+        /// Initializes internal feature filters to operational state based on a bundle of sample data
         /// </summary>
         /// <param name="inputBundle">Sample input data</param>
         public void Initialize(VectorBundle inputBundle)
@@ -395,7 +469,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             {
                 //Continuous feeding
                 //Fixed lengths
-                _fixedExtVectorLength = inputBundle.InputVectorCollection[0].Length;
+                _varyingDataVectorLength = inputBundle.InputVectorCollection[0].Length;
                 NumOfTimePoints = 1;
                 //Add internal inputs and initialize feature filters
                 UpdateFeatureFilters(AddInternalInputs(inputBundle.InputVectorCollection));
@@ -406,23 +480,24 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
                 FeedingPatternedSettings feedingPatternedCfg = (FeedingPatternedSettings)_encoderCfg.FeedingCfg;
                 //Input pattern length constraint and number of time-points
                 NumOfTimePoints = feedingPatternedCfg.UnificationCfg.ResamplingCfg.TargetTimePoints != ResamplingSettings.AutoTargetTimePointsNum ? feedingPatternedCfg.UnificationCfg.ResamplingCfg.TargetTimePoints : VariableNumOfTimePoints;
-                if(NumOfTimePoints == VariableNumOfTimePoints && (RoutedFieldCollection.Count > 0 || feedingPatternedCfg.Slices > 1))
+                if(NumOfTimePoints == VariableNumOfTimePoints && (_routedVaryingFieldCollection.Count > 0 || feedingPatternedCfg.Slices > 1))
                 {
                     //because no resampling, length of external input vector must be fixed to keep consistent data
-                    _fixedExtVectorLength = inputBundle.InputVectorCollection[0].Length;
+                    _varyingDataVectorLength = inputBundle.InputVectorCollection[0].Length - _numOfSteadyFields;
                     //Number of time-points must be also fixed
-                    NumOfTimePoints = _fixedExtVectorLength / Fields.Count;
+                    NumOfTimePoints = _varyingDataVectorLength / _varyingFields.Count;
                 }
                 //Convert input vectors to InputPatterns
-                List<List<double[]>> inputPatterns = new List<List<double[]>>(inputBundle.InputVectorCollection.Count);
-                foreach (double[] vector in inputBundle.InputVectorCollection)
+                foreach (double[] orgVector in inputBundle.InputVectorCollection)
                 {
-                    //Check length of the external input vector
-                    ValidateExtInputVectorLength(vector.Length);
+                    //Split steady and varying data
+                    SplitSteadyAndVaryingInputData(orgVector, out double[] steadyVector, out double[] varyingVector);
+                    //Check length of the external varying data vector
+                    ValidateExtInputVectorLength(varyingVector.Length);
                     //Convert external vector to pattern
                     FeedingPatternedSettings feedingCfg = (FeedingPatternedSettings)_encoderCfg.FeedingCfg;
-                    InputPattern inputPattern = new InputPattern(vector,
-                                                                 _encoderCfg.FieldsCfg.ExternalFieldsCfg.FieldCfgCollection.Count,
+                    InputPattern inputPattern = new InputPattern(varyingVector,
+                                                                 _encoderCfg.VaryingFieldsCfg.ExternalFieldsCfg.FieldCfgCollection.Count,
                                                                  feedingCfg.VarSchema,
                                                                  feedingCfg.UnificationCfg.Detrend,
                                                                  feedingCfg.UnificationCfg.UnifyAmplitude,
@@ -432,14 +507,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
                                                                  NumOfTimePoints == VariableNumOfTimePoints ? ResamplingSettings.AutoTargetTimePointsNum : NumOfTimePoints
                                                                  );
                     List<double[]> inputPatternVectors = CompleteInputPattern(inputPattern);
-                    inputPatterns.Add(inputPatternVectors);
                     UpdateFeatureFilters(inputPatternVectors);
                 }
             }
             //Number of routed input values
-            if (RoutedFieldCollection.Count > 0)
+            NumOfRoutedValues = _routedSteadyFieldIndexCollection.Count;
+            if (_routedVaryingFieldCollection.Count > 0)
             {
-                NumOfRoutedFieldValues = RoutedFieldCollection.Count * NumOfTimePoints;
+                NumOfRoutedValues += _routedVaryingFieldCollection.Count * NumOfTimePoints;
             }
             return;
         }
@@ -460,14 +535,16 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             }
             else
             {
-                //Check length of the external input vector
-                ValidateExtInputVectorLength(inputVector.Length);
+                //Split steady and varying data
+                SplitSteadyAndVaryingInputData(inputVector, out _steadyData, out double[] varyingVector);
+                //Check length of the external varying data vector
+                ValidateExtInputVectorLength(varyingVector.Length);
                 //Reset input neurons to initial state
                 ResetInputNeurons(false);
                 //Prepare input pattern
                 FeedingPatternedSettings feedingCfg = (FeedingPatternedSettings)_encoderCfg.FeedingCfg;
-                InputPattern inputPattern = new InputPattern(inputVector,
-                                                             _encoderCfg.FieldsCfg.ExternalFieldsCfg.FieldCfgCollection.Count,
+                InputPattern inputPattern = new InputPattern(varyingVector,
+                                                             _encoderCfg.VaryingFieldsCfg.ExternalFieldsCfg.FieldCfgCollection.Count,
                                                              feedingCfg.VarSchema,
                                                              feedingCfg.UnificationCfg.Detrend,
                                                              feedingCfg.UnificationCfg.UnifyAmplitude,
@@ -489,9 +566,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         {
             if (_numOfProcessedInputs < _inputDataQueue.Count)
             {
-                for (int i = 0; i < Fields.Count; i++)
+                for (int i = 0; i < _varyingFields.Count; i++)
                 {
-                    Fields[i].SetNewData(_inputDataQueue[_numOfProcessedInputs][i], collectStatistics);
+                    _varyingFields[i].SetNewData(_inputDataQueue[_numOfProcessedInputs][i], collectStatistics);
                 }
                 ++_numOfProcessedInputs;
                 return true;
@@ -527,18 +604,20 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// </summary>
         public List<PredictorDescriptor> GetInputValuesPredictorsDescriptors()
         {
-            //Check call relevancy
-            if(NumOfTimePoints == VariableNumOfTimePoints)
-            {
-                throw new InvalidOperationException("Wrong function call. Number of time-points per input is variable.");
-            }
             //Build descriptors
-            List<PredictorDescriptor> result = new List<PredictorDescriptor>(RoutedFieldCollection.Count * NumOfTimePoints);
-            foreach (InputField field in RoutedFieldCollection)
+            List<PredictorDescriptor> result = new List<PredictorDescriptor>(_routedSteadyFieldIndexCollection.Count + _routedVaryingFieldCollection.Count * NumOfTimePoints);
+            //Steady fields
+
+            foreach(int idx in _routedSteadyFieldIndexCollection)
+            {
+                result.Add(new PredictorDescriptor(((FeedingPatternedSettings)_encoderCfg.FeedingCfg).SteadyFieldsCfg.FieldCfgCollection[idx].Name));
+            }
+            //Varying fields
+            foreach (InputField field in _routedVaryingFieldCollection)
             {
                 for (int i = 0; i < NumOfTimePoints; i++)
                 {
-                    result.Add(new PredictorDescriptor(field.Idx, ReservoirID, PoolID, PredictorDescriptor.InputFieldValue));
+                    result.Add(new PredictorDescriptor(field.Name));
                 }
             }
             return result;
@@ -553,7 +632,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         public int CopyRoutedInputDataTo(double[] buffer, int fromOffset)
         {
             int count = 0;
-            foreach (InputField field in RoutedFieldCollection)
+            //Steady fields
+            foreach(int idx in _routedSteadyFieldIndexCollection)
+            {
+                buffer[fromOffset++] = _steadyData[idx];
+                ++count;
+            }
+            //Varying fields
+            foreach (InputField field in _routedVaryingFieldCollection)
             {
                 for (int i = 0; i < _inputDataQueue.Count; i++)
                 {

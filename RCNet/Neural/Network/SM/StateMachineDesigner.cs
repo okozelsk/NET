@@ -116,7 +116,7 @@ namespace RCNet.Neural.Network.SM
                 extFieldCollection.Add(new ExternalFieldSettings(name, new RealFeatureFilterSettings(), routeToReadout, spikeCodeCfg));
             }
             ExternalFieldsSettings extFieldsCfg = new ExternalFieldsSettings(extFieldCollection);
-            FieldsSettings fieldsCfg = new FieldsSettings(extFieldsCfg, null, null);
+            VaryingFieldsSettings fieldsCfg = new VaryingFieldsSettings(extFieldsCfg, null, null, routeToReadout);
             return new InputEncoderSettings(feedingCfg, fieldsCfg);
         }
 
@@ -125,8 +125,10 @@ namespace RCNet.Neural.Network.SM
         /// Contains only external input fields.
         /// </summary>
         /// <param name="feedingCfg">Input feeding configuration</param>
+        /// <param name="routeToReadout">Specifies whether to route input values to readout</param>
         /// <param name="externalFieldCfg">External input field configuration</param>
         public static InputEncoderSettings CreateInputCfg(IFeedingSettings feedingCfg,
+                                                          bool routeToReadout,
                                                           params ExternalFieldSettings[] externalFieldCfg
                                                           )
         {
@@ -134,7 +136,7 @@ namespace RCNet.Neural.Network.SM
             {
                 throw new ArgumentNullException("feedingCfg");
             }
-            return new InputEncoderSettings(feedingCfg, new FieldsSettings(new ExternalFieldsSettings(externalFieldCfg)));
+            return new InputEncoderSettings(feedingCfg, new VaryingFieldsSettings(new ExternalFieldsSettings(externalFieldCfg), null, null, routeToReadout));
         }
 
         /// <summary>
@@ -369,9 +371,9 @@ namespace RCNet.Neural.Network.SM
                                                                                      new PoolsSettings(poolCfg)
                                                                                      );
             //Input connections configuration
-            List<InputConnSettings> inputConns = new List<InputConnSettings>(InputCfg.FieldsCfg.ExternalFieldsCfg.FieldCfgCollection.Count);
-            double maxInpSynWeight = MaxInputWeightSum / InputCfg.FieldsCfg.ExternalFieldsCfg.FieldCfgCollection.Count;
-            foreach (ExternalFieldSettings fieldCfg in InputCfg.FieldsCfg.ExternalFieldsCfg.FieldCfgCollection)
+            List<InputConnSettings> inputConns = new List<InputConnSettings>(InputCfg.VaryingFieldsCfg.ExternalFieldsCfg.FieldCfgCollection.Count);
+            double maxInpSynWeight = MaxInputWeightSum / InputCfg.VaryingFieldsCfg.ExternalFieldsCfg.FieldCfgCollection.Count;
+            foreach (ExternalFieldSettings fieldCfg in InputCfg.VaryingFieldsCfg.ExternalFieldsCfg.FieldCfgCollection)
             {
                 InputConnSettings inputConnCfg = new InputConnSettings(fieldCfg.Name,
                                                                        poolCfg.Name,
@@ -457,8 +459,8 @@ namespace RCNet.Neural.Network.SM
                                                                                      new PoolsSettings(poolCfg)
                                                                                      );
             //Input connections configuration
-            List<InputConnSettings> inputConns = new List<InputConnSettings>(InputCfg.FieldsCfg.ExternalFieldsCfg.FieldCfgCollection.Count);
-            foreach (ExternalFieldSettings fieldCfg in InputCfg.FieldsCfg.ExternalFieldsCfg.FieldCfgCollection)
+            List<InputConnSettings> inputConns = new List<InputConnSettings>(InputCfg.VaryingFieldsCfg.ExternalFieldsCfg.FieldCfgCollection.Count);
+            foreach (ExternalFieldSettings fieldCfg in InputCfg.VaryingFieldsCfg.ExternalFieldsCfg.FieldCfgCollection)
             {
                 InputConnSettings inputConnCfg = new InputConnSettings(fieldCfg.Name,
                                                                        poolCfg.Name,

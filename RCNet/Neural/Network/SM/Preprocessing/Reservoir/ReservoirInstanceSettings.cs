@@ -149,7 +149,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             }
             foreach (InputConnSettings inputConnCfg in InputConnsCfg.ConnCfgCollection)
             {
-                inputCfg.FieldsCfg.GetFieldID(inputConnCfg.InputFieldName, true);
+                inputCfg.VaryingFieldsCfg.GetFieldID(inputConnCfg.InputFieldName, true);
                 reservoirStructureCfg.PoolsCfg.GetPoolID(inputConnCfg.PoolName);
             }
             return;

@@ -8,11 +8,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
     public interface IFeedingSettings
     {
         /// <summary>
-        /// Specifies whether to route input fields to readout layer together with other predictors
-        /// </summary>
-        bool RouteToReadout { get; }
-
-        /// <summary>
         /// Type of input feeding
         /// </summary>
         InputEncoder.InputFeedingType FeedingType { get; }

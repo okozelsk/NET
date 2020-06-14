@@ -124,7 +124,7 @@ namespace Demo.DemoConsoleApp.SM
                     throw new InvalidOperationException($"Incorrect file format. When NeuralPreprocessor is bypassed, only patterned data are allowed.");
                 }
                 trainingData = VectorBundle.Load(trainingCsvData,
-                                                 demoCaseParams.StateMachineCfg.NeuralPreprocessorCfg.InputEncoderCfg.FieldsCfg.ExternalFieldsCfg.GetFieldNames(),
+                                                 demoCaseParams.StateMachineCfg.NeuralPreprocessorCfg.InputEncoderCfg.VaryingFieldsCfg.ExternalFieldsCfg.GetFieldNames(),
                                                  demoCaseParams.StateMachineCfg.ReadoutLayerCfg.OutputFieldNameCollection,
                                                  out predictionInputVector
                                                  );
@@ -164,7 +164,7 @@ namespace Demo.DemoConsoleApp.SM
                     double[] tmp = stateMachine.Compute(predictionInputVector);
                     //Load verification data and get new predictionInputVector for final prediction
                     verificationData = VectorBundle.Load(verificationCsvData,
-                                                         demoCaseParams.StateMachineCfg.NeuralPreprocessorCfg.InputEncoderCfg.FieldsCfg.ExternalFieldsCfg.GetFieldNames(),
+                                                         demoCaseParams.StateMachineCfg.NeuralPreprocessorCfg.InputEncoderCfg.VaryingFieldsCfg.ExternalFieldsCfg.GetFieldNames(),
                                                          demoCaseParams.StateMachineCfg.ReadoutLayerCfg.OutputFieldNameCollection,
                                                          out predictionInputVector
                                                          );

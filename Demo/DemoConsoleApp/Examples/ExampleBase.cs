@@ -117,7 +117,7 @@ namespace Demo.DemoConsoleApp.Examples
             {
                 //Continuous feeding data format
                 trainingData = VectorBundle.Load(trainingCsvData,
-                                                 stateMachine.Config.NeuralPreprocessorCfg.InputEncoderCfg.FieldsCfg.ExternalFieldsCfg.GetFieldNames(),
+                                                 stateMachine.Config.NeuralPreprocessorCfg.InputEncoderCfg.VaryingFieldsCfg.ExternalFieldsCfg.GetFieldNames(),
                                                  stateMachine.Config.ReadoutLayerCfg.OutputFieldNameCollection,
                                                  out predictionInputVector
                                                  );
@@ -171,7 +171,7 @@ namespace Demo.DemoConsoleApp.Examples
                 double[] tmp = stateMachine.Compute(omittedInputVector);
                 //Load verification data and get new predictionInputVector for final prediction
                 verificationData = VectorBundle.Load(verificationCsvData,
-                                                     stateMachine.Config.NeuralPreprocessorCfg.InputEncoderCfg.FieldsCfg.ExternalFieldsCfg.GetFieldNames(),
+                                                     stateMachine.Config.NeuralPreprocessorCfg.InputEncoderCfg.VaryingFieldsCfg.ExternalFieldsCfg.GetFieldNames(),
                                                      stateMachine.Config.ReadoutLayerCfg.OutputFieldNameCollection,
                                                      out predictionInputVector
                                                      );

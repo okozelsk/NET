@@ -32,7 +32,8 @@ namespace Demo.DemoConsoleApp.Examples
         {
             //Create StateMachine configuration
             //Simplified input configuration
-            InputEncoderSettings inputCfg = StateMachineDesigner.CreateInputCfg(new FeedingPatternedSettings(1, true, false, RCNet.Neural.Data.InputPattern.VariablesSchema.Groupped),
+            InputEncoderSettings inputCfg = StateMachineDesigner.CreateInputCfg(new FeedingPatternedSettings(1, true, RCNet.Neural.Data.InputPattern.VariablesSchema.Groupped),
+                                                                                false,
                                                                                 new ExternalFieldSettings("coord_abcissa", new RealFeatureFilterSettings()),
                                                                                 new ExternalFieldSettings("coord_ordinate", new RealFeatureFilterSettings())
                                                                                 );
