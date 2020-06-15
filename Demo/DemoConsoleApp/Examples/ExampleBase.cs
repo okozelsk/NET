@@ -7,6 +7,7 @@ using RCNet.Neural.Network.SM;
 using RCNet.Neural.Network.SM.Preprocessing;
 using RCNet.Neural.Network.SM.Preprocessing.Input;
 
+
 namespace Demo.DemoConsoleApp.Examples
 {
     /// <summary>
