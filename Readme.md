@@ -42,7 +42,7 @@ Several examples show how to simply setup State Machine using State Machine Desi
 ### Data format for the demo application
 Input data is standardly located in the Data sub-folder relative to the location of the executable DemoConsoleApp.exe. Data is expected in csv format and data delimiter can be a tab, semicolon or comma character.
 * **Continuous feeding regime** requires a standard csv format, where the first line contains the names of the data fields and each next line contains the data. [Here](https://github.com/okozelsk/NET/blob/master/Demo/DemoConsoleApp/Data/TTOO.csv) is an example
-* **Patterned feeding regime** requires specific logical csv format without colum names (header). Each data line contains values of repetitive pattern features followed by expected output values at the end. Values of repetitive pattern features can be organized in two ways: groupped [v1(t1),v2(t1),v1(t2),v2(t2),v1(t3),v2(t3)] or sequential [v1(t1),v1(t2),v1(t3),v2(t1),v2(t2),v2(t3)]. [Here](https://github.com/okozelsk/NET/blob/master/Demo/DemoConsoleApp/Data/LibrasMovement.csv) is an example
+* **Patterned feeding regime** requires specific logical csv format without colum names (header). Each data line contains values of steady (optional) and repetitive pattern features followed by expected output values at the end. Values of repetitive pattern features can be organized in two ways: groupped [v1(t1),v2(t1),v1(t2),v2(t2),v1(t3),v2(t3)] or sequential [v1(t1),v1(t2),v1(t3),v2(t1),v2(t2),v2(t3)]. [Here](https://github.com/okozelsk/NET/blob/master/Demo/DemoConsoleApp/Data/LibrasMovement.csv) is an example
 
 ## Components overview
 

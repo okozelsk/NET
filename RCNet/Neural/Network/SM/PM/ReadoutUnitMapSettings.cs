@@ -103,6 +103,11 @@ namespace RCNet.Neural.Network.SM.PM
 
 
         //Methods
+        /// <summary>
+        /// Determines whether the predictor's origin is allowed
+        /// </summary>
+        /// <param name="resName">Reservoir instance name</param>
+        /// <param name="poolName">Pool name</param>
         private bool IsAllowedPredictorOrigin(string resName, string poolName)
         {
             if(AllowedPoolsCfg != null)
@@ -112,6 +117,10 @@ namespace RCNet.Neural.Network.SM.PM
             return false;
         }
 
+        /// <summary>
+        /// Determines whether Predictor is allowed
+        /// </summary>
+        /// <param name="predictorID">Predictor identificator</param>
         private bool IsAllowedPredictorID(PredictorsProvider.PredictorID predictorID)
         {
             if(AllowedPredictorsCfg != null)
@@ -121,6 +130,12 @@ namespace RCNet.Neural.Network.SM.PM
             return false;
         }
 
+        /// <summary>
+        /// Determines whether the Predictor's origin and Predictor are both allowed
+        /// </summary>
+        /// <param name="resName">Reservoir instance name</param>
+        /// <param name="poolName">Pool name</param>
+        /// <param name="predictorID">Predictor identificator</param>
         public bool IsAllowedPredictor(string resName, string poolName, PredictorsProvider.PredictorID predictorID)
         {
             if(IsAllowedPredictorOrigin(resName, poolName))
@@ -130,6 +145,10 @@ namespace RCNet.Neural.Network.SM.PM
             return false;
         }
 
+        /// <summary>
+        /// Determines whether given input field is allowed
+        /// </summary>
+        /// <param name="inputFieldName">Name of the input field</param>
         public bool IsAllowedInputField(string inputFieldName)
         {
             if(AllowedInputFieldsCfg != null)

@@ -607,7 +607,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             //Build descriptors
             List<PredictorDescriptor> result = new List<PredictorDescriptor>(_routedSteadyFieldIndexCollection.Count + _routedVaryingFieldCollection.Count * NumOfTimePoints);
             //Steady fields
-
             foreach(int idx in _routedSteadyFieldIndexCollection)
             {
                 result.Add(new PredictorDescriptor(((FeedingPatternedSettings)_encoderCfg.FeedingCfg).SteadyFieldsCfg.FieldCfgCollection[idx].Name));

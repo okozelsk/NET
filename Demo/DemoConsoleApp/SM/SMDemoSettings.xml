@@ -1,129 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <demo dataFolder=".\\Data" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="SMDemoSettings.xsd">
 
-  <!--
-    This demo case illustrates why and how to define steady data fields in case of patterned feeding.
-  -->
-  <case name="Forecast task SteadyMG: pure ESN reservoir generating Activation predictors, MLP as a forecaster (Resilient trainer)">
-    <samples trainingData="SteadyMG_train.csv" verificationData="SteadyMG_verify.csv"/>
-    <stateMachine randomizerSeek="0">
-      <neuralPreprocessor predictorsReductionRatio="0">
-        <inputEncoder>
-          <feedingPatterned slices="1" bidir="false" variablesSchema="Sequential">
-            <unification unifyAmplitude="false" detrend="false">
-              <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
-            </unification>
-            <steadyFields>
-              <field name="tau" routeToReadout="true"/>
-            </steadyFields>
-          </feedingPatterned>
-          <varyingFields routeToReadout="false">
-            <externalFields>
-              <field name="MG">
-                <realFeature />
-              </field>
-            </externalFields>
-          </varyingFields>
-        </inputEncoder>
-        <reservoirStructures>
-          <reservoirStructure name="MainCfg">
-            <pools>
-              <pool name="PoolMain">
-                <proportions dimX="200" dimY="1" dimZ="1"/>
-                <neuronGroups>
-                  <analogGroup name="TanH-grp" relShare="1">
-                    <activationTanH/>
-                  </analogGroup>
-                </neuronGroups>
-                <interconnection>
-                  <randomSchema density="0.1" avgDistance="NA" allowSelfConnection="true"/>
-                  <chainSchema/>
-                </interconnection>
-              </pool>
-            </pools>
-          </reservoirStructure>
-        </reservoirStructures>
-        <reservoirInstances>
-          <reservoirInstance name="Main" reservoirStructure="MainCfg">
-            <inputConnections>
-              <connection inputFieldName="MG" poolName="PoolMain" analogTargetDensity="0.25" signalingRestriction="NoRestriction"/>
-            </inputConnections>
-            <synapse>
-              <analogTarget spectralRadius="0.9999">
-                <input maxDelay="0">
-                  <analogSource>
-                    <weight min="0" max="1.5"/>
-                  </analogSource>
-                </input>
-                <indifferent maxDelay="0"/>
-              </analogTarget>
-            </synapse>
-            <predictors activation="true"
-                        activationSquare="false"
-                        activationFadingSum="false"
-                        activationMWAvg="false"
-                        firingFadingSum="false"
-                        firingMWAvg="false"
-                        firingCount="false"
-                        firingBinPattern="false">
-            </predictors>
-          </reservoirInstance>
-        </reservoirInstances>
-      </neuralPreprocessor>
-      <readoutLayer testDataRatio="0.5" folds="Auto" repetitions="1">
-        <defaultNetworks>
-          <forecast>
-            <ff>
-              <activationIdentity/>
-              <hiddenLayers>
-                <layer neurons="10">
-                  <activationLeakyReLU/>
-                </layer>
-                <layer neurons="10">
-                  <activationLeakyReLU/>
-                </layer>
-              </hiddenLayers>
-              <resPropTrainer attempts="5" attemptEpochs="1000"/>
-            </ff>
-          </forecast>
-        </defaultNetworks>
-        <readoutUnits>
-          <readoutUnit name="MG-with-steady">
-            <forecast>
-              <realFeature/>
-            </forecast>
-          </readoutUnit>
-          <readoutUnit name="MG-w/o-steady">
-            <forecast>
-              <realFeature/>
-            </forecast>
-          </readoutUnit>
-        </readoutUnits>
-      </readoutLayer>
-      <mapper>
-        <map readoutUnitName="MG-with-steady">
-          <allowedPredictors>
-            <predictor name="Activation"/>
-          </allowedPredictors>
-          <allowedPools>
-            <pool reservoirInstanceName="Main" poolName="PoolMain"/>
-          </allowedPools>
-          <allowedInputFields>
-            <field name="tau"/>
-          </allowedInputFields>
-        </map>
-        <map readoutUnitName="MG-w/o-steady">
-          <allowedPredictors>
-            <predictor name="Activation"/>
-          </allowedPredictors>
-          <allowedPools>
-            <pool reservoirInstanceName="Main" poolName="PoolMain"/>
-          </allowedPools>
-        </map>
-      </mapper>
-    </stateMachine>
-  </case>
-
 
   <!--
     Here StateMachine achieves 71% accuracy. It is clearly worse than the best accuracy 81.4% achieved by the algorithm
@@ -1306,6 +1183,128 @@
     </stateMachine>
   </case>
 
+  <!--
+    This demo case illustrates how to define steady data fields in case of patterned feeding.
+  -->
+  <case name="Forecast task SteadyMG: pure ESN reservoir generating Activation predictors, MLP as a forecaster (Resilient trainer)">
+    <samples trainingData="SteadyMG_train.csv" verificationData="SteadyMG_verify.csv"/>
+    <stateMachine randomizerSeek="0">
+      <neuralPreprocessor predictorsReductionRatio="0">
+        <inputEncoder>
+          <feedingPatterned slices="1" bidir="false" variablesSchema="Sequential">
+            <unification unifyAmplitude="false" detrend="false">
+              <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
+            </unification>
+            <steadyFields>
+              <field name="tau" routeToReadout="true"/>
+            </steadyFields>
+          </feedingPatterned>
+          <varyingFields routeToReadout="false">
+            <externalFields>
+              <field name="MG">
+                <realFeature />
+              </field>
+            </externalFields>
+          </varyingFields>
+        </inputEncoder>
+        <reservoirStructures>
+          <reservoirStructure name="MainCfg">
+            <pools>
+              <pool name="PoolMain">
+                <proportions dimX="200" dimY="1" dimZ="1"/>
+                <neuronGroups>
+                  <analogGroup name="TanH-grp" relShare="1">
+                    <activationTanH/>
+                  </analogGroup>
+                </neuronGroups>
+                <interconnection>
+                  <randomSchema density="0.1" avgDistance="NA" allowSelfConnection="true"/>
+                  <chainSchema/>
+                </interconnection>
+              </pool>
+            </pools>
+          </reservoirStructure>
+        </reservoirStructures>
+        <reservoirInstances>
+          <reservoirInstance name="Main" reservoirStructure="MainCfg">
+            <inputConnections>
+              <connection inputFieldName="MG" poolName="PoolMain" analogTargetDensity="0.25" signalingRestriction="NoRestriction"/>
+            </inputConnections>
+            <synapse>
+              <analogTarget spectralRadius="0.9999">
+                <input maxDelay="0">
+                  <analogSource>
+                    <weight min="0" max="1.5"/>
+                  </analogSource>
+                </input>
+                <indifferent maxDelay="0"/>
+              </analogTarget>
+            </synapse>
+            <predictors activation="true"
+                        activationSquare="false"
+                        activationFadingSum="false"
+                        activationMWAvg="false"
+                        firingFadingSum="false"
+                        firingMWAvg="false"
+                        firingCount="false"
+                        firingBinPattern="false">
+            </predictors>
+          </reservoirInstance>
+        </reservoirInstances>
+      </neuralPreprocessor>
+      <readoutLayer testDataRatio="0.5" folds="Auto" repetitions="1">
+        <defaultNetworks>
+          <forecast>
+            <ff>
+              <activationIdentity/>
+              <hiddenLayers>
+                <layer neurons="10">
+                  <activationLeakyReLU/>
+                </layer>
+                <layer neurons="10">
+                  <activationLeakyReLU/>
+                </layer>
+              </hiddenLayers>
+              <resPropTrainer attempts="5" attemptEpochs="1000"/>
+            </ff>
+          </forecast>
+        </defaultNetworks>
+        <readoutUnits>
+          <readoutUnit name="MG-with-steady">
+            <forecast>
+              <realFeature/>
+            </forecast>
+          </readoutUnit>
+          <readoutUnit name="MG-w/o-steady">
+            <forecast>
+              <realFeature/>
+            </forecast>
+          </readoutUnit>
+        </readoutUnits>
+      </readoutLayer>
+      <mapper>
+        <map readoutUnitName="MG-with-steady">
+          <allowedPredictors>
+            <predictor name="Activation"/>
+          </allowedPredictors>
+          <allowedPools>
+            <pool reservoirInstanceName="Main" poolName="PoolMain"/>
+          </allowedPools>
+          <allowedInputFields>
+            <field name="tau"/>
+          </allowedInputFields>
+        </map>
+        <map readoutUnitName="MG-w/o-steady">
+          <allowedPredictors>
+            <predictor name="Activation"/>
+          </allowedPredictors>
+          <allowedPools>
+            <pool reservoirInstanceName="Main" poolName="PoolMain"/>
+          </allowedPools>
+        </map>
+      </mapper>
+    </stateMachine>
+  </case>
 
 
 </demo>

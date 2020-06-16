@@ -117,22 +117,37 @@ namespace RCNet.Neural.Network.NonRecurrent
         {
             if (binaryOutput)
             {
-                if (candidate.CombinedBinaryError < currentBest.CombinedBinaryError)
+                if(candidate.CombinedBinaryError > currentBest.CombinedBinaryError)
+                {
+                    return false;
+                }
+                else if (candidate.CombinedBinaryError < currentBest.CombinedBinaryError)
                 {
                     return true;
                 }
-                else if (candidate.CombinedBinaryError == currentBest.CombinedBinaryError &&
-                       (candidate.TestingBinErrorStat.BinValErrStat[0].Sum < currentBest.TestingBinErrorStat.BinValErrStat[0].Sum ||
-                       (candidate.TestingBinErrorStat.BinValErrStat[0].Sum == currentBest.TestingBinErrorStat.BinValErrStat[0].Sum && candidate.TrainingBinErrorStat.BinValErrStat[0].Sum < currentBest.TrainingBinErrorStat.BinValErrStat[0].Sum)
-                        ))
+                //CombinedBinaryError is the same
+                else if (candidate.TestingBinErrorStat.BinValErrStat[0].Sum > currentBest.TestingBinErrorStat.BinValErrStat[0].Sum)
+                {
+                    return false;
+                }
+                else if(candidate.TestingBinErrorStat.BinValErrStat[0].Sum < currentBest.TestingBinErrorStat.BinValErrStat[0].Sum)
                 {
                     return true;
                 }
-                else if (candidate.CombinedBinaryError == currentBest.CombinedBinaryError &&
-                         candidate.TestingBinErrorStat.BinValErrStat[0].Sum == currentBest.TestingBinErrorStat.BinValErrStat[0].Sum &&
-                         candidate.TrainingBinErrorStat.BinValErrStat[0].Sum == currentBest.TrainingBinErrorStat.BinValErrStat[0].Sum &&
-                         candidate.CombinedPrecisionError < currentBest.CombinedPrecisionError
-                         )
+                //CombinedBinaryError is the same
+                //TestingBinErrorStat.BinValErrStat[0].Sum is the same
+                else if (candidate.TrainingBinErrorStat.BinValErrStat[0].Sum > currentBest.TrainingBinErrorStat.BinValErrStat[0].Sum)
+                {
+                    return false;
+                }
+                else if (candidate.TrainingBinErrorStat.BinValErrStat[0].Sum < currentBest.TrainingBinErrorStat.BinValErrStat[0].Sum)
+                {
+                    return true;
+                }
+                //CombinedBinaryError is the same
+                //TestingBinErrorStat.BinValErrStat[0].Sum is the same
+                //TrainingBinErrorStat.BinValErrStat[0].Sum is the same
+                else if (candidate.CombinedPrecisionError < currentBest.CombinedPrecisionError)
                 {
                     return true;
                 }
