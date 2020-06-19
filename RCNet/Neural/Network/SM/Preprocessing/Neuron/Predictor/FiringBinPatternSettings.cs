@@ -18,7 +18,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         /// <summary>
         /// Default value of window length
         /// </summary>
-        public const int DefaultWindow = 32;
+        public const int DefaultWindow = 1;
 
         //Attribute properties
         /// <summary>

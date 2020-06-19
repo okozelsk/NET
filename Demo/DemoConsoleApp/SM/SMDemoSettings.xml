@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <demo dataFolder=".\\Data" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="SMDemoSettings.xsd">
 
-
   <!--
     Here StateMachine achieves 71% accuracy. It is clearly worse than the best accuracy 81.4% achieved by the algorithm
     called COTE referenced at the dataset's home site:
@@ -406,8 +405,105 @@
   </case>
 
   <!--
+    This demo case demonstrates use of transformed input field together with a simple ESN reservoir.
+    Following configuration of the StateMachine achieves 95.00% accuracy on verification data, slightly better than the best algorithm
+    called BOSS, referenced at the dataset's home site:
+    "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
+    https://timeseriesclassification.com/description.php?Dataset=BeetleFly.
+    MPEG-7 CE Shape-1 Part B is a database of binary images developed for testing MPEG-7 shape descriptors, and is available free online. 
+    It is used for testing contour/image and skeleton-based descriptors. Classes of images vary broadly, and include classes that are
+    similar in shape to one another. There are 20 instances of each class, and 60 classes in total.
+    We have extracted the outlines of these images and mapped them into 1-D series of distances to the centre. 
+    Beetle/Fly is the problem of distinguishing between an outline of a beetle and a fly.
+  -->
+  <case name="Classification task BeetleFly: Simple pure ESN reservoir generating FiringFadingSum predictors, one Identity neuron as a classifier (Resilient trainer)">
+    <samples trainingData="BeetleFly_train.csv" verificationData="BeetleFly_verify.csv"/>
+    <stateMachine randomizerSeek="0">
+      <neuralPreprocessor>
+        <inputEncoder>
+          <feedingPatterned slices="1" bidir="false">
+            <unification unifyAmplitude="false" detrend="false">
+              <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
+            </unification>
+          </feedingPatterned>
+          <varyingFields routeToReadout="true">
+            <externalFields>
+              <field name="Dist">
+                <realFeature standardize="true" keepReserve="true"/>
+              </field>
+            </externalFields>
+            <transformedFields>
+              <field name="Diff">
+                <diff fieldName="Dist" interval="1"/>
+              </field>
+            </transformedFields>
+          </varyingFields>
+        </inputEncoder>
+        <reservoirStructures>
+          <reservoirStructure name="MainCfg">
+            <pools>
+              <pool name="PureESN">
+                <proportions dimX="6" dimY="6" dimZ="5"/>
+                <neuronGroups>
+                  <analogGroup name="TanH-grp" firingThreshold="0.00125" relShare="1" signalingRestriction="NoRestriction">
+                    <activationTanH/>
+                  </analogGroup>
+                </neuronGroups>
+                <interconnection>
+                  <randomSchema density="0.1" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false"/>
+                </interconnection>
+              </pool>
+            </pools>
+          </reservoirStructure>
+        </reservoirStructures>
+        <reservoirInstances>
+          <reservoirInstance name="Main" reservoirStructure="MainCfg">
+            <inputConnections>
+              <connection inputFieldName="Diff" analogTargetDensity="0.25" poolName="PureESN"/>
+            </inputConnections>
+            <synapse>
+              <analogTarget>
+                <input maxDelay="0" delayMethod="Random">
+                  <analogSource>
+                    <weight min="0" max="2.5"/>
+                  </analogSource>
+                </input>
+                <indifferent maxDelay="0" delayMethod="Random"/>
+              </analogTarget>
+            </synapse>
+            <predictors activation="false"
+                        activationSquare="false"
+                        activationFadingSum="false"
+                        activationMWAvg="false"
+                        firingFadingSum="true"
+                        firingMWAvg="false"
+                        firingCount="false"
+                        firingBinPattern="false">
+            </predictors>
+          </reservoirInstance>
+        </reservoirInstances>
+      </neuralPreprocessor>
+      <readoutLayer testDataRatio="0.1" folds="Auto" repetitions="1">
+        <defaultNetworks/>
+        <readoutUnits>
+          <readoutUnit name="Beetle1Fly0">
+            <classification>
+              <networks>
+                <ff>
+                  <activationIdentity/>
+                  <resPropTrainer attempts="5" attemptEpochs="200"/>
+                </ff>
+              </networks>
+            </classification>
+          </readoutUnit>
+        </readoutUnits>
+      </readoutLayer>
+    </stateMachine>
+  </case>
+
+  <!--
     This demo case demonstrates successful use of a simple LSM reservoir consisting of LeakyIF neurons for the accurate classifications.
-    Following straightforward configuration of the StateMachine exhibits 90.00% accuracy, slightly worse than the best algorithm
+    Following straightforward configuration of the StateMachine achieves 90.00% accuracy, slightly worse than the best algorithm
     called BOSS, referenced at the dataset's home site:
     "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
     https://timeseriesclassification.com/description.php?Dataset=BeetleFly.
@@ -1001,7 +1097,7 @@
   <!--
     This demo case demonstrates successful use of the pure analog ESN reservoir for the fast and accurate classifications enabled by
     the new ability of the analog neurons to fire a spike.
-    Following straightforward configuration of the StateMachine achieves 90.1% accuracy, a little bit better (practically the same) than
+    Following straightforward configuration of the StateMachine achieves 90.1% accuracy, a little bit worse than
     the best algorithm called BOSS, referenced at the dataset's home site:
     "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
     https://timeseriesclassification.com/description.php?Dataset=Yoga.

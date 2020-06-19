@@ -1704,9 +1704,9 @@
 
   <!-- Firing binary pattern -->
   <xs:complexType name="PredictorFiringBinPatternType">
-    <xs:attribute type="UIntGE1LE32Type" name="window" use="optional" default="32">
+    <xs:attribute type="UIntGE1LE32Type" name="window" use="optional" default="1">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Sliding window size (1..32). Default value is 32</xs:documentation>
+        <xs:documentation xml:lang="en">Sliding window size (1..32). Default value is 1</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
