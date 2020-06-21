@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 
 namespace RCNet.Queue
 {
@@ -46,6 +47,24 @@ namespace RCNet.Queue
 
         //Methods
         /// <summary>
+        /// Throws InvalidOperationException
+        /// </summary>
+        /// <param name="text">Exception text</param>
+        private void ThrowInvalidOperationException(string text)
+        {
+            throw new InvalidOperationException(text);
+        }
+
+        /// <summary>
+        /// Throws IndexOutOfRangeException
+        /// </summary>
+        /// <param name="text">Exception text</param>
+        private void ThrowIndexOutOfRangeException(string text)
+        {
+            throw new IndexOutOfRangeException(text);
+        }
+
+        /// <summary>
         /// Resets queue to its initial state
         /// </summary>
         public void Reset()
@@ -76,6 +95,7 @@ namespace RCNet.Queue
         /// Returns element from queue buffer on the next enqueue position.
         /// If element exists then it can be reused in immediately following Enqueue call.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T GetElementAtEnqueuePosition()
         {
             return _queueBuffer[_enqueueIndex];
@@ -87,11 +107,14 @@ namespace RCNet.Queue
         /// <param name="logicalPos">Logical position 0..(Count-1)</param>
         /// <param name="latestFirst">Specifies logical order (latest..oldest or vice versa)</param>
         /// <returns>Non-negative index</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private int GetElementIndex(int logicalPos, bool latestFirst = false)
         {
             if (logicalPos < 0 || logicalPos >= Count)
             {
-                throw new IndexOutOfRangeException($"Specified logicalPos {logicalPos} is outside of the range 0..{Count - 1}");
+                ThrowIndexOutOfRangeException($"Specified logicalPos {logicalPos} is outside of the range 0..{Count - 1}");
+                //This will never happen
+                return -1;
             }
             else if (latestFirst)
             {
@@ -113,6 +136,7 @@ namespace RCNet.Queue
         /// <param name="logicalPos">Logical position 0..(Count-1)</param>
         /// <param name="latestFirst">Specifies logical order (latest..oldest or oldest..latest)</param>
         /// <returns>Element at the logical position</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T GetElementAt(int logicalPos, bool latestFirst = false)
         {
             return _queueBuffer[GetElementIndex(logicalPos, latestFirst)];
@@ -125,6 +149,7 @@ namespace RCNet.Queue
         /// <param name="logicalPos">Logical position 0..(Count-1)</param>
         /// <param name="latestFirst">Specifies logical order (latest..oldest or oldest..latest)</param>
         /// <returns>Replaced element at the logical position</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T SetElementAt(T elem, int logicalPos, bool latestFirst = false)
         {
             int index = GetElementIndex(logicalPos, latestFirst);
@@ -139,6 +164,7 @@ namespace RCNet.Queue
         /// <param name="elem">Element to be added</param>
         /// <param name="autoDequeue">Specifies whether to atomatically dequeue when queue is full</param>
         /// <returns>True if success, False if queue is full</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Enqueue(T elem, bool autoDequeue = false)
         {
             //Atomatically dequeue when queue is full and parameter autoDequeue is true
@@ -165,6 +191,7 @@ namespace RCNet.Queue
         /// Picks up next element from the queue (FIFO order)
         /// </summary>
         /// <returns>Dequeued element</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T Dequeue()
         {
             if (Count > 0)
@@ -180,7 +207,9 @@ namespace RCNet.Queue
             }
             else
             {
-                throw new InvalidOperationException($"Queue is empty.");
+                ThrowInvalidOperationException($"Queue is empty.");
+                //This will never happen
+                return default;
             }
         }
 

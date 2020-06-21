@@ -9,7 +9,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
     public class LinearEfficacy : IEfficacy
     {
         //Attributes
-        private readonly INeuron _sourceNeuron;
+        private readonly NeuronOutputData _sourceNeuronOutputData;
         private readonly LinearDynamicsSettings _dynamicsCfg;
         private double _efficacy;
 
@@ -21,7 +21,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         /// <param name="dynamicsCfg">Dynamics configuration</param>
         public LinearEfficacy(INeuron sourceNeuron, LinearDynamicsSettings dynamicsCfg)
         {
-            _sourceNeuron = sourceNeuron;
+            _sourceNeuronOutputData = sourceNeuron.OutputData;
             _dynamicsCfg = (LinearDynamicsSettings)dynamicsCfg.DeepClone();
             Reset();
             return;
@@ -42,17 +42,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         /// </summary>
         public double Compute()
         {
-            /*
-            if (_sourceNeuron.GetSignal(ActivationType.Spiking) > 0)
-            {
-                _efficacy -= (_dynamicsCfg.Alpha * (1d - _dynamicsCfg.Beta));
-            }
-            else
-            {
-                _efficacy -= (_dynamicsCfg.Alpha * (0d - _dynamicsCfg.Beta));
-            }
-            */
-            _efficacy -= (_sourceNeuron.SpikeLeak - 1) * (_dynamicsCfg.Alpha * (0d - _dynamicsCfg.Beta));
+            _efficacy -= (_sourceNeuronOutputData._spikeLeak - 1) * (_dynamicsCfg.Alpha * (0d - _dynamicsCfg.Beta));
             _efficacy = _efficacy.Bound(0d, 1d);
             _efficacy -= (_dynamicsCfg.Alpha * (1d - _dynamicsCfg.Beta));
             _efficacy = _efficacy.Bound(0d, 1d);

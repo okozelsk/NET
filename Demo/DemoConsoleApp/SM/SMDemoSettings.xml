@@ -53,7 +53,7 @@
         <reservoirInstances>
           <reservoirInstance name="Main" reservoirStructure="MainCfg">
             <inputConnections>
-              <connection inputFieldName="Accel" poolName="PoolMain" analogTargetDensity="0.25" signalingRestriction="NoRestriction"/>
+              <connection inputFieldName="Accel" poolName="PoolMain" analogTargetDensity="0.25"/>
             </inputConnections>
             <synapse>
               <analogTarget spectralRadius="0.9999">
@@ -174,7 +174,7 @@
               <pool name="PureESN">
                 <proportions dimX="120" dimY="1" dimZ="1"/>
                 <neuronGroups>
-                  <analogGroup name="TanH-grp" relShare="1" firingThreshold="0.00125" signalingRestriction="NoRestriction">
+                  <analogGroup name="TanH-grp" relShare="1" firingThreshold="0.00125">
                     <activationTanH/>
                   </analogGroup>
                 </neuronGroups>
@@ -334,7 +334,7 @@
               <pool name="PureESN">
                 <proportions dimX="7" dimY="7" dimZ="7"/>
                 <neuronGroups>
-                  <analogGroup name="TanH-grp" relShare="1" firingThreshold="0.00125" signalingRestriction="NoRestriction">
+                  <analogGroup name="TanH-grp" relShare="1" firingThreshold="0.00125">
                     <activationTanH/>
                   </analogGroup>
                 </neuronGroups>
@@ -445,7 +445,7 @@
               <pool name="PureESN">
                 <proportions dimX="6" dimY="6" dimZ="5"/>
                 <neuronGroups>
-                  <analogGroup name="TanH-grp" firingThreshold="0.00125" relShare="1" signalingRestriction="NoRestriction">
+                  <analogGroup name="TanH-grp" firingThreshold="0.00125" relShare="1">
                     <activationTanH/>
                   </analogGroup>
                 </neuronGroups>
@@ -647,7 +647,7 @@
               <pool name="PureESN">
                 <proportions dimX="6" dimY="6" dimZ="5"/>
                 <neuronGroups>
-                  <analogGroup name="TanH-grp" firingThreshold="0.00125" relShare="1" signalingRestriction="NoRestriction">
+                  <analogGroup name="TanH-grp" firingThreshold="0.00125" relShare="1">
                     <activationTanH/>
                   </analogGroup>
                 </neuronGroups>
@@ -1022,7 +1022,7 @@
               <pool name="Logistic pool">
                 <proportions dimX="6" dimY="6" dimZ="6"/>
                 <neuronGroups>
-                  <analogGroup name="TanH-grp" relShare="1" signalingRestriction="NoRestriction">
+                  <analogGroup name="TanH-grp" relShare="1">
                     <activationTanH/>
                     <retainment density="1">
                       <strength min="0" max="0.75" />
@@ -1216,7 +1216,7 @@
               <pool name="PureESN">
                 <proportions dimX="178" dimY="1" dimZ="1"/>
                 <neuronGroups>
-                  <analogGroup name="TanH-grp" relShare="1" signalingRestriction="NoRestriction">
+                  <analogGroup name="TanH-grp" relShare="1">
                     <activationTanH/>
                   </analogGroup>
                 </neuronGroups>
@@ -1324,7 +1324,7 @@
         <reservoirInstances>
           <reservoirInstance name="Main" reservoirStructure="MainCfg">
             <inputConnections>
-              <connection inputFieldName="MG" poolName="PoolMain" analogTargetDensity="0.25" signalingRestriction="NoRestriction"/>
+              <connection inputFieldName="MG" poolName="PoolMain" analogTargetDensity="0.25"/>
             </inputConnections>
             <synapse>
               <analogTarget spectralRadius="0.9999">

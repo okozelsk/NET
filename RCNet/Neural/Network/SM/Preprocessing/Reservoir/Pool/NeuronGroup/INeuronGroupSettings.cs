@@ -32,11 +32,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         double RelShare { get; }
 
         /// <summary>
-        /// Restriction of neuron's output signaling
-        /// </summary>
-        NeuronCommon.NeuronSignalingRestrictionType SignalingRestriction { get; }
-
-        /// <summary>
         /// Each neuron within the group receives constant input bias. Value of the neuron's bias is driven
         /// by this random settings.
         /// </summary>

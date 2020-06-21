@@ -180,6 +180,7 @@
     <Compile Include="Neural\Network\SM\Preprocessing\Neuron\HiddenNeuron.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\Neuron\INeuron.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\Neuron\NeuronCommon.cs" />
+    <Compile Include="Neural\Network\SM\Preprocessing\Neuron\NeuronOutputData.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\Neuron\NeuronLocation.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\Neuron\NeuronStatistics.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\Neuron\Predictor\ActivationFadingSumSettings.cs" />

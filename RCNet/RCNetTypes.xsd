@@ -75,15 +75,6 @@
     </xs:restriction>
   </xs:simpleType>
 
-  <!-- Enumeration of neuron's output signaling restriction -->
-  <xs:simpleType name="SignalingRestrictionType">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="NoRestriction"/>
-      <xs:enumeration value="AnalogOnly"/>
-      <xs:enumeration value="SpikingOnly"/>
-    </xs:restriction>
-  </xs:simpleType>
-
   <!-- Enumeration of neuron's activation type -->
   <xs:simpleType name="ActivationType">
     <xs:restriction base="xs:string">
@@ -1911,11 +1902,6 @@
         <xs:documentation xml:lang="en">A number between 0 and 1 (LT1). Every time the new normalized activation value is higher than the previous normalized activation value by at least the threshold, it is evaluated as a firing event. Default value is 0.00125.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute type="SignalingRestrictionType" name="signalingRestriction" use="optional" default="NoRestriction">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is NoRestriction</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
   </xs:complexType>
 
   <!-- Neuron groups choice-->
@@ -2249,11 +2235,6 @@
     <xs:attribute type="UDoubleLE1Type" name="analogTargetDensity" use="optional" default="1">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="SignalingRestrictionType" name="signalingRestriction" use="optional" default="NoRestriction">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is NoRestriction</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>

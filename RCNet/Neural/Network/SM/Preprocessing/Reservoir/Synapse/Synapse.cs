@@ -101,6 +101,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
 
 
         //Attributes
+        private readonly double[] _sourceNeuronSignals;
+        private readonly int _sourceSignalIdx;
         private readonly IEfficacy _efficacyComputer;
         private readonly int _maxDelay;
         private SimpleQueue<Signal> _signalQueue;
@@ -133,7 +135,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
             if (TargetNeuron.TypeOfActivation == ActivationType.Spiking)
             {
                 //Spiking target
-                if (role == SynRole.Input)
+                if (Role == SynRole.Input)
                 {
                     DelayMethod = synapseCfg.SpikingTargetCfg.InputSynCfg.DelayMethod;
                     _maxDelay = synapseCfg.SpikingTargetCfg.InputSynCfg.MaxDelay;
@@ -151,7 +153,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
                                                                                  );
                     }
                 }
-                else if (role == SynRole.Excitatory)
+                else if (Role == SynRole.Excitatory)
                 {
                     DelayMethod = synapseCfg.SpikingTargetCfg.ExcitatorySynCfg.DelayMethod;
                     _maxDelay = synapseCfg.SpikingTargetCfg.ExcitatorySynCfg.MaxDelay;
@@ -169,7 +171,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
                                                                                  );
                     }
                 }
-                else if (role == SynRole.Inhibitory)
+                else if (Role == SynRole.Inhibitory)
                 {
                     DelayMethod = synapseCfg.SpikingTargetCfg.InhibitorySynCfg.DelayMethod;
                     _maxDelay = synapseCfg.SpikingTargetCfg.InhibitorySynCfg.MaxDelay;
@@ -195,7 +197,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
             else
             {
                 //Analog target
-                if (role == SynRole.Input)
+                if (Role == SynRole.Input)
                 {
                     DelayMethod = synapseCfg.AnalogTargetCfg.InputSynCfg.DelayMethod;
                     _maxDelay = synapseCfg.AnalogTargetCfg.InputSynCfg.MaxDelay;
@@ -213,7 +215,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
                                                                                  );
                     }
                 }
-                else if (role == SynRole.Indifferent)
+                else if (Role == SynRole.Indifferent)
                 {
                     DelayMethod = synapseCfg.AnalogTargetCfg.IndifferentSynCfg.DelayMethod;
                     _maxDelay = synapseCfg.AnalogTargetCfg.IndifferentSynCfg.MaxDelay;
@@ -237,7 +239,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
                     throw new ArgumentException($"Invalid synapse role {role}.", "role");
                 }
             }
-
+            //Source neuron - signals and signal index
+            _sourceNeuronSignals = SourceNeuron.OutputData._signals;
+            _sourceSignalIdx = TargetNeuron.TypeOfActivation == ActivationType.Analog ? NeuronOutputData.AnalogSignalIdx : NeuronOutputData.SpikingSignalIdx;
             //Efficacy statistics
             EfficacyStat = new BasicStat(false);
             Reset(true);
@@ -315,11 +319,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         /// <param name="collectStatistics">Specifies whether to update internal statistics</param>
         public double GetSignal(bool collectStatistics)
         {
-            //Weighted source neuron signal
-            double signal = SourceNeuron.GetSignal(TargetNeuron.TypeOfActivation);
+            //Source neuron signal
+            double sourceNeuronSignal = _sourceNeuronSignals[_sourceSignalIdx];
             double efficacy = 1d;
             //Short-term plasticity
-            if (_efficacyComputer != null && signal > 0)
+            if (_efficacyComputer != null && sourceNeuronSignal > 0)
             {
                 //Compute synapse efficacy
                 efficacy = _efficacyComputer.Compute();
@@ -329,12 +333,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
                     EfficacyStat.AddSampleValue(efficacy);
                 }
             }
-            //Final weighted signal
-            double weightedSignal = signal * Weight * efficacy;
-            //Delayed signal
+            //Final signal to be delivered
+            double signalToTarget = sourceNeuronSignal * Weight * efficacy;
+            //Delayed signal?
             if (_signalQueue == null)
             {
-                return weightedSignal;
+                //No delay
+                return signalToTarget;
             }
             else
             {
@@ -343,11 +348,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
                 Signal sigObj = _signalQueue.GetElementAtEnqueuePosition();
                 if (sigObj != null)
                 {
-                    sigObj._weightedSignal = weightedSignal;
+                    sigObj._weightedSignal = signalToTarget;
                 }
                 else
                 {
-                    sigObj = new Signal { _weightedSignal = weightedSignal };
+                    sigObj = new Signal { _weightedSignal = signalToTarget };
                 }
                 _signalQueue.Enqueue(sigObj);
                 //Is there delayed signal to be delivered?

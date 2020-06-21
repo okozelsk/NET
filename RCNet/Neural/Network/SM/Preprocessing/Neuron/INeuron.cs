@@ -31,24 +31,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
         ActivationType TypeOfActivation { get; }
 
         /// <summary>
-        /// Output signaling restriction
+        /// Neuron's output data
         /// </summary>
-        NeuronCommon.NeuronSignalingRestrictionType SignalingRestriction { get; }
-
-        /// <summary>
-        /// Computation cycles gone from the last emitted spike or start (if no spike emitted before current computation cycle)
-        /// </summary>
-        int SpikeLeak { get; }
-
-        /// <summary>
-        /// Specifies, if neuron has already emitted spike before current computation cycle
-        /// </summary>
-        bool AfterFirstSpike { get; }
-
-        /// <summary>
-        /// Number of provided predictors
-        /// </summary>
-        int NumOfEnabledPredictors { get; }
+        NeuronOutputData OutputData { get; }
 
         //Methods
         /// <summary>
@@ -65,40 +50,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
         void NewStimulation(double iStimuli, double rStimuli);
 
         /// <summary>
-        /// Computes neuron's new output signal, updates SpikeLeak, AfterFirstSpike and Statistics.
+        /// Computes neuron's new OutputData and updates Statistics.
         /// Must be called only once per stored incoming stimulation.
         /// </summary>
         /// <param name="collectStatistics">Specifies whether to update internal statistics</param>
         void Recompute(bool collectStatistics);
-
-        /// <summary>
-        /// Neuron's output signal.
-        /// </summary>
-        /// <param name="targetActivationType">Specifies what type of the signal is required if possible</param>
-        double GetSignal(ActivationType targetActivationType);
-
-        /// <summary>
-        /// Checks if given predictor is enabled
-        /// </summary>
-        /// <param name="predictorID">Identificator of the predictor</param>
-        bool IsPredictorEnabled(PredictorsProvider.PredictorID predictorID);
-
-        /// <summary>
-        /// Copies values of enabled predictors to a given buffer starting from specified position (idx)
-        /// </summary>
-        /// <param name="predictors">Buffer where to be copied enabled predictors</param>
-        /// <param name="idx">Starting position index</param>
-        int CopyPredictorsTo(double[] predictors, int idx);
-
-        /// <summary>
-        /// Returns array containing values of enabled predictors
-        /// </summary>
-        double[] GetPredictors();
-
-        /// <summary>
-        /// Returns identifiers of enabled predictors in the same order as is used in the methods CopyPredictorsTo and GetPredictors
-        /// </summary>
-        List<PredictorsProvider.PredictorID> GetEnabledPredictorsIDs();
 
     }//INeuron
 

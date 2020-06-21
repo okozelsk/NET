@@ -42,7 +42,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// <summary>
         /// Neurons providing predictors
         /// </summary>
-        public List<INeuron> PredictingNeuronCollection { get; }
+        public List<HiddenNeuron> PredictingNeuronCollection { get; }
 
         /// <summary>
         /// Number of reservoir's predictors
@@ -117,7 +117,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             _numOfSpikingNeurons = 0;
             List<HiddenNeuron> allNeurons = new List<HiddenNeuron>();
             _poolNeuronCollection = new List<HiddenNeuron[]>(StructureCfg.PoolsCfg.PoolCfgCollection.Count);
-            PredictingNeuronCollection = new List<INeuron>();
+            PredictingNeuronCollection = new List<HiddenNeuron>();
             for (int poolID = 0; poolID < StructureCfg.PoolsCfg.PoolCfgCollection.Count; poolID++)
             {
                 PoolSettings poolSettings = StructureCfg.PoolsCfg.PoolCfgCollection[poolID];
@@ -134,7 +134,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                     {
                         grpNCP[i] = new NeuronCreationParams
                         {
-                            SignalingRestriction = ngs.SignalingRestriction,
                             Activation = ActivationFactory.Create(ngs.ActivationCfg, rand),
                             Bias = ngs.BiasCfg == null ? 0 : rand.NextDouble(ngs.BiasCfg),
                             GroupID = groupID,
@@ -194,7 +193,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                                                                                   neuronParamCollection[neuronPoolFlatIdx].Bias,
                                                                                   neuronParamCollection[neuronPoolFlatIdx].AnalogFiringThreshold,
                                                                                   neuronParamCollection[neuronPoolFlatIdx].RetainmentStrength,
-                                                                                  neuronParamCollection[neuronPoolFlatIdx].SignalingRestriction,
                                                                                   neuronParamCollection[neuronPoolFlatIdx].PredictorsCfg
                                                                                   );
                             }
@@ -350,7 +348,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         public List<PredictorDescriptor> GetPredictorsDescriptors()
         {
             List<PredictorDescriptor> result = new List<PredictorDescriptor>(NumOfPredictors);
-            foreach (INeuron neuron in PredictingNeuronCollection)
+            foreach (HiddenNeuron neuron in PredictingNeuronCollection)
             {
                 if (neuron.NumOfEnabledPredictors > 0)
                 {
@@ -568,8 +566,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                 }
                 if (targetNeurons.Count > 0)
                 {
-                    if (inputConnCfg.SignalingRestriction == NeuronCommon.NeuronSignalingRestrictionType.AnalogOnly ||
-                        (activationType == (int)ActivationType.Analog && inputConnCfg.SignalingRestriction == NeuronCommon.NeuronSignalingRestrictionType.NoRestriction))
+                    if (activationType == (int)ActivationType.Analog)
                     {
                         //Analog synapses
                         for (int i = 0; i < targetNeurons.Count; i++)
@@ -932,7 +929,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         public int CopyPredictorsTo(double[] buffer, int fromOffset)
         {
             int offset = fromOffset;
-            foreach (INeuron neuron in PredictingNeuronCollection)
+            foreach (HiddenNeuron neuron in PredictingNeuronCollection)
             {
                 offset += neuron.CopyPredictorsTo(buffer, offset);
             }
@@ -963,7 +960,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         //Inner classes
         private class NeuronCreationParams
         {
-            public NeuronCommon.NeuronSignalingRestrictionType SignalingRestriction { get; set; }
             public IActivationFunction Activation { get; set; }
             public double Bias { get; set; }
             public int GroupID { get; set; }

@@ -25,10 +25,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// Default analog target density
         /// </summary>
         public const double DefaultAnalogTargetDensity = 1d;
-        /// <summary>
-        /// Default value of signaling restriction of associated input neuron
-        /// </summary>
-        public const NeuronCommon.NeuronSignalingRestrictionType DefaultSignalingRestriction = NeuronCommon.NeuronSignalingRestrictionType.AnalogOnly;
 
         /// <summary>
         /// Name of the input field
@@ -50,11 +46,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// </summary>
         public double AnalogTargetDensity { get; }
 
-        /// <summary>
-        /// Signaling restriction of associated input neuron
-        /// </summary>
-        public NeuronCommon.NeuronSignalingRestrictionType SignalingRestriction { get; }
-
         //Constructors
         /// <summary>
         /// Creates an itialized instance.
@@ -63,19 +54,16 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// <param name="poolName">Name of target pool</param>
         /// <param name="spikingTargetDensity">Spiking target density</param>
         /// <param name="analogTargetDensity">Analog target density</param>
-        /// <param name="signalingRestriction">Signaling restriction of associated input neuron</param>
         public InputConnSettings(string inputFieldName,
                                  string poolName,
                                  double spikingTargetDensity = DefaultSpikingTargetDensity,
-                                 double analogTargetDensity = DefaultAnalogTargetDensity,
-                                 NeuronCommon.NeuronSignalingRestrictionType signalingRestriction = DefaultSignalingRestriction
+                                 double analogTargetDensity = DefaultAnalogTargetDensity
                                  )
         {
             InputFieldName = inputFieldName;
             PoolName = poolName;
             SpikingTargetDensity = spikingTargetDensity;
             AnalogTargetDensity = analogTargetDensity;
-            SignalingRestriction = signalingRestriction;
             Check();
             return;
         }
@@ -85,7 +73,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// </summary>
         /// <param name="source">Source instance</param>
         public InputConnSettings(InputConnSettings source)
-            : this(source.InputFieldName, source.PoolName, source.SpikingTargetDensity, source.AnalogTargetDensity, source.SignalingRestriction)
+            : this(source.InputFieldName, source.PoolName, source.SpikingTargetDensity, source.AnalogTargetDensity)
         {
             return;
         }
@@ -103,7 +91,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             PoolName = settingsElem.Attribute("poolName").Value;
             SpikingTargetDensity = double.Parse(settingsElem.Attribute("spikingTargetDensity").Value, CultureInfo.InvariantCulture);
             AnalogTargetDensity = double.Parse(settingsElem.Attribute("analogTargetDensity").Value, CultureInfo.InvariantCulture);
-            SignalingRestriction = (NeuronCommon.NeuronSignalingRestrictionType)Enum.Parse(typeof(NeuronCommon.NeuronSignalingRestrictionType), settingsElem.Attribute("signalingRestriction").Value, true);
             Check();
             return;
         }
@@ -118,11 +105,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// Checks if settings are default
         /// </summary>
         public bool IsDefaultAnalogTargetDensity { get { return (AnalogTargetDensity == DefaultAnalogTargetDensity); } }
-
-        /// <summary>
-        /// Checks if settings are default
-        /// </summary>
-        public bool IsDefaultSignalingRestriction { get { return (SignalingRestriction == DefaultSignalingRestriction); } }
 
         /// <summary>
         /// Identifies settings containing only default values
@@ -181,10 +163,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             if (!suppressDefaults || !IsDefaultAnalogTargetDensity)
             {
                 rootElem.Add(new XAttribute("analogTargetDensity", AnalogTargetDensity.ToString(CultureInfo.InvariantCulture)));
-            }
-            if (!suppressDefaults || !IsDefaultSignalingRestriction)
-            {
-                rootElem.Add(new XAttribute("signalingRestriction", SignalingRestriction.ToString()));
             }
             Validate(rootElem, XsdTypeName);
             return rootElem;

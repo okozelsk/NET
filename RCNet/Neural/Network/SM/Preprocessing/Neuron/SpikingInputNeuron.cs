@@ -1,13 +1,12 @@
 ﻿using RCNet.Neural.Activation;
-using RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor;
 using System;
 using System.Collections.Generic;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
 {
     /// <summary>
-    /// Spiking input neuron is the special type of a neuron without accosiated activation function. Its purpose is only to mediate
-    /// external input spike value for a synapse in appropriate form and to provide predictors.
+    /// Spiking input neuron is the special type of a neuron with no assosiated activation function. Its purpose is only to mediate
+    /// external input spike value for a synapse.
     /// </summary>
     [Serializable]
     public class SpikingInputNeuron : INeuron
@@ -24,22 +23,24 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
         /// </summary>
         public NeuronStatistics Statistics { get; }
 
+        /// <summary>
+        /// Neuron's output data
+        /// </summary>
+        public NeuronOutputData OutputData { get; }
+
         //Attributes
         private double _inputSpike;
-        private double _outputSpike;
-        private readonly PredictorsProvider _predictors;
 
         //Constructor
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
         /// <param name="location">Neuron's location</param>
-        /// <param name="predictorsCfg">Configuration of neuron's predictors</param>
-        public SpikingInputNeuron(NeuronLocation location, PredictorsSettings predictorsCfg)
+        public SpikingInputNeuron(NeuronLocation location)
         {
             Location = location;
             Statistics = new NeuronStatistics();
-            _predictors = predictorsCfg != null ? new PredictorsProvider(predictorsCfg) : null;
+            OutputData = new NeuronOutputData();
             Reset(false);
             return;
         }
@@ -55,26 +56,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
         /// </summary>
         public ActivationType TypeOfActivation { get { return ActivationType.Spiking; } }
 
-        /// <summary>
-        /// Output signaling restriction
-        /// </summary>
-        public NeuronCommon.NeuronSignalingRestrictionType SignalingRestriction { get { return NeuronCommon.NeuronSignalingRestrictionType.SpikingOnly; } }
-
-        /// <summary>
-        /// Computation cycles gone from the last emitted spike or start (if no spike emitted before current computation cycle)
-        /// </summary>
-        public int SpikeLeak { get; private set; }
-
-        /// <summary>
-        /// Specifies, if neuron has already emitted spike before current computation cycle
-        /// </summary>
-        public bool AfterFirstSpike { get; private set; }
-
-        /// <summary>
-        /// Number of provided predictors
-        /// </summary>
-        public int NumOfEnabledPredictors { get { return _predictors == null ? 0 : _predictors.NumOfEnabledPredictors; } }
-
         //Methods
         /// <summary>
         /// Resets neuron to its initial state
@@ -83,10 +64,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
         public void Reset(bool statistics)
         {
             _inputSpike = 0;
-            _outputSpike = 0;
-            SpikeLeak = 0;
-            AfterFirstSpike = false;
-            _predictors?.Reset();
+            OutputData.Reset();
             if (statistics)
             {
                 Statistics.Reset();
@@ -111,80 +89,21 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
         /// <param name="collectStatistics">Specifies whether to update internal statistics</param>
         public void Recompute(bool collectStatistics)
         {
-            if (_outputSpike > 0)
+            if (OutputData._signals[NeuronOutputData.SpikingSignalIdx] > 0)
             {
                 //Spike during previous cycle, so reset the counter
-                AfterFirstSpike = true;
-                SpikeLeak = 0;
+                OutputData._afterFirstSpike = true;
+                OutputData._spikeLeak = 0;
             }
-            ++SpikeLeak;
-            _outputSpike = _inputSpike;
-            bool firing = _outputSpike > 0;
-            //Update predictors
-            _predictors?.Update(_outputSpike, _outputSpike, firing);
+            ++OutputData._spikeLeak;
+            OutputData._signals[NeuronOutputData.SpikingSignalIdx] = _inputSpike;
             //Statistics
             if (collectStatistics)
             {
-                Statistics.Update(_inputSpike, 0d, _inputSpike, _inputSpike, 0, _outputSpike);
+                Statistics.Update(_inputSpike, 0d, _inputSpike, _inputSpike, 0, _inputSpike);
             }
             return;
         }
-
-        /// <summary>
-        /// Checks if given predictor is enabled
-        /// </summary>
-        /// <param name="predictorID">Identificator of the predictor</param>
-        public bool IsPredictorEnabled(PredictorsProvider.PredictorID predictorID)
-        {
-            if (_predictors != null && _predictors.IsPredictorEnabled(predictorID))
-            {
-                return true;
-            }
-            return false;
-        }
-
-        /// <summary>
-        /// Returns input for hidden neuron having activation of specified type.
-        /// </summary>
-        /// <param name="targetActivationType">Specifies what type of the signal is required.</param>
-        public double GetSignal(ActivationType targetActivationType)
-        {
-            return _outputSpike;
-        }
-
-        /// <summary>
-        /// Copies values of enabled predictors to a given buffer starting from specified position (idx)
-        /// </summary>
-        /// <param name="predictors">Buffer where to be copied enabled predictors</param>
-        /// <param name="idx">Starting position index</param>
-        public int CopyPredictorsTo(double[] predictors, int idx)
-        {
-            if (_predictors == null)
-            {
-                return 0;
-            }
-            else
-            {
-                return _predictors.CopyPredictorsTo(predictors, idx);
-            }
-        }
-
-        /// <summary>
-        /// Returns array containing values of enabled predictors
-        /// </summary>
-        public double[] GetPredictors()
-        {
-            return _predictors?.GetPredictors();
-        }
-
-        /// <summary>
-        /// Returns identifiers of enabled predictors in the same order as is used in the methods CopyPredictorsTo and GetPredictors
-        /// </summary>
-        public List<PredictorsProvider.PredictorID> GetEnabledPredictorsIDs()
-        {
-            return _predictors?.GetEnabledIDs();
-        }
-
 
     }//SpikingInputNeuron
 

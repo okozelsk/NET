@@ -21,26 +21,6 @@
             Hidden
         }//NeuronType
 
-        /// <summary>
-        /// Output signaling restriction of the neuron
-        /// </summary>
-        public enum NeuronSignalingRestrictionType
-        {
-            /// <summary>
-            /// Neuron can emitt both analog signal and spikes.
-            /// </summary>
-            NoRestriction,
-            /// <summary>
-            /// Neuron can emitt only analog signal.
-            /// </summary>
-            AnalogOnly,
-            /// <summary>
-            /// Neuron can emitt only spiking signal.
-            /// </summary>
-            SpikingOnly
-        }
-
-
     }//NeuronCommon
 
 } //Namespace

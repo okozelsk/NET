@@ -136,11 +136,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         public ActivationType Type { get { return ActivationType.Spiking; } }
 
         /// <summary>
-        /// Restriction of neuron's output signaling
-        /// </summary>
-        public NeuronCommon.NeuronSignalingRestrictionType SignalingRestriction { get { return NeuronCommon.NeuronSignalingRestrictionType.SpikingOnly; } }
-
-        /// <summary>
         /// Checks if settings are default
         /// </summary>
         public bool IsDefaultHomogenousExcitabilityCfg { get { return HomogenousExcitabilityCfg.ContainsOnlyDefaults; } }

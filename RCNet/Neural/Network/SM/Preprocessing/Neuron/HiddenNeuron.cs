@@ -4,7 +4,6 @@ using RCNet.Neural.Activation;
 using RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor;
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
 {
@@ -29,24 +28,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
         public NeuronStatistics Statistics { get; }
 
         /// <summary>
-        /// Output signaling restriction
-        /// </summary>
-        public NeuronCommon.NeuronSignalingRestrictionType SignalingRestriction { get; }
-
-        /// <summary>
         /// Constant bias
         /// </summary>
         public double Bias { get; }
 
         /// <summary>
-        /// Computation cycles gone from the last emitted spike or start (if no spike emitted before current computation cycle)
+        /// Neuron's output data
         /// </summary>
-        public int SpikeLeak { get; private set; }
-
-        /// <summary>
-        /// Specifies, if neuron has already emitted spike before current computation cycle
-        /// </summary>
-        public bool AfterFirstSpike { get; private set; }
+        public NeuronOutputData OutputData { get; }
 
         //Attributes
         /// <summary>
@@ -75,12 +64,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
         /// Activation state
         /// </summary>
         private double _activationState;
-
-        /// <summary>
-        /// Signals
-        /// </summary>
-        private double _analogSignal;
-        private double _spikingSignal;
 
         /// <summary>
         /// Predictors
@@ -112,10 +95,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
                 throw new InvalidOperationException($"Called wrong type of hidden neuron constructor for spiking activation.");
             }
             _activation = spikingActivation;
-            SignalingRestriction = NeuronCommon.NeuronSignalingRestrictionType.SpikingOnly;
             _analogFiringThreshold = 0;
             _retainmentStrength = 0;
             _predictors = predictorsCfg != null ? new PredictorsProvider(predictorsCfg) : null;
+            OutputData = new NeuronOutputData();
             Reset(false);
             return;
         }
@@ -129,14 +112,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
         /// <param name="bias">Constant bias to be applied.</param>
         /// <param name="firingThreshold">A number between 0 and 1 (LT1). Every time the new activation value is higher than the previous activation value by at least the threshold, it is evaluated as a firing event.</param>
         /// <param name="retainmentStrength">Strength of the analog neuron's retainment property.</param>
-        /// <param name="signalingRestriction">Output signaling restriction.</param>
         /// <param name="predictorsCfg">Configuration of neuron's predictors</param>
         public HiddenNeuron(NeuronLocation location,
                             IActivationFunction analogActivation,
                             double bias,
                             double firingThreshold,
                             double retainmentStrength,
-                            NeuronCommon.NeuronSignalingRestrictionType signalingRestriction,
                             PredictorsSettings predictorsCfg
                             )
         {
@@ -149,10 +130,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
                 throw new InvalidOperationException($"Called wrong type of hidden neuron constructor for analog activation.");
             }
             _activation = analogActivation;
-            SignalingRestriction = signalingRestriction;
             _analogFiringThreshold = firingThreshold;
             _retainmentStrength = retainmentStrength;
             _predictors = predictorsCfg != null ? new PredictorsProvider(predictorsCfg) : null;
+            OutputData = new NeuronOutputData();
             Reset(false);
             return;
         }
@@ -191,10 +172,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
             _rStimuli = 0;
             _tStimuli = 0;
             _activationState = 0;
-            _analogSignal = 0;
-            _spikingSignal = 0;
-            SpikeLeak = 0;
-            AfterFirstSpike = false;
+            OutputData.Reset();
             if (statistics)
             {
                 Statistics.Reset();
@@ -222,63 +200,42 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
         public void Recompute(bool collectStatistics)
         {
             //Spike leak handling
-            if (_spikingSignal > 0)
+            if (OutputData._signals[NeuronOutputData.SpikingSignalIdx] > 0)
             {
                 //Spike during previous cycle, so reset the counter
-                AfterFirstSpike = true;
-                SpikeLeak = 0;
+                OutputData._afterFirstSpike = true;
+                OutputData._spikeLeak = 0;
             }
-            ++SpikeLeak;
+            ++OutputData._spikeLeak;
 
             double normalizedActivation;
             if (_activation.TypeOfActivation == ActivationType.Spiking)
             {
                 //Spiking activation
-                _spikingSignal = _activation.Compute(_tStimuli);
+                OutputData._signals[NeuronOutputData.SpikingSignalIdx] = _activation.Compute(_tStimuli);
+                OutputData._signals[NeuronOutputData.AnalogSignalIdx] = OutputData._signals[NeuronOutputData.SpikingSignalIdx];
                 _activationState = _activation.InternalState;
                 normalizedActivation = _outputRange.Rescale(_activation.InternalState, _activation.InternalStateRange);
-                _analogSignal = _spikingSignal;
             }
             else
             {
                 //Analog activation
                 double newState = _activation.Compute(_tStimuli);
                 _activationState = (_retainmentStrength * _activationState) + (1d - _retainmentStrength) * newState;
-                double prevAnalogSignal = _analogSignal;
+                double prevAnalogSignal = OutputData._signals[NeuronOutputData.AnalogSignalIdx];
                 normalizedActivation = _outputRange.Rescale(_activationState, _activation.OutputRange);
-                _analogSignal = normalizedActivation;
-                bool firingEvent = (_analogSignal - prevAnalogSignal) > _analogFiringThreshold;
-                _spikingSignal = firingEvent ? 1d : 0d;
+                OutputData._signals[NeuronOutputData.AnalogSignalIdx] = normalizedActivation;
+                bool firingEvent = (OutputData._signals[NeuronOutputData.AnalogSignalIdx] - prevAnalogSignal) > _analogFiringThreshold;
+                OutputData._signals[NeuronOutputData.SpikingSignalIdx] = firingEvent ? 1d : 0d;
             }
             //Update predictors
-            _predictors?.Update(_activationState, normalizedActivation.Bound(0, 1), (_spikingSignal > 0));
+            _predictors?.Update(_activationState, normalizedActivation.Bound(0, 1), (OutputData._signals[NeuronOutputData.SpikingSignalIdx] > 0));
             //Update statistics
             if (collectStatistics)
             {
-                Statistics.Update(_iStimuli, _rStimuli, _tStimuli, _activationState, _analogSignal, _spikingSignal);
+                Statistics.Update(_iStimuli, _rStimuli, _tStimuli, _activationState, OutputData._signals[NeuronOutputData.AnalogSignalIdx], OutputData._signals[NeuronOutputData.SpikingSignalIdx]);
             }
             return;
-        }
-
-        /// <summary>
-        /// Neuron returns previously computed signal of required type (if possible).
-        /// Type of finally returned signal depends on specified targetActivationType and signaling restriction of the neuron.
-        /// Signal is always within the range 0...1
-        /// </summary>
-        /// <param name="targetActivationType">Specifies what type of the signal is preferred.</param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public double GetSignal(ActivationType targetActivationType)
-        {
-            if (SignalingRestriction == NeuronCommon.NeuronSignalingRestrictionType.NoRestriction)
-            {
-                //Return signal according to targetActivationType
-                return targetActivationType == ActivationType.Analog ? _analogSignal : _spikingSignal;
-            }
-            else
-            {
-                //Apply internal restriction
-                return SignalingRestriction == NeuronCommon.NeuronSignalingRestrictionType.AnalogOnly ? _analogSignal : _spikingSignal;
-            }
         }
 
         /// <summary>

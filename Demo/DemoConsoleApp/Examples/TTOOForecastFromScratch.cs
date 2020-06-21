@@ -78,7 +78,6 @@ namespace Demo.DemoConsoleApp.Examples
                                                                                relShare,
                                                                                new TanHSettings(),
                                                                                AnalogNeuronGroupSettings.DefaultFiringThreshold,
-                                                                               AnalogNeuronGroupSettings.DefaultSignalingRestriction,
                                                                                biasCfg,
                                                                                retainmentCfg,
                                                                                null
@@ -153,8 +152,7 @@ namespace Demo.DemoConsoleApp.Examples
             InputConnSettings inputConnCfg = new InputConnSettings(inputFieldName,
                                                                    poolName,
                                                                    0,
-                                                                   1,
-                                                                   NeuronCommon.NeuronSignalingRestrictionType.AnalogOnly
+                                                                   1
                                                                    );
             return inputConnCfg;
         }

@@ -9,7 +9,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
     public class NonlinearEfficacy : IEfficacy
     {
         //Attributes
-        private readonly INeuron _sourceNeuron;
+        private readonly NeuronOutputData _sourceNeuronOutputData;
         private readonly NonlinearDynamicsSettings _dynamicsCfg;
         private double _facilitation;
         private double _depression;
@@ -22,7 +22,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         /// <param name="dynamicsCfg">Dynamics configuration</param>
         public NonlinearEfficacy(INeuron sourceNeuron, NonlinearDynamicsSettings dynamicsCfg)
         {
-            _sourceNeuron = sourceNeuron;
+            _sourceNeuronOutputData = sourceNeuron.OutputData;
             _dynamicsCfg = (NonlinearDynamicsSettings)dynamicsCfg.DeepClone();
             Reset();
             return;
@@ -44,9 +44,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         /// </summary>
         public double Compute()
         {
-            if (_sourceNeuron.AfterFirstSpike)
+            if (_sourceNeuronOutputData._afterFirstSpike)
             {
-                double sourceSpikeLeak = _sourceNeuron.SpikeLeak;
+                double sourceSpikeLeak = _sourceNeuronOutputData._spikeLeak;
                 //Facilitation model
                 double tmp = _facilitation * Math.Exp(-(sourceSpikeLeak / _dynamicsCfg.TauFacilitation));
                 _facilitation = tmp + _dynamicsCfg.RestingEfficacy * (1d - tmp);

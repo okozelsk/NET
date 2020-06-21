@@ -302,7 +302,6 @@ namespace RCNet.Neural.Network.SM
                                                                                1d,
                                                                                activationCfg,
                                                                                AnalogNeuronGroupSettings.DefaultFiringThreshold,
-                                                                               AnalogNeuronGroupSettings.DefaultSignalingRestriction,
                                                                                biasCfg,
                                                                                retainmentCfg,
                                                                                null
@@ -378,8 +377,7 @@ namespace RCNet.Neural.Network.SM
                 InputConnSettings inputConnCfg = new InputConnSettings(fieldCfg.Name,
                                                                        poolCfg.Name,
                                                                        0,
-                                                                       inputConnectionDensity,
-                                                                       NeuronCommon.NeuronSignalingRestrictionType.AnalogOnly
+                                                                       inputConnectionDensity
                                                                        );
                 inputConns.Add(inputConnCfg);
             }
@@ -465,8 +463,7 @@ namespace RCNet.Neural.Network.SM
                 InputConnSettings inputConnCfg = new InputConnSettings(fieldCfg.Name,
                                                                        poolCfg.Name,
                                                                        inputConnectionDensity,
-                                                                       0,
-                                                                       NeuronCommon.NeuronSignalingRestrictionType.SpikingOnly
+                                                                       0
                                                                        );
                 inputConns.Add(inputConnCfg);
             }

@@ -37,7 +37,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         public AnalogInputNeuron AnalogNeuron { get; }
 
         /// <summary>
-        /// Collection of input neurons representing spike train of analog value
+        /// Collection of input neurons representing an analog value as a spike code 
         /// </summary>
         public SpikingInputNeuron[] SpikingNeuronCollection { get; }
 
@@ -72,10 +72,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             RouteToReadout = routeToReadout;
             _featureFilter = FeatureFilterFactory.Create(dataWorkingRange, featureFilterCfg);
             //Analog neuron
-            AnalogNeuron = new AnalogInputNeuron(new NeuronLocation(InputEncoder.ReservoirID, inputNeuronsStartIdx, InputEncoder.PoolID, inputNeuronsStartIdx, idx, coordinates[0], coordinates[1], coordinates[2]),
-                                                 _featureFilter.OutputRange,
-                                                 null
-                                                 );
+            AnalogNeuron = new AnalogInputNeuron(new NeuronLocation(InputEncoder.ReservoirID, inputNeuronsStartIdx, InputEncoder.PoolID, inputNeuronsStartIdx, idx, coordinates[0], coordinates[1], coordinates[2]));
             ++inputNeuronsStartIdx;
             //Spiking neurons
             _realSpikeCode = null;
@@ -96,7 +93,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             SpikingNeuronCollection = new SpikingInputNeuron[populationSize];
             for (int i = 0; i < SpikingNeuronCollection.Length; i++)
             {
-                SpikingNeuronCollection[i] = new SpikingInputNeuron(new NeuronLocation(InputEncoder.ReservoirID, inputNeuronsStartIdx, InputEncoder.PoolID, inputNeuronsStartIdx, idx, coordinates[0], coordinates[1], coordinates[2]), null);
+                SpikingNeuronCollection[i] = new SpikingInputNeuron(new NeuronLocation(InputEncoder.ReservoirID, inputNeuronsStartIdx, InputEncoder.PoolID, inputNeuronsStartIdx, idx, coordinates[0], coordinates[1], coordinates[2]));
                 ++inputNeuronsStartIdx;
             }
             return;

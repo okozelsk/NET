@@ -34,7 +34,7 @@ namespace Demo.DemoConsoleApp.SM
         /// <param name="fileName">Xml file consisting of demo cases definitions</param>
         public SMDemoSettings(string fileName)
         {
-            //Validate xml file and load the document 
+            //Validate xml file and load the document
             DocValidator validator = new DocValidator();
             //Add RCNetTypes.xsd
             validator.AddSchema(RCNetBaseSettings.LoadRCNetTypesSchema());
