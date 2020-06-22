@@ -101,8 +101,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
 
 
         //Attributes
-        private readonly double[] _sourceNeuronSignals;
-        private readonly int _sourceSignalIdx;
+        private readonly NeuronOutputData _sourceNeuronOutputData;
+        private readonly bool _analogSourceSignal;
         private readonly IEfficacy _efficacyComputer;
         private readonly int _maxDelay;
         private SimpleQueue<Signal> _signalQueue;
@@ -239,9 +239,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
                     throw new ArgumentException($"Invalid synapse role {role}.", "role");
                 }
             }
-            //Source neuron - signals and signal index
-            _sourceNeuronSignals = SourceNeuron.OutputData._signals;
-            _sourceSignalIdx = TargetNeuron.TypeOfActivation == ActivationType.Analog ? NeuronOutputData.AnalogSignalIdx : NeuronOutputData.SpikingSignalIdx;
+            //Source neuron - output data and signal index
+            _sourceNeuronOutputData = SourceNeuron.OutputData;
+            _analogSourceSignal = TargetNeuron.TypeOfActivation == ActivationType.Analog;
             //Efficacy statistics
             EfficacyStat = new BasicStat(false);
             Reset(true);
@@ -320,7 +320,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         public double GetSignal(bool collectStatistics)
         {
             //Source neuron signal
-            double sourceNeuronSignal = _sourceNeuronSignals[_sourceSignalIdx];
+            double sourceNeuronSignal = _analogSourceSignal ? _sourceNeuronOutputData._analogSignal : _sourceNeuronOutputData._spikingSignal;
             double efficacy = 1d;
             //Short-term plasticity
             if (_efficacyComputer != null && sourceNeuronSignal > 0)

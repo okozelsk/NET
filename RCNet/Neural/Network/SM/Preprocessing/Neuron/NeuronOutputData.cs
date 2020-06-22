@@ -10,20 +10,17 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
     public class NeuronOutputData
     {
         //Constants
-        /// <summary>
-        /// Index of analog output signal within the Signals array
-        /// </summary>
-        public const int AnalogSignalIdx = 0;
-        /// <summary>
-        /// Index of spiking output signal within the Signals array
-        /// </summary>
-        public const int SpikingSignalIdx = 1;
 
         //Attributes
         /// <summary>
-        /// Neuron's output signals (analog, spiking)
+        /// Neuron's output analog signal
         /// </summary>
-        public double[] _signals;
+        public double _analogSignal;
+
+        /// <summary>
+        /// Neuron's output spiking signal
+        /// </summary>
+        public double _spikingSignal;
 
         /// <summary>
         /// Computation cycles gone from the last emitted spike or start (if no spike emitted before current computation cycle)
@@ -41,7 +38,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
         /// </summary>
         public NeuronOutputData()
         {
-            _signals = new double[2];
             Reset();
             return;
         }
@@ -52,22 +48,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
         /// <param name="source">Source instance.</param>
         public NeuronOutputData(NeuronOutputData source)
         {
-            _signals = (double[])source._signals.Clone();
+            _analogSignal = source._analogSignal;
+            _spikingSignal = source._spikingSignal;
             _spikeLeak = source._spikeLeak;
             _afterFirstSpike = source._afterFirstSpike;
             return;
         }
-
-        //Properties
-        /// <summary>
-        /// Extracted analog signal from the Signals array
-        /// </summary>
-        public double AnalogSignal { get { return _signals[AnalogSignalIdx]; } }
-
-        /// <summary>
-        /// Extracted spiking signal from the Signals array
-        /// </summary>
-        public double SpikingSignal { get { return _signals[SpikingSignalIdx]; } }
 
         //Methods
         /// <summary>
@@ -75,7 +61,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
         /// </summary>
         public void Reset()
         {
-            _signals.Populate(0);
+            _analogSignal = 0d;
+            _spikingSignal = 0d;
             _spikeLeak = 0;
             _afterFirstSpike = false;
         }

@@ -91,7 +91,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
         /// <param name="collectStatistics">Specifies whether to update internal statistics</param>
         public void Recompute(bool collectStatistics)
         {
-            OutputData._signals[NeuronOutputData.AnalogSignalIdx] = _stimuli;
+            OutputData._analogSignal = _stimuli;
             //Statistics
             if (collectStatistics)
             {

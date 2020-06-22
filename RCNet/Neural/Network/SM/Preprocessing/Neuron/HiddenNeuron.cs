@@ -200,7 +200,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
         public void Recompute(bool collectStatistics)
         {
             //Spike leak handling
-            if (OutputData._signals[NeuronOutputData.SpikingSignalIdx] > 0)
+            if (OutputData._spikingSignal > 0)
             {
                 //Spike during previous cycle, so reset the counter
                 OutputData._afterFirstSpike = true;
@@ -212,8 +212,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
             if (_activation.TypeOfActivation == ActivationType.Spiking)
             {
                 //Spiking activation
-                OutputData._signals[NeuronOutputData.SpikingSignalIdx] = _activation.Compute(_tStimuli);
-                OutputData._signals[NeuronOutputData.AnalogSignalIdx] = OutputData._signals[NeuronOutputData.SpikingSignalIdx];
+                OutputData._spikingSignal = _activation.Compute(_tStimuli);
+                OutputData._analogSignal = OutputData._spikingSignal;
                 _activationState = _activation.InternalState;
                 normalizedActivation = _outputRange.Rescale(_activation.InternalState, _activation.InternalStateRange);
             }
@@ -222,18 +222,18 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
                 //Analog activation
                 double newState = _activation.Compute(_tStimuli);
                 _activationState = (_retainmentStrength * _activationState) + (1d - _retainmentStrength) * newState;
-                double prevAnalogSignal = OutputData._signals[NeuronOutputData.AnalogSignalIdx];
+                double prevAnalogSignal = OutputData._analogSignal;
                 normalizedActivation = _outputRange.Rescale(_activationState, _activation.OutputRange);
-                OutputData._signals[NeuronOutputData.AnalogSignalIdx] = normalizedActivation;
-                bool firingEvent = (OutputData._signals[NeuronOutputData.AnalogSignalIdx] - prevAnalogSignal) > _analogFiringThreshold;
-                OutputData._signals[NeuronOutputData.SpikingSignalIdx] = firingEvent ? 1d : 0d;
+                OutputData._analogSignal = normalizedActivation;
+                bool firingEvent = (OutputData._analogSignal - prevAnalogSignal) > _analogFiringThreshold;
+                OutputData._spikingSignal = firingEvent ? 1d : 0d;
             }
             //Update predictors
-            _predictors?.Update(_activationState, normalizedActivation.Bound(0, 1), (OutputData._signals[NeuronOutputData.SpikingSignalIdx] > 0));
+            _predictors?.Update(_activationState, normalizedActivation.Bound(0, 1), (OutputData._spikingSignal > 0));
             //Update statistics
             if (collectStatistics)
             {
-                Statistics.Update(_iStimuli, _rStimuli, _tStimuli, _activationState, OutputData._signals[NeuronOutputData.AnalogSignalIdx], OutputData._signals[NeuronOutputData.SpikingSignalIdx]);
+                Statistics.Update(_iStimuli, _rStimuli, _tStimuli, _activationState, OutputData._analogSignal, OutputData._spikingSignal);
             }
             return;
         }

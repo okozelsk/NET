@@ -89,14 +89,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
         /// <param name="collectStatistics">Specifies whether to update internal statistics</param>
         public void Recompute(bool collectStatistics)
         {
-            if (OutputData._signals[NeuronOutputData.SpikingSignalIdx] > 0)
+            if (OutputData._spikingSignal > 0)
             {
                 //Spike during previous cycle, so reset the counter
                 OutputData._afterFirstSpike = true;
                 OutputData._spikeLeak = 0;
             }
             ++OutputData._spikeLeak;
-            OutputData._signals[NeuronOutputData.SpikingSignalIdx] = _inputSpike;
+            OutputData._spikingSignal = _inputSpike;
             //Statistics
             if (collectStatistics)
             {
