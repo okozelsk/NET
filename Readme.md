@@ -34,12 +34,12 @@ site and State Machine usually achieves very similar results to the best classif
 #### Classification Results Comparison
 |Dataset|State Machine Accuracy|Best Ref. Accuracy|Best Ref. Algorithm|
 |--|--|--|--|
-|[CricketX](https://timeseriesclassification.com/description.php?Dataset=CricketX)|71%|81.4%|COTE|
-|[Worms](https://timeseriesclassification.com/description.php?Dataset=Worms)|84.42%|73.49%|BOSS|
+|[CricketX](https://timeseriesclassification.com/description.php?Dataset=CricketX)|78.46%|81.4%|COTE|
+|[Worms](https://timeseriesclassification.com/description.php?Dataset=Worms)|83.12%|73.49%|BOSS|
 |[BeetleFly](https://timeseriesclassification.com/description.php?Dataset=BeetleFly)|95%|94.85%|BOSS|
 |[BirdChicken](https://timeseriesclassification.com/description.php?Dataset=BirdChicken)|100%|98.4%|BOSS|
-|[ProximalPhalanx](https://timeseriesclassification.com/description.php?Dataset=ProximalPhalanxOutlineAgeGroup)|87.8%|88.09%|ST|
-|[Yoga](https://timeseriesclassification.com/description.php?Dataset=Yoga)|90.1%|90.99%|BOSS|
+|[ProximalPhalanx](https://timeseriesclassification.com/description.php?Dataset=ProximalPhalanxOutlineAgeGroup)|88.29%|88.09%|ST|
+|[Yoga](https://timeseriesclassification.com/description.php?Dataset=Yoga)|90.93%|90.99%|BOSS|
 
 
 ### Code examples (2. menu choice)

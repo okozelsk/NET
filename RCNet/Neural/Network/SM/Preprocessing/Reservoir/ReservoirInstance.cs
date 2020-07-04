@@ -130,6 +130,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                     NeuronCreationParams[] grpNCP = new NeuronCreationParams[ngs.Count];
                     PredictorsSettings predictorsCfg = new PredictorsSettings(ngs.PredictorsCfg, poolSettings.PredictorsCfg, InstanceCfg.PredictorsCfg);
                     //Group neuron params
+                    int analogThresholdMaxRefDeepness = 1;
                     for (int i = 0; i < ngs.Count; i++)
                     {
                         grpNCP[i] = new NeuronCreationParams
@@ -138,11 +139,16 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                             Bias = ngs.BiasCfg == null ? 0 : rand.NextDouble(ngs.BiasCfg),
                             GroupID = groupID,
                             AnalogFiringThreshold = ngs.Type == ActivationType.Spiking ? -1 : ((AnalogNeuronGroupSettings)ngs).FiringThreshold,
+                            AnalogThresholdMaxRefDeepness = ngs.Type == ActivationType.Spiking ? -1 : analogThresholdMaxRefDeepness++,
                             RetainmentStrength = 0,
                             PredictorsCfg = null
                         };
                         if (ngs.Type == ActivationType.Analog)
                         {
+                            if (analogThresholdMaxRefDeepness > ((AnalogNeuronGroupSettings)ngs).ThresholdMaxRefDeepness)
+                            {
+                                analogThresholdMaxRefDeepness = 1;
+                            }
                             ++_numOfAnalogNeurons;
                         }
                         else
@@ -177,6 +183,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                 //Instantiate neurons
                 HiddenNeuron[] poolNeurons = new HiddenNeuron[poolSettings.ProportionsCfg.Size];
                 int neuronPoolFlatIdx = 0;
+                int firingRefHistDistance = 0;
                 for (int x = 0; x < poolSettings.ProportionsCfg.DimX; x++)
                 {
                     for (int y = 0; y < poolSettings.ProportionsCfg.DimY; y++)
@@ -192,9 +199,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                                                                                   neuronParamCollection[neuronPoolFlatIdx].Activation,
                                                                                   neuronParamCollection[neuronPoolFlatIdx].Bias,
                                                                                   neuronParamCollection[neuronPoolFlatIdx].AnalogFiringThreshold,
+                                                                                  neuronParamCollection[neuronPoolFlatIdx].AnalogThresholdMaxRefDeepness,
                                                                                   neuronParamCollection[neuronPoolFlatIdx].RetainmentStrength,
                                                                                   neuronParamCollection[neuronPoolFlatIdx].PredictorsCfg
                                                                                   );
+                                if(firingRefHistDistance > 40)
+                                {
+                                    firingRefHistDistance = 0;
+                                }
                             }
                             else
                             {
@@ -556,7 +568,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                 //Density
                 double density = activationType == (int)ActivationType.Spiking ? inputConnCfg.SpikingTargetDensity : inputConnCfg.AnalogTargetDensity;
                 //Available target neurons
-                List<HiddenNeuron> targetNeurons = targetNeuronsByActivation[activationType];
+                List<HiddenNeuron> targetNeurons = new List<HiddenNeuron>(targetNeuronsByActivation[activationType]);
                 rand.Shuffle(targetNeurons);
                 //Limit target neurons 
                 int targetNeuronsCount = (int)Math.Round(targetNeurons.Count * density, 0);
@@ -964,6 +976,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             public double Bias { get; set; }
             public int GroupID { get; set; }
             public double AnalogFiringThreshold { get; set; }
+            public int AnalogThresholdMaxRefDeepness { get; set; }
             public double RetainmentStrength { get; set; }
             public PredictorsSettings PredictorsCfg { get; set; }
         }//NeuronCreationParams

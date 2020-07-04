@@ -91,6 +91,14 @@ namespace RCNet.Neural.Activation
         /// Adjusted (modified) input stimuli
         /// </summary>
         protected double _stimuli;
+        /// <summary>
+        /// Indicates spike during last computation
+        /// </summary>
+        protected bool _lastSpike;
+        /// <summary>
+        /// Minimum membrane voltage
+        /// </summary>
+        protected double _minV;
 
         /// <summary>
         /// Constructs an initialized instance
@@ -119,10 +127,10 @@ namespace RCNet.Neural.Activation
         {
             _restV = restV;
             _resetV = resetV;
+            _minV = Math.Min(_resetV, _restV);
             _initialV = _resetV;
             _firingThresholdV = firingThresholdV;
             _refractoryPeriods = refractoryPeriods;
-            _stateRange = new Interval(Math.Min(_resetV, _restV), _firingThresholdV);
             _evolVars = new Vector(numOfEvolvingVars);
             _solvingMethod = solvingMethod;
             _stepTimeScale = stepTimeScale;
@@ -130,8 +138,10 @@ namespace RCNet.Neural.Activation
             _evolVars[VarMembraneVIdx] = _initialV;
             _inRefractory = false;
             _refractoryPeriod = 0;
+            _lastSpike = false;
             _currentCoeff = inputCurrentCoeff;
             _potentialCoeff = membranePotentialCoeff;
+            _stateRange = new Interval(_potentialCoeff * Math.Min(_resetV, _restV), _potentialCoeff * _firingThresholdV);
             return;
         }
 
@@ -175,6 +185,7 @@ namespace RCNet.Neural.Activation
             _evolVars[VarMembraneVIdx] = _initialV;
             _inRefractory = false;
             _refractoryPeriod = 0;
+            _lastSpike = false;
             return;
         }
 
@@ -182,10 +193,10 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Sets initial state of the membrane potential
         /// </summary>
-        /// <param name="state">0 LE state LT 1, where 0 means Min(reset, rest) potential and 1 means firing threshold</param>
+        /// <param name="state">0 LE state LT 1, where 0 correspondes to Min(reset, rest) potential and 1 correspondes to firing threshold</param>
         public void SetInitialInternalState(double state)
         {
-            _initialV = _stateRange.Min + state * _stateRange.Span;
+            _initialV = _minV + state * (_firingThresholdV - _minV);
             Reset();
             return;
         }
@@ -197,14 +208,21 @@ namespace RCNet.Neural.Activation
         /// <param name="x">Input stimuli (interpreted as an electric current)</param>
         public virtual double Compute(double x)
         {
-            if (_evolVars[VarMembraneVIdx] >= _firingThresholdV)
-            {
-                _evolVars[VarMembraneVIdx] = _resetV;
-                _refractoryPeriod = 0;
-                _inRefractory = true;
-            }
             //Stimuli
             _stimuli = (x * _currentCoeff).Bound();
+            //Membrane reset?
+            if(_lastSpike)
+            {
+                _evolVars[VarMembraneVIdx] = _resetV;
+                //Refractory
+                //Enter refractory?
+                if (_refractoryPeriods > 0)
+                {
+                    _refractoryPeriod = 0;
+                    _inRefractory = true;
+                }
+            }
+            //Exit refractory?
             if (_inRefractory)
             {
                 ++_refractoryPeriod;
@@ -221,26 +239,37 @@ namespace RCNet.Neural.Activation
             }
 
             //Compute membrane new potential
+            bool spike = false;
             foreach (ODENumSolver.Estimation subResult in ODENumSolver.SolveGradually(MembraneDiffEq, 0, _evolVars, _stepTimeScale, _subSteps, _solvingMethod))
             {
                 _evolVars = subResult.V;
                 if (_evolVars[VarMembraneVIdx] >= _firingThresholdV)
                 {
+                    //Keep maximum voltage
+                    _evolVars[VarMembraneVIdx] = _firingThresholdV;
+                    spike = true;
                     break;
+                }
+                else if(_evolVars[VarMembraneVIdx] < _minV)
+                {
+                    //Keep minimum voltage
+                    _evolVars[VarMembraneVIdx] = _minV;
                 }
             }
 
+
             //Firing
-            if (_evolVars[VarMembraneVIdx] >= _firingThresholdV)
+            if (spike)
             {
-                _evolVars[VarMembraneVIdx] = _firingThresholdV;
                 OnFiring();
                 //Spike
+                _lastSpike = true;
                 return Spike;
             }
             else
             {
                 //No spike
+                _lastSpike = false;
                 return 0d;
             }
         }

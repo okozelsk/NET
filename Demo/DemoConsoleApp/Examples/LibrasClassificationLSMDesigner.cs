@@ -34,10 +34,10 @@ namespace Demo.DemoConsoleApp.Examples
         {
             //Create StateMachine configuration
             //Simplified input configuration
-            InputEncoderSettings inputCfg = StateMachineDesigner.CreateInputCfg(new FeedingPatternedSettings(1, false, RCNet.Neural.Data.InputPattern.VariablesSchema.Groupped),
-                                                                                true,
-                                                                                new ExternalFieldSettings("coord_abcissa", new RealFeatureFilterSettings(), true, new SpikeCodeSettings(15, 1e-5, true, true)),
-                                                                                new ExternalFieldSettings("coord_ordinate", new RealFeatureFilterSettings(), true, new SpikeCodeSettings(15, 1e-5, true, true))
+            InputEncoderSettings inputCfg = StateMachineDesigner.CreateInputCfg(new FeedingPatternedSettings(1, true, RCNet.Neural.Data.InputPattern.VariablesSchema.Groupped),
+                                                                                false,
+                                                                                new ExternalFieldSettings("coord_abcissa", new RealFeatureFilterSettings(), true, new SpikeCodeSettings(15, 1e-3, true, true, true, false)),
+                                                                                new ExternalFieldSettings("coord_ordinate", new RealFeatureFilterSettings(), true, new SpikeCodeSettings(15, 1e-3, true, true, true, false))
                                                                                 );
             //Simplified readout layer configuration
             ReadoutLayerSettings readoutCfg = StateMachineDesigner.CreateClassificationReadoutCfg(StateMachineDesigner.CreateSingleLayerRegrNet(new ElliotSettings(), 5, 400),
@@ -63,16 +63,17 @@ namespace Demo.DemoConsoleApp.Examples
             //Create designer instance
             StateMachineDesigner smd = new StateMachineDesigner(inputCfg, readoutCfg);
             //Create pure LSM fashioned StateMachine configuration
-            StateMachineSettings stateMachineCfg = smd.CreatePureLSMCfg(new ProportionsSettings(120, 1, 1), //Proportions (it also determines total size)
+            StateMachineSettings stateMachineCfg = smd.CreatePureLSMCfg(new ProportionsSettings(60, 1, 1), //Proportions (it also determines total size)
                                                                         new AdExpIFSettings(), //Activation
-                                                                        new HomogenousExcitabilitySettings(0.7, 0.6, 0.1),
+                                                                        //new ExpIFSettings(null, null, null, null, null, null, null, 0), //Activation
+                                                                        new HomogenousExcitabilitySettings(0.75, 0.75, 0.25),
                                                                         1d, //Input connection density
                                                                         0, //Input max delay
                                                                         0.1d, //Interconnection density
                                                                         0, //Internal synapses max delay
                                                                         0, //Steady bias
-                                                                        new PredictorsParamsSettings(new FiringCountSettings(45)),
-                                                                        PredictorsProvider.PredictorID.FiringCount
+                                                                        null,
+                                                                        PredictorsProvider.PredictorID.FiringFadingSum
                                                                         );
 
             //Display StateMachine xml configuration

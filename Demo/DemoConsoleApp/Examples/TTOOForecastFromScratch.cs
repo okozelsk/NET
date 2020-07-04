@@ -78,6 +78,7 @@ namespace Demo.DemoConsoleApp.Examples
                                                                                relShare,
                                                                                new TanHSettings(),
                                                                                AnalogNeuronGroupSettings.DefaultFiringThreshold,
+                                                                               AnalogNeuronGroupSettings.DefaultThresholdMaxRefDeepness,
                                                                                biasCfg,
                                                                                retainmentCfg,
                                                                                null

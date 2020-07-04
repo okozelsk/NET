@@ -21,10 +21,15 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// </summary>
         public const string XsdTypeName = "PoolAnalogNeuronGroupType";
         /// <summary>
+        /// Default value of the firing threshold.
         /// Every time the new normalized activation value is higher than the previous
         /// normalized activation value by at least the threshold, it is evaluated as a firing event
         /// </summary>
         public const double DefaultFiringThreshold = 0.00125d;
+        /// <summary>
+        /// Default maximum deepness of historical normalized activation value to be compared with current normalized activation value when evaluating firing event.
+        /// </summary>
+        public const int DefaultThresholdMaxRefDeepness = 1;
 
         //Attribute properties
         /// <summary>
@@ -47,6 +52,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// normalized activation value by at least the threshold, it is evaluated as a firing event.
         /// </summary>
         public double FiringThreshold { get; }
+
+        /// <summary>
+        /// Maximum deepness of historical normalized activation value to be compared with current normalized activation value when evaluating firing event.
+        /// </summary>
+        public int ThresholdMaxRefDeepness { get; }
 
         /// <summary>
         /// Each neuron within the group receives constant input bias. Value of the neuron's bias is driven by this random settings
@@ -80,6 +90,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// A number between 0 and 1 (LT1). Every time the new normalized activation value is higher than the previous
         /// normalized activation value by at least the threshold, it is evaluated as a firing event.
         /// </param>
+        /// <param name="thresholdMaxRefDeepness">Maximum deepness of historical normalized activation value to be compared with current normalized activation value when evaluating firing event.</param>
         /// <param name="biasCfg">Each neuron within the group receives constant input bias. Value of the neuron's bias is driven by this random settings</param>
         /// <param name="retainmentCfg">Neurons' retainment property configuration</param>
         /// <param name="predictorsCfg">Configuration of the predictors</param>
@@ -87,6 +98,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
                                          double relShare,
                                          RCNetBaseSettings activationCfg,
                                          double firingThreshold = DefaultFiringThreshold,
+                                         int thresholdMaxRefDeepness = DefaultThresholdMaxRefDeepness,
                                          RandomValueSettings biasCfg = null,
                                          RetainmentSettings retainmentCfg = null,
                                          PredictorsSettings predictorsCfg = null
@@ -96,6 +108,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
             RelShare = relShare;
             ActivationCfg = activationCfg.DeepClone();
             FiringThreshold = firingThreshold;
+            ThresholdMaxRefDeepness = thresholdMaxRefDeepness;
             BiasCfg = biasCfg == null ? null : (RandomValueSettings)biasCfg.DeepClone();
             RetainmentCfg = retainmentCfg == null ? null : (RetainmentSettings)retainmentCfg.DeepClone();
             PredictorsCfg = predictorsCfg == null ? null : (PredictorsSettings)predictorsCfg.DeepClone();
@@ -108,7 +121,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// </summary>
         /// <param name="source">Source instance</param>
         public AnalogNeuronGroupSettings(AnalogNeuronGroupSettings source)
-            : this(source.Name, source.RelShare, source.ActivationCfg, source.FiringThreshold,
+            : this(source.Name, source.RelShare, source.ActivationCfg, source.FiringThreshold, source.ThresholdMaxRefDeepness,
                   source.BiasCfg, source.RetainmentCfg, source.PredictorsCfg)
         {
             return;
@@ -131,6 +144,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
             ActivationCfg = ActivationFactory.LoadSettings(settingsElem.Elements().First());
             //Firing threshold
             FiringThreshold = double.Parse(settingsElem.Attribute("firingThreshold").Value, CultureInfo.InvariantCulture);
+            ThresholdMaxRefDeepness = int.Parse(settingsElem.Attribute("thresholdMaxRefDeepness").Value, CultureInfo.InvariantCulture);
             //Bias
             XElement biasSettingsElem = settingsElem.Elements("bias").FirstOrDefault();
             BiasCfg = biasSettingsElem == null ? null : new RandomValueSettings(biasSettingsElem);
@@ -157,6 +171,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// Checks if settings are default
         /// </summary>
         public bool IsDefaultFiringThreshold { get { return (FiringThreshold == DefaultFiringThreshold); } }
+
+        /// <summary>
+        /// Checks if settings are default
+        /// </summary>
+        public bool IsDefaultThresholdMaxRefDeepness { get { return (ThresholdMaxRefDeepness == DefaultThresholdMaxRefDeepness); } }
 
         /// <summary>
         /// Identifies settings containing only default values
@@ -196,6 +215,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
             {
                 throw new ArgumentException($"Invalid FiringThreshold {FiringThreshold.ToString(CultureInfo.InvariantCulture)}. FiringThreshold must be GE to 0 and LE to 1.", "FiringThreshold");
             }
+            if (ThresholdMaxRefDeepness < 1)
+            {
+                throw new ArgumentException($"Invalid ThresholdMaxRefDeepness {ThresholdMaxRefDeepness.ToString(CultureInfo.InvariantCulture)}. ThresholdMaxRefDeepness must be GT 1.", "ThresholdMaxRefDeepness");
+            }
             return;
         }
 
@@ -223,6 +246,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
             if (!suppressDefaults || !IsDefaultFiringThreshold)
             {
                 rootElem.Add(new XAttribute("firingThreshold", FiringThreshold.ToString(CultureInfo.InvariantCulture)));
+            }
+            if (!suppressDefaults || !IsDefaultThresholdMaxRefDeepness)
+            {
+                rootElem.Add(new XAttribute("thresholdMaxRefDeepness", ThresholdMaxRefDeepness.ToString(CultureInfo.InvariantCulture)));
             }
             if (BiasCfg != null)
             {

@@ -302,6 +302,7 @@ namespace RCNet.Neural.Network.SM
                                                                                1d,
                                                                                activationCfg,
                                                                                AnalogNeuronGroupSettings.DefaultFiringThreshold,
+                                                                               AnalogNeuronGroupSettings.DefaultThresholdMaxRefDeepness,
                                                                                biasCfg,
                                                                                retainmentCfg,
                                                                                null

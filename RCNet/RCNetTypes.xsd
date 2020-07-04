@@ -1902,6 +1902,11 @@
         <xs:documentation xml:lang="en">A number between 0 and 1 (LT1). Every time the new normalized activation value is higher than the previous normalized activation value by at least the threshold, it is evaluated as a firing event. Default value is 0.00125.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
+    <xs:attribute type="UIntGT0Type" name="thresholdMaxRefDeepness" use="optional" default="1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Maximum deepness of historical normalized activation value to be compared with current normalized activation value when evaluating firing event. Default value is 1.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- Neuron groups choice-->
@@ -2075,7 +2080,7 @@
 
   <!-- Input spike code configuration -->
   <xs:complexType name="NPInputSpikeCodeType">
-    <xs:attribute type="UIntGE1LE1024Type" name="componentHalfCodeLength" use="optional" default="16">
+    <xs:attribute type="UIntGE1LE32Type" name="componentHalfCodeLength" use="optional" default="16">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is 16</xs:documentation>
       </xs:annotation>
@@ -2085,14 +2090,24 @@
         <xs:documentation xml:lang="en">Firing threshold of the most sensitive spike. Default value is 1e-5</xs:documentation>
       </xs:annotation>
     </xs:attribute>
+    <xs:attribute type="xs:boolean" name="thresholdFullSpikeSet" use="optional" default="true">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Specifies whether to activate all thresholded spikes. Default value is true</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
     <xs:attribute type="xs:boolean" name="signalComponent" use="optional" default="true">
       <xs:annotation>
-        <xs:documentation xml:lang="en">If to use strength of the current analog signal as a component of the spike code. Default value is true</xs:documentation>
+        <xs:documentation xml:lang="en">Specifies whether to use thresholding of the current analog signal strength as a component of the spike code. Default value is true</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="xs:boolean" name="deltaComponent" use="optional" default="false">
       <xs:annotation>
-        <xs:documentation xml:lang="en">If to use difference of the current analog signal and previous analog signal as a component of the spike code. Default value is false</xs:documentation>
+        <xs:documentation xml:lang="en">Specifies whether to use thresholding of the difference of current and previous analog signals as a component of the spike code. Default value is false</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="binaryComponent" use="optional" default="false">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Specifies whether to use binary representation of the signal as a component of the spike code. Default value is false</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>

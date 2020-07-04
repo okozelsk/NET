@@ -2,7 +2,7 @@
 <demo dataFolder=".\\Data" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="SMDemoSettings.xsd">
 
   <!--
-    Here StateMachine achieves 71% accuracy. It is clearly worse than the best accuracy 81.4% achieved by the algorithm
+    Here StateMachine achieves 78.46% accuracy. It is a bit worse than the best accuracy 81.4% achieved by the algorithm
     called COTE referenced at the dataset's home site:
     "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
     https://timeseriesclassification.com/description.php?Dataset=CricketX.
@@ -38,7 +38,7 @@
               <pool name="PoolMain">
                 <proportions dimX="400" dimY="1" dimZ="1"/>
                 <neuronGroups>
-                  <analogGroup name="TanH-grp" relShare="1" firingThreshold="0.00125">
+                  <analogGroup name="TanH-grp" relShare="1" firingThreshold="0.00125" thresholdMaxRefDeepness="40">
                     <activationTanH/>
                   </analogGroup>
                 </neuronGroups>
@@ -281,7 +281,7 @@
   <!--
     This demo case demonstrates successful use of the pure analog ESN reservoir for the fast and accurate classifications enabled by
     the new ability of the analog neurons to fire a spike, input resampling and transformation. 
-    Following straightforward configuration of the StateMachine exhibits 84.42% accuracy, clearly better than the best algorithm
+    Following straightforward configuration of the StateMachine exhibits 83.12% accuracy, clearly better than the best algorithm
     called BOSS (73.49%), referenced at the dataset's home site:
     "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
     https://timeseriesclassification.com/description.php?Dataset=Worms.
@@ -502,8 +502,8 @@
   </case>
 
   <!--
-    This demo case demonstrates successful use of a simple LSM reservoir consisting of LeakyIF neurons for the accurate classifications.
-    Following straightforward configuration of the StateMachine achieves 90.00% accuracy, slightly worse than the best algorithm
+    This demo case demonstrates use of a simple LSM reservoir consisting of LeakyIF neurons for the classifications.
+    Following straightforward configuration of the StateMachine achieves XX.00% accuracy. It is worse than the best algorithm
     called BOSS, referenced at the dataset's home site:
     "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
     https://timeseriesclassification.com/description.php?Dataset=BeetleFly.
@@ -696,7 +696,7 @@
   <!--
     This demo case demonstrates successful use of the pure analog ESN reservoir for the fast and accurate classifications enabled by
     the new ability of the analog neurons to fire a spike.
-    Following configuration of the StateMachine leads to 87.8% accuracy, slightly worse than the best algorithm
+    Following configuration of the StateMachine leads to 88.29% accuracy, slightly better than the best algorithm
     called ST, referenced at the dataset's home site:
     "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
     https://timeseriesclassification.com/description.php?Dataset=ProximalPhalanxOutlineAgeGroup.
@@ -1097,7 +1097,7 @@
   <!--
     This demo case demonstrates successful use of the pure analog ESN reservoir for the fast and accurate classifications enabled by
     the new ability of the analog neurons to fire a spike.
-    Following straightforward configuration of the StateMachine achieves 90.1% accuracy, a little bit worse than
+    Following straightforward configuration of the StateMachine achieves 90.93% accuracy, a little bit worse than
     the best algorithm called BOSS, referenced at the dataset's home site:
     "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
     https://timeseriesclassification.com/description.php?Dataset=Yoga.
@@ -1189,7 +1189,7 @@
     Used dataset is a pre-processed and re-structured/reshaped version of a very commonly used dataset featuring epileptic seizure detection.
     The dataset was converted from https://archive.ics.uci.edu/ml/datasets/Epileptic+Seizure+Recognition and contains 11500 EEG recordings
     each for 1 second. After conversion each EEG pattern corresponds to an epileptic seizure or not.
-    Achieved accuracy is 99.2%
+    Achieved accuracy is 99%
     Relevant paper: http://users.fs.cvut.cz/ivo.bukovsky/PROJEKT/Data/Realna/BIO/EEG/reference/PRE61907.pdf
   -->
   <case name="Classification task Recognition of the Epileptic Seizure Brain Activity (EEG):  Pure ESN reservoir generating FiringFadingSum predictors, Multilayer FF network as a classifier (Resilient trainer)">

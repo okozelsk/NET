@@ -187,26 +187,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         }
 
         /// <summary>
-        /// Prepares set of meaningful combinations of indexes of input spiking neurons to be connected together.
+        /// Prepares set of meaningful combinations of indexes of input spiking neurons to be connected to a target hidden neuron.
         /// </summary>
         /// <param name="numOfCombinations">Desired number of connections</param>
         public List<int[]> GetSpikingInputCombinations(int numOfCombinations)
         {
-            List<int[]> result = new List<int[]>(numOfCombinations);
-            //Alone neurons
-            for (int i = 0; i < SpikingNeuronCollection.Length; i++)
-            {
-                int[] cmbIdxs = new int[1];
-                cmbIdxs[0] = i;
-                result.Add(cmbIdxs);
-                if (result.Count == numOfCombinations)
-                {
-                    //Desired number of combinations is reached
-                    return result;
-                }
-            }
-            //Maximum number of combinations is reached
-            return result;
+            return _realSpikeCode.GetCombinations(numOfCombinations);
         }
 
     }//InputField

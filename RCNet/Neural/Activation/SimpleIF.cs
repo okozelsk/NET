@@ -155,6 +155,10 @@ namespace RCNet.Neural.Activation
             }
             else
             {
+                if(_membraneV < _restV)
+                {
+                    _membraneV = _restV;
+                }
                 return 0d;
             }
         }

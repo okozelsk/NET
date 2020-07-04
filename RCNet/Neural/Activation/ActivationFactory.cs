@@ -264,13 +264,13 @@ namespace RCNet.Neural.Activation
             {
                 throw new ArgumentException($"Unsupported activation function settings: {settingsType.Name}");
             }
-            /*
+            //*
             //Set random initial membrane potential for spiking activation
             if(!af.Stateless && af.TypeOfActivation == ActivationType.Spiking)
             {
                 af.SetInitialInternalState(rand.NextRangedUniformDouble(0.05, 0.95));
             }
-            */
+            //*/
             return af;
         }
 

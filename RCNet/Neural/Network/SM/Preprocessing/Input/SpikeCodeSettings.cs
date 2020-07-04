@@ -21,17 +21,25 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// </summary>
         public const int DefaultComponentHalfCodeLength = 16;
         /// <summary>
-        /// Default value of parameter specifying firing threshold of the most sensitive input neuron
+        /// Default value of parameter specifying threshold of the most sensitive spike
         /// </summary>
         public const double DefaultLowestThreshold = 1e-5;
         /// <summary>
-        /// Default value of parameter specifying if to use strength of the current analog signal as a component of the spike code
+        /// Default value of parameter specifying whether to activate all thresholded spikes
+        /// </summary>
+        public const bool DefaultThresholdFullSpikeSet = true;
+        /// <summary>
+        /// Default value of parameter specifying whether to use thresholding of the current analog signal strength as a component of the spike code
         /// </summary>
         public const bool DefaultSignalComponent = true;
         /// <summary>
-        /// Default value of parameter specifying if to use difference of the current analog signal and previous analog signal as a component of the spike code
+        /// Default value of parameter specifying whether to use thresholding of the difference of current and previous analog signals as a component of the spike code
         /// </summary>
         public const bool DefaultDeltaComponent = false;
+        /// <summary>
+        /// Default value of parameter specifying whether to use binary representation of the signal as a component of the spike code
+        /// </summary>
+        public const bool DefaultBinaryComponent = false;
 
 
         //Attribute properties
@@ -41,19 +49,29 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         public int ComponentHalfCodeLength { get; }
 
         /// <summary>
-        /// Firing threshold of the most sensitive input neuron
+        /// Threshold of the most sensitive spike
         /// </summary>
         public double LowestThreshold { get; }
 
         /// <summary>
-        /// Specifies whether to use strength of the current analog signal as a component of the spike code
+        /// Specifies whether to activate all thresholded spikes
+        /// </summary>
+        public bool ThresholdFullSpikeSet { get; }
+
+        /// <summary>
+        /// Specifies whether to use thresholding of the current analog signal strength as a component of the spike code
         /// </summary>
         public bool SignalComponent { get; }
 
         /// <summary>
-        /// Specifies whether to use difference of the current analog signal and previous analog signal as a component of the spike code
+        /// Specifies whether to use thresholding of the difference of current and previous analog signals as a component of the spike code
         /// </summary>
         public bool DeltaComponent { get; }
+
+        /// <summary>
+        /// Specifies whether to use binary representation of the signal as a component of the spike code
+        /// </summary>
+        public bool BinaryComponent { get; }
 
 
         //Constructors
@@ -61,19 +79,25 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// Creates an itialized instance.
         /// </summary>
         /// <param name="componentHalfCodeLength">Length of the half of component code</param>
-        /// <param name="lowestThreshold">Firing threshold of the most sensitive input neuron</param>
-        /// <param name="signalComponent">Specifies whether to use strength of the current analog signal as a component of the spike code</param>
-        /// <param name="deltaComponent">Specifies whether to use difference of the current analog signal and previous analog signal as a component of the spike code</param>
+        /// <param name="lowestThreshold">Threshold of the most sensitive spike</param>
+        /// <param name="thresholdFullSpikeSet">Specifies whether to activate all thresholded spikes</param>
+        /// <param name="signalComponent">Specifies whether to use thresholding of the current analog signal strength as a component of the spike code</param>
+        /// <param name="deltaComponent">Specifies whether to use thresholding of the difference of current and previous analog signals as a component of the spike code</param>
+        /// <param name="binaryComponent">Specifies whether to use binary representation of the signal as a component of the spike code</param>
         public SpikeCodeSettings(int componentHalfCodeLength = DefaultComponentHalfCodeLength,
                                  double lowestThreshold = DefaultLowestThreshold,
+                                 bool thresholdFullSpikeSet = DefaultThresholdFullSpikeSet,
                                  bool signalComponent = DefaultSignalComponent,
-                                 bool deltaComponent = DefaultDeltaComponent
+                                 bool deltaComponent = DefaultDeltaComponent,
+                                 bool binaryComponent = DefaultBinaryComponent
                                  )
         {
             ComponentHalfCodeLength = componentHalfCodeLength;
             LowestThreshold = lowestThreshold;
+            ThresholdFullSpikeSet = thresholdFullSpikeSet;
             SignalComponent = signalComponent;
             DeltaComponent = deltaComponent;
+            BinaryComponent = binaryComponent;
             Check();
             return;
         }
@@ -83,7 +107,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// </summary>
         /// <param name="source">Source instance</param>
         public SpikeCodeSettings(SpikeCodeSettings source)
-            : this(source.ComponentHalfCodeLength, source.LowestThreshold, source.SignalComponent, source.DeltaComponent)
+            : this(source.ComponentHalfCodeLength, source.LowestThreshold, source.ThresholdFullSpikeSet, source.SignalComponent,
+                   source.DeltaComponent, source.BinaryComponent)
         {
             return;
         }
@@ -99,13 +124,20 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             //Parsing
             ComponentHalfCodeLength = int.Parse(settingsElem.Attribute("componentHalfCodeLength").Value, CultureInfo.InvariantCulture);
             LowestThreshold = double.Parse(settingsElem.Attribute("lowestThreshold").Value, CultureInfo.InvariantCulture);
+            ThresholdFullSpikeSet = bool.Parse(settingsElem.Attribute("thresholdFullSpikeSet").Value);
             SignalComponent = bool.Parse(settingsElem.Attribute("signalComponent").Value);
             DeltaComponent = bool.Parse(settingsElem.Attribute("deltaComponent").Value);
+            BinaryComponent = bool.Parse(settingsElem.Attribute("binaryComponent").Value);
             Check();
             return;
         }
 
         //Properties
+        /// <summary>
+        /// Number of enabled components within the spike code
+        /// </summary>
+        public int NumOfComponents { get { return (SignalComponent ? 1 : 0) + (DeltaComponent ? 1 : 0) + (BinaryComponent ? 1 : 0); } }
+        
         /// <summary>
         /// Checks if settings are default
         /// </summary>
@@ -119,12 +151,22 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// Checks if settings are default
         /// </summary>
-        public bool IsDefaultUseDeviation { get { return (SignalComponent == DefaultSignalComponent); } }
+        public bool IsDefaultThresholdFullSpikeSet { get { return (ThresholdFullSpikeSet == DefaultThresholdFullSpikeSet); } }
 
         /// <summary>
         /// Checks if settings are default
         /// </summary>
-        public bool IsDefaultUseDifference { get { return (DeltaComponent == DefaultDeltaComponent); } }
+        public bool IsDefaultSignalComponent { get { return (SignalComponent == DefaultSignalComponent); } }
+
+        /// <summary>
+        /// Checks if settings are default
+        /// </summary>
+        public bool IsDefaultDeltaComponent { get { return (DeltaComponent == DefaultDeltaComponent); } }
+
+        /// <summary>
+        /// Checks if settings are default
+        /// </summary>
+        public bool IsDefaultBinaryComponent { get { return (BinaryComponent == DefaultBinaryComponent); } }
 
         /// <summary>
         /// Identifies settings containing only default values
@@ -135,8 +177,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             {
                 return IsDefaultComponentHalfCodeLength &&
                        IsDefaultLowestThreshold &&
-                       IsDefaultUseDeviation &&
-                       IsDefaultUseDifference;
+                       IsDefaultThresholdFullSpikeSet &&
+                       IsDefaultSignalComponent &&
+                       IsDefaultDeltaComponent &&
+                       IsDefaultBinaryComponent;
             }
         }
 
@@ -146,17 +190,17 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// </summary>
         protected override void Check()
         {
-            if (ComponentHalfCodeLength < 1 || ComponentHalfCodeLength > 1024)
+            if (ComponentHalfCodeLength < 1 || ComponentHalfCodeLength > 32)
             {
-                throw new ArgumentException($"Invalid ComponentHalfCodeLength {ComponentHalfCodeLength.ToString(CultureInfo.InvariantCulture)}. ComponentHalfCodeLength must be GE to 1 and LE to 1024.", "ComponentHalfCodeLength");
+                throw new ArgumentException($"Invalid ComponentHalfCodeLength {ComponentHalfCodeLength.ToString(CultureInfo.InvariantCulture)}. ComponentHalfCodeLength must be GE to 1 and LE to 32.", "ComponentHalfCodeLength");
             }
             if (LowestThreshold <= 0 || LowestThreshold >= 1d)
             {
                 throw new ArgumentException($"Invalid LowestThreshold {LowestThreshold.ToString(CultureInfo.InvariantCulture)}. LowestThreshold must be GT 0 and LT 1.", "LowestThreshold");
             }
-            if (!SignalComponent && !DeltaComponent)
+            if (NumOfComponents == 0)
             {
-                throw new ArgumentException($"At least one component of the spike code has to be used.", "SignalComponent/DeltaComponent");
+                throw new ArgumentException($"At least one component of the spike code has to be used.", "SignalComponent/DeltaComponent/BinaryComponent");
             }
             return;
         }
@@ -186,13 +230,21 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             {
                 rootElem.Add(new XAttribute("lowestThreshold", LowestThreshold.ToString(CultureInfo.InvariantCulture)));
             }
-            if (!suppressDefaults || !IsDefaultUseDeviation)
+            if (!suppressDefaults || !IsDefaultThresholdFullSpikeSet)
+            {
+                rootElem.Add(new XAttribute("thresholdFullSpikeSet", ThresholdFullSpikeSet.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()));
+            }
+            if (!suppressDefaults || !IsDefaultSignalComponent)
             {
                 rootElem.Add(new XAttribute("signalComponent", SignalComponent.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()));
             }
-            if (!suppressDefaults || !IsDefaultUseDifference)
+            if (!suppressDefaults || !IsDefaultDeltaComponent)
             {
                 rootElem.Add(new XAttribute("deltaComponent", DeltaComponent.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()));
+            }
+            if (!suppressDefaults || !IsDefaultBinaryComponent)
+            {
+                rootElem.Add(new XAttribute("binaryComponent", BinaryComponent.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()));
             }
             Validate(rootElem, XsdTypeName);
             return rootElem;
