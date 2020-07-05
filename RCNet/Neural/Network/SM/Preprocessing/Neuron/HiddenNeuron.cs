@@ -136,7 +136,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
             }
             _activation = analogActivation;
             _analogFiringThreshold = firingThreshold;
-            _histActivationsQueue = new SimpleQueue<double>(thresholdMaxRefDeepness);
+            _histActivationsQueue = thresholdMaxRefDeepness < 2 ? null : new SimpleQueue<double>(thresholdMaxRefDeepness);
             _analogRetainmentStrength = retainmentStrength;
             _predictors = predictorsCfg != null ? new PredictorsProvider(predictorsCfg) : null;
             OutputData = new NeuronOutputData();
@@ -178,6 +178,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
             _rStimuli = 0;
             _tStimuli = 0;
             _activationState = 0;
+            _histActivationsQueue?.Reset();
             OutputData.Reset();
             if (statistics)
             {
@@ -230,9 +231,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
                 double newState = _activation.Compute(_tStimuli);
                 _activationState = (_analogRetainmentStrength * _activationState) + (1d - _analogRetainmentStrength) * newState;
                 normalizedActivation = _outputRange.Rescale(_activationState, _activation.OutputRange).Bound(_outputRange.Min, _outputRange.Max);
+                bool firingEvent = _histActivationsQueue == null ? ((normalizedActivation - OutputData._analogSignal) > _analogFiringThreshold) : (_histActivationsQueue.Full ? (normalizedActivation - _histActivationsQueue.Dequeue()) > _analogFiringThreshold : (normalizedActivation - 0.5d) > _analogFiringThreshold);
+                _histActivationsQueue?.Enqueue(normalizedActivation);
+                //New output data
                 OutputData._analogSignal = normalizedActivation;
-                bool firingEvent = _histActivationsQueue.Full ? (OutputData._analogSignal - _histActivationsQueue.Dequeue()) > _analogFiringThreshold : OutputData._analogSignal > _analogFiringThreshold;
-                _histActivationsQueue.Enqueue(normalizedActivation);
                 OutputData._spikingSignal = firingEvent ? 1d : 0d;
             }
             //Update predictors

@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <demo dataFolder=".\\Data" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="SMDemoSettings.xsd">
 
+
   <!--
-    Here StateMachine achieves 78.46% accuracy. It is a bit worse than the best accuracy 81.4% achieved by the algorithm
+    Here StateMachine achieves 80.77% accuracy. It is a bit worse than the best accuracy 81.4% achieved by the algorithm
     called COTE referenced at the dataset's home site:
     "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
     https://timeseriesclassification.com/description.php?Dataset=CricketX.
@@ -36,14 +37,14 @@
           <reservoirStructure name="MainCfg">
             <pools>
               <pool name="PoolMain">
-                <proportions dimX="400" dimY="1" dimZ="1"/>
+                <proportions dimX="500" dimY="1" dimZ="1"/>
                 <neuronGroups>
-                  <analogGroup name="TanH-grp" relShare="1" firingThreshold="0.00125" thresholdMaxRefDeepness="40">
+                  <analogGroup name="TanH-grp" relShare="1" firingThreshold="0.00125" thresholdMaxRefDeepness="60">
                     <activationTanH/>
                   </analogGroup>
                 </neuronGroups>
                 <interconnection>
-                  <randomSchema density="0.1" avgDistance="NA" allowSelfConnection="true"/>
+                  <randomSchema density="0.05" avgDistance="NA" allowSelfConnection="true"/>
                   <chainSchema/>
                 </interconnection>
               </pool>
@@ -130,152 +131,6 @@
       </readoutLayer>
     </stateMachine>
   </case>
-
-  <!--
-    This demo case demonstrates successful use of the pure analog ESN reservoir for the fast and accurate classifications enabled by
-    the new ability of the analog neurons to fire a spike.
-    The dataset is from https://archive.ics.uci.edu/ml/datasets/Libras+Movement and contains 15 classes of 24 instances each, where
-    each class references to a hand movement type in LIBRAS. The hand movement is represented as a bidimensional curve performed
-    by the hand in a period of time. The curves were obtained from videos of hand movements, with the Libras performance from 4 
-    different people, during 2 sessions. Each video corresponds to only one hand movement and has about 7 seconds.    
-    Each video corresponds to a function F in a functions space which is the continual version of the input dataset.
-    In the video pre-processing, a time normalization is carried out selecting 45 frames from each video, in according 
-    to an uniform distribution. In each frame, the centroid pixels of the segmented objects (the hand) are found, which 
-    compose the discrete version of the curve F with 45 points. All curves are normalized in the unitary space.
-    Each curve F is mapped in a representation with 90 features, with representing the coordinates of movement.
-    Each instance represents 45 points on a bi-dimensional space, which can be plotted in an ordered way (from 1 through
-    45 as the X co-ordinate) in order to draw the path of the movement.
-    For this demo purposes was selected 4x15 instances as the verification set.
-  -->
-  <case name="Classification task Libras Movement: Simple pure ESN reservoir generating FiringCount predictors, one Identity neuron as a classifier (Resilient trainer)">
-    <samples trainingData="LibrasMovement_train.csv" verificationData="LibrasMovement_verify.csv"/>
-    <stateMachine randomizerSeek="0">
-      <neuralPreprocessor>
-        <inputEncoder>
-          <feedingPatterned slices="1" bidir="true" variablesSchema="Groupped">
-            <unification unifyAmplitude="false" detrend="false">
-              <resampling uniformTimeScale="true" targetTimePoints="Auto"/>
-            </unification>
-          </feedingPatterned>
-          <varyingFields routeToReadout="false">
-            <externalFields>
-              <field name="coord_abcissa">
-                <realFeature/>
-              </field>
-              <field name="coord_ordinate">
-                <realFeature/>
-              </field>
-            </externalFields>
-          </varyingFields>
-        </inputEncoder>
-        <reservoirStructures>
-          <reservoirStructure name="MainCfg">
-            <pools>
-              <pool name="PureESN">
-                <proportions dimX="120" dimY="1" dimZ="1"/>
-                <neuronGroups>
-                  <analogGroup name="TanH-grp" relShare="1" firingThreshold="0.00125">
-                    <activationTanH/>
-                  </analogGroup>
-                </neuronGroups>
-                <interconnection>
-                  <randomSchema density="0.1" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false"/>
-                </interconnection>
-              </pool>
-            </pools>
-          </reservoirStructure>
-        </reservoirStructures>
-        <reservoirInstances>
-          <reservoirInstance name="Main" reservoirStructure="MainCfg">
-            <inputConnections>
-              <connection inputFieldName="coord_abcissa" poolName="PureESN" analogTargetDensity="0.25" spikingTargetDensity="0"/>
-              <connection inputFieldName="coord_ordinate" poolName="PureESN" analogTargetDensity="0.25" spikingTargetDensity="0"/>
-            </inputConnections>
-            <synapse>
-              <analogTarget>
-                <input maxDelay="5">
-                  <analogSource>
-                    <weight min="0" max="1.5"/>
-                  </analogSource>
-                </input>
-                <indifferent maxDelay="0"/>
-              </analogTarget>
-            </synapse>
-            <predictors activation="false"
-                        activationSquare="false"
-                        activationFadingSum="false"
-                        activationMWAvg="false"
-                        firingFadingSum="false"
-                        firingMWAvg="false"
-                        firingCount="true"
-                        firingBinPattern="false">
-              <params>
-                <firingCount window="45"/>
-              </params>
-            </predictors>
-          </reservoirInstance>
-        </reservoirInstances>
-      </neuralPreprocessor>
-      <readoutLayer testDataRatio="0.0825" folds="Auto">
-        <defaultNetworks>
-          <classification>
-            <ff>
-              <activationIdentity/>
-              <resPropTrainer attempts="5" attemptEpochs="400"/>
-            </ff>
-          </classification>
-        </defaultNetworks>
-        <readoutUnits>
-          <readoutUnit name="curved swing">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="horizontal swing">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="vertical swing">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="anti-clockwise arc">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="clockwise arc">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="circle">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="horizontal straight-line">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="vertical straight-line">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="horizontal zigzag">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="vertical zigzag">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="horizontal wavy">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="vertical wavy">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="face-up curve">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="face-down curve">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="tremble">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-        </readoutUnits>
-      </readoutLayer>
-    </stateMachine>
-  </case>
-
 
 
   <!--
@@ -501,114 +356,6 @@
     </stateMachine>
   </case>
 
-  <!--
-    This demo case demonstrates use of a simple LSM reservoir consisting of LeakyIF neurons for the classifications.
-    Following straightforward configuration of the StateMachine achieves XX.00% accuracy. It is worse than the best algorithm
-    called BOSS, referenced at the dataset's home site:
-    "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
-    https://timeseriesclassification.com/description.php?Dataset=BeetleFly.
-    MPEG-7 CE Shape-1 Part B is a database of binary images developed for testing MPEG-7 shape descriptors, and is available free online. 
-    It is used for testing contour/image and skeleton-based descriptors. Classes of images vary broadly, and include classes that are
-    similar in shape to one another. There are 20 instances of each class, and 60 classes in total.
-    We have extracted the outlines of these images and mapped them into 1-D series of distances to the centre. 
-    Beetle/Fly is the problem of distinguishing between an outline of a beetle and a fly.
-  -->
-  <case name="Classification task BeetleFly: Simple pure LSM reservoir generating FiringFadingSum predictors, one TanH neuron as a classifier (Resilient trainer)">
-    <samples trainingData="BeetleFly_train.csv" verificationData="BeetleFly_verify.csv"/>
-    <stateMachine randomizerSeek="0">
-      <neuralPreprocessor predictorsReductionRatio="0">
-        <inputEncoder>
-          <feedingPatterned slices="1" bidir="false">
-            <unification unifyAmplitude="false" detrend="false">
-              <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
-            </unification>
-          </feedingPatterned>
-          <varyingFields routeToReadout="false">
-            <externalFields>
-              <field name="DistanceFromCenter">
-                <realFeature standardize="true" keepReserve="true"/>
-                <spikeCode componentHalfCodeLength="15" lowestThreshold="1e-2" signalComponent="true" deltaComponent="false"/>
-              </field>
-            </externalFields>
-          </varyingFields>
-        </inputEncoder>
-        <reservoirStructures>
-          <reservoirStructure name="MainCfg">
-            <pools>
-              <pool name="PureLSM">
-                <proportions dimX="6" dimY="6" dimZ="5"/>
-                <neuronGroups>
-                  <spikingGroup name="Spiking-grp" relShare="1">
-                    <activationLeakyIF refractoryPeriods="0"/>
-                    <homogenousExcitability excitatoryStrength="0.7" inputRatio="0.8" inhibitoryRatio="0.1"/>
-                  </spikingGroup>
-                </neuronGroups>
-                <interconnection>
-                  <randomSchema density="0.2" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false"/>
-                </interconnection>
-              </pool>
-            </pools>
-          </reservoirStructure>
-        </reservoirStructures>
-        <reservoirInstances>
-          <reservoirInstance name="Main" reservoirStructure="MainCfg">
-            <inputConnections>
-              <connection inputFieldName="DistanceFromCenter" poolName="PureLSM" spikingTargetDensity="1"/>
-            </inputConnections>
-            <synapse>
-              <spikingTarget>
-                <input maxDelay="0">
-                  <spikingSource>
-                    <plasticity>
-                      <linearDynamics/>
-                    </plasticity>
-                  </spikingSource>
-                </input>
-                <excitatory maxDelay="0">
-                  <spikingSource>
-                    <plasticity>
-                      <linearDynamics/>
-                    </plasticity>
-                  </spikingSource>
-                </excitatory>
-                <inhibitory maxDelay="0">
-                  <spikingSource>
-                    <plasticity>
-                      <linearDynamics/>
-                    </plasticity>
-                  </spikingSource>
-                </inhibitory>
-              </spikingTarget>
-            </synapse>
-            <predictors activation="false"
-                        activationSquare="false"
-                        activationFadingSum="false"
-                        activationMWAvg="false"
-                        firingFadingSum="true"
-                        firingMWAvg="false"
-                        firingCount="false"
-                        firingBinPattern="false">
-            </predictors>
-          </reservoirInstance>
-        </reservoirInstances>
-      </neuralPreprocessor>
-      <readoutLayer testDataRatio="0.1" folds="Auto">
-        <defaultNetworks/>
-        <readoutUnits>
-          <readoutUnit name="Beetle1Fly0">
-            <classification>
-              <networks>
-                <ff>
-                  <activationTanH/>
-                  <resPropTrainer attempts="5" attemptEpochs="200"/>
-                </ff>
-              </networks>
-            </classification>
-          </readoutUnit>
-        </readoutUnits>
-      </readoutLayer>
-    </stateMachine>
-  </case>
 
   <!--
     This demo case demonstrates successful use of the pure analog ESN reservoir for the fast and accurate classifications enabled by
@@ -737,14 +484,14 @@
           <reservoirStructure name="MainCfg">
             <pools>
               <pool name="Pool1">
-                <proportions dimX="80" dimY="1" dimZ="1"/>
+                <proportions dimX="240" dimY="1" dimZ="1"/>
                 <neuronGroups>
-                  <analogGroup name="Analog-grp" relShare="1" firingThreshold="0.00125">
+                  <analogGroup name="Analog-grp" relShare="1" firingThreshold="0.00125" thresholdMaxRefDeepness="9">
                     <activationTanH/>
                   </analogGroup>
                 </neuronGroups>
                 <interconnection>
-                  <randomSchema density="0.1" allowSelfConnection="true"/>
+                  <chainSchema ratio="1" circle="true" repetitions="30"/>
                 </interconnection>
               </pool>
             </pools>
@@ -753,7 +500,7 @@
         <reservoirInstances>
           <reservoirInstance name="Main" reservoirStructure="MainCfg">
             <inputConnections>
-              <connection inputFieldName="Outline" poolName="Pool1" analogTargetDensity="0.2"/>
+              <connection inputFieldName="Outline" poolName="Pool1" analogTargetDensity="0.25"/>
             </inputConnections>
             <synapse>
               <analogTarget>
@@ -762,11 +509,11 @@
                     <weight min="0" max="1"/>
                   </analogSource>
                 </input>
-                <indifferent maxDelay="1"/>
+                <indifferent maxDelay="0"/>
               </analogTarget>
             </synapse>
-            <predictors activation="true"
-                        activationSquare="true"
+            <predictors activation="false"
+                        activationSquare="false"
                         activationFadingSum="false"
                         activationMWAvg="false"
                         firingFadingSum="true"
@@ -800,6 +547,352 @@
       </readoutLayer>
     </stateMachine>
   </case>
+
+
+  <!--
+    This demo case demonstrates successful use of the pure analog ESN reservoir for the fast and accurate classifications enabled by
+    the new ability of the analog neurons to fire a spike.
+    Following straightforward configuration of the StateMachine achieves 90.2% accuracy, slightly worse than
+    the best algorithm called BOSS, referenced at the dataset's home site:
+    "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
+    https://timeseriesclassification.com/description.php?Dataset=Yoga.
+    The dataset was obtained by capturing two actors transiting between yoga poses in front of a green screen. The problem is to
+    discriminate between one actor (male) and another (female). Each image was converted to a one dimensional series by finding the
+    outline and measuring the distance of the outline to the centre.
+  -->
+  <case name="Classification task Yoga: Simple pure ESN reservoir generating FiringCount predictors, multilayer FF network as a classifier (Resilient trainer)">
+    <samples trainingData="Yoga_train.csv" verificationData="Yoga_verify.csv"/>
+    <stateMachine>
+      <neuralPreprocessor>
+        <inputEncoder>
+          <feedingPatterned slices="2" bidir="true"/>
+          <varyingFields routeToReadout="true">
+            <externalFields>
+              <field name="DistanceFromCenter">
+                <realFeature/>
+              </field>
+            </externalFields>
+          </varyingFields>
+        </inputEncoder>
+        <reservoirStructures>
+          <reservoirStructure name="MainCfg">
+            <pools>
+              <pool name="PureESN">
+                <proportions dimX="213" dimY="1" dimZ="1"/>
+                <neuronGroups>
+                  <analogGroup name="TanH-grp" relShare="1">
+                    <activationTanH/>
+                  </analogGroup>
+                </neuronGroups>
+                <interconnection>
+                  <randomSchema/>
+                </interconnection>
+              </pool>
+            </pools>
+          </reservoirStructure>
+        </reservoirStructures>
+        <reservoirInstances>
+          <reservoirInstance name="Main" reservoirStructure="MainCfg">
+            <inputConnections>
+              <connection inputFieldName="DistanceFromCenter" poolName="PureESN"/>
+            </inputConnections>
+            <predictors activation="false"
+                        activationSquare="false"
+                        activationFadingSum="false"
+                        activationMWAvg="false"
+                        firingFadingSum="false"
+                        firingMWAvg="false"
+                        firingCount="true"
+                        firingBinPattern="false">
+              <params>
+                <firingCount window="426"/>
+              </params>
+            </predictors>
+          </reservoirInstance>
+        </reservoirInstances>
+      </neuralPreprocessor>
+      <readoutLayer testDataRatio="0.1" folds="Auto" repetitions="1">
+        <defaultNetworks/>
+        <readoutUnits>
+          <readoutUnit name="Female1Male0">
+            <classification>
+              <networks>
+                <ff>
+                  <activationIdentity/>
+                  <hiddenLayers>
+                    <layer neurons="10">
+                      <activationLeakyReLU/>
+                    </layer>
+                    <layer neurons="10">
+                      <activationLeakyReLU/>
+                    </layer>
+                  </hiddenLayers>
+                  <resPropTrainer attempts="5" attemptEpochs="400"/>
+                </ff>
+              </networks>
+            </classification>
+          </readoutUnit>
+        </readoutUnits>
+      </readoutLayer>
+    </stateMachine>
+  </case>
+
+
+  <!--
+    This demo case demonstrates use of a simple LSM reservoir consisting of LeakyIF neurons for the classifications.
+    Following straightforward configuration of the StateMachine achieves XX.00% accuracy. It is worse than the best algorithm
+    called BOSS, referenced at the dataset's home site:
+    "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
+    https://timeseriesclassification.com/description.php?Dataset=BeetleFly.
+    MPEG-7 CE Shape-1 Part B is a database of binary images developed for testing MPEG-7 shape descriptors, and is available free online. 
+    It is used for testing contour/image and skeleton-based descriptors. Classes of images vary broadly, and include classes that are
+    similar in shape to one another. There are 20 instances of each class, and 60 classes in total.
+    We have extracted the outlines of these images and mapped them into 1-D series of distances to the centre. 
+    Beetle/Fly is the problem of distinguishing between an outline of a beetle and a fly.
+  -->
+  <case name="Classification task BeetleFly: Simple pure LSM reservoir generating FiringFadingSum predictors, one TanH neuron as a classifier (Resilient trainer)">
+    <samples trainingData="BeetleFly_train.csv" verificationData="BeetleFly_verify.csv"/>
+    <stateMachine randomizerSeek="0">
+      <neuralPreprocessor predictorsReductionRatio="0">
+        <inputEncoder>
+          <feedingPatterned slices="1" bidir="false">
+            <unification unifyAmplitude="false" detrend="false">
+              <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
+            </unification>
+          </feedingPatterned>
+          <varyingFields routeToReadout="false">
+            <externalFields>
+              <field name="DistanceFromCenter">
+                <realFeature standardize="true" keepReserve="true"/>
+                <spikeCode componentHalfCodeLength="15" lowestThreshold="1e-2" signalComponent="true" deltaComponent="false"/>
+              </field>
+            </externalFields>
+          </varyingFields>
+        </inputEncoder>
+        <reservoirStructures>
+          <reservoirStructure name="MainCfg">
+            <pools>
+              <pool name="PureLSM">
+                <proportions dimX="6" dimY="6" dimZ="5"/>
+                <neuronGroups>
+                  <spikingGroup name="Spiking-grp" relShare="1">
+                    <activationLeakyIF refractoryPeriods="0"/>
+                    <homogenousExcitability excitatoryStrength="0.7" inputRatio="0.8" inhibitoryRatio="0.1"/>
+                  </spikingGroup>
+                </neuronGroups>
+                <interconnection>
+                  <randomSchema density="0.2" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false"/>
+                </interconnection>
+              </pool>
+            </pools>
+          </reservoirStructure>
+        </reservoirStructures>
+        <reservoirInstances>
+          <reservoirInstance name="Main" reservoirStructure="MainCfg">
+            <inputConnections>
+              <connection inputFieldName="DistanceFromCenter" poolName="PureLSM" spikingTargetDensity="1"/>
+            </inputConnections>
+            <synapse>
+              <spikingTarget>
+                <input maxDelay="0">
+                  <spikingSource>
+                    <plasticity>
+                      <linearDynamics/>
+                    </plasticity>
+                  </spikingSource>
+                </input>
+                <excitatory maxDelay="0">
+                  <spikingSource>
+                    <plasticity>
+                      <linearDynamics/>
+                    </plasticity>
+                  </spikingSource>
+                </excitatory>
+                <inhibitory maxDelay="0">
+                  <spikingSource>
+                    <plasticity>
+                      <linearDynamics/>
+                    </plasticity>
+                  </spikingSource>
+                </inhibitory>
+              </spikingTarget>
+            </synapse>
+            <predictors activation="false"
+                        activationSquare="false"
+                        activationFadingSum="false"
+                        activationMWAvg="false"
+                        firingFadingSum="true"
+                        firingMWAvg="false"
+                        firingCount="false"
+                        firingBinPattern="false">
+            </predictors>
+          </reservoirInstance>
+        </reservoirInstances>
+      </neuralPreprocessor>
+      <readoutLayer testDataRatio="0.1" folds="Auto">
+        <defaultNetworks/>
+        <readoutUnits>
+          <readoutUnit name="Beetle1Fly0">
+            <classification>
+              <networks>
+                <ff>
+                  <activationTanH/>
+                  <resPropTrainer attempts="5" attemptEpochs="200"/>
+                </ff>
+              </networks>
+            </classification>
+          </readoutUnit>
+        </readoutUnits>
+      </readoutLayer>
+    </stateMachine>
+  </case>
+
+
+  <!--
+    This demo case demonstrates successful use of the pure analog ESN reservoir for the fast and accurate classifications enabled by
+    the new ability of the analog neurons to fire a spike.
+    The dataset is from https://archive.ics.uci.edu/ml/datasets/Libras+Movement and contains 15 classes of 24 instances each, where
+    each class references to a hand movement type in LIBRAS. The hand movement is represented as a bidimensional curve performed
+    by the hand in a period of time. The curves were obtained from videos of hand movements, with the Libras performance from 4 
+    different people, during 2 sessions. Each video corresponds to only one hand movement and has about 7 seconds.    
+    Each video corresponds to a function F in a functions space which is the continual version of the input dataset.
+    In the video pre-processing, a time normalization is carried out selecting 45 frames from each video, in according 
+    to an uniform distribution. In each frame, the centroid pixels of the segmented objects (the hand) are found, which 
+    compose the discrete version of the curve F with 45 points. All curves are normalized in the unitary space.
+    Each curve F is mapped in a representation with 90 features, with representing the coordinates of movement.
+    Each instance represents 45 points on a bi-dimensional space, which can be plotted in an ordered way (from 1 through
+    45 as the X co-ordinate) in order to draw the path of the movement.
+    For this demo purposes was selected 4x15 instances as the verification set.
+  -->
+  <case name="Classification task Libras Movement: Simple pure ESN reservoir generating FiringCount predictors, one Identity neuron as a classifier (Resilient trainer)">
+    <samples trainingData="LibrasMovement_train.csv" verificationData="LibrasMovement_verify.csv"/>
+    <stateMachine randomizerSeek="0">
+      <neuralPreprocessor>
+        <inputEncoder>
+          <feedingPatterned slices="1" bidir="true" variablesSchema="Groupped">
+            <unification unifyAmplitude="false" detrend="false">
+              <resampling uniformTimeScale="true" targetTimePoints="Auto"/>
+            </unification>
+          </feedingPatterned>
+          <varyingFields routeToReadout="false">
+            <externalFields>
+              <field name="coord_abcissa">
+                <realFeature/>
+              </field>
+              <field name="coord_ordinate">
+                <realFeature/>
+              </field>
+            </externalFields>
+          </varyingFields>
+        </inputEncoder>
+        <reservoirStructures>
+          <reservoirStructure name="MainCfg">
+            <pools>
+              <pool name="PureESN">
+                <proportions dimX="120" dimY="1" dimZ="1"/>
+                <neuronGroups>
+                  <analogGroup name="TanH-grp" relShare="1" firingThreshold="0.00125">
+                    <activationTanH/>
+                  </analogGroup>
+                </neuronGroups>
+                <interconnection>
+                  <randomSchema density="0.1" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false"/>
+                </interconnection>
+              </pool>
+            </pools>
+          </reservoirStructure>
+        </reservoirStructures>
+        <reservoirInstances>
+          <reservoirInstance name="Main" reservoirStructure="MainCfg">
+            <inputConnections>
+              <connection inputFieldName="coord_abcissa" poolName="PureESN" analogTargetDensity="0.25" spikingTargetDensity="0"/>
+              <connection inputFieldName="coord_ordinate" poolName="PureESN" analogTargetDensity="0.25" spikingTargetDensity="0"/>
+            </inputConnections>
+            <synapse>
+              <analogTarget>
+                <input maxDelay="5">
+                  <analogSource>
+                    <weight min="0" max="1.5"/>
+                  </analogSource>
+                </input>
+                <indifferent maxDelay="0"/>
+              </analogTarget>
+            </synapse>
+            <predictors activation="false"
+                        activationSquare="false"
+                        activationFadingSum="false"
+                        activationMWAvg="false"
+                        firingFadingSum="false"
+                        firingMWAvg="false"
+                        firingCount="true"
+                        firingBinPattern="false">
+              <params>
+                <firingCount window="45"/>
+              </params>
+            </predictors>
+          </reservoirInstance>
+        </reservoirInstances>
+      </neuralPreprocessor>
+      <readoutLayer testDataRatio="0.0825" folds="Auto">
+        <defaultNetworks>
+          <classification>
+            <ff>
+              <activationIdentity/>
+              <resPropTrainer attempts="5" attemptEpochs="400"/>
+            </ff>
+          </classification>
+        </defaultNetworks>
+        <readoutUnits>
+          <readoutUnit name="curved swing">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="horizontal swing">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="vertical swing">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="anti-clockwise arc">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="clockwise arc">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="circle">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="horizontal straight-line">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="vertical straight-line">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="horizontal zigzag">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="vertical zigzag">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="horizontal wavy">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="vertical wavy">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="face-up curve">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="face-down curve">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="tremble">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+        </readoutUnits>
+      </readoutLayer>
+    </stateMachine>
+  </case>
+
 
   <!--
     This demo case demonstrates bypassing of neural preprocessor.
@@ -1093,95 +1186,6 @@
       </readoutLayer>
     </stateMachine>
   </case>
-
-  <!--
-    This demo case demonstrates successful use of the pure analog ESN reservoir for the fast and accurate classifications enabled by
-    the new ability of the analog neurons to fire a spike.
-    Following straightforward configuration of the StateMachine achieves 90.93% accuracy, a little bit worse than
-    the best algorithm called BOSS, referenced at the dataset's home site:
-    "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
-    https://timeseriesclassification.com/description.php?Dataset=Yoga.
-    The dataset was obtained by capturing two actors transiting between yoga poses in front of a green screen. The problem is to
-    discriminate between one actor (male) and another (female). Each image was converted to a one dimensional series by finding the
-    outline and measuring the distance of the outline to the centre.
-  -->
-  <case name="Classification task Yoga: Simple pure ESN reservoir generating FiringCount predictors, multilayer FF network as a classifier (Resilient trainer)">
-    <samples trainingData="Yoga_train.csv" verificationData="Yoga_verify.csv"/>
-    <stateMachine>
-      <neuralPreprocessor>
-        <inputEncoder>
-          <feedingPatterned slices="2" bidir="true"/>
-          <varyingFields routeToReadout="true">
-            <externalFields>
-              <field name="DistanceFromCenter">
-                <realFeature/>
-              </field>
-            </externalFields>
-          </varyingFields>
-        </inputEncoder>
-        <reservoirStructures>
-          <reservoirStructure name="MainCfg">
-            <pools>
-              <pool name="PureESN">
-                <proportions dimX="213" dimY="1" dimZ="1"/>
-                <neuronGroups>
-                  <analogGroup name="TanH-grp" relShare="1">
-                    <activationTanH/>
-                  </analogGroup>
-                </neuronGroups>
-                <interconnection>
-                  <randomSchema/>
-                </interconnection>
-              </pool>
-            </pools>
-          </reservoirStructure>
-        </reservoirStructures>
-        <reservoirInstances>
-          <reservoirInstance name="Main" reservoirStructure="MainCfg">
-            <inputConnections>
-              <connection inputFieldName="DistanceFromCenter" poolName="PureESN"/>
-            </inputConnections>
-            <predictors activation="false"
-                        activationSquare="false"
-                        activationFadingSum="false"
-                        activationMWAvg="false"
-                        firingFadingSum="false"
-                        firingMWAvg="false"
-                        firingCount="true"
-                        firingBinPattern="false">
-              <params>
-                <firingCount window="426"/>
-              </params>
-            </predictors>
-          </reservoirInstance>
-        </reservoirInstances>
-      </neuralPreprocessor>
-      <readoutLayer testDataRatio="0.1" folds="Auto" repetitions="1">
-        <defaultNetworks/>
-        <readoutUnits>
-          <readoutUnit name="Female1Male0">
-            <classification>
-              <networks>
-                <ff>
-                  <activationIdentity/>
-                  <hiddenLayers>
-                    <layer neurons="10">
-                      <activationLeakyReLU/>
-                    </layer>
-                    <layer neurons="10">
-                      <activationLeakyReLU/>
-                    </layer>
-                  </hiddenLayers>
-                  <resPropTrainer attempts="5" attemptEpochs="1000"/>
-                </ff>
-              </networks>
-            </classification>
-          </readoutUnit>
-        </readoutUnits>
-      </readoutLayer>
-    </stateMachine>
-  </case>
-
 
 
 

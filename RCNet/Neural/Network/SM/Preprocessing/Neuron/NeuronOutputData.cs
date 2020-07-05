@@ -61,7 +61,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
         /// </summary>
         public void Reset()
         {
-            _analogSignal = 0d;
+            _analogSignal = 0.5d;
             _spikingSignal = 0d;
             _spikeLeak = 0;
             _afterFirstSpike = false;
