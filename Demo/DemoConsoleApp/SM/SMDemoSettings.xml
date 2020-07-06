@@ -2,6 +2,141 @@
 <demo dataFolder=".\\Data" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="SMDemoSettings.xsd">
 
 
+
+  <!--
+    This demo case demonstrates use of a simple LSM reservoir consisting of LeakyIF neurons for the classifications.
+    Following straightforward configuration of the StateMachine achieves XX.00% accuracy. It is worse than the best algorithm
+    called BOSS, referenced at the dataset's home site:
+    "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
+    https://timeseriesclassification.com/description.php?Dataset=BeetleFly.
+    MPEG-7 CE Shape-1 Part B is a database of binary images developed for testing MPEG-7 shape descriptors, and is available free online. 
+    It is used for testing contour/image and skeleton-based descriptors. Classes of images vary broadly, and include classes that are
+    similar in shape to one another. There are 20 instances of each class, and 60 classes in total.
+    We have extracted the outlines of these images and mapped them into 1-D series of distances to the centre. 
+    Beetle/Fly is the problem of distinguishing between an outline of a beetle and a fly.
+  -->
+  <case name="Classification task BeetleFly: Simple pure LSM reservoir generating FiringFadingSum predictors, one TanH neuron as a classifier (Resilient trainer)">
+    <samples trainingData="BeetleFly_train.csv" verificationData="BeetleFly_verify.csv"/>
+    <stateMachine randomizerSeek="0">
+      <neuralPreprocessor predictorsReductionRatio="0">
+        <inputEncoder>
+          <feedingPatterned slices="1" bidir="true">
+            <unification unifyAmplitude="false" detrend="false">
+              <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
+            </unification>
+          </feedingPatterned>
+          <varyingFields routeToReadout="false">
+            <externalFields>
+              <field name="DistanceFromCenter">
+                <realFeature standardize="true" keepReserve="true"/>
+                <spikeCode componentHalfCodeLength="8" thresholdFullSpikeSet="false" lowestThreshold="1e-2" signalComponent="true" deltaComponent="true" binaryComponent="true"/>
+              </field>
+            </externalFields>
+          </varyingFields>
+        </inputEncoder>
+        <reservoirStructures>
+          <reservoirStructure name="MainCfg">
+            <pools>
+              <pool name="PureESN">
+                <proportions dimX="128" dimY="1" dimZ="1"/>
+                <neuronGroups>
+                  <analogGroup name="Analog-grp" relShare="1" firingThreshold="0.004" thresholdMaxRefDeepness="4">
+                    <activationTanH/>
+                  </analogGroup>
+                </neuronGroups>
+                <interconnection>
+                  <randomSchema density="0.1" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false"/>
+                </interconnection>
+              </pool>
+              <pool name="PureLSM">
+                <proportions dimX="128" dimY="1" dimZ="1"/>
+                <neuronGroups>
+                  <spikingGroup name="Spiking-grp" relShare="1">
+                    <activationLeakyIF refractoryPeriods="0"/>
+                    <homogenousExcitability excitatoryStrength="0.8" inputRatio="0" inhibitoryRatio="0.05"/>
+                  </spikingGroup>
+                </neuronGroups>
+                <interconnection>
+                  <randomSchema density="0.1" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false"/>
+                </interconnection>
+                <predictors activation="false"
+                            activationSquare="false"
+                            activationFadingSum="false"
+                            activationMWAvg="false"
+                            firingFadingSum="false"
+                            firingMWAvg="false"
+                            firingCount="false"
+                            firingBinPattern="false">
+                </predictors>
+              </pool>
+            </pools>
+            <interPoolConnections>
+              <interPoolConnection targetPool="PureLSM" targetConnDensity="0.5" sourcePool="PureESN" sourceConnDensity="0.5"/>
+            </interPoolConnections>
+          </reservoirStructure>
+        </reservoirStructures>
+        <reservoirInstances>
+          <reservoirInstance name="Main" reservoirStructure="MainCfg">
+            <inputConnections>
+              <connection inputFieldName="DistanceFromCenter" poolName="PureESN" spikingTargetDensity="1"/>
+            </inputConnections>
+            <synapse>
+              <spikingTarget>
+                <excitatory maxDelay="0">
+                  <spikingSource>
+                    <plasticity>
+                      <linearDynamics/>
+                    </plasticity>
+                  </spikingSource>
+                </excitatory>
+                <inhibitory maxDelay="0">
+                  <spikingSource>
+                    <plasticity>
+                      <linearDynamics/>
+                    </plasticity>
+                  </spikingSource>
+                </inhibitory>
+              </spikingTarget>
+              <analogTarget>
+                <input maxDelay="0"/>
+                <indifferent maxDelay="0"/>
+              </analogTarget>
+            </synapse>
+            <predictors activation="false"
+                        activationSquare="false"
+                        activationFadingSum="false"
+                        activationMWAvg="false"
+                        firingFadingSum="true"
+                        firingMWAvg="false"
+                        firingCount="false"
+                        firingBinPattern="false">
+              <params>
+                <firingFadingSum strength="0.001"/>
+              </params>
+            </predictors>
+          </reservoirInstance>
+        </reservoirInstances>
+      </neuralPreprocessor>
+      <readoutLayer testDataRatio="0.1" folds="Auto" repetitions="1">
+        <defaultNetworks/>
+        <readoutUnits>
+          <readoutUnit name="Beetle1Fly0">
+            <classification>
+              <networks>
+                <ff>
+                  <activationIdentity/>
+                  <resPropTrainer attempts="5" attemptEpochs="500"/>
+                </ff>
+              </networks>
+            </classification>
+          </readoutUnit>
+        </readoutUnits>
+      </readoutLayer>
+    </stateMachine>
+  </case>
+
+
+
   <!--
     Here StateMachine achieves 80.77% accuracy. It is a bit worse than the best accuracy 81.4% achieved by the algorithm
     called COTE referenced at the dataset's home site:
@@ -552,7 +687,7 @@
   <!--
     This demo case demonstrates successful use of the pure analog ESN reservoir for the fast and accurate classifications enabled by
     the new ability of the analog neurons to fire a spike.
-    Following straightforward configuration of the StateMachine achieves 90.2% accuracy, slightly worse than
+    Following straightforward configuration of the StateMachine achieves 91.13% accuracy, slightly better than
     the best algorithm called BOSS, referenced at the dataset's home site:
     "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
     https://timeseriesclassification.com/description.php?Dataset=Yoga.
@@ -560,12 +695,12 @@
     discriminate between one actor (male) and another (female). Each image was converted to a one dimensional series by finding the
     outline and measuring the distance of the outline to the centre.
   -->
-  <case name="Classification task Yoga: Simple pure ESN reservoir generating FiringCount predictors, multilayer FF network as a classifier (Resilient trainer)">
+  <case name="Classification task Yoga: Simple pure ESN reservoir generating FiringFadingSum predictors, multilayer FF network as a classifier (Resilient trainer)">
     <samples trainingData="Yoga_train.csv" verificationData="Yoga_verify.csv"/>
     <stateMachine>
       <neuralPreprocessor>
         <inputEncoder>
-          <feedingPatterned slices="2" bidir="true"/>
+          <feedingPatterned slices="1" bidir="true"/>
           <varyingFields routeToReadout="true">
             <externalFields>
               <field name="DistanceFromCenter">
@@ -600,12 +735,12 @@
                         activationSquare="false"
                         activationFadingSum="false"
                         activationMWAvg="false"
-                        firingFadingSum="false"
+                        firingFadingSum="true"
                         firingMWAvg="false"
                         firingCount="true"
                         firingBinPattern="false">
               <params>
-                <firingCount window="426"/>
+                <firingFadingSum strength="0.001"/>
               </params>
             </predictors>
           </reservoirInstance>
