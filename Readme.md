@@ -36,7 +36,7 @@ site and State Machine usually achieves very similar results to the best classif
 |--|--|--|--|
 |[CricketX](https://timeseriesclassification.com/description.php?Dataset=CricketX)|80.77%|81.4%|COTE|
 |[Worms](https://timeseriesclassification.com/description.php?Dataset=Worms)|83.12%|73.49%|BOSS|
-|[BeetleFly](https://timeseriesclassification.com/description.php?Dataset=BeetleFly)|95%|94.85%|BOSS|
+|[BeetleFly](https://timeseriesclassification.com/description.php?Dataset=BeetleFly)|100%|94.85%|BOSS|
 |[BirdChicken](https://timeseriesclassification.com/description.php?Dataset=BirdChicken)|100%|98.4%|BOSS|
 |[ProximalPhalanx](https://timeseriesclassification.com/description.php?Dataset=ProximalPhalanxOutlineAgeGroup)|88.29%|88.09%|ST|
 |[Yoga](https://timeseriesclassification.com/description.php?Dataset=Yoga)|91.13%|90.99%|BOSS|

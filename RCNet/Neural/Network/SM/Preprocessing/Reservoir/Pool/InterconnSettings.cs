@@ -87,6 +87,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
                 {
                     SchemaCfgCollection.Add(new ChainSchemaSettings(schemaElem));
                 }
+                else if (schemaElem.Name.LocalName == "emptySchema")
+                {
+                    SchemaCfgCollection.Add(new EmptySchemaSettings(schemaElem));
+                }
                 else
                 {
                     //Ignore
@@ -111,7 +115,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
         {
             if (SchemaCfgCollection.Count == 0)
             {
-                throw new ArgumentException($"At least one interconnection schema must be specified.", "SchemaCfgCollection");
+                throw new InvalidOperationException($"At least one interconnection schema must be specified.");
+            }
+            foreach(IInterconnSchemaSettings schema in SchemaCfgCollection)
+            {
+                if(schema.GetType() == typeof(EmptySchemaSettings) && SchemaCfgCollection.Count > 1)
+                {
+                    throw new InvalidOperationException($"No other schema specification is allowed together with EmptySchema.");
+                }
             }
             return;
         }

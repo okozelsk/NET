@@ -262,6 +262,14 @@
     </xs:restriction>
   </xs:simpleType>
 
+  <!-- Unsigned double GT 0 LE 1-->
+  <xs:simpleType name="UDoubleGT0LE1Type">
+    <xs:restriction base="xs:double">
+      <xs:minExclusive value="0" />
+      <xs:maxInclusive value="1" />
+    </xs:restriction>
+  </xs:simpleType>
+
   <!-- Unsigned double GE 0 LT 1-->
   <xs:simpleType name="UDoubleLT1Type">
     <xs:restriction base="xs:double">
@@ -1762,9 +1770,13 @@
   </xs:complexType>
 
   <!-- Pool interconnection schemas -->
+  <!-- Empty schema -->
+  <xs:complexType name="PoolInterconnectionEmptySchemaType">
+  </xs:complexType>
+
   <!-- Random schema -->
   <xs:complexType name="PoolInterconnectionRandomSchemaType">
-    <xs:attribute type="UDoubleLE1Type" name="density" use="optional" default="0.1">
+    <xs:attribute type="UDoubleGT0LE1Type" name="density" use="optional" default="0.1">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is 0.1</xs:documentation>
       </xs:annotation>
@@ -1798,7 +1810,7 @@
 
   <!-- Chain schema -->
   <xs:complexType name="PoolInterconnectionChainSchemaType">
-    <xs:attribute type="UDoubleLE1Type" name="ratio" use="optional" default="1">
+    <xs:attribute type="UDoubleGT0LE1Type" name="ratio" use="optional" default="1">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
       </xs:annotation>
@@ -1822,12 +1834,17 @@
 
   <!-- Pool interconnection configuration -->
   <xs:complexType name="PoolInterconnectionType">
-    <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:choice minOccurs="1" maxOccurs="unbounded">
-        <xs:element type="PoolInterconnectionRandomSchemaType" name="randomSchema" minOccurs="1" maxOccurs="1"/>
-        <xs:element type="PoolInterconnectionChainSchemaType" name="chainSchema" minOccurs="1" maxOccurs="1"/>
-      </xs:choice>
-    </xs:sequence>
+    <xs:choice minOccurs="1" maxOccurs="1">
+      <xs:sequence minOccurs="1" maxOccurs="1">
+        <xs:element type="PoolInterconnectionEmptySchemaType" name="emptySchema" minOccurs="1" maxOccurs="1"/>
+      </xs:sequence>
+      <xs:sequence minOccurs="1" maxOccurs="1">
+        <xs:choice minOccurs="1" maxOccurs="unbounded">
+          <xs:element type="PoolInterconnectionRandomSchemaType" name="randomSchema" minOccurs="1" maxOccurs="1"/>
+          <xs:element type="PoolInterconnectionChainSchemaType" name="chainSchema" minOccurs="1" maxOccurs="1"/>
+        </xs:choice>
+      </xs:sequence>
+    </xs:choice>
   </xs:complexType>
 
   <!-- Homogenous excitability configuration -->

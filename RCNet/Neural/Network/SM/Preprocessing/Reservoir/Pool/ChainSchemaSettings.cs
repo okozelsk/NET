@@ -146,9 +146,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
         /// </summary>
         protected override void Check()
         {
-            if (Ratio < 0 || Ratio > 1)
+            if (Ratio <= 0 || Ratio > 1)
             {
-                throw new ArgumentException($"Invalid Ratio {Ratio.ToString(CultureInfo.InvariantCulture)}. Ratio must be GE to 0 and LE to 1.", "Ratio");
+                throw new ArgumentException($"Invalid Ratio {Ratio.ToString(CultureInfo.InvariantCulture)}. Ratio must be GT 0 and LE to 1.", "Ratio");
             }
             if (Repetitions < 1)
             {

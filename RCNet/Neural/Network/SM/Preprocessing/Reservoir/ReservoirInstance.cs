@@ -265,7 +265,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                 //Apply defined schemas
                 foreach (object connSchema in StructureCfg.PoolsCfg.PoolCfgCollection[poolID].InterconnectionCfg.SchemaCfgCollection)
                 {
-                    if (connSchema.GetType() == typeof(RandomSchemaSettings))
+                    if (connSchema.GetType() == typeof(EmptySchemaSettings))
+                    {
+                        //No interconnection
+                        break;
+                    }
+                    else if (connSchema.GetType() == typeof(RandomSchemaSettings))
                     {
                         ConnectRandomSchema(poolID, rand, (RandomSchemaSettings)connSchema);
                     }

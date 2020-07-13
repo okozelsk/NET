@@ -198,6 +198,7 @@
     <Compile Include="Neural\Network\SM\Preprocessing\Neuron\SpikingInputNeuron.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\Reservoir\InputConnSettings.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\Reservoir\InputConnsSettings.cs" />
+    <Compile Include="Neural\Network\SM\Preprocessing\Reservoir\Pool\EmptySchemaSettings.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\Reservoir\Pool\NeuronGroup\INeuronGroupSettings.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\Reservoir\Pool\NeuronGroup\HomogenousExcitabilitySettings.cs" />
     <Compile Include="Neural\Network\SM\Preprocessing\Reservoir\ReservoirStat.cs" />

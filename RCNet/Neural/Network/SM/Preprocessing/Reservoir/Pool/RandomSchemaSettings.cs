@@ -192,9 +192,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
         /// </summary>
         protected override void Check()
         {
-            if (Density < 0 || Density > 1)
+            if (Density <= 0 || Density > 1)
             {
-                throw new ArgumentException($"Invalid Density {Density.ToString(CultureInfo.InvariantCulture)}. Density must be GE to 0 and LE to 1.", "Density");
+                throw new ArgumentException($"Invalid Density {Density.ToString(CultureInfo.InvariantCulture)}. Density must be GT 0 and LE to 1.", "Density");
             }
             if (AvgDistance < 0)
             {
