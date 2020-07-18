@@ -12,7 +12,7 @@ The main component of RCNet is called "**State Machine**" and it has to be insta
 Source code is written in C# 7.3 (.NET framework 4.7.2).
 More detailed documentation will be posted [here](https://github.com/okozelsk/NET/wiki) as soon as the current stage of the wild changes is over.
 <br/>
-I welcome questions, ideas and suggestions for improvements, usage experiences, bug alerts, constructive comments, etc... Please use my email address oldrich.kozelsky@email.cz to contact me.
+*I welcome questions, ideas and suggestions for improvements, usage experiences, bug alerts, constructive comments, etc... Please use my email address oldrich.kozelsky@email.cz to contact me.*
 
 
 ## State Machine demo application
