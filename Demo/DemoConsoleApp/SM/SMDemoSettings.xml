@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <demo dataFolder=".\\Data" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="SMDemoSettings.xsd">
 
-
   <!--
     Here StateMachine achieves 80.77% accuracy. It is a bit worse than the best accuracy 81.4% achieved by the algorithm
     called COTE referenced at the dataset's home site:
@@ -1430,6 +1429,197 @@
       </mapper>
     </stateMachine>
   </case>
+
+
+  <!--
+    Experimental architectre.
+  -->
+  <case name="Classification task CricketX: pure ESN reservoir generating FiringFadingSum predictors, one Identity neuron as a classifier (Resilient trainer)">
+    <samples trainingData="CricketX_train.csv" verificationData="CricketX_verify.csv"/>
+    <stateMachine randomizerSeek="0">
+      <neuralPreprocessor predictorsReductionRatio="0">
+        <inputEncoder>
+          <feedingPatterned slices="1" bidir="true" variablesSchema="Sequential">
+            <unification unifyAmplitude="false" detrend="false">
+              <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
+            </unification>
+          </feedingPatterned>
+          <varyingFields routeToReadout="false">
+            <externalFields>
+              <field name="Accel">
+                <realFeature />
+                <spikeCode lowestThreshold="1e-5" componentHalfCodeLength="16" thresholdFullSpikeSet="false" signalComponent="true" deltaComponent="true" binaryComponent="true"/>
+              </field>
+            </externalFields>
+            <transformedFields>
+              <field name="DiffAccel" routeToReadout="false">
+                <diff fieldName="Accel" interval="1"/>
+              </field>
+            </transformedFields>
+          </varyingFields>
+        </inputEncoder>
+        <reservoirStructures>
+          <reservoirStructure name="MainCfg">
+            <pools>
+              <pool name="ESN-Pool1">
+                <proportions dimX="200" dimY="1" dimZ="1"/>
+                <neuronGroups>
+                  <analogGroup name="TanH-grp" relShare="1" firingThreshold="0.00125" thresholdMaxRefDeepness="50">
+                    <activationTanH/>
+                  </analogGroup>
+                </neuronGroups>
+                <interconnection>
+                  <randomSchema density="0.1" avgDistance="NA" allowSelfConnection="true"/>
+                  <chainSchema/>
+                </interconnection>
+                <predictors activation="false"
+                            activationSquare="false"
+                            activationFadingSum="false"
+                            activationMWAvg="false"
+                            firingFadingSum="true"
+                            firingMWAvg="false"
+                            firingCount="false"
+                            firingBinPattern="false">
+                  <params>
+                    <firingFadingSum strength="0.005"/>
+                  </params>
+                </predictors>
+              </pool>
+              <pool name="LSM-Pool">
+                <proportions dimX="100" dimY="1" dimZ="1"/>
+                <neuronGroups>
+                  <spikingGroup name="LSM-LeakyIF-grp" relShare="1">
+                    <activationLeakyIF refractoryPeriods="0"/>
+                    <homogenousExcitability excitatoryStrength="0.75" inputRatio="0" inhibitoryRatio="0.25"/>
+                  </spikingGroup>
+                </neuronGroups>
+                <interconnection>
+                  <randomSchema density="0.1" avgDistance="NA" allowSelfConnection="false"/>
+                </interconnection>
+                <predictors activation="false"
+                            activationSquare="false"
+                            activationFadingSum="false"
+                            activationMWAvg="false"
+                            firingFadingSum="true"
+                            firingMWAvg="false"
+                            firingCount="false"
+                            firingBinPattern="false">
+                  <params>
+                    <firingFadingSum strength="0.005"/>
+                  </params>
+                </predictors>
+              </pool>
+            </pools>
+            <interPoolConnections>
+              <interPoolConnection targetPool="LSM-Pool" targetConnDensity="1" sourcePool="ESN-Pool1" sourceConnDensity="0.05"/>
+            </interPoolConnections>
+          </reservoirStructure>
+        </reservoirStructures>
+        <reservoirInstances>
+          <reservoirInstance name="Main" reservoirStructure="MainCfg">
+            <inputConnections>
+              <connection inputFieldName="Accel" poolName="ESN-Pool1" analogTargetDensity="0.25"/>
+            </inputConnections>
+            <synapse>
+              <spikingTarget>
+                <input maxDelay="0">
+                  <spikingSource>
+                    <plasticity>
+                      <constantDynamics/>
+                    </plasticity>
+                  </spikingSource>
+                </input>
+                <excitatory maxDelay="12">
+                  <spikingSource>
+                    <plasticity>
+                      <linearDynamics/>
+                    </plasticity>
+                  </spikingSource>
+                </excitatory>
+                <inhibitory maxDelay="12">
+                  <spikingSource>
+                    <plasticity>
+                      <linearDynamics/>
+                    </plasticity>
+                  </spikingSource>
+                </inhibitory>
+              </spikingTarget>
+              <analogTarget spectralRadius="0.9999">
+                <input maxDelay="0">
+                  <analogSource>
+                    <weight min="0" max="1.5"/>
+                  </analogSource>
+                </input>
+                <indifferent maxDelay="0"/>
+              </analogTarget>
+            </synapse>
+            <predictors activation="false"
+                        activationSquare="false"
+                        activationFadingSum="false"
+                        activationMWAvg="false"
+                        firingFadingSum="true"
+                        firingMWAvg="false"
+                        firingCount="false"
+                        firingBinPattern="false">
+              <params>
+                <firingFadingSum strength="0.005"/>
+              </params>
+            </predictors>
+          </reservoirInstance>
+        </reservoirInstances>
+      </neuralPreprocessor>
+      <readoutLayer testDataRatio="0.1" folds="Auto" repetitions="1">
+        <defaultNetworks>
+          <classification>
+            <ff>
+              <activationIdentity/>
+              <resPropTrainer attempts="5" attemptEpochs="1000"/>
+            </ff>
+          </classification>
+        </defaultNetworks>
+        <readoutUnits>
+          <readoutUnit name="Cancel Call">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="Dead Ball">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="Four">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="Last Hour">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="Leg Bye">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="No Ball">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="One Short">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="Out">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="Penalty Runs">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="Six">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="TV Replay">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+          <readoutUnit name="Wide">
+            <classification oneWinnerGroupName="Gesture"/>
+          </readoutUnit>
+        </readoutUnits>
+      </readoutLayer>
+    </stateMachine>
+  </case>
+
+
 
 
 </demo>

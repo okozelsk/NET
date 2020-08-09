@@ -367,6 +367,7 @@
     <Content Include="Docs\Imgs\ReservoirComputing_BasicSchema.png" />
     <Content Include="Docs\Imgs\ReservoirStructure.png" />
     <Content Include="Docs\Imgs\StateMachine_EntityRelationship.png" />
+    <Content Include="Docs\Imgs\StateMachine_TrainingSequence.png" />
     <Content Include="Docs\Imgs\TanH.jpg" />
     <Content Include="Docs\Imgs\TanH.png" />
   </ItemGroup>
