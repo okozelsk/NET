@@ -43,13 +43,13 @@ site and State Machine usually achieves very similar results to the best classif
 
 
 ### Code examples (2. menu choice)
-The "Hello World" example shows how to learn Feed Forward Network component to solve boolean algebra.
+This very simple machine learning example shows how to learn Feed Forward Network component to solve boolean algebra. Feed Forward network is a part of the State Machine's readout layer, but here is shown that it can be also used as a stand alone component.
 
 ### Code examples (3. menu choice)
-Example shows how to painfully setup State Machine from the scratch.
+Example shows how to manually setup State Machine configuration from the scratch, then how to train State Machine and how to verify its performance.
 
 ### Code examples (4, ... menu choices)
-Several examples show how to simply setup State Machine using State Machine Designer component.
+Several examples show usage of the State Machine Designer component to setup simple State Machine configuration, then how to train State Machine and how to verify its performance.
 
 ### Data format for the demo application
 Input data is standardly located in the Data sub-folder relative to the location of the executable DemoConsoleApp.exe. Data is expected in csv format and data delimiter can be a tab, semicolon or comma character.
@@ -189,10 +189,10 @@ See the [wiki pages.](https://en.wikipedia.org/wiki/Biological_neuron_model)
 The main component [StateMachine](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/StateMachine.cs) encapsulates independent NeuralPreprocessor and ReadoutLayer components into the single component and adds support for routing specific predictors and input fields to the specific readout units. Allows to bypass NeuralPreprocessor and to use input data directly as a predictors for the readout layer.
 
 #### Setup
-Each component that makes up StateMachine (including StateMachine itself) has its own related settings class, which is required by the component's constructor.
+Each component that makes up StateMachine (including StateMachine itself) has its own related settings class providing configuration, which is required by the component's constructor.
 </br>
-Each settings class can be instantiated from scratch or from a xml element. [RCNetTypes.xsd](https://github.com/okozelsk/NET/blob/master/RCNet/RCNetTypes.xsd) defines all necessary xml elements for creating settings classes using xml constructors.
+Each settings class can be instantiated manually from scratch or from a xml element encapsulating all parameters. [RCNetTypes.xsd](https://github.com/okozelsk/NET/blob/master/RCNet/RCNetTypes.xsd) defines all xml elements used in settings classes constructors.
 </br>
-Each settings class implements the GetXml method so it can be instantiated from scratch and then export the initialization xml element using the GetXml method. Using xml constructors is generally preferable because the initialization xml can be edited without the need to modify source code.
+Each settings class also implements the GetXml method so it can be instantiated from scratch and the initialization xml element can be exported by calling the GetXml method (and stored for later use). Using xml constructors is generally preferable because the initialization xml can be edited without the need to modify source code of the manual setup.
 </br>
-RCNet has also implemented helper component [StateMachineDesigner](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/StateMachineDesigner.cs) for easier setup of simple ESN and LSM StateMachine configurations from the code (see examples in demo application).
+To make things easier, RCNet also implements helper component [StateMachineDesigner](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/StateMachineDesigner.cs) for easier setup of simple ESN and LSM StateMachine configurations from the code (see examples in demo application).
