@@ -89,6 +89,8 @@ namespace RCNet.CsvTools
         /// <param name="delimiter">Data items delimiter. If AutoDetectDelimiter is specified than delimiter will be recognized automatically.</param>
         public CsvDataHolder(string fileName, char delimiter = AutoDetectDelimiter)
         {
+            var dir = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            fileName = Path.Combine(dir, fileName);
             using (StreamReader streamReader = new StreamReader(new FileStream(fileName, FileMode.Open)))
             {
                 InitFromStream(streamReader, delimiter);

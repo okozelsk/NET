@@ -47,7 +47,7 @@ namespace Demo.DemoConsoleApp.Examples
             _log.Write("-------------------------------");
             _log.Write(xmlConfig);
             _log.Write(string.Empty);
-            _log.Write("Pres Enter to continue (StateMachine training)...");
+            _log.Write("Press Enter to continue (StateMachine training)...");
             _log.Write(string.Empty);
             Console.ReadLine();
 
@@ -58,7 +58,7 @@ namespace Demo.DemoConsoleApp.Examples
             //StateMachine instance
             StateMachine stateMachine = new StateMachine(stateMachineCfg);
             //StateMachine training
-            TrainStateMachine(stateMachine, ".\\Data\\TTOO.csv", out double[] predictionInputVector);
+            TrainStateMachine(stateMachine, "./Data/TTOO.csv", out double[] predictionInputVector);
 
             //Forecast
             ReadoutLayer.ReadoutData readoutData = stateMachine.ComputeReadoutData(predictionInputVector);

@@ -93,12 +93,12 @@ namespace Demo.DemoConsoleApp.SM
                 //Samples
                 XElement samplesElem = demoCaseElem.Elements("samples").First();
                 //Full path to training csv file
-                TrainingDataFileName = dir + "\\" + samplesElem.Attribute("trainingData").Value;
+                TrainingDataFileName = Path.Combine(dir, samplesElem.Attribute("trainingData").Value);
                 //Verification data file
                 if (samplesElem.Attribute("verificationData").Value.Trim().Length > 0)
                 {
                     //Full path to verification csv file
-                    VerificationDataFileName = dir + "\\" + samplesElem.Attribute("verificationData").Value;
+                    VerificationDataFileName = Path.Combine(dir, samplesElem.Attribute("verificationData").Value);
                 }
                 else
                 {

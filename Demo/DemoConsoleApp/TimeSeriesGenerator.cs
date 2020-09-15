@@ -102,9 +102,9 @@ namespace Demo.DemoConsoleApp
         /// <param name="timeSeriesLength">The required length of the generated time series</param>
         public static void PrepareDemoTimeSeriesCsvFiles(string dir, CultureInfo cultureInfo, int timeSeriesLength = 10000)
         {
-            SaveTimeSeriesToCsvFile(dir + "\\" + "Random.csv", "Value", GenRandomTimeSeries(timeSeriesLength), cultureInfo);
-            SaveTimeSeriesToCsvFile(dir + "\\" + "Sinusoid.csv", "Value", GenSinusoidTimeSeries(timeSeriesLength), cultureInfo);
-            SaveTimeSeriesToCsvFile(dir + "\\" + "MackeyGlass.csv", "Value", GenMackeyGlassTimeSeries(timeSeriesLength), cultureInfo);
+            SaveTimeSeriesToCsvFile(Path.Combine(dir, "Random.csv"), "Value", GenRandomTimeSeries(timeSeriesLength), cultureInfo);
+            SaveTimeSeriesToCsvFile(Path.Combine(dir, "Sinusoid.csv"), "Value", GenSinusoidTimeSeries(timeSeriesLength), cultureInfo);
+            SaveTimeSeriesToCsvFile(Path.Combine(dir, "MackeyGlass.csv"), "Value", GenMackeyGlassTimeSeries(timeSeriesLength), cultureInfo);
             return;
         }
 

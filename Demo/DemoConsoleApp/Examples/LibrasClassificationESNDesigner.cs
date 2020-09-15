@@ -77,7 +77,7 @@ namespace Demo.DemoConsoleApp.Examples
             _log.Write("-------------------------------");
             _log.Write(xmlConfig);
             _log.Write(string.Empty);
-            _log.Write("Pres Enter to continue (StateMachine training and verification)...");
+            _log.Write("Press Enter to continue (StateMachine training and verification)...");
             _log.Write(string.Empty);
             Console.ReadLine();
 
@@ -88,13 +88,13 @@ namespace Demo.DemoConsoleApp.Examples
             //StateMachine instance
             StateMachine stateMachine = new StateMachine(stateMachineCfg);
             //StateMachine training
-            TrainStateMachine(stateMachine, ".\\Data\\LibrasMovement_train.csv", out _);
+            TrainStateMachine(stateMachine, "./Data/LibrasMovement_train.csv", out _);
             _log.Write(string.Empty);
             //StateMachine verification
             _log.Write("StateMachine verification:");
             _log.Write("--------------------------");
             _log.Write(string.Empty);
-            VerifyStateMachine(stateMachine, ".\\Data\\LibrasMovement_verify.csv", null, out _);
+            VerifyStateMachine(stateMachine, "./Data/LibrasMovement_verify.csv", null, out _);
             _log.Write(string.Empty);
 
             return;
