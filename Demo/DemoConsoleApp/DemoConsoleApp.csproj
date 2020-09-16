@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <AssemblyTitle>DemoConsoleApp</AssemblyTitle>
     <Product>DemoConsoleApp</Product>
     <Copyright>Copyright ©  2018</Copyright>
@@ -16,6 +16,9 @@
 
   <ItemGroup>
     <EmbeddedResource Include="SM\SMDemoSettings.xsd">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SM\SMDemoSettings.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>
