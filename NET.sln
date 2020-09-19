@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29102.190
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DemoConsoleApp", "Demo\DemoConsoleApp\DemoConsoleApp.csproj", "{D18DB05D-F4C4-4388-846A-52BA4B3722D1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DemoConsoleApp", "Demo\DemoConsoleApp\DemoConsoleApp.csproj", "{D18DB05D-F4C4-4388-846A-52BA4B3722D1}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{27FD896B-0D8F-4083-A577-2CA808E4145E}"
 	ProjectSection(SolutionItems) = preProject
@@ -12,7 +12,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Readme.md = Readme.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RCNet", "RCNet\RCNet.csproj", "{7F44508E-0B06-4652-9631-4740EA97EFE1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RCNet", "RCNet\RCNet.csproj", "{7F44508E-0B06-4652-9631-4740EA97EFE1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -28,16 +28,16 @@ Global
 		{D18DB05D-F4C4-4388-846A-52BA4B3722D1}.Debug|x64.Build.0 = Debug|x64
 		{D18DB05D-F4C4-4388-846A-52BA4B3722D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D18DB05D-F4C4-4388-846A-52BA4B3722D1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D18DB05D-F4C4-4388-846A-52BA4B3722D1}.Release|x64.ActiveCfg = Release|x64
-		{D18DB05D-F4C4-4388-846A-52BA4B3722D1}.Release|x64.Build.0 = Release|x64
+		{D18DB05D-F4C4-4388-846A-52BA4B3722D1}.Release|x64.ActiveCfg = Release|Any CPU
+		{D18DB05D-F4C4-4388-846A-52BA4B3722D1}.Release|x64.Build.0 = Release|Any CPU
 		{7F44508E-0B06-4652-9631-4740EA97EFE1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7F44508E-0B06-4652-9631-4740EA97EFE1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7F44508E-0B06-4652-9631-4740EA97EFE1}.Debug|x64.ActiveCfg = Debug|x64
 		{7F44508E-0B06-4652-9631-4740EA97EFE1}.Debug|x64.Build.0 = Debug|x64
 		{7F44508E-0B06-4652-9631-4740EA97EFE1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7F44508E-0B06-4652-9631-4740EA97EFE1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7F44508E-0B06-4652-9631-4740EA97EFE1}.Release|x64.ActiveCfg = Release|x64
-		{7F44508E-0B06-4652-9631-4740EA97EFE1}.Release|x64.Build.0 = Release|x64
+		{7F44508E-0B06-4652-9631-4740EA97EFE1}.Release|x64.ActiveCfg = Release|Any CPU
+		{7F44508E-0B06-4652-9631-4740EA97EFE1}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

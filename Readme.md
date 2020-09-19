@@ -9,13 +9,12 @@ Hidden neuron also provides a standardized set of predictors no matter what acti
 <br/>
 The main component of RCNet is called "**State Machine**" and it has to be instantiated through its settings class. "**State Machine**" is serializable so it is easily possible to instantiate and train it and than use it as a real-time loadable component in the solution.
 <br/>
-Source code is written in C# 7.3 (.NET framework 4.7.2).
 More detailed documentation will be posted [here](https://github.com/okozelsk/NET/wiki) as soon as the current stage of the wild changes is over.
 <br/>
 *I welcome questions, ideas and suggestions for improvements, usage experiences, bug alerts, constructive comments, etc... Please use my email address oldrich.kozelsky@email.cz to contact me.*
 
 
-## State Machine demo application
+## State Machine demo application (.NET Core 3.1)
 Main functionality and possibilities of the State Machine are demonstrated in a simple [demo application](https://github.com/okozelsk/NET/tree/master/Demo/DemoConsoleApp).
 Application has no startup parameters and when started, it shows the menu.
 <br>
@@ -56,7 +55,7 @@ Input data is standardly located in the Data sub-folder relative to the location
 * **Continuous feeding regime** requires a standard csv format, where the first line contains the names of the data fields and each next line contains the data. [Here](https://github.com/okozelsk/NET/blob/master/Demo/DemoConsoleApp/Data/TTOO.csv) is an example
 * **Patterned feeding regime** requires specific logical csv format without colum names (header). Each data line contains values of steady (optional) and repetitive pattern features followed by expected output values at the end. Values of repetitive pattern features can be organized in two ways: groupped [v1(t1),v2(t1),v1(t2),v2(t2),v1(t3),v2(t3)] or sequential [v1(t1),v1(t2),v1(t3),v2(t1),v2(t2),v2(t3)]. [Here](https://github.com/okozelsk/NET/blob/master/Demo/DemoConsoleApp/Data/LibrasMovement.csv) is an example
 
-## Components overview
+## RCNet library (.NET Standard 2.0) Components overview
 
 ![Reservoir Computing conceptual view](https://github.com/okozelsk/NET/blob/master/RCNet/Docs/Imgs/StateMachine_EntityRelationship.png)
 <br/>
