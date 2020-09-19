@@ -31,7 +31,7 @@ namespace Demo.DemoConsoleApp
                         try
                         {
                             //Run the demo
-                            (new SMDemo(new ConsoleLog())).RunDemo(@"SM\SMDemoSettings.xml");
+                            (new SMDemo(new ConsoleLog())).RunDemo(@"./SM/SMDemoSettings.xml");
                         }
                         catch (Exception e)
                         {

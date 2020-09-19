@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using RCNet.CsvTools;
 using System.Globalization;
+using System.IO;
 
 namespace Demo.DemoConsoleApp
 {
@@ -166,8 +167,8 @@ namespace Demo.DemoConsoleApp
                 }
             }
             //Save files
-            trainingData.Save(path + "\\" + "SteadyMG_train.csv");
-            verificationData.Save(path + "\\" + "SteadyMG_verify.csv");
+            trainingData.Save(Path.Combine(path, "SteadyMG_train.csv"));
+            verificationData.Save(Path.Combine(path, "SteadyMG_verify.csv"));
 
             return;
         }

@@ -56,7 +56,8 @@ namespace RCNet.XmlTools
         /// <param name="filename">File containing the xml content</param>
         public XDocument LoadXDocFromFile(string filename)
         {
-            XDocument xDoc = XDocument.Load(filename);
+            var binDir = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            XDocument xDoc = XDocument.Load(Path.Combine(binDir, filename));
             xDoc.Validate(_schemaSet, new ValidationEventHandler(XmlValidationCallback), true);
             return xDoc;
         }

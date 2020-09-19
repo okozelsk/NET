@@ -23,12 +23,15 @@ namespace Demo.DemoConsoleApp.Log
         /// </summary>
         public ConsoleLog()
         {
+#if Windows
             //Set console buffer size
             Console.SetBufferSize(Math.Max(ConsoleBufferMinWidth, Console.BufferWidth), Math.Max(ConsoleBufferMinHeight, Console.BufferHeight));
             //Adjust console window position and size
             Console.WindowLeft = 0;
             Console.WindowTop = 0;
             Console.WindowWidth = Console.LargestWindowWidth;
+#endif
+
             //Clear the console
             Console.Clear();
             //Store current cursor position

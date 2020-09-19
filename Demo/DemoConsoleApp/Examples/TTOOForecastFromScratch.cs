@@ -298,13 +298,15 @@ namespace Demo.DemoConsoleApp.Examples
         public void Run()
         {
             //Create Examples directory
-            Directory.CreateDirectory(".\\Examples");
+            var binDir = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            var examplesDir = Path.Combine(binDir, "./Examples");
+            Directory.CreateDirectory(examplesDir);
 
             //Create StateMachine configuration
             StateMachineSettings stateMachineCfg = CreateStateMachineCfg();
             //Store StateMachine xml configuration
             string xmlConfig = stateMachineCfg.GetXml(true).ToString();
-            string configFileName = ".\\Examples\\TTOOForecastFromScratchSMConfig.xml";
+            string configFileName = Path.Combine(examplesDir, "TTOOForecastFromScratchSMConfig.xml");
             using (StreamWriter writer = new StreamWriter(File.Create(configFileName)))
             {
                 writer.Write(xmlConfig);
@@ -314,7 +316,7 @@ namespace Demo.DemoConsoleApp.Examples
             _log.Write("-------------------------------");
             _log.Write(xmlConfig);
             _log.Write(string.Empty);
-            _log.Write("Pres Enter to continue (StateMachine training)...");
+            _log.Write("Press Enter to continue (StateMachine training)...");
             _log.Write(string.Empty);
             Console.ReadLine();
 
@@ -325,11 +327,11 @@ namespace Demo.DemoConsoleApp.Examples
             //StateMachine instance
             StateMachine stateMachine = new StateMachine(stateMachineCfg);
             //StateMachine training
-            TrainStateMachine(stateMachine, ".\\Data\\TTOO.csv", out double[] predictionInputVector);
+            TrainStateMachine(stateMachine, "./Data/TTOO.csv", out double[] predictionInputVector);
 
 
             //Serialize StateMachine
-            string serializationFileName = ".\\Examples\\TTOOForecastFromScratchSM.dat";
+            string serializationFileName = Path.Combine(examplesDir, "/TTOOForecastFromScratchSM.dat");
             stateMachine.SaveToFile(serializationFileName);
 
             //Forecast
