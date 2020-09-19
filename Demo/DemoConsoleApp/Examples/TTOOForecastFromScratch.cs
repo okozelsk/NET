@@ -299,7 +299,7 @@ namespace Demo.DemoConsoleApp.Examples
         {
             //Create Examples directory
             var binDir = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-            var examplesDir = Path.Combine(binDir, "./Examples");
+            var examplesDir = Path.Combine(binDir, "Examples");
             Directory.CreateDirectory(examplesDir);
 
             //Create StateMachine configuration
@@ -327,11 +327,11 @@ namespace Demo.DemoConsoleApp.Examples
             //StateMachine instance
             StateMachine stateMachine = new StateMachine(stateMachineCfg);
             //StateMachine training
-            TrainStateMachine(stateMachine, "./Data/TTOO.csv", out double[] predictionInputVector);
+            TrainStateMachine(stateMachine, Path.Combine(binDir, "Data", "TTOO.csv"), out double[] predictionInputVector);
 
 
             //Serialize StateMachine
-            string serializationFileName = Path.Combine(examplesDir, "/TTOOForecastFromScratchSM.dat");
+            string serializationFileName = Path.Combine(examplesDir, "TTOOForecastFromScratchSM.dat");
             stateMachine.SaveToFile(serializationFileName);
 
             //Forecast

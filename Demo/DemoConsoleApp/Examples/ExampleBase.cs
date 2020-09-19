@@ -158,7 +158,7 @@ namespace Demo.DemoConsoleApp.Examples
             //Check NeuralPreprocessor is configured
             if (stateMachine.Config.NeuralPreprocessorCfg == null)
             {
-                throw new InvalidOperationException($"Can't train StateMachine. Neural preprocessor has to be configured.");
+                throw new InvalidOperationException($"Can't verify StateMachine. Neural preprocessor has to be configured.");
             }
             //Load csv data
             CsvDataHolder verificationCsvData = new CsvDataHolder(verificationDataFileName);
