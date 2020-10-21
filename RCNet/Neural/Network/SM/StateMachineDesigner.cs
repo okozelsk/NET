@@ -24,6 +24,12 @@ namespace RCNet.Neural.Network.SM
     [Serializable]
     public class StateMachineDesigner
     {
+        //Constants
+        /// <summary>
+        /// Default maximum total sum of input synapses' weights per analog hidden neuron
+        /// </summary>
+        public const double DefaultMaxInputWeightSum = 2.75d;
+
         //Enums
         /// <summary>
         /// Design of the preprocessor's reservoir
@@ -337,6 +343,7 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         /// <param name="totalSize">Total number of hidden neurons</param>
         /// <param name="inputConnectionDensity">Density of the input field connections to hidden neurons</param>
+        /// <param name="maxInputWeightSum">Maximum total sum of input synapses' weights per analog hidden neuron (default value is defined as public DefaultMaxInputWeightSum constant)</param>
         /// <param name="maxInputDelay">Maximum delay of input synapse</param>
         /// <param name="interconnectionDensity">Density of the hidden neurons interconnection</param>
         /// <param name="maxInternalDelay">Maximum delay of internal synapse</param>
@@ -346,6 +353,7 @@ namespace RCNet.Neural.Network.SM
         /// <param name="allowedPredictor">Allowed predictor(s)</param>
         public StateMachineSettings CreatePureESNCfg(int totalSize,
                                                      double inputConnectionDensity,
+                                                     double maxInputWeightSum,
                                                      int maxInputDelay,
                                                      double interconnectionDensity,
                                                      int maxInternalDelay,
@@ -355,7 +363,6 @@ namespace RCNet.Neural.Network.SM
                                                      params PredictorsProvider.PredictorID[] allowedPredictor
                                                      )
         {
-            const double MaxInputWeightSum = 2.75d;
             //Default ESN activation
             RCNetBaseSettings aFnCfg = new TanHSettings();
             //One neuron group
@@ -372,7 +379,7 @@ namespace RCNet.Neural.Network.SM
                                                                                      );
             //Input connections configuration
             List<InputConnSettings> inputConns = new List<InputConnSettings>(InputCfg.VaryingFieldsCfg.ExternalFieldsCfg.FieldCfgCollection.Count);
-            double maxInpSynWeight = MaxInputWeightSum / InputCfg.VaryingFieldsCfg.ExternalFieldsCfg.FieldCfgCollection.Count;
+            double maxInpSynWeight = maxInputWeightSum / InputCfg.VaryingFieldsCfg.ExternalFieldsCfg.FieldCfgCollection.Count;
             foreach (ExternalFieldSettings fieldCfg in InputCfg.VaryingFieldsCfg.ExternalFieldsCfg.FieldCfgCollection)
             {
                 InputConnSettings inputConnCfg = new InputConnSettings(fieldCfg.Name,

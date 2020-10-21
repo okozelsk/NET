@@ -40,7 +40,18 @@ namespace Demo.DemoConsoleApp.Examples
             //Create designer instance
             StateMachineDesigner smd = new StateMachineDesigner(inputCfg, readoutCfg);
             //Create pure ESN fashioned StateMachine configuration
-            StateMachineSettings stateMachineCfg = smd.CreatePureESNCfg(250, 1, 0, 0.2d, 0, 0.1d, 0.75d, null, PredictorsProvider.PredictorID.Activation, PredictorsProvider.PredictorID.ActivationSquare);
+            StateMachineSettings stateMachineCfg = smd.CreatePureESNCfg(250,
+                                                                        1d,
+                                                                        StateMachineDesigner.DefaultMaxInputWeightSum,
+                                                                        0,
+                                                                        0.2d,
+                                                                        0,
+                                                                        0.1d,
+                                                                        0.75d,
+                                                                        null,
+                                                                        PredictorsProvider.PredictorID.Activation,
+                                                                        PredictorsProvider.PredictorID.ActivationSquare
+                                                                        );
             //Display StateMachine xml configuration
             string xmlConfig = stateMachineCfg.GetXml(true).ToString();
             _log.Write("StateMachine configuration xml:");

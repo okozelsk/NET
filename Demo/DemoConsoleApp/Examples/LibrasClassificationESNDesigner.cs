@@ -63,6 +63,7 @@ namespace Demo.DemoConsoleApp.Examples
             //Create pure ESN fashioned StateMachine configuration
             StateMachineSettings stateMachineCfg = smd.CreatePureESNCfg(150,
                                                                         0.25d,
+                                                                        StateMachineDesigner.DefaultMaxInputWeightSum,
                                                                         5,
                                                                         0.1d,
                                                                         0,
