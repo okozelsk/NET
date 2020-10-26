@@ -113,6 +113,10 @@ Input data is standardly located in the Data sub-folder relative to the location
 |[PowerTransformer](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Data/Transformers/PowerTransformer.cs)|Transforms input field value to value^exponent|
 |[YeoJohnsonTransformer](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Data/Transformers/YeoJohnsonTransformer.cs)|Applies Yeo-Johnson transformation to input field value. See the [wiki pages](https://en.wikipedia.org/wiki/Power_transform#Yeo%E2%80%93Johnson_transformation).|
 
+### Analog to spikes data coding
+|Component|Description|
+|--|--|
+|[A2SCoder](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Data/Coders/AnalogToSpiking/A2SCoder.cs)|Codes an analog value to spikes|
 
 ### Data holding
 |Component|Description|
@@ -171,20 +175,20 @@ See the [wiki pages.](https://en.wikipedia.org/wiki/Biological_neuron_model)
 |[TrainedNetworkCluster](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/NonRecurrent/TrainedNetworkCluster.cs)|Encapsulates set of trained non-recurrent networks (cluster of TrainedNetwork instances) and related error statistics. Offers weighted cluster prediction and also publics all inner members sub-predictions.|
 |[TrainedNetworkClusterBuilder](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/NonRecurrent/TrainedNetworkClusterBuilder.cs)|Builds cluster of trained networks based on x-fold cross validation approach. Each fold can have associated number of various networks.|
 
-### State Machine components
+### State Machine Sub-Components
 |Component|Description|
 |--|--|
-|[Synapse](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/Preprocessing/Reservoir/Synapse/Synapse.cs)|Computes dynamically weighted signal from source to target neuron. It supports short-term plasticity and signal delay.|
-|[InputEncoder](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/Preprocessing/Input/InputEncoder.cs)|Encodes external input for the processing in the reservoirs. Supports set of various realtime input chainable transformations as additional computed input fields. Provides analog and spiking input neurons.|
+|[InputEncoder](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/Preprocessing/Input/InputEncoder.cs)|Processes given natural external input data and provides it's representation on analog and spiking input neurons for the data processing in the reservoirs. Supports set of various realtime input chainable data transformations and data generators as additional computed input fields. Supports two main input feeding regimes: Continuous (one input is data vector at time T) and Patterned (one input is InputPattern containing data for all timepoints). Supports three ways how to represent analog value as the spikes: Horizontal (fast - simultaneous activity of the neuronal population), Vertical (slow - spike-train on single input neuron) or None (fast - spiking represetantion is then forbidden).|
 |[AnalogInputNeuron](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/Preprocessing/Neuron/AnalogInputNeuron.cs)|Input neuron providing analog signal.|
 |[SpikingInputNeuron](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/Preprocessing/Neuron/AnalogInputNeuron.cs)|Input neuron providing spiking signal.|
 |[HiddenNeuron](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/Preprocessing/Neuron/HiddenNeuron.cs)|Supports both analog and spiking activation functions and can produce analog signal and/or spikes (neuron is able to fire spikes even when stateless analog activation is used). Supports Retainment property of analog activation (leaky integrator). Supports set of different predictors.|
+|[Synapse](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/Preprocessing/Reservoir/Synapse/Synapse.cs)|Computes dynamically weighted signal from source to target neuron. It supports short-term plasticity and signal delay.|
 |[ReservoirInstance](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/Preprocessing/Reservoir/ReservoirInstance.cs)|Provides recurrent network supporting analog and spiking neurons working directly together. Supports SpectralRadius (for weights of analog neurons), Homogenous excitability of spiking neurons, Multiple 3D pools of neurons, Pool to pool connections. It can work as the Echo State Network reservoir, Liquid State Machine reservoir or Mixed reservoir|
 |[NeuralPreprocessor](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/Preprocessing/NeuralPreprocessor.cs)|Provides data preprocessing to predictors. Supports multiple internal reservoirs. Supports virtual input data associated with predefined signal generators and transformers. Supports two input feeding regimes: Continuous and Patterned|
 |[ReadoutUnit](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/Readout/ReadoutUnit.cs)|Readout unit does the Forecast or Classification and encapsulates TrainedNetworkCluster.|
 |[ReadoutLayer](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/Readout/ReadoutLayer.cs)|Implements independent readout layer consisting of trained readout units.|
 
-### State Machine
+### State Machine Component
 The main component [StateMachine](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/StateMachine.cs) encapsulates independent NeuralPreprocessor and ReadoutLayer components into the single component and adds support for routing specific predictors and input fields to the specific readout units. Allows to bypass NeuralPreprocessor and to use input data directly as a predictors for the readout layer.
 
 #### Setup

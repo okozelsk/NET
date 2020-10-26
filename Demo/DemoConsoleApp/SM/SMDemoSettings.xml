@@ -24,6 +24,9 @@
               <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
             </unification>
           </feedingPatterned>
+          <codingA2S>
+            <none/>
+          </codingA2S>
           <varyingFields routeToReadout="false">
             <externalFields>
               <field name="Accel">
@@ -168,6 +171,9 @@
               <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="180"/>
             </unification>
           </feedingPatterned>
+          <codingA2S>
+            <none/>
+          </codingA2S>
           <varyingFields routeToReadout="false">
             <externalFields>
               <field name="Eigenworm1">
@@ -284,6 +290,9 @@
               <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
             </unification>
           </feedingPatterned>
+          <codingA2S>
+            <none/>
+          </codingA2S>
           <varyingFields routeToReadout="false">
             <externalFields>
               <field name="DistanceFromCenter">
@@ -404,6 +413,9 @@
               <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
             </unification>
           </feedingPatterned>
+          <codingA2S>
+            <none/>
+          </codingA2S>
           <varyingFields routeToReadout="false">
             <externalFields>
               <field name="DistanceFromCenter">
@@ -496,6 +508,9 @@
               <resampling/>
             </unification>
           </feedingPatterned>
+          <codingA2S>
+            <none/>
+          </codingA2S>
           <varyingFields routeToReadout="false">
             <externalFields>
               <field name="Outline">
@@ -590,6 +605,9 @@
       <neuralPreprocessor>
         <inputEncoder>
           <feedingPatterned slices="1" bidir="true"/>
+          <codingA2S>
+            <none/>
+          </codingA2S>
           <varyingFields routeToReadout="true">
             <externalFields>
               <field name="DistanceFromCenter">
@@ -684,11 +702,13 @@
               <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
             </unification>
           </feedingPatterned>
+          <codingA2S>
+            <horizontal halfCodeLength="15" lowestThreshold="1e-2"/>
+          </codingA2S>
           <varyingFields routeToReadout="false">
             <externalFields>
               <field name="DistanceFromCenter">
                 <realFeature standardize="true" keepReserve="true"/>
-                <spikeCode componentHalfCodeLength="15" lowestThreshold="1e-2" signalComponent="true" deltaComponent="false"/>
               </field>
             </externalFields>
           </varyingFields>
@@ -798,6 +818,9 @@
               <resampling uniformTimeScale="true" targetTimePoints="Auto"/>
             </unification>
           </feedingPatterned>
+          <codingA2S>
+            <none/>
+          </codingA2S>
           <varyingFields routeToReadout="false">
             <externalFields>
               <field name="coord_abcissa">
@@ -986,6 +1009,9 @@
       <neuralPreprocessor predictorsReductionRatio="0">
         <inputEncoder>
           <feedingContinuous bootCycles="Auto"/>
+          <codingA2S>
+            <none/>
+          </codingA2S>
           <varyingFields routeToReadout="true">
             <externalFields>
               <field name="Value" routeToReadout="true">
@@ -1119,6 +1145,9 @@
       <neuralPreprocessor>
         <inputEncoder>
           <feedingContinuous bootCycles="Auto"/>
+          <codingA2S>
+            <none/>
+          </codingA2S>
           <varyingFields routeToReadout="true">
             <externalFields>
               <field name="High" routeToReadout="true">
@@ -1230,6 +1259,9 @@
               <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
             </unification>
           </feedingPatterned>
+          <codingA2S>
+            <none/>
+          </codingA2S>
           <varyingFields routeToReadout="false">
             <externalFields>
               <field name="EEG" routeToReadout="true">
@@ -1323,6 +1355,9 @@
               <field name="tau" routeToReadout="true"/>
             </steadyFields>
           </feedingPatterned>
+          <codingA2S>
+            <none/>
+          </codingA2S>
           <varyingFields routeToReadout="false">
             <externalFields>
               <field name="MG">
@@ -1444,11 +1479,13 @@
               <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
             </unification>
           </feedingPatterned>
+          <codingA2S>
+            <none/>
+          </codingA2S>
           <varyingFields routeToReadout="false">
             <externalFields>
               <field name="Accel">
                 <realFeature />
-                <spikeCode lowestThreshold="1e-5" componentHalfCodeLength="16" thresholdFullSpikeSet="false" signalComponent="true" deltaComponent="true" binaryComponent="true"/>
               </field>
             </externalFields>
             <transformedFields>
@@ -1619,6 +1656,110 @@
     </stateMachine>
   </case>
 
+
+  <!--
+    EXPERIMENTAL VERTICAL spike-train SETUP for new InputEncoder.
+    Note that the vertical spike-train configuration leads to significantly slower reservoir data processing
+    than in case of horizontal setup because there is necessary spike-train-length times more reservoir computation cycles.
+  -->
+  <case name="Classification task BeetleFly: Simple pure LSM reservoir generating FiringFadingSum predictors, one TanH neuron as a classifier (Resilient trainer)">
+    <samples trainingData="BeetleFly_train.csv" verificationData="BeetleFly_verify.csv"/>
+    <stateMachine randomizerSeek="0">
+      <neuralPreprocessor predictorsReductionRatio="0">
+        <inputEncoder>
+          <feedingPatterned slices="1" bidir="false">
+            <unification unifyAmplitude="false" detrend="false">
+              <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
+            </unification>
+          </feedingPatterned>
+          <codingA2S>
+            <vertical spikeTrainLength="10"/>
+          </codingA2S>
+          <varyingFields routeToReadout="false">
+            <externalFields>
+              <field name="DistanceFromCenter">
+                <realFeature standardize="true" keepReserve="true"/>
+              </field>
+            </externalFields>
+          </varyingFields>
+        </inputEncoder>
+        <reservoirStructures>
+          <reservoirStructure name="MainCfg">
+            <pools>
+              <pool name="PureLSM">
+                <proportions dimX="6" dimY="6" dimZ="5"/>
+                <neuronGroups>
+                  <spikingGroup name="Spiking-grp" relShare="1">
+                    <activationLeakyIF refractoryPeriods="0"/>
+                    <homogenousExcitability excitatoryStrength="0.9" inputRatio="0.7" inhibitoryRatio="0.1"/>
+                  </spikingGroup>
+                </neuronGroups>
+                <interconnection>
+                  <randomSchema density="0.2" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false"/>
+                </interconnection>
+              </pool>
+            </pools>
+          </reservoirStructure>
+        </reservoirStructures>
+        <reservoirInstances>
+          <reservoirInstance name="Main" reservoirStructure="MainCfg">
+            <inputConnections>
+              <connection inputFieldName="DistanceFromCenter" poolName="PureLSM" spikingTargetDensity="0.25"/>
+            </inputConnections>
+            <synapse>
+              <spikingTarget>
+                <input maxDelay="0">
+                  <spikingSource>
+                    <plasticity>
+                      <linearDynamics/>
+                    </plasticity>
+                  </spikingSource>
+                </input>
+                <excitatory maxDelay="0">
+                  <spikingSource>
+                    <plasticity>
+                      <linearDynamics/>
+                    </plasticity>
+                  </spikingSource>
+                </excitatory>
+                <inhibitory maxDelay="0">
+                  <spikingSource>
+                    <plasticity>
+                      <linearDynamics/>
+                    </plasticity>
+                  </spikingSource>
+                </inhibitory>
+              </spikingTarget>
+            </synapse>
+            <predictors activation="false"
+                        activationSquare="false"
+                        activationFadingSum="false"
+                        activationMWAvg="false"
+                        firingFadingSum="true"
+                        firingMWAvg="false"
+                        firingCount="false"
+                        firingBinPattern="false">
+            </predictors>
+          </reservoirInstance>
+        </reservoirInstances>
+      </neuralPreprocessor>
+      <readoutLayer testDataRatio="0.1" folds="Auto">
+        <defaultNetworks/>
+        <readoutUnits>
+          <readoutUnit name="Beetle1Fly0">
+            <classification>
+              <networks>
+                <ff>
+                  <activationTanH/>
+                  <resPropTrainer attempts="5" attemptEpochs="200"/>
+                </ff>
+              </networks>
+            </classification>
+          </readoutUnit>
+        </readoutUnits>
+      </readoutLayer>
+    </stateMachine>
+  </case>
 
 
 

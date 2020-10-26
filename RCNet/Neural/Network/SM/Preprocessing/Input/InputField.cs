@@ -1,6 +1,7 @@
 ﻿using RCNet.MathTools;
 using RCNet.Neural.Data.Filter;
 using RCNet.Neural.Network.SM.Preprocessing.Neuron;
+using RCNet.Neural.Data.Coders.AnalogToSpiking;
 using System;
 using System.Collections.Generic;
 
@@ -43,7 +44,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
 
         //Attributes
         private readonly FeatureFilterBase _featureFilter;
-        private readonly SpikeCode _realSpikeCode;
+        private readonly A2SCoder _spikingCoder;
+        private double _iAnalogStimuli;
+        private byte[] _iSpikingStimuli;
+        private int _currentDataIdx;
 
         //Constructor
         /// <summary>
@@ -54,15 +58,15 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <param name="coordinates">Input coordinates (entry point)</param>
         /// <param name="dataWorkingRange">Input data range</param>
         /// <param name="featureFilterCfg">Feature filter configuration</param>
-        /// <param name="spikeCodeCfg">Configuration of the input spike code</param>
+        /// <param name="spikingCoderCfg">Configuration of the analog value to spikes coder</param>
         /// <param name="routeToReadout">Specifies whether to route values as the additional predictors to readout</param>
-        /// <param name="inputNeuronsStartIdx">Index of the first input neuron of this unit among all input neurons</param>
+        /// <param name="inputNeuronsStartIdx">Index of the first input neuron of this field among all input neurons</param>
         public InputField(string name,
                           int idx,
                           int[] coordinates,
                           Interval dataWorkingRange,
                           IFeatureFilterSettings featureFilterCfg,
-                          SpikeCodeSettings spikeCodeCfg,
+                          A2SCoderSettings spikingCoderCfg,
                           bool routeToReadout,
                           int inputNeuronsStartIdx
                           )
@@ -71,26 +75,44 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             Idx = idx;
             RouteToReadout = routeToReadout;
             _featureFilter = FeatureFilterFactory.Create(dataWorkingRange, featureFilterCfg);
+            _iAnalogStimuli = 0;
+            _currentDataIdx = 0;
             //Analog neuron
             AnalogNeuron = new AnalogInputNeuron(new NeuronLocation(InputEncoder.ReservoirID, inputNeuronsStartIdx, InputEncoder.PoolID, inputNeuronsStartIdx, idx, coordinates[0], coordinates[1], coordinates[2]));
             ++inputNeuronsStartIdx;
             //Spiking neurons
-            _realSpikeCode = null;
-            int populationSize = -1;
-            switch (_featureFilter.Type)
+            _spikingCoder = new A2SCoder(spikingCoderCfg);
+            int spikingPopulationSize = -1;
+            if (_spikingCoder.Method == A2SCoder.CodingMethod.Horizontal)
             {
-                case FeatureFilterBase.FeatureType.Real:
-                    _realSpikeCode = new SpikeCode(spikeCodeCfg);
-                    populationSize = _realSpikeCode.Code.Length;
-                    break;
-                case FeatureFilterBase.FeatureType.Binary:
-                    populationSize = 1;
-                    break;
-                case FeatureFilterBase.FeatureType.Enum:
-                    populationSize = ((EnumFeatureFilterSettings)featureFilterCfg).NumOfElements;
-                    break;
+                //Horizontal coding
+                switch (_featureFilter.Type)
+                {
+                    case FeatureFilterBase.FeatureType.Real:
+                        spikingPopulationSize = _spikingCoder.SpikeCode.Length;
+                        break;
+                    case FeatureFilterBase.FeatureType.Binary:
+                        spikingPopulationSize = 1;
+                        break;
+                    case FeatureFilterBase.FeatureType.Enum:
+                        spikingPopulationSize = ((EnumFeatureFilterSettings)featureFilterCfg).NumOfElements;
+                        break;
+                }
+                _iSpikingStimuli = new byte[spikingPopulationSize];
             }
-            SpikingNeuronCollection = new SpikingInputNeuron[populationSize];
+            else if (_spikingCoder.Method == A2SCoder.CodingMethod.Vertical)
+            {
+                //Vertical coding
+                spikingPopulationSize = 1;
+                _iSpikingStimuli = new byte[_spikingCoder.SpikeCode.Length];
+            }
+            else
+            {
+                //None coding
+                spikingPopulationSize = 0;
+                _iSpikingStimuli = new byte[_spikingCoder.SpikeCode.Length];
+            }
+            SpikingNeuronCollection = new SpikingInputNeuron[spikingPopulationSize];
             for (int i = 0; i < SpikingNeuronCollection.Length; i++)
             {
                 SpikingNeuronCollection[i] = new SpikingInputNeuron(new NeuronLocation(InputEncoder.ReservoirID, inputNeuronsStartIdx, InputEncoder.PoolID, inputNeuronsStartIdx, idx, coordinates[0], coordinates[1], coordinates[2]));
@@ -130,7 +152,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <param name="statistics">Specifies whether to reset internal statistics of the associated neurons</param>
         public void ResetNeurons(bool statistics)
         {
-            _realSpikeCode?.Reset();
+            _spikingCoder?.Reset();
             AnalogNeuron.Reset(statistics);
             for (int i = 0; i < SpikingNeuronCollection.Length; i++)
             {
@@ -143,47 +165,92 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// Prepares input neurons to provide new incoming data.
         /// </summary>
         /// <param name="value">External natural input data</param>
-        /// <param name="collectStatistics">Specifies whether to update internal statistics of associated input neurons</param>
-        public void SetNewData(double value, bool collectStatistics)
+        public void SetNewData(double value)
         {
-            double iStimuli = _featureFilter.ApplyFilter(value);
-            //Analog neuron
-            AnalogNeuron.NewStimulation(iStimuli, 0d);
-            AnalogNeuron.Recompute(collectStatistics);
-            //Spiking neurons
-            switch (_featureFilter.Type)
+            _iAnalogStimuli = _featureFilter.ApplyFilter(value);
+            _currentDataIdx = 0;
+            switch (_spikingCoder.Method)
             {
-                case FeatureFilterBase.FeatureType.Real:
+                case A2SCoder.CodingMethod.Horizontal:
                     {
-                        _realSpikeCode.Encode(iStimuli);
-                        for (int i = 0; i < SpikingNeuronCollection.Length; i++)
+                        switch (_featureFilter.Type)
                         {
-                            SpikingNeuronCollection[i].NewStimulation(_realSpikeCode.Code[i], 0d);
-                            SpikingNeuronCollection[i].Recompute(collectStatistics);
+                            case FeatureFilterBase.FeatureType.Real:
+                                _spikingCoder.Encode(_iAnalogStimuli);
+                                _spikingCoder.SpikeCode.CopyTo(_iSpikingStimuli, 0);
+                                break;
+                            case FeatureFilterBase.FeatureType.Binary:
+                                _iSpikingStimuli[0] = (byte)value;
+                                break;
+                            case FeatureFilterBase.FeatureType.Enum:
+                                {
+                                    int spikeIdx = ((int)Math.Round(value, 0)) - 1;
+                                    for (int i = 0; i < _iSpikingStimuli.Length; i++)
+                                    {
+                                        _iSpikingStimuli[i] = i == spikeIdx ? (byte)1 : (byte)0;
+                                    }
+                                }
+                                break;
                         }
                     }
                     break;
 
-                case FeatureFilterBase.FeatureType.Binary:
-                    {
-                        SpikingNeuronCollection[0].NewStimulation(value, 0d);
-                        SpikingNeuronCollection[0].Recompute(collectStatistics);
-                    }
+                case A2SCoder.CodingMethod.Vertical:
+                    _spikingCoder.Encode(_iAnalogStimuli);
+                    _spikingCoder.SpikeCode.CopyTo(_iSpikingStimuli, 0);
                     break;
-
-                case FeatureFilterBase.FeatureType.Enum:
-                    {
-                        int neuronIdx = ((int)Math.Round(value, 0)) - 1;
-                        for (int i = 0; i < SpikingNeuronCollection.Length; i++)
-                        {
-                            double spikeVal = i == neuronIdx ? 1d : 0d;
-                            SpikingNeuronCollection[i].NewStimulation(spikeVal, 0d);
-                            SpikingNeuronCollection[i].Recompute(collectStatistics);
-                        }
-                    }
+                
+                default:
                     break;
             }
             return;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="collectStatistics">Specifies whether to update internal statistics of associated input neurons</param>
+        public bool Fetch(bool collectStatistics)
+        {
+            if (_currentDataIdx == 0 || _currentDataIdx < _iSpikingStimuli.Length)
+            {
+                switch (_spikingCoder.Method)
+                {
+                    case A2SCoder.CodingMethod.Horizontal:
+                        {
+                            //Analog neuron
+                            AnalogNeuron.NewStimulation(_iAnalogStimuli, 0d);
+                            AnalogNeuron.Recompute(collectStatistics);
+                            //Spiking neurons
+                            for (int i = 0; i < SpikingNeuronCollection.Length; i++)
+                            {
+                                SpikingNeuronCollection[i].NewStimulation(_iSpikingStimuli[i], 0d);
+                                SpikingNeuronCollection[i].Recompute(collectStatistics);
+                            }
+                        }
+                        break;
+
+                    case A2SCoder.CodingMethod.Vertical:
+                        {
+                            //Analog neuron
+                            AnalogNeuron.NewStimulation(_iSpikingStimuli[_currentDataIdx] == 0 ? -1d : 0d, 0d);
+                            AnalogNeuron.Recompute(collectStatistics);
+                            //Spiking neuron
+                            SpikingNeuronCollection[0].NewStimulation(_iSpikingStimuli[_currentDataIdx], 0d);
+                            SpikingNeuronCollection[0].Recompute(collectStatistics);
+                        }
+                        break;
+
+                    default:
+                        //Only analog neuron
+                        AnalogNeuron.NewStimulation(_iAnalogStimuli, 0d);
+                        AnalogNeuron.Recompute(collectStatistics);
+                        break;
+                }
+                ++_currentDataIdx;
+                return true;
+            }
+            return false;
         }
 
         /// <summary>
@@ -192,7 +259,20 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <param name="numOfCombinations">Desired number of connections</param>
         public List<int[]> GetSpikingInputCombinations(int numOfCombinations)
         {
-            return _realSpikeCode.GetCombinations(numOfCombinations);
+            List<int[]> result = new List<int[]>(numOfCombinations);
+            //Alone coding spikes
+            for (int i = 0; i < SpikingNeuronCollection.Length; i++)
+            {
+                int[] cmbIdxs = new int[1];
+                cmbIdxs[0] = i;
+                result.Add(cmbIdxs);
+                if (result.Count == numOfCombinations)
+                {
+                    //Desired number of combinations is reached
+                    return result;
+                }
+            }
+            return result;
         }
 
     }//InputField

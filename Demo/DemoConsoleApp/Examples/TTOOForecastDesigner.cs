@@ -1,5 +1,6 @@
 ﻿using System;
 using RCNet.Neural.Activation;
+using RCNet.Neural.Data.Coders.AnalogToSpiking;
 using RCNet.Neural.Data.Filter;
 using RCNet.Neural.Network.SM;
 using RCNet.Neural.Network.SM.Preprocessing.Input;
@@ -25,6 +26,7 @@ namespace Demo.DemoConsoleApp.Examples
             //Create StateMachine configuration
             //Simplified input configuration
             InputEncoderSettings inputCfg = StateMachineDesigner.CreateInputCfg(new FeedingContinuousSettings(FeedingContinuousSettings.AutoBootCyclesNum),
+                                                                                new A2SCoderSettings(new A2SNoneMethodSettings()),
                                                                                 true,
                                                                                 new ExternalFieldSettings("High", new RealFeatureFilterSettings()),
                                                                                 new ExternalFieldSettings("Low", new RealFeatureFilterSettings()),

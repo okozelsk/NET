@@ -2,6 +2,7 @@
 using System.IO;
 using RCNet.Extensions;
 using RCNet.Neural.Activation;
+using RCNet.Neural.Data.Coders.AnalogToSpiking;
 using RCNet.Neural.Data.Filter;
 using RCNet.Neural.Network.NonRecurrent.FF;
 using RCNet.Neural.Network.SM;
@@ -54,7 +55,10 @@ namespace Demo.DemoConsoleApp.Examples
             //based on neural preprocessor structure
             FeedingContinuousSettings feedingContinuousCfg = new FeedingContinuousSettings(FeedingContinuousSettings.AutoBootCyclesNum);
             //Create and return input configuration
-            return new InputEncoderSettings(feedingContinuousCfg, new VaryingFieldsSettings(externalFieldsCfg, null, null, RouteToReadout));
+            return new InputEncoderSettings(feedingContinuousCfg,
+                                            new A2SCoderSettings(new A2SNoneMethodSettings()),
+                                            new VaryingFieldsSettings(externalFieldsCfg, null, null, RouteToReadout)
+                                            );
         }
 
         /// <summary>

@@ -1,11 +1,13 @@
 ﻿using RCNet.Neural.Activation;
 using RCNet.Neural.Data.Transformers;
 using RCNet.Neural.Data.Generators;
+using RCNet.Neural.Data.Coders.AnalogToSpiking;
 using System;
 using System.Collections.Generic;
 using RCNet.CsvTools;
 using System.Globalization;
 using System.IO;
+using System.Text;
 
 namespace Demo.DemoConsoleApp
 {
@@ -173,11 +175,49 @@ namespace Demo.DemoConsoleApp
             return;
         }
 
+        private string ByteArrayToString(byte[] arr)
+        {
+            StringBuilder builder = new StringBuilder(arr.Length);
+            for(int i = 0; i < arr.Length; i++)
+            {
+                builder.Append(arr[i].ToString());
+            }
+            return builder.ToString();
+        }
+
+        private void TestA2SCoder()
+        {
+            double[] analogValues = { -1, -0.9, -0.8, -0.7, -0.6, -0.5, -0.4, -0.3, -0.2, -0.1, -0.05, -0.025, -0.0125, 0, 0.0125, 0.025, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1 };
+            A2SCoder coder = null;
+            //Horizontal
+            int halfCodeLength = 32;
+            coder = new A2SCoder(new A2SCoderSettings(new A2SHorizontalMethodSettings(halfCodeLength, 0.01d)));
+            Console.WriteLine($"{coder.Method}");
+            Console.WriteLine($"    {"",-11}{"Bellow average".PadRight(halfCodeLength)}Above average");
+            foreach (double value in analogValues)
+            {
+                coder.Encode(value);
+                Console.WriteLine($"    {value.ToString(CultureInfo.InvariantCulture),-10} {ByteArrayToString(coder.SpikeCode)}");
+            }
+            Console.ReadLine();
+            //Vertical
+            coder = new A2SCoder(new A2SCoderSettings(new A2SVerticalMethodSettings(8)));
+            Console.WriteLine($"{coder.Method}");
+            foreach (double value in analogValues)
+            {
+                coder.Encode(value);
+                Console.WriteLine($"    {value.ToString(CultureInfo.InvariantCulture),-10} {ByteArrayToString(coder.SpikeCode)}");
+            }
+            return;
+        }
+
         /// <summary>
         /// Playground's entry point
         /// </summary>
         public void Run()
         {
+            Console.Clear();
+            TestA2SCoder();
             //TODO - place your code here
             /*
             TestActivation(ActivationFactory.Create(new SimpleIFSettings(), _rand), 200, 0.25, 50, 100);

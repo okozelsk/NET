@@ -11,7 +11,10 @@ using System.Threading.Tasks;
 namespace RCNet.Neural.Network.SM.Preprocessing.Input
 {
     /// <summary>
-    /// Input processing unit
+    /// Processes given natural external input data and provides it's representation on analog and spiking input neurons for the data processing in the reservoirs.
+    /// Supports set of various realtime input chainable data transformations and data generators as additional computed input fields.
+    /// Supports two main input feeding regimes: Continuous (one input is data vector at time T) and Patterned (one input is InputPattern containing data for all timepoints).
+    /// Supports three ways how to represent analog value as the spikes: Horizontal (fast - simultaneous activity of the neuronal population), Vertical (slow - spike-train on single input neuron) or None (fast - spiking represetantion is then forbidden).
     /// </summary>
     [Serializable]
     public class InputEncoder
@@ -126,7 +129,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// Number of already processed inputs from _inputDataQueue
         /// </summary>
         private int _numOfProcessedInputs;
-        
+
+        /// <summary>
+        /// Number of alredy processed fetches of currently encoded data
+        /// </summary>
+        private int _numOfProcessedFetches;
+
         /// <summary>
         /// Indicates reverse mode of input data processing
         /// </summary>
@@ -171,7 +179,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
                                           coordinates,
                                           _dataRange,
                                           fieldCfg.FeatureFilterCfg,
-                                          fieldCfg.SpikeCodeCfg,
+                                          _encoderCfg.SpikingCoderCfg,
                                           (fieldCfg.RouteToReadout && _encoderCfg.VaryingFieldsCfg.RouteToReadout),
                                           inputNeuronStartIdx
                                           ));
@@ -190,7 +198,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
                                               coordinates,
                                               _dataRange,
                                               fieldCfg.FeatureFilterCfg,
-                                              fieldCfg.SpikingCodingCfg,
+                                              _encoderCfg.SpikingCoderCfg,
                                               (fieldCfg.RouteToReadout && _encoderCfg.VaryingFieldsCfg.RouteToReadout),
                                               inputNeuronStartIdx
                                               ));
@@ -209,7 +217,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
                                               coordinates,
                                               _dataRange,
                                               fieldCfg.FeatureFilterCfg,
-                                              fieldCfg.SpikingCodingCfg,
+                                              _encoderCfg.SpikingCoderCfg,
                                               (fieldCfg.RouteToReadout && _encoderCfg.VaryingFieldsCfg.RouteToReadout),
                                               inputNeuronStartIdx
                                               ));
@@ -561,16 +569,34 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// Initializes input fields by next stored piece of input data if available
         /// </summary>
-        /// <param name="collectStatistics">Specifies whether to update internal statistics of associated input neurons</param>
-        public bool EncodeNextInputData(bool collectStatistics)
+        public bool EncodeNextInputData()
         {
             if (_numOfProcessedInputs < _inputDataQueue.Count)
             {
                 for (int i = 0; i < _varyingFields.Count; i++)
                 {
-                    _varyingFields[i].SetNewData(_inputDataQueue[_numOfProcessedInputs][i], collectStatistics);
+                    _varyingFields[i].SetNewData(_inputDataQueue[_numOfProcessedInputs][i]);
                 }
                 ++_numOfProcessedInputs;
+                _numOfProcessedFetches = 0;
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Delivers encoded data into the input neurons
+        /// </summary>
+        /// <param name="collectStatistics">Specifies whether to update internal statistics of associated input neurons</param>
+        public bool Fetch(bool collectStatistics)
+        {
+            if (_numOfProcessedFetches < _encoderCfg.NumOfFetches)
+            {
+                for (int i = 0; i < _varyingFields.Count; i++)
+                {
+                    _varyingFields[i].Fetch(collectStatistics);
+                }
+                ++_numOfProcessedFetches;
                 return true;
             }
             return false;

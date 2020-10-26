@@ -320,9 +320,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         public double GetSignal(bool collectStatistics)
         {
             //Source neuron signal
-            double sourceNeuronSignal = _analogSourceSignal ? _sourceNeuronOutputData._analogSignal : _sourceNeuronOutputData._spikingSignal;
-            double efficacy = 1d;
+            double sourceNeuronSignal = _analogSourceSignal? _sourceNeuronOutputData._analogSignal: _sourceNeuronOutputData._spikingSignal;
             //Short-term plasticity
+            double efficacy = 1d;
             if (_efficacyComputer != null && sourceNeuronSignal > 0)
             {
                 //Compute synapse efficacy

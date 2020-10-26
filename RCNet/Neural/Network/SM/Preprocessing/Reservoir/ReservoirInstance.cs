@@ -590,11 +590,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                         {
                             //Create synapse
                             Synapse synapse = new Synapse(inputField.AnalogNeuron,
-                                                          targetNeurons[i],
-                                                          Synapse.SynRole.Input,
-                                                          InstanceCfg.SynapseCfg,
-                                                          rand
-                                                          );
+                                                            targetNeurons[i],
+                                                            Synapse.SynRole.Input,
+                                                            InstanceCfg.SynapseCfg,
+                                                            rand
+                                                            );
                             _inputDistancesStat.AddSampleValue(synapse.Distance);
                             SetInterconnection(_neuronInputConnectionsCollection, synapse);
                         }//for i
@@ -608,12 +608,33 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                         int cmbIdx = 0;
                         for (int nIdx = 0; nIdx < targetNeurons.Count; nIdx++)
                         {
-                            //Connect planned connection combination to neuron
-                            for (int i = 0; i < plannedConnCmbIdxs[cmbIdx].Length; i++)
+                            if (plannedConnCmbIdxs.Count > 0)
                             {
-                                //Create synapse
-                                inputNeuronUsageChecker[plannedConnCmbIdxs[cmbIdx][i]] = true;
-                                Synapse synapse = new Synapse(inputField.SpikingNeuronCollection[plannedConnCmbIdxs[cmbIdx][i]],
+                                //Connect planned connection combination to neuron
+                                for (int i = 0; i < plannedConnCmbIdxs[cmbIdx].Length; i++)
+                                {
+                                    //Create synapse
+                                    inputNeuronUsageChecker[plannedConnCmbIdxs[cmbIdx][i]] = true;
+                                    Synapse synapse = new Synapse(inputField.SpikingNeuronCollection[plannedConnCmbIdxs[cmbIdx][i]],
+                                                                  targetNeurons[nIdx],
+                                                                  Synapse.SynRole.Input,
+                                                                  InstanceCfg.SynapseCfg,
+                                                                  rand
+                                                                  );
+                                    _inputDistancesStat.AddSampleValue(synapse.Distance);
+                                    SetInterconnection(_neuronInputConnectionsCollection, synapse);
+                                }//for i
+                                 //Increment combination index
+                                if (++cmbIdx == plannedConnCmbIdxs.Count)
+                                {
+                                    //Restart from the beginning
+                                    cmbIdx = 0;
+                                }
+                            }
+                            else
+                            {
+                                //Connect input analog neuron to spiking hidden neuron
+                                Synapse synapse = new Synapse(inputField.AnalogNeuron,
                                                               targetNeurons[nIdx],
                                                               Synapse.SynRole.Input,
                                                               InstanceCfg.SynapseCfg,
@@ -621,12 +642,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                                                               );
                                 _inputDistancesStat.AddSampleValue(synapse.Distance);
                                 SetInterconnection(_neuronInputConnectionsCollection, synapse);
-                            }//for i
-                            //Increment combination index
-                            if (++cmbIdx == plannedConnCmbIdxs.Count)
-                            {
-                                //Restart from the beginning
-                                cmbIdx = 0;
                             }
                         }//for nIdx
                         for (int i = 0; i < inputField.SpikingNeuronCollection.Length; i++)

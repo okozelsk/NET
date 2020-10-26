@@ -423,6 +423,47 @@
     </xs:attribute>
   </xs:complexType>
 
+
+  <!-- Coders -->
+  <!-- Methods to code an analog value as spiking -->
+  <!-- Horizontal coding method configuration -->
+  <xs:complexType name="A2SCodingMethodHorizontalType">
+    <xs:attribute type="UIntGE1LE32Type" name="halfCodeLength" use="optional" default="16">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 16</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleGT0LT1Type" name="lowestThreshold" use="optional" default="1e-5">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Firing threshold of the most sensitive spike. Default value is 1e-5</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <!-- Vertical coding configuration -->
+  <xs:complexType name="A2SCodingMethodVerticalType">
+    <xs:attribute type="UIntGE1LE32Type" name="spikeTrainLength" use="optional" default="16">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 16</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <!-- None coding configuration -->
+  <xs:complexType name="A2SCodingMethodNoneType">
+  </xs:complexType>
+
+  <!-- Ways to code an analog value as spiking configuration-->
+  <xs:complexType name="A2SCoderType">
+    <xs:choice minOccurs="1" maxOccurs="1">
+      <xs:element type="A2SCodingMethodHorizontalType" name="horizontal" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="A2SCodingMethodVerticalType" name="vertical" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="A2SCodingMethodNoneType" name="none" minOccurs="1" maxOccurs="1"/>
+    </xs:choice>
+  </xs:complexType>
+
+
+
   <!-- Input generators -->
   <!-- Pulse generator -->
   <xs:complexType name="PulseGeneratorType">
@@ -2095,50 +2136,13 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Input spike code configuration -->
-  <xs:complexType name="NPInputSpikeCodeType">
-    <xs:attribute type="UIntGE1LE32Type" name="componentHalfCodeLength" use="optional" default="16">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 16</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="UDoubleGT0LT1Type" name="lowestThreshold" use="optional" default="1e-5">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Firing threshold of the most sensitive spike. Default value is 1e-5</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="xs:boolean" name="thresholdFullSpikeSet" use="optional" default="true">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Specifies whether to activate all thresholded spikes. Default value is true</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="xs:boolean" name="signalComponent" use="optional" default="true">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Specifies whether to use thresholding of the current analog signal strength as a component of the spike code. Default value is true</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="xs:boolean" name="deltaComponent" use="optional" default="false">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Specifies whether to use thresholding of the difference of current and previous analog signals as a component of the spike code. Default value is false</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="xs:boolean" name="binaryComponent" use="optional" default="false">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Specifies whether to use binary representation of the signal as a component of the spike code. Default value is false</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-  </xs:complexType>
-
   <!-- External input field -->
   <xs:complexType name="NPExternalInpFieldType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:choice minOccurs="1" maxOccurs="1">
         <xs:element type="BinFeatureFilterType" name="binFeature" minOccurs="0" maxOccurs="1"/>
         <xs:element type="EnumFeatureFilterType" name="enumFeature" minOccurs="0" maxOccurs="1"/>
-        <xs:sequence minOccurs="0" maxOccurs="1">
-          <xs:element type="RealFeatureFilterType" name="realFeature" minOccurs="1" maxOccurs="1"/>
-          <xs:element type="NPInputSpikeCodeType" name="spikeCode" minOccurs="0" maxOccurs="1"/>
-        </xs:sequence>
+        <xs:element type="RealFeatureFilterType" name="realFeature" minOccurs="0" maxOccurs="1"/>
       </xs:choice>
     </xs:sequence>
     <xs:attribute type="xs:string" name="name" use="required"/>
@@ -2172,7 +2176,6 @@
         <xs:element type="LinearTransformerType" name="linear" minOccurs="1" maxOccurs="1"/>
       </xs:choice>
       <xs:element type="RealFeatureFilterType" name="realFeature" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="NPInputSpikeCodeType" name="spikeCode" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:string" name="name" use="required"/>
     <xs:attribute type="xs:boolean" name="routeToReadout" use="optional" default="true">
@@ -2199,7 +2202,6 @@
         <xs:element type="MackeyGlassGeneratorType" name="mackeyGlass" minOccurs="1" maxOccurs="1"/>
       </xs:choice>
       <xs:element type="RealFeatureFilterType" name="realFeature" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="NPInputSpikeCodeType" name="spikeCode" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:string" name="name" use="required"/>
     <xs:attribute type="xs:boolean" name="routeToReadout" use="optional" default="false">
@@ -2237,6 +2239,7 @@
         <xs:element type="NPInpFeedingContinuousType" name="feedingContinuous" minOccurs="1" maxOccurs="1"/>
         <xs:element type="NPInpFeedingPatternedType" name="feedingPatterned" minOccurs="1" maxOccurs="1"/>
       </xs:choice>
+      <xs:element type="A2SCoderType" name="codingA2S" minOccurs="1" maxOccurs="1"/>
       <xs:element type="NPVaryingInpFieldsType" name="varyingFields" minOccurs="1" maxOccurs="1">
         <xs:unique name="np_unique_varying_input_field_name">
           <xs:selector xpath=".//field"/>

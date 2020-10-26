@@ -1,4 +1,5 @@
-﻿using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Space3D;
+﻿using RCNet.Neural.Data.Coders.AnalogToSpiking;
+using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Space3D;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,6 +26,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         public IFeedingSettings FeedingCfg { get; }
 
         /// <summary>
+        /// An analog value to spikes coder settings
+        /// </summary>
+        public A2SCoderSettings SpikingCoderCfg { get; }
+        
+        /// <summary>
         /// Varying input fields settings
         /// </summary>
         public VaryingFieldsSettings VaryingFieldsCfg { get; }
@@ -39,14 +45,17 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// Creates an initialized instance
         /// </summary>
         /// <param name="feedingCfg">Input feeding settings</param>
+        /// <param name="spikingCoderCfg">An analog value to spikes coder settings</param>
         /// <param name="varyingFieldsCfg">Varying input fields settings</param>
         /// <param name="coordinatesCfg">Input placement in 3D space</param>
         public InputEncoderSettings(IFeedingSettings feedingCfg,
+                                    A2SCoderSettings spikingCoderCfg,
                                     VaryingFieldsSettings varyingFieldsCfg,
                                     CoordinatesSettings coordinatesCfg = null
                                     )
         {
             FeedingCfg = (IFeedingSettings)feedingCfg.DeepClone();
+            SpikingCoderCfg = (A2SCoderSettings)spikingCoderCfg.DeepClone();
             VaryingFieldsCfg = (VaryingFieldsSettings)varyingFieldsCfg.DeepClone();
             CoordinatesCfg = coordinatesCfg == null ? new CoordinatesSettings() : (CoordinatesSettings)coordinatesCfg.DeepClone();
             Check();
@@ -58,7 +67,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// </summary>
         /// <param name="source">Source instance</param>
         public InputEncoderSettings(InputEncoderSettings source)
-            : this(source.FeedingCfg, source.VaryingFieldsCfg, source.CoordinatesCfg)
+            : this(source.FeedingCfg, source.SpikingCoderCfg, source.VaryingFieldsCfg, source.CoordinatesCfg)
         {
             return;
         }
@@ -74,6 +83,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             //Parsing
             XElement feedingElem = settingsElem.Elements().First();
             FeedingCfg = feedingElem.Name.LocalName == "feedingContinuous" ? (IFeedingSettings)new FeedingContinuousSettings(feedingElem) : new FeedingPatternedSettings(feedingElem);
+            SpikingCoderCfg = new A2SCoderSettings(settingsElem.Elements("codingA2S").First());
             VaryingFieldsCfg = new VaryingFieldsSettings(settingsElem.Elements("varyingFields").First());
             XElement coordinatesElem = settingsElem.Elements("coordinates").FirstOrDefault();
             CoordinatesCfg = coordinatesElem == null ? new CoordinatesSettings() : new CoordinatesSettings(coordinatesElem);
@@ -82,6 +92,24 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         }
 
         //Properties
+        /// <summary>
+        /// Necessary number of fetches to process encoded data
+        /// </summary>
+        public int NumOfFetches
+        {
+            get
+            {
+                switch(SpikingCoderCfg.CodingMethodCfg.Method)
+                {
+                    case A2SCoder.CodingMethod.Vertical:
+                        {
+                            return ((A2SVerticalMethodSettings)SpikingCoderCfg.CodingMethodCfg).SpikeTrainLength;
+                        }
+                    default:
+                        return 1;
+                }
+            }
+        }
         /// <summary>
         /// Identifies settings containing only default values
         /// </summary>
@@ -187,6 +215,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         {
             XElement rootElem = new XElement(rootElemName,
                                              FeedingCfg.GetXml(suppressDefaults),
+                                             SpikingCoderCfg.GetXml(suppressDefaults),
                                              VaryingFieldsCfg.GetXml(suppressDefaults)
                                              );
             if (!suppressDefaults || !CoordinatesCfg.ContainsOnlyDefaults)

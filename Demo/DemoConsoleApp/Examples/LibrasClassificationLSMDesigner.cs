@@ -1,5 +1,6 @@
 ﻿using System;
 using RCNet.Neural.Activation;
+using RCNet.Neural.Data.Coders.AnalogToSpiking;
 using RCNet.Neural.Data.Filter;
 using RCNet.Neural.Network.SM;
 using RCNet.Neural.Network.SM.Preprocessing.Input;
@@ -35,9 +36,10 @@ namespace Demo.DemoConsoleApp.Examples
             //Create StateMachine configuration
             //Simplified input configuration
             InputEncoderSettings inputCfg = StateMachineDesigner.CreateInputCfg(new FeedingPatternedSettings(1, true, RCNet.Neural.Data.InputPattern.VariablesSchema.Groupped),
+                                                                                new A2SCoderSettings(new A2SHorizontalMethodSettings(15, 1e-3)),
                                                                                 false,
-                                                                                new ExternalFieldSettings("coord_abcissa", new RealFeatureFilterSettings(), true, new SpikeCodeSettings(15, 1e-3, true, true, true, false)),
-                                                                                new ExternalFieldSettings("coord_ordinate", new RealFeatureFilterSettings(), true, new SpikeCodeSettings(15, 1e-3, true, true, true, false))
+                                                                                new ExternalFieldSettings("coord_abcissa", new RealFeatureFilterSettings(), true),
+                                                                                new ExternalFieldSettings("coord_ordinate", new RealFeatureFilterSettings(), true)
                                                                                 );
             //Simplified readout layer configuration
             ReadoutLayerSettings readoutCfg = StateMachineDesigner.CreateClassificationReadoutCfg(StateMachineDesigner.CreateSingleLayerRegrNet(new ElliotSettings(), 5, 400),

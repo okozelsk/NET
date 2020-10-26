@@ -91,7 +91,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
         /// <param name="collectStatistics">Specifies whether to update internal statistics</param>
         public void Recompute(bool collectStatistics)
         {
+            //Analog output signal
             OutputData._analogSignal = _stimuli;
+            //Transposed and scaled analog signal as direct input for spiking target neuron
+            OutputData._spikingSignal = (_stimuli + 1d) / 2d;
             //Statistics
             if (collectStatistics)
             {

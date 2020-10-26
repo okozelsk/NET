@@ -46,11 +46,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// </summary>
         public RealFeatureFilterSettings FeatureFilterCfg { get; }
 
-        /// <summary>
-        /// Configuration of spiking coding neurons
-        /// </summary>
-        public SpikeCodeSettings SpikingCodingCfg { get; }
-
 
         //Constructors
         /// <summary>
@@ -58,21 +53,18 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// </summary>
         /// <param name="name">Generated field name</param>
         /// <param name="generatorCfg">Configuration of associated generator</param>
-        /// <param name="featureFilterCfg">Configuration of real feature filter</param>
-        /// <param name="spikingCodingCfg">Configuration of spiking coding neurons</param>
         /// <param name="routeToReadout">Specifies whether to route generated field to readout layer together with other predictors</param>
+        /// <param name="featureFilterCfg">Configuration of real feature filter</param>
         public GeneratedFieldSettings(string name,
                                       RCNetBaseSettings generatorCfg,
                                       bool routeToReadout = DefaultRouteToReadout,
-                                      RealFeatureFilterSettings featureFilterCfg = null,
-                                      SpikeCodeSettings spikingCodingCfg = null
+                                      RealFeatureFilterSettings featureFilterCfg = null
                                       )
         {
             Name = name;
             GeneratorCfg = generatorCfg.DeepClone();
             RouteToReadout = routeToReadout;
             FeatureFilterCfg = featureFilterCfg == null ? null : (RealFeatureFilterSettings)featureFilterCfg.DeepClone();
-            SpikingCodingCfg = spikingCodingCfg == null ? null : (SpikeCodeSettings)spikingCodingCfg.DeepClone();
             Check();
             return;
         }
@@ -82,7 +74,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// </summary>
         /// <param name="source">Source instance</param>
         public GeneratedFieldSettings(GeneratedFieldSettings source)
-            : this(source.Name, source.GeneratorCfg, source.RouteToReadout, source.FeatureFilterCfg, source.SpikingCodingCfg)
+            : this(source.Name, source.GeneratorCfg, source.RouteToReadout, source.FeatureFilterCfg)
         {
             return;
         }
@@ -102,8 +94,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             GeneratorCfg = GeneratorFactory.LoadSettings(genElem);
             XElement realFeatureFilterElem = settingsElem.Elements("realFeatureFilter").FirstOrDefault();
             FeatureFilterCfg = realFeatureFilterElem == null ? new RealFeatureFilterSettings() : new RealFeatureFilterSettings(realFeatureFilterElem);
-            XElement spikingCodingElem = settingsElem.Elements("spikingCoding").FirstOrDefault();
-            SpikingCodingCfg = spikingCodingElem == null ? new SpikeCodeSettings() : new SpikeCodeSettings(spikingCodingElem);
             Check();
             return;
         }
@@ -167,10 +157,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             if (!suppressDefaults || !FeatureFilterCfg.ContainsOnlyDefaults)
             {
                 rootElem.Add(FeatureFilterCfg.GetXml(suppressDefaults));
-            }
-            if (!suppressDefaults || !SpikingCodingCfg.ContainsOnlyDefaults)
-            {
-                rootElem.Add(SpikingCodingCfg.GetXml(suppressDefaults));
             }
             Validate(rootElem, XsdTypeName);
             return rootElem;

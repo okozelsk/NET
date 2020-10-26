@@ -39,11 +39,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// </summary>
         public bool RouteToReadout { get; }
 
-        /// <summary>
-        /// Configuration of spiking coding neurons
-        /// </summary>
-        public SpikeCodeSettings SpikeCodeCfg { get; }
-
         //Constructors
         /// <summary>
         /// Creates an unitialized instance
@@ -51,21 +46,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <param name="name">Input field name</param>
         /// <param name="featureFilterCfg">Configuration of feature filter associated with the input field</param>
         /// <param name="routeToReadout">Specifies whether to route input field to readout layer together with other predictors</param>
-        /// <param name="spikeCodeCfg">Configuration of spike code</param>
         public ExternalFieldSettings(string name,
                                      IFeatureFilterSettings featureFilterCfg,
-                                     bool routeToReadout = DefaultRouteToReadout,
-                                     SpikeCodeSettings spikeCodeCfg = null
+                                     bool routeToReadout = DefaultRouteToReadout
                                      )
         {
             Name = name;
             FeatureFilterCfg = (IFeatureFilterSettings)featureFilterCfg.DeepClone();
             RouteToReadout = routeToReadout;
-            SpikeCodeCfg = (SpikeCodeSettings)spikeCodeCfg?.DeepClone();
-            if (featureFilterCfg.Type == FeatureFilterBase.FeatureType.Real && spikeCodeCfg == null)
-            {
-                SpikeCodeCfg = new SpikeCodeSettings();
-            }
             Check();
             return;
         }
@@ -75,7 +63,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// </summary>
         /// <param name="source">Source instance</param>
         public ExternalFieldSettings(ExternalFieldSettings source)
-            : this(source.Name, source.FeatureFilterCfg, source.RouteToReadout, source.SpikeCodeCfg)
+            : this(source.Name, source.FeatureFilterCfg, source.RouteToReadout)
         {
             return;
         }
@@ -92,8 +80,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             Name = settingsElem.Attribute("name").Value;
             RouteToReadout = bool.Parse(settingsElem.Attribute("routeToReadout").Value);
             FeatureFilterCfg = FeatureFilterFactory.LoadSettings(settingsElem.Elements().First());
-            XElement spikingCodingElem = settingsElem.Elements("spikeCode").FirstOrDefault();
-            SpikeCodeCfg = spikingCodingElem == null ? null : new SpikeCodeSettings(spikingCodingElem);
             Check();
             return;
         }
@@ -118,10 +104,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             if (Name.Length == 0)
             {
                 throw new ArgumentException($"Name can not be empty.", "Name");
-            }
-            if (FeatureFilterCfg.Type != FeatureFilterBase.FeatureType.Real && SpikeCodeCfg != null)
-            {
-                throw new ArgumentException("Spiking coding configuration is relevant for real-feature only.", "SpikeCodeCfg");
             }
             return;
         }
@@ -149,10 +131,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             if (!suppressDefaults || !IsDefaultRouteToReadout)
             {
                 rootElem.Add(new XAttribute("routeToReadout", RouteToReadout.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()));
-            }
-            if (SpikeCodeCfg != null && (!SpikeCodeCfg.ContainsOnlyDefaults || !suppressDefaults))
-            {
-                rootElem.Add(SpikeCodeCfg.GetXml(suppressDefaults));
             }
             Validate(rootElem, XsdTypeName);
             return rootElem;

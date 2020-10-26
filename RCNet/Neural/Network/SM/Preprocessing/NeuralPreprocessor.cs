@@ -343,11 +343,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             //Loop pending data
             while (_inputEncoder.NumOfRemainingInputs > 0)
             {
-                _inputEncoder.EncodeNextInputData(collectStatistics);
-                //Compute reservoir(s)
-                foreach (ReservoirInstance reservoir in ReservoirCollection)
+                _inputEncoder.EncodeNextInputData();
+                while (_inputEncoder.Fetch(collectStatistics))
                 {
-                    reservoir.Compute(collectStatistics);
+                    //Compute reservoir(s)
+                    foreach (ReservoirInstance reservoir in ReservoirCollection)
+                    {
+                        reservoir.Compute(collectStatistics);
+                    }
                 }
                 if ((_predictorsTimePointSlicesPlan != null && computationStep == _predictorsTimePointSlicesPlan[predictorsTimePointSlicesPlanIdx]) ||
                     (_predictorsTimePointSlicesPlan == null && _inputEncoder.NumOfRemainingInputs == 0))

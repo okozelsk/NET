@@ -1,5 +1,6 @@
 ﻿using RCNet.Extensions;
 using RCNet.Neural.Activation;
+using RCNet.Neural.Data.Coders.AnalogToSpiking;
 using RCNet.Neural.Data.Filter;
 using RCNet.Neural.Network.NonRecurrent.FF;
 using RCNet.Neural.Network.SM.Preprocessing;
@@ -101,29 +102,29 @@ namespace RCNet.Neural.Network.SM
         /// <param name="feedingCfg">Input feeding configuration</param>
         /// <param name="extFieldNameCollection">Names of the external input fields</param>
         /// <param name="routeToReadout">Specifies whether to route input values to readout</param>
-        /// <param name="spikeCodeCfg">Configuration of the spike code</param>
+        /// <param name="spikingCoderCfg">Configuration of the spiking coder</param>
         public static InputEncoderSettings CreateInputCfg(IFeedingSettings feedingCfg,
                                                           IEnumerable<string> extFieldNameCollection,
                                                           bool routeToReadout = true,
-                                                          SpikeCodeSettings spikeCodeCfg = null
+                                                          A2SCoderSettings spikingCoderCfg = null
                                                           )
         {
             if (feedingCfg == null)
             {
                 throw new ArgumentNullException("feedingCfg");
             }
-            if (spikeCodeCfg == null)
+            if (spikingCoderCfg == null)
             {
-                spikeCodeCfg = new SpikeCodeSettings();
+                spikingCoderCfg = new A2SCoderSettings(new A2SHorizontalMethodSettings());
             }
             List<ExternalFieldSettings> extFieldCollection = new List<ExternalFieldSettings>();
             foreach (string name in extFieldNameCollection)
             {
-                extFieldCollection.Add(new ExternalFieldSettings(name, new RealFeatureFilterSettings(), routeToReadout, spikeCodeCfg));
+                extFieldCollection.Add(new ExternalFieldSettings(name, new RealFeatureFilterSettings(), routeToReadout));
             }
             ExternalFieldsSettings extFieldsCfg = new ExternalFieldsSettings(extFieldCollection);
             VaryingFieldsSettings fieldsCfg = new VaryingFieldsSettings(extFieldsCfg, null, null, routeToReadout);
-            return new InputEncoderSettings(feedingCfg, fieldsCfg);
+            return new InputEncoderSettings(feedingCfg, spikingCoderCfg, fieldsCfg);
         }
 
         /// <summary>
@@ -131,9 +132,11 @@ namespace RCNet.Neural.Network.SM
         /// Contains only external input fields.
         /// </summary>
         /// <param name="feedingCfg">Input feeding configuration</param>
+        /// <param name="spikingCoderCfg">Configuration of an analog value to spikes coder</param>
         /// <param name="routeToReadout">Specifies whether to route input values to readout</param>
         /// <param name="externalFieldCfg">External input field configuration</param>
         public static InputEncoderSettings CreateInputCfg(IFeedingSettings feedingCfg,
+                                                          A2SCoderSettings spikingCoderCfg,
                                                           bool routeToReadout,
                                                           params ExternalFieldSettings[] externalFieldCfg
                                                           )
@@ -142,7 +145,14 @@ namespace RCNet.Neural.Network.SM
             {
                 throw new ArgumentNullException("feedingCfg");
             }
-            return new InputEncoderSettings(feedingCfg, new VaryingFieldsSettings(new ExternalFieldsSettings(externalFieldCfg), null, null, routeToReadout));
+            return new InputEncoderSettings(feedingCfg,
+                                            spikingCoderCfg,
+                                            new VaryingFieldsSettings(new ExternalFieldsSettings(externalFieldCfg),
+                                                                      null,
+                                                                      null,
+                                                                      routeToReadout
+                                                                      )
+                                            );
         }
 
         /// <summary>
