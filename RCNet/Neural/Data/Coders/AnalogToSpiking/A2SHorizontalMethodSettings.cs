@@ -110,9 +110,9 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
         /// </summary>
         protected override void Check()
         {
-            if (HalfCodeLength < 1 || HalfCodeLength > 32)
+            if (HalfCodeLength < 1 || HalfCodeLength > 128)
             {
-                throw new ArgumentException($"Invalid HalfCodeLength {HalfCodeLength.ToString(CultureInfo.InvariantCulture)}. HalfCodeLength must be GE to 1 and LE to 32.", "HalfCodeLength");
+                throw new ArgumentException($"Invalid HalfCodeLength {HalfCodeLength.ToString(CultureInfo.InvariantCulture)}. HalfCodeLength must be GE to 1 and LE to 128.", "HalfCodeLength");
             }
             if (LowestThreshold <= 0 || LowestThreshold >= 1d)
             {

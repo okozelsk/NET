@@ -65,7 +65,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
             XElement dynamicsCfgElem = settingsElem.Elements().FirstOrDefault();
             if (dynamicsCfgElem == null)
             {
-                DynamicsCfg = new ConstantDynamicsSTInhibitorySettings();
+                DynamicsCfg = new LinearDynamicsSTInhibitorySettings();
             }
             else
             {
@@ -125,11 +125,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
-            XElement rootElem = new XElement(rootElemName);
-            if (!suppressDefaults || !((RCNetBaseSettings)DynamicsCfg).ContainsOnlyDefaults)
-            {
-                rootElem.Add(DynamicsCfg.GetXml(suppressDefaults));
-            }
+            XElement rootElem = new XElement(rootElemName, DynamicsCfg.GetXml(suppressDefaults));
             Validate(rootElem, XsdTypeName);
             return rootElem;
         }

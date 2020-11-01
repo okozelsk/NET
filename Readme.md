@@ -33,12 +33,13 @@ site and State Machine usually achieves very similar results to the best classif
 #### Classification Results Comparison
 |Dataset|State Machine Accuracy|Best Ref. Accuracy|Best Ref. Algorithm|
 |--|--|--|--|
-|[CricketX](https://timeseriesclassification.com/description.php?Dataset=CricketX)|80.77%|81.4%|COTE|
+|[CricketX](https://timeseriesclassification.com/description.php?Dataset=CricketX)|81.03%|81.4%|COTE|
 |[Worms](https://timeseriesclassification.com/description.php?Dataset=Worms)|83.12%|73.49%|BOSS|
 |[BeetleFly](https://timeseriesclassification.com/description.php?Dataset=BeetleFly)|100%|94.85%|BOSS|
 |[BirdChicken](https://timeseriesclassification.com/description.php?Dataset=BirdChicken)|100%|98.4%|BOSS|
 |[ProximalPhalanx](https://timeseriesclassification.com/description.php?Dataset=ProximalPhalanxOutlineAgeGroup)|88.29%|88.09%|ST|
-|[Yoga](https://timeseriesclassification.com/description.php?Dataset=Yoga)|91.13%|90.99%|BOSS|
+|[Yoga](https://timeseriesclassification.com/description.php?Dataset=Yoga)|91.7%|90.99%|BOSS|
+|[Libras](https://timeseriesclassification.com/description.php?Dataset=Libras)|90%|89.4%|DTWi|
 
 
 ### Code examples (2. menu choice)
@@ -184,7 +185,7 @@ See the [wiki pages.](https://en.wikipedia.org/wiki/Biological_neuron_model)
 |[HiddenNeuron](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/Preprocessing/Neuron/HiddenNeuron.cs)|Supports both analog and spiking activation functions and can produce analog signal and/or spikes (neuron is able to fire spikes even when stateless analog activation is used). Supports Retainment property of analog activation (leaky integrator). Supports set of different predictors.|
 |[Synapse](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/Preprocessing/Reservoir/Synapse/Synapse.cs)|Computes dynamically weighted signal from source to target neuron. It supports short-term plasticity and signal delay.|
 |[ReservoirInstance](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/Preprocessing/Reservoir/ReservoirInstance.cs)|Provides recurrent network supporting analog and spiking neurons working directly together. Supports SpectralRadius (for weights of analog neurons), Homogenous excitability of spiking neurons, Multiple 3D pools of neurons, Pool to pool connections. It can work as the Echo State Network reservoir, Liquid State Machine reservoir or Mixed reservoir|
-|[NeuralPreprocessor](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/Preprocessing/NeuralPreprocessor.cs)|Provides data preprocessing to predictors. Supports multiple internal reservoirs. Supports virtual input data associated with predefined signal generators and transformers. Supports two input feeding regimes: Continuous and Patterned|
+|[NeuralPreprocessor](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/Preprocessing/NeuralPreprocessor.cs)|Encaptulates InputEncoder and reservoirs. Provides encaptulated data preprocessing to predictors for the readout layer|
 |[ReadoutUnit](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/Readout/ReadoutUnit.cs)|Readout unit does the Forecast or Classification and encapsulates TrainedNetworkCluster.|
 |[ReadoutLayer](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/Readout/ReadoutLayer.cs)|Implements independent readout layer consisting of trained readout units.|
 
@@ -192,7 +193,7 @@ See the [wiki pages.](https://en.wikipedia.org/wiki/Biological_neuron_model)
 The main component [StateMachine](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/StateMachine.cs) encapsulates independent NeuralPreprocessor and ReadoutLayer components into the single component and adds support for routing specific predictors and input fields to the specific readout units. Allows to bypass NeuralPreprocessor and to use input data directly as a predictors for the readout layer.
 
 #### Setup
-Each component that makes up StateMachine (including StateMachine itself) has its own related settings class providing configuration, which is required by the component's constructor.
+Each executive component that makes up StateMachine (including StateMachine itself) has its own related settings class providing configuration, which is required by the executive component's constructor.
 </br>
 Each settings class can be instantiated manually from scratch or from a xml element encapsulating all parameters. [RCNetTypes.xsd](https://github.com/okozelsk/NET/blob/master/RCNet/RCNetTypes.xsd) defines all xml elements used in settings classes constructors.
 </br>

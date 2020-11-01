@@ -197,16 +197,16 @@ namespace Demo.DemoConsoleApp
             foreach (double value in analogValues)
             {
                 coder.Encode(value);
-                Console.WriteLine($"    {value.ToString(CultureInfo.InvariantCulture),-10} {ByteArrayToString(coder.SpikeCode)}");
+                Console.WriteLine($"    {value.ToString(CultureInfo.InvariantCulture), -10} {ByteArrayToString(coder.SpikeCode)}");
             }
             Console.ReadLine();
             //Vertical
-            coder = new A2SCoder(new A2SCoderSettings(new A2SVerticalMethodSettings(8)));
+            coder = new A2SCoder(new A2SCoderSettings(new A2SVerticalMethodSettings(32)));
             Console.WriteLine($"{coder.Method}");
             foreach (double value in analogValues)
             {
                 coder.Encode(value);
-                Console.WriteLine($"    {value.ToString(CultureInfo.InvariantCulture),-10} {ByteArrayToString(coder.SpikeCode)}");
+                Console.WriteLine($"    {value.ToString(CultureInfo.InvariantCulture), -10} {ByteArrayToString(coder.SpikeCode)}");
             }
             return;
         }

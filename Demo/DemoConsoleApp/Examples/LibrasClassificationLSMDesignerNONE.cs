@@ -13,6 +13,7 @@ namespace Demo.DemoConsoleApp.Examples
 {
     /// <summary>
     /// Example code shows how to setup StateMachine as a pure LSM for classification using StateMachineDesigner.
+    /// 
     /// Example uses LibrasMovement_train.csv and LibrasMovement_verify.csv from ./Data subfolder.
     /// The dataset is from "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
     /// https://timeseriesclassification.com/description.php?Dataset=Libras
@@ -28,7 +29,7 @@ namespace Demo.DemoConsoleApp.Examples
     /// Each instance represents 45 points on a bi-dimensional space, which can be plotted in an ordered way (from 1 through
     /// 45 as the X co-ordinate) in order to draw the path of the movement.
     /// </summary>
-    public class LibrasClassificationLSMDesigner : ExampleBase
+    public class LibrasClassificationLSMDesignerNONE : ExampleBase
     {
         /// <summary>
         /// Runs the example code.
@@ -37,14 +38,14 @@ namespace Demo.DemoConsoleApp.Examples
         {
             //Create StateMachine configuration
             //Simplified input configuration
-            InputEncoderSettings inputCfg = StateMachineDesigner.CreateInputCfg(new FeedingPatternedSettings(1, true, RCNet.Neural.Data.InputPattern.VariablesSchema.Groupped, new UnificationSettings(true)),
-                                                                                new A2SCoderSettings(new A2SHorizontalMethodSettings(15, 1e-3)),
-                                                                                false,
+            InputEncoderSettings inputCfg = StateMachineDesigner.CreateInputCfg(new FeedingPatternedSettings(1, true, RCNet.Neural.Data.InputPattern.VariablesSchema.Groupped, new UnificationSettings(true, true)),
+                                                                                new A2SCoderSettings(new A2SNoneMethodSettings()),
+                                                                                true,
                                                                                 new ExternalFieldSettings("coord_abcissa", new RealFeatureFilterSettings(), true),
                                                                                 new ExternalFieldSettings("coord_ordinate", new RealFeatureFilterSettings(), true)
                                                                                 );
             //Simplified readout layer configuration
-            ReadoutLayerSettings readoutCfg = StateMachineDesigner.CreateClassificationReadoutCfg(StateMachineDesigner.CreateSingleLayerRegrNet(new ElliotSettings(), 5, 400),
+            ReadoutLayerSettings readoutCfg = StateMachineDesigner.CreateClassificationReadoutCfg(StateMachineDesigner.CreateSingleLayerRegrNet(new TanHSettings(), 5, 800),
                                                                                                   0.0825d,
                                                                                                   1,
                                                                                                   "Hand movement",
@@ -69,7 +70,9 @@ namespace Demo.DemoConsoleApp.Examples
             //Create pure LSM fashioned StateMachine configuration
             StateMachineSettings stateMachineCfg = smd.CreatePureLSMCfg(new ProportionsSettings(180, 1, 1), //Proportions (it also determines total size)
                                                                         new LeakyIFSettings(), //Activation
-                                                                        new HomogenousExcitabilitySettings(0.8, 0.5, 0.05), //Homogenous excitability
+                                                                        //new AdExpIFSettings(), //Activation
+                                                                        //new ExpIFSettings(null, null, null, null, null, null, null, 0), //Activation
+                                                                        new HomogenousExcitabilitySettings(0.75, 0.75, 0.65),
                                                                         1d, //Input connection density
                                                                         0, //Input max delay
                                                                         0.1d, //Interconnection density
@@ -108,6 +111,6 @@ namespace Demo.DemoConsoleApp.Examples
             return;
         }
 
-    }//LibrasClassificationLSMDesigner
+    }//LibrasClassificationLSMDesignerNONE
 
 }//Namespace

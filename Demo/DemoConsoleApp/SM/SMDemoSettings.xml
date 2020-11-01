@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <demo dataFolder="./Data" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="SMDemoSettings.xsd">
 
+
   <!--
-    Here StateMachine achieves 80.77% accuracy. It is a bit worse than the best accuracy 81.4% achieved by the algorithm
+    Here StateMachine achieves 81.03% accuracy. It is a bit worse than the best accuracy 81.4% achieved by the algorithm
     called COTE referenced at the dataset's home site:
     "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
     https://timeseriesclassification.com/description.php?Dataset=CricketX.
@@ -280,7 +281,7 @@
     We have extracted the outlines of these images and mapped them into 1-D series of distances to the centre. 
     Beetle/Fly is the problem of distinguishing between an outline of a beetle and a fly.
   -->
-  <case name="Classification task BeetleFly: Combined ESNxLSM reservoir generating FiringFadingSum predictors, one Identity neuron as a classifier (Resilient trainer)">
+  <case name="Classification task BeetleFly: Combined ESNxLSM reservoir generating FiringFadingSum predictors, one TanH neuron as a classifier (Resilient trainer)">
     <samples trainingData="BeetleFly_train.csv" verificationData="BeetleFly_verify.csv"/>
     <stateMachine randomizerSeek="0">
       <neuralPreprocessor predictorsReductionRatio="0">
@@ -378,7 +379,7 @@
             <classification>
               <networks>
                 <ff>
-                  <activationIdentity/>
+                  <activationTanH/>
                   <resPropTrainer attempts="5" attemptEpochs="500"/>
                 </ff>
               </networks>
@@ -679,6 +680,176 @@
     </stateMachine>
   </case>
 
+  <!--
+    This demo case demonstrates successful use of the pure analog ESN reservoir for the fast and accurate classifications enabled by
+    the new ability of the analog hidden neurons to fire a spike. It also shows use of additional transformed input fields and
+    their pre-processing in separated neural pool.
+    The dataset is from "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
+    https://timeseriesclassification.com/description.php?Dataset=Libras
+    Here StateMachine achieves 90% accuracy. It is a bit better than the benchmark 89.4% mentioned in related pdf https://arxiv.org/pdf/1811.00075.pdf
+    The dataset contains 15 classes of 24 instances each, where
+    each class references to a hand movement type in LIBRAS. The hand movement is represented as a bidimensional curve performed
+    by the hand in a period of time. The curves were obtained from videos of hand movements, with the Libras performance from 4 
+    different people, during 2 sessions. Each video corresponds to only one hand movement and has about 7 seconds.    
+    Each video corresponds to a function F in a functions space which is the continual version of the input dataset.
+    In the video pre-processing, a time normalization is carried out selecting 45 frames from each video, in according 
+    to an uniform distribution. In each frame, the centroid pixels of the segmented objects (the hand) are found, which 
+    compose the discrete version of the curve F with 45 points. All curves are normalized in the unitary space.
+    Each curve F is mapped in a representation with 90 features, with representing the coordinates of movement.
+    Each instance represents 45 points on a bi-dimensional space, which can be plotted in an ordered way (from 1 through
+    45 as the X co-ordinate) in order to draw the path of the movement.
+  -->
+  <case name="Classification task Libras Movement: Two independent pools ESN reservoir generating ActivationMWAvg and FiringCount predictors, one TanH neuron as a classifier (Resilient trainer)">
+    <samples trainingData="LibrasMovement_train.csv" verificationData="LibrasMovement_verify.csv"/>
+    <stateMachine randomizerSeek="0">
+      <neuralPreprocessor>
+        <inputEncoder>
+          <feedingPatterned slices="1" bidir="true" variablesSchema="Groupped">
+            <unification unifyAmplitude="true" detrend="false">
+              <resampling uniformTimeScale="true" targetTimePoints="Auto"/>
+            </unification>
+          </feedingPatterned>
+          <codingA2S>
+            <none/>
+          </codingA2S>
+          <varyingFields routeToReadout="false">
+            <externalFields>
+              <field name="coord_abcissa" routeToReadout="true">
+                <realFeature/>
+              </field>
+              <field name="coord_ordinate" routeToReadout="true">
+                <realFeature/>
+              </field>
+            </externalFields>
+            <transformedFields>
+              <field name="coord_abcissa_diff" routeToReadout="false">
+                <diff fieldName="coord_abcissa" interval="1"/>
+              </field>
+              <field name="coord_ordinate_diff" routeToReadout="false">
+                <diff fieldName="coord_ordinate" interval="1"/>
+              </field>
+            </transformedFields>
+          </varyingFields>
+        </inputEncoder>
+        <reservoirStructures>
+          <reservoirStructure name="MainCfg">
+            <pools>
+              <pool name="PureESN1">
+                <proportions dimX="150" dimY="1" dimZ="1"/>
+                <neuronGroups>
+                  <analogGroup name="TanH-grp" relShare="1" thresholdMaxRefDeepness="1">
+                    <activationTanH/>
+                  </analogGroup>
+                </neuronGroups>
+                <interconnection>
+                  <randomSchema density="0.1" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false"/>
+                </interconnection>
+              </pool>
+              <pool name="PureESN2">
+                <proportions dimX="150" dimY="1" dimZ="1"/>
+                <neuronGroups>
+                  <analogGroup name="TanH-grp" relShare="1" thresholdMaxRefDeepness="1">
+                    <activationTanH/>
+                  </analogGroup>
+                </neuronGroups>
+                <interconnection>
+                  <randomSchema density="0.1" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false"/>
+                </interconnection>
+              </pool>
+            </pools>
+          </reservoirStructure>
+        </reservoirStructures>
+        <reservoirInstances>
+          <reservoirInstance name="Main" reservoirStructure="MainCfg">
+            <inputConnections>
+              <connection inputFieldName="coord_abcissa" poolName="PureESN1" analogTargetDensity="0.25" spikingTargetDensity="0"/>
+              <connection inputFieldName="coord_ordinate" poolName="PureESN1" analogTargetDensity="0.25" spikingTargetDensity="0"/>
+              <connection inputFieldName="coord_abcissa_diff" poolName="PureESN2" analogTargetDensity="0.25" spikingTargetDensity="0"/>
+              <connection inputFieldName="coord_ordinate_diff" poolName="PureESN2" analogTargetDensity="0.25" spikingTargetDensity="0"/>
+            </inputConnections>
+            <synapse>
+              <analogTarget>
+                <input maxDelay="0"/>
+                <indifferent maxDelay="10"/>
+              </analogTarget>
+            </synapse>
+            <predictors activation="false"
+                        activationSquare="false"
+                        activationFadingSum="false"
+                        activationMWAvg="true"
+                        firingFadingSum="false"
+                        firingMWAvg="false"
+                        firingCount="true"
+                        firingBinPattern="false">
+              <params>
+                <firingCount window="90"/>
+                <activationMWAvg weights="Constant" window="90"/>
+              </params>
+            </predictors>
+          </reservoirInstance>
+        </reservoirInstances>
+      </neuralPreprocessor>
+      <readoutLayer testDataRatio="0.0825" folds="Auto" repetitions="1">
+        <defaultNetworks>
+          <classification>
+            <ff>
+              <activationTanH/>
+              <resPropTrainer attempts="5" attemptEpochs="400"/>
+            </ff>
+          </classification>
+        </defaultNetworks>
+        <readoutUnits>
+          <readoutUnit name="curved swing">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="horizontal swing">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="vertical swing">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="anti-clockwise arc">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="clockwise arc">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="circle">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="horizontal straight-line">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="vertical straight-line">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="horizontal zigzag">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="vertical zigzag">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="horizontal wavy">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="vertical wavy">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="face-up curve">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="face-down curve">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="tremble">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+        </readoutUnits>
+      </readoutLayer>
+    </stateMachine>
+  </case>
+
+
 
   <!--
     This demo case demonstrates use of a simple LSM reservoir consisting of LeakyIF neurons for the classifications.
@@ -791,154 +962,6 @@
     </stateMachine>
   </case>
 
-
-  <!--
-    This demo case demonstrates successful use of the pure analog ESN reservoir for the fast and accurate classifications enabled by
-    the new ability of the analog neurons to fire a spike.
-    The dataset is from https://archive.ics.uci.edu/ml/datasets/Libras+Movement and contains 15 classes of 24 instances each, where
-    each class references to a hand movement type in LIBRAS. The hand movement is represented as a bidimensional curve performed
-    by the hand in a period of time. The curves were obtained from videos of hand movements, with the Libras performance from 4 
-    different people, during 2 sessions. Each video corresponds to only one hand movement and has about 7 seconds.    
-    Each video corresponds to a function F in a functions space which is the continual version of the input dataset.
-    In the video pre-processing, a time normalization is carried out selecting 45 frames from each video, in according 
-    to an uniform distribution. In each frame, the centroid pixels of the segmented objects (the hand) are found, which 
-    compose the discrete version of the curve F with 45 points. All curves are normalized in the unitary space.
-    Each curve F is mapped in a representation with 90 features, with representing the coordinates of movement.
-    Each instance represents 45 points on a bi-dimensional space, which can be plotted in an ordered way (from 1 through
-    45 as the X co-ordinate) in order to draw the path of the movement.
-    For this demo purposes was selected 4x15 instances as the verification set.
-  -->
-  <case name="Classification task Libras Movement: Simple pure ESN reservoir generating FiringCount predictors, one Identity neuron as a classifier (Resilient trainer)">
-    <samples trainingData="LibrasMovement_train.csv" verificationData="LibrasMovement_verify.csv"/>
-    <stateMachine randomizerSeek="0">
-      <neuralPreprocessor>
-        <inputEncoder>
-          <feedingPatterned slices="1" bidir="true" variablesSchema="Groupped">
-            <unification unifyAmplitude="false" detrend="false">
-              <resampling uniformTimeScale="true" targetTimePoints="Auto"/>
-            </unification>
-          </feedingPatterned>
-          <codingA2S>
-            <none/>
-          </codingA2S>
-          <varyingFields routeToReadout="false">
-            <externalFields>
-              <field name="coord_abcissa">
-                <realFeature/>
-              </field>
-              <field name="coord_ordinate">
-                <realFeature/>
-              </field>
-            </externalFields>
-          </varyingFields>
-        </inputEncoder>
-        <reservoirStructures>
-          <reservoirStructure name="MainCfg">
-            <pools>
-              <pool name="PureESN">
-                <proportions dimX="120" dimY="1" dimZ="1"/>
-                <neuronGroups>
-                  <analogGroup name="TanH-grp" relShare="1" firingThreshold="0.00125">
-                    <activationTanH/>
-                  </analogGroup>
-                </neuronGroups>
-                <interconnection>
-                  <randomSchema density="0.1" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false"/>
-                </interconnection>
-              </pool>
-            </pools>
-          </reservoirStructure>
-        </reservoirStructures>
-        <reservoirInstances>
-          <reservoirInstance name="Main" reservoirStructure="MainCfg">
-            <inputConnections>
-              <connection inputFieldName="coord_abcissa" poolName="PureESN" analogTargetDensity="0.25" spikingTargetDensity="0"/>
-              <connection inputFieldName="coord_ordinate" poolName="PureESN" analogTargetDensity="0.25" spikingTargetDensity="0"/>
-            </inputConnections>
-            <synapse>
-              <analogTarget>
-                <input maxDelay="5">
-                  <analogSource>
-                    <weight min="0" max="1.5"/>
-                  </analogSource>
-                </input>
-                <indifferent maxDelay="0"/>
-              </analogTarget>
-            </synapse>
-            <predictors activation="false"
-                        activationSquare="false"
-                        activationFadingSum="false"
-                        activationMWAvg="false"
-                        firingFadingSum="false"
-                        firingMWAvg="false"
-                        firingCount="true"
-                        firingBinPattern="false">
-              <params>
-                <firingCount window="45"/>
-              </params>
-            </predictors>
-          </reservoirInstance>
-        </reservoirInstances>
-      </neuralPreprocessor>
-      <readoutLayer testDataRatio="0.0825" folds="Auto">
-        <defaultNetworks>
-          <classification>
-            <ff>
-              <activationIdentity/>
-              <resPropTrainer attempts="5" attemptEpochs="400"/>
-            </ff>
-          </classification>
-        </defaultNetworks>
-        <readoutUnits>
-          <readoutUnit name="curved swing">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="horizontal swing">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="vertical swing">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="anti-clockwise arc">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="clockwise arc">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="circle">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="horizontal straight-line">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="vertical straight-line">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="horizontal zigzag">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="vertical zigzag">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="horizontal wavy">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="vertical wavy">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="face-up curve">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="face-down curve">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="tremble">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-        </readoutUnits>
-      </readoutLayer>
-    </stateMachine>
-  </case>
 
 
   <!--
@@ -1760,6 +1783,143 @@
       </readoutLayer>
     </stateMachine>
   </case>
+
+  <!--
+    EXPERIMENTAL
+  -->
+  <case name="Classification task Libras Movement: Simple pure LSM reservoir (HORIZONTAL spiking input) test">
+    <samples trainingData="LibrasMovement_train.csv" verificationData="LibrasMovement_verify.csv"/>
+    <stateMachine randomizerSeek="0">
+      <neuralPreprocessor>
+        <inputEncoder>
+          <feedingPatterned slices="1" bidir="true" variablesSchema="Groupped">
+            <unification unifyAmplitude="false" detrend="true">
+              <resampling uniformTimeScale="true" targetTimePoints="Auto"/>
+            </unification>
+          </feedingPatterned>
+          <codingA2S>
+            <horizontal halfCodeLength="15" lowestThreshold="1e-4"/>
+          </codingA2S>
+          <varyingFields routeToReadout="false">
+            <externalFields>
+              <field name="coord_abcissa">
+                <realFeature/>
+              </field>
+              <field name="coord_ordinate">
+                <realFeature/>
+              </field>
+            </externalFields>
+          </varyingFields>
+        </inputEncoder>
+        <reservoirStructures>
+          <reservoirStructure name="MainCfg">
+            <pools>
+              <pool name="PureLSM">
+                <proportions dimX="180" dimY="1" dimZ="1"/>
+                <neuronGroups>
+                  <spikingGroup name="LeakyIF-grp" relShare="1">
+                    <activationLeakyIF/>
+                    <homogenousExcitability excitatoryStrength="0.8" inputRatio="0.5" inhibitoryRatio="0.05"/>
+                  </spikingGroup>
+                </neuronGroups>
+                <interconnection>
+                  <randomSchema density="0.1" avgDistance="NA" allowSelfConnection="false" constantNumOfConnections="false"/>
+                </interconnection>
+              </pool>
+            </pools>
+          </reservoirStructure>
+        </reservoirStructures>
+        <reservoirInstances>
+          <reservoirInstance name="Main" reservoirStructure="MainCfg">
+            <inputConnections>
+              <connection inputFieldName="coord_abcissa" poolName="PureLSM" spikingTargetDensity="1"/>
+              <connection inputFieldName="coord_ordinate" poolName="PureLSM" spikingTargetDensity="1"/>
+            </inputConnections>
+            <synapse>
+              <spikingTarget>
+                <input maxDelay="0"/>
+                <excitatory maxDelay="0"/>
+                <inhibitory maxDelay="0"/>
+              </spikingTarget>
+            </synapse>
+            <predictors activation="false"
+                        activationSquare="false"
+                        activationFadingSum="false"
+                        activationMWAvg="false"
+                        firingFadingSum="true"
+                        firingMWAvg="false"
+                        firingCount="false"
+                        firingBinPattern="false">
+              <params>
+                <firingCount window="45"/>
+                <activationMWAvg weights="Constant" window="45"/>
+              </params>
+            </predictors>
+          </reservoirInstance>
+        </reservoirInstances>
+      </neuralPreprocessor>
+      <readoutLayer testDataRatio="0.0825" folds="Auto">
+        <defaultNetworks>
+          <classification>
+            <ff>
+              <activationIdentity/>
+              <resPropTrainer attempts="5" attemptEpochs="400"/>
+            </ff>
+          </classification>
+        </defaultNetworks>
+        <readoutUnits>
+          <readoutUnit name="curved swing">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="horizontal swing">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="vertical swing">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="anti-clockwise arc">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="clockwise arc">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="circle">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="horizontal straight-line">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="vertical straight-line">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="horizontal zigzag">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="vertical zigzag">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="horizontal wavy">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="vertical wavy">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="face-up curve">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="face-down curve">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="tremble">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+        </readoutUnits>
+      </readoutLayer>
+    </stateMachine>
+  </case>
+
+
+
 
 
 

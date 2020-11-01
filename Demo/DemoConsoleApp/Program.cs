@@ -19,7 +19,9 @@ namespace Demo.DemoConsoleApp
                 Console.WriteLine("  3. TTOO share prices forecast (State Machine ESN setup from scratch)");
                 Console.WriteLine("  4. TTOO share prices forecast (State Machine ESN setup using StateMachineDesigner)");
                 Console.WriteLine("  5. Libras Movement classification (State Machine ESN setup using StateMachineDesigner)");
-                Console.WriteLine("  6. Libras Movement classification (State Machine LSM setup using StateMachineDesigner)");
+                Console.WriteLine("  6. Libras Movement classification (State Machine LSM setup with spiking input population using StateMachineDesigner)");
+                Console.WriteLine("  7. Libras Movement classification (State Machine LSM with input spike-trains setup using StateMachineDesigner)");
+                Console.WriteLine("  8. Libras Movement classification (State Machine LSM with direct analog input setup using StateMachineDesigner)");
                 Console.WriteLine("  9. Playground");
                 Console.WriteLine("  0. Exit");
                 Console.WriteLine();
@@ -87,6 +89,28 @@ namespace Demo.DemoConsoleApp
                         try
                         {
                             (new LibrasClassificationLSMDesigner()).Run();
+                        }
+                        catch (Exception e)
+                        {
+                            ReportException(e);
+                        }
+                        break;
+
+                    case '7':
+                        try
+                        {
+                            (new LibrasClassificationLSMDesignerVERTICAL()).Run();
+                        }
+                        catch (Exception e)
+                        {
+                            ReportException(e);
+                        }
+                        break;
+
+                    case '8':
+                        try
+                        {
+                            (new LibrasClassificationLSMDesignerNONE()).Run();
                         }
                         catch (Exception e)
                         {

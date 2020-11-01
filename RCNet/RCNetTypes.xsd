@@ -144,6 +144,14 @@
     </xs:restriction>
   </xs:simpleType>
 
+  <!-- Unsigned integer GE 1 and LE 128-->
+  <xs:simpleType name="UIntGE1LE128Type">
+    <xs:restriction base="xs:unsignedInt">
+      <xs:minInclusive value="1" />
+      <xs:maxInclusive value="128" />
+    </xs:restriction>
+  </xs:simpleType>
+
   <!-- Unsigned integer GE 2 and LE 128-->
   <xs:simpleType name="UIntGE2LE128Type">
     <xs:restriction base="xs:unsignedInt">
@@ -428,7 +436,7 @@
   <!-- Methods to code an analog value as spiking -->
   <!-- Horizontal coding method configuration -->
   <xs:complexType name="A2SCodingMethodHorizontalType">
-    <xs:attribute type="UIntGE1LE32Type" name="halfCodeLength" use="optional" default="16">
+    <xs:attribute type="UIntGE1LE128Type" name="halfCodeLength" use="optional" default="16">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is 16</xs:documentation>
       </xs:annotation>

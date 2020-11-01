@@ -109,16 +109,16 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
             SpikeCode.Populate((byte)0);
             return;
         }
+
         private void EncodeBinaryCode(double value, byte[] buffer)
         {
             //Set all output to 0
             buffer.Populate((byte)0);
             //Scale value between 0 and 1
             double absValue = (value + 1d) / 2d;
-            uint pieces = (uint)Math.Min(Math.Floor(absValue / _precisionPiece), (double)_maxPrecisionBitMask);
-            for (int bitIdx = buffer.Length - 1, i = 0; bitIdx >= 0; bitIdx--, i++)
+            ulong pieces = Math.Min((ulong)Math.Floor(absValue / _precisionPiece), _maxPrecisionBitMask);
+            for (int i = 0; i < buffer.Length; i++)
             {
-                //buffer[i] = (byte)Bitwise.GetBit(pieces, bitIdx);
                 buffer[i] = (byte)Bitwise.GetBit(pieces, i);
             }
             return;

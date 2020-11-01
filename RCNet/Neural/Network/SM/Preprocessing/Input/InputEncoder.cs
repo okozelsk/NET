@@ -274,6 +274,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             _steadyData = null;
             _inputDataQueue.Clear();
             _numOfProcessedInputs = 0;
+            _numOfProcessedFetches = 0;
             _reverseMode = false;
             return;
         }

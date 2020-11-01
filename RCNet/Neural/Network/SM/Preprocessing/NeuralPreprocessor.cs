@@ -335,11 +335,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             int predictorsIdx = 0;
             int predictorsTimePointSlicesPlanIdx = 0;
             int computationStep = 1;
-            //Reset reservoirs in case of patterned feeding
-            if (_preprocessorCfg.InputEncoderCfg.FeedingCfg.FeedingType == InputEncoder.InputFeedingType.Patterned)
-            {
-                ResetReservoirs(false);
-            }
             //Loop pending data
             while (_inputEncoder.NumOfRemainingInputs > 0)
             {
@@ -381,6 +376,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             _inputEncoder.StoreNewData(inputVector);
             //Collect routed input data
             outputFeaturesIdx += _inputEncoder.CopyRoutedInputDataTo(outputFeatures, outputFeaturesIdx);
+            //Reset reservoirs in case of patterned feeding
+            if (_preprocessorCfg.InputEncoderCfg.FeedingCfg.FeedingType == InputEncoder.InputFeedingType.Patterned)
+            {
+                ResetReservoirs(false);
+            }
             //Process input data in reservoirs and collect predictors
             double[] predictors = ProcessPendingData(collectStatistics);
             predictors.CopyTo(outputFeatures, outputFeaturesIdx);

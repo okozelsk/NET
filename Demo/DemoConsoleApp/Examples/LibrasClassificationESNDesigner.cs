@@ -10,9 +10,11 @@ using RCNet.Neural.Network.SM.Readout;
 namespace Demo.DemoConsoleApp.Examples
 {
     /// <summary>
-    /// Example code shows how to setup StateMachine as a pure ESN for classification using StateMachineDesigner.
+    /// Example code shows how to setup StateMachine as a pure ESN for multivariate timeseries classification using StateMachineDesigner.
     /// Example uses LibrasMovement_train.csv and LibrasMovement_verify.csv from ./Data subfolder.
-    /// The dataset is from https://archive.ics.uci.edu/ml/datasets/Libras+Movement and contains 15 classes of 24 instances each, where
+    /// The dataset is from "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
+    /// https://timeseriesclassification.com/description.php?Dataset=Libras
+    /// and contains 15 classes of 24 instances each, where
     /// each class references to a hand movement type in LIBRAS.The hand movement is represented as a bidimensional curve performed
     /// by the hand in a period of time.The curves were obtained from videos of hand movements, with the Libras performance from 4 
     /// different people, during 2 sessions.Each video corresponds to only one hand movement and has about 7 seconds.
