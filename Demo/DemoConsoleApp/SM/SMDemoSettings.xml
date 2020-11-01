@@ -592,7 +592,7 @@
   <!--
     This demo case demonstrates successful use of the pure analog ESN reservoir for the fast and accurate classifications enabled by
     the new ability of the analog neurons to fire a spike.
-    Following straightforward configuration of the StateMachine achieves 91.13% accuracy, slightly better than
+    Following straightforward configuration of the StateMachine achieves 91.7% accuracy, slightly better than
     the best algorithm called BOSS, referenced at the dataset's home site:
     "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
     https://timeseriesclassification.com/description.php?Dataset=Yoga.
