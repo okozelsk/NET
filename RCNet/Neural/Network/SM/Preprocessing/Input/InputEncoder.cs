@@ -56,6 +56,25 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             Patterned
         }
 
+        /// <summary>
+        /// Type of spikes encoding
+        /// </summary>
+        public enum SpikesEncodingType
+        {
+            /// <summary>
+            /// Spikes are encoded as input neurons population activity (horizontal)
+            /// </summary>
+            Population,
+            /// <summary>
+            /// Spikes are encoded as spike-train on single input neuron (vertical)
+            /// </summary>
+            Spiketrain,
+            /// <summary>
+            /// Spikes encoding is not allowed
+            /// </summary>
+            Forbidden
+        }
+
         //Static attributes
         /// <summary>
         /// Input data will be normalized by feature filters to this range before the usage in the reservoirs
@@ -179,7 +198,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
                                           coordinates,
                                           _dataRange,
                                           fieldCfg.FeatureFilterCfg,
-                                          _encoderCfg.SpikingCoderCfg,
+                                          _encoderCfg.SpikesEncodingCfg.EncodingCfg,
                                           (fieldCfg.RouteToReadout && _encoderCfg.VaryingFieldsCfg.RouteToReadout),
                                           inputNeuronStartIdx
                                           ));
@@ -198,7 +217,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
                                               coordinates,
                                               _dataRange,
                                               fieldCfg.FeatureFilterCfg,
-                                              _encoderCfg.SpikingCoderCfg,
+                                              _encoderCfg.SpikesEncodingCfg.EncodingCfg,
                                               (fieldCfg.RouteToReadout && _encoderCfg.VaryingFieldsCfg.RouteToReadout),
                                               inputNeuronStartIdx
                                               ));
@@ -217,7 +236,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
                                               coordinates,
                                               _dataRange,
                                               fieldCfg.FeatureFilterCfg,
-                                              _encoderCfg.SpikingCoderCfg,
+                                              _encoderCfg.SpikesEncodingCfg.EncodingCfg,
                                               (fieldCfg.RouteToReadout && _encoderCfg.VaryingFieldsCfg.RouteToReadout),
                                               inputNeuronStartIdx
                                               ));

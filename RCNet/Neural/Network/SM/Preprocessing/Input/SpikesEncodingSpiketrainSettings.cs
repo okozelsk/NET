@@ -1,31 +1,37 @@
 ﻿using System;
 using System.Globalization;
+using System.Linq;
 using System.Xml.Linq;
+using RCNet.Neural.Data.Coders.AnalogToSpiking;
 
-namespace RCNet.Neural.Data.Coders.AnalogToSpiking
+namespace RCNet.Neural.Network.SM.Preprocessing.Input
 {
     /// <summary>
-    /// Settings of none spike code
+    /// Settings of spikes encoding of spike-train type
     /// </summary>
     [Serializable]
-    public class A2SNoneMethodSettings : RCNetBaseSettings, IA2SCodingMethodSettings
+    public class SpikesEncodingSpiketrainSettings : RCNetBaseSettings, ISpikesEncodingSettings
     {
         //Constants
         /// <summary>
         /// Name of the associated xsd type
         /// </summary>
-        public const string XsdTypeName = "A2SCodingMethodNoneType";
-        //Default values
+        public const string XsdTypeName = "NPSpikesEncodingSpiketrainType";
 
         //Attribute properties
-
+        /// <summary>
+        /// Configuration of spikes coder
+        /// </summary>
+        public IA2SCoderSettings CoderCfg { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an itialized instance.
+        /// Creates an initialized instance.
         /// </summary>
-        public A2SNoneMethodSettings()
+        /// <param name="coderCfg">Configuration of spikes coder</param>
+        public SpikesEncodingSpiketrainSettings(IA2SCoderSettings coderCfg)
         {
+            CoderCfg = (IA2SCoderSettings)coderCfg.DeepClone();
             Check();
             return;
         }
@@ -34,8 +40,8 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
         /// The deep copy constructor.
         /// </summary>
         /// <param name="source">Source instance</param>
-        public A2SNoneMethodSettings(A2SNoneMethodSettings source)
-            : this()
+        public SpikesEncodingSpiketrainSettings(SpikesEncodingSpiketrainSettings source)
+            : this(source.CoderCfg)
         {
             return;
         }
@@ -44,31 +50,26 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
         /// Creates an initialized instance from the given xml element.
         /// </summary>
         /// <param name="elem">Xml element containing the initialization settings</param>
-        public A2SNoneMethodSettings(XElement elem)
+        public SpikesEncodingSpiketrainSettings(XElement elem)
         {
             //Validation
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
+            CoderCfg = A2SCoderFactory.LoadSettings(settingsElem.Elements().First());
             Check();
             return;
         }
 
         //Properties
         /// <summary>
-        /// Way to convert an analog value to spikes
+        /// Type of spikes encoding
         /// </summary>
-        public A2SCoder.CodingMethod Method { get { return A2SCoder.CodingMethod.None; } }
+        public InputEncoder.SpikesEncodingType EncodingType { get { return InputEncoder.SpikesEncodingType.Spiketrain; } }
 
         /// <summary>
         /// Identifies settings containing only default values
         /// </summary>
-        public override bool ContainsOnlyDefaults
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool ContainsOnlyDefaults { get { return false; } }
 
         //Methods
         /// <summary>
@@ -84,7 +85,7 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
         /// </summary>
         public override RCNetBaseSettings DeepClone()
         {
-            return new A2SNoneMethodSettings(this);
+            return new SpikesEncodingSpiketrainSettings(this);
         }
 
         /// <summary>
@@ -95,7 +96,7 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
-            XElement rootElem = new XElement(rootElemName);
+            XElement rootElem = new XElement(rootElemName, CoderCfg.GetXml(suppressDefaults));
             Validate(rootElem, XsdTypeName);
             return rootElem;
         }
@@ -107,10 +108,10 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(bool suppressDefaults)
         {
-            return GetXml("none", suppressDefaults);
+            return GetXml("spike-train", suppressDefaults);
         }
 
-    }//SpikeCodeNoneSettings
+    }//SpikesEncodingSpiketrainSettings
 
 }//Namespace
 

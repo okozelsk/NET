@@ -25,9 +25,9 @@
               <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
             </unification>
           </feedingPatterned>
-          <codingA2S>
-            <none/>
-          </codingA2S>
+          <spikesEncoding>
+            <forbidden/>
+          </spikesEncoding>
           <varyingFields routeToReadout="false">
             <externalFields>
               <field name="Accel">
@@ -172,9 +172,9 @@
               <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="180"/>
             </unification>
           </feedingPatterned>
-          <codingA2S>
-            <none/>
-          </codingA2S>
+          <spikesEncoding>
+            <forbidden/>
+          </spikesEncoding>
           <varyingFields routeToReadout="false">
             <externalFields>
               <field name="Eigenworm1">
@@ -291,9 +291,9 @@
               <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
             </unification>
           </feedingPatterned>
-          <codingA2S>
-            <none/>
-          </codingA2S>
+          <spikesEncoding>
+            <forbidden/>
+          </spikesEncoding>
           <varyingFields routeToReadout="false">
             <externalFields>
               <field name="DistanceFromCenter">
@@ -414,9 +414,9 @@
               <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
             </unification>
           </feedingPatterned>
-          <codingA2S>
-            <none/>
-          </codingA2S>
+          <spikesEncoding>
+            <forbidden/>
+          </spikesEncoding>
           <varyingFields routeToReadout="false">
             <externalFields>
               <field name="DistanceFromCenter">
@@ -509,9 +509,9 @@
               <resampling/>
             </unification>
           </feedingPatterned>
-          <codingA2S>
-            <none/>
-          </codingA2S>
+          <spikesEncoding>
+            <forbidden/>
+          </spikesEncoding>
           <varyingFields routeToReadout="false">
             <externalFields>
               <field name="Outline">
@@ -606,9 +606,9 @@
       <neuralPreprocessor>
         <inputEncoder>
           <feedingPatterned slices="1" bidir="true"/>
-          <codingA2S>
-            <none/>
-          </codingA2S>
+          <spikesEncoding>
+            <forbidden/>
+          </spikesEncoding>
           <varyingFields routeToReadout="true">
             <externalFields>
               <field name="DistanceFromCenter">
@@ -709,9 +709,9 @@
               <resampling uniformTimeScale="true" targetTimePoints="Auto"/>
             </unification>
           </feedingPatterned>
-          <codingA2S>
-            <none/>
-          </codingA2S>
+          <spikesEncoding>
+            <forbidden/>
+          </spikesEncoding>
           <varyingFields routeToReadout="false">
             <externalFields>
               <field name="coord_abcissa" routeToReadout="true">
@@ -873,9 +873,11 @@
               <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
             </unification>
           </feedingPatterned>
-          <codingA2S>
-            <horizontal halfCodeLength="15" lowestThreshold="1e-2"/>
-          </codingA2S>
+          <spikesEncoding>
+            <population>
+              <potentiometer absValCodeLength="15" lowestThreshold="1e-2"/>
+            </population>
+          </spikesEncoding>
           <varyingFields routeToReadout="false">
             <externalFields>
               <field name="DistanceFromCenter">
@@ -1032,9 +1034,9 @@
       <neuralPreprocessor predictorsReductionRatio="0">
         <inputEncoder>
           <feedingContinuous bootCycles="Auto"/>
-          <codingA2S>
-            <none/>
-          </codingA2S>
+          <spikesEncoding>
+            <forbidden/>
+          </spikesEncoding>
           <varyingFields routeToReadout="true">
             <externalFields>
               <field name="Value" routeToReadout="true">
@@ -1168,9 +1170,9 @@
       <neuralPreprocessor>
         <inputEncoder>
           <feedingContinuous bootCycles="Auto"/>
-          <codingA2S>
-            <none/>
-          </codingA2S>
+          <spikesEncoding>
+            <forbidden/>
+          </spikesEncoding>
           <varyingFields routeToReadout="true">
             <externalFields>
               <field name="High" routeToReadout="true">
@@ -1282,9 +1284,9 @@
               <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
             </unification>
           </feedingPatterned>
-          <codingA2S>
-            <none/>
-          </codingA2S>
+          <spikesEncoding>
+            <forbidden/>
+          </spikesEncoding>
           <varyingFields routeToReadout="false">
             <externalFields>
               <field name="EEG" routeToReadout="true">
@@ -1378,9 +1380,9 @@
               <field name="tau" routeToReadout="true"/>
             </steadyFields>
           </feedingPatterned>
-          <codingA2S>
-            <none/>
-          </codingA2S>
+          <spikesEncoding>
+            <forbidden/>
+          </spikesEncoding>
           <varyingFields routeToReadout="false">
             <externalFields>
               <field name="MG">
@@ -1502,9 +1504,9 @@
               <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
             </unification>
           </feedingPatterned>
-          <codingA2S>
-            <none/>
-          </codingA2S>
+          <spikesEncoding>
+            <forbidden/>
+          </spikesEncoding>
           <varyingFields routeToReadout="false">
             <externalFields>
               <field name="Accel">
@@ -1695,9 +1697,11 @@
               <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
             </unification>
           </feedingPatterned>
-          <codingA2S>
-            <vertical spikeTrainLength="10"/>
-          </codingA2S>
+          <spikesEncoding>
+            <spike-train>
+              <bintree absValCodeLength="10" halved="false"/>
+            </spike-train>
+          </spikesEncoding>
           <varyingFields routeToReadout="false">
             <externalFields>
               <field name="DistanceFromCenter">
@@ -1797,9 +1801,11 @@
               <resampling uniformTimeScale="true" targetTimePoints="Auto"/>
             </unification>
           </feedingPatterned>
-          <codingA2S>
-            <horizontal halfCodeLength="15" lowestThreshold="1e-4"/>
-          </codingA2S>
+          <spikesEncoding>
+            <population>
+              <potentiometer absValCodeLength="15" lowestThreshold="1e-4"/>
+            </population>
+          </spikesEncoding>
           <varyingFields routeToReadout="false">
             <externalFields>
               <field name="coord_abcissa">

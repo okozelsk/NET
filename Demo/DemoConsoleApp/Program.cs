@@ -1,6 +1,7 @@
 ﻿using Demo.DemoConsoleApp.Examples;
 using Demo.DemoConsoleApp.Log;
 using Demo.DemoConsoleApp.SM;
+using RCNet.Neural.Network.SM.Preprocessing.Input;
 using System;
 
 namespace Demo.DemoConsoleApp
@@ -14,14 +15,14 @@ namespace Demo.DemoConsoleApp
                 //Main menu
                 Console.Clear();
                 Console.WriteLine("Main menu:");
-                Console.WriteLine("  1. State Machine performance demo (execution of the tasks defined in the SMDemoSettings.xml)");
-                Console.WriteLine("  2. Feed Forward network trained to solve boolean algebra");
-                Console.WriteLine("  3. TTOO share prices forecast (State Machine ESN setup from scratch)");
-                Console.WriteLine("  4. TTOO share prices forecast (State Machine ESN setup using StateMachineDesigner)");
-                Console.WriteLine("  5. Libras Movement classification (State Machine ESN setup using StateMachineDesigner)");
-                Console.WriteLine("  6. Libras Movement classification (State Machine LSM setup with spiking input population using StateMachineDesigner)");
-                Console.WriteLine("  7. Libras Movement classification (State Machine LSM with input spike-trains setup using StateMachineDesigner)");
-                Console.WriteLine("  8. Libras Movement classification (State Machine LSM with direct analog input setup using StateMachineDesigner)");
+                Console.WriteLine("  1. State Machine performance demo. It sequentially performs the tasks defined in SMDemoSettings.xml.");
+                Console.WriteLine("  2. Feed Forward network trained to solve boolean algebra. Shows use of FF network as an alone component with no relationship to State Machine.");
+                Console.WriteLine("  3. TTOO share prices forecast (ESN design from scratch).");
+                Console.WriteLine("  4. TTOO share prices forecast (ESN design using StateMachineDesigner).");
+                Console.WriteLine("  5. Libras Movement classification (ESN design using StateMachineDesigner).");
+                Console.WriteLine("  6. Libras Movement classification (LSM design using StateMachineDesigner, spiking population input encoding).");
+                Console.WriteLine("  7. Libras Movement classification (LSM design using StateMachineDesigner, spike-train input encoding).");
+                Console.WriteLine("  8. Libras Movement classification (LSM design using StateMachineDesigner, directly analog input encoding).");
                 Console.WriteLine("  9. Playground");
                 Console.WriteLine("  0. Exit");
                 Console.WriteLine();
@@ -88,7 +89,7 @@ namespace Demo.DemoConsoleApp
                     case '6':
                         try
                         {
-                            (new LibrasClassificationLSMDesigner()).Run();
+                            (new LibrasClassificationLSMDesigner()).Run(InputEncoder.SpikesEncodingType.Population);
                         }
                         catch (Exception e)
                         {
@@ -99,7 +100,7 @@ namespace Demo.DemoConsoleApp
                     case '7':
                         try
                         {
-                            (new LibrasClassificationLSMDesignerVERTICAL()).Run();
+                            (new LibrasClassificationLSMDesigner()).Run(InputEncoder.SpikesEncodingType.Spiketrain);
                         }
                         catch (Exception e)
                         {
@@ -110,7 +111,7 @@ namespace Demo.DemoConsoleApp
                     case '8':
                         try
                         {
-                            (new LibrasClassificationLSMDesignerNONE()).Run();
+                            (new LibrasClassificationLSMDesigner()).Run(InputEncoder.SpikesEncodingType.Forbidden);
                         }
                         catch (Exception e)
                         {

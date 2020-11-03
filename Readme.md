@@ -117,7 +117,8 @@ Input data is standardly located in the Data sub-folder relative to the location
 ### Analog to spikes data coding
 |Component|Description|
 |--|--|
-|[A2SCoder](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Data/Coders/AnalogToSpiking/A2SCoder.cs)|Codes an analog value to spikes|
+|[A2SCoderBintree](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Data/Coders/AnalogToSpiking/A2SCoderBintree.cs)|Codes an analog value as a set of spikes where combination of enabled spikes expresses the analog value|
+|[A2SCoderPotentiometer](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Data/Coders/AnalogToSpiking/A2SCoderPotentiometer.cs)|Codes an analog value as a set of spikes where number of consequent enabled spikes expresses the analog value strength|
 
 ### Data holding
 |Component|Description|
@@ -179,7 +180,7 @@ See the [wiki pages.](https://en.wikipedia.org/wiki/Biological_neuron_model)
 ### State Machine Sub-Components
 |Component|Description|
 |--|--|
-|[InputEncoder](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/Preprocessing/Input/InputEncoder.cs)|Processes given natural external input data and provides it's representation on analog and spiking input neurons for the data processing in the reservoirs. Supports set of various realtime input chainable data transformations and data generators as additional computed input fields. Supports two main input feeding regimes: Continuous (one input is data vector at time T) and Patterned (one input is InputPattern containing data for all timepoints). Supports three ways how to represent analog value as the spikes: Horizontal (fast - simultaneous activity of the neuronal population), Vertical (slow - spike-train on single input neuron) or None (fast - spiking represetantion is then forbidden).|
+|[InputEncoder](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/Preprocessing/Input/InputEncoder.cs)|Processes given natural external input data and provides it's representation on analog and spiking input neurons for the data processing in the reservoirs. Supports set of various realtime input chainable data transformations and data generators as additional computed input fields. Supports two main input feeding regimes: Continuous (one input is a variables data vector at time T) and Patterned (one input is an InputPattern containing variables data for all timepoints). Supports three ways how to represent analog value as the spikes: Population (fast - simultaneous spiking activity of the neuronal population), Spike-train (slow - spike-train on single input neuron) or Forbidden (fast - spiking represetantion is then forbidden and directly analog values are used instead).|
 |[AnalogInputNeuron](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/Preprocessing/Neuron/AnalogInputNeuron.cs)|Input neuron providing analog signal.|
 |[SpikingInputNeuron](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/Preprocessing/Neuron/AnalogInputNeuron.cs)|Input neuron providing spiking signal.|
 |[HiddenNeuron](https://github.com/okozelsk/NET/blob/master/RCNet/Neural/Network/SM/Preprocessing/Neuron/HiddenNeuron.cs)|Supports both analog and spiking activation functions and can produce analog signal and/or spikes (neuron is able to fire spikes even when stateless analog activation is used). Supports Retainment property of analog activation (leaky integrator). Supports set of different predictors.|

@@ -188,25 +188,23 @@ namespace Demo.DemoConsoleApp
         private void TestA2SCoder()
         {
             double[] analogValues = { -1, -0.9, -0.8, -0.7, -0.6, -0.5, -0.4, -0.3, -0.2, -0.1, -0.05, -0.025, -0.0125, 0, 0.0125, 0.025, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1 };
-            A2SCoder coder = null;
-            //Horizontal
-            int halfCodeLength = 32;
-            coder = new A2SCoder(new A2SCoderSettings(new A2SHorizontalMethodSettings(halfCodeLength, 0.01d)));
-            Console.WriteLine($"{coder.Method}");
-            Console.WriteLine($"    {"",-11}{"Bellow average".PadRight(halfCodeLength)}Above average");
+            A2SCoderBase coder = null;
+            //Potentiometer
+            int valAbsCodeLength = 32;
+            coder = new A2SCoderPotentiometer(new A2SCoderPotentiometerSettings(valAbsCodeLength, 0.01d, true));
+            Console.WriteLine($"{coder.GetType().Name}");
+            Console.WriteLine($"    {"",-11}{"Bellow average".PadRight(valAbsCodeLength)}Above average");
             foreach (double value in analogValues)
             {
-                coder.Encode(value);
-                Console.WriteLine($"    {value.ToString(CultureInfo.InvariantCulture), -10} {ByteArrayToString(coder.SpikeCode)}");
+                Console.WriteLine($"    {value.ToString(CultureInfo.InvariantCulture), -10} {ByteArrayToString(coder.GetCode(value))}");
             }
             Console.ReadLine();
-            //Vertical
-            coder = new A2SCoder(new A2SCoderSettings(new A2SVerticalMethodSettings(32)));
-            Console.WriteLine($"{coder.Method}");
+            //Bintree
+            coder = new A2SCoderBintree(new A2SCoderBintreeSettings(valAbsCodeLength, false));
+            Console.WriteLine($"{coder.GetType().Name}");
             foreach (double value in analogValues)
             {
-                coder.Encode(value);
-                Console.WriteLine($"    {value.ToString(CultureInfo.InvariantCulture), -10} {ByteArrayToString(coder.SpikeCode)}");
+                Console.WriteLine($"    {value.ToString(CultureInfo.InvariantCulture),-10} {ByteArrayToString(coder.GetCode(value))}");
             }
             return;
         }

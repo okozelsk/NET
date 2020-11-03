@@ -26,9 +26,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         public IFeedingSettings FeedingCfg { get; }
 
         /// <summary>
-        /// An analog value to spikes coder settings
+        /// Spikes encoding settings
         /// </summary>
-        public A2SCoderSettings SpikingCoderCfg { get; }
+        public SpikesEncodingSettings SpikesEncodingCfg { get; }
         
         /// <summary>
         /// Varying input fields settings
@@ -45,17 +45,17 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// Creates an initialized instance
         /// </summary>
         /// <param name="feedingCfg">Input feeding settings</param>
-        /// <param name="spikingCoderCfg">An analog value to spikes coder settings</param>
+        /// <param name="spikesEncodingCfg">Spikes encoding settings</param>
         /// <param name="varyingFieldsCfg">Varying input fields settings</param>
         /// <param name="coordinatesCfg">Input placement in 3D space</param>
         public InputEncoderSettings(IFeedingSettings feedingCfg,
-                                    A2SCoderSettings spikingCoderCfg,
+                                    SpikesEncodingSettings spikesEncodingCfg,
                                     VaryingFieldsSettings varyingFieldsCfg,
                                     CoordinatesSettings coordinatesCfg = null
                                     )
         {
             FeedingCfg = (IFeedingSettings)feedingCfg.DeepClone();
-            SpikingCoderCfg = (A2SCoderSettings)spikingCoderCfg.DeepClone();
+            SpikesEncodingCfg = (SpikesEncodingSettings)spikesEncodingCfg.DeepClone();
             VaryingFieldsCfg = (VaryingFieldsSettings)varyingFieldsCfg.DeepClone();
             CoordinatesCfg = coordinatesCfg == null ? new CoordinatesSettings() : (CoordinatesSettings)coordinatesCfg.DeepClone();
             Check();
@@ -67,7 +67,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// </summary>
         /// <param name="source">Source instance</param>
         public InputEncoderSettings(InputEncoderSettings source)
-            : this(source.FeedingCfg, source.SpikingCoderCfg, source.VaryingFieldsCfg, source.CoordinatesCfg)
+            : this(source.FeedingCfg, source.SpikesEncodingCfg, source.VaryingFieldsCfg, source.CoordinatesCfg)
         {
             return;
         }
@@ -83,7 +83,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             //Parsing
             XElement feedingElem = settingsElem.Elements().First();
             FeedingCfg = feedingElem.Name.LocalName == "feedingContinuous" ? (IFeedingSettings)new FeedingContinuousSettings(feedingElem) : new FeedingPatternedSettings(feedingElem);
-            SpikingCoderCfg = new A2SCoderSettings(settingsElem.Elements("codingA2S").First());
+            SpikesEncodingCfg = new SpikesEncodingSettings(settingsElem.Elements("spikesEncoding").First());
             VaryingFieldsCfg = new VaryingFieldsSettings(settingsElem.Elements("varyingFields").First());
             XElement coordinatesElem = settingsElem.Elements("coordinates").FirstOrDefault();
             CoordinatesCfg = coordinatesElem == null ? new CoordinatesSettings() : new CoordinatesSettings(coordinatesElem);
@@ -99,11 +99,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         {
             get
             {
-                switch(SpikingCoderCfg.CodingMethodCfg.Method)
+                switch(SpikesEncodingCfg.EncodingCfg.EncodingType)
                 {
-                    case A2SCoder.CodingMethod.Vertical:
+                    case InputEncoder.SpikesEncodingType.Spiketrain:
                         {
-                            return ((A2SVerticalMethodSettings)SpikingCoderCfg.CodingMethodCfg).SpikeTrainLength;
+                            return ((SpikesEncodingSpiketrainSettings)SpikesEncodingCfg.EncodingCfg).CoderCfg.AbsValCodeLength * (((SpikesEncodingSpiketrainSettings)SpikesEncodingCfg.EncodingCfg).CoderCfg.Halved ? 2 : 1);
                         }
                     default:
                         return 1;
@@ -215,7 +215,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         {
             XElement rootElem = new XElement(rootElemName,
                                              FeedingCfg.GetXml(suppressDefaults),
-                                             SpikingCoderCfg.GetXml(suppressDefaults),
+                                             SpikesEncodingCfg.GetXml(suppressDefaults),
                                              VaryingFieldsCfg.GetXml(suppressDefaults)
                                              );
             if (!suppressDefaults || !CoordinatesCfg.ContainsOnlyDefaults)

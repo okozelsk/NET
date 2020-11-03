@@ -12,7 +12,8 @@ using RCNet.Neural.Network.SM.Readout;
 namespace Demo.DemoConsoleApp.Examples
 {
     /// <summary>
-    /// Example code shows how to setup StateMachine as a pure LSM for classification using StateMachineDesigner.
+    /// Example code shows how to setup StateMachine as a pure LSM for classification using StateMachineDesigner and various
+    /// ways of input encoding for LSM spiking hidden neurons.
     /// Example uses LibrasMovement_train.csv and LibrasMovement_verify.csv from ./Data subfolder.
     /// The dataset is from "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
     /// https://timeseriesclassification.com/description.php?Dataset=Libras
@@ -33,16 +34,39 @@ namespace Demo.DemoConsoleApp.Examples
         /// <summary>
         /// Runs the example code.
         /// </summary>
-        public void Run()
+        public void Run(InputEncoder.SpikesEncodingType spikesEncodingType)
         {
             //Create StateMachine configuration
             //Simplified input configuration
-            InputEncoderSettings inputCfg = StateMachineDesigner.CreateInputCfg(new FeedingPatternedSettings(1, true, RCNet.Neural.Data.InputPattern.VariablesSchema.Groupped, new UnificationSettings(true)),
-                                                                                new A2SCoderSettings(new A2SHorizontalMethodSettings(15, 1e-3)),
-                                                                                false,
-                                                                                new ExternalFieldSettings("coord_abcissa", new RealFeatureFilterSettings(), true),
-                                                                                new ExternalFieldSettings("coord_ordinate", new RealFeatureFilterSettings(), true)
-                                                                                );
+            InputEncoderSettings inputCfg;
+            switch(spikesEncodingType)
+            {
+                case InputEncoder.SpikesEncodingType.Population:
+                    inputCfg = StateMachineDesigner.CreateInputCfg(new FeedingPatternedSettings(1, true, RCNet.Neural.Data.InputPattern.VariablesSchema.Groupped, new UnificationSettings(true)),
+                                                                   new SpikesEncodingSettings(new SpikesEncodingPopulationSettings(new A2SCoderPotentiometerSettings(15, 1e-3, true))),
+                                                                   false,
+                                                                   new ExternalFieldSettings("coord_abcissa", new RealFeatureFilterSettings(), true),
+                                                                   new ExternalFieldSettings("coord_ordinate", new RealFeatureFilterSettings(), true)
+                                                                   );
+                    break;
+                case InputEncoder.SpikesEncodingType.Spiketrain:
+                    inputCfg = StateMachineDesigner.CreateInputCfg(new FeedingPatternedSettings(1, true, RCNet.Neural.Data.InputPattern.VariablesSchema.Groupped),
+                                                                   new SpikesEncodingSettings(new SpikesEncodingSpiketrainSettings(new A2SCoderBintreeSettings(4, false))),
+                                                                   false,
+                                                                   new ExternalFieldSettings("coord_abcissa", new RealFeatureFilterSettings(), true),
+                                                                   new ExternalFieldSettings("coord_ordinate", new RealFeatureFilterSettings(), true)
+                                                                   );
+                    break;
+                default:
+                    inputCfg = StateMachineDesigner.CreateInputCfg(new FeedingPatternedSettings(1, true, RCNet.Neural.Data.InputPattern.VariablesSchema.Groupped, new UnificationSettings(true, true)),
+                                                                   new SpikesEncodingSettings(new SpikesEncodingForbiddenSettings()),
+                                                                   true,
+                                                                   new ExternalFieldSettings("coord_abcissa", new RealFeatureFilterSettings(), true),
+                                                                   new ExternalFieldSettings("coord_ordinate", new RealFeatureFilterSettings(), true)
+                                                                   );
+                    break;
+            }
+
             //Simplified readout layer configuration
             ReadoutLayerSettings readoutCfg = StateMachineDesigner.CreateClassificationReadoutCfg(StateMachineDesigner.CreateSingleLayerRegrNet(new ElliotSettings(), 5, 400),
                                                                                                   0.0825d,

@@ -102,20 +102,20 @@ namespace RCNet.Neural.Network.SM
         /// <param name="feedingCfg">Input feeding configuration</param>
         /// <param name="extFieldNameCollection">Names of the external input fields</param>
         /// <param name="routeToReadout">Specifies whether to route input values to readout</param>
-        /// <param name="spikingCoderCfg">Configuration of the spiking coder</param>
+        /// <param name="spikesEncodingCfg">Configuration of the spikies encoding</param>
         public static InputEncoderSettings CreateInputCfg(IFeedingSettings feedingCfg,
                                                           IEnumerable<string> extFieldNameCollection,
                                                           bool routeToReadout = true,
-                                                          A2SCoderSettings spikingCoderCfg = null
+                                                          SpikesEncodingSettings spikesEncodingCfg = null
                                                           )
         {
             if (feedingCfg == null)
             {
                 throw new ArgumentNullException("feedingCfg");
             }
-            if (spikingCoderCfg == null)
+            if (spikesEncodingCfg == null)
             {
-                spikingCoderCfg = new A2SCoderSettings(new A2SHorizontalMethodSettings());
+                spikesEncodingCfg = new SpikesEncodingSettings(new SpikesEncodingPopulationSettings(new A2SCoderPotentiometerSettings()));
             }
             List<ExternalFieldSettings> extFieldCollection = new List<ExternalFieldSettings>();
             foreach (string name in extFieldNameCollection)
@@ -124,7 +124,7 @@ namespace RCNet.Neural.Network.SM
             }
             ExternalFieldsSettings extFieldsCfg = new ExternalFieldsSettings(extFieldCollection);
             VaryingFieldsSettings fieldsCfg = new VaryingFieldsSettings(extFieldsCfg, null, null, routeToReadout);
-            return new InputEncoderSettings(feedingCfg, spikingCoderCfg, fieldsCfg);
+            return new InputEncoderSettings(feedingCfg, spikesEncodingCfg, fieldsCfg);
         }
 
         /// <summary>
@@ -132,11 +132,11 @@ namespace RCNet.Neural.Network.SM
         /// Contains only external input fields.
         /// </summary>
         /// <param name="feedingCfg">Input feeding configuration</param>
-        /// <param name="spikingCoderCfg">Configuration of an analog value to spikes coder</param>
+        /// <param name="spikesEncodingCfg">Configuration of the spikies encoding</param>
         /// <param name="routeToReadout">Specifies whether to route input values to readout</param>
         /// <param name="externalFieldCfg">External input field configuration</param>
         public static InputEncoderSettings CreateInputCfg(IFeedingSettings feedingCfg,
-                                                          A2SCoderSettings spikingCoderCfg,
+                                                          SpikesEncodingSettings spikesEncodingCfg,
                                                           bool routeToReadout,
                                                           params ExternalFieldSettings[] externalFieldCfg
                                                           )
@@ -146,7 +146,7 @@ namespace RCNet.Neural.Network.SM
                 throw new ArgumentNullException("feedingCfg");
             }
             return new InputEncoderSettings(feedingCfg,
-                                            spikingCoderCfg,
+                                            spikesEncodingCfg,
                                             new VaryingFieldsSettings(new ExternalFieldsSettings(externalFieldCfg),
                                                                       null,
                                                                       null,

@@ -1,41 +1,30 @@
 ﻿using System;
 using System.Globalization;
+using System.Linq;
 using System.Xml.Linq;
 
-namespace RCNet.Neural.Data.Coders.AnalogToSpiking
+namespace RCNet.Neural.Network.SM.Preprocessing.Input
 {
     /// <summary>
-    /// Settings of vertical spike train
+    /// Settings of forbidden spikes encoding
     /// </summary>
     [Serializable]
-    public class A2SVerticalMethodSettings : RCNetBaseSettings, IA2SCodingMethodSettings
+    public class SpikesEncodingForbiddenSettings : RCNetBaseSettings, ISpikesEncodingSettings
     {
         //Constants
         /// <summary>
         /// Name of the associated xsd type
         /// </summary>
-        public const string XsdTypeName = "A2SCodingMethodVerticalType";
-        //Default values
-        /// <summary>
-        /// Default value of parameter specifying length of the spike train
-        /// </summary>
-        public const int DefaultSpikeTrainLength = 16;
+        public const string XsdTypeName = "NPSpikesEncodingForbiddenType";
 
         //Attribute properties
-        /// <summary>
-        /// Length of the half of spike code
-        /// </summary>
-        public int SpikeTrainLength { get; }
-
 
         //Constructors
         /// <summary>
-        /// Creates an itialized instance.
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="spikeTrainLength">Length of the spike train</param>
-        public A2SVerticalMethodSettings(int spikeTrainLength = DefaultSpikeTrainLength)
+        public SpikesEncodingForbiddenSettings()
         {
-            SpikeTrainLength = spikeTrainLength;
             Check();
             return;
         }
@@ -44,8 +33,8 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
         /// The deep copy constructor.
         /// </summary>
         /// <param name="source">Source instance</param>
-        public A2SVerticalMethodSettings(A2SVerticalMethodSettings source)
-            : this(source.SpikeTrainLength)
+        public SpikesEncodingForbiddenSettings(SpikesEncodingForbiddenSettings source)
+            : this()
         {
             return;
         }
@@ -54,37 +43,24 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
         /// Creates an initialized instance from the given xml element.
         /// </summary>
         /// <param name="elem">Xml element containing the initialization settings</param>
-        public A2SVerticalMethodSettings(XElement elem)
+        public SpikesEncodingForbiddenSettings(XElement elem)
         {
             //Validation
             XElement settingsElem = Validate(elem, XsdTypeName);
-            //Parsing
-            SpikeTrainLength = int.Parse(settingsElem.Attribute("spikeTrainLength").Value, CultureInfo.InvariantCulture);
             Check();
             return;
         }
 
         //Properties
         /// <summary>
-        /// Way to convert an analog value to spikes
+        /// Type of spikes encoding
         /// </summary>
-        public A2SCoder.CodingMethod Method { get { return A2SCoder.CodingMethod.Vertical; } }
-
-        /// <summary>
-        /// Checks if settings are default
-        /// </summary>
-        public bool IsDefaultSpikeTrainLength { get { return (SpikeTrainLength == DefaultSpikeTrainLength); } }
+        public InputEncoder.SpikesEncodingType EncodingType { get { return InputEncoder.SpikesEncodingType.Forbidden; } }
 
         /// <summary>
         /// Identifies settings containing only default values
         /// </summary>
-        public override bool ContainsOnlyDefaults
-        {
-            get
-            {
-                return IsDefaultSpikeTrainLength;
-            }
-        }
+        public override bool ContainsOnlyDefaults { get { return true; } }
 
         //Methods
         /// <summary>
@@ -92,10 +68,6 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
         /// </summary>
         protected override void Check()
         {
-            if (SpikeTrainLength < 1 || SpikeTrainLength > 32)
-            {
-                throw new ArgumentException($"Invalid SpikeTrainLength {SpikeTrainLength.ToString(CultureInfo.InvariantCulture)}. SpikeTrainLength must be GE to 1 and LE to 32.", "SpikeTrainLength");
-            }
             return;
         }
 
@@ -104,7 +76,7 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
         /// </summary>
         public override RCNetBaseSettings DeepClone()
         {
-            return new A2SVerticalMethodSettings(this);
+            return new SpikesEncodingForbiddenSettings(this);
         }
 
         /// <summary>
@@ -116,10 +88,6 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             XElement rootElem = new XElement(rootElemName);
-            if (!suppressDefaults || !IsDefaultSpikeTrainLength)
-            {
-                rootElem.Add(new XAttribute("spikeTrainLength", SpikeTrainLength.ToString(CultureInfo.InvariantCulture)));
-            }
             Validate(rootElem, XsdTypeName);
             return rootElem;
         }
@@ -131,10 +99,10 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(bool suppressDefaults)
         {
-            return GetXml("vertical", suppressDefaults);
+            return GetXml("forbidden", suppressDefaults);
         }
 
-    }//SpikeCodeVerticalSettings
+    }//SpikesEncodingForbiddenSettings
 
 }//Namespace
 

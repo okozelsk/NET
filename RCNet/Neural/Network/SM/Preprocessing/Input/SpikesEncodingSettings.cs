@@ -2,36 +2,36 @@
 using System.Globalization;
 using System.Linq;
 using System.Xml.Linq;
+using RCNet.Neural.Data.Coders.AnalogToSpiking;
 
-namespace RCNet.Neural.Data.Coders.AnalogToSpiking
+namespace RCNet.Neural.Network.SM.Preprocessing.Input
 {
     /// <summary>
-    /// Settings of an analog value to spikes coder
+    /// Settings of spikes encoding
     /// </summary>
     [Serializable]
-    public class A2SCoderSettings : RCNetBaseSettings
+    public class SpikesEncodingSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
         /// Name of the associated xsd type
         /// </summary>
-        public const string XsdTypeName = "A2SCoderType";
-        //Default values
+        public const string XsdTypeName = "NPSpikesEncodingType";
 
         //Attribute properties
         /// <summary>
-        /// Configuration of the method to be used for coding
+        /// Configuration of spikes coder
         /// </summary>
-        public IA2SCodingMethodSettings CodingMethodCfg { get; }
+        public ISpikesEncodingSettings EncodingCfg { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an itialized instance.
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="codingMethodCfg">Configuration of the method to be used for coding</param>
-        public A2SCoderSettings(IA2SCodingMethodSettings codingMethodCfg)
+        /// <param name="encodingCfg">Configuration of spikes encoding</param>
+        public SpikesEncodingSettings(ISpikesEncodingSettings encodingCfg)
         {
-            CodingMethodCfg = codingMethodCfg;
+            EncodingCfg = (ISpikesEncodingSettings)encodingCfg.DeepClone();
             Check();
             return;
         }
@@ -40,8 +40,8 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
         /// The deep copy constructor.
         /// </summary>
         /// <param name="source">Source instance</param>
-        public A2SCoderSettings(A2SCoderSettings source)
-            : this(source.CodingMethodCfg)
+        public SpikesEncodingSettings(SpikesEncodingSettings source)
+            : this(source.EncodingCfg)
         {
             return;
         }
@@ -50,26 +50,12 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
         /// Creates an initialized instance from the given xml element.
         /// </summary>
         /// <param name="elem">Xml element containing the initialization settings</param>
-        public A2SCoderSettings(XElement elem)
+        public SpikesEncodingSettings(XElement elem)
         {
             //Validation
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
-            XElement codingMethodElem = settingsElem.Elements().First();
-            switch(codingMethodElem.Name.LocalName)
-            {
-                case "horizontal":
-                    CodingMethodCfg = new A2SHorizontalMethodSettings(codingMethodElem);
-                    break;
-                case "vertical":
-                    CodingMethodCfg = new A2SVerticalMethodSettings(codingMethodElem);
-                    break;
-                case "none":
-                    CodingMethodCfg = new A2SNoneMethodSettings(codingMethodElem);
-                    break;
-                default:
-                    throw new ArgumentException($"Unexpected child element name {codingMethodElem.Name.LocalName.ToString(CultureInfo.InvariantCulture)}.", "elem");
-            }
+            EncodingCfg = SpikesEncodingFactory.LoadSettings(settingsElem.Elements().First());
             Check();
             return;
         }
@@ -78,13 +64,7 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
         /// <summary>
         /// Identifies settings containing only default values
         /// </summary>
-        public override bool ContainsOnlyDefaults
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public override bool ContainsOnlyDefaults { get { return false; } }
 
         //Methods
         /// <summary>
@@ -92,10 +72,6 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
         /// </summary>
         protected override void Check()
         {
-            if (CodingMethodCfg == null)
-            {
-                throw new ArgumentNullException($"Coding method must be specified.", "CodingMethodCfg");
-            }
             return;
         }
 
@@ -104,7 +80,7 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
         /// </summary>
         public override RCNetBaseSettings DeepClone()
         {
-            return new A2SCoderSettings(this);
+            return new SpikesEncodingSettings(this);
         }
 
         /// <summary>
@@ -115,7 +91,7 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
-            XElement rootElem = new XElement(rootElemName, ((RCNetBaseSettings)CodingMethodCfg).GetXml(suppressDefaults));
+            XElement rootElem = new XElement(rootElemName, ((RCNetBaseSettings)EncodingCfg).GetXml(suppressDefaults));
             Validate(rootElem, XsdTypeName);
             return rootElem;
         }
@@ -127,10 +103,10 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(bool suppressDefaults)
         {
-            return GetXml("codingA2S", suppressDefaults);
+            return GetXml("spikesEncoding", suppressDefaults);
         }
 
-    }//A2SCoderSettings
+    }//SpikesEncodingSettings
 
 }//Namespace
 

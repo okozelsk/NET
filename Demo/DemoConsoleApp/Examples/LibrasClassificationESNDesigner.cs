@@ -36,7 +36,7 @@ namespace Demo.DemoConsoleApp.Examples
             //Create StateMachine configuration
             //Simplified input configuration
             InputEncoderSettings inputCfg = StateMachineDesigner.CreateInputCfg(new FeedingPatternedSettings(1, true, RCNet.Neural.Data.InputPattern.VariablesSchema.Groupped),
-                                                                                new A2SCoderSettings(new A2SNoneMethodSettings()),
+                                                                                new SpikesEncodingSettings(new SpikesEncodingForbiddenSettings()),
                                                                                 false,
                                                                                 new ExternalFieldSettings("coord_abcissa", new RealFeatureFilterSettings()),
                                                                                 new ExternalFieldSettings("coord_ordinate", new RealFeatureFilterSettings())

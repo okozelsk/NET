@@ -5,48 +5,50 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Data.Coders.AnalogToSpiking
 {
     /// <summary>
-    /// Settings of horizontal spike code
+    /// Settings of A2SCoderBintree coder
     /// </summary>
     [Serializable]
-    public class A2SHorizontalMethodSettings : RCNetBaseSettings, IA2SCodingMethodSettings
+    public class A2SCoderBintreeSettings : RCNetBaseSettings, IA2SCoderSettings
     {
         //Constants
         /// <summary>
         /// Name of the associated xsd type
         /// </summary>
-        public const string XsdTypeName = "A2SCodingMethodHorizontalType";
+        public const string XsdTypeName = "A2SCoderBintreeType";
         //Default values
         /// <summary>
-        /// Default value of parameter specifying length of the half of spike code
+        /// Default value of parameter specifying the length of the spike-code of the analog absolute value
         /// </summary>
-        public const int DefaultHalfCodeLength = 16;
+        public const int DefaultAbsValCodeLength = 8;
         /// <summary>
-        /// Default value of parameter specifying threshold of the most sensitive spike
+        /// Default value of parameter specifying if to generate halved spike-code where one half is dedicated for bellow average values (-)
+        /// and second half for above average values (+)
         /// </summary>
-        public const double DefaultLowestThreshold = 1e-5;
+        public const bool DefaultHalved = true;
 
         //Attribute properties
         /// <summary>
-        /// Length of the half of spike code
+        /// Length of the spike-code of the analog absolute value
         /// </summary>
-        public int HalfCodeLength { get; }
+        public int AbsValCodeLength { get; }
 
         /// <summary>
-        /// Threshold of the most sensitive spike
+        /// Specifies if to generate halved spike-code where one half is dedicated for bellow average values (-)
+        /// and second half for above average values (+)
         /// </summary>
-        public double LowestThreshold { get; }
-
+        public bool Halved { get; }
 
         //Constructors
         /// <summary>
         /// Creates an itialized instance.
         /// </summary>
-        /// <param name="halfCodeLength">Length of the half of spike code</param>
-        /// <param name="lowestThreshold">Threshold of the most sensitive spike</param>
-        public A2SHorizontalMethodSettings(int halfCodeLength = DefaultHalfCodeLength, double lowestThreshold = DefaultLowestThreshold)
+        /// <param name="absValCodeLength">Length of the spike-code of the analog absolute value</param>
+        /// <param name="halved">Specifies if to generate halved spike-code where one half is dedicated for bellow average values (-) and second half for above average values (+)</param>
+        public A2SCoderBintreeSettings(int absValCodeLength = DefaultAbsValCodeLength,
+                                             bool halved = DefaultHalved)
         {
-            HalfCodeLength = halfCodeLength;
-            LowestThreshold = lowestThreshold;
+            AbsValCodeLength = absValCodeLength;
+            Halved = halved;
             Check();
             return;
         }
@@ -55,8 +57,8 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
         /// The deep copy constructor.
         /// </summary>
         /// <param name="source">Source instance</param>
-        public A2SHorizontalMethodSettings(A2SHorizontalMethodSettings source)
-            : this(source.HalfCodeLength, source.LowestThreshold)
+        public A2SCoderBintreeSettings(A2SCoderBintreeSettings source)
+            : this(source.AbsValCodeLength, source.Halved)
         {
             return;
         }
@@ -65,32 +67,27 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
         /// Creates an initialized instance from the given xml element.
         /// </summary>
         /// <param name="elem">Xml element containing the initialization settings</param>
-        public A2SHorizontalMethodSettings(XElement elem)
+        public A2SCoderBintreeSettings(XElement elem)
         {
             //Validation
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
-            HalfCodeLength = int.Parse(settingsElem.Attribute("halfCodeLength").Value, CultureInfo.InvariantCulture);
-            LowestThreshold = double.Parse(settingsElem.Attribute("lowestThreshold").Value, CultureInfo.InvariantCulture);
+            AbsValCodeLength = int.Parse(settingsElem.Attribute("absValCodeLength").Value, CultureInfo.InvariantCulture);
+            Halved = bool.Parse(settingsElem.Attribute("halved").Value);
             Check();
             return;
         }
 
         //Properties
         /// <summary>
-        /// Way to convert an analog value to spikes
+        /// Checks if settings are default
         /// </summary>
-        public A2SCoder.CodingMethod Method { get { return A2SCoder.CodingMethod.Horizontal; } }
+        public bool IsDefaultAbsValCodeLength { get { return (AbsValCodeLength == DefaultAbsValCodeLength); } }
 
         /// <summary>
         /// Checks if settings are default
         /// </summary>
-        public bool IsDefaultHalfCodeLength { get { return (HalfCodeLength == DefaultHalfCodeLength); } }
-
-        /// <summary>
-        /// Checks if settings are default
-        /// </summary>
-        public bool IsDefaultLowestThreshold { get { return (LowestThreshold == DefaultLowestThreshold); } }
+        public bool IsDefaultHalved { get { return (Halved == DefaultHalved); } }
 
         /// <summary>
         /// Identifies settings containing only default values
@@ -99,8 +96,8 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
         {
             get
             {
-                return IsDefaultHalfCodeLength &&
-                       IsDefaultLowestThreshold;
+                return IsDefaultAbsValCodeLength &&
+                       IsDefaultHalved;
             }
         }
 
@@ -110,13 +107,9 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
         /// </summary>
         protected override void Check()
         {
-            if (HalfCodeLength < 1 || HalfCodeLength > 128)
+            if (AbsValCodeLength < 1 || AbsValCodeLength > 32)
             {
-                throw new ArgumentException($"Invalid HalfCodeLength {HalfCodeLength.ToString(CultureInfo.InvariantCulture)}. HalfCodeLength must be GE to 1 and LE to 128.", "HalfCodeLength");
-            }
-            if (LowestThreshold <= 0 || LowestThreshold >= 1d)
-            {
-                throw new ArgumentException($"Invalid LowestThreshold {LowestThreshold.ToString(CultureInfo.InvariantCulture)}. LowestThreshold must be GT 0 and LT 1.", "LowestThreshold");
+                throw new ArgumentException($"Invalid AbsValCodeLength {AbsValCodeLength.ToString(CultureInfo.InvariantCulture)}. AbsValCodeLength must be GE to 1 and LE to 32.", "AbsValCodeLength");
             }
             return;
         }
@@ -126,7 +119,7 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
         /// </summary>
         public override RCNetBaseSettings DeepClone()
         {
-            return new A2SHorizontalMethodSettings(this);
+            return new A2SCoderBintreeSettings(this);
         }
 
         /// <summary>
@@ -138,13 +131,13 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             XElement rootElem = new XElement(rootElemName);
-            if (!suppressDefaults || !IsDefaultHalfCodeLength)
+            if (!suppressDefaults || !IsDefaultAbsValCodeLength)
             {
-                rootElem.Add(new XAttribute("halfCodeLength", HalfCodeLength.ToString(CultureInfo.InvariantCulture)));
+                rootElem.Add(new XAttribute("absValCodeLength", AbsValCodeLength.ToString(CultureInfo.InvariantCulture)));
             }
-            if (!suppressDefaults || !IsDefaultLowestThreshold)
+            if (!suppressDefaults || !IsDefaultHalved)
             {
-                rootElem.Add(new XAttribute("lowestThreshold", LowestThreshold.ToString(CultureInfo.InvariantCulture)));
+                rootElem.Add(new XAttribute("halved", Halved.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()));
             }
             Validate(rootElem, XsdTypeName);
             return rootElem;
@@ -157,10 +150,10 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(bool suppressDefaults)
         {
-            return GetXml("horizontal", suppressDefaults);
+            return GetXml("bintree", suppressDefaults);
         }
 
-    }//SpikeCodeHorizontalSettings
+    }//A2SCoderBintreeSettings
 
 }//Namespace
 

@@ -433,10 +433,10 @@
 
 
   <!-- Coders -->
-  <!-- Methods to code an analog value as spiking -->
-  <!-- Horizontal coding method configuration -->
-  <xs:complexType name="A2SCodingMethodHorizontalType">
-    <xs:attribute type="UIntGE1LE128Type" name="halfCodeLength" use="optional" default="16">
+  <!-- Methods to code an analog value as spikes -->
+  <!-- Potentiometer spikes coding method -->
+  <xs:complexType name="A2SCoderPotentiometerType">
+    <xs:attribute type="UIntGE1LE128Type" name="absValCodeLength" use="optional" default="16">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is 16</xs:documentation>
       </xs:annotation>
@@ -446,30 +446,26 @@
         <xs:documentation xml:lang="en">Firing threshold of the most sensitive spike. Default value is 1e-5</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-  </xs:complexType>
-
-  <!-- Vertical coding configuration -->
-  <xs:complexType name="A2SCodingMethodVerticalType">
-    <xs:attribute type="UIntGE1LE32Type" name="spikeTrainLength" use="optional" default="16">
+    <xs:attribute type="xs:boolean" name="halved" use="optional" default="true">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 16</xs:documentation>
+        <xs:documentation xml:lang="en">Specifies if to generate halved spike-code where one half is dedicated for bellow average values (-) and second half for above average values (+)</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
 
-  <!-- None coding configuration -->
-  <xs:complexType name="A2SCodingMethodNoneType">
+  <!-- Bintree spikes coding method -->
+  <xs:complexType name="A2SCoderBintreeType">
+    <xs:attribute type="UIntGE1LE32Type" name="absValCodeLength" use="optional" default="8">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 10</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="halved" use="optional" default="true">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Specifies if to generate halved spike-code where one half is dedicated for bellow average values (-) and second half for above average values (+)</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
-
-  <!-- Ways to code an analog value as spiking configuration-->
-  <xs:complexType name="A2SCoderType">
-    <xs:choice minOccurs="1" maxOccurs="1">
-      <xs:element type="A2SCodingMethodHorizontalType" name="horizontal" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="A2SCodingMethodVerticalType" name="vertical" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="A2SCodingMethodNoneType" name="none" minOccurs="1" maxOccurs="1"/>
-    </xs:choice>
-  </xs:complexType>
-
 
 
   <!-- Input generators -->
@@ -2144,6 +2140,36 @@
     </xs:attribute>
   </xs:complexType>
 
+  <!-- Supported spikes encodings -->
+  <!-- Population encoding -->
+  <xs:complexType name="NPSpikesEncodingPopulationType">
+    <xs:choice minOccurs="1" maxOccurs="1">
+      <xs:element type="A2SCoderPotentiometerType" name="potentiometer" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="A2SCoderBintreeType" name="bintree" minOccurs="1" maxOccurs="1"/>
+    </xs:choice>
+  </xs:complexType>
+
+  <!-- Spike-train encoding -->
+  <xs:complexType name="NPSpikesEncodingSpiketrainType">
+    <xs:choice minOccurs="1" maxOccurs="1">
+      <xs:element type="A2SCoderPotentiometerType" name="potentiometer" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="A2SCoderBintreeType" name="bintree" minOccurs="1" maxOccurs="1"/>
+    </xs:choice>
+  </xs:complexType>
+
+  <!-- Forbidden encoding -->
+  <xs:complexType name="NPSpikesEncodingForbiddenType">
+  </xs:complexType>
+
+  <!-- Spikes encoding selection -->
+  <xs:complexType name="NPSpikesEncodingType">
+    <xs:choice minOccurs="1" maxOccurs="1">
+      <xs:element type="NPSpikesEncodingPopulationType" name="population" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="NPSpikesEncodingSpiketrainType" name="spike-train" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="NPSpikesEncodingForbiddenType" name="forbidden" minOccurs="1" maxOccurs="1"/>
+    </xs:choice>
+  </xs:complexType>
+
   <!-- External input field -->
   <xs:complexType name="NPExternalInpFieldType">
     <xs:sequence minOccurs="1" maxOccurs="1">
@@ -2247,7 +2273,7 @@
         <xs:element type="NPInpFeedingContinuousType" name="feedingContinuous" minOccurs="1" maxOccurs="1"/>
         <xs:element type="NPInpFeedingPatternedType" name="feedingPatterned" minOccurs="1" maxOccurs="1"/>
       </xs:choice>
-      <xs:element type="A2SCoderType" name="codingA2S" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="NPSpikesEncodingType" name="spikesEncoding" minOccurs="1" maxOccurs="1"/>
       <xs:element type="NPVaryingInpFieldsType" name="varyingFields" minOccurs="1" maxOccurs="1">
         <xs:unique name="np_unique_varying_input_field_name">
           <xs:selector xpath=".//field"/>
