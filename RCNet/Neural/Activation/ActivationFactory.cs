@@ -12,6 +12,14 @@ namespace RCNet.Neural.Activation
     public static class ActivationFactory
     {
         //Constants
+        /// <summary>
+        /// Minimal initial potentisl of spiking membrane
+        /// </summary>
+        private const double SMInitMinPotential = 0.05d;
+        /// <summary>
+        /// Maximal initial potentisl of spiking membrane
+        /// </summary>
+        private const double SMInitMaxPotential = 0.95d;
         //Default values
         /// <summary>
         /// Default value of refractory periods
@@ -264,13 +272,11 @@ namespace RCNet.Neural.Activation
             {
                 throw new ArgumentException($"Unsupported activation function settings: {settingsType.Name}");
             }
-            //*
             //Set random initial membrane potential for spiking activation
             if(!af.Stateless && af.TypeOfActivation == ActivationType.Spiking)
             {
-                af.SetInitialInternalState(rand.NextRangedUniformDouble(0.05, 0.95));
+                af.SetInitialInternalState(rand.NextRangedUniformDouble(SMInitMinPotential, SMInitMaxPotential));
             }
-            //*/
             return af;
         }
 

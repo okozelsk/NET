@@ -44,10 +44,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
 
         //Attributes
         private readonly FeatureFilterBase _featureFilter;
-        private readonly InputEncoder.SpikesEncodingType _spikesEncodingType;
-        private readonly A2SCoderBase _spikingCoder;
+        private readonly InputSpikesCoder _spikesEncoder;
         private double _iAnalogStimuli;
-        private byte[] _iSpikingStimuli;
         private int _currentDataIdx;
 
         //Constructor
@@ -67,7 +65,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
                           int[] coordinates,
                           Interval dataWorkingRange,
                           IFeatureFilterSettings featureFilterCfg,
-                          ISpikesEncodingSettings spikesEncodingCfg,
+                          InputSpikesCoderSettings spikesEncodingCfg,
                           bool routeToReadout,
                           int inputNeuronsStartIdx
                           )
@@ -78,30 +76,28 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             _featureFilter = FeatureFilterFactory.Create(dataWorkingRange, featureFilterCfg);
             _iAnalogStimuli = 0;
             _currentDataIdx = 0;
+            //Spikes encoder
+            _spikesEncoder = new InputSpikesCoder(spikesEncodingCfg);
             //Analog neuron
-            AnalogNeuron = new AnalogInputNeuron(new NeuronLocation(InputEncoder.ReservoirID, inputNeuronsStartIdx, InputEncoder.PoolID, inputNeuronsStartIdx, idx, coordinates[0], coordinates[1], coordinates[2]));
+            int verticalCycles = _spikesEncoder.Regime == InputEncoder.SpikingInputEncodingRegime.Vertical ? _spikesEncoder.LargestComponentLength : 1;
+            AnalogNeuron = new AnalogInputNeuron(new NeuronLocation(InputEncoder.ReservoirID, inputNeuronsStartIdx, InputEncoder.PoolID, inputNeuronsStartIdx, idx, coordinates[0], coordinates[1], coordinates[2]), verticalCycles);
             ++inputNeuronsStartIdx;
             //Spiking neurons
-            _spikesEncodingType = spikesEncodingCfg.EncodingType;
-            _spikingCoder = SpikesEncodingFactory.CreateCoder(spikesEncodingCfg);
             int spikingPopulationSize;
-            if (_spikesEncodingType == InputEncoder.SpikesEncodingType.Population)
+            if (_spikesEncoder.Regime == InputEncoder.SpikingInputEncodingRegime.Horizontal)
             {
                 //Population encoding
-                spikingPopulationSize = _spikingCoder.CodeTotalLength;
-                _iSpikingStimuli = new byte[_spikingCoder.CodeTotalLength];
+                spikingPopulationSize = _spikesEncoder.AllSpikesFlatCollection.Length;
             }
-            else if (_spikesEncodingType == InputEncoder.SpikesEncodingType.Spiketrain)
+            else if (_spikesEncoder.Regime == InputEncoder.SpikingInputEncodingRegime.Vertical)
             {
                 //Spike-train encoding
-                spikingPopulationSize = 1;
-                _iSpikingStimuli = new byte[_spikingCoder.CodeTotalLength];
+                spikingPopulationSize = _spikesEncoder.ComponentSpikesCollection.Length;
             }
             else
             {
                 //Forbidden encoding
                 spikingPopulationSize = 0;
-                _iSpikingStimuli = null;
             }
             SpikingNeuronCollection = new SpikingInputNeuron[spikingPopulationSize];
             for (int i = 0; i < SpikingNeuronCollection.Length; i++)
@@ -143,7 +139,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <param name="statistics">Specifies whether to reset internal statistics of the associated neurons</param>
         public void ResetNeurons(bool statistics)
         {
-            _spikingCoder?.Reset();
+            _spikesEncoder?.Reset();
             AnalogNeuron.Reset(statistics);
             for (int i = 0; i < SpikingNeuronCollection.Length; i++)
             {
@@ -160,24 +156,21 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         {
             _iAnalogStimuli = _featureFilter.ApplyFilter(value);
             _currentDataIdx = 0;
-            if(_spikesEncodingType != InputEncoder.SpikesEncodingType.Forbidden)
-            {
-                _spikingCoder.GetCode(_iAnalogStimuli).CopyTo(_iSpikingStimuli, 0);
-            }
+            _spikesEncoder.Encode(_iAnalogStimuli);
             return;
         }
 
         /// <summary>
-        /// 
+        /// Fetches next piece of current data
         /// </summary>
         /// <param name="collectStatistics">Specifies whether to update internal statistics of associated input neurons</param>
         public bool Fetch(bool collectStatistics)
         {
-            if (_currentDataIdx == 0 || _currentDataIdx < _iSpikingStimuli.Length)
+            if (_currentDataIdx == 0 || (_spikesEncoder.Regime == InputEncoder.SpikingInputEncodingRegime.Vertical && _currentDataIdx < _spikesEncoder.LargestComponentLength))
             {
-                switch (_spikesEncodingType)
+                switch (_spikesEncoder.Regime)
                 {
-                    case InputEncoder.SpikesEncodingType.Population:
+                    case InputEncoder.SpikingInputEncodingRegime.Horizontal:
                         {
                             //Analog neuron
                             AnalogNeuron.NewStimulation(_iAnalogStimuli, 0d);
@@ -185,20 +178,23 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
                             //Spiking neurons
                             for (int i = 0; i < SpikingNeuronCollection.Length; i++)
                             {
-                                SpikingNeuronCollection[i].NewStimulation(_iSpikingStimuli[i], 0d);
+                                SpikingNeuronCollection[i].NewStimulation(_spikesEncoder.AllSpikesFlatCollection[i], 0d);
                                 SpikingNeuronCollection[i].Recompute(collectStatistics);
                             }
                         }
                         break;
 
-                    case InputEncoder.SpikesEncodingType.Spiketrain:
+                    case InputEncoder.SpikingInputEncodingRegime.Vertical:
                         {
                             //Analog neuron
-                            AnalogNeuron.NewStimulation(_iSpikingStimuli[_currentDataIdx] == 0 ? -1d : 0d, 0d);
+                            AnalogNeuron.NewStimulation(_iAnalogStimuli, 0d);
                             AnalogNeuron.Recompute(collectStatistics);
-                            //Spiking neuron
-                            SpikingNeuronCollection[0].NewStimulation(_iSpikingStimuli[_currentDataIdx], 0d);
-                            SpikingNeuronCollection[0].Recompute(collectStatistics);
+                            //Spiking neurons
+                            for (int i = 0; i < _spikesEncoder.ComponentSpikesCollection.Length; i++)
+                            {
+                                SpikingNeuronCollection[i].NewStimulation(_spikesEncoder.ComponentSpikesCollection[i][_currentDataIdx], 0d);
+                                SpikingNeuronCollection[i].Recompute(collectStatistics);
+                            }
                         }
                         break;
 
@@ -221,7 +217,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         public List<int[]> GetSpikingInputCombinations(int numOfCombinations)
         {
             List<int[]> result = new List<int[]>(numOfCombinations);
-            //Alone coding spikes
+            //Alone spiking neurons
             for (int i = 0; i < SpikingNeuronCollection.Length; i++)
             {
                 int[] cmbIdxs = new int[1];

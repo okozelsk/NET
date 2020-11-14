@@ -3,10 +3,10 @@ using RCNet.Neural.Activation;
 using RCNet.Neural.Data.Coders.AnalogToSpiking;
 using RCNet.Neural.Data.Filter;
 using RCNet.Neural.Network.SM;
+using RCNet.Neural.Network.SM.Preprocessing;
 using RCNet.Neural.Network.SM.Preprocessing.Input;
 using RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Space3D;
 using RCNet.Neural.Network.SM.Readout;
 
 namespace Demo.DemoConsoleApp.Examples
@@ -34,41 +34,65 @@ namespace Demo.DemoConsoleApp.Examples
         /// <summary>
         /// Runs the example code.
         /// </summary>
-        public void Run(InputEncoder.SpikesEncodingType spikesEncodingType)
+        public void Run(InputEncoder.SpikingInputEncodingRegime spikesEncodingRegime)
         {
             //Create StateMachine configuration
-            //Simplified input configuration
+            //Simplified input configuration and homogenous excitability
             InputEncoderSettings inputCfg;
-            switch(spikesEncodingType)
+            HomogenousExcitabilitySettings homogenousExcitability;
+            switch (spikesEncodingRegime)
             {
-                case InputEncoder.SpikesEncodingType.Population:
-                    inputCfg = StateMachineDesigner.CreateInputCfg(new FeedingPatternedSettings(1, true, RCNet.Neural.Data.InputPattern.VariablesSchema.Groupped, new UnificationSettings(true)),
-                                                                   new SpikesEncodingSettings(new SpikesEncodingPopulationSettings(new A2SCoderPotentiometerSettings(15, 1e-3, true))),
-                                                                   false,
-                                                                   new ExternalFieldSettings("coord_abcissa", new RealFeatureFilterSettings(), true),
-                                                                   new ExternalFieldSettings("coord_ordinate", new RealFeatureFilterSettings(), true)
-                                                                   );
-                    break;
-                case InputEncoder.SpikesEncodingType.Spiketrain:
-                    inputCfg = StateMachineDesigner.CreateInputCfg(new FeedingPatternedSettings(1, true, RCNet.Neural.Data.InputPattern.VariablesSchema.Groupped),
-                                                                   new SpikesEncodingSettings(new SpikesEncodingSpiketrainSettings(new A2SCoderBintreeSettings(4, false))),
-                                                                   false,
-                                                                   new ExternalFieldSettings("coord_abcissa", new RealFeatureFilterSettings(), true),
-                                                                   new ExternalFieldSettings("coord_ordinate", new RealFeatureFilterSettings(), true)
-                                                                   );
-                    break;
-                default:
-                    inputCfg = StateMachineDesigner.CreateInputCfg(new FeedingPatternedSettings(1, true, RCNet.Neural.Data.InputPattern.VariablesSchema.Groupped, new UnificationSettings(true, true)),
-                                                                   new SpikesEncodingSettings(new SpikesEncodingForbiddenSettings()),
+                /*
+                 * Horizontal spikes encoding means that every spike position in the spike-train has related its own input neuron.
+                 * So all the spikes are encoded at once, during one reservoir computation cycle.
+                 */
+                case InputEncoder.SpikingInputEncodingRegime.Horizontal:
+                    inputCfg = StateMachineDesigner.CreateInputCfg(new FeedingPatternedSettings(1, NeuralPreprocessor.BidirProcessing.Continuous, RCNet.Neural.Data.InputPattern.VariablesSchema.Groupped, new UnificationSettings(false, false)),
+                                                                   new InputSpikesCoderSettings(InputEncoder.SpikingInputEncodingRegime.Horizontal,
+                                                                                                new A2SCoderSignalStrengthSettings(8),
+                                                                                                new A2SCoderUpDirArrowsSettings(8, 8),
+                                                                                                new A2SCoderDownDirArrowsSettings(8, 8)
+                                                                                                ),
                                                                    true,
                                                                    new ExternalFieldSettings("coord_abcissa", new RealFeatureFilterSettings(), true),
                                                                    new ExternalFieldSettings("coord_ordinate", new RealFeatureFilterSettings(), true)
                                                                    );
+                    homogenousExcitability = new HomogenousExcitabilitySettings(1d, 0.7d, 0.2d); 
+                    break;
+                /*
+                 * Vertical spikes encoding means that every coder generating spike-train has related its own input neuron.
+                 * So all the spikes are encoded in several reservoir computation cycles, depending on largest coder's code (number of code time-points).
+                 */
+                case InputEncoder.SpikingInputEncodingRegime.Vertical:
+                    inputCfg = StateMachineDesigner.CreateInputCfg(new FeedingPatternedSettings(1, NeuralPreprocessor.BidirProcessing.Continuous, RCNet.Neural.Data.InputPattern.VariablesSchema.Groupped),
+                                                                   new InputSpikesCoderSettings(InputEncoder.SpikingInputEncodingRegime.Vertical,
+                                                                                                new A2SCoderSignalStrengthSettings(8),
+                                                                                                new A2SCoderUpDirArrowsSettings(8, 8),
+                                                                                                new A2SCoderDownDirArrowsSettings(8, 8)
+                                                                                                ),
+                                                                   true,
+                                                                   new ExternalFieldSettings("coord_abcissa", new RealFeatureFilterSettings(), true),
+                                                                   new ExternalFieldSettings("coord_ordinate", new RealFeatureFilterSettings(), true)
+                                                                   );
+                    homogenousExcitability = new HomogenousExcitabilitySettings(1d, 0.7d, 0.2d);
+                    break;
+                /*
+                 * Forbidden spikes encoding means no input spikes. Analog values from input fields are directly routed through synapses to hidden neurons.
+                 * So all the input values are encoded at once, during one reservoir computation cycle.
+                 */
+                default:
+                    inputCfg = StateMachineDesigner.CreateInputCfg(new FeedingPatternedSettings(1, NeuralPreprocessor.BidirProcessing.Continuous, RCNet.Neural.Data.InputPattern.VariablesSchema.Groupped, new UnificationSettings(false, false)),
+                                                                   new InputSpikesCoderSettings(InputEncoder.SpikingInputEncodingRegime.Forbidden),
+                                                                   true,
+                                                                   new ExternalFieldSettings("coord_abcissa", new RealFeatureFilterSettings(), true),
+                                                                   new ExternalFieldSettings("coord_ordinate", new RealFeatureFilterSettings(), true)
+                                                                   );
+                    homogenousExcitability = new HomogenousExcitabilitySettings(1, 0.7, 0.2d);
                     break;
             }
 
             //Simplified readout layer configuration
-            ReadoutLayerSettings readoutCfg = StateMachineDesigner.CreateClassificationReadoutCfg(StateMachineDesigner.CreateSingleLayerRegrNet(new ElliotSettings(), 5, 400),
+            ReadoutLayerSettings readoutCfg = StateMachineDesigner.CreateClassificationReadoutCfg(StateMachineDesigner.CreateMultiLayerRegrNet(10, new LeakyReLUSettings(), 2, 5, 400),
                                                                                                   0.0825d,
                                                                                                   1,
                                                                                                   "Hand movement",
@@ -91,15 +115,15 @@ namespace Demo.DemoConsoleApp.Examples
             //Create designer instance
             StateMachineDesigner smd = new StateMachineDesigner(inputCfg, readoutCfg);
             //Create pure LSM fashioned StateMachine configuration
-            StateMachineSettings stateMachineCfg = smd.CreatePureLSMCfg(new ProportionsSettings(180, 1, 1), //Proportions (it also determines total size)
-                                                                        new LeakyIFSettings(), //Activation
-                                                                        new HomogenousExcitabilitySettings(0.8, 0.5, 0.05), //Homogenous excitability
-                                                                        1d, //Input connection density
+            StateMachineSettings stateMachineCfg = smd.CreatePureLSMCfg(192, //Total size of the reservoir
+                                                                        new AdExpIFSettings(), //Activation
+                                                                        homogenousExcitability, //Homogenous excitability
+                                                                        1, //Input connection density
                                                                         0, //Input max delay
                                                                         0.1d, //Interconnection density
                                                                         0, //Internal synapses max delay
                                                                         0, //Steady bias
-                                                                        null,
+                                                                        new PredictorsParamsSettings(new FiringFadingSumSettings(0.0005)),
                                                                         PredictorsProvider.PredictorID.FiringFadingSum
                                                                         );
 

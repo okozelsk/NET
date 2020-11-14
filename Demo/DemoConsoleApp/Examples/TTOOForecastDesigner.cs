@@ -26,7 +26,7 @@ namespace Demo.DemoConsoleApp.Examples
             //Create StateMachine configuration
             //Simplified input configuration
             InputEncoderSettings inputCfg = StateMachineDesigner.CreateInputCfg(new FeedingContinuousSettings(FeedingContinuousSettings.AutoBootCyclesNum),
-                                                                                new SpikesEncodingSettings(new SpikesEncodingForbiddenSettings()),
+                                                                                new InputSpikesCoderSettings(),
                                                                                 true,
                                                                                 new ExternalFieldSettings("High", new RealFeatureFilterSettings()),
                                                                                 new ExternalFieldSettings("Low", new RealFeatureFilterSettings()),
@@ -44,7 +44,6 @@ namespace Demo.DemoConsoleApp.Examples
             //Create pure ESN fashioned StateMachine configuration
             StateMachineSettings stateMachineCfg = smd.CreatePureESNCfg(250,
                                                                         1d,
-                                                                        StateMachineDesigner.DefaultMaxInputWeightSum,
                                                                         0,
                                                                         0.2d,
                                                                         0,

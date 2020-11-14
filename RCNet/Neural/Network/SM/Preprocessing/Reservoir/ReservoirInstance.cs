@@ -629,6 +629,22 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                                 {
                                     //Restart from the beginning
                                     cmbIdx = 0;
+                                    /*
+                                    //Add analog synapse if allowed
+                                    if(nIdx < targetNeurons.Count - 1 && inputConnCfg.EnableIA2HS)
+                                    {
+                                        ++nIdx;
+                                        //Connect input analog neuron to spiking hidden neuron
+                                        Synapse synapse = new Synapse(inputField.AnalogNeuron,
+                                                                      targetNeurons[nIdx],
+                                                                      Synapse.SynRole.Input,
+                                                                      InstanceCfg.SynapseCfg,
+                                                                      rand
+                                                                      );
+                                        _inputDistancesStat.AddSampleValue(synapse.Distance);
+                                        SetInterconnection(_neuronInputConnectionsCollection, synapse);
+                                    }
+                                    */
                                 }
                             }
                             else

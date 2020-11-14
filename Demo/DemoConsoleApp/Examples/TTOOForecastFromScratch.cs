@@ -56,8 +56,7 @@ namespace Demo.DemoConsoleApp.Examples
             FeedingContinuousSettings feedingContinuousCfg = new FeedingContinuousSettings(FeedingContinuousSettings.AutoBootCyclesNum);
             //Create and return input configuration
             return new InputEncoderSettings(feedingContinuousCfg,
-                                            new SpikesEncodingSettings(new SpikesEncodingForbiddenSettings()),
-                                            new VaryingFieldsSettings(externalFieldsCfg, null, null, RouteToReadout)
+                                            new VaryingFieldsSettings(new InputSpikesCoderSettings(), externalFieldsCfg, null, null, RouteToReadout)
                                             );
         }
 

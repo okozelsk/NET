@@ -23,9 +23,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// </summary>
         public const int DefaultSlices = 1;
         /// <summary>
-        /// Default value of parameter specifying if to preprocess time series pattern in both time directions (doubles predictors in total)
+        /// Default value of parameter specifying whether and how to preprocess time series pattern in both time directions
         /// </summary>
-        public const bool DefaultBidir = false;
+        public const NeuralPreprocessor.BidirProcessing DefaultBidir = NeuralPreprocessor.BidirProcessing.Forbidden;
         /// <summary>
         /// Default value of parameter specifying variables organization in the pattern
         /// </summary>
@@ -38,9 +38,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         public int Slices { get; }
 
         /// <summary>
-        /// Specifies whether to preprocess time series pattern in both time directions (doubles predictors in total)
+        /// Specifies whether and how to preprocess time series pattern in both time directions
         /// </summary>
-        public bool Bidir { get; }
+        public NeuralPreprocessor.BidirProcessing Bidir { get; }
 
         /// <summary>
         /// Specifies variables organization in the pattern
@@ -62,12 +62,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// Creates an itialized instance.
         /// </summary>
         /// <param name="slices">Specifies how many times to collect predictors during pattern data preprocessing</param>
-        /// <param name="bidir">Specifies whether to preprocess time series pattern in both time directions (doubles predictors in total)</param>
+        /// <param name="bidir">Specifies whether and how to preprocess time series pattern in both time directions</param>
         /// <param name="varSchema">Specifies variables organization in the pattern</param>
         /// <param name="unificationCfg">Configuration of an input pattern unification</param>
         /// <param name="steadyFieldsCfg">Steady external input fields settings</param>
         public FeedingPatternedSettings(int slices = DefaultSlices,
-                                        bool bidir = DefaultBidir,
+                                        NeuralPreprocessor.BidirProcessing bidir = DefaultBidir,
                                         InputPattern.VariablesSchema varSchema = DefaultVarSchema,
                                         UnificationSettings unificationCfg = null,
                                         SteadyFieldsSettings steadyFieldsCfg = null
@@ -102,7 +102,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
             Slices = int.Parse(settingsElem.Attribute("slices").Value, CultureInfo.InvariantCulture);
-            Bidir = bool.Parse(settingsElem.Attribute("bidir").Value);
+            Bidir = (NeuralPreprocessor.BidirProcessing)Enum.Parse(typeof(NeuralPreprocessor.BidirProcessing), settingsElem.Attribute("bidir").Value, true);
             VarSchema = (InputPattern.VariablesSchema)Enum.Parse(typeof(InputPattern.VariablesSchema), settingsElem.Attribute("variablesSchema").Value, true);
             XElement uniElem = settingsElem.Elements("unification").FirstOrDefault();
             if (uniElem != null)
@@ -207,7 +207,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             }
             if (!suppressDefaults || !IsDefaultBidir)
             {
-                rootElem.Add(new XAttribute("bidir", Bidir.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()));
+                rootElem.Add(new XAttribute("bidir", Bidir.ToString()));
             }
             if (!suppressDefaults || !IsDefaultVarSchema)
             {

@@ -32,15 +32,18 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
 
         //Attributes
         private double _stimuli;
+        private int _verticalCycles;
 
         //Constructor
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
         /// <param name="location">Neuron's location</param>
-        public AnalogInputNeuron(NeuronLocation location)
+        /// <param name="verticalCycles">Neuron's vertical cycles</param>
+        public AnalogInputNeuron(NeuronLocation location, int verticalCycles = 1)
         {
             Location = location;
+            _verticalCycles = verticalCycles;
             Statistics = new NeuronStatistics();
             OutputData = new NeuronOutputData();
             Reset(false);
@@ -94,7 +97,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
             //Analog output signal
             OutputData._analogSignal = _stimuli;
             //Transposed and scaled analog signal as direct input for spiking target neuron
-            OutputData._spikingSignal = (_stimuli + 1d) / 2d;
+            OutputData._spikingSignal = ((_stimuli + 1d) / 2d) / _verticalCycles;
             //Statistics
             if (collectStatistics)
             {

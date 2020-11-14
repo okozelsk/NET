@@ -8,6 +8,7 @@ using RCNet.CsvTools;
 using System.Globalization;
 using System.IO;
 using System.Text;
+using System.Linq;
 
 namespace Demo.DemoConsoleApp
 {
@@ -185,27 +186,59 @@ namespace Demo.DemoConsoleApp
             return builder.ToString();
         }
 
+        private string ByteArraysToString(byte[][] arr)
+        {
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < arr.Length; i++)
+            {
+                builder.Append(" ");
+                builder.Append(ByteArrayToString(arr[i]));
+            }
+            return builder.ToString();
+        }
+
         private void TestA2SCoder()
         {
             double[] analogValues = { -1, -0.9, -0.8, -0.7, -0.6, -0.5, -0.4, -0.3, -0.2, -0.1, -0.05, -0.025, -0.0125, 0, 0.0125, 0.025, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1 };
             A2SCoderBase coder = null;
-            //Potentiometer
-            int valAbsCodeLength = 32;
-            coder = new A2SCoderPotentiometer(new A2SCoderPotentiometerSettings(valAbsCodeLength, 0.01d, true));
+            int baseCodeLength = 16;
+
+            //Gaussian
+            coder = new A2SCoderGaussianReceptors(new A2SCoderGaussianReceptorsSettings(8, baseCodeLength));
             Console.WriteLine($"{coder.GetType().Name}");
-            Console.WriteLine($"    {"",-11}{"Bellow average".PadRight(valAbsCodeLength)}Above average");
             foreach (double value in analogValues)
             {
-                Console.WriteLine($"    {value.ToString(CultureInfo.InvariantCulture), -10} {ByteArrayToString(coder.GetCode(value))}");
+                Console.WriteLine($"    {value.ToString(CultureInfo.InvariantCulture),-10} {ByteArraysToString(coder.GetCode(value))}");
             }
             Console.ReadLine();
-            //Bintree
-            coder = new A2SCoderBintree(new A2SCoderBintreeSettings(valAbsCodeLength, false));
+
+            //Signal strength
+            coder = new A2SCoderSignalStrength(new A2SCoderSignalStrengthSettings(baseCodeLength));
             Console.WriteLine($"{coder.GetType().Name}");
             foreach (double value in analogValues)
             {
-                Console.WriteLine($"    {value.ToString(CultureInfo.InvariantCulture),-10} {ByteArrayToString(coder.GetCode(value))}");
+                Console.WriteLine($"    {value.ToString(CultureInfo.InvariantCulture),-10} {ByteArraysToString(coder.GetCode(value))}");
             }
+            Console.ReadLine();
+
+            //UpDirArrows
+            coder = new A2SCoderUpDirArrows(new A2SCoderUpDirArrowsSettings(baseCodeLength));
+            Console.WriteLine($"{coder.GetType().Name}");
+            foreach (double value in analogValues)
+            {
+                Console.WriteLine($"    {value.ToString(CultureInfo.InvariantCulture),-10} {ByteArraysToString(coder.GetCode(value))}");
+            }
+            Console.ReadLine();
+
+            //DownDirArrows
+            coder = new A2SCoderDownDirArrows(new A2SCoderDownDirArrowsSettings(baseCodeLength));
+            Console.WriteLine($"{coder.GetType().Name}");
+            foreach (double value in analogValues.Reverse())
+            {
+                Console.WriteLine($"    {value.ToString(CultureInfo.InvariantCulture),-10} {ByteArraysToString(coder.GetCode(value))}");
+            }
+            Console.ReadLine();
+
             return;
         }
 

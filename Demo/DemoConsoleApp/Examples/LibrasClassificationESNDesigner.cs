@@ -3,6 +3,7 @@ using RCNet.Neural.Activation;
 using RCNet.Neural.Data.Coders.AnalogToSpiking;
 using RCNet.Neural.Data.Filter;
 using RCNet.Neural.Network.SM;
+using RCNet.Neural.Network.SM.Preprocessing;
 using RCNet.Neural.Network.SM.Preprocessing.Input;
 using RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor;
 using RCNet.Neural.Network.SM.Readout;
@@ -35,8 +36,8 @@ namespace Demo.DemoConsoleApp.Examples
         {
             //Create StateMachine configuration
             //Simplified input configuration
-            InputEncoderSettings inputCfg = StateMachineDesigner.CreateInputCfg(new FeedingPatternedSettings(1, true, RCNet.Neural.Data.InputPattern.VariablesSchema.Groupped),
-                                                                                new SpikesEncodingSettings(new SpikesEncodingForbiddenSettings()),
+            InputEncoderSettings inputCfg = StateMachineDesigner.CreateInputCfg(new FeedingPatternedSettings(1, NeuralPreprocessor.BidirProcessing.WithReset, RCNet.Neural.Data.InputPattern.VariablesSchema.Groupped),
+                                                                                new InputSpikesCoderSettings(),
                                                                                 false,
                                                                                 new ExternalFieldSettings("coord_abcissa", new RealFeatureFilterSettings()),
                                                                                 new ExternalFieldSettings("coord_ordinate", new RealFeatureFilterSettings())
@@ -67,14 +68,13 @@ namespace Demo.DemoConsoleApp.Examples
             //Create pure ESN fashioned StateMachine configuration
             StateMachineSettings stateMachineCfg = smd.CreatePureESNCfg(150,
                                                                         0.25d,
-                                                                        StateMachineDesigner.DefaultMaxInputWeightSum,
                                                                         5,
                                                                         0.1d,
                                                                         0,
                                                                         0,
                                                                         0,
-                                                                        null,
-                                                                        PredictorsProvider.PredictorID.FiringCount
+                                                                        new PredictorsParamsSettings(new FiringFadingSumSettings(0.05)),
+                                                                        PredictorsProvider.PredictorID.FiringFadingSum
                                                                         );
             //Display StateMachine xml configuration
             string xmlConfig = stateMachineCfg.GetXml(true).ToString();

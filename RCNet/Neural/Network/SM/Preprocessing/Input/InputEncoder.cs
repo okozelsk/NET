@@ -57,18 +57,18 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         }
 
         /// <summary>
-        /// Type of spikes encoding
+        /// Enumeration of spiking input encoding regimes
         /// </summary>
-        public enum SpikesEncodingType
+        public enum SpikingInputEncodingRegime
         {
             /// <summary>
-            /// Spikes are encoded as input neurons population activity (horizontal)
+            /// Spikes are encoded at once as input neurons population activity (horizontal)
             /// </summary>
-            Population,
+            Horizontal,
             /// <summary>
-            /// Spikes are encoded as spike-train on single input neuron (vertical)
+            /// Spikes are encoded in several cycles as spike-train on single input neuron (vertical)
             /// </summary>
-            Spiketrain,
+            Vertical,
             /// <summary>
             /// Spikes encoding is not allowed
             /// </summary>
@@ -150,11 +150,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         private int _numOfProcessedInputs;
 
         /// <summary>
-        /// Number of alredy processed fetches of currently encoded data
-        /// </summary>
-        private int _numOfProcessedFetches;
-
-        /// <summary>
         /// Indicates reverse mode of input data processing
         /// </summary>
         private bool _reverseMode;
@@ -198,7 +193,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
                                           coordinates,
                                           _dataRange,
                                           fieldCfg.FeatureFilterCfg,
-                                          _encoderCfg.SpikesEncodingCfg.EncodingCfg,
+                                          _encoderCfg.VaryingFieldsCfg.SpikesCoderCfg,
                                           (fieldCfg.RouteToReadout && _encoderCfg.VaryingFieldsCfg.RouteToReadout),
                                           inputNeuronStartIdx
                                           ));
@@ -217,7 +212,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
                                               coordinates,
                                               _dataRange,
                                               fieldCfg.FeatureFilterCfg,
-                                              _encoderCfg.SpikesEncodingCfg.EncodingCfg,
+                                              _encoderCfg.VaryingFieldsCfg.SpikesCoderCfg,
                                               (fieldCfg.RouteToReadout && _encoderCfg.VaryingFieldsCfg.RouteToReadout),
                                               inputNeuronStartIdx
                                               ));
@@ -236,7 +231,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
                                               coordinates,
                                               _dataRange,
                                               fieldCfg.FeatureFilterCfg,
-                                              _encoderCfg.SpikesEncodingCfg.EncodingCfg,
+                                              _encoderCfg.VaryingFieldsCfg.SpikesCoderCfg,
                                               (fieldCfg.RouteToReadout && _encoderCfg.VaryingFieldsCfg.RouteToReadout),
                                               inputNeuronStartIdx
                                               ));
@@ -293,7 +288,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             _steadyData = null;
             _inputDataQueue.Clear();
             _numOfProcessedInputs = 0;
-            _numOfProcessedFetches = 0;
             _reverseMode = false;
             return;
         }
@@ -598,7 +592,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
                     _varyingFields[i].SetNewData(_inputDataQueue[_numOfProcessedInputs][i]);
                 }
                 ++_numOfProcessedInputs;
-                _numOfProcessedFetches = 0;
                 return true;
             }
             return false;
@@ -610,16 +603,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <param name="collectStatistics">Specifies whether to update internal statistics of associated input neurons</param>
         public bool Fetch(bool collectStatistics)
         {
-            if (_numOfProcessedFetches < _encoderCfg.NumOfFetches)
+            foreach(InputField field in _varyingFields)
             {
-                for (int i = 0; i < _varyingFields.Count; i++)
+                if(!field.Fetch(collectStatistics))
                 {
-                    _varyingFields[i].Fetch(collectStatistics);
+                    return false;
                 }
-                ++_numOfProcessedFetches;
-                return true;
             }
-            return false;
+            return true;
         }
 
         /// <summary>

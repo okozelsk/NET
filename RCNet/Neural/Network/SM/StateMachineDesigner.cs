@@ -26,10 +26,6 @@ namespace RCNet.Neural.Network.SM
     public class StateMachineDesigner
     {
         //Constants
-        /// <summary>
-        /// Default maximum total sum of input synapses' weights per analog hidden neuron
-        /// </summary>
-        public const double DefaultMaxInputWeightSum = 2.75d;
 
         //Enums
         /// <summary>
@@ -100,22 +96,22 @@ namespace RCNet.Neural.Network.SM
         /// All input fields are considered as the real values.
         /// </summary>
         /// <param name="feedingCfg">Input feeding configuration</param>
+        /// <param name="spikesCoderCfg">Configuration of the input spikes coder</param>
         /// <param name="extFieldNameCollection">Names of the external input fields</param>
         /// <param name="routeToReadout">Specifies whether to route input values to readout</param>
-        /// <param name="spikesEncodingCfg">Configuration of the spikies encoding</param>
         public static InputEncoderSettings CreateInputCfg(IFeedingSettings feedingCfg,
+                                                          InputSpikesCoderSettings spikesCoderCfg,
                                                           IEnumerable<string> extFieldNameCollection,
-                                                          bool routeToReadout = true,
-                                                          SpikesEncodingSettings spikesEncodingCfg = null
+                                                          bool routeToReadout = true
                                                           )
         {
             if (feedingCfg == null)
             {
                 throw new ArgumentNullException("feedingCfg");
             }
-            if (spikesEncodingCfg == null)
+            if (spikesCoderCfg == null)
             {
-                spikesEncodingCfg = new SpikesEncodingSettings(new SpikesEncodingPopulationSettings(new A2SCoderPotentiometerSettings()));
+                spikesCoderCfg = new InputSpikesCoderSettings();
             }
             List<ExternalFieldSettings> extFieldCollection = new List<ExternalFieldSettings>();
             foreach (string name in extFieldNameCollection)
@@ -123,8 +119,8 @@ namespace RCNet.Neural.Network.SM
                 extFieldCollection.Add(new ExternalFieldSettings(name, new RealFeatureFilterSettings(), routeToReadout));
             }
             ExternalFieldsSettings extFieldsCfg = new ExternalFieldsSettings(extFieldCollection);
-            VaryingFieldsSettings fieldsCfg = new VaryingFieldsSettings(extFieldsCfg, null, null, routeToReadout);
-            return new InputEncoderSettings(feedingCfg, spikesEncodingCfg, fieldsCfg);
+            VaryingFieldsSettings fieldsCfg = new VaryingFieldsSettings(spikesCoderCfg, extFieldsCfg, null, null, routeToReadout);
+            return new InputEncoderSettings(feedingCfg, fieldsCfg);
         }
 
         /// <summary>
@@ -132,11 +128,11 @@ namespace RCNet.Neural.Network.SM
         /// Contains only external input fields.
         /// </summary>
         /// <param name="feedingCfg">Input feeding configuration</param>
-        /// <param name="spikesEncodingCfg">Configuration of the spikies encoding</param>
+        /// <param name="spikesCoderCfg">Configuration of the input spikes coder</param>
         /// <param name="routeToReadout">Specifies whether to route input values to readout</param>
         /// <param name="externalFieldCfg">External input field configuration</param>
         public static InputEncoderSettings CreateInputCfg(IFeedingSettings feedingCfg,
-                                                          SpikesEncodingSettings spikesEncodingCfg,
+                                                          InputSpikesCoderSettings spikesCoderCfg,
                                                           bool routeToReadout,
                                                           params ExternalFieldSettings[] externalFieldCfg
                                                           )
@@ -146,8 +142,8 @@ namespace RCNet.Neural.Network.SM
                 throw new ArgumentNullException("feedingCfg");
             }
             return new InputEncoderSettings(feedingCfg,
-                                            spikesEncodingCfg,
-                                            new VaryingFieldsSettings(new ExternalFieldsSettings(externalFieldCfg),
+                                            new VaryingFieldsSettings(spikesCoderCfg,
+                                                                      new ExternalFieldsSettings(externalFieldCfg),
                                                                       null,
                                                                       null,
                                                                       routeToReadout
@@ -353,7 +349,6 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         /// <param name="totalSize">Total number of hidden neurons</param>
         /// <param name="inputConnectionDensity">Density of the input field connections to hidden neurons</param>
-        /// <param name="maxInputWeightSum">Maximum total sum of input synapses' weights per analog hidden neuron (default value is defined as public DefaultMaxInputWeightSum constant)</param>
         /// <param name="maxInputDelay">Maximum delay of input synapse</param>
         /// <param name="interconnectionDensity">Density of the hidden neurons interconnection</param>
         /// <param name="maxInternalDelay">Maximum delay of internal synapse</param>
@@ -363,7 +358,6 @@ namespace RCNet.Neural.Network.SM
         /// <param name="allowedPredictor">Allowed predictor(s)</param>
         public StateMachineSettings CreatePureESNCfg(int totalSize,
                                                      double inputConnectionDensity,
-                                                     double maxInputWeightSum,
                                                      int maxInputDelay,
                                                      double interconnectionDensity,
                                                      int maxInternalDelay,
@@ -389,7 +383,6 @@ namespace RCNet.Neural.Network.SM
                                                                                      );
             //Input connections configuration
             List<InputConnSettings> inputConns = new List<InputConnSettings>(InputCfg.VaryingFieldsCfg.ExternalFieldsCfg.FieldCfgCollection.Count);
-            double maxInpSynWeight = maxInputWeightSum / InputCfg.VaryingFieldsCfg.ExternalFieldsCfg.FieldCfgCollection.Count;
             foreach (ExternalFieldSettings fieldCfg in InputCfg.VaryingFieldsCfg.ExternalFieldsCfg.FieldCfgCollection)
             {
                 InputConnSettings inputConnCfg = new InputConnSettings(fieldCfg.Name,
@@ -400,8 +393,7 @@ namespace RCNet.Neural.Network.SM
                 inputConns.Add(inputConnCfg);
             }
             //Synapse general configuration
-            AnalogSourceSettings asc = new AnalogSourceSettings(new URandomValueSettings(0, maxInpSynWeight));
-            SynapseATInputSettings synapseATInputSettings = new SynapseATInputSettings(Synapse.SynapticDelayMethod.Random, maxInputDelay, asc, null);
+            SynapseATInputSettings synapseATInputSettings = new SynapseATInputSettings(Synapse.SynapticDelayMethod.Random, maxInputDelay);
             SynapseATIndifferentSettings synapseATIndifferentSettings = new SynapseATIndifferentSettings(Synapse.SynapticDelayMethod.Random, maxInternalDelay);
             SynapseATSettings synapseATCfg = new SynapseATSettings(SynapseATSettings.DefaultSpectralRadiusNum, synapseATInputSettings, synapseATIndifferentSettings);
             SynapseSettings synapseCfg = new SynapseSettings(null, synapseATCfg);
@@ -435,7 +427,7 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// Creates StateMachine configuration following pure LSM design
         /// </summary>
-        /// <param name="proportionsCfg">LSM pool proportions</param>
+        /// <param name="totalSize">Total number of hidden neurons</param>
         /// <param name="aFnCfg">Spiking activation function configuration</param>
         /// <param name="hes">Homogenous excitability configuration</param>
         /// <param name="inputConnectionDensity">Density of the input field connections to hidden neurons</param>
@@ -445,7 +437,7 @@ namespace RCNet.Neural.Network.SM
         /// <param name="steadyBias">Constant bias (0 means bias is not required)</param>
         /// <param name="predictorsParamsCfg">Predictors parameters (use null for defaults)</param>
         /// <param name="allowedPredictor">Allowed predictor(s)</param>
-        public StateMachineSettings CreatePureLSMCfg(ProportionsSettings proportionsCfg,
+        public StateMachineSettings CreatePureLSMCfg(int totalSize,
                                                      RCNetBaseSettings aFnCfg,
                                                      HomogenousExcitabilitySettings hes,
                                                      double inputConnectionDensity,
@@ -466,7 +458,7 @@ namespace RCNet.Neural.Network.SM
             SpikingNeuronGroupSettings grp = CreateSpikingGroup(aFnCfg, hes, steadyBias);
             //Simple spiking pool
             PoolSettings poolCfg = new PoolSettings(GetPoolName(ActivationContent.Spiking, 0),
-                                                    proportionsCfg,
+                                                    new ProportionsSettings(totalSize, 1, 1),
                                                     new NeuronGroupsSettings(grp),
                                                     new InterconnSettings(new RandomSchemaSettings(interconnectionDensity, 0d, false, false))
                                                     );
@@ -486,9 +478,13 @@ namespace RCNet.Neural.Network.SM
                 inputConns.Add(inputConnCfg);
             }
             //Synapse general configuration
-            SynapseSTInputSettings synapseSTInputSettings = new SynapseSTInputSettings(Synapse.SynapticDelayMethod.Random, maxInputDelay);
-            SynapseSTExcitatorySettings synapseSTExcitatorySettings = new SynapseSTExcitatorySettings(Synapse.SynapticDelayMethod.Random, maxInternalDelay);
-            SynapseSTInhibitorySettings synapseSTInhibitorySettings = new SynapseSTInhibitorySettings(Synapse.SynapticDelayMethod.Random, maxInternalDelay);
+            SpikingSourceSTInputSettings spikingSourceSTInputSettings = new SpikingSourceSTInputSettings(new URandomValueSettings(0,1), new PlasticitySTInputSettings(new ConstantDynamicsSTInputSettings()));
+            SpikingSourceSTExcitatorySettings spikingSourceSTExcitatorySettings = new SpikingSourceSTExcitatorySettings(new URandomValueSettings(0, 1), new PlasticitySTExcitatorySettings(new ConstantDynamicsSTExcitatorySettings()));
+            SpikingSourceSTInhibitorySettings spikingSourceSTInhibitorySettings = new SpikingSourceSTInhibitorySettings(new URandomValueSettings(0, 1), new PlasticitySTInhibitorySettings(new ConstantDynamicsSTInhibitorySettings()));
+
+            SynapseSTInputSettings synapseSTInputSettings = new SynapseSTInputSettings(Synapse.SynapticDelayMethod.Random, maxInputDelay, null, spikingSourceSTInputSettings);
+            SynapseSTExcitatorySettings synapseSTExcitatorySettings = new SynapseSTExcitatorySettings(Synapse.SynapticDelayMethod.Random, maxInternalDelay, 4, null, spikingSourceSTExcitatorySettings);
+            SynapseSTInhibitorySettings synapseSTInhibitorySettings = new SynapseSTInhibitorySettings(Synapse.SynapticDelayMethod.Random, maxInternalDelay, 1, null, spikingSourceSTInhibitorySettings);
             SynapseSTSettings synapseSTCfg = new SynapseSTSettings(synapseSTInputSettings, synapseSTExcitatorySettings, synapseSTInhibitorySettings);
             SynapseSettings synapseCfg = new SynapseSettings(synapseSTCfg, null);
 

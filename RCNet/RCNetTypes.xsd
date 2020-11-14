@@ -29,6 +29,27 @@
     </xs:restriction>
   </xs:simpleType>
 
+  <!-- Enumeration of the bidir mode of neural preprocessor-->
+  <xs:simpleType name="NPBidirProcessing">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Continuous">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Bi-directional processing without hidden neurons' reset when input data time direction to be turned.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="WithReset">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Bi-directional processing with hidden neurons' reset when input data time direction to be turned.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Forbidden">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Bi-directional processing is forbidden.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+
   <!-- Enumeration of the output of the MWStat transformer -->
   <xs:simpleType name="MWStatTransformerOutputType">
     <xs:restriction base="xs:string">
@@ -122,6 +143,15 @@
     </xs:restriction>
   </xs:simpleType>
 
+  <!-- Enumeration of spiking input encoding regimes -->
+  <xs:simpleType name="SpikingInputEncodingRegimeType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Forbidden"/>
+      <xs:enumeration value="Horizontal"/>
+      <xs:enumeration value="Vertical"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <!-- Auto option-->
   <xs:simpleType name="AutoOptionType">
     <xs:restriction base="xs:string">
@@ -189,6 +219,14 @@
     <xs:restriction base="xs:unsignedInt">
       <xs:minInclusive value="2" />
       <xs:maxInclusive value="64" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Unsigned integer GE 2 and LE 32-->
+  <xs:simpleType name="UIntGE2LE32Type">
+    <xs:restriction base="xs:unsignedInt">
+      <xs:minInclusive value="2" />
+      <xs:maxInclusive value="32" />
     </xs:restriction>
   </xs:simpleType>
 
@@ -275,6 +313,14 @@
     <xs:restriction base="xs:double">
       <xs:minExclusive value="0" />
       <xs:maxInclusive value="1" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Unsigned double GT 0 LE 32-->
+  <xs:simpleType name="UDoubleGT0LE32Type">
+    <xs:restriction base="xs:double">
+      <xs:minExclusive value="0" />
+      <xs:maxInclusive value="32" />
     </xs:restriction>
   </xs:simpleType>
 
@@ -433,40 +479,43 @@
 
 
   <!-- Coders -->
-  <!-- Methods to code an analog value as spikes -->
-  <!-- Potentiometer spikes coding method -->
-  <xs:complexType name="A2SCoderPotentiometerType">
-    <xs:attribute type="UIntGE1LE128Type" name="absValCodeLength" use="optional" default="16">
+  <!-- Methods to code an analog signal as spikes -->
+  <!-- Gaussian receptive fields coder -->
+  <xs:complexType name="A2SCoderGaussianReceptorsType">
+    <xs:attribute type="UIntGE1LE32Type" name="receptors" use="optional" default="8">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 16</xs:documentation>
+        <xs:documentation xml:lang="en">Default value is 8</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute type="UDoubleGT0LT1Type" name="lowestThreshold" use="optional" default="1e-5">
+    <xs:attribute type="UIntGE2LE32Type" name="timePoints" use="optional" default="8">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Firing threshold of the most sensitive spike. Default value is 1e-5</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="xs:boolean" name="halved" use="optional" default="true">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Specifies if to generate halved spike-code where one half is dedicated for bellow average values (-) and second half for above average values (+)</xs:documentation>
+        <xs:documentation xml:lang="en">Default value is 8</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Bintree spikes coding method -->
-  <xs:complexType name="A2SCoderBintreeType">
-    <xs:attribute type="UIntGE1LE32Type" name="absValCodeLength" use="optional" default="8">
+  <!-- Signal strength coder -->
+  <xs:complexType name="A2SCoderSignalStrengthType">
+    <xs:attribute type="UIntGE2LE32Type" name="timePoints" use="optional" default="8">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 10</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="xs:boolean" name="halved" use="optional" default="true">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Specifies if to generate halved spike-code where one half is dedicated for bellow average values (-) and second half for above average values (+)</xs:documentation>
+        <xs:documentation xml:lang="en">Default value is 8</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
 
+  <!-- Signal direction arrows coder (common for up and down arrows) -->
+  <xs:complexType name="A2SCoderDirArrowsType">
+    <xs:attribute type="UIntGE1LE32Type" name="receptors" use="optional" default="8">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 8</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UIntGE1LE32Type" name="timePoints" use="optional" default="8">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 8</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
 
   <!-- Input generators -->
   <!-- Pulse generator -->
@@ -2128,9 +2177,9 @@
         <xs:documentation xml:lang="en">Specifies how many times to collect predictors during pattern data preprocessing. Default value is 1</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute type="xs:boolean" name="bidir" use="optional" default="false">
+    <xs:attribute type="NPBidirProcessing" name="bidir" use="optional" default="Forbidden">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Specifies whether to preprocess time series pattern in both time directions (doubles predictors in total). Default value is false</xs:documentation>
+        <xs:documentation xml:lang="en">Specifies whether and how to preprocess time series pattern in both time directions (doubles predictors in total). Default value is Forbidden</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="VariablesSchemaType" name="variablesSchema" use="optional" default="Groupped">
@@ -2140,34 +2189,19 @@
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Supported spikes encodings -->
-  <!-- Population encoding -->
-  <xs:complexType name="NPSpikesEncodingPopulationType">
-    <xs:choice minOccurs="1" maxOccurs="1">
-      <xs:element type="A2SCoderPotentiometerType" name="potentiometer" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="A2SCoderBintreeType" name="bintree" minOccurs="1" maxOccurs="1"/>
+  <!-- Input spikes coder -->
+  <xs:complexType name="NPInpSpikesCoderType">
+    <xs:choice minOccurs="0" maxOccurs="4">
+      <xs:element type="A2SCoderGaussianReceptorsType" name="gaussianReceptorsCoder" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="A2SCoderSignalStrengthType" name="signalStrengthCoder" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="A2SCoderDirArrowsType" name="upDirArrowsCoder" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="A2SCoderDirArrowsType" name="downDirArrowsCoder" minOccurs="1" maxOccurs="1"/>
     </xs:choice>
-  </xs:complexType>
-
-  <!-- Spike-train encoding -->
-  <xs:complexType name="NPSpikesEncodingSpiketrainType">
-    <xs:choice minOccurs="1" maxOccurs="1">
-      <xs:element type="A2SCoderPotentiometerType" name="potentiometer" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="A2SCoderBintreeType" name="bintree" minOccurs="1" maxOccurs="1"/>
-    </xs:choice>
-  </xs:complexType>
-
-  <!-- Forbidden encoding -->
-  <xs:complexType name="NPSpikesEncodingForbiddenType">
-  </xs:complexType>
-
-  <!-- Spikes encoding selection -->
-  <xs:complexType name="NPSpikesEncodingType">
-    <xs:choice minOccurs="1" maxOccurs="1">
-      <xs:element type="NPSpikesEncodingPopulationType" name="population" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="NPSpikesEncodingSpiketrainType" name="spike-train" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="NPSpikesEncodingForbiddenType" name="forbidden" minOccurs="1" maxOccurs="1"/>
-    </xs:choice>
+    <xs:attribute type="SpikingInputEncodingRegimeType" name="regime" use="optional" default="Forbidden">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is Forbidden.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- External input field -->
@@ -2255,6 +2289,7 @@
   <!-- Varying input fields -->
   <xs:complexType name="NPVaryingInpFieldsType">
     <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="NPInpSpikesCoderType" name="spikesCoder" minOccurs="1" maxOccurs="1"/>
       <xs:element type="NPExternalInpFieldsType" name="externalFields" minOccurs="1" maxOccurs="1"/>
       <xs:element type="NPTransformedInpFieldsType" name="transformedFields" minOccurs="0" maxOccurs="1"/>
       <xs:element type="NPGeneratedInpFieldsType" name="generatedFields" minOccurs="0" maxOccurs="1"/>
@@ -2273,7 +2308,6 @@
         <xs:element type="NPInpFeedingContinuousType" name="feedingContinuous" minOccurs="1" maxOccurs="1"/>
         <xs:element type="NPInpFeedingPatternedType" name="feedingPatterned" minOccurs="1" maxOccurs="1"/>
       </xs:choice>
-      <xs:element type="NPSpikesEncodingType" name="spikesEncoding" minOccurs="1" maxOccurs="1"/>
       <xs:element type="NPVaryingInpFieldsType" name="varyingFields" minOccurs="1" maxOccurs="1">
         <xs:unique name="np_unique_varying_input_field_name">
           <xs:selector xpath=".//field"/>
@@ -2304,6 +2338,11 @@
     <xs:attribute type="UDoubleLE1Type" name="analogTargetDensity" use="optional" default="1">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="enableIA2HS" use="optional" default="true">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is true</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>

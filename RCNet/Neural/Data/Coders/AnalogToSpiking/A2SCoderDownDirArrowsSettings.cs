@@ -5,50 +5,49 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Data.Coders.AnalogToSpiking
 {
     /// <summary>
-    /// Settings of A2SCoderBintree coder
+    /// Settings of A2SCoderDownDirArrows coder
     /// </summary>
     [Serializable]
-    public class A2SCoderBintreeSettings : RCNetBaseSettings, IA2SCoderSettings
+    public class A2SCoderDownDirArrowsSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
         /// Name of the associated xsd type
         /// </summary>
-        public const string XsdTypeName = "A2SCoderBintreeType";
+        public const string XsdTypeName = "A2SCoderDirArrowsType";
         //Default values
         /// <summary>
-        /// Default value of parameter specifying the length of the spike-code of the analog absolute value
+        /// Default value of parameter specifying number of receptors
         /// </summary>
-        public const int DefaultAbsValCodeLength = 8;
+        public const int DefaultNumOfReceptors = 8;
         /// <summary>
-        /// Default value of parameter specifying if to generate halved spike-code where one half is dedicated for bellow average values (-)
-        /// and second half for above average values (+)
+        /// Default value of parameter specifying number of time-points per receptor
         /// </summary>
-        public const bool DefaultHalved = true;
+        public const int DefaultNumOfTimePoints = 8;
 
         //Attribute properties
         /// <summary>
-        /// Length of the spike-code of the analog absolute value
+        /// Number of receptors
         /// </summary>
-        public int AbsValCodeLength { get; }
+        public int NumOfReceptors { get; }
 
         /// <summary>
-        /// Specifies if to generate halved spike-code where one half is dedicated for bellow average values (-)
-        /// and second half for above average values (+)
+        /// Number of time-points per receptor
         /// </summary>
-        public bool Halved { get; }
+        public int NumOfTimePoints { get; }
 
         //Constructors
         /// <summary>
         /// Creates an itialized instance.
         /// </summary>
-        /// <param name="absValCodeLength">Length of the spike-code of the analog absolute value</param>
-        /// <param name="halved">Specifies if to generate halved spike-code where one half is dedicated for bellow average values (-) and second half for above average values (+)</param>
-        public A2SCoderBintreeSettings(int absValCodeLength = DefaultAbsValCodeLength,
-                                             bool halved = DefaultHalved)
+        /// <param name="numOfReceptors">Number of receptors</param>
+        /// <param name="numOfTimePoints">Number of intervals per receptor</param>
+        public A2SCoderDownDirArrowsSettings(int numOfReceptors = DefaultNumOfReceptors,
+                                           int numOfTimePoints = DefaultNumOfTimePoints
+                                           )
         {
-            AbsValCodeLength = absValCodeLength;
-            Halved = halved;
+            NumOfReceptors = numOfReceptors;
+            NumOfTimePoints = numOfTimePoints;
             Check();
             return;
         }
@@ -57,8 +56,8 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
         /// The deep copy constructor.
         /// </summary>
         /// <param name="source">Source instance</param>
-        public A2SCoderBintreeSettings(A2SCoderBintreeSettings source)
-            : this(source.AbsValCodeLength, source.Halved)
+        public A2SCoderDownDirArrowsSettings(A2SCoderDownDirArrowsSettings source)
+            : this(source.NumOfReceptors, source.NumOfTimePoints)
         {
             return;
         }
@@ -67,13 +66,13 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
         /// Creates an initialized instance from the given xml element.
         /// </summary>
         /// <param name="elem">Xml element containing the initialization settings</param>
-        public A2SCoderBintreeSettings(XElement elem)
+        public A2SCoderDownDirArrowsSettings(XElement elem)
         {
             //Validation
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
-            AbsValCodeLength = int.Parse(settingsElem.Attribute("absValCodeLength").Value, CultureInfo.InvariantCulture);
-            Halved = bool.Parse(settingsElem.Attribute("halved").Value);
+            NumOfReceptors = int.Parse(settingsElem.Attribute("receptors").Value, CultureInfo.InvariantCulture);
+            NumOfTimePoints = int.Parse(settingsElem.Attribute("timePoints").Value, CultureInfo.InvariantCulture);
             Check();
             return;
         }
@@ -82,12 +81,12 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
         /// <summary>
         /// Checks if settings are default
         /// </summary>
-        public bool IsDefaultAbsValCodeLength { get { return (AbsValCodeLength == DefaultAbsValCodeLength); } }
+        public bool IsDefaultNumOfReceptors { get { return (NumOfReceptors == DefaultNumOfReceptors); } }
 
         /// <summary>
         /// Checks if settings are default
         /// </summary>
-        public bool IsDefaultHalved { get { return (Halved == DefaultHalved); } }
+        public bool IsDefaultNumOfTimePoints { get { return (NumOfTimePoints == DefaultNumOfTimePoints); } }
 
         /// <summary>
         /// Identifies settings containing only default values
@@ -96,8 +95,8 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
         {
             get
             {
-                return IsDefaultAbsValCodeLength &&
-                       IsDefaultHalved;
+                return IsDefaultNumOfReceptors &&
+                       IsDefaultNumOfTimePoints;
             }
         }
 
@@ -107,9 +106,13 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
         /// </summary>
         protected override void Check()
         {
-            if (AbsValCodeLength < 1 || AbsValCodeLength > 32)
+            if (NumOfReceptors < 1 || NumOfReceptors > 32)
             {
-                throw new ArgumentException($"Invalid AbsValCodeLength {AbsValCodeLength.ToString(CultureInfo.InvariantCulture)}. AbsValCodeLength must be GE to 1 and LE to 32.", "AbsValCodeLength");
+                throw new ArgumentException($"Invalid NumOfReceptors {NumOfReceptors.ToString(CultureInfo.InvariantCulture)}. NumOfReceptors must be GE to 1 and LE to 32.", "NumOfReceptors");
+            }
+            if (NumOfTimePoints < 1 || NumOfTimePoints > 32)
+            {
+                throw new ArgumentException($"Invalid NumOfTimePoints {NumOfTimePoints.ToString(CultureInfo.InvariantCulture)}. NumOfTimePoints must be GE to 1 and LE to 32.", "NumOfTimePoints");
             }
             return;
         }
@@ -119,7 +122,7 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
         /// </summary>
         public override RCNetBaseSettings DeepClone()
         {
-            return new A2SCoderBintreeSettings(this);
+            return new A2SCoderDownDirArrowsSettings(this);
         }
 
         /// <summary>
@@ -131,13 +134,13 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             XElement rootElem = new XElement(rootElemName);
-            if (!suppressDefaults || !IsDefaultAbsValCodeLength)
+            if (!suppressDefaults || !IsDefaultNumOfReceptors)
             {
-                rootElem.Add(new XAttribute("absValCodeLength", AbsValCodeLength.ToString(CultureInfo.InvariantCulture)));
+                rootElem.Add(new XAttribute("receptors", NumOfReceptors.ToString(CultureInfo.InvariantCulture)));
             }
-            if (!suppressDefaults || !IsDefaultHalved)
+            if (!suppressDefaults || !IsDefaultNumOfTimePoints)
             {
-                rootElem.Add(new XAttribute("halved", Halved.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()));
+                rootElem.Add(new XAttribute("timePoints", NumOfTimePoints.ToString(CultureInfo.InvariantCulture)));
             }
             Validate(rootElem, XsdTypeName);
             return rootElem;
@@ -150,10 +153,10 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(bool suppressDefaults)
         {
-            return GetXml("bintree", suppressDefaults);
+            return GetXml("downDirArrowsCoder", suppressDefaults);
         }
 
-    }//A2SCoderBintreeSettings
+    }//A2SCoderDownDirArrows
 
 }//Namespace
 

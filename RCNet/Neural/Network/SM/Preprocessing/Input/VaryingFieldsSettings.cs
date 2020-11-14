@@ -8,7 +8,7 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Input
 {
     /// <summary>
-    /// Contains configuration of external and generated varying input fields
+    /// Contains configuration of external and generated varying input fields and input spikes coder
     /// </summary>
     [Serializable]
     public class VaryingFieldsSettings : RCNetBaseSettings
@@ -25,6 +25,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         public const bool DefaultRouteToReadout = false;
 
         //Attribute properties
+        /// <summary>
+        /// Input spikes coder settings
+        /// </summary>
+        public InputSpikesCoderSettings SpikesCoderCfg { get; }
+
         /// <summary>
         /// External input fields settings
         /// </summary>
@@ -49,16 +54,19 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
+        /// <param name="spikesCoderCfg">Input spikes coder settings</param>
         /// <param name="externalFieldsCfg">External input fields settings</param>
         /// <param name="transformedFieldsCfg">Transformed input fields settings</param>
         /// <param name="generatedFieldsCfg">Generated input fields settings</param>
         /// <param name="routeToReadout">Specifies whether to route input fields to readout layer together with other predictors</param>
-        public VaryingFieldsSettings(ExternalFieldsSettings externalFieldsCfg,
-                                         TransformedFieldsSettings transformedFieldsCfg = null,
-                                         GeneratedFieldsSettings generatedFieldsCfg = null,
-                                         bool routeToReadout = DefaultRouteToReadout
-                                         )
+        public VaryingFieldsSettings(InputSpikesCoderSettings spikesCoderCfg,
+                                     ExternalFieldsSettings externalFieldsCfg,
+                                     TransformedFieldsSettings transformedFieldsCfg = null,
+                                     GeneratedFieldsSettings generatedFieldsCfg = null,
+                                     bool routeToReadout = DefaultRouteToReadout
+                                     )
         {
+            SpikesCoderCfg = (InputSpikesCoderSettings)spikesCoderCfg.DeepClone();
             ExternalFieldsCfg = (ExternalFieldsSettings)externalFieldsCfg.DeepClone();
             TransformedFieldsCfg = transformedFieldsCfg == null ? null : (TransformedFieldsSettings)transformedFieldsCfg.DeepClone();
             GeneratedFieldsCfg = generatedFieldsCfg == null ? null : (GeneratedFieldsSettings)generatedFieldsCfg.DeepClone();
@@ -72,7 +80,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// </summary>
         /// <param name="source">Source instance</param>
         public VaryingFieldsSettings(VaryingFieldsSettings source)
-            : this(source.ExternalFieldsCfg, source.TransformedFieldsCfg, source.GeneratedFieldsCfg, source.RouteToReadout)
+            : this(source.SpikesCoderCfg, source.ExternalFieldsCfg, source.TransformedFieldsCfg, source.GeneratedFieldsCfg, source.RouteToReadout)
         {
             return;
         }
@@ -86,6 +94,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             //Validation
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
+            SpikesCoderCfg = new InputSpikesCoderSettings(settingsElem.Elements("spikesCoder").First());
             ExternalFieldsCfg = new ExternalFieldsSettings(settingsElem.Elements("externalFields").First());
             XElement transformedFieldsElem = settingsElem.Elements("transformedFields").FirstOrDefault();
             TransformedFieldsCfg = transformedFieldsElem == null ? null : new TransformedFieldsSettings(transformedFieldsElem);
@@ -281,6 +290,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             XElement rootElem = new XElement(rootElemName,
+                                             SpikesCoderCfg.GetXml(suppressDefaults),
                                              ExternalFieldsCfg.GetXml(suppressDefaults)
                                              );
             if (TransformedFieldsCfg != null)

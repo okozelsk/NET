@@ -20,9 +20,9 @@ namespace Demo.DemoConsoleApp
                 Console.WriteLine("  3. TTOO share prices forecast (ESN design from scratch).");
                 Console.WriteLine("  4. TTOO share prices forecast (ESN design using StateMachineDesigner).");
                 Console.WriteLine("  5. Libras Movement classification (ESN design using StateMachineDesigner).");
-                Console.WriteLine("  6. Libras Movement classification (LSM design using StateMachineDesigner, spiking population input encoding).");
-                Console.WriteLine("  7. Libras Movement classification (LSM design using StateMachineDesigner, spike-train input encoding).");
-                Console.WriteLine("  8. Libras Movement classification (LSM design using StateMachineDesigner, directly analog input encoding).");
+                Console.WriteLine("  6. Libras Movement classification (LSM design using StateMachineDesigner, horizontal spiking input encoding).");
+                Console.WriteLine("  7. Libras Movement classification (LSM design using StateMachineDesigner, vertical spiking input encoding).");
+                Console.WriteLine("  8. Libras Movement classification (LSM design using StateMachineDesigner, analog input direct routing).");
                 Console.WriteLine("  9. Playground");
                 Console.WriteLine("  0. Exit");
                 Console.WriteLine();
@@ -89,7 +89,7 @@ namespace Demo.DemoConsoleApp
                     case '6':
                         try
                         {
-                            (new LibrasClassificationLSMDesigner()).Run(InputEncoder.SpikesEncodingType.Population);
+                            (new LibrasClassificationLSMDesigner()).Run(InputEncoder.SpikingInputEncodingRegime.Horizontal);
                         }
                         catch (Exception e)
                         {
@@ -100,7 +100,7 @@ namespace Demo.DemoConsoleApp
                     case '7':
                         try
                         {
-                            (new LibrasClassificationLSMDesigner()).Run(InputEncoder.SpikesEncodingType.Spiketrain);
+                            (new LibrasClassificationLSMDesigner()).Run(InputEncoder.SpikingInputEncodingRegime.Vertical);
                         }
                         catch (Exception e)
                         {
@@ -111,7 +111,7 @@ namespace Demo.DemoConsoleApp
                     case '8':
                         try
                         {
-                            (new LibrasClassificationLSMDesigner()).Run(InputEncoder.SpikesEncodingType.Forbidden);
+                            (new LibrasClassificationLSMDesigner()).Run(InputEncoder.SpikingInputEncodingRegime.Forbidden);
                         }
                         catch (Exception e)
                         {

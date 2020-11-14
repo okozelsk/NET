@@ -18,6 +18,26 @@ namespace RCNet.Neural.Network.SM.Preprocessing
     [Serializable]
     public class NeuralPreprocessor
     {
+        //Enums
+        /// <summary>
+        /// Specifies whether and how to preprocess time series pattern in both time directions (doubles predictors in total).
+        /// </summary>
+        public enum BidirProcessing
+        {
+            /// <summary>
+            /// Bi-directional processing without hidden neurons' reset when input data time direction to be turned
+            /// </summary>
+            Continuous,
+            /// <summary>
+            /// Bi-directional processing without hidden neurons' reset when input data time direction to be turned
+            /// </summary>
+            WithReset,
+            /// <summary>
+            /// Bi-directional processing is forbidden
+            /// </summary>
+            Forbidden
+        }
+
         //Delegates
         /// <summary>
         /// Delegate of PreprocessingProgressChanged event handler.
@@ -137,9 +157,15 @@ namespace RCNet.Neural.Network.SM.Preprocessing
 
         //Properties
         /// <summary>
-        /// Indicates bidirectional input processing
+        /// Specifies mode of bidirectional input processing
         /// </summary>
-        private bool Bidir { get { return _preprocessorCfg.InputEncoderCfg.FeedingCfg.FeedingType == InputEncoder.InputFeedingType.Patterned && ((FeedingPatternedSettings)_preprocessorCfg.InputEncoderCfg.FeedingCfg).Bidir; } }
+        private BidirProcessing Bidir
+        {
+            get
+            {
+                return _preprocessorCfg.InputEncoderCfg.FeedingCfg.FeedingType == InputEncoder.InputFeedingType.Patterned ? ((FeedingPatternedSettings)_preprocessorCfg.InputEncoderCfg.FeedingCfg).Bidir : BidirProcessing.Forbidden;
+            }
+        }
 
         /// <summary>
         /// Number of suppressed output features (exhibits no meaningfully different values or directly reduced by setup parameters)
@@ -196,7 +222,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             {
                 //Patterned feeding
                 FeedingPatternedSettings patternedCfg = (FeedingPatternedSettings)_preprocessorCfg.InputEncoderCfg.FeedingCfg;
-                for (int i = 0; i < (patternedCfg.Bidir ? 2 : 1); i++)
+                for (int i = 0; i < (patternedCfg.Bidir != BidirProcessing.Forbidden ? 2 : 1); i++)
                 {
                     for(int j = 0; j < patternedCfg.Slices; j++)
                     {
@@ -331,7 +357,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// <param name="collectStatistics">Indicates whether to update internal statistics</param>
         private double[] ProcessPendingData(bool collectStatistics)
         {
-            double[] predictors = new double[_totalNumOfReservoirsPredictors / (Bidir ? 2 : 1)];
+            double[] predictors = new double[_totalNumOfReservoirsPredictors / (Bidir == BidirProcessing.Forbidden ? 1 : 2)];
             int predictorsIdx = 0;
             int predictorsTimePointSlicesPlanIdx = 0;
             int computationStep = 1;
@@ -386,8 +412,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing
             predictors.CopyTo(outputFeatures, outputFeaturesIdx);
             outputFeaturesIdx += predictors.Length;
             //Bidirectional input processing?
-            if (Bidir)
+            if (Bidir != BidirProcessing.Forbidden)
             {
+                if (Bidir == BidirProcessing.WithReset)
+                {
+                    ResetReservoirs(false);
+                }
                 //Set reverse mode
                 _inputEncoder.SetReverseMode();
                 //Process reversed input data in reservoirs
