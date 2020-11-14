@@ -2340,11 +2340,6 @@
         <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute type="xs:boolean" name="enableIA2HS" use="optional" default="true">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is true</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
   </xs:complexType>
 
   <!-- Input connections -->

@@ -24,10 +24,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// Default analog target density
         /// </summary>
         public const double DefaultAnalogTargetDensity = 1d;
-        /// <summary>
-        /// Default value of the parameter specifying whether to enable connection from analog input neuron to hidden spiking neuron
-        /// </summary>
-        public const bool DefaultEnableIA2HS = true;
 
         /// <summary>
         /// Name of the input field
@@ -49,11 +45,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// </summary>
         public double AnalogTargetDensity { get; }
 
-        /// <summary>
-        /// Specifies whether to enable connection from analog input neuron to hidden spiking neuron
-        /// </summary>
-        public bool EnableIA2HS { get; }
-
         //Constructors
         /// <summary>
         /// Creates an itialized instance.
@@ -62,19 +53,16 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// <param name="poolName">Name of target pool</param>
         /// <param name="spikingTargetDensity">Spiking target density</param>
         /// <param name="analogTargetDensity">Analog target density</param>
-        /// <param name="enableIA2HS">Specifies whether to enable connection from analog input neuron to hidden spiking neuron</param>
         public InputConnSettings(string inputFieldName,
                                  string poolName,
                                  double spikingTargetDensity = DefaultSpikingTargetDensity,
-                                 double analogTargetDensity = DefaultAnalogTargetDensity,
-                                 bool enableIA2HS = DefaultEnableIA2HS
+                                 double analogTargetDensity = DefaultAnalogTargetDensity
                                  )
         {
             InputFieldName = inputFieldName;
             PoolName = poolName;
             SpikingTargetDensity = spikingTargetDensity;
             AnalogTargetDensity = analogTargetDensity;
-            EnableIA2HS = enableIA2HS;
             Check();
             return;
         }
@@ -84,7 +72,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// </summary>
         /// <param name="source">Source instance</param>
         public InputConnSettings(InputConnSettings source)
-            : this(source.InputFieldName, source.PoolName, source.SpikingTargetDensity, source.AnalogTargetDensity, source.EnableIA2HS)
+            : this(source.InputFieldName, source.PoolName, source.SpikingTargetDensity, source.AnalogTargetDensity)
         {
             return;
         }
@@ -102,7 +90,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             PoolName = settingsElem.Attribute("poolName").Value;
             SpikingTargetDensity = double.Parse(settingsElem.Attribute("spikingTargetDensity").Value, CultureInfo.InvariantCulture);
             AnalogTargetDensity = double.Parse(settingsElem.Attribute("analogTargetDensity").Value, CultureInfo.InvariantCulture);
-            EnableIA2HS = bool.Parse(settingsElem.Attribute("enableIA2HS").Value);
             Check();
             return;
         }
@@ -117,11 +104,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// Checks if settings are default
         /// </summary>
         public bool IsDefaultAnalogTargetDensity { get { return (AnalogTargetDensity == DefaultAnalogTargetDensity); } }
-
-        /// <summary>
-        /// Checks if settings are default
-        /// </summary>
-        public bool IsDefaultEnableIA2HS { get { return (EnableIA2HS == DefaultEnableIA2HS); } }
 
         /// <summary>
         /// Identifies settings containing only default values
@@ -180,10 +162,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             if (!suppressDefaults || !IsDefaultAnalogTargetDensity)
             {
                 rootElem.Add(new XAttribute("analogTargetDensity", AnalogTargetDensity.ToString(CultureInfo.InvariantCulture)));
-            }
-            if (!suppressDefaults || !IsDefaultEnableIA2HS)
-            {
-                rootElem.Add(new XAttribute("enableIA2HS", EnableIA2HS.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()));
             }
             Validate(rootElem, XsdTypeName);
             return rootElem;
