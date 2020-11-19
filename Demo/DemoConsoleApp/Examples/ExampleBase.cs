@@ -103,36 +103,43 @@ namespace Demo.DemoConsoleApp.Examples
         /// <param name="predictionInputVector">Returned vector to be used for next prediction (relevant only in case of continuous feeding of the input)</param>
         protected void TrainStateMachine(StateMachine stateMachine, string trainingDataFileName, out double[] predictionInputVector)
         {
-            //Check NeuralPreprocessor is configured
-            if (stateMachine.Config.NeuralPreprocessorCfg == null)
-            {
-                throw new InvalidOperationException($"Can't train StateMachine. Neural preprocessor has to be configured.");
-            }
             //Register to RegressionEpochDone event
             stateMachine.RL.RegressionEpochDone += OnRegressionEpochDone;
             //Load csv data
             CsvDataHolder trainingCsvData = new CsvDataHolder(trainingDataFileName);
             //Convert csv data to VectorBundle useable for StateMachine training
             VectorBundle trainingData;
-            if (stateMachine.Config.NeuralPreprocessorCfg.InputEncoderCfg.FeedingCfg.FeedingType == InputEncoder.InputFeedingType.Continuous)
+            if (stateMachine.Config.NeuralPreprocessorCfg != null)
             {
-                //Continuous feeding data format
-                trainingData = VectorBundle.Load(trainingCsvData,
-                                                 stateMachine.Config.NeuralPreprocessorCfg.InputEncoderCfg.VaryingFieldsCfg.ExternalFieldsCfg.GetFieldNames(),
-                                                 stateMachine.Config.ReadoutLayerCfg.OutputFieldNameCollection,
-                                                 out predictionInputVector
-                                                 );
+                //Neural preprocessing is enabled
+                if (stateMachine.Config.NeuralPreprocessorCfg.InputEncoderCfg.FeedingCfg.FeedingType == InputEncoder.InputFeedingType.Continuous)
+                {
+                    //Continuous feeding data format
+                    trainingData = VectorBundle.Load(trainingCsvData,
+                                                     stateMachine.Config.NeuralPreprocessorCfg.InputEncoderCfg.VaryingFieldsCfg.ExternalFieldsCfg.GetFieldNames(),
+                                                     stateMachine.Config.ReadoutLayerCfg.OutputFieldNameCollection,
+                                                     out predictionInputVector
+                                                     );
+                }
+                else
+                {
+                    //Patterned feeding data format
+                    predictionInputVector = null;
+                    trainingData = VectorBundle.Load(trainingCsvData,
+                                                     stateMachine.Config.ReadoutLayerCfg.OutputFieldNameCollection.Count
+                                                     );
+                }
+                //Register to PreprocessingProgressChanged event
+                stateMachine.NP.PreprocessingProgressChanged += OnPreprocessingProgressChanged;
             }
             else
             {
-                //Patterned feeding data format
+                //Neural preprocessing is bypassed
                 predictionInputVector = null;
                 trainingData = VectorBundle.Load(trainingCsvData,
                                                  stateMachine.Config.ReadoutLayerCfg.OutputFieldNameCollection.Count
                                                  );
             }
-            //Register to PreprocessingProgressChanged event
-            stateMachine.NP.PreprocessingProgressChanged += OnPreprocessingProgressChanged;
             //StateMachine training
             StateMachine.TrainingResults trainingResults = stateMachine.Train(trainingData);
             _log.Write(string.Empty);
@@ -155,37 +162,43 @@ namespace Demo.DemoConsoleApp.Examples
         /// <param name="predictionInputVector">Returned vector to be used for next prediction (relevant only in case of continuous feeding of the input)</param>
         protected void VerifyStateMachine(StateMachine stateMachine, string verificationDataFileName, double[] omittedInputVector, out double[] predictionInputVector)
         {
-            //Check NeuralPreprocessor is configured
-            if (stateMachine.Config.NeuralPreprocessorCfg == null)
-            {
-                throw new InvalidOperationException($"Can't verify StateMachine. Neural preprocessor has to be configured.");
-            }
             //Load csv data
             CsvDataHolder verificationCsvData = new CsvDataHolder(verificationDataFileName);
             //Convert csv data to VectorBundle useable for StateMachine verification
             VectorBundle verificationData;
-            if (stateMachine.Config.NeuralPreprocessorCfg.InputEncoderCfg.FeedingCfg.FeedingType == InputEncoder.InputFeedingType.Continuous)
+            //Check NeuralPreprocessor is configured
+            if (stateMachine.Config.NeuralPreprocessorCfg != null)
             {
-                //Continuous input feeding
-                //Last known input values from training (predictionInputVector) must be pushed into the reservoirs to keep time series continuity
-                //(first input data in verification.csv is output of the last data in training.csv)
-                double[] tmp = stateMachine.Compute(omittedInputVector);
-                //Load verification data and get new predictionInputVector for final prediction
-                verificationData = VectorBundle.Load(verificationCsvData,
-                                                     stateMachine.Config.NeuralPreprocessorCfg.InputEncoderCfg.VaryingFieldsCfg.ExternalFieldsCfg.GetFieldNames(),
-                                                     stateMachine.Config.ReadoutLayerCfg.OutputFieldNameCollection,
-                                                     out predictionInputVector
-                                                     );
+                //Neural preprocessing is enabled
+                if (stateMachine.Config.NeuralPreprocessorCfg.InputEncoderCfg.FeedingCfg.FeedingType == InputEncoder.InputFeedingType.Continuous)
+                {
+                    //Continuous input feeding
+                    //Last known input values from training (predictionInputVector) must be pushed into the reservoirs to keep time series continuity
+                    //(first input data in verification.csv is output of the last data in training.csv)
+                    double[] tmp = stateMachine.Compute(omittedInputVector);
+                    //Load verification data and get new predictionInputVector for final prediction
+                    verificationData = VectorBundle.Load(verificationCsvData,
+                                                         stateMachine.Config.NeuralPreprocessorCfg.InputEncoderCfg.VaryingFieldsCfg.ExternalFieldsCfg.GetFieldNames(),
+                                                         stateMachine.Config.ReadoutLayerCfg.OutputFieldNameCollection,
+                                                         out predictionInputVector
+                                                         );
+                }
+                else
+                {
+                    predictionInputVector = null;
+                    //Patterned feeding data format
+                    verificationData = VectorBundle.Load(verificationCsvData, stateMachine.Config.ReadoutLayerCfg.OutputFieldNameCollection.Count);
+                }
             }
             else
             {
+                //Neural preprocessing is bypassed
                 predictionInputVector = null;
-                //Patterned feeding data format
                 verificationData = VectorBundle.Load(verificationCsvData, stateMachine.Config.ReadoutLayerCfg.OutputFieldNameCollection.Count);
             }
+            //StateMachine verification
             //Register to VerificationProgressChanged event
             stateMachine.VerificationProgressChanged += OnVerificationProgressChanged;
-            //StateMachine verification
             StateMachine.VerificationResults verificationResults = stateMachine.Verify(verificationData);
             _log.Write(string.Empty);
             //Report verification results

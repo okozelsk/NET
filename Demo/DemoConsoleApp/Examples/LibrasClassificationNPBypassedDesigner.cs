@@ -6,12 +6,13 @@ using RCNet.Neural.Network.SM;
 using RCNet.Neural.Network.SM.Preprocessing;
 using RCNet.Neural.Network.SM.Preprocessing.Input;
 using RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor;
+using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup;
 using RCNet.Neural.Network.SM.Readout;
 
 namespace Demo.DemoConsoleApp.Examples
 {
     /// <summary>
-    /// Example code shows how to setup StateMachine as a pure ESN for multivariate timeseries classification using StateMachineDesigner.
+    /// Example code shows how to setup StateMachine having bypassed neural preprocessor.
     /// Example uses LibrasMovement_train.csv and LibrasMovement_verify.csv from ./Data subfolder.
     /// The dataset is from "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
     /// https://timeseriesclassification.com/description.php?Dataset=Libras
@@ -27,7 +28,7 @@ namespace Demo.DemoConsoleApp.Examples
     /// Each instance represents 45 points on a bi-dimensional space, which can be plotted in an ordered way (from 1 through
     /// 45 as the X co-ordinate) in order to draw the path of the movement.
     /// </summary>
-    public class LibrasClassificationESNDesigner : ExampleBase
+    public class LibrasClassificationNPBypassedDesigner : ExampleBase
     {
         /// <summary>
         /// Runs the example code.
@@ -35,15 +36,8 @@ namespace Demo.DemoConsoleApp.Examples
         public void Run()
         {
             //Create StateMachine configuration
-            //Simplified input configuration
-            InputEncoderSettings inputCfg = StateMachineDesigner.CreateInputCfg(new FeedingPatternedSettings(1, NeuralPreprocessor.BidirProcessing.WithReset, RCNet.Neural.Data.InputPattern.VariablesSchema.Groupped),
-                                                                                new InputSpikesCoderSettings(),
-                                                                                false,
-                                                                                new ExternalFieldSettings("coord_abcissa", new RealFeatureFilterSettings()),
-                                                                                new ExternalFieldSettings("coord_ordinate", new RealFeatureFilterSettings())
-                                                                                );
-            //Simplified readout layer configuration
-            ReadoutLayerSettings readoutCfg = StateMachineDesigner.CreateClassificationReadoutCfg(StateMachineDesigner.CreateSingleLayerRegrNet(new IdentitySettings(), 5, 400),
+            //Simplified readout layer configuration using FF-network having 2 hidden layers as the classifier
+            ReadoutLayerSettings readoutCfg = StateMachineDesigner.CreateClassificationReadoutCfg(StateMachineDesigner.CreateMultiLayerRegrNet(10, new LeakyReLUSettings(), 2, 5, 400),
                                                                                                   0.0825d,
                                                                                                   1,
                                                                                                   "Hand movement",
@@ -64,19 +58,10 @@ namespace Demo.DemoConsoleApp.Examples
                                                                                                   "tremble"
                                                                                                   );
             //Create designer instance
-            StateMachineDesigner smd = new StateMachineDesigner(inputCfg, readoutCfg);
-            //Create pure ESN fashioned StateMachine configuration
-            StateMachineSettings stateMachineCfg = smd.CreatePureESNCfg(150, //Size
-                                                                        StateMachineDesigner.DefaultAnalogMaxInputStrength, //Max input strength
-                                                                        0.25d, //Input connection density
-                                                                        5, //Max input delay
-                                                                        0.1d, //Interconnection density
-                                                                        0, //Max internal delay
-                                                                        0, //Max absolute value of bias
-                                                                        0, //Max retainment strength
-                                                                        new PredictorsParamsSettings(new FiringFadingSumSettings(0.05)),
-                                                                        PredictorsProvider.PredictorID.FiringFadingSum
-                                                                        );
+            StateMachineDesigner smd = new StateMachineDesigner(readoutCfg);
+            //Create StateMachine configuration without preprocessing
+            StateMachineSettings stateMachineCfg = smd.CreateBypassedCfg();
+
             //Display StateMachine xml configuration
             string xmlConfig = stateMachineCfg.GetXml(true).ToString();
             _log.Write("StateMachine configuration xml:");
@@ -106,6 +91,6 @@ namespace Demo.DemoConsoleApp.Examples
             return;
         }
 
-    }//LibrasClassificationESNDesigner
+    }//LibrasClassificationNPBypassedDesigner
 
 }//Namespace

@@ -152,7 +152,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(bool suppressDefaults)
         {
-            return GetXml("dynamicsIE", suppressDefaults);
+            return GetXml("nonlinearDynamics", suppressDefaults);
         }
 
     }//NonlinearDynamicsSTInhibitorySettings

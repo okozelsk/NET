@@ -165,7 +165,8 @@ namespace RCNet.Neural.Data
                     //Upsample
                     double[] upsampledData = Upsample(patternRawData[varIdx], signalBeginIdxs[varIdx], signalEndIdxs[varIdx], lcm);
                     //Downsample
-                    double[] downsampledData = Downsample(upsampledData, targetTimePoints);
+                    double[] downsampledData = DownsampleMaxDiff(upsampledData, targetTimePoints);
+                    //double[] downsampledData = DownsampleAvg(upsampledData, targetTimePoints);
                     VariablesDataCollection.Add(downsampledData);
                 }
                 else
@@ -250,7 +251,7 @@ namespace RCNet.Neural.Data
             return upsampledData;
         }
 
-        private static double[] Downsample(double[] varData, int targetLength)
+        private static double[] DownsampleMaxDiff(double[] varData, int targetLength)
         {
             int downsamplingPoints = varData.Length / targetLength;
             if (downsamplingPoints > 1)
@@ -290,28 +291,7 @@ namespace RCNet.Neural.Data
             }
         }
 
-        /*
-        private static double[] Downsample(double[] varData, int targetLength)
-        {
-            int downsamplingPoints = varData.Length / targetLength;
-            if (downsamplingPoints > 1)
-            {
-                //Downsampling is necessary
-                double[] downsampledData = new double[targetLength];
-                for (int downsampledDataIdx = 0, varDataIdx = downsamplingPoints - 1; downsampledDataIdx < targetLength; downsampledDataIdx++, varDataIdx += downsamplingPoints)
-                {
-                    downsampledData[downsampledDataIdx] = varData[varDataIdx];
-                }
-                return downsampledData;
-            }
-            else
-            {
-                //No downsampling is necessary so simply return original data
-                return varData;
-            }
-        }
-
-        private static double[] Downsample(double[] varData, int targetLength)
+        private static double[] DownsampleAvg(double[] varData, int targetLength)
         {
             int downsamplingPoints = varData.Length / targetLength;
             if (downsamplingPoints > 1)
@@ -335,7 +315,6 @@ namespace RCNet.Neural.Data
                 return varData;
             }
         }
-        */
 
         //Methods
         /// <summary>

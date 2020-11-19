@@ -117,6 +117,16 @@ namespace RCNet.Extensions
         }
 
         /// <summary>
+        /// Returns random double following the Gaussian distribution.
+        /// </summary>
+        /// <param name="rand"></param>
+        /// <param name="distrParams">Gaussian distribution parameters</param>
+        public static double NextGaussianDouble(this Random rand, UGaussianDistrSettings distrParams)
+        {
+            return NextGaussianDouble(rand, distrParams.Mean, distrParams.StdDev);
+        }
+
+        /// <summary>
         /// Returns random double following the Gaussian distribution and belonging to a specified range.
         /// Warning: due to applied range filterring, this function can lead to a bad performance. Performance depends on parameters.
         /// </summary>
@@ -171,6 +181,16 @@ namespace RCNet.Extensions
         /// <param name="rand"></param>
         /// <param name="distrParams">Exponential distribution parameters</param>
         public static double NextExponentialDouble(this Random rand, ExponentialDistrSettings distrParams)
+        {
+            return NextExponentialDouble(rand, distrParams.Mean);
+        }
+
+        /// <summary>
+        /// Returns random double following the Exponential distribution.
+        /// </summary>
+        /// <param name="rand"></param>
+        /// <param name="distrParams">Exponential distribution parameters</param>
+        public static double NextExponentialDouble(this Random rand, UExponentialDistrSettings distrParams)
         {
             return NextExponentialDouble(rand, distrParams.Mean);
         }

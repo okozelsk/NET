@@ -43,6 +43,7 @@ namespace Demo.DemoConsoleApp.Examples
             StateMachineDesigner smd = new StateMachineDesigner(inputCfg, readoutCfg);
             //Create pure ESN fashioned StateMachine configuration
             StateMachineSettings stateMachineCfg = smd.CreatePureESNCfg(250,
+                                                                        StateMachineDesigner.DefaultAnalogMaxInputStrength,
                                                                         1d,
                                                                         0,
                                                                         0.2d,
@@ -72,9 +73,9 @@ namespace Demo.DemoConsoleApp.Examples
             //StateMachine training
             TrainStateMachine(stateMachine, "./Data/TTOO.csv", out double[] predictionInputVector);
 
-            //Forecast
+            //Forecasting
             ReadoutLayer.ReadoutData readoutData = stateMachine.ComputeReadoutData(predictionInputVector);
-            _log.Write("    Forecast next High and Low (real values are High=6.58$ and Low=5.99$):", false);
+            _log.Write("    Forecasted next High and Low TTOO prices (real prices on 2018/03/05 are High=6.58$ and Low=5.99$):", false);
             _log.Write(stateMachine.RL.GetForecastReport(readoutData.DataVector, 6));
             _log.Write(string.Empty);
 

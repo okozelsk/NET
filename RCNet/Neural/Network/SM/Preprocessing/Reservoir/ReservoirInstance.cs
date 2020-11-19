@@ -843,7 +843,15 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                 foreach (Tuple<HiddenNeuron, HiddenNeuron> connPair in connPairs)
                 {
                     //Establish connection
-                    ConnectNeuron(connPair.Item2, new List<HiddenNeuron>() { connPair.Item1 }, spikingRoleSelector, -1, 1, rand, false, schemaCfg.ReplaceExistingConnections);
+                    ConnectNeuron(connPair.Item2,
+                                  new List<HiddenNeuron>() { connPair.Item1 },
+                                  spikingRoleSelector,
+                                  -1,
+                                  1,
+                                  rand,
+                                  false,
+                                  schemaCfg.ReplaceExistingConnections
+                                  );
                 }
 
             }

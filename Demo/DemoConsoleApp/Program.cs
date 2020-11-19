@@ -23,14 +23,15 @@ namespace Demo.DemoConsoleApp
                 Console.WriteLine("  6. Libras Movement classification (LSM design using StateMachineDesigner, horizontal spiking input encoding).");
                 Console.WriteLine("  7. Libras Movement classification (LSM design using StateMachineDesigner, vertical spiking input encoding).");
                 Console.WriteLine("  8. Libras Movement classification (LSM design using StateMachineDesigner, analog input direct routing).");
-                Console.WriteLine("  9. Playground");
-                Console.WriteLine("  0. Exit");
+                Console.WriteLine("  9. Libras Movement classification (No preprocessing - alone Readout Layer design using StateMachineDesigner, indicative benchmark for ESN and LSM).");
+                Console.WriteLine("  A. Playground");
+                Console.WriteLine("  X. Exit");
                 Console.WriteLine();
-                Console.WriteLine("  Press the digit...");
+                Console.WriteLine("  Press the digit or letter of your choice...");
                 ConsoleKeyInfo consoleKeyInfo = Console.ReadKey(true);
-                switch (consoleKeyInfo.KeyChar)
+                switch (consoleKeyInfo.KeyChar.ToString().ToUpperInvariant())
                 {
-                    case '1':
+                    case "1":
                         try
                         {
                             //Run the demo
@@ -42,7 +43,7 @@ namespace Demo.DemoConsoleApp
                         }
                         break;
 
-                    case '2':
+                    case "2":
                         try
                         {
                             (new FFNetBoolAlg()).Run();
@@ -53,7 +54,7 @@ namespace Demo.DemoConsoleApp
                         }
                         break;
 
-                    case '3':
+                    case "3":
                         try
                         {
                             (new TTOOForecastFromScratch()).Run();
@@ -64,7 +65,7 @@ namespace Demo.DemoConsoleApp
                         }
                         break;
 
-                    case '4':
+                    case "4":
                         try
                         {
                             (new TTOOForecastDesigner()).Run();
@@ -75,7 +76,7 @@ namespace Demo.DemoConsoleApp
                         }
                         break;
 
-                    case '5':
+                    case "5":
                         try
                         {
                             (new LibrasClassificationESNDesigner()).Run();
@@ -86,7 +87,7 @@ namespace Demo.DemoConsoleApp
                         }
                         break;
 
-                    case '6':
+                    case "6":
                         try
                         {
                             (new LibrasClassificationLSMDesigner()).Run(InputEncoder.SpikingInputEncodingRegime.Horizontal);
@@ -97,7 +98,7 @@ namespace Demo.DemoConsoleApp
                         }
                         break;
 
-                    case '7':
+                    case "7":
                         try
                         {
                             (new LibrasClassificationLSMDesigner()).Run(InputEncoder.SpikingInputEncodingRegime.Vertical);
@@ -108,7 +109,7 @@ namespace Demo.DemoConsoleApp
                         }
                         break;
 
-                    case '8':
+                    case "8":
                         try
                         {
                             (new LibrasClassificationLSMDesigner()).Run(InputEncoder.SpikingInputEncodingRegime.Forbidden);
@@ -119,7 +120,18 @@ namespace Demo.DemoConsoleApp
                         }
                         break;
 
-                    case '9':
+                    case "9":
+                        try
+                        {
+                            (new LibrasClassificationNPBypassedDesigner()).Run();
+                        }
+                        catch (Exception e)
+                        {
+                            ReportException(e);
+                        }
+                        break;
+
+                    case "A":
                         try
                         {
                             (new Playground()).Run();
@@ -130,7 +142,7 @@ namespace Demo.DemoConsoleApp
                         }
                         break;
 
-                    case '0':
+                    case "X":
                         return;
 
                     default:

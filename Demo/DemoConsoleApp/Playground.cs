@@ -199,41 +199,41 @@ namespace Demo.DemoConsoleApp
 
         private void TestA2SCoder()
         {
-            double[] analogValues = { -1, -0.9, -0.8, -0.7, -0.6, -0.5, -0.4, -0.3, -0.2, -0.1, -0.05, -0.025, -0.0125, 0, 0.0125, 0.025, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1 };
+            double[] orderedAnalogValues = { -1, -0.9, -0.8, -0.7, -0.6, -0.5, -0.4, -0.3, -0.2, -0.1, -0.05, -0.025, -0.0125, 0, 0.0125, 0.025, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1 };
+            double[] disorderedAnalogValues = { -1, 1, -0.8, -0.7, 0.8, 0.8, -0.4, 0.3, 0.2, 1, 0, 0.1, 0.2, 0.3, -0.5, 0.6, 0.9 };
             A2SCoderBase coder = null;
-            int baseCodeLength = 16;
 
             //Gaussian
-            coder = new A2SCoderGaussianReceptors(new A2SCoderGaussianReceptorsSettings(8, baseCodeLength));
+            coder = new A2SCoderGaussianReceptors(new A2SCoderGaussianReceptorsSettings(8, 10));
             Console.WriteLine($"{coder.GetType().Name}");
-            foreach (double value in analogValues)
+            foreach (double value in orderedAnalogValues)
             {
                 Console.WriteLine($"    {value.ToString(CultureInfo.InvariantCulture),-10} {ByteArraysToString(coder.GetCode(value))}");
             }
             Console.ReadLine();
 
             //Signal strength
-            coder = new A2SCoderSignalStrength(new A2SCoderSignalStrengthSettings(baseCodeLength));
+            coder = new A2SCoderSignalStrength(new A2SCoderSignalStrengthSettings(8));
             Console.WriteLine($"{coder.GetType().Name}");
-            foreach (double value in analogValues)
+            foreach (double value in orderedAnalogValues)
             {
                 Console.WriteLine($"    {value.ToString(CultureInfo.InvariantCulture),-10} {ByteArraysToString(coder.GetCode(value))}");
             }
             Console.ReadLine();
 
             //UpDirArrows
-            coder = new A2SCoderUpDirArrows(new A2SCoderUpDirArrowsSettings(baseCodeLength));
+            coder = new A2SCoderUpDirArrows(new A2SCoderUpDirArrowsSettings(16, 8));
             Console.WriteLine($"{coder.GetType().Name}");
-            foreach (double value in analogValues)
+            foreach (double value in disorderedAnalogValues)
             {
                 Console.WriteLine($"    {value.ToString(CultureInfo.InvariantCulture),-10} {ByteArraysToString(coder.GetCode(value))}");
             }
             Console.ReadLine();
 
             //DownDirArrows
-            coder = new A2SCoderDownDirArrows(new A2SCoderDownDirArrowsSettings(baseCodeLength));
+            coder = new A2SCoderDownDirArrows(new A2SCoderDownDirArrowsSettings(16, 8));
             Console.WriteLine($"{coder.GetType().Name}");
-            foreach (double value in analogValues.Reverse())
+            foreach (double value in disorderedAnalogValues)
             {
                 Console.WriteLine($"    {value.ToString(CultureInfo.InvariantCulture),-10} {ByteArraysToString(coder.GetCode(value))}");
             }

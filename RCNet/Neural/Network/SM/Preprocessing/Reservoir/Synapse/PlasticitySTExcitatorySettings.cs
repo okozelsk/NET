@@ -30,7 +30,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         {
             if (dynamicsCfg == null)
             {
-                DynamicsCfg = new LinearDynamicsSTExcitatorySettings();
+                DynamicsCfg = new NonlinearDynamicsSTExcitatorySettings();
             }
             else if (dynamicsCfg.Application != PlasticityCommon.DynApplication.STExcitatory)
             {
@@ -65,7 +65,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
             XElement dynamicsCfgElem = settingsElem.Elements().FirstOrDefault();
             if (dynamicsCfgElem == null)
             {
-                DynamicsCfg = new LinearDynamicsSTExcitatorySettings();
+                DynamicsCfg = new NonlinearDynamicsSTExcitatorySettings();
             }
             else
             {

@@ -1,6 +1,5 @@
 ﻿using RCNet.Extensions;
 using RCNet.Neural.Activation;
-using RCNet.Neural.Data.Coders.AnalogToSpiking;
 using RCNet.Neural.Data.Filter;
 using RCNet.Neural.Network.NonRecurrent.FF;
 using RCNet.Neural.Network.SM.Preprocessing;
@@ -26,6 +25,10 @@ namespace RCNet.Neural.Network.SM
     public class StateMachineDesigner
     {
         //Constants
+        /// <summary>
+        /// Default max sum of weights of input synapses per analog hidden neuron
+        /// </summary>
+        public const double DefaultAnalogMaxInputStrength = 1d;
 
         //Enums
         /// <summary>
@@ -89,6 +92,23 @@ namespace RCNet.Neural.Network.SM
             _rand = new Random(0);
             return;
         }
+
+        /// <summary>
+        /// Instantiates an uninitialized instance
+        /// </summary>
+        public StateMachineDesigner(ReadoutLayerSettings readoutCfg)
+        {
+            InputCfg = null;
+            ReadoutCfg = readoutCfg ?? throw new ArgumentNullException("readoutCfg");
+            _rand = new Random(0);
+            return;
+        }
+
+        //Properties
+        /// <summary>
+        /// Indicates target configuration with bypassed neural preprocessor
+        /// </summary>
+        public bool BypassedNP { get { return (InputCfg == null); } }
 
         //Static methods
         /// <summary>
@@ -348,6 +368,7 @@ namespace RCNet.Neural.Network.SM
         /// Creates StateMachine configuration following pure ESN design
         /// </summary>
         /// <param name="totalSize">Total number of hidden neurons</param>
+        /// <param name="maxInputStrength">Max sum of weights of input synapses per analog hidden neuron (see the constant DefaultAnalogMaxInputStrength)</param>
         /// <param name="inputConnectionDensity">Density of the input field connections to hidden neurons</param>
         /// <param name="maxInputDelay">Maximum delay of input synapse</param>
         /// <param name="interconnectionDensity">Density of the hidden neurons interconnection</param>
@@ -357,6 +378,7 @@ namespace RCNet.Neural.Network.SM
         /// <param name="predictorsParamsCfg">Predictors parameters (use null for defaults)</param>
         /// <param name="allowedPredictor">Allowed predictor(s)</param>
         public StateMachineSettings CreatePureESNCfg(int totalSize,
+                                                     double maxInputStrength,
                                                      double inputConnectionDensity,
                                                      int maxInputDelay,
                                                      double interconnectionDensity,
@@ -367,6 +389,11 @@ namespace RCNet.Neural.Network.SM
                                                      params PredictorsProvider.PredictorID[] allowedPredictor
                                                      )
         {
+            //Check NP is not bypassed
+            if(BypassedNP)
+            {
+                throw new InvalidOperationException("Neural preprocessor is bypassed thus ESN design can't be created.");
+            }
             //Default ESN activation
             RCNetBaseSettings aFnCfg = new TanHSettings();
             //One neuron group
@@ -393,7 +420,7 @@ namespace RCNet.Neural.Network.SM
                 inputConns.Add(inputConnCfg);
             }
             //Synapse general configuration
-            SynapseATInputSettings synapseATInputSettings = new SynapseATInputSettings(Synapse.SynapticDelayMethod.Random, maxInputDelay);
+            SynapseATInputSettings synapseATInputSettings = new SynapseATInputSettings(Synapse.SynapticDelayMethod.Random, maxInputDelay, new AnalogSourceSettings(new URandomValueSettings(0d, maxInputStrength)));
             SynapseATIndifferentSettings synapseATIndifferentSettings = new SynapseATIndifferentSettings(Synapse.SynapticDelayMethod.Random, maxInternalDelay);
             SynapseATSettings synapseATCfg = new SynapseATSettings(SynapseATSettings.DefaultSpectralRadiusNum, synapseATInputSettings, synapseATIndifferentSettings);
             SynapseSettings synapseCfg = new SynapseSettings(null, synapseATCfg);
@@ -449,6 +476,11 @@ namespace RCNet.Neural.Network.SM
                                                      params PredictorsProvider.PredictorID[] allowedPredictor
                                                      )
         {
+            //Check NP is not bypassed
+            if (BypassedNP)
+            {
+                throw new InvalidOperationException("Neural preprocessor is bypassed thus LSM design can't be created.");
+            }
             //Activation check
             if (ActivationFactory.Create(aFnCfg, new Random()).TypeOfActivation != ActivationType.Spiking)
             {
@@ -478,10 +510,9 @@ namespace RCNet.Neural.Network.SM
                 inputConns.Add(inputConnCfg);
             }
             //Synapse general configuration
-            SpikingSourceSTInputSettings spikingSourceSTInputSettings = new SpikingSourceSTInputSettings(new URandomValueSettings(0,1), new PlasticitySTInputSettings(new ConstantDynamicsSTInputSettings()));
-            SpikingSourceSTExcitatorySettings spikingSourceSTExcitatorySettings = new SpikingSourceSTExcitatorySettings(new URandomValueSettings(0, 1), new PlasticitySTExcitatorySettings(new ConstantDynamicsSTExcitatorySettings()));
-            SpikingSourceSTInhibitorySettings spikingSourceSTInhibitorySettings = new SpikingSourceSTInhibitorySettings(new URandomValueSettings(0, 1), new PlasticitySTInhibitorySettings(new ConstantDynamicsSTInhibitorySettings()));
-
+            SpikingSourceSTInputSettings spikingSourceSTInputSettings = new SpikingSourceSTInputSettings(new URandomValueSettings(0,1), new PlasticitySTInputSettings(new NonlinearDynamicsSTInputSettings()));
+            SpikingSourceSTExcitatorySettings spikingSourceSTExcitatorySettings = new SpikingSourceSTExcitatorySettings(new URandomValueSettings(0, 1), new PlasticitySTExcitatorySettings(new NonlinearDynamicsSTExcitatorySettings()));
+            SpikingSourceSTInhibitorySettings spikingSourceSTInhibitorySettings = new SpikingSourceSTInhibitorySettings(new URandomValueSettings(0, 1), new PlasticitySTInhibitorySettings(new NonlinearDynamicsSTInhibitorySettings()));
             SynapseSTInputSettings synapseSTInputSettings = new SynapseSTInputSettings(Synapse.SynapticDelayMethod.Random, maxInputDelay, null, spikingSourceSTInputSettings);
             SynapseSTExcitatorySettings synapseSTExcitatorySettings = new SynapseSTExcitatorySettings(Synapse.SynapticDelayMethod.Random, maxInternalDelay, 4, null, spikingSourceSTExcitatorySettings);
             SynapseSTInhibitorySettings synapseSTInhibitorySettings = new SynapseSTInhibitorySettings(Synapse.SynapticDelayMethod.Random, maxInternalDelay, 1, null, spikingSourceSTInhibitorySettings);
@@ -514,6 +545,17 @@ namespace RCNet.Neural.Network.SM
                                             );
         }
 
+        /// <summary>
+        /// Creates StateMachine configuration having bypassed neural preprocessing
+        /// </summary>
+        /// <returns></returns>
+        public StateMachineSettings CreateBypassedCfg()
+        {
+            //Build and return SM configuration
+            return new StateMachineSettings(null,
+                                            ReadoutCfg
+                                            );
+        }
 
 
     }//StateMachineDesigner

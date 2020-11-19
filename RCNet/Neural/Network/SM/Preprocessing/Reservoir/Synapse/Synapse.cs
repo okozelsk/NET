@@ -166,10 +166,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
                     {
                         //Spiking source
                         Weight = rand.NextDouble(synapseCfg.SpikingTargetCfg.ExcitatorySynCfg.SpikingSourceCfg.WeightCfg);
-                        _efficacyComputer = PlasticityCommon.GetEfficacyComputer(SourceNeuron,
-                                                                                 synapseCfg.SpikingTargetCfg.ExcitatorySynCfg.SpikingSourceCfg.PlasticityCfg.DynamicsCfg
-                                                                                 );
                     }
+                    _efficacyComputer = PlasticityCommon.GetEfficacyComputer(SourceNeuron,
+                                                                             synapseCfg.SpikingTargetCfg.ExcitatorySynCfg.SpikingSourceCfg.PlasticityCfg.DynamicsCfg
+                                                                             );
                 }
                 else if (Role == SynRole.Inhibitory)
                 {
@@ -184,10 +184,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
                     {
                         //Spiking source
                         Weight = -rand.NextDouble(synapseCfg.SpikingTargetCfg.InhibitorySynCfg.SpikingSourceCfg.WeightCfg);
-                        _efficacyComputer = PlasticityCommon.GetEfficacyComputer(SourceNeuron,
-                                                                                 synapseCfg.SpikingTargetCfg.InhibitorySynCfg.SpikingSourceCfg.PlasticityCfg.DynamicsCfg
-                                                                                 );
                     }
+                    _efficacyComputer = PlasticityCommon.GetEfficacyComputer(SourceNeuron,
+                                                                             synapseCfg.SpikingTargetCfg.InhibitorySynCfg.SpikingSourceCfg.PlasticityCfg.DynamicsCfg
+                                                                             );
                 }
                 else
                 {

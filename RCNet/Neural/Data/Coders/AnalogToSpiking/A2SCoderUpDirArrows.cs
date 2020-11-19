@@ -12,6 +12,9 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
     [Serializable]
     public class A2SCoderUpDirArrows : A2SCoderBase
     {
+        //Constants
+        private const double InitialValue = 1d;
+
         //Attributes
         private readonly A2SCoderUpDirArrowsSettings _coderCfg;
         private readonly SimpleQueue<double> _histValues;
@@ -26,7 +29,7 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
         {
             _coderCfg = (A2SCoderUpDirArrowsSettings)coderCfg.DeepClone();
             _histValues = new SimpleQueue<double>(_coderCfg.NumOfReceptors);
-            while (!_histValues.Full) _histValues.Enqueue(0d);
+            ResetHistValues();
             return;
         }
 
@@ -36,8 +39,14 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
         /// </summary>
         public override void Reset()
         {
+            ResetHistValues();
+            return;
+        }
+
+        private void ResetHistValues()
+        {
             _histValues.Reset();
-            while (!_histValues.Full) _histValues.Enqueue(0d);
+            while (!_histValues.Full) _histValues.Enqueue(InitialValue);
             return;
         }
 

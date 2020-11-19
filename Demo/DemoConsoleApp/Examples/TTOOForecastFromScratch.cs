@@ -337,16 +337,16 @@ namespace Demo.DemoConsoleApp.Examples
             string serializationFileName = Path.Combine(examplesDir, "TTOOForecastFromScratchSM.dat");
             stateMachine.SaveToFile(serializationFileName);
 
-            //Forecast
+            //Forecasting
             ReadoutLayer.ReadoutData readoutData = stateMachine.ComputeReadoutData(predictionInputVector);
-            _log.Write("    Forecast next High and Low (real values are High=6.58$ and Low=5.99$):", false);
+            _log.Write("    Forecasted next High and Low TTOO prices (real prices on 2018/03/05 are High=6.58$ and Low=5.99$):", false);
             _log.Write(stateMachine.RL.GetForecastReport(readoutData.DataVector, 6));
             _log.Write(string.Empty);
 
-            //New StateMachine instance from the file
+            //Create new StateMachine instance from the file
+            //Instance was serialized before forecasting of the next values
             StateMachine stateMachineNewInstance = StateMachine.LoadFromFile(serializationFileName);
-
-            //New StateMachine instance forecast (exactly the same results as previous)
+            //Forecasting of the deserialized instance (exactly the same results as in previous forecasting)
             readoutData = stateMachineNewInstance.ComputeReadoutData(predictionInputVector);
             _log.Write("    Forecast of the new StateMachine instance:", false);
             _log.Write(stateMachineNewInstance.RL.GetForecastReport(readoutData.DataVector, 6));

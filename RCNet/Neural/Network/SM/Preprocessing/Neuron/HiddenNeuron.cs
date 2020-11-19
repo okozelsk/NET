@@ -72,7 +72,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
         /// </summary>
         private readonly PredictorsProvider _predictors;
 
-
         //Constructor
         /// <summary>
         /// Creates an initialized instance of hidden neuron having spiking activation
@@ -228,10 +227,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
             else
             {
                 //Analog activation
-                double newState = _activation.Compute(_tStimuli);
-                _activationState = (_analogRetainmentStrength * _activationState) + (1d - _analogRetainmentStrength) * newState;
+                _activationState = (_analogRetainmentStrength * _activationState) + (1d - _analogRetainmentStrength) * _activation.Compute(_tStimuli);
                 normalizedActivation = _outputRange.Rescale(_activationState, _activation.OutputRange).Bound(_outputRange.Min, _outputRange.Max);
-                bool firingEvent = _histActivationsQueue == null ? ((normalizedActivation - OutputData._analogSignal) > _analogFiringThreshold) : (_histActivationsQueue.Full ? (normalizedActivation - _histActivationsQueue.Dequeue()) > _analogFiringThreshold : (normalizedActivation - 0.5d) > _analogFiringThreshold);
+                double activationDifference = _histActivationsQueue == null ? ((normalizedActivation - OutputData._analogSignal)) : (_histActivationsQueue.Full ? (normalizedActivation - _histActivationsQueue.Dequeue()) : (normalizedActivation - 0.5d));
+                //Firing event decision
+                bool firingEvent = activationDifference > _analogFiringThreshold;
+                //Enqueue last normalized activation
                 _histActivationsQueue?.Enqueue(normalizedActivation);
                 //New output data
                 OutputData._analogSignal = normalizedActivation;

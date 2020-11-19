@@ -48,12 +48,13 @@ namespace Demo.DemoConsoleApp.Examples
                  */
                 case InputEncoder.SpikingInputEncodingRegime.Horizontal:
                     inputCfg = StateMachineDesigner.CreateInputCfg(new FeedingPatternedSettings(1, NeuralPreprocessor.BidirProcessing.Continuous, RCNet.Neural.Data.InputPattern.VariablesSchema.Groupped, new UnificationSettings(false, false)),
+                                                                   //136 spiking input neurons per input field - coding at once
                                                                    new InputSpikesCoderSettings(InputEncoder.SpikingInputEncodingRegime.Horizontal,
-                                                                                                new A2SCoderSignalStrengthSettings(8),
-                                                                                                new A2SCoderUpDirArrowsSettings(8, 8),
-                                                                                                new A2SCoderDownDirArrowsSettings(8, 8)
+                                                                                                new A2SCoderSignalStrengthSettings(8), //8 neurons (spike-train length = 1)
+                                                                                                new A2SCoderUpDirArrowsSettings(8, 8), //64 neurons (spike-train length = 1)
+                                                                                                new A2SCoderDownDirArrowsSettings(8, 8) //64 neurons (spike-train length = 1)
                                                                                                 ),
-                                                                   true,
+                                                                   true, //Route the input pattern as the predictors to a readout layer
                                                                    new ExternalFieldSettings("coord_abcissa", new RealFeatureFilterSettings(), true),
                                                                    new ExternalFieldSettings("coord_ordinate", new RealFeatureFilterSettings(), true)
                                                                    );
@@ -65,12 +66,13 @@ namespace Demo.DemoConsoleApp.Examples
                  */
                 case InputEncoder.SpikingInputEncodingRegime.Vertical:
                     inputCfg = StateMachineDesigner.CreateInputCfg(new FeedingPatternedSettings(1, NeuralPreprocessor.BidirProcessing.Continuous, RCNet.Neural.Data.InputPattern.VariablesSchema.Groupped),
+                                                                   //17 spiking input neurons per input field- coding in 10 cycles
                                                                    new InputSpikesCoderSettings(InputEncoder.SpikingInputEncodingRegime.Vertical,
-                                                                                                new A2SCoderSignalStrengthSettings(8),
-                                                                                                new A2SCoderUpDirArrowsSettings(8, 8),
-                                                                                                new A2SCoderDownDirArrowsSettings(8, 8)
+                                                                                                new A2SCoderSignalStrengthSettings(10), //1 neuron (spike-train length = 10)
+                                                                                                new A2SCoderUpDirArrowsSettings(8, 10), //8 neurons (spike-train length = 10)
+                                                                                                new A2SCoderDownDirArrowsSettings(8, 10) //8 neurons (spike-train length = 10)
                                                                                                 ),
-                                                                   true,
+                                                                   true, //Route the input pattern as the predictors to a readout layer
                                                                    new ExternalFieldSettings("coord_abcissa", new RealFeatureFilterSettings(), true),
                                                                    new ExternalFieldSettings("coord_ordinate", new RealFeatureFilterSettings(), true)
                                                                    );
@@ -81,13 +83,14 @@ namespace Demo.DemoConsoleApp.Examples
                  * So all the input values are encoded at once, during one reservoir computation cycle.
                  */
                 default:
+                    //1 analog input neuron per input field
                     inputCfg = StateMachineDesigner.CreateInputCfg(new FeedingPatternedSettings(1, NeuralPreprocessor.BidirProcessing.Continuous, RCNet.Neural.Data.InputPattern.VariablesSchema.Groupped, new UnificationSettings(false, false)),
                                                                    new InputSpikesCoderSettings(InputEncoder.SpikingInputEncodingRegime.Forbidden),
-                                                                   true,
+                                                                   true, //Route the input pattern as the predictors to a readout layer
                                                                    new ExternalFieldSettings("coord_abcissa", new RealFeatureFilterSettings(), true),
                                                                    new ExternalFieldSettings("coord_ordinate", new RealFeatureFilterSettings(), true)
                                                                    );
-                    homogenousExcitability = new HomogenousExcitabilitySettings(1, 0.7, 0.2d);
+                    homogenousExcitability = new HomogenousExcitabilitySettings(0.25, 0.7, 0.2d);
                     break;
             }
 
@@ -115,7 +118,7 @@ namespace Demo.DemoConsoleApp.Examples
             //Create designer instance
             StateMachineDesigner smd = new StateMachineDesigner(inputCfg, readoutCfg);
             //Create pure LSM fashioned StateMachine configuration
-            StateMachineSettings stateMachineCfg = smd.CreatePureLSMCfg(192, //Total size of the reservoir
+            StateMachineSettings stateMachineCfg = smd.CreatePureLSMCfg(272, //Total size of the reservoir
                                                                         new AdExpIFSettings(), //Activation
                                                                         homogenousExcitability, //Homogenous excitability
                                                                         1, //Input connection density
