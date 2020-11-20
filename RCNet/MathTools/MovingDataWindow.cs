@@ -1,4 +1,5 @@
-﻿using RCNet.Queue;
+﻿using RCNet.MathTools.Hurst;
+using RCNet.Queue;
 using System;
 
 namespace RCNet.MathTools
@@ -106,6 +107,54 @@ namespace RCNet.MathTools
                 stat.AddSampleValue(_dataWindow.GetElementAt(i, latestFirst));
             }
             return stat;
+        }
+
+        /// <summary>
+        /// Returns statistics of differences of data samples currently stored in the internal sliding window
+        /// </summary>
+        /// <param name="latestFirst">Specifies logical order (latest..oldest or oldest..latest)</param>
+        /// <param name="reqNumOfSamples">Number of requiered samples</param>
+        public BasicStat GetDataDiffStat(bool latestFirst = false, int reqNumOfSamples = -1)
+        {
+            int numOfSamplesToBeProcessed = reqNumOfSamples == -1 ? _dataWindow.Count : reqNumOfSamples;
+            BasicStat stat = new BasicStat();
+            for (int i = 1; i < numOfSamplesToBeProcessed; i++)
+            {
+                stat.AddSampleValue(_dataWindow.GetElementAt(i - 1, latestFirst) - _dataWindow.GetElementAt(i, latestFirst));
+            }
+            return stat;
+        }
+
+        /// <summary>
+        /// Returns rescalled range of data samples currently stored in the internal sliding window
+        /// </summary>
+        /// <param name="latestFirst">Specifies logical order (latest..oldest or oldest..latest)</param>
+        /// <param name="reqNumOfSamples">Number of requiered samples</param>
+        public double GetDataRescalledRange(bool latestFirst = false, int reqNumOfSamples = -1)
+        {
+            int numOfSamplesToBeProcessed = reqNumOfSamples == -1 ? _dataWindow.Count : reqNumOfSamples;
+            RescalledRange rr = new RescalledRange(numOfSamplesToBeProcessed);
+            for (int i = 0; i < numOfSamplesToBeProcessed; i++)
+            {
+                rr.AddValue(_dataWindow.GetElementAt(i, latestFirst));
+            }
+            return rr.Compute();
+        }
+
+        /// <summary>
+        /// Returns rescalled range of differences of data samples currently stored in the internal sliding window
+        /// </summary>
+        /// <param name="latestFirst">Specifies logical order (latest..oldest or oldest..latest)</param>
+        /// <param name="reqNumOfSamples">Number of requiered samples</param>
+        public double GetDataDiffRescalledRange(bool latestFirst = false, int reqNumOfSamples = -1)
+        {
+            int numOfSamplesToBeProcessed = reqNumOfSamples == -1 ? _dataWindow.Count : reqNumOfSamples;
+            RescalledRange rr = new RescalledRange(numOfSamplesToBeProcessed - 1);
+            for (int i = 1; i < numOfSamplesToBeProcessed; i++)
+            {
+                rr.AddValue(_dataWindow.GetElementAt(i - 1, latestFirst) - _dataWindow.GetElementAt(i, latestFirst));
+            }
+            return rr.Compute();
         }
 
         /// <summary>

@@ -2,7 +2,6 @@
 <demo dataFolder="./Data" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="SMDemoSettings.xsd">
 
 
-  
   <!--
     Here StateMachine achieves 81.03% accuracy. It is a bit worse than the best accuracy 81.4% achieved by the algorithm
     called COTE referenced at the dataset's home site:
@@ -77,6 +76,7 @@
                         firingCount="false"
                         firingBinPattern="false">
               <params>
+                <activationMWAvg window="300"/>
                 <firingFadingSum strength="0.005"/>
               </params>
             </predictors>
