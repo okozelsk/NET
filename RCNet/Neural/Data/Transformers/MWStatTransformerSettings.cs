@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.Xml.Linq;
+using RCNet.MathTools;
 
 namespace RCNet.Neural.Data.Transformers
 {
@@ -30,7 +31,7 @@ namespace RCNet.Neural.Data.Transformers
         /// <summary>
         /// Requiered output
         /// </summary>
-        public MWStatTransformer.OutputValue Output { get; }
+        public BasicStat.OutputFeature Output { get; }
 
 
         //Constructors
@@ -40,7 +41,7 @@ namespace RCNet.Neural.Data.Transformers
         /// <param name="inputFieldName">Name of the input field to be transformed</param>
         /// <param name="window">Difference interval</param>
         /// <param name="output">Requiered output</param>
-        public MWStatTransformerSettings(string inputFieldName, int window, MWStatTransformer.OutputValue output)
+        public MWStatTransformerSettings(string inputFieldName, int window, BasicStat.OutputFeature output)
         {
             InputFieldName = inputFieldName;
             Window = window;
@@ -70,7 +71,7 @@ namespace RCNet.Neural.Data.Transformers
             //Parsing
             InputFieldName = settingsElem.Attribute("fieldName").Value;
             Window = int.Parse(settingsElem.Attribute("window").Value, CultureInfo.InvariantCulture);
-            Output = (MWStatTransformer.OutputValue)Enum.Parse(typeof(MWStatTransformer.OutputValue), settingsElem.Attribute("output").Value, true);
+            Output = (BasicStat.OutputFeature)Enum.Parse(typeof(BasicStat.OutputFeature), settingsElem.Attribute("output").Value, true);
             Check();
             return;
         }

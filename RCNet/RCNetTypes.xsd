@@ -50,8 +50,8 @@
     </xs:restriction>
   </xs:simpleType>
 
-  <!-- Enumeration of the output of the MWStat transformer -->
-  <xs:simpleType name="MWStatTransformerOutputType">
+  <!-- Enumeration of the available statistical features -->
+  <xs:simpleType name="StatFeatureType">
     <xs:restriction base="xs:string">
       <xs:enumeration value="Sum"/>
       <xs:enumeration value="NegSum"/>
@@ -104,26 +104,14 @@
     </xs:restriction>
   </xs:simpleType>
 
-  <!-- Enumeration of moving weighted average weights type -->
-  <xs:simpleType name="MWAvgWeightsType">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="Exponential"/>
-      <xs:enumeration value="Linear"/>
-      <xs:enumeration value="Constant"/>
-    </xs:restriction>
-  </xs:simpleType>
-
   <!-- Enumeration of available predictors -->
   <xs:simpleType name="PredictorIDType">
     <xs:restriction base="xs:string">
       <xs:enumeration value="Activation"/>
       <xs:enumeration value="ActivationSquare"/>
-      <xs:enumeration value="ActivationFadingSum"/>
-      <xs:enumeration value="ActivationMWAvg"/>
-      <xs:enumeration value="FiringFadingSum"/>
-      <xs:enumeration value="FiringMWAvg"/>
-      <xs:enumeration value="FiringCount"/>
-      <xs:enumeration value="FiringBinPattern"/>
+      <xs:enumeration value="ActivationStatFeature"/>
+      <xs:enumeration value="ActivationDiffStatFeature"/>
+      <xs:enumeration value="FiringTrace"/>
     </xs:restriction>
   </xs:simpleType>
 
@@ -206,14 +194,6 @@
     </xs:restriction>
   </xs:simpleType>
 
-  <!-- Unsigned integer GE 1 and LE 1024-->
-  <xs:simpleType name="UIntGE1LE1024Type">
-    <xs:restriction base="xs:unsignedInt">
-      <xs:minInclusive value="1" />
-      <xs:maxInclusive value="1024" />
-    </xs:restriction>
-  </xs:simpleType>
-
   <!-- Unsigned integer GE 2 and LE 64-->
   <xs:simpleType name="UIntGE2LE64Type">
     <xs:restriction base="xs:unsignedInt">
@@ -267,6 +247,27 @@
   <!-- UIntGT1Type with Auto option-->
   <xs:simpleType name="UIntGT1AutoOptionType">
     <xs:union memberTypes="UIntGT1Type AutoOptionType"/>
+  </xs:simpleType>
+
+  <!-- Unsigned integer GE 1 and LE 1024-->
+  <xs:simpleType name="UIntGE1LE1024Type">
+    <xs:restriction base="xs:unsignedInt">
+      <xs:minInclusive value="1" />
+      <xs:maxInclusive value="8192" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Unsigned integer GE 2 and LE 1024-->
+  <xs:simpleType name="UIntGE2LE1024Type">
+    <xs:restriction base="xs:unsignedInt">
+      <xs:minInclusive value="2" />
+      <xs:maxInclusive value="8192" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Unsigned integer GE 2 and LE 1024 with NA option-->
+  <xs:simpleType name="UIntGE2LE1024NAOptionType">
+    <xs:union memberTypes="UIntGE2LE1024Type NAOptionType"/>
   </xs:simpleType>
 
   <!-- Double with NA option-->
@@ -659,7 +660,7 @@
     <xs:complexContent>
       <xs:extension base="SingleFieldTransformerBaseType">
         <xs:attribute type="UIntGT1Type" name="window" use="required"/>
-        <xs:attribute type="MWStatTransformerOutputType" name="output" use="required"/>
+        <xs:attribute type="StatFeatureType" name="output" use="required"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -1753,115 +1754,155 @@
   </xs:complexType>
 
 
-  <!-- Predictor parameters -->
-  <!-- Activation fading sum -->
-  <xs:complexType name="PredictorActivationFadingSumType">
-    <xs:attribute type="UDoubleLT1Type" name="strength" use="optional" default="0.1">
+  <!-- Predictors -->
+  <!-- Activation predictor -->
+  <xs:complexType name="PredictorActivationType"/>
+
+  <!-- Activation power predictor -->
+  <xs:complexType name="PredictorActivationPowerType">
+    <xs:attribute type="UDoubleGT0Type" name="exponent" use="optional" default="2">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Fading strength (GE0..LT1). Default value is 0.1</xs:documentation>
+        <xs:documentation xml:lang="en">Default value is 2.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="keepSign" use="optional" default="false">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is true.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Firing fading sum -->
-  <xs:complexType name="PredictorFiringFadingSumType">
-    <xs:attribute type="UDoubleLT1Type" name="strength" use="optional" default="0.005">
+  <!-- Activation stat feature predictor -->
+  <xs:complexType name="PredictorActivationStatFeatureType">
+    <xs:attribute type="UIntGE2LE1024NAOptionType" name="window" use="optional" default="NA">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Fading strength (GE0..LT1). Default value is 0.005</xs:documentation>
+        <xs:documentation xml:lang="en">Specifies whether a predictor is computed continuously (NA) or from the moving data window (size 2-1024). Default value is NA.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="StatFeatureType" name="feature" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Specifies requiered statistical feature to be used.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Moving weighted average -->
-  <xs:complexType name="PredictorMWAvgType">
-    <xs:attribute type="UIntGT0Type" name="window" use="optional" default="64">
+  <!-- Activation rescalled range predictor -->
+  <xs:complexType name="PredictorActivationRescalledRangeType">
+    <xs:attribute type="UIntGE2LE1024Type" name="window" use="required">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Sliding window size (1..64 for Exp weights, 1..10240 for Lin weights and 1..N for Const weights). Default value is 64</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="MWAvgWeightsType" name="weights" use="optional" default="Exponential">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Sample weights. Default value is Exponential</xs:documentation>
+        <xs:documentation xml:lang="en">Specifies moving data window size (2-1024).</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Firing count -->
-  <xs:complexType name="PredictorFiringCountType">
-    <xs:attribute type="UIntGT0Type" name="window" use="optional" default="64">
+  <!-- Activation linearly weighted average predictor -->
+  <xs:complexType name="PredictorActivationLinWAvgType">
+    <xs:attribute type="UIntGE2LE1024NAOptionType" name="window" use="optional" default="NA">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Sliding window size (1..10240). Default value is 64</xs:documentation>
+        <xs:documentation xml:lang="en">Specifies whether a predictor is computed continuously (NA) or from the moving data window (size 2-1024). Default value is NA.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Firing binary pattern -->
-  <xs:complexType name="PredictorFiringBinPatternType">
-    <xs:attribute type="UIntGE1LE32Type" name="window" use="optional" default="1">
+  <!-- Activation differences stat feature predictor -->
+  <xs:complexType name="PredictorActivationDiffStatFeatureType">
+    <xs:attribute type="UIntGE2LE1024NAOptionType" name="window" use="optional" default="NA">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Sliding window size (1..32). Default value is 1</xs:documentation>
+        <xs:documentation xml:lang="en">Specifies whether a predictor is computed continuously (NA) or from the moving data window (size 2-1024). Default value is NA.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="StatFeatureType" name="feature" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Specifies requiered statistical feature to be used.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Predictors parameterization choices -->
-  <xs:complexType name="PredictorsParamsType">
-    <xs:choice minOccurs="0" maxOccurs="6">
-      <xs:element type="PredictorActivationFadingSumType" name="activationFadingSum" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="PredictorMWAvgType" name="activationMWAvg" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="PredictorFiringFadingSumType" name="firingFadingSum" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="PredictorMWAvgType" name="firingMWAvg" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="PredictorFiringCountType" name="firingCount" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="PredictorFiringBinPatternType" name="firingBinPattern" minOccurs="1" maxOccurs="1"/>
-    </xs:choice>
+  <!-- Activation differences rescalled range predictor -->
+  <xs:complexType name="PredictorActivationDiffRescalledRangeType">
+    <xs:attribute type="UIntGE2LE1024Type" name="window" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Specifies moving data window size (2-1024).</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
+
+  <!-- Activation differences linearly weighted average predictor -->
+  <xs:complexType name="PredictorActivationDiffLinWAvgType">
+    <xs:attribute type="UIntGE2LE1024NAOptionType" name="window" use="optional" default="NA">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Specifies whether a predictor is computed continuously (NA) or from the moving data window (size 2-1024). Default value is NA.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+
+  <!-- Firing trace predictor -->
+  <xs:complexType name="PredictorFiringTraceType">
+    <xs:attribute type="UIntGE2LE1024NAOptionType" name="window" use="optional" default="NA">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Specifies whether a predictor is computed continuously (NA) or from the moving data window (size 2-1024). Default value is NA.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleLE1Type" name="fading" use="optional" default="0.005">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Trace fading strength (GE0..LE1). Default value is 0.005</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
 
   <!-- Predictors configuration -->
   <xs:complexType name="PredictorsType">
-    <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="PredictorsParamsType" name="params" minOccurs="0" maxOccurs="1"/>
-    </xs:sequence>
-    <xs:attribute type="xs:boolean" name="activation" use="optional" default="true">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Current activation. Default value is true</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="xs:boolean" name="activationSquare" use="optional" default="true">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Current squared activation. Default value is true</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="xs:boolean" name="activationFadingSum" use="optional" default="true">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Fading sum of activations. Default value is true</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="xs:boolean" name="activationMWAvg" use="optional" default="true">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Weighted moving average of activations. Default value is true</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="xs:boolean" name="firingFadingSum" use="optional" default="true">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Fading sum of firings. Default value is true</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="xs:boolean" name="firingMWAvg" use="optional" default="true">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Weighted moving average of firings. Default value is true</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="xs:boolean" name="firingCount" use="optional" default="true">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Number of firings within the sliding window. Default value is true</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="xs:boolean" name="firingBinPattern" use="optional" default="true">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Binary (0/1) recent firing sequence. Default value is true</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element type="PredictorActivationType" name="activation" minOccurs="0" maxOccurs="1">
+          <xs:annotation>
+            <xs:documentation xml:lang="en">Result of the activation function.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element type="PredictorActivationPowerType" name="activationPower" minOccurs="0" maxOccurs="1">
+          <xs:annotation>
+            <xs:documentation xml:lang="en">Powered absolute value of the result of the activation function.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element type="PredictorActivationStatFeatureType" name="activationStatFeature" minOccurs="0" maxOccurs="1">
+          <xs:annotation>
+            <xs:documentation xml:lang="en">Statistical feature computed from the activation function results.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element type="PredictorActivationRescalledRangeType" name="activationRescalledRange" minOccurs="0" maxOccurs="1">
+          <xs:annotation>
+            <xs:documentation xml:lang="en">Rescalled range computed from the activation function results.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element type="PredictorActivationLinWAvgType" name="activationLinWAvg" minOccurs="0" maxOccurs="1">
+          <xs:annotation>
+            <xs:documentation xml:lang="en">Linearly weighted average computed from the activation function results.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element type="PredictorActivationDiffStatFeatureType" name="activationDiffStatFeature" minOccurs="0" maxOccurs="1">
+          <xs:annotation>
+            <xs:documentation xml:lang="en">Statistical feature computed from the differences of the activation function results (A[T] - A[T-1]).</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element type="PredictorActivationDiffRescalledRangeType" name="activationDiffRescalledRange" minOccurs="0" maxOccurs="1">
+          <xs:annotation>
+            <xs:documentation xml:lang="en">Rescalled range computed from the differences of the activation function results (A[T] - A[T-1]).</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element type="PredictorActivationDiffLinWAvgType" name="activationDiffLinWAvg" minOccurs="0" maxOccurs="1">
+          <xs:annotation>
+            <xs:documentation xml:lang="en">Linearly weighted average computed from the differences of the activation function results (A[T] - A[T-1]).</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element type="PredictorFiringTraceType" name="firingTrace" minOccurs="0" maxOccurs="1">
+          <xs:annotation>
+            <xs:documentation xml:lang="en">Traced neuron's firing.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+      </xs:choice>
   </xs:complexType>
+
 
   <!-- Pool interconnection schemas -->
   <!-- Empty schema -->
@@ -1974,7 +2015,7 @@
       </xs:choice>
       <xs:element type="HomogenousExcitabilityType" name="homogenousExcitability" minOccurs="0" maxOccurs="1"/>
       <xs:element type="RandomValueType" name="bias" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="PredictorsType" name="predictors" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="PredictorsType" name="predictors" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:string" name="name" use="required" />
     <xs:attribute type="UDoubleType" name="relShare" use="required"/>
@@ -2004,7 +2045,7 @@
       </xs:choice>
       <xs:element type="RandomValueType" name="bias" minOccurs="0" maxOccurs="1"/>
       <xs:element type="RetainmentType" name="retainment" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="PredictorsType" name="predictors" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="PredictorsType" name="predictors" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:string" name="name" use="required" />
     <xs:attribute type="UDoubleType" name="relShare" use="required"/>
@@ -2042,7 +2083,6 @@
         </xs:unique>
       </xs:element>
       <xs:element type="PoolInterconnectionType" name="interconnection" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="PredictorsType" name="predictors" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:string" name="name" use="required" />
   </xs:complexType>
@@ -2360,7 +2400,6 @@
         </xs:unique>
       </xs:element>
       <xs:element type="SynapseType" name="synapse" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="PredictorsType" name="predictors" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="xs:string" name="name" use="required" />
     <xs:attribute type="xs:string" name="reservoirStructure" use="required"/>

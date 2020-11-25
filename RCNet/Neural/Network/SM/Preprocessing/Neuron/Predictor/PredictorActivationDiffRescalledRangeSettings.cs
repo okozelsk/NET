@@ -1,39 +1,36 @@
-﻿using System;
+﻿using RCNet.MathTools;
+using System;
 using System.Globalization;
 using System.Xml.Linq;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
 {
     /// <summary>
-    /// Fading sum of the firing predictor settings
+    /// Configuration of the ActivationDiffRescalledRange predictor
     /// </summary>
     [Serializable]
-    public class FiringFadingSumSettings : RCNetBaseSettings, IPredictorParamsSettings
+    public class PredictorActivationDiffRescalledRangeSettings : RCNetBaseSettings, IPredictorSettings
     {
         //Constants
         /// <summary>
         /// Name of the associated xsd type
         /// </summary>
-        public const string XsdTypeName = "PredictorFiringFadingSumType";
-        /// <summary>
-        /// Default value of strength of fading
-        /// </summary>
-        public const double DefaultStrength = 0.005;
+        public const string XsdTypeName = "PredictorActivationDiffRescalledRangeType";
 
         //Attribute properties
         /// <summary>
-        /// Strength of fading
+        /// Specifies data window size
         /// </summary>
-        public double Strength { get; }
+        public int Window { get; }
 
         //Constructors
         /// <summary>
-        /// Creates initialized instance
+        /// Creates an initialized instance
         /// </summary>
-        /// <param name="strength">Strength of fading</param>
-        public FiringFadingSumSettings(double strength = DefaultStrength)
+        /// <param name="window">Specifies data window size</param>
+        public PredictorActivationDiffRescalledRangeSettings(int window)
         {
-            Strength = strength;
+            Window = window;
             Check();
             return;
         }
@@ -42,9 +39,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         /// Copy constructor
         /// </summary>
         /// <param name="source">Source instance</param>
-        public FiringFadingSumSettings(FiringFadingSumSettings source)
+        public PredictorActivationDiffRescalledRangeSettings(PredictorActivationDiffRescalledRangeSettings source)
+            : this(source.Window)
         {
-            Strength = source.Strength;
             return;
         }
 
@@ -52,12 +49,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         /// Creates initialized instance using xml element
         /// </summary>
         /// <param name="elem">Xml element containing settings</param>
-        public FiringFadingSumSettings(XElement elem)
+        public PredictorActivationDiffRescalledRangeSettings(XElement elem)
         {
             //Validation
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
-            Strength = double.Parse(settingsElem.Attribute("strength").Value, CultureInfo.InvariantCulture);
+            Window = int.Parse(settingsElem.Attribute("window").Value, CultureInfo.InvariantCulture);
             Check();
             return;
         }
@@ -66,17 +63,32 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         /// <summary>
         /// ID of the predictor
         /// </summary>
-        public PredictorsProvider.PredictorID ID { get { return PredictorsProvider.PredictorID.FiringFadingSum; } }
+        public PredictorsProvider.PredictorID ID { get { return PredictorsProvider.PredictorID.ActivationDiffRescalledRange; } }
 
         /// <summary>
-        /// Checks if settings are default
+        /// Specifies necessary size of the windowed history of activations
         /// </summary>
-        public bool IsDefaultStrength { get { return (Strength == DefaultStrength); } }
+        public int RequiredWndSizeOfActivations { get { return Window; } }
+
+        /// <summary>
+        /// Specifies necessary size of the windowed history of firings
+        /// </summary>
+        public int RequiredWndSizeOfFirings { get { return 0; } }
+
+        /// <summary>
+        /// Indicates use of continuous stat of activations
+        /// </summary>
+        public bool NeedsContinuousActivationStat { get { return false; } }
+
+        /// <summary>
+        /// Indicates use of continuous stat of activation differences
+        /// </summary>
+        public bool NeedsContinuousActivationDiffStat { get { return false; } }
 
         /// <summary>
         /// Identifies settings containing only default values
         /// </summary>
-        public override bool ContainsOnlyDefaults { get { return IsDefaultStrength; } }
+        public override bool ContainsOnlyDefaults { get { return false; } }
 
 
         //Methods
@@ -85,9 +97,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         /// </summary>
         protected override void Check()
         {
-            if (Strength < 0 || Strength >= 1)
+            if (Window < 2 || Window > 1024)
             {
-                throw new ArgumentException($"Invalid Strength {Strength.ToString(CultureInfo.InvariantCulture)}. Strength must be GE to 0 and LT 1.", "Strength");
+                throw new ArgumentException($"Invalid Window size {Window.ToString(CultureInfo.InvariantCulture)}. Window size must be GE2 and LE1024.", "Window");
             }
             return;
         }
@@ -97,7 +109,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         /// </summary>
         public override RCNetBaseSettings DeepClone()
         {
-            return new FiringFadingSumSettings(this);
+            return new PredictorActivationDiffRescalledRangeSettings(this);
         }
 
         /// <summary>
@@ -108,11 +120,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
-            XElement rootElem = new XElement(rootElemName);
-            if (!suppressDefaults || !IsDefaultStrength)
-            {
-                rootElem.Add(new XAttribute("strength", Strength.ToString(CultureInfo.InvariantCulture)));
-            }
+            XElement rootElem = new XElement(rootElemName,
+                                             new XAttribute("window", Window.ToString(CultureInfo.InvariantCulture))
+                                             );
             Validate(rootElem, XsdTypeName);
             return rootElem;
         }
@@ -124,9 +134,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(bool suppressDefaults)
         {
-            return GetXml(PredictorsSettings.GetXmlName(ID), suppressDefaults);
+            return GetXml(PredictorFactory.GetXmlName(ID), suppressDefaults);
         }
 
-    }//PredictorFiringFadingSumSettings
+    }//PredictorActivationDiffRescalledRangeSettings
 
 }//Namespace

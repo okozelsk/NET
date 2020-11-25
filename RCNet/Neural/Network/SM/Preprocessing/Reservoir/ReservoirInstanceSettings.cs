@@ -40,11 +40,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// </summary>
         public SynapseSettings SynapseCfg { get; }
 
-        /// <summary>
-        /// Configuration of the predictors
-        /// </summary>
-        public PredictorsSettings PredictorsCfg { get; }
-
         //Constructors
         /// <summary>
         /// Creates an initialized instance
@@ -53,19 +48,16 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// <param name="structureCfgName">Name of the reservoir structure settings</param>
         /// <param name="inputConnsCfg">Collection of input connections settings</param>
         /// <param name="synapseCfg">Synapse configuration</param>
-        /// <param name="predictorsCfg">Configuration of the predictors</param>
         public ReservoirInstanceSettings(string name,
                                          string structureCfgName,
                                          InputConnsSettings inputConnsCfg,
-                                         SynapseSettings synapseCfg = null,
-                                         PredictorsSettings predictorsCfg = null
+                                         SynapseSettings synapseCfg = null
                                          )
         {
             Name = name;
             StructureCfgName = structureCfgName;
             InputConnsCfg = (InputConnsSettings)inputConnsCfg.DeepClone();
             SynapseCfg = synapseCfg == null ? null : (SynapseSettings)synapseCfg.DeepClone();
-            PredictorsCfg = predictorsCfg == null ? null : (PredictorsSettings)predictorsCfg.DeepClone();
             Check();
             return;
         }
@@ -75,7 +67,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// </summary>
         /// <param name="source">Source instance</param>
         public ReservoirInstanceSettings(ReservoirInstanceSettings source)
-            : this(source.Name, source.StructureCfgName, source.InputConnsCfg, source.SynapseCfg, source.PredictorsCfg)
+            : this(source.Name, source.StructureCfgName, source.InputConnsCfg, source.SynapseCfg)
         {
             return;
         }
@@ -96,12 +88,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             //Synapse
             XElement synapseElem = settingsElem.Elements("synapse").FirstOrDefault();
             SynapseCfg = synapseElem == null ? new SynapseSettings() : new SynapseSettings(synapseElem);
-            //Predictors
-            XElement predictorsElem = settingsElem.Elements("predictors").FirstOrDefault();
-            if (predictorsElem != null)
-            {
-                PredictorsCfg = new PredictorsSettings(predictorsElem);
-            }
             Check();
             return;
         }
@@ -179,10 +165,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             if (SynapseCfg != null && !SynapseCfg.ContainsOnlyDefaults)
             {
                 rootElem.Add(SynapseCfg.GetXml(suppressDefaults));
-            }
-            if (PredictorsCfg != null && !PredictorsCfg.ContainsOnlyDefaults)
-            {
-                rootElem.Add(PredictorsCfg.GetXml(suppressDefaults));
             }
             Validate(rootElem, XsdTypeName);
             return rootElem;

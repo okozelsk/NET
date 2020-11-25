@@ -43,16 +43,17 @@ namespace Demo.DemoConsoleApp.Examples
             StateMachineDesigner smd = new StateMachineDesigner(inputCfg, readoutCfg);
             //Create pure ESN fashioned StateMachine configuration
             StateMachineSettings stateMachineCfg = smd.CreatePureESNCfg(250,
-                                                                        StateMachineDesigner.DefaultAnalogMaxInputStrength,
+                                                                        2.5,
                                                                         1d,
                                                                         0,
-                                                                        0.2d,
-                                                                        0,
                                                                         0.1d,
-                                                                        0.75d,
-                                                                        null,
-                                                                        PredictorsProvider.PredictorID.Activation,
-                                                                        PredictorsProvider.PredictorID.ActivationSquare
+                                                                        0,
+                                                                        0d,
+                                                                        0d,
+                                                                        new PredictorsProviderSettings(new PredictorActivationSettings(),
+                                                                                                       new PredictorActivationPowerSettings(2d, true),
+                                                                                                       new PredictorFiringTraceSettings(0.05, 30)
+                                                                                                       )
                                                                         );
             //Display StateMachine xml configuration
             string xmlConfig = stateMachineCfg.GetXml(true).ToString();

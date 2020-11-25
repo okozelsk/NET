@@ -76,15 +76,23 @@ namespace Demo.DemoConsoleApp.Examples
             //selected from the range 0 to 0.75 using uniform distribution
             URandomValueSettings retainmentStrengthCfg = new URandomValueSettings(0, 0.75);
             RetainmentSettings retainmentCfg = new RetainmentSettings(RetainmentDensity, retainmentStrengthCfg);
+            //Predictors configuration
+            //We will use Activation and ActivationSquare predictors
+            PredictorsProviderSettings predictorsCfg = new PredictorsProviderSettings(new PredictorActivationSettings(),
+                                                                                      new PredictorActivationPowerSettings()
+                                                                                      );
+
+
+
             //Create neuron group configuration
             AnalogNeuronGroupSettings groupCfg = new AnalogNeuronGroupSettings(groupName,
                                                                                relShare,
                                                                                new TanHSettings(),
+                                                                               predictorsCfg,
                                                                                AnalogNeuronGroupSettings.DefaultFiringThreshold,
                                                                                AnalogNeuronGroupSettings.DefaultThresholdMaxRefDeepness,
                                                                                biasCfg,
-                                                                               retainmentCfg,
-                                                                               null
+                                                                               retainmentCfg
                                                                                );
             return groupCfg;
         }
@@ -194,26 +202,11 @@ namespace Demo.DemoConsoleApp.Examples
             SynapseATIndifferentSettings synapseATIndifferentSettings = new SynapseATIndifferentSettings(Synapse.SynapticDelayMethod.Random, internalMaxDelay);
             SynapseATSettings synapseATCfg = new SynapseATSettings(SynapseATSettings.DefaultSpectralRadiusNum, synapseATInputSettings, synapseATIndifferentSettings);
             SynapseSettings synapseCfg = new SynapseSettings(null, synapseATCfg);
-            //Predictors configuration
-            //We use constructor accepting array of boolean switches
-            //Initially we set all switches to false - all available predictors are forbidden
-            bool[] predictorSwitches = new bool[PredictorsProvider.NumOfSupportedPredictors];
-            predictorSwitches.Populate(false);
-            //Now we enable Activation and ActivationMWAvg predictors
-            predictorSwitches[(int)PredictorsProvider.PredictorID.Activation] = true;
-            predictorSwitches[(int)PredictorsProvider.PredictorID.ActivationMWAvg] = true;
-            //We configure activation moving average predictor to use constant weights and last 7 values without the leaks
-            ActivationMWAvgSettings activationMWAvgCfg = new ActivationMWAvgSettings(7, PredictorsProvider.PredictorMWAvgWeightsType.Constant);
-            //We create predictors parameters configuration including custom configuration of activation moving average predictor
-            PredictorsParamsSettings predictorsParamsCfg = new PredictorsParamsSettings(activationMWAvgCfg);
-            //Create predictors configuration using prepared boolean switches and predictors parameters
-            PredictorsSettings predictorsCfg = new PredictorsSettings(predictorSwitches, predictorsParamsCfg);
             //Create reservoir instance configuration
             ReservoirInstanceSettings resInstCfg = new ReservoirInstanceSettings(instName,
                                                                                  structName,
                                                                                  new InputConnsSettings(inpConnHighCfg, inpConnLowCfg, inpConnAdjCloseP1Cfg, inpConnAdjCloseP2Cfg),
-                                                                                 synapseCfg,
-                                                                                 predictorsCfg
+                                                                                 synapseCfg
                                                                                  );
             return resInstCfg;
         }

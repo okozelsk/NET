@@ -40,7 +40,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// <summary>
         /// Configuration of the predictors
         /// </summary>
-        PredictorsSettings PredictorsCfg { get; }
+        PredictorsProviderSettings PredictorsCfg { get; }
 
         /// <summary>
         /// Additional helper computed field.

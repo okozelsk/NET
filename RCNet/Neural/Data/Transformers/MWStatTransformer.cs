@@ -11,70 +11,6 @@ namespace RCNet.Neural.Data.Transformers
     [Serializable]
     public class MWStatTransformer : ITransformer
     {
-        //Enums
-        /// <summary>
-        /// Available outputs
-        /// </summary>
-        public enum OutputValue
-        {
-            /// <summary>
-            /// Sum of values
-            /// </summary>
-            Sum,
-            /// <summary>
-            /// Sum of negative values
-            /// </summary>
-            NegSum,
-            /// <summary>
-            /// Sum of positive values
-            /// </summary>
-            PosSum,
-            /// <summary>
-            /// Sum of squared values
-            /// </summary>
-            SumOfSquares,
-            /// <summary>
-            /// Min value
-            /// </summary>
-            Min,
-            /// <summary>
-            /// Max value
-            /// </summary>
-            Max,
-            /// <summary>
-            /// The center value between min and max
-            /// </summary>
-            Mid,
-            /// <summary>
-            /// Span between min and max
-            /// </summary>
-            Span,
-            /// <summary>
-            /// Arithmetic average
-            /// </summary>
-            ArithAvg,
-            /// <summary>
-            /// Mean of the squared values
-            /// </summary>
-            MeanSquare,
-            /// <summary>
-            /// Root of the mean of the squared values
-            /// </summary>
-            RootMeanSquare,
-            /// <summary>
-            /// The variance of the values
-            /// </summary>
-            Variance,
-            /// <summary>
-            /// The standard deviation of the values
-            /// </summary>
-            StdDev,
-            /// <summary>
-            /// The min-max span multiplicated by standard deviation of the values
-            /// </summary>
-            SpanDev
-        }
-
         //Attributes
         private readonly int _fieldIdx;
         private readonly SimpleQueue<double> _lastValues;
@@ -124,24 +60,7 @@ namespace RCNet.Neural.Data.Transformers
             {
                 stat.AddSampleValue(_lastValues.GetElementAt(i, true));
             }
-            switch (_settings.Output)
-            {
-                case OutputValue.Sum: return stat.Sum;
-                case OutputValue.NegSum: return stat.NegSum;
-                case OutputValue.PosSum: return stat.PosSum;
-                case OutputValue.SumOfSquares: return stat.SumOfSquares;
-                case OutputValue.Min: return stat.Min;
-                case OutputValue.Max: return stat.Max;
-                case OutputValue.Mid: return stat.Mid;
-                case OutputValue.Span: return stat.Span;
-                case OutputValue.ArithAvg: return stat.ArithAvg;
-                case OutputValue.MeanSquare: return stat.MeanSquare;
-                case OutputValue.RootMeanSquare: return stat.RootMeanSquare;
-                case OutputValue.Variance: return stat.Variance;
-                case OutputValue.StdDev: return stat.StdDev;
-                case OutputValue.SpanDev: return stat.SpanDev;
-                default: return 0;
-            }
+            return stat.Get(_settings.Output);
         }
 
     }//MWStatTransformer

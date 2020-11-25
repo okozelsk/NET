@@ -1,5 +1,4 @@
 ﻿using RCNet.Neural.Activation;
-using RCNet.Neural.Network.SM.Preprocessing.Neuron;
 using RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor;
 using RCNet.RandomValue;
 using System;
@@ -50,7 +49,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// <summary>
         /// Configuration of the predictors
         /// </summary>
-        public PredictorsSettings PredictorsCfg { get; }
+        public PredictorsProviderSettings PredictorsCfg { get; }
 
         /// <summary>
         /// Additional helper computed field.
@@ -66,23 +65,23 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// <param name="name">Name of the neuron group</param>
         /// <param name="relShare">Specifies how big relative portion of pool's neurons is formed by this group of the neurons</param>
         /// <param name="activationCfg">Common activation function settings of the groupped neurons</param>
+        /// <param name="predictorsCfg">Configuration of the predictors</param>
         /// <param name="homogenousExcitabilityCfg">Configuration of the neuron's homogenous excitability</param>
         /// <param name="biasCfg">Each neuron within the group receives constant input bias. Value of the neuron's bias is driven by this random settings</param>
-        /// <param name="predictorsCfg">Configuration of the predictors</param>
         public SpikingNeuronGroupSettings(string name,
                                           double relShare,
                                           RCNetBaseSettings activationCfg,
+                                          PredictorsProviderSettings predictorsCfg,
                                           HomogenousExcitabilitySettings homogenousExcitabilityCfg = null,
-                                          RandomValueSettings biasCfg = null,
-                                          PredictorsSettings predictorsCfg = null
+                                          RandomValueSettings biasCfg = null
                                           )
         {
             Name = name;
             RelShare = relShare;
             ActivationCfg = activationCfg.DeepClone();
+            PredictorsCfg = (PredictorsProviderSettings)predictorsCfg.DeepClone();
             HomogenousExcitabilityCfg = homogenousExcitabilityCfg == null ? new HomogenousExcitabilitySettings() : (HomogenousExcitabilitySettings)homogenousExcitabilityCfg.DeepClone();
             BiasCfg = biasCfg == null ? null : (RandomValueSettings)biasCfg.DeepClone();
-            PredictorsCfg = predictorsCfg == null ? null : (PredictorsSettings)predictorsCfg.DeepClone();
             Check();
             return;
         }
@@ -92,8 +91,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// </summary>
         /// <param name="source">Source instance</param>
         public SpikingNeuronGroupSettings(SpikingNeuronGroupSettings source)
-            : this(source.Name, source.RelShare, source.ActivationCfg, source.HomogenousExcitabilityCfg,
-                  source.BiasCfg, source.PredictorsCfg)
+            : this(source.Name, source.RelShare, source.ActivationCfg, source.PredictorsCfg, source.HomogenousExcitabilityCfg,
+                  source.BiasCfg)
         {
             return;
         }
@@ -120,11 +119,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
             XElement biasSettingsElem = settingsElem.Elements("bias").FirstOrDefault();
             BiasCfg = biasSettingsElem == null ? null : new RandomValueSettings(biasSettingsElem);
             //Predictors
-            XElement predictorsSettingsElem = settingsElem.Elements("predictors").FirstOrDefault();
-            if (predictorsSettingsElem != null)
-            {
-                PredictorsCfg = new PredictorsSettings(predictorsSettingsElem);
-            }
+            PredictorsCfg = new PredictorsProviderSettings(settingsElem.Elements("predictors").First());
             Check();
             return;
         }
@@ -205,10 +200,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
             {
                 rootElem.Add(BiasCfg.GetXml("bias", suppressDefaults));
             }
-            if (PredictorsCfg != null && !PredictorsCfg.ContainsOnlyDefaults)
-            {
-                rootElem.Add(PredictorsCfg.GetXml(suppressDefaults));
-            }
+            rootElem.Add(PredictorsCfg.GetXml(suppressDefaults));
             Validate(rootElem, XsdTypeName);
             return rootElem;
         }
@@ -223,6 +215,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
             return GetXml("spikingGroup", suppressDefaults);
         }
 
-    }//PoolSpikingNeuronGroupSettings
+    }//SpikingNeuronGroupSettings
 
 }//Namespace

@@ -317,9 +317,11 @@ namespace RCNet.Neural.Network.SM
         /// Creates configuration of group of analog neurons having specified analog activation.
         /// </summary>
         /// <param name="activationCfg">Activation function configuration</param>
+        /// <param name="predictorsCfg">Predictors configuration</param>
         /// <param name="maxAbsBias">Maximum absolute value of the bias (0 means bias is not required)</param>
         /// <param name="maxRetainmentStrength">Maximum retainment strength (0 means retainment property is not required)</param>
         private AnalogNeuronGroupSettings CreateAnalogGroup(RCNetBaseSettings activationCfg,
+                                                            PredictorsProviderSettings predictorsCfg,
                                                             double maxAbsBias = 0d,
                                                             double maxRetainmentStrength = 0d
                                                             )
@@ -333,11 +335,11 @@ namespace RCNet.Neural.Network.SM
             AnalogNeuronGroupSettings groupCfg = new AnalogNeuronGroupSettings(GetNeuronGroupName(activationCfg),
                                                                                1d,
                                                                                activationCfg,
+                                                                               predictorsCfg,
                                                                                AnalogNeuronGroupSettings.DefaultFiringThreshold,
                                                                                AnalogNeuronGroupSettings.DefaultThresholdMaxRefDeepness,
                                                                                biasCfg,
-                                                                               retainmentCfg,
-                                                                               null
+                                                                               retainmentCfg
                                                                                );
             return groupCfg;
         }
@@ -346,9 +348,14 @@ namespace RCNet.Neural.Network.SM
         /// Creates configuration of group of spiking neurons having specified spiking activation.
         /// </summary>
         /// <param name="activationCfg">Activation function configuration</param>
+        /// <param name="predictorsCfg">Predictors configuration</param>
         /// <param name="heCfg">Configuration of the homogenous excitability</param>
         /// <param name="steadyBias">Constant bias (0 means bias is not required)</param>
-        private SpikingNeuronGroupSettings CreateSpikingGroup(RCNetBaseSettings activationCfg, HomogenousExcitabilitySettings heCfg, double steadyBias = 0d)
+        private SpikingNeuronGroupSettings CreateSpikingGroup(RCNetBaseSettings activationCfg,
+                                                              PredictorsProviderSettings predictorsCfg,
+                                                              HomogenousExcitabilitySettings heCfg,
+                                                              double steadyBias = 0d
+                                                              )
         {
             //Bias configuration
             RandomValueSettings biasCfg = steadyBias == 0 ? null : new RandomValueSettings(steadyBias, steadyBias);
@@ -356,9 +363,9 @@ namespace RCNet.Neural.Network.SM
             SpikingNeuronGroupSettings groupCfg = new SpikingNeuronGroupSettings(GetNeuronGroupName(activationCfg),
                                                                                  1d,
                                                                                  activationCfg,
+                                                                                 predictorsCfg,
                                                                                  heCfg,
-                                                                                 biasCfg,
-                                                                                 null
+                                                                                 biasCfg
                                                                                  );
             return groupCfg;
         }
@@ -375,8 +382,7 @@ namespace RCNet.Neural.Network.SM
         /// <param name="maxInternalDelay">Maximum delay of internal synapse</param>
         /// <param name="maxAbsBias">Maximum absolute value of the bias (0 means bias is not required)</param>
         /// <param name="maxRetainmentStrength">Maximum retainment strength (0 means retainment property is not required)</param>
-        /// <param name="predictorsParamsCfg">Predictors parameters (use null for defaults)</param>
-        /// <param name="allowedPredictor">Allowed predictor(s)</param>
+        /// <param name="predictorsProviderCfg">Predictors configuration</param>
         public StateMachineSettings CreatePureESNCfg(int totalSize,
                                                      double maxInputStrength,
                                                      double inputConnectionDensity,
@@ -385,8 +391,7 @@ namespace RCNet.Neural.Network.SM
                                                      int maxInternalDelay,
                                                      double maxAbsBias,
                                                      double maxRetainmentStrength,
-                                                     PredictorsParamsSettings predictorsParamsCfg,
-                                                     params PredictorsProvider.PredictorID[] allowedPredictor
+                                                     PredictorsProviderSettings predictorsProviderCfg
                                                      )
         {
             //Check NP is not bypassed
@@ -397,7 +402,7 @@ namespace RCNet.Neural.Network.SM
             //Default ESN activation
             RCNetBaseSettings aFnCfg = new TanHSettings();
             //One neuron group
-            AnalogNeuronGroupSettings grp = CreateAnalogGroup(aFnCfg, maxAbsBias, maxRetainmentStrength);
+            AnalogNeuronGroupSettings grp = CreateAnalogGroup(aFnCfg, predictorsProviderCfg, maxAbsBias, maxRetainmentStrength);
             //Simple analog pool
             PoolSettings poolCfg = new PoolSettings(GetPoolName(ActivationContent.Analog, 0),
                                                     new ProportionsSettings(totalSize, 1, 1),
@@ -425,22 +430,11 @@ namespace RCNet.Neural.Network.SM
             SynapseATSettings synapseATCfg = new SynapseATSettings(SynapseATSettings.DefaultSpectralRadiusNum, synapseATInputSettings, synapseATIndifferentSettings);
             SynapseSettings synapseCfg = new SynapseSettings(null, synapseATCfg);
 
-            //Initially set all switches to false - all available predictors are forbidden
-            bool[] predictorSwitches = new bool[PredictorsProvider.NumOfSupportedPredictors];
-            predictorSwitches.Populate(false);
-            //Enable specified predictors
-            foreach (PredictorsProvider.PredictorID predictorID in allowedPredictor)
-            {
-                predictorSwitches[(int)predictorID] = true;
-            }
-            //Create predictors configuration using default params
-            PredictorsSettings predictorsCfg = new PredictorsSettings(predictorSwitches, predictorsParamsCfg);
             //Create reservoir instance
             ReservoirInstanceSettings resInstCfg = new ReservoirInstanceSettings(GetResInstName(ResDesign.PureESN, 0),
                                                                                  resStructCfg.Name,
                                                                                  new InputConnsSettings(inputConns),
-                                                                                 synapseCfg,
-                                                                                 predictorsCfg
+                                                                                 synapseCfg
                                                                                  );
             //Build and return SM configuration
             return new StateMachineSettings(new NeuralPreprocessorSettings(InputCfg,
@@ -462,8 +456,7 @@ namespace RCNet.Neural.Network.SM
         /// <param name="interconnectionDensity">Density of the hidden neurons interconnection</param>
         /// <param name="maxInternalDelay">Maximum delay of internal synapse</param>
         /// <param name="steadyBias">Constant bias (0 means bias is not required)</param>
-        /// <param name="predictorsParamsCfg">Predictors parameters (use null for defaults)</param>
-        /// <param name="allowedPredictor">Allowed predictor(s)</param>
+        /// <param name="predictorsCfg">Predictors configuration</param>
         public StateMachineSettings CreatePureLSMCfg(int totalSize,
                                                      RCNetBaseSettings aFnCfg,
                                                      HomogenousExcitabilitySettings hes,
@@ -472,8 +465,7 @@ namespace RCNet.Neural.Network.SM
                                                      double interconnectionDensity,
                                                      int maxInternalDelay,
                                                      double steadyBias,
-                                                     PredictorsParamsSettings predictorsParamsCfg,
-                                                     params PredictorsProvider.PredictorID[] allowedPredictor
+                                                     PredictorsProviderSettings predictorsCfg
                                                      )
         {
             //Check NP is not bypassed
@@ -487,7 +479,7 @@ namespace RCNet.Neural.Network.SM
                 throw new ArgumentException("Specified activation must be spiking.", "aFnCfg");
             }
             //One neuron group
-            SpikingNeuronGroupSettings grp = CreateSpikingGroup(aFnCfg, hes, steadyBias);
+            SpikingNeuronGroupSettings grp = CreateSpikingGroup(aFnCfg, predictorsCfg, hes, steadyBias);
             //Simple spiking pool
             PoolSettings poolCfg = new PoolSettings(GetPoolName(ActivationContent.Spiking, 0),
                                                     new ProportionsSettings(totalSize, 1, 1),
@@ -519,22 +511,11 @@ namespace RCNet.Neural.Network.SM
             SynapseSTSettings synapseSTCfg = new SynapseSTSettings(synapseSTInputSettings, synapseSTExcitatorySettings, synapseSTInhibitorySettings);
             SynapseSettings synapseCfg = new SynapseSettings(synapseSTCfg, null);
 
-            //Initially set all switches to false - all available predictors are forbidden
-            bool[] predictorSwitches = new bool[PredictorsProvider.NumOfSupportedPredictors];
-            predictorSwitches.Populate(false);
-            //Enable specified predictors
-            foreach (PredictorsProvider.PredictorID predictorID in allowedPredictor)
-            {
-                predictorSwitches[(int)predictorID] = true;
-            }
-            //Create predictors configuration using default params
-            PredictorsSettings predictorsCfg = new PredictorsSettings(predictorSwitches, predictorsParamsCfg);
             //Create reservoir instance
             ReservoirInstanceSettings resInstCfg = new ReservoirInstanceSettings(GetResInstName(ResDesign.PureLSM, 0),
                                                                                  resStructCfg.Name,
                                                                                  new InputConnsSettings(inputConns),
-                                                                                 synapseCfg,
-                                                                                 predictorsCfg
+                                                                                 synapseCfg
                                                                                  );
             //Build and return SM configuration
             return new StateMachineSettings(new NeuralPreprocessorSettings(InputCfg,

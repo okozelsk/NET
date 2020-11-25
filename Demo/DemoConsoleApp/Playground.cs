@@ -9,6 +9,7 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Linq;
+using RCNet.MathTools;
 
 namespace Demo.DemoConsoleApp
 {
@@ -116,7 +117,7 @@ namespace Demo.DemoConsoleApp
             transformer = new YeoJohnsonTransformer(singleFieldList, new YeoJohnsonTransformerSettings(singleFieldList[0], 0.5d));
             TestSingleFieldTransformer(transformer);
             //MWStat transformer
-            transformer = new MWStatTransformer(singleFieldList, new MWStatTransformerSettings(singleFieldList[0], 5, MWStatTransformer.OutputValue.RootMeanSquare));
+            transformer = new MWStatTransformer(singleFieldList, new MWStatTransformerSettings(singleFieldList[0], 5, BasicStat.OutputFeature.RootMeanSquare));
             TestSingleFieldTransformer(transformer);
             //Mul transformer
             transformer = new MulTransformer(twoFieldsList, new MulTransformerSettings(twoFieldsList[0], twoFieldsList[1]));

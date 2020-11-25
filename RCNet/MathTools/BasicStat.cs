@@ -10,6 +10,70 @@ namespace RCNet.MathTools
     [Serializable]
     public class BasicStat
     {
+        //Enums
+        /// <summary>
+        /// Available outputs
+        /// </summary>
+        public enum OutputFeature
+        {
+            /// <summary>
+            /// Sum of values
+            /// </summary>
+            Sum,
+            /// <summary>
+            /// Sum of negative values
+            /// </summary>
+            NegSum,
+            /// <summary>
+            /// Sum of positive values
+            /// </summary>
+            PosSum,
+            /// <summary>
+            /// Sum of squared values
+            /// </summary>
+            SumOfSquares,
+            /// <summary>
+            /// Min value
+            /// </summary>
+            Min,
+            /// <summary>
+            /// Max value
+            /// </summary>
+            Max,
+            /// <summary>
+            /// The center value between min and max
+            /// </summary>
+            Mid,
+            /// <summary>
+            /// Span between min and max
+            /// </summary>
+            Span,
+            /// <summary>
+            /// Arithmetic average
+            /// </summary>
+            ArithAvg,
+            /// <summary>
+            /// Mean of the squared values
+            /// </summary>
+            MeanSquare,
+            /// <summary>
+            /// Root of the mean of the squared values
+            /// </summary>
+            RootMeanSquare,
+            /// <summary>
+            /// The variance of the values
+            /// </summary>
+            Variance,
+            /// <summary>
+            /// The standard deviation of the values
+            /// </summary>
+            StdDev,
+            /// <summary>
+            /// The span multiplicated by standard deviation of the values
+            /// </summary>
+            SpanDev
+        }
+
         //Attributes
         //Locker to ensure thread safe behaviour
         private readonly Object _lock;
@@ -820,6 +884,32 @@ namespace RCNet.MathTools
             Reset();
             AddSampleValues(sampleValueCollection);
             return;
+        }
+
+        /// <summary>
+        /// Gets the statistical feature
+        /// </summary>
+        /// <param name="feature">Requiered statistical feature</param>
+        public double Get(OutputFeature feature)
+        {
+            switch(feature)
+            {
+                case OutputFeature.Sum: return Sum;
+                case OutputFeature.NegSum: return NegSum;
+                case OutputFeature.PosSum: return PosSum;
+                case OutputFeature.SumOfSquares: return SumOfSquares;
+                case OutputFeature.Min: return Min;
+                case OutputFeature.Max: return Max;
+                case OutputFeature.Mid: return Mid;
+                case OutputFeature.Span: return Span;
+                case OutputFeature.ArithAvg: return ArithAvg;
+                case OutputFeature.MeanSquare: return MeanSquare;
+                case OutputFeature.RootMeanSquare: return RootMeanSquare;
+                case OutputFeature.Variance: return Variance;
+                case OutputFeature.StdDev: return StdDev;
+                case OutputFeature.SpanDev: return SpanDev;
+                default: return 0d;
+            }
         }
 
     }//BasicStat

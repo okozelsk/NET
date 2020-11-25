@@ -1,37 +1,34 @@
-﻿using System;
+﻿using RCNet.MathTools;
+using System;
 using System.Globalization;
 using System.Xml.Linq;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
 {
     /// <summary>
-    /// Firing binary pattern predictor settings
+    /// Configuration of the ActivationRescalledRange predictor
     /// </summary>
     [Serializable]
-    public class FiringBinPatternSettings : RCNetBaseSettings, IPredictorParamsSettings
+    public class PredictorActivationRescalledRangeSettings : RCNetBaseSettings, IPredictorSettings
     {
         //Constants
         /// <summary>
         /// Name of the associated xsd type
         /// </summary>
-        public const string XsdTypeName = "PredictorFiringBinPatternType";
-        /// <summary>
-        /// Default value of window length
-        /// </summary>
-        public const int DefaultWindow = 1;
+        public const string XsdTypeName = "PredictorActivationRescalledRangeType";
 
         //Attribute properties
         /// <summary>
-        /// Window length
+        /// Specifies data window size
         /// </summary>
         public int Window { get; }
 
         //Constructors
         /// <summary>
-        /// Creates initialized instance
+        /// Creates an initialized instance
         /// </summary>
-        /// <param name="window">Strength of fading</param>
-        public FiringBinPatternSettings(int window = DefaultWindow)
+        /// <param name="window">Specifies data window size</param>
+        public PredictorActivationRescalledRangeSettings(int window)
         {
             Window = window;
             Check();
@@ -42,9 +39,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         /// Copy constructor
         /// </summary>
         /// <param name="source">Source instance</param>
-        public FiringBinPatternSettings(FiringBinPatternSettings source)
+        public PredictorActivationRescalledRangeSettings(PredictorActivationRescalledRangeSettings source)
+            : this(source.Window)
         {
-            Window = source.Window;
             return;
         }
 
@@ -52,7 +49,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         /// Creates initialized instance using xml element
         /// </summary>
         /// <param name="elem">Xml element containing settings</param>
-        public FiringBinPatternSettings(XElement elem)
+        public PredictorActivationRescalledRangeSettings(XElement elem)
         {
             //Validation
             XElement settingsElem = Validate(elem, XsdTypeName);
@@ -64,19 +61,35 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
 
         //Properties
         /// <summary>
-        /// Predictor's ID
+        /// ID of the predictor
         /// </summary>
-        public PredictorsProvider.PredictorID ID { get { return PredictorsProvider.PredictorID.FiringBinPattern; } }
+        public PredictorsProvider.PredictorID ID { get { return PredictorsProvider.PredictorID.ActivationRescalledRange; } }
 
         /// <summary>
-        /// Checks if settings are default
+        /// Specifies necessary size of the windowed history of activations
         /// </summary>
-        public bool IsDefaultWindow { get { return (Window == DefaultWindow); } }
+        public int RequiredWndSizeOfActivations { get { return Window; } }
+
+        /// <summary>
+        /// Specifies necessary size of the windowed history of firings
+        /// </summary>
+        public int RequiredWndSizeOfFirings { get { return 0; } }
+
+        /// <summary>
+        /// Indicates use of continuous stat of activations
+        /// </summary>
+        public bool NeedsContinuousActivationStat { get { return false; } }
+
+        /// <summary>
+        /// Indicates use of continuous stat of activation differences
+        /// </summary>
+        public bool NeedsContinuousActivationDiffStat { get { return false; } }
 
         /// <summary>
         /// Identifies settings containing only default values
         /// </summary>
-        public override bool ContainsOnlyDefaults { get { return IsDefaultWindow; } }
+        public override bool ContainsOnlyDefaults { get { return false; } }
+
 
         //Methods
         /// <summary>
@@ -84,9 +97,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         /// </summary>
         protected override void Check()
         {
-            if (Window < 1 || Window > 32)
+            if (Window < 2 || Window > 1024)
             {
-                throw new ArgumentException($"Invalid Window {Window.ToString(CultureInfo.InvariantCulture)}. Window must be GE to 1 and LE to 32.", "Window");
+                throw new ArgumentException($"Invalid Window size {Window.ToString(CultureInfo.InvariantCulture)}. Window size must be GE2 and LE1024.", "Window");
             }
             return;
         }
@@ -96,7 +109,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         /// </summary>
         public override RCNetBaseSettings DeepClone()
         {
-            return new FiringBinPatternSettings(this);
+            return new PredictorActivationRescalledRangeSettings(this);
         }
 
         /// <summary>
@@ -107,11 +120,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
-            XElement rootElem = new XElement(rootElemName);
-            if (!suppressDefaults || !IsDefaultWindow)
-            {
-                rootElem.Add(new XAttribute("window", Window.ToString(CultureInfo.InvariantCulture)));
-            }
+            XElement rootElem = new XElement(rootElemName,
+                                             new XAttribute("window", Window.ToString(CultureInfo.InvariantCulture))
+                                             );
             Validate(rootElem, XsdTypeName);
             return rootElem;
         }
@@ -123,9 +134,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(bool suppressDefaults)
         {
-            return GetXml(PredictorsSettings.GetXmlName(ID), suppressDefaults);
+            return GetXml(PredictorFactory.GetXmlName(ID), suppressDefaults);
         }
 
-    }//PredictorFiringBinPatternSettings
+    }//PredictorActivationRescalledRangeSettings
 
 }//Namespace

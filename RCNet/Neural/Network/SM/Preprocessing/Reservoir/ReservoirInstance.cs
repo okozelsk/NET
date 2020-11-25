@@ -128,7 +128,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                 foreach (INeuronGroupSettings ngs in poolSettings.NeuronGroupsCfg.GroupCfgCollection)
                 {
                     NeuronCreationParams[] grpNCP = new NeuronCreationParams[ngs.Count];
-                    PredictorsSettings predictorsCfg = new PredictorsSettings(ngs.PredictorsCfg, poolSettings.PredictorsCfg, InstanceCfg.PredictorsCfg);
                     //Group neuron params
                     int analogThresholdMaxRefDeepness = 1;
                     for (int i = 0; i < ngs.Count; i++)
@@ -169,11 +168,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                         }
                     }
                     //Readout
-                    if (predictorsCfg.NumOfEnabledPredictors > 0)
+                    if (ngs.PredictorsCfg.NumOfPredictors > 0)
                     {
                         for (int i = 0; i < ngs.Count; i++)
                         {
-                            grpNCP[i].PredictorsCfg = predictorsCfg;
+                            grpNCP[i].PredictorsCfg = ngs.PredictorsCfg;
                         }
                     }
                     ++groupID;
@@ -219,10 +218,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                             }
                             allNeurons.Add(poolNeurons[neuronPoolFlatIdx]);
                             //Predictor
-                            if (poolNeurons[neuronPoolFlatIdx].NumOfEnabledPredictors > 0)
+                            if (poolNeurons[neuronPoolFlatIdx].NumOfProvidedPredictors > 0)
                             {
                                 PredictingNeuronCollection.Add(poolNeurons[neuronPoolFlatIdx]);
-                                NumOfPredictors += poolNeurons[neuronPoolFlatIdx].NumOfEnabledPredictors;
+                                NumOfPredictors += poolNeurons[neuronPoolFlatIdx].NumOfProvidedPredictors;
                             }
                             ++neuronPoolFlatIdx;
                             ++neuronReservoirFlatIdx;
@@ -367,9 +366,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             List<PredictorDescriptor> result = new List<PredictorDescriptor>(NumOfPredictors);
             foreach (HiddenNeuron neuron in PredictingNeuronCollection)
             {
-                if (neuron.NumOfEnabledPredictors > 0)
+                if (neuron.NumOfProvidedPredictors > 0)
                 {
-                    foreach (PredictorsProvider.PredictorID id in neuron.GetEnabledPredictorsIDs())
+                    foreach (PredictorsProvider.PredictorID id in neuron.GetPredictorsIDs())
                     {
                         result.Add(new PredictorDescriptor(neuron.Location.ReservoirID, neuron.Location.PoolID, id));
                     }
@@ -1006,7 +1005,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             public double AnalogFiringThreshold { get; set; }
             public int AnalogThresholdMaxRefDeepness { get; set; }
             public double RetainmentStrength { get; set; }
-            public PredictorsSettings PredictorsCfg { get; set; }
+            public PredictorsProviderSettings PredictorsCfg { get; set; }
         }//NeuronCreationParams
 
         private class RelatedNeuron

@@ -74,8 +74,7 @@ namespace Demo.DemoConsoleApp.Examples
                                                                         0, //Max internal delay
                                                                         0, //Max absolute value of bias
                                                                         0, //Max retainment strength
-                                                                        new PredictorsParamsSettings(new FiringFadingSumSettings(0.05)),
-                                                                        PredictorsProvider.PredictorID.FiringFadingSum
+                                                                        new PredictorsProviderSettings(new PredictorFiringTraceSettings(0.05, 45))
                                                                         );
             //Display StateMachine xml configuration
             string xmlConfig = stateMachineCfg.GetXml(true).ToString();

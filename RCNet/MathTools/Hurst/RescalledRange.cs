@@ -65,7 +65,7 @@ namespace RCNet.MathTools.Hurst
                 }
                 if (devStat.StdDev != 0)
                 {
-                    rescalledRange = (cumulRange.Max - cumulRange.Min) / devStat.StdDev;
+                    rescalledRange = cumulRange.Span / devStat.StdDev;
                 }
             }
             return rescalledRange;

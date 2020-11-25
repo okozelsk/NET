@@ -1,37 +1,47 @@
-﻿using System;
+﻿using RCNet.MathTools;
+using System;
 using System.Globalization;
 using System.Xml.Linq;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
 {
     /// <summary>
-    /// Firing count predictor settings
+    /// Configuration of the ActivationDiffLinWAvg predictor
     /// </summary>
     [Serializable]
-    public class FiringCountSettings : RCNetBaseSettings, IPredictorParamsSettings
+    public class PredictorActivationDiffLinWAvgSettings : RCNetBaseSettings, IPredictorSettings
     {
         //Constants
         /// <summary>
         /// Name of the associated xsd type
         /// </summary>
-        public const string XsdTypeName = "PredictorFiringCountType";
+        public const string XsdTypeName = "PredictorActivationDiffLinWAvgType";
         /// <summary>
-        /// Default value of window length
+        /// Numeric value indicating no data window
         /// </summary>
-        public const int DefaultWindow = 64;
+        public const int NAWindowNum = 0;
+        /// <summary>
+        /// Code indicating no data window
+        /// </summary>
+        public const string NAWindowCode = "NA";
+        //Default values
+        /// <summary>
+        /// Default value of the parameter specifying data window size
+        /// </summary>
+        public const int DefaultWindow = NAWindowNum;
 
         //Attribute properties
         /// <summary>
-        /// Window length
+        /// Specifies data window size
         /// </summary>
         public int Window { get; }
 
         //Constructors
         /// <summary>
-        /// Creates initialized instance
+        /// Creates an initialized instance
         /// </summary>
-        /// <param name="window">Strength of fading</param>
-        public FiringCountSettings(int window = DefaultWindow)
+        /// <param name="window">Specifies data window size</param>
+        public PredictorActivationDiffLinWAvgSettings(int window = DefaultWindow)
         {
             Window = window;
             Check();
@@ -42,9 +52,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         /// Copy constructor
         /// </summary>
         /// <param name="source">Source instance</param>
-        public FiringCountSettings(FiringCountSettings source)
+        public PredictorActivationDiffLinWAvgSettings(PredictorActivationDiffLinWAvgSettings source)
+            : this(source.Window)
         {
-            Window = source.Window;
             return;
         }
 
@@ -52,21 +62,42 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         /// Creates initialized instance using xml element
         /// </summary>
         /// <param name="elem">Xml element containing settings</param>
-        public FiringCountSettings(XElement elem)
+        public PredictorActivationDiffLinWAvgSettings(XElement elem)
         {
             //Validation
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
-            Window = int.Parse(settingsElem.Attribute("window").Value, CultureInfo.InvariantCulture);
+            string attrValue = settingsElem.Attribute("window").Value;
+            Window = attrValue == NAWindowCode ? NAWindowNum : int.Parse(attrValue, CultureInfo.InvariantCulture);
             Check();
             return;
         }
 
         //Properties
         /// <summary>
-        /// Predictor's ID
+        /// ID of the predictor
         /// </summary>
-        public PredictorsProvider.PredictorID ID { get { return PredictorsProvider.PredictorID.FiringCount; } }
+        public PredictorsProvider.PredictorID ID { get { return PredictorsProvider.PredictorID.ActivationDiffLinWAvg; } }
+
+        /// <summary>
+        /// Specifies necessary size of the windowed history of activations
+        /// </summary>
+        public int RequiredWndSizeOfActivations { get { return Window; } }
+
+        /// <summary>
+        /// Specifies necessary size of the windowed history of firings
+        /// </summary>
+        public int RequiredWndSizeOfFirings { get { return 0; } }
+
+        /// <summary>
+        /// Indicates use of continuous stat of activations
+        /// </summary>
+        public bool NeedsContinuousActivationStat { get { return false; } }
+
+        /// <summary>
+        /// Indicates use of continuous stat of activation differences
+        /// </summary>
+        public bool NeedsContinuousActivationDiffStat { get { return Window == NAWindowNum; } }
 
         /// <summary>
         /// Checks if settings are default
@@ -85,9 +116,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         /// </summary>
         protected override void Check()
         {
-            if (Window < 1)
+            if (Window < 0 || Window == 1 || Window > 1024)
             {
-                throw new ArgumentException($"Invalid Window {Window.ToString(CultureInfo.InvariantCulture)}. Window must be GE to 1.", "Window");
+                throw new ArgumentException($"Invalid Window size {Window.ToString(CultureInfo.InvariantCulture)}. Window size must be GE0 and NE1 and LE1024.", "Window");
             }
             return;
         }
@@ -97,7 +128,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         /// </summary>
         public override RCNetBaseSettings DeepClone()
         {
-            return new FiringCountSettings(this);
+            return new PredictorActivationDiffLinWAvgSettings(this);
         }
 
         /// <summary>
@@ -111,7 +142,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
             XElement rootElem = new XElement(rootElemName);
             if (!suppressDefaults || !IsDefaultWindow)
             {
-                rootElem.Add(new XAttribute("window", Window.ToString(CultureInfo.InvariantCulture)));
+                rootElem.Add(new XAttribute("window", Window == NAWindowNum ? NAWindowCode : Window.ToString(CultureInfo.InvariantCulture)));
             }
             Validate(rootElem, XsdTypeName);
             return rootElem;
@@ -124,9 +155,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(bool suppressDefaults)
         {
-            return GetXml(PredictorsSettings.GetXmlName(ID), suppressDefaults);
+            return GetXml(PredictorFactory.GetXmlName(ID), suppressDefaults);
         }
 
-    }//PredictorFiringCountSettings
+    }//PredictorActivationDiffLinWAvgSettings
 
 }//Namespace

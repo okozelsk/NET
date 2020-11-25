@@ -126,8 +126,7 @@ namespace Demo.DemoConsoleApp.Examples
                                                                         0.1d, //Interconnection density
                                                                         0, //Internal synapses max delay
                                                                         0, //Steady bias
-                                                                        new PredictorsParamsSettings(new FiringFadingSumSettings(0.0005)),
-                                                                        PredictorsProvider.PredictorID.FiringFadingSum
+                                                                        new PredictorsProviderSettings(new PredictorFiringTraceSettings(0.0005, 0))
                                                                         );
 
             //Display StateMachine xml configuration

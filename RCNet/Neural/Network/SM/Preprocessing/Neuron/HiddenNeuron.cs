@@ -1,5 +1,6 @@
 ﻿using RCNet.Extensions;
 using RCNet.MathTools;
+using RCNet.MathTools.Hurst;
 using RCNet.Neural.Activation;
 using RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor;
 using RCNet.Queue;
@@ -83,7 +84,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
         public HiddenNeuron(NeuronLocation location,
                             IActivationFunction spikingActivation,
                             double bias,
-                            PredictorsSettings predictorsCfg
+                            PredictorsProviderSettings predictorsCfg
                             )
         {
             Location = location;
@@ -122,7 +123,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
                             double firingThreshold,
                             int thresholdMaxRefDeepness,
                             double retainmentStrength,
-                            PredictorsSettings predictorsCfg
+                            PredictorsProviderSettings predictorsCfg
                             )
         {
             Location = location;
@@ -162,7 +163,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
         /// <summary>
         /// Number of provided predictors
         /// </summary>
-        public int NumOfEnabledPredictors { get { return _predictors == null ? 0 : _predictors.NumOfEnabledPredictors; } }
+        public int NumOfProvidedPredictors { get { return _predictors == null ? 0 : _predictors.NumOfProvidedPredictors; } }
 
         //Methods
         /// <summary>
@@ -249,19 +250,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
         }
 
         /// <summary>
-        /// Checks if given predictor is enabled
-        /// </summary>
-        /// <param name="predictorID">Identificator of the predictor</param>
-        public bool IsPredictorEnabled(PredictorsProvider.PredictorID predictorID)
-        {
-            if (_predictors != null && _predictors.IsPredictorEnabled(predictorID))
-            {
-                return true;
-            }
-            return false;
-        }
-
-        /// <summary>
         /// Copies values of enabled predictors to a given buffer starting from specified position (idx)
         /// </summary>
         /// <param name="predictors">Buffer where to be copied enabled predictors</param>
@@ -287,11 +275,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
         }
 
         /// <summary>
-        /// Returns identifiers of enabled predictors in the same order as is used in the methods CopyPredictorsTo and GetPredictors
+        /// Returns identifiers of provided predictors in the same order as is used in the methods CopyPredictorsTo and GetPredictors
         /// </summary>
-        public List<PredictorsProvider.PredictorID> GetEnabledPredictorsIDs()
+        public List<PredictorsProvider.PredictorID> GetPredictorsIDs()
         {
-            return _predictors?.GetEnabledIDs();
+            return _predictors?.GetIDs();
         }
 
 

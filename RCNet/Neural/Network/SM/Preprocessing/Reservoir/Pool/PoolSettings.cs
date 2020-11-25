@@ -40,10 +40,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
         /// Configuration of the pool's neurons interconnection
         /// </summary>
         public InterconnSettings InterconnectionCfg { get; }
-        /// <summary>
-        /// Configuration of the predictors
-        /// </summary>
-        public PredictorsSettings PredictorsCfg { get; }
 
         //Constructors
         /// <summary>
@@ -53,13 +49,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
         /// <param name="proportionsCfg">Pool dimensions</param>
         /// <param name="neuronGroupsCfg">Settings of the neuron groups in the pool</param>
         /// <param name="interconnectionCfg">Configuration of the pool's neurons interconnection</param>
-        /// <param name="predictorsCfg">Configuration of the predictors</param>
         /// <param name="coordinatesCfg">Pool coordinates within the 3D space</param>
         public PoolSettings(string name,
                             ProportionsSettings proportionsCfg,
                             NeuronGroupsSettings neuronGroupsCfg,
                             InterconnSettings interconnectionCfg,
-                            PredictorsSettings predictorsCfg = null,
                             CoordinatesSettings coordinatesCfg = null
                             )
         {
@@ -67,7 +61,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
             ProportionsCfg = (ProportionsSettings)proportionsCfg.DeepClone();
             NeuronGroupsCfg = (NeuronGroupsSettings)neuronGroupsCfg.DeepClone();
             InterconnectionCfg = (InterconnSettings)interconnectionCfg.DeepClone();
-            PredictorsCfg = predictorsCfg == null ? null : (PredictorsSettings)predictorsCfg.DeepClone();
             CoordinatesCfg = coordinatesCfg == null ? new CoordinatesSettings() : (CoordinatesSettings)coordinatesCfg.DeepClone();
             Check();
             return;
@@ -78,7 +71,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
         /// </summary>
         /// <param name="source">Source instance</param>
         public PoolSettings(PoolSettings source)
-            : this(source.Name, source.ProportionsCfg, source.NeuronGroupsCfg, source.InterconnectionCfg, source.PredictorsCfg, source.CoordinatesCfg)
+            : this(source.Name, source.ProportionsCfg, source.NeuronGroupsCfg, source.InterconnectionCfg, source.CoordinatesCfg)
         {
             return;
         }
@@ -96,12 +89,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
             ProportionsCfg = new ProportionsSettings(poolSettingsElem.Elements("proportions").First());
             NeuronGroupsCfg = new NeuronGroupsSettings(poolSettingsElem.Elements("neuronGroups").First());
             InterconnectionCfg = new InterconnSettings(poolSettingsElem.Elements("interconnection").First());
-            //Predictors
-            XElement predictorsElem = poolSettingsElem.Elements("predictors").FirstOrDefault();
-            if (predictorsElem != null)
-            {
-                PredictorsCfg = new PredictorsSettings(predictorsElem);
-            }
             //Coordinates
             XElement coordinatesElem = poolSettingsElem.Elements("coordinates").FirstOrDefault();
             CoordinatesCfg = coordinatesElem == null ? new CoordinatesSettings() : new CoordinatesSettings(coordinatesElem);
@@ -160,10 +147,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
             }
             rootElem.Add(NeuronGroupsCfg.GetXml(suppressDefaults));
             rootElem.Add(InterconnectionCfg.GetXml(suppressDefaults));
-            if (PredictorsCfg != null && !PredictorsCfg.ContainsOnlyDefaults)
-            {
-                rootElem.Add(PredictorsCfg.GetXml(suppressDefaults));
-            }
             Validate(rootElem, XsdTypeName);
             return rootElem;
         }
