@@ -131,6 +131,22 @@
     </xs:restriction>
   </xs:simpleType>
 
+  <!-- Enumeration of network cluster 2nd level computation modes  -->
+  <xs:simpleType name="ClusterSecondLevelCompModeType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="SecondLevelOutputOnly">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Used is only output based on 2nd level networks.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="AveragedOutputs">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Used is average value of the first level output and the second level output.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+
   <!-- Enumeration of spiking input encoding regimes -->
   <xs:simpleType name="SpikingInputEncodingRegimeType">
     <xs:restriction base="xs:string">
@@ -314,6 +330,14 @@
     <xs:restriction base="xs:double">
       <xs:minExclusive value="0" />
       <xs:maxInclusive value="1" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Unsigned double GT 0 LE 0.5-->
+  <xs:simpleType name="UDoubleGT0LE05Type">
+    <xs:restriction base="xs:double">
+      <xs:minExclusive value="0" />
+      <xs:maxInclusive value="0.5" />
     </xs:restriction>
   </xs:simpleType>
 
@@ -1212,6 +1236,28 @@
         <xs:element type="FFNetRPropTrainerType" name="resPropTrainer" minOccurs="1" maxOccurs="1"/>
       </xs:choice>
     </xs:sequence>
+  </xs:complexType>
+
+  <!-- Network cluster 2nd level computation configuration -->
+  <xs:complexType name="NetworkClusterSecondLevelCompType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="FFNetType" name="ff" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+    <xs:attribute type="ClusterSecondLevelCompModeType" name ="mode" use="optional" default="AveragedOutputs">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Computation mode of the cluster. Default value is AveragedOutputs.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleGT0LE05Type" name="testDataRatio" use="optional" default="0.333333333">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Required test data ratio constituting one fold. Default value is 0.333333333.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UIntGT0AutoOptionType" name="folds" use="optional" default="Auto">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Number of folds of 2nd level x-fold cross-validation computation. Default value is Auto</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- P-Delta rule trainer -->
@@ -2497,6 +2543,7 @@
     </xs:attribute>
   </xs:complexType>
 
+
   <!-- Readout unit configuration -->
   <xs:complexType name="ROutLayerUnitType">
     <xs:sequence minOccurs="1" maxOccurs="1">
@@ -2512,6 +2559,7 @@
   <xs:complexType name="ROutLayerUnitsType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="ROutLayerUnitType" name="readoutUnit" minOccurs="1" maxOccurs="unbounded"/>
+      <xs:element type="NetworkClusterSecondLevelCompType" name ="clusterSecondLevelComputation" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
   </xs:complexType>
 
@@ -2526,14 +2574,7 @@
         </xs:unique>
       </xs:element>
     </xs:sequence>
-    <xs:attribute name="testDataRatio" use="required">
-      <xs:simpleType>
-        <xs:restriction base="xs:double">
-          <xs:minExclusive value="0" />
-          <xs:maxInclusive value="0.5" />
-        </xs:restriction>
-      </xs:simpleType>
-    </xs:attribute>
+    <xs:attribute type="UDoubleGT0LE05Type" name="testDataRatio" use="required"/>
     <xs:attribute type="UIntGT0AutoOptionType" name="folds" use="optional" default="Auto">
       <xs:annotation>
         <xs:documentation xml:lang="en">Default value is Auto</xs:documentation>

@@ -15,15 +15,15 @@ namespace Demo.DemoConsoleApp
                 //Main menu
                 Console.Clear();
                 Console.WriteLine("Main menu:");
-                Console.WriteLine("  1. State Machine performance demo. It sequentially performs the tasks defined in SMDemoSettings.xml.");
-                Console.WriteLine("  2. Feed Forward network trained to solve boolean algebra. Shows use of FF network as an alone component with no relationship to State Machine.");
+                Console.WriteLine("  1. State Machine performance demo. Sequentially performs the tasks defined in SMDemoSettings.xml.");
+                Console.WriteLine("  2. Feed Forward network trained to solve boolean algebra. Shows use of the FF network stndalone component (no relation to State Machine).");
                 Console.WriteLine("  3. TTOO share prices forecast (ESN design from scratch).");
                 Console.WriteLine("  4. TTOO share prices forecast (ESN design using StateMachineDesigner).");
                 Console.WriteLine("  5. Libras Movement classification (ESN design using StateMachineDesigner).");
                 Console.WriteLine("  6. Libras Movement classification (LSM design using StateMachineDesigner, horizontal spiking input encoding).");
                 Console.WriteLine("  7. Libras Movement classification (LSM design using StateMachineDesigner, vertical spiking input encoding).");
                 Console.WriteLine("  8. Libras Movement classification (LSM design using StateMachineDesigner, analog input direct routing).");
-                Console.WriteLine("  9. Libras Movement classification (No preprocessing - alone Readout Layer design using StateMachineDesigner, indicative benchmark for ESN and LSM).");
+                Console.WriteLine("  9. Libras Movement classification (No preprocessing - alone Readout Layer design using StateMachineDesigner, an indicative benchmark for ESN and LSM).");
                 Console.WriteLine("  A. Playground");
                 Console.WriteLine("  X. Exit");
                 Console.WriteLine();
@@ -35,7 +35,7 @@ namespace Demo.DemoConsoleApp
                         try
                         {
                             //Run the demo
-                            (new SMDemo(new ConsoleLog())).RunDemo(@"./SM/SMDemoSettings.xml");
+                            (new SMDemo(new ConsoleLog())).RunDemo(@"./SMDemoSettings.xml");
                         }
                         catch (Exception e)
                         {

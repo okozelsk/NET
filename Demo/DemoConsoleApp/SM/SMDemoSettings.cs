@@ -40,7 +40,7 @@ namespace Demo.DemoConsoleApp.SM
             validator.AddSchema(RCNetBaseSettings.LoadRCNetTypesSchema());
             //Add SMDemoSettings.xsd
             Assembly assembly = Assembly.GetExecutingAssembly();
-            using (Stream schemaStream = assembly.GetManifestResourceStream("DemoConsoleApp.SM.SMDemoSettings.xsd"))
+            using (Stream schemaStream = assembly.GetManifestResourceStream("DemoConsoleApp.SMDemoSettings.xsd"))
             {
                 validator.AddSchema(schemaStream);
             }

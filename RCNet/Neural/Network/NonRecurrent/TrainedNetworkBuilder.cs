@@ -267,7 +267,7 @@ namespace RCNet.Neural.Network.NonRecurrent
                     lastImprovementCombinedBinaryError = currNetwork.CombinedBinaryError;
                 }
                 //Raise notification event
-                RegressionEpochDone(regrState, instructions.CurrentIsBetter);
+                RegressionEpochDone?.Invoke(regrState, instructions.CurrentIsBetter);
                 //Process instructions
                 if (instructions.StopProcess)
                 {

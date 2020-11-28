@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <demo dataFolder="./Data" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="SMDemoSettings.xsd">
 
-
   <!--
-    Here StateMachine achieves 81.28% accuracy. It is a bit worse than the best accuracy 81.4% achieved by the algorithm
+    Here StateMachine achieves 82.05% accuracy. It is a bit better than the best accuracy 81.4% achieved by the algorithm
     called COTE referenced at the dataset's home site:
     "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
     https://timeseriesclassification.com/description.php?Dataset=CricketX.
@@ -15,16 +14,12 @@
     format cannot be used s such Segmentation of intentional gestures for sports video annotation, Online Context Recognition in Multisensor Systems using Dynamic Time Warping.
     The data are multi-dimensional, but they are not aligned, so it is not possible.
   -->
-  <case name="Classification task CricketX: pure ESN reservoir generating FiringTrace predictors, one Identity neuron as a classifier (Resilient trainer)">
+  <case name="Classification task CricketX: Pure ESN reservoir generating FiringTrace predictors, one Identity neuron as a classifier (Resilient trainer)">
     <samples trainingData="CricketX_train.csv" verificationData="CricketX_verify.csv"/>
     <stateMachine randomizerSeek="0">
       <neuralPreprocessor predictorsReductionRatio="0">
         <inputEncoder>
-          <feedingPatterned slices="1" bidir="Continuous" variablesSchema="Sequential">
-            <unification unifyAmplitude="false" detrend="false">
-              <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
-            </unification>
-          </feedingPatterned>
+          <feedingPatterned slices="1" bidir="Continuous" variablesSchema="Sequential"/>
           <varyingFields routeToReadout="false">
             <spikesCoder regime="Forbidden"/>
             <externalFields>
@@ -159,7 +154,7 @@
         <inputEncoder>
           <feedingPatterned slices="1" bidir="Forbidden">
             <unification unifyAmplitude="false" detrend="false">
-              <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="180"/>
+              <resampling uniformTimeScale="true" targetTimePoints="180"/>
             </unification>
           </feedingPatterned>
           <varyingFields routeToReadout="false">
@@ -446,7 +441,8 @@
   <!--
     This demo case demonstrates successful use of the pure analog ESN reservoir for the fast and accurate classifications enabled by
     the new ability of the analog neurons to fire a spike.
-    Following configuration of the StateMachine leads to 88.29% accuracy, slightly better than the best algorithm
+    Demo also shows use of the 2nd level network computation on cluster of the  ReadoutUnit.
+    Following configuration of the StateMachine leads to 88.78% accuracy, slightly better than the best algorithm
     called ST, referenced at the dataset's home site:
     "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
     https://timeseriesclassification.com/description.php?Dataset=ProximalPhalanxOutlineAgeGroup.
@@ -465,13 +461,13 @@
     the stage of development. The final three bone image classification problems, DistalPhalanxTW, MiddlePhalanxTW and ProximalPhalanxTW},
     involve predicting the Tanner-Whitehouse score (as labelled by a human expert) from the outline.
   -->
-  <case name="Classification task ProximalPhalanxOutlineAgeGroup: Small pure ESN reservoir generating Activation, ActivationSquare and FiringTrace predictors, one Elliot neuron as a classifier (Resilient trainer)">
+  <case name="Classification task ProximalPhalanxOutlineAgeGroup: Pure ESN reservoir generating FiringTrace and activationDiffRescalledRange predictors, one Elliot neuron as a 1st level classifier + 2nd level cluster computation.">
     <samples trainingData="ProximalPhalanxOutlineAgeGroup_train.csv" verificationData="ProximalPhalanxOutlineAgeGroup_verify.csv"/>
     <stateMachine randomizerSeek="0">
       <neuralPreprocessor>
         <inputEncoder>
-          <feedingPatterned slices="1" bidir="Forbidden">
-            <unification unifyAmplitude="false" detrend="true">
+          <feedingPatterned slices="1" bidir="Continuous">
+            <unification unifyAmplitude="false" detrend="false">
               <resampling/>
             </unification>
           </feedingPatterned>
@@ -493,7 +489,8 @@
                   <analogGroup name="Analog-grp" relShare="1" firingThreshold="0.00125" thresholdMaxRefDeepness="9">
                     <activationTanH/>
                     <predictors>
-                      <firingTrace fading="0.005"/>
+                      <firingTrace fading="0.05"/>
+                      <activationDiffRescalledRange window="80"/>
                     </predictors>
                   </analogGroup>
                 </neuronGroups>
@@ -509,16 +506,6 @@
             <inputConnections>
               <connection inputFieldName="Outline" poolName="Pool1" analogTargetDensity="0.25"/>
             </inputConnections>
-            <synapse>
-              <analogTarget>
-                <input maxDelay="0">
-                  <analogSource>
-                    <weight min="0" max="1"/>
-                  </analogSource>
-                </input>
-                <indifferent maxDelay="0"/>
-              </analogTarget>
-            </synapse>
           </reservoirInstance>
         </reservoirInstances>
       </neuralPreprocessor>
@@ -527,7 +514,7 @@
           <classification>
             <ff>
               <activationElliot/>
-              <resPropTrainer attempts="3" attemptEpochs="1000"/>
+              <resPropTrainer attempts="10" attemptEpochs="400"/>
             </ff>
           </classification>
         </defaultNetworks>
@@ -541,6 +528,12 @@
           <readoutUnit name="13-19 years">
             <classification oneWinnerGroupName="AgeGroup"/>
           </readoutUnit>
+          <clusterSecondLevelComputation mode="SecondLevelOutputOnly" testDataRatio="0.5" folds="Auto">
+            <ff>
+              <activationIdentity/>
+              <resPropTrainer attempts="5" attemptEpochs="400"/>
+            </ff>
+          </clusterSecondLevelComputation>
         </readoutUnits>
       </readoutLayer>
     </stateMachine>
@@ -550,7 +543,7 @@
   <!--
     This demo case demonstrates successful use of the pure analog ESN reservoir for the fast and accurate classifications enabled by
     the new ability of the analog neurons to fire a spike.
-    Following straightforward configuration of the StateMachine achieves 91.43% accuracy, slightly better than
+    Following straightforward configuration of the StateMachine achieves 91.27% accuracy, slightly better than
     the best algorithm called BOSS, referenced at the dataset's home site:
     "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
     https://timeseriesclassification.com/description.php?Dataset=Yoga.
@@ -558,7 +551,7 @@
     discriminate between one actor (male) and another (female). Each image was converted to a one dimensional series by finding the
     outline and measuring the distance of the outline to the centre.
   -->
-  <case name="Classification task Yoga: Simple pure ESN reservoir generating FiringFadingSum predictors, multilayer FF network as a classifier (Resilient trainer)">
+  <case name="Classification task Yoga: Simple pure ESN reservoir generating FiringFadingSum and activationStatFeature-ArithAvg predictors, multilayer FF network as a classifier (Resilient trainer)">
     <samples trainingData="Yoga_train.csv" verificationData="Yoga_verify.csv"/>
     <stateMachine>
       <neuralPreprocessor>
@@ -651,18 +644,14 @@
     <stateMachine randomizerSeek="0">
       <neuralPreprocessor>
         <inputEncoder>
-          <feedingPatterned slices="1" bidir="WithReset" variablesSchema="Groupped">
-            <unification unifyAmplitude="false" detrend="false">
-              <resampling uniformTimeScale="true" targetTimePoints="Auto"/>
-            </unification>
-          </feedingPatterned>
-          <varyingFields routeToReadout="false">
+          <feedingPatterned slices="1" bidir="WithReset" variablesSchema="Groupped"/>
+          <varyingFields>
             <spikesCoder regime="Forbidden"/>
             <externalFields>
-              <field name="coord_abcissa" routeToReadout="true">
+              <field name="coord_abcissa">
                 <realFeature/>
               </field>
-              <field name="coord_ordinate" routeToReadout="true">
+              <field name="coord_ordinate">
                 <realFeature/>
               </field>
             </externalFields>
@@ -674,7 +663,7 @@
               <pool name="SimpleESN">
                 <proportions dimX="150" dimY="1" dimZ="1"/>
                 <neuronGroups>
-                  <analogGroup name="TanH-grp" relShare="1" thresholdMaxRefDeepness="1">
+                  <analogGroup name="TanH-grp" relShare="1">
                     <activationTanH/>
                     <predictors>
                       <firingTrace fading="0.05"/>
@@ -682,7 +671,7 @@
                   </analogGroup>
                 </neuronGroups>
                 <interconnection>
-                  <randomSchema density="0.1" avgDistance="NA" allowSelfConnection="true" constantNumOfConnections="false"/>
+                  <randomSchema density="0.1"/>
                 </interconnection>
               </pool>
             </pools>
@@ -764,9 +753,9 @@
 
 
   <!--
-    This demo case demonstrates bypassing of neural preprocessor.
-    Following simple configuration of the StateMachine's alone readout layer exhibits 85.85% accuracy, it is slightly worse than the best algorithm
-    called ST, referenced at the dataset's home site:
+    This demo case demonstrates bypassing of neural preprocessor (no preprocessing at all).
+    Following simple configuration of the StateMachine's alone readout layer achieves 86.37% accuracy, it is worse than the best algorithm
+    called ST (88.09%), referenced at the dataset's home site:
     "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
     https://timeseriesclassification.com/description.php?Dataset=ProximalPhalanxOutlineAgeGroup.
     This series of 11 classification problems were created as part of Luke Davis's PhD titled "Predictive Modelling of Bone Ageing".
@@ -787,14 +776,17 @@
   <case name="Classification task ProximalPhalanxOutlineAgeGroup: No preprocesing, Multilayer Feed forward network as a classifier (Resilient trainer)">
     <samples trainingData="ProximalPhalanxOutlineAgeGroup_train.csv" verificationData="ProximalPhalanxOutlineAgeGroup_verify.csv"/>
     <stateMachine randomizerSeek="0">
-      <readoutLayer testDataRatio="0.25" folds="Auto">
+      <readoutLayer testDataRatio="0.1" folds="Auto">
         <defaultNetworks>
           <classification>
             <ff>
               <activationIdentity/>
               <hiddenLayers>
-                <layer neurons="50">
-                  <activationTanH/>
+                <layer neurons="20">
+                  <activationLeakyReLU/>
+                </layer>
+                <layer neurons="20">
+                  <activationLeakyReLU/>
                 </layer>
               </hiddenLayers>
               <resPropTrainer attempts="10" attemptEpochs="500"/>
@@ -811,11 +803,16 @@
           <readoutUnit name="13-19 years">
             <classification oneWinnerGroupName="AgeGroup"/>
           </readoutUnit>
+          <clusterSecondLevelComputation mode="AveragedOutputs" testDataRatio="0.5" folds="Auto">
+            <ff>
+              <activationIdentity/>
+              <resPropTrainer attempts="5" attemptEpochs="400"/>
+            </ff>
+          </clusterSecondLevelComputation>
         </readoutUnits>
       </readoutLayer>
     </stateMachine>
   </case>
-
 
 
   <!--
@@ -934,7 +931,7 @@
         <readoutUnits>
           <readoutUnit name="Value">
             <forecast>
-              <realFeature standardize="true" keepReserve="true"/>
+              <realFeature/>
               <networks>
                 <ff>
                   <activationIdentity/>
@@ -958,7 +955,7 @@
     The last recorded prices are from 2018/03/02 so StateMachine is predicting next High, Low and Close prices for the following
     business day 2018/03/05 (where real prices were High=6.58$, Low=5.99$ and Close=6.15$).
   -->
-  <case name="Forecast task High and Low share prices of TTOO (T2 Biosystems, Inc.): Small analog reservoir (ESN), one Identity neuron as a forecaster (Elastic trainer)">
+  <case name="Forecast task High and Low share prices of TTOO (T2 Biosystems, Inc.): Pure ESN reservoir generating Activation and ActivationPower predictors, one Identity neuron as a forecaster (Elastic trainer)">
     <samples trainingData="TTOO_train.csv" verificationData="TTOO_verify.csv"/>
     <stateMachine randomizerSeek="0">
       <neuralPreprocessor>
@@ -1141,7 +1138,7 @@
   <!--
     This demo case illustrates how to define steady data fields in case of patterned feeding.
   -->
-  <case name="Forecast task SteadyMG: pure ESN reservoir generating Activation predictors, MLP as a forecaster (Resilient trainer)">
+  <case name="Forecast task SteadyMG: Pure ESN reservoir generating Activation predictors, Multilayer FF as a forecaster (Resilient trainer)">
     <samples trainingData="SteadyMG_train.csv" verificationData="SteadyMG_verify.csv"/>
     <stateMachine randomizerSeek="0">
       <neuralPreprocessor predictorsReductionRatio="0">
@@ -1422,11 +1419,85 @@
   </case>
 
 
+  <!--
+    Benchmark - bypassed neural preprocessing
+  -->
+  <case name="Classification task Libras Movement: Bypassed preprocessing benchmark">
+    <samples trainingData="LibrasMovement_train.csv" verificationData="LibrasMovement_verify.csv"/>
+    <stateMachine randomizerSeek="0">
+      <readoutLayer testDataRatio="0.0825" folds="Auto">
+        <defaultNetworks>
+          <classification>
+            <ff>
+              <activationIdentity/>
+              <hiddenLayers>
+                <layer neurons="10">
+                  <activationLeakyReLU/>
+                </layer>
+                <layer neurons="10">
+                  <activationLeakyReLU/>
+                </layer>
+              </hiddenLayers>
+              <resPropTrainer attempts="5" attemptEpochs="400"/>
+            </ff>
+          </classification>
+        </defaultNetworks>
+        <readoutUnits>
+          <readoutUnit name="curved swing">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="horizontal swing">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="vertical swing">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="anti-clockwise arc">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="clockwise arc">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="circle">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="horizontal straight-line">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="vertical straight-line">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="horizontal zigzag">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="vertical zigzag">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="horizontal wavy">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="vertical wavy">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="face-up curve">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="face-down curve">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+          <readoutUnit name="tremble">
+            <classification oneWinnerGroupName="Hand movement type"/>
+          </readoutUnit>
+        </readoutUnits>
+      </readoutLayer>
+    </stateMachine>
+  </case>
+
 
   <!--
     EXPERIMENTAL
   -->
-  <case name="Classification task Libras Movement: LSM reservoir having Prime and Recurrent pools (VERTICAL spiking input), MLP classifier.">
+  <case name="Classification task Libras Movement: LSM reservoir having Prime and Recurrent pools (VERTICAL spiking input), Multilayer FF as a classifier.">
     <samples trainingData="LibrasMovement_train.csv" verificationData="LibrasMovement_verify.csv"/>
     <stateMachine randomizerSeek="0">
       <neuralPreprocessor>
@@ -1525,81 +1596,6 @@
           </reservoirInstance>
         </reservoirInstances>
       </neuralPreprocessor>
-      <readoutLayer testDataRatio="0.0825" folds="Auto">
-        <defaultNetworks>
-          <classification>
-            <ff>
-              <activationIdentity/>
-              <hiddenLayers>
-                <layer neurons="10">
-                  <activationLeakyReLU/>
-                </layer>
-                <layer neurons="10">
-                  <activationLeakyReLU/>
-                </layer>
-              </hiddenLayers>
-              <resPropTrainer attempts="5" attemptEpochs="400"/>
-            </ff>
-          </classification>
-        </defaultNetworks>
-        <readoutUnits>
-          <readoutUnit name="curved swing">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="horizontal swing">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="vertical swing">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="anti-clockwise arc">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="clockwise arc">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="circle">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="horizontal straight-line">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="vertical straight-line">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="horizontal zigzag">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="vertical zigzag">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="horizontal wavy">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="vertical wavy">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="face-up curve">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="face-down curve">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-          <readoutUnit name="tremble">
-            <classification oneWinnerGroupName="Hand movement type"/>
-          </readoutUnit>
-        </readoutUnits>
-      </readoutLayer>
-    </stateMachine>
-  </case>
-
-
-  <!--
-    Benchmark - bypassed neural preprocessing
-  -->
-  <case name="Classification task Libras Movement: Simple pure LSM reservoir (HORIZONTAL spiking input) test">
-    <samples trainingData="LibrasMovement_train.csv" verificationData="LibrasMovement_verify.csv"/>
-    <stateMachine randomizerSeek="0">
       <readoutLayer testDataRatio="0.0825" folds="Auto">
         <defaultNetworks>
           <classification>

@@ -20,25 +20,18 @@ namespace RCNet.Neural.Network.NonRecurrent
         /// Maximum part of available samples useable for test purposes
         /// </summary>
         public const double MaxRatioOfTestData = 0.5d;
+        
         /// <summary>
         /// Minimum length of the test dataset
         /// </summary>
         public const int MinLengthOfTestDataset = 2;
-
-        //Delegates
-        /// <summary>
-        /// Delegate of RegressionEpochDone event handler.
-        /// </summary>
-        /// <param name="buildingState">Current state of the regression process</param>
-        /// <param name="foundBetter">Indicates that the best network was found as a result of the performed epoch</param>
-        public delegate void RegressionEpochDoneHandler(TrainedNetworkBuilder.BuildingState buildingState, bool foundBetter);
 
         //Events
         /// <summary>
         /// This informative event occurs every time the regression epoch is done
         /// </summary>
         [field: NonSerialized]
-        public event RegressionEpochDoneHandler RegressionEpochDone;
+        public event TrainedNetworkBuilder.RegressionEpochDoneHandler RegressionEpochDone;
 
         //Attributes
         private readonly string _clusterName;
@@ -47,6 +40,7 @@ namespace RCNet.Neural.Network.NonRecurrent
         private readonly Random _rand;
         private readonly TrainedNetworkBuilder.RegressionControllerDelegate _controller;
         private readonly Interval _dataRange;
+        private readonly NetworkClusterSecondLevelCompSettings _secondLevelCompCfg;
 
         //Constructor
         /// <summary>
@@ -58,12 +52,14 @@ namespace RCNet.Neural.Network.NonRecurrent
         /// <param name="binBorder">If specified, it indicates that the network ideal output is binary and specifies numeric border where GE network output is decided as a 1 and LT output as a 0.</param>
         /// <param name="rand">Random generator to be used (optional)</param>
         /// <param name="controller">Regression controller (optional)</param>
+        /// <param name="secondLevelCompCfg">Configuration of the network cluster 2nd level computation (optional)</param>
         public TrainedNetworkClusterBuilder(string clusterName,
                                             List<INonRecurrentNetworkSettings> networkSettingsCollection,
                                             Interval dataRange,
                                             double binBorder = double.NaN,
                                             Random rand = null,
-                                            TrainedNetworkBuilder.RegressionControllerDelegate controller = null
+                                            TrainedNetworkBuilder.RegressionControllerDelegate controller = null,
+                                            NetworkClusterSecondLevelCompSettings secondLevelCompCfg = null
                                             )
         {
             _clusterName = clusterName;
@@ -72,6 +68,7 @@ namespace RCNet.Neural.Network.NonRecurrent
             _binBorder = binBorder;
             _rand = rand ?? new Random(0);
             _controller = controller;
+            _secondLevelCompCfg = secondLevelCompCfg;
             return;
         }
 
@@ -96,12 +93,12 @@ namespace RCNet.Neural.Network.NonRecurrent
         /// <param name="testDataRatio">Ratio of test data to be used (determines fold size)</param>
         /// <param name="numOfFolds">Requested number of testing folds (determines number of cluster members). Value LE 0 causes automatic setup. </param>
         /// <param name="repetitions">Defines how many times the generation of folds will be repeated. </param>
-        /// <param name="outputFeatureFilterCollection">Output feature filters to be used for output data denormalization.</param>
+        /// <param name="outputFeatureFilter">Output feature filter to be used for output data denormalization.</param>
         public TrainedNetworkCluster Build(VectorBundle dataBundle,
                                            double testDataRatio,
                                            int numOfFolds,
                                            int repetitions,
-                                           FeatureFilterBase[] outputFeatureFilterCollection
+                                           FeatureFilterBase outputFeatureFilter
                                            )
         {
             //Test fold size
@@ -122,7 +119,9 @@ namespace RCNet.Neural.Network.NonRecurrent
             }
             //Cluster of trained networks
             int numOfMembers = numOfFolds * _networkSettingsCollection.Count * repetitions;
-            TrainedNetworkCluster cluster = new TrainedNetworkCluster(_clusterName, numOfMembers, _dataRange, _binBorder);
+            TrainedNetworkCluster cluster = new TrainedNetworkCluster(_clusterName, _dataRange, _binBorder, _secondLevelCompCfg);
+            //Member's training
+            int memberIdx = 0;
             for (int cycle = 0; cycle < repetitions; cycle++)
             {
                 //Data split to folds
@@ -131,7 +130,7 @@ namespace RCNet.Neural.Network.NonRecurrent
                 //Train collection of networks for each fold in the cluster.
                 for (int foldIdx = 0; foldIdx < numOfFolds; foldIdx++)
                 {
-                    for (int netCfgIdx = 0; netCfgIdx < _networkSettingsCollection.Count; netCfgIdx++)
+                    for (int netCfgIdx = 0; netCfgIdx < _networkSettingsCollection.Count; netCfgIdx++, memberIdx++)
                     {
                         //Prepare training data bundle
                         VectorBundle trainingData = new VectorBundle();
@@ -157,24 +156,8 @@ namespace RCNet.Neural.Network.NonRecurrent
                         //Register notification
                         netBuilder.RegressionEpochDone += OnRegressionEpochDone;
                         //Build trained network. Trained network becomes to be the cluster member
-                        cluster.Members.Add(netBuilder.Build());
-                        //Set member's weight proportionally to train/test number of samples ratio
-                        cluster.Weights.Add((double)subBundleCollection[foldIdx].InputVectorCollection.Count / (double)trainingData.InputVectorCollection.Count);
-                        //Update cluster error statistics (pesimistic approach)
-                        for (int sampleIdx = 0; sampleIdx < subBundleCollection[foldIdx].OutputVectorCollection.Count; sampleIdx++)
-                        {
-                            double[] nrmComputedValues = cluster.Members.Last().Network.Compute(subBundleCollection[foldIdx].InputVectorCollection[sampleIdx]);
-                            for (int i = 0; i < nrmComputedValues.Length; i++)
-                            {
-                                double naturalComputedValue = outputFeatureFilterCollection[i].ApplyReverse(nrmComputedValues[i]);
-                                double naturalIdealValue = outputFeatureFilterCollection[i].ApplyReverse(subBundleCollection[foldIdx].OutputVectorCollection[sampleIdx][i]);
-                                cluster.ErrorStats.Update(nrmComputedValues[i],
-                                                          subBundleCollection[foldIdx].OutputVectorCollection[sampleIdx][i],
-                                                          naturalComputedValue,
-                                                          naturalIdealValue
-                                                          );
-                            }//i
-                        }//sampleIdx
+                        TrainedNetwork tn = netBuilder.Build();
+                        cluster.AddMember(tn, subBundleCollection[foldIdx], outputFeatureFilter);
                     }//netCfgIdx
                 }//foldIdx
                 if (cycle < repetitions - 1)
@@ -183,7 +166,11 @@ namespace RCNet.Neural.Network.NonRecurrent
                     dataBundle.Shuffle(_rand);
                 }
             }
-            //Return built cluster
+            //Make the cluster operable
+            //Register notification
+            cluster.RegressionEpochDone += OnRegressionEpochDone;
+            cluster.FinalizeCluster(dataBundle);
+            //Return the built cluster
             return cluster;
         }
 

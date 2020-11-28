@@ -38,9 +38,12 @@ namespace RCNet.Extensions
                 newRange = new Interval(0d, 1d);
             }
             Interval orgMinMax = new Interval(array);
-            for (int i = 0; i < array.Length; i++)
+            if (orgMinMax.Min != orgMinMax.Max && newRange.Min != newRange.Max)
             {
-                array[i] = newRange.Rescale(array[i], orgMinMax);
+                for (int i = 0; i < array.Length; i++)
+                {
+                    array[i] = newRange.Rescale(array[i], orgMinMax);
+                }
             }
             return;
         }
@@ -92,6 +95,52 @@ namespace RCNet.Extensions
             }
             return sum;
         }
+
+
+        /// <summary>
+        /// Scales members in the way the sum equals to new desired value.
+        /// </summary>
+        /// <param name="array">Array of doubles.</param>
+        /// <param name="newSum">New sum to be ensured.</param>
+        public static void ScaleToNewSum(this double[] array, double newSum = 1d)
+        {
+            double sum = Sum(array);
+            if (sum != newSum)
+            {
+                if (sum != 0d)
+                {
+                    array.Scale(newSum / sum);
+                }
+                else
+                {
+                    for(int i = 0; i < array.Length; i++)
+                    {
+                        array[i] += newSum / array.Length;
+                    }
+                }
+            }
+            return;
+        }
+
+        /// <summary>
+        /// Makes min is max and others proportionally
+        /// </summary>
+        public static void RevertMeaning(this double[] array)
+        {
+            double max = array.Max();
+            double min = array.Min();
+            if(min != max)
+            {
+                array.Rescale();
+                for (int i = 0; i < array.Length; i++)
+                {
+                    array[i] = min + (1d - array[i]) * (max - min);
+                }
+            }
+            return;
+        }
+
+
 
     }//DoubleArrayExtensions
 

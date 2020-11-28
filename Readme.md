@@ -20,25 +20,28 @@ Application has no startup parameters and when started, it shows the menu.
 <br>
 Note that if necessary, examples use Examples sub-folder relative to the location of the executable DemoConsoleApp.exe.
 
-### Performance demonstration (1. menu choice)
-Application performs sequence of defined tasks.
-Tasks are defined in the [SMDemoSettings.xml](./Demo/DemoConsoleApp/SM/SMDemoSettings.xml) xml file, where each task is defined in the xml element "case" so you can easily insert new task or tune existing one by simple modification of xml content.
-SMDemoSettings.xml has to be located in the SM sub-folder relative to the location of the executable DemoConsoleApp.exe. 
-<br>
-SMDemoSettings.xml currently also includes several classification problems from the:
+### Demonstration of performance and configuration options (1. menu choice)
+Application performs sequence of tasks defined in the [SMDemoSettings.xml](./Demo/DemoConsoleApp/SMDemoSettings.xml) xml file, where each task is defined in the xml element "case" so you can easily insert new task or tune existing one by simple modification of xml content.
+SMDemoSettings.xml has to be located in the same folder as the executable DemoConsoleApp.exe.
+
+#### Notes for SMDemoSettings.xml modification
+If you modify SMDemoSettings.xml within the open solution in MS Studio, then for the correct connection of xml and xsd it is enough to have SMDemoSettings.xsd and RCNetTypes.xsd open at the same time. If you modify SMDemoSettings.xsd outside the open solution, then you must first add the schemaLocation = "RCNetTypes.xsd" attribute to the "import" element in the SMDemoSettings.xsd schema in the destination directory where the DemoConsoleApp.exe executable is located.
+Demo application has internally implemented the xml validation so connection of xml and xsd directly on file level is not necessary. But functional external connection of xml and xsd is useful for manual modifications, because consistency checks, annotations, selections from allowed values and checks of the range of entered values are then available instantly.
+
+#### Time-series classification results comparison
+SMDemoSettings.xml currently includes several classification problems from the:
 [Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com](https://timeseriesclassification.com)
-site and State Machine usually achieves very similar results to the best classification algorithms referenced on the website.
+site and State Machine is surprisingly able to achieve better results then the best classification algorithms referenced on that website.
 <br>
 
-#### Classification Results Comparison
 |Dataset|State Machine Accuracy|Best Ref. Accuracy|Best Ref. Algorithm|
 |--|--|--|--|
-|[CricketX](https://timeseriesclassification.com/description.php?Dataset=CricketX)|81.28%|81.4%|COTE|
+|[CricketX](https://timeseriesclassification.com/description.php?Dataset=CricketX)|82.05%|81.4%|COTE|
 |[Worms](https://timeseriesclassification.com/description.php?Dataset=Worms)|83.12%|73.49%|BOSS|
 |[BeetleFly](https://timeseriesclassification.com/description.php?Dataset=BeetleFly)|100%|94.85%|BOSS|
 |[BirdChicken](https://timeseriesclassification.com/description.php?Dataset=BirdChicken)|100%|98.4%|BOSS|
-|[ProximalPhalanx](https://timeseriesclassification.com/description.php?Dataset=ProximalPhalanxOutlineAgeGroup)|88.29%|88.09%|ST|
-|[Yoga](https://timeseriesclassification.com/description.php?Dataset=Yoga)|91.43%|90.99%|BOSS|
+|[ProximalPhalanx](https://timeseriesclassification.com/description.php?Dataset=ProximalPhalanxOutlineAgeGroup)|88.78%|88.09%|ST|
+|[Yoga](https://timeseriesclassification.com/description.php?Dataset=Yoga)|91.27%|90.99%|BOSS|
 |[Libras](https://timeseriesclassification.com/description.php?Dataset=Libras)|92.78%|89.4%|DTWi|
 
 

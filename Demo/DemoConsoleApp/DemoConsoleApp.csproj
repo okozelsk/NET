@@ -15,12 +15,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="SM\SMDemoSettings.xsd">
+    <EmbeddedResource Include="SMDemoSettings.xsd">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="SM\SMDemoSettings.xml">
+    <EmbeddedResource Include="SMDemoSettings.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="..\..\RCNet\RCNetTypes.xsd" Link="RCNetTypes.xsd" />
   </ItemGroup>
   <ItemGroup>
     <None Update="Data\**\*.*">
