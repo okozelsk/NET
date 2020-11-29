@@ -322,6 +322,26 @@ namespace RCNet.Neural.Network.NonRecurrent
             return outputVector;
         }
 
+        /*
+        private TrainedNetworkBuilder.BuildingInstr RegressionController(TrainedNetworkBuilder.BuildingState buildingState)
+        {
+            TrainedNetworkBuilder.BuildingInstr instructions = new TrainedNetworkBuilder.BuildingInstr
+            {
+                CurrentIsBetter = TrainedNetworkBuilder.IsBetter(buildingState.BinaryOutput,
+                                                                 buildingState.CurrNetwork,
+                                                                 buildingState.BestNetwork
+                                                                 ),
+                StopCurrentAttempt = (BinaryOutput &&
+                                      buildingState.BestNetworkAttempt == buildingState.RegrAttemptNumber &&
+                                      buildingState.BestNetwork.TrainingBinErrorStat.TotalErrStat.Sum == 0 &&
+                                      buildingState.BestNetwork.TestingBinErrorStat.TotalErrStat.Sum == 0 &&
+                                      buildingState.CurrNetwork.CombinedPrecisionError > buildingState.BestNetwork.CombinedPrecisionError
+                                      )
+            };
+            return instructions;
+        }
+        */
+
         /// <summary>
         /// Initialized second level networks
         /// </summary>
@@ -339,54 +359,44 @@ namespace RCNet.Neural.Network.NonRecurrent
                 outputVector[0] = dataBundle.OutputVectorCollection[sampleIdx][0];
                 shuffledDataBundle.AddPair(inputVector, outputVector);
             }
-            shuffledDataBundle.Shuffle(new Random(0));
-            //Split shuffled data into the folds
-
-            //Test fold size
-            int testDataSetLength = (int)Math.Round(shuffledDataBundle.OutputVectorCollection.Count * _secondLevelCompCfg.TestDataRatio, 0);
-            if (testDataSetLength < 1)
-            {
-                throw new ArgumentException($"Num of resulting test samples is less than 1.", "TestDataRatio");
-            }
-            int numOfFolds = _secondLevelCompCfg.Folds;
-            //Number of folds
-            if (numOfFolds <= 0)
-            {
-                //Auto setup
-                numOfFolds = shuffledDataBundle.OutputVectorCollection.Count / testDataSetLength;
-            }
-            List<VectorBundle> subBundleCollection = shuffledDataBundle.Split(testDataSetLength, BinBorder);
-            numOfFolds = Math.Min(numOfFolds, subBundleCollection.Count);
-            //Build trained network for each fold
             Random random = new Random(0);
-            for(int foldIdx = 0; foldIdx < numOfFolds; foldIdx++)
+            for (int repetitionIdx = 0; repetitionIdx < _secondLevelCompCfg.CrossvalidationCfg.Repetitions; repetitionIdx++)
             {
-                //Prepare training data bundle
-                VectorBundle trainingData = new VectorBundle();
-                for (int bundleIdx = 0; bundleIdx < subBundleCollection.Count; bundleIdx++)
+                //Reshuffle the data
+                shuffledDataBundle.Shuffle(random);
+                //Split shuffled data into the folds
+                List<VectorBundle> subBundleCollection = shuffledDataBundle.CreateFolds(_secondLevelCompCfg.CrossvalidationCfg.FoldDataRatio, BinBorder);
+                int numOfFoldsToBeProcessed = Math.Min(_secondLevelCompCfg.CrossvalidationCfg.Folds <= 0 ? subBundleCollection.Count : _secondLevelCompCfg.CrossvalidationCfg.Folds, subBundleCollection.Count);
+                //Build trained network for each fold
+                for (int foldIdx = 0; foldIdx < numOfFoldsToBeProcessed; foldIdx++)
                 {
-                    if (bundleIdx != foldIdx)
+                    //Prepare training data bundle
+                    VectorBundle trainingData = new VectorBundle();
+                    for (int bundleIdx = 0; bundleIdx < subBundleCollection.Count; bundleIdx++)
                     {
-                        trainingData.Add(subBundleCollection[bundleIdx]);
+                        if (bundleIdx != foldIdx)
+                        {
+                            trainingData.Add(subBundleCollection[bundleIdx]);
+                        }
                     }
+                    //Initialize network builder
+                    TrainedNetworkBuilder netBuilder = new TrainedNetworkBuilder(ClusterName + " - 2nd level net",
+                                                                                 _secondLevelCompCfg.NetCfg,
+                                                                                 (repetitionIdx * numOfFoldsToBeProcessed) + foldIdx + 1,
+                                                                                 _secondLevelCompCfg.CrossvalidationCfg.Repetitions * numOfFoldsToBeProcessed,
+                                                                                 1,
+                                                                                 1,
+                                                                                 trainingData,
+                                                                                 subBundleCollection[foldIdx],
+                                                                                 BinBorder,
+                                                                                 random,
+                                                                                 null
+                                                                                 );
+                    //Register notification
+                    netBuilder.RegressionEpochDone += OnRegressionEpochDone;
+                    //Add trained network into the holder
+                    _secondLevelNetCollection.Add(netBuilder.Build());
                 }
-                //Initialize network builder
-                TrainedNetworkBuilder netBuilder = new TrainedNetworkBuilder(ClusterName + " - 2nd level net",
-                                                                             _secondLevelCompCfg.NetCfg,
-                                                                             foldIdx + 1,
-                                                                             numOfFolds,
-                                                                             1,
-                                                                             1,
-                                                                             trainingData,
-                                                                             subBundleCollection[foldIdx],
-                                                                             BinBorder,
-                                                                             random,
-                                                                             null
-                                                                             );
-                //Register notification
-                netBuilder.RegressionEpochDone += OnRegressionEpochDone;
-                //Add trained network into the holder
-                _secondLevelNetCollection.Add(netBuilder.Build());
             }
             //Init second level networks weights
             _secondLevelWeights = GetSoftmaxWeights(_secondLevelNetCollection, BinaryOutput);
@@ -427,7 +437,7 @@ namespace RCNet.Neural.Network.NonRecurrent
             {
                 secondLevelMemberOutputCollection[i] = _secondLevelNetCollection[i].Network.Compute(inputVector)[0];
             }
-            return ComputeCompositeOutput(secondLevelMemberOutputCollection, _secondLevelWeights, BinaryOutput);
+            return ComputeCompositeOutput(secondLevelMemberOutputCollection, _secondLevelWeights, true);
         }
 
         /// <summary>

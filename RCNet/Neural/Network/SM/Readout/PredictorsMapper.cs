@@ -143,9 +143,9 @@ namespace RCNet.Neural.Network.SM.Readout
         /// </summary>
         /// <param name="readoutUnitName">ReadoutUnit name</param>
         /// <param name="predictorsCollection">Collection of available predictors</param>
-        public List<double[]> CreateVectorCollection(string readoutUnitName, List<double[]> predictorsCollection)
+        public List<double[]> CreateVectorCollection(string readoutUnitName, IEnumerable<double[]> predictorsCollection)
         {
-            List<double[]> vectorCollection = new List<double[]>(predictorsCollection.Count);
+            List<double[]> vectorCollection = new List<double[]>();
             ReadoutUnitMap rum = null;
             if (_mapCollection.ContainsKey(readoutUnitName))
             {

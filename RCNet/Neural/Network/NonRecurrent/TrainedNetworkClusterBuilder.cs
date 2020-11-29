@@ -15,17 +15,6 @@ namespace RCNet.Neural.Network.NonRecurrent
     /// </summary>
     public class TrainedNetworkClusterBuilder
     {
-        //Constants
-        /// <summary>
-        /// Maximum part of available samples useable for test purposes
-        /// </summary>
-        public const double MaxRatioOfTestData = 0.5d;
-        
-        /// <summary>
-        /// Minimum length of the test dataset
-        /// </summary>
-        public const int MinLengthOfTestDataset = 2;
-
         //Events
         /// <summary>
         /// This informative event occurs every time the regression epoch is done
@@ -89,48 +78,26 @@ namespace RCNet.Neural.Network.NonRecurrent
         /// <summary>
         /// Builds computation cluster of trained networks
         /// </summary>
-        /// <param name="dataBundle">Data to be used for training</param>
-        /// <param name="testDataRatio">Ratio of test data to be used (determines fold size)</param>
-        /// <param name="numOfFolds">Requested number of testing folds (determines number of cluster members). Value LE 0 causes automatic setup. </param>
-        /// <param name="repetitions">Defines how many times the generation of folds will be repeated. </param>
+        /// <param name="dataBundle">Data to be used for training. Take into the account that rows in this bundle may be in random order after the Build call.</param>
+        /// <param name="crossvalidationCfg">Crossvalidation configuration</param>
         /// <param name="outputFeatureFilter">Output feature filter to be used for output data denormalization.</param>
         public TrainedNetworkCluster Build(VectorBundle dataBundle,
-                                           double testDataRatio,
-                                           int numOfFolds,
-                                           int repetitions,
+                                           CrossvalidationSettings crossvalidationCfg,
                                            FeatureFilterBase outputFeatureFilter
                                            )
         {
-            //Test fold size
-            if (testDataRatio > MaxRatioOfTestData)
-            {
-                throw new ArgumentException($"Test data ratio is greater than {MaxRatioOfTestData.ToString(CultureInfo.InvariantCulture)}", "testingDataRatio");
-            }
-            int testDataSetLength = (int)Math.Round(dataBundle.OutputVectorCollection.Count * testDataRatio, 0);
-            if (testDataSetLength < MinLengthOfTestDataset)
-            {
-                throw new ArgumentException($"Num of resulting test samples is less than {MinLengthOfTestDataset.ToString(CultureInfo.InvariantCulture)}", "testingDataRatio");
-            }
-            //Number of folds
-            if (numOfFolds <= 0)
-            {
-                //Auto setup
-                numOfFolds = dataBundle.OutputVectorCollection.Count / testDataSetLength;
-            }
             //Cluster of trained networks
-            int numOfMembers = numOfFolds * _networkSettingsCollection.Count * repetitions;
             TrainedNetworkCluster cluster = new TrainedNetworkCluster(_clusterName, _dataRange, _binBorder, _secondLevelCompCfg);
             //Member's training
-            int memberIdx = 0;
-            for (int cycle = 0; cycle < repetitions; cycle++)
+            for (int repetitionIdx = 0; repetitionIdx < crossvalidationCfg.Repetitions; repetitionIdx++)
             {
                 //Data split to folds
-                List<VectorBundle> subBundleCollection = dataBundle.Split(testDataSetLength, _binBorder);
-                numOfFolds = Math.Min(numOfFolds, subBundleCollection.Count);
-                //Train collection of networks for each fold in the cluster.
-                for (int foldIdx = 0; foldIdx < numOfFolds; foldIdx++)
+                List<VectorBundle> subBundleCollection = dataBundle.CreateFolds(crossvalidationCfg.FoldDataRatio, _binBorder);
+                int numOfFoldsToBeProcessed = Math.Min(crossvalidationCfg.Folds <= 0 ? subBundleCollection.Count : crossvalidationCfg.Folds, subBundleCollection.Count);
+                //Train collection of networks for each processing fold.
+                for (int foldIdx = 0; foldIdx < numOfFoldsToBeProcessed; foldIdx++)
                 {
-                    for (int netCfgIdx = 0; netCfgIdx < _networkSettingsCollection.Count; netCfgIdx++, memberIdx++)
+                    for (int netCfgIdx = 0; netCfgIdx < _networkSettingsCollection.Count; netCfgIdx++)
                     {
                         //Prepare training data bundle
                         VectorBundle trainingData = new VectorBundle();
@@ -143,8 +110,8 @@ namespace RCNet.Neural.Network.NonRecurrent
                         }
                         TrainedNetworkBuilder netBuilder = new TrainedNetworkBuilder(_clusterName,
                                                                                      _networkSettingsCollection[netCfgIdx],
-                                                                                     (cycle * numOfFolds) + foldIdx + 1,
-                                                                                     repetitions * numOfFolds,
+                                                                                     (repetitionIdx * numOfFoldsToBeProcessed) + foldIdx + 1,
+                                                                                     crossvalidationCfg.Repetitions * numOfFoldsToBeProcessed,
                                                                                      netCfgIdx + 1,
                                                                                      _networkSettingsCollection.Count,
                                                                                      trainingData,
@@ -160,12 +127,12 @@ namespace RCNet.Neural.Network.NonRecurrent
                         cluster.AddMember(tn, subBundleCollection[foldIdx], outputFeatureFilter);
                     }//netCfgIdx
                 }//foldIdx
-                if (cycle < repetitions - 1)
+                if (repetitionIdx < crossvalidationCfg.Repetitions - 1)
                 {
-                    //Reshuffle data
+                    //Reshuffle the data
                     dataBundle.Shuffle(_rand);
                 }
-            }
+            }//repetitionIdx
             //Make the cluster operable
             //Register notification
             cluster.RegressionEpochDone += OnRegressionEpochDone;

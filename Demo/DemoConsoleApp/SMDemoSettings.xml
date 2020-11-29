@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <demo dataFolder="./Data" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="SMDemoSettings.xsd">
 
+
   <!--
     Here StateMachine achieves 82.05% accuracy. It is a bit better than the best accuracy 81.4% achieved by the algorithm
     called COTE referenced at the dataset's home site:
@@ -68,7 +69,8 @@
           </reservoirInstance>
         </reservoirInstances>
       </neuralPreprocessor>
-      <readoutLayer testDataRatio="0.1" folds="Auto" repetitions="1">
+      <readoutLayer>
+        <crossvalidation foldDataRatio="0.1" folds="Auto" repetitions="1"/>
         <defaultNetworks>
           <classification>
             <ff>
@@ -208,7 +210,8 @@
           </reservoirInstance>
         </reservoirInstances>
       </neuralPreprocessor>
-      <readoutLayer testDataRatio="0.1" folds="Auto">
+      <readoutLayer>
+        <crossvalidation foldDataRatio="0.1" folds="Auto" repetitions="1"/>
         <defaultNetworks>
           <classification>
             <ff>
@@ -341,7 +344,8 @@
           </reservoirInstance>
         </reservoirInstances>
       </neuralPreprocessor>
-      <readoutLayer testDataRatio="0.1" folds="Auto" repetitions="1">
+      <readoutLayer>
+        <crossvalidation/>
         <defaultNetworks/>
         <readoutUnits>
           <readoutUnit name="Beetle1Fly0">
@@ -420,7 +424,8 @@
           </reservoirInstance>
         </reservoirInstances>
       </neuralPreprocessor>
-      <readoutLayer testDataRatio="0.1" folds="Auto" repetitions="1">
+      <readoutLayer>
+        <crossvalidation/>
         <defaultNetworks/>
         <readoutUnits>
           <readoutUnit name="Chicken1Bird0">
@@ -442,8 +447,8 @@
     This demo case demonstrates successful use of the pure analog ESN reservoir for the fast and accurate classifications enabled by
     the new ability of the analog neurons to fire a spike.
     Demo also shows use of the 2nd level network computation on cluster of the  ReadoutUnit.
-    Following configuration of the StateMachine leads to 88.78% accuracy, slightly better than the best algorithm
-    called ST, referenced at the dataset's home site:
+    Following configuration of the StateMachine leads to 87.8% accuracy, slightly worse than the best algorithm
+    called ST (88.09), referenced at the dataset's home site:
     "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
     https://timeseriesclassification.com/description.php?Dataset=ProximalPhalanxOutlineAgeGroup.
     This series of 11 classification problems were created as part of Luke Davis's PhD titled "Predictive Modelling of Bone Ageing".
@@ -461,7 +466,7 @@
     the stage of development. The final three bone image classification problems, DistalPhalanxTW, MiddlePhalanxTW and ProximalPhalanxTW},
     involve predicting the Tanner-Whitehouse score (as labelled by a human expert) from the outline.
   -->
-  <case name="Classification task ProximalPhalanxOutlineAgeGroup: Pure ESN reservoir generating FiringTrace and activationDiffRescalledRange predictors, one Elliot neuron as a 1st level classifier + 2nd level cluster computation.">
+  <case name="Classification task ProximalPhalanxOutlineAgeGroup: Pure ESN reservoir generating FiringTrace predictors, one Elliot neuron as a 1st level classifier + MLP 2nd level cluster computation.">
     <samples trainingData="ProximalPhalanxOutlineAgeGroup_train.csv" verificationData="ProximalPhalanxOutlineAgeGroup_verify.csv"/>
     <stateMachine randomizerSeek="0">
       <neuralPreprocessor>
@@ -484,13 +489,12 @@
           <reservoirStructure name="MainCfg">
             <pools>
               <pool name="Pool1">
-                <proportions dimX="240" dimY="1" dimZ="1"/>
+                <proportions dimX="300" dimY="1" dimZ="1"/>
                 <neuronGroups>
-                  <analogGroup name="Analog-grp" relShare="1" firingThreshold="0.00125" thresholdMaxRefDeepness="9">
+                  <analogGroup name="Analog-grp" relShare="1" firingThreshold="0.00125" thresholdMaxRefDeepness="1">
                     <activationTanH/>
                     <predictors>
                       <firingTrace fading="0.05"/>
-                      <activationDiffRescalledRange window="80"/>
                     </predictors>
                   </analogGroup>
                 </neuronGroups>
@@ -506,10 +510,17 @@
             <inputConnections>
               <connection inputFieldName="Outline" poolName="Pool1" analogTargetDensity="0.25"/>
             </inputConnections>
+            <synapse>
+              <analogTarget>
+                <input maxDelay="5"/>
+                <indifferent maxDelay="0"/>
+              </analogTarget>
+            </synapse>
           </reservoirInstance>
         </reservoirInstances>
       </neuralPreprocessor>
-      <readoutLayer testDataRatio="0.25" folds="Auto" repetitions="1">
+      <readoutLayer>
+        <crossvalidation foldDataRatio="0.25" folds="Auto" repetitions="1"/>
         <defaultNetworks>
           <classification>
             <ff>
@@ -528,9 +539,15 @@
           <readoutUnit name="13-19 years">
             <classification oneWinnerGroupName="AgeGroup"/>
           </readoutUnit>
-          <clusterSecondLevelComputation mode="SecondLevelOutputOnly" testDataRatio="0.5" folds="Auto">
+          <clusterSecondLevelComputation mode="AveragedOutputs">
+            <crossvalidation foldDataRatio="0.25" folds="Auto" repetitions="1"/>
             <ff>
               <activationIdentity/>
+              <hiddenLayers>
+                <layer neurons="10">
+                  <activationLeakyReLU/>
+                </layer>
+              </hiddenLayers>
               <resPropTrainer attempts="5" attemptEpochs="400"/>
             </ff>
           </clusterSecondLevelComputation>
@@ -595,7 +612,8 @@
           </reservoirInstance>
         </reservoirInstances>
       </neuralPreprocessor>
-      <readoutLayer testDataRatio="0.05" folds="Auto" repetitions="1">
+      <readoutLayer>
+        <crossvalidation foldDataRatio="0.05" folds="Auto" repetitions="1"/>
         <defaultNetworks/>
         <readoutUnits>
           <readoutUnit name="Female1Male0">
@@ -691,7 +709,8 @@
           </reservoirInstance>
         </reservoirInstances>
       </neuralPreprocessor>
-      <readoutLayer testDataRatio="0.0825" folds="Auto" repetitions="1">
+      <readoutLayer>
+        <crossvalidation foldDataRatio="0.0825" folds="Auto" repetitions="1"/>
         <defaultNetworks>
           <classification>
             <ff>
@@ -776,7 +795,8 @@
   <case name="Classification task ProximalPhalanxOutlineAgeGroup: No preprocesing, Multilayer Feed forward network as a classifier (Resilient trainer)">
     <samples trainingData="ProximalPhalanxOutlineAgeGroup_train.csv" verificationData="ProximalPhalanxOutlineAgeGroup_verify.csv"/>
     <stateMachine randomizerSeek="0">
-      <readoutLayer testDataRatio="0.1" folds="Auto">
+      <readoutLayer>
+        <crossvalidation foldDataRatio="0.1" folds="Auto" repetitions="1"/>
         <defaultNetworks>
           <classification>
             <ff>
@@ -803,7 +823,8 @@
           <readoutUnit name="13-19 years">
             <classification oneWinnerGroupName="AgeGroup"/>
           </readoutUnit>
-          <clusterSecondLevelComputation mode="AveragedOutputs" testDataRatio="0.5" folds="Auto">
+          <clusterSecondLevelComputation mode="AveragedOutputs">
+            <crossvalidation foldDataRatio="0.5" folds="Auto" repetitions="1"/>
             <ff>
               <activationIdentity/>
               <resPropTrainer attempts="5" attemptEpochs="400"/>
@@ -926,7 +947,8 @@
           </reservoirInstance>
         </reservoirInstances>
       </neuralPreprocessor>
-      <readoutLayer testDataRatio="0.1" folds="1">
+      <readoutLayer>
+        <crossvalidation foldDataRatio="0.1" folds="1" repetitions="1"/>
         <defaultNetworks/>
         <readoutUnits>
           <readoutUnit name="Value">
@@ -1019,7 +1041,8 @@
           </reservoirInstance>
         </reservoirInstances>
       </neuralPreprocessor>
-      <readoutLayer testDataRatio="0.1" folds="Auto">
+      <readoutLayer>
+        <crossvalidation foldDataRatio="0.1" folds="Auto" repetitions="1"/>
         <defaultNetworks>
           <forecast>
             <ff>
@@ -1109,7 +1132,8 @@
           </reservoirInstance>
         </reservoirInstances>
       </neuralPreprocessor>
-      <readoutLayer testDataRatio="0.1" folds="Auto">
+      <readoutLayer>
+        <crossvalidation foldDataRatio="0.1" folds="Auto" repetitions="1"/>
         <defaultNetworks/>
         <readoutUnits>
           <readoutUnit name="EpilepticSeizure">
@@ -1199,7 +1223,8 @@
           </reservoirInstance>
         </reservoirInstances>
       </neuralPreprocessor>
-      <readoutLayer testDataRatio="0.5" folds="Auto" repetitions="1">
+      <readoutLayer>
+        <crossvalidation foldDataRatio="0.5" folds="Auto" repetitions="1"/>
         <defaultNetworks>
           <forecast>
             <ff>
@@ -1340,7 +1365,8 @@
           </reservoirInstance>
         </reservoirInstances>
       </neuralPreprocessor>
-      <readoutLayer testDataRatio="0.0825" folds="Auto" repetitions="1">
+      <readoutLayer>
+        <crossvalidation foldDataRatio="0.0825" folds="Auto" repetitions="1"/>
         <defaultNetworks>
           <classification>
             <ff>
@@ -1425,7 +1451,8 @@
   <case name="Classification task Libras Movement: Bypassed preprocessing benchmark">
     <samples trainingData="LibrasMovement_train.csv" verificationData="LibrasMovement_verify.csv"/>
     <stateMachine randomizerSeek="0">
-      <readoutLayer testDataRatio="0.0825" folds="Auto">
+      <readoutLayer>
+        <crossvalidation foldDataRatio="0.0825" folds="Auto" repetitions="1"/>
         <defaultNetworks>
           <classification>
             <ff>
@@ -1596,7 +1623,8 @@
           </reservoirInstance>
         </reservoirInstances>
       </neuralPreprocessor>
-      <readoutLayer testDataRatio="0.0825" folds="Auto">
+      <readoutLayer>
+        <crossvalidation foldDataRatio="0.0825" folds="Auto" repetitions="1"/>
         <defaultNetworks>
           <classification>
             <ff>
@@ -1663,11 +1691,6 @@
       </readoutLayer>
     </stateMachine>
   </case>
-
-
-
-
-
 
 </demo>
 

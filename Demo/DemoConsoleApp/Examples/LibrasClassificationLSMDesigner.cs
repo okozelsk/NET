@@ -2,6 +2,7 @@
 using RCNet.Neural.Activation;
 using RCNet.Neural.Data.Coders.AnalogToSpiking;
 using RCNet.Neural.Data.Filter;
+using RCNet.Neural.Network.NonRecurrent;
 using RCNet.Neural.Network.SM;
 using RCNet.Neural.Network.SM.Preprocessing;
 using RCNet.Neural.Network.SM.Preprocessing.Input;
@@ -95,10 +96,10 @@ namespace Demo.DemoConsoleApp.Examples
             }
 
             //Simplified readout layer configuration
-            ReadoutLayerSettings readoutCfg = StateMachineDesigner.CreateClassificationReadoutCfg(StateMachineDesigner.CreateMultiLayerRegrNet(10, new LeakyReLUSettings(), 2, 5, 400),
-                                                                                                  0.0825d,
-                                                                                                  1,
+            ReadoutLayerSettings readoutCfg = StateMachineDesigner.CreateClassificationReadoutCfg(new CrossvalidationSettings(0.0825d, 0, 1),
+                                                                                                  StateMachineDesigner.CreateMultiLayerRegrNet(10, new LeakyReLUSettings(), 2, 5, 400),
                                                                                                   "Hand movement",
+                                                                                                  null,
                                                                                                   "curved swing",
                                                                                                   "horizontal swing",
                                                                                                   "vertical swing",

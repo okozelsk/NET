@@ -4,6 +4,7 @@ using RCNet.Extensions;
 using RCNet.Neural.Activation;
 using RCNet.Neural.Data.Coders.AnalogToSpiking;
 using RCNet.Neural.Data.Filter;
+using RCNet.Neural.Network.NonRecurrent;
 using RCNet.Neural.Network.NonRecurrent.FF;
 using RCNet.Neural.Network.SM;
 using RCNet.Neural.Network.SM.Preprocessing;
@@ -238,10 +239,10 @@ namespace Demo.DemoConsoleApp.Examples
         /// <summary>
         /// Creates readout layer configuration
         /// </summary>
-        /// <param name="testDataRatio">Specifies what part of available data to be used as test data</param>
+        /// <param name="foldDataRatio">Specifies what part of available data to be used as the fold data</param>
         /// <param name="numOfAttempts">Number of regression attempts. Each readout network will try to learn numOfAttempts times</param>
         /// <param name="numOfEpochs">Number of training epochs within an attempt</param>
-        ReadoutLayerSettings CreateReadoutLayerCfg(double testDataRatio, int numOfAttempts, int numOfEpochs)
+        ReadoutLayerSettings CreateReadoutLayerCfg(double foldDataRatio, int numOfAttempts, int numOfEpochs)
         {
             //For each output field we will use prediction of two networks
             //First network having only Identity output neuron and associated the resilient back propagation trainer
@@ -262,12 +263,10 @@ namespace Demo.DemoConsoleApp.Examples
             ReadoutUnitSettings highReadoutUnitCfg = new ReadoutUnitSettings("High", new ForecastTaskSettings(new RealFeatureFilterSettings()));
             ReadoutUnitSettings lowReadoutUnitCfg = new ReadoutUnitSettings("Low", new ForecastTaskSettings(new RealFeatureFilterSettings()));
             //Create readout layer configuration
-            ReadoutLayerSettings readoutLayerCfg = new ReadoutLayerSettings(new ReadoutUnitsSettings(highReadoutUnitCfg,
+            ReadoutLayerSettings readoutLayerCfg = new ReadoutLayerSettings(new CrossvalidationSettings(foldDataRatio),
+                                                                            new ReadoutUnitsSettings(highReadoutUnitCfg,
                                                                                                      lowReadoutUnitCfg
                                                                                                      ),
-                                                                            testDataRatio,
-                                                                            ReadoutLayerSettings.AutoFolds,
-                                                                            ReadoutLayerSettings.DefaultRepetitions,
                                                                             defaultNetworksCfg
                                                                             );
             return readoutLayerCfg;

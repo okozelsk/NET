@@ -1,6 +1,7 @@
 ﻿using RCNet.Extensions;
 using RCNet.Neural.Activation;
 using RCNet.Neural.Data.Filter;
+using RCNet.Neural.Network.NonRecurrent;
 using RCNet.Neural.Network.NonRecurrent.FF;
 using RCNet.Neural.Network.SM.Preprocessing;
 using RCNet.Neural.Network.SM.Preprocessing.Input;
@@ -204,13 +205,13 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// Creates readout layer configuration to solve forecast task
         /// </summary>
+        /// <param name="crossvalidationCfg">Crossvalidation configuration</param>
         /// <param name="netCfg">FF network configuration to be associated with readout units</param>
-        /// <param name="testDataRatio">Specifies what part of available data to be used as test data</param>
-        /// <param name="repetitions">Number of repetitions of the folds regression</param>
+        /// <param name="cluster2ndLevelComputingCfg">Optional configuration of the 2nd level computation of the network cluster</param>
         /// <param name="unitName">Readout unit name</param>
-        public static ReadoutLayerSettings CreateForecastReadoutCfg(FeedForwardNetworkSettings netCfg,
-                                                                    double testDataRatio,
-                                                                    int repetitions,
+        public static ReadoutLayerSettings CreateForecastReadoutCfg(CrossvalidationSettings crossvalidationCfg,
+                                                                    FeedForwardNetworkSettings netCfg,
+                                                                    NetworkClusterSecondLevelCompSettings cluster2ndLevelComputingCfg,
                                                                     params string[] unitName
                                                                     )
         {
@@ -223,10 +224,8 @@ namespace RCNet.Neural.Network.SM
             {
                 unitCfgCollection.Add(new ReadoutUnitSettings(name, new ForecastTaskSettings(new RealFeatureFilterSettings())));
             }
-            return new ReadoutLayerSettings(new ReadoutUnitsSettings(unitCfgCollection),
-                                            testDataRatio,
-                                            ReadoutLayerSettings.AutoFolds,
-                                            repetitions,
+            return new ReadoutLayerSettings(crossvalidationCfg,
+                                            new ReadoutUnitsSettings(unitCfgCollection, cluster2ndLevelComputingCfg),
                                             new DefaultNetworksSettings(null, new ForecastNetworksSettings(netCfg))
                                             );
         }
@@ -234,15 +233,15 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// Creates readout layer configuration to solve classification task
         /// </summary>
+        /// <param name="crossvalidationCfg">Crossvalidation configuration</param>
         /// <param name="netCfg">FF network configuration to be associated with readout units</param>
-        /// <param name="testDataRatio">Specifies what part of available data to be used as test data</param>
-        /// <param name="repetitions">Number of repetitions of the folds regression</param>
         /// <param name="oneWinnerGroupName">Name of the "one winner" group encapsulating classification readout units</param>
+        /// <param name="cluster2ndLevelComputingCfg">Optional configuration of the 2nd level computation of the network cluster</param>
         /// <param name="unitName">Readout unit name</param>
-        public static ReadoutLayerSettings CreateClassificationReadoutCfg(FeedForwardNetworkSettings netCfg,
-                                                                          double testDataRatio,
-                                                                          int repetitions,
+        public static ReadoutLayerSettings CreateClassificationReadoutCfg(CrossvalidationSettings crossvalidationCfg,
+                                                                          FeedForwardNetworkSettings netCfg,
                                                                           string oneWinnerGroupName,
+                                                                          NetworkClusterSecondLevelCompSettings cluster2ndLevelComputingCfg,
                                                                           params string[] unitName
                                                                           )
         {
@@ -255,10 +254,8 @@ namespace RCNet.Neural.Network.SM
             {
                 unitCfgCollection.Add(new ReadoutUnitSettings(name, new ClassificationTaskSettings(oneWinnerGroupName)));
             }
-            return new ReadoutLayerSettings(new ReadoutUnitsSettings(unitCfgCollection),
-                                            testDataRatio,
-                                            ReadoutLayerSettings.AutoFolds,
-                                            repetitions,
+            return new ReadoutLayerSettings(crossvalidationCfg,
+                                            new ReadoutUnitsSettings(unitCfgCollection, cluster2ndLevelComputingCfg),
                                             new DefaultNetworksSettings(new ClassificationNetworksSettings(netCfg), null)
                                             );
         }

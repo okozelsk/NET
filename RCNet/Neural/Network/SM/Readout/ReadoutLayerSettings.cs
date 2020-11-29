@@ -1,9 +1,8 @@
-﻿using RCNet.Neural.Network.NonRecurrent;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Xml.Linq;
+using RCNet.Neural.Network.NonRecurrent;
 
 namespace RCNet.Neural.Network.SM.Readout
 {
@@ -18,52 +17,12 @@ namespace RCNet.Neural.Network.SM.Readout
         /// Name of the associated xsd type
         /// </summary>
         public const string XsdTypeName = "ROutLayerType";
-        /// <summary>
-        /// Maximum allowed test data ratio
-        /// </summary>
-        public const double MaxTestDataRatio = 0.5d;
-        /// <summary>
-        /// Automatic number of folds (code)
-        /// </summary>
-        public const string AutoFoldsCode = "Auto";
-        /// <summary>
-        /// Automatic number of folds (num)
-        /// </summary>
-        public const int AutoFolds = 0;
-        //Default values
-        /// <summary>
-        /// Default number of folds - string code
-        /// </summary>
-        public const string DefaultFoldsString = AutoFoldsCode;
-        /// <summary>
-        /// Default number of folds - numeric code
-        /// </summary>
-        public const int DefaultFoldsNum = AutoFolds;
-        /// <summary>
-        /// Default number of repetitions
-        /// </summary>
-        public const int DefaultRepetitions = 1;
-
 
         //Attribute properties
         /// <summary>
-        /// Specifies how big part of available samples will be used as testing samples during the training
+        /// Crossvalidation configuration
         /// </summary>
-        public double TestDataRatio { get; }
-
-        /// <summary>
-        /// The x in the x-fold cross-validation
-        /// https://en.wikipedia.org/wiki/Cross-validation_(statistics)
-        /// Parameter has two options.
-        /// 0 - means auto setup to achieve full cross-validation if it is possible (related to specified TestDataRatio)
-        /// GT 0 - means exact number of the folds
-        /// </summary>
-        public int Folds { get; }
-
-        /// <summary>
-        /// Defines how many times the generation of whole folds will be repeated
-        /// </summary>
-        public int Repetitions { get; }
+        public CrossvalidationSettings CrossvalidationCfg { get; }
 
         /// <summary>
         /// Task dependent networks settings to be applied when specific networks for readout unit are not specified
@@ -71,7 +30,7 @@ namespace RCNet.Neural.Network.SM.Readout
         public DefaultNetworksSettings DefaultNetworksCfg { get; }
 
         /// <summary>
-        /// Readout units settings
+        /// Readout units configuration
         /// </summary>
         public ReadoutUnitsSettings ReadoutUnitsCfg { get; }
 
@@ -79,31 +38,17 @@ namespace RCNet.Neural.Network.SM.Readout
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="readoutUnitsCfg">Readout units settings</param>
-        /// <param name="testDataRatio">Specifies how big part of available samples will be used as testing samples during the training</param>
-        /// <param name="folds">The x in the x-fold cross-validation</param>
-        /// <param name="repetitions">Defines how many times the generation of whole folds will be repeated</param>
+        /// <param name="crossvalidationCfg">Crossvalidation configuration</param>
+        /// <param name="readoutUnitsCfg">Readout units configuration</param>
         /// <param name="defaultNetworksCfg">Task dependent networks settings to be applied when specific networks for readout unit are not specified</param>
-        public ReadoutLayerSettings(ReadoutUnitsSettings readoutUnitsCfg,
-                                    double testDataRatio,
-                                    int folds = DefaultFoldsNum,
-                                    int repetitions = DefaultRepetitions,
+        public ReadoutLayerSettings(CrossvalidationSettings crossvalidationCfg,
+                                    ReadoutUnitsSettings readoutUnitsCfg,
                                     DefaultNetworksSettings defaultNetworksCfg = null
                                     )
         {
-            //Default settings
-            TestDataRatio = testDataRatio;
-            Folds = folds;
-            Repetitions = repetitions;
+            CrossvalidationCfg = (CrossvalidationSettings)crossvalidationCfg.DeepClone();
             ReadoutUnitsCfg = (ReadoutUnitsSettings)readoutUnitsCfg.DeepClone();
-            if (defaultNetworksCfg == null)
-            {
-                DefaultNetworksCfg = new DefaultNetworksSettings();
-            }
-            else
-            {
-                DefaultNetworksCfg = (DefaultNetworksSettings)defaultNetworksCfg.DeepClone();
-            }
+            DefaultNetworksCfg = defaultNetworksCfg == null ? new DefaultNetworksSettings() : (DefaultNetworksSettings)defaultNetworksCfg.DeepClone();
             Check();
             return;
         }
@@ -113,7 +58,7 @@ namespace RCNet.Neural.Network.SM.Readout
         /// </summary>
         /// <param name="source">Source instance</param>
         public ReadoutLayerSettings(ReadoutLayerSettings source)
-            : this(source.ReadoutUnitsCfg, source.TestDataRatio, source.Folds, source.Repetitions, source.DefaultNetworksCfg)
+            : this(source.CrossvalidationCfg, source.ReadoutUnitsCfg, source.DefaultNetworksCfg)
         {
             return;
         }
@@ -126,16 +71,15 @@ namespace RCNet.Neural.Network.SM.Readout
         public ReadoutLayerSettings(XElement elem)
         {
             //Validation
-            XElement readoutLayerSettingsElem = Validate(elem, XsdTypeName);
+            XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
-            TestDataRatio = double.Parse(readoutLayerSettingsElem.Attribute("testDataRatio").Value, CultureInfo.InvariantCulture);
-            Folds = readoutLayerSettingsElem.Attribute("folds").Value == DefaultFoldsString ? DefaultFoldsNum : int.Parse(readoutLayerSettingsElem.Attribute("folds").Value, CultureInfo.InvariantCulture);
-            Repetitions = int.Parse(readoutLayerSettingsElem.Attribute("repetitions").Value, CultureInfo.InvariantCulture);
+            //Crossvalidation
+            CrossvalidationCfg = new CrossvalidationSettings(settingsElem.Element("crossvalidation"));
             //Default networks settings
-            XElement defaultNetworksElem = readoutLayerSettingsElem.Elements("defaultNetworks").FirstOrDefault();
+            XElement defaultNetworksElem = settingsElem.Elements("defaultNetworks").FirstOrDefault();
             DefaultNetworksCfg = defaultNetworksElem == null ? new DefaultNetworksSettings() : new DefaultNetworksSettings(defaultNetworksElem);
             //Readout units
-            XElement readoutUnitsElem = readoutLayerSettingsElem.Elements("readoutUnits").First();
+            XElement readoutUnitsElem = settingsElem.Elements("readoutUnits").First();
             ReadoutUnitsCfg = new ReadoutUnitsSettings(readoutUnitsElem);
             Check();
             return;
@@ -154,16 +98,6 @@ namespace RCNet.Neural.Network.SM.Readout
         }
 
         /// <summary>
-        /// Checks if settings are default
-        /// </summary>
-        public bool IsDefaultFolds { get { return (Folds == DefaultFoldsNum); } }
-
-        /// <summary>
-        /// Checks if settings are default
-        /// </summary>
-        public bool IsDefaultRepetitions { get { return (Repetitions == DefaultRepetitions); } }
-
-        /// <summary>
         /// Identifies settings containing only default values
         /// </summary>
         public override bool ContainsOnlyDefaults { get { return false; } }
@@ -174,18 +108,6 @@ namespace RCNet.Neural.Network.SM.Readout
         /// </summary>
         protected override void Check()
         {
-            if (TestDataRatio <= 0 || TestDataRatio > MaxTestDataRatio)
-            {
-                throw new ArgumentException($"Invalid TestDataRatio {TestDataRatio.ToString(CultureInfo.InvariantCulture)}. TestDataRatio must be GT 0 and GE {MaxTestDataRatio.ToString(CultureInfo.InvariantCulture)}.", "TestDataRatio");
-            }
-            if (Folds < 0)
-            {
-                throw new ArgumentException($"Invalid Folds {Folds.ToString(CultureInfo.InvariantCulture)}. Folds must be GE to 0 (0 means Auto folds).", "Folds");
-            }
-            if (Repetitions < 1)
-            {
-                throw new ArgumentException($"Invalid Repetitions {Repetitions.ToString(CultureInfo.InvariantCulture)}. Repetitions must be GE to 1.", "Repetitions");
-            }
             foreach (ReadoutUnitSettings rus in ReadoutUnitsCfg.ReadoutUnitCfgCollection)
             {
                 if (rus.TaskCfg.NetworkCfgCollection.Count == 0)
@@ -232,16 +154,7 @@ namespace RCNet.Neural.Network.SM.Readout
         /// <returns>XElement containing the settings</returns>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
-            XElement rootElem = new XElement(rootElemName);
-            rootElem.Add(new XAttribute("testDataRatio", TestDataRatio.ToString(CultureInfo.InvariantCulture)));
-            if (!suppressDefaults || !IsDefaultFolds)
-            {
-                rootElem.Add(new XAttribute("folds", Folds == DefaultFoldsNum ? DefaultFoldsString : Folds.ToString(CultureInfo.InvariantCulture)));
-            }
-            if (!suppressDefaults || !IsDefaultRepetitions)
-            {
-                rootElem.Add(new XAttribute("repetitions", Repetitions.ToString(CultureInfo.InvariantCulture)));
-            }
+            XElement rootElem = new XElement(rootElemName, CrossvalidationCfg.GetXml(suppressDefaults));
             if (!DefaultNetworksCfg.ContainsOnlyDefaults)
             {
                 rootElem.Add(DefaultNetworksCfg.GetXml(suppressDefaults));

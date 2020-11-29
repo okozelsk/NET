@@ -1238,24 +1238,34 @@
     </xs:sequence>
   </xs:complexType>
 
+  <!-- Crossvalidation configuration -->
+  <xs:complexType name="CrossvalidationType">
+    <xs:attribute type="UDoubleGT0LE05Type" name="foldDataRatio" use="optional" default="0.1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Required ratio of samples constituting one fold. Default value is 0.1.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UIntGT0AutoOptionType" name="folds" use="optional" default="Auto">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Number of folds to be used. Default value is Auto (all available folds).</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UIntGT0Type" name="repetitions" use="optional" default="1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Defines how many times the generation of whole folds on shuffled data to be repeated. This parameter multiplies the number of networks in the cluster. Default value is 1.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
   <!-- Network cluster 2nd level computation configuration -->
   <xs:complexType name="NetworkClusterSecondLevelCompType">
     <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="CrossvalidationType" name="crossvalidation" minOccurs="1" maxOccurs="1"/>
       <xs:element type="FFNetType" name="ff" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute type="ClusterSecondLevelCompModeType" name ="mode" use="optional" default="AveragedOutputs">
       <xs:annotation>
         <xs:documentation xml:lang="en">Computation mode of the cluster. Default value is AveragedOutputs.</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="UDoubleGT0LE05Type" name="testDataRatio" use="optional" default="0.333333333">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Required test data ratio constituting one fold. Default value is 0.333333333.</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="UIntGT0AutoOptionType" name="folds" use="optional" default="Auto">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Number of folds of 2nd level x-fold cross-validation computation. Default value is Auto</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -2566,6 +2576,7 @@
   <!-- Readout layer configuration -->
   <xs:complexType name="ROutLayerType">
     <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="CrossvalidationType" name="crossvalidation" minOccurs="1" maxOccurs="1"/>
       <xs:element type="ROutLayerUnitDefaultNetworksType" name="defaultNetworks" minOccurs="0" maxOccurs="1"/>
       <xs:element type="ROutLayerUnitsType" name="readoutUnits" minOccurs="1" maxOccurs="1">
         <xs:unique name="rol_unique_readout_unit">
@@ -2574,17 +2585,6 @@
         </xs:unique>
       </xs:element>
     </xs:sequence>
-    <xs:attribute type="UDoubleGT0LE05Type" name="testDataRatio" use="required"/>
-    <xs:attribute type="UIntGT0AutoOptionType" name="folds" use="optional" default="Auto">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is Auto</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="UIntGT0Type" name="repetitions" use="optional" default="1">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
   </xs:complexType>
 
 

@@ -187,9 +187,10 @@ namespace RCNet.Neural.Network.NonRecurrent
         public TrainedNetwork Build()
         {
             TrainedNetwork bestNetwork = null;
-            int lastImprovementEpoch = 0;
-            double lastImprovementCombinedPrecisionError = 0d;
-            double lastImprovementCombinedBinaryError = 0d;
+            int bestNetworkAttempt = 0;
+            int currNetworkLastImprovementEpoch = 0;
+            double currNetworkLastImprovementCombinedPrecisionError = 0d;
+            double currNetworkLastImprovementCombinedBinaryError = 0d;
             //Create network and trainer
             NonRecurrentNetUtils.CreateNetworkAndTrainer(_networkSettings,
                                                          _trainingBundle.InputVectorCollection,
@@ -240,14 +241,18 @@ namespace RCNet.Neural.Network.NonRecurrent
                 //Restart lastImprovementEpoch when new trainer's attempt started
                 if (trainer.AttemptEpoch == 1)
                 {
-                    lastImprovementEpoch = trainer.AttemptEpoch;
-                    lastImprovementCombinedPrecisionError = currNetwork.CombinedPrecisionError;
-                    lastImprovementCombinedBinaryError = currNetwork.CombinedBinaryError;
+                    currNetworkLastImprovementEpoch = trainer.AttemptEpoch;
+                    currNetworkLastImprovementCombinedPrecisionError = currNetwork.CombinedPrecisionError;
+                    currNetworkLastImprovementCombinedBinaryError = currNetwork.CombinedBinaryError;
                 }
                 //First initialization of the best network
-                bestNetwork = bestNetwork ?? currNetwork.DeepClone();
+                if(bestNetwork == null)
+                {
+                    bestNetwork = currNetwork.DeepClone();
+                    bestNetworkAttempt = trainer.Attempt;
+                }
                 //RegrState instance
-                BuildingState regrState = new BuildingState(_networkName, _binBorder, _foldNum, _numOfFolds, _foldNetworkNum, _numOfFoldNetworks, trainer.Attempt, trainer.MaxAttempt, trainer.AttemptEpoch, trainer.MaxAttemptEpoch, currNetwork, bestNetwork, lastImprovementEpoch);
+                BuildingState regrState = new BuildingState(_networkName, _binBorder, _foldNum, _numOfFolds, _foldNetworkNum, _numOfFoldNetworks, trainer.Attempt, trainer.MaxAttempt, trainer.AttemptEpoch, trainer.MaxAttemptEpoch, currNetwork, currNetworkLastImprovementEpoch, bestNetwork, bestNetworkAttempt);
                 //Call controller
                 BuildingInstr instructions = _controller(regrState);
                 //Better?
@@ -256,15 +261,13 @@ namespace RCNet.Neural.Network.NonRecurrent
                     //Adopt current regression unit as a best one
                     bestNetwork = currNetwork.DeepClone();
                     regrState.BestNetwork = bestNetwork;
-                    lastImprovementEpoch = trainer.AttemptEpoch;
-                    lastImprovementCombinedPrecisionError = currNetwork.CombinedPrecisionError;
-                    lastImprovementCombinedBinaryError = currNetwork.CombinedBinaryError;
+                    bestNetworkAttempt = trainer.Attempt;
                 }
-                if (currNetwork.CombinedBinaryError < lastImprovementCombinedBinaryError || currNetwork.CombinedPrecisionError < lastImprovementCombinedPrecisionError)
+                if (currNetwork.CombinedBinaryError < currNetworkLastImprovementCombinedBinaryError || currNetwork.CombinedPrecisionError < currNetworkLastImprovementCombinedPrecisionError)
                 {
-                    lastImprovementEpoch = trainer.AttemptEpoch;
-                    lastImprovementCombinedPrecisionError = currNetwork.CombinedPrecisionError;
-                    lastImprovementCombinedBinaryError = currNetwork.CombinedBinaryError;
+                    currNetworkLastImprovementEpoch = trainer.AttemptEpoch;
+                    currNetworkLastImprovementCombinedPrecisionError = currNetwork.CombinedPrecisionError;
+                    currNetworkLastImprovementCombinedBinaryError = currNetwork.CombinedBinaryError;
                 }
                 //Raise notification event
                 RegressionEpochDone?.Invoke(regrState, instructions.CurrentIsBetter);
@@ -341,13 +344,17 @@ namespace RCNet.Neural.Network.NonRecurrent
             /// </summary>
             public TrainedNetwork CurrNetwork { get; }
             /// <summary>
+            /// Specifies when was lastly found an improvement of current network within the current attempt
+            /// </summary>
+            public int CurrNetworkLastImprovementEpoch { get; set; }
+            /// <summary>
             /// Contains the best network for now and related important error statistics.
             /// </summary>
             public TrainedNetwork BestNetwork { get; set; }
             /// <summary>
-            /// Specifies when was lastly found an improvement
+            /// Number of attempt in which was recognized the best network
             /// </summary>
-            public int LastImprovementEpoch { get; set; }
+            public int BestNetworkAttempt { get; set; }
 
             /// <summary>
             /// Creates an initialized instance
@@ -363,8 +370,9 @@ namespace RCNet.Neural.Network.NonRecurrent
             /// <param name="epoch">Current epoch number within the current regression attempt</param>
             /// <param name="maxEpochs">Maximum number of epochs</param>
             /// <param name="currNetwork">Current network and related important error statistics.</param>
+            /// <param name="currNetworkLastImprovementEpoch">Specifies when was lastly found an improvement of current network within the current attempt.</param>
             /// <param name="bestNetwork">The best network for now and related important error statistics.</param>
-            /// <param name="lastImprovementEpoch">Specifies when was lastly found an improvement (bestNetwork=currNetwork).</param>
+            /// <param name="bestNetworkAttempt">Number of attempt in which was recognized the best network.</param>
             public BuildingState(string networkName,
                                  double binBorder,
                                  int foldNum,
@@ -376,8 +384,9 @@ namespace RCNet.Neural.Network.NonRecurrent
                                  int epoch,
                                  int maxEpochs,
                                  TrainedNetwork currNetwork,
+                                 int currNetworkLastImprovementEpoch,
                                  TrainedNetwork bestNetwork,
-                                 int lastImprovementEpoch
+                                 int bestNetworkAttempt
                                  )
             {
                 NetworkName = networkName;
@@ -391,8 +400,9 @@ namespace RCNet.Neural.Network.NonRecurrent
                 Epoch = epoch;
                 MaxEpochs = maxEpochs;
                 CurrNetwork = currNetwork;
+                CurrNetworkLastImprovementEpoch = currNetworkLastImprovementEpoch;
                 BestNetwork = bestNetwork;
-                LastImprovementEpoch = lastImprovementEpoch;
+                BestNetworkAttempt = bestNetworkAttempt;
                 return;
             }
 

@@ -273,7 +273,7 @@ namespace RCNet.Neural.Network.SM
                 readoutInput = NP.InitializeAndPreprocessBundle(vectorBundle, out preprocessingOverview);
             }
             //Training of the readout layer 
-            ReadoutLayer.RegressionOverview regressionOverview = RL.Build(readoutInput, BuildPredictorsMapper(), regressionController);
+            ReadoutLayer.RegressionOverview regressionOverview = RL.Build(readoutInput, BuildPredictorsMapper(), regressionController, Config.RandomizerSeek);
             //Return compact results
             return new TrainingResults(preprocessingOverview, regressionOverview);
         }

@@ -2,6 +2,7 @@
 using RCNet.Neural.Activation;
 using RCNet.Neural.Data.Coders.AnalogToSpiking;
 using RCNet.Neural.Data.Filter;
+using RCNet.Neural.Network.NonRecurrent;
 using RCNet.Neural.Network.SM;
 using RCNet.Neural.Network.SM.Preprocessing.Input;
 using RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor;
@@ -33,9 +34,9 @@ namespace Demo.DemoConsoleApp.Examples
                                                                                 new ExternalFieldSettings("Adj Close", new RealFeatureFilterSettings())
                                                                                 );
             //Simplified readout layer configuration
-            ReadoutLayerSettings readoutCfg = StateMachineDesigner.CreateForecastReadoutCfg(StateMachineDesigner.CreateSingleLayerRegrNet(new IdentitySettings(), 2, 1000),
-                                                                                            0.1d,
-                                                                                            1,
+            ReadoutLayerSettings readoutCfg = StateMachineDesigner.CreateForecastReadoutCfg(new CrossvalidationSettings(0.1d, 0, 1),
+                                                                                            StateMachineDesigner.CreateSingleLayerRegrNet(new IdentitySettings(), 2, 1000),
+                                                                                            null,
                                                                                             "High",
                                                                                             "Low"
                                                                                             );

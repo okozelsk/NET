@@ -126,10 +126,17 @@ namespace RCNet.Neural.Network.SM.Readout
         /// <param name="dataBundle">Collection of input predictors and associated desired output values</param>
         /// <param name="predictorsMapper">Optional specific mapping of predictors to readout units</param>
         /// <param name="controller">Optional external regression controller</param>
+        /// <param name="randomizerSeek">
+        /// Specifies random number generator's initial seek.
+        /// A value greater than or equal to 0 will always ensure the same initialization of the internal
+        /// random number generator and therefore also the same internal configuration each time the StateMachine to be instantiated.
+        /// A value less than 0 causes different internal configuration each time the ReadoutLayer to be Built.
+        ///</param>
         /// <returns>Results of the regression</returns>
         public RegressionOverview Build(VectorBundle dataBundle,
                                         PredictorsMapper predictorsMapper = null,
-                                        TrainedNetworkBuilder.RegressionControllerDelegate controller = null
+                                        TrainedNetworkBuilder.RegressionControllerDelegate controller = null,
+                                        int randomizerSeek = 0
                                         )
         {
             //Basic checks
@@ -199,7 +206,7 @@ namespace RCNet.Neural.Network.SM.Readout
             });
 
             //Random object initialization
-            Random rand = new Random(0);
+            Random rand = (randomizerSeek < 0 ? new Random() : new Random(randomizerSeek));
             //Create shuffled copy of the data
             VectorBundle shuffledData = new VectorBundle(normalizedPredictorsCollection, normalizedIdealOutputsCollection);
             shuffledData.Shuffle(rand);
@@ -230,9 +237,7 @@ namespace RCNet.Neural.Network.SM.Readout
                 //Build trained readout unit. Trained unit becomes to be the predicting cluster member
                 _readoutUnitCollection[unitIdx] = new ReadoutUnit(unitIdx,
                                                                   readoutUnitBuilder.Build(readoutUnitDataBundle,
-                                                                                           ReadoutLayerCfg.TestDataRatio,
-                                                                                           ReadoutLayerCfg.Folds,
-                                                                                           ReadoutLayerCfg.Repetitions,
+                                                                                           ReadoutLayerCfg.CrossvalidationCfg,
                                                                                            _outputFeatureFilterCollection[unitIdx]
                                                                                            )
                                                                   );
