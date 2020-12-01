@@ -1,24 +1,26 @@
 # Reservoir Computing for .NET (RCNet)
 ![Reservoir Computing conceptual view](./RCNet/Docs/Imgs/ReservoirComputing_BasicSchema.png)
 <br>
-The aim of this project is to make the [reservoir computing](https://en.wikipedia.org/wiki/Reservoir_computing) methods  easy to use and available for .net platform without any other dependencies.
-Two main reservoir computing methods are called Echo State Network (ESN) and Liquid State Machine (LSM).
-RCNet supports both of these methods. Moreover, since ESN and LSM are based on similar general principles, RCNet allows to design complex "hybrid" recurrent reservoirs consisting of spiking and analog neurons synaptically linked together.
-Mutual cooperation of the hidden neurons having stateless analog and stateful spiking activation functions is enabled by specific implementation of hidden neuron. Hidden neuron is not stateless and it can fire spikes even in case of stateless analog activation is used. "Analog spikes" are based on defined firing event depending on current and previous values of the stateles activation.
-Hidden neuron also provides a standardized set of available predictors no matter what activation function is used. According to preliminary results, it seems that it is no longer true that ESN is not capable to generalize and separate input signal enaugh to perform excellent classification. On the contrary. It now appears that the use of pure analog activations (like TanH) and the simple classical ESN reservoir design could be a capable competitor to spiking LSM reservoirs.
-<br/>
-The main component of RCNet is called "**State Machine**" and it has to be instantiated through its settings class. "**State Machine**" is serializable so it is easily possible to instantiate and train it and than use it as a real-time loadable component in the solution.
-<br/>
+The main purpose of this project is to offer an easy-to-use .NET library for prediction and classification of time series.
+RCNet library implementation is based on the ["**Reservoir Computing**"](https://en.wikipedia.org/wiki/Reservoir_computing) concept where the two most well-known methods are Echo State Network (ESN) and Liquid State Machine (LSM).
+ESN uses analog activations within the recurrent reservoir and LSM uses spiking activations.
+The main component of RCNet is called "**State Machine**". State Machine has quite wide configuration options of the reservoirs and except of both mentioned methods (ESN, LSM) it also supports "hybrid" recurrent reservoirs where hidden neurons having an analog and spiking activation can be synaptically connected.
+The correct synaptic linkage of hidden neurons having heterogeneous activations is enabled by a specific implementation of a hidden neuron, where each hidden neuron provides analog and spiking output regardless of the type of activation function is used.
+Dual output of hidden neuron also enables to always offer the full set of predictors on hidden neuron level (very important is the FiringTrace predictor).
+Firing a spike of the hidden neuron having analog activation is based on defined firing event depending on current and previous value of the activation. Use of spiking based predictor (FiringTrace) dramatically improves classification accuracy of the classical ESN.
+"Analog spiking" is an unique feature discovered and introduced by this project and thanks that, ESN is now capable to classify time series with high accuracy with relatively low resources and to be fully competetive to other classification algorithms.
+
+
 More detailed documentation will be posted [here](https://github.com/okozelsk/NET/wiki) as soon as the current stage of the wild changes is over.
-<br/>
-*I welcome questions, ideas and suggestions for improvements, usage experiences, bug alerts, constructive comments, etc... Please use my email address oldrich.kozelsky@email.cz to contact me.*
+I welcome questions, ideas and suggestions for improvements, usage experiences, bug alerts, constructive comments, etc...
+Please use my email address oldrich.kozelsky@email.cz to contact me.
 
 
-## State Machine demo application (.NET Core 3.1)
-Main functionality and possibilities of the State Machine are demonstrated in a simple [demo application](https://github.com/okozelsk/NET/tree/master/Demo/DemoConsoleApp).
+## The demo application (.NET Core 3.1)
+A simple [demo application](https://github.com/okozelsk/NET/tree/master/Demo/DemoConsoleApp) demonstrates main functionalities and possibilities of the State Machine component.
 Application has no startup parameters and when started, it shows the menu.
 <br>
-Note that if necessary, examples use Examples sub-folder relative to the location of the executable DemoConsoleApp.exe.
+*Note that application may write data into "Examples" sub-folder relative to the location of the executable DemoConsoleApp.exe.**
 
 ### Demonstration of performance and configuration options (1. menu choice)
 Application performs sequence of tasks defined in the [SMDemoSettings.xml](./Demo/DemoConsoleApp/SMDemoSettings.xml) xml file, where each task is defined in the xml element "case" so you can easily insert new task or tune existing one by simple modification of xml content.
@@ -31,7 +33,7 @@ Demo application has internally implemented the xml validation so connection of 
 #### Time-series classification results comparison
 SMDemoSettings.xml currently includes several classification problems from the:
 [Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com](https://timeseriesclassification.com)
-site and State Machine is surprisingly able to achieve competetive results to the best classification algorithms referenced on that website.
+site and State Machine is able to achieve competetive results to the best classification algorithms referenced on that website.
 <br>
 
 |Dataset|State Machine Accuracy|Best Ref. Accuracy|Best Ref. Algorithm|
@@ -49,28 +51,31 @@ site and State Machine is surprisingly able to achieve competetive results to th
 This very simple machine learning example shows how to learn Feed Forward Network component to solve boolean algebra. Feed Forward network is a part of the State Machine's readout layer, but here is shown that it can be also used as a stand alone component.
 
 ### Code examples (3. menu choice)
-Example shows how to manually setup State Machine configuration from the scratch, then how to train State Machine and how to verify its performance.
+Example shows how to setup State Machine configuration from the scratch in the code, then how to train State Machine and how to verify its performance.
 
 ### Code examples (4, ... menu choices)
-Several examples show usage of the State Machine Designer component to setup simple State Machine configuration, then how to train State Machine and how to verify its performance.
+Several examples show usage of the State Machine Designer component to setup simple State Machine configurations, then how to train State Machine and how to verify its performance.
 
 ### Data format for the demo application
-Input data is standardly located in the Data sub-folder relative to the location of the executable DemoConsoleApp.exe. Data is expected in csv format and data delimiter can be a tab, semicolon or comma character.
+Input data is standardly located in the "Data" sub-folder relative to the location of the executable DemoConsoleApp.exe. Data is expected in csv format and data delimiter can be a tab, semicolon or comma character.
 * **Continuous feeding regime** requires a standard csv format, where the first line contains the names of the data fields and each next line contains the data. [Here](./Demo/DemoConsoleApp/Data/TTOO.csv) is an example
 * **Patterned feeding regime** requires specific logical csv format without colum names (header). Each data line contains values of steady (optional) and repetitive pattern features followed by expected output values at the end. Values of repetitive pattern features can be organized in two ways: groupped [v1(t1),v2(t1),v1(t2),v2(t2),v1(t3),v2(t3)] or sequential [v1(t1),v1(t2),v1(t3),v2(t1),v2(t2),v2(t3)]. [Here](./Demo/DemoConsoleApp/Data/LibrasMovement_train.csv) is an example
 
-## RCNet library (.NET Standard 2.0) Components overview
+## RCNet library (.NET Standard 2.0)
 
-![Reservoir Computing conceptual view](./RCNet/Docs/Imgs/StateMachine_EntityRelationship.png)
-<br/>
-(listed in logical order from basic to composite and complex)
+### Code metrics
+|Maintenance index|Cyclomatic complexity|Depth of inheritance|Code lines|Executable code lines|
+|--|--|--|--|--|
+|82 (green)|6956|3|53197|11124|
+
+Follows list of components in logical order from basic to composite and complex.
 
 ### Math
 |Component|Description|
 |--|--|
 |[BasicStat](./RCNet/MathTools/BasicStat.cs)|Provides basic statistics of given data (averages, sum of squares, standard deviation, etc.)|
 |[WeightedAvg](./RCNet/MathTools/WeightedAvg.cs)|Computes weighted average of given value/weight data pairs|
-|[MovingDataWindow](./RCNet/MathTools/MovingDataWindow.cs)|Implements moving data window and offers computation of weighted average of recent part of given data|
+|[MovingDataWindow](./RCNet/MathTools/MovingDataWindow.cs)|Implements moving data window providing additional functions such as statistics, weighted average, etc.|
 |[ODENumSolver](./RCNet/MathTools/Differential/ODENumSolver.cs)|Implements ordinary differential equations (ODE) numerical solver supporting Euler and RK4 methods|
 |[Vector](./RCNet/MathTools/VectorMath/Vector.cs)|Implements vector of double values supporting basic mathematical operations|
 |[Matrix](./RCNet/MathTools/MatrixMath/Matrix.cs)|Implements matrix of double values supporting basic mathematical operations. Contains buit-in Power Iteration method for the largest eigen value quick estimation|
@@ -79,7 +84,7 @@ Input data is standardly located in the Data sub-folder relative to the location
 |[QRD](./RCNet/MathTools/MatrixMath/QRD.cs)|QR decomposition of a matrix|
 |[LUD](./RCNet/MathTools/MatrixMath/LUD.cs)|LU decomposition of a squared matrix|
 |[ParamSeeker](./RCNet/MathTools/PS/ParamSeeker.cs)|Implements an error driven iterative search for the best value of a given parameter|
-|[HurstExpEstim](./RCNet/MathTools/Hurst/HurstExpEstim.cs)|Implements Hurst exponent estimator and Rescalled range. It can be used to evaluate level of data randomness|
+|[HurstExpEstim](./RCNet/MathTools/Hurst/HurstExpEstim.cs)|Implements Rescalled range and Hurst exponent estimator. It can be used to evaluate level of data randomness|
 |["RandomValue"](https://github.com/okozelsk/NET/tree/master/RCNet/RandomValue)|Supports Uniform, Gaussian, Exponential and Gamma distributions. Here is [extension code](./RCNet/Extensions/RandomExtensions.cs)|
 |[Others](https://github.com/okozelsk/NET/tree/master/RCNet/MathTools)|Set of small additional helper components like PhysUnit, Interval, Bitwise, Combinatorics, Discrete,...|
 
@@ -91,7 +96,7 @@ Input data is standardly located in the Data sub-folder relative to the location
 ### Data generators
 |Component|Description|
 |--|--|
-|[PulseGenerator](./RCNet/Neural/Data/Generators/PulseGenerator.cs)|Generates constant pulses having specified average period. Pulse leaks follow specified random distribution or can be constant|
+|[PulseGenerator](./RCNet/Neural/Data/Generators/PulseGenerator.cs)|Generates constant pulses having specified average period. Pulse leaks follow specified random distribution or the constant.|
 |[MackeyGlassGenerator](./RCNet/Neural/Data/Generators/MackeyGlassGenerator.cs)|Generates Mackey-Glass chaotic signal|
 |[RandomGenerator](./RCNet/Neural/Data/Generators/RandomGenerator.cs)|Generates random signal following specified distribution|
 |[SinusoidalGenerator](./RCNet/Neural/Data/Generators/SinusoidalGenerator.cs)|Generates sinusoidal signal|
@@ -103,7 +108,7 @@ Input data is standardly located in the Data sub-folder relative to the location
 |[EnumFeatureFilter](./RCNet/Neural/Data/Filter/EnumFeatureFIlter.cs)|Enumeration (1..N) feature filter|
 |[RealFeatureFilter](./RCNet/Neural/Data/Filter/RealFeatureFilter.cs)|Real number feature filter supporting standardization and range reserve for handling of unseen data in the future|
 
-### Chainable Data Transformations
+### Chainable Input Data Transformations
 |Component|Description|
 |--|--|
 |[CDivTransformer](./RCNet/Neural/Data/Transformers/CDivTransformer.cs)|Provides "constant divided by an input field value" transformation|
@@ -128,7 +133,7 @@ Input data is standardly located in the Data sub-folder relative to the location
 ### Data holding
 |Component|Description|
 |--|--|
-|[SimpleQueue](./RCNet/Queue/SimpleQueue.cs)|Implements quick and simple FIFO queue (template). Supports access to enqueued elements so it can be also used as the "sliding window"|
+|[SimpleQueue](./RCNet/Queue/SimpleQueue.cs)|Implements quick and simple FIFO queue (template). Supports access to enqueued elements.|
 |[DelimitedStringValues](./RCNet/CsvTools/DelimitedStringValues.cs)|Helper encoder and decoder of data line in csv format|
 |[CsvDataHolder](./RCNet/CsvTools/CsvDataHolder.cs)|Provides simple loading and saving of csv data|
 |[VectorBundle](./RCNet/Neural/Data/VectorBundle.cs)|Bundle of input data vectors and corresponding desired output vectors (1:1). Supports upload from csv file|
@@ -182,21 +187,24 @@ See the [wiki pages.](https://en.wikipedia.org/wiki/Biological_neuron_model)
 |[TrainedNetworkCluster](./RCNet/Neural/Network/NonRecurrent/TrainedNetworkCluster.cs)|Encapsulates set of trained non-recurrent networks (cluster of TrainedNetwork instances) and related error statistics. Offers sub-predictions of inner member networks, weighted prediction and also prediction of the 2nd level network.|
 |[TrainedNetworkClusterBuilder](./RCNet/Neural/Network/NonRecurrent/TrainedNetworkClusterBuilder.cs)|Builds cluster of trained networks based on x-fold cross validation approach. Each fold can have associated number of various networks.|
 
-### State Machine Sub-Components
+### State Machine components
+
+![Reservoir Computing conceptual view](./RCNet/Docs/Imgs/StateMachine_EntityRelationship.png)
+
 |Component|Description|
 |--|--|
-|[InputEncoder](./RCNet/Neural/Network/SM/Preprocessing/Input/InputEncoder.cs)|Processes given natural external input data and provides it's representation on analog and spiking input neurons for the data processing in the reservoirs. Supports set of various realtime input chainable data transformations and data generators as additional computed input fields. Supports two main input feeding regimes: Continuous (one input is a variables data vector at time T) and Patterned (one input is an InputPattern containing variables data for all timepoints). Supports three ways how to encode analog input value as the spikes: Horizontal (fast - simultaneous spiking activity of the large neuronal population), Vertical (slow - spike-train on single input neuron) or Forbidden (fast - spiking represetantion is then forbidden and analog values are directly used instead).|
-|[AnalogInputNeuron](./RCNet/Neural/Network/SM/Preprocessing/Neuron/AnalogInputNeuron.cs)|Input neuron providing analog signal.|
-|[SpikingInputNeuron](./RCNet/Neural/Network/SM/Preprocessing/Neuron/AnalogInputNeuron.cs)|Input neuron providing spiking signal.|
-|[HiddenNeuron](./RCNet/Neural/Network/SM/Preprocessing/Neuron/HiddenNeuron.cs)|Supports both analog and spiking activation functions and can produce analog signal and/or spikes (neuron is able to fire spikes even when stateless analog activation is used). Supports Retainment property of analog activation (leaky integrator). Offers set of various predictors.|
-|[Synapse](./RCNet/Neural/Network/SM/Preprocessing/Reservoir/Synapse/Synapse.cs)|Computes dynamically weighted signal from source to target neuron. It supports signal delaying and short-term plasticity supporting Constant, Linear and non-Linear Facilitation x Depression dynamics models.|
-|[ReservoirInstance](./RCNet/Neural/Network/SM/Preprocessing/Reservoir/ReservoirInstance.cs)|Provides recurrent network supporting analog and spiking neurons working directly together. Supports SpectralRadius (for weights of analog neurons), Homogenous excitability of spiking neurons, Multiple 3D pools of neurons, Pool to pool connections. It can work as the Echo State Network reservoir, Liquid State Machine reservoir or Mixed reservoir|
+|[InputEncoder](./RCNet/Neural/Network/SM/Preprocessing/Input/InputEncoder.cs)|Processes given natural external input data and provides it's representation on analog and spiking input neurons for the input synapses of the reservoirs. Supports set of various realtime input chainable data transformations and data generators as additional computed input fields. Supports two main input feeding regimes: Continuous (one input is a variables data vector at time T) and Patterned (one input is an InputPattern containing variables data for all timepoints). Supports three ways how to encode analog input value as the spikes: Horizontal (fast - simultaneous spiking activity of the large neuronal population), Vertical (slow - spike-train on single input neuron) or Forbidden (fast - spiking represetantion is then forbidden and analog values are directly used instead).|
+|[AnalogInputNeuron](./RCNet/Neural/Network/SM/Preprocessing/Neuron/AnalogInputNeuron.cs)|Provides analog signal for input synapses.|
+|[SpikingInputNeuron](./RCNet/Neural/Network/SM/Preprocessing/Neuron/SpikingInputNeuron.cs)|Provides spiking signal for input synapses.|
+|[HiddenNeuron](./RCNet/Neural/Network/SM/Preprocessing/Neuron/HiddenNeuron.cs)|Supports engagement of both analog and spiking activation functions and provides unified set of predictors.|
+|[Synapse](./RCNet/Neural/Network/SM/Preprocessing/Reservoir/Synapse/Synapse.cs)|Computes weighted signal from source to target neuron. It supports signal delaying and short-term plasticity (Constant, Linear and non-Linear Facilitation x Depression dynamics models of the efficacy).|
+|[ReservoirInstance](./RCNet/Neural/Network/SM/Preprocessing/Reservoir/ReservoirInstance.cs)|Provides recurrent network of hidden neurons. Supports SpectralRadius for weights of analog neurons, Homogenous excitability of spiking neurons, Multiple 3D pools of neurons, Pool to pool connections. It can be configured as the Echo State Network reservoir, Liquid State Machine reservoir or hybrid reservoir|
 |[NeuralPreprocessor](./RCNet/Neural/Network/SM/Preprocessing/NeuralPreprocessor.cs)|Encaptulates InputEncoder and reservoirs. Provides encaptulated data preprocessing to predictors for the readout layer|
 |[ReadoutUnit](./RCNet/Neural/Network/SM/Readout/ReadoutUnit.cs)|Readout unit does the Forecast or Classification and encapsulates TrainedNetworkCluster.|
 |[ReadoutLayer](./RCNet/Neural/Network/SM/Readout/ReadoutLayer.cs)|Implements independent readout layer consisting of trained readout units.|
 
-### State Machine Component
-The main component [StateMachine](./RCNet/Neural/Network/SM/StateMachine.cs) encapsulates independent NeuralPreprocessor and ReadoutLayer components into the single component and adds support for routing specific predictors and input fields to the specific readout units. Allows to bypass NeuralPreprocessor and to use input data directly as a predictors for the readout layer.
+### State Machine component
+The main serializable [StateMachine](./RCNet/Neural/Network/SM/StateMachine.cs) component encapsulates independent NeuralPreprocessor and ReadoutLayer components into the single component and adds support for routing specific predictors and input fields to the specific readout units. Allows to bypass NeuralPreprocessor and to use input data directly as a predictors for the readout layer.
 
 #### Setup
 Each executive component that makes up StateMachine (including StateMachine itself) has its own related settings class providing configuration, which is required by the executive component's constructor.
@@ -205,4 +213,4 @@ Each settings class can be instantiated manually from scratch or from a xml elem
 </br>
 Each settings class also implements the GetXml method so it can be instantiated from scratch and the initialization xml element can be exported by calling the GetXml method (and stored for later use). Using xml constructors is generally preferable because the initialization xml can be edited without the need to modify source code of the manual setup.
 </br>
-To make things easier, RCNet also implements helper component [StateMachineDesigner](./RCNet/Neural/Network/SM/StateMachineDesigner.cs) for easier setup of simple ESN and LSM StateMachine configurations from the code (see examples in demo application).
+To make things easier, RCNet also implements helper component [StateMachineDesigner](./RCNet/Neural/Network/SM/StateMachineDesigner.cs) for easier setup of simple ESN and LSM StateMachine configurations from the code (see the examples in demo application).
