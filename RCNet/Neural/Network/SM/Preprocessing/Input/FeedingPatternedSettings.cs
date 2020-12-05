@@ -7,7 +7,7 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Input
 {
     /// <summary>
-    /// Settings of continuous input feeding regime
+    /// Configuration of the patterned input feeding regime
     /// </summary>
     [Serializable]
     public class FeedingPatternedSettings : RCNetBaseSettings, IFeedingSettings
@@ -127,9 +127,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         }
 
         //Properties
-        /// <summary>
-        /// Type of input feeding
-        /// </summary>
+        /// <inheritdoc/>
         public InputEncoder.InputFeedingType FeedingType { get { return InputEncoder.InputFeedingType.Patterned; } }
 
         /// <summary>
@@ -138,23 +136,21 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         public int NumOfSteadyFields { get { return SteadyFieldsCfg == null ? 0 : SteadyFieldsCfg.FieldCfgCollection.Count; } }
 
         /// <summary>
-        /// Checks if settings are default
+        /// Checks the defaults
         /// </summary>
         public bool IsDefaultSlices { get { return (Slices == DefaultSlices); } }
 
         /// <summary>
-        /// Checks if settings are default
+        /// Checks the defaults
         /// </summary>
         public bool IsDefaultBidir { get { return (Bidir == DefaultBidir); } }
 
         /// <summary>
-        /// Checks if settings are default
+        /// Checks the defaults
         /// </summary>
         public bool IsDefaultVarSchema { get { return (VarSchema == DefaultVarSchema); } }
 
-        /// <summary>
-        /// Identifies settings containing only default values
-        /// </summary>
+        /// <inheritdoc/>
         public override bool ContainsOnlyDefaults
         {
             get
@@ -168,9 +164,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         }
 
         //Methods
-        /// <summary>
-        /// Checks consistency
-        /// </summary>
+        /// <inheritdoc/>
         protected override void Check()
         {
             if (Slices <= 0)
@@ -184,20 +178,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             return;
         }
 
-        /// <summary>
-        /// Creates the deep copy instance of this instance
-        /// </summary>
+        /// <inheritdoc/>
         public override RCNetBaseSettings DeepClone()
         {
             return new FeedingPatternedSettings(this);
         }
 
-        /// <summary>
-        /// Generates xml element containing the settings.
-        /// </summary>
-        /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc/>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             XElement rootElem = new XElement(rootElemName);
@@ -225,11 +212,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             return rootElem;
         }
 
-        /// <summary>
-        /// Generates default named xml element containing the settings.
-        /// </summary>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc/>
         public override XElement GetXml(bool suppressDefaults)
         {
             return GetXml("feedingPatterned", suppressDefaults);

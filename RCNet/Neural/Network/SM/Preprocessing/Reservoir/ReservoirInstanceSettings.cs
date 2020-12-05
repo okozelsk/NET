@@ -8,7 +8,7 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
 {
     /// <summary>
-    /// Contains reservoir instance settings
+    /// Configuration of the reservoir instance
     /// </summary>
     [Serializable]
     public class ReservoirInstanceSettings : RCNetBaseSettings
@@ -93,9 +93,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         }
 
         //Properties
-        /// <summary>
-        /// Identifies settings containing only default values
-        /// </summary>
+        /// <inheritdoc />
         public override bool ContainsOnlyDefaults
         {
             get
@@ -105,9 +103,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         }
 
         //Methods
-        /// <summary>
-        /// Checks consistency
-        /// </summary>
+        /// <inheritdoc />
         protected override void Check()
         {
             if (Name.Length == 0)
@@ -121,12 +117,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             return;
         }
 
-        /// <summary>
-        /// Checks consistency of this reservoir instance configuration and given
-        /// preprocessor's input and reservoir structure configuration
-        /// </summary>
-        /// <param name="inputCfg">Preprocessor's input configuration</param>
-        /// <param name="reservoirStructureCfg">Reservoir structure configuration</param>
+        /// <inheritdoc />
         public void CheckConsistency(InputEncoderSettings inputCfg, ReservoirStructureSettings reservoirStructureCfg)
         {
             if (StructureCfgName != reservoirStructureCfg.Name)
@@ -141,20 +132,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             return;
         }
 
-        /// <summary>
-        /// Creates the deep copy instance of this instance
-        /// </summary>
+        /// <inheritdoc />
         public override RCNetBaseSettings DeepClone()
         {
             return new ReservoirInstanceSettings(this);
         }
 
-        /// <summary>
-        /// Generates xml element containing the settings.
-        /// </summary>
-        /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc />
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             XElement rootElem = new XElement(rootElemName,
@@ -170,11 +154,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             return rootElem;
         }
 
-        /// <summary>
-        /// Generates default named xml element containing the settings.
-        /// </summary>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc />
         public override XElement GetXml(bool suppressDefaults)
         {
             return GetXml("reservoirInstance", suppressDefaults);

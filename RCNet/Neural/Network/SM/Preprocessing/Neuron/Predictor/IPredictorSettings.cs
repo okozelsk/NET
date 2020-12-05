@@ -3,14 +3,12 @@
 namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
 {
     /// <summary>
-    /// Common interface of PredictorXXXSettings classes
+    /// Common interface of the predictors configurations
     /// </summary>
     public interface IPredictorSettings
     {
 
-        /// <summary>
-        /// Identifier of the predictor
-        /// </summary>
+        /// <inheritdoc cref="PredictorsProvider.PredictorID"/>
         PredictorsProvider.PredictorID ID { get; }
 
         /// <summary>

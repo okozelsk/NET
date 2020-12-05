@@ -53,7 +53,7 @@ namespace RCNet.Neural.Network.NonRecurrent
         /// Type of settings is determined using element local name.
         /// </summary>
         /// <param name="cfgElem">XML element containing settings</param>
-        public static INonRecurrentNetworkSettings InstantiateSettings(XElement cfgElem)
+        public static INonRecurrentNetworkSettings LoadSettings(XElement cfgElem)
         {
             if (IsFFElem(cfgElem))
             {
@@ -83,7 +83,7 @@ namespace RCNet.Neural.Network.NonRecurrent
                 {
                     if (IsFFElem(cfgElem) || IsPPElem(cfgElem))
                     {
-                        settingsCollection.Add(InstantiateSettings(cfgElem));
+                        settingsCollection.Add(LoadSettings(cfgElem));
                     }
                 }
             }

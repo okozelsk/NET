@@ -3,7 +3,7 @@
 namespace RCNet.Neural.Data.Generators
 {
     /// <summary>
-    /// Generates sinusoidal signal
+    /// Implements the sinusoidal signal generator
     /// </summary>
     [Serializable]
     public class SinusoidalGenerator : IGenerator
@@ -25,18 +25,14 @@ namespace RCNet.Neural.Data.Generators
         }
 
         //Methods
-        /// <summary>
-        /// Resets generator to its initial state
-        /// </summary>
+        /// <inheritdoc />
         public void Reset()
         {
             _step = 0;
             return;
         }
 
-        /// <summary>
-        /// Returns next signal value
-        /// </summary>
+        /// <inheritdoc />
         public double Next()
         {
             double signal = _settings.Ampl * Math.Sin(Math.PI * ((_step * _settings.Freq + _settings.Phase) / 180d));

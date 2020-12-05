@@ -7,35 +7,23 @@ using System.Threading.Tasks;
 namespace RCNet.Neural.Network.NonRecurrent.FF
 {
     /// <summary>
-    /// Implements iRPROP+ method trainer
+    /// Implements the Resilient Backpropagation iRPROP+ method trainer
     /// </summary>
     [Serializable]
     public class RPropTrainer : INonRecurrentNetworkTrainer
     {
         //Attribute properties
-        /// <summary>
-        /// Epoch-1 error (MSE).
-        /// </summary>
+        /// <inheritdoc/>
         public double MSE { get; private set; }
-        /// <summary>
-        /// Max attempt
-        /// </summary>
+        /// <inheritdoc/>
         public int MaxAttempt { get; private set; }
-        /// <summary>
-        /// Current attempt
-        /// </summary>
+        /// <inheritdoc/>
         public int Attempt { get; private set; }
-        /// <summary>
-        /// Max epoch
-        /// </summary>
+        /// <inheritdoc/>
         public int MaxAttemptEpoch { get; private set; }
-        /// <summary>
-        /// Current epoch (incremented each call of Iteration)
-        /// </summary>
+        /// <inheritdoc/>
         public int AttemptEpoch { get; private set; }
-        /// <summary>
-        /// Informative message from the trainer
-        /// </summary>
+        /// <inheritdoc/>
         public string InfoMessage { get; private set; }
 
         //Attributes
@@ -104,9 +92,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         }
 
         //Properties
-        /// <summary>
-        /// FF network beeing trained
-        /// </summary>
+        /// <inheritdoc/>
         public INonRecurrentNetwork Net { get { return _net; } }
 
         //Methods
@@ -175,9 +161,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             return;
         }
 
-        /// <summary>
-        /// Starts next training attempt
-        /// </summary>
+        /// <inheritdoc/>
         public bool NextAttempt()
         {
             if (Attempt < MaxAttempt)
@@ -202,9 +186,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             }
         }
 
-        /// <summary>
-        /// Performs training iteration.
-        /// </summary>
+        /// <inheritdoc/>
         public bool Iteration()
         {
             if (AttemptEpoch == MaxAttemptEpoch)
@@ -319,7 +301,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
 
         //Inner classes
         [Serializable]
-        private class GradientWorkerData
+        internal class GradientWorkerData
         {
             //Attribute properties
             public int _fromRow;
@@ -328,7 +310,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             public double[] _weigthsGradsAcc;
 
             //Constructor
-            public GradientWorkerData(int fromRow, int toRow, int numOfWeights)
+            internal GradientWorkerData(int fromRow, int toRow, int numOfWeights)
             {
                 _fromRow = fromRow;
                 _toRow = toRow;
@@ -338,7 +320,10 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             }
 
             //Methods
-            public void Reset()
+            /// <summary>
+            /// Resets the gradient worker data to initial state
+            /// </summary>
+            internal void Reset()
             {
                 _sumSquaredErr = 0;
                 _weigthsGradsAcc.Populate(0);

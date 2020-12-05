@@ -5,7 +5,7 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.NonRecurrent.FF
 {
     /// <summary>
-    /// Setup parameters for the resilient propagation trainer
+    /// Configuration of the RPropTrainer
     /// </summary>
     [Serializable]
     public class RPropTrainerSettings : RCNetBaseSettings
@@ -148,32 +148,32 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
 
         //Properties
         /// <summary>
-        /// Checks if settings are default
+        /// Checks the defaults
         /// </summary>
         public bool IsDefaultZeroTolerance { get { return (ZeroTolerance == DefaultZeroTolerance); } }
 
         /// <summary>
-        /// Checks if settings are default
+        /// Checks the defaults
         /// </summary>
         public bool IsDefaultPositiveEta { get { return (PositiveEta == DefaultPositiveEta); } }
 
         /// <summary>
-        /// Checks if settings are default
+        /// Checks the defaults
         /// </summary>
         public bool IsDefaultNegativeEta { get { return (NegativeEta == DefaultNegativeEta); } }
 
         /// <summary>
-        /// Checks if settings are default
+        /// Checks the defaults
         /// </summary>
         public bool IsDefaultIniDelta { get { return (IniDelta == DefaultIniDelta); } }
 
         /// <summary>
-        /// Checks if settings are default
+        /// Checks the defaults
         /// </summary>
         public bool IsDefaultMinDelta { get { return (MinDelta == DefaultMinDelta); } }
 
         /// <summary>
-        /// Checks if settings are default
+        /// Checks the defaults
         /// </summary>
         public bool IsDefaultMaxDelta { get { return (MaxDelta == DefaultMaxDelta); } }
 

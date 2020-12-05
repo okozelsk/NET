@@ -6,7 +6,7 @@ using System.Xml.Linq;
 namespace RCNet.RandomValue
 {
     /// <summary>
-    /// Class specifies properties of randomly generated unsigned values
+    /// Configuration of the unsigned random value
     /// </summary>
     [Serializable]
     public class URandomValueSettings : RCNetBaseSettings
@@ -100,25 +100,21 @@ namespace RCNet.RandomValue
 
         //Properties
         /// <summary>
-        /// Checks if settings are default
+        /// Checks the defaults
         /// </summary>
         public bool IsDefaultDistrType { get { return DistrType == RandomCommon.DistributionType.Uniform; } }
 
-        /// <summary>
-        /// Identifies settings containing only default values
-        /// </summary>
+        /// <inheritdoc />
         public override bool ContainsOnlyDefaults { get { return false; } }
 
-        /// <summary>
-        /// Type of used random distribution
-        /// </summary>
+        /// <inheritdoc />
         public RandomCommon.DistributionType DistrType { get { return DistrCfg.Type; } }
 
         //Methods
         //Static methods
         /// <summary>
         /// If exists descendant element within the root element then function creates instance of the RandomValueSettings using
-        /// descendant's xml settings. If not, function creates instance of the URandomValueSettings using specified default parameters.
+        /// descendant's xml settings. If not, function creates an instance of the URandomValueSettings using specified default parameters.
         /// </summary>
         public static URandomValueSettings LoadOrDefault(XElement rootElem, string descendant, double defaultMin, double defaultMax)
         {
@@ -135,7 +131,7 @@ namespace RCNet.RandomValue
 
         /// <summary>
         /// If exists descendant element within the root element then function creates instance of the URandomValueSettings using
-        /// descendant's xml settings. If not, function creates instance of the URandomValueSettings using specified default parameters.
+        /// descendant's xml settings. If not, function creates an instance of the URandomValueSettings using specified default parameters.
         /// </summary>
         public static URandomValueSettings LoadOrDefault(XElement rootElem, string descendant, double defaultConst)
         {
@@ -166,9 +162,7 @@ namespace RCNet.RandomValue
         }
 
         //Methods
-        /// <summary>
-        /// Checks consistency
-        /// </summary>
+        /// <inheritdoc />
         protected override void Check()
         {
             if (Max < Min || Min < 0 || Max < 0)
@@ -178,20 +172,13 @@ namespace RCNet.RandomValue
             return;
         }
 
-        /// <summary>
-        /// Creates the deep copy instance of this instance
-        /// </summary>
+        /// <inheritdoc />
         public override RCNetBaseSettings DeepClone()
         {
             return new URandomValueSettings(this);
         }
 
-        /// <summary>
-        /// Generates xml element containing the settings.
-        /// </summary>
-        /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc />
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             XElement rootElem = new XElement(rootElemName, new XAttribute("min", Min.ToString(CultureInfo.InvariantCulture)),

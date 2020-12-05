@@ -4,7 +4,7 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Data.Filter
 {
     /// <summary>
-    /// Startup parameters for the binary feature filter
+    /// Configuration of the binary feature filter
     /// </summary>
     [Serializable]
     public class BinFeatureFilterSettings : RCNetBaseSettings, IFeatureFilterSettings
@@ -45,49 +45,32 @@ namespace RCNet.Neural.Data.Filter
         }
 
         //Properties
-        /// <summary>
-        /// Feature type
-        /// </summary>
+        /// <inheritdoc/>
         public FeatureFilterBase.FeatureType Type { get { return FeatureFilterBase.FeatureType.Binary; } }
 
-        /// <summary>
-        /// Identifies settings containing only default values
-        /// </summary>
+        /// <inheritdoc/>
         public override bool ContainsOnlyDefaults { get { return true; } }
 
         //Methods
-        /// <summary>
-        /// Checks consistency
-        /// </summary>
+        /// <inheritdoc/>
         protected override void Check()
         {
             return;
         }
 
-        /// <summary>
-        /// Creates the deep copy instance of this instance
-        /// </summary>
+        /// <inheritdoc/>
         public override RCNetBaseSettings DeepClone()
         {
             return new BinFeatureFilterSettings(this);
         }
 
-        /// <summary>
-        /// Generates xml element containing the settings.
-        /// </summary>
-        /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc/>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             return Validate(new XElement(rootElemName), XsdTypeName);
         }
 
-        /// <summary>
-        /// Generates default named xml element containing the settings.
-        /// </summary>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc/>
         public override XElement GetXml(bool suppressDefaults)
         {
             return GetXml("binFeature", suppressDefaults);

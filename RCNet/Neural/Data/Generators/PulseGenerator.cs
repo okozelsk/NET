@@ -4,7 +4,7 @@ using System;
 namespace RCNet.Neural.Data.Generators
 {
     /// <summary>
-    /// Generates constant pulses
+    /// Implements the constant signal pulses generator
     /// </summary>
     [Serializable]
     public class PulseGenerator : IGenerator
@@ -106,9 +106,7 @@ namespace RCNet.Neural.Data.Generators
             return;
         }
 
-        /// <summary>
-        /// Resets generator to its initial state
-        /// </summary>
+        /// <inheritdoc />
         public void Reset()
         {
             _rand = new Random(0);
@@ -117,9 +115,7 @@ namespace RCNet.Neural.Data.Generators
             return;
         }
 
-        /// <summary>
-        /// Returns next signal value
-        /// </summary>
+        /// <inheritdoc />
         public double Next()
         {
             ++_t;

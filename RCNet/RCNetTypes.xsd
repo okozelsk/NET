@@ -1093,6 +1093,10 @@
   <xs:complexType name="ActivationSoftPlusType">
   </xs:complexType>
 
+  <!-- Activation SoftMax -->
+  <xs:complexType name="ActivationSoftMaxType">
+  </xs:complexType>
+
   <!-- Activation TanH -->
   <xs:complexType name="ActivationTanHType">
   </xs:complexType>
@@ -1225,6 +1229,7 @@
           <xs:element type="ActivationSinusoidType" name="activationSinusoid" minOccurs="1" maxOccurs="1"/>
           <xs:element type="ActivationSoftExponentialType" name="activationSoftExponential" minOccurs="1" maxOccurs="1"/>
           <xs:element type="ActivationSoftPlusType" name="activationSoftPlus" minOccurs="1" maxOccurs="1"/>
+          <xs:element type="ActivationSoftMaxType" name="activationSoftMax" minOccurs="1" maxOccurs="1"/>
           <xs:element type="ActivationTanHType" name="activationTanH" minOccurs="1" maxOccurs="1"/>
         </xs:choice>
         <xs:element type="FFNetHiddenLayersType" name="hiddenLayers" minOccurs="0" maxOccurs="1"/>
@@ -2023,6 +2028,35 @@
     </xs:attribute>
   </xs:complexType>
 
+  <!-- Double twisted toroid schema -->
+  <xs:complexType name="PoolInterconnectionDoubleTwistedToroidSchemaType">
+    <xs:attribute type="UDoubleGT0LE1Type" name="ratio" use="optional" default="1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="lDiagonalSelf" use="optional" default="false">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is false</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="rDiagonalSelf" use="optional" default="false">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is false</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="replaceExistingConnections" use="optional" default="true">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is true</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UIntGT0Type" name="repetitions" use="optional" default="1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
   <!-- Pool interconnection configuration -->
   <xs:complexType name="PoolInterconnectionType">
     <xs:choice minOccurs="1" maxOccurs="1">
@@ -2033,6 +2067,7 @@
         <xs:choice minOccurs="1" maxOccurs="unbounded">
           <xs:element type="PoolInterconnectionRandomSchemaType" name="randomSchema" minOccurs="1" maxOccurs="1"/>
           <xs:element type="PoolInterconnectionChainSchemaType" name="chainSchema" minOccurs="1" maxOccurs="1"/>
+          <xs:element type="PoolInterconnectionDoubleTwistedToroidSchemaType" name="doubleTwistedToroidSchema" minOccurs="1" maxOccurs="1"/>
         </xs:choice>
       </xs:sequence>
     </xs:choice>

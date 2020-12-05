@@ -5,7 +5,7 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Data.Transformers
 {
     /// <summary>
-    /// Setup parameters for the "constant divided by input value" transformer
+    /// Configuration of the CDivTransformer
     /// </summary>
     [Serializable]
     public class CDivTransformerSettings : RCNetBaseSettings
@@ -17,7 +17,7 @@ namespace RCNet.Neural.Data.Transformers
         public const string XsdTypeName = "CDivTransformerType";
         //Default values
         /// <summary>
-        /// Default value of interval argument
+        /// Default value of the numerator
         /// </summary>
         public const double DefaultC = 1d;
 
@@ -73,20 +73,16 @@ namespace RCNet.Neural.Data.Transformers
 
         //Properties
         /// <summary>
-        /// Checks if settings are default
+        /// Checks the defaults
         /// </summary>
         public bool IsDefaultC { get { return (C == DefaultC); } }
 
-        /// <summary>
-        /// Identifies settings containing only default values
-        /// </summary>
+        /// <inheritdoc/>
         public override bool ContainsOnlyDefaults { get { return false; } }
 
 
         //Methods
-        /// <summary>
-        /// Checks consistency
-        /// </summary>
+        /// <inheritdoc/>
         protected override void Check()
         {
             if (InputFieldName.Length == 0)
@@ -96,20 +92,13 @@ namespace RCNet.Neural.Data.Transformers
             return;
         }
 
-        /// <summary>
-        /// Creates the deep copy instance of this instance
-        /// </summary>
+        /// <inheritdoc/>
         public override RCNetBaseSettings DeepClone()
         {
             return new CDivTransformerSettings(this);
         }
 
-        /// <summary>
-        /// Generates xml element containing the settings.
-        /// </summary>
-        /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc/>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             XElement rootElem = new XElement(rootElemName,
@@ -123,11 +112,7 @@ namespace RCNet.Neural.Data.Transformers
             return rootElem;
         }
 
-        /// <summary>
-        /// Generates default named xml element containing the settings.
-        /// </summary>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc/>
         public override XElement GetXml(bool suppressDefaults)
         {
             return GetXml("cdiv", suppressDefaults);

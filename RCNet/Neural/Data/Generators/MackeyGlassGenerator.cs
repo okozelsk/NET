@@ -5,7 +5,7 @@ using System.Linq;
 namespace RCNet.Neural.Data.Generators
 {
     /// <summary>
-    /// Generates Mackey-Glass signal
+    /// Implements the Mackey-Glass signal generator
     /// </summary>
     [Serializable]
     public class MackeyGlassGenerator : IGenerator
@@ -30,18 +30,14 @@ namespace RCNet.Neural.Data.Generators
         }
 
         //Methods
-        /// <summary>
-        /// Resets generator to its initial state
-        /// </summary>
+        /// <inheritdoc />
         public void Reset()
         {
             _lastValues = IniValues.ToList();
             return;
         }
 
-        /// <summary>
-        /// Returns next signal value
-        /// </summary>
+        /// <inheritdoc />
         public double Next()
         {
             double refMGV = _lastValues[_lastValues.Count - _settings.Tau];

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
 {
     /// <summary>
-    /// Neuron is the basic unit of a neural network.
+    /// Common interface for the input and hidden neurons
     /// </summary>
     public interface INeuron
     {

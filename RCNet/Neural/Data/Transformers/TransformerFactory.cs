@@ -5,7 +5,7 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Data.Transformers
 {
     /// <summary>
-    /// Provides proper load of settings and instantiation of data transformers
+    /// Helper class for the proper loading of configurations and the proper instantiationing of the input fields transformers
     /// </summary>
     public static class TransformerFactory
     {

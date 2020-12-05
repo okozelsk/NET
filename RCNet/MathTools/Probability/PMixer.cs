@@ -5,21 +5,22 @@ using System.Collections.Generic;
 namespace RCNet.MathTools.Probability
 {
     /// <summary>
-    /// Implements methods for weighted probabilities mixing to final probability
+    /// Implements the weighted probabilities mixer
     /// </summary>
     public static class PMixer
     {
-        /// <summary>
-        /// Probability interval
-        /// </summary>
-        public static Interval ProbabilityRange = new Interval(0d, 1d);
-
         //Constants
         //Operating bounds
         private const double MinP = 1e-6;
         private const double MaxP = 1d - MinP;
         private const double MinX = -40d;
         private const double MaxX = 40d;
+
+        //Properties
+        /// <summary>
+        /// Probability interval
+        /// </summary>
+        public static Interval ProbabilityRange { get { return Interval.IntZP1; } }
 
         //Methods
         /// <summary>

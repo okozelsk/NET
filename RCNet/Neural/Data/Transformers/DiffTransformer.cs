@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace RCNet.Neural.Data.Transformers
 {
     /// <summary>
-    /// Transforms input field value as a difference between current value and a past value
+    /// Implements the transformation of an input field value as a difference of field current value and a past value
     /// </summary>
     [Serializable]
     public class DiffTransformer : ITransformer
@@ -35,20 +35,15 @@ namespace RCNet.Neural.Data.Transformers
         }
 
         //Methods
-        /// <summary>
-        /// Resets generator to its initial state
-        /// </summary>
+        /// <inheritdoc />
         public void Reset()
         {
             _lastValues.Reset();
             return;
         }
 
-        /// <summary>
-        /// Computes transformed value
-        /// </summary>
-        /// <param name="data">Collection of natural values of the already known input fields</param>
-        public double Next(double[] data)
+        /// <inheritdoc />
+        public double Transform(double[] data)
         {
             double transVal = 0d;
             if (double.IsNaN(data[_fieldIdx]))

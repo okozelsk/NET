@@ -5,7 +5,7 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
 {
     /// <summary>
-    /// Configuration of homogenous excitability
+    /// Configuration of spiking neuron's homogenous excitability
     /// </summary>
     [Serializable]
     public class HomogenousExcitabilitySettings : RCNetBaseSettings
@@ -93,21 +93,19 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
 
         //Properties
         /// <summary>
-        /// Checks if settings are default
+        /// Checks the defaults
         /// </summary>
         public bool IsDefaultExcitatoryStrength { get { return (ExcitatoryStrength == DefaultExcitatoryStrength); } }
         /// <summary>
-        /// Checks if settings are default
+        /// Checks the defaults
         /// </summary>
         public bool IsDefaultInputRatio { get { return (InputRatio == DefaultInputRatio); } }
         /// <summary>
-        /// Checks if settings are default
+        /// Checks the defaults
         /// </summary>
         public bool IsDefaultInhibitoryRatio { get { return (InhibitoryRatio == DefaultInhibitoryRatio); } }
 
-        /// <summary>
-        /// Identifies settings containing only default values
-        /// </summary>
+        /// <inheritdoc/>
         public override bool ContainsOnlyDefaults
         {
             get
@@ -119,9 +117,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         }
 
         //Methods
-        /// <summary>
-        /// Checks consistency
-        /// </summary>
+        /// <inheritdoc/>
         protected override void Check()
         {
             if (ExcitatoryStrength <= 0)
@@ -139,20 +135,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
             return;
         }
 
-        /// <summary>
-        /// Creates the deep copy instance of this instance
-        /// </summary>
+        /// <inheritdoc/>
         public override RCNetBaseSettings DeepClone()
         {
             return new HomogenousExcitabilitySettings(this);
         }
 
-        /// <summary>
-        /// Generates xml element containing the settings.
-        /// </summary>
-        /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc/>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             XElement rootElem = new XElement(rootElemName);
@@ -172,11 +161,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
             return rootElem;
         }
 
-        /// <summary>
-        /// Generates default named xml element containing the settings.
-        /// </summary>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc/>
         public override XElement GetXml(bool suppressDefaults)
         {
             return GetXml("homogenousExcitability", suppressDefaults);

@@ -5,7 +5,7 @@ using System.Xml.Linq;
 namespace RCNet.RandomValue
 {
     /// <summary>
-    /// Exponential distribution parameters
+    /// Configuration of the Exponential random distribution
     /// </summary>
     [Serializable]
     public class ExponentialDistrSettings : RCNetBaseSettings, IDistrSettings
@@ -60,21 +60,15 @@ namespace RCNet.RandomValue
 
 
         //Properties
-        /// <summary>
-        /// Identifies settings containing only default values
-        /// </summary>
+        /// <inheritdoc />
         public override bool ContainsOnlyDefaults { get { return false; } }
 
-        /// <summary>
-        /// Type of random distribution
-        /// </summary>
+        /// <inheritdoc />
         public RandomCommon.DistributionType Type { get { return RandomCommon.DistributionType.Exponential; } }
 
 
         //Methods
-        /// <summary>
-        /// Checks consistency
-        /// </summary>
+        /// <inheritdoc />
         protected override void Check()
         {
             if (Mean == 0)
@@ -84,30 +78,19 @@ namespace RCNet.RandomValue
             return;
         }
 
-        /// <summary>
-        /// Creates the deep copy instance of this instance
-        /// </summary>
+        /// <inheritdoc />
         public override RCNetBaseSettings DeepClone()
         {
             return new ExponentialDistrSettings(this);
         }
 
-        /// <summary>
-        /// Generates xml element containing the settings.
-        /// </summary>
-        /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc />
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             return Validate(new XElement(rootElemName, new XAttribute("mean", Mean.ToString(CultureInfo.InvariantCulture))), XsdTypeName);
         }
 
-        /// <summary>
-        /// Generates default named xml element containing the settings.
-        /// </summary>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc />
         public override XElement GetXml(bool suppressDefaults)
         {
             return GetXml(RandomCommon.GetDistrElemName(Type), suppressDefaults);

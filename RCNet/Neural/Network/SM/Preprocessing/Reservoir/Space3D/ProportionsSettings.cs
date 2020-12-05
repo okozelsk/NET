@@ -5,7 +5,7 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Space3D
 {
     /// <summary>
-    /// Class contains 3D dimensions
+    /// Configuration of the 3D proportions
     /// </summary>
     [Serializable]
     public class ProportionsSettings : RCNetBaseSettings
@@ -82,16 +82,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Space3D
         /// </summary>
         public int Size { get { return DimX * DimY * DimZ; } }
 
-        /// <summary>
-        /// Identifies settings containing only default values
-        /// </summary>
+        /// <inheritdoc/>
         public override bool ContainsOnlyDefaults { get { return false; } }
 
 
         //Methods
-        /// <summary>
-        /// Checks consistency
-        /// </summary>
+        /// <inheritdoc/>
         protected override void Check()
         {
             if (DimX < 1)
@@ -109,20 +105,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Space3D
             return;
         }
 
-        /// <summary>
-        /// Creates the deep copy instance of this instance
-        /// </summary>
+        /// <inheritdoc/>
         public override RCNetBaseSettings DeepClone()
         {
             return new ProportionsSettings(this);
         }
 
-        /// <summary>
-        /// Generates xml element containing the settings.
-        /// </summary>
-        /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc/>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             XElement rootElem = new XElement(rootElemName, new XAttribute("dimX", DimX.ToString(CultureInfo.InvariantCulture)),
@@ -132,11 +121,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Space3D
             return rootElem;
         }
 
-        /// <summary>
-        /// Generates default named xml element containing the settings.
-        /// </summary>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc/>
         public override XElement GetXml(bool suppressDefaults)
         {
             return GetXml("proportions", suppressDefaults);

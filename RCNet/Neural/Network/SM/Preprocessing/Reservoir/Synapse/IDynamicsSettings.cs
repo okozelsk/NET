@@ -8,21 +8,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
     public interface IDynamicsSettings
     {
 
-        /// <summary>
-        /// Type of synapse's dynamics
-        /// </summary>
+        /// <inheritdoc cref="PlasticityCommon.DynType"/>
         PlasticityCommon.DynType Type { get; }
 
-        /// <summary>
-        /// Application (purpose) of the synapse's dynamics
-        /// </summary>
+        /// <inheritdoc cref="PlasticityCommon.DynApplication"/>
         PlasticityCommon.DynApplication Application { get; }
 
-        /// <summary>
-        /// Generates default named xml element containing the settings.
-        /// </summary>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc cref="RCNetBaseSettings.GetXml(bool)"/>
         XElement GetXml(bool suppressDefaults);
 
     }//IDynamics

@@ -8,31 +8,24 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
 {
     /// <summary>
     /// Analog input neuron is the special type of a neuron without accosiated activation function. Its purpose is only to mediate
-    /// external input analog value for a synapse in appropriate form.
+    /// external input analog value for a synapse.
     /// </summary>
     [Serializable]
     public class AnalogInputNeuron : INeuron
     {
         //Attribute properties
-        /// <summary>
-        /// Information about a neuron location within the neural preprocessor
-        /// Note that Input neuron home PoolID is always -1 because Input neurons do not belong to a standard pools.
-        /// </summary>
+        /// <inheritdoc/>
         public NeuronLocation Location { get; }
 
-        /// <summary>
-        /// Neuron's key statistics
-        /// </summary>
+        /// <inheritdoc/>
         public NeuronStatistics Statistics { get; }
 
-        /// <summary>
-        /// Neuron's output data
-        /// </summary>
+        /// <inheritdoc/>
         public NeuronOutputData OutputData { get; }
 
         //Attributes
+        private readonly int _verticalCycles;
         private double _stimuli;
-        private int _verticalCycles;
 
         //Constructor
         /// <summary>
@@ -51,21 +44,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
         }
 
         //Properties
-        /// <summary>
-        /// Neuron type
-        /// </summary>
+        /// <inheritdoc/>
         public NeuronCommon.NeuronType Type { get { return NeuronCommon.NeuronType.Input; } }
 
-        /// <summary>
-        /// Type of the activation function
-        /// </summary>
+        /// <inheritdoc/>
         public ActivationType TypeOfActivation { get { return ActivationType.Analog; } }
 
         //Methods
-        /// <summary>
-        /// Resets neuron to its initial state
-        /// </summary>
-        /// <param name="statistics">Specifies whether to reset internal statistics</param>
+        /// <inheritdoc/>
         public void Reset(bool statistics)
         {
             _stimuli = 0;
@@ -77,21 +63,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
             return;
         }
 
-        /// <summary>
-        /// Stores new incoming stimulation.
-        /// </summary>
-        /// <param name="iStimuli">External input analog signal</param>
-        /// <param name="rStimuli">Parameter is ignored. Stimulation comming from reservoir neurons is irrelevant. </param>
+        /// <inheritdoc/>
         public void NewStimulation(double iStimuli, double rStimuli)
         {
             _stimuli = iStimuli.Bound();
             return;
         }
 
-        /// <summary>
-        /// Prepares new output signal (input for hidden neurons).
-        /// </summary>
-        /// <param name="collectStatistics">Specifies whether to update internal statistics</param>
+        /// <inheritdoc/>
         public void Recompute(bool collectStatistics)
         {
             //Analog output signal

@@ -178,7 +178,7 @@ namespace RCNet.Neural.Network.SM
         /// <param name="aFnCfg">Activation of output layer</param>
         /// <param name="numOfAttempts">Number of regression attempts. Each readout network will try to learn numOfAttempts times</param>
         /// <param name="numOfEpochs">Number of training epochs within an attempt</param>
-        public static FeedForwardNetworkSettings CreateSingleLayerRegrNet(RCNetBaseSettings aFnCfg, int numOfAttempts, int numOfEpochs)
+        public static FeedForwardNetworkSettings CreateSingleLayerRegrNet(IActivationSettings aFnCfg, int numOfAttempts, int numOfEpochs)
         {
             return new FeedForwardNetworkSettings(aFnCfg, null, new RPropTrainerSettings(numOfAttempts, numOfEpochs));
         }
@@ -191,7 +191,12 @@ namespace RCNet.Neural.Network.SM
         /// <param name="numOfHiddenLayers">Number of hidden layers</param>
         /// <param name="numOfAttempts">Number of regression attempts. Each readout network will try to learn numOfAttempts times</param>
         /// <param name="numOfEpochs">Number of training epochs within an attempt</param>
-        public static FeedForwardNetworkSettings CreateMultiLayerRegrNet(int hiddenLayerSize, RCNetBaseSettings hiddenLayerAFnCfg, int numOfHiddenLayers, int numOfAttempts, int numOfEpochs)
+        public static FeedForwardNetworkSettings CreateMultiLayerRegrNet(int hiddenLayerSize,
+                                                                         IActivationSettings hiddenLayerAFnCfg,
+                                                                         int numOfHiddenLayers,
+                                                                         int numOfAttempts,
+                                                                         int numOfEpochs
+                                                                         )
         {
             List<HiddenLayerSettings> hiddenLayerCollection = new List<HiddenLayerSettings>(numOfHiddenLayers);
             for (int i = 0; i < numOfHiddenLayers; i++)
@@ -199,7 +204,7 @@ namespace RCNet.Neural.Network.SM
                 hiddenLayerCollection.Add(new HiddenLayerSettings(hiddenLayerSize, hiddenLayerAFnCfg));
             }
             HiddenLayersSettings hiddenLayersCfg = new HiddenLayersSettings(hiddenLayerCollection);
-            return new FeedForwardNetworkSettings(new IdentitySettings(), hiddenLayersCfg, new RPropTrainerSettings(numOfAttempts, numOfEpochs));
+            return new FeedForwardNetworkSettings(new AFAnalogIdentitySettings(), hiddenLayersCfg, new RPropTrainerSettings(numOfAttempts, numOfEpochs));
         }
 
         /// <summary>
@@ -265,9 +270,9 @@ namespace RCNet.Neural.Network.SM
         /// Builds name of the specified activation function
         /// </summary>
         /// <param name="activationCfg">Activation function configuration</param>
-        private string GetActivationName(RCNetBaseSettings activationCfg)
+        private string GetActivationName(IActivationSettings activationCfg)
         {
-            IActivationFunction aFn = ActivationFactory.Create(activationCfg, _rand);
+            IActivation aFn = ActivationFactory.CreateAF(activationCfg, _rand);
             return aFn.TypeOfActivation.ToString() + "-" + aFn.GetType().Name.Replace("Settings", string.Empty);
         }
 
@@ -275,7 +280,7 @@ namespace RCNet.Neural.Network.SM
         /// Builds name of neuron group
         /// </summary>
         /// <param name="activationCfg">Activation function configuration</param>
-        private string GetNeuronGroupName(RCNetBaseSettings activationCfg)
+        private string GetNeuronGroupName(IActivationSettings activationCfg)
         {
             return "Grp-" + GetActivationName(activationCfg);
         }
@@ -317,7 +322,7 @@ namespace RCNet.Neural.Network.SM
         /// <param name="predictorsCfg">Predictors configuration</param>
         /// <param name="maxAbsBias">Maximum absolute value of the bias (0 means bias is not required)</param>
         /// <param name="maxRetainmentStrength">Maximum retainment strength (0 means retainment property is not required)</param>
-        private AnalogNeuronGroupSettings CreateAnalogGroup(RCNetBaseSettings activationCfg,
+        private AnalogNeuronGroupSettings CreateAnalogGroup(IActivationSettings activationCfg,
                                                             PredictorsProviderSettings predictorsCfg,
                                                             double maxAbsBias = 0d,
                                                             double maxRetainmentStrength = 0d
@@ -348,7 +353,7 @@ namespace RCNet.Neural.Network.SM
         /// <param name="predictorsCfg">Predictors configuration</param>
         /// <param name="heCfg">Configuration of the homogenous excitability</param>
         /// <param name="steadyBias">Constant bias (0 means bias is not required)</param>
-        private SpikingNeuronGroupSettings CreateSpikingGroup(RCNetBaseSettings activationCfg,
+        private SpikingNeuronGroupSettings CreateSpikingGroup(IActivationSettings activationCfg,
                                                               PredictorsProviderSettings predictorsCfg,
                                                               HomogenousExcitabilitySettings heCfg,
                                                               double steadyBias = 0d
@@ -397,7 +402,7 @@ namespace RCNet.Neural.Network.SM
                 throw new InvalidOperationException("Neural preprocessor is bypassed thus ESN design can't be created.");
             }
             //Default ESN activation
-            RCNetBaseSettings aFnCfg = new TanHSettings();
+            IActivationSettings aFnCfg = new AFAnalogTanHSettings();
             //One neuron group
             AnalogNeuronGroupSettings grp = CreateAnalogGroup(aFnCfg, predictorsProviderCfg, maxAbsBias, maxRetainmentStrength);
             //Simple analog pool
@@ -455,7 +460,7 @@ namespace RCNet.Neural.Network.SM
         /// <param name="steadyBias">Constant bias (0 means bias is not required)</param>
         /// <param name="predictorsCfg">Predictors configuration</param>
         public StateMachineSettings CreatePureLSMCfg(int totalSize,
-                                                     RCNetBaseSettings aFnCfg,
+                                                     IActivationSettings aFnCfg,
                                                      HomogenousExcitabilitySettings hes,
                                                      double inputConnectionDensity,
                                                      int maxInputDelay,
@@ -471,7 +476,7 @@ namespace RCNet.Neural.Network.SM
                 throw new InvalidOperationException("Neural preprocessor is bypassed thus LSM design can't be created.");
             }
             //Activation check
-            if (ActivationFactory.Create(aFnCfg, new Random()).TypeOfActivation != ActivationType.Spiking)
+            if (ActivationFactory.CreateAF(aFnCfg, new Random()).TypeOfActivation != ActivationType.Spiking)
             {
                 throw new ArgumentException("Specified activation must be spiking.", "aFnCfg");
             }

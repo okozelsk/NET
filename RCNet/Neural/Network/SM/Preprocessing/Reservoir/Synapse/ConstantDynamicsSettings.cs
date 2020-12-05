@@ -5,7 +5,7 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
 {
     /// <summary>
-    /// Configuration of synapse constant (no short-term plasticity) dynamics
+    /// Configuration of synapse constant dynamics (no short-term plasticity)
     /// </summary>
     [Serializable]
     public abstract class ConstantDynamicsSettings : RCNetBaseSettings, IDynamicsSettings
@@ -55,20 +55,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         }
 
         //Properties
-        /// <summary>
-        /// Type of synapse's dynamics
-        /// </summary>
+        /// <inheritdoc />
         public PlasticityCommon.DynType Type { get { return PlasticityCommon.DynType.Constant; } }
 
-        /// <summary>
-        /// Application of the synapse's dynamics
-        /// </summary>
+        /// <inheritdoc />
         public abstract PlasticityCommon.DynApplication Application { get; }
 
         //Methods
-        /// <summary>
-        /// Checks validity
-        /// </summary>
+        /// <inheritdoc />
         protected override void Check()
         {
             if (Efficacy < 0 || Efficacy > 1)

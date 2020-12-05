@@ -5,7 +5,7 @@ using System.Xml.Linq;
 namespace RCNet.RandomValue
 {
     /// <summary>
-    /// Gamma distribution parameters
+    /// Configuration of the Gamma random distribution
     /// </summary>
     [Serializable]
     public class GammaDistrSettings : RCNetBaseSettings, IDistrSettings
@@ -68,21 +68,15 @@ namespace RCNet.RandomValue
         }
 
         //Properties
-        /// <summary>
-        /// Identifies settings containing only default values
-        /// </summary>
+        /// <inheritdoc />
         public override bool ContainsOnlyDefaults { get { return false; } }
 
-        /// <summary>
-        /// Type of random distribution
-        /// </summary>
+        /// <inheritdoc />
         public RandomCommon.DistributionType Type { get { return RandomCommon.DistributionType.Gamma; } }
 
 
         //Methods
-        /// <summary>
-        /// Checks consistency
-        /// </summary>
+        /// <inheritdoc />
         protected override void Check()
         {
             if (Alpha <= 0)
@@ -96,20 +90,13 @@ namespace RCNet.RandomValue
             return;
         }
 
-        /// <summary>
-        /// Creates the deep copy instance of this instance
-        /// </summary>
+        /// <inheritdoc />
         public override RCNetBaseSettings DeepClone()
         {
             return new GammaDistrSettings(this);
         }
 
-        /// <summary>
-        /// Generates xml element containing the settings.
-        /// </summary>
-        /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc />
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             return Validate(new XElement(rootElemName, new XAttribute("alpha", Alpha.ToString(CultureInfo.InvariantCulture)),
@@ -117,11 +104,7 @@ namespace RCNet.RandomValue
                                                        XsdTypeName);
         }
 
-        /// <summary>
-        /// Generates default named xml element containing the settings.
-        /// </summary>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc />
         public override XElement GetXml(bool suppressDefaults)
         {
             return GetXml(RandomCommon.GetDistrElemName(Type), suppressDefaults);

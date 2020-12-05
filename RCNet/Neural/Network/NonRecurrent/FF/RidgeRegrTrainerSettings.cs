@@ -7,7 +7,7 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.NonRecurrent.FF
 {
     /// <summary>
-    /// Startup parameters for the ridge regression trainer
+    /// Configuration of the RidgeRegrTrainer
     /// </summary>
     [Serializable]
     public class RidgeRegrTrainerSettings : RCNetBaseSettings
@@ -102,19 +102,15 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         public int NumOfAttempts { get { return 1; } }
 
         /// <summary>
-        /// Checks if settings are default
+        /// Checks the defaults
         /// </summary>
         public bool IsDefaultLambdaSeeker { get { return (LambdaSeekerCfg.Min == DefaultMinLambda && LambdaSeekerCfg.Max == DefaultMaxLambda && LambdaSeekerCfg.NumOfSubIntervals == DefaultSteps); } }
 
-        /// <summary>
-        /// Identifies settings containing only default values
-        /// </summary>
+        /// <inheritdoc/>
         public override bool ContainsOnlyDefaults { get { return false; } }
 
         //Methods
-        /// <summary>
-        /// Checks consistency
-        /// </summary>
+        /// <inheritdoc/>
         protected override void Check()
         {
             if (NumOfAttemptEpochs < 1)
@@ -124,20 +120,13 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             return;
         }
 
-        /// <summary>
-        /// Creates the deep copy instance of this instance
-        /// </summary>
+        /// <inheritdoc/>
         public override RCNetBaseSettings DeepClone()
         {
             return new RidgeRegrTrainerSettings(this);
         }
 
-        /// <summary>
-        /// Generates xml element containing the settings.
-        /// </summary>
-        /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc/>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             XElement rootElem = new XElement(rootElemName, new XAttribute("attemptEpochs", NumOfAttemptEpochs.ToString(CultureInfo.InvariantCulture)));
@@ -149,11 +138,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             return rootElem;
         }
 
-        /// <summary>
-        /// Generates default named xml element containing the settings.
-        /// </summary>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc/>
         public override XElement GetXml(bool suppressDefaults)
         {
             return GetXml("ridgeRegrTrainer", suppressDefaults);

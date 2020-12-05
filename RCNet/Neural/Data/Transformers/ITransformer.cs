@@ -1,20 +1,20 @@
 ﻿namespace RCNet.Neural.Data.Transformers
 {
     /// <summary>
-    /// Common interface for input data transformers.
+    /// Common interface for the input data transformers.
     /// </summary>
     public interface ITransformer
     {
         /// <summary>
-        /// Resets transformer to its initial state
+        /// Resets the transformer to its initial state
         /// </summary>
         void Reset();
 
         /// <summary>
-        /// Computes transformed value
+        /// Computes the transformed value
         /// </summary>
-        /// <param name="data">Collection of natural values of the already known input fields</param>
-        double Next(double[] data);
+        /// <param name="data">The collection of already known input fields values</param>
+        double Transform(double[] data);
 
     }//ITransformer
 

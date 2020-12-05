@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace RCNet.Neural.Data.Transformers
 {
     /// <summary>
-    /// Two input fields linear transformation
+    /// Implements the "two input fields (a*X + b*Y) linear" transformation
     /// </summary>
     [Serializable]
     public class LinearTransformer : ITransformer
@@ -30,19 +30,14 @@ namespace RCNet.Neural.Data.Transformers
         }
 
         //Methods
-        /// <summary>
-        /// Resets generator to its initial state
-        /// </summary>
+        /// <inheritdoc />
         public void Reset()
         {
             return;
         }
 
-        /// <summary>
-        /// Computes transformed value
-        /// </summary>
-        /// <param name="data">Collection of natural values of the already known input fields</param>
-        public double Next(double[] data)
+        /// <inheritdoc />
+        public double Transform(double[] data)
         {
             if (double.IsNaN(data[_xFieldIdx]))
             {
@@ -56,4 +51,5 @@ namespace RCNet.Neural.Data.Transformers
         }
 
     }//LinearTransformer
+
 }//Namespace

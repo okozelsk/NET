@@ -3,42 +3,18 @@
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Types of the neuron's activation function
+    /// Basic identification of the type of an activation function
     /// </summary>
     public enum ActivationType
     {
         /// <summary>
-        /// Fires spike only when firing condition is met
+        /// Identifies spiking activation function
         /// </summary>
         Spiking,
         /// <summary>
-        /// Produces continuous analog output signal
+        /// Identifies analog activation function
         /// </summary>
         Analog
     };
-
-    /// <summary>
-    /// Helper class for activations
-    /// </summary>
-    public static class ActivationCommon
-    {
-        /// <summary>
-        /// Parses ActivationType from the given code
-        /// </summary>
-        /// <param name="code">Activation type code</param>
-        public static ActivationType ParseActivationType(string code)
-        {
-            switch (code.ToUpper())
-            {
-                case "ANALOG":
-                    return ActivationType.Analog;
-                case "SPIKING":
-                    return ActivationType.Spiking;
-                default:
-                    throw new InvalidOperationException($"Unknown activation type code {code}.");
-            }
-        }
-
-    }//ActivationCommon
 
 }//Namespace

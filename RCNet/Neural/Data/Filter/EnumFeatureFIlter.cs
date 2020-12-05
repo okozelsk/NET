@@ -5,7 +5,7 @@ using System;
 namespace RCNet.Neural.Data.Filter
 {
     /// <summary>
-    /// Implements enumeration feature filter
+    /// Implements the enumeration feature filter
     /// </summary>
     [Serializable]
     public class EnumFeatureFilter : FeatureFilterBase
@@ -14,11 +14,9 @@ namespace RCNet.Neural.Data.Filter
         /// <summary>
         /// Number of enumeration elements
         /// </summary>
-        public int NumOfElements { get; }
+        public int NumOfEnumElements { get; }
 
-        /// <summary>
-        /// Feature range
-        /// </summary>
+        /// <inheritdoc/>
         public override Interval FeatureRange { get; }
 
         //Constructor
@@ -30,8 +28,8 @@ namespace RCNet.Neural.Data.Filter
         public EnumFeatureFilter(Interval outputRange, int numOfElements)
             : base(FeatureType.Enum, outputRange)
         {
-            NumOfElements = numOfElements;
-            FeatureRange = new Interval(0.5d, NumOfElements + 0.5d);
+            NumOfEnumElements = numOfElements;
+            FeatureRange = new Interval(1, NumOfEnumElements);
             return;
         }
 
@@ -41,46 +39,34 @@ namespace RCNet.Neural.Data.Filter
         /// <param name="outputRange">Filter's output range</param>
         /// <param name="settings">Settings class</param>
         public EnumFeatureFilter(Interval outputRange, EnumFeatureFilterSettings settings)
-            : base(FeatureType.Enum, outputRange)
+            : this(outputRange, settings.NumOfElements)
         {
-            NumOfElements = settings.NumOfElements;
-            FeatureRange = new Interval(0.5d, NumOfElements + 0.5d);
             return;
         }
 
         //Methods
-        /// <summary>
-        /// Resets filter to its initial state
-        /// </summary>
+        /// <inheritdoc/>
         public override void Reset()
         {
             base.Reset();
             return;
         }
 
-        /// <summary>
-        /// Updates internal statistics
-        /// </summary>
-        /// <param name="sample">Feature sample value</param>
+        /// <inheritdoc/>
         public override void Update(double sample)
         {
-            if (sample < 1d || sample > NumOfElements || Math.Ceiling(sample) != sample)
+            if (sample < 1d || sample > NumOfEnumElements || Math.Ceiling(sample) != sample)
             {
-                throw new ArgumentException($"Sample value {sample} is not allowed. Sample value must be an integer value from 1..{NumOfElements}.", "sample");
+                throw new ArgumentException($"Sample value {sample} is not allowed. Sample value must be an integer value from 1..{NumOfEnumElements}.", "sample");
             }
             base.Update(sample);
             return;
         }
 
-
-        /// <summary>
-        /// Applies filter reverse
-        /// </summary>
-        /// <param name="value">Filter value</param>
-        /// <returns>Feature value</returns>
+        /// <inheritdoc/>
         public override double ApplyReverse(double value)
         {
-            return base.ApplyReverse(value).Bound(FeatureRange.Min, FeatureRange.Max);
+            return Math.Round(base.ApplyReverse(value)).Bound(FeatureRange.Min, FeatureRange.Max);
         }
 
     }//EnumFeatureFilter

@@ -88,7 +88,7 @@ namespace Demo.DemoConsoleApp.Examples
             //Create neuron group configuration
             AnalogNeuronGroupSettings groupCfg = new AnalogNeuronGroupSettings(groupName,
                                                                                relShare,
-                                                                               new TanHSettings(),
+                                                                               new AFAnalogTanHSettings(),
                                                                                predictorsCfg,
                                                                                AnalogNeuronGroupSettings.DefaultFiringThreshold,
                                                                                AnalogNeuronGroupSettings.DefaultThresholdMaxRefDeepness,
@@ -246,14 +246,14 @@ namespace Demo.DemoConsoleApp.Examples
         {
             //For each output field we will use prediction of two networks
             //First network having only Identity output neuron and associated the resilient back propagation trainer
-            FeedForwardNetworkSettings ffNet1Cfg = new FeedForwardNetworkSettings(new IdentitySettings(),
+            FeedForwardNetworkSettings ffNet1Cfg = new FeedForwardNetworkSettings(new AFAnalogIdentitySettings(),
                                                                                   null,
                                                                                   new RPropTrainerSettings(numOfAttempts, numOfEpochs)
                                                                                   );
             //Second network having Identity output neuron, hidden layer consisting of 5 LeakyReLU neurons
             //and associated the resilient back propagation trainer
-            HiddenLayerSettings hiddenLayerCfg = new HiddenLayerSettings(5, new LeakyReLUSettings());
-            FeedForwardNetworkSettings ffNet2Cfg = new FeedForwardNetworkSettings(new IdentitySettings(),
+            HiddenLayerSettings hiddenLayerCfg = new HiddenLayerSettings(5, new AFAnalogLeakyReLUSettings());
+            FeedForwardNetworkSettings ffNet2Cfg = new FeedForwardNetworkSettings(new AFAnalogIdentitySettings(),
                                                                                   new HiddenLayersSettings(hiddenLayerCfg),
                                                                                   new RPropTrainerSettings(numOfAttempts, numOfEpochs)
                                                                                   );

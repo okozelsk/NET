@@ -7,7 +7,7 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Readout
 {
     /// <summary>
-    /// Collection of readout unit settings
+    /// The collection of the readout units configurations
     /// </summary>
     [Serializable]
     public class ReadoutUnitsSettings : RCNetBaseSettings
@@ -103,15 +103,11 @@ namespace RCNet.Neural.Network.SM.Readout
         }
 
         //Properties
-        /// <summary>
-        /// Identifies settings containing only default values
-        /// </summary>
+        /// <inheritdoc />
         public override bool ContainsOnlyDefaults { get { return false; } }
 
         //Methods
-        /// <summary>
-        /// Checks consistency
-        /// </summary>
+        /// <inheritdoc />
         protected override void Check()
         {
             if (ReadoutUnitCfgCollection.Count == 0)
@@ -184,20 +180,13 @@ namespace RCNet.Neural.Network.SM.Readout
             return ReadoutUnitCfgCollection[GetReadoutUnitID(readoutUnitName)];
         }
 
-        /// <summary>
-        /// Creates the deep copy instance of this instance
-        /// </summary>
+        /// <inheritdoc />
         public override RCNetBaseSettings DeepClone()
         {
             return new ReadoutUnitsSettings(this);
         }
 
-        /// <summary>
-        /// Generates xml element containing the settings.
-        /// </summary>
-        /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc />
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             XElement rootElem = new XElement(rootElemName);
@@ -213,11 +202,7 @@ namespace RCNet.Neural.Network.SM.Readout
             return rootElem;
         }
 
-        /// <summary>
-        /// Generates default named xml element containing the settings.
-        /// </summary>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc />
         public override XElement GetXml(bool suppressDefaults)
         {
             return GetXml("readoutUnits", suppressDefaults);

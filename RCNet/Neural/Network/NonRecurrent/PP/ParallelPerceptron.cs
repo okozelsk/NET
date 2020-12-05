@@ -18,12 +18,6 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
         /// </summary>
         public const double BiasValue = 1d;
 
-        //Static members
-        /// <summary>
-        /// Output range
-        /// </summary>
-        public static Interval PPOutputRange = new Interval(-1d, 1d);
-
         //Attribute properties
         /// <summary>
         /// Number of network's input values
@@ -92,25 +86,16 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
         }
 
         //Properties
-        /// <summary>
-        /// Number of network's output values
-        /// </summary>
+        /// <inheritdoc/>
         public int NumOfOutputValues { get { return 1; } }
 
-        /// <summary>
-        /// Total number of network's weights
-        /// </summary>
+        /// <inheritdoc/>
         public int NumOfWeights { get { return _flatWeights.Length; } }
 
-        /// <summary>
-        /// Output range of the output layer
-        /// </summary>
-        public Interval OutputRange { get { return PPOutputRange; } }
+        /// <inheritdoc/>
+        public Interval OutputRange { get { return Interval.IntN1P1; } }
 
         //Methods
-        //Static methods
-
-        //Instance methods
         private double ComputeGate(int gateIdx, double[] input, out double sum)
         {
             int weightsStartFlatIdx = gateIdx * _numOfGateWeights;
@@ -142,11 +127,7 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
             return output;
         }
 
-        /// <summary>
-        /// Computes network output values
-        /// </summary>
-        /// <param name="input">Input values to be passed into the network</param>
-        /// <returns>Computed output values</returns>
+        /// <inheritdoc/>
         public double[] Compute(double[] input)
         {
             double sum = 0;
@@ -173,15 +154,7 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
             return ComputeResult(sum);
         }
 
-        /// <summary>
-        /// Function goes through collection (batch) of the network inputs and for each of them computes the output.
-        /// Computed output is then compared with a corresponding ideal output.
-        /// The error Abs(ideal - computed) is passed to the result error statistics.
-        /// </summary>
-        /// <param name="inputCollection">Collection of the network inputs (batch)</param>
-        /// <param name="idealOutputCollection">Collection of the ideal outputs (batch)</param>
-        /// <param name="computedOutputCollection">Collection of the computed outputs (batch)</param>
-        /// <returns>Error statistics</returns>
+        /// <inheritdoc/>
         public BasicStat ComputeBatchErrorStat(List<double[]> inputCollection, List<double[]> idealOutputCollection, out List<double[]> computedOutputCollection)
         {
             double[] flatErrors = new double[inputCollection.Count * NumOfOutputValues];
@@ -200,14 +173,7 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
             return new BasicStat(flatErrors);
         }
 
-        /// <summary>
-        /// Function goes through collection (batch) of the network inputs and for each of them computes the output.
-        /// Computed output is then compared with a corresponding ideal output.
-        /// The error Abs(ideal - computed) is passed to the result error statistics.
-        /// </summary>
-        /// <param name="inputCollection">Collection of the network inputs (batch)</param>
-        /// <param name="idealOutputCollection">Collection of the ideal outputs (batch)</param>
-        /// <returns>Error statistics</returns>
+        /// <inheritdoc/>
         public BasicStat ComputeBatchErrorStat(List<double[]> inputCollection, List<double[]> idealOutputCollection)
         {
             double[] flatErrors = new double[inputCollection.Count * NumOfOutputValues];
@@ -241,17 +207,13 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
             return;
         }
 
-        /// <summary>
-        /// Function creates the statistics of the internal weights
-        /// </summary>
+        /// <inheritdoc/>
         public BasicStat ComputeWeightsStat()
         {
             return (new BasicStat(_flatWeights));
         }
 
-        /// <summary>
-        /// Randomizes internal weights
-        /// </summary>
+        /// <inheritdoc/>
         public void RandomizeWeights(Random rand)
         {
             //Random values
@@ -285,9 +247,7 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
             return;
         }
 
-        /// <summary>
-        /// Creates a deep copy
-        /// </summary>
+        /// <inheritdoc/>
         public INonRecurrentNetwork DeepClone()
         {
             ParallelPerceptron clone = new ParallelPerceptron(NumOfInputValues, Gates, Resolution);

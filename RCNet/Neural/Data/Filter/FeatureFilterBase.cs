@@ -4,35 +4,33 @@ using System;
 namespace RCNet.Neural.Data.Filter
 {
     /// <summary>
-    /// Base class of feature filters
+    /// Base class of all the feature filters
     /// </summary>
     [Serializable]
     public abstract class FeatureFilterBase
     {
         //Enumerations
         /// <summary>
-        /// Feature type
+        /// Type of the feature
         /// </summary>
         public enum FeatureType
         {
             /// <summary>
-            /// Values 0/1
+            /// Feature value is 0 or 1
             /// </summary>
             Binary,
             /// <summary>
-            /// Enumeration of values 1..N
+            /// Feature value is one of the enumerated values 1..N
             /// </summary>
             Enum,
             /// <summary>
-            /// Real numbers
+            /// Feature value is the Real number
             /// </summary>
             Real
         }
 
         //Attribute properties
-        /// <summary>
-        /// Feature type
-        /// </summary>
+        /// <inheritdoc cref="FeatureType"/>
         public FeatureType Type { get; }
 
         /// <summary>
@@ -68,7 +66,7 @@ namespace RCNet.Neural.Data.Filter
 
         //Methods
         /// <summary>
-        /// Resets filter to its initial state
+        /// Resets the filter to its initial state
         /// </summary>
         public virtual void Reset()
         {
@@ -87,7 +85,7 @@ namespace RCNet.Neural.Data.Filter
         }
 
         /// <summary>
-        /// Applies filter
+        /// Applies the filter
         /// </summary>
         /// <param name="value">Feature value</param>
         /// <returns>Filter value</returns>
@@ -98,7 +96,7 @@ namespace RCNet.Neural.Data.Filter
         }
 
         /// <summary>
-        /// Applies filter reverse
+        /// Applies the reverse filter
         /// </summary>
         /// <param name="value">Filter value</param>
         /// <returns>Feature value</returns>

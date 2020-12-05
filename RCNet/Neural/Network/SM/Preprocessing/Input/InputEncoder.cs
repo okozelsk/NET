@@ -42,16 +42,16 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
 
         //Enumerations
         /// <summary>
-        /// Input feeding variants
+        /// Type of the input feeding regime
         /// </summary>
         public enum InputFeedingType
         {
             /// <summary>
-            /// Continuous feeding
+            /// Continuous input feeding
             /// </summary>
             Continuous,
             /// <summary>
-            /// Patterned feeding
+            /// Patterned input feeding
             /// </summary>
             Patterned
         }
@@ -74,12 +74,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             /// </summary>
             Forbidden
         }
-
-        //Static attributes
-        /// <summary>
-        /// Input data will be normalized by feature filters to this range before the usage in the reservoirs
-        /// </summary>
-        private static readonly Interval _dataRange = new Interval(-1, 1);
 
         //Attribute properties
         /// <summary>
@@ -191,7 +185,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
                 _varyingFields.Add(new InputField(fieldCfg.Name,
                                           fieldIdx++,
                                           coordinates,
-                                          _dataRange,
+                                          Interval.IntN1P1,
                                           fieldCfg.FeatureFilterCfg,
                                           _encoderCfg.VaryingFieldsCfg.SpikesCoderCfg,
                                           (fieldCfg.RouteToReadout && _encoderCfg.VaryingFieldsCfg.RouteToReadout),
@@ -210,7 +204,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
                     _varyingFields.Add(new InputField(fieldCfg.Name,
                                               fieldIdx++,
                                               coordinates,
-                                              _dataRange,
+                                              Interval.IntN1P1,
                                               fieldCfg.FeatureFilterCfg,
                                               _encoderCfg.VaryingFieldsCfg.SpikesCoderCfg,
                                               (fieldCfg.RouteToReadout && _encoderCfg.VaryingFieldsCfg.RouteToReadout),
@@ -229,7 +223,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
                     _varyingFields.Add(new InputField(fieldCfg.Name,
                                               fieldIdx++,
                                               coordinates,
-                                              _dataRange,
+                                              Interval.IntN1P1,
                                               fieldCfg.FeatureFilterCfg,
                                               _encoderCfg.VaryingFieldsCfg.SpikesCoderCfg,
                                               (fieldCfg.RouteToReadout && _encoderCfg.VaryingFieldsCfg.RouteToReadout),
@@ -370,7 +364,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             //Transformed fields
             foreach (ITransformer transformer in _internalInputTransformerCollection)
             {
-                inputVector[index++] = transformer.Next(inputVector);
+                inputVector[index++] = transformer.Transform(inputVector);
             }
             //Generated fields
             foreach (IGenerator generator in _internalInputGeneratorCollection)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using RCNet.Extensions;
 
 namespace RCNet.MathTools
 {
@@ -9,7 +10,26 @@ namespace RCNet.MathTools
     [Serializable]
     public class Interval
     {
+        //Static members
+        /// <summary>
+        /// An interval of range -1...1
+        /// </summary>
+        public static readonly Interval IntN1P1 = new Interval(-1d, 1d, false, true);
+        /// <summary>
+        /// An interval of range 0...1
+        /// </summary>
+        public static readonly Interval IntZP1 = new Interval(0d, 1d, false, true);
+        /// <summary>
+        /// An interval of range 0...positive infiniti
+        /// </summary>
+        public static readonly Interval IntZPI = new Interval(0d, double.PositiveInfinity.Bound(), false, true);
+        /// <summary>
+        /// An interval of range negative infiniti...positive infiniti
+        /// </summary>
+        public static readonly Interval IntNIPI = new Interval(double.NegativeInfinity.Bound(), double.PositiveInfinity.Bound(), false, true);
+
         //Constants
+        //Enumerations
         /// <summary>
         /// Interval types
         /// </summary>
@@ -33,6 +53,12 @@ namespace RCNet.MathTools
             LeftOpenRightOpen
         }//IntervalType
 
+        //Attribute properties
+        /// <summary>
+        /// Indicates whether the content can be modified or is unmodifiable.
+        /// </summary>
+        public bool Unmodifiable { get; private set; }
+
         //Attributes
         //Locker to ensure thread safe behaviour
         private readonly Object _lock = new Object();
@@ -50,6 +76,7 @@ namespace RCNet.MathTools
         /// <param name="threadSafe">Specifies whether to create thread safe instance</param>
         public Interval(bool threadSafe = false)
         {
+            Unmodifiable = false;
             _threadSafe = threadSafe;
             Reset();
             return;
@@ -61,10 +88,12 @@ namespace RCNet.MathTools
         /// <param name="min">Left value</param>
         /// <param name="max">Right value</param>
         /// <param name="threadSafe">Specifies whether to create thread safe instance</param>
-        public Interval(double min, double max, bool threadSafe = false)
+        /// <param name="unmodifiable">Indicates whether the content can be modified or is unmodifiable.</param>
+        public Interval(double min, double max, bool threadSafe = false, bool unmodifiable = false)
             : this(threadSafe)
         {
             Set(min, max);
+            Unmodifiable = unmodifiable;
             return;
         }
 
@@ -73,13 +102,15 @@ namespace RCNet.MathTools
         /// </summary>
         /// <param name="values">Collection of the values from which are determined interval's min and max borders</param>
         /// <param name="threadSafe">Specifies whether to create thread safe instance</param>
-        public Interval(IEnumerable<double> values, bool threadSafe = false)
+        /// <param name="unmodifiable">Indicates whether the content can be modified or is unmodifiable.</param>
+        public Interval(IEnumerable<double> values, bool threadSafe = false, bool unmodifiable = false)
             : this(threadSafe)
         {
             foreach (double value in values)
             {
                 Adjust(value);
             }
+            Unmodifiable = unmodifiable;
             return;
         }
 
@@ -203,6 +234,37 @@ namespace RCNet.MathTools
 
         //Methods
         /// <summary>
+        /// Checks the content can be modified
+        /// </summary>
+        private void CheckModifiable()
+        {
+            if(Unmodifiable)
+            {
+                throw new InvalidOperationException("Content can not be modified.");
+            }
+            return;
+        }
+
+        /// <summary>
+        /// Sets the content unmodifiable. That this is an irreversible change.
+        /// </summary>
+        public void SetUnmodifiable()
+        {
+            if (_threadSafe)
+            {
+                lock (_lock)
+                {
+                    Unmodifiable = true;
+                }
+            }
+            else
+            {
+                Unmodifiable = false;
+            }
+            return;
+        }
+
+        /// <summary>
         /// See the base.
         /// </summary>
         public override bool Equals(object obj)
@@ -234,6 +296,7 @@ namespace RCNet.MathTools
         /// </summary>
         public void Reset()
         {
+            CheckModifiable();
             if (_threadSafe)
             {
                 lock (_lock)
@@ -281,6 +344,7 @@ namespace RCNet.MathTools
         /// <param name="source">Source instance</param>
         public void CopyFrom(Interval source)
         {
+            CheckModifiable();
             if (_threadSafe)
             {
                 lock (source._lock)
@@ -300,6 +364,7 @@ namespace RCNet.MathTools
             _min = source._min;
             _max = source._max;
             _initialized = source._initialized;
+            Unmodifiable = source.Unmodifiable;
             return;
         }
 
@@ -311,6 +376,7 @@ namespace RCNet.MathTools
         /// <param name="border2">The second border value</param>
         public void Set(double border1, double border2)
         {
+            CheckModifiable();
             if (_threadSafe)
             {
                 lock (_lock)
@@ -339,6 +405,7 @@ namespace RCNet.MathTools
         /// <param name="sampleValue">Sample value</param>
         public void Adjust(double sampleValue)
         {
+            CheckModifiable();
             if (_threadSafe)
             {
                 lock (_lock)
@@ -381,6 +448,7 @@ namespace RCNet.MathTools
         /// <param name="sampleValueCollection">Collection of sample values</param>
         public void Adjust(IEnumerable<double> sampleValueCollection)
         {
+            CheckModifiable();
             foreach (double value in sampleValueCollection)
             {
                 Adjust(value);
@@ -394,6 +462,7 @@ namespace RCNet.MathTools
         /// <param name="sampleValueCollection">Collection of sample values</param>
         public void Adjust(IEnumerable<long> sampleValueCollection)
         {
+            CheckModifiable();
             foreach (long value in sampleValueCollection)
             {
                 Adjust(value);
@@ -407,6 +476,7 @@ namespace RCNet.MathTools
         /// <param name="sampleValueCollection">Collection of sample values</param>
         public void Adjust(IEnumerable<ulong> sampleValueCollection)
         {
+            CheckModifiable();
             foreach (ulong value in sampleValueCollection)
             {
                 Adjust(value);
@@ -420,6 +490,7 @@ namespace RCNet.MathTools
         /// <param name="sampleValueCollection">Collection of sample values</param>
         public void Adjust(IEnumerable<int> sampleValueCollection)
         {
+            CheckModifiable();
             foreach (int value in sampleValueCollection)
             {
                 Adjust(value);
@@ -433,6 +504,7 @@ namespace RCNet.MathTools
         /// <param name="sampleValueCollection">Collection of sample values</param>
         public void Adjust(IEnumerable<uint> sampleValueCollection)
         {
+            CheckModifiable();
             foreach (uint value in sampleValueCollection)
             {
                 Adjust(value);
@@ -446,6 +518,7 @@ namespace RCNet.MathTools
         /// <param name="sampleValueCollection">Collection of sample values</param>
         public void Adjust(IEnumerable<sbyte> sampleValueCollection)
         {
+            CheckModifiable();
             foreach (sbyte value in sampleValueCollection)
             {
                 Adjust(value);
@@ -459,6 +532,7 @@ namespace RCNet.MathTools
         /// <param name="sampleValueCollection">Collection of sample values</param>
         public void Adjust(IEnumerable<byte> sampleValueCollection)
         {
+            CheckModifiable();
             foreach (byte value in sampleValueCollection)
             {
                 Adjust(value);

@@ -5,7 +5,7 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Data.Generators
 {
     /// <summary>
-    /// Setup parameters for the Sinusoidal signal generator
+    /// Configuration of the SinusoidalGenerator
     /// </summary>
     [Serializable]
     public class SinusoidalGeneratorSettings : RCNetBaseSettings
@@ -62,6 +62,7 @@ namespace RCNet.Neural.Data.Generators
             Phase = phase;
             Freq = freq;
             Ampl = ampl;
+            Check();
             return;
         }
 
@@ -70,10 +71,8 @@ namespace RCNet.Neural.Data.Generators
         /// </summary>
         /// <param name="source">Source instance</param>
         public SinusoidalGeneratorSettings(SinusoidalGeneratorSettings source)
+            :this(source.Phase, source.Freq, source.Ampl)
         {
-            Phase = source.Phase;
-            Freq = source.Freq;
-            Ampl = source.Ampl;
             return;
         }
 
@@ -89,53 +88,43 @@ namespace RCNet.Neural.Data.Generators
             Phase = double.Parse(settingsElem.Attribute("phase").Value, CultureInfo.InvariantCulture);
             Freq = double.Parse(settingsElem.Attribute("freq").Value, CultureInfo.InvariantCulture);
             Ampl = double.Parse(settingsElem.Attribute("ampl").Value, CultureInfo.InvariantCulture);
+            Check();
             return;
         }
 
         //Properties
         /// <summary>
-        /// Checks if settings are default
+        /// Checks the defaults
         /// </summary>
         public bool IsDefaultPhase { get { return (Phase == DefaultPhase); } }
 
         /// <summary>
-        /// Checks if settings are default
+        /// Checks the defaults
         /// </summary>
         public bool IsDefaultFreq { get { return (Freq == DefaultFreq); } }
 
         /// <summary>
-        /// Checks if settings are default
+        /// Checks the defaults
         /// </summary>
         public bool IsDefaultAmpl { get { return (Ampl == DefaultAmpl); } }
 
-        /// <summary>
-        /// Identifies settings containing only default values
-        /// </summary>
+        /// <inheritdoc />
         public override bool ContainsOnlyDefaults { get { return IsDefaultPhase && IsDefaultFreq && IsDefaultAmpl; } }
 
         //Methods
-        /// <summary>
-        /// Checks consistency
-        /// </summary>
+        /// <inheritdoc />
         protected override void Check()
         {
             return;
         }
 
-        /// <summary>
-        /// Creates the deep copy instance of this instance
-        /// </summary>
+        /// <inheritdoc />
         public override RCNetBaseSettings DeepClone()
         {
             return new SinusoidalGeneratorSettings(this);
         }
 
-        /// <summary>
-        /// Generates xml element containing the settings.
-        /// </summary>
-        /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc />
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             XElement rootElem = new XElement(rootElemName);
@@ -156,11 +145,7 @@ namespace RCNet.Neural.Data.Generators
             return rootElem;
         }
 
-        /// <summary>
-        /// Generates default named xml element containing the settings.
-        /// </summary>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc />
         public override XElement GetXml(bool suppressDefaults)
         {
             return GetXml("sinusoidal", suppressDefaults);

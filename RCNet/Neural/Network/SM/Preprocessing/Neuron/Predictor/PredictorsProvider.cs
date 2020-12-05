@@ -13,7 +13,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
     public class PredictorsProvider
     {
         /// <summary>
-        /// Identifiers of the implemented predictors
+        /// Identifier of the predictor
         /// </summary>
         public enum PredictorID
         {

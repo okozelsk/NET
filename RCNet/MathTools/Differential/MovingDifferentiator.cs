@@ -9,12 +9,6 @@ namespace RCNet.MathTools.Differential
     [Serializable]
     public class MovingDifferentiator
     {
-        //Static members
-        /// <summary>
-        /// Range of the differential data
-        /// </summary>
-        public static readonly Interval DiffDataRange = new Interval(-1d, 1d);
-
         //Constants
         /// <summary>
         /// Minimum allowed depth
@@ -56,6 +50,12 @@ namespace RCNet.MathTools.Differential
             Reset();
             return;
         }
+
+        //Properties
+        /// <summary>
+        /// Range of the differential data
+        /// </summary>
+        public static Interval DiffDataRange { get { return Interval.IntN1P1; } }
 
         //Methods
         /// <summary>

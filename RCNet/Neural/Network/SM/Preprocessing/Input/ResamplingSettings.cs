@@ -5,7 +5,7 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Input
 {
     /// <summary>
-    /// Settings of input pattern resampling
+    /// Configuration of the Resampling
     /// </summary>
     [Serializable]
     public class ResamplingSettings : RCNetBaseSettings
@@ -114,28 +114,26 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
 
         //Properties
         /// <summary>
-        /// Checks if settings are default
+        /// Checks the defaults
         /// </summary>
         public bool IsDefaultSignalBeginThreshold { get { return (SignalBeginThreshold == DefaultSignalBeginThreshold); } }
 
         /// <summary>
-        /// Checks if settings are default
+        /// Checks the defaults
         /// </summary>
         public bool IsDefaultSignalEndThreshold { get { return (SignalEndThreshold == DefaultSignalEndThreshold); } }
 
         /// <summary>
-        /// Checks if settings are default
+        /// Checks the defaults
         /// </summary>
         public bool IsDefaultUniformTimeScale { get { return (UniformTimeScale == DefaultUniformTimeScale); } }
 
         /// <summary>
-        /// Checks if settings are default
+        /// Checks the defaults
         /// </summary>
         public bool IsDefaultTargetTimePoints { get { return (TargetTimePoints == DefaultTargetTimePoints); } }
 
-        /// <summary>
-        /// Identifies settings containing only default values
-        /// </summary>
+        /// <inheritdoc/>
         public override bool ContainsOnlyDefaults
         {
             get
@@ -148,9 +146,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         }
 
         //Methods
-        /// <summary>
-        /// Checks consistency
-        /// </summary>
+        /// <inheritdoc/>
         protected override void Check()
         {
             if (SignalBeginThreshold < 0)
@@ -168,20 +164,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             return;
         }
 
-        /// <summary>
-        /// Creates the deep copy instance of this instance
-        /// </summary>
+        /// <inheritdoc/>
         public override RCNetBaseSettings DeepClone()
         {
             return new ResamplingSettings(this);
         }
 
-        /// <summary>
-        /// Generates xml element containing the settings.
-        /// </summary>
-        /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc/>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             XElement rootElem = new XElement(rootElemName);
@@ -206,11 +195,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             return rootElem;
         }
 
-        /// <summary>
-        /// Generates default named xml element containing the settings.
-        /// </summary>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc/>
         public override XElement GetXml(bool suppressDefaults)
         {
             return GetXml("resampling", suppressDefaults);

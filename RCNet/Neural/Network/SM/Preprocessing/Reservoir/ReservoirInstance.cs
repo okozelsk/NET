@@ -134,15 +134,15 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                     {
                         grpNCP[i] = new NeuronCreationParams
                         {
-                            Activation = ActivationFactory.Create(ngs.ActivationCfg, rand),
+                            Activation = ActivationFactory.CreateAF(ngs.ActivationCfg, rand),
                             Bias = ngs.BiasCfg == null ? 0 : rand.NextDouble(ngs.BiasCfg),
                             GroupID = groupID,
-                            AnalogFiringThreshold = ngs.Type == ActivationType.Spiking ? -1 : ((AnalogNeuronGroupSettings)ngs).FiringThreshold,
-                            AnalogThresholdMaxRefDeepness = ngs.Type == ActivationType.Spiking ? -1 : analogThresholdMaxRefDeepness++,
+                            AnalogFiringThreshold = ngs.ActivationCfg.TypeOfActivation == ActivationType.Spiking ? -1 : ((AnalogNeuronGroupSettings)ngs).FiringThreshold,
+                            AnalogThresholdMaxRefDeepness = ngs.ActivationCfg.TypeOfActivation == ActivationType.Spiking ? -1 : analogThresholdMaxRefDeepness++,
                             RetainmentStrength = 0,
                             PredictorsCfg = null
                         };
-                        if (ngs.Type == ActivationType.Analog)
+                        if (ngs.ActivationCfg.TypeOfActivation == ActivationType.Analog)
                         {
                             if (analogThresholdMaxRefDeepness > ((AnalogNeuronGroupSettings)ngs).ThresholdMaxRefDeepness)
                             {
@@ -158,7 +158,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                         ++idx;
                     }
                     //Retainment
-                    if (ngs.Type == ActivationType.Analog && ((AnalogNeuronGroupSettings)ngs).RetainmentCfg != null)
+                    if (ngs.ActivationCfg.TypeOfActivation == ActivationType.Analog && ((AnalogNeuronGroupSettings)ngs).RetainmentCfg != null)
                     {
                         int numOfRetNeurons = (int)Math.Round(((AnalogNeuronGroupSettings)ngs).RetainmentCfg.Density * ngs.Count, 0);
                         rand.Shuffle(grpNCP);
@@ -195,7 +195,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                             {
                                 //Use constructor for hidden neuron having analog activation
                                 poolNeurons[neuronPoolFlatIdx] = new HiddenNeuron(location,
-                                                                                  neuronParamCollection[neuronPoolFlatIdx].Activation,
+                                                                                  (AFAnalogBase)neuronParamCollection[neuronPoolFlatIdx].Activation,
                                                                                   neuronParamCollection[neuronPoolFlatIdx].Bias,
                                                                                   neuronParamCollection[neuronPoolFlatIdx].AnalogFiringThreshold,
                                                                                   neuronParamCollection[neuronPoolFlatIdx].AnalogThresholdMaxRefDeepness,
@@ -211,7 +211,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                             {
                                 //Use constructor for hidden neuron having spiking activation
                                 poolNeurons[neuronPoolFlatIdx] = new HiddenNeuron(location,
-                                                                                  neuronParamCollection[neuronPoolFlatIdx].Activation,
+                                                                                  (AFSpikingBase)neuronParamCollection[neuronPoolFlatIdx].Activation,
                                                                                   neuronParamCollection[neuronPoolFlatIdx].Bias,
                                                                                   neuronParamCollection[neuronPoolFlatIdx].PredictorsCfg
                                                                                   );
@@ -276,6 +276,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                     else if (connSchema.GetType() == typeof(ChainSchemaSettings))
                     {
                         ConnectChainSchema(poolID, rand, (ChainSchemaSettings)connSchema);
+                    }
+                    else if (connSchema.GetType() == typeof(DoubleTwistedToroidSchemaSettings))
+                    {
+                        ConnectDoubleTwistedToroidSchema(poolID, rand, (DoubleTwistedToroidSchemaSettings)connSchema);
                     }
                     else
                     {
@@ -394,7 +398,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                 {
                     foreach (Synapse synapse in _neuronNeuronConnectionsCollection[neuron.Location.ReservoirFlatIdx].Values)
                     {
-                        wMatrix.Data[neuron.Location.ReservoirFlatIdx][synapse.SourceNeuron.Location.ReservoirFlatIdx] = synapse.Weight;
+                        wMatrix.Data[neuron.Location.ReservoirFlatIdx][synapse.PresynapticNeuron.Location.ReservoirFlatIdx] = synapse.Weight;
                     }
                 });
                 double largestEigenValue = Math.Abs(wMatrix.EstimateLargestEigenValue(out double[] eigenVector));
@@ -521,11 +525,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         private bool SetInterconnection(SortedList<int, Synapse>[] connectionsCollection, Synapse synapse, bool replace = false)
         {
             //Add new connection
-            lock (connectionsCollection[synapse.TargetNeuron.Location.ReservoirFlatIdx])
+            lock (connectionsCollection[synapse.PostsynapticNeuron.Location.ReservoirFlatIdx])
             {
                 try
                 {
-                    connectionsCollection[synapse.TargetNeuron.Location.ReservoirFlatIdx].Add(synapse.SourceNeuron.Location.ReservoirFlatIdx, synapse);
+                    connectionsCollection[synapse.PostsynapticNeuron.Location.ReservoirFlatIdx].Add(synapse.PresynapticNeuron.Location.ReservoirFlatIdx, synapse);
                     return true;
                 }
                 catch
@@ -533,7 +537,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                     //Connection already exists
                     if (replace)
                     {
-                        connectionsCollection[synapse.TargetNeuron.Location.ReservoirFlatIdx][synapse.SourceNeuron.Location.ReservoirFlatIdx] = synapse;
+                        connectionsCollection[synapse.PostsynapticNeuron.Location.ReservoirFlatIdx][synapse.PresynapticNeuron.Location.ReservoirFlatIdx] = synapse;
                         return true;
                     }
                     return false;
@@ -802,57 +806,132 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             return;
         }
 
-        private void ConnectChainSchema(int poolID, Random rand, ChainSchemaSettings schemaCfg)
+        private List<HiddenNeuron> RandomlySelectPoolNeurons(int poolID, Random rand, int count)
+        {
+            //Select neurons to be chained
+            List<HiddenNeuron> neurons = new List<HiddenNeuron>(_poolNeuronCollection[poolID]);
+            rand.Shuffle(neurons);
+            if (count < neurons.Count)
+            {
+                //Cut the list according to chainLength
+                neurons.RemoveRange(count, neurons.Count - count);
+            }
+            return neurons;
+        }
+
+        private void ConnectChainOfNeurons(List<HiddenNeuron> neurons, Random rand, bool replace)
         {
             RelShareSelector<Synapse.SynRole> spikingRoleSelector = new RelShareSelector<Synapse.SynRole>();
             spikingRoleSelector.Add(InstanceCfg.SynapseCfg.SpikingTargetCfg.ExcitatorySynCfg.RelShare, Synapse.SynRole.Excitatory);
             spikingRoleSelector.Add(InstanceCfg.SynapseCfg.SpikingTargetCfg.InhibitorySynCfg.RelShare, Synapse.SynRole.Inhibitory);
-            List<HiddenNeuron> chainNeurons = new List<HiddenNeuron>(_poolNeuronCollection[poolID]);
+            for (int i = 0; i < neurons.Count - 1; i++)
+            {
+                //Establish connection
+                ConnectNeuron(neurons[i + 1],
+                              new List<HiddenNeuron>() { neurons[i] },
+                              spikingRoleSelector,
+                              -1,
+                              1,
+                              rand,
+                              false,
+                              replace
+                              );
+            }
+            return;
+        }
+
+        private void ConnectChainSchema(int poolID, Random rand, ChainSchemaSettings schemaCfg)
+        {
+            //Length of one chain
+            int chainLength = (int)Math.Round(schemaCfg.Ratio * _poolNeuronCollection[poolID].Length);
+            if (chainLength < 2)
+            {
+                //Nothing to do
+                return;
+            }
+            for (int repetition = 1; repetition <= schemaCfg.Repetitions; repetition++)
+            {
+                List<HiddenNeuron> chainNeuronCollection = RandomlySelectPoolNeurons(poolID, rand, chainLength);
+                if(schemaCfg.Circle)
+                {
+                    chainNeuronCollection.Add(chainNeuronCollection[0]);
+                }
+                ConnectChainOfNeurons(chainNeuronCollection, rand, schemaCfg.ReplaceExistingConnections);
+            }
+            return;
+        }
+
+        private void ConnectDoubleTwistedToroidSchema(int poolID, Random rand, DoubleTwistedToroidSchemaSettings schemaCfg)
+        {
+            //Number of neurons to be connected
+            int twistSize = (int)Math.Round(schemaCfg.Ratio * _poolNeuronCollection[poolID].Length);
+            if (twistSize < 4)
+            {
+                //Nothing to do
+                return;
+            }
 
             for (int repetition = 1; repetition <= schemaCfg.Repetitions; repetition++)
             {
-                int chainLength = (int)Math.Round(schemaCfg.Ratio * chainNeurons.Count);
-                if (chainLength < 2)
+                List<HiddenNeuron> twistNeuronCollection = RandomlySelectPoolNeurons(poolID, rand, twistSize);
+                int width = (int)Math.Round(Math.Sqrt(twistNeuronCollection.Count));
+                int height = width + (width * width < twistNeuronCollection.Count ? 1 : 0);
+                List<HiddenNeuron> chain = new List<HiddenNeuron>(twistNeuronCollection.Count + 1);
+                //Double twisted toroid base
+                //Chain 1
+                chain.Clear();
+                for (int i = 0; i < height; i++)
                 {
-                    //Nothing to do
-                    return;
+                    for (int j = 0; j < width; j++)
+                    {
+                        int idx = i * width + j;
+                        if (idx < twistNeuronCollection.Count)
+                        {
+                            chain.Add(twistNeuronCollection[idx]);
+                        }
+                    }
                 }
-                //////////////////////////////////////////////////////////////////////////////////////
-                //Collect neurons to be chained
-                List<HiddenNeuron> chainNeuronCollection = new List<HiddenNeuron>(chainNeurons);
-                rand.Shuffle(chainNeuronCollection);
-                if (chainLength < chainNeuronCollection.Count)
+                chain.Add(twistNeuronCollection[0]);
+                ConnectChainOfNeurons(chain, rand, schemaCfg.ReplaceExistingConnections);
+                //Chain 2
+                chain.Clear();
+                for (int j = 0; j < width; j++)
                 {
-                    //Cut the list according to chainLength
-                    chainNeuronCollection.RemoveRange(chainLength, chainNeuronCollection.Count - chainLength);
+                    for (int i = height - 1; i >= 0; i--)
+                    {
+                        int idx = i * width + j;
+                        if (idx < twistNeuronCollection.Count)
+                        {
+                            chain.Add(twistNeuronCollection[idx]);
+                        }
+                    }
                 }
-                //////////////////////////////////////////////////////////////////////////////////////
-                //Create connection pairs
-                List<Tuple<HiddenNeuron, HiddenNeuron>> connPairs = new List<Tuple<HiddenNeuron, HiddenNeuron>>(chainNeuronCollection.Count * 2);
-                for (int i = 0; i < chainNeuronCollection.Count - 1; i++)
+                chain.Add(twistNeuronCollection[0]);
+                ConnectChainOfNeurons(chain, rand, schemaCfg.ReplaceExistingConnections);
+                if(schemaCfg.LDiagonalSelf)
                 {
-                    connPairs.Add(new Tuple<HiddenNeuron, HiddenNeuron>(chainNeuronCollection[i], chainNeuronCollection[i + 1]));
+                    //Left diagonal self connections
+                    chain.Clear();
+                    for (int i = 0; i < width; i++)
+                    {
+                        int idx = i * width + i;
+                        chain.Add(twistNeuronCollection[idx]);
+                        chain.Add(twistNeuronCollection[idx]);
+                    }
+                    ConnectChainOfNeurons(chain, rand, schemaCfg.ReplaceExistingConnections);
                 }
-                if (schemaCfg.Circle)
+                if (schemaCfg.RDiagonalSelf)
                 {
-                    connPairs.Add(new Tuple<HiddenNeuron, HiddenNeuron>(chainNeuronCollection[chainNeuronCollection.Count - 1], chainNeuronCollection[0]));
+                    //Right diagonal self connections
+                    chain.Clear();
+                    for (int i = width - 1, j = 0; i >= 0; i--, j++)
+                    {
+                        int idx = j * width + i;
+                        chain.Add(twistNeuronCollection[idx]);
+                        chain.Add(twistNeuronCollection[idx]);
+                    }
+                    ConnectChainOfNeurons(chain, rand, schemaCfg.ReplaceExistingConnections);
                 }
-                //////////////////////////////////////////////////////////////////////////////////////
-                //Connect connection pairs
-                foreach (Tuple<HiddenNeuron, HiddenNeuron> connPair in connPairs)
-                {
-                    //Establish connection
-                    ConnectNeuron(connPair.Item2,
-                                  new List<HiddenNeuron>() { connPair.Item1 },
-                                  spikingRoleSelector,
-                                  -1,
-                                  1,
-                                  rand,
-                                  false,
-                                  schemaCfg.ReplaceExistingConnections
-                                  );
-                }
-
             }
             return;
         }
@@ -922,13 +1001,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         }
 
         /// <summary>
-        /// Computes new cycle of the reservoir.
+        /// Performs new computation cycle of the reservoir.
         /// </summary>
-        /// <param name="updateStatistics">Specifies whether to update neurons statistics. Specify "false" during the booting phase and "true" after the booting phase.</param>
+        /// <param name="updateStatistics">Specifies whether to update reservoir's statistics.</param>
         public void Compute(bool updateStatistics)
         {
-            //Perform reservoir's computation cycle
-            //Collect new stimulation for each reservoir neuron
+            //Set new stimulation on each reservoir neuron
             Parallel.ForEach(_parallelRanges, range =>
             {
                 for (int neuronIdx = range.Item1; neuronIdx < range.Item2; neuronIdx++)
@@ -949,7 +1027,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                     _reservoirNeuronCollection[neuronIdx].NewStimulation(iStimuli, rStimuli);
                 }
             });
-            //Recompute state of all reservoir neurons
+            //Recompute state of each reservoir neuron
             Parallel.ForEach(_parallelRanges, range =>
             {
                 for (int neuronIdx = range.Item1; neuronIdx < range.Item2; neuronIdx++)
@@ -999,7 +1077,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         //Inner classes
         private class NeuronCreationParams
         {
-            public IActivationFunction Activation { get; set; }
+            public IActivation Activation { get; set; }
             public double Bias { get; set; }
             public int GroupID { get; set; }
             public double AnalogFiringThreshold { get; set; }

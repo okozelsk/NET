@@ -5,7 +5,7 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Data.Coders.AnalogToSpiking
 {
     /// <summary>
-    /// Settings of A2SCoderSignalStrength coder
+    /// Configuration of the A2SCoderSignalStrength coder
     /// </summary>
     [Serializable]
     public class A2SCoderSignalStrengthSettings : RCNetBaseSettings
@@ -65,13 +65,11 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
 
         //Properties
         /// <summary>
-        /// Checks if settings are default
+        /// Checks the defaults
         /// </summary>
         public bool IsDefaultNumOfTimePoints { get { return (NumOfTimePoints == DefaultNumOfTimePoints); } }
 
-        /// <summary>
-        /// Identifies settings containing only default values
-        /// </summary>
+        /// <inheritdoc />
         public override bool ContainsOnlyDefaults
         {
             get
@@ -81,9 +79,7 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
         }
 
         //Methods
-        /// <summary>
-        /// Checks consistency
-        /// </summary>
+        /// <inheritdoc />
         protected override void Check()
         {
             if (NumOfTimePoints < 2 || NumOfTimePoints > 32)
@@ -93,20 +89,13 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
             return;
         }
 
-        /// <summary>
-        /// Creates the deep copy instance of this instance
-        /// </summary>
+        /// <inheritdoc />
         public override RCNetBaseSettings DeepClone()
         {
             return new A2SCoderSignalStrengthSettings(this);
         }
 
-        /// <summary>
-        /// Generates xml element containing the settings.
-        /// </summary>
-        /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc />
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             XElement rootElem = new XElement(rootElemName);
@@ -118,11 +107,7 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
             return rootElem;
         }
 
-        /// <summary>
-        /// Generates default named xml element containing the settings.
-        /// </summary>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc />
         public override XElement GetXml(bool suppressDefaults)
         {
             return GetXml("signalStrengthCoder", suppressDefaults);

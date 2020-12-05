@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace RCNet.Neural.Data.Transformers
 {
     /// <summary>
-    /// Transforms input field value to value^exponent
+    /// Implements the "value^exponent" input field value transformation
     /// </summary>
     [Serializable]
     public class PowerTransformer : ITransformer
@@ -29,19 +29,14 @@ namespace RCNet.Neural.Data.Transformers
         }
 
         //Methods
-        /// <summary>
-        /// Resets generator to its initial state
-        /// </summary>
+        /// <inheritdoc />
         public void Reset()
         {
             return;
         }
 
-        /// <summary>
-        /// Computes transformed value
-        /// </summary>
-        /// <param name="data">Collection of natural values of the already known input fields</param>
-        public double Next(double[] data)
+        /// <inheritdoc />
+        public double Transform(double[] data)
         {
             if (double.IsNaN(data[_fieldIdx]))
             {
@@ -58,4 +53,5 @@ namespace RCNet.Neural.Data.Transformers
         }
 
     }//PowerTransformer
+
 }//Namespace

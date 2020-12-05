@@ -5,14 +5,11 @@ using System;
 namespace RCNet.Neural.Data.Filter
 {
     /// <summary>
-    /// Implements binary feature filter
+    /// Implements the binary feature filter
     /// </summary>
     [Serializable]
     public class BinFeatureFilter : FeatureFilterBase
     {
-        //Static members
-        private static readonly Interval _range = new Interval(0d, 1d);
-
         //Constructor
         /// <summary>
         /// Instantiates an initialized instance
@@ -30,50 +27,39 @@ namespace RCNet.Neural.Data.Filter
         /// <param name="outputRange">Filter's output range</param>
         /// <param name="settings">Settings class</param>
         public BinFeatureFilter(Interval outputRange, BinFeatureFilterSettings settings)
-            : base(FeatureType.Binary, outputRange)
+            : this(outputRange)
         {
             return;
         }
 
 
         //Properties
-        /// <summary>
-        /// Feature range
-        /// </summary>
-        public override Interval FeatureRange { get { return _range; } }
+        /// <inheritdoc/>
+        public override Interval FeatureRange { get { return Interval.IntZP1; } }
 
         //Methods
-        /// <summary>
-        /// Resets filter to its initial state
-        /// </summary>
+        /// <inheritdoc/>
         public override void Reset()
         {
             base.Reset();
             return;
         }
 
-        /// <summary>
-        /// Updates internal statistics
-        /// </summary>
-        /// <param name="sample">Feature sample value</param>
+        /// <inheritdoc/>
         public override void Update(double sample)
         {
-            if (sample != _range.Min && sample != _range.Max)
+            if (sample != Interval.IntZP1.Min && sample != Interval.IntZP1.Max)
             {
-                throw new ArgumentException($"Sample value {sample} is not allowed. Sample value must be {_range.Min} or {_range.Max}.", "sample");
+                throw new ArgumentException($"Sample value {sample} is not allowed. Sample value must be {Interval.IntZP1.Min} or {Interval.IntZP1.Max}.", "sample");
             }
             base.Update(sample);
             return;
         }
 
-        /// <summary>
-        /// Applies filter reverse
-        /// </summary>
-        /// <param name="value">Filter value</param>
-        /// <returns>Feature value</returns>
+        /// <inheritdoc/>
         public override double ApplyReverse(double value)
         {
-            return base.ApplyReverse(value).Bound(_range.Min, _range.Max);
+            return Math.Round(base.ApplyReverse(value)).Bound(FeatureRange.Min, FeatureRange.Max);
         }
 
     }//BinFeatureFilter

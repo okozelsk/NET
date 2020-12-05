@@ -10,6 +10,7 @@ using System.IO;
 using System.Text;
 using System.Linq;
 using RCNet.MathTools;
+using RCNet.Neural.Data.Filter;
 
 namespace Demo.DemoConsoleApp
 {
@@ -29,7 +30,7 @@ namespace Demo.DemoConsoleApp
         }
 
         //Methods
-        private void TestActivation(IActivationFunction af, int simLength, double constCurrent, int from, int count)
+        private void TestSpikingAF(AFSpikingBase af, int simLength, double constCurrent, int from, int count)
         {
             for (int i = 1; i <= simLength; i++)
             {
@@ -55,15 +56,15 @@ namespace Demo.DemoConsoleApp
         {
             double[] inputValues = new double[1];
             inputValues[0] = double.MinValue;
-            Console.WriteLine($"{transformer.GetType().Name} Input {inputValues[0]} Output {transformer.Next(inputValues)}");
+            Console.WriteLine($"{transformer.GetType().Name} Input {inputValues[0]} Output {transformer.Transform(inputValues)}");
             for (double input = -5d; input <= 5d; input += 0.1d)
             {
                 input = Math.Round(input, 1);
                 inputValues[0] = input;
-                Console.WriteLine($"{transformer.GetType().Name} Input {input} Output {transformer.Next(inputValues)}");
+                Console.WriteLine($"{transformer.GetType().Name} Input {input} Output {transformer.Transform(inputValues)}");
             }
             inputValues[0] = double.MaxValue;
-            Console.WriteLine($"{transformer.GetType().Name} Input {inputValues[0]} Output {transformer.Next(inputValues)}");
+            Console.WriteLine($"{transformer.GetType().Name} Input {inputValues[0]} Output {transformer.Transform(inputValues)}");
             Console.ReadLine();
             return;
         }
@@ -73,7 +74,7 @@ namespace Demo.DemoConsoleApp
             double[] inputValues = new double[2];
             inputValues[0] = double.MinValue;
             inputValues[1] = double.MinValue;
-            Console.WriteLine($"{transformer.GetType().Name} Inputs [{inputValues[0]}, {inputValues[1]}] Output {transformer.Next(inputValues)}");
+            Console.WriteLine($"{transformer.GetType().Name} Inputs [{inputValues[0]}, {inputValues[1]}] Output {transformer.Transform(inputValues)}");
 
             for (double input1 = -5d; input1 <= 5d; input1 += 0.5d)
             {
@@ -83,12 +84,12 @@ namespace Demo.DemoConsoleApp
                     input2 = Math.Round(input2, 1);
                     inputValues[0] = input1;
                     inputValues[1] = input2;
-                    Console.WriteLine($"{transformer.GetType().Name} Inputs [{inputValues[0]}, {inputValues[1]}] Output {transformer.Next(inputValues)}");
+                    Console.WriteLine($"{transformer.GetType().Name} Inputs [{inputValues[0]}, {inputValues[1]}] Output {transformer.Transform(inputValues)}");
                 }
             }
             inputValues[0] = double.MaxValue;
             inputValues[1] = double.MaxValue;
-            Console.WriteLine($"{transformer.GetType().Name} Inputs [{inputValues[0]}, {inputValues[1]}] Output {transformer.Next(inputValues)}");
+            Console.WriteLine($"{transformer.GetType().Name} Inputs [{inputValues[0]}, {inputValues[1]}] Output {transformer.Transform(inputValues)}");
             Console.ReadLine();
             return;
         }
@@ -243,21 +244,69 @@ namespace Demo.DemoConsoleApp
             return;
         }
 
+        private void TestEnumFeatureFilter()
+        {
+            int enumerations = 10;
+            EnumFeatureFilter filter = new EnumFeatureFilter(Interval.IntZP1, new EnumFeatureFilterSettings(enumerations));
+            Random rand = new Random();
+            for(int i = 0; i < 200; i++)
+            {
+                filter.Update((double)rand.Next(1, enumerations));
+            }
+
+            Console.WriteLine($"{filter.GetType().Name} ApplyFilter");
+            for (int i = 1; i <= 10; i++)
+            {
+                Console.WriteLine($"    {i.ToString(CultureInfo.InvariantCulture),-20} {filter.ApplyFilter(i)}");
+            }
+
+            Console.WriteLine($"{filter.GetType().Name} ApplyReverse");
+            int pieces = 100;
+            for(int i = 0; i <= pieces; i++)
+            {
+                double value = (double)i * (1d / pieces);
+                Console.WriteLine($"    {value.ToString(CultureInfo.InvariantCulture),-20} {filter.ApplyReverse(value)}");
+            }
+            Console.ReadLine();
+
+        }
+
+        private void TestBinFeatureFilter()
+        {
+            BinFeatureFilter filter = new BinFeatureFilter(Interval.IntZP1, new BinFeatureFilterSettings());
+            Random rand = new Random();
+            for (int i = 0; i < 200; i++)
+            {
+                filter.Update((double)rand.Next(0, 1));
+            }
+
+            Console.WriteLine($"{filter.GetType().Name} ApplyFilter");
+            for (int i = 0; i <= 1; i++)
+            {
+                Console.WriteLine($"    {i.ToString(CultureInfo.InvariantCulture),-20} {filter.ApplyFilter(i)}");
+            }
+
+            Console.WriteLine($"{filter.GetType().Name} ApplyReverse");
+            int pieces = 10;
+            for (int i = 0; i <= pieces; i++)
+            {
+                double value = (double)i * (1d / pieces);
+                Console.WriteLine($"    {value.ToString(CultureInfo.InvariantCulture),-20} {filter.ApplyReverse(value)}");
+            }
+            Console.ReadLine();
+
+        }
+
         /// <summary>
         /// Playground's entry point
         /// </summary>
         public void Run()
         {
             Console.Clear();
-            TestA2SCoder();
             //TODO - place your code here
-            /*
-            TestActivation(ActivationFactory.Create(new SimpleIFSettings(), _rand), 200, 0.25, 50, 100);
-            TestTransformers();
-            GenSteadyPatternedMGData(10, 18, 200, 200, 0.5d, "C:\\Users\\Okozelsk\\Development\\DotNet\\Projects\\NET\\Demo\\DemoConsoleApp\\Data");
-            */
-
-
+            //TestSpikingAF((AFSpikingBase)ActivationFactory.CreateAF(new AFSpikingExpIFSettings(), _rand), 200, 0.25, 50, 100);
+            //TestEnumFeatureFilter();
+            TestBinFeatureFilter();
             return;
         }
 

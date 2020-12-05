@@ -5,7 +5,7 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Space3D
 {
     /// <summary>
-    /// Class contains 3D coordinates
+    /// Configuration of the coordinates
     /// </summary>
     [Serializable]
     public class CoordinatesSettings : RCNetBaseSettings
@@ -59,6 +59,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Space3D
             X = x;
             Y = y;
             Z = z;
+            Check();
             return;
         }
 
@@ -84,35 +85,39 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Space3D
             X = int.Parse(settingsElem.Attribute("x").Value, CultureInfo.InvariantCulture);
             Y = int.Parse(settingsElem.Attribute("y").Value, CultureInfo.InvariantCulture);
             Z = int.Parse(settingsElem.Attribute("z").Value, CultureInfo.InvariantCulture);
+            Check();
             return;
         }
 
         //Properties
         /// <summary>
-        /// Checks if settings are default
+        /// Checks the defaults
         /// </summary>
         public bool IsDefaultX { get { return (X == DefaultX); } }
 
         /// <summary>
-        /// Checks if settings are default
+        /// Checks the defaults
         /// </summary>
         public bool IsDefaultY { get { return (Y == DefaultY); } }
 
         /// <summary>
-        /// Checks if settings are default
+        /// Checks the defaults
         /// </summary>
         public bool IsDefaultZ { get { return (Z == DefaultZ); } }
 
-        /// <summary>
-        /// Identifies settings containing only default values
-        /// </summary>
-        public override bool ContainsOnlyDefaults { get { return IsDefaultX && IsDefaultY && IsDefaultZ; } }
-
+        /// <inheritdoc/>
+        public override bool ContainsOnlyDefaults
+        {
+            get
+            {
+                return IsDefaultX &&
+                       IsDefaultY &&
+                       IsDefaultZ;
+            }
+        }
 
         //Methods
-        /// <summary>
-        /// Checks consistency
-        /// </summary>
+        /// <inheritdoc/>
         protected override void Check()
         {
             return;
@@ -125,20 +130,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Space3D
         {
             return new int[] { X, Y, Z };
         }
-        /// <summary>
-        /// Creates the deep copy instance of this instance
-        /// </summary>
+
+        /// <inheritdoc/>
         public override RCNetBaseSettings DeepClone()
         {
             return new CoordinatesSettings(this);
         }
 
-        /// <summary>
-        /// Generates xml element containing the settings.
-        /// </summary>
-        /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc/>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             XElement rootElem = new XElement(rootElemName);
@@ -158,16 +157,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Space3D
             return rootElem;
         }
 
-        /// <summary>
-        /// Generates default named xml element containing the settings.
-        /// </summary>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc/>
         public override XElement GetXml(bool suppressDefaults)
         {
             return GetXml("coordinates", suppressDefaults);
         }
 
-    }//PlacementSettings
+    }//CoordinatesSettings
 
 }//Namespace

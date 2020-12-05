@@ -48,7 +48,7 @@ namespace RCNet
 
         //Properties
         /// <summary>
-        /// Identifies settings containing only default values
+        /// Indicates the fully default configuration
         /// </summary>
         public abstract bool ContainsOnlyDefaults { get; }
 
@@ -96,29 +96,26 @@ namespace RCNet
         public abstract RCNetBaseSettings DeepClone();
 
         /// <summary>
-        /// Checks consistency
+        /// Checks the correctness of the configuration
         /// </summary>
         protected abstract void Check();
 
         /// <summary>
-        /// Generates xml element containing the settings.
+        /// Generates the xml element containing the entire configuration.
         /// </summary>
-        /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
-        public virtual XElement GetXml(string rootElemName, bool suppressDefaults)
-        {
-            throw new NotImplementedException("GetXml method is not implemented.");
-        }
+        /// <param name="rootElemName">Name to be used for the root xml element.</param>
+        /// <param name="suppressDefaults">Specifies whether to omit optional nodes containing only default values</param>
+        /// <returns>The root XElement containing the entire configuration</returns>
+        public abstract XElement GetXml(string rootElemName, bool suppressDefaults);
 
         /// <summary>
-        /// Generates default named xml element containing the settings.
+        /// Generates defaultly named root xml element containing the configuration.
         /// </summary>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <param name="suppressDefaults">Specifies whether to omit optional nodes containing only default values</param>
+        /// <returns>The root XElement containing the entire configuration</returns>
         public virtual XElement GetXml(bool suppressDefaults)
         {
-            throw new NotImplementedException("GetXml method is not implemented.");
+            return GetXml("config", suppressDefaults);
         }
 
     }//RCNetBaseSettings

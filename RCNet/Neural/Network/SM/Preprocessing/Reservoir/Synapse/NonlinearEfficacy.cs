@@ -4,12 +4,12 @@ using System;
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
 {
     /// <summary>
-    /// Implements nonlinear efficacy computer
+    /// Implements the nonlinear efficacy computer
     /// </summary>
     public class NonlinearEfficacy : IEfficacy
     {
         //Attributes
-        private readonly NeuronOutputData _sourceNeuronOutputData;
+        private readonly NeuronOutputData _presynapticNeuronOutputData;
         private readonly NonlinearDynamicsSettings _dynamicsCfg;
         private double _facilitation;
         private double _depression;
@@ -18,20 +18,18 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         /// <summary>
         /// Creates an initialized instance
         /// </summary>
-        /// <param name="sourceNeuron">Source neuron</param>
+        /// <param name="presynapticNeuron">Presynaptic neuron</param>
         /// <param name="dynamicsCfg">Dynamics configuration</param>
-        public NonlinearEfficacy(INeuron sourceNeuron, NonlinearDynamicsSettings dynamicsCfg)
+        public NonlinearEfficacy(INeuron presynapticNeuron, NonlinearDynamicsSettings dynamicsCfg)
         {
-            _sourceNeuronOutputData = sourceNeuron.OutputData;
+            _presynapticNeuronOutputData = presynapticNeuron.OutputData;
             _dynamicsCfg = (NonlinearDynamicsSettings)dynamicsCfg.DeepClone();
             Reset();
             return;
         }
 
         //Methods
-        /// <summary>
-        /// Resets efficacy computer to its initial state
-        /// </summary>
+        /// <inheritdoc />
         public void Reset()
         {
             _facilitation = _dynamicsCfg.RestingEfficacy;
@@ -39,19 +37,17 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
             return;
         }
 
-        /// <summary>
-        /// Computes synapse efficacy (call only when spike)
-        /// </summary>
+        /// <inheritdoc />
         public double Compute()
         {
-            if (_sourceNeuronOutputData._afterFirstSpike)
+            if (_presynapticNeuronOutputData._afterFirstSpike)
             {
-                double sourceSpikeLeak = _sourceNeuronOutputData._spikeLeak;
+                double presynapticSpikeLeak = _presynapticNeuronOutputData._spikeLeak;
                 //Facilitation model
-                double tmp = _facilitation * Math.Exp(-(sourceSpikeLeak / _dynamicsCfg.TauFacilitation));
+                double tmp = _facilitation * Math.Exp(-(presynapticSpikeLeak / _dynamicsCfg.TauFacilitation));
                 _facilitation = tmp + _dynamicsCfg.RestingEfficacy * (1d - tmp);
                 //Depression model
-                tmp = Math.Exp(-(sourceSpikeLeak / _dynamicsCfg.TauDepression));
+                tmp = Math.Exp(-(presynapticSpikeLeak / _dynamicsCfg.TauDepression));
                 _depression = _depression * (1d - _facilitation) * tmp + 1d - tmp;
             }
             return _facilitation * _depression;

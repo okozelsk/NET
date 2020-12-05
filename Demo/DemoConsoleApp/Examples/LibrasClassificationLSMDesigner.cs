@@ -97,7 +97,7 @@ namespace Demo.DemoConsoleApp.Examples
 
             //Simplified readout layer configuration
             ReadoutLayerSettings readoutCfg = StateMachineDesigner.CreateClassificationReadoutCfg(new CrossvalidationSettings(0.0825d, 0, 1),
-                                                                                                  StateMachineDesigner.CreateMultiLayerRegrNet(10, new LeakyReLUSettings(), 2, 5, 400),
+                                                                                                  StateMachineDesigner.CreateMultiLayerRegrNet(10, new AFAnalogLeakyReLUSettings(), 2, 5, 400),
                                                                                                   "Hand movement",
                                                                                                   null,
                                                                                                   "curved swing",
@@ -120,7 +120,7 @@ namespace Demo.DemoConsoleApp.Examples
             StateMachineDesigner smd = new StateMachineDesigner(inputCfg, readoutCfg);
             //Create pure LSM fashioned StateMachine configuration
             StateMachineSettings stateMachineCfg = smd.CreatePureLSMCfg(272, //Total size of the reservoir
-                                                                        new AdExpIFSettings(), //Activation
+                                                                        new AFSpikingAdExpIFSettings(), //Activation
                                                                         homogenousExcitability, //Homogenous excitability
                                                                         1, //Input connection density
                                                                         0, //Input max delay

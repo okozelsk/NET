@@ -5,7 +5,7 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
 {
     /// <summary>
-    /// Configuration of synapse linear short-term plasticity dynamics
+    /// Configuration of the synapse linear short-term plasticity dynamics
     /// </summary>
     [Serializable]
     public abstract class LinearDynamicsSettings : RCNetBaseSettings, IDynamicsSettings
@@ -73,20 +73,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         }
 
         //Properties
-        /// <summary>
-        /// Type of synapse's dynamics
-        /// </summary>
+        /// <inheritdoc />
         public PlasticityCommon.DynType Type { get { return PlasticityCommon.DynType.Linear; } }
 
-        /// <summary>
-        /// Application of the synapse's dynamics
-        /// </summary>
+        /// <inheritdoc />
         public abstract PlasticityCommon.DynApplication Application { get; }
 
         //Methods
-        /// <summary>
-        /// Checks validity
-        /// </summary>
+        /// <inheritdoc />
         protected override void Check()
         {
             if (Alpha < 0 || Alpha > 1)

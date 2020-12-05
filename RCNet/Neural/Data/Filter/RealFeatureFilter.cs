@@ -4,7 +4,7 @@ using System;
 namespace RCNet.Neural.Data.Filter
 {
     /// <summary>
-    /// Implements real number feature filter
+    /// Implements the real number feature filter
     /// </summary>
     [Serializable]
     public class RealFeatureFilter : FeatureFilterBase
@@ -54,9 +54,7 @@ namespace RCNet.Neural.Data.Filter
         }
 
         //Properties
-        /// <summary>
-        /// Feature range
-        /// </summary>
+        /// <inheritdoc/>
         public override Interval FeatureRange
         {
             get
@@ -67,9 +65,7 @@ namespace RCNet.Neural.Data.Filter
         }
 
         //Methods
-        /// <summary>
-        /// Resets filter to its initial state
-        /// </summary>
+        /// <inheritdoc/>
         public override void Reset()
         {
             base.Reset();
@@ -77,10 +73,7 @@ namespace RCNet.Neural.Data.Filter
             return;
         }
 
-        /// <summary>
-        /// Updates internal statistics
-        /// </summary>
-        /// <param name="sample">Feature sample value</param>
+        /// <inheritdoc/>
         public override void Update(double sample)
         {
             base.Update(sample);
@@ -131,11 +124,7 @@ namespace RCNet.Neural.Data.Filter
             return;
         }
 
-        /// <summary>
-        /// Applies filter
-        /// </summary>
-        /// <param name="value">Feature value</param>
-        /// <returns>Filter value</returns>
+        /// <inheritdoc/>
         public override double ApplyFilter(double value)
         {
             RecomputeRange();
@@ -147,11 +136,7 @@ namespace RCNet.Neural.Data.Filter
             return base.ApplyFilter(value);
         }
 
-        /// <summary>
-        /// Applies filter reverse
-        /// </summary>
-        /// <param name="value">Filter value</param>
-        /// <returns>Feature value</returns>
+        /// <inheritdoc/>
         public override double ApplyReverse(double value)
         {
             RecomputeRange();

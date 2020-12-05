@@ -5,7 +5,7 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
 {
     /// <summary>
-    /// Class contains configuration of the Random schema of pool's neurons interconnection
+    /// Configuration of the Random schema of pool's neurons interconnection
     /// </summary>
     [Serializable]
     public class RandomSchemaSettings : RCNetBaseSettings, IInterconnSchemaSettings
@@ -65,13 +65,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
         /// Specifies whether to keep constant number of synapses per target neuron
         /// </summary>
         public bool ConstantNumOfConnections { get; }
-        /// <summary>
-        /// Specifies whether the connections of this schema will replace existing connections
-        /// </summary>
+        /// <inheritdoc/>
         public bool ReplaceExistingConnections { get; }
-        /// <summary>
-        /// Number of applications of this schema
-        /// </summary>
+        /// <inheritdoc/>
         public int Repetitions { get; }
 
         //Constructors
@@ -140,38 +136,36 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
 
         //Properties
         /// <summary>
-        /// Checks if settings are default
+        /// Checks the defaults
         /// </summary>
         public bool IsDefaultDensity { get { return (Density == DefaultDensity); } }
 
         /// <summary>
-        /// Checks if settings are default
+        /// Checks the defaults
         /// </summary>
         public bool IsDefaultAvgDistance { get { return (AvgDistance == DefaultAvgDistanceNum); } }
 
         /// <summary>
-        /// Checks if settings are default
+        /// Checks the defaults
         /// </summary>
         public bool IsDefaultAllowSelfConnection { get { return (AllowSelfConnection == DefaultAllowSelfConnection); } }
 
         /// <summary>
-        /// Checks if settings are default
+        /// Checks the defaults
         /// </summary>
         public bool IsDefaultConstantNumOfConnections { get { return (ConstantNumOfConnections == DefaultConstantNumOfConnections); } }
 
         /// <summary>
-        /// Checks if settings are default
+        /// Checks the defaults
         /// </summary>
         public bool IsDefaultReplaceExistingConnections { get { return (ReplaceExistingConnections == DefaultReplaceExistingConnections); } }
 
         /// <summary>
-        /// Checks if settings are default
+        /// Checks the defaults
         /// </summary>
         public bool IsDefaultRepetitions { get { return (Repetitions == DefaultRepetitions); } }
 
-        /// <summary>
-        /// Identifies settings containing only default values
-        /// </summary>
+        /// <inheritdoc/>
         public override bool ContainsOnlyDefaults
         {
             get
@@ -187,9 +181,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
 
 
         //Methods
-        /// <summary>
-        /// Checks consistency
-        /// </summary>
+        /// <inheritdoc/>
         protected override void Check()
         {
             if (Density <= 0 || Density > 1)
@@ -207,20 +199,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
             return;
         }
 
-        /// <summary>
-        /// Creates the deep copy instance of this instance
-        /// </summary>
+        /// <inheritdoc/>
         public override RCNetBaseSettings DeepClone()
         {
             return new RandomSchemaSettings(this);
         }
 
-        /// <summary>
-        /// Generates xml element containing the settings.
-        /// </summary>
-        /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc/>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             XElement rootElem = new XElement(rootElemName);
@@ -252,11 +237,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
             return rootElem;
         }
 
-        /// <summary>
-        /// Generates default named xml element containing the settings.
-        /// </summary>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc/>
         public override XElement GetXml(bool suppressDefaults)
         {
             return GetXml("randomSchema", suppressDefaults);

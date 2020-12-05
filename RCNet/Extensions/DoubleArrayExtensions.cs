@@ -1,5 +1,6 @@
-﻿using RCNet.MathTools;
+﻿using System;
 using System.Runtime.CompilerServices;
+using RCNet.MathTools;
 
 namespace RCNet.Extensions
 {
@@ -136,6 +137,39 @@ namespace RCNet.Extensions
                 {
                     array[i] = min + (1d - array[i]) * (max - min);
                 }
+            }
+            return;
+        }
+
+        /// <summary>
+        /// Applies softmax
+        /// </summary>
+        public static void Softmax(this double[] array)
+        {
+            double min = array.Min();
+            double max = array.Max();
+            if (min != max)
+            {
+                //Transformation is possible
+                array.ScaleToNewSum(1d);
+                min = array.Min();
+                max = array.Max();
+                double[] expW = new double[array.Length];
+                double expWSum = 0d;
+                for (int i = 0; i < array.Length; i++)
+                {
+                    expW[i] = Math.Exp((array[i] - min) / (max - min));
+                    expWSum += expW[i];
+                }
+                for (int i = 0; i < array.Length; i++)
+                {
+                    array[i] = expW[i] / expWSum;
+                }
+            }
+            else
+            {
+                //Softmax transformation is not possible, ensure the sum of weights is 1
+                array.ScaleToNewSum(1d);
             }
             return;
         }

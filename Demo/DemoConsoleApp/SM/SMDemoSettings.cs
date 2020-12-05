@@ -10,8 +10,7 @@ using System.Xml.Linq;
 namespace Demo.DemoConsoleApp.SM
 {
     /// <summary>
-    /// Encapsulates StateMachine demo cases configurations.
-    /// One and only way to create an instance is to use the xml constructor.
+    /// Holds the StateMachine demo cases configurations.
     /// </summary>
     public class SMDemoSettings
     {

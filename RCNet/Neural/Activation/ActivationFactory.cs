@@ -1,28 +1,28 @@
-﻿using RCNet.Extensions;
+﻿using System;
+using System.Xml.Linq;
+using RCNet.Extensions;
 using RCNet.MathTools;
 using RCNet.MathTools.Differential;
-using System;
-using System.Xml.Linq;
 
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Class mediates operations with activation functions
+    /// Class mediates operations with activation functions and af configurations
     /// </summary>
     public static class ActivationFactory
     {
         //Constants
         /// <summary>
-        /// Minimal initial potentisl of spiking membrane
+        /// Minimal initial voltage ratio of the spiking activation function
         /// </summary>
-        private const double SMInitMinPotential = 0.05d;
+        private const double MinInitialVRatio = 0.05d;
         /// <summary>
-        /// Maximal initial potentisl of spiking membrane
+        /// Maximal initial voltage ratio of the spiking activation function
         /// </summary>
-        private const double SMInitMaxPotential = 0.95d;
+        private const double MaxInitialVRatio = 0.95d;
         //Default values
         /// <summary>
-        /// Default value of refractory periods
+        /// Default value of the refractory periods
         /// </summary>
         public const int DefaultRefractoryPeriods = 1;
 
@@ -37,342 +37,236 @@ namespace RCNet.Neural.Activation
         public const int DefaultSolverCompSteps = 2;
 
         /// <summary>
-        /// Default duration of spiking neuron stimulation in ms.
+        /// Default duration of the spiking neuron stimulation in ms.
         /// </summary>
         public const double DefaultStimuliDuration = 1;
 
 
         //Methods
         /// <summary>
-        /// Returns the instance of the activation function settings
+        /// Loads configuration of the activation function from the given xml element
         /// </summary>
-        /// <param name="settingsElem">
-        /// XML element containing specific activation settings
-        /// </param>
-        public static RCNetBaseSettings LoadSettings(XElement settingsElem)
+        /// <param name="settingsElem">XML element containing the configuration</param>
+        public static IActivationSettings LoadSettings(XElement settingsElem)
         {
             switch (settingsElem.Name.LocalName)
             {
                 case "activationAdExpIF":
-                    return new AdExpIFSettings(settingsElem);
+                    return new AFSpikingAdExpIFSettings(settingsElem);
                 case "activationSQNL":
-                    return new SQNLSettings(settingsElem);
+                    return new AFAnalogSQNLSettings(settingsElem);
                 case "activationBentIdentity":
-                    return new BentIdentitySettings(settingsElem);
+                    return new AFAnalogBentIdentitySettings(settingsElem);
                 case "activationElliot":
-                    return new ElliotSettings(settingsElem);
+                    return new AFAnalogElliotSettings(settingsElem);
                 case "activationExpIF":
-                    return new ExpIFSettings(settingsElem);
+                    return new AFSpikingExpIFSettings(settingsElem);
                 case "activationIzhikevichIF":
-                    return new IzhikevichIFSettings(settingsElem);
+                    return new AFSpikingIzhikevichIFSettings(settingsElem);
                 case "activationAutoIzhikevichIF":
-                    return new AutoIzhikevichIFSettings(settingsElem);
+                    return new AFSpikingAutoIzhikevichIFSettings(settingsElem);
                 case "activationGaussian":
-                    return new GaussianSettings(settingsElem);
+                    return new AFAnalogGaussianSettings(settingsElem);
                 case "activationIdentity":
-                    return new IdentitySettings(settingsElem);
+                    return new AFAnalogIdentitySettings(settingsElem);
                 case "activationISRU":
-                    return new ISRUSettings(settingsElem);
+                    return new AFAnalogISRUSettings(settingsElem);
                 case "activationLeakyIF":
-                    return new LeakyIFSettings(settingsElem);
+                    return new AFSpikingLeakyIFSettings(settingsElem);
                 case "activationLeakyReLU":
-                    return new LeakyReLUSettings(settingsElem);
+                    return new AFAnalogLeakyReLUSettings(settingsElem);
                 case "activationSigmoid":
-                    return new SigmoidSettings(settingsElem);
+                    return new AFAnalogSigmoidSettings(settingsElem);
                 case "activationSimpleIF":
-                    return new SimpleIFSettings(settingsElem);
+                    return new AFSpikingSimpleIFSettings(settingsElem);
                 case "activationSinc":
-                    return new SincSettings(settingsElem);
+                    return new AFAnalogSincSettings(settingsElem);
                 case "activationSinusoid":
-                    return new SinusoidSettings(settingsElem);
+                    return new AFAnalogSinusoidSettings(settingsElem);
                 case "activationSoftExponential":
-                    return new SoftExponentialSettings(settingsElem);
+                    return new AFAnalogSoftExponentialSettings(settingsElem);
+                case "activationSoftMax":
+                    return new AFAnalogSoftMaxSettings(settingsElem);
                 case "activationSoftPlus":
-                    return new SoftPlusSettings(settingsElem);
+                    return new AFAnalogSoftPlusSettings(settingsElem);
                 case "activationTanH":
-                    return new TanHSettings(settingsElem);
+                    return new AFAnalogTanHSettings(settingsElem);
                 default:
                     throw new ArgumentException($"Unsupported activation function settings: {settingsElem.Name}", "settingsElem");
             }
         }
 
         /// <summary>
-        /// Collects basic information about activation function corresponding to given configuration
+        /// Creates an instance of the activation function according to given configuration.
         /// </summary>
-        /// <param name="activationSettings">Activation function settings</param>
-        /// <param name="stateless">Indicates whether the activation function is stateless</param>
-        /// <param name="supportsDerivative">Indicates whether the activation function supports derivative</param>
-        /// <returns>Output range of the activation function</returns>
-        public static Interval GetInfo(RCNetBaseSettings activationSettings, out bool stateless, out bool supportsDerivative)
-        {
-            IActivationFunction af = Create(activationSettings, new Random());
-            Interval outputRange = af.OutputRange.DeepClone();
-            stateless = af.Stateless;
-            supportsDerivative = af.SupportsDerivative;
-            return outputRange;
-        }
-
-        /// <summary>
-        /// Creates an instance of the activation function according to given settings.
-        /// </summary>
-        /// <param name="settings">Specific activation function settings </param>
+        /// <param name="settings">Configuration of the activation function</param>
         /// <param name="rand">Random object to be used for randomly generated parameters</param>
-        public static IActivationFunction Create(RCNetBaseSettings settings, Random rand)
+        public static IActivation CreateAF(IActivationSettings settings, Random rand)
         {
-            IActivationFunction af;
+            IActivation af;
             Type settingsType = settings.GetType();
-            if (settingsType == typeof(AdExpIFSettings))
+            if (settingsType == typeof(AFSpikingAdExpIFSettings))
             {
-                AdExpIFSettings afs = (AdExpIFSettings)settings;
-                af = new AdExpIF(rand.NextDouble(afs.TimeScale),
-                                 rand.NextDouble(afs.Resistance),
-                                 rand.NextDouble(afs.RestV),
-                                 rand.NextDouble(afs.ResetV),
-                                 rand.NextDouble(afs.RheobaseV),
-                                 rand.NextDouble(afs.FiringThresholdV),
-                                 rand.NextDouble(afs.SharpnessDeltaT),
-                                 rand.NextDouble(afs.AdaptationVoltageCoupling),
-                                 rand.NextDouble(afs.AdaptationTimeConstant),
-                                 rand.NextDouble(afs.AdaptationSpikeTriggeredIncrement),
-                                 afs.SolverMethod,
-                                 afs.SolverCompSteps,
-                                 afs.StimuliDuration
-                                 );
+                AFSpikingAdExpIFSettings afs = (AFSpikingAdExpIFSettings)settings;
+                af = new AFSpikingAdExpIF(rand.NextDouble(afs.TimeScale),
+                                          rand.NextDouble(afs.Resistance),
+                                          rand.NextDouble(afs.RestV),
+                                          rand.NextDouble(afs.ResetV),
+                                          rand.NextDouble(afs.RheobaseV),
+                                          rand.NextDouble(afs.FiringThresholdV),
+                                          rand.NextDouble(afs.SharpnessDeltaT),
+                                          rand.NextDouble(afs.AdaptationVoltageCoupling),
+                                          rand.NextDouble(afs.AdaptationTimeConstant),
+                                          rand.NextDouble(afs.AdaptationSpikeTriggeredIncrement),
+                                          afs.SolverMethod,
+                                          afs.SolverCompSteps,
+                                          afs.StimuliDuration,
+                                          rand.NextRangedUniformDouble(MinInitialVRatio, MaxInitialVRatio)
+                                          );
             }
-            else if (settingsType == typeof(BentIdentitySettings))
+            else if (settingsType == typeof(AFAnalogBentIdentitySettings))
             {
-                af = new BentIdentity();
+                af = new AFAnalogBentIdentity();
             }
-            else if (settingsType == typeof(ElliotSettings))
+            else if (settingsType == typeof(AFAnalogElliotSettings))
             {
-                ElliotSettings afs = (ElliotSettings)settings;
-                af = new Elliot(rand.NextDouble(afs.Slope));
+                AFAnalogElliotSettings afs = (AFAnalogElliotSettings)settings;
+                af = new AFAnalogElliot(rand.NextDouble(afs.Slope));
             }
-            else if (settingsType == typeof(ExpIFSettings))
+            else if (settingsType == typeof(AFSpikingExpIFSettings))
             {
-                ExpIFSettings afs = (ExpIFSettings)settings;
-                af = new ExpIF(rand.NextDouble(afs.TimeScale),
-                               rand.NextDouble(afs.Resistance),
-                               rand.NextDouble(afs.RestV),
-                               rand.NextDouble(afs.ResetV),
-                               rand.NextDouble(afs.RheobaseV),
-                               rand.NextDouble(afs.FiringThresholdV),
-                               rand.NextDouble(afs.SharpnessDeltaT),
-                               afs.RefractoryPeriods,
-                               afs.SolverMethod,
-                               afs.SolverCompSteps,
-                               afs.StimuliDuration
-                               );
+                AFSpikingExpIFSettings afs = (AFSpikingExpIFSettings)settings;
+                af = new AFSpikingExpIF(rand.NextDouble(afs.TimeScale),
+                                        rand.NextDouble(afs.Resistance),
+                                        rand.NextDouble(afs.RestV),
+                                        rand.NextDouble(afs.ResetV),
+                                        rand.NextDouble(afs.RheobaseV),
+                                        rand.NextDouble(afs.FiringThresholdV),
+                                        rand.NextDouble(afs.SharpnessDeltaT),
+                                        afs.RefractoryPeriods,
+                                        afs.SolverMethod,
+                                        afs.SolverCompSteps,
+                                        afs.StimuliDuration,
+                                        rand.NextRangedUniformDouble(MinInitialVRatio, MaxInitialVRatio)
+                                        );
             }
-            else if (settingsType == typeof(GaussianSettings))
+            else if (settingsType == typeof(AFAnalogGaussianSettings))
             {
-                af = new Gaussian();
+                af = new AFAnalogGaussian();
             }
-            else if (settingsType == typeof(IdentitySettings))
+            else if (settingsType == typeof(AFAnalogIdentitySettings))
             {
-                af = new Identity();
+                af = new AFAnalogIdentity();
             }
-            else if (settingsType == typeof(ISRUSettings))
+            else if (settingsType == typeof(AFAnalogISRUSettings))
             {
-                ISRUSettings afs = (ISRUSettings)settings;
-                af = new ISRU(rand.NextDouble(afs.Alpha));
+                AFAnalogISRUSettings afs = (AFAnalogISRUSettings)settings;
+                af = new AFAnalogISRU(rand.NextDouble(afs.Alpha));
             }
-            else if (settingsType == typeof(IzhikevichIFSettings))
+            else if (settingsType == typeof(AFSpikingIzhikevichIFSettings))
             {
-                IzhikevichIFSettings afs = (IzhikevichIFSettings)settings;
-                af = new IzhikevichIF(rand.NextDouble(afs.RecoveryTimeScale),
-                                      rand.NextDouble(afs.RecoverySensitivity),
-                                      rand.NextDouble(afs.RecoveryReset),
-                                      rand.NextDouble(afs.RestV),
-                                      rand.NextDouble(afs.ResetV),
-                                      rand.NextDouble(afs.FiringThresholdV),
-                                      afs.RefractoryPeriods,
-                                      afs.SolverMethod,
-                                      afs.SolverCompSteps,
-                                      afs.StimuliDuration
-                                      );
+                AFSpikingIzhikevichIFSettings afs = (AFSpikingIzhikevichIFSettings)settings;
+                af = new AFSpikingIzhikevichIF(rand.NextDouble(afs.RecoveryTimeScale),
+                                               rand.NextDouble(afs.RecoverySensitivity),
+                                               rand.NextDouble(afs.RecoveryReset),
+                                               rand.NextDouble(afs.RestV),
+                                               rand.NextDouble(afs.ResetV),
+                                               rand.NextDouble(afs.FiringThresholdV),
+                                               afs.RefractoryPeriods,
+                                               afs.SolverMethod,
+                                               afs.SolverCompSteps,
+                                               afs.StimuliDuration,
+                                               rand.NextRangedUniformDouble(MinInitialVRatio, MaxInitialVRatio)
+                                               );
 
             }
-            else if (settingsType == typeof(AutoIzhikevichIFSettings))
+            else if (settingsType == typeof(AFSpikingAutoIzhikevichIFSettings))
             {
                 double randomValue = rand.NextDouble().Power(2);
-                AutoIzhikevichIFSettings afs = (AutoIzhikevichIFSettings)settings;
+                AFSpikingAutoIzhikevichIFSettings afs = (AFSpikingAutoIzhikevichIFSettings)settings;
                 //Ranges
-                af = new IzhikevichIF(0.02,
-                                      0.2,
-                                      8 + (-6 * randomValue),
-                                      -70,
-                                      -65 + (15 * randomValue),
-                                      30,
-                                      afs.RefractoryPeriods,
-                                      afs.SolverMethod,
-                                      afs.SolverCompSteps,
-                                      afs.StimuliDuration
-                                      );
+                af = new AFSpikingIzhikevichIF(0.02,
+                                               0.2,
+                                               8 + (-6 * randomValue),
+                                               -70,
+                                               -65 + (15 * randomValue),
+                                               30,
+                                               afs.RefractoryPeriods,
+                                               afs.SolverMethod,
+                                               afs.SolverCompSteps,
+                                               afs.StimuliDuration,
+                                               rand.NextRangedUniformDouble(MinInitialVRatio, MaxInitialVRatio)
+                                               );
             }
-            else if (settingsType == typeof(LeakyIFSettings))
+            else if (settingsType == typeof(AFSpikingLeakyIFSettings))
             {
-                LeakyIFSettings afs = (LeakyIFSettings)settings;
-                af = new LeakyIF(rand.NextDouble(afs.TimeScale),
-                                 rand.NextDouble(afs.Resistance),
-                                 rand.NextDouble(afs.RestV),
-                                 rand.NextDouble(afs.ResetV),
-                                 rand.NextDouble(afs.FiringThresholdV),
-                                 afs.RefractoryPeriods,
-                                 afs.SolverMethod,
-                                 afs.SolverCompSteps,
-                                 afs.StimuliDuration
-                                 );
+                AFSpikingLeakyIFSettings afs = (AFSpikingLeakyIFSettings)settings;
+                af = new AFSpikingLeakyIF(rand.NextDouble(afs.TimeScale),
+                                          rand.NextDouble(afs.Resistance),
+                                          rand.NextDouble(afs.RestV),
+                                          rand.NextDouble(afs.ResetV),
+                                          rand.NextDouble(afs.FiringThresholdV),
+                                          afs.RefractoryPeriods,
+                                          afs.SolverMethod,
+                                          afs.SolverCompSteps,
+                                          afs.StimuliDuration,
+                                          rand.NextRangedUniformDouble(MinInitialVRatio, MaxInitialVRatio)
+                                          );
             }
-            else if (settingsType == typeof(LeakyReLUSettings))
+            else if (settingsType == typeof(AFAnalogLeakyReLUSettings))
             {
-                LeakyReLUSettings afs = (LeakyReLUSettings)settings;
-                af = new LeakyReLU(rand.NextDouble(afs.NegSlope));
+                AFAnalogLeakyReLUSettings afs = (AFAnalogLeakyReLUSettings)settings;
+                af = new AFAnalogLeakyReLU(rand.NextDouble(afs.NegSlope));
             }
-            else if (settingsType == typeof(SigmoidSettings))
+            else if (settingsType == typeof(AFAnalogSigmoidSettings))
             {
-                af = new Sigmoid();
+                af = new AFAnalogSigmoid();
             }
-            else if (settingsType == typeof(SimpleIFSettings))
+            else if (settingsType == typeof(AFSpikingSimpleIFSettings))
             {
-                SimpleIFSettings afs = (SimpleIFSettings)settings;
-                af = new SimpleIF(rand.NextDouble(afs.Resistance),
-                                  rand.NextDouble(afs.DecayRate),
-                                  rand.NextDouble(afs.ResetV),
-                                  rand.NextDouble(afs.FiringThresholdV),
-                                  afs.RefractoryPeriods
-                                  );
+                AFSpikingSimpleIFSettings afs = (AFSpikingSimpleIFSettings)settings;
+                af = new AFSpikingSimpleIF(rand.NextDouble(afs.Resistance),
+                                           rand.NextDouble(afs.DecayRate),
+                                           rand.NextDouble(afs.ResetV),
+                                           rand.NextDouble(afs.FiringThresholdV),
+                                           afs.RefractoryPeriods,
+                                           rand.NextRangedUniformDouble(MinInitialVRatio, MaxInitialVRatio)
+                                           );
             }
-            else if (settingsType == typeof(SincSettings))
+            else if (settingsType == typeof(AFAnalogSincSettings))
             {
-                af = new Sinc();
+                af = new AFAnalogSinc();
             }
-            else if (settingsType == typeof(SinusoidSettings))
+            else if (settingsType == typeof(AFAnalogSinusoidSettings))
             {
-                af = new Sinusoid();
+                af = new AFAnalogSinusoid();
             }
-            else if (settingsType == typeof(SoftExponentialSettings))
+            else if (settingsType == typeof(AFAnalogSoftExponentialSettings))
             {
-                SoftExponentialSettings afs = (SoftExponentialSettings)settings;
-                af = new SoftExponential(rand.NextDouble(afs.Alpha));
+                AFAnalogSoftExponentialSettings afs = (AFAnalogSoftExponentialSettings)settings;
+                af = new AFAnalogSoftExponential(rand.NextDouble(afs.Alpha));
             }
-            else if (settingsType == typeof(SoftPlusSettings))
+            else if (settingsType == typeof(AFAnalogSoftMaxSettings))
             {
-                af = new SoftPlus();
+                af = new AFAnalogSoftMax();
             }
-            else if (settingsType == typeof(SQNLSettings))
+            else if (settingsType == typeof(AFAnalogSoftPlusSettings))
             {
-                af = new SQNL();
+                af = new AFAnalogSoftPlus();
             }
-            else if (settingsType == typeof(TanHSettings))
+            else if (settingsType == typeof(AFAnalogSQNLSettings))
             {
-                af = new TanH();
+                af = new AFAnalogSQNL();
+            }
+            else if (settingsType == typeof(AFAnalogTanHSettings))
+            {
+                af = new AFAnalogTanH();
             }
             else
             {
-                throw new ArgumentException($"Unsupported activation function settings: {settingsType.Name}");
-            }
-            //Set random initial membrane potential for spiking activation
-            if(!af.Stateless && af.TypeOfActivation == ActivationType.Spiking)
-            {
-                af.SetInitialInternalState(rand.NextRangedUniformDouble(SMInitMinPotential, SMInitMaxPotential));
+                throw new ArgumentException($"Unsupported activation function configuration: {settingsType.Name}");
             }
             return af;
-        }
-
-        /// <summary>
-        /// Returns the deep clone of the activation function settings
-        /// </summary>
-        /// <param name="settings">
-        /// Specific activation function settings
-        /// </param>
-        public static RCNetBaseSettings DeepCloneActivationSettings(RCNetBaseSettings settings)
-        {
-            Type settingsType = settings.GetType();
-            if (settingsType == typeof(AdExpIFSettings))
-            {
-                return ((AdExpIFSettings)settings).DeepClone();
-            }
-            else if (settingsType == typeof(SQNLSettings))
-            {
-                return ((SQNLSettings)settings).DeepClone();
-            }
-            else if (settingsType == typeof(BentIdentitySettings))
-            {
-                return ((BentIdentitySettings)settings).DeepClone();
-            }
-            else if (settingsType == typeof(ElliotSettings))
-            {
-                return ((ElliotSettings)settings).DeepClone();
-            }
-            else if (settingsType == typeof(ExpIFSettings))
-            {
-                return ((ExpIFSettings)settings).DeepClone();
-            }
-            else if (settingsType == typeof(GaussianSettings))
-            {
-                return ((GaussianSettings)settings).DeepClone();
-            }
-            else if (settingsType == typeof(IdentitySettings))
-            {
-                return ((IdentitySettings)settings).DeepClone();
-            }
-            else if (settingsType == typeof(ISRUSettings))
-            {
-                return ((ISRUSettings)settings).DeepClone();
-            }
-            else if (settingsType == typeof(IzhikevichIFSettings))
-            {
-                return ((IzhikevichIFSettings)settings).DeepClone();
-            }
-            else if (settingsType == typeof(AutoIzhikevichIFSettings))
-            {
-                return ((AutoIzhikevichIFSettings)settings).DeepClone();
-            }
-            else if (settingsType == typeof(LeakyIFSettings))
-            {
-                return ((LeakyIFSettings)settings).DeepClone();
-            }
-            else if (settingsType == typeof(LeakyReLUSettings))
-            {
-                return ((LeakyReLUSettings)settings).DeepClone();
-            }
-            else if (settingsType == typeof(LeakyReLUSettings))
-            {
-                return ((LeakyReLUSettings)settings).DeepClone();
-            }
-            else if (settingsType == typeof(SigmoidSettings))
-            {
-                return ((SigmoidSettings)settings).DeepClone();
-            }
-            else if (settingsType == typeof(SimpleIFSettings))
-            {
-                return ((SimpleIFSettings)settings).DeepClone();
-            }
-            else if (settingsType == typeof(SincSettings))
-            {
-                return ((SincSettings)settings).DeepClone();
-            }
-            else if (settingsType == typeof(SinusoidSettings))
-            {
-                return ((SinusoidSettings)settings).DeepClone();
-            }
-            else if (settingsType == typeof(SoftExponentialSettings))
-            {
-                return ((SoftExponentialSettings)settings).DeepClone();
-            }
-            else if (settingsType == typeof(SoftPlusSettings))
-            {
-                return ((SoftPlusSettings)settings).DeepClone();
-            }
-            else if (settingsType == typeof(TanHSettings))
-            {
-                return ((TanHSettings)settings).DeepClone();
-            }
-            else
-            {
-                throw new ArgumentException($"Unsupported activation function settings: {settingsType.Name}");
-            }
         }
 
     }//ActivationFactory

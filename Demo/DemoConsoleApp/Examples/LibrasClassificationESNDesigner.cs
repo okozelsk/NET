@@ -44,9 +44,9 @@ namespace Demo.DemoConsoleApp.Examples
                                                                                 );
             //Simplified readout layer configuration
             ReadoutLayerSettings readoutCfg = StateMachineDesigner.CreateClassificationReadoutCfg(new CrossvalidationSettings(0.0825d, CrossvalidationSettings.AutoFolds, 1),
-                                                                                                  StateMachineDesigner.CreateSingleLayerRegrNet(new IdentitySettings(), 5, 400),
+                                                                                                  StateMachineDesigner.CreateSingleLayerRegrNet(new AFAnalogIdentitySettings(), 5, 400),
                                                                                                   "Hand movement",
-                                                                                                  new NetworkClusterSecondLevelCompSettings(new CrossvalidationSettings(0.25d, CrossvalidationSettings.AutoFolds, 2), StateMachineDesigner.CreateMultiLayerRegrNet(10, new LeakyReLUSettings(), 1, 5, 400)),
+                                                                                                  new NetworkClusterSecondLevelCompSettings(new CrossvalidationSettings(0.25d, CrossvalidationSettings.AutoFolds, 2), StateMachineDesigner.CreateMultiLayerRegrNet(10, new AFAnalogLeakyReLUSettings(), 1, 5, 400)),
                                                                                                   "curved swing",
                                                                                                   "horizontal swing",
                                                                                                   "vertical swing",

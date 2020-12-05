@@ -34,8 +34,8 @@ namespace Demo.DemoConsoleApp.Examples
             //Create configuration of the feed forward network having Identity output layer and two LeakyReLU hidden layers
             //with associated resilient back propagation trainer configuration
             const int HiddenLayerSize = 3;
-            HiddenLayerSettings hiddenLayerCfg = new HiddenLayerSettings(HiddenLayerSize, new LeakyReLUSettings());
-            FeedForwardNetworkSettings ffNetCfg = new FeedForwardNetworkSettings(new IdentitySettings(),
+            HiddenLayerSettings hiddenLayerCfg = new HiddenLayerSettings(HiddenLayerSize, new AFAnalogLeakyReLUSettings());
+            FeedForwardNetworkSettings ffNetCfg = new FeedForwardNetworkSettings(new AFAnalogIdentitySettings(),
                                                                                  new HiddenLayersSettings(hiddenLayerCfg, hiddenLayerCfg),
                                                                                  new RPropTrainerSettings(2, 200)
                                                                                  );

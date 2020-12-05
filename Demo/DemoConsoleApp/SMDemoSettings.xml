@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <demo dataFolder="./Data" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="SMDemoSettings.xsd">
 
-
   <!--
     Here StateMachine achieves 82.05% accuracy. It is a bit better than the best accuracy 81.4% achieved by the algorithm
     called COTE referenced at the dataset's home site:
@@ -560,7 +559,7 @@
   <!--
     This demo case demonstrates successful use of the pure analog ESN reservoir for the fast and accurate classifications enabled by
     the new ability of the analog neurons to fire a spike.
-    Following straightforward configuration of the StateMachine achieves 91.27% accuracy, slightly better than
+    Following straightforward configuration of the StateMachine achieves 91.37% accuracy, slightly better than
     the best algorithm called BOSS, referenced at the dataset's home site:
     "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
     https://timeseriesclassification.com/description.php?Dataset=Yoga.

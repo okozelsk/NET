@@ -35,7 +35,7 @@ namespace Demo.DemoConsoleApp.Examples
                                                                                 );
             //Simplified readout layer configuration
             ReadoutLayerSettings readoutCfg = StateMachineDesigner.CreateForecastReadoutCfg(new CrossvalidationSettings(0.1d, 0, 1),
-                                                                                            StateMachineDesigner.CreateSingleLayerRegrNet(new IdentitySettings(), 2, 1000),
+                                                                                            StateMachineDesigner.CreateSingleLayerRegrNet(new AFAnalogIdentitySettings(), 2, 1000),
                                                                                             null,
                                                                                             "High",
                                                                                             "Low"

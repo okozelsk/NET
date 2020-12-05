@@ -5,7 +5,7 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Data.Generators
 {
     /// <summary>
-    /// Setup parameters for the Mackey-Glass signal generator
+    /// Configuration of the Mackey-Glass signal generator
     /// </summary>
     [Serializable]
     public class MackeyGlassGeneratorSettings : RCNetBaseSettings
@@ -72,10 +72,8 @@ namespace RCNet.Neural.Data.Generators
         /// </summary>
         /// <param name="source">Source instance</param>
         public MackeyGlassGeneratorSettings(MackeyGlassGeneratorSettings source)
+            :this(source.Tau, source.B, source.C)
         {
-            Tau = source.Tau;
-            B = source.B;
-            C = source.C;
             return;
         }
 
@@ -97,30 +95,26 @@ namespace RCNet.Neural.Data.Generators
 
         //Properties
         /// <summary>
-        /// Checks if settings are default
+        /// Checks the defaults
         /// </summary>
         public bool IsDefaultTau { get { return (Tau == DefaultTau); } }
 
         /// <summary>
-        /// Checks if settings are default
+        /// Checks the defaults
         /// </summary>
         public bool IsDefaultB { get { return (B == DefaultB); } }
 
         /// <summary>
-        /// Checks if settings are default
+        /// Checks the defaults
         /// </summary>
         public bool IsDefaultC { get { return (C == DefaultC); } }
 
-        /// <summary>
-        /// Identifies settings containing only default values
-        /// </summary>
+        /// <inheritdoc />
         public override bool ContainsOnlyDefaults { get { return IsDefaultTau && IsDefaultB && IsDefaultC; } }
 
 
         //Methods
-        /// <summary>
-        /// Checks consistency
-        /// </summary>
+        /// <inheritdoc />
         protected override void Check()
         {
             if (Tau < 2 || Tau > 18)
@@ -130,20 +124,13 @@ namespace RCNet.Neural.Data.Generators
             return;
         }
 
-        /// <summary>
-        /// Creates the deep copy instance of this instance
-        /// </summary>
+        /// <inheritdoc />
         public override RCNetBaseSettings DeepClone()
         {
             return new MackeyGlassGeneratorSettings(this);
         }
 
-        /// <summary>
-        /// Generates xml element containing the settings.
-        /// </summary>
-        /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc />
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             XElement rootElem = new XElement(rootElemName);
@@ -164,11 +151,7 @@ namespace RCNet.Neural.Data.Generators
             return rootElem;
         }
 
-        /// <summary>
-        /// Generates default named xml element containing the settings.
-        /// </summary>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc />
         public override XElement GetXml(bool suppressDefaults)
         {
             return GetXml("mackeyGlass", suppressDefaults);

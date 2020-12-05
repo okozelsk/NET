@@ -1,7 +1,7 @@
 ﻿namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
 {
     /// <summary>
-    /// Implements constant efficacy computer
+    /// Implements the constant efficacy computer
     /// </summary>
     public class ConstantEfficacy : IEfficacy
     {
@@ -20,17 +20,13 @@
         }
 
         //Methods
-        /// <summary>
-        /// Resets efficacy computer to its initial state
-        /// </summary>
+        /// <inheritdoc />
         public void Reset()
         {
             return;
         }
 
-        /// <summary>
-        /// Computes synapse efficacy
-        /// </summary>
+        /// <inheritdoc />
         public double Compute()
         {
             return _dynamicsCfg == null ? 1d : _dynamicsCfg.Efficacy;

@@ -31,14 +31,18 @@ namespace RCNet.Neural.Network.NonRecurrent
         }
 
         //Constants
-        //Zero level macro-weights
+        //Macro-weights
         //Measures group weights
         private const double TrainGroupWeight = 1d;
         private const double TestGroupWeight = 1d;
         //Measures weights
         private const double SamplesWeight = 1d;
-        private const double AccuracyWeight = 2d;
-        private const double BinAccuracyWeight = 2d;
+        private const double PrecisionWeight = 1d;
+        private const double MisrecognizedWeight = 1d;
+        private const double UnrecognizedWeight = 0d;
+
+        //Switches
+        private const bool Join1stLevelOutputTo2ndLevelInput = true;
 
         //Events
         /// <summary>
@@ -52,12 +56,12 @@ namespace RCNet.Neural.Network.NonRecurrent
         /// Name of the cluster
         /// </summary>
         public string ClusterName { get; }
-        
+
         /// <summary>
         /// Range of input and output data
         /// </summary>
         public Interval DataRange { get; }
-        
+
         /// <summary>
         /// If specified, it indicates that the whole network output is binary and specifies numeric border where GE network output is decided as a 1 and LT output as a 0.
         /// </summary>
@@ -196,9 +200,9 @@ namespace RCNet.Neural.Network.NonRecurrent
         }
 
         /// <summary>
-        /// Gets softmax weights of given trained networks
+        /// Computes weights of given trained networks
         /// </summary>
-        private double[] GetSoftmaxWeights(List<TrainedNetwork> trainedNetworks, bool probabilistic)
+        private double[] ComputeTrainedNetworksWeights(List<TrainedNetwork> trainedNetworks, bool probabilistic)
         {
             double[] weightCollection = new double[trainedNetworks.Count];
             if (weightCollection.Length == 1)
@@ -210,76 +214,60 @@ namespace RCNet.Neural.Network.NonRecurrent
                 //Holders for metrics from member's training and testing phases
                 //Training
                 double[] wHolderTrainSamples = new double[trainedNetworks.Count];
-                double[] wHolderTrainErr = new double[trainedNetworks.Count];
-                double[] wHolderTrainBinAcc = new double[trainedNetworks.Count];
+                double[] wHolderTrainPrecision = new double[trainedNetworks.Count];
+                double[] wHolderTrainMisrecognized = new double[trainedNetworks.Count];
+                double[] wHolderTrainUnrecognized = new double[trainedNetworks.Count];
                 //Testing
                 double[] wHolderTestSamples = new double[trainedNetworks.Count];
-                double[] wHolderTestErr = new double[trainedNetworks.Count];
-                double[] wHolderTestBinAcc = new double[trainedNetworks.Count];
+                double[] wHolderTestPrecision = new double[trainedNetworks.Count];
+                double[] wHolderTestMisrecognized = new double[trainedNetworks.Count];
+                double[] wHolderTestUnrecognized = new double[trainedNetworks.Count];
                 //Collect members' metrics
                 for (int memberIdx = 0; memberIdx < trainedNetworks.Count; memberIdx++)
                 {
                     wHolderTrainSamples[memberIdx] = trainedNetworks[memberIdx].TrainingErrorStat.NumOfSamples;
-                    wHolderTrainErr[memberIdx] = trainedNetworks[memberIdx].TrainingErrorStat.ArithAvg;
-                    wHolderTrainBinAcc[memberIdx] = probabilistic ? (1d - trainedNetworks[memberIdx].TrainingBinErrorStat.TotalErrStat.ArithAvg) : 1d;
+                    wHolderTrainPrecision[memberIdx] = trainedNetworks[memberIdx].TrainingErrorStat.ArithAvg;
+                    wHolderTrainMisrecognized[memberIdx] = probabilistic ? (1d - trainedNetworks[memberIdx].TrainingBinErrorStat.BinValErrStat[0].ArithAvg) : 1d;
+                    wHolderTrainUnrecognized[memberIdx] = probabilistic ? (1d - trainedNetworks[memberIdx].TrainingBinErrorStat.BinValErrStat[1].ArithAvg) : 1d;
                     wHolderTestSamples[memberIdx] = trainedNetworks[memberIdx].TestingErrorStat.NumOfSamples;
-                    wHolderTestErr[memberIdx] = trainedNetworks[memberIdx].TestingErrorStat.ArithAvg;
-                    wHolderTestBinAcc[memberIdx] = probabilistic ? (1d - trainedNetworks[memberIdx].TestingBinErrorStat.TotalErrStat.ArithAvg) : 1d;
+                    wHolderTestPrecision[memberIdx] = trainedNetworks[memberIdx].TestingErrorStat.ArithAvg;
+                    wHolderTestMisrecognized[memberIdx] = probabilistic ? (1d - trainedNetworks[memberIdx].TestingBinErrorStat.BinValErrStat[0].ArithAvg) : 1d;
+                    wHolderTestUnrecognized[memberIdx] = probabilistic ? (1d - trainedNetworks[memberIdx].TestingBinErrorStat.BinValErrStat[1].ArithAvg) : 1d;
                 }
                 //Turn the metrics to have the same meaning and scale them to be useable as the sub-weights
                 wHolderTrainSamples.ScaleToNewSum(1d);
                 wHolderTestSamples.ScaleToNewSum(1d);
-                wHolderTrainErr.RevertMeaning();
-                wHolderTrainErr.ScaleToNewSum(1d);
-                wHolderTestErr.RevertMeaning();
-                wHolderTestErr.ScaleToNewSum(1d);
-                wHolderTrainBinAcc.ScaleToNewSum(1d);
-                wHolderTestBinAcc.ScaleToNewSum(1d);
+                wHolderTrainPrecision.RevertMeaning();
+                wHolderTrainPrecision.ScaleToNewSum(1d);
+                wHolderTestPrecision.RevertMeaning();
+                wHolderTestPrecision.ScaleToNewSum(1d);
+                wHolderTrainMisrecognized.ScaleToNewSum(1d);
+                wHolderTestMisrecognized.ScaleToNewSum(1d);
+                wHolderTrainUnrecognized.ScaleToNewSum(1d);
+                wHolderTestUnrecognized.ScaleToNewSum(1d);
                 //Build the final weights
                 //Combine the sub-weights using defined macro weights of the metrics
                 for (int i = 0; i < trainedNetworks.Count; i++)
                 {
                     weightCollection[i] = TrainGroupWeight * (SamplesWeight * wHolderTrainSamples[i] +
-                                                              AccuracyWeight * wHolderTrainErr[i] +
-                                                              (probabilistic ? BinAccuracyWeight * wHolderTrainBinAcc[i] : 0d)
+                                                              PrecisionWeight * wHolderTrainPrecision[i] +
+                                                              (probabilistic ? MisrecognizedWeight * wHolderTrainMisrecognized[i] : 0d) +
+                                                              (probabilistic ? UnrecognizedWeight * wHolderTrainUnrecognized[i] : 0d)
                                                               ) +
                                           TestGroupWeight * (SamplesWeight * wHolderTestSamples[i] +
-                                                             AccuracyWeight * wHolderTestErr[i] +
-                                                             (probabilistic ? BinAccuracyWeight * wHolderTestBinAcc[i] : 0d)
+                                                             PrecisionWeight * wHolderTestPrecision[i] +
+                                                             (probabilistic ? MisrecognizedWeight * wHolderTestMisrecognized[i] : 0d) +
+                                                             (probabilistic ? UnrecognizedWeight * wHolderTestUnrecognized[i] : 0d)
                                                              );
                 }
-                //Softmax transformation if it is possible
-                double min = weightCollection.Min();
-                double max = weightCollection.Max();
-                if (min != max)
-                {
-                    //Transformation is possible
-                    weightCollection.ScaleToNewSum(1d);
-                    min = weightCollection.Min();
-                    max = weightCollection.Max();
-                    double[] expW = new double[trainedNetworks.Count];
-                    double expWSum = 0d;
-                    for (int i = 0; i < trainedNetworks.Count; i++)
-                    {
-                        expW[i] = Math.Exp((weightCollection[i] - min) / (max - min));
-                        expWSum += expW[i];
-                    }
-                    for (int i = 0; i < trainedNetworks.Count; i++)
-                    {
-                        weightCollection[i] = expW[i] / expWSum;
-                    }
-                }
-                else
-                {
-                    //Softmax transformation is not possible so ensure the sum of weights is 1
-                    weightCollection.ScaleToNewSum(1d);
-                }
+                //Softmax transformation
+                weightCollection.Softmax();
             }
             return weightCollection;
         }
 
         /// <summary>
-        /// Computes composite result
+        /// Computes the composite result
         /// </summary>
         private double ComputeCompositeOutput(double[] values, double[] weights, bool probabilistic)
         {
@@ -292,7 +280,7 @@ namespace RCNet.Neural.Network.NonRecurrent
                 {
                     probabilities[i] = PMixer.ProbabilityRange.Rescale(values[i], DataRange);
                 }
-                //Compute mixed probability and return back rescaled value
+                //Compute mixed probability and return back-rescaled value
                 return DataRange.Rescale(PMixer.MixP(probabilities, weights), PMixer.ProbabilityRange);
             }
             else
@@ -322,25 +310,16 @@ namespace RCNet.Neural.Network.NonRecurrent
             return outputVector;
         }
 
-        /*
-        private TrainedNetworkBuilder.BuildingInstr RegressionController(TrainedNetworkBuilder.BuildingState buildingState)
+        private double[] BuildSecondLevelInputVector(double[] memberResults, double firstLevelOutput)
         {
-            TrainedNetworkBuilder.BuildingInstr instructions = new TrainedNetworkBuilder.BuildingInstr
+            double[] inputVector = new double[memberResults.Length + (Join1stLevelOutputTo2ndLevelInput ? 1 : 0)];
+            memberResults.CopyTo(inputVector, 0);
+            if(Join1stLevelOutputTo2ndLevelInput)
             {
-                CurrentIsBetter = TrainedNetworkBuilder.IsBetter(buildingState.BinaryOutput,
-                                                                 buildingState.CurrNetwork,
-                                                                 buildingState.BestNetwork
-                                                                 ),
-                StopCurrentAttempt = (BinaryOutput &&
-                                      buildingState.BestNetworkAttempt == buildingState.RegrAttemptNumber &&
-                                      buildingState.BestNetwork.TrainingBinErrorStat.TotalErrStat.Sum == 0 &&
-                                      buildingState.BestNetwork.TestingBinErrorStat.TotalErrStat.Sum == 0 &&
-                                      buildingState.CurrNetwork.CombinedPrecisionError > buildingState.BestNetwork.CombinedPrecisionError
-                                      )
-            };
-            return instructions;
+                inputVector[memberResults.Length] = firstLevelOutput;
+            }
+            return inputVector;
         }
-        */
 
         /// <summary>
         /// Initialized second level networks
@@ -351,10 +330,8 @@ namespace RCNet.Neural.Network.NonRecurrent
             VectorBundle shuffledDataBundle = new VectorBundle(dataBundle.InputVectorCollection.Count);
             for (int sampleIdx = 0; sampleIdx < dataBundle.InputVectorCollection.Count; sampleIdx++)
             {
-                double[] inputVector = new double[NumOfMembers + 1];
                 double[] memberResults = ComputeClusterMemberNetworks(dataBundle.InputVectorCollection[sampleIdx]);
-                inputVector[0] = ComputeCompositeOutput(memberResults, _firstLevelWeights, BinaryOutput);
-                memberResults.CopyTo(inputVector, 1);
+                double[] inputVector = BuildSecondLevelInputVector(memberResults, ComputeCompositeOutput(memberResults, _firstLevelWeights, BinaryOutput));
                 double[] outputVector = new double[1];
                 outputVector[0] = dataBundle.OutputVectorCollection[sampleIdx][0];
                 shuffledDataBundle.AddPair(inputVector, outputVector);
@@ -399,7 +376,7 @@ namespace RCNet.Neural.Network.NonRecurrent
                 }
             }
             //Init second level networks weights
-            _secondLevelWeights = GetSoftmaxWeights(_secondLevelNetCollection, BinaryOutput);
+            _secondLevelWeights = ComputeTrainedNetworksWeights(_secondLevelNetCollection, BinaryOutput);
             return;
         }
 
@@ -409,12 +386,12 @@ namespace RCNet.Neural.Network.NonRecurrent
         /// <param name="dataBundle">Whole data used for training of inner members</param>
         public void FinalizeCluster(VectorBundle dataBundle)
         {
-            if(Finalized)
+            if (Finalized)
             {
                 throw new InvalidOperationException("Cluster was already finalized.");
             }
             //In all cases initialize the first level members' weights (softmax)
-            _firstLevelWeights = GetSoftmaxWeights(_memberNetCollection, BinaryOutput);
+            _firstLevelWeights = ComputeTrainedNetworksWeights(_memberNetCollection, BinaryOutput);
             //When necessary, prepare the second level networks
             if (SecondLevelComputation)
             {
@@ -427,13 +404,11 @@ namespace RCNet.Neural.Network.NonRecurrent
         /// <summary>
         /// Computes second level output
         /// </summary>
-        private double ComputeSecondLevelOutput(double[] memberOutputs, double firstLevelOutput)
+        private double ComputeSecondLevelOutput(double[] memberResults, double firstLevelOutput)
         {
-            double[] inputVector = new double[NumOfMembers + 1];
-            inputVector[0] = firstLevelOutput;
-            memberOutputs.CopyTo(inputVector, 1);
+            double[] inputVector = BuildSecondLevelInputVector(memberResults, firstLevelOutput);
             double[] secondLevelMemberOutputCollection = new double[_secondLevelNetCollection.Count];
-            for(int i = 0; i < _secondLevelNetCollection.Count; i++)
+            for (int i = 0; i < _secondLevelNetCollection.Count; i++)
             {
                 secondLevelMemberOutputCollection[i] = _secondLevelNetCollection[i].Network.Compute(inputVector)[0];
             }
@@ -457,7 +432,7 @@ namespace RCNet.Neural.Network.NonRecurrent
             double firstLevelOutput = ComputeCompositeOutput(memberOutputs, _firstLevelWeights, BinaryOutput);
 
             //Final result
-            if(!SecondLevelComputation)
+            if (!SecondLevelComputation)
             {
                 return firstLevelOutput;
             }

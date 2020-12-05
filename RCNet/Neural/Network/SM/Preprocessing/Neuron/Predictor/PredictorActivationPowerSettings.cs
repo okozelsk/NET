@@ -76,52 +76,37 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         }
 
         //Properties
-        /// <summary>
-        /// ID of the predictor
-        /// </summary>
+        /// <inheritdoc/>
         public PredictorsProvider.PredictorID ID { get { return PredictorsProvider.PredictorID.ActivationPower; } }
 
-        /// <summary>
-        /// Specifies necessary size of the windowed history of activations
-        /// </summary>
+        /// <inheritdoc/>
         public int RequiredWndSizeOfActivations { get { return 0; } }
 
-        /// <summary>
-        /// Specifies necessary size of the windowed history of firings
-        /// </summary>
+        /// <inheritdoc/>
         public int RequiredWndSizeOfFirings { get { return 0; } }
 
-        /// <summary>
-        /// Indicates use of continuous stat of activations
-        /// </summary>
+        /// <inheritdoc/>
         public bool NeedsContinuousActivationStat { get { return false; } }
 
-        /// <summary>
-        /// Indicates use of continuous stat of activation differences
-        /// </summary>
+        /// <inheritdoc/>
         public bool NeedsContinuousActivationDiffStat { get { return false; } }
 
         /// <summary>
-        /// Checks if settings are default
+        /// Checks the defaults
         /// </summary>
         public bool IsDefaultExponent { get { return (Exponent == DefaultExponent); } }
 
         /// <summary>
-        /// Checks if settings are default
+        /// Checks the defaults
         /// </summary>
         public bool IsDefaultKeepSign { get { return (KeepSign == DefaultKeepSign); } }
 
-
-        /// <summary>
-        /// Identifies settings containing only default values
-        /// </summary>
+        /// <inheritdoc/>
         public override bool ContainsOnlyDefaults { get { return IsDefaultExponent && IsDefaultKeepSign; } }
 
 
         //Methods
-        /// <summary>
-        /// Checks consistency
-        /// </summary>
+        /// <inheritdoc/>
         protected override void Check()
         {
             if (Exponent <= 0d)
@@ -131,20 +116,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
             return;
         }
 
-        /// <summary>
-        /// Creates the deep copy instance of this instance
-        /// </summary>
+        /// <inheritdoc/>
         public override RCNetBaseSettings DeepClone()
         {
             return new PredictorActivationPowerSettings(this);
         }
 
-        /// <summary>
-        /// Generates xml element containing the settings.
-        /// </summary>
-        /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc/>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             XElement rootElem = new XElement(rootElemName);
@@ -160,11 +138,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
             return rootElem;
         }
 
-        /// <summary>
-        /// Generates default named xml element containing the settings.
-        /// </summary>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc/>
         public override XElement GetXml(bool suppressDefaults)
         {
             return GetXml(PredictorFactory.GetXmlName(ID), suppressDefaults);

@@ -5,7 +5,7 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Input
 {
     /// <summary>
-    /// Settings of continuous input feeding regime
+    /// Configuration of the continuous input feeding regime
     /// </summary>
     [Serializable]
     public class FeedingContinuousSettings : RCNetBaseSettings, IFeedingSettings
@@ -72,25 +72,19 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         }
 
         //Properties
-        /// <summary>
-        /// Type of input feeding
-        /// </summary>
+        /// <inheritdoc/>
         public InputEncoder.InputFeedingType FeedingType { get { return InputEncoder.InputFeedingType.Continuous; } }
 
         /// <summary>
-        /// Checks if settings are default
+        /// Checks the defaults
         /// </summary>
         public bool IsDefaultBootCycles { get { return (BootCycles == DefaultBootCycles); } }
 
-        /// <summary>
-        /// Identifies settings containing only default values
-        /// </summary>
+        /// <inheritdoc/>
         public override bool ContainsOnlyDefaults { get { return IsDefaultBootCycles; } }
 
         //Methods
-        /// <summary>
-        /// Checks consistency
-        /// </summary>
+        /// <inheritdoc/>
         protected override void Check()
         {
             if (BootCycles != AutoBootCyclesNum && BootCycles <= 0)
@@ -100,20 +94,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             return;
         }
 
-        /// <summary>
-        /// Creates the deep copy instance of this instance
-        /// </summary>
+        /// <inheritdoc/>
         public override RCNetBaseSettings DeepClone()
         {
             return new FeedingContinuousSettings(this);
         }
 
-        /// <summary>
-        /// Generates xml element containing the settings.
-        /// </summary>
-        /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc/>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             XElement rootElem = new XElement(rootElemName);
@@ -125,11 +112,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             return rootElem;
         }
 
-        /// <summary>
-        /// Generates default named xml element containing the settings.
-        /// </summary>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc/>
         public override XElement GetXml(bool suppressDefaults)
         {
             return GetXml("feedingContinuous", suppressDefaults);

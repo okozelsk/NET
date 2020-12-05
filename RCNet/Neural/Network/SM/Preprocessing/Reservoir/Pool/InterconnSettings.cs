@@ -5,7 +5,7 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
 {
     /// <summary>
-    /// Collection of pool's neurons interconnection schemas settings
+    /// The collection of pool's neurons interconnection schemas configurations
     /// </summary>
     [Serializable]
     public class InterconnSettings : RCNetBaseSettings
@@ -87,6 +87,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
                 {
                     SchemaCfgCollection.Add(new ChainSchemaSettings(schemaElem));
                 }
+                else if (schemaElem.Name.LocalName == "doubleTwistedToroidSchema")
+                {
+                    SchemaCfgCollection.Add(new DoubleTwistedToroidSchemaSettings(schemaElem));
+                }
                 else if (schemaElem.Name.LocalName == "emptySchema")
                 {
                     SchemaCfgCollection.Add(new EmptySchemaSettings(schemaElem));
@@ -102,15 +106,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
         }
 
         //Properties
-        /// <summary>
-        /// Identifies settings containing only default values
-        /// </summary>
+        /// <inheritdoc/>
         public override bool ContainsOnlyDefaults { get { return false; } }
 
         //Methods
-        /// <summary>
-        /// Checks consistency
-        /// </summary>
+        /// <inheritdoc/>
         protected override void Check()
         {
             if (SchemaCfgCollection.Count == 0)
@@ -140,20 +140,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
             return;
         }
 
-        /// <summary>
-        /// Creates the deep copy instance of this instance
-        /// </summary>
+        /// <inheritdoc/>
         public override RCNetBaseSettings DeepClone()
         {
             return new InterconnSettings(this);
         }
 
-        /// <summary>
-        /// Generates xml element containing the settings.
-        /// </summary>
-        /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc/>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             XElement rootElem = new XElement(rootElemName);
@@ -165,16 +158,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
             return rootElem;
         }
 
-        /// <summary>
-        /// Generates default named xml element containing the settings.
-        /// </summary>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc/>
         public override XElement GetXml(bool suppressDefaults)
         {
             return GetXml("interconnection", suppressDefaults);
         }
 
-    }//PoolInterconnectionSettings
+    }//InterconnSettings
 
 }//Namespace

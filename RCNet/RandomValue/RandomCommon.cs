@@ -10,7 +10,7 @@ namespace RCNet.RandomValue
     {
         //Enums
         /// <summary>
-        /// Supported distribution types
+        /// Type of the random distribution
         /// </summary>
         public enum DistributionType
         {

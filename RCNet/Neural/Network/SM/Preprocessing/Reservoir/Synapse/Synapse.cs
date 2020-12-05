@@ -60,17 +60,17 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
 
         //Attribute properties
         /// <summary>
-        /// Source neuron
+        /// Presynaptic neuron
         /// </summary>
-        public INeuron SourceNeuron { get; }
+        public INeuron PresynapticNeuron { get; }
 
         /// <summary>
-        /// Target neuron
+        /// Postsynaptic neuron
         /// </summary>
-        public INeuron TargetNeuron { get; }
+        public INeuron PostsynapticNeuron { get; }
 
         /// <summary>
-        /// Euclidean distance between SourceNeuron and TargetNeuron
+        /// Euclidean distance of presynaptic and postsynaptic neurons
         /// </summary>
         public double Distance { get; }
 
@@ -101,8 +101,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
 
 
         //Attributes
-        private readonly NeuronOutputData _sourceNeuronOutputData;
-        private readonly bool _analogSourceSignal;
+        private readonly NeuronOutputData _presynapticNeuronOutputData;
+        private readonly bool _analogPresynapticSignal;
         private readonly IEfficacy _efficacyComputer;
         private readonly int _maxDelay;
         private SimpleQueue<Signal> _signalQueue;
@@ -111,35 +111,35 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         /// <summary>
         /// Creates initialized instance
         /// </summary>
-        /// <param name="sourceNeuron">Source neuron</param>
-        /// <param name="targetNeuron">Target neuron</param>
+        /// <param name="presynapticNeuron">Presynaptic neuron</param>
+        /// <param name="postsynapticNeuron">Postsynaptic neuron</param>
         /// <param name="role">Synapse role</param>
         /// <param name="synapseCfg">Synapse general configuration</param>
         /// <param name="rand">Random object</param>
-        public Synapse(INeuron sourceNeuron,
-                       INeuron targetNeuron,
+        public Synapse(INeuron presynapticNeuron,
+                       INeuron postsynapticNeuron,
                        SynRole role,
                        SynapseSettings synapseCfg,
                        Random rand
                        )
         {
             //Neurons to be connected
-            SourceNeuron = sourceNeuron;
-            TargetNeuron = targetNeuron;
+            PresynapticNeuron = presynapticNeuron;
+            PostsynapticNeuron = postsynapticNeuron;
             //Synapse role
             Role = role;
             //Euclidean distance
-            Distance = EuclideanDistance.Compute(SourceNeuron.Location.ReservoirCoordinates, TargetNeuron.Location.ReservoirCoordinates);
+            Distance = EuclideanDistance.Compute(PresynapticNeuron.Location.ReservoirCoordinates, PostsynapticNeuron.Location.ReservoirCoordinates);
             //The rest
             _efficacyComputer = null;
-            if (TargetNeuron.TypeOfActivation == ActivationType.Spiking)
+            if (PostsynapticNeuron.TypeOfActivation == ActivationType.Spiking)
             {
                 //Spiking target
                 if (Role == SynRole.Input)
                 {
                     DelayMethod = synapseCfg.SpikingTargetCfg.InputSynCfg.DelayMethod;
                     _maxDelay = synapseCfg.SpikingTargetCfg.InputSynCfg.MaxDelay;
-                    if (SourceNeuron.TypeOfActivation == ActivationType.Analog)
+                    if (PresynapticNeuron.TypeOfActivation == ActivationType.Analog)
                     {
                         //Analog source
                         Weight = rand.NextDouble(synapseCfg.SpikingTargetCfg.InputSynCfg.AnalogSourceCfg.WeightCfg);
@@ -148,7 +148,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
                     {
                         //Spiking source
                         Weight = rand.NextDouble(synapseCfg.SpikingTargetCfg.InputSynCfg.SpikingSourceCfg.WeightCfg);
-                        _efficacyComputer = PlasticityCommon.GetEfficacyComputer(SourceNeuron,
+                        _efficacyComputer = PlasticityCommon.GetEfficacyComputer(PresynapticNeuron,
                                                                                  synapseCfg.SpikingTargetCfg.InputSynCfg.SpikingSourceCfg.PlasticityCfg.DynamicsCfg
                                                                                  );
                     }
@@ -157,7 +157,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
                 {
                     DelayMethod = synapseCfg.SpikingTargetCfg.ExcitatorySynCfg.DelayMethod;
                     _maxDelay = synapseCfg.SpikingTargetCfg.ExcitatorySynCfg.MaxDelay;
-                    if (SourceNeuron.TypeOfActivation == ActivationType.Analog)
+                    if (PresynapticNeuron.TypeOfActivation == ActivationType.Analog)
                     {
                         //Analog source
                         Weight = rand.NextDouble(synapseCfg.SpikingTargetCfg.ExcitatorySynCfg.AnalogSourceCfg.WeightCfg);
@@ -167,7 +167,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
                         //Spiking source
                         Weight = rand.NextDouble(synapseCfg.SpikingTargetCfg.ExcitatorySynCfg.SpikingSourceCfg.WeightCfg);
                     }
-                    _efficacyComputer = PlasticityCommon.GetEfficacyComputer(SourceNeuron,
+                    _efficacyComputer = PlasticityCommon.GetEfficacyComputer(PresynapticNeuron,
                                                                              synapseCfg.SpikingTargetCfg.ExcitatorySynCfg.SpikingSourceCfg.PlasticityCfg.DynamicsCfg
                                                                              );
                 }
@@ -175,7 +175,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
                 {
                     DelayMethod = synapseCfg.SpikingTargetCfg.InhibitorySynCfg.DelayMethod;
                     _maxDelay = synapseCfg.SpikingTargetCfg.InhibitorySynCfg.MaxDelay;
-                    if (SourceNeuron.TypeOfActivation == ActivationType.Analog)
+                    if (PresynapticNeuron.TypeOfActivation == ActivationType.Analog)
                     {
                         //Analog source
                         Weight = -rand.NextDouble(synapseCfg.SpikingTargetCfg.InhibitorySynCfg.AnalogSourceCfg.WeightCfg);
@@ -185,7 +185,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
                         //Spiking source
                         Weight = -rand.NextDouble(synapseCfg.SpikingTargetCfg.InhibitorySynCfg.SpikingSourceCfg.WeightCfg);
                     }
-                    _efficacyComputer = PlasticityCommon.GetEfficacyComputer(SourceNeuron,
+                    _efficacyComputer = PlasticityCommon.GetEfficacyComputer(PresynapticNeuron,
                                                                              synapseCfg.SpikingTargetCfg.InhibitorySynCfg.SpikingSourceCfg.PlasticityCfg.DynamicsCfg
                                                                              );
                 }
@@ -201,7 +201,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
                 {
                     DelayMethod = synapseCfg.AnalogTargetCfg.InputSynCfg.DelayMethod;
                     _maxDelay = synapseCfg.AnalogTargetCfg.InputSynCfg.MaxDelay;
-                    if (SourceNeuron.TypeOfActivation == ActivationType.Analog)
+                    if (PresynapticNeuron.TypeOfActivation == ActivationType.Analog)
                     {
                         //Analog source
                         Weight = rand.NextDouble(synapseCfg.AnalogTargetCfg.InputSynCfg.AnalogSourceCfg.WeightCfg);
@@ -210,7 +210,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
                     {
                         //Spiking source
                         Weight = rand.NextSign() * rand.NextDouble(synapseCfg.AnalogTargetCfg.InputSynCfg.SpikingSourceCfg.WeightCfg);
-                        _efficacyComputer = PlasticityCommon.GetEfficacyComputer(SourceNeuron,
+                        _efficacyComputer = PlasticityCommon.GetEfficacyComputer(PresynapticNeuron,
                                                                                  synapseCfg.AnalogTargetCfg.InputSynCfg.SpikingSourceCfg.PlasticityCfg.DynamicsCfg
                                                                                  );
                     }
@@ -219,7 +219,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
                 {
                     DelayMethod = synapseCfg.AnalogTargetCfg.IndifferentSynCfg.DelayMethod;
                     _maxDelay = synapseCfg.AnalogTargetCfg.IndifferentSynCfg.MaxDelay;
-                    if (SourceNeuron.TypeOfActivation == ActivationType.Analog)
+                    if (PresynapticNeuron.TypeOfActivation == ActivationType.Analog)
                     {
                         //Analog source
                         Weight = rand.NextSign() * rand.NextDouble(synapseCfg.AnalogTargetCfg.IndifferentSynCfg.AnalogSourceCfg.WeightCfg);
@@ -228,7 +228,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
                     {
                         //Spiking source
                         Weight = rand.NextSign() * rand.NextDouble(synapseCfg.AnalogTargetCfg.IndifferentSynCfg.SpikingSourceCfg.WeightCfg);
-                        _efficacyComputer = PlasticityCommon.GetEfficacyComputer(SourceNeuron,
+                        _efficacyComputer = PlasticityCommon.GetEfficacyComputer(PresynapticNeuron,
                                                                                  synapseCfg.AnalogTargetCfg.IndifferentSynCfg.SpikingSourceCfg.PlasticityCfg.DynamicsCfg
                                                                                  );
                     }
@@ -240,8 +240,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
                 }
             }
             //Source neuron - output data and signal index
-            _sourceNeuronOutputData = SourceNeuron.OutputData;
-            _analogSourceSignal = TargetNeuron.TypeOfActivation == ActivationType.Analog;
+            _presynapticNeuronOutputData = PresynapticNeuron.OutputData;
+            _analogPresynapticSignal = PostsynapticNeuron.TypeOfActivation == ActivationType.Analog;
             //Efficacy statistics
             EfficacyStat = new BasicStat(false);
             Reset(true);
@@ -314,13 +314,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         }
 
         /// <summary>
-        /// Returns signal to be delivered to target neuron.
+        /// Returns signal to be delivered to postsynaptic neuron.
         /// </summary>
         /// <param name="collectStatistics">Specifies whether to update internal statistics</param>
         public double GetSignal(bool collectStatistics)
         {
             //Source neuron signal
-            double sourceNeuronSignal = _analogSourceSignal? _sourceNeuronOutputData._analogSignal: _sourceNeuronOutputData._spikingSignal;
+            double sourceNeuronSignal = _analogPresynapticSignal? _presynapticNeuronOutputData._analogSignal: _presynapticNeuronOutputData._spikingSignal;
             //Short-term plasticity
             double efficacy = 1d;
             if (_efficacyComputer != null && sourceNeuronSignal > 0)

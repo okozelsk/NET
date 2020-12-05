@@ -13,9 +13,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
     public class PredictorFiringTrace : IPredictor
     {
         //Attribute properties
-        /// <summary>
-        /// Configuration of the predictor
-        /// </summary>
+        /// <inheritdoc/>
         public IPredictorSettings Cfg { get; }
 
         //Attributes
@@ -36,21 +34,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
             return;
         }
 
-        /// <summary>
-        /// Resets the predictor computer
-        /// </summary>
+        /// <inheritdoc/>
         public void Reset()
         {
             _continuousTrace = 0d;
             return;
         }
 
-        /// <summary>
-        /// Updates the predictor computer
-        /// </summary>
-        /// <param name="activation">Current value of the activation</param>
-        /// <param name="normalizedActivation">Current value of the activation normalized between 0 and 1</param>
-        /// <param name="spike">Indicates whether the neuron is firing</param>
+        /// <inheritdoc/>
         public void Update(double activation, double normalizedActivation, bool spike)
         {
             PredictorFiringTraceSettings cfg = (PredictorFiringTraceSettings)Cfg;
@@ -62,17 +53,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
             return;
         }
 
-        /// <summary>
-        /// Computes the predictor value
-        /// </summary>
-        /// <param name="continuousActivationStat">Continuous statistics of the activations</param>
-        /// <param name="continuousActivationDiffStat">Continuous statistics of the activation differences</param>
-        /// <param name="activationMDW">Moving window of the activations</param>
-        /// <param name="firingMDW">Moving window of the firings</param>
-        /// <param name="activation">Current value of the activation</param>
-        /// <param name="normalizedActivation">Current value of the activation normalized between 0 and 1</param>
-        /// <param name="spike">Indicates whether the neuron is firing</param>
-        /// <returns>Computed predictor</returns>
+        /// <inheritdoc/>
         public double Compute(BasicStat continuousActivationStat,
                               BasicStat continuousActivationDiffStat,
                               MovingDataWindow activationMDW,

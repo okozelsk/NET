@@ -5,7 +5,7 @@ using System.Xml.Linq;
 namespace RCNet.MathTools.PS
 {
     /// <summary>
-    /// Settings of the parameter seeker
+    /// Configuration of the parameter seeker
     /// </summary>
     [Serializable]
     public class ParamSeekerSettings : RCNetBaseSettings
@@ -87,13 +87,11 @@ namespace RCNet.MathTools.PS
 
         //Properties
         /// <summary>
-        /// Checks if settings are default
+        /// Checks the defaults
         /// </summary>
         public bool IsDefaultNumOfSubIntervals { get { return (NumOfSubIntervals == DefaultNumOfSubIntervals); } }
 
-        /// <summary>
-        /// Identifies settings containing only default values
-        /// </summary>
+        /// <inheritdoc />
         public override bool ContainsOnlyDefaults { get { return false; } }
 
         //Methods

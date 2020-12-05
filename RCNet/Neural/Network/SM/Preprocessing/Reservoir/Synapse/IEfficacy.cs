@@ -6,12 +6,12 @@
     public interface IEfficacy
     {
         /// <summary>
-        /// Resets efficacy computer to its initial state
+        /// Resets the efficacy computer to its initial state
         /// </summary>
         void Reset();
 
         /// <summary>
-        /// Computes synapse efficacy
+        /// Computes the synapse efficacy
         /// </summary>
         double Compute();
 

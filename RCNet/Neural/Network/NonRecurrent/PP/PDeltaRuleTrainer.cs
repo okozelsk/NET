@@ -6,35 +6,23 @@ using System.Threading.Tasks;
 namespace RCNet.Neural.Network.NonRecurrent.PP
 {
     /// <summary>
-    /// Implements parallel perceptron trainer (p-delta rule)
+    /// Implements the p-delta rule trainer of the parallel perceptron network
     /// </summary>
     [Serializable]
     public class PDeltaRuleTrainer : INonRecurrentNetworkTrainer
     {
         //Attribute properties
-        /// <summary>
-        /// MSE after an epoch.
-        /// </summary>
+        /// <inheritdoc/>
         public double MSE { get; private set; }
-        /// <summary>
-        /// Max attempt
-        /// </summary>
+        /// <inheritdoc/>
         public int MaxAttempt { get; private set; }
-        /// <summary>
-        /// Current attempt
-        /// </summary>
+        /// <inheritdoc/>
         public int Attempt { get; private set; }
-        /// <summary>
-        /// Max epoch
-        /// </summary>
+        /// <inheritdoc/>
         public int MaxAttemptEpoch { get; private set; }
-        /// <summary>
-        /// Current epoch (incremented each call of Iteration)
-        /// </summary>
+        /// <inheritdoc/>
         public int AttemptEpoch { get; private set; }
-        /// <summary>
-        /// Informative message from the trainer
-        /// </summary>
+        /// <inheritdoc/>
         public string InfoMessage { get; private set; }
 
         //Attributes
@@ -111,9 +99,7 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
         }
 
         //Properties
-        /// <summary>
-        /// PP network beeing trained
-        /// </summary>
+        /// <inheritdoc/>
         public INonRecurrentNetwork Net { get { return _net; } }
 
         //Methods
@@ -159,9 +145,7 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
             return;
         }
 
-        /// <summary>
-        /// Starts next training attempt
-        /// </summary>
+        /// <inheritdoc/>
         public bool NextAttempt()
         {
             if (Attempt < MaxAttempt)
@@ -185,9 +169,7 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
             }
         }
 
-        /// <summary>
-        /// Performs training iteration.
-        /// </summary>
+        /// <inheritdoc/>
         public bool Iteration()
         {
             if (AttemptEpoch == MaxAttemptEpoch)
@@ -269,7 +251,7 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
 
         //Inner classes
         [Serializable]
-        private class WorkerRange
+        internal class WorkerRange
         {
             public int FromRow { get; set; }
             public int ToRow { get; set; }
@@ -277,7 +259,7 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
             public double M { get; set; }
 
             //Constructor
-            public WorkerRange(int fromRow, int toRow, int numOfWeights)
+            internal WorkerRange(int fromRow, int toRow, int numOfWeights)
             {
                 FromRow = fromRow;
                 ToRow = toRow;
@@ -288,7 +270,7 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
             }
 
             //Methods
-            public void UpdateWeigths(double[] weights)
+            internal void UpdateWeigths(double[] weights)
             {
                 Parallel.For(0, WeightChangeAcc.Length, i =>
                 {

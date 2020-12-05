@@ -6,12 +6,12 @@
     public interface IGenerator
     {
         /// <summary>
-        /// Resets generator to its initial state
+        /// Resets the generator to its initial state
         /// </summary>
         void Reset();
 
         /// <summary>
-        /// Returns next signal value
+        /// Generates the next value
         /// </summary>
         double Next();
 

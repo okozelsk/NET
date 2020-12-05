@@ -9,7 +9,7 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
 {
     /// <summary>
-    /// Contains spiking neuron group settings
+    /// Configuration of the group of spiking neurons
     /// </summary>
     [Serializable]
     public class SpikingNeuronGroupSettings : RCNetBaseSettings, INeuronGroupSettings
@@ -21,40 +21,27 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         public const string XsdTypeName = "PoolSpikingNeuronGroupType";
 
         //Attribute properties
-        /// <summary>
-        /// Name of the neuron group
-        /// </summary>
+        /// <inheritdoc/>
         public string Name { get; }
 
-        /// <summary>
-        /// Specifies how big relative portion of pool's neurons is formed by this group of the neurons
-        /// </summary>
+        /// <inheritdoc/>
         public double RelShare { get; }
 
-        /// <summary>
-        /// Common activation function settings of the groupped neurons
-        /// </summary>
-        public RCNetBaseSettings ActivationCfg { get; }
+        /// <inheritdoc/>
+        public IActivationSettings ActivationCfg { get; }
 
         /// <summary>
         /// Configuration of the neuron's homogenous excitability
         /// </summary>
         public HomogenousExcitabilitySettings HomogenousExcitabilityCfg { get; }
 
-        /// <summary>
-        /// Each neuron within the group receives constant input bias. Value of the neuron's bias is driven by this random settings
-        /// </summary>
+        /// <inheritdoc/>
         public RandomValueSettings BiasCfg { get; }
 
-        /// <summary>
-        /// Configuration of the predictors
-        /// </summary>
+        /// <inheritdoc/>
         public PredictorsProviderSettings PredictorsCfg { get; }
 
-        /// <summary>
-        /// Additional helper computed field.
-        /// Specifies exact number of neurons of the group within the current context.
-        /// </summary>
+        /// <inheritdoc/>
         public int Count { get; set; } = 0;
 
 
@@ -70,7 +57,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// <param name="biasCfg">Each neuron within the group receives constant input bias. Value of the neuron's bias is driven by this random settings</param>
         public SpikingNeuronGroupSettings(string name,
                                           double relShare,
-                                          RCNetBaseSettings activationCfg,
+                                          IActivationSettings activationCfg,
                                           PredictorsProviderSettings predictorsCfg,
                                           HomogenousExcitabilitySettings homogenousExcitabilityCfg = null,
                                           RandomValueSettings biasCfg = null
@@ -78,7 +65,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         {
             Name = name;
             RelShare = relShare;
-            ActivationCfg = activationCfg.DeepClone();
+            ActivationCfg = (IActivationSettings)activationCfg.DeepClone();
             PredictorsCfg = (PredictorsProviderSettings)predictorsCfg.DeepClone();
             HomogenousExcitabilityCfg = homogenousExcitabilityCfg == null ? new HomogenousExcitabilitySettings() : (HomogenousExcitabilitySettings)homogenousExcitabilityCfg.DeepClone();
             BiasCfg = biasCfg == null ? null : (RandomValueSettings)biasCfg.DeepClone();
@@ -126,18 +113,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
 
         //Properties
         /// <summary>
-        /// Type of the activation functions within the group (analog or spiking)
-        /// </summary>
-        public ActivationType Type { get { return ActivationType.Spiking; } }
-
-        /// <summary>
-        /// Checks if settings are default
+        /// Checks the defaults
         /// </summary>
         public bool IsDefaultHomogenousExcitabilityCfg { get { return HomogenousExcitabilityCfg.ContainsOnlyDefaults; } }
 
-        /// <summary>
-        /// Identifies settings containing only default values
-        /// </summary>
+        /// <inheritdoc/>
         public override bool ContainsOnlyDefaults
         {
             get
@@ -147,9 +127,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         }
 
         //Methods
-        /// <summary>
-        /// Checks consistency
-        /// </summary>
+        /// <inheritdoc/>
         protected override void Check()
         {
             if (Name.Length == 0)
@@ -157,12 +135,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
                 throw new ArgumentException($"Name can not be empty.", "Name");
             }
             Type activationType = ActivationCfg.GetType();
-            if (activationType != typeof(SimpleIFSettings) &&
-                activationType != typeof(LeakyIFSettings) &&
-                activationType != typeof(ExpIFSettings) &&
-                activationType != typeof(AdExpIFSettings) &&
-                activationType != typeof(IzhikevichIFSettings) &&
-                activationType != typeof(AutoIzhikevichIFSettings)
+            if (activationType != typeof(AFSpikingSimpleIFSettings) &&
+                activationType != typeof(AFSpikingLeakyIFSettings) &&
+                activationType != typeof(AFSpikingExpIFSettings) &&
+                activationType != typeof(AFSpikingAdExpIFSettings) &&
+                activationType != typeof(AFSpikingIzhikevichIFSettings) &&
+                activationType != typeof(AFSpikingAutoIzhikevichIFSettings)
                 )
             {
                 throw new ArgumentException($"Not allowed activation type {activationType.Name}.", "ActivationCfg");
@@ -170,20 +148,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
             return;
         }
 
-        /// <summary>
-        /// Creates the deep copy instance of this instance
-        /// </summary>
+        /// <inheritdoc/>
         public override RCNetBaseSettings DeepClone()
         {
             return new SpikingNeuronGroupSettings(this);
         }
 
-        /// <summary>
-        /// Generates xml element containing the settings.
-        /// </summary>
-        /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc/>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             XElement rootElem = new XElement(rootElemName,
@@ -205,11 +176,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
             return rootElem;
         }
 
-        /// <summary>
-        /// Generates default named xml element containing the settings.
-        /// </summary>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc/>
         public override XElement GetXml(bool suppressDefaults)
         {
             return GetXml("spikingGroup", suppressDefaults);

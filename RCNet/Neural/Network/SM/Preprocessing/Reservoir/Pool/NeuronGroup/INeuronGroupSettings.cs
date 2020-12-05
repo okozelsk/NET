@@ -1,5 +1,4 @@
 ﻿using RCNet.Neural.Activation;
-using RCNet.Neural.Network.SM.Preprocessing.Neuron;
 using RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor;
 using RCNet.RandomValue;
 using System.Xml.Linq;
@@ -7,7 +6,7 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
 {
     /// <summary>
-    /// Common interface of analog and spking neuron groups settings
+    /// Common interface of neuron groups configurations
     /// </summary>
     public interface INeuronGroupSettings
     {
@@ -17,14 +16,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         string Name { get; }
 
         /// <summary>
-        /// Type of the activation functions within the group (analog or spiking)
+        /// Activation function configuration of the neurons within the group
         /// </summary>
-        ActivationType Type { get; }
-
-        /// <summary>
-        /// Common activation function settings of the groupped neurons
-        /// </summary>
-        RCNetBaseSettings ActivationCfg { get; }
+        IActivationSettings ActivationCfg { get; }
 
         /// <summary>
         /// Specifies how big relative portion of pool's neurons is formed by this group of the neurons
@@ -48,18 +42,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// </summary>
         int Count { get; set; }
 
-        /// <summary>
-        /// Creates the deep copy instance of this instance
-        /// </summary>
+        /// <inheritdoc cref="RCNetBaseSettings.DeepClone"/>
         RCNetBaseSettings DeepClone();
 
-        /// <summary>
-        /// Generates default named xml element containing the settings.
-        /// </summary>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc cref="RCNetBaseSettings.GetXml(bool)"/>
         XElement GetXml(bool suppressDefaults);
 
-    }//IPoolNeuronGroupSettings
+    }//INeuronGroupSettings
 
 }//Namespace

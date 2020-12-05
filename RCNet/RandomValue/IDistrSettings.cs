@@ -1,13 +1,11 @@
 ﻿namespace RCNet.RandomValue
 {
     /// <summary>
-    /// Technical interface for random distributions
+    /// Common interface of random distributions configurations
     /// </summary>
     public interface IDistrSettings
     {
-        /// <summary>
-        /// Type of random distribution
-        /// </summary>
+        /// <inheritdoc cref="RandomCommon.DistributionType" />
         RandomCommon.DistributionType Type { get; }
 
     }//IDistrSettings

@@ -8,7 +8,7 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Readout
 {
     /// <summary>
-    /// Readout unit - forecast task settings
+    /// Configuration of the forecast task
     /// </summary>
     [Serializable]
     public class ForecastTaskSettings : RCNetBaseSettings, ITaskSettings
@@ -20,9 +20,7 @@ namespace RCNet.Neural.Network.SM.Readout
         public const string XsdTypeName = "ROutLayerUnitForecastTaskType";
 
         //Attribute properties
-        /// <summary>
-        /// Output feature filter settings
-        /// </summary>
+        /// <inheritdoc />
         public IFeatureFilterSettings FeatureFilterCfg { get; }
         /// <summary>
         /// Forecast networks settings
@@ -86,19 +84,13 @@ namespace RCNet.Neural.Network.SM.Readout
         }
 
         //Properties
-        /// <summary>
-        /// Identifies forecast task
-        /// </summary>
+        /// <inheritdoc />
         public ReadoutUnit.TaskType Type { get { return ReadoutUnit.TaskType.Forecast; } }
 
-        /// <summary>
-        /// Associated networks settings
-        /// </summary>
+        /// <inheritdoc />
         public List<INonRecurrentNetworkSettings> NetworkCfgCollection { get { return NetworksCfg.NetworkCfgCollection; } }
 
-        /// <summary>
-        /// Identifies settings containing only default values
-        /// </summary>
+        /// <inheritdoc />
         public override bool ContainsOnlyDefaults
         {
             get
@@ -109,28 +101,19 @@ namespace RCNet.Neural.Network.SM.Readout
 
 
         //Methods
-        /// <summary>
-        /// Checks consistency
-        /// </summary>
+        /// <inheritdoc />
         protected override void Check()
         {
             return;
         }
 
-        /// <summary>
-        /// Creates the deep copy instance of this instance
-        /// </summary>
+        /// <inheritdoc />
         public override RCNetBaseSettings DeepClone()
         {
             return new ForecastTaskSettings(this);
         }
 
-        /// <summary>
-        /// Generates xml element containing the settings.
-        /// </summary>
-        /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc />
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             XElement rootElem = new XElement(rootElemName);
@@ -143,11 +126,7 @@ namespace RCNet.Neural.Network.SM.Readout
             return rootElem;
         }
 
-        /// <summary>
-        /// Generates default named xml element containing the settings.
-        /// </summary>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc />
         public override XElement GetXml(bool suppressDefaults)
         {
             return GetXml("forecast", suppressDefaults);

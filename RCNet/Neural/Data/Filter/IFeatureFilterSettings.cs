@@ -7,9 +7,7 @@ namespace RCNet.Neural.Data.Filter
     /// </summary>
     public interface IFeatureFilterSettings
     {
-        /// <summary>
-        /// Feature type
-        /// </summary>
+        /// <inheritdoc cref="FeatureFilterBase.FeatureType"/>
         FeatureFilterBase.FeatureType Type { get; }
 
         /// <summary>

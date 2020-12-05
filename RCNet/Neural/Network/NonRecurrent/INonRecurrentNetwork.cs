@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace RCNet.Neural.Network.NonRecurrent
 {
     /// <summary>
-    /// Common interface of non-recurrent networks
+    /// Common interface of the non-recurrent networks
     /// </summary>
     public interface INonRecurrentNetwork
     {
@@ -33,7 +33,7 @@ namespace RCNet.Neural.Network.NonRecurrent
 
         //Methods
         /// <summary>
-        /// Computes network output values
+        /// Computes the network output values
         /// </summary>
         /// <param name="input">Input values to be passed into the network</param>
         /// <returns>Computed output values</returns>
@@ -71,11 +71,10 @@ namespace RCNet.Neural.Network.NonRecurrent
         void RandomizeWeights(Random rand);
 
         /// <summary>
-        /// Creates a deep copy
+        /// Creates the deep copy instance of this instance
         /// </summary>
         INonRecurrentNetwork DeepClone();
 
-
-
     }//INonRecurrentNetwork
+
 }//Namespace

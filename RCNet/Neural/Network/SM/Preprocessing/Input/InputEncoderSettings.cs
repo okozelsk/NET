@@ -1,5 +1,4 @@
-﻿using RCNet.Neural.Data.Coders.AnalogToSpiking;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Space3D;
+﻿using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Space3D;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +7,7 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Input
 {
     /// <summary>
-    /// Contains configuration of the preprocessor's input encoder
+    /// Configuration of the InputEncoder
     /// </summary>
     [Serializable]
     public class InputEncoderSettings : RCNetBaseSettings
@@ -83,15 +82,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         }
 
         //Properties
-        /// <summary>
-        /// Identifies settings containing only default values
-        /// </summary>
+        /// <inheritdoc/>
         public override bool ContainsOnlyDefaults { get { return false; } }
 
         //Methods
-        /// <summary>
-        /// Checks consistency
-        /// </summary>
+        /// <inheritdoc/>
         protected override void Check()
         {
             //Uniqueness of all input field names
@@ -170,20 +165,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             return names;
         }
 
-        /// <summary>
-        /// Creates the deep copy instance of this instance
-        /// </summary>
+        /// <inheritdoc/>
         public override RCNetBaseSettings DeepClone()
         {
             return new InputEncoderSettings(this);
         }
 
-        /// <summary>
-        /// Generates xml element containing the settings.
-        /// </summary>
-        /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc/>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             XElement rootElem = new XElement(rootElemName,
@@ -198,11 +186,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             return rootElem;
         }
 
-        /// <summary>
-        /// Generates default named xml element containing the settings.
-        /// </summary>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc/>
         public override XElement GetXml(bool suppressDefaults)
         {
             return GetXml("inputEncoder", suppressDefaults);

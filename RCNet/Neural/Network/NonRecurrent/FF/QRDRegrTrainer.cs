@@ -22,29 +22,17 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         //Constants
         private const double StopNoiseDifference = 1e-8;
         //Attribute properties
-        /// <summary>
-        /// Epoch error (MSE).
-        /// </summary>
+        /// <inheritdoc/>
         public double MSE { get; private set; }
-        /// <summary>
-        /// Max attempt
-        /// </summary>
+        /// <inheritdoc/>
         public int MaxAttempt { get; private set; }
-        /// <summary>
-        /// Current attempt
-        /// </summary>
+        /// <inheritdoc/>
         public int Attempt { get; private set; }
-        /// <summary>
-        /// Max epoch
-        /// </summary>
+        /// <inheritdoc/>
         public int MaxAttemptEpoch { get; private set; }
-        /// <summary>
-        /// Current epoch (incremented each call of Iteration)
-        /// </summary>
+        /// <inheritdoc/>
         public int AttemptEpoch { get; private set; }
-        /// <summary>
-        /// Informative message from the trainer
-        /// </summary>
+        /// <inheritdoc/>
         public string InfoMessage { get; private set; }
 
         //Attributes
@@ -79,7 +67,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
                 throw new InvalidOperationException($"Can´t create trainer. Network structure was not finalized.");
             }
             //Check network conditions
-            if (net.LayerCollection.Count != 1 || !(net.LayerCollection[0].Activation is Identity))
+            if (net.LayerCollection.Count != 1 || !(net.LayerCollection[0].Activation is AFAnalogIdentity))
             {
                 throw new InvalidOperationException($"Can´t create trainer. Network structure is not complient (single layer having Identity activation).");
             }
@@ -114,9 +102,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         }
 
         //Properties
-        /// <summary>
-        /// FF network beeing trained
-        /// </summary>
+        /// <inheritdoc/>
         public INonRecurrentNetwork Net { get { return _net; } }
 
         //Methods
@@ -138,9 +124,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         }
 
 
-        /// <summary>
-        /// Starts next training attempt
-        /// </summary>
+        /// <inheritdoc/>
         public bool NextAttempt()
         {
             if (Attempt < MaxAttempt)
@@ -161,9 +145,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             }
         }
 
-        /// <summary>
-        /// Performs training iteration.
-        /// </summary>
+        /// <inheritdoc/>
         public bool Iteration()
         {
             //Fetch next noise intensity

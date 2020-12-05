@@ -28,13 +28,9 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         public const double WeightDefaultIniMax = 0.05;
 
         //Attribute properties
-        /// <summary>
-        /// Number of network's input values
-        /// </summary>
+        /// <inheritdoc/>
         public int NumOfInputValues { get; }
-        /// <summary>
-        /// Number of network's output values
-        /// </summary>
+        /// <inheritdoc/>
         public int NumOfOutputValues { get; }
         /// <summary>
         /// Total number of network's neurons
@@ -85,10 +81,10 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             for (int i = 0; i < settings.HiddenLayersCfg.HiddenLayerCfgCollection.Count; i++)
             {
                 AddLayer(settings.HiddenLayersCfg.HiddenLayerCfgCollection[i].NumOfNeurons,
-                         ActivationFactory.Create(settings.HiddenLayersCfg.HiddenLayerCfgCollection[i].ActivationCfg, rand)
+                         (AFAnalogBase)ActivationFactory.CreateAF(settings.HiddenLayersCfg.HiddenLayerCfgCollection[i].ActivationCfg, rand)
                          );
             }
-            FinalizeStructure(ActivationFactory.Create(settings.OutputActivationCfg, rand));
+            FinalizeStructure((AFAnalogBase)ActivationFactory.CreateAF(settings.OutputActivationCfg, rand));
             return;
         }
 
@@ -97,14 +93,47 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         /// Indicates whether the network structure is finalized
         /// </summary>
         public bool Finalized { get { return NumOfNeurons > 0; } }
-        /// <summary>
-        /// Total number of network's weights
-        /// </summary>
+        /// <inheritdoc/>
         public int NumOfWeights { get { return _flatWeights.Length; } }
-        /// <summary>
-        /// Output range of the output layer
-        /// </summary>
+        /// <inheritdoc/>
         public Interval OutputRange { get { return LayerCollection[LayerCollection.Count - 1].Activation.OutputRange; } }
+
+        //Static methods
+        /// <summary>
+        /// Tests if the activation function specified by its given configuration can be used in FF network's output layer
+        /// </summary>
+        /// <param name="activationCfg">Activation configuration</param>
+        public static bool IsAllowedOutputAF(IActivationSettings activationCfg)
+        {
+            if (activationCfg.TypeOfActivation != ActivationType.Analog)
+            {
+                return false;
+            }
+            AFAnalogBase analogAF = (AFAnalogBase)ActivationFactory.CreateAF(activationCfg, new Random(0));
+            if (!analogAF.SupportsDerivative)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Tests if the activation function specified by its given configuration can be used in FF network's hidden layer
+        /// </summary>
+        /// <param name="activationCfg">Activation configuration</param>
+        public static bool IsAllowedHiddenAF(IActivationSettings activationCfg)
+        {
+            if (activationCfg.TypeOfActivation != ActivationType.Analog)
+            {
+                return false;
+            }
+            AFAnalogBase analogAF = (AFAnalogBase)ActivationFactory.CreateAF(activationCfg, new Random(0));
+            if (!analogAF.SupportsDerivative || analogAF.RequiresMultipleInput)
+            {
+                return false;
+            }
+            return true;
+        }
 
         //Methods
         /// <summary>
@@ -112,10 +141,14 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         /// </summary>
         /// <param name="numOfNeurons">Number of layer's neurons</param>
         /// <param name="activation">Each of layer's neuron will be activated by this activation function</param>
-        public void AddLayer(int numOfNeurons, IActivationFunction activation)
+        public void AddLayer(int numOfNeurons, AFAnalogBase activation)
         {
             if (!Finalized)
             {
+                if(activation.RequiresMultipleInput)
+                {
+                    throw new ArgumentException("Activation requires multiple input for the Compute method. It is not allowed for the hidden layer.", "activation");
+                }
                 //Add new layer
                 LayerCollection.Add(new Layer(numOfNeurons, activation));
             }
@@ -130,11 +163,15 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         /// Finalizes the network internal structure and locks it against further changes.
         /// </summary>
         /// <param name="outputActivation">Activation function of the output layer's neurons</param>
-        public void FinalizeStructure(IActivationFunction outputActivation)
+        public void FinalizeStructure(AFAnalogBase outputActivation)
         {
             if (Finalized)
             {
                 throw new InvalidOperationException($"Network structure has been already finalized.");
+            }
+            if (outputActivation.RequiresMultipleInput && NumOfOutputValues < 2)
+            {
+                throw new ArgumentException("Activation requires multiple input for the Compute method but number of output values is less than 2.", "outputActivation");
             }
             //Add output layer
             LayerCollection.Add(new Layer(NumOfOutputValues, outputActivation));
@@ -149,8 +186,8 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
                 neuronsFlatStartIdx += layer.NumOfLayerNeurons;
                 weightsFlatStartIdx += layer.NumOfLayerNeurons * layer.NumOfInputNodes + layer.NumOfLayerNeurons;
                 numOfInputNodes = layer.NumOfLayerNeurons;
-                if (layer.Activation.GetType() != typeof(Elliot) &&
-                   layer.Activation.GetType() != typeof(TanH)
+                if (layer.Activation.GetType() != typeof(AFAnalogElliot) &&
+                   layer.Activation.GetType() != typeof(AFAnalogTanH)
                    )
                 {
                     _isAllowedNguyenWidrowRandomization = false;
@@ -188,10 +225,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             return;
         }
 
-        /// <summary>
-        /// Randomizes network's weights (this function must be called before the network training)
-        /// </summary>
-        /// <param name="rand">Random generator to be used</param>
+        /// <inheritdoc/>
         public void RandomizeWeights(Random rand)
         {
             if (!Finalized)
@@ -209,9 +243,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             return;
         }
 
-        /// <summary>
-        /// Creates a deep copy of this network
-        /// </summary>
+        /// <inheritdoc/>
         public INonRecurrentNetwork DeepClone()
         {
             FeedForwardNetwork clone = new FeedForwardNetwork(NumOfInputValues, NumOfOutputValues)
@@ -227,11 +259,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             return clone;
         }
 
-        /// <summary>
-        /// Computes network output values (faster version for standard usage)
-        /// </summary>
-        /// <param name="input">Input values to be passed into the network</param>
-        /// <returns>Computed output values</returns>
+        /// <inheritdoc/>
         public double[] Compute(double[] input)
         {
             double[] result = input;
@@ -268,15 +296,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             return result;
         }
 
-        /// <summary>
-        /// Function goes through collection (batch) of the network inputs and for each of them computes the output.
-        /// Computed output is then compared with a corresponding ideal output.
-        /// The error Abs(ideal - computed) is passed to the result error statistics.
-        /// </summary>
-        /// <param name="inputCollection">Collection of the network inputs (batch)</param>
-        /// <param name="idealOutputCollection">Collection of the ideal outputs (batch)</param>
-        /// <param name="computedOutputCollection">Collection of the computed outputs (batch)</param>
-        /// <returns>Error statistics</returns>
+        /// <inheritdoc/>
         public BasicStat ComputeBatchErrorStat(List<double[]> inputCollection, List<double[]> idealOutputCollection, out List<double[]> computedOutputCollection)
         {
             double[][] computedOutputs = new double[idealOutputCollection.Count][];
@@ -294,14 +314,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             return new BasicStat(flatErrors);
         }
 
-        /// <summary>
-        /// Function goes through collection (batch) of the network inputs and for each of them computes the output.
-        /// Computed output is then compared with a corresponding ideal output.
-        /// The error Abs(ideal - computed) is passed to the result error statistics.
-        /// </summary>
-        /// <param name="inputCollection">Collection of the network inputs (batch)</param>
-        /// <param name="idealOutputCollection">Collection of the ideal outputs (batch)</param>
-        /// <returns>Error statistics</returns>
+        /// <inheritdoc/>
         public BasicStat ComputeBatchErrorStat(List<double[]> inputCollection, List<double[]> idealOutputCollection)
         {
             double[] flatErrors = new double[inputCollection.Count * NumOfOutputValues];
@@ -334,9 +347,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             return;
         }
 
-        /// <summary>
-        /// Function creates the statistics of the internal weights
-        /// </summary>
+        /// <inheritdoc/>
         public BasicStat ComputeWeightsStat()
         {
             return (new BasicStat(_flatWeights));
@@ -353,7 +364,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             /// <summary>
             /// The activation function of the layer's neurons
             /// </summary>
-            public IActivationFunction Activation { get; }
+            public AFAnalogBase Activation { get; }
             /// <summary>
             /// Number of layer input nodes
             /// </summary>
@@ -382,7 +393,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             /// </summary>
             /// <param name="numOfNeurons">Number of layer's neurons</param>
             /// <param name="activation">Each of the layer's neuron will be activated by this activation function</param>
-            public Layer(int numOfNeurons, IActivationFunction activation)
+            public Layer(int numOfNeurons, AFAnalogBase activation)
             {
                 //Check correctness
                 if (numOfNeurons < 1)
@@ -422,7 +433,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             }
 
             /// <summary>
-            /// Creates a deep copy of this layer
+            /// Creates the deep copy instance of this layer
             /// </summary>
             internal Layer DeepClone()
             {
@@ -445,26 +456,34 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             /// <returns>The layer's neurons states</returns>
             internal double[] Compute(double[] inputs, double[] flatWeights, double[] flatDerivatives = null)
             {
-                double[] result = new double[NumOfLayerNeurons];
                 int weightFlatIdx = WeightsStartFlatIdx;
                 int biasFlatIdx = BiasesStartFlatIdx;
+                //Compute summed weighted inputs
+                double[] sums = new double[NumOfLayerNeurons];
                 for (int neuronIdx = 0; neuronIdx < NumOfLayerNeurons; neuronIdx++, biasFlatIdx++)
                 {
-                    double sum = flatWeights[biasFlatIdx] * BiasValue;
+                    sums[neuronIdx] = flatWeights[biasFlatIdx] * BiasValue;
                     for (int inputIdx = 0; inputIdx < NumOfInputNodes; inputIdx++, weightFlatIdx++)
                     {
-                        sum += flatWeights[weightFlatIdx] * inputs[inputIdx];
-                    }
-                    result[neuronIdx] = Activation.Compute(sum);
-                    if (flatDerivatives != null)
-                    {
-                        flatDerivatives[NeuronsStartFlatIdx + neuronIdx] = Activation.ComputeDerivative(result[neuronIdx], sum);
+                        sums[neuronIdx] += flatWeights[weightFlatIdx] * inputs[inputIdx];
                     }
                 }
-                return result;
+                //Compute activations
+                double[] activations = new double[NumOfLayerNeurons];
+                Activation.Compute(sums, activations);
+                if (flatDerivatives != null)
+                {
+                    double[] derivatives = new double[NumOfLayerNeurons];
+                    //Compute derivatives
+                    Activation.ComputeDerivative(activations, sums, derivatives);
+                    //Copy derivatives to flat buffer
+                    derivatives.CopyTo(flatDerivatives, NeuronsStartFlatIdx);
+                }
+                return activations;
             }
 
         }//Layer
+
     }//FeedForwardNetwork
 
 }//Namespace

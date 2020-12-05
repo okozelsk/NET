@@ -1,5 +1,4 @@
-﻿using RCNet.MathTools;
-using System;
+﻿using System;
 using System.Globalization;
 using System.Linq;
 using System.Xml.Linq;
@@ -7,8 +6,7 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.NonRecurrent.PP
 {
     /// <summary>
-    /// The class contains parallel perceptron configuration parameters
-    /// The easiest and safest way to create an instance is to use the xml constructor.
+    /// Configuration of the ParallelPerceptron
     /// </summary>
     [Serializable]
     public class ParallelPerceptronSettings : RCNetBaseSettings, INonRecurrentNetworkSettings
@@ -28,9 +26,6 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
         /// Default output resolution (2 means binary output)
         /// </summary>
         public const int DefaultResolution = 2;
-
-        //Static attributes
-        private static readonly Interval GatesRange = new Interval(-1, 1);
 
         //Attribute properties
         /// <summary>
@@ -70,10 +65,8 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
         /// </summary>
         /// <param name="source">Source instance</param>
         public ParallelPerceptronSettings(ParallelPerceptronSettings source)
+            :this(source.Gates, source.Resolution, source.PDeltaRuleTrainerCfg)
         {
-            Gates = source.Gates;
-            Resolution = source.Resolution;
-            PDeltaRuleTrainerCfg = (PDeltaRuleTrainerSettings)source.PDeltaRuleTrainerCfg.DeepClone();
             return;
         }
 
@@ -96,29 +89,20 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
 
         //Properties
         /// <summary>
-        /// Network output range.
-        /// </summary>
-        public Interval OutputRange { get { return GatesRange; } }
-
-        /// <summary>
-        /// Checks if settings are default
+        /// Checks the defaults
         /// </summary>
         public bool IsDefaultGates { get { return (Gates == DefaultGates); } }
 
         /// <summary>
-        /// Checks if settings are default
+        /// Checks the defaults
         /// </summary>
         public bool IsDefaultResolution { get { return (Resolution == DefaultResolution); } }
 
-        /// <summary>
-        /// Identifies settings containing only default values
-        /// </summary>
+        /// <inheritdoc/>
         public override bool ContainsOnlyDefaults { get { return false; } }
 
         //Methods
-        /// <summary>
-        /// Checks consistency
-        /// </summary>
+        /// <inheritdoc/>
         protected override void Check()
         {
             if (Gates < 1)
@@ -132,20 +116,13 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
             return;
         }
 
-        /// <summary>
-        /// Creates the deep copy instance of this instance
-        /// </summary>
+        /// <inheritdoc/>
         public override RCNetBaseSettings DeepClone()
         {
             return new ParallelPerceptronSettings(this);
         }
 
-        /// <summary>
-        /// Generates xml element containing the settings.
-        /// </summary>
-        /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc/>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             XElement rootElem = new XElement(rootElemName);
@@ -162,11 +139,7 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
             return rootElem;
         }
 
-        /// <summary>
-        /// Generates default named xml element containing the settings.
-        /// </summary>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc/>
         public override XElement GetXml(bool suppressDefaults)
         {
             return GetXml("pp", suppressDefaults);

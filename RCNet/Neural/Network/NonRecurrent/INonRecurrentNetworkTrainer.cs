@@ -11,27 +11,27 @@
         /// </summary>
         double MSE { get; }
         /// <summary>
-        /// Max attempt
+        /// Max number of training attempts
         /// </summary>
         int MaxAttempt { get; }
         /// <summary>
-        /// Current attempt
+        /// Current training attempt number
         /// </summary>
         int Attempt { get; }
         /// <summary>
-        /// Max epoch
+        /// Max number of epochs within the training attempt
         /// </summary>
         int MaxAttemptEpoch { get; }
         /// <summary>
-        /// Current epoch (incremented each call of Iteration)
+        /// Current epoch number within the current training attempt
         /// </summary>
         int AttemptEpoch { get; }
         /// <summary>
-        /// Network beeing trained
+        /// A non-recurrent network that is being trained
         /// </summary>
         INonRecurrentNetwork Net { get; }
         /// <summary>
-        /// Informative message from the trainer
+        /// An informative message sent from the trainer
         /// </summary>
         string InfoMessage { get; }
 
@@ -39,8 +39,9 @@
         /// Starts next training attempt
         /// </summary>
         bool NextAttempt();
+
         /// <summary>
-        /// Performs training iteration.
+        /// Performs the training epoch.
         /// </summary>
         bool Iteration();
 

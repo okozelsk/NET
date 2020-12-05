@@ -10,23 +10,16 @@ using System.Collections.Generic;
 namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
 {
     /// <summary>
-    /// Reservoir's hidden neuron
+    /// Implements the hidden neuron
     /// </summary>
     [Serializable]
     public class HiddenNeuron : INeuron
     {
-        //Static attributes
-        private static readonly Interval _outputRange = new Interval(0, 1);
-
         //Attribute properties
-        /// <summary>
-        /// Information about a neuron location within the neural preprocessor
-        /// </summary>
+        /// <inheritdoc/>
         public NeuronLocation Location { get; }
 
-        /// <summary>
-        /// Neuron's key statistics
-        /// </summary>
+        /// <inheritdoc/>
         public NeuronStatistics Statistics { get; }
 
         /// <summary>
@@ -34,16 +27,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
         /// </summary>
         public double Bias { get; }
 
-        /// <summary>
-        /// Neuron's output data
-        /// </summary>
+        /// <inheritdoc/>
         public NeuronOutputData OutputData { get; }
 
         //Attributes
         /// <summary>
         /// Neuron's activation function
         /// </summary>
-        private readonly IActivationFunction _activation;
+        private readonly IActivation _activation;
 
         /// <summary>
         /// Analog firing
@@ -82,7 +73,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
         /// <param name="bias">Constant bias to be applied.</param>
         /// <param name="predictorsCfg">Configuration of neuron's predictors</param>
         public HiddenNeuron(NeuronLocation location,
-                            IActivationFunction spikingActivation,
+                            AFSpikingBase spikingActivation,
                             double bias,
                             PredictorsProviderSettings predictorsCfg
                             )
@@ -118,7 +109,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
         /// <param name="retainmentStrength">Strength of the analog neuron's retainment property.</param>
         /// <param name="predictorsCfg">Configuration of neuron's predictors</param>
         public HiddenNeuron(NeuronLocation location,
-                            IActivationFunction analogActivation,
+                            AFAnalogBase analogActivation,
                             double bias,
                             double firingThreshold,
                             int thresholdMaxRefDeepness,
@@ -144,15 +135,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
             return;
         }
 
+        //Static properties
+        private static Interval OutputRange { get { return Interval.IntZP1; } }
+
         //Properties
-        /// <summary>
-        /// Neuron type
-        /// </summary>
+        /// <inheritdoc/>
         public NeuronCommon.NeuronType Type { get { return NeuronCommon.NeuronType.Hidden; } }
 
-        /// <summary>
-        /// Type of the activation function
-        /// </summary>
+        /// <inheritdoc/>
         public ActivationType TypeOfActivation { get { return _activation.TypeOfActivation; } }
 
         /// <summary>
@@ -166,13 +156,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
         public int NumOfProvidedPredictors { get { return _predictors == null ? 0 : _predictors.NumOfProvidedPredictors; } }
 
         //Methods
-        /// <summary>
-        /// Resets the neuron to its initial state
-        /// </summary>
-        /// <param name="statistics">Specifies whether to reset also internal statistics</param>
+        /// <inheritdoc/>
         public void Reset(bool statistics)
         {
-            _activation.Reset();
+            if (_activation.TypeOfActivation == ActivationType.Spiking)
+            {
+                ((AFSpikingBase)_activation).Reset();
+            }
             _predictors?.Reset();
             _iStimuli = 0;
             _rStimuli = 0;
@@ -187,11 +177,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
             return;
         }
 
-        /// <summary>
-        /// Stores new incoming stimulation.
-        /// </summary>
-        /// <param name="iStimuli">Stimulation comming from input neurons</param>
-        /// <param name="rStimuli">Stimulation comming from reservoir neurons</param>
+        /// <inheritdoc/>
         public void NewStimulation(double iStimuli, double rStimuli)
         {
             _iStimuli = iStimuli;
@@ -200,10 +186,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
             return;
         }
 
-        /// <summary>
-        /// Computes neuron's new output signal and updates statistics
-        /// </summary>
-        /// <param name="collectStatistics">Specifies whether to update internal statistics</param>
+        /// <inheritdoc/>
         public void Recompute(bool collectStatistics)
         {
             //Spike leak handling
@@ -219,17 +202,18 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
             if (_activation.TypeOfActivation == ActivationType.Spiking)
             {
                 //Spiking activation
-                OutputData._spikingSignal = _activation.Compute(_tStimuli);
+                AFSpikingBase af = (AFSpikingBase)_activation;
+                OutputData._spikingSignal = af.Compute(_tStimuli);
                 //OutputData._analogSignal = OutputData._spikingSignal;
-                _activationState = _activation.InternalState;
-                normalizedActivation = _outputRange.Rescale(_activation.InternalState, _activation.InternalStateRange).Bound(_outputRange.Min, _outputRange.Max);
+                _activationState = af.InternalState;
+                normalizedActivation = OutputRange.Rescale(af.InternalState, af.InternalStateRange).Bound(OutputRange.Min, OutputRange.Max);
                 OutputData._analogSignal = normalizedActivation;
             }
             else
             {
                 //Analog activation
                 _activationState = (_analogRetainmentStrength * _activationState) + (1d - _analogRetainmentStrength) * _activation.Compute(_tStimuli);
-                normalizedActivation = _outputRange.Rescale(_activationState, _activation.OutputRange).Bound(_outputRange.Min, _outputRange.Max);
+                normalizedActivation = OutputRange.Rescale(_activationState, _activation.OutputRange).Bound(OutputRange.Min, OutputRange.Max);
                 double activationDifference = _histActivationsQueue == null ? ((normalizedActivation - OutputData._analogSignal)) : (_histActivationsQueue.Full ? (normalizedActivation - _histActivationsQueue.Dequeue()) : (normalizedActivation - 0.5d));
                 //Firing event decision
                 bool firingEvent = activationDifference > _analogFiringThreshold;

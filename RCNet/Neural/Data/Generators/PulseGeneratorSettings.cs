@@ -5,7 +5,7 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Data.Generators
 {
     /// <summary>
-    /// Setup parameters for the Pulse signal generator
+    /// Configuration of the PulseGenerator
     /// </summary>
     [Serializable]
     public class PulseGeneratorSettings : RCNetBaseSettings
@@ -56,10 +56,8 @@ namespace RCNet.Neural.Data.Generators
         /// </summary>
         /// <param name="source">Source instance</param>
         public PulseGeneratorSettings(PulseGeneratorSettings source)
+            :this(source.Signal, source.AvgPeriod, source.Mode)
         {
-            Signal = source.Signal;
-            AvgPeriod = source.AvgPeriod;
-            Mode = source.Mode;
             return;
         }
 
@@ -80,15 +78,11 @@ namespace RCNet.Neural.Data.Generators
         }
 
         //Properties
-        /// <summary>
-        /// Identifies settings containing only default values
-        /// </summary>
+        /// <inheritdoc />
         public override bool ContainsOnlyDefaults { get { return false; } }
 
         //Methods
-        /// <summary>
-        /// Checks consistency
-        /// </summary>
+        /// <inheritdoc />
         protected override void Check()
         {
             if (AvgPeriod < 1)
@@ -98,20 +92,13 @@ namespace RCNet.Neural.Data.Generators
             return;
         }
 
-        /// <summary>
-        /// Creates the deep copy instance of this instance
-        /// </summary>
+        /// <inheritdoc />
         public override RCNetBaseSettings DeepClone()
         {
             return new PulseGeneratorSettings(this);
         }
 
-        /// <summary>
-        /// Generates xml element containing the settings.
-        /// </summary>
-        /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc />
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             return Validate(new XElement(rootElemName, new XAttribute("signal", Signal.ToString(CultureInfo.InvariantCulture)),
@@ -120,11 +107,7 @@ namespace RCNet.Neural.Data.Generators
                                                        XsdTypeName);
         }
 
-        /// <summary>
-        /// Generates default named xml element containing the settings.
-        /// </summary>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc />
         public override XElement GetXml(bool suppressDefaults)
         {
             return GetXml("pulse", suppressDefaults);

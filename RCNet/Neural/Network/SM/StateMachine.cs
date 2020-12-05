@@ -620,12 +620,12 @@ namespace RCNet.Neural.Network.SM
                     }
 
                     //Group error
-                    double err = (readoutData.OneWinnerDataCollection[Name].MemberWinningIndex == memberCorrectIndex ? 0d : 1d);
+                    double err = (readoutData.OneWinnerDataCollection[Name].MemberWinningGroupIndex == memberCorrectIndex ? 0d : 1d);
                     GroupErrorStat.AddSampleValue(err);
 
                     //Member errors
                     MemberErrorStatCollection[memberCorrectIndex].Update(readoutData.OneWinnerDataCollection[Name].MemberProbabilities,
-                                                                         readoutData.OneWinnerDataCollection[Name].MemberWinningIndex
+                                                                         readoutData.OneWinnerDataCollection[Name].MemberWinningGroupIndex
                                                                          );
                     return;
                 }

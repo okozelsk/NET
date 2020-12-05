@@ -9,7 +9,7 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
 {
     /// <summary>
-    /// Contains analog neuron group settings
+    /// Configuration of the group of analog neurons
     /// </summary>
     [Serializable]
     public class AnalogNeuronGroupSettings : RCNetBaseSettings, INeuronGroupSettings
@@ -31,20 +31,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         public const int DefaultThresholdMaxRefDeepness = 1;
 
         //Attribute properties
-        /// <summary>
-        /// Name of the neuron group
-        /// </summary>
+        /// <inheritdoc/>
         public string Name { get; }
 
-        /// <summary>
-        /// Specifies how big relative portion of pool's neurons is formed by this group of the neurons
-        /// </summary>
+        /// <inheritdoc/>
         public double RelShare { get; }
 
-        /// <summary>
-        /// Common activation function settings of the groupped neurons
-        /// </summary>
-        public RCNetBaseSettings ActivationCfg { get; }
+        /// <inheritdoc/>
+        public IActivationSettings ActivationCfg { get; }
 
         /// <summary>
         /// A number between 0 and 1 (LT1). Every time the new normalized activation value is higher than the previous
@@ -57,9 +51,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// </summary>
         public int ThresholdMaxRefDeepness { get; }
 
-        /// <summary>
-        /// Each neuron within the group receives constant input bias. Value of the neuron's bias is driven by this random settings
-        /// </summary>
+        /// <inheritdoc/>
         public RandomValueSettings BiasCfg { get; }
 
         /// <summary>
@@ -67,15 +59,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// </summary>
         public RetainmentSettings RetainmentCfg { get; }
 
-        /// <summary>
-        /// Configuration of the predictors
-        /// </summary>
+        /// <inheritdoc/>
         public PredictorsProviderSettings PredictorsCfg { get; }
 
-        /// <summary>
-        /// Additional helper computed field.
-        /// Specifies exact number of neurons of the group within the current context.
-        /// </summary>
+        /// <inheritdoc/>
         public int Count { get; set; } = 0;
 
         //Constructors
@@ -95,7 +82,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// <param name="retainmentCfg">Neurons' retainment property configuration</param>
         public AnalogNeuronGroupSettings(string name,
                                          double relShare,
-                                         RCNetBaseSettings activationCfg,
+                                         IActivationSettings activationCfg,
                                          PredictorsProviderSettings predictorsCfg,
                                          double firingThreshold = DefaultFiringThreshold,
                                          int thresholdMaxRefDeepness = DefaultThresholdMaxRefDeepness,
@@ -105,7 +92,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         {
             Name = name;
             RelShare = relShare;
-            ActivationCfg = activationCfg.DeepClone();
+            ActivationCfg = (IActivationSettings)activationCfg.DeepClone();
             PredictorsCfg = (PredictorsProviderSettings)predictorsCfg.DeepClone();
             FiringThreshold = firingThreshold;
             ThresholdMaxRefDeepness = thresholdMaxRefDeepness;
@@ -158,23 +145,16 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
 
         //Properties
         /// <summary>
-        /// Type of the activation functions within the group (analog or spiking)
-        /// </summary>
-        public ActivationType Type { get { return ActivationType.Analog; } }
-
-        /// <summary>
-        /// Checks if settings are default
+        /// Checks the defaults
         /// </summary>
         public bool IsDefaultFiringThreshold { get { return (FiringThreshold == DefaultFiringThreshold); } }
 
         /// <summary>
-        /// Checks if settings are default
+        /// Checks the defaults
         /// </summary>
         public bool IsDefaultThresholdMaxRefDeepness { get { return (ThresholdMaxRefDeepness == DefaultThresholdMaxRefDeepness); } }
 
-        /// <summary>
-        /// Identifies settings containing only default values
-        /// </summary>
+        /// <inheritdoc/>
         public override bool ContainsOnlyDefaults
         {
             get
@@ -184,9 +164,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         }
 
         //Methods
-        /// <summary>
-        /// Checks consistency
-        /// </summary>
+        /// <inheritdoc/>
         protected override void Check()
         {
             if (Name.Length == 0)
@@ -194,14 +172,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
                 throw new ArgumentException($"Name can not be empty.", "Name");
             }
             Type activationType = ActivationCfg.GetType();
-            if (activationType != typeof(SQNLSettings) &&
-                activationType != typeof(ElliotSettings) &&
-                activationType != typeof(GaussianSettings) &&
-                activationType != typeof(ISRUSettings) &&
-                activationType != typeof(SigmoidSettings) &&
-                activationType != typeof(SincSettings) &&
-                activationType != typeof(SinusoidSettings) &&
-                activationType != typeof(TanHSettings)
+            if (activationType != typeof(AFAnalogSQNLSettings) &&
+                activationType != typeof(AFAnalogElliotSettings) &&
+                activationType != typeof(AFAnalogGaussianSettings) &&
+                activationType != typeof(AFAnalogISRUSettings) &&
+                activationType != typeof(AFAnalogSigmoidSettings) &&
+                activationType != typeof(AFAnalogSincSettings) &&
+                activationType != typeof(AFAnalogSinusoidSettings) &&
+                activationType != typeof(AFAnalogTanHSettings)
                 )
             {
                 throw new ArgumentException($"Not allowed Activation settings {activationType.Name}.", "ActivationCfg");
@@ -217,20 +195,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
             return;
         }
 
-        /// <summary>
-        /// Creates the deep copy instance of this instance
-        /// </summary>
+        /// <inheritdoc/>
         public override RCNetBaseSettings DeepClone()
         {
             return new AnalogNeuronGroupSettings(this);
         }
 
-        /// <summary>
-        /// Generates xml element containing the settings.
-        /// </summary>
-        /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc/>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             XElement rootElem = new XElement(rootElemName,
@@ -259,11 +230,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
             return rootElem;
         }
 
-        /// <summary>
-        /// Generates default named xml element containing the settings.
-        /// </summary>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc/>
         public override XElement GetXml(bool suppressDefaults)
         {
             return GetXml("analogGroup", suppressDefaults);

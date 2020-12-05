@@ -43,7 +43,7 @@ site and State Machine is able to achieve competetive results to the best classi
 |[BeetleFly](https://timeseriesclassification.com/description.php?Dataset=BeetleFly)|100%|94.85%|BOSS|
 |[BirdChicken](https://timeseriesclassification.com/description.php?Dataset=BirdChicken)|100%|98.4%|BOSS|
 |[ProximalPhalanx](https://timeseriesclassification.com/description.php?Dataset=ProximalPhalanxOutlineAgeGroup)|87.8%|88.09%|ST|
-|[Yoga](https://timeseriesclassification.com/description.php?Dataset=Yoga)|91.27%|90.99%|BOSS|
+|[Yoga](https://timeseriesclassification.com/description.php?Dataset=Yoga)|91.37%|90.99%|BOSS|
 |[Libras](https://timeseriesclassification.com/description.php?Dataset=Libras)|92.78%|89.4%|DTWi|
 
 
@@ -66,7 +66,7 @@ Input data is standardly located in the "Data" sub-folder relative to the locati
 ### Code metrics
 |Maintenance index|Cyclomatic complexity|Depth of inheritance|Code lines|Executable code lines|
 |--|--|--|--|--|
-|82 (green)|6956|3|53197|11124|
+|82 (green)|7010|3|50199|11177|
 
 Follows list of components in logical order from basic to composite and complex.
 
@@ -145,30 +145,31 @@ See the [wiki pages.](https://en.wikipedia.org/wiki/Activation_function)
 
 |Component|Description|
 |--|--|
-|[BentIdentity](./RCNet/Neural/Activation/BentIdentity.cs)|Bent identity activation function|
-|[SQNL](./RCNet/Neural/Activation/SQNL.cs)|Square nonlinearity activation function|
-|[Elliot](./RCNet/Neural/Activation/Elliot.cs)|Elliot activation function (aka Softsign)|
-|[Gaussian](./RCNet/Neural/Activation/Gaussian.cs)|Gaussian activation function|
-|[Identity](./RCNet/Neural/Activation/Identity.cs)|Identity activation function (aka Linear)|
-|[ISRU](./RCNet/Neural/Activation/ISRU.cs)|ISRU (Inverse Square Root Unit) activation function|
-|[LeakyReLU](./RCNet/Neural/Activation/LeakyReLU.cs)|Leaky ReLU (Leaky Rectified Linear Unit) activation function|
-|[Sigmoid](./RCNet/Neural/Activation/Sinusoid.cs)|Sigmoid activation function|
-|[Sinc](./RCNet/Neural/Activation/Sinc.cs)|Sinc activation function|
-|[Sinusoid](./RCNet/Neural/Activation/Sinusoid.cs)|Sinusoid activation function|
-|[SoftExponential](./RCNet/Neural/Activation/SoftExponential.cs)|Soft exponential activation function|
-|[SoftPlus](./RCNet/Neural/Activation/SoftPlus.cs)|Soft Plus activation function|
-|[TanH](./RCNet/Neural/Activation/TanH.cs)|TanH activation function|
+|[AFAnalogBentIdentity](./RCNet/Neural/Activation/AFAnalogBentIdentity.cs)|Bent identity activation function|
+|[AFAnalogSQNL](./RCNet/Neural/Activation/AFAnalogSQNL.cs)|Square nonlinearity activation function|
+|[AFAnalogElliot](./RCNet/Neural/Activation/AFAnalogElliot.cs)|Elliot activation function (aka Softsign)|
+|[AFAnalogGaussian](./RCNet/Neural/Activation/AFAnalogGaussian.cs)|Gaussian activation function|
+|[AFAnalogIdentity](./RCNet/Neural/Activation/AFAnalogIdentity.cs)|Identity activation function (aka Linear)|
+|[AFAnalogISRU](./RCNet/Neural/Activation/AFAnalogISRU.cs)|ISRU (Inverse Square Root Unit) activation function|
+|[AFAnalogLeakyReLU](./RCNet/Neural/Activation/AFAnalogLeakyReLU.cs)|Leaky ReLU (Leaky Rectified Linear Unit) activation function|
+|[AFAnalogSigmoid](./RCNet/Neural/Activation/AFAnalogSinusoid.cs)|Sigmoid activation function|
+|[AFAnalogSinc](./RCNet/Neural/Activation/AFAnalogSinc.cs)|Sinc activation function|
+|[AFAnalogSinusoid](./RCNet/Neural/Activation/AFAnalogSinusoid.cs)|Sinusoid activation function|
+|[AFAnalogSoftExponential](./RCNet/Neural/Activation/AFAnalogSoftExponential.cs)|Soft exponential activation function|
+|[AFAnalogSoftMax](./RCNet/Neural/Activation/AFAnalogSoftMax.cs)|Soft Max activation function|
+|[AFAnalogSoftPlus](./RCNet/Neural/Activation/AFAnalogSoftPlus.cs)|Soft Plus activation function|
+|[AFAnalogTanH](./RCNet/Neural/Activation/AFAnalogTanH.cs)|TanH activation function|
 
 ### Spiking activation functions (stateful)
 See the [wiki pages.](https://en.wikipedia.org/wiki/Biological_neuron_model)
 
 |Component|Description|
 |--|--|
-|[SimpleIF](./RCNet/Neural/Activation/SimpleIF.cs)|Simple Integrate and Fire activation function|
-|[LeakyIF](./RCNet/Neural/Activation/LeakyIF.cs)|Leaky Integrate and Fire activation function|
-|[ExpIF](./RCNet/Neural/Activation/ExpIF.cs)|Exponential Integrate and Fire activation function|
-|[AdExpIF](./RCNet/Neural/Activation/AdExpIF.cs)|Adaptive Exponential Integrate and Fire activation function|
-|[IzhikevichIF](./RCNet/Neural/Activation/IzhikevichIF.cs)|Izhikevich Integrate and Fire activation function (model "one fits all")|
+|[AFSpikingSimpleIF](./RCNet/Neural/Activation/AFSpikingSimpleIF.cs)|Simple Integrate and Fire activation function|
+|[AFSpikingLeakyIF](./RCNet/Neural/Activation/AFSpikingLeakyIF.cs)|Leaky Integrate and Fire activation function|
+|[AFSpikingExpIF](./RCNet/Neural/Activation/AFSpikingExpIF.cs)|Exponential Integrate and Fire activation function|
+|[AFSpikingAdExpIF](./RCNet/Neural/Activation/AFSpikingAdExpIF.cs)|Adaptive Exponential Integrate and Fire activation function|
+|[AFSpikingIzhikevichIF](./RCNet/Neural/Activation/AFSpikingIzhikevichIF.cs)|Izhikevich Integrate and Fire activation function (model "one fits all")|
 
 ### Non-recurrent networks and trainers
 |Component|Description|

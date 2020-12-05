@@ -5,7 +5,7 @@ using System;
 namespace RCNet.Neural.Data.Generators
 {
     /// <summary>
-    /// Generates random signal
+    /// Implements the random signal generator
     /// </summary>
     [Serializable]
     public class RandomGenerator : IGenerator
@@ -33,18 +33,14 @@ namespace RCNet.Neural.Data.Generators
         }
 
         //Methods
-        /// <summary>
-        /// Resets generator to its initial state
-        /// </summary>
+        /// <inheritdoc />
         public void Reset()
         {
             _rand = (_seek < 0) ? new Random() : new Random(_seek);
             return;
         }
 
-        /// <summary>
-        /// Returns next signal value
-        /// </summary>
+        /// <inheritdoc />
         public double Next()
         {
             return _rand.NextDouble(_settings);

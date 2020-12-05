@@ -7,8 +7,7 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.NonRecurrent.FF
 {
     /// <summary>
-    /// The class contains feed forward network configuration parameters
-    /// The easiest and safest way to create an instance is to use the xml constructor.
+    /// Configuration of the FeedForwardNetwork and associated trainer
     /// </summary>
     [Serializable]
     public class FeedForwardNetworkSettings : RCNetBaseSettings, INonRecurrentNetworkSettings
@@ -27,11 +26,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         /// <summary>
         /// Output layer activation configuration
         /// </summary>
-        public RCNetBaseSettings OutputActivationCfg { get; }
-        /// <summary>
-        /// Network output values range.
-        /// </summary>
-        public Interval OutputRange { get; }
+        public IActivationSettings OutputActivationCfg { get; }
         /// <summary>
         /// Configuration of associated trainer
         /// </summary>
@@ -43,14 +38,13 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         /// </summary>
         /// <param name="outputActivationCfg">Output layer activation configuration</param>
         /// <param name="hiddenLayersCfg">Hidden layers configuration. Hidden layers are optional.</param>
-        /// <param name="trainerCfg">Configuration of associated trainer</param>
-        public FeedForwardNetworkSettings(RCNetBaseSettings outputActivationCfg,
+        /// <param name="trainerCfg">Configuration of the associated trainer</param>
+        public FeedForwardNetworkSettings(IActivationSettings outputActivationCfg,
                                           HiddenLayersSettings hiddenLayersCfg,
                                           RCNetBaseSettings trainerCfg
                                           )
         {
-            OutputActivationCfg = ActivationFactory.DeepCloneActivationSettings(outputActivationCfg);
-            OutputRange = ActivationFactory.GetInfo(OutputActivationCfg, out _, out _);
+            OutputActivationCfg = (IActivationSettings)outputActivationCfg.DeepClone();
             HiddenLayersCfg = hiddenLayersCfg == null ? new HiddenLayersSettings() : (HiddenLayersSettings)hiddenLayersCfg.DeepClone();
             TrainerCfg = trainerCfg.DeepClone();
             Check();
@@ -62,11 +56,8 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         /// </summary>
         /// <param name="source">Source instance</param>
         public FeedForwardNetworkSettings(FeedForwardNetworkSettings source)
+            :this(source.OutputActivationCfg, source.HiddenLayersCfg, source.TrainerCfg)
         {
-            OutputActivationCfg = ActivationFactory.DeepCloneActivationSettings(source.OutputActivationCfg);
-            OutputRange = source.OutputRange.DeepClone();
-            HiddenLayersCfg = (HiddenLayersSettings)source.HiddenLayersCfg.DeepClone();
-            TrainerCfg = source.TrainerCfg.DeepClone();
             return;
         }
 
@@ -80,7 +71,6 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
             OutputActivationCfg = ActivationFactory.LoadSettings(settingsElem.Elements().First());
-            OutputRange = ActivationFactory.GetInfo(OutputActivationCfg, out _, out _);
             //Hidden layers
             XElement hiddenLayersElem = settingsElem.Elements("hiddenLayers").FirstOrDefault();
             if (hiddenLayersElem != null)
@@ -121,36 +111,16 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         }
 
         //Properties
-        /// <summary>
-        /// Identifies settings containing only default values
-        /// </summary>
+        /// <inheritdoc/>
         public override bool ContainsOnlyDefaults { get { return false; } }
 
-        //Static methods
-        /// <summary>
-        /// Fuction tests if specified activation can be used in FF network 
-        /// </summary>
-        /// <param name="activationSettings">Activation settings</param>
-        /// <param name="outputRange">Returned range of the activation function</param>
-        public static bool IsAllowedActivation(RCNetBaseSettings activationSettings, out Interval outputRange)
-        {
-            outputRange = ActivationFactory.GetInfo(activationSettings, out bool stateless, out bool supportsDerivative);
-            if (!stateless || !supportsDerivative)
-            {
-                return false;
-            }
-            return true;
-        }
-
         //Methods
-        /// <summary>
-        /// Checks consistency
-        /// </summary>
+        /// <inheritdoc/>
         protected override void Check()
         {
-            if (!IsAllowedActivation(OutputActivationCfg, out _))
+            if(!FeedForwardNetwork.IsAllowedOutputAF(OutputActivationCfg))
             {
-                throw new ArgumentException($"Specified OutputActivationCfg can't be used in FF network. Activation function has to be stateless and has to support derivative calculation.", "OutputActivationCfg");
+                throw new ArgumentException($"Specified output activation function can't be used in FF network's output activation.", "OutputActivationCfg");
             }
             if (TrainerCfg == null)
             {
@@ -165,7 +135,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             {
                 throw new ArgumentException($"Unsupported TrainerCfg {trainerType.Name}.", "TrainerCfg");
             }
-            if ((HiddenLayersCfg.HiddenLayerCfgCollection.Count > 0 || OutputActivationCfg.GetType() != typeof(IdentitySettings)) &&
+            if ((HiddenLayersCfg.HiddenLayerCfgCollection.Count > 0 || OutputActivationCfg.GetType() != typeof(AFAnalogIdentitySettings)) &&
                trainerType != typeof(RPropTrainerSettings)
                )
             {
@@ -174,20 +144,13 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             return;
         }
 
-        /// <summary>
-        /// Creates the deep copy instance of this instance
-        /// </summary>
+        /// <inheritdoc/>
         public override RCNetBaseSettings DeepClone()
         {
             return new FeedForwardNetworkSettings(this);
         }
 
-        /// <summary>
-        /// Generates xml element containing the settings.
-        /// </summary>
-        /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc/>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             XElement rootElem = new XElement(rootElemName);
@@ -201,11 +164,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             return rootElem;
         }
 
-        /// <summary>
-        /// Generates default named xml element containing the settings.
-        /// </summary>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc/>
         public override XElement GetXml(bool suppressDefaults)
         {
             return GetXml("ff", suppressDefaults);

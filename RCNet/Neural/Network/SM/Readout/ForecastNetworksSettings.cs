@@ -8,7 +8,7 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Readout
 {
     /// <summary>
-    /// Collection of forecast networks settings
+    /// The collection of the forecast networks configurations
     /// </summary>
     [Serializable]
     public class ForecastNetworksSettings : RCNetBaseSettings
@@ -95,35 +95,24 @@ namespace RCNet.Neural.Network.SM.Readout
         }
 
         //Properties
-        /// <summary>
-        /// Identifies settings containing only default values
-        /// </summary>
+        /// <inheritdoc />
         public override bool ContainsOnlyDefaults { get { return NetworkCfgCollection.Count == 0; } }
 
 
         //Methods
-        /// <summary>
-        /// Checks consistency
-        /// </summary>
+        /// <inheritdoc />
         protected override void Check()
         {
             return;
         }
 
-        /// <summary>
-        /// Creates the deep copy instance of this instance
-        /// </summary>
+        /// <inheritdoc />
         public override RCNetBaseSettings DeepClone()
         {
             return new ForecastNetworksSettings(this);
         }
 
-        /// <summary>
-        /// Generates xml element containing the settings.
-        /// </summary>
-        /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc />
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             XElement rootElem = new XElement(rootElemName);

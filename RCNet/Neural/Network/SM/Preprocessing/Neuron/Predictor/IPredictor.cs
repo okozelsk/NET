@@ -17,7 +17,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         IPredictorSettings Cfg { get; }
 
         /// <summary>
-        /// Resets the predictor computer
+        /// Resets the predictor computer to its initial state
         /// </summary>
         void Reset();
 
