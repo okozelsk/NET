@@ -211,19 +211,21 @@ namespace RCNet.Neural.Data
             return bundle;
         }
 
-        //Methods
         /// <summary>
-        /// Splits this bundle to a collection of smaller folds (sub-bundles) suitable for the cross-validation.
-        /// Remember that in case of binary output the length of the output vectors should be equal to 1, because
-        /// function keeps balanced ratios of 0 and 1 values in output vectors in each fold and takes into account
-        /// only the first value in the output vector.
+        /// Adds data from given bundle into this bundle
         /// </summary>
-        /// <param name="foldDataRatio">Requested ratio of the samples constituting one fold (sub-bundle).</param>
-        /// <param name="binBorder">If specified, method keeps balanced ratios of 0 and 1 values in each fold (sub-bundle).</param>
-        /// <returns>Collection of created folds (sub-bundles)</returns>
-        public List<VectorBundle> CreateFolds(double foldDataRatio, double binBorder = double.NaN)
+        /// <param name="data">Data to be added</param>
+        public void Add(VectorBundle data)
         {
-            if(OutputVectorCollection.Count < 2)
+            InputVectorCollection.AddRange(data.InputVectorCollection);
+            OutputVectorCollection.AddRange(data.OutputVectorCollection);
+            return;
+        }
+
+        //Methods
+        public List<VectorBundle> Folderize(double foldDataRatio, double binBorder = double.NaN)
+        {
+            if (OutputVectorCollection.Count < 2)
             {
                 throw new InvalidOperationException($"Insufficient number of samples ({OutputVectorCollection.Count.ToString(CultureInfo.InvariantCulture)}).");
             }
@@ -268,11 +270,11 @@ namespace RCNet.Neural.Data
                 BinDistribution refBinDistr = new BinDistribution(binBorder);
                 refBinDistr.Update(OutputVectorCollection, 0);
                 int min01 = Math.Min(refBinDistr.NumOf[0], refBinDistr.NumOf[1]);
-                if(min01 < 2)
+                if (min01 < 2)
                 {
                     throw new InvalidOperationException($"Insufficient bin 0 or 1 samples (less than 2).");
                 }
-                if(numOfFolds > min01)
+                if (numOfFolds > min01)
                 {
                     numOfFolds = min01;
                 }
@@ -334,17 +336,186 @@ namespace RCNet.Neural.Data
 
             return bundleCollection;
         }
-
-
         /// <summary>
-        /// Adds data from given bundle into this bundle
+        /// Splits this bundle to a collection of smaller folds (sub-bundles) suitable for the cross-validation.
+        /// When the binBorder is specified then all output features are considered as binary
+        /// within the "one takes all" group and function then keeps balanced ratios of 0 and 1
+        /// for every output feature and fold.
         /// </summary>
-        /// <param name="data">Data to be added</param>
-        public void Add(VectorBundle data)
+        /// <param name="foldDataRatio">Requested ratio of the samples constituting one fold (sub-bundle).</param>
+        /// <param name="binBorder">When specified then method keeps balanced ratios of 0 and 1 values in each fold sub-bundle.</param>
+        /// <returns>Collection of created folds.</returns>
+        public List<VectorBundle> Folderize_new(double foldDataRatio, double binBorder = double.NaN)
         {
-            InputVectorCollection.AddRange(data.InputVectorCollection);
-            OutputVectorCollection.AddRange(data.OutputVectorCollection);
-            return;
+            if (OutputVectorCollection.Count < 2)
+            {
+                throw new InvalidOperationException($"Insufficient number of samples ({OutputVectorCollection.Count.ToString(CultureInfo.InvariantCulture)}).");
+            }
+            List<VectorBundle> foldCollection = new List<VectorBundle>();
+            //Fold data ratio basic correction
+            if (foldDataRatio > MaxRatioOfFoldData)
+            {
+                foldDataRatio = MaxRatioOfFoldData;
+            }
+            //Prelimitary fold size estimation
+            int foldSize = Math.Max(1, (int)Math.Round(OutputVectorCollection.Count * foldDataRatio, 0));
+            //Prelimitary number of folds
+            int numOfFolds = OutputVectorCollection.Count / foldSize;
+            //Folds creation
+            if (double.IsNaN(binBorder))
+            {
+                //No binary output -> simple split
+                int samplesPos = 0;
+                for (int foldIdx = 0; foldIdx < numOfFolds; foldIdx++)
+                {
+                    VectorBundle fold = new VectorBundle();
+                    for (int i = 0; i < foldSize && samplesPos < OutputVectorCollection.Count; i++)
+                    {
+                        fold.InputVectorCollection.Add(InputVectorCollection[samplesPos]);
+                        fold.OutputVectorCollection.Add(OutputVectorCollection[samplesPos]);
+                        ++samplesPos;
+                    }
+                    foldCollection.Add(fold);
+                }
+                //Remaining samples
+                for (int i = 0; i < OutputVectorCollection.Count - samplesPos; i++)
+                {
+                    int foldIdx = i % foldCollection.Count;
+                    foldCollection[foldIdx].InputVectorCollection.Add(InputVectorCollection[samplesPos + i]);
+                    foldCollection[foldIdx].OutputVectorCollection.Add(OutputVectorCollection[samplesPos + i]);
+                }
+            }//Indifferent output
+            else
+            {
+                //Binary outputs -> keep balanced ratios of outputs
+                int numOfOutputs = OutputVectorCollection[0].Length;
+                if(numOfOutputs == 1)
+                {
+                    //Special case there is only one binary output
+                    //Investigation of the output data metrics
+                    BinDistribution refBinDistr = new BinDistribution(binBorder);
+                    refBinDistr.Update(OutputVectorCollection, 0);
+                    int min01 = Math.Min(refBinDistr.NumOf[0], refBinDistr.NumOf[1]);
+                    if (min01 < 2)
+                    {
+                        throw new InvalidOperationException($"Insufficient bin 0 or 1 samples (less than 2).");
+                    }
+                    if (numOfFolds > min01)
+                    {
+                        numOfFolds = min01;
+                    }
+                    //Scan data
+                    int[] bin0SampleIdxs = new int[refBinDistr.NumOf[0]];
+                    int bin0SamplesPos = 0;
+                    int[] bin1SampleIdxs = new int[refBinDistr.NumOf[1]];
+                    int bin1SamplesPos = 0;
+                    for (int i = 0; i < OutputVectorCollection.Count; i++)
+                    {
+                        if (OutputVectorCollection[i][0] >= refBinDistr.BinBorder)
+                        {
+                            bin1SampleIdxs[bin1SamplesPos++] = i;
+                        }
+                        else
+                        {
+                            bin0SampleIdxs[bin0SamplesPos++] = i;
+                        }
+                    }
+                    //Determine distributions of 0 and 1 for one fold
+                    int bundleBin0Count = Math.Max(1, refBinDistr.NumOf[0] / numOfFolds);
+                    int bundleBin1Count = Math.Max(1, refBinDistr.NumOf[1] / numOfFolds);
+                    //Bundles creation
+                    bin0SamplesPos = 0;
+                    bin1SamplesPos = 0;
+                    for (int foldIdx = 0; foldIdx < numOfFolds; foldIdx++)
+                    {
+                        VectorBundle fold = new VectorBundle();
+                        //Bin 0
+                        for (int i = 0; i < bundleBin0Count; i++)
+                        {
+                            fold.InputVectorCollection.Add(InputVectorCollection[bin0SampleIdxs[bin0SamplesPos]]);
+                            fold.OutputVectorCollection.Add(OutputVectorCollection[bin0SampleIdxs[bin0SamplesPos]]);
+                            ++bin0SamplesPos;
+                        }
+                        //Bin 1
+                        for (int i = 0; i < bundleBin1Count; i++)
+                        {
+                            fold.InputVectorCollection.Add(InputVectorCollection[bin1SampleIdxs[bin1SamplesPos]]);
+                            fold.OutputVectorCollection.Add(OutputVectorCollection[bin1SampleIdxs[bin1SamplesPos]]);
+                            ++bin1SamplesPos;
+                        }
+                        foldCollection.Add(fold);
+                    }
+                    //Remaining samples
+                    for (int i = 0; i < bin0SampleIdxs.Length - bin0SamplesPos; i++)
+                    {
+                        int foldIdx = i % foldCollection.Count;
+                        foldCollection[foldIdx].InputVectorCollection.Add(InputVectorCollection[bin0SampleIdxs[bin0SamplesPos + i]]);
+                        foldCollection[foldIdx].OutputVectorCollection.Add(OutputVectorCollection[bin0SampleIdxs[bin0SamplesPos + i]]);
+                    }
+                    for (int i = 0; i < bin1SampleIdxs.Length - bin1SamplesPos; i++)
+                    {
+                        int foldIdx = i % foldCollection.Count;
+                        foldCollection[foldIdx].InputVectorCollection.Add(InputVectorCollection[bin1SampleIdxs[bin1SamplesPos + i]]);
+                        foldCollection[foldIdx].OutputVectorCollection.Add(OutputVectorCollection[bin1SampleIdxs[bin1SamplesPos + i]]);
+                    }
+                }//Only 1 binary output
+                else
+                {
+                    //There is more than 1 binary output - "one takes all approach"
+                    //Investigation of the output data metrics
+                    //Collect bin 1 sample indexes and check "one takes all" consistency for every output feature
+                    List<int>[] outBin1SampleIdxs = new List<int>[numOfOutputs];
+                    for (int i = 0; i < numOfOutputs; i++)
+                    {
+                        outBin1SampleIdxs[i] = new List<int>();
+                    }
+                    for (int sampleIdx = 0; sampleIdx < OutputVectorCollection.Count; sampleIdx++)
+                    {
+                        int numOf1 = 0;
+                        for (int outFeatureIdx = 0; outFeatureIdx < numOfOutputs; outFeatureIdx++)
+                        {
+                            if(OutputVectorCollection[sampleIdx][outFeatureIdx] >= binBorder)
+                            {
+                                outBin1SampleIdxs[outFeatureIdx].Add(sampleIdx);
+                                ++numOf1;
+                            }
+                        }
+                        if(numOf1 != 1)
+                        {
+                            throw new ArgumentException($"Data are inconsistent on data index {sampleIdx.ToString(CultureInfo.InvariantCulture)}. Output vector has {numOf1.ToString(CultureInfo.InvariantCulture)} feature(s) having bin value 1.", "binBorder");
+                        }
+                    }
+                    //Determine max possible number of folds
+                    int maxNumOfFolds = OutputVectorCollection.Count;
+                    for (int outFeatureIdx = 0; outFeatureIdx < numOfOutputs; outFeatureIdx++)
+                    {
+                        int outFeatureMaxFolds = Math.Min(outBin1SampleIdxs[outFeatureIdx].Count, OutputVectorCollection.Count - outBin1SampleIdxs[outFeatureIdx].Count);
+                        maxNumOfFolds = Math.Min(outFeatureMaxFolds, maxNumOfFolds);
+                    }
+                    //Correct the number of folds to be created
+                    if(numOfFolds > maxNumOfFolds)
+                    {
+                        numOfFolds = maxNumOfFolds;
+                    }
+                    //Create the folds
+                    for(int foldIdx = 0; foldIdx < numOfFolds; foldIdx++)
+                    {
+                        foldCollection.Add(new VectorBundle());
+                    }
+                    //Samples distribution
+                    for (int outFeatureIdx = 0; outFeatureIdx < numOfOutputs; outFeatureIdx++)
+                    {
+                        for(int bin1SampleRefIdx = 0; bin1SampleRefIdx < outBin1SampleIdxs[outFeatureIdx].Count; bin1SampleRefIdx++)
+                        {
+                            int foldIdx = bin1SampleRefIdx % foldCollection.Count;
+                            int dataIdx = outBin1SampleIdxs[outFeatureIdx][bin1SampleRefIdx];
+                            foldCollection[foldIdx].AddPair(InputVectorCollection[dataIdx], OutputVectorCollection[dataIdx]);
+                        }
+                    }
+                }//More binary outputs
+            }//Binary output
+
+            return foldCollection;
         }
 
     }//VectorBundle

@@ -1,16 +1,18 @@
-﻿using RCNet.Neural.Activation;
-using RCNet.Neural.Data.Transformers;
-using RCNet.Neural.Data.Generators;
-using RCNet.Neural.Data.Coders.AnalogToSpiking;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using RCNet.CsvTools;
 using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Linq;
+using RCNet.Extensions;
+using RCNet.Neural.Activation;
+using RCNet.Neural.Data.Transformers;
+using RCNet.Neural.Data.Generators;
+using RCNet.Neural.Data.Coders.AnalogToSpiking;
+using RCNet.CsvTools;
 using RCNet.MathTools;
 using RCNet.Neural.Data.Filter;
+using RCNet.Neural.Data;
 
 namespace Demo.DemoConsoleApp
 {
@@ -294,7 +296,47 @@ namespace Demo.DemoConsoleApp
                 Console.WriteLine($"    {value.ToString(CultureInfo.InvariantCulture),-20} {filter.ApplyReverse(value)}");
             }
             Console.ReadLine();
+        }
 
+        private void TestVectorBundleFolderization(string dataFile, int numOfClasses)
+        {
+            //Load csv data
+            CsvDataHolder csvData = new CsvDataHolder(dataFile);
+            //Convert csv data to a VectorBundle
+            VectorBundle vectorData = VectorBundle.Load(csvData, numOfClasses);
+            double binBorder = 0.5d;
+            double[] foldDataRatios = { -1d, 0d, 0.1d, 0.5d, 0.75d, 1d, 2d };
+            Console.WriteLine($"Folderization test of {dataFile}. NumOfSamples={vectorData.InputVectorCollection.Count.ToString(CultureInfo.InvariantCulture)}, NumOfFoldDataRatios={foldDataRatios.Length.ToString(CultureInfo.InvariantCulture)}");
+            foreach (double foldDataRatio in foldDataRatios)
+            {
+                Console.WriteLine($"  Testing fold data ratio = {foldDataRatio.ToString(CultureInfo.InvariantCulture)}");
+                List<VectorBundle> folds = vectorData.Folderize(foldDataRatio, binBorder);
+                Console.WriteLine($"    Number of resulting folds = {folds.Count.ToString(CultureInfo.InvariantCulture)}");
+                for (int foldIdx = 0; foldIdx < folds.Count; foldIdx++)
+                {
+                    int numOfFoldSamples = folds[foldIdx].InputVectorCollection.Count;
+                    Console.WriteLine($"      FoldIdx={foldIdx.ToString(CultureInfo.InvariantCulture),-4} FoldSize={numOfFoldSamples.ToString(CultureInfo.InvariantCulture),-4}");
+                    int[] classesBin1Counts = new int[numOfClasses];
+                    classesBin1Counts.Populate(0);
+                    for (int sampleIdx = 0; sampleIdx < numOfFoldSamples; sampleIdx++)
+                    {
+                        for(int classIdx = 0; classIdx < numOfClasses; classIdx++)
+                        {
+                            if(folds[foldIdx].OutputVectorCollection[sampleIdx][classIdx] >= binBorder)
+                            {
+                                ++classesBin1Counts[classIdx];
+                            }
+                        }
+                    }
+                    Console.WriteLine($"        Number of positive samples per class");
+                    for (int classIdx = 0; classIdx < numOfClasses; classIdx++)
+                    {
+                        Console.WriteLine($"          ClassID={classIdx.ToString(CultureInfo.InvariantCulture), -3}, Bin1Samples={classesBin1Counts[classIdx].ToString(CultureInfo.InvariantCulture)}");
+                    }
+                }
+                Console.ReadLine();
+            }
+            return;
         }
 
         /// <summary>
@@ -304,9 +346,7 @@ namespace Demo.DemoConsoleApp
         {
             Console.Clear();
             //TODO - place your code here
-            //TestSpikingAF((AFSpikingBase)ActivationFactory.CreateAF(new AFSpikingExpIFSettings(), _rand), 200, 0.25, 50, 100);
-            //TestEnumFeatureFilter();
-            TestBinFeatureFilter();
+            TestVectorBundleFolderization("./Data/ProximalPhalanxOutlineAgeGroup_train.csv", 3);
             return;
         }
 

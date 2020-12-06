@@ -59,7 +59,7 @@ namespace RCNet.Neural.Data.Filter
         /// <inheritdoc/>
         public override double ApplyReverse(double value)
         {
-            return Math.Round(base.ApplyReverse(value)).Bound(FeatureRange.Min, FeatureRange.Max);
+            return base.ApplyReverse(value);
         }
 
     }//BinFeatureFilter

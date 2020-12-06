@@ -314,7 +314,7 @@ namespace RCNet.Neural.Network.NonRecurrent
         {
             double[] inputVector = new double[memberResults.Length + (Join1stLevelOutputTo2ndLevelInput ? 1 : 0)];
             memberResults.CopyTo(inputVector, 0);
-            if(Join1stLevelOutputTo2ndLevelInput)
+            if (Join1stLevelOutputTo2ndLevelInput)
             {
                 inputVector[memberResults.Length] = firstLevelOutput;
             }
@@ -342,7 +342,7 @@ namespace RCNet.Neural.Network.NonRecurrent
                 //Reshuffle the data
                 shuffledDataBundle.Shuffle(random);
                 //Split shuffled data into the folds
-                List<VectorBundle> subBundleCollection = shuffledDataBundle.CreateFolds(_secondLevelCompCfg.CrossvalidationCfg.FoldDataRatio, BinBorder);
+                List<VectorBundle> subBundleCollection = shuffledDataBundle.Folderize(_secondLevelCompCfg.CrossvalidationCfg.FoldDataRatio, BinBorder);
                 int numOfFoldsToBeProcessed = Math.Min(_secondLevelCompCfg.CrossvalidationCfg.Folds <= 0 ? subBundleCollection.Count : _secondLevelCompCfg.CrossvalidationCfg.Folds, subBundleCollection.Count);
                 //Build trained network for each fold
                 for (int foldIdx = 0; foldIdx < numOfFoldsToBeProcessed; foldIdx++)
@@ -416,44 +416,58 @@ namespace RCNet.Neural.Network.NonRecurrent
         }
 
         /// <summary>
-        /// Computes cluster output
+        /// Computes the cluster output
         /// </summary>
         /// <param name="predictors">Input predictors</param>
-        /// <param name="memberOutputs">Collection of cluster member networks outputs</param>
-        public double Compute(double[] predictors, out double[] memberOutputs)
+        /// <param name="subOutputs">Collection of all cluster member networks alone outputs and if required, also caggregated cluster-level outputs.</param>
+        /// <param name="includeClusterLevels">Specifies whether to include aggregated cluster-level outputs into the subOutputs.</param>
+        public double Compute(double[] predictors,
+                              out double[] subOutputs,
+                              bool includeClusterLevels = true
+                              )
         {
             if (!Finalized)
             {
                 throw new InvalidOperationException("Cluster is not finalized. Call FinalizeCluster method first.");
             }
+            double output;
             //Collect member networks output
-            memberOutputs = ComputeClusterMemberNetworks(predictors);
+            double[] memberOutputs = ComputeClusterMemberNetworks(predictors);
+            List<double> subOutputCollection = new List<double>(memberOutputs);
             //Compute first level result
             double firstLevelOutput = ComputeCompositeOutput(memberOutputs, _firstLevelWeights, BinaryOutput);
-
+            if (includeClusterLevels) subOutputCollection.Add(firstLevelOutput);
             //Final result
             if (!SecondLevelComputation)
             {
-                return firstLevelOutput;
+                output = firstLevelOutput;
             }
             else
             {
                 double secondLevelOutput = ComputeSecondLevelOutput(memberOutputs, firstLevelOutput);
+                if (includeClusterLevels) subOutputCollection.Add(secondLevelOutput);
                 switch (_secondLevelCompCfg.CompMode)
                 {
                     case SecondLevelCompMode.SecondLevelOutputOnly:
-                        return secondLevelOutput;
+                        {
+                            output = secondLevelOutput;
+                        }
+                        break;
                     case SecondLevelCompMode.AveragedOutputs:
                         {
                             WeightedAvg finalResult = new WeightedAvg();
                             finalResult.AddSampleValue(firstLevelOutput, 1d);
                             finalResult.AddSampleValue(secondLevelOutput, 1d);
-                            return finalResult.Avg;
+                            if (includeClusterLevels) subOutputCollection.Add(finalResult.Avg);
+                            output = finalResult.Avg;
                         }
+                        break;
                     default:
-                        return secondLevelOutput;
+                        throw new ArgumentException("Unknown second level computation mode.", "CompMode");
                 }
             }
+            subOutputs = subOutputCollection.ToArray();
+            return output;
         }
 
         /// <summary>

@@ -412,12 +412,14 @@ namespace RCNet.Neural.Network.SM.Readout
                 for (int i = 0; i < rl.ReadoutLayerCfg.ReadoutUnitsCfg.ReadoutUnitCfgCollection.Count; i++)
                 {
                     ReadoutUnitSettings rus = rl.ReadoutLayerCfg.ReadoutUnitsCfg.ReadoutUnitCfgCollection[i];
-                    ReadoutUnitDataCollection.Add(rus.Name, new ReadoutUnitData() { Name = rus.Name,
-                                                                                    Index = i,
-                                                                                    Task = rus.TaskCfg.Type,
-                                                                                    SubPredictions = unitsAllSubResults[i],
-                                                                                    DataValue = DataVector[i]
-                                                                                   });
+                    ReadoutUnitDataCollection.Add(rus.Name, new ReadoutUnitData()
+                    {
+                        Name = rus.Name,
+                        Index = i,
+                        Task = rus.TaskCfg.Type,
+                        SubPredictions = unitsAllSubResults[i],
+                        DataValue = DataVector[i]
+                    });
                 }
                 //One Winner groups
                 OneWinnerDataCollection = new Dictionary<string, OneWinnerGroupData>();

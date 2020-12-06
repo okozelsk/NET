@@ -92,7 +92,7 @@ namespace RCNet.Neural.Network.NonRecurrent
             for (int repetitionIdx = 0; repetitionIdx < crossvalidationCfg.Repetitions; repetitionIdx++)
             {
                 //Data split to folds
-                List<VectorBundle> subBundleCollection = dataBundle.CreateFolds(crossvalidationCfg.FoldDataRatio, _binBorder);
+                List<VectorBundle> subBundleCollection = dataBundle.Folderize(crossvalidationCfg.FoldDataRatio, _binBorder);
                 int numOfFoldsToBeProcessed = Math.Min(crossvalidationCfg.Folds <= 0 ? subBundleCollection.Count : crossvalidationCfg.Folds, subBundleCollection.Count);
                 //Train collection of networks for each processing fold.
                 for (int foldIdx = 0; foldIdx < numOfFoldsToBeProcessed; foldIdx++)
