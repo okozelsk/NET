@@ -69,15 +69,17 @@
         </reservoirInstances>
       </neuralPreprocessor>
       <readoutLayer>
-        <crossvalidation foldDataRatio="0.1" folds="Auto" repetitions="1"/>
-        <defaultNetworks>
-          <classification>
-            <ff>
-              <activationIdentity/>
-              <resPropTrainer attempts="10" attemptEpochs="500"/>
-            </ff>
-          </classification>
-        </defaultNetworks>
+        <cluster>
+          <crossvalidation foldDataRatio="0.1" folds="Auto" repetitions="1"/>
+          <defaultNetworks>
+            <classification>
+              <ff>
+                <activationIdentity/>
+                <resPropTrainer attempts="10" attemptEpochs="500"/>
+              </ff>
+            </classification>
+          </defaultNetworks>
+        </cluster>
         <readoutUnits>
           <readoutUnit name="Cancel Call">
             <classification oneWinnerGroupName="Gesture"/>
@@ -210,15 +212,17 @@
         </reservoirInstances>
       </neuralPreprocessor>
       <readoutLayer>
-        <crossvalidation foldDataRatio="0.1" folds="Auto" repetitions="1"/>
-        <defaultNetworks>
-          <classification>
-            <ff>
-              <activationElliot/>
-              <resPropTrainer attempts="5" attemptEpochs="1500"/>
-            </ff>
-          </classification>
-        </defaultNetworks>
+        <cluster>
+          <crossvalidation foldDataRatio="0.1" folds="Auto" repetitions="1"/>
+          <defaultNetworks>
+            <classification>
+              <ff>
+                <activationElliot/>
+                <resPropTrainer attempts="5" attemptEpochs="1500"/>
+              </ff>
+            </classification>
+          </defaultNetworks>
+        </cluster>
         <readoutUnits>
           <readoutUnit name="Wild-N2">
             <classification oneWinnerGroupName="WormDNA"/>
@@ -344,8 +348,10 @@
         </reservoirInstances>
       </neuralPreprocessor>
       <readoutLayer>
-        <crossvalidation/>
-        <defaultNetworks/>
+        <cluster>
+          <crossvalidation/>
+          <defaultNetworks/>
+        </cluster>
         <readoutUnits>
           <readoutUnit name="Beetle1Fly0">
             <classification>
@@ -424,8 +430,10 @@
         </reservoirInstances>
       </neuralPreprocessor>
       <readoutLayer>
-        <crossvalidation/>
-        <defaultNetworks/>
+        <cluster>
+          <crossvalidation/>
+          <defaultNetworks/>
+        </cluster>
         <readoutUnits>
           <readoutUnit name="Chicken1Bird0">
             <classification>
@@ -519,26 +527,17 @@
         </reservoirInstances>
       </neuralPreprocessor>
       <readoutLayer>
-        <crossvalidation foldDataRatio="0.25" folds="Auto" repetitions="1"/>
-        <defaultNetworks>
-          <classification>
-            <ff>
-              <activationElliot/>
-              <resPropTrainer attempts="10" attemptEpochs="400"/>
-            </ff>
-          </classification>
-        </defaultNetworks>
-        <readoutUnits>
-          <readoutUnit name="0-6 years">
-            <classification oneWinnerGroupName="AgeGroup"/>
-          </readoutUnit>
-          <readoutUnit name="7-12 years">
-            <classification oneWinnerGroupName="AgeGroup"/>
-          </readoutUnit>
-          <readoutUnit name="13-19 years">
-            <classification oneWinnerGroupName="AgeGroup"/>
-          </readoutUnit>
-          <clusterSecondLevelComputation mode="AveragedOutputs">
+        <cluster>
+          <crossvalidation foldDataRatio="0.25" folds="Auto" repetitions="1"/>
+          <defaultNetworks>
+            <classification>
+              <ff>
+                <activationElliot/>
+                <resPropTrainer attempts="10" attemptEpochs="400"/>
+              </ff>
+            </classification>
+          </defaultNetworks>
+          <secondLevelComputation mode="AveragedOutputs">
             <crossvalidation foldDataRatio="0.25" folds="Auto" repetitions="1"/>
             <ff>
               <activationIdentity/>
@@ -549,7 +548,18 @@
               </hiddenLayers>
               <resPropTrainer attempts="5" attemptEpochs="400"/>
             </ff>
-          </clusterSecondLevelComputation>
+          </secondLevelComputation>
+        </cluster>
+        <readoutUnits>
+          <readoutUnit name="0-6 years">
+            <classification oneWinnerGroupName="AgeGroup"/>
+          </readoutUnit>
+          <readoutUnit name="7-12 years">
+            <classification oneWinnerGroupName="AgeGroup"/>
+          </readoutUnit>
+          <readoutUnit name="13-19 years">
+            <classification oneWinnerGroupName="AgeGroup"/>
+          </readoutUnit>
         </readoutUnits>
       </readoutLayer>
     </stateMachine>
@@ -612,8 +622,10 @@
         </reservoirInstances>
       </neuralPreprocessor>
       <readoutLayer>
-        <crossvalidation foldDataRatio="0.05" folds="Auto" repetitions="1"/>
-        <defaultNetworks/>
+        <cluster>
+          <crossvalidation foldDataRatio="0.05" folds="Auto" repetitions="1"/>
+          <defaultNetworks/>
+        </cluster>
         <readoutUnits>
           <readoutUnit name="Female1Male0">
             <classification>
@@ -709,15 +721,17 @@
         </reservoirInstances>
       </neuralPreprocessor>
       <readoutLayer>
-        <crossvalidation foldDataRatio="0.0825" folds="Auto" repetitions="1"/>
-        <defaultNetworks>
-          <classification>
-            <ff>
-              <activationIdentity/>
-              <resPropTrainer attempts="10" attemptEpochs="300"/>
-            </ff>
-          </classification>
-        </defaultNetworks>
+        <cluster>
+          <crossvalidation foldDataRatio="0.0825" folds="Auto" repetitions="1"/>
+          <defaultNetworks>
+            <classification>
+              <ff>
+                <activationIdentity/>
+                <resPropTrainer attempts="10" attemptEpochs="300"/>
+              </ff>
+            </classification>
+          </defaultNetworks>
+        </cluster>
         <readoutUnits>
           <readoutUnit name="curved swing">
             <classification oneWinnerGroupName="Hand movement type"/>
@@ -795,23 +809,32 @@
     <samples trainingData="ProximalPhalanxOutlineAgeGroup_train.csv" verificationData="ProximalPhalanxOutlineAgeGroup_verify.csv"/>
     <stateMachine randomizerSeek="0">
       <readoutLayer>
-        <crossvalidation foldDataRatio="0.1" folds="Auto" repetitions="1"/>
-        <defaultNetworks>
-          <classification>
+        <cluster>
+          <crossvalidation foldDataRatio="0.1" folds="Auto" repetitions="1"/>
+          <defaultNetworks>
+            <classification>
+              <ff>
+                <activationIdentity/>
+                <hiddenLayers>
+                  <layer neurons="20">
+                    <activationLeakyReLU/>
+                  </layer>
+                  <layer neurons="20">
+                    <activationLeakyReLU/>
+                  </layer>
+                </hiddenLayers>
+                <resPropTrainer attempts="10" attemptEpochs="500"/>
+              </ff>
+            </classification>
+          </defaultNetworks>
+          <secondLevelComputation mode="AveragedOutputs">
+            <crossvalidation foldDataRatio="0.5" folds="Auto" repetitions="1"/>
             <ff>
               <activationIdentity/>
-              <hiddenLayers>
-                <layer neurons="20">
-                  <activationLeakyReLU/>
-                </layer>
-                <layer neurons="20">
-                  <activationLeakyReLU/>
-                </layer>
-              </hiddenLayers>
-              <resPropTrainer attempts="10" attemptEpochs="500"/>
+              <resPropTrainer attempts="5" attemptEpochs="400"/>
             </ff>
-          </classification>
-        </defaultNetworks>
+          </secondLevelComputation>
+        </cluster>
         <readoutUnits>
           <readoutUnit name="0-6 years">
             <classification oneWinnerGroupName="AgeGroup"/>
@@ -822,13 +845,6 @@
           <readoutUnit name="13-19 years">
             <classification oneWinnerGroupName="AgeGroup"/>
           </readoutUnit>
-          <clusterSecondLevelComputation mode="AveragedOutputs">
-            <crossvalidation foldDataRatio="0.5" folds="Auto" repetitions="1"/>
-            <ff>
-              <activationIdentity/>
-              <resPropTrainer attempts="5" attemptEpochs="400"/>
-            </ff>
-          </clusterSecondLevelComputation>
         </readoutUnits>
       </readoutLayer>
     </stateMachine>
@@ -947,8 +963,10 @@
         </reservoirInstances>
       </neuralPreprocessor>
       <readoutLayer>
-        <crossvalidation foldDataRatio="0.1" folds="1" repetitions="1"/>
-        <defaultNetworks/>
+        <cluster>
+          <crossvalidation foldDataRatio="0.1" folds="1" repetitions="1"/>
+          <defaultNetworks/>
+        </cluster>
         <readoutUnits>
           <readoutUnit name="Value">
             <forecast>
@@ -1041,15 +1059,17 @@
         </reservoirInstances>
       </neuralPreprocessor>
       <readoutLayer>
-        <crossvalidation foldDataRatio="0.1" folds="Auto" repetitions="1"/>
-        <defaultNetworks>
-          <forecast>
-            <ff>
-              <activationIdentity/>
-              <elasticRegrTrainer attemptEpochs="400" lambda="1e-6" alpha="0.5"/>
-            </ff>
-          </forecast>
-        </defaultNetworks>
+        <cluster>
+          <crossvalidation foldDataRatio="0.1" folds="Auto" repetitions="1"/>
+          <defaultNetworks>
+            <forecast>
+              <ff>
+                <activationIdentity/>
+                <elasticRegrTrainer attemptEpochs="400" lambda="1e-6" alpha="0.5"/>
+              </ff>
+            </forecast>
+          </defaultNetworks>
+        </cluster>
         <readoutUnits>
           <readoutUnit name="High">
             <forecast>
@@ -1132,8 +1152,10 @@
         </reservoirInstances>
       </neuralPreprocessor>
       <readoutLayer>
-        <crossvalidation foldDataRatio="0.1" folds="Auto" repetitions="1"/>
-        <defaultNetworks/>
+        <cluster>
+          <crossvalidation foldDataRatio="0.1" folds="Auto" repetitions="1"/>
+          <defaultNetworks/>
+        </cluster>
         <readoutUnits>
           <readoutUnit name="EpilepticSeizure">
             <classification>
@@ -1223,23 +1245,25 @@
         </reservoirInstances>
       </neuralPreprocessor>
       <readoutLayer>
-        <crossvalidation foldDataRatio="0.5" folds="Auto" repetitions="1"/>
-        <defaultNetworks>
-          <forecast>
-            <ff>
-              <activationIdentity/>
-              <hiddenLayers>
-                <layer neurons="10">
-                  <activationLeakyReLU/>
-                </layer>
-                <layer neurons="10">
-                  <activationLeakyReLU/>
-                </layer>
-              </hiddenLayers>
-              <resPropTrainer attempts="5" attemptEpochs="1000"/>
-            </ff>
-          </forecast>
-        </defaultNetworks>
+        <cluster>
+          <crossvalidation foldDataRatio="0.5" folds="Auto" repetitions="1"/>
+          <defaultNetworks>
+            <forecast>
+              <ff>
+                <activationIdentity/>
+                <hiddenLayers>
+                  <layer neurons="10">
+                    <activationLeakyReLU/>
+                  </layer>
+                  <layer neurons="10">
+                    <activationLeakyReLU/>
+                  </layer>
+                </hiddenLayers>
+                <resPropTrainer attempts="5" attemptEpochs="1000"/>
+              </ff>
+            </forecast>
+          </defaultNetworks>
+        </cluster>
         <readoutUnits>
           <readoutUnit name="MG-with-steady">
             <forecast>
@@ -1365,15 +1389,17 @@
         </reservoirInstances>
       </neuralPreprocessor>
       <readoutLayer>
-        <crossvalidation foldDataRatio="0.0825" folds="Auto" repetitions="1"/>
-        <defaultNetworks>
-          <classification>
-            <ff>
-              <activationIdentity/>
-              <resPropTrainer attempts="5" attemptEpochs="400"/>
-            </ff>
-          </classification>
-        </defaultNetworks>
+        <cluster>
+          <crossvalidation foldDataRatio="0.0825" folds="Auto" repetitions="1"/>
+          <defaultNetworks>
+            <classification>
+              <ff>
+                <activationIdentity/>
+                <resPropTrainer attempts="5" attemptEpochs="400"/>
+              </ff>
+            </classification>
+          </defaultNetworks>
+        </cluster>
         <readoutUnits>
           <readoutUnit name="curved swing">
             <classification oneWinnerGroupName="Hand movement type"/>
@@ -1451,23 +1477,25 @@
     <samples trainingData="LibrasMovement_train.csv" verificationData="LibrasMovement_verify.csv"/>
     <stateMachine randomizerSeek="0">
       <readoutLayer>
-        <crossvalidation foldDataRatio="0.0825" folds="Auto" repetitions="1"/>
-        <defaultNetworks>
-          <classification>
-            <ff>
-              <activationIdentity/>
-              <hiddenLayers>
-                <layer neurons="10">
-                  <activationLeakyReLU/>
-                </layer>
-                <layer neurons="10">
-                  <activationLeakyReLU/>
-                </layer>
-              </hiddenLayers>
-              <resPropTrainer attempts="5" attemptEpochs="400"/>
-            </ff>
-          </classification>
-        </defaultNetworks>
+        <cluster>
+          <crossvalidation foldDataRatio="0.0825" folds="Auto" repetitions="1"/>
+          <defaultNetworks>
+            <classification>
+              <ff>
+                <activationIdentity/>
+                <hiddenLayers>
+                  <layer neurons="10">
+                    <activationLeakyReLU/>
+                  </layer>
+                  <layer neurons="10">
+                    <activationLeakyReLU/>
+                  </layer>
+                </hiddenLayers>
+                <resPropTrainer attempts="5" attemptEpochs="400"/>
+              </ff>
+            </classification>
+          </defaultNetworks>
+        </cluster>
         <readoutUnits>
           <readoutUnit name="curved swing">
             <classification oneWinnerGroupName="Hand movement type"/>
@@ -1623,23 +1651,25 @@
         </reservoirInstances>
       </neuralPreprocessor>
       <readoutLayer>
-        <crossvalidation foldDataRatio="0.0825" folds="Auto" repetitions="1"/>
-        <defaultNetworks>
-          <classification>
-            <ff>
-              <activationIdentity/>
-              <hiddenLayers>
-                <layer neurons="10">
-                  <activationLeakyReLU/>
-                </layer>
-                <layer neurons="10">
-                  <activationLeakyReLU/>
-                </layer>
-              </hiddenLayers>
-              <resPropTrainer attempts="5" attemptEpochs="400"/>
-            </ff>
-          </classification>
-        </defaultNetworks>
+        <cluster>
+          <crossvalidation foldDataRatio="0.0825" folds="Auto" repetitions="1"/>
+          <defaultNetworks>
+            <classification>
+              <ff>
+                <activationIdentity/>
+                <hiddenLayers>
+                  <layer neurons="10">
+                    <activationLeakyReLU/>
+                  </layer>
+                  <layer neurons="10">
+                    <activationLeakyReLU/>
+                  </layer>
+                </hiddenLayers>
+                <resPropTrainer attempts="5" attemptEpochs="400"/>
+              </ff>
+            </classification>
+          </defaultNetworks>
+        </cluster>
         <readoutUnits>
           <readoutUnit name="curved swing">
             <classification oneWinnerGroupName="Hand movement type"/>

@@ -20,35 +20,35 @@ namespace RCNet.Neural.Network.SM.Readout
 
         //Attribute properties
         /// <summary>
-        /// Crossvalidation configuration
+        /// Configuration of the cluster associated with the readout unit
         /// </summary>
-        public CrossvalidationSettings CrossvalidationCfg { get; }
-
-        /// <summary>
-        /// Task dependent networks settings to be applied when specific networks for readout unit are not specified
-        /// </summary>
-        public DefaultNetworksSettings DefaultNetworksCfg { get; }
+        public ClusterSettings ClusterCfg { get; }
 
         /// <summary>
         /// Readout units configuration
         /// </summary>
         public ReadoutUnitsSettings ReadoutUnitsCfg { get; }
 
+        /// <summary>
+        /// Configuration of the decision maker applied on "One winner" groups
+        /// </summary>
+        public OneWinnerDecisionMakerSettings OneWinnerDecisionMakerCfg { get; }
+
         //Constructors
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="crossvalidationCfg">Crossvalidation configuration</param>
+        /// <param name="clusterCfg">Configuration of the cluster associated with the readout unit</param>
         /// <param name="readoutUnitsCfg">Readout units configuration</param>
-        /// <param name="defaultNetworksCfg">Task dependent networks settings to be applied when specific networks for readout unit are not specified</param>
-        public ReadoutLayerSettings(CrossvalidationSettings crossvalidationCfg,
+        /// <param name="oneWinnerDecisionMakerCfg">Configuration of the decision maker applied on "One winner" groups</param>
+        public ReadoutLayerSettings(ClusterSettings clusterCfg,
                                     ReadoutUnitsSettings readoutUnitsCfg,
-                                    DefaultNetworksSettings defaultNetworksCfg = null
+                                    OneWinnerDecisionMakerSettings oneWinnerDecisionMakerCfg = null
                                     )
         {
-            CrossvalidationCfg = (CrossvalidationSettings)crossvalidationCfg.DeepClone();
+            ClusterCfg = (ClusterSettings)clusterCfg.DeepClone();
             ReadoutUnitsCfg = (ReadoutUnitsSettings)readoutUnitsCfg.DeepClone();
-            DefaultNetworksCfg = defaultNetworksCfg == null ? new DefaultNetworksSettings() : (DefaultNetworksSettings)defaultNetworksCfg.DeepClone();
+            OneWinnerDecisionMakerCfg = (OneWinnerDecisionMakerSettings)oneWinnerDecisionMakerCfg?.DeepClone();
             Check();
             return;
         }
@@ -58,7 +58,7 @@ namespace RCNet.Neural.Network.SM.Readout
         /// </summary>
         /// <param name="source">Source instance</param>
         public ReadoutLayerSettings(ReadoutLayerSettings source)
-            : this(source.CrossvalidationCfg, source.ReadoutUnitsCfg, source.DefaultNetworksCfg)
+            : this(source.ClusterCfg, source.ReadoutUnitsCfg, source.OneWinnerDecisionMakerCfg)
         {
             return;
         }
@@ -73,14 +73,14 @@ namespace RCNet.Neural.Network.SM.Readout
             //Validation
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
-            //Crossvalidation
-            CrossvalidationCfg = new CrossvalidationSettings(settingsElem.Element("crossvalidation"));
-            //Default networks settings
-            XElement defaultNetworksElem = settingsElem.Elements("defaultNetworks").FirstOrDefault();
-            DefaultNetworksCfg = defaultNetworksElem == null ? new DefaultNetworksSettings() : new DefaultNetworksSettings(defaultNetworksElem);
+            //Cluster
+            ClusterCfg = new ClusterSettings(settingsElem.Element("cluster"));
             //Readout units
             XElement readoutUnitsElem = settingsElem.Elements("readoutUnits").First();
             ReadoutUnitsCfg = new ReadoutUnitsSettings(readoutUnitsElem);
+            //One winner decision maker
+            XElement oneWinnerDecisionMakerElem = settingsElem.Elements("oneWinnerDecisionMaker").FirstOrDefault();
+            OneWinnerDecisionMakerCfg = oneWinnerDecisionMakerElem == null ? null : new OneWinnerDecisionMakerSettings(oneWinnerDecisionMakerElem);
             Check();
             return;
         }
@@ -108,7 +108,7 @@ namespace RCNet.Neural.Network.SM.Readout
             {
                 if (rus.TaskCfg.NetworkCfgCollection.Count == 0)
                 {
-                    if (DefaultNetworksCfg.GetTaskNetworksCfgs(rus.TaskCfg.Type).Count == 0)
+                    if (ClusterCfg.DefaultNetworksCfg.GetTaskNetworksCfgs(rus.TaskCfg.Type).Count == 0)
                     {
                         throw new ArgumentException($"Readout unit {rus.Name} has not associated network(s) settings.", "ReadoutUnitsCfg");
                     }
@@ -130,7 +130,7 @@ namespace RCNet.Neural.Network.SM.Readout
             }
             else
             {
-                return DefaultNetworksCfg.GetTaskNetworksCfgs(ReadoutUnitsCfg.ReadoutUnitCfgCollection[readoutUnitIndex].TaskCfg.Type);
+                return ClusterCfg.DefaultNetworksCfg.GetTaskNetworksCfgs(ReadoutUnitsCfg.ReadoutUnitCfgCollection[readoutUnitIndex].TaskCfg.Type);
             }
         }
 
@@ -143,12 +143,12 @@ namespace RCNet.Neural.Network.SM.Readout
         /// <inheritdoc />
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
-            XElement rootElem = new XElement(rootElemName, CrossvalidationCfg.GetXml(suppressDefaults));
-            if (!DefaultNetworksCfg.ContainsOnlyDefaults)
-            {
-                rootElem.Add(DefaultNetworksCfg.GetXml(suppressDefaults));
-            }
+            XElement rootElem = new XElement(rootElemName, ClusterCfg.GetXml(suppressDefaults));
             rootElem.Add(ReadoutUnitsCfg.GetXml(suppressDefaults));
+            if (OneWinnerDecisionMakerCfg != null)
+            {
+                rootElem.Add(OneWinnerDecisionMakerCfg.GetXml(suppressDefaults));
+            }
             Validate(rootElem, XsdTypeName);
             return rootElem;
         }

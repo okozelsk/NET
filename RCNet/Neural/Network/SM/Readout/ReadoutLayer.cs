@@ -227,18 +227,22 @@ namespace RCNet.Neural.Network.SM.Readout
                                                                                                    ReadoutLayerCfg.ReadoutUnitsCfg.ReadoutUnitCfgCollection[unitIdx].TaskCfg.Type == ReadoutUnit.TaskType.Classification ? InternalBinBorder : double.NaN,
                                                                                                    rand,
                                                                                                    controller,
-                                                                                                   ReadoutLayerCfg.ReadoutUnitsCfg.ClusterSecondLevelCompCfg
+                                                                                                   ReadoutLayerCfg.ClusterCfg.SecondLevelCompCfg
                                                                                                    );
                 //Register notification
                 readoutUnitBuilder.RegressionEpochDone += OnRegressionEpochDone;
                 //Build trained readout unit. Trained unit becomes to be the predicting cluster member
                 _readoutUnitCollection[unitIdx] = new ReadoutUnit(unitIdx,
                                                                   readoutUnitBuilder.Build(readoutUnitDataBundle,
-                                                                                           ReadoutLayerCfg.CrossvalidationCfg,
+                                                                                           ReadoutLayerCfg.ClusterCfg.CrossvalidationCfg,
                                                                                            _outputFeatureFilterCollection[unitIdx]
                                                                                            )
                                                                   );
             }//unitIdx
+
+            //TODO Train One Winner Groups decision makers if defined
+
+
 
             //Readout layer is trained and ready
             Trained = true;

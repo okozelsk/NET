@@ -1,5 +1,4 @@
-﻿using RCNet.Neural.Network.NonRecurrent;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
@@ -25,11 +24,6 @@ namespace RCNet.Neural.Network.SM.Readout
         public List<ReadoutUnitSettings> ReadoutUnitCfgCollection { get; }
 
         /// <summary>
-        /// Configuration of the network cluster 2nd level computation
-        /// </summary>
-        public NetworkClusterSecondLevelCompSettings ClusterSecondLevelCompCfg { get; }
-
-        /// <summary>
         /// Dictionary of "one winner" groups
         /// </summary>
         public Dictionary<string, OneWinnerGroup> OneWinnerGroupCollection { get; private set; }
@@ -40,17 +34,13 @@ namespace RCNet.Neural.Network.SM.Readout
         /// Creates an initialized instance
         /// </summary>
         /// <param name="readoutUnitsCfgs">Collection of readout unit settings</param>
-        /// <param name="clusterSecondLevelCompCfg">Configuration of the network cluster 2nd level computation</param>
-        public ReadoutUnitsSettings(IEnumerable<ReadoutUnitSettings> readoutUnitsCfgs,
-                                    NetworkClusterSecondLevelCompSettings clusterSecondLevelCompCfg = null
-                                    )
+        public ReadoutUnitsSettings(IEnumerable<ReadoutUnitSettings> readoutUnitsCfgs)
         {
             ReadoutUnitCfgCollection = new List<ReadoutUnitSettings>();
             foreach (ReadoutUnitSettings rucfg in readoutUnitsCfgs)
             {
                 ReadoutUnitCfgCollection.Add((ReadoutUnitSettings)rucfg.DeepClone());
             }
-            ClusterSecondLevelCompCfg = (NetworkClusterSecondLevelCompSettings)clusterSecondLevelCompCfg?.DeepClone();
             Check();
             return;
         }
@@ -60,7 +50,7 @@ namespace RCNet.Neural.Network.SM.Readout
         /// </summary>
         /// <param name="readoutUnitsCfgs">Readout layer settings</param>
         public ReadoutUnitsSettings(params ReadoutUnitSettings[] readoutUnitsCfgs)
-            : this(readoutUnitsCfgs.AsEnumerable(), null)
+            : this(readoutUnitsCfgs.AsEnumerable())
         {
             return;
         }
@@ -70,7 +60,7 @@ namespace RCNet.Neural.Network.SM.Readout
         /// </summary>
         /// <param name="source">Source instance</param>
         public ReadoutUnitsSettings(ReadoutUnitsSettings source)
-            : this(source.ReadoutUnitCfgCollection, source.ClusterSecondLevelCompCfg)
+            : this(source.ReadoutUnitCfgCollection)
         {
             return;
         }
@@ -88,15 +78,6 @@ namespace RCNet.Neural.Network.SM.Readout
             foreach (XElement unitElem in settingsElem.Elements("readoutUnit"))
             {
                 ReadoutUnitCfgCollection.Add(new ReadoutUnitSettings(unitElem));
-            }
-            XElement clusterSecondLevelCompElem = settingsElem.Elements("clusterSecondLevelComputation").FirstOrDefault();
-            if(clusterSecondLevelCompElem != null)
-            {
-                ClusterSecondLevelCompCfg = new NetworkClusterSecondLevelCompSettings(clusterSecondLevelCompElem);
-            }
-            else
-            {
-                ClusterSecondLevelCompCfg = null;
             }
             Check();
             return;
@@ -193,10 +174,6 @@ namespace RCNet.Neural.Network.SM.Readout
             foreach (ReadoutUnitSettings rucfg in ReadoutUnitCfgCollection)
             {
                 rootElem.Add(rucfg.GetXml(suppressDefaults));
-            }
-            if(ClusterSecondLevelCompCfg != null)
-            {
-                rootElem.Add(ClusterSecondLevelCompCfg.GetXml(suppressDefaults));
             }
             Validate(rootElem, XsdTypeName);
             return rootElem;

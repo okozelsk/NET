@@ -67,6 +67,25 @@ namespace RCNet.Extensions
         }
 
         /// <summary>
+        /// Returns an index of the max value within an array
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int MaxIdx(this double[] array)
+        {
+            double max = double.MinValue;
+            int maxIdx = 0;
+            for (int i = 0; i < array.Length; i++)
+            {
+                if (max < array[i])
+                {
+                    max = array[i];
+                    maxIdx = i;
+                }
+            }
+            return maxIdx;
+        }
+
+        /// <summary>
         /// Returns the min value within an array
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -81,6 +100,25 @@ namespace RCNet.Extensions
                 }
             }
             return min;
+        }
+
+        /// <summary>
+        /// Returns an index of the min value within an array
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int MinIdx(this double[] array)
+        {
+            double min = double.MaxValue;
+            int minIdx = 0;
+            for (int i = 0; i < array.Length; i++)
+            {
+                if (min > array[i])
+                {
+                    min = array[i];
+                    minIdx = i;
+                }
+            }
+            return minIdx;
         }
 
         /// <summary>

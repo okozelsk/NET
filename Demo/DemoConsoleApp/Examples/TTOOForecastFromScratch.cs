@@ -263,11 +263,11 @@ namespace Demo.DemoConsoleApp.Examples
             ReadoutUnitSettings highReadoutUnitCfg = new ReadoutUnitSettings("High", new ForecastTaskSettings(new RealFeatureFilterSettings()));
             ReadoutUnitSettings lowReadoutUnitCfg = new ReadoutUnitSettings("Low", new ForecastTaskSettings(new RealFeatureFilterSettings()));
             //Create readout layer configuration
-            ReadoutLayerSettings readoutLayerCfg = new ReadoutLayerSettings(new CrossvalidationSettings(foldDataRatio),
+            ReadoutLayerSettings readoutLayerCfg = new ReadoutLayerSettings(new ClusterSettings(new CrossvalidationSettings(foldDataRatio), defaultNetworksCfg),
                                                                             new ReadoutUnitsSettings(highReadoutUnitCfg,
                                                                                                      lowReadoutUnitCfg
                                                                                                      ),
-                                                                            defaultNetworksCfg
+                                                                            null
                                                                             );
             return readoutLayerCfg;
         }

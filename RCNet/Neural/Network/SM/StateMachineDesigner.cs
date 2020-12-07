@@ -229,9 +229,9 @@ namespace RCNet.Neural.Network.SM
             {
                 unitCfgCollection.Add(new ReadoutUnitSettings(name, new ForecastTaskSettings(new RealFeatureFilterSettings())));
             }
-            return new ReadoutLayerSettings(crossvalidationCfg,
-                                            new ReadoutUnitsSettings(unitCfgCollection, cluster2ndLevelComputingCfg),
-                                            new DefaultNetworksSettings(null, new ForecastNetworksSettings(netCfg))
+            return new ReadoutLayerSettings(new ClusterSettings(crossvalidationCfg, new DefaultNetworksSettings(null, new ForecastNetworksSettings(netCfg)), cluster2ndLevelComputingCfg),
+                                            new ReadoutUnitsSettings(unitCfgCollection),
+                                            null
                                             );
         }
 
@@ -259,9 +259,9 @@ namespace RCNet.Neural.Network.SM
             {
                 unitCfgCollection.Add(new ReadoutUnitSettings(name, new ClassificationTaskSettings(oneWinnerGroupName)));
             }
-            return new ReadoutLayerSettings(crossvalidationCfg,
-                                            new ReadoutUnitsSettings(unitCfgCollection, cluster2ndLevelComputingCfg),
-                                            new DefaultNetworksSettings(new ClassificationNetworksSettings(netCfg), null)
+            return new ReadoutLayerSettings(new ClusterSettings(crossvalidationCfg, new DefaultNetworksSettings(new ClassificationNetworksSettings(netCfg), null), cluster2ndLevelComputingCfg),
+                                            new ReadoutUnitsSettings(unitCfgCollection),
+                                            null
                                             );
         }
 

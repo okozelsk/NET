@@ -1243,6 +1243,21 @@
     </xs:sequence>
   </xs:complexType>
 
+  <!-- Feed forward network -->
+  <xs:complexType name="FFNetOneTakesAllType">
+    <xs:sequence minOccurs="0" maxOccurs="1">
+      <xs:sequence minOccurs="1" maxOccurs="1">
+        <xs:choice minOccurs="1" maxOccurs="1">
+          <xs:element type="ActivationSoftMaxType" name="activationSoftMax" minOccurs="1" maxOccurs="1"/>
+        </xs:choice>
+        <xs:element type="FFNetHiddenLayersType" name="hiddenLayers" minOccurs="0" maxOccurs="1"/>
+      </xs:sequence>
+      <xs:choice minOccurs="1" maxOccurs="1">
+        <xs:element type="FFNetRPropTrainerType" name="resPropTrainer" minOccurs="1" maxOccurs="1"/>
+      </xs:choice>
+    </xs:sequence>
+  </xs:complexType>
+
   <!-- Crossvalidation configuration -->
   <xs:complexType name="CrossvalidationType">
     <xs:attribute type="UDoubleGT0LE05Type" name="foldDataRatio" use="optional" default="0.1">
@@ -2556,8 +2571,8 @@
     </xs:sequence>
   </xs:complexType>
 
-  <!-- Default networks -->
-  <xs:complexType name="ROutLayerUnitDefaultNetworksType">
+  <!-- Cluster default networks -->
+  <xs:complexType name="ROutLayerClusterDefaultNetworksType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="ROutLayerUnitClassificationNetworksType" name="classification" minOccurs="0" maxOccurs="1"/>
       <xs:element type="ROutLayerUnitForecastNetworksType" name="forecast" minOccurs="0" maxOccurs="1"/>
@@ -2604,21 +2619,45 @@
   <xs:complexType name="ROutLayerUnitsType">
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="ROutLayerUnitType" name="readoutUnit" minOccurs="1" maxOccurs="unbounded"/>
-      <xs:element type="NetworkClusterSecondLevelCompType" name ="clusterSecondLevelComputation" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  
+  
+  
+  <!-- One winner decision maker configuration -->
+  <xs:complexType name="ROutLayerOneWinnerDecisionMakerType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="CrossvalidationType" name="crossvalidation" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="FFNetOneTakesAllType" name="ff" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+    <xs:attribute type="xs:boolean" name ="considerAllSubPredictions" use="optional" default="true">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Specifies how rich will be an input for the final probabilities network. True means to use all available sub-predictions from clusters members and False means to use only already aggregated predictions from clusters. Default value is true.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <!-- Readout layer unit cluster configuration -->
+  <xs:complexType name="ROutLayerClusterType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="CrossvalidationType" name="crossvalidation" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="ROutLayerClusterDefaultNetworksType" name="defaultNetworks" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="NetworkClusterSecondLevelCompType" name ="secondLevelComputation" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
   </xs:complexType>
 
   <!-- Readout layer configuration -->
   <xs:complexType name="ROutLayerType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="CrossvalidationType" name="crossvalidation" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="ROutLayerUnitDefaultNetworksType" name="defaultNetworks" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="ROutLayerClusterType" name="cluster" minOccurs="1" maxOccurs="1"/>
       <xs:element type="ROutLayerUnitsType" name="readoutUnits" minOccurs="1" maxOccurs="1">
         <xs:unique name="rol_unique_readout_unit">
           <xs:selector xpath="./readoutUnit"/>
           <xs:field xpath="@name"/>
         </xs:unique>
       </xs:element>
+      <xs:element type="ROutLayerOneWinnerDecisionMakerType" name="oneWinnerDecisionMaker" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
   </xs:complexType>
 
